@@ -1,0 +1,8 @@
+export enum MentorStatus {
+  ALL = "ALL",
+  APPROVED = "APPROVED",
+  BLOCKED = "BLOCKED",
+  PENDING = "PENDING",
+  REJECTED = "REJECTED",
+  REQUESTED = "REQUESTED",
+}

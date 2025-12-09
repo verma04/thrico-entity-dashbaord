@@ -1,0 +1,254 @@
+/* Dashboard.module.css */
+
+.dashboardContainer {
+  padding: 24px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+}
+
+.headerSection {
+  margin-bottom: 24px;
+}
+
+.headerTitle {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+  font-weight: 700;
+}
+
+.kpiCard {
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+  border: none;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.kpiCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.kpiCardContent {
+  position: relative;
+  z-index: 1;
+}
+
+.kpiCard::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+}
+
+.chartCard {
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: none;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.chartCard:hover {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.moduleCard {
+  background: linear-gradient(135deg, #f6f9fc 0%, #ffffff 100%);
+  border-radius: 12px;
+  border: 1px solid #e8f4f8;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.moduleCard::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #52c41a 0%, #73d13d 100%);
+}
+
+.moduleCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.iconContainer {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.iconContainer::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: inherit;
+  opacity: 0.1;
+  border-radius: inherit;
+}
+
+.activityItem {
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  padding: 8px;
+  margin: -8px;
+}
+
+.activityItem:hover {
+  background: #f0f2f5;
+}
+
+.metricBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+  background: rgba(24, 144, 255, 0.1);
+  color: #1890ff;
+  border: 1px solid rgba(24, 144, 255, 0.2);
+}
+
+.trendIndicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 2px 6px;
+  border-radius: 8px;
+}
+
+.trendUp {
+  color: #52c41a;
+  background: rgba(82, 196, 26, 0.1);
+}
+
+.trendDown {
+  color: #ff4d4f;
+  background: rgba(255, 77, 79, 0.1);
+}
+
+.progressContainer {
+  position: relative;
+  margin-top: 8px;
+}
+
+.customProgress {
+  height: 6px;
+  border-radius: 3px;
+  background: #f0f0f0;
+  overflow: hidden;
+}
+
+.progressBar {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #52c41a 0%, #73d13d 100%);
+  transition: width 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .dashboardContainer {
+    padding: 16px;
+  }
+
+  .headerSection h2 {
+    font-size: 20px;
+  }
+
+  .kpiCard {
+    margin-bottom: 16px;
+  }
+}
+
+@media (max-width: 576px) {
+  .dashboardContainer {
+    padding: 12px;
+  }
+
+  .chartCard {
+    border-radius: 12px;
+  }
+
+  .kpiCard {
+    border-radius: 12px;
+  }
+}
+
+/* Custom scrollbar for lists */
+.ant-list-item-meta {
+  align-items: center;
+}
+
+/* Animation classes */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fadeInUp {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(24, 144, 255, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(24, 144, 255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(24, 144, 255, 0);
+  }
+}
+
+.pulseAnimation {
+  animation: pulse 2s infinite;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .dashboardContainer {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  }
+
+  .kpiCard,
+  .chartCard,
+  .moduleCard {
+    background: #262626;
+    border-color: #404040;
+  }
+
+  .headerTitle {
+    color: #ffffff;
+  }
+}
