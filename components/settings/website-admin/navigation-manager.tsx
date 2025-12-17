@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
+import { Formik, Form, Field } from "formik";
+import * as Yup from "yup";
 
-import { Form } from "@/components/ui/form";
 import {
   Card,
   CardContent,
@@ -14,6 +14,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -22,71 +23,64 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "@/components/ui/form";
-
-import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 
-import {
-  Plus,
-  Trash2,
-  ChevronUp,
-  ChevronDown,
-  SaveIcon,
-  Home,
-  Calendar,
-  Users,
-  ShoppingCart,
-  Book,
-  MessageCircle,
-  Settings,
-  Star,
-  Bell,
-  Info,
-} from "lucide-react";
+import { SaveIcon } from "lucide-react";
+import { ImageUploadWithCrop } from "@/components/ui/image-upload-with-crop";
 
 import {
-  useGetNavigationMenus,
-  useSaveNavigationMenus,
-} from "@/graphql/website/website-quiries";
+  useWebsiteBuilderStore,
+  LayoutType,
+} from "@/store/useWebsiteBuilderStore";
+import { LivePreviewNavbar } from "@/components/website-layout/preview/live-preview-navbar";
+import { MenuEditor } from "@/components/website-layout/settings/menu-editor";
 
 // ------------------------------------------------
 // TYPES
 // ------------------------------------------------
 
 interface NavigationItem {
-  id?: string;
-  key: string;
+  id: string;
   label: string;
+  link?: string;
   icon?: string;
-  href?: string;
+  children?: NavigationItem[];
 }
 
 interface NavigationConfig {
-  items: NavigationItem[];
+  layout: LayoutType;
+  logoText: string;
+  logoType: "text" | "image";
+  logoImage?: string;
+  menuItems: NavigationItem[];
 }
 
 // ------------------------------------------------
-// ICON MAP
+// VALIDATION SCHEMA
 // ------------------------------------------------
 
-const iconMap = {
-  home: Home,
-  calendar: Calendar,
-  users: Users,
-  "shopping-cart": ShoppingCart,
-  book: Book,
-  "message-circle": MessageCircle,
-  settings: Settings,
-  star: Star,
-  bell: Bell,
-  info: Info,
-};
+const navigationSchema = Yup.object().shape({
+  layout: Yup.string().required("Layout is required"),
+  logoText: Yup.string()
+    .required("Logo text is required")
+    .min(1, "Logo text must be at least 1 character"),
+  logoType: Yup.string().oneOf(["text", "image"]).required(),
+  logoImage: Yup.string().when("logoType", {
+    is: "image",
+    then: (schema) =>
+      schema.required("Logo image is required when using image logo"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  menuItems: Yup.array().of(
+    Yup.object().shape({
+      id: Yup.string().required(),
+      label: Yup.string().required("Label is required"),
+      link: Yup.string(),
+      icon: Yup.string(),
+      children: Yup.array(),
+    })
+  ),
+});
 
 // ------------------------------------------------
 // COMPONENT
@@ -94,242 +88,211 @@ const iconMap = {
 
 export default function NavigationManager() {
   const { toast } = useToast();
+  const { globalHeader, updateModuleContent, updateModuleLayout } =
+    useWebsiteBuilderStore();
 
-  const form = useForm<NavigationConfig>({
-    defaultValues: { items: [] },
-  });
+  // Initial values from global header
+  const initialValues: NavigationConfig = {
+    layout: globalHeader.layout,
+    logoText: globalHeader.content?.logoText || "Brand",
+    logoType: globalHeader.content?.logoType || "text",
+    logoImage: globalHeader.content?.logoImage || "",
+    menuItems: globalHeader.content?.menuItems || [],
+  };
 
-  const { fields, append, remove, move } = useFieldArray({
-    control: form.control,
-    name: "items",
-    keyName: "formId",
-  });
+  const handleSubmit = (values: NavigationConfig) => {
+    // Update store
+    updateModuleLayout(globalHeader.id, values.layout);
+    updateModuleContent(globalHeader.id, {
+      logoText: values.logoText,
+      logoType: values.logoType,
+      logoImage: values.logoImage,
+      menuItems: values.menuItems,
+    });
 
-  const { data, loading } = useGetNavigationMenus();
-
-  useEffect(() => {
-    if (data?.getNavigationMenus) {
-      const withIds = data.getNavigationMenus.map((item: NavigationItem) => ({
-        id: crypto.randomUUID(),
-        ...item,
-      }));
-      form.reset({ items: withIds });
-    }
-  }, [data]);
-
-  const onSubmit = form.handleSubmit(async (values) => {
-    localStorage.setItem("navigation-config", JSON.stringify(values));
     toast({
       title: "Navigation Saved",
-      description: "Your navigation menu has been updated successfully.",
+      description: "Global navigation has been updated.",
     });
-  });
-
-  if (loading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Navigation Manager</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Skeleton className="h-96 w-full" />
-        </CardContent>
-      </Card>
-    );
-  }
+  };
 
   return (
-    <Form {...form}>
-      <form onSubmit={onSubmit} className="space-y-6">
-        {/* ------------------------------------------------ */}
-        {/* PREVIEW */}
-        {/* ------------------------------------------------ */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Navigation Preview</CardTitle>
-            <CardDescription>Live preview of your menu</CardDescription>
-          </CardHeader>
+    <Formik
+      initialValues={initialValues}
+      validationSchema={navigationSchema}
+      onSubmit={handleSubmit}
+      enableReinitialize
+    >
+      {({ values, setFieldValue, errors, touched, isSubmitting }) => (
+        <Form className="space-y-6">
+          {/* ------------------------------------------------ */}
+          {/* SAVE BUTTON (TOP) */}
+          {/* ------------------------------------------------ */}
 
-          <CardContent>
-            <nav className="flex gap-6 rounded-md bg-muted p-4">
-              {fields.map((item) => {
-                const Icon = item.icon
-                  ? iconMap[item.icon as keyof typeof iconMap]
-                  : null;
+          {/* ------------------------------------------------ */}
+          {/* LIVE PREVIEW */}
+          {/* ------------------------------------------------ */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-6">
+              <div>
+                <CardTitle>Live Preview</CardTitle>
+                <CardDescription>
+                  See how your navigation will look on your website
+                </CardDescription>
+              </div>
 
-                return (
-                  <a
-                    key={item.id}
-                    href={item.href || "#"}
-                    className="flex items-center gap-2 text-sm font-medium text-foreground hover:text-primary"
+              <Button
+                type="submit"
+                size="sm"
+                className="gap-2 shadow-lg"
+                disabled={isSubmitting}
+              >
+                <SaveIcon className="h-4 w-4" />
+                {isSubmitting ? "Saving..." : "Save Navigation"}
+              </Button>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="border rounded-lg overflow-hidden bg-background">
+                <LivePreviewNavbar
+                  content={{
+                    logoText: values.logoText,
+                    logoType: values.logoType,
+                    logoImage: values.logoImage,
+                    menuItems: values.menuItems,
+                  }}
+                  layout={values.layout}
+                  previewDevice="desktop"
+                />
+              </div>
+              <div className="text-xs text-muted-foreground text-center">
+                Preview updates automatically as you make changes
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* ------------------------------------------------ */}
+          {/* LAYOUT & BRANDING */}
+          {/* ------------------------------------------------ */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Layout & Branding</CardTitle>
+              <CardDescription>
+                Configure the look of your navigation bar
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Layout Selector */}
+              <div className="grid gap-6 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="layout">Layout Variant</Label>
+                  <Select
+                    value={values.layout}
+                    onValueChange={(value) => setFieldValue("layout", value)}
                   >
-                    {Icon && <Icon className="h-4 w-4" />}
-                    {item.label}
-                  </a>
-                );
-              })}
-            </nav>
-          </CardContent>
-        </Card>
-
-        {/* ------------------------------------------------ */}
-        {/* MENU EDITOR */}
-        {/* ------------------------------------------------ */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Menu Items</CardTitle>
-            <CardDescription>Customize your navigation menu</CardDescription>
-          </CardHeader>
-
-          <CardContent className="space-y-4">
-            {fields.map((field, index) => (
-              <div key={field.id} className="rounded-lg border p-4 space-y-3">
-                <div className="flex justify-between">
-                  <h4 className="font-medium">Menu Item {index + 1}</h4>
-
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      disabled={index === 0}
-                      onClick={() => move(index, index - 1)}
-                    >
-                      <ChevronUp className="h-4 w-4" />
-                    </Button>
-
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      disabled={index === fields.length - 1}
-                      onClick={() => move(index, index + 1)}
-                    >
-                      <ChevronDown className="h-4 w-4" />
-                    </Button>
-
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => remove(index)}
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                  </div>
+                    <SelectTrigger id="layout">
+                      <SelectValue placeholder="Select a layout" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="simple">
+                        Simple (Right Aligned)
+                      </SelectItem>
+                      <SelectItem value="centered">Centered Logo</SelectItem>
+                      <SelectItem value="minimal">
+                        Minimal (Hamburger)
+                      </SelectItem>
+                      <SelectItem value="stacked">
+                        Stacked (Two Rows)
+                      </SelectItem>
+                      <SelectItem value="split">Split</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {errors.layout && touched.layout && (
+                    <p className="text-xs text-red-500">{errors.layout}</p>
+                  )}
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-2">
-                  {/* KEY */}
-                  <FormField
-                    control={form.control}
-                    name={`items.${index}.key`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Key</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="e.g., home" />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* LABEL */}
-                  <FormField
-                    control={form.control}
-                    name={`items.${index}.label`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Label</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="e.g., Home" />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  {/* ICON */}
-                  <FormField
-                    control={form.control}
-                    name={`items.${index}.icon`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Icon</FormLabel>
-
-                        <Select
-                          value={field.value}
-                          onValueChange={field.onChange}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Choose icon" />
-                            </SelectTrigger>
-                          </FormControl>
-
-                          <SelectContent>
-                            {Object.entries(iconMap).map(([key, Icon]) => (
-                              <SelectItem key={key} value={key}>
-                                <div className="flex items-center gap-2">
-                                  <Icon className="h-4 w-4" />
-                                  {key}
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* URL */}
-                  <FormField
-                    control={form.control}
-                    name={`items.${index}.href`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>URL</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="/about" />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
+                {/* Logo Type Selector */}
+                <div className="space-y-2">
+                  <Label htmlFor="logoType">Logo Type</Label>
+                  <Select
+                    value={values.logoType}
+                    onValueChange={(value) => setFieldValue("logoType", value)}
+                  >
+                    <SelectTrigger id="logoType">
+                      <SelectValue placeholder="Select logo type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="text">Text Logo</SelectItem>
+                      <SelectItem value="image">Image Logo</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {errors.logoType && touched.logoType && (
+                    <p className="text-xs text-red-500">{errors.logoType}</p>
+                  )}
                 </div>
               </div>
-            ))}
 
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() =>
-                append({
-                  id: crypto.randomUUID(),
-                  key: "",
-                  label: "",
-                  icon: "",
-                  href: "",
-                })
-              }
-              className="w-full gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              Add Menu Item
-            </Button>
-          </CardContent>
-        </Card>
+              {/* Logo Content */}
+              <div className="space-y-4">
+                {/* Text Logo */}
+                {(values.logoType === "text" || !values.logoType) && (
+                  <div className="space-y-2">
+                    <Label htmlFor="logoText">Logo Text</Label>
+                    <Field
+                      name="logoText"
+                      as={Input}
+                      id="logoText"
+                      placeholder="My Brand"
+                    />
+                    {errors.logoText && touched.logoText && (
+                      <p className="text-xs text-red-500">{errors.logoText}</p>
+                    )}
+                  </div>
+                )}
 
-        {/* ------------------------------------------------ */}
-        {/* SAVE BUTTON */}
-        {/* ------------------------------------------------ */}
-        <div className="flex justify-end">
-          <Button type="submit" size="lg" className="gap-2">
-            <SaveIcon className="h-4 w-4" />
-            Save Navigation
-          </Button>
-        </div>
-      </form>
-    </Form>
+                {/* Image Logo */}
+                {values.logoType === "image" && (
+                  <div className="space-y-2">
+                    <ImageUploadWithCrop
+                      label="Logo Image"
+                      currentImage={values.logoImage}
+                      onImageUpdate={(imageUrl: string) =>
+                        setFieldValue("logoImage", imageUrl)
+                      }
+                      recommendedWidth={150}
+                      recommendedHeight={50}
+                      aspectRatio={3}
+                      showDimensions
+                    />
+                    {errors.logoImage && touched.logoImage && (
+                      <p className="text-xs text-red-500">{errors.logoImage}</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* ------------------------------------------------ */}
+          {/* MENU EDITOR */}
+          {/* ------------------------------------------------ */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Menu Items</CardTitle>
+              <CardDescription>Customize your navigation links</CardDescription>
+            </CardHeader>
+
+            <CardContent>
+              <MenuEditor
+                menuItems={values.menuItems}
+                onChange={(items) => setFieldValue("menuItems", items)}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Save button moved to top */}
+        </Form>
+      )}
+    </Formik>
   );
 }

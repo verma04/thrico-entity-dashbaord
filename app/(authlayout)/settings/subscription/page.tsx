@@ -8,6 +8,7 @@ const Page = () => {
   const { data } = useCheckEntitySubscription();
 
   const subscription = data?.checkEntitySubscription;
+  console.log("subscription", subscription);
 
   return (
     <>

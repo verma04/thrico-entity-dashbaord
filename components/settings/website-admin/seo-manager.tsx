@@ -1,8 +1,15 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
+import { useState } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -10,147 +17,112 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
-import { useToast } from "@/hooks/use-toast"
-import { useForm } from "react-hook-form"
-import { Edit2Icon } from "lucide-react"
-
-interface SeoData {
-  key: string
-  path: string
-  name: string
-  title: string
-  description: string
-  keywords: string
-  isCustomPage?: boolean
-  slug?: string
-}
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
+import { useForm } from "react-hook-form";
+import { Edit2Icon, Wand2 } from "lucide-react";
+import { useWebsiteBuilderStore } from "@/store/useWebsiteBuilderStore";
 
 export default function SeoManager() {
-  const [loading, setLoading] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
-  const [seoData, setSeoData] = useState<SeoData[]>([])
-  const [isModalVisible, setIsModalVisible] = useState(false)
-  const [currentPage, setCurrentPage] = useState<SeoData | null>(null)
-  const { toast } = useToast()
-  const form = useForm()
+  const { pages, updatePageSeo } = useWebsiteBuilderStore();
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [editingPageId, setEditingPageId] = useState<string | null>(null);
 
-  useEffect(() => {
-    setTimeout(() => {
-      const homeSeo = JSON.parse(
-        localStorage.getItem("thrico-seo-home") ||
-          '{"title":"Thrico - Connect with Your Community","description":"Join events, groups, and meet like-minded people in your area","keywords":"community, events, groups, networking"}',
-      )
-      const aboutSeo = JSON.parse(
-        localStorage.getItem("thrico-seo-about") ||
-          '{"title":"About Us - Thrico","description":"Learn more about Thrico and our mission to connect communities","keywords":"about, mission, team, community platform"}',
-      )
-      const contactSeo = JSON.parse(
-        localStorage.getItem("thrico-seo-contact") ||
-          '{"title":"Contact Us - Thrico","description":"Get in touch with the Thrico team for support, feedback, or partnership inquiries","keywords":"contact, support, help, feedback, inquiries"}',
-      )
-      const privacySeo = JSON.parse(
-        localStorage.getItem("thrico-seo-privacy") ||
-          '{"title":"Privacy Policy - Thrico","description":"Learn about how Thrico collects, uses, and protects your personal information","keywords":"privacy policy, data protection, personal information, cookies, GDPR"}',
-      )
+  const { toast } = useToast();
+  const form = useForm({
+    defaultValues: {
+      title: "",
+      description: "",
+      keywords: "",
+      schemaMarkup: "",
+    },
+  });
 
-      const customPages = JSON.parse(localStorage.getItem("thrico-custom-pages") || "[]")
+  const generateSchemaMarkup = () => {
+    const page = pages.find((p) => p.id === editingPageId);
+    if (!page) return;
 
-      const allSeoData = [
-        { key: "home", path: "/", name: "Home", ...homeSeo },
-        { key: "about", path: "/about", name: "About Us", ...aboutSeo },
-        { key: "contact", path: "/contact", name: "Contact Us", ...contactSeo },
-        {
-          key: "privacy",
-          path: "/privacy",
-          name: "Privacy Policy",
-          ...privacySeo,
-        },
-        ...customPages.map((page: any) => ({
-          key: `page-${page.slug}`,
-          path: `/pages/${page.slug}`,
-          name: page.title,
-          title: page.title,
-          description: page.description || "",
-          keywords: page.keywords || "",
-          isCustomPage: true,
-          slug: page.slug,
-        })),
-      ]
+    const title = form.getValues("title");
+    const description = form.getValues("description");
+    const keywords = form.getValues("keywords");
 
-      setSeoData(allSeoData)
-      setIsLoading(false)
-    }, 1000)
-  }, [])
+    const schema = {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      name: title || page.name,
+      description: description || `Learn more about ${page.name}`,
+      url: `https://yourwebsite.com/${page.slug}`,
+      keywords: keywords || page.name,
+      inLanguage: "en-US",
+      isPartOf: {
+        "@type": "WebSite",
+        name: "Your Website",
+        url: "https://yourwebsite.com",
+      },
+      datePublished: new Date().toISOString(),
+      dateModified: new Date().toISOString(),
+    };
 
-  const handleEdit = (record: SeoData) => {
-    setCurrentPage(record)
+    const schemaMarkup = `<script type="application/ld+json">
+${JSON.stringify(schema, null, 2)}
+</script>`;
+
+    form.setValue("schemaMarkup", schemaMarkup);
+
+    toast({
+      title: "Schema Generated",
+      description:
+        "SEO schema markup has been auto-generated based on your page data.",
+    });
+  };
+
+  const handleEdit = (pageId: string) => {
+    const page = pages.find((p) => p.id === pageId);
+    if (!page) return;
+
+    setEditingPageId(pageId);
     form.reset({
-      title: record.title,
-      description: record.description,
-      keywords: record.keywords,
-    })
-    setIsModalVisible(true)
-  }
+      title: page.seo?.title || `${page.name} - My Website`,
+      description: page.seo?.description || "", // Fallback to page description if exists
+      keywords: page.seo?.keywords || "",
+      schemaMarkup: page.seo?.schemaMarkup || "",
+    });
+    setIsModalVisible(true);
+  };
 
   const handleSave = form.handleSubmit((values) => {
-    if (!currentPage) return
-    setLoading(true)
+    if (!editingPageId) return;
 
-    setTimeout(() => {
-      if (currentPage.isCustomPage) {
-        const customPages = JSON.parse(localStorage.getItem("thrico-custom-pages") || "[]")
-        const updatedPages = customPages.map((page: any) => {
-          if (page.slug === currentPage.slug) {
-            return {
-              ...page,
-              title: values.title,
-              description: values.description,
-              keywords: values.keywords,
-            }
-          }
-          return page
-        })
-        localStorage.setItem("thrico-custom-pages", JSON.stringify(updatedPages))
-      } else {
-        localStorage.setItem(
-          `thrico-seo-${currentPage.key}`,
-          JSON.stringify({
-            title: values.title,
-            description: values.description,
-            keywords: values.keywords,
-          }),
-        )
-      }
+    updatePageSeo(editingPageId, {
+      title: values.title,
+      description: values.description,
+      keywords: values.keywords,
+      schemaMarkup: values.schemaMarkup,
+    });
 
-      setSeoData((prevData) => prevData.map((item) => (item.key === currentPage.key ? { ...item, ...values } : item)))
-
-      toast({
-        title: "Success",
-        description: "SEO settings updated successfully!",
-      })
-      setLoading(false)
-      setIsModalVisible(false)
-    }, 1000)
-  })
-
-  if (isLoading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>SEO Manager</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Skeleton className="h-96 w-full" />
-        </CardContent>
-      </Card>
-    )
-  }
+    toast({
+      title: "Success",
+      description: "SEO settings updated successfully!",
+    });
+    setIsModalVisible(false);
+  });
 
   return (
     <div className="space-y-6">
@@ -158,8 +130,8 @@ export default function SeoManager() {
         <CardHeader>
           <CardTitle>SEO Manager</CardTitle>
           <CardDescription>
-            Manage SEO settings for all pages on your website. Optimize your meta titles, descriptions, and keywords to
-            improve search engine visibility.
+            Manage SEO settings for all pages on your website. Optimize your
+            meta titles, descriptions, and keywords.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -169,23 +141,48 @@ export default function SeoManager() {
                 <TableRow className="border-border">
                   <TableHead className="font-semibold">Page</TableHead>
                   <TableHead className="font-semibold">Meta Title</TableHead>
-                  <TableHead className="font-semibold">Meta Description</TableHead>
-                  <TableHead className="text-right font-semibold">Actions</TableHead>
+                  <TableHead className="font-semibold">
+                    Meta Description
+                  </TableHead>
+                  <TableHead className="text-right font-semibold">
+                    Actions
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {seoData.map((item) => (
-                  <TableRow key={item.key} className="border-border">
+                {pages.map((page) => (
+                  <TableRow key={page.id} className="border-border">
                     <TableCell>
                       <div>
-                        <div className="font-medium text-foreground">{item.name}</div>
-                        <div className="text-sm text-muted-foreground">{item.path}</div>
+                        <div className="font-medium text-foreground">
+                          {page.name}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          /{page.slug}
+                        </div>
                       </div>
                     </TableCell>
-                    <TableCell className="text-sm text-foreground line-clamp-1">{item.title}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground line-clamp-1">{item.description}</TableCell>
+                    <TableCell className="text-sm text-foreground line-clamp-1">
+                      {page.seo?.title || (
+                        <span className="text-muted-foreground italic">
+                          Not set
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground line-clamp-1">
+                      {page.seo?.description || (
+                        <span className="text-muted-foreground italic">
+                          Not set
+                        </span>
+                      )}
+                    </TableCell>
                     <TableCell className="text-right">
-                      <Button size="sm" variant="outline" onClick={() => handleEdit(item)} className="gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleEdit(page.id)}
+                        className="gap-2"
+                      >
                         <Edit2Icon className="h-4 w-4" />
                         Edit
                       </Button>
@@ -201,8 +198,10 @@ export default function SeoManager() {
       <Dialog open={isModalVisible} onOpenChange={setIsModalVisible}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Edit SEO for {currentPage?.name || ""}</DialogTitle>
-            <DialogDescription>Update meta information to improve search engine visibility</DialogDescription>
+            <DialogTitle>Edit SEO Settings</DialogTitle>
+            <DialogDescription>
+              Update meta information to improve search engine visibility
+            </DialogDescription>
           </DialogHeader>
 
           <Form {...form}>
@@ -230,7 +229,11 @@ export default function SeoManager() {
                   <FormItem>
                     <FormLabel>Meta Description</FormLabel>
                     <FormControl>
-                      <Textarea {...field} placeholder="Enter meta description" rows={4} />
+                      <Textarea
+                        {...field}
+                        placeholder="Enter meta description"
+                        rows={4}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -245,25 +248,66 @@ export default function SeoManager() {
                   <FormItem>
                     <FormLabel>Meta Keywords</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Enter keywords separated by commas" />
+                      <Input
+                        {...field}
+                        placeholder="Enter keywords separated by commas"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
+              <FormField
+                control={form.control}
+                name="schemaMarkup"
+                render={({ field }) => (
+                  <FormItem>
+                    <div className="flex items-center justify-between">
+                      <FormLabel>Schema Markup (JSON-LD)</FormLabel>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={generateSchemaMarkup}
+                        className="gap-2"
+                      >
+                        <Wand2 className="h-4 w-4" />
+                        Auto-Generate
+                      </Button>
+                    </div>
+                    <FormControl>
+                      <Textarea
+                        {...field}
+                        placeholder='Click "Auto-Generate" to create schema markup or paste your own...'
+                        className="font-mono text-xs"
+                        rows={8}
+                      />
+                    </FormControl>
+                    <p className="text-xs text-muted-foreground">
+                      Schema markup helps search engines understand your content
+                      better. Click Auto-Generate to create based on your page
+                      data.
+                    </p>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setIsModalVisible(false)}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsModalVisible(false)}
+                >
                   Cancel
                 </Button>
-                <Button type="submit" loading={loading}>
-                  Save Changes
-                </Button>
+                <Button type="submit">Save Changes</Button>
               </DialogFooter>
             </form>
           </Form>
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

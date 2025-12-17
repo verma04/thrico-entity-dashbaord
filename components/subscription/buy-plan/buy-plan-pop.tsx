@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -30,6 +30,7 @@ import {
   useUpdateTrialToPackage,
   useVerifyRazorpayPayment,
 } from "@/graphql/actions/plan";
+import { useSubscriptionStore } from "@/store/subscriptionStore";
 
 interface BuyPlanPopUpProps {
   visible: boolean;
@@ -57,18 +58,48 @@ export default function BuyPlanPopUp({
   const [billingCycle, setBillingCycle] = useState<BillingCycle>(
     BillingCycle.Monthly
   );
+  const { showBuyPlanDialog, setShowBuyPlanDialog } = useSubscriptionStore();
 
   const currentDate = moment();
 
   const { Razorpay } = useRazorpay();
   const { refetch, loading: statusLoader } = useCheckEntitySubscription();
 
+  // Inject global styles for Razorpay z-index
+  useEffect(() => {
+    const styleId = "razorpay-z-index-fix";
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement("style");
+      style.id = styleId;
+      style.innerHTML = `
+        .razorpay-container {
+          z-index: 999999 !important;
+        }
+        .razorpay-backdrop {
+          z-index: 999998 !important;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    return () => {
+      const existingStyle = document.getElementById(styleId);
+      if (existingStyle) {
+        existingStyle.remove();
+      }
+    };
+  }, []);
+
   const [verify, { loading: verificationLoader }] = useVerifyRazorpayPayment({
     onCompleted: (data) => {
       if (data?.verifyRazorpayPayment) {
         refetch();
+        setShowBuyPlanDialog(true); // Show dialog again after verification
         onClose();
-      } else alert("Payment verification failed.");
+      } else {
+        setShowBuyPlanDialog(true); // Show dialog again on failure
+        alert("Payment verification failed.");
+      }
     },
   });
 
@@ -94,7 +125,7 @@ export default function BuyPlanPopUp({
               },
             },
           });
-          onClose();
+          setShowBuyPlanDialog(true);
         },
         prefill: {
           name: "John Doe",
@@ -102,9 +133,100 @@ export default function BuyPlanPopUp({
           contact: "9999999999",
         },
         theme: { color: "#6C47FF" },
+        modal: {
+          ondismiss: () => {
+            setShowBuyPlanDialog(true);
+          },
+          backdropclose: false,
+          escape: true,
+          handleback: false,
+        },
       };
 
-      new Razorpay(options).open();
+      const rzp = new Razorpay(options);
+
+      rzp.on("payment.failed", () => {
+        setShowBuyPlanDialog(true);
+      });
+
+      // Function to apply z-index fix
+      const applyZIndexFix = () => {
+        const razorpayContainer = document.querySelector(".razorpay-container");
+        const razorpayBackdrop = document.querySelector(".razorpay-backdrop");
+        const razorpayFrame = document.querySelector(
+          'iframe[src*="checkout.razorpay.com"]'
+        );
+
+        if (razorpayContainer) {
+          (razorpayContainer as HTMLElement).style.setProperty(
+            "z-index",
+            "999999",
+            "important"
+          );
+          (razorpayContainer as HTMLElement).style.position = "fixed";
+        }
+        if (razorpayBackdrop) {
+          (razorpayBackdrop as HTMLElement).style.setProperty(
+            "z-index",
+            "999998",
+            "important"
+          );
+          (razorpayBackdrop as HTMLElement).style.position = "fixed";
+        }
+        if (razorpayFrame) {
+          (razorpayFrame as HTMLElement).style.setProperty(
+            "z-index",
+            "999999",
+            "important"
+          );
+        }
+
+        // Also hide all dialog overlays temporarily
+        const dialogOverlays = document.querySelectorAll(
+          "[data-radix-dialog-overlay]"
+        );
+        dialogOverlays.forEach((overlay) => {
+          (overlay as HTMLElement).style.display = "none";
+        });
+      };
+
+      // Set up MutationObserver to watch for Razorpay elements
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          mutation.addedNodes.forEach((node) => {
+            if (node instanceof HTMLElement) {
+              if (
+                node.classList.contains("razorpay-container") ||
+                node.classList.contains("razorpay-backdrop") ||
+                node.querySelector(".razorpay-container")
+              ) {
+                applyZIndexFix();
+              }
+            }
+          });
+        });
+      });
+
+      // Start observing
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+      });
+
+      // Hide dialog and open Razorpay
+      setShowBuyPlanDialog(false);
+      rzp.open();
+
+      // Apply fix multiple times as backup
+      setTimeout(applyZIndexFix, 50);
+      setTimeout(applyZIndexFix, 100);
+      setTimeout(applyZIndexFix, 200);
+      setTimeout(applyZIndexFix, 500);
+
+      // Clean up observer after 10 seconds
+      setTimeout(() => {
+        observer.disconnect();
+      }, 10000);
     },
   });
 
@@ -116,8 +238,16 @@ export default function BuyPlanPopUp({
       : null;
 
   return (
-    <Dialog open={visible} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl bg-card border-border p-0 overflow-hidden">
+    <Dialog
+      open={visible && showBuyPlanDialog}
+      onOpenChange={(open) => {
+        if (!open) {
+          setShowBuyPlanDialog(true);
+          onClose();
+        }
+      }}
+    >
+      <DialogContent className="max-w-2xl bg-card border-border z-50 p-0 overflow-hidden">
         {/* HEADER WITH GRADIENT */}
         <div className="relative px-6 pt-6 pb-4 border-b border-border">
           <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent" />

@@ -114,32 +114,30 @@ const KycEntity: React.FC<KycEntityProps> = ({
 
   const entityTypes = [
     {
-      value: "Enterprise",
+      value: "academia",
+      label: "Academia",
+      description: "Educational or research institution",
+    },
+    {
+      value: "enterprise",
       label: "Enterprise",
       description: "Large business organization",
     },
     {
-      value: "Creator",
+      value: "creator",
       label: "Creator",
       description: "Content creator or influencer",
     },
     {
-      value: "Association",
+      value: "association",
       label: "Association",
       description: "Non-profit or community group",
     },
     {
-      value: "Public Enterprise",
-      label: "Public Enterprise",
-      description: "Government entity",
+      value: "startup",
+      label: "Startup",
+      description: "Early-stage company",
     },
-    {
-      value: "Professional",
-      label: "Professional",
-      description: "Professional services",
-    },
-    { value: "Startup", label: "Startup", description: "Early-stage company" },
-    { value: "other", label: "Other", description: "Other type of entity" },
   ];
 
   const industryTypes = [

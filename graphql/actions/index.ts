@@ -179,8 +179,26 @@ export function useUpdateEntityModule() {
     { input: InputUpdateEntityModule[] }
   >(UPDATE_ENTITY_MODULE);
 }
+
+// Upload Image Mutation
+export const UPLOAD_IMAGE = gql`
+  mutation UploadImage($file: Upload!) {
+    uploadImage(file: $file)
+  }
+`;
+
+export interface UploadImageResponse {
+  uploadImage: string;
+}
+
+export const useUploadImage = (options?: any) =>
+  useMutation<UploadImageResponse, { file: File }>(UPLOAD_IMAGE, options);
+
 // Action for GetAllEntityInvoice
 import { GET_ALL_ENTITY_INVOICE, GetAllEntityInvoiceResponse } from "../quries";
 
 export const useGetAllEntityInvoice = () =>
   useQuery<GetAllEntityInvoiceResponse>(GET_ALL_ENTITY_INVOICE);
+
+// Website Actions
+export * from "./website";

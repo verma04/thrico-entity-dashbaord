@@ -14,6 +14,7 @@ import {
   LogOutIcon,
   MessageSquare,
   BarChart3,
+  ShoppingBag,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
@@ -77,6 +78,18 @@ export const extendedItems = [
       { key: "polls-settings", label: "Settings", path: "/polls/settings" },
     ],
   },
+
+  {
+    key: "feedback",
+    label: "feedback",
+    path: "/feedback",
+    icon: <BarChart3 size={18} />,
+    children: [
+      { key: "all-polls", label: "Manage Polls", path: "/feedback" },
+      { key: "polls-settings", label: "Settings", path: "/polls/settings" },
+    ],
+  },
+
   {
     key: "communities",
     label: "Communities",
@@ -109,6 +122,24 @@ export const extendedItems = [
     children: [
       { key: "job-approval", label: "Manage Approvals", path: "/jobs" },
       { key: "job-settings", label: "Settings", path: "/jobs/settings" },
+    ],
+  },
+  {
+    key: "marketplace",
+    label: "Marketplace",
+    path: "/listing",
+    icon: <ShoppingBag size={18} />,
+    children: [
+      {
+        key: "marketplace-listings",
+        label: "Manage Listings",
+        path: "/listing",
+      },
+      {
+        key: "marketplace-settings",
+        label: "Settings",
+        path: "/listing/settings",
+      },
     ],
   },
 ];

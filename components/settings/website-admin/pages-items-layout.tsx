@@ -6,8 +6,9 @@ import {
   LayoutGrid,
   FileText,
   Globe,
-  PanelLeftClose,
   Menu,
+  Settings,
+  PanelBottom,
 } from "lucide-react";
 import { Tabs } from "@/components/ui/tabs";
 
@@ -24,7 +25,6 @@ const PagesItemsLayout = ({ children }: { children: React.ReactNode }) => {
   const activeTab = pathname.replace("/app-layout/", "") || "layouts";
 
   const menuItems: Tab[] = [
-   
     {
       key: "pages",
       label: "Pages",
@@ -40,7 +40,7 @@ const PagesItemsLayout = ({ children }: { children: React.ReactNode }) => {
     {
       key: "footer",
       label: "Footer",
-      icon: <PanelLeftClose className="h-4 w-4" />,
+      icon: <PanelBottom className="h-4 w-4" />,
       path: "/app-layout/footer",
     },
     {
@@ -49,8 +49,14 @@ const PagesItemsLayout = ({ children }: { children: React.ReactNode }) => {
       icon: <Globe className="h-4 w-4" />,
       path: "/app-layout/seo",
     },
+    {
+      key: "settings",
+      label: "Settings",
+      icon: <Settings className="h-4 w-4" />,
+      path: "/app-layout/settings",
+    },
 
-     {
+    {
       key: "layouts",
       label: "Layouts",
       icon: <LayoutGrid className="h-4 w-4" />,
@@ -65,15 +71,7 @@ const PagesItemsLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="sticky top-0 z-40 border-b border-border bg-card/80 backdrop-blur-sm">
-        <div className="flex items-center px-6 py-4">
-          <h1 className="text-xl font-semibold tracking-tight text-foreground">
-            Website Admin
-          </h1>
-        </div>
-      </div>
-
-      <div className="sticky top-14 z-30 border-b border-border bg-card/50 backdrop-blur-sm">
+      <div className="sticky top-0 z-30 border-b border-border bg-card/50 backdrop-blur-sm">
         <div className="px-6">
           <Tabs
             value={activeTab}

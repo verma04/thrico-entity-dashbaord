@@ -9,8 +9,15 @@ import {
   DuplicateQuestionFn,
   UpdateQuestionFn,
 } from "./ts-types";
-import { arrayMove } from "@dnd-kit/sortable";
-import dayjs from "dayjs";
+import moment from "moment";
+
+// Helper function to reorder array items (replaces arrayMove from @dnd-kit/sortable)
+const reorderArray = <T,>(list: T[], startIndex: number, endIndex: number): T[] => {
+  const result = Array.from(list);
+  const [removed] = result.splice(startIndex, 1);
+  result.splice(endIndex, 0, removed);
+  return result;
+};
 
 interface FormState {
   formTitle: string;
@@ -18,7 +25,7 @@ interface FormState {
   questions: Question[];
   formSettings: FormSettings;
   previewType: "SCROLL_LONG" | "MULTI_STEP";
-  endDate: dayjs.Dayjs | null;
+  endDate: moment.Moment | null;
   setQuestions: (questions: Question[]) => void;
 
   setFormTitle: (title: string) => void;
@@ -33,7 +40,7 @@ interface FormState {
   updateFormSetting: UpdateFormSettingFn;
   reorderQuestions: (oldIndex: number, newIndex: number) => void;
   setPreviewType: (previewType: "SCROLL_LONG" | "MULTI_STEP") => void;
-  setEndDate: (previewType: dayjs.Dayjs | null) => void;
+  setEndDate: (previewType: moment.Moment | null) => void;
 }
 
 export const useFormStore = create<FormState>((set, get) => ({
@@ -181,27 +188,9 @@ export const useFormStore = create<FormState>((set, get) => ({
       },
     })),
 
-  // New helper for drag-and-drop reordering
-  moveQuestion: (
-    active: { id: any },
-    over: { id: any } | null,
-    arrayMove: (array: any[], from: number, to: number) => any[]
-  ) =>
-    set((state) => {
-      const oldIndex = state.questions.findIndex(
-        (item) => item.id === active.id
-      );
-      const newIndex = state.questions.findIndex(
-        (item) => item.id === over?.id
-      );
-      if (oldIndex === -1 || newIndex === -1) return {};
-      return {
-        questions: arrayMove(state.questions, oldIndex, newIndex),
-      };
-    }),
-
+  // Reorder questions using our custom reorderArray helper
   reorderQuestions: (oldIndex, newIndex) =>
     set((state) => ({
-      questions: arrayMove(state.questions, oldIndex, newIndex),
+      questions: reorderArray(state.questions, oldIndex, newIndex),
     })),
 }));

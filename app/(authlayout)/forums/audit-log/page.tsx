@@ -1,8 +1,7 @@
 import React from "react";
-import AuditLogsPage from "../../../../screen/user/drawer/AuditLog";
 
 const page = () => {
-  return <AuditLogsPage />;
+  return <></>;
 };
 
 export default page;

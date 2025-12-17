@@ -2,8 +2,7 @@
 
 import React from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Tabs } from "@/components/ui/tabs";
 import { LayoutDashboard, Wrench, List, AlertTriangle } from "lucide-react";
 
 type MenuItem = {
@@ -32,23 +31,23 @@ const MenuItemsLayout = ({
     {
       key: "dashboard",
       label: "Dashboard",
-      icon: <LayoutDashboard className="h-4 w-4 mr-2" />,
+      icon: <LayoutDashboard className="h-4 w-4" />,
     },
     ...items,
     {
       key: "reports",
       label: "Reports",
-      icon: <AlertTriangle className="h-4 w-4 mr-2" />,
+      icon: <AlertTriangle className="h-4 w-4" />,
     },
     {
       key: "audit-log",
       label: "Audit Log",
-      icon: <List className="h-4 w-4 mr-2" />,
+      icon: <List className="h-4 w-4" />,
     },
     {
       key: "settings",
       label: "Settings",
-      icon: <Wrench className="h-4 w-4 mr-2" />,
+      icon: <Wrench className="h-4 w-4" />,
     },
   ];
 
@@ -59,25 +58,30 @@ const MenuItemsLayout = ({
 
   return (
     <div className="min-h-screen bg-background">
-      <Tabs value={activeTab} onValueChange={onChange} className="px-4 pt-6">
-        <TabsList className="flex gap-0 mb-6">
-          {menuitems.map((item) => (
-            <TabsTrigger
-              key={item.key}
-              value={item.key}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium"
-            >
-              {item.icon}
-              {item.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </Tabs>
-      <Card className="max-w-full mx-auto mt-8 shadow-none border-none bg-transparent">
-        <CardContent className="pt-0">
-          <div className="bg-card rounded-lg shadow p-6">{children}</div>
-        </CardContent>
-      </Card>
+      <div className="sticky top-0 z-30 border-b border-border bg-card/50 backdrop-blur-sm">
+        <div className="px-6">
+          <Tabs value={activeTab} onValueChange={onChange} className="w-full">
+            <div className="flex gap-0">
+              {menuitems.map((item) => (
+                <button
+                  key={item.key}
+                  onClick={() => onChange(item.key)}
+                  className={`flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
+                    activeTab === item.key
+                      ? "border-primary text-primary"
+                      : "border-transparent text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {item.icon}
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          </Tabs>
+        </div>
+      </div>
+
+      <main className="mx-auto max-w-7xl px-6 py-8">{children}</main>
     </div>
   );
 };

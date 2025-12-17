@@ -106,7 +106,7 @@ export default function SidebarLayout({
   );
 
   return (
-    <SidebarProvider defaultOpen={true}>
+    <SidebarProvider defaultOpen={false}>
       <Sidebar className="border-r border-border">
         {/* HEADER */}
         <SidebarHeader className="flex h-14 items-center border-b border-border px-4">
@@ -160,7 +160,7 @@ export default function SidebarLayout({
           <VisitSite />
         </header>
 
-        <main className="flex-1 p-4 lg:p-6 w-full min-w-0">{children}</main>
+        <main className="flex-1 p-4 lg:p-6 w-full min-w-0 ">{children}</main>
       </SidebarInset>
 
       <LogoutModal open={logoutOpen} onOpenChange={setLogoutOpen} />

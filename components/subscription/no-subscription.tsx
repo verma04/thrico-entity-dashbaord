@@ -1,118 +1,145 @@
 "use client";
 
-import { useState } from "react";
 import { Alert } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
+import { useGetEntity } from "@/graphql/actions";
 
-// If you have a Typography/Text component, otherwise use <span>
+
 import {
   AlertCircle,
   Clock,
   Ban,
-  ArrowRight,
   Star,
   Zap,
   Rocket,
+  Sparkles,
 } from "lucide-react";
 import BuyPlan from "./buy-plan/buy-plan";
 
 export default function NoSubscription() {
-  const [status, setStatus] = useState<"cancelled" | "suspended" | "pending">(
-    "pending"
-  );
+  const { data, loading } = useGetEntity();
+  
+  // Get subscription status from entity data
+  const subscription = data?.getEntity?.subscription;
+  const status = subscription?.status || "pending";
+
+  // Determine the display status
+  const displayStatus = 
+    !subscription ? "no_subscription" :
+    status === "cancelled" ? "cancelled" :
+    status === "suspended" ? "suspended" :
+    status === "active" ? "active" :
+    status === "scheduled_downgrade" ? "scheduled_downgrade" :
+    status === "scheduled_upgrade" ? "scheduled_upgrade" :
+    "pending";
 
   const statusConfig = {
+    no_subscription: {
+      variant: "default" as const,
+      icon: <Sparkles className="text-blue-600 dark:text-blue-400" size={24} />,
+      message: "No Active Subscription",
+      description:
+        "You don't have an active subscription yet. Choose a plan below to unlock all premium features and grow your community.",
+      action: "View Plans",
+    },
     cancelled: {
       variant: "destructive" as const,
-      icon: <Ban className="text-red-500" size={24} />,
+      icon: <Ban className="text-red-500 dark:text-red-400" size={24} />,
       message: "Subscription Cancelled",
       description:
-        "Your subscription has been cancelled. Reactivate to continue using premium features.",
+        "Your subscription has been cancelled. Reactivate to continue using premium features and maintain your community engagement.",
       action: "Reactivate Now",
     },
     suspended: {
       variant: "default" as const,
-      icon: <AlertCircle className="text-yellow-500" size={24} />,
+      icon: <AlertCircle className="text-yellow-500 dark:text-yellow-400" size={24} />,
       message: "Account Suspended",
       description:
-        "Your account is temporarily suspended. Please resolve payment issues to continue.",
+        "Your account is temporarily suspended. Please resolve payment issues to continue accessing your dashboard.",
       action: "Update Payment",
     },
     pending: {
       variant: "default" as const,
-      icon: <Clock className="text-blue-500" size={24} />,
+      icon: <Clock className="text-blue-500 dark:text-blue-400" size={24} />,
       message: "Subscription Pending",
       description:
-        "Your subscription is being processed. You currently have limited access.",
+        "Your subscription is being processed. You currently have limited access. This usually takes a few minutes.",
       action: "Complete Setup",
+    },
+    active: {
+      variant: "default" as const,
+      icon: <Sparkles className="text-green-500 dark:text-green-400" size={24} />,
+      message: "Subscription Active",
+      description:
+        `Your ${subscription?.planName || 'subscription'} plan is active. Enjoy all premium features!`,
+      action: "Manage Subscription",
+    },
+    scheduled_downgrade: {
+      variant: "default" as const,
+      icon: <AlertCircle className="text-orange-500 dark:text-orange-400" size={24} />,
+      message: "Downgrade Scheduled",
+      description:
+        `Your plan will be downgraded on ${subscription?.endDate ? new Date(subscription.endDate).toLocaleDateString() : 'the next billing cycle'}. You can cancel this change anytime.`,
+      action: "Cancel Downgrade",
+    },
+    scheduled_upgrade: {
+      variant: "default" as const,
+      icon: <Rocket className="text-purple-600 dark:text-purple-400" size={24} />,
+      message: "Upgrade Scheduled",
+      description:
+        `Your plan will be upgraded on ${subscription?.endDate ? new Date(subscription.endDate).toLocaleDateString() : 'the next billing cycle'}. Get ready for more features!`,
+      action: "View Upgrade Details",
     },
   };
 
-  const plans = [
-    {
-      name: "Starter",
-      price: "$9",
-      period: "/month",
-      description: "Perfect for individuals getting started",
-      icon: <Star className="text-blue-500" size={24} />,
-      features: [
-        "5 Projects",
-        "Basic Analytics",
-        "Email Support",
-        "1GB Storage",
-        "Basic Templates",
-      ],
-      buttonText: "Choose Starter",
-      popular: false,
-      color: "text-blue-500",
-    },
-    {
-      name: "Professional",
-      price: "$29",
-      period: "/month",
-      description: "Best for growing businesses",
-      icon: <Zap className="text-green-500" size={24} />,
-      features: [
-        "Unlimited Projects",
-        "Advanced Analytics",
-        "Priority Support",
-        "10GB Storage",
-        "Premium Templates",
-        "Team Collaboration",
-        "API Access",
-      ],
-      buttonText: "Choose Professional",
-      popular: true,
-      color: "text-green-500",
-    },
-    {
-      name: "Enterprise",
-      price: "$99",
-      period: "/month",
-      description: "For large organizations",
-      icon: <Rocket className="text-purple-600" size={24} />,
-      features: [
-        "Everything in Professional",
-        "Custom Integrations",
-        "Dedicated Support",
-        "Unlimited Storage",
-        "White-label Solution",
-        "Advanced Security",
-        "SLA Guarantee",
-      ],
-      buttonText: "Contact Sales",
-      popular: false,
-      color: "text-purple-600",
-    },
-  ];
+  const currentConfig = statusConfig[displayStatus as keyof typeof statusConfig];
 
-  const currentConfig = statusConfig[status];
+  if (loading) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center">
+        {/* Backdrop */}
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm" />
+        
+        {/* Modal Content */}
+        <div className="relative z-50 w-full max-w-6xl max-h-[90vh] overflow-y-auto bg-background border border-border rounded-lg shadow-lg mx-4">
+
+          {/* Header */}
+          <div className="px-6 pt-6 pb-4 border-b">
+            <h2 className="text-2xl font-semibold">Subscription Status</h2>
+            <p className="text-sm text-muted-foreground mt-1">Loading your subscription information...</p>
+          </div>
+
+          {/* Loading Content */}
+          <div className="p-6">
+            <div className="rounded-lg border-2 px-6 py-4 flex items-center gap-4 animate-pulse">
+              <div className="w-6 h-6 bg-muted rounded-full" />
+              <div className="flex-1 space-y-2">
+                <div className="h-4 bg-muted rounded w-1/4" />
+                <div className="h-3 bg-muted rounded w-3/4" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="bg-muted min-h-screen">
-      {/* Banner */}
-      <div className="py-6 bg-background border-b border-muted">
-        <div className="max-w-5xl mx-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      {/* Backdrop */}
+      <div className="fixed inset-0 bg-black/80 backdrop-blur-sm"></div>
+      
+      {/* Modal Content */}
+      <div className="relative z-50 w-full max-w-6xl max-h-[90vh] overflow-y-auto bg-background border border-border rounded-lg shadow-lg mx-4">
+
+        {/* Header */}
+        <div className="px-6 pt-6 pb-4 border-b">
+          <h2 className="text-2xl font-semibold">Subscription Management</h2>
+          <p className="text-sm text-muted-foreground mt-1">{currentConfig.message}</p>
+        </div>
+        
+        {/* Content */}
+        <div className="p-6 space-y-6">
+          {/* Status Alert */}
           <Alert
             variant={currentConfig.variant}
             className="rounded-lg border-2 px-6 py-4 flex items-center gap-4"
@@ -126,18 +153,12 @@ export default function NoSubscription() {
                 {currentConfig.description}
               </div>
             </div>
-            <Button
-              variant="default"
-              size="sm"
-              className="ml-4 flex items-center gap-2"
-            >
-              <ArrowRight size={16} />
-              {currentConfig.action}
-            </Button>
           </Alert>
+
+          {/* Plans */}
+          <BuyPlan displayStatus={displayStatus} />
         </div>
       </div>
-      <BuyPlan />
     </div>
   );
 }

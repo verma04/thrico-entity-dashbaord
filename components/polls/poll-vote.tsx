@@ -85,7 +85,7 @@ function PollComponent({
       },
     });
 
-    let newValue = data?.getPollByIdForUser;
+    const newValue = data?.getPollByIdForUser;
     if (!newValue) return;
 
     let updatedIsVoted = newValue.isVoted || false;

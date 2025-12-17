@@ -28,14 +28,14 @@ export default function withAuth<P>(
     }
 
     // If not authenticated, redirect to login
-    // if ((!getUser || error) && typeof window !== "undefined") {
-    //   localStorage.removeItem("key");
-    //   return (
-    //     <Redirect
-    //       to={`${ACCOUNTS_URL}/auth?path=${DASHBOARD_URL}${pathname}&&host=${DASHBOARD_URL}`}
-    //     />
-    //   );
-    // }
+    if ((!getUser || error) && typeof window !== "undefined") {
+      localStorage.removeItem("key");
+      return (
+        <Redirect
+          to={`${ACCOUNTS_URL}/auth?path=${DASHBOARD_URL}${pathname}&&host=${DASHBOARD_URL}`}
+        />
+      );
+    }
 
     // Render the protected component
     return <WrappedComponent {...props} />;

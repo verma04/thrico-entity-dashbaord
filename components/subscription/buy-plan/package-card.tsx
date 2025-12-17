@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +9,8 @@ import {
   ShieldAlert,
   Check,
   Star,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { formatPrice, renderModuleIcon } from "../utils";
 import { CountryPackage } from "../ts-types";
@@ -37,6 +39,13 @@ const PackageCard: React.FC<PackageCardProps> = ({
   activePackage,
   setActivePackage,
 }) => {
+  const [showAllModules, setShowAllModules] = useState(false);
+  const moduleLimit = 3; // Show only 3 modules by default
+  const hasMoreModules = pkg.modules.length > moduleLimit;
+  const visibleModules = showAllModules
+    ? pkg.modules
+    : pkg.modules.slice(0, moduleLimit);
+
   const savings = getYearlySavings(
     pkg.monthlyPrice,
     pkg.yearlyPrice,
@@ -113,12 +122,31 @@ const PackageCard: React.FC<PackageCardProps> = ({
             ))}
         </div>
         <div className="w-full flex flex-col gap-2 mb-2">
-          {pkg.modules.map((module, index) => (
+          {visibleModules.map((module, index) => (
             <div key={index} className="flex items-center gap-2">
               {renderModuleIcon(module.icon)}
               <span className="text-sm">{module.name}</span>
             </div>
           ))}
+
+          {hasMoreModules && (
+            <button
+              onClick={() => setShowAllModules(!showAllModules)}
+              className="flex items-center gap-1 text-sm text-primary hover:text-primary/80 mt-2 transition-colors"
+            >
+              {showAllModules ? (
+                <>
+                  <ChevronUp size={14} />
+                  Show Less
+                </>
+              ) : (
+                <>
+                  <ChevronDown size={14} />
+                  Show {pkg.modules.length - moduleLimit} More
+                </>
+              )}
+            </button>
+          )}
         </div>
         <Button
           className={`mt-4 w-full ${

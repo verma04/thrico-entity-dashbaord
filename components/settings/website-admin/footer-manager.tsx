@@ -1,319 +1,380 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
-import { Skeleton } from "@/components/ui/skeleton"
-import { useToast } from "@/hooks/use-toast"
-import { useForm } from "react-hook-form"
-import { Plus, Trash2, SaveIcon } from "lucide-react"
+import { Formik, Form, Field, FormikProps } from "formik";
+import * as Yup from "yup";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import { SaveIcon } from "lucide-react";
+import { ImageUploadWithCrop } from "@/components/ui/image-upload-with-crop";
+import {
+  useWebsiteBuilderStore,
+  LayoutType,
+} from "@/store/useWebsiteBuilderStore";
+import { LivePreviewFooter } from "@/components/website-layout/preview/live-preview-footer";
+import { SocialLinksEditor } from "@/components/website-layout/settings/social-links-editor";
+import { MenuEditor } from "@/components/website-layout/settings/menu-editor";
 
-interface FooterConfig {
-  companyInfo?: { name: string; logo?: string; description?: string }
-  contactInfo?: { phone?: string; email?: string; address?: string }
-  socialMedia?: Array<{ platform: string; url: string }>
-  footerSections?: Array<{ title: string; links: Array<{ label: string; href: string }> }>
-  newsletter?: { enabled: boolean; title?: string; description?: string }
-  copyright?: { text: string; showYear?: boolean }
+// ------------------------------------------------
+// TYPES
+// ------------------------------------------------
+
+interface SocialLink {
+  id: string;
+  platform: string;
+  url: string;
 }
 
-const socialMediaOptions = [
-  { label: "Facebook", value: "facebook" },
-  { label: "Twitter", value: "twitter" },
-  { label: "Instagram", value: "instagram" },
-  { label: "LinkedIn", value: "linkedin" },
-  { label: "YouTube", value: "youtube" },
-  { label: "TikTok", value: "tiktok" },
-  { label: "Discord", value: "discord" },
-]
+interface MenuItem {
+  id: string;
+  label: string;
+  link?: string;
+  icon?: string;
+  children?: MenuItem[];
+}
+
+interface FooterConfig {
+  layout: LayoutType;
+  logoText: string;
+  logoType: "text" | "image";
+  logoImage?: string;
+  description: string;
+  socialLinks: SocialLink[];
+  menuItems: MenuItem[];
+  copyrightText: string;
+}
+
+// ------------------------------------------------
+// VALIDATION SCHEMA
+// ------------------------------------------------
+
+const footerSchema = Yup.object().shape({
+  layout: Yup.string().required("Layout is required"),
+  logoText: Yup.string()
+    .required("Logo text is required")
+    .min(1, "Logo text must be at least 1 character"),
+  logoType: Yup.string().oneOf(["text", "image"]).required(),
+  logoImage: Yup.string().when("logoType", {
+    is: "image",
+    then: (schema) =>
+      schema.required("Logo image is required when using image logo"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  description: Yup.string(),
+  socialLinks: Yup.array().of(
+    Yup.object().shape({
+      id: Yup.string().required(),
+      platform: Yup.string().required("Platform is required"),
+      url: Yup.string().url("Must be a valid URL").required("URL is required"),
+    })
+  ),
+  copyrightText: Yup.string(),
+});
+
+// ------------------------------------------------
+// COMPONENT
+// ------------------------------------------------
 
 export default function FooterManager() {
-  const [loading, setLoading] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
-  const { toast } = useToast()
-  const form = useForm<FooterConfig>()
+  const { toast } = useToast();
+  const { globalFooter, updateModuleContent, updateModuleLayout } =
+    useWebsiteBuilderStore();
 
-  useEffect(() => {
-    setTimeout(() => {
-      const defaultConfig: FooterConfig = {
-        companyInfo: {
-          name: "Your Company Name",
-          logo: "https://example.com/logo.png",
-          description: "Brief description about your company",
-        },
-        contactInfo: {
-          phone: "+1 (555) 123-4567",
-          email: "info@yourcompany.com",
-          address: "123 Main Street, City, State",
-        },
-        socialMedia: [
-          { platform: "facebook", url: "https://facebook.com/yourcompany" },
-          { platform: "twitter", url: "https://twitter.com/yourcompany" },
-        ],
-        newsletter: {
-          enabled: true,
-          title: "Subscribe to our Newsletter",
-          description: "Get the latest updates and news",
-        },
-        copyright: {
-          text: "© 2025 Your Company Name. All rights reserved.",
-          showYear: true,
-        },
-      }
-      form.reset(defaultConfig)
-      setIsLoading(false)
-    }, 500)
-  }, [form])
+  // Initial values from global footer
+  const initialValues: FooterConfig = {
+    layout: globalFooter.layout,
+    logoText: globalFooter.content?.logoText || "Brand",
+    logoType: globalFooter.content?.logoType || "text",
+    logoImage: globalFooter.content?.logoImage || "",
+    description: globalFooter.content?.description || "",
+    socialLinks: globalFooter.content?.socialLinks || [],
+    menuItems: globalFooter.content?.menuItems || [],
+    copyrightText:
+      globalFooter.content?.copyrightText ||
+      `© ${new Date().getFullYear()} All rights reserved.`,
+  };
 
-  const onSubmit = form.handleSubmit((values) => {
-    setLoading(true)
-    setTimeout(() => {
-      localStorage.setItem("footer-config", JSON.stringify(values))
-      toast({
-        title: "Success",
-        description: "Footer configuration saved successfully!",
-      })
-      setLoading(false)
-    }, 1000)
-  })
+  const handleSubmit = (values: FooterConfig) => {
+    // Update store
+    updateModuleLayout(globalFooter.id, values.layout);
+    updateModuleContent(globalFooter.id, {
+      logoText: values.logoText,
+      logoType: values.logoType,
+      logoImage: values.logoImage,
+      description: values.description,
+      socialLinks: values.socialLinks,
+      menuItems: values.menuItems,
+      copyrightText: values.copyrightText,
+    });
 
-  if (isLoading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Footer Manager</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Skeleton className="h-96 w-full" />
-        </CardContent>
-      </Card>
-    )
-  }
+    toast({
+      title: "Footer Saved",
+      description: "Global footer has been updated successfully.",
+    });
+  };
 
   return (
-    <div className="space-y-6">
-      <form onSubmit={onSubmit}>
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Company Information</CardTitle>
-            <CardDescription>Configure your company details and branding</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <FormField
-              control={form.control}
-              name="companyInfo.name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Company Name</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="Your Company Name" />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="companyInfo.logo"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Logo URL</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="https://example.com/logo.png" />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="companyInfo.description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Company Description</FormLabel>
-                  <FormControl>
-                    <Textarea {...field} placeholder="Brief description about your company" rows={3} />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-          </CardContent>
-        </Card>
+    <Formik
+      initialValues={initialValues}
+      validationSchema={footerSchema}
+      onSubmit={handleSubmit}
+      enableReinitialize
+    >
+      {({
+        values,
+        setFieldValue,
+        errors,
+        touched,
+        isSubmitting,
+      }: FormikProps<FooterConfig>) => (
+        <Form className="space-y-6">
+          {/* ------------------------------------------------ */}
+          {/* LIVE PREVIEW */}
+          {/* ------------------------------------------------ */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-6">
+              <div>
+                <CardTitle>Live Preview</CardTitle>
+                <CardDescription>
+                  See how your footer will look on your website
+                </CardDescription>
+              </div>
 
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Contact Information</CardTitle>
-            <CardDescription>Add contact details for your company</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <FormField
-              control={form.control}
-              name="contactInfo.phone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Phone</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="+1 (555) 123-4567" />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="contactInfo.email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="info@yourcompany.com" />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="contactInfo.address"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Address</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="123 Main Street, City, State" />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-          </CardContent>
-        </Card>
-
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Social Media Links</CardTitle>
-            <CardDescription>Add your social media profiles</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
               <Button
-                type="button"
-                variant="outline"
+                type="submit"
                 size="sm"
-                className="gap-2 bg-transparent"
-                onClick={() => {
-                  const current = form.getValues("socialMedia") || []
-                  form.setValue("socialMedia", [...current, { platform: "", url: "" }])
-                }}
+                className="gap-2 shadow-lg"
+                disabled={isSubmitting}
               >
-                <Plus className="h-4 w-4" />
-                Add Social Media
+                <SaveIcon className="h-4 w-4" />
+                {isSubmitting ? "Saving..." : "Save Footer"}
               </Button>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="border rounded-lg overflow-hidden bg-background shadow-sm">
+                <LivePreviewFooter
+                  content={{
+                    logoText: values.logoText,
+                    logoType: values.logoType,
+                    logoImage: values.logoImage,
+                    description: values.description,
+                    socialLinks: values.socialLinks,
+                    menuItems: values.menuItems,
+                    copyrightText: values.copyrightText,
+                  }}
+                  layout={values.layout}
+                />
+              </div>
+              <div className="text-xs text-muted-foreground text-center">
+                Preview updates automatically as you make changes
+              </div>
+            </CardContent>
+          </Card>
 
-              {form.watch("socialMedia")?.map((_, index) => (
-                <div key={index} className="space-y-3 rounded-lg border border-border p-4">
-                  <div className="flex justify-between items-start">
-                    <h4 className="font-medium">Social Media {index + 1}</h4>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        const current = form.getValues("socialMedia") || []
-                        form.setValue(
-                          "socialMedia",
-                          current.filter((_, i) => i !== index),
-                        )
-                      }}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+          {/* ------------------------------------------------ */}
+          {/* LAYOUT & BRANDING */}
+          {/* ------------------------------------------------ */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Layout & Branding</CardTitle>
+              <CardDescription>
+                Configure the look of your footer
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Layout Selector */}
+              <div className="space-y-2">
+                <Label htmlFor="layout">Layout Variant</Label>
+                <Select
+                  value={values.layout}
+                  onValueChange={(value) => setFieldValue("layout", value)}
+                >
+                  <SelectTrigger id="layout" className="w-full">
+                    <SelectValue placeholder="Select a layout" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="columns">
+                      <div className="flex flex-col items-start">
+                        <span className="font-medium">Multi-Column</span>
+                        <span className="text-xs text-muted-foreground">Logo + 3 columns of links</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="simple">
+                      <div className="flex flex-col items-start">
+                        <span className="font-medium">Simple</span>
+                        <span className="text-xs text-muted-foreground">Center-aligned with links</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="minimal">
+                      <div className="flex flex-col items-start">
+                        <span className="font-medium">Minimal</span>
+                        <span className="text-xs text-muted-foreground">Single line footer</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="corporate">
+                      <div className="flex flex-col items-start">
+                        <span className="font-medium">Corporate</span>
+                        <span className="text-xs text-muted-foreground">Professional multi-section</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="newsletter">
+                      <div className="flex flex-col items-start">
+                        <span className="font-medium">Newsletter</span>
+                        <span className="text-xs text-muted-foreground">Newsletter signup focused</span>
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                {errors.layout && touched.layout && (
+                  <p className="text-xs text-red-500">{errors.layout}</p>
+                )}
+              </div>
 
-                  <FormField
-                    control={form.control}
-                    name={`socialMedia.${index}.platform`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Platform</FormLabel>
-                        <Select value={field.value} onValueChange={field.onChange}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select platform" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {socialMediaOptions.map((option) => (
-                              <SelectItem key={option.value} value={option.value}>
-                                {option.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormItem>
+              {/* Logo Type Selector */}
+              <div className="space-y-2">
+                <Label htmlFor="logoType">Logo Type</Label>
+                <Select
+                  value={values.logoType}
+                  onValueChange={(value) => setFieldValue("logoType", value)}
+                >
+                  <SelectTrigger id="logoType">
+                    <SelectValue placeholder="Select logo type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="text">Text Logo</SelectItem>
+                    <SelectItem value="image">Image Logo</SelectItem>
+                  </SelectContent>
+                </Select>
+                {errors.logoType && touched.logoType && (
+                  <p className="text-xs text-red-500">{errors.logoType}</p>
+                )}
+              </div>
+
+              {/* Logo Content */}
+              <div className="space-y-4">
+                {/* Text Logo */}
+                {(values.logoType === "text" || !values.logoType) && (
+                  <div className="space-y-2">
+                    <Label htmlFor="logoText">Logo Text</Label>
+                    <Field
+                      name="logoText"
+                      as={Input}
+                      id="logoText"
+                      placeholder="My Brand"
+                    />
+                    {errors.logoText && touched.logoText && (
+                      <p className="text-xs text-red-500">{errors.logoText}</p>
                     )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name={`socialMedia.${index}.url`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>URL</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="https://facebook.com/yourcompany" />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Copyright Information</CardTitle>
-            <CardDescription>Set your copyright text and settings</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <FormField
-              control={form.control}
-              name="copyright.text"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Copyright Text</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="© 2025 Your Company Name. All rights reserved." />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="copyright.showYear"
-              render={({ field }) => (
-                <FormItem className="flex items-center justify-between rounded-lg border border-border p-4">
-                  <div>
-                    <FormLabel>Auto Update Year</FormLabel>
-                    <p className="text-sm text-muted-foreground">Automatically update the year in the copyright text</p>
                   </div>
-                  <FormControl>
-                    <Switch checked={field.value} onCheckedChange={field.onChange} />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-          </CardContent>
-        </Card>
+                )}
 
-        <div className="flex justify-end">
-          <Button type="submit" size="lg" loading={loading} className="gap-2">
-            <SaveIcon className="h-4 w-4" />
-            Save Footer Configuration
-          </Button>
-        </div>
-      </form>
-    </div>
-  )
+                {/* Image Logo */}
+                {values.logoType === "image" && (
+                  <div className="space-y-2">
+                    <ImageUploadWithCrop
+                      label="Logo Image"
+                      currentImage={values.logoImage}
+                      onImageUpdate={(imageUrl: string) =>
+                        setFieldValue("logoImage", imageUrl)
+                      }
+                      recommendedWidth={150}
+                      recommendedHeight={50}
+                      aspectRatio={3}
+                      showDimensions
+                    />
+                    {errors.logoImage && touched.logoImage && (
+                      <p className="text-xs text-red-500">{errors.logoImage}</p>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Description */}
+              <div className="space-y-2">
+                <Label htmlFor="description">Description</Label>
+                <Field
+                  name="description"
+                  as={Textarea}
+                  id="description"
+                  placeholder="A brief description about your company..."
+                  rows={3}
+                />
+                {errors.description && touched.description && (
+                  <p className="text-xs text-red-500">{errors.description}</p>
+                )}
+              </div>
+
+              {/* Copyright Text */}
+              <div className="space-y-2">
+                <Label htmlFor="copyrightText">Copyright Text</Label>
+                <Field
+                  name="copyrightText"
+                  as={Input}
+                  id="copyrightText"
+                  placeholder="© 2025 All rights reserved."
+                />
+                {errors.copyrightText && touched.copyrightText && (
+                  <p className="text-xs text-red-500">{errors.copyrightText}</p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* ------------------------------------------------ */}
+          {/* NAVIGATION LINKS */}
+          {/* ------------------------------------------------ */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Footer Navigation</CardTitle>
+              <CardDescription>
+                Add navigation links and columns to your footer
+              </CardDescription>
+            </CardHeader>
+
+            <CardContent>
+              <MenuEditor
+                menuItems={values.menuItems}
+                onChange={(items) => setFieldValue("menuItems", items)}
+              />
+            </CardContent>
+          </Card>
+
+          {/* ------------------------------------------------ */}
+          {/* SOCIAL LINKS */}
+          {/* ------------------------------------------------ */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Social Media</CardTitle>
+              <CardDescription>
+                Connect your social media profiles
+              </CardDescription>
+            </CardHeader>
+
+            <CardContent>
+              <SocialLinksEditor
+                links={values.socialLinks}
+                onChange={(links) => setFieldValue("socialLinks", links)}
+              />
+            </CardContent>
+          </Card>
+        </Form>
+      )}
+    </Formik>
+  );
 }

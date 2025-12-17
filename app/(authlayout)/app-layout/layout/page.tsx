@@ -1,9 +1,10 @@
 "use client";
-import BuilderLayout from "./_components/BuilderLayout";
+
+import BuilderLayout from "@/components/website-layout/builder-layout";
 
 const WebsiteBuilderPage = () => {
   return (
-    <div className="fixed inset-0 z-[1000] bg-background w-full h-full p-0">
+    <div className="fixed inset-0 z-[30] bg-background w-full h-full p-0">
       <div className="flex flex-row items-center justify-between px-4 pt-4 pb-2">
         <div>
           <h1 className="text-xl font-bold">Website Builder</h1>

@@ -66,7 +66,7 @@ const KycHeader = () => {
 
             {current >= 0 && (
               <Badge variant="outline" className="gap-1.5">
-                Step {current + 1} of {actualSteps}
+                Step {current + 1} of {4}
                 <ChevronRight className="h-3 w-3" />
                 {Math.round(progress)}%
               </Badge>
