@@ -18,17 +18,7 @@ export const EventCountdownSettings = ({
         <Input
           value={content.eventName || ""}
           onChange={(e) => onChange({ eventName: e.target.value })}
-          placeholder="Annual Conference 2024"
-          className="h-8 text-xs"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label className="text-[10px] text-muted-foreground">Event Date & Time</Label>
-        <Input
-          type="datetime-local"
-          value={content.eventDate || ""}
-          onChange={(e) => onChange({ eventDate: e.target.value })}
+          placeholder="Annual Tech Conference 2024"
           className="h-8 text-xs"
         />
       </div>
@@ -38,10 +28,52 @@ export const EventCountdownSettings = ({
         <Textarea
           value={content.description || ""}
           onChange={(e) => onChange({ description: e.target.value })}
-          placeholder="Event description..."
-          className="text-xs min-h-[50px]"
+          placeholder="Join us for an amazing experience with industry leaders..."
+          className="text-xs min-h-[60px]"
           rows={2}
         />
+      </div>
+
+      <div className="grid grid-cols-2 gap-2">
+        <div className="space-y-2">
+          <Label className="text-[10px] text-muted-foreground">Event Date & Time</Label>
+          <Input
+            type="datetime-local"
+            value={content.eventDate || ""}
+            onChange={(e) => onChange({ eventDate: e.target.value })}
+            className="h-8 text-xs"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label className="text-[10px] text-muted-foreground">Venue/Location</Label>
+          <Input
+            value={content.venue || ""}
+            onChange={(e) => onChange({ venue: e.target.value })}
+            placeholder="Grand Convention Center"
+            className="h-8 text-xs"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2">
+        <div className="space-y-2">
+          <Label className="text-[10px] text-muted-foreground">Expected Attendees</Label>
+          <Input
+            value={content.attendees || ""}
+            onChange={(e) => onChange({ attendees: e.target.value })}
+            placeholder="500+ Attendees Expected"
+            className="h-8 text-xs"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label className="text-[10px] text-muted-foreground">CTA Button Text</Label>
+          <Input
+            value={content.ctaText || ""}
+            onChange={(e) => onChange({ ctaText: e.target.value })}
+            placeholder="Register Now"
+            className="h-8 text-xs"
+          />
+        </div>
       </div>
 
       <div className="space-y-2">
@@ -49,7 +81,7 @@ export const EventCountdownSettings = ({
         <Input
           value={content.registrationLink || ""}
           onChange={(e) => onChange({ registrationLink: e.target.value })}
-          placeholder="https://..."
+          placeholder="https://example.com/register"
           className="h-8 text-xs"
         />
       </div>

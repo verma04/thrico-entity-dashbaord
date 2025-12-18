@@ -65,9 +65,9 @@ export const FooterSettings = ({
           <ImageUploadWithCrop
             label="Footer Logo"
             currentImage={content.logoImage}
-            onImageUpdate={(imageUrl: string) =>
-              onContentUpdate({ logoImage: imageUrl })
-            }
+            onImageUpdate={(imageUrl: string) => {
+              onContentUpdate({ logoImage: imageUrl });
+            }}
             recommendedWidth={150}
             recommendedHeight={50}
             aspectRatio={3}

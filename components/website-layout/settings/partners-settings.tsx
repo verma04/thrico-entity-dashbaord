@@ -12,6 +12,7 @@ import {
   DropResult,
 } from "@hello-pangea/dnd";
 import { cn } from "@/lib/utils";
+import { ImageUploadWithCrop } from "@/components/ui/image-upload-with-crop";
 
 interface PartnersSettingsProps {
   content: any;
@@ -131,12 +132,13 @@ export const PartnersSettings = ({
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-[10px] text-muted-foreground">Logo URL</Label>
-                        <Input
-                          value={partner.logo || ""}
-                          onChange={(e) => updatePartner(index, "logo", e.target.value)}
-                          placeholder="https://..."
-                          className="h-8 text-xs"
+                        <Label className="text-[10px] text-muted-foreground">Partner Logo</Label>
+                        <ImageUploadWithCrop
+                          currentImage={partner.logo || ""}
+                          onImageUpdate={(url: string) => updatePartner(index, "logo", url)}
+                          aspectRatio={16 / 9}
+                          label="Upload Logo"
+                          maxFileSize={2}
                         />
                       </div>
 

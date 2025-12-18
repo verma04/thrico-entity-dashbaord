@@ -12,6 +12,7 @@ import {
   DropResult,
 } from "@hello-pangea/dnd";
 import { cn } from "@/lib/utils";
+import { ImageUploadWithCrop } from "@/components/ui/image-upload-with-crop";
 
 interface ChaptersSettingsProps {
   content: any;
@@ -194,16 +195,18 @@ export const ChaptersSettings = ({
                             placeholder="contact@chapter.org"
                             className="h-8 text-xs"
                           />
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-[10px] text-muted-foreground">Image URL</Label>
-                          <Input
-                            value={chapter.image || ""}
-                            onChange={(e) => updateChapter(index, "image", e.target.value)}
-                            placeholder="https://..."
-                            className="h-8 text-xs"
-                          />
-                        </div>
+                      </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-[10px] text-muted-foreground">Chapter Image</Label>
+                        <ImageUploadWithCrop
+                          currentImage={chapter.image || ""}
+                          onImageUpdate={(url: string) => updateChapter(index, "image", url)}
+                          aspectRatio={16 / 9}
+                          label="Upload Chapter Image"
+                          maxFileSize={3}
+                        />
                       </div>
 
                       {layout === "map" && (

@@ -10,8 +10,8 @@ const PhonePreview = () => {
 
   return (
     <div className="w-[full] flex items-center justify-center ">
-      <div className="w-[250px] flex justify-center align-middle">
-        <Iphone src="https://placehold.co/900x1600?text=Hello+World"></Iphone>
+      <div className="w-[250px] mt-20 flex justify-center align-middle">
+        <Iphone src="https://cdn.thrico.network/mobile-preview.png"></Iphone>
       </div>
     </div>
   );

@@ -57,21 +57,23 @@ const PackageCard: React.FC<PackageCardProps> = ({
       {pkg.isPopular && (
         <Badge
           variant="default"
-          className="absolute left-1/2 -translate-x-1/2 -top-4 z-10 bg-blue-600 text-white px-4 py-1 rounded-full shadow"
+          className="absolute left-1/2 -translate-x-1/2 -top-0 z-10 bg-gradient-to-r from-blue-600 via-blue-500 to-purple-600 text-white px-3 py-2 text-sm font-bold rounded-full shadow-lg shadow-blue-500/50 animate-pulse"
         >
-          Most Popular
+          ⭐ Most Popular
         </Badge>
       )}
       <Card
-        className={`mt-6 flex flex-col items-center p-6 shadow-lg border-2 ${
-          pkg.isPopular ? "border-blue-600" : "border-muted"
+        className={`mt-6 flex flex-col items-center p-6 border-2 transition-all duration-300 ${
+          pkg.isPopular 
+            ? "border-blue-500 shadow-2xl shadow-blue-500/30 bg-gradient-to-br from-blue-50/50 to-purple-50/50 dark:from-blue-950/20 dark:to-purple-950/20" 
+            : "border-muted shadow-lg"
         }`}
       >
         <div className="text-center mb-4 h-24 flex flex-col justify-center items-center">
           <div className="flex items-center justify-center mb-2">
             <span className="text-2xl font-bold">{pkg.name}</span>
             {pkg.isPopular && (
-              <Star className="ml-2 text-yellow-400" size={20} />
+              <Star className="ml-2 text-yellow-400 fill-yellow-400 drop-shadow-lg" size={24} />
             )}
           </div>
           <div>
@@ -149,14 +151,16 @@ const PackageCard: React.FC<PackageCardProps> = ({
           )}
         </div>
         <Button
-          className={`mt-4 w-full ${
-            pkg.isPopular ? "bg-blue-600 text-white hover:bg-blue-700" : ""
+          className={`mt-4 w-full font-semibold transition-all duration-300 ${
+            pkg.isPopular 
+              ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl hover:scale-[1.02]" 
+              : ""
           }`}
           loading={activePackage?.packageId === pkg.packageId}
           onClick={() => setActivePackage(pkg)}
           variant={pkg.isPopular ? "default" : "outline"}
         >
-          Get Started
+          {pkg.isPopular ? "🚀 Get Started" : "Get Started"}
         </Button>
       </Card>
     </div>

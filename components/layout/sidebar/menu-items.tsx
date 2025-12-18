@@ -15,8 +15,18 @@ import {
   MessageSquare,
   BarChart3,
   ShoppingBag,
+  Calendar,
+  Gift,
+  Trophy,
+  Gamepad2,
+  GraduationCap,
+  PartyPopper,
+  HelpCircle,
+  BookOpen,
+  Newspaper,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useGetUser } from "@/graphql/actions";
 
 const menuLink = (href: string, text: string) => (
   <Link
@@ -81,7 +91,7 @@ export const extendedItems = [
 
   {
     key: "feedback",
-    label: "feedback",
+    label: "Feedback",
     path: "/feedback",
     icon: <BarChart3 size={18} />,
     children: [
@@ -113,6 +123,23 @@ export const extendedItems = [
     label: "Events",
     path: "/events",
     icon: <BellDotIcon size={18} />,
+    children: [
+      {
+        key: "events-manage",
+        label: "Manage Events",
+        path: "/events",
+      },
+      {
+        key: "events-categories",
+        label: "Categories",
+        path: "/events/categories",
+      },
+      {
+        key: "events-settings",
+        label: "Settings",
+        path: "/events/settings",
+      },
+    ],
   },
   {
     key: "jobs",
@@ -142,15 +169,165 @@ export const extendedItems = [
       },
     ],
   },
+  {
+    key: "mentorship",
+    label: "Mentorship",
+    path: "/mentorship",
+    icon: <GraduationCap size={18} />,
+    children: [
+      {
+        key: "mentorship-programs",
+        label: "Manage Programs",
+        path: "/mentorship",
+      },
+      {
+        key: "mentorship-settings",
+        label: "Settings",
+        path: "/mentorship/settings",
+      },
+    ],
+  },
+  {
+    key: "offers",
+    label: "Offers & Deals",
+    path: "/offers",
+    icon: <Gift size={18} />,
+    children: [
+      {
+        key: "offers-manage",
+        label: "Manage Offers",
+        path: "/offers",
+      },
+      {
+        key: "offers-settings",
+        label: "Settings",
+        path: "/offers/settings",
+      },
+    ],
+  },
+  {
+    key: "wall-of-fame",
+    label: "Wall of Fame",
+    path: "/wall-of-fame",
+    icon: <Trophy size={18} />,
+    children: [
+      {
+        key: "wall-manage",
+        label: "Manage Honorees",
+        path: "/wall-of-fame",
+      },
+      {
+        key: "wall-settings",
+        label: "Settings",
+        path: "/wall-of-fame/settings",
+      },
+    ],
+  },
+  {
+    key: "gamification",
+    label: "Gamification",
+    path: "/gamification",
+    icon: <Gamepad2 size={18} />,
+    children: [
+      {
+        key: "gamification-leaderboard",
+        label: "Leaderboards",
+        path: "/gamification/leaderboard",
+      },
+      {
+        key: "gamification-badges",
+        label: "Badges & Achievements",
+        path: "/gamification/badges",
+      },
+      {
+        key: "gamification-settings",
+        label: "Settings",
+        path: "/gamification/settings",
+      },
+    ],
+  },
+  {
+    key: "celebrations",
+    label: "Celebrations",
+    path: "/celebrations",
+    icon: <PartyPopper size={18} />,
+    children: [
+      {
+        key: "celebrations-birthdays",
+        label: "Birthdays",
+        path: "/celebrations/birthdays",
+      },
+      {
+        key: "celebrations-anniversaries",
+        label: "Anniversaries",
+        path: "/celebrations/anniversaries",
+      },
+      {
+        key: "celebrations-settings",
+        label: "Settings",
+        path: "/celebrations/settings",
+      },
+    ],
+  },
+  {
+    key: "faq",
+    label: "FAQ",
+    path: "/faq",
+    icon: <HelpCircle size={18} />,
+    children: [
+      {
+        key: "faq-manage",
+        label: "Manage FAQs",
+        path: "/faq",
+      },
+      {
+        key: "faq-categories",
+        label: "Categories",
+        path: "/faq/categories",
+      },
+      {
+        key: "faq-settings",
+        label: "Settings",
+        path: "/faq/settings",
+      },
+    ],
+  },
+
+  {
+    key: "news",
+    label: "News",
+    path: "/news",
+    icon: <Newspaper size={18} />,
+    children: [
+      {
+        key: "news-articles",
+        label: "Manage Articles",
+        path: "/news",
+      },
+      {
+        key: "news-categories",
+        label: "Categories",
+        path: "/news/categories",
+      },
+      {
+        key: "news-settings",
+        label: "Settings",
+        path: "/news/settings",
+      },
+    ],
+  },
 ];
 
-export const UserAvatar = () => (
-  <Avatar className="w-6 h-6">
-    <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-xs font-bold">
-      A
-    </AvatarFallback>
-  </Avatar>
-);
+export const UserAvatar = () => {
+  const { data, loading } = useGetUser();
+  return (
+    <Avatar className="w-6 h-6">
+      <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-xs font-bold">
+        A
+      </AvatarFallback>
+    </Avatar>
+  );
+};
 
 export const profile = [
   {

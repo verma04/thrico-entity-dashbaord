@@ -12,6 +12,14 @@ import {
   DropResult,
 } from "@hello-pangea/dnd";
 import { cn } from "@/lib/utils";
+import { ImageUploadWithCrop } from "@/components/ui/image-upload-with-crop";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface ResourcesSettingsProps {
   content: any;
@@ -145,36 +153,27 @@ export const ResourcesSettings = ({
 
                       <div className="grid grid-cols-2 gap-2">
                         <div className="space-y-2">
-                          <Label className="text-[10px] text-muted-foreground">Type</Label>
-                          <Input
+                          <Label className="text-[10px] text-muted-foreground">Resource Type</Label>
+                          <Select
                             value={resource.type || ""}
-                            onChange={(e) => updateResource(index, "type", e.target.value)}
-                            placeholder="PDF, Video, Guide"
-                            className="h-8 text-xs"
-                          />
+                            onValueChange={(value) => updateResource(index, "type", value)}
+                          >
+                            <SelectTrigger className="h-8 text-xs">
+                              <SelectValue placeholder="Select type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="PDF">📄 PDF</SelectItem>
+                              <SelectItem value="Video">🎥 Video</SelectItem>
+                              <SelectItem value="Guide">📖 Guide</SelectItem>
+                              <SelectItem value="Template">📋 Template</SelectItem>
+                              <SelectItem value="Whitepaper">📝 Whitepaper</SelectItem>
+                              <SelectItem value="Ebook">📚 Ebook</SelectItem>
+                              <SelectItem value="Worksheet">📊 Worksheet</SelectItem>
+                              <SelectItem value="Tool">🛠️ Tool</SelectItem>
+                              <SelectItem value="Other">📦 Other</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
-                        <div className="space-y-2">
-                          <Label className="text-[10px] text-muted-foreground">File Size</Label>
-                          <Input
-                            value={resource.fileSize || ""}
-                            onChange={(e) => updateResource(index, "fileSize", e.target.value)}
-                            placeholder="2.5 MB"
-                            className="h-8 text-xs"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label className="text-[10px] text-muted-foreground">Download URL</Label>
-                        <Input
-                          value={resource.url || ""}
-                          onChange={(e) => updateResource(index, "url", e.target.value)}
-                          placeholder="https://..."
-                          className="h-8 text-xs"
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-2">
                         <div className="space-y-2">
                           <Label className="text-[10px] text-muted-foreground">Category</Label>
                           <Input
@@ -184,15 +183,38 @@ export const ResourcesSettings = ({
                             className="h-8 text-xs"
                           />
                         </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2">
                         <div className="space-y-2">
-                          <Label className="text-[10px] text-muted-foreground">Thumbnail URL</Label>
+                          <Label className="text-[10px] text-muted-foreground">File Size</Label>
                           <Input
-                            value={resource.thumbnail || ""}
-                            onChange={(e) => updateResource(index, "thumbnail", e.target.value)}
+                            value={resource.fileSize || ""}
+                            onChange={(e) => updateResource(index, "fileSize", e.target.value)}
+                            placeholder="2.5 MB"
+                            className="h-8 text-xs"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-[10px] text-muted-foreground">Download URL</Label>
+                          <Input
+                            value={resource.url || ""}
+                            onChange={(e) => updateResource(index, "url", e.target.value)}
                             placeholder="https://..."
                             className="h-8 text-xs"
                           />
                         </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-[10px] text-muted-foreground">Resource Thumbnail</Label>
+                        <ImageUploadWithCrop
+                          currentImage={resource.thumbnail || ""}
+                          onImageUpdate={(url: string) => updateResource(index, "thumbnail", url)}
+                          aspectRatio={16 / 9}
+                          label="Upload Thumbnail"
+                          maxFileSize={2}
+                        />
                       </div>
                     </div>
                   )}

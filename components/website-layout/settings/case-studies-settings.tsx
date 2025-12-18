@@ -40,6 +40,7 @@ export const CaseStudiesSettings = ({
         image: "",
         testimonial: "",
         metrics: [],
+        url: "",
       },
     ];
     onChange({ caseStudies: newCaseStudies });
@@ -52,7 +53,9 @@ export const CaseStudiesSettings = ({
   };
 
   const deleteCaseStudy = (index: number) => {
-    const newCaseStudies = caseStudies.filter((_: any, i: number) => i !== index);
+    const newCaseStudies = caseStudies.filter(
+      (_: any, i: number) => i !== index
+    );
     onChange({ caseStudies: newCaseStudies });
   };
 
@@ -107,7 +110,8 @@ export const CaseStudiesSettings = ({
                       {...provided.draggableProps}
                       className={cn(
                         "space-y-2 p-3 bg-muted/10 rounded border transition-shadow",
-                        snapshot.isDragging && "shadow-lg ring-2 ring-primary/20"
+                        snapshot.isDragging &&
+                          "shadow-lg ring-2 ring-primary/20"
                       )}
                     >
                       <div className="flex justify-between items-center">
@@ -115,7 +119,9 @@ export const CaseStudiesSettings = ({
                           <div {...provided.dragHandleProps}>
                             <GripVertical className="h-4 w-4 text-muted-foreground/50 cursor-grab active:cursor-grabbing" />
                           </div>
-                          <span className="text-xs font-bold">Case Study {index + 1}</span>
+                          <span className="text-xs font-bold">
+                            Case Study {index + 1}
+                          </span>
                         </div>
                         <button
                           onClick={() => deleteCaseStudy(index)}
@@ -126,10 +132,14 @@ export const CaseStudiesSettings = ({
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-[10px] text-muted-foreground">Title</Label>
+                        <Label className="text-[10px] text-muted-foreground">
+                          Title
+                        </Label>
                         <Input
                           value={caseStudy.title || ""}
-                          onChange={(e) => updateCaseStudy(index, "title", e.target.value)}
+                          onChange={(e) =>
+                            updateCaseStudy(index, "title", e.target.value)
+                          }
                           placeholder="Project Success Story"
                           className="h-8 text-xs"
                         />
@@ -137,19 +147,27 @@ export const CaseStudiesSettings = ({
 
                       <div className="grid grid-cols-2 gap-2">
                         <div className="space-y-2">
-                          <Label className="text-[10px] text-muted-foreground">Client</Label>
+                          <Label className="text-[10px] text-muted-foreground">
+                            Client
+                          </Label>
                           <Input
                             value={caseStudy.client || ""}
-                            onChange={(e) => updateCaseStudy(index, "client", e.target.value)}
+                            onChange={(e) =>
+                              updateCaseStudy(index, "client", e.target.value)
+                            }
                             placeholder="Company Name"
                             className="h-8 text-xs"
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-[10px] text-muted-foreground">Industry</Label>
+                          <Label className="text-[10px] text-muted-foreground">
+                            Industry
+                          </Label>
                           <Input
                             value={caseStudy.industry || ""}
-                            onChange={(e) => updateCaseStudy(index, "industry", e.target.value)}
+                            onChange={(e) =>
+                              updateCaseStudy(index, "industry", e.target.value)
+                            }
                             placeholder="Technology"
                             className="h-8 text-xs"
                           />
@@ -157,10 +175,14 @@ export const CaseStudiesSettings = ({
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-[10px] text-muted-foreground">Challenge</Label>
+                        <Label className="text-[10px] text-muted-foreground">
+                          Challenge
+                        </Label>
                         <Textarea
                           value={caseStudy.challenge || ""}
-                          onChange={(e) => updateCaseStudy(index, "challenge", e.target.value)}
+                          onChange={(e) =>
+                            updateCaseStudy(index, "challenge", e.target.value)
+                          }
                           placeholder="Describe the challenge..."
                           className="text-xs min-h-[50px]"
                           rows={2}
@@ -168,10 +190,14 @@ export const CaseStudiesSettings = ({
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-[10px] text-muted-foreground">Solution</Label>
+                        <Label className="text-[10px] text-muted-foreground">
+                          Solution
+                        </Label>
                         <Textarea
                           value={caseStudy.solution || ""}
-                          onChange={(e) => updateCaseStudy(index, "solution", e.target.value)}
+                          onChange={(e) =>
+                            updateCaseStudy(index, "solution", e.target.value)
+                          }
                           placeholder="Describe the solution..."
                           className="text-xs min-h-[50px]"
                           rows={2}
@@ -179,21 +205,28 @@ export const CaseStudiesSettings = ({
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-[10px] text-muted-foreground">Results</Label>
+                        <Label className="text-[10px] text-muted-foreground">
+                          Results
+                        </Label>
                         <Textarea
                           value={caseStudy.results || ""}
-                          onChange={(e) => updateCaseStudy(index, "results", e.target.value)}
+                          onChange={(e) =>
+                            updateCaseStudy(index, "results", e.target.value)
+                          }
                           placeholder="Describe the results..."
                           className="text-xs min-h-[50px]"
                           rows={2}
                         />
                       </div>
 
+                      {console.log(caseStudy.image)}
                       {/* Image Upload */}
                       <div className="space-y-2">
                         <ImageUploadWithCrop
                           currentImage={caseStudy.image || ""}
-                          onImageUpdate={(url) => updateCaseStudy(index, "image", url)}
+                          onImageUpdate={(url) =>
+                            updateCaseStudy(index, "image", url)
+                          }
                           label="Case Study Image"
                           recommendedWidth={800}
                           recommendedHeight={600}
@@ -204,10 +237,18 @@ export const CaseStudiesSettings = ({
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-[10px] text-muted-foreground">Testimonial (optional)</Label>
+                        <Label className="text-[10px] text-muted-foreground">
+                          Testimonial (optional)
+                        </Label>
                         <Textarea
                           value={caseStudy.testimonial || ""}
-                          onChange={(e) => updateCaseStudy(index, "testimonial", e.target.value)}
+                          onChange={(e) =>
+                            updateCaseStudy(
+                              index,
+                              "testimonial",
+                              e.target.value
+                            )
+                          }
                           placeholder="Client testimonial..."
                           className="text-xs min-h-[40px]"
                           rows={2}
@@ -215,7 +256,23 @@ export const CaseStudiesSettings = ({
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-[10px] text-muted-foreground">Metrics (comma-separated)</Label>
+                        <Label className="text-[10px] text-muted-foreground">
+                          Case Study URL (optional)
+                        </Label>
+                        <Input
+                          value={caseStudy.url || ""}
+                          onChange={(e) =>
+                            updateCaseStudy(index, "url", e.target.value)
+                          }
+                          placeholder="https://example.com/case-study"
+                          className="h-8 text-xs"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-[10px] text-muted-foreground">
+                          Metrics (comma-separated)
+                        </Label>
                         <Textarea
                           value={(caseStudy.metrics || []).join(", ")}
                           onChange={(e) => {

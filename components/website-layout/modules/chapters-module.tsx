@@ -42,8 +42,16 @@ export const ChaptersModule = ({
                 key={idx}
                 className="bg-white p-6 rounded-lg border text-center"
               >
-                <div className="w-12 h-12 bg-blue-100 rounded-lg mx-auto mb-4 flex items-center justify-center">
-                  📍
+                <div className="w-12 h-12 bg-blue-100 rounded-lg mx-auto mb-4 flex items-center justify-center overflow-hidden">
+                  {chapter.image ? (
+                    <img
+                      src={chapter.image}
+                      alt={chapter.name || "Chapter"}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span>📍</span>
+                  )}
                 </div>
                 <h3 className="font-semibold mb-2">
                   {chapter.name || `Chapter ${idx + 1}`}
@@ -79,8 +87,16 @@ export const ChaptersModule = ({
                   key={idx}
                   className="bg-white p-4 rounded-lg border flex items-center gap-4"
                 >
-                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                    📍
+                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center overflow-hidden">
+                    {chapter.image ? (
+                      <img
+                        src={chapter.image}
+                        alt={chapter.name || "Chapter"}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span>📍</span>
+                    )}
                   </div>
                   <div className="flex-1">
                     <h3 className="font-semibold">
@@ -109,8 +125,16 @@ export const ChaptersModule = ({
                 className="bg-white p-6 rounded-lg border flex items-center justify-between"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white">
-                    📍
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white overflow-hidden">
+                    {chapter.image ? (
+                      <img
+                        src={chapter.image}
+                        alt={chapter.name || "Chapter"}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span>📍</span>
+                    )}
                   </div>
                   <div>
                     <h3 className="font-semibold">
@@ -171,8 +195,16 @@ export const ChaptersModule = ({
                           className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
                         >
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                              📍
+                            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center overflow-hidden">
+                              {chapter.image ? (
+                                <img
+                                  src={chapter.image}
+                                  alt={chapter.name || "Chapter"}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <span className="text-sm">📍</span>
+                              )}
                             </div>
                             <div>
                               <h4 className="font-medium">

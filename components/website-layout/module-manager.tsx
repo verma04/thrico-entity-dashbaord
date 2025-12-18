@@ -92,6 +92,8 @@ const AVAILABLE_MODULES: {
   // Content & Text
   {
     type: "custom-content",
+    
+    
     name: "Custom Content",
     description:
       "Flexible content section with headings, text, images, or rich content.",
@@ -138,6 +140,14 @@ const AVAILABLE_MODULES: {
     description: "Short highlighted message or announcement.",
     defaultLayout: "info-box",
     icon: Info,
+    category: "Content & Text",
+  },
+  {
+    type: "ceo-message",
+    name: "CEO Message",
+    description: "Executive message or letter from leadership to the community.",
+    defaultLayout: "classic-card",
+    icon: MessageSquare,
     category: "Content & Text",
   },
 
@@ -194,7 +204,8 @@ const AVAILABLE_MODULES: {
   {
     type: "latest-members",
     name: "Latest Members",
-    description: "Display recently joined members with various presentation styles.",
+    description:
+      "Display recently joined members with various presentation styles.",
     defaultLayout: "grid-cards",
     icon: UserCheck,
     category: "People & Community",
@@ -202,7 +213,8 @@ const AVAILABLE_MODULES: {
   {
     type: "members-around-world",
     name: "Members Around the World",
-    description: "Showcase global member distribution across countries and regions.",
+    description:
+      "Showcase global member distribution across countries and regions.",
     defaultLayout: "country-cards",
     icon: Map,
     category: "People & Community",
@@ -217,6 +229,30 @@ const AVAILABLE_MODULES: {
   },
 
   // Business & Services
+  {
+    type: "communities",
+    name: "Communities",
+    description: "Showcase your communities, groups, or member organizations.",
+    defaultLayout: "grid",
+    icon: Users,
+    category: "Business & Services",
+  },
+  {
+    type: "marketplace",
+    name: "Marketplace",
+    description: "Display products, services, or offerings for sale or exchange.",
+    defaultLayout: "grid",
+    icon: Building,
+    category: "Business & Services",
+  },
+  {
+    type: "jobs",
+    name: "Job Board",
+    description: "List job openings, career opportunities, and positions.",
+    defaultLayout: "list",
+    icon: Briefcase,
+    category: "Business & Services",
+  },
   {
     type: "services",
     name: "Services",
@@ -508,29 +544,29 @@ const BASIC_MODULE_TYPES: ModuleType[] = [
   "custom-content",
   "faq",
   "blog",
-  
+
   // Basic People & Community
   "team-members",
   "testimonials",
-  
+
   // Basic Business
   "services",
   "pricing",
-  
+
   // Marketing Essentials
   "cta-banner",
   "newsletter",
-  
+
   // Basic Data
   "stats",
-  
+
   // Events
   "events",
   "timeline",
-  
+
   // Media
   "media-gallery",
-  
+
   // Contact
   "contact",
   "location-map",
@@ -712,10 +748,10 @@ const ModuleManager = () => {
   const currentPage = pages.find((p) => p.id === currentPageId);
   const pageModules = currentPage?.modules || [];
 
-  // Split modules into Navbar, Body, and Footer
-  const bodyModules = pageModules.filter(
-    (m) => m.type !== "navbar" && m.type !== "footer"
-  );
+  // Split modules into Navbar, Body, and Footer, then sort by sort field
+  const bodyModules = pageModules
+    .filter((m) => m.type !== "navbar" && m.type !== "footer")
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
   // Get unique categories
   const categories = Array.from(
@@ -759,6 +795,12 @@ const ModuleManager = () => {
     const [moved] = newBodyModules.splice(sourceIndex, 1);
     newBodyModules.splice(destIndex, 0, moved);
 
+    // Assign sort indices to maintain explicit ordering
+    const modulesWithSort = newBodyModules.map((module, index) => ({
+      ...module,
+      order: index,
+    }));
+
     // Reconstruct the full list, ensuring we only update the body modules for the page
     // Note: Navbar/Footer are now global and not part of page.modules usually,
     // but if we are migrating, we ensure we only save body modules back if we want to clean data,
@@ -769,7 +811,7 @@ const ModuleManager = () => {
     // To strictly support the new architecture, page.modules should NOT contain navbar/footer.
     // So we just save the new body list.
     // However, if we want to be safe, we can keep them if they existed, but better to enforce the new rule.
-    setModules(newBodyModules);
+    setModules(modulesWithSort);
   };
 
   const handleAddModule = (
@@ -784,13 +826,24 @@ const ModuleManager = () => {
     if (isPremiumModule && !isPremium) {
       toast({
         title: "Premium Feature",
-        description: "This module is only available for premium users. Upgrade to access all modules.",
+        description:
+          "This module is only available for premium users. Upgrade to access all modules.",
         variant: "destructive",
       });
       return;
     }
 
-    const newId = `${type}-${Date.now()}`;
+    const newId = crypto.randomUUID();
+
+    // Calculate sort value for new module (next available index)
+    const currentPage = pages.find((p) => p.id === currentPageId);
+    const currentModules = currentPage?.modules || [];
+    const maxSort = currentModules.reduce(
+      (max, mod) => Math.max(max, mod.order ?? -1),
+      -1
+    );
+    const newSort = maxSort + 1;
+
     const newModule: ModuleData = {
       id: newId,
       type: type,
@@ -804,6 +857,7 @@ const ModuleManager = () => {
       },
       isCustomized: false,
       visibility: "public",
+      order: newSort,
     };
 
     addModuleToPage(currentPageId, newModule);
@@ -882,9 +936,11 @@ const ModuleManager = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {modules.map((item) => {
                       const IconComponent = item.icon;
-                      const isPremiumModule = !BASIC_MODULE_TYPES.includes(item.type);
+                      const isPremiumModule = !BASIC_MODULE_TYPES.includes(
+                        item.type
+                      );
                       const isLocked = isPremiumModule && !isPremium;
-                      
+
                       return (
                         <button
                           key={item.type}
@@ -903,12 +959,14 @@ const ModuleManager = () => {
                               : "hover:border-primary hover:bg-primary/5"
                           )}
                         >
-                          <div className={cn(
-                            "flex-shrink-0 p-2 rounded-lg transition-colors",
-                            isLocked
-                              ? "bg-muted/50"
-                              : "bg-muted group-hover:bg-primary/10"
-                          )}>
+                          <div
+                            className={cn(
+                              "flex-shrink-0 p-2 rounded-lg transition-colors",
+                              isLocked
+                                ? "bg-muted/50"
+                                : "bg-muted group-hover:bg-primary/10"
+                            )}
+                          >
                             {React.createElement(IconComponent, {
                               className: cn(
                                 "h-5 w-5 transition-colors",
@@ -920,12 +978,14 @@ const ModuleManager = () => {
                           </div>
                           <div className="space-y-1 min-w-0 flex-1">
                             <div className="flex items-center gap-2">
-                              <span className={cn(
-                                "font-semibold text-sm transition-colors block",
-                                isLocked
-                                  ? "text-muted-foreground"
-                                  : "group-hover:text-primary"
-                              )}>
+                              <span
+                                className={cn(
+                                  "font-semibold text-sm transition-colors block",
+                                  isLocked
+                                    ? "text-muted-foreground"
+                                    : "group-hover:text-primary"
+                                )}
+                              >
                                 {item.name}
                               </span>
                               {isPremiumModule && (

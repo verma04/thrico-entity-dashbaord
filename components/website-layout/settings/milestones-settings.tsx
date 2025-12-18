@@ -12,6 +12,15 @@ import {
   DropResult,
 } from "@hello-pangea/dnd";
 import { cn } from "@/lib/utils";
+import { IconPicker } from "./icon-picker";
+import { ImageUploadWithCrop } from "@/components/ui/image-upload-with-crop";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface MilestonesSettingsProps {
   content: any;
@@ -34,6 +43,8 @@ export const MilestonesSettings = ({
         description: "",
         date: "",
         status: "completed",
+        icon: "",
+        image: "",
       },
     ];
     onChange({ milestones: newMilestones });
@@ -142,23 +153,50 @@ export const MilestonesSettings = ({
 
                       <div className="grid grid-cols-2 gap-2">
                         <div className="space-y-2">
-                          <Label className="text-[10px] text-muted-foreground">Date</Label>
-                          <Input
-                            type="date"
-                            value={milestone.date || ""}
-                            onChange={(e) => updateMilestone(index, "date", e.target.value)}
-                            className="h-8 text-xs"
+                          <Label className="text-[10px] text-muted-foreground">Icon</Label>
+                          <IconPicker
+                            value={milestone.icon || ""}
+                            onChange={(icon) => updateMilestone(index, "icon", icon)}
                           />
                         </div>
                         <div className="space-y-2">
                           <Label className="text-[10px] text-muted-foreground">Status</Label>
-                          <Input
-                            value={milestone.status || ""}
-                            onChange={(e) => updateMilestone(index, "status", e.target.value)}
-                            placeholder="completed, in-progress"
-                            className="h-8 text-xs"
-                          />
+                          <Select
+                            value={milestone.status || "completed"}
+                            onValueChange={(value) => updateMilestone(index, "status", value)}
+                          >
+                            <SelectTrigger className="h-8 text-xs">
+                              <SelectValue placeholder="Select status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="completed">✅ Completed</SelectItem>
+                              <SelectItem value="in-progress">🔄 In Progress</SelectItem>
+                              <SelectItem value="upcoming">📅 Upcoming</SelectItem>
+                              <SelectItem value="planned">📋 Planned</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-[10px] text-muted-foreground">Date</Label>
+                        <Input
+                          type="date"
+                          value={milestone.date || ""}
+                          onChange={(e) => updateMilestone(index, "date", e.target.value)}
+                          className="h-8 text-xs"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-[10px] text-muted-foreground">Milestone Image</Label>
+                        <ImageUploadWithCrop
+                          currentImage={milestone.image || ""}
+                          onImageUpdate={(url: string) => updateMilestone(index, "image", url)}
+                          aspectRatio={16 / 9}
+                          label="Upload Image"
+                          maxFileSize={2}
+                        />
                       </div>
                     </div>
                   )}

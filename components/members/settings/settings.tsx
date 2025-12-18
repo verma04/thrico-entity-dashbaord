@@ -8,12 +8,6 @@ const Settings = () => {
   const { data, loading } = useEntitySettings();
   const [update, { loading: loadingBtn }] = useUpdateEntitySettings({});
 
-  console.log(
-    "Settings data:",
-    data?.getEntitySettings?.allowNewUser,
-    data?.getEntitySettings?.autoApproveUser
-  );
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">

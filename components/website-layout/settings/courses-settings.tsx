@@ -12,6 +12,15 @@ import {
   DropResult,
 } from "@hello-pangea/dnd";
 import { cn } from "@/lib/utils";
+import { IconPicker } from "./icon-picker";
+import { ImageUploadWithCrop } from "@/components/ui/image-upload-with-crop";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface CoursesSettingsProps {
   content: any;
@@ -34,10 +43,13 @@ export const CoursesSettings = ({
         description: "",
         instructor: "",
         duration: "",
-        level: "",
+        level: "beginner",
         price: "",
         thumbnail: "",
         enrollmentLink: "",
+        icon: "",
+        rating: "",
+        studentsEnrolled: "",
       },
     ];
     onChange({ courses: newCourses });
@@ -144,6 +156,44 @@ export const CoursesSettings = ({
                         />
                       </div>
 
+                      <div className="space-y-2">
+                        <Label className="text-[10px] text-muted-foreground">Thumbnail Image</Label>
+                        <ImageUploadWithCrop
+                          currentImage={course.thumbnail || ""}
+                          onImageUpdate={(url: string) => updateCourse(index, "thumbnail", url)}
+                          aspectRatio={16 / 9}
+                          label="Upload Thumbnail"
+                          maxFileSize={3}
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="space-y-2">
+                          <Label className="text-[10px] text-muted-foreground">Icon</Label>
+                          <IconPicker
+                            value={course.icon || ""}
+                            onChange={(icon) => updateCourse(index, "icon", icon)}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-[10px] text-muted-foreground">Level</Label>
+                          <Select
+                            value={course.level || "beginner"}
+                            onValueChange={(value) => updateCourse(index, "level", value)}
+                          >
+                            <SelectTrigger className="h-8 text-xs">
+                              <SelectValue placeholder="Select level" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="beginner">🌱 Beginner</SelectItem>
+                              <SelectItem value="intermediate">📈 Intermediate</SelectItem>
+                              <SelectItem value="advanced">🚀 Advanced</SelectItem>
+                              <SelectItem value="expert">💎 Expert</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+
                       <div className="grid grid-cols-2 gap-2">
                         <div className="space-y-2">
                           <Label className="text-[10px] text-muted-foreground">Instructor</Label>
@@ -165,16 +215,7 @@ export const CoursesSettings = ({
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="space-y-2">
-                          <Label className="text-[10px] text-muted-foreground">Level</Label>
-                          <Input
-                            value={course.level || ""}
-                            onChange={(e) => updateCourse(index, "level", e.target.value)}
-                            placeholder="Beginner, Intermediate, Advanced"
-                            className="h-8 text-xs"
-                          />
-                        </div>
+                      <div className="grid grid-cols-3 gap-2">
                         <div className="space-y-2">
                           <Label className="text-[10px] text-muted-foreground">Price</Label>
                           <Input
@@ -184,27 +225,39 @@ export const CoursesSettings = ({
                             className="h-8 text-xs"
                           />
                         </div>
+                        <div className="space-y-2">
+                          <Label className="text-[10px] text-muted-foreground">Rating</Label>
+                          <Input
+                            type="number"
+                            step="0.1"
+                            min="0"
+                            max="5"
+                            value={course.rating || ""}
+                            onChange={(e) => updateCourse(index, "rating", e.target.value)}
+                            placeholder="4.8"
+                            className="h-8 text-xs"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-[10px] text-muted-foreground">Students</Label>
+                          <Input
+                            type="number"
+                            value={course.studentsEnrolled || ""}
+                            onChange={(e) => updateCourse(index, "studentsEnrolled", e.target.value)}
+                            placeholder="1250"
+                            className="h-8 text-xs"
+                          />
+                        </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="space-y-2">
-                          <Label className="text-[10px] text-muted-foreground">Thumbnail URL</Label>
-                          <Input
-                            value={course.thumbnail || ""}
-                            onChange={(e) => updateCourse(index, "thumbnail", e.target.value)}
-                            placeholder="https://..."
-                            className="h-8 text-xs"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-[10px] text-muted-foreground">Enrollment Link</Label>
-                          <Input
-                            value={course.enrollmentLink || ""}
-                            onChange={(e) => updateCourse(index, "enrollmentLink", e.target.value)}
-                            placeholder="https://..."
-                            className="h-8 text-xs"
-                          />
-                        </div>
+                      <div className="space-y-2">
+                        <Label className="text-[10px] text-muted-foreground">Enrollment Link</Label>
+                        <Input
+                          value={course.enrollmentLink || ""}
+                          onChange={(e) => updateCourse(index, "enrollmentLink", e.target.value)}
+                          placeholder="https://..."
+                          className="h-8 text-xs"
+                        />
                       </div>
                     </div>
                   )}

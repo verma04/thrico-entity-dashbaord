@@ -12,6 +12,7 @@ import {
   DropResult,
 } from "@hello-pangea/dnd";
 import { cn } from "@/lib/utils";
+import { IconPicker } from "./icon-picker";
 
 interface BenefitsSettingsProps {
   content: any;
@@ -141,30 +142,65 @@ export const BenefitsSettings = ({
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-[10px] text-muted-foreground">Icon Name</Label>
-                        <Input
+                        <Label className="text-[10px] text-muted-foreground">Icon</Label>
+                        <IconPicker
                           value={benefit.icon || ""}
-                          onChange={(e) => updateBenefit(index, "icon", e.target.value)}
-                          placeholder="Star, Shield, Award"
-                          className="h-8 text-xs"
+                          onChange={(icon) => updateBenefit(index, "icon", icon)}
                         />
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-[10px] text-muted-foreground">Features (comma-separated)</Label>
-                        <Textarea
-                          value={(benefit.features || []).join(", ")}
-                          onChange={(e) => {
-                            const features = e.target.value
-                              .split(",")
-                              .map((f) => f.trim())
-                              .filter(Boolean);
-                            updateBenefit(index, "features", features);
-                          }}
-                          placeholder="Feature 1, Feature 2, Feature 3"
-                          className="text-xs min-h-[50px]"
-                          rows={2}
-                        />
+                        <div className="flex items-center justify-between">
+                          <Label className="text-[10px] text-muted-foreground">Features</Label>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              const currentFeatures = benefit.features || [];
+                              updateBenefit(index, "features", [...currentFeatures, ""]);
+                            }}
+                            className="h-6 text-xs px-2"
+                          >
+                            <Plus className="h-3 w-3 mr-1" />
+                            Add Feature
+                          </Button>
+                        </div>
+                        <div className="space-y-2">
+                          {(benefit.features || []).map((feature: string, featureIdx: number) => (
+                            <div key={featureIdx} className="flex items-center gap-2">
+                              <Input
+                                value={feature}
+                                onChange={(e) => {
+                                  const newFeatures = [...(benefit.features || [])];
+                                  newFeatures[featureIdx] = e.target.value;
+                                  updateBenefit(index, "features", newFeatures);
+                                }}
+                                placeholder="Enter feature"
+                                className="h-7 text-xs flex-1"
+                              />
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  const newFeatures = (benefit.features || []).filter(
+                                    (_: string, i: number) => i !== featureIdx
+                                  );
+                                  updateBenefit(index, "features", newFeatures);
+                                }}
+                                className="h-7 w-7 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          ))}
+                          {(!benefit.features || benefit.features.length === 0) && (
+                            <p className="text-xs text-muted-foreground text-center py-2 bg-gray-50 rounded border border-dashed">
+                              No features added. Click "Add Feature" to create one.
+                            </p>
+                          )}
+                        </div>
                       </div>
                     </div>
                   )}

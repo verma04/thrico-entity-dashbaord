@@ -39,12 +39,24 @@ export const ContactSettings: React.FC<ContactSettingsProps> = ({
 
         <div>
           <Label className="text-[10px] text-muted-foreground">
+            Subtitle
+          </Label>
+          <Input
+            value={content.subtitle || ""}
+            onChange={(e) => onChange({ subtitle: e.target.value })}
+            placeholder="We'd love to hear from you"
+            className="h-8 text-xs"
+          />
+        </div>
+
+        <div>
+          <Label className="text-[10px] text-muted-foreground">
             Description
           </Label>
           <Textarea
             value={content.description || ""}
             onChange={(e) => onChange({ description: e.target.value })}
-            placeholder="We'd love to hear from you..."
+            placeholder="Additional information about contacting us..."
             className="text-xs min-h-[60px]"
             rows={3}
           />
@@ -105,9 +117,20 @@ export const ContactSettings: React.FC<ContactSettingsProps> = ({
         </div>
       </div>
 
-      {/* Office Hours */}
+      {/* Support Info */}
       <div className="space-y-3 pt-2 border-t">
-        <Label className="text-xs font-bold">Office Hours</Label>
+        <Label className="text-xs font-bold">Support Information</Label>
+        <div>
+          <Label className="text-[10px] text-muted-foreground">
+            Response Time
+          </Label>
+          <Input
+            value={content.responseTime || ""}
+            onChange={(e) => onChange({ responseTime: e.target.value })}
+            placeholder="We typically respond within 24 hours"
+            className="h-8 text-xs"
+          />
+        </div>
         <div>
           <Label className="text-[10px] text-muted-foreground">
             Business Hours
@@ -218,78 +241,116 @@ export const ContactSettings: React.FC<ContactSettingsProps> = ({
         )}
       </div>
 
-      {/* Map Settings */}
-      {layout === "contact-with-map" && (
-        <div className="space-y-3 pt-2 border-t">
-          <Label className="text-xs font-bold">Map Settings</Label>
-          <div>
-            <Label className="text-[10px] text-muted-foreground">
-              Map Coordinates (Lat, Lng)
-            </Label>
-            <div className="grid grid-cols-2 gap-2">
+      {/* FAQs */}
+      <div className="space-y-3 pt-2 border-t">
+        <div className="flex justify-between items-center">
+          <Label className="text-xs font-bold">Frequently Asked Questions</Label>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              const faqs = [...(content.faqs || [])];
+              faqs.push({
+                question: "",
+                answer: "",
+              });
+              onChange({ faqs });
+            }}
+            className="h-7 text-xs"
+          >
+            <Plus className="h-3 w-3 mr-1" />
+            Add FAQ
+          </Button>
+        </div>
+
+        {(content.faqs || []).map((faq: any, index: number) => (
+          <div
+            key={index}
+            className="space-y-2 p-3 bg-background rounded border"
+          >
+            <div className="flex justify-between items-center">
+              <span className="text-xs font-bold">FAQ {index + 1}</span>
+              <button
+                onClick={() => {
+                  const faqs = [...(content.faqs || [])];
+                  faqs.splice(index, 1);
+                  onChange({ faqs });
+                }}
+                className="text-red-500 hover:bg-red-50 p-1 rounded"
+              >
+                <Trash2 className="h-3 w-3" />
+              </button>
+            </div>
+
+            <div>
+              <Label className="text-[10px] text-muted-foreground">
+                Question
+              </Label>
               <Input
-                value={content.mapLatitude || ""}
-                onChange={(e) => onChange({ mapLatitude: e.target.value })}
-                placeholder="40.7128"
+                value={faq.question || ""}
+                onChange={(e) => {
+                  const faqs = [...(content.faqs || [])];
+                  faqs[index] = {
+                    ...faqs[index],
+                    question: e.target.value,
+                  };
+                  onChange({ faqs });
+                }}
+                placeholder="How do I reset my password?"
                 className="h-8 text-xs"
-                type="number"
-                step="any"
               />
-              <Input
-                value={content.mapLongitude || ""}
-                onChange={(e) => onChange({ mapLongitude: e.target.value })}
-                placeholder="-74.0060"
-                className="h-8 text-xs"
-                type="number"
-                step="any"
+            </div>
+
+            <div>
+              <Label className="text-[10px] text-muted-foreground">
+                Answer
+              </Label>
+              <Textarea
+                value={faq.answer || ""}
+                onChange={(e) => {
+                  const faqs = [...(content.faqs || [])];
+                  faqs[index] = {
+                    ...faqs[index],
+                    answer: e.target.value,
+                  };
+                  onChange({ faqs });
+                }}
+                placeholder="Go to settings and click reset password..."
+                className="text-xs min-h-[50px]"
+                rows={2}
               />
             </div>
           </div>
+        ))}
 
-          <div>
-            <Label className="text-[10px] text-muted-foreground">
-              Map Zoom Level
-            </Label>
-            <Input
-              value={content.mapZoom || "15"}
-              onChange={(e) => onChange({ mapZoom: e.target.value })}
-              placeholder="15"
-              className="h-8 text-xs"
-              type="number"
-              min="1"
-              max="20"
-            />
-          </div>
-        </div>
-      )}
+        {(content.faqs || []).length === 0 && (
+          <p className="text-xs text-muted-foreground text-center py-4">
+            No FAQs yet. Click "Add FAQ" to create one.
+          </p>
+        )}
+      </div>
 
-      {/* Contact Form Settings */}
+      {/* Map Settings */}
       <div className="space-y-3 pt-2 border-t">
-        <Label className="text-xs font-bold">Contact Form</Label>
+        <Label className="text-xs font-bold">Map Settings</Label>
         <div>
           <Label className="text-[10px] text-muted-foreground">
-            Form Submit URL (Optional)
+            Map Embed URL
           </Label>
           <Input
-            value={content.formAction || ""}
-            onChange={(e) => onChange({ formAction: e.target.value })}
-            placeholder="/api/contact"
+            value={content.mapUrl || ""}
+            onChange={(e) => onChange({ mapUrl: e.target.value })}
+            placeholder="https://www.google.com/maps/embed?pb=..."
             className="h-8 text-xs"
           />
-        </div>
-
-        <div>
-          <Label className="text-[10px] text-muted-foreground">
-            Success Message
-          </Label>
-          <Input
-            value={content.successMessage || ""}
-            onChange={(e) => onChange({ successMessage: e.target.value })}
-            placeholder="Thank you for your message!"
-            className="h-8 text-xs"
-          />
+          <p className="text-[10px] text-muted-foreground mt-1">
+            Get embed URL from Google Maps → Share → Embed a map
+          </p>
         </div>
       </div>
+
+    
     </div>
   );
 };

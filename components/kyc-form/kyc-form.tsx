@@ -22,6 +22,7 @@ import { User, Building, Globe, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { useKycFormStore } from "@/store/kycStore";
+import { Card } from "../ui/card";
 
 interface KycFormData {
   user?: {
@@ -114,7 +115,7 @@ const KycForm = ({ data }: { data: KycFormData }) => {
 
   return (
     <div className="min-h-screen overflow-hidden bg-gradient-to-br from-slate-50 via-white to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 pb-24">
-      {/* Header */}
+    
 
       <div className=" overflow-hidden">
         <KycHeader />
@@ -125,9 +126,15 @@ const KycForm = ({ data }: { data: KycFormData }) => {
             }`}
           >
             {/* Main */}
-            <div className={`space-y-6  0 w-1/2`}>
-              {current === 0 && <KycWelcome onStart={() => setCurrent(1)} />}
 
+           
+          
+              {current === 0 &&  <div  className={`space-y-6  0 w-1/2 p-10   `}> <KycWelcome onStart={() => setCurrent(1)} />       </div>}
+          
+                { current !== 0 && 
+
+                
+            <Card className={`space-y-6  0 w-1/2 p-10  bg-white/100  `}>
               {current === 1 && (
                 <KycProfile
                   fullName={`${user?.firstName || ""} ${user?.lastName || ""}`}
@@ -139,6 +146,7 @@ const KycForm = ({ data }: { data: KycFormData }) => {
                   setCurrent={setCurrent}
                 />
               )}
+
 
               {current === 2 && (
                 <KycEntity
@@ -161,7 +169,9 @@ const KycForm = ({ data }: { data: KycFormData }) => {
                   setLogoPreview={setLogoPreview}
                 />
               )}
-            </div>
+              </Card>
+}
+         
 
             {/* Right Sidebar - Preview - 50% */}
 

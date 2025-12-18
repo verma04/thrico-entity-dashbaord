@@ -28,6 +28,7 @@ import { useToast } from "@/hooks/use-toast";
 import { PageListItem } from "@/components/pages/page-list-item";
 import { CreatePageDialog } from "@/components/pages/create-page-dialog";
 import { ConfirmDialog } from "@/components/pages/confirm-dialog";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Page = () => {
   const router = useRouter();
@@ -272,3 +273,22 @@ const Page = () => {
 };
 
 export default Page;
+
+
+  const PageSkeleton = () => (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+        <div className="space-y-2 flex-1">
+          <Skeleton className="h-6 w-32" />
+          <Skeleton className="h-4 w-48" />
+        </div>
+        <Skeleton className="h-9 w-9 rounded-md" />
+      </CardHeader>
+      <CardContent>
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-5 w-16" />
+          <Skeleton className="h-5 w-20" />
+        </div>
+      </CardContent>
+    </Card>
+  );

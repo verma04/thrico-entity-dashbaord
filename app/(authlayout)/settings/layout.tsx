@@ -99,7 +99,7 @@ function SettingsLayout({ children }: { children: React.ReactNode }) {
   ];
 
   return (
-    <div className="fixed inset-0 flex">
+    <div className="fixed inset-0 flex z-50">
       <SidebarProvider defaultOpen={true}>
         <Sidebar collapsible="icon" className="border-r">
           <SidebarHeader className="border-b px-6 py-4">

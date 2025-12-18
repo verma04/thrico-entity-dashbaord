@@ -45,7 +45,7 @@ const KycWelcome = ({ onStart }: KycWelcomeProps) => {
                 start with people.
               </h1>
             </div>
-            <div className="absolute -top-4 left-1/2 w-0.5 h-8 bg-primary/30" />
+           
           </div>
 
           {/* Subheading */}

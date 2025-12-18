@@ -176,9 +176,7 @@ export const ContactRenderer = ({ module, previewDevice = "desktop" }: ContactRe
           <div className={cn("grid gap-16 items-center", !isMobile && "lg:grid-cols-2")}>
             <div className="space-y-8">
               <div className="space-y-4">
-                <div className="inline-block bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium">
-                  For Enterprise
-                </div>
+                
                 <h1 className="text-4xl md:text-5xl font-bold">{content.title || "Let's Talk Business"}</h1>
                 <p className="text-xl text-muted-foreground">{content.subtitle || "Scale your team with our enterprise solutions."}</p>
               </div>

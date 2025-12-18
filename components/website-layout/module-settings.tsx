@@ -279,9 +279,15 @@ const getAvailableLayouts = (
   if (moduleType === "social-proof") {
     return ["inline-proof"];
   }
-  if (moduleType === "countdown-banner") {
-    return ["centered-countdown"];
-  }
+ if (moduleType === "countdown-banner") {
+  return [
+    "centered-countdown",
+    "inline-banner",
+    "flip-card",
+    "split-banner",
+    "minimal-timer"
+  ];
+}
   if (moduleType === "comparison-table") {
     return ["table-grid"];
   }
@@ -318,12 +324,24 @@ const getAvailableLayouts = (
       "featured-story",
     ];
   }
-  if (moduleType === "event-countdown") {
-    return ["timer-large"];
-  }
-  if (moduleType === "milestones") {
-    return ["milestone-track"];
-  }
+ if (moduleType === "event-countdown") {
+  return [
+    "timer-large",
+    "event-card",
+    "circular-progress",
+    "compact-banner",
+    "milestone-counter"
+  ];
+}
+ if (moduleType === "milestones") {
+  return [
+    "timeline-vertical",
+    "timeline-horizontal", 
+    "milestone-cards",
+    "roadmap-view",
+    "achievement-list"
+  ];
+}
   if (moduleType === "leaderboard") {
     return ["rank-list", "podium-view", "stats-board", "card-rankings"];
   }
@@ -390,7 +408,7 @@ const getAvailableLayouts = (
     return ["episode-list", "player-cards", "season-grid", "featured-episode"];
   }
   if (moduleType === "polls") {
-    return ["poll-card", "live-voting", "results-chart", "poll-grid"];
+    return ["poll-card", "live-voting", "results-chart", "poll-grid" , "results-dashboard"];
   }
   if (moduleType === "social-feed") {
     return ["feed-grid", "timeline-feed", "masonry-posts", "platform-tabs"];

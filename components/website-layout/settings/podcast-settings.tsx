@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { Plus, Trash2, GripVertical } from "lucide-react";
 import {
   DragDropContext,
@@ -12,6 +13,7 @@ import {
   DropResult,
 } from "@hello-pangea/dnd";
 import { cn } from "@/lib/utils";
+import { ImageUploadWithCrop } from "@/components/ui/image-upload-with-crop";
 
 interface PodcastSettingsProps {
   content: any;
@@ -38,6 +40,7 @@ export const PodcastSettings = ({
         season: 1,
         episodeNumber: episodes.length + 1,
         thumbnail: "",
+        isFeatured: false,
       },
     ];
     onChange({ episodes: newEpisodes });
@@ -133,6 +136,28 @@ export const PodcastSettings = ({
                         />
                       </div>
 
+                      <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg border border-purple-200">
+                        <div>
+                          <Label className="text-xs font-medium">Featured Episode</Label>
+                          <p className="text-[10px] text-muted-foreground">Show this episode prominently</p>
+                        </div>
+                        <Switch
+                          checked={episode.isFeatured || false}
+                          onCheckedChange={(checked) => {
+                            // If setting this as featured, unfeatured all others
+                            if (checked) {
+                              const updatedEpisodes = episodes.map((ep: any, idx: number) => ({
+                                ...ep,
+                                isFeatured: idx === index,
+                              }));
+                              onChange({ episodes: updatedEpisodes });
+                            } else {
+                              updateEpisode(index, "isFeatured", false);
+                            }
+                          }}
+                        />
+                      </div>
+
                       <div className="space-y-2">
                         <Label className="text-[10px] text-muted-foreground">Description</Label>
                         <Textarea
@@ -196,15 +221,17 @@ export const PodcastSettings = ({
                             className="h-8 text-xs"
                           />
                         </div>
-                        <div className="space-y-2">
-                          <Label className="text-[10px] text-muted-foreground">Thumbnail URL</Label>
-                          <Input
-                            value={episode.thumbnail || ""}
-                            onChange={(e) => updateEpisode(index, "thumbnail", e.target.value)}
-                            placeholder="https://..."
-                            className="h-8 text-xs"
-                          />
-                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-[10px] text-muted-foreground">Episode Thumbnail</Label>
+                        <ImageUploadWithCrop
+                          currentImage={episode.thumbnail || ""}
+                          onImageUpdate={(url: string) => updateEpisode(index, "thumbnail", url)}
+                          aspectRatio={16 / 9}
+                          label="Upload Thumbnail"
+                          maxFileSize={3}
+                        />
                       </div>
                     </div>
                   )}

@@ -1,6 +1,8 @@
 "use client";
 
 import BuilderLayout from "@/components/website-layout/builder-layout";
+import { redirect } from "next/navigation";
+
 
 const WebsiteBuilderPage = () => {
   return (
@@ -16,7 +18,7 @@ const WebsiteBuilderPage = () => {
       <button
         className="rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition p-2 shadow-sm absolute top-4 right-4"
         aria-label="Close"
-        onClick={() => window.history.back()}
+        onClick={() =>  redirect("/app-layout/pages")}
       >
         <span className="sr-only">Close</span>
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none">

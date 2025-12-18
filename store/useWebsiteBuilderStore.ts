@@ -287,6 +287,7 @@ export type ModuleType =
   | "navbar"
   | "hero"
   | "ceo-message"
+  | "results-dashboard"
   | "communities"
   | "marketplace"
   | "jobs"
@@ -365,6 +366,7 @@ export interface ModuleData {
   content: Record<string, any>; // Flexible content, but specific types like { menuItems: MenuItem[] } for navbar
   isCustomized: boolean; // True if user manually changed layout
   visibility: "public" | "members" | "admin";
+  order?: number; // Explicit order order for modules
 }
 
 export interface Page {
@@ -495,6 +497,7 @@ const DEFAULT_MODULES: ModuleData[] = [
     },
     isCustomized: false,
     visibility: "public",
+    order: 0,
   },
   {
     id: "ceo-1",
@@ -505,6 +508,7 @@ const DEFAULT_MODULES: ModuleData[] = [
     content: { message: "Hello" },
     isCustomized: false,
     visibility: "public",
+    order: 1,
   },
   {
     id: "comm-1",
@@ -515,6 +519,7 @@ const DEFAULT_MODULES: ModuleData[] = [
     content: {},
     isCustomized: false,
     visibility: "public",
+    order: 2,
   },
   {
     id: "market-1",
@@ -525,6 +530,7 @@ const DEFAULT_MODULES: ModuleData[] = [
     content: {},
     isCustomized: false,
     visibility: "public",
+    order: 3,
   },
   {
     id: "jobs-1",
@@ -535,6 +541,7 @@ const DEFAULT_MODULES: ModuleData[] = [
     content: {},
     isCustomized: false,
     visibility: "public",
+    order: 4,
   },
   {
     id: "test-1",
@@ -545,6 +552,7 @@ const DEFAULT_MODULES: ModuleData[] = [
     content: {},
     isCustomized: false,
     visibility: "public",
+    order: 5,
   },
 ];
 
@@ -937,31 +945,6 @@ const THEME_DEFAULTS: Record<ThemeType, Record<ModuleType, LayoutType>> = {
 
 // --- Store ---
 
-const FOOTER = {
-  id: "foot-faq",
-  type: "footer",
-  name: "Footer",
-  isEnabled: true,
-  layout: "default",
-  content: {},
-  isCustomized: false,
-  visibility: "public",
-};
-const NAVBAR = {
-  id: "nav-about",
-  type: "navbar",
-  name: "Navbar",
-  isEnabled: true,
-  layout: "simple",
-  content: {
-    menuItems: DEFAULT_MENU,
-    logoText: "Brand",
-    logoType: "text",
-  },
-  isCustomized: false,
-  visibility: "public",
-};
-
 const DEFAULT_PAGES: Page[] = [
   {
     id: "home",
@@ -985,6 +968,7 @@ const DEFAULT_PAGES: Page[] = [
         content: {},
         isCustomized: false,
         visibility: "public",
+        order: 0,
       },
     ],
 
@@ -1015,6 +999,7 @@ const DEFAULT_PAGES: Page[] = [
         },
         isCustomized: false,
         visibility: "public",
+        order: 0,
       },
     ],
     isEnabled: true,
@@ -1064,6 +1049,7 @@ const DEFAULT_PAGES: Page[] = [
         },
         isCustomized: false,
         visibility: "public",
+        order: 0,
       },
     ],
 
@@ -1141,6 +1127,7 @@ const DEFAULT_PAGES: Page[] = [
         },
         isCustomized: false,
         visibility: "public",
+        order: 0,
       },
     ],
   },
@@ -1651,7 +1638,7 @@ export const useWebsiteBuilderStore = create<WebsiteBuilderState>()(
         })),
     }),
     {
-      name: "wsdjjjjssdsddss", // unique name
+      name: "website-manager", // unique name
     }
   )
 );
