@@ -51,8 +51,8 @@ export const HeroSettings: React.FC<HeroSettingsProps> = ({
         </Label>
         <Textarea
           id="description "
-          value={content.description  || ""}
-          onChange={(e) => onChange({description : e.target.value })}
+          value={content.description || ""}
+          onChange={(e) => onChange({ description: e.target.value })}
           placeholder="Discover amazing opportunities and connect with like-minded people"
           className="text-xs min-h-[60px]"
           rows={3}
@@ -63,9 +63,7 @@ export const HeroSettings: React.FC<HeroSettingsProps> = ({
       <ImageUploadWithCrop
         label="Background Image"
         currentImage={content.image}
-        onImageUpdate={(imageUrl: string) =>
-          onChange({ image: imageUrl })
-        }
+        onImageUpdate={(imageUrl: string) => onChange({ image: imageUrl })}
         recommendedWidth={1920}
         recommendedHeight={1080}
         aspectRatio={16 / 9}
@@ -190,7 +188,7 @@ export const HeroSettings: React.FC<HeroSettingsProps> = ({
       </div>
 
       {/* Layout-specific fields */}
-      
+
       {/* CAROUSEL LAYOUT */}
       {layout === "carousel" && (
         <div className="space-y-2 pt-2 border-t">
@@ -210,7 +208,7 @@ export const HeroSettings: React.FC<HeroSettingsProps> = ({
             />
           </div>
           <p className="text-[9px] text-muted-foreground">
-            Carousel slides are managed in the carousel component
+            Carousel slides are managed in the carousel component settings.
           </p>
         </div>
       )}
