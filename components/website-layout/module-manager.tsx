@@ -728,8 +728,7 @@ const ModuleManager = () => {
     currentPageId,
     setModules,
     addModuleToPage,
-    globalHeader,
-    globalFooter,
+   
   } = useWebsiteBuilderStore();
   const [isMounted, setIsMounted] = useState(false);
   const [isAddOpen, setIsAddOpen] = useState(false);

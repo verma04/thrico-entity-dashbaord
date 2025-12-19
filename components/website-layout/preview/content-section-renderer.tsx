@@ -2,6 +2,7 @@ import React from "react";
 import { ModuleData } from "@/store/useWebsiteBuilderStore";
 import { cn } from "@/lib/utils";
 import { Play } from "lucide-react";
+import { ModuleContainer } from "../modules/module-container";
 
 interface ContentSectionRendererProps {
   module: ModuleData;
@@ -40,14 +41,16 @@ export const ContentSectionRenderer = ({
   };
 
   return (
-    <div
-      className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-8"
-      style={{
-        backgroundColor: backgroundColor || undefined,
-        color: textColor || undefined,
-      }}
+    <ModuleContainer 
+      containerSettings={content.containerSettings}
+      className=""
     >
-      <div className="max-w-4xl mx-auto space-y-8 sm:space-y-12">
+      <div
+        className="max-w-4xl mx-auto"
+        style={{
+          color: textColor || undefined,
+        }}
+      >
         {/* Section Header */}
         {(content.title || content.description) && (
           <div className={cn("space-y-3 sm:space-y-4", alignmentClasses[alignment as keyof typeof alignmentClasses])}>
@@ -214,6 +217,6 @@ export const ContentSectionRenderer = ({
           </div>
         )}
       </div>
-    </div>
+    </ModuleContainer>
   );
 };

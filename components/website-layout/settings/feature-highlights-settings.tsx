@@ -10,6 +10,8 @@ import {
 } from "@/components/ui/popover";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { GripVertical, Trash2, Plus } from "lucide-react";
+import * as LucideIcons from "lucide-react";
+import { IconPicker } from "./icon-picker";
 
 interface FeatureHighlightsSettingsProps {
   content: {
@@ -37,26 +39,26 @@ const FeatureHighlightsSettings: React.FC<FeatureHighlightsSettingsProps> = ({
         title: "Lightning Fast",
         description:
           "Experience blazing fast performance that keeps your users engaged",
-        icon: "⚡",
+        icon: "Zap",
         highlight: true,
       },
       {
         title: "Secure & Reliable",
         description: "Bank-level security with 99.9% uptime guarantee",
-        icon: "🔒",
+        icon: "Lock",
         highlight: false,
       },
       {
         title: "24/7 Support",
         description: "Round-the-clock support from our expert team",
-        icon: "🎧",
+        icon: "Headphones",
         highlight: false,
       },
       {
         title: "Easy Integration",
         description:
           "Seamlessly integrate with your existing workflow in minutes",
-        icon: "🔗",
+        icon: "Link",
         highlight: true,
       },
     ],
@@ -70,7 +72,7 @@ const FeatureHighlightsSettings: React.FC<FeatureHighlightsSettingsProps> = ({
       {
         title: "New Feature",
         description: "Feature description",
-        icon: "✨",
+        icon: "Sparkles",
         highlight: false,
       },
     ];
@@ -100,6 +102,14 @@ const FeatureHighlightsSettings: React.FC<FeatureHighlightsSettingsProps> = ({
     newFeatures.splice(result.destination.index, 0, reorderedFeature);
 
     onChange({ features: newFeatures });
+  };
+
+  // Helper function to render icon from icon name
+  const renderIcon = (iconName: string, className?: string) => {
+    if (!iconName) return null;
+    const IconComponent = (LucideIcons as any)[iconName];
+    if (!IconComponent) return null;
+    return <IconComponent className={className} />;
   };
 
   return (
@@ -170,7 +180,9 @@ const FeatureHighlightsSettings: React.FC<FeatureHighlightsSettingsProps> = ({
                             >
                               <GripVertical className="h-4 w-4 text-gray-400" />
                             </div>
-                            <span className="text-lg">{feature.icon}</span>
+                            <div className="flex items-center justify-center w-6 h-6">
+                              {renderIcon(feature.icon, "w-5 h-5")}
+                            </div>
                             <span className="text-sm font-medium">
                               {feature.title}
                             </span>
@@ -236,15 +248,13 @@ const FeatureHighlightsSettings: React.FC<FeatureHighlightsSettingsProps> = ({
                         <div className="grid grid-cols-2 gap-3">
                           <div>
                             <Label className="text-xs text-gray-600">
-                              Icon (Emoji)
+                              Icon
                             </Label>
-                            <Input
+                            <IconPicker
                               value={feature.icon}
-                              onChange={(e) =>
-                                updateFeature(index, { icon: e.target.value })
+                              onChange={(icon) =>
+                                updateFeature(index, { icon: icon })
                               }
-                              placeholder="⚡"
-                              className="text-center"
                             />
                           </div>
 

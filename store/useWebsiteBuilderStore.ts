@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 
 // --- Types ---
 
@@ -437,6 +436,7 @@ export interface WebsiteBuilderState {
   togglePageStatus: (id: string) => void;
   togglePageSitemap: (id: string) => void;
   updateSiteSettings: (settings: Partial<SiteSettings>) => void;
+  initializeWebsiteData: (websiteData: any) => void;
 }
 
 // --- Defaults ---
@@ -1175,108 +1175,45 @@ const DEFAULT_PAGES: Page[] = [
   },
 ];
 
-export const useWebsiteBuilderStore = create<WebsiteBuilderState>()(
-  persist(
-    (set, get) => ({
-      theme: "academia",
-      font: "inter",
-      fontFamily: "inter",
-      pages: DEFAULT_PAGES,
-      siteSettings: {
-        googleAnalyticsId: "",
-        favicon: "",
-        socialLinks: { twitter: "", linkedin: "", github: "", instagram: "" },
-      },
-      // Initialize Global Modules
-      globalFooter: {
-        id: "foot-1",
-        type: "footer",
-        name: "Footer",
-        isEnabled: true,
-        layout: "columns",
-        content: {
-          companyInfo: {
-            name: "Thrico",
-            description: "Building the future of community.",
-          },
-          contactInfo: {
-            phone: "+1 (555) 000-0000",
-            email: "support@thrico.com",
-            address: "123 Tech Blvd, San Francisco, CA",
-          },
-          socialLinks: [
-            {
-              platform: "twitter",
-              url: "https://twitter.com",
-            },
-            {
-              platform: "linkedin",
-              url: "https://linkedin.com",
-            },
-            {
-              platform: "github",
-              url: "https://github.com",
-            },
-          ],
-          copyright: {
-            text: "© 2024 Thrico Inc. All rights reserved.",
-            showYear: true,
-          },
-        },
-        isCustomized: false,
-        visibility: "public",
-      },
-      globalHeader: {
-        id: "navbar",
-        type: "navbar",
-        name: "Navbar",
-        isEnabled: true,
-        layout: "split",
-        content: {
-          menuItems: [
-            {
-              id: "1",
-              label: "Home",
-              link: "/",
-            },
-            {
-              id: "2",
-              label: "About",
-              link: "/about",
-              children: [
-                {
-                  id: "2-1",
-                  label: "Our Story",
-                  link: "/story",
-                },
-                {
-                  id: "2-2",
-                  label: "Team",
-                  link: "/team",
-                },
-              ],
-            },
-            {
-              id: "3",
-              label: "Services",
-              link: "/services",
-            },
-            {
-              id: "4",
-              label: "Contact",
-              link: "/contact",
-            },
-          ],
-          logoText: "Brand",
-          logoType: "text",
-        },
-        isCustomized: false,
-        visibility: "public",
-      },
+export const useWebsiteBuilderStore = create<WebsiteBuilderState>()((set, get) => ({
+  theme: "academia",
+  font: "inter",
+  fontFamily: "inter",
+  pages: [],
+  siteSettings: {
+    googleAnalyticsId: "",
+    favicon: "",
+    socialLinks: { twitter: "", linkedin: "", github: "", instagram: "" },
+  },
+  // Initialize Global Modules with minimal defaults
+  globalFooter: {
+    id: "footer",
+    type: "footer",
+    name: "Footer",
+    isEnabled: true,
+    layout: "columns",
+    content: {},
+    isCustomized: false,
+    visibility: "public",
+  },
+  globalHeader: {
+    id: "navbar",
+    type: "navbar",
+    name: "Navbar",
+    isEnabled: true,
+    layout: "split",
+    content: {
+      menuItems: [],
+      logoText: "",
+      logoType: "text",
+    },
+    isCustomized: false,
+    visibility: "public",
+  },
 
-      currentPageId: null,
-      selectedModuleId: null,
-      previewDevice: "desktop",
+  currentPageId: null,
+  selectedModuleId: null,
+  previewDevice: "desktop",
 
       // Computed properties
       get currentTheme() {
@@ -1636,9 +1573,16 @@ export const useWebsiteBuilderStore = create<WebsiteBuilderState>()(
         set((state) => ({
           siteSettings: { ...state.siteSettings, ...settings },
         })),
-    }),
-    {
-      name: "website-manager", // unique name
-    }
-  )
-);
+
+      initializeWebsiteData: (websiteData) => {
+        if (!websiteData) return;
+        
+        set(() => ({
+          theme: websiteData.theme || "academia",
+          font: websiteData.font || "inter",
+          pages: websiteData.pages || [],
+          globalHeader: websiteData.navbar || get().globalHeader,
+          globalFooter: websiteData.footer || get().globalFooter,
+        }));
+      },
+    }));

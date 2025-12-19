@@ -14,6 +14,7 @@ import {
   Star,
   Zap,
 } from "lucide-react";
+import { ModuleContainer } from "../modules/module-container";
 
 interface BlogPost {
   id: string;
@@ -192,7 +193,7 @@ const BlogRenderer: React.FC<BlogRendererProps> = ({
 
   if (posts.length === 0) {
     return (
-      <section className="py-16 px-6">
+      <ModuleContainer containerSettings={content.containerSettings}>
         <div className="max-w-4xl mx-auto text-center">
           <div className="mb-4">{getLayoutIcon(layout)}</div>
           <h2 className="text-2xl font-bold mb-2">{title}</h2>
@@ -203,12 +204,12 @@ const BlogRenderer: React.FC<BlogRendererProps> = ({
             </p>
           </div>
         </div>
-      </section>
+      </ModuleContainer>
     );
   }
 
   return (
-    <section className="py-16 px-6">
+    <ModuleContainer containerSettings={content.containerSettings}>
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
@@ -299,7 +300,7 @@ const BlogRenderer: React.FC<BlogRendererProps> = ({
           </div>
         )}
       </div>
-    </section>
+    </ModuleContainer>
   );
 };
 

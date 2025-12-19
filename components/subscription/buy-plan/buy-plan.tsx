@@ -77,6 +77,8 @@ const BuyPlan = ({ displayStatus = "no_subscription" }: BuyPlanProps) => {
       </div>
       <Separator className="mb-8" />
 
+  
+
       {loading && <PlanCardSkeleton />}
       {!loading && (
         <div className="flex flex-wrap justify-center gap-6">

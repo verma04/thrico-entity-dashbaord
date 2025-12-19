@@ -2,6 +2,7 @@ import React from "react";
 import { ModuleData } from "@/store/useWebsiteBuilderStore";
 import { cn } from "@/lib/utils";
 import { ModuleHeader } from "./module-header";
+import { ModuleContainer } from "./module-container";
 
 interface WallOfFameModuleProps {
   module: ModuleData;
@@ -16,8 +17,7 @@ export const WallOfFameModule: React.FC<WallOfFameModuleProps> = ({
   const honorees = content.honorees || [];
 
   return (
-    <div className="py-16 px-8 bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50">
-      <div className="max-w-7xl mx-auto">
+      <ModuleContainer containerSettings={content.containerSettings} className="bg-black border-y">
         <ModuleHeader
           title={content.title}
           description={content.description}
@@ -292,7 +292,7 @@ export const WallOfFameModule: React.FC<WallOfFameModuleProps> = ({
             ))}
           </div>
         )}
-      </div>
-    </div>
+   </ModuleContainer>
+ 
   );
 };

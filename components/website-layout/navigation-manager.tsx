@@ -12,9 +12,10 @@ export const NavigationManager = () => {
 
   return (
     <div className="space-y-2">
+
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-muted-foreground uppercase">
-          Global Navigation
+          Global Navigation 
         </h3>
       </div>
       
@@ -30,7 +31,7 @@ export const NavigationManager = () => {
             <Menu className="h-4 w-4 text-primary" />
           </div>
           <div className="flex-1">
-            <div className="font-medium text-sm">{globalHeader.name}</div>
+            <div className="font-medium text-sm">Navbar</div>
             <div className="text-xs text-muted-foreground">
               Layout: {globalHeader.layout} • {globalHeader.visibility}
             </div>

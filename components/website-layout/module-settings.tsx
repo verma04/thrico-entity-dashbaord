@@ -28,6 +28,7 @@ import { SocialLinksEditor } from "./settings/social-links-editor";
 import { LayoutSelector } from "./settings/layout-selector";
 import CtaBannerSettings from "./settings/cta-banner-settings";
 import StatsSettings from "./settings/stats-settings";
+import { ImageUploadWithCrop } from "@/components/ui/image-upload-with-crop";
 import LogoCloudSettings from "./settings/logo-cloud-settings";
 import TimelineSettings from "./settings/timeline-settings";
 import ProcessStepsSettings from "./settings/process-steps-settings";
@@ -97,6 +98,7 @@ import { JobsSettings } from "./settings/jobs-settings";
 import { WallOfFameSettings } from "./settings/wall-of-fame-settings";
 import { MembersAroundWorldSettings } from "./settings/members-around-world-settings";
 import { LatestMembersSettings } from "./settings/latest-members-settings";
+import { IconPicker } from "./settings/icon-picker";
 import { CommonHeaderSettings } from "./settings/common-header-settings";
 
 const getAvailableLayouts = (
@@ -460,6 +462,7 @@ const ModuleSettings = () => {
       selectedModule = globalFooter;
     }
   }
+  console.log(globalFooter , globalHeader)
 
   useEffect(() => {
     // If selectedModuleId is set but no matching module found, reset it
@@ -482,6 +485,8 @@ const ModuleSettings = () => {
     currentTheme,
     selectedModule.type
   );
+
+  
 
   return (
     <div className="flex flex-col h-full bg-card border-l w-full">
@@ -1170,6 +1175,547 @@ const ModuleSettings = () => {
             </div>
           </RadioGroup>
         </div>
+
+        {/* CONTAINER SETTINGS */}
+        {!["navbar", "footer", "cta-banner" ,"hero" ].includes(selectedModule.type) && (
+          <>
+            <hr className="border-border" />
+            <div className="space-y-4">
+              <Label className="uppercase text-xs text-muted-foreground font-bold tracking-wider">
+                Container Settings
+              </Label>
+
+              {/* Container Width Option */}
+              <div className="space-y-2">
+                <Label className="text-xs text-gray-600">Container Width</Label>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() =>
+                      updateModuleContent(selectedModule.id, {
+                        containerSettings: {
+                          ...selectedModule.content.containerSettings,
+                          fullWidth: false,
+                        },
+                      })
+                    }
+                    className={`flex-1 h-9 px-3 rounded-md border text-sm transition ${
+                      !selectedModule.content.containerSettings?.fullWidth
+                        ? "border-primary bg-primary text-white"
+                        : "border-input bg-background hover:bg-muted"
+                    }`}
+                  >
+                    Fixed Container
+                  </button>
+                  <button
+                    onClick={() =>
+                      updateModuleContent(selectedModule.id, {
+                        containerSettings: {
+                          ...selectedModule.content.containerSettings,
+                          fullWidth: true,
+                        },
+                      })
+                    }
+                    className={`flex-1 h-9 px-3 rounded-md border text-sm transition ${
+                      selectedModule.content.containerSettings?.fullWidth
+                        ? "border-primary bg-primary text-white"
+                        : "border-input bg-background hover:bg-muted"
+                    }`}
+                  >
+                    Full Width
+                  </button>
+                </div>
+                <p className="text-[10px] text-muted-foreground">
+                  Fixed container centers content, full width spans entire screen
+                </p>
+              </div>
+
+              {/* Background Color with Color Picker */}
+              <div className="space-y-2">
+                <Label className="text-xs text-gray-600">Background Color</Label>
+                <div className="flex gap-2">
+                  <input
+                    type="color"
+                    value={
+                      selectedModule.content.containerSettings?.background?.startsWith("#")
+                        ? selectedModule.content.containerSettings.background
+                        : "#ffffff"
+                    }
+                    onChange={(e) =>
+                      updateModuleContent(selectedModule.id, {
+                        containerSettings: {
+                          ...selectedModule.content.containerSettings,
+                          background: e.target.value,
+                        },
+                      })
+                    }
+                    className="h-9 w-16 rounded-md border border-input cursor-pointer"
+                  />
+                  <Input
+                    type="text"
+                    value={selectedModule.content.containerSettings?.background || ""}
+                    onChange={(e) =>
+                      updateModuleContent(selectedModule.id, {
+                        containerSettings: {
+                          ...selectedModule.content.containerSettings,
+                          background: e.target.value,
+                        },
+                      })
+                    }
+                    placeholder="e.g., #ff5500 or bg-slate-50"
+                    className="h-9 flex-1"
+                  />
+                </div>
+                <p className="text-[10px] text-muted-foreground">
+                  Use color picker or enter hex, rgb, or Tailwind class
+                </p>
+              </div>
+
+              {/* Background Image Upload */}
+              <ImageUploadWithCrop
+                currentImage={selectedModule.content.containerSettings?.backgroundImage}
+                onImageUpdate={(imageUrl) =>
+                  updateModuleContent(selectedModule.id, {
+                    containerSettings: {
+                      ...selectedModule.content.containerSettings,
+                      backgroundImage: imageUrl,
+                    },
+                  })
+                }
+                label="Background Image"
+                recommendedWidth={1920}
+                recommendedHeight={1080}
+                aspectRatio={16 / 9}
+                maxFileSize={10}
+                showDimensions={true}
+                className=""
+              />
+
+              {/* Opacity */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs text-gray-600">Background Opacity</Label>
+                  <span className="text-xs text-muted-foreground">
+                    {selectedModule.content.containerSettings?.opacity ?? 100}%
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="5"
+                  value={selectedModule.content.containerSettings?.opacity ?? 100}
+                  onChange={(e) =>
+                    updateModuleContent(selectedModule.id, {
+                      containerSettings: {
+                        ...selectedModule.content.containerSettings,
+                        opacity: parseInt(e.target.value),
+                      },
+                    })
+                  }
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                />
+                <p className="text-[10px] text-muted-foreground">
+                  Control background transparency (0% = transparent, 100% = opaque)
+                </p>
+              </div>
+
+              {/* CTA Button Settings */}
+              <div className="space-y-3 pt-2 border-t">
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs text-gray-600">CTA Button</Label>
+                  <button
+                    onClick={() =>
+                      updateModuleContent(selectedModule.id, {
+                        containerSettings: {
+                          ...selectedModule.content.containerSettings,
+                          button: {
+                            ...selectedModule.content.containerSettings?.button,
+                            enabled: !selectedModule.content.containerSettings?.button?.enabled,
+                            text: selectedModule.content.containerSettings?.button?.text || "View All",
+                            style: selectedModule.content.containerSettings?.button?.style || "primary",
+                            position: selectedModule.content.containerSettings?.button?.position || "right",
+                          },
+                        },
+                      })
+                    }
+                    className={`h-6 w-11 rounded-full transition ${
+                      selectedModule.content.containerSettings?.button?.enabled
+                        ? "bg-primary"
+                        : "bg-gray-300"
+                    } relative`}
+                  >
+                    <span
+                      className={`block h-4 w-4 rounded-full bg-white shadow transform transition ${
+                        selectedModule.content.containerSettings?.button?.enabled
+                          ? "translate-x-6"
+                          : "translate-x-1"
+                      } mt-1`}
+                    />
+                  </button>
+                </div>
+
+                {selectedModule.content.containerSettings?.button?.enabled && (
+                  <div className="space-y-3 pl-2 border-l-2 border-primary/20">
+                    {/* Button Text Selector */}
+                    <div className="space-y-2">
+                      <Label className="text-xs text-gray-600">Button Text</Label>
+                      <select
+                        value={
+                          ["View All", "Explore More", "Learn More", "See More"].includes(
+                            selectedModule.content.containerSettings?.button?.text || ""
+                          )
+                            ? selectedModule.content.containerSettings?.button?.text
+                            : "Custom"
+                        }
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          updateModuleContent(selectedModule.id, {
+                            containerSettings: {
+                              ...selectedModule.content.containerSettings,
+                              button: {
+                                ...selectedModule.content.containerSettings?.button,
+                                enabled: true,
+                                text: value === "Custom" ? "" : value,
+                                style: selectedModule.content.containerSettings?.button?.style || "primary",
+                                position: selectedModule.content.containerSettings?.button?.position || "right",
+                              },
+                            },
+                          });
+                        }}
+                        className="w-full h-9 px-3 rounded-md border border-input bg-background text-sm"
+                      >
+                        <option value="View All">View All</option>
+                        <option value="Explore More">Explore More</option>
+                        <option value="Learn More">Learn More</option>
+                        <option value="See More">See More</option>
+                        <option value="Custom">Custom Text</option>
+                      </select>
+                    </div>
+
+                    {/* Custom Text Input */}
+                    {!["View All", "Explore More", "Learn More", "See More"].includes(
+                      selectedModule.content.containerSettings?.button?.text || ""
+                    ) && (
+                      <div className="space-y-2">
+                        <Label className="text-xs text-gray-600">Custom Button Text</Label>
+                        <Input
+                          type="text"
+                          value={selectedModule.content.containerSettings?.button?.text || ""}
+                          onChange={(e) =>
+                            updateModuleContent(selectedModule.id, {
+                              containerSettings: {
+                                ...selectedModule.content.containerSettings,
+                                button: {
+                                  ...selectedModule.content.containerSettings?.button,
+                                  enabled: true,
+                                  text: e.target.value,
+                                  style: selectedModule.content.containerSettings?.button?.style || "primary",
+                                  position: selectedModule.content.containerSettings?.button?.position || "right",
+                                },
+                              },
+                            })
+                          }
+                          placeholder="Enter button text"
+                          className="h-9"
+                        />
+                      </div>
+                    )}
+
+                    {/* Button Icon (Optional) */}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-xs text-gray-600">Button Icon (Optional)</Label>
+                        {selectedModule.content.containerSettings?.button?.icon && (
+                          <button
+                            onClick={() =>
+                              updateModuleContent(selectedModule.id, {
+                                containerSettings: {
+                                  ...selectedModule.content.containerSettings,
+                                  button: {
+                                    ...selectedModule.content.containerSettings?.button,
+                                    icon: undefined,
+                                    iconPosition: undefined,
+                                  },
+                                },
+                              })
+                            }
+                            className="text-xs text-red-500 hover:text-red-700"
+                          >
+                            Clear
+                          </button>
+                        )}
+                      </div>
+                      <IconPicker
+                        value={selectedModule.content.containerSettings?.button?.icon || ""}
+                        onChange={(icon) =>
+                          updateModuleContent(selectedModule.id, {
+                            containerSettings: {
+                              ...selectedModule.content.containerSettings,
+                              button: {
+                                ...selectedModule.content.containerSettings?.button,
+                                enabled: true,
+                                icon: icon,
+                                iconPosition: selectedModule.content.containerSettings?.button?.iconPosition || "left",
+                                text: selectedModule.content.containerSettings?.button?.text || "View All",
+                                style: selectedModule.content.containerSettings?.button?.style || "primary",
+                                position: selectedModule.content.containerSettings?.button?.position || "right",
+                              },
+                            },
+                          })
+                        }
+                      />
+                    </div>
+
+                    {/* Icon Position (only show if icon is selected) */}
+                    {selectedModule.content.containerSettings?.button?.icon && (
+                      <div className="space-y-2">
+                        <Label className="text-xs text-gray-600">Icon Position</Label>
+                        <div className="grid grid-cols-2 gap-2">
+                          <button
+                            onClick={() =>
+                              updateModuleContent(selectedModule.id, {
+                                containerSettings: {
+                                  ...selectedModule.content.containerSettings,
+                                  button: {
+                                    ...selectedModule.content.containerSettings?.button,
+                                    iconPosition: "left",
+                                  },
+                                },
+                              })
+                            }
+                            className={`h-9 px-3 rounded-md border text-xs flex items-center justify-center gap-2 transition ${
+                              (selectedModule.content.containerSettings?.button?.iconPosition === "left" ||
+                                !selectedModule.content.containerSettings?.button?.iconPosition)
+                                ? "border-primary bg-primary text-white"
+                                : "border-input bg-background hover:bg-muted"
+                            }`}
+                          >
+                            ← Left
+                          </button>
+                          <button
+                            onClick={() =>
+                              updateModuleContent(selectedModule.id, {
+                                containerSettings: {
+                                  ...selectedModule.content.containerSettings,
+                                  button: {
+                                    ...selectedModule.content.containerSettings?.button,
+                                    iconPosition: "right",
+                                  },
+                                },
+                              })
+                            }
+                            className={`h-9 px-3 rounded-md border text-xs flex items-center justify-center gap-2 transition ${
+                              selectedModule.content.containerSettings?.button?.iconPosition === "right"
+                                ? "border-primary bg-primary text-white"
+                                : "border-input bg-background hover:bg-muted"
+                            }`}
+                          >
+                            Right →
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Button Link Type */}
+                    <div className="space-y-2">
+                      <Label className="text-xs text-gray-600">Link Type</Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          onClick={() =>
+                            updateModuleContent(selectedModule.id, {
+                              containerSettings: {
+                                ...selectedModule.content.containerSettings,
+                                button: {
+                                  ...selectedModule.content.containerSettings?.button,
+                                  enabled: true,
+                                  linkType: "internal",
+                                  link: "/",
+                                  target: "_self",
+                                  text: selectedModule.content.containerSettings?.button?.text || "View All",
+                                  style: selectedModule.content.containerSettings?.button?.style || "primary",
+                                  position: selectedModule.content.containerSettings?.button?.position || "right",
+                                },
+                              },
+                            })
+                          }
+                          className={`h-9 px-3 rounded-md border text-xs flex items-center justify-center gap-2 transition ${
+                            (selectedModule.content.containerSettings?.button?.linkType === "internal" ||
+                              (!selectedModule.content.containerSettings?.button?.linkType &&
+                                selectedModule.content.containerSettings?.button?.link?.startsWith("/")))
+                              ? "border-primary bg-primary text-white"
+                              : "border-input bg-background hover:bg-muted"
+                          }`}
+                        >
+                          <span>📄</span> Internal Page
+                        </button>
+                        <button
+                          onClick={() =>
+                            updateModuleContent(selectedModule.id, {
+                              containerSettings: {
+                                ...selectedModule.content.containerSettings,
+                                button: {
+                                  ...selectedModule.content.containerSettings?.button,
+                                  enabled: true,
+                                  linkType: "external",
+                                  link: "https://",
+                                  target: "_blank",
+                                  text: selectedModule.content.containerSettings?.button?.text || "View All",
+                                  style: selectedModule.content.containerSettings?.button?.style || "primary",
+                                  position: selectedModule.content.containerSettings?.button?.position || "right",
+                                },
+                              },
+                            })
+                          }
+                          className={`h-9 px-3 rounded-md border text-xs flex items-center justify-center gap-2 transition ${
+                            selectedModule.content.containerSettings?.button?.linkType === "external"
+                              ? "border-primary bg-primary text-white"
+                              : "border-input bg-background hover:bg-muted"
+                          }`}
+                        >
+                          <span>🔗</span> External URL
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Button Link - Internal Page Selector */}
+                    {(selectedModule.content.containerSettings?.button?.linkType === "internal" ||
+                      (!selectedModule.content.containerSettings?.button?.linkType &&
+                        selectedModule.content.containerSettings?.button?.link?.startsWith("/"))) && (
+                      <div className="space-y-2">
+                        <Label className="text-xs text-gray-600">Select Page</Label>
+                        <select
+                          value={selectedModule.content.containerSettings?.button?.link || "/"}
+                          onChange={(e) =>
+                            updateModuleContent(selectedModule.id, {
+                              containerSettings: {
+                                ...selectedModule.content.containerSettings,
+                                button: {
+                                  ...selectedModule.content.containerSettings?.button,
+                                  enabled: true,
+                                  link: e.target.value,
+                                  linkType: "internal",
+                                  target: "_self",
+                                  text: selectedModule.content.containerSettings?.button?.text || "View All",
+                                  style: selectedModule.content.containerSettings?.button?.style || "primary",
+                                  position: selectedModule.content.containerSettings?.button?.position || "right",
+                                },
+                              },
+                            })
+                          }
+                          className="w-full h-9 px-3 rounded-md border border-input bg-background text-sm"
+                        >
+                          <option value="/">Home</option>
+                          {useWebsiteBuilderStore.getState().pages
+                            .filter((p) => p.isEnabled)
+                            .map((page) => (
+                              <option key={page.id} value={`/${page.slug}`}>
+                                {page.name} (/{page.slug})
+                              </option>
+                            ))}
+                        </select>
+                      </div>
+                    )}
+
+                    {/* Button Link - External URL Input */}
+                    {selectedModule.content.containerSettings?.button?.linkType === "external" && (
+                      <div className="space-y-2">
+                        <Label className="text-xs text-gray-600">External URL</Label>
+                        <Input
+                          type="text"
+                          value={selectedModule.content.containerSettings?.button?.link || ""}
+                          onChange={(e) =>
+                            updateModuleContent(selectedModule.id, {
+                              containerSettings: {
+                                ...selectedModule.content.containerSettings,
+                                button: {
+                                  ...selectedModule.content.containerSettings?.button,
+                                  enabled: true,
+                                  link: e.target.value,
+                                  linkType: "external",
+                                  text: selectedModule.content.containerSettings?.button?.text || "View All",
+                                  style: selectedModule.content.containerSettings?.button?.style || "primary",
+                                  position: selectedModule.content.containerSettings?.button?.position || "right",
+                                },
+                              },
+                            })
+                          }
+                          placeholder="https://example.com"
+                          className="h-9"
+                        />
+                      </div>
+                    )}
+
+                    {/* Button Style */}
+                    <div className="space-y-2">
+                      <Label className="text-xs text-gray-600">Button Style</Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {["primary", "secondary", "outline", "ghost"].map((style) => (
+                          <button
+                            key={style}
+                            onClick={() =>
+                              updateModuleContent(selectedModule.id, {
+                                containerSettings: {
+                                  ...selectedModule.content.containerSettings,
+                                  button: {
+                                    ...selectedModule.content.containerSettings?.button,
+                                    enabled: true,
+                                    style: style as any,
+                                    text: selectedModule.content.containerSettings?.button?.text || "View All",
+                                    position: selectedModule.content.containerSettings?.button?.position || "right",
+                                  },
+                                },
+                              })
+                            }
+                            className={`h-9 px-3 rounded-md border text-xs capitalize transition ${
+                              selectedModule.content.containerSettings?.button?.style === style
+                                ? "border-primary bg-primary text-white"
+                                : "border-input bg-background hover:bg-muted"
+                            }`}
+                          >
+                            {style}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Button Position */}
+                    <div className="space-y-2">
+                      <Label className="text-xs text-gray-600">Button Position</Label>
+                      <div className="grid grid-cols-3 gap-2">
+                        {["left", "center", "right"].map((position) => (
+                          <button
+                            key={position}
+                            onClick={() =>
+                              updateModuleContent(selectedModule.id, {
+                                containerSettings: {
+                                  ...selectedModule.content.containerSettings,
+                                  button: {
+                                    ...selectedModule.content.containerSettings?.button,
+                                    enabled: true,
+                                    position: position as any,
+                                    text: selectedModule.content.containerSettings?.button?.text || "View All",
+                                    style: selectedModule.content.containerSettings?.button?.style || "primary",
+                                  },
+                                },
+                              })
+                            }
+                            className={`h-9 px-3 rounded-md border text-xs capitalize transition ${
+                              selectedModule.content.containerSettings?.button?.position === position
+                                ? "border-primary bg-primary text-white"
+                                : "border-input bg-background hover:bg-muted"
+                            }`}
+                          >
+                            {position}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

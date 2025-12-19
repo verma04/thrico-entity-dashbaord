@@ -1,6 +1,16 @@
 import { ModuleData } from "@/store/useWebsiteBuilderStore";
 import { cn } from "@/lib/utils";
 import { Check, Star, ArrowRight } from "lucide-react";
+import * as LucideIcons from "lucide-react";
+import { ModuleContainer } from "../modules/module-container";
+
+// Helper function to render icon from icon name
+const renderIcon = (iconName: string, className?: string) => {
+  if (!iconName) return null;
+  const IconComponent = (LucideIcons as any)[iconName];
+  if (!IconComponent) return null;
+  return <IconComponent className={className} />;
+};
 
 export const FeatureHighlightsRenderer = ({
   module,
@@ -21,26 +31,26 @@ export const FeatureHighlightsRenderer = ({
       title: "Lightning Fast",
       description:
         "Experience blazing fast performance that keeps your users engaged",
-      icon: "⚡",
+      icon: "Zap",
       highlight: true,
     },
     {
       title: "Secure & Reliable",
       description: "Bank-level security with 99.9% uptime guarantee",
-      icon: "🔒",
+      icon: "Lock",
       highlight: false,
     },
     {
       title: "24/7 Support",
       description: "Round-the-clock support from our expert team",
-      icon: "🎧",
+      icon: "Headphones",
       highlight: false,
     },
     {
       title: "Easy Integration",
       description:
         "Seamlessly integrate with your existing workflow in minutes",
-      icon: "🔗",
+      icon: "Link",
       highlight: true,
     },
   ];
@@ -48,8 +58,7 @@ export const FeatureHighlightsRenderer = ({
   // Grid Highlights Layout
   if (layout === "grid-highlights") {
     return (
-      <section className="py-16 bg-background">
-        <div className={cn("container mx-auto", isMobile && "px-4")}>
+      <ModuleContainer containerSettings={content.containerSettings}>
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">{title}</h2>
             {description && (
@@ -74,7 +83,14 @@ export const FeatureHighlightsRenderer = ({
                     : "bg-white border border-gray-200 hover:border-primary/30"
                 )}
               >
-                <div className="text-4xl mb-4">{feature.icon}</div>
+                <div className={cn(
+                  "w-16 h-16 mx-auto mb-4 rounded-xl flex items-center justify-center transition-all",
+                  feature.highlight
+                    ? "bg-gradient-to-br from-primary to-primary/80 text-white shadow-lg"
+                    : "bg-primary/10 text-primary"
+                )}>
+                  {renderIcon(feature.icon, "w-8 h-8")}
+                </div>
                 <h3 className="font-bold text-lg mb-3">{feature.title}</h3>
                 <p className="text-muted-foreground text-sm">
                   {feature.description}
@@ -89,16 +105,16 @@ export const FeatureHighlightsRenderer = ({
               </div>
             ))}
           </div>
-        </div>
-      </section>
+      </ModuleContainer>
     );
   }
 
   // List Highlights Layout
   if (layout === "list-highlights") {
     return (
-      <section className="py-16 bg-slate-50">
-        <div className={cn("container mx-auto max-w-4xl", isMobile && "px-4")}>
+      <ModuleContainer 
+        containerSettings={{...content.containerSettings, background: content.containerSettings?.backgroundColor || "bg-slate-50"}}
+      >
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">{title}</h2>
             {description && (
@@ -116,9 +132,15 @@ export const FeatureHighlightsRenderer = ({
                     : "border border-gray-200 hover:shadow-md"
                 )}
               >
+
                 <div className="flex-shrink-0">
-                  <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center text-2xl">
-                    {feature.icon}
+                  <div className={cn(
+                    "w-16 h-16 rounded-full flex items-center justify-center transition-all",
+                    feature.highlight
+                      ? "bg-gradient-to-br from-primary to-primary/80 text-white shadow-md"
+                      : "bg-primary/10 text-primary"
+                  )}>
+                    {renderIcon(feature.icon, "w-7 h-7")}
                   </div>
                 </div>
                 <div className="flex-1">
@@ -136,16 +158,16 @@ export const FeatureHighlightsRenderer = ({
               </div>
             ))}
           </div>
-        </div>
-      </section>
+      </ModuleContainer>
     );
   }
 
   // Cards Highlights Layout
   if (layout === "cards-highlights") {
     return (
-      <section className="py-16 bg-background">
-        <div className={cn("container mx-auto", isMobile && "px-4")}>
+      <ModuleContainer 
+        containerSettings={{...content.containerSettings, background: content.containerSettings?.backgroundColor || "bg-slate-50"}}
+      >
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">{title}</h2>
             {description && (
@@ -172,8 +194,13 @@ export const FeatureHighlightsRenderer = ({
                     </div>
                   </div>
                 )}
-                <div className="text-5xl mb-6 group-hover:scale-110 transition-transform">
-                  {feature.icon}
+                <div className={cn(
+                  "w-20 h-20 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-all duration-300",
+                  feature.highlight
+                    ? "bg-gradient-to-br from-primary via-primary to-primary/90 text-white shadow-lg"
+                    : "bg-gradient-to-br from-primary/10 to-primary/5 text-primary"
+                )}>
+                  {renderIcon(feature.icon, "w-10 h-10")}
                 </div>
                 <h3 className="font-bold text-xl mb-4">{feature.title}</h3>
                 <p className="text-muted-foreground leading-relaxed">
@@ -186,16 +213,16 @@ export const FeatureHighlightsRenderer = ({
               </div>
             ))}
           </div>
-        </div>
-      </section>
+      </ModuleContainer>
     );
   }
 
   // Icon Highlights Layout
   if (layout === "icon-highlights") {
     return (
-      <section className="py-16 bg-slate-50">
-        <div className={cn("container mx-auto", isMobile && "px-4")}>
+      <ModuleContainer 
+        containerSettings={{...content.containerSettings, background: content.containerSettings?.backgroundColor || "bg-slate-50"}}
+      >
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">{title}</h2>
             {description && (
@@ -214,13 +241,13 @@ export const FeatureHighlightsRenderer = ({
               <div key={idx} className="text-center group">
                 <div
                   className={cn(
-                    "w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center text-3xl transition-all duration-300",
+                    "w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center transition-all duration-300 group-hover:scale-110",
                     feature.highlight
-                      ? "bg-gradient-to-br from-primary to-primary/80 text-white shadow-lg"
-                      : "bg-white border-2 border-gray-200 group-hover:border-primary"
+                      ? "bg-gradient-to-br from-primary via-primary to-primary/90 text-white shadow-xl shadow-primary/30"
+                      : "bg-gradient-to-br from-primary/10 to-primary/5 text-primary border-2 border-transparent group-hover:border-primary/30"
                   )}
                 >
-                  {feature.icon}
+                  {renderIcon(feature.icon, "w-9 h-9")}
                 </div>
                 <h3 className="font-bold text-lg mb-3">{feature.title}</h3>
                 <p className="text-muted-foreground text-sm leading-relaxed">
@@ -234,15 +261,13 @@ export const FeatureHighlightsRenderer = ({
               </div>
             ))}
           </div>
-        </div>
-      </section>
+      </ModuleContainer>
     );
   }
 
   // Default Simple Highlights
   return (
-    <section className="py-16 bg-background">
-      <div className={cn("container mx-auto", isMobile && "px-4")}>
+    <ModuleContainer containerSettings={content.containerSettings}>
         <div className="text-center mb-12">
           <h2 className="text-2xl font-bold mb-4">{title}</h2>
           {description && (
@@ -256,8 +281,10 @@ export const FeatureHighlightsRenderer = ({
           )}
         >
           {features.map((feature: any, idx: number) => (
-            <div key={idx} className="text-center p-4">
-              <div className="text-3xl mb-3">{feature.icon}</div>
+            <div key={idx} className="text-center p-4 group">
+              <div className="w-14 h-14 mx-auto mb-3 rounded-lg bg-primary/10 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all duration-300">
+                {renderIcon(feature.icon, "w-7 h-7")}
+              </div>
               <h3 className="font-semibold mb-2">{feature.title}</h3>
               <p className="text-sm text-muted-foreground">
                 {feature.description}
@@ -265,7 +292,6 @@ export const FeatureHighlightsRenderer = ({
             </div>
           ))}
         </div>
-      </div>
-    </section>
+      </ModuleContainer>
   );
 };

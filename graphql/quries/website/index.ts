@@ -22,6 +22,8 @@ export const GET_WEBSITE = gql`
         isEnabled
         content
         updatedAt
+        name 
+        type
       }
 
       footer {
@@ -30,6 +32,8 @@ export const GET_WEBSITE = gql`
         isEnabled
         content
         updatedAt
+         name 
+        type
       }
 
       pages {
@@ -40,8 +44,20 @@ export const GET_WEBSITE = gql`
         order
         createdAt
         updatedAt
-
-
+seo {
+        title
+        description
+        keywords
+      }
+        modules {
+          id
+          type
+          name
+          layout
+          content
+          isEnabled
+          order
+        }
       }
     }
   }
@@ -59,12 +75,16 @@ export const GET_WEBSITE_BY_SLUG = gql`
         layout
         isEnabled
         content
+         name 
+        type
       }
 
       footer {
         layout
         isEnabled
         content
+         name 
+        type
       }
 
       pages {
@@ -73,6 +93,11 @@ export const GET_WEBSITE_BY_SLUG = gql`
         slug
         isEnabled
         order
+        seo {
+        title
+        description
+        keywords
+      }
         modules {
           id
           type
@@ -95,6 +120,11 @@ export const GET_PAGE = gql`
       slug
       isEnabled
       order
+      seo {
+        title
+        description
+        keywords
+      }
       modules {
         id
         type

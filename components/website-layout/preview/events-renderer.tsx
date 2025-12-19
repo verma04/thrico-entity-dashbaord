@@ -1,6 +1,7 @@
 import { ModuleData } from "@/store/useWebsiteBuilderStore";
 import { cn } from "@/lib/utils";
 import { Calendar, MapPin, Clock } from "lucide-react";
+import { ModuleContainer } from "../modules/module-container";
 
 export const EventsRenderer = ({
   module,
@@ -49,7 +50,7 @@ export const EventsRenderer = ({
   // Card Events Layout
   if (layout === "card-events") {
     return (
-      <section className="py-16 bg-background">
+      <ModuleContainer containerSettings={content.containerSettings}>
         <div className={cn("container mx-auto", isMobile && "px-4")}>
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">{title}</h2>
@@ -113,14 +114,14 @@ export const EventsRenderer = ({
             ))}
           </div>
         </div>
-      </section>
+      </ModuleContainer>
     );
   }
 
   // List Events Layout
   if (layout === "list-events") {
     return (
-      <section className="py-16 bg-slate-50">
+      <ModuleContainer containerSettings={content.containerSettings}>
         <div className={cn("container mx-auto max-w-4xl", isMobile && "px-4")}>
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">{title}</h2>
@@ -205,14 +206,14 @@ export const EventsRenderer = ({
             ))}
           </div>
         </div>
-      </section>
+      </ModuleContainer>
     );
   }
 
   // Timeline Events Layout
   if (layout === "timeline-events") {
     return (
-      <section className="py-16 bg-background">
+      <ModuleContainer containerSettings={content.containerSettings}>
         <div className={cn("container mx-auto max-w-4xl", isMobile && "px-4")}>
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">{title}</h2>
@@ -260,14 +261,14 @@ export const EventsRenderer = ({
             </div>
           </div>
         </div>
-      </section>
+      </ModuleContainer>
     );
   }
 
   // Calendar Events Layout
   if (layout === "calendar-events") {
     return (
-      <section className="py-16 bg-slate-50">
+      <ModuleContainer containerSettings={content.containerSettings}>
         <div className={cn("container mx-auto", isMobile && "px-4")}>
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">{title}</h2>
@@ -338,13 +339,13 @@ export const EventsRenderer = ({
             </div>
           </div>
         </div>
-      </section>
+      </ModuleContainer>
     );
   }
 
   // Default Simple Events
   return (
-    <section className="py-16 bg-background">
+    <ModuleContainer containerSettings={content.containerSettings}>
       <div className={cn("container mx-auto", isMobile && "px-4")}>
         <div className="text-center mb-12">
           <h2 className="text-2xl font-bold mb-4">{title}</h2>
@@ -368,6 +369,6 @@ export const EventsRenderer = ({
           ))}
         </div>
       </div>
-    </section>
+    </ModuleContainer>
   );
 };

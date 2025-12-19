@@ -28,7 +28,7 @@ import { ContactRenderer } from "./preview/contact-renderer";
 import { PrivacyPolicyRenderer } from "./preview/privacypolicy-renderer";
 import { TeamMembersRenderer } from "./preview/team-members-renderer";
 import { TermsRenderer } from "./preview/terms-renderer";
-import { FaqRenderer } from "./preview/FaqRenderer";
+import { FaqRenderer } from "./preview/faq-renderer";
 import { ContentSectionRenderer } from "./preview/content-section-renderer";
 import { CtaBannerRenderer } from "./preview/cta-banner-renderer";
 import { StatsRenderer } from "./preview/stats-renderer";
@@ -423,7 +423,10 @@ const LivePreview = () => {
         {globalHeader.isEnabled && (
           <ModuleRenderer
             key="global-header"
-            module={globalHeader}
+            module={{
+              ...globalHeader,
+              type: "navbar",
+            }}
             theme={currentTheme}
             previewDevice={previewDevice}
             isSelected={selectedModuleId === globalHeader.id}
@@ -447,7 +450,10 @@ const LivePreview = () => {
         {globalFooter.isEnabled && (
           <ModuleRenderer
             key="global-footer"
-            module={globalFooter}
+            module={{
+              ...globalFooter,
+              type: "footer",
+            }}
             theme={currentTheme}
             previewDevice={previewDevice}
             isSelected={selectedModuleId === globalFooter.id}

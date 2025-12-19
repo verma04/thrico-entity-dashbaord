@@ -3,6 +3,7 @@ import { ModuleData } from "@/store/useWebsiteBuilderStore";
 import { cn } from "@/lib/utils";
 import { DynamicIcon } from "./DynamicIcon";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ModuleContainer } from "../modules/module-container";
 
 interface TeamMembersRendererProps {
   module: ModuleData;
@@ -36,17 +37,15 @@ export const TeamMembersRenderer = ({
   };
 
   return (
-    <div className="py-16 px-4 sm:px-6 md:px-8 bg-background">
-      <div className="max-w-7xl mx-auto">
-        
-        {/* Header (Common) */}
-        <div className="text-center space-y-4 mb-12">
+    <ModuleContainer containerSettings={content.containerSettings}>
+      {/* Header (Common) */}
+      <div className="text-center space-y-4 mb-12">
             <h1 className="text-4xl font-bold tracking-tight">{content.title || "Meet Our Team"}</h1>
-            <p className="text-xl text-muted-foreground">{content.subtitle || "The people behind the mission."}</p>
-        </div>
+          <p className="text-xl text-muted-foreground">{content.subtitle || "The people behind the mission."}</p>
+      </div>
 
-        {/* 1. GRID PROFILES */}
-        {layout === "grid-profiles" && (
+      {/* 1. GRID PROFILES */}
+      {layout === "grid-profiles" && (
             <div className={cn("grid gap-8", !isMobile && "grid-cols-2 lg:grid-cols-4")}>
                 {members.map((member: any, idx: number) => (
                     <div key={idx} className="group relative bg-card border rounded-2xl overflow-hidden hover:shadow-lg transition-all">
@@ -157,8 +156,6 @@ export const TeamMembersRenderer = ({
                 ))}
             </div>
         )}
-
-      </div>
-    </div>
+    </ModuleContainer>
   );
 };

@@ -12,11 +12,11 @@ export const PlanCardSkeleton = () => {
           <Skeleton className="h-6 w-32 ml-4" />
         </div>
       </div>
-      <div className="flex flex-wrap justify-center gap-8">
+    <div className="flex justify-center gap-2 ">
         {[1, 2, 3].map((index) => (
           <div
             key={index}
-            className="relative w-full max-w-xs bg-background border rounded-xl shadow-sm flex flex-col p-6"
+            className="relative w-full sm:max-w-xs bg-background border rounded-xl shadow-sm flex flex-col p-6"
           >
             <Skeleton className="absolute top-2 right-2 h-6 w-20" />
 

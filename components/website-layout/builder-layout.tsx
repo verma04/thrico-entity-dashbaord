@@ -38,6 +38,16 @@ const BuilderLayout = () => {
   const [newPageSlug, setNewPageSlug] = React.useState("");
   const { isPremium } = useIsPremium();
 
+
+
+  
+  // Set currentPageId to first page if not set
+  React.useEffect(() => {
+    if (!currentPageId && pages.length > 0) {
+      setCurrentPage(pages[0].id);
+    }
+  }, [currentPageId, pages, setCurrentPage]);
+
   const handleAddPage = () => {
     if (!newPageName || !newPageSlug) return;
     addPage(newPageName, newPageSlug);
@@ -111,7 +121,9 @@ const BuilderLayout = () => {
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p className="text-xs">Upgrade to create additional pages</p>
+                      <p className="text-xs">
+                        Upgrade to create additional pages
+                      </p>
                     </TooltipContent>
                   </Tooltip>
                 )}
@@ -164,7 +176,10 @@ const BuilderLayout = () => {
                     >
                       Cancel
                     </Button>
-                    <Button onClick={handleAddPage} disabled={!newPageName || !newPageSlug}>
+                    <Button
+                      onClick={handleAddPage}
+                      disabled={!newPageName || !newPageSlug}
+                    >
                       Create Page
                     </Button>
                   </DialogFooter>

@@ -1,8 +1,7 @@
 import React from "react";
-import Reports from "../../../../components/reports/Reports";
 
 const page = () => {
-  return <Reports />;
+  return <></>;
 };
 
 export default page;

@@ -1,0 +1,11 @@
+services:
+  thrico-entity-admin:
+    container_name: thrico-entity-admin
+    image: thrico-entity-admin:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    # assuming your app runs on port 3000 inside the container
+    environment:
+      - NODE_ENV=production

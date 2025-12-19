@@ -152,7 +152,17 @@ export const ImageUploadWithCrop = ({
   const onImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
     const { width, height } = e.currentTarget;
     const aspect = aspectRatio || width / height;
-    setCrop(centerAspectCrop(width, height, aspect));
+    const initialCrop = centerAspectCrop(width, height, aspect);
+    setCrop(initialCrop);
+    
+    // Also set completedCrop so the image can be saved even without manual interaction
+    setCompletedCrop({
+      unit: 'px',
+      x: (initialCrop.x / 100) * width,
+      y: (initialCrop.y / 100) * height,
+      width: (initialCrop.width / 100) * width,
+      height: (initialCrop.height / 100) * height,
+    });
   };
 
   const getCroppedImg = async (): Promise<Blob | null> => {

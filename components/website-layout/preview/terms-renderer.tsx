@@ -3,6 +3,7 @@ import { ModuleData } from "@/store/useWebsiteBuilderStore";
 import { cn } from "@/lib/utils";
 import { DynamicIcon } from "./DynamicIcon";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { ModuleContainer } from "../modules/module-container";
 
 interface TermsRendererProps {
   module: ModuleData;
@@ -22,11 +23,9 @@ export const TermsRenderer = ({
   ];
 
   return (
-    <div className="py-16 px-4 sm:px-6 md:px-8 bg-background">
-      <div className="max-w-7xl mx-auto">
-        
-        {/* 1. SIMPLE TERMS */}
-        {layout === "simple-terms" && (
+    <ModuleContainer containerSettings={content.containerSettings}>
+      {/* 1. SIMPLE TERMS */}
+      {layout === "simple-terms" && (
           <div className="max-w-3xl mx-auto space-y-12">
             <div className="border-b pb-8">
                 <h1 className="text-4xl font-extrabold tracking-tight mb-4">{content.title || "Terms of Service"}</h1>
@@ -44,10 +43,10 @@ export const TermsRenderer = ({
               ))}
             </div>
           </div>
-        )}
+      )}
 
-        {/* 2. STRUCTURED AGREEMENT */}
-        {layout === "structured-agreement" && (
+      {/* 2. STRUCTURED AGREEMENT */}
+      {layout === "structured-agreement" && (
             <div className={cn("flex gap-12", isMobile && "flex-col")}>
                 {/* TOC Sidebar */}
                 {!isMobile && (
@@ -108,9 +107,7 @@ export const TermsRenderer = ({
                 </div>
              </div>
         )}
-
-      </div>
-    </div>
+    </ModuleContainer>
   );
 };
 

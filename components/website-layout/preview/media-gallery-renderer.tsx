@@ -1,5 +1,6 @@
 import { ModuleData } from "@/store/useWebsiteBuilderStore";
 import { cn } from "@/lib/utils";
+import { ModuleContainer } from "../modules/module-container";
 
 export const MediaGalleryRenderer = ({
   module,
@@ -25,7 +26,7 @@ export const MediaGalleryRenderer = ({
   // Grid Gallery
   if (layout === "grid-gallery") {
     return (
-      <section className="py-16 bg-slate-50">
+      <ModuleContainer containerSettings={content.containerSettings}>
         <div className={cn("container mx-auto", isMobile && "px-4")}>
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">{title}</h2>
@@ -63,14 +64,14 @@ export const MediaGalleryRenderer = ({
             ))}
           </div>
         </div>
-      </section>
+      </ModuleContainer>
     );
   }
 
   // Masonry Gallery
   if (layout === "masonry-gallery") {
     return (
-      <section className="py-16 bg-background">
+      <ModuleContainer containerSettings={content.containerSettings}>
         <div className={cn("container mx-auto", isMobile && "px-4")}>
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">{title}</h2>
@@ -109,14 +110,14 @@ export const MediaGalleryRenderer = ({
             ))}
           </div>
         </div>
-      </section>
+      </ModuleContainer>
     );
   }
 
   // Lightbox Gallery
   if (layout === "lightbox-gallery") {
     return (
-      <section className="py-16 bg-slate-50">
+      <ModuleContainer containerSettings={content.containerSettings}>
         <div className={cn("container mx-auto", isMobile && "px-4")}>
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">{title}</h2>
@@ -170,14 +171,14 @@ export const MediaGalleryRenderer = ({
             ))}
           </div>
         </div>
-      </section>
+      </ModuleContainer>
     );
   }
 
   // Carousel Gallery
   if (layout === "carousel-gallery") {
     return (
-      <section className="py-16 bg-background">
+      <ModuleContainer containerSettings={content.containerSettings}>
         <div className={cn("container mx-auto", isMobile && "px-4")}>
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">{title}</h2>
@@ -216,13 +217,13 @@ export const MediaGalleryRenderer = ({
             </div>
           </div>
         </div>
-      </section>
+      </ModuleContainer>
     );
   }
 
   // Default Grid Gallery
   return (
-    <section className="py-16 bg-slate-50">
+    <ModuleContainer containerSettings={content.containerSettings}>
       <div className={cn("container mx-auto", isMobile && "px-4")}>
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold">{title}</h2>
@@ -241,6 +242,6 @@ export const MediaGalleryRenderer = ({
           ))}
         </div>
       </div>
-    </section>
+    </ModuleContainer>
   );
 };

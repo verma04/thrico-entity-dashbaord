@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { ModuleData } from "@/store/useWebsiteBuilderStore";
 import { cn } from "@/lib/utils";
 import { DynamicIcon } from "./DynamicIcon";
+import { ModuleContainer } from "../modules/module-container";
 
 interface PrivacyPolicyRendererProps {
   module: ModuleData;
@@ -23,11 +24,9 @@ export const PrivacyPolicyRenderer = ({
   ];
 
   return (
-    <div className="py-16 px-4 sm:px-6 md:px-8 bg-background">
-      <div className="max-w-7xl mx-auto">
-        
-        {/* 1. SIMPLE PRIVACY */}
-        {layout === "simple-privacy" && (
+    <ModuleContainer containerSettings={content.containerSettings}>
+      {/* 1. SIMPLE PRIVACY */}
+      {layout === "simple-privacy" && (
           <div className="max-w-3xl mx-auto space-y-12">
             <div className="text-center space-y-4">
               <h1 className="text-4xl font-bold tracking-tight">{content.title || "Privacy Policy"}</h1>
@@ -45,10 +44,10 @@ export const PrivacyPolicyRenderer = ({
               ))}
             </div>
           </div>
-        )}
+      )}
 
-        {/* 2. LEGAL DOCUMENT */}
-        {layout === "legal-document" && (
+      {/* 2. LEGAL DOCUMENT */}
+      {layout === "legal-document" && (
           <div className={cn("grid gap-12", !isMobile && "grid-cols-[250px_1fr]")}>
             {/* Sidebar Navigation */}
             <div className={cn("space-y-6", isMobile && "hidden")}>
@@ -137,11 +136,9 @@ export const PrivacyPolicyRenderer = ({
                     </div>
                   </div>
                 </div>
-             </div>
-          </div>
-        )}
-
-      </div>
-    </div>
+              </div>
+           </div>
+      )}
+    </ModuleContainer>
   );
 };

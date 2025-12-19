@@ -1,5 +1,6 @@
 import { ModuleData } from "@/store/useWebsiteBuilderStore";
 import { cn } from "@/lib/utils";
+import { ModuleContainer } from "../modules/module-container";
 
 export const TimelineRenderer = ({
   module,
@@ -39,7 +40,7 @@ export const TimelineRenderer = ({
   // Vertical Timeline
   if (layout === "vertical-timeline") {
     return (
-      <section className="py-16 bg-slate-50">
+      <ModuleContainer containerSettings={content.containerSettings}>
         <div className={cn("container mx-auto", isMobile && "px-4")}>
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">{title}</h2>
@@ -67,14 +68,14 @@ export const TimelineRenderer = ({
             ))}
           </div>
         </div>
-      </section>
+      </ModuleContainer>
     );
   }
 
   // Horizontal Timeline
   if (layout === "horizontal-timeline") {
     return (
-      <section className="py-16 bg-background">
+      <ModuleContainer containerSettings={content.containerSettings}>
         <div
           className={cn("container mx-auto text-center", isMobile && "px-4")}
         >
@@ -117,14 +118,14 @@ export const TimelineRenderer = ({
             ))}
           </div>
         </div>
-      </section>
+      </ModuleContainer>
     );
   }
 
   // Card Timeline
   if (layout === "card-timeline") {
     return (
-      <section className="py-16 bg-slate-50">
+      <ModuleContainer containerSettings={content.containerSettings}>
         <div className={cn("container mx-auto", isMobile && "px-4")}>
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">{title}</h2>
@@ -157,14 +158,14 @@ export const TimelineRenderer = ({
             ))}
           </div>
         </div>
-      </section>
+      </ModuleContainer>
     );
   }
 
   // Zigzag Timeline
   if (layout === "zigzag-timeline") {
     return (
-      <section className="py-16 bg-background">
+      <ModuleContainer containerSettings={content.containerSettings}>
         <div className={cn("container mx-auto", isMobile && "px-4")}>
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">{title}</h2>
@@ -211,13 +212,13 @@ export const TimelineRenderer = ({
             ))}
           </div>
         </div>
-      </section>
+      </ModuleContainer>
     );
   }
 
   // Minimal Timeline (default)
   return (
-    <section className="py-16 bg-slate-50">
+    <ModuleContainer containerSettings={content.containerSettings}>
       <div className={cn("container mx-auto", isMobile && "px-4")}>
         <div className="text-center mb-12">
           <h2 className="text-2xl font-bold">{title}</h2>
@@ -242,6 +243,6 @@ export const TimelineRenderer = ({
           ))}
         </div>
       </div>
-    </section>
+    </ModuleContainer>
   );
 };

@@ -146,8 +146,8 @@ export default function SidebarLayout({
             <SidebarGroup>
               <div className="flex items-center justify-between px-2 mb-2">
                 <div 
-                  className="flex items-center gap-2 cursor-pointer flex-1"
-                  onClick={() => setExtendedCollapsed(!extendedCollapsed)}
+                  className="flex items-center gap-2  flex-1"
+                  // onClick={() => setExtendedCollapsed(!extendedCollapsed)}
                 >
                   <SidebarGroupLabel className="cursor-pointer">
                     Features
@@ -155,11 +155,11 @@ export default function SidebarLayout({
                   <Badge variant="secondary" className="text-[10px] h-5">
                     {filteredExtendedItems.length}
                   </Badge>
-                  <ChevronRight
+                  {/* <ChevronRight
                     className={`h-3 w-3 transition-transform ${
                       !extendedCollapsed ? "rotate-90" : ""
                     }`}
-                  />
+                  /> */}
                 </div>
               </div>
 

@@ -1,6 +1,7 @@
 import { ModuleData } from "@/store/useWebsiteBuilderStore";
 import { cn } from "@/lib/utils";
 import { DynamicIcon } from "./DynamicIcon";
+import { ModuleContainer } from "../modules/module-container";
 
 interface AboutRendererProps {
   module: ModuleData;
@@ -10,10 +11,10 @@ export const AboutRenderer = ({ module }: AboutRendererProps) => {
   const { layout, content } = module;
 
   return (
-    <div className="py-16 px-4 sm:px-6 md:px-8">
-      <div className="max-w-7xl mx-auto">
-        {/* 1. STORY & VISION */}
-        {layout === "story-vision" && (
+    <>
+      {/* 1. STORY & VISION */}
+      {layout === "story-vision" && (
+        <ModuleContainer containerSettings={content.containerSettings}>
           <div className="space-y-16">
             {/* Hero Section */}
             <div className="text-center max-w-4xl mx-auto space-y-6">
@@ -77,10 +78,12 @@ export const AboutRenderer = ({ module }: AboutRendererProps) => {
               </p>
             </div>
           </div>
-        )}
+        </ModuleContainer>
+      )}
 
-        {/* 2. MISSION & VALUES */}
-        {layout === "mission-values" && (
+      {/* 2. MISSION & VALUES */}
+      {layout === "mission-values" && (
+        <ModuleContainer containerSettings={content.containerSettings}>
           <div className="space-y-16">
             {/* Mission Statement */}
             <div className="text-center max-w-4xl mx-auto space-y-6">
@@ -159,10 +162,12 @@ export const AboutRenderer = ({ module }: AboutRendererProps) => {
               </div>
             </div>
           </div>
-        )}
+        </ModuleContainer>
+      )}
 
-        {/* 3. FOUNDER'S MESSAGE */}
-        {layout === "founder-message" && (
+      {/* 3. FOUNDER'S MESSAGE */}
+      {layout === "founder-message" && (
+        <ModuleContainer containerSettings={content.containerSettings}>
           <div className="max-w-5xl mx-auto space-y-12">
             <div className="text-center space-y-4">
               <h1 className="text-4xl sm:text-5xl font-bold">
@@ -225,10 +230,12 @@ export const AboutRenderer = ({ module }: AboutRendererProps) => {
               </div>
             </div>
           </div>
-        )}
+        </ModuleContainer>
+      )}
 
-        {/* 4. IMPACT & GROWTH */}
-        {layout === "impact-growth" && (
+      {/* 4. IMPACT & GROWTH */}
+      {layout === "impact-growth" && (
+        <ModuleContainer containerSettings={content.containerSettings}>
           <div className="space-y-16">
             <div className="text-center max-w-4xl mx-auto space-y-6">
               <h1 className="text-4xl sm:text-5xl font-bold">
@@ -338,10 +345,12 @@ export const AboutRenderer = ({ module }: AboutRendererProps) => {
               </div>
             </div>
           </div>
-        )}
+        </ModuleContainer>
+      )}
 
-        {/* 5. SIMPLE OVERVIEW */}
-        {layout === "simple-overview" && (
+      {/* 5. SIMPLE OVERVIEW */}
+      {layout === "simple-overview" && (
+        <ModuleContainer containerSettings={content.containerSettings}>
           <div className="max-w-4xl mx-auto space-y-12">
             <div className="text-center space-y-6">
               <h1 className="text-4xl sm:text-5xl font-bold">
@@ -444,8 +453,8 @@ export const AboutRenderer = ({ module }: AboutRendererProps) => {
               </a>
             </div>
           </div>
-        )}
-      </div>
-    </div>
+        </ModuleContainer>
+      )}
+    </>
   );
 };
