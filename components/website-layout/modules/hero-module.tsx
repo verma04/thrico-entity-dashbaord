@@ -8,11 +8,7 @@ import {
   HeroBentoGrid,
   HeroNewsletter,
 } from "../modules";
-import {
-  HeroAppShowcase,
-  HeroSingleImage,
-  HeroSplit,
-} from "../hero";
+import { HeroAppShowcase, HeroSingleImage, HeroSplit } from "../hero";
 
 interface HeroModuleProps {
   module: ModuleData;
@@ -32,7 +28,8 @@ export function HeroModule({ module, previewDevice }: HeroModuleProps) {
           "relative min-h-[500px] flex items-center justify-center text-white overflow-hidden",
         layout === "saas-modern" && "bg-white py-24",
         layout === "bento-grid" && "bg-slate-50 py-20",
-        layout === "split" && "p-12 flex flex-col justify-center min-h-[300px] flex-row items-center gap-8 bg-white",
+        layout === "split" &&
+          "p-12 flex flex-col justify-center min-h-[300px] flex-row items-center gap-8 bg-white",
         layout === "newsletter-focus" &&
           "bg-gradient-to-br from-indigo-50 via-white to-purple-50 py-32 flex items-center justify-center",
         layout === "app-showcase" && "bg-white py-20"
@@ -55,7 +52,7 @@ export function HeroModule({ module, previewDevice }: HeroModuleProps) {
 
       {/* 6. NEWSLETTER FOCUS */}
       {layout === "newsletter-focus" && <HeroNewsletter content={content} />}
-        {layout === "single-image" && <HeroSingleImage content={content} />}
+      {layout === "single-image" && <HeroSingleImage content={content} />}
 
       {/* 7. APP SHOWCASE */}
       {layout === "app-showcase" && <HeroAppShowcase content={content} />}
