@@ -26,7 +26,7 @@ import { Badge } from "@/components/ui/badge";
 import { discussionForm } from "../ts-types";
 
 import Vote from "./votes/forum-vote";
-import Comment from "../forum-comments/forum-comment";
+// import Comment from "../forum-comments/forum-comment";
 // import PostComment from "../forum-comments/forum-post-comment";
 import { useGetEntity } from "@/graphql/actions";
 
@@ -200,7 +200,7 @@ const Details = ({
             {/* Comment Section */}
             {/* <PostComment id={selectedForum?.id} /> */}
 
-            {selectedForum?.id && <Comment id={selectedForum?.id} />}
+            {/* {selectedForum?.id && <Comment id={selectedForum?.id} />} */}
           </div>
         )}
       </SheetContent>
