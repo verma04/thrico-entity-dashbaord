@@ -26,8 +26,8 @@ import { Badge } from "@/components/ui/badge";
 import { discussionForm } from "../ts-types";
 
 import Vote from "./votes/forum-vote";
-import Comment from "./comments/forum-comment";
-import PostComment from "./comments/forum-post-comment";
+import Comment from "../comments/forum-comment";
+import PostComment from "../comments/forum-post-comment";
 import { useGetEntity } from "@/graphql/actions";
 
 const Details = ({
