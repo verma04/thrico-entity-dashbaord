@@ -52,7 +52,7 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              {table.getHeaderGroups().map((headerGroup) => (
+              {table?.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id} className="border-b border-border bg-muted/40">
                   {headerGroup.headers.map((header) => (
                     <th key={header.id} className="px-6 py-4 text-left font-semibold text-foreground">
@@ -84,7 +84,7 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
               ))}
             </thead>
             <tbody>
-              {table.getRowModel().rows.map((row) => (
+              {table?.getRowModel()?.rows.map((row) => (
                 <tr key={row.id} className="border-b border-border hover:bg-muted/30 transition-colors">
                   {row.getVisibleCells().map((cell) => (
                     <td key={cell.id} className="px-6 py-4">

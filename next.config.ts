@@ -2,7 +2,12 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    domains: ["cdn.thrico.network"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "cdn.thrico.network",
+      },
+    ],
   },
   output: "standalone",
 

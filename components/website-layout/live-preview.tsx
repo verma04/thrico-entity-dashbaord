@@ -56,6 +56,7 @@ import { CalloutModule } from "./modules/callout-module";
 
 // Information Modules
 import { AnnouncementModule } from "./modules/announcement-module";
+import { AnnouncementBarModule } from "./modules/announcement-bar-module";
 import { SitemapModule } from "./modules/sitemap-module";
 import { GuidelinesModule } from "./modules/guidelines-module";
 
@@ -212,6 +213,9 @@ const ModuleRenderer: React.FC<ModuleRendererProps> = ({
     announcement: (
       <AnnouncementModule module={module} previewDevice={previewDevice} />
     ),
+    "announcement-bar": (
+      <AnnouncementBarModule module={module} previewDevice={previewDevice} />
+    ),
     sitemap: <SitemapModule module={module} previewDevice={previewDevice} />,
     guidelines: (
       <GuidelinesModule module={module} previewDevice={previewDevice} />
@@ -328,6 +332,11 @@ const ModuleRenderer: React.FC<ModuleRendererProps> = ({
     ),
     timeline: (
       <TimelineRenderer module={module} previewDevice={previewDevice} />
+    ),
+    "results-dashboard": (
+      <div className="p-12 bg-gray-100 border-2 border-dashed border-gray-300 text-center">
+        <p className="text-gray-500">Results Dashboard - Coming Soon</p>
+      </div>
     ),
   };
 

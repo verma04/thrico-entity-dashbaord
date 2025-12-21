@@ -351,6 +351,14 @@ const AVAILABLE_MODULES: {
     icon: Heart,
     category: "Marketing & Conversion",
   },
+  {
+    type: "announcement-bar",
+    name: "Announcement Bar",
+    description: "Top notification bar for alerts, promotions, and important messages.",
+    defaultLayout: "info-message",
+    icon: Bell,
+    category: "Marketing & Conversion",
+  },
 
   // Data & Analytics
   {

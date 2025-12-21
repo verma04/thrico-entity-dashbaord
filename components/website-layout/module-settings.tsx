@@ -1,21 +1,8 @@
-import {
-  LayoutType,
-  ModuleData,
-  ModuleType,
-  ThemeType,
-  useWebsiteBuilderStore,
-  MenuItem,
-} from "@/store/useWebsiteBuilderStore";
+import { LayoutType, ModuleType, ThemeType, useWebsiteBuilderStore, MenuItem } from "@/store/useWebsiteBuilderStore";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import { Button } from "@/components/ui/button";
@@ -38,6 +25,7 @@ import FeatureHighlightsSettings from "./settings/feature-highlights-settings";
 import MediaGallerySettings from "./settings/media-gallery-settings";
 import BlogSettings from "./settings/blog-settings";
 import { useEffect } from "react";
+import React from "react";
 import { HeroSettings } from "./settings/hero-settings";
 import { PrivacyPolicySettings } from "./settings/privacy-policy-settings";
 import { TeamSettings } from "./settings/team-settings";
@@ -80,6 +68,7 @@ import { CalloutSettings } from "./settings/callout-settings";
 
 // Information Module Settings
 import { AnnouncementSettings } from "./settings/announcement-settings";
+import { AnnouncementBarSettings } from "./settings/announcement-bar-settings";
 import { SitemapSettings } from "./settings/sitemap-settings";
 import { GuidelinesSettings } from "./settings/guidelines-settings";
 
@@ -415,6 +404,19 @@ const getAvailableLayouts = (
   if (moduleType === "social-feed") {
     return ["feed-grid", "timeline-feed", "masonry-posts", "platform-tabs"];
   }
+  if (moduleType === "announcement-bar") {
+    return [
+      "info-message",
+      "warning-alert",
+      "success-message",
+      "error-alert",
+      "promotion-banner",
+      "maintenance-notice",
+      "dismissible-bar",
+      "countdown-alert",
+      "link-notification",
+    ];
+  }
   if (moduleType === "donation") {
     return [
       "donation-simple",
@@ -446,6 +448,8 @@ const ModuleSettings = () => {
     globalHeader,
     globalFooter,
   } = useWebsiteBuilderStore();
+
+  const [isExpanded, setIsExpanded] = React.useState(false);
 
   // Get current page's modules
   const currentPage = pages.find((p) => p.id === currentPageId);
@@ -489,7 +493,10 @@ const ModuleSettings = () => {
   
 
   return (
-    <div className="flex flex-col h-full bg-card border-l w-full">
+    <div className={cn(
+      "flex flex-col h-full bg-card border-l transition-all duration-300",
+      isExpanded ? "w-full md:w-[800px] lg:w-[1000px] shadow-2xl z-1000" : "w-full"
+    )}>
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b">
         <div>
@@ -498,12 +505,35 @@ const ModuleSettings = () => {
             {selectedModule.type} Module
           </p>
         </div>
-        <button
-          onClick={() => selectModule(null)}
-          className="p-2 hover:bg-muted rounded-full"
-        >
-          <X className="h-4 w-4" />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="p-2 hover:bg-muted rounded-lg transition-colors"
+            title={isExpanded ? "Collapse" : "Expand"}
+          >
+            {isExpanded ? (
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M8 3v3a2 2 0 0 1-2 2H3"/>
+                <path d="M21 8h-3a2 2 0 0 1-2-2V3"/>
+                <path d="M3 16h3a2 2 0 0 1 2 2v3"/>
+                <path d="M16 21v-3a2 2 0 0 1 2-2h3"/>
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M15 3h6v6"/>
+                <path d="M9 21H3v-6"/>
+                <path d="M21 3l-7 7"/>
+                <path d="M3 21l7-7"/>
+              </svg>
+            )}
+          </button>
+          <button
+            onClick={() => selectModule(null)}
+            className="p-2 hover:bg-muted rounded-full"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
@@ -1060,6 +1090,16 @@ const ModuleSettings = () => {
               onChange={(updates) =>
                 updateModuleContent(selectedModule.id, updates)
               }
+            />
+          )}
+
+          {selectedModule.type === "announcement-bar" && (
+            <AnnouncementBarSettings
+              content={selectedModule.content}
+              onChange={(updates) =>
+                updateModuleContent(selectedModule.id, updates)
+              }
+              layout={selectedModule.layout}
             />
           )}
 

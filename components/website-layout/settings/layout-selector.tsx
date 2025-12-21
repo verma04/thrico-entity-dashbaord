@@ -109,7 +109,7 @@ export const LayoutSelector = ({
           {currentTheme}
         </span>
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-3 gap-2">
         {availableLayouts.map((layout) => {
           const { icon: Icon, description, color } = getLayoutInfo(layout);
           const isSelected = currentLayout === layout;
@@ -119,34 +119,34 @@ export const LayoutSelector = ({
               key={layout}
               onClick={() => onLayoutChange(layout)}
               className={cn(
-                "group relative cursor-pointer rounded-xl border-2 p-4 transition-all duration-300 ease-out",
-                "hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]",
+                "group relative cursor-pointer rounded-lg border-2 p-2 transition-all duration-300 ease-out",
+                "hover:shadow-md hover:scale-[1.02] active:scale-[0.98]",
                 isSelected
-                  ? "border-primary bg-gradient-to-br from-primary/10 to-primary/5 shadow-md"
+                  ? "border-primary bg-gradient-to-br from-primary/10 to-primary/5 shadow-sm"
                   : "border-border hover:border-primary/40 bg-card/50 hover:bg-card"
               )}
             >
               {/* Selected indicator */}
               {isSelected && (
-                <div className="absolute -top-2 -right-2 bg-primary text-primary-foreground rounded-full p-1 shadow-lg animate-in zoom-in duration-300">
-                  <Check className="h-3 w-3" strokeWidth={3} />
+                <div className="absolute -top-1 -right-1 bg-primary text-primary-foreground rounded-full p-0.5 shadow-md animate-in zoom-in duration-300">
+                  <Check className="h-2.5 w-2.5" strokeWidth={3} />
                 </div>
               )}
 
               {/* Icon */}
               <div
                 className={cn(
-                  "mb-2 transition-transform duration-300 group-hover:scale-110",
+                  "mb-1 transition-transform duration-300 group-hover:scale-110",
                   isSelected ? color : "text-muted-foreground"
                 )}
               >
-                <Icon className="h-5 w-5 mx-auto" strokeWidth={2} />
+                <Icon className="h-4 w-4 mx-auto" strokeWidth={2} />
               </div>
 
               {/* Layout name */}
               <div
                 className={cn(
-                  "text-xs font-medium text-center capitalize mb-1 transition-colors",
+                  "text-[10px] font-medium text-center capitalize mb-0.5 transition-colors leading-tight",
                   isSelected ? "text-primary" : "text-foreground"
                 )}
               >
@@ -154,14 +154,14 @@ export const LayoutSelector = ({
               </div>
 
               {/* Description */}
-              <div className="text-[10px] text-center text-muted-foreground">
+              <div className="text-[9px] text-center text-muted-foreground leading-tight">
                 {description}
               </div>
 
               {/* Hover effect overlay */}
               <div
                 className={cn(
-                  "absolute inset-0 rounded-xl opacity-0 transition-opacity duration-300",
+                  "absolute inset-0 rounded-lg opacity-0 transition-opacity duration-300",
                   "bg-gradient-to-br from-primary/5 to-transparent",
                   !isSelected && "group-hover:opacity-100"
                 )}

@@ -280,6 +280,15 @@ export type LayoutType =
   | "podium"
   | "hall-grid"
   | "featured-cards" // Wall of Fame layouts
+  | "info-message"
+  | "warning-alert"
+  | "success-message"
+  | "error-alert"
+  | "promotion-banner"
+  | "maintenance-notice"
+  | "dismissible-bar"
+  | "countdown-alert"
+  | "link-notification" // Announcement Bar layouts
   | "default";
 
 export type ModuleType =
@@ -345,6 +354,7 @@ export type ModuleType =
   | "latest-members"
   | "members-around-world"
   | "wall-of-fame"
+  | "announcement-bar"
   | "footer";
 
 export interface MenuItem {
@@ -619,6 +629,8 @@ const THEME_DEFAULTS: Record<ThemeType, Record<ModuleType, LayoutType>> = {
     "latest-members": "grid-cards",
     "members-around-world": "country-stats-grid",
     "wall-of-fame": "podium",
+    "announcement-bar": "info-message",
+    "results-dashboard": "default",
     footer: "columns",
   },
   enterprise: {
@@ -683,6 +695,8 @@ const THEME_DEFAULTS: Record<ThemeType, Record<ModuleType, LayoutType>> = {
     "latest-members": "list-view",
     "members-around-world": "pin-drop-map",
     "wall-of-fame": "hall-grid",
+    "announcement-bar": "warning-alert",
+    "results-dashboard": "default",
     footer: "columns",
   },
   creator: {
@@ -747,6 +761,8 @@ const THEME_DEFAULTS: Record<ThemeType, Record<ModuleType, LayoutType>> = {
     "latest-members": "compact-grid",
     "members-around-world": "member-density-chart",
     "wall-of-fame": "timeline",
+    "announcement-bar": "promotion-banner",
+    "results-dashboard": "default",
     footer: "columns",
   },
   association: {
@@ -811,6 +827,8 @@ const THEME_DEFAULTS: Record<ThemeType, Record<ModuleType, LayoutType>> = {
     "latest-members": "timeline",
     "members-around-world": "top-countries-leaderboard",
     "wall-of-fame": "featured-cards",
+    "announcement-bar": "success-message",
+    "results-dashboard": "default",
     footer: "columns",
   },
   startup: {
@@ -875,6 +893,8 @@ const THEME_DEFAULTS: Record<ThemeType, Record<ModuleType, LayoutType>> = {
     "latest-members": "grid-cards",
     "members-around-world": "country-stats-grid",
     "wall-of-fame": "podium",
+    "announcement-bar": "countdown-alert",
+    "results-dashboard": "default",
     footer: "columns",
   },
   "dark-mode": {
@@ -939,6 +959,8 @@ const THEME_DEFAULTS: Record<ThemeType, Record<ModuleType, LayoutType>> = {
     "latest-members": "list-view",
     "members-around-world": "pin-drop-map",
     "wall-of-fame": "hall-grid",
+    "announcement-bar": "dismissible-bar",
+    "results-dashboard": "default",
     footer: "columns",
   },
 };
