@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { List } from "lucide-react";
+import { MessageSquare, List, BarChart3, Settings } from "lucide-react";
 import NewForm from "@/components/feedback-form/new-feed-back-form";
 
 function RootLayout({ children }: { children: React.ReactNode }) {
@@ -27,28 +27,58 @@ function RootLayout({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <>
-      <Tabs value={activeTab} onValueChange={handleTabChange}>
-        <div className="flex items-center justify-between border-b pb-2">
-          <TabsList>
-            <TabsTrigger value="all" className="flex items-center gap-2">
-              <List className="h-4 w-4" />
-              All
-            </TabsTrigger>
-
-            {/*
-            <TabsTrigger value="admin">By Admin</TabsTrigger>
-            <TabsTrigger value="user">By User</TabsTrigger>
-            */}
-          </TabsList>
-
-          {/* Extra content (Right side like antd tabBarExtraContent) */}
-          <NewForm />
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b">
+        <div>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <MessageSquare className="h-6 w-6 text-primary" />
+            </div>
+            <h1 className="text-3xl font-bold">Feedback & Polls</h1>
+          </div>
+          <p className="text-muted-foreground">
+            Create interactive forms, polls, and surveys to gather feedback.
+          </p>
         </div>
-      </Tabs>
+        <NewForm />
+      </div>
 
-      <div className="mt-4">{children}</div>
-    </>
+      <Tabs
+        value={activeTab}
+        onValueChange={handleTabChange}
+        className="w-full"
+      >
+        <TabsList className="mb-6 flex-wrap h-auto w-full justify-start gap-2 bg-transparent p-0">
+          <TabsTrigger
+            value="all"
+            className="gap-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary border border-transparent data-[state=active]:border-primary/20 bg-muted/50"
+          >
+            <List className="h-4 w-4" />
+            All Forms
+          </TabsTrigger>
+          {/* Future Tabs Placeholders - matching Mentorship style */}
+          <TabsTrigger
+            value="analytics"
+            disabled
+            className="gap-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary border border-transparent data-[state=active]:border-primary/20 bg-muted/50 opacity-50 cursor-not-allowed"
+          >
+            <BarChart3 className="h-4 w-4" />
+            Analytics
+          </TabsTrigger>
+          <TabsTrigger
+            value="settings"
+            disabled
+            className="gap-2 data-[state=active]:bg-primary/10 data-[state=active]:text-primary border border-transparent data-[state=active]:border-primary/20 bg-muted/50 opacity-50 cursor-not-allowed"
+          >
+            <Settings className="h-4 w-4" />
+            Settings
+          </TabsTrigger>
+        </TabsList>
+
+        <div className="mt-0 min-h-[400px]">{children}</div>
+      </Tabs>
+    </div>
   );
 }
 

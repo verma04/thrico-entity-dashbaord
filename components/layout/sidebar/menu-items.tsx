@@ -25,7 +25,7 @@ import {
   BookOpen,
   Newspaper,
 } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useGetUser } from "@/graphql/actions";
 
 const menuLink = (href: string, text: string) => (
@@ -95,7 +95,7 @@ export const extendedItems = [
     path: "/feedback",
     icon: <BarChart3 size={18} />,
     children: [
-      { key: "all-polls", label: "Manage Polls", path: "/feedback" },
+      { key: "all-polls", label: "Manage Feedback", path: "/feedback" },
       { key: "polls-settings", label: "Settings", path: "/polls/settings" },
     ],
   },
@@ -320,12 +320,35 @@ export const extendedItems = [
 
 export const UserAvatar = () => {
   const { data, loading } = useGetUser();
+  const user = data?.getUser;
+
+  const getInitials = (name?: string) => {
+    if (!name) return "U";
+    const parts = name.trim().split(" ");
+    if (parts.length >= 2) {
+      return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  };
+
   return (
     <Avatar className="w-6 h-6">
+      {user?.profilePicture && (
+        <AvatarImage src={user.profilePicture} alt={user?.name || "User"} />
+      )}
       <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-xs font-bold">
-        A
+        {getInitials(user?.firstName || user?.lastName)}
       </AvatarFallback>
     </Avatar>
+  );
+};
+
+export const UserName = () => {
+  const { data, loading } = useGetUser();
+  return (
+    <span>
+      {data?.getUser?.firstName + " " + data?.getUser.lastName || "Admin User"}
+    </span>
   );
 };
 
@@ -358,7 +381,7 @@ export const profile = [
   {
     key: "user",
     icon: <UserAvatar />,
-    label: "Admin User",
+    label: <UserName />,
     children: [
       {
         key: "profile",

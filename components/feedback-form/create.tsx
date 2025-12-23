@@ -1,235 +1,133 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, ChevronDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-
-import Settings from "./settings";
-import {
-  DragDropContext,
-  Droppable,
-  Draggable,
-  DropResult,
-} from "@hello-pangea/dnd";
-import { SortableQuestionItem } from "./editor/sortable-question-Item";
-import { Sidebar } from "./editor/sidebar";
-import { options } from "./options";
-import Preview from "./preview/preview";
-
-import { Question } from "../../../store/ts-types";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, Eye } from "lucide-react";
 import { useFormStore } from "@/store/useFormStore";
+import Settings from "./settings";
+import Preview from "./preview/preview";
+import { QuestionListSidebar } from "./editor/question-list-sidebar";
+import { Canvas } from "./editor/canvas";
+import { PropertiesPanel } from "./editor/properties-panel";
 
 interface NewFormPageProps {
-  add: () => void;
+  onPublish: () => void;
+  onClose: () => void;
 }
 
-export default function NewFormPage({}: NewFormPageProps) {
+export default function NewFormPage({ onPublish, onClose }: NewFormPageProps) {
   const {
-    formTitle,
-    formDescription,
-    questions,
     formSettings,
+    formTitle,
     setFormTitle,
-    setFormDescription,
-    addQuestion,
-    updateQuestion,
-    duplicateQuestion,
-    updateOption,
-    addOption,
-    removeQuestion,
+    formDescription,
     updateFormSetting,
-    reorderQuestions,
+    questions,
   } = useFormStore();
-
-  function handleDragEnd(result: DropResult) {
-    if (!result.destination) return;
-
-    const oldIndex = result.source.index;
-    const newIndex = result.destination.index;
-    
-    if (oldIndex !== newIndex) {
-      reorderQuestions(oldIndex, newIndex);
-    }
-  }
-
-  const [tab, setActiveTab] = useState("edit");
+  const [activeTab, setActiveTab] = useState("edit");
 
   return (
-    <div className="min-h-screen bg-muted/30">
-      <div className="container mx-auto p-6">
-        <Tabs defaultValue="edit" onValueChange={setActiveTab}>
-          <TabsList className="grid w-full max-w-md grid-cols-3">
-            <TabsTrigger value="edit">Edit</TabsTrigger>
-            <TabsTrigger value="preview">Preview</TabsTrigger>
-            <TabsTrigger value="settings">Settings</TabsTrigger>
-          </TabsList>
+    <div className="h-[calc(100vh)] bg-gray-50 flex flex-col">
+      {/* Top Bar for Tabs */}
+      <div className="bg-white border-b px-4 h-16 flex items-center justify-between shrink-0 z-10 sticky top-0 relative shadow-sm">
+        <div className="flex items-center gap-4 w-1/3">
+          {/* Left: Back & Title */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="shrink-0"
+            onClick={onClose}
+          >
+            <ChevronLeft className="h-5 w-5 text-gray-500" />
+          </Button>
+          <div className="flex flex-col flex-1">
+            <input
+              value={formTitle}
+              onChange={(e) => setFormTitle(e.target.value)}
+              className="font-semibold text-sm text-gray-900 leading-none border-none hover:bg-gray-100 p-1 rounded focus:bg-white focus:ring-2 focus:ring-primary/20 transition-all outline-none w-full max-w-[200px]"
+              placeholder="Untitled Form"
+            />
+            <span className="text-[10px] text-gray-500 uppercase tracking-wider font-medium mt-1 px-1">
+              Draft
+            </span>
+          </div>
+        </div>
 
-          <TabsContent value="edit" className="mt-6">
-            <div className="flex gap-6">
-              {/* Sidebar */}
-              <Card className="w-1/5">
-                <CardHeader className="pb-3">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" className="w-full">
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add Question
-                        <ChevronDown className="h-4 w-4 ml-2" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-56">
-                      {options.map((option) => (
-                        <DropdownMenuItem
-                          key={option.key}
-                          onClick={() => addQuestion(option.key as Question["type"])}
-                        >
-                          {option.icon && <span className="mr-2">{option.icon}</span>}
-                          {option.label}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </CardHeader>
-                <CardContent>
-                  <DragDropContext onDragEnd={handleDragEnd}>
-                    <Droppable droppableId="sidebar-questions">
-                      {(provided) => (
-                        <div
-                          {...provided.droppableProps}
-                          ref={provided.innerRef}
-                          className="space-y-2"
-                        >
-                          {questions.map((question, index) => (
-                            <Draggable
-                              key={question.id}
-                              draggableId={question.id}
-                              index={index}
-                            >
-                              {(provided) => (
-                                <div
-                                  ref={provided.innerRef}
-                                  {...provided.draggableProps}
-                                  {...provided.dragHandleProps}
-                                >
-                                  <Sidebar
-                                    question={question}
-                                    index={index}
-                                    duplicateQuestion={duplicateQuestion}
-                                    updateQuestion={updateQuestion}
-                                    updateOption={updateOption}
-                                    addOption={addOption}
-                                    removeQuestion={removeQuestion}
-                                    options={options}
-                                  />
-                                </div>
-                              )}
-                            </Draggable>
-                          ))}
-                          {provided.placeholder}
-                        </div>
-                      )}
-                    </Droppable>
-                  </DragDropContext>
-                </CardContent>
-              </Card>
+        <div className="flex justify-center w-1/3">
+          {/* Center: Navigation */}
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="w-auto"
+          >
+            <TabsList className="bg-transparent p-0 gap-6">
+              {["edit", "preview", "settings"].map((tab) => (
+                <TabsTrigger
+                  key={tab}
+                  value={tab}
+                  className="bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-black text-gray-500 border-b-2 border-transparent data-[state=active]:border-black rounded-none px-2 py-2 transition-all font-medium capitalize"
+                >
+                  {tab === "edit"
+                    ? "Create"
+                    : tab === "preview"
+                    ? "Connect"
+                    : "Share"}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+        </div>
 
-              {/* Main Content */}
-              <div className="flex-1 space-y-6">
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="form-title">Form Title</Label>
-                        <Input
-                          id="form-title"
-                          value={formTitle}
-                          onChange={(e) => setFormTitle(e.target.value)}
-                          className="text-xl font-bold"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="form-description">Description (Optional)</Label>
-                        <Textarea
-                          id="form-description"
-                          placeholder="Enter a description for your form"
-                          value={formDescription}
-                          onChange={(e) => setFormDescription(e.target.value)}
-                          rows={4}
-                        />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+        <div className="flex items-center justify-end gap-3 w-1/3">
+          {/* Right: Actions */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-gray-500 hidden md:flex"
+          >
+            <Eye className="h-4 w-4 mr-2" />
+            Preview
+          </Button>
+          <Button
+            size="sm"
+            className="bg-black hover:bg-gray-800 text-white px-6 rounded-md font-medium"
+            onClick={onPublish}
+          >
+            Publish
+          </Button>
+        </div>
+      </div>
 
-                <DragDropContext onDragEnd={handleDragEnd}>
-                  <Droppable droppableId="main-questions">
-                    {(provided) => (
-                      <div
-                        {...provided.droppableProps}
-                        ref={provided.innerRef}
-                        className="space-y-4"
-                      >
-                        {questions.map((question, index) => (
-                          <Draggable
-                            key={question.id}
-                            draggableId={question.id}
-                            index={index}
-                          >
-                            {(provided) => (
-                              <div
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                              >
-                                <SortableQuestionItem
-                                  question={question}
-                                  index={index}
-                                  updateQuestion={updateQuestion}
-                                  updateOption={updateOption}
-                                  addOption={addOption}
-                                  removeQuestion={removeQuestion}
-                                  options={options}
-                                  dragHandleProps={provided.dragHandleProps}
-                                />
-                              </div>
-                            )}
-                          </Draggable>
-                        ))}
-                        {provided.placeholder}
-                      </div>
-                    )}
-                  </Droppable>
-                </DragDropContext>
-              </div>
-            </div>
-          </TabsContent>
+      <div className="flex-1 overflow-hidden relative">
+        {activeTab === "edit" ? (
+          <div className="flex h-full">
+            {/* Left Sidebar - Question List */}
+            <QuestionListSidebar />
 
-          <TabsContent value="preview" className="mt-6">
+            {/* Center - Canvas */}
+            <Canvas />
+
+            {/* Right Sidebar - Properties */}
+            <PropertiesPanel />
+          </div>
+        ) : activeTab === "preview" ? (
+          <div className="h-full overflow-y-auto p-8">
             <Preview
               formTitle={formTitle}
               formDescription={formDescription}
               questions={questions}
               formSettings={formSettings}
             />
-          </TabsContent>
-
-          <TabsContent value="settings" className="mt-6">
+          </div>
+        ) : (
+          <div className="h-full overflow-y-auto p-8 max-w-4xl mx-auto">
             <Settings
               formSettings={formSettings}
               updateFormSetting={updateFormSetting}
             />
-          </TabsContent>
-        </Tabs>
+          </div>
+        )}
       </div>
     </div>
   );

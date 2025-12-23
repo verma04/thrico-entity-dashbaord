@@ -46,7 +46,7 @@ export function ApolloWrapper({ children, host }: Props) {
     });
 
     const uploadLink = createUploadLink({
-      uri: host ?? "https://admin.thrico.app/graphql",
+      uri: host ?? "http://localhost:1111/graphql",
     });
 
     const authMiddleware = new ApolloLink(

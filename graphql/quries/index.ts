@@ -35,7 +35,7 @@ export const GET_ORGANIZATION = gql`
 `;
 
 export const CHECK_DOMAIN = gql`
-  query CheckDomain($input: domainQuery) {
+  query CheckDomain($input: DomainQuery) {
     checkDomain(input: $input) {
       success
     }
@@ -43,7 +43,7 @@ export const CHECK_DOMAIN = gql`
 `;
 
 export const REGISTER_ORGANIZATION = gql`
-  mutation Mutation($input: registerEntityInput) {
+  mutation Mutation($input: RegisterEntityInput) {
     registerEntity(input: $input) {
       success
     }

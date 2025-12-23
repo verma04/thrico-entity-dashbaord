@@ -12,7 +12,11 @@ import {
 import moment from "moment";
 
 // Helper function to reorder array items (replaces arrayMove from @dnd-kit/sortable)
-const reorderArray = <T,>(list: T[], startIndex: number, endIndex: number): T[] => {
+const reorderArray = <T>(
+  list: T[],
+  startIndex: number,
+  endIndex: number
+): T[] => {
   const result = Array.from(list);
   const [removed] = result.splice(startIndex, 1);
   result.splice(endIndex, 0, removed);
@@ -27,6 +31,9 @@ interface FormState {
   previewType: "SCROLL_LONG" | "MULTI_STEP";
   endDate: moment.Moment | null;
   setQuestions: (questions: Question[]) => void;
+
+  selectedQuestionId: string | number | null;
+  selectQuestion: (id: string | number | null) => void;
 
   setFormTitle: (title: string) => void;
   setFormDescription: (desc: string) => void;
@@ -48,6 +55,7 @@ export const useFormStore = create<FormState>((set, get) => ({
   formDescription: "",
   previewType: "SCROLL_LONG",
   endDate: null,
+  selectedQuestionId: 1,
   questions: [
     {
       id: 1,
@@ -81,6 +89,7 @@ export const useFormStore = create<FormState>((set, get) => ({
     hoverEffect: "none",
   },
 
+  selectQuestion: (id) => set({ selectedQuestionId: id }),
   setFormTitle: (title) => set({ formTitle: title }),
   setEndDate: (date) => set({ endDate: date }),
   setPreviewType: (previewType) => set({ previewType: previewType }),
@@ -88,10 +97,60 @@ export const useFormStore = create<FormState>((set, get) => ({
   setQuestions: (questions) => set({ questions }),
   addQuestion: (type) => {
     const questions = get().questions;
+    let defaultQuestion = "New Question";
+
+    switch (type) {
+      case "SHORT_TEXT":
+        defaultQuestion = "What is your name?";
+        break;
+      case "LONG_TEXT":
+        defaultQuestion = "Please describe your feedback";
+        break;
+      case "MULTIPLE_CHOICE":
+        defaultQuestion = "Select an option";
+        break;
+      case "DROPDOWN":
+        defaultQuestion = "Select one from the list";
+        break;
+      case "ISOPTION":
+        defaultQuestion = "Choose your preference";
+        break;
+      case "RATING":
+        defaultQuestion = "How would you rate us?";
+        break;
+      case "OPINION_SCALE":
+        defaultQuestion = "How likely are you to recommend us?";
+        break;
+      case "LEGAL":
+        defaultQuestion = "Do you accept the terms?";
+        break;
+      case "DATE":
+        defaultQuestion = "Select a date";
+        break;
+      case "TIME":
+        defaultQuestion = "Select a time";
+        break;
+      case "EMAIL":
+        defaultQuestion = "What is your email?";
+        break;
+      case "PHONE":
+        defaultQuestion = "What is your phone number?";
+        break;
+      case "WEBSITE":
+        defaultQuestion = "What is your website?";
+        break;
+      case "NUMBER":
+        defaultQuestion = "Enter a number";
+        break;
+      case "YES-NO":
+        defaultQuestion = "Do you agree?";
+        break;
+    }
+
     const newQuestion: Question = {
       id: questions.length + 1,
       type,
-      question: "New Question",
+      question: defaultQuestion,
       required: false,
     };
 
@@ -125,7 +184,10 @@ export const useFormStore = create<FormState>((set, get) => ({
         break;
     }
 
-    set({ questions: [...questions, newQuestion] });
+    set({
+      questions: [...questions, newQuestion],
+      selectedQuestionId: newQuestion.id,
+    });
   },
 
   updateQuestion: (id, field, value) =>

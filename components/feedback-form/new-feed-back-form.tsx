@@ -63,25 +63,8 @@ export default function NewForm() {
           <Button>Create New Form</Button>
         </SheetTrigger>
         <SheetContent side="right" className="w-full sm:max-w-full p-0">
-          <SheetHeader className="px-6 py-4 border-b">
-            <div className="flex items-center justify-between">
-              <SheetTitle>Create New Form</SheetTitle>
-              <div className="flex items-center gap-2">
-                {/* <Button variant="outline" asChild>
-                  <Link href="/feedback">Cancel</Link>
-                </Button> */}
-                <Button
-                  onClick={() => onFinish()}
-                  disabled={loading}
-                >
-                  <Save className="h-4 w-4 mr-2" />
-                  {loading ? "Creating..." : "Create New Form"}
-                </Button>
-              </div>
-            </div>
-          </SheetHeader>
-          <div className="overflow-y-auto h-[calc(100vh-80px)]">
-            <NewFormPage add={add} />
+          <div className="overflow-y-auto h-[calc(100vh)]">
+            <NewFormPage onPublish={onFinish} onClose={onClose} />
           </div>
         </SheetContent>
       </Sheet>
