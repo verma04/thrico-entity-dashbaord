@@ -25,8 +25,9 @@ import {
   BookOpen,
   Newspaper,
 } from "lucide-react";
+import { useMemo } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useGetUser } from "@/graphql/actions";
+import { useGetUser, useCheckEntitySubscription } from "@/graphql/actions";
 
 const menuLink = (href: string, text: string) => (
   <Link
@@ -69,38 +70,6 @@ export const settings = [
 
 export const extendedItems = [
   {
-    key: "forums",
-    label: "Forums",
-    path: "/forums",
-    icon: <MessageSquare size={18} />,
-    children: [
-      { key: "all-forums", label: "Manage Forums", path: "/forums" },
-      { key: "forums-settings", label: "Settings", path: "/forums/settings" },
-    ],
-  },
-  {
-    key: "polls",
-    label: "Polls",
-    path: "/polls",
-    icon: <BarChart3 size={18} />,
-    children: [
-      { key: "all-polls", label: "Manage Polls", path: "/polls" },
-      { key: "polls-settings", label: "Settings", path: "/polls/settings" },
-    ],
-  },
-
-  {
-    key: "feedback",
-    label: "Feedback",
-    path: "/feedback",
-    icon: <BarChart3 size={18} />,
-    children: [
-      { key: "all-polls", label: "Manage Feedback", path: "/feedback" },
-      { key: "polls-settings", label: "Settings", path: "/polls/settings" },
-    ],
-  },
-
-  {
     key: "communities",
     label: "Communities",
     path: "/communities",
@@ -141,6 +110,7 @@ export const extendedItems = [
       },
     ],
   },
+
   {
     key: "jobs",
     label: "Jobs",
@@ -152,7 +122,7 @@ export const extendedItems = [
     ],
   },
   {
-    key: "marketplace",
+    key: "listing",
     label: "Marketplace",
     path: "/listing",
     icon: <ShoppingBag size={18} />,
@@ -169,6 +139,38 @@ export const extendedItems = [
       },
     ],
   },
+  {
+    key: "forums",
+    label: "Forums",
+    path: "/forums",
+    icon: <MessageSquare size={18} />,
+    children: [
+      { key: "all-forums", label: "Manage Forums", path: "/forums" },
+      { key: "forums-settings", label: "Settings", path: "/forums/settings" },
+    ],
+  },
+  {
+    key: "polls",
+    label: "Polls",
+    path: "/polls",
+    icon: <BarChart3 size={18} />,
+    children: [
+      { key: "all-polls", label: "Manage Polls", path: "/polls" },
+      { key: "polls-settings", label: "Settings", path: "/polls/settings" },
+    ],
+  },
+
+  {
+    key: "feedback",
+    label: "Feedback",
+    path: "/feedback",
+    icon: <BarChart3 size={18} />,
+    children: [
+      { key: "all-polls", label: "Manage Feedback", path: "/feedback" },
+      { key: "polls-settings", label: "Settings", path: "/polls/settings" },
+    ],
+  },
+
   {
     key: "mentorship",
     label: "Mentorship",
@@ -317,6 +319,41 @@ export const extendedItems = [
     ],
   },
 ];
+
+/**
+ * Hook to filter extended menu items based on subscription modules.
+ * Only shows menu items where the key matches an enabled module id from subscription.
+ */
+export const useFilteredExtendedItems = () => {
+  const { data, loading } = useCheckEntitySubscription();
+
+  const filteredItems = useMemo(() => {
+    const modules = data?.checkEntitySubscription?.modules || [];
+
+    // Normalize module names: lowercase and replace single quotes with underscores
+    const enabledModuleIds = new Set(
+      modules
+        .filter((m) => m.enabled)
+        .map((m) => m.name?.toLowerCase().replace(/'/g, "_"))
+    );
+
+    // If no modules data yet (loading), return all items if no subscription data
+    if (modules.length === 0 && !loading) {
+      return extendedItems;
+    }
+
+    // Filter extendedItems to only include those with matching enabled module IDs
+    return extendedItems.filter((item) =>
+      enabledModuleIds.has(item.key?.toLowerCase().replace(/'/g, "_"))
+    );
+  }, [data?.checkEntitySubscription?.modules, loading]);
+
+  return {
+    filteredItems,
+    loading,
+    allModules: data?.checkEntitySubscription?.modules || [],
+  };
+};
 
 export const UserAvatar = () => {
   const { data, loading } = useGetUser();

@@ -12,6 +12,8 @@ import { PlanDrawer } from "@/components/layout/plan-drawer";
 import SidebarLayout from "@/components/layout/sidebar/sidebar";
 import { useSearchParams } from "next/navigation";
 import { useDrawerStore } from "@/store/drawerStore";
+import { WelcomeCelebration } from "@/components/layout/welcome-celebration";
+import DomainStatusAlert from "@/components/layout/domain-status-alert";
 
 function RootLayout({ children }: { children: React.ReactNode }) {
   const { data, loading } = useGetEntity();
@@ -24,10 +26,10 @@ function RootLayout({ children }: { children: React.ReactNode }) {
   const showDrawer = searchParams.has("choose-plan");
   const { isOpen: drawerOpen, openDrawer } = useDrawerStore();
   useEffect(() => {
-    if (showDrawer && !drawerOpen) {
+    if (showDrawer) {
       openDrawer();
     }
-  }, [showDrawer, drawerOpen, openDrawer]);
+  }, [showDrawer]);
   return (
     <>
       {!loading && !loadingUser && (
@@ -35,6 +37,7 @@ function RootLayout({ children }: { children: React.ReactNode }) {
           {check ? (
             <>
               <TrialBanner />
+              <WelcomeCelebration />
               <>
                 {!data?.getEntity?.subscription?.status && <NoSubscription />}
                 <SidebarLayout>
@@ -43,6 +46,7 @@ function RootLayout({ children }: { children: React.ReactNode }) {
 
                 {/* Plan Drawer Component */}
                 <PlanDrawer />
+                <DomainStatusAlert />
               </>
             </>
           ) : (

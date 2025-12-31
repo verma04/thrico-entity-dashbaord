@@ -3,87 +3,56 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ListingCreationForm } from "./listing-creation-form";
-import { ListingPreview } from "./listing-preview";
 import { useAddListing } from "@/graphql/actions/listing";
+import { AnimatePresence, motion } from "framer-motion";
 
 export function CreateListingDialog() {
   const [open, setOpen] = useState(false);
 
-  const onOpenChange = (isOpen: boolean) => {
-    setOpen(isOpen);
+  const onClose = () => {
+    setOpen(false);
   };
+
   const [add, { loading }] = useAddListing({
     onCompleted: (data) => {
-      setOpen(false);
+      onClose();
     },
   });
 
-  const [activeTab, setActiveTab] = useState("form");
-  const [formData, setFormData] = useState<any>(null);
-
-  const handleFormSubmit = (data: any) => {
-    setFormData(data);
-    setActiveTab("preview");
-  };
-
-  const handlePreviewSubmit = () => {
-    add({ variables: { input: formData } });
+  const onFinish = (values: any) => {
+    add({
+      variables: {
+        input: values,
+      },
+    });
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <Button onClick={() => onOpenChange(true)}>
+    <>
+      <Button onClick={() => setOpen(true)}>
         <Plus className="w-4 h-4 mr-2" />
         Create Listing
       </Button>
 
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Create New Listing</DialogTitle>
-          <DialogDescription>
-            Fill in the details to create a new marketplace listing
-          </DialogDescription>
-        </DialogHeader>
-
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="form">Details</TabsTrigger>
-            <TabsTrigger value="preview" disabled={!formData}>
-              Preview
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="form" className="space-y-4">
-            <ListingCreationForm onSubmit={handleFormSubmit} />
-          </TabsContent>
-
-          <TabsContent value="preview">
-            {formData && (
-              <div className="space-y-4">
-                <ListingPreview data={formData} />
-                <div className="flex justify-between gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => setActiveTab("form")}
-                  >
-                    Back to Edit
-                  </Button>
-                  <Button onClick={handlePreviewSubmit}>Create Listing</Button>
-                </div>
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
-      </DialogContent>
-    </Dialog>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: "100%" }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: "100%" }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="fixed inset-0 z-50 bg-background"
+          >
+            <ListingCreationForm
+              initialValues={{}}
+              loading={loading}
+              onFinish={onFinish}
+              onCancel={onClose}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }

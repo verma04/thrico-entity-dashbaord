@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
   Command,
   CommandEmpty,
@@ -22,11 +22,17 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import debounce from "lodash/debounce";
-import { useAllPages } from "../../../graphql/actions/commany";
-import PageForm from "../../page/PageForm";
+import { useAllPages } from "@/graphql/actions/commany";
+import {
+  Check,
+  ChevronsUpDown,
+  Building2,
+  ChevronRight,
+  Save,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import PageForm from "../page/page-form";
 
 type Page = {
   id: string;
@@ -45,44 +51,48 @@ export function CompanyAutocompleteSelect({
     name: string;
   };
 }) {
-  const [popoverOpen, setPopoverOpen] = useState(false);
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [options, setOptions] = useState<Page[]>([]);
   const [selectedValue, setSelectedValue] = useState<
     { id: string; name: string; logo: string } | undefined
   >(initialValue);
-  const [searchValue, setSearchValue] = useState("");
+  const [value, setValue] = useState<string>("");
+  const [showDrawer, setShowDrawer] = useState(false);
 
   const { data, loading, refetch } = useAllPages({
     variables: {
       input: {
-        value: searchValue,
+        value: value,
         limit: 10,
       },
     },
   });
 
-  const pages = data?.getAllPages || [];
+  const debouncedFetchUsers = debounce(async (searchText: string) => {
+    if (!searchText) {
+      setOptions([]);
+      return;
+    }
 
-  const debouncedSearch = debounce((value: string) => {
-    setSearchValue(value);
-    refetch();
+    try {
+      await refetch();
+      if (data?.getAllPages) {
+        setOptions(data.getAllPages);
+      }
+    } catch (error) {
+      console.log("Error fetching users:", error);
+    }
   }, 500);
 
   useEffect(() => {
     return () => {
-      debouncedSearch.cancel();
+      debouncedFetchUsers.cancel();
     };
-  }, []);
+  }, [debouncedFetchUsers]);
 
-  const handleSelect = (page: Page) => {
-    const newValue = {
-      id: page.id,
-      name: page.name,
-      logo: page.logo,
-    };
-    setSelectedValue(newValue);
-    onChange(newValue);
-    setPopoverOpen(false);
+  const handleSearch = async (searchText: string) => {
+    setValue(searchText);
+    await debouncedFetchUsers(searchText);
   };
 
   interface AddPageData {
@@ -94,7 +104,7 @@ export function CompanyAutocompleteSelect({
   }
 
   const onCompleted = (data: AddPageData): void => {
-    setDrawerOpen(false);
+    setShowDrawer(false);
     const { addPage } = data;
 
     if (addPage) {
@@ -103,6 +113,7 @@ export function CompanyAutocompleteSelect({
         name: addPage.name,
         logo: addPage.logo,
       };
+
       setSelectedValue(newValue);
       onChange(newValue);
     }
@@ -110,98 +121,156 @@ export function CompanyAutocompleteSelect({
 
   return (
     <>
-      <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+      <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
             variant="outline"
             role="combobox"
-            aria-expanded={popoverOpen}
-            className="w-full justify-between"
+            aria-expanded={open}
+            className="w-full justify-between bg-transparent"
           >
             {selectedValue ? (
               <div className="flex items-center gap-2">
-                <Avatar className="h-6 w-6">
+                <Avatar className="h-5 w-5">
                   <AvatarImage
-                    src={`https://cdn.thrico.network/${selectedValue.logo}`}
-                    alt={selectedValue.name}
+                    src={
+                      selectedValue.logo
+                        ? `https://cdn.thrico.network/${selectedValue.logo}`
+                        : "/placeholder.svg"
+                    }
                   />
-                  <AvatarFallback>{selectedValue.name.charAt(0)}</AvatarFallback>
+                  <AvatarFallback>{selectedValue.name[0]}</AvatarFallback>
                 </Avatar>
                 <span>{selectedValue.name}</span>
               </div>
             ) : (
-              "Search for a School/Institute"
+              "Search for a School/Institute..."
             )}
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-full p-0">
+
+        <PopoverContent className="w-full p-0" align="start">
           <Command>
             <CommandInput
-              placeholder="Search company..."
-              onValueChange={(value) => debouncedSearch(value)}
+              placeholder="Search companies..."
+              onValueChange={handleSearch}
             />
             <CommandList>
               <CommandEmpty>
                 {loading ? (
-                  <div className="flex items-center justify-center p-4">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  </div>
-                ) : searchValue ? (
-                  <div className="p-4 text-center space-y-2">
-                    <p className="text-sm text-muted-foreground">
-                      No company found. Add "{searchValue}"?
-                    </p>
-                    <Button size="sm" onClick={() => setDrawerOpen(true)}>
-                      Add Company
+                  <div className="p-2 text-sm">Searching...</div>
+                ) : value ? (
+                  <div className="p-2 text-sm">
+                    <p>No company found</p>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setShowDrawer(true)}
+                      className="mt-2 w-full"
+                    >
+                      Add {value}
                     </Button>
                   </div>
                 ) : (
-                  <p className="p-4 text-sm text-center text-muted-foreground">
-                    Search for a company
-                  </p>
+                  <div className="p-2 text-sm text-muted-foreground">
+                    Search Company
+                  </div>
                 )}
               </CommandEmpty>
-              <CommandGroup>
-                {pages.map((page: Page) => (
-                  <CommandItem
-                    key={page.id}
-                    value={page.id}
-                    onSelect={() => handleSelect(page)}
-                  >
-                    <Check
-                      className={cn(
-                        "mr-2 h-4 w-4",
-                        selectedValue?.id === page.id ? "opacity-100" : "opacity-0"
-                      )}
-                    />
-                    <div className="flex items-center gap-2">
-                      <Avatar className="h-6 w-6">
+              {options.length > 0 && (
+                <CommandGroup>
+                  {options.map((page) => (
+                    <CommandItem
+                      key={page.id}
+                      value={page.id}
+                      onSelect={(currentValue) => {
+                        onChange({
+                          id: page.id,
+                          name: page.name,
+                          logo: page.logo,
+                        });
+                        setSelectedValue({
+                          id: page.id,
+                          name: page.name,
+                          logo: page.logo,
+                        });
+                        setOpen(false);
+                      }}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          selectedValue?.id === page.id
+                            ? "opacity-100"
+                            : "opacity-0"
+                        )}
+                      />
+                      <Avatar className="h-5 w-5">
                         <AvatarImage
-                          src={`https://cdn.thrico.network/${page.logo}`}
-                          alt={page.name}
+                          src={
+                            page.logo
+                              ? `https://cdn.thrico.network/${page.logo}`
+                              : "/placeholder.svg"
+                          }
                         />
-                        <AvatarFallback>{page.name.charAt(0)}</AvatarFallback>
+                        <AvatarFallback>{page.name[0]}</AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col">
                         <span>{page.name}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {page.name}
+                        </span>
                       </div>
-                    </div>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              )}
             </CommandList>
           </Command>
         </PopoverContent>
       </Popover>
 
-      <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto">
-          <SheetHeader>
-            <SheetTitle>Add New Company</SheetTitle>
-          </SheetHeader>
-          <div className="mt-6">
-            <PageForm value={searchValue} onCompleted={onCompleted} />
+      <Sheet open={showDrawer} onOpenChange={setShowDrawer}>
+        <SheetContent
+          side="bottom"
+          className="h-screen p-0 border-none flex flex-col overflow-y-auto"
+        >
+          {/* Header section - Sticky */}
+          <div className="sticky top-0 z-30 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b px-6 py-4">
+            <div className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-3 mb-1">
+                  <div className="p-2.5 rounded-xl bg-primary/10 ring-1 ring-primary/20">
+                    <Building2 className="h-5 w-5 text-primary" />
+                  </div>
+                  <h1 className="text-2xl font-bold tracking-tight">
+                    Add New Company
+                  </h1>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground ml-1">
+                  <span>Jobs</span>
+                  <ChevronRight className="h-3 w-3" />
+                  <span>Add Company</span>
+                </div>
+              </div>
+              <div className="hidden sm:flex gap-3">
+                <Button
+                  variant="outline"
+                  type="button"
+                  size="sm"
+                  onClick={() => setShowDrawer(false)}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex-1 overflow-y-auto">
+            <div className="max-w-3xl mx-auto py-8">
+              <PageForm value={value} onCompleted={onCompleted} />
+            </div>
           </div>
         </SheetContent>
       </Sheet>

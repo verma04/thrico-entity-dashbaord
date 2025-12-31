@@ -1,12 +1,13 @@
 "use client";
+
 import * as React from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { List, CheckCircle, User } from "lucide-react";
+import { List, CheckCircle, User, Settings } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 
 import NewPoll from "@/components/polls/new-poll";
 
-function RootLayout({ children }: { children: React.ReactNode }) {
+function PollsLayout({ children }: { children: React.ReactNode }) {
   const items = [
     {
       key: "all",
@@ -27,11 +28,28 @@ function RootLayout({ children }: { children: React.ReactNode }) {
 
   const router = useRouter();
   const pathname = usePathname();
-  const activeTab = pathname.replace("/polls/", "") || "all";
+
+  // Determine active tab
+  const getActiveTab = () => {
+    if (pathname.includes("/settings")) return "settings";
+    if (pathname.includes("/admin")) return "admin";
+    if (pathname.includes("/user")) return "user";
+    return "all";
+  };
+
+  const activeTab = getActiveTab();
 
   const onChange = (value: string) => {
-    if (value === "all") router.push(`/polls/`);
-    else router.push(`/polls/${value}`);
+    switch (value) {
+      case "all":
+        router.push("/polls");
+        break;
+      case "settings":
+        router.push("/polls/settings");
+        break;
+      default:
+        router.push(`/polls/${value}`);
+    }
   };
 
   return (
@@ -47,11 +65,11 @@ function RootLayout({ children }: { children: React.ReactNode }) {
             ))}
           </TabsList>
         </Tabs>
-        <NewPoll />
+        {!pathname.includes("/settings") && <NewPoll />}
       </div>
       {children}
     </div>
   );
 }
 
-export default RootLayout;
+export default PollsLayout;

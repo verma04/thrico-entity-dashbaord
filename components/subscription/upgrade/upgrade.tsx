@@ -58,11 +58,16 @@ const Upgrade = () => {
     setActivePackage(pkg);
   };
 
+  const isHighTier = !loading && data?.getCountryPackage.length === 0;
+
   return (
     <>
       <div className="min-h-screen bg-background py-12 px-4">
         <div className="mx-auto max-w-6xl">
-          <UpgradeHeader subscriptionType={planOverview?.subscriptionType} />
+          <UpgradeHeader
+            subscriptionType={planOverview?.subscriptionType}
+            isHighTier={isHighTier}
+          />
 
           {loading && <PlanCardSkeleton />}
 
@@ -104,9 +109,9 @@ const Upgrade = () => {
             </>
           )}
 
-          {!loading && data?.getCountryPackage.length === 0 && (
+          {/* {!loading && data?.getCountryPackage.length === 0 && (
             <MaxTierMessage />
-          )}
+          )} */}
 
           <CustomRequestForm />
         </div>

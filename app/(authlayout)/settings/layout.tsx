@@ -28,6 +28,8 @@ import {
   PaintBucket,
   Receipt,
   UserCheck,
+  Headset,
+  Coins,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -95,6 +97,16 @@ function SettingsLayout({ children }: { children: React.ReactNode }) {
       key: "/settings/policies",
       icon: FileStack,
       label: "Policies",
+    },
+    {
+      key: "/settings/contact",
+      icon: Headset,
+      label: "Contact Support",
+    },
+    {
+      key: "/settings/currency",
+      icon: Coins,
+      label: "Currency",
     },
   ];
 

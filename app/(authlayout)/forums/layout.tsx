@@ -1,11 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { List, FolderTree } from "lucide-react";
+import { List, FolderTree, Settings } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
 import { Card } from "@/components/ui/card";
 
-function RootLayout({ children }: { children: React.ReactNode }) {
+function ForumsLayout({ children }: { children: React.ReactNode }) {
   const items = [
     {
       key: "all",
@@ -20,7 +20,7 @@ function RootLayout({ children }: { children: React.ReactNode }) {
   ];
 
   return (
-    <MenuItemsLayout active={"forums"} items={items}>
+    <MenuItemsLayout active="forums" items={items}>
       <Card className="border-0 shadow-sm">
         <div className="p-6">{children}</div>
       </Card>
@@ -28,4 +28,4 @@ function RootLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default RootLayout;
+export default ForumsLayout;

@@ -149,10 +149,10 @@ const ModuleRenderer: React.FC<ModuleRendererProps> = ({
       <LocationMapModule module={module} previewDevice={previewDevice} />
     ),
     "contact-form": (
-       <ContactRenderer module={module} previewDevice={previewDevice as any} />
+      <ContactRenderer module={module} previewDevice={previewDevice as any} />
     ),
     "contact-info": (
-       <ContactRenderer module={module} previewDevice={previewDevice as any} />
+      <ContactRenderer module={module} previewDevice={previewDevice as any} />
     ),
 
     // Community Components

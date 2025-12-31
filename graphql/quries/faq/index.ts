@@ -58,3 +58,45 @@ export const SORT_FAQ = gql`
     }
   }
 `;
+
+export const GET_FAQ_BY_MODULE = gql`
+  query GetFaqByModule($input: ModuleInput!) {
+    getFaqByModule(input: $input) {
+      faq
+      module
+    }
+  }
+`;
+
+export const GET_TERMS_AND_CONDITIONS_BY_MODULE = gql`
+  query GetTermsAndConditionsByModule($input: ModuleInput!) {
+    getTermsAndConditionsByModule(input: $input) {
+      module
+      termsAndConditions
+    }
+  }
+`;
+
+export const UPDATE_FAQ_BY_MODULE = gql`
+  mutation UpdateFaqByModule($module: String!, $faq: JSON!) {
+    updateFaqByModule(module: $module, faq: $faq) {
+      faq
+      module
+    }
+  }
+`;
+
+export const UPDATE_TERMS_AND_CONDITIONS_BY_MODULE = gql`
+  mutation UpdateTermsAndConditionsByModule(
+    $module: String!
+    $termsAndConditions: JSON!
+  ) {
+    updateTermsAndConditionsByModule(
+      module: $module
+      termsAndConditions: $termsAndConditions
+    ) {
+      module
+      termsAndConditions
+    }
+  }
+`;

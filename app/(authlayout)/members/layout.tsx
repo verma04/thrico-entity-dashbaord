@@ -1,11 +1,11 @@
 "use client";
+
 import * as React from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users } from "lucide-react";
+import { Users, Settings } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
 
-function RootLayout({ children }: { children: React.ReactNode }) {
+function MembersLayout({ children }: { children: React.ReactNode }) {
   const items = [
     {
       key: "all",
@@ -15,10 +15,10 @@ function RootLayout({ children }: { children: React.ReactNode }) {
   ];
 
   return (
-    <MenuItemsLayout active={"members"} items={items}>
+    <MenuItemsLayout active="members" items={items}>
       <CardContent className="pt-6">{children}</CardContent>
     </MenuItemsLayout>
   );
 }
 
-export default RootLayout;
+export default MembersLayout;

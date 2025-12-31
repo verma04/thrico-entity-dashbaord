@@ -25,7 +25,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 
-import { main, extendedItems, profile, settings } from "./menu-items";
+import {
+  main,
+  useFilteredExtendedItems,
+  profile,
+  settings,
+} from "./menu-items";
 import Logo from "./logo";
 import VisitSite from "./visit";
 import LogoutModal from "./logout";
@@ -50,23 +55,31 @@ export default function SidebarLayout({
   const [searchQuery, setSearchQuery] = useState("");
   const [extendedCollapsed, setExtendedCollapsed] = useState(false);
 
+  // Get subscription-filtered extended items
+  const { filteredItems: subscriptionFilteredItems, loading: modulesLoading } =
+    useFilteredExtendedItems();
+
   const toggleGroup = (key: string) => {
     setOpenGroup((prev) => (prev === key ? null : key));
   };
 
-  // Filter extended items based on search query
+  // Filter extended items based on search query (on top of subscription filtering)
   const filteredExtendedItems = useMemo(() => {
-    if (!searchQuery.trim()) return extendedItems;
-    
+    if (!searchQuery.trim()) return subscriptionFilteredItems;
+
     const query = searchQuery.toLowerCase();
-    return extendedItems.filter((item) => {
-      const labelMatch = typeof item.label === 'string' && item.label.toLowerCase().includes(query);
+    return subscriptionFilteredItems.filter((item) => {
+      const labelMatch =
+        typeof item.label === "string" &&
+        item.label.toLowerCase().includes(query);
       const childrenMatch = item.children?.some(
-        (child) => typeof child.label === 'string' && child.label.toLowerCase().includes(query)
+        (child) =>
+          typeof child.label === "string" &&
+          child.label.toLowerCase().includes(query)
       );
       return labelMatch || childrenMatch;
     });
-  }, [searchQuery]);
+  }, [searchQuery, subscriptionFilteredItems]);
 
   const renderItems = (items: MenuItem[]) => (
     <SidebarMenu>
@@ -142,15 +155,15 @@ export default function SidebarLayout({
           </SidebarGroup>
 
           {/* EXTENDED MODULES */}
-          {extendedItems.length > 0 && (
+          {subscriptionFilteredItems.length > 0 && (
             <SidebarGroup>
               <div className="flex items-center justify-between px-2 mb-2">
-                <div 
+                <div
                   className="flex items-center gap-2  flex-1"
                   // onClick={() => setExtendedCollapsed(!extendedCollapsed)}
                 >
                   <SidebarGroupLabel className="cursor-pointer">
-                    Features
+                    Modules
                   </SidebarGroupLabel>
                   <Badge variant="secondary" className="text-[10px] h-5">
                     {filteredExtendedItems.length}
@@ -170,7 +183,7 @@ export default function SidebarLayout({
                     <div className="relative">
                       <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
                       <Input
-                        placeholder="Search features..."
+                        placeholder="Search  Modules..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="h-8 pl-7 pr-7 text-xs"
@@ -191,7 +204,7 @@ export default function SidebarLayout({
                       renderItems(filteredExtendedItems)
                     ) : (
                       <div className="px-2 py-4 text-center text-xs text-muted-foreground">
-                        No features found
+                        No Module found
                       </div>
                     )}
                   </SidebarGroupContent>

@@ -9,6 +9,7 @@ import {
   UPDATE_COMMUNITY_BASIC_INFO,
   UPDATE_COMMUNITY_PERMISSIONS,
   UPDATE_COMMUNITY_RULES,
+  GET_COMMUNITY_STATS,
 } from "../../quries/group/approval";
 
 export const addCommunity = (options: any) =>
@@ -283,3 +284,6 @@ export const changeDiscussionCommunityVerification = (options: any) =>
 
 export const getCommunityRequest = (options: any) =>
   useQuery(GET_COMMUNITY_REQUEST, options);
+
+export const getCommunityStats = (options: any) =>
+  useQuery(GET_COMMUNITY_STATS, options);

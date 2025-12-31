@@ -11,7 +11,8 @@ import {
 } from "../../quries/plan";
 import { CountryPackage } from "@/components/subscription/ts-types";
 
-export const useCountryPackage = () => useQuery(GET_COUNTRY_PACKAGES);
+export const useCountryPackage = (options: any) =>
+  useQuery(GET_COUNTRY_PACKAGES, options);
 
 export const useUpdateTrialToPackage = (options: any) =>
   useMutation(UPDATE_TRAIL_TO_PACKAGE, options);

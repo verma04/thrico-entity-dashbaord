@@ -38,9 +38,6 @@ const BuilderLayout = () => {
   const [newPageSlug, setNewPageSlug] = React.useState("");
   const { isPremium } = useIsPremium();
 
-
-
-  
   // Set currentPageId to first page if not set
   React.useEffect(() => {
     if (!currentPageId && pages.length > 0) {

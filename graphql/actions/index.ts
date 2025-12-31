@@ -2,6 +2,7 @@ import { gql, useMutation, useQuery } from "@apollo/client";
 import {
   CHANGE_THEME_COLOR,
   CHECK_DOMAIN,
+  CHANGE_ENTITY_DOMAIN,
   CHECK_ENTITY_SUBSCRIPTIONS,
   ENTITY_KYC,
   GET_CURRENCY,
@@ -13,6 +14,7 @@ import {
   UPDATE_ENTITY_SETTINGS,
   UPLOAD_ENTITY_LOGO,
   UPDATE_ENTITY_PROFILE,
+  CHANGE_ENTITY_CURRENCY,
 } from "../quries";
 import { GET_MEMBERS_TERMS_AND_CONDITIONS } from "../quries/user";
 
@@ -58,6 +60,9 @@ export const useGetEntity = () => useQuery<GetEntityResponse>(GET_ORGANIZATION);
 
 export const useCheckDomain = (options: any) => useQuery(CHECK_DOMAIN, options);
 
+export const useChangeEntityDomain = (onCompleted: any) =>
+  useMutation(CHANGE_ENTITY_DOMAIN, onCompleted);
+
 export const useRegisterOrganization = (onCompleted: any) =>
   useMutation(REGISTER_ORGANIZATION, onCompleted);
 
@@ -68,7 +73,43 @@ export const useChangeThemeColor = (onCompleted: any) =>
 
 export const useEntityKYC = () => useQuery(ENTITY_KYC);
 
-export const useEntitySettings = () => useQuery(GET_ENTITY_SETTINGS);
+export interface EntitySettings {
+  id: string;
+  entity: string;
+  allowNewUser: boolean;
+  autoApproveUser: boolean;
+  allowCommunity: boolean;
+  autoApproveCommunity: boolean;
+  autoApproveGroup: boolean;
+  allowDiscussionForum: boolean;
+  autoApproveDiscussionForum: boolean;
+  allowEvents: boolean;
+  autoApproveEvents: boolean;
+  allowJobs: boolean;
+  autoApproveJobs: boolean;
+  allowMentorship: boolean;
+  autoApproveMentorship: boolean;
+  allowListing: boolean;
+  autoApproveListing: boolean;
+  autoApproveMarketPlace: boolean;
+  allowShop: boolean;
+  autoApproveShop: boolean;
+  allowOffers: boolean;
+  autoApproveOffers: boolean;
+  allowSurveys: boolean;
+  autoApproveSurveys: boolean;
+  allowPolls: boolean;
+  autoApprovePolls: boolean;
+  allowStories: boolean;
+  autoApproveStories: boolean;
+}
+
+export interface GetEntitySettingsResponse {
+  getEntitySettings: EntitySettings;
+}
+
+export const useEntitySettings = () =>
+  useQuery<GetEntitySettingsResponse>(GET_ENTITY_SETTINGS);
 
 export const useUpdateEntitySettings = (options: any) =>
   useMutation(UPDATE_ENTITY_SETTINGS, {
@@ -125,6 +166,9 @@ export interface CheckEntitySubscriptionQuery {
 }
 
 export const useEntityCurrency = () => useQuery(GET_CURRENCY);
+
+export const useChangeEntityCurrency = (onCompleted: any) =>
+  useMutation(CHANGE_ENTITY_CURRENCY, onCompleted);
 
 export const useUploadEntityLogo = (options: any) =>
   useMutation(UPLOAD_ENTITY_LOGO, {
@@ -202,3 +246,4 @@ export const useGetAllEntityInvoice = () =>
 
 // Website Actions
 export * from "./website";
+export * from "./dashboard";

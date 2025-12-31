@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   Dialog,
@@ -7,11 +7,19 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { getModalDescription, getModalTitle } from "@/lib/utils"
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { getModalDescription, getModalTitle } from "@/lib/utils";
 
-type DialogAction = "APPROVE" | "DISABLE" | "ENABLE" | "REJECT" | "VERIFY" | "UNVERIFY" | "REAPPROVE" | "PAUSE"
+type DialogAction =
+  | "APPROVE"
+  | "DISABLE"
+  | "ENABLE"
+  | "REJECT"
+  | "VERIFY"
+  | "UNVERIFY"
+  | "REAPPROVE"
+  | "PAUSE";
 
 export function ListingActionDialog({
   open,
@@ -20,14 +28,14 @@ export function ListingActionDialog({
   onConfirm,
   isLoading,
 }: {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  action?: DialogAction
-  onConfirm: () => void
-  isLoading: boolean
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  action?: DialogAction;
+  onConfirm: () => void;
+  isLoading: boolean;
 }) {
-  const title = getModalTitle(action)
-  const description = getModalDescription(action)
+  const title = getModalTitle(action);
+  const description = getModalDescription(action);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -46,5 +54,5 @@ export function ListingActionDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

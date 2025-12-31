@@ -27,17 +27,17 @@ export default function withAuth<P>(
       return <AppLoading />;
     }
 
-    // // If not authenticated, redirect to login
-    // if ((!getUser || error) && typeof window !== "undefined") {
-    //   localStorage.removeItem("key");
-    //   return (
-    //     <Redirect
-    //       to={`${ACCOUNTS_URL}/auth?path=${DASHBOARD_URL}${pathname}&&host=${DASHBOARD_URL}`}
-    //     />
-    //   );
-    // }
+    // If not authenticated, redirect to login
+    if ((!getUser || error) && typeof window !== "undefined") {
+      localStorage.removeItem("key");
+      return (
+        <Redirect
+          to={`${ACCOUNTS_URL}/auth?path=${DASHBOARD_URL}${pathname}&&host=${DASHBOARD_URL}`}
+        />
+      );
+    }
 
-    // Render the protected component
+    //  Render the protected component
     return <WrappedComponent {...props} />;
   };
 

@@ -58,13 +58,12 @@ const BuyPlan = ({ displayStatus = "no_subscription" }: BuyPlanProps) => {
       "Your upgrade is scheduled! In the meantime, explore other plans below or modify your upcoming upgrade to better suit your needs.",
   };
 
-  const message = statusMessages[displayStatus] || statusMessages.no_subscription;
+  const message =
+    statusMessages[displayStatus] || statusMessages.no_subscription;
 
   return (
     <Card className="max-w-5xl mx-auto mt-8 p-8 shadow-lg">
-      <p className="text-muted-foreground mb-6">
-        {message}
-      </p>
+      <p className="text-muted-foreground mb-6">{message}</p>
       <div className="flex items-center gap-4 mb-8">
         <Label className={isYearly ? "" : "font-bold"}>Monthly</Label>
         <Switch checked={isYearly} onCheckedChange={setIsYearly} />
@@ -76,8 +75,6 @@ const BuyPlan = ({ displayStatus = "no_subscription" }: BuyPlanProps) => {
         </Badge>
       </div>
       <Separator className="mb-8" />
-
-  
 
       {loading && <PlanCardSkeleton />}
       {!loading && (

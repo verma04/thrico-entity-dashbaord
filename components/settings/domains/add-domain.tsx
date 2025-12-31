@@ -57,10 +57,15 @@ export const AddDomain = () => {
   });
 
   const onSubmit = (values: DomainFormValues) => {
+    let domain = values.website;
+    if (domain.startsWith("www.")) {
+      domain = domain.replace("www.", "");
+    }
+
     add({
       variables: {
         input: {
-          domain: values.website,
+          domain,
         },
       },
     });

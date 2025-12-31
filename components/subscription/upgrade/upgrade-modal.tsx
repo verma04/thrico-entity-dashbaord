@@ -35,6 +35,7 @@ import {
   useVerifyRazorpayPayment,
 } from "@/graphql/actions/plan";
 import { useCheckEntitySubscription } from "@/graphql/actions";
+import { useRouter } from "next/navigation";
 
 enum BillingCycle {
   Monthly = "monthly",
@@ -75,6 +76,7 @@ export default function UpgradeModal({
   summary,
   activePackage,
 }: UpgradeModalProps) {
+  const router = useRouter();
   const [billingCycle, setBillingCycle] = useState<BillingCycle>(
     BillingCycle.Monthly
   );
@@ -95,8 +97,8 @@ export default function UpgradeModal({
   const [verify] = useVerifyRazorpayPayment({
     onCompleted: (data: { verifyRazorpayPayment: boolean }) => {
       if (data?.verifyRazorpayPayment) {
-        refetch();
-        onClose();
+        router.push("/?firstLogin=true&intensity=high");
+        window.location.reload();
       } else {
         alert("Payment verification failed.");
       }

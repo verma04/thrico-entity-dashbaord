@@ -7,7 +7,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Globe } from "lucide-react";
+import { Globe, Lock, Zap } from "lucide-react";
 
 import { getCustomDomain } from "@/graphql/actions/domain";
 import { ThricoDomain } from "./thrico-domain";
@@ -43,20 +43,55 @@ export const DomainsPage = () => {
               trust and find easily.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Get a new domain or connect one you already own from providers
-              like Namecheap or GoDaddy.
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <AddDomain />
-              <Link
-                href="https://www.godaddy.com/domains/searchresults.aspx?checkAvail=1&tmskey=&domainToCheck=yourdomain&isc=GPPT01A0010001"
-                target="_blank"
-                rel="noreferrer"
-              >
-                <Button variant="outline">Buy Domain</Button>
-              </Link>
+          <CardContent className="space-y-6">
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Get a new domain or connect one you already own from providers
+                like Namecheap or GoDaddy.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <AddDomain />
+                <Link
+                  href="https://www.godaddy.com/domains/searchresults.aspx?checkAvail=1&tmskey=&domainToCheck=yourdomain&isc=GPPT01A0010001"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <Button variant="outline">Buy Domain</Button>
+                </Link>
+              </div>
+            </div>
+
+            <div className="grid gap-4 pt-4 border-t md:grid-cols-3">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 font-medium text-sm">
+                  <Globe className="h-4 w-4 text-blue-500" />
+                  Root & Subdomains
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Connect your main domain (example.com) or a subdomain
+                  (portal.example.com).
+                </p>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 font-medium text-sm">
+                  <Lock className="h-4 w-4 text-green-500" />
+                  Automatic SSL
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  We automatically provision free SSL certificates to keep your
+                  site secure.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 font-medium text-sm">
+                  <Zap className="h-4 w-4 text-amber-500" />
+                  Global CDN
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Your content is cached globally for lightning-fast load times
+                  everywhere.
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>

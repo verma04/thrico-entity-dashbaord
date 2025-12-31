@@ -10,7 +10,7 @@ export const NUMBER_OF_FEED = gql`
   }
 `;
 export const GET_ALL_FEED = gql`
-  query GetAllFeed($input: pagination) {
+  query GetAllFeed($input: PaginationInput) {
     getAllFeed(input: $input) {
       id
       source
@@ -45,7 +45,7 @@ export const GET_ALL_FEED = gql`
 `;
 
 export const ADD_FEED = gql`
-  mutation AddFeed($input: inputAddFeed) {
+  mutation AddFeed($input: InputAddFeed) {
     addFeed(input: $input) {
       id
       source

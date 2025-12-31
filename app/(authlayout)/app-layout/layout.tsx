@@ -14,26 +14,24 @@ function RootLayout({ children }: { children: React.ReactNode }) {
     (state) => state.initializeWebsiteData
   );
 
-
   React.useEffect(() => {
     if (website && !loading) {
       initializeWebsiteData({
         ...website,
-       globalFooter: {
-        ...website?.footer,
-         id: "footer",
-    type: "footer",
-    name: "Footer",
-       },
-       globalHeader: {
-        ...website?.navbar,
-         id: "navbar",
-    type: "navbar",
-    name: "Navbar",   
-       },
-     
-       currentPageId: website?.pages?.[0]?.id || null,
+        globalFooter: {
+          ...website?.footer,
+          id: "footer",
+          type: "footer",
+          name: "Footer",
+        },
+        globalHeader: {
+          ...website?.navbar,
+          id: "navbar",
+          type: "navbar",
+          name: "Navbar",
+        },
 
+        currentPageId: website?.pages?.[0]?.id || null,
       });
     }
   }, [website, loading, initializeWebsiteData]);

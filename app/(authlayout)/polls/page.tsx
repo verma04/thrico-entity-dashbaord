@@ -1,9 +1,7 @@
-import Poll from "@/components/polls/polls";
-import { By } from "@/components/polls/ts-types";
+"use client";
 import React from "react";
+import PollsAnalytics from "@/components/polls/dashboard/analytics";
 
-const page = () => {
-  return <Poll by={By.ALL} />;
-};
-
-export default page;
+export default function PollsPage() {
+  return <PollsAnalytics />;
+}

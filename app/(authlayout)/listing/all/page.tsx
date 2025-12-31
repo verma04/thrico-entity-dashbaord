@@ -2,7 +2,6 @@
 import React from "react";
 import { useListings } from "../../../../graphql/actions/listing";
 
-
 import TableLoading from "@/components/layout/table-loading";
 import { ListingsTable } from "@/components/listings/listings-table";
 
@@ -17,7 +16,7 @@ const page = () => {
   return (
     <>
       {loading && <TableLoading />}
-      <ListingsTable listings={data?.getListing} />
+      {/* <ListingsTable listings={data?.getListing} /> */}
     </>
   );
 };

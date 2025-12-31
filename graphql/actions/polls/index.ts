@@ -1,3 +1,27 @@
+import { GET_POLL_STATS } from "@/graphql/quries/polls";
+import { TimeRange } from "..";
+
+export interface PollStats {
+  totalPolls: number;
+  activePolls: number;
+  votes: number;
+  engagementRate: number;
+  totalPollsChange: number;
+  activePollsChange: number;
+  votesChange: number;
+  engagementRateChange: number;
+}
+
+export interface GetPollStatsResponse {
+  getPollStats: PollStats;
+}
+
+export const useGetPollStats = (timeRange: TimeRange, options?: any) =>
+  useQuery<GetPollStatsResponse, { timeRange: TimeRange }>(GET_POLL_STATS, {
+    variables: { timeRange },
+    ...options,
+  });
+
 import { useMutation, useQuery } from "@apollo/client";
 import {
   ADD_POOL,

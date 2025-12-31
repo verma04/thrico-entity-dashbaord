@@ -77,8 +77,8 @@ export const DELETE_DOMAIN = gql`
 `;
 
 export const CHECK_SSL = gql`
-  query CheckSSL($input: inputId!) {
-    checkSSL(input: $input) {
+  query CheckSSL {
+    checkSSL {
       id
       ssl
     }

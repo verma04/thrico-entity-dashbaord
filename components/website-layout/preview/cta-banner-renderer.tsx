@@ -13,16 +13,21 @@ export const CtaBannerRenderer = ({
   const { layout, content } = module;
   const isMobile = previewDevice === "mobile";
 
+  console.log(layout);
+
   const title = content.title || "Ready to Get Started?";
   const description =
-    content.description || "Join thousands of users already using our platform";
+    content.description ||
+    content.subtitle ||
+    "Join thousands of users already using our platform";
   const secondaryText = content.secondaryText || "No credit card required";
   const buttons = content.buttons || [];
 
   // Helper function to get button variant classes
   const getButtonClasses = (variant: string, isWhiteBackground = false) => {
-    const baseClasses = "px-6 py-3 rounded-lg font-semibold transition-colors inline-flex items-center gap-2";
-    
+    const baseClasses =
+      "px-6 py-3 rounded-lg font-semibold transition-colors inline-flex items-center gap-2";
+
     switch (variant) {
       case "primary":
         return isWhiteBackground
@@ -46,14 +51,19 @@ export const CtaBannerRenderer = ({
   // Centered Banner
   if (layout === "centered-banner") {
     return (
-      <ModuleContainer 
-        containerSettings={{...content.containerSettings, background: content?.backgroundColor || "bg-gradient-to-r from-primary to-primary/80"}}
+      <ModuleContainer
+        containerSettings={{
+          ...content.containerSettings,
+          background:
+            content?.backgroundColor ||
+            "bg-gradient-to-r from-primary to-primary/80",
+        }}
         className="text-white"
       >
         <div className="text-center">
           <h2 className="text-4xl font-bold mb-4">{title}</h2>
           <p className="text-xl mb-8 opacity-90">{description}</p>
-          
+
           <div className="flex flex-wrap gap-4 justify-center">
             {buttons.slice(0, 2).map((button: any, index: number) => (
               <button
@@ -65,7 +75,7 @@ export const CtaBannerRenderer = ({
               </button>
             ))}
           </div>
-          
+
           <p className="text-sm mt-4 opacity-75">{secondaryText}</p>
         </div>
       </ModuleContainer>
@@ -75,8 +85,11 @@ export const CtaBannerRenderer = ({
   // Split CTA
   if (layout === "split-cta") {
     return (
-      <ModuleContainer 
-        containerSettings={{...content.containerSettings, background: content?.backgroundColor || "bg-slate-50"}}
+      <ModuleContainer
+        containerSettings={{
+          ...content.containerSettings,
+          background: content?.backgroundColor || "bg-slate-50",
+        }}
       >
         <div
           className={cn(
@@ -86,15 +99,16 @@ export const CtaBannerRenderer = ({
         >
           <div>
             <h2 className="text-3xl font-bold mb-4">{title}</h2>
-            <p className="text-lg text-muted-foreground mb-6">
-              {description}
-            </p>
-            
+            <p className="text-lg text-muted-foreground mb-6">{description}</p>
+
             <div className="flex flex-wrap gap-3">
               {buttons.slice(0, 2).map((button: any, index: number) => (
                 <button
                   key={index}
-                  className={getButtonClasses(button.variant || "primary", true)}
+                  className={getButtonClasses(
+                    button.variant || "primary",
+                    true
+                  )}
                 >
                   {button.text || "Get Started"}
                   <ArrowRight className="h-5 w-5" />
@@ -102,7 +116,7 @@ export const CtaBannerRenderer = ({
               ))}
             </div>
           </div>
-          
+
           {/* Image or Placeholder */}
           {content.image ? (
             <div className="rounded-2xl overflow-hidden h-64 md:h-80">
@@ -125,14 +139,17 @@ export const CtaBannerRenderer = ({
   // Full-Width Highlight
   if (layout === "full-width-highlight") {
     return (
-      <ModuleContainer 
-        containerSettings={{...content.containerSettings, background: content?.backgroundColor || "bg-black"}}
+      <ModuleContainer
+        containerSettings={{
+          ...content.containerSettings,
+          background: content?.backgroundColor || "bg-black",
+        }}
         className="text-white"
       >
         <div className="text-center">
           <h2 className="text-4xl font-bold mb-4">{title}</h2>
           <p className="text-xl mb-8 opacity-80">{description}</p>
-          
+
           <div className="flex flex-wrap gap-4 justify-center">
             {buttons.slice(0, 2).map((button: any, index: number) => (
               <button
@@ -151,8 +168,11 @@ export const CtaBannerRenderer = ({
   // Minimal CTA
   if (layout === "minimal-cta") {
     return (
-      <ModuleContainer 
-        containerSettings={{...content.containerSettings, background: content?.backgroundColor}}
+      <ModuleContainer
+        containerSettings={{
+          ...content.containerSettings,
+          background: content?.backgroundColor || "bg-muted/30",
+        }}
         className="border-y"
       >
         <div className="flex items-center justify-between flex-wrap gap-4">
@@ -160,7 +180,7 @@ export const CtaBannerRenderer = ({
             <h3 className="text-2xl font-semibold">{title}</h3>
             <p className="text-muted-foreground">{description}</p>
           </div>
-          
+
           <div className="flex flex-wrap gap-3">
             {buttons.slice(0, 2).map((button: any, index: number) => (
               <button
@@ -179,11 +199,13 @@ export const CtaBannerRenderer = ({
   // Urgency CTA
   if (layout === "urgency-cta") {
     return (
-      <ModuleContainer 
-        containerSettings={{...content.containerSettings, background: content?.backgroundColor}}
+      <ModuleContainer
+        containerSettings={{
+          ...content.containerSettings,
+          background: content?.backgroundColor || "bg-rose-600",
+        }}
         className="text-white"
       >
-
         <div className="text-center">
           <div className="inline-flex items-center gap-2 bg-white/20 px-4 py-2 rounded-full mb-4">
             <Clock className="h-4 w-4" />
@@ -191,7 +213,7 @@ export const CtaBannerRenderer = ({
           </div>
           <h2 className="text-4xl font-bold mb-4">{title}</h2>
           <p className="text-xl mb-8 opacity-90">{description}</p>
-          
+
           <div className="flex flex-wrap gap-4 justify-center">
             {buttons.slice(0, 2).map((button: any, index: number) => (
               <button
@@ -203,12 +225,12 @@ export const CtaBannerRenderer = ({
               </button>
             ))}
           </div>
-          
+
           <p className="text-sm mt-4 font-medium">Offer ends in 48 hours!</p>
         </div>
       </ModuleContainer>
     );
   }
 
-  return null;
+  return <>{layout}</>;
 };

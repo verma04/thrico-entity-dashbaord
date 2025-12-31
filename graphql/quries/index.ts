@@ -42,6 +42,14 @@ export const CHECK_DOMAIN = gql`
   }
 `;
 
+export const CHANGE_ENTITY_DOMAIN = gql`
+  mutation ChangeEntityDomain($input: ChangeEntityDomainInput!) {
+    changeEntityDomain(input: $input) {
+      success
+    }
+  }
+`;
+
 export const REGISTER_ORGANIZATION = gql`
   mutation Mutation($input: RegisterEntityInput) {
     registerEntity(input: $input) {
@@ -93,14 +101,33 @@ export const GET_ENTITY_SETTINGS = gql`
   query GetEntitySettings {
     getEntitySettings {
       id
-      autoApproveUser
-      autoApproveGroup
-      autoApproveEvents
-      autoApproveJobs
-      autoApproveMarketPlace
+      entity
       allowNewUser
-      autoApproveDiscussionForum
+      autoApproveUser
+      allowCommunity
+      autoApproveCommunity
+      autoApproveGroup
       allowDiscussionForum
+      autoApproveDiscussionForum
+      allowEvents
+      autoApproveEvents
+      allowJobs
+      autoApproveJobs
+      allowMentorship
+      autoApproveMentorship
+      allowListing
+      autoApproveListing
+      autoApproveMarketPlace
+      allowShop
+      autoApproveShop
+      allowOffers
+      autoApproveOffers
+      allowSurveys
+      autoApproveSurveys
+      allowPolls
+      autoApprovePolls
+      allowStories
+      autoApproveStories
     }
   }
 `;
@@ -108,15 +135,33 @@ export const UPDATE_ENTITY_SETTINGS = gql`
   mutation UpdateEntitySettings($input: EntityAutoApprovalSettingsInput) {
     updateEntitySettings(input: $input) {
       id
-      autoApproveUser
-      autoApproveGroup
-      autoApproveEvents
-      autoApproveJobs
-      autoApproveMarketPlace
       entity
       allowNewUser
-      autoApproveDiscussionForum
+      autoApproveUser
+      allowCommunity
+      autoApproveCommunity
+      autoApproveGroup
       allowDiscussionForum
+      autoApproveDiscussionForum
+      allowEvents
+      autoApproveEvents
+      allowJobs
+      autoApproveJobs
+      allowMentorship
+      autoApproveMentorship
+      allowListing
+      autoApproveListing
+      autoApproveMarketPlace
+      allowShop
+      autoApproveShop
+      allowOffers
+      autoApproveOffers
+      allowSurveys
+      autoApproveSurveys
+      allowPolls
+      autoApprovePolls
+      allowStories
+      autoApproveStories
     }
   }
 `;
@@ -160,6 +205,15 @@ export const CHECK_ENTITY_SUBSCRIPTIONS = gql`
 export const GET_CURRENCY = gql`
   query GetEntityCurrency {
     getEntityCurrency
+  }
+`;
+
+export const CHANGE_ENTITY_CURRENCY = gql`
+  mutation ChangeEntityCurrency($currency: String!) {
+    changeEntityCurrency(currency: $currency) {
+      success
+      message
+    }
   }
 `;
 
@@ -258,3 +312,5 @@ export interface EntityInvoice {
 export interface GetAllEntityInvoiceResponse {
   getAllEntityInvoice: EntityInvoice[];
 }
+
+export * from "./dashboard";

@@ -20,8 +20,6 @@ interface Props {
 export function ApolloWrapper({ children, host }: Props) {
   const token = useTokenStore((state) => state.token);
 
-  console.log(token);
-
   function makeClient() {
     const errorControl = onError(({ graphQLErrors, networkError }) => {
       if (graphQLErrors) {
@@ -46,7 +44,7 @@ export function ApolloWrapper({ children, host }: Props) {
     });
 
     const uploadLink = createUploadLink({
-      uri: host ?? "http://localhost:1111/graphql",
+      uri: host ?? "https://admin.thrico.app/graphql",
     });
 
     const authMiddleware = new ApolloLink(

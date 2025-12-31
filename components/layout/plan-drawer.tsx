@@ -13,9 +13,9 @@ export const PlanDrawer = () => {
   const pathname = usePathname();
 
   const handleClose = async () => {
-
- await   router.replace(pathname, { scroll: false });
-     await   closeDrawer();
+    router.replace(pathname, { scroll: false });
+    closeDrawer();
+    router.push("/?firstLogin=true&intensity=high");
   };
 
   if (!drawerOpen) {

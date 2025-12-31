@@ -92,8 +92,7 @@ const AVAILABLE_MODULES: {
   // Content & Text
   {
     type: "custom-content",
-    
-    
+
     name: "Custom Content",
     description:
       "Flexible content section with headings, text, images, or rich content.",
@@ -145,7 +144,8 @@ const AVAILABLE_MODULES: {
   {
     type: "ceo-message",
     name: "CEO Message",
-    description: "Executive message or letter from leadership to the community.",
+    description:
+      "Executive message or letter from leadership to the community.",
     defaultLayout: "classic-card",
     icon: MessageSquare,
     category: "Content & Text",
@@ -240,7 +240,8 @@ const AVAILABLE_MODULES: {
   {
     type: "marketplace",
     name: "Marketplace",
-    description: "Display products, services, or offerings for sale or exchange.",
+    description:
+      "Display products, services, or offerings for sale or exchange.",
     defaultLayout: "grid",
     icon: Building,
     category: "Business & Services",
@@ -354,7 +355,8 @@ const AVAILABLE_MODULES: {
   {
     type: "announcement-bar",
     name: "Announcement Bar",
-    description: "Top notification bar for alerts, promotions, and important messages.",
+    description:
+      "Top notification bar for alerts, promotions, and important messages.",
     defaultLayout: "info-message",
     icon: Bell,
     category: "Marketing & Conversion",
@@ -718,7 +720,7 @@ const ModuleCard = ({
                 >
                   Cancel
                 </Button>
-                <Button variant="destructive" onClick={handleDelete}>
+                <Button variant="default" onClick={handleDelete}>
                   Delete
                 </Button>
               </DialogFooter>
@@ -731,13 +733,8 @@ const ModuleCard = ({
 };
 
 const ModuleManager = () => {
-  const {
-    pages,
-    currentPageId,
-    setModules,
-    addModuleToPage,
-   
-  } = useWebsiteBuilderStore();
+  const { pages, currentPageId, setModules, addModuleToPage } =
+    useWebsiteBuilderStore();
   const [isMounted, setIsMounted] = useState(false);
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -888,7 +885,7 @@ const ModuleManager = () => {
               <PlusCircle className="h-3 w-3" />
             </Button>
           </DialogTrigger>
-          <DialogContent className="z-[2000] max-w-4xl max-h-[80vh]">
+          <DialogContent className="z-[2000] max-w-4xl ">
             <DialogHeader>
               <DialogTitle>Add Section</DialogTitle>
               <DialogDescription>

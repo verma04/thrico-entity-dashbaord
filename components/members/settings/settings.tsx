@@ -1,6 +1,6 @@
 "use client";
 
-import { SettingsForm } from "./settings-form";
+import { ModuleSettingsForm } from "@/components/common/module-settings-form";
 import { useEntitySettings, useUpdateEntitySettings } from "@/graphql/actions";
 import { Loader2 } from "lucide-react";
 
@@ -16,8 +16,25 @@ const Settings = () => {
     );
   }
 
+  const fields = [
+    {
+      key: "autoApproveUser",
+      label: "Auto Approve New Users",
+      description: "Automatically approve new user registrations",
+    },
+    {
+      key: "allowNewUser",
+      label: "Allow New User Registration",
+      description:
+        "Turn off temporarily if you need to pause new user registrations",
+    },
+  ];
+
   return (
-    <SettingsForm
+    <ModuleSettingsForm
+      title="Member Settings"
+      description="Configure system-wide settings for user management"
+      fields={fields}
       onSave={(settings) => {
         update({
           variables: {

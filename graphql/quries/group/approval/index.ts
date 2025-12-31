@@ -82,7 +82,7 @@ export const ADD_COMMUNITY = gql`
 `;
 
 export const GET_COMMUNITIES = gql`
-  query GetCommunities($input: inputGetCommunities!) {
+  query GetCommunities($input: InputGetCommunities!) {
     getCommunities(input: $input) {
       id
       title
@@ -163,3 +163,46 @@ export const GET_COMMUNITY_REQUEST = gql`
     }
   }
 `;
+
+export const GET_COMMUNITY_STATS = gql`
+  query GetCommunityStats($input: CommunityStatsInput) {
+    getCommunityStats(input: $input) {
+      totalCommunities
+      totalMembers
+      totalPosts
+      totalViews
+      newCommunities
+      newMembers
+      newPosts
+      statusBreakdown {
+        status
+        count
+      }
+    }
+  }
+`;
+
+export interface CommunityStatsInput {
+  startDate?: string | null;
+  endDate?: string | null;
+}
+
+export interface StatusBreakdown {
+  status: string;
+  count: number;
+}
+
+export interface CommunityStats {
+  totalCommunities: number;
+  totalMembers: number;
+  totalPosts: number;
+  totalViews: number;
+  newCommunities: number;
+  newMembers: number;
+  newPosts: number;
+  statusBreakdown: StatusBreakdown[];
+}
+
+export interface GetCommunityStatsResponse {
+  getCommunityStats: CommunityStats;
+}

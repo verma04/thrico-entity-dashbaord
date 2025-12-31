@@ -1,9 +1,7 @@
+"use client";
 import React from "react";
+import FeedbackAnalytics from "@/components/feedback/dashboard/analytics";
 
-
-
-const page = () => {
-  return <></>
-};
-
-export default page;
+export default function FeedbackPage() {
+  return <FeedbackAnalytics />;
+}

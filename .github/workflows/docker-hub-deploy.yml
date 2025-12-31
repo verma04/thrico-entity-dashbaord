@@ -2,7 +2,7 @@ name: Build & Deploy from /web-app to Docker Hub and DO Droplet
 
 on:
   push:
-    branches: [layouts]
+    branches: [tests]
 
 jobs:
   build-push-deploy:
