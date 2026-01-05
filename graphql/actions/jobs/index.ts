@@ -7,13 +7,7 @@ import {
   QueryResult,
   useQuery,
 } from "@apollo/client";
-import {
-  ADD_JOB,
-  CHANGE_JOB_STATUS,
-  CHANGE_JOB_VERIFICATION,
-  GET_JOB_STATS,
-  GET_JOBS,
-} from "../../quries/jobs";
+
 
 // --- GraphQL Mutation Document ---
 

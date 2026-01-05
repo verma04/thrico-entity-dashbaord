@@ -4,6 +4,15 @@ import { usePathname } from "next/navigation";
 import { useGetUser } from "@/graphql/actions";
 import { Redirect } from "@/components/layout/redirect";
 import AppLoading from "@/components/layout/loading";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type Options = {
   ssr?: boolean;
@@ -31,9 +40,25 @@ export default function withAuth<P>(
     if ((!getUser || error) && typeof window !== "undefined") {
       localStorage.removeItem("key");
       return (
-        <Redirect
-          to={`${ACCOUNTS_URL}/auth?path=${DASHBOARD_URL}${pathname}&&host=${DASHBOARD_URL}`}
-        />
+        <AlertDialog open={true}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Session Expired</AlertDialogTitle>
+              <AlertDialogDescription>
+                Your session has expired. Please log in again to continue.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogAction
+                onClick={() => {
+                  window.location.href = `${ACCOUNTS_URL}/auth?path=${DASHBOARD_URL}${pathname}&&host=${DASHBOARD_URL}`;
+                }}
+              >
+                Log In
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       );
     }
 
