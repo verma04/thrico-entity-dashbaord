@@ -105,7 +105,7 @@ export function FaqWithRefetch() {
       },
     },
     // Optional: Configure polling
-    pollInterval: 30000, // Refetch every 30 seconds
+
     // Optional: Configure fetch policy
     fetchPolicy: "cache-and-network",
   });

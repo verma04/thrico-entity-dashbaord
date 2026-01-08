@@ -8,7 +8,7 @@ interface CheckSslProps {
 
 export const CheckSsl = ({ ssl }: CheckSslProps) => {
   const { data } = checkSSl({
-    pollInterval: 2000,
+    pollInterval: 10000,
   });
 
   if (ssl) return null;

@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/select";
 
 import { useToast } from "@/hooks/use-toast";
+import { useUpdateNavbar, useGetWebsite } from "@/graphql/actions/website";
 
 import { SaveIcon } from "lucide-react";
 import { ImageUploadWithCrop } from "@/components/ui/image-upload-with-crop";
@@ -91,6 +92,27 @@ export default function NavigationManager() {
   const { globalHeader, updateModuleContent, updateModuleLayout } =
     useWebsiteBuilderStore();
 
+  // Fetch website data
+  const { data: websiteData, refetch } = useGetWebsite({});
+
+  // Update navbar mutation
+  const [updateNavbarMutation, { loading: isUpdating }] = useUpdateNavbar({
+    onCompleted: () => {
+      toast({
+        title: "Navigation Saved",
+        description: "Global navigation has been updated.",
+      });
+      refetch();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update navigation",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Initial values from global header
   const initialValues: NavigationConfig = {
     layout: globalHeader.layout,
@@ -100,20 +122,43 @@ export default function NavigationManager() {
     menuItems: globalHeader.content?.menuItems || [],
   };
 
-  const handleSubmit = (values: NavigationConfig) => {
-    // Update store
-    updateModuleLayout(globalHeader.id, values.layout);
-    updateModuleContent(globalHeader.id, {
-      logoText: values.logoText,
-      logoType: values.logoType,
-      logoImage: values.logoImage,
-      menuItems: values.menuItems,
-    });
+  const handleSubmit = async (values: NavigationConfig) => {
+    if (!websiteData?.getWebsite?.id) {
+      toast({
+        title: "Error",
+        description: "Website not found",
+        variant: "destructive",
+      });
+      return;
+    }
 
-    toast({
-      title: "Navigation Saved",
-      description: "Global navigation has been updated.",
-    });
+    try {
+      // Call GraphQL mutation to update navbar in database
+      await updateNavbarMutation({
+        variables: {
+          websiteId: websiteData.getWebsite.id,
+          layout: values.layout,
+          content: {
+            logoText: values.logoText,
+            logoType: values.logoType,
+            logoImage: values.logoImage,
+            menuItems: values.menuItems,
+          },
+        },
+      });
+
+      // Update local store for immediate UI update
+      updateModuleLayout(globalHeader.id, values.layout);
+      updateModuleContent(globalHeader.id, {
+        logoText: values.logoText,
+        logoType: values.logoType,
+        logoImage: values.logoImage,
+        menuItems: values.menuItems,
+      });
+    } catch (error) {
+      // Error handling is done in the mutation's onError callback
+      console.error("Navbar update failed:", error);
+    }
   };
 
   return (
@@ -145,10 +190,10 @@ export default function NavigationManager() {
                 type="submit"
                 size="sm"
                 className="gap-2 shadow-lg"
-                disabled={isSubmitting}
+                disabled={isUpdating}
               >
                 <SaveIcon className="h-4 w-4" />
-                {isSubmitting ? "Saving..." : "Save Navigation"}
+                {isUpdating ? "Saving..." : "Save Navigation"}
               </Button>
             </CardHeader>
             <CardContent className="space-y-4">

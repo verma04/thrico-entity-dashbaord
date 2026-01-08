@@ -10,33 +10,25 @@ import { cn } from "@/lib/utils";
 import { Home, Mail, Users, Plus, Lock } from "lucide-react";
 import ThemeSelector from "./theme-selector";
 import FontSelector from "./font-selector";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useIsPremium } from "@/hooks/useIsPremium";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Label } from "@/components/ui/label";
+import { CreatePageDialog } from "@/components/pages/create-page-dialog";
+import { useGetWebsite } from "@/graphql/actions/website";
 
 const BuilderLayout = () => {
   const { selectedModuleId, pages, currentPageId, setCurrentPage, addPage } =
     useWebsiteBuilderStore();
   const [isMounted, setIsMounted] = React.useState(false);
   const [isAddPageOpen, setIsAddPageOpen] = React.useState(false);
-  const [newPageName, setNewPageName] = React.useState("");
-  const [newPageSlug, setNewPageSlug] = React.useState("");
   const { isPremium } = useIsPremium();
+
+  // Fetch website data for websiteId
+  const { data: websiteData, refetch } = useGetWebsite({});
 
   // Set currentPageId to first page if not set
   React.useEffect(() => {
@@ -44,14 +36,6 @@ const BuilderLayout = () => {
       setCurrentPage(pages[0].id);
     }
   }, [currentPageId, pages, setCurrentPage]);
-
-  const handleAddPage = () => {
-    if (!newPageName || !newPageSlug) return;
-    addPage(newPageName, newPageSlug);
-    setNewPageName("");
-    setNewPageSlug("");
-    setIsAddPageOpen(false);
-  };
 
   React.useEffect(() => {
     setIsMounted(true);
@@ -93,95 +77,35 @@ const BuilderLayout = () => {
                 </select>
               </div>
 
-              <Dialog open={isAddPageOpen} onOpenChange={setIsAddPageOpen}>
-                {isPremium ? (
-                  <DialogTrigger asChild>
+              {isPremium ? (
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-10 w-10 shrink-0 bg-background"
+                  title="Add New Page"
+                  onClick={() => setIsAddPageOpen(true)}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              ) : (
+                <Tooltip>
+                  <TooltipTrigger asChild>
                     <Button
                       variant="outline"
                       size="icon"
-                      className="h-10 w-10 shrink-0 bg-background"
-                      title="Add New Page"
+                      className="h-10 w-10 shrink-0 bg-background opacity-60 cursor-not-allowed"
+                      disabled
                     >
-                      <Plus className="h-4 w-4" />
+                      <Lock className="h-4 w-4 text-muted-foreground" />
                     </Button>
-                  </DialogTrigger>
-                ) : (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="h-10 w-10 shrink-0 bg-background opacity-60 cursor-not-allowed"
-                        disabled
-                      >
-                        <Lock className="h-4 w-4 text-muted-foreground" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p className="text-xs">
-                        Upgrade to create additional pages
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                )}
-                <DialogContent className="w-[400px] z-[1000]">
-                  <DialogHeader>
-                    <DialogTitle>Add New Page</DialogTitle>
-                    <DialogDescription>
-                      Create a new page for your website.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-4 py-4">
-                    <div className="space-y-2">
-                      <Label>Page Name</Label>
-                      <Input
-                        placeholder="e.g. Services"
-                        value={newPageName}
-                        onChange={(e) => {
-                          setNewPageName(e.target.value);
-                          // Auto-generate slug from name
-                          const slug = e.target.value
-                            .toLowerCase()
-                            .trim()
-                            .replace(/[^\w\s-]/g, "") // Remove special characters
-                            .replace(/\s+/g, "-") // Replace spaces with hyphens
-                            .replace(/-+/g, "-"); // Replace multiple hyphens with single hyphen
-                          setNewPageSlug(slug);
-                        }}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>URL Slug</Label>
-                      <div className="flex items-center gap-2">
-                        <span className="text-muted-foreground text-sm">/</span>
-                        <Input
-                          placeholder="services"
-                          value={newPageSlug}
-                          onChange={(e) =>
-                            setNewPageSlug(
-                              e.target.value.toLowerCase().replace(/\s+/g, "-")
-                            )
-                          }
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <Button
-                      variant="outline"
-                      onClick={() => setIsAddPageOpen(false)}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      onClick={handleAddPage}
-                      disabled={!newPageName || !newPageSlug}
-                    >
-                      Create Page
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-xs">
+                      Upgrade to create additional pages
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
             </div>
           </div>
 
@@ -197,7 +121,7 @@ const BuilderLayout = () => {
           {/* --- MODULE SETTINGS DRAWER (Slide-over within Left Panel) --- */}
           <div
             className={cn(
-              "absolute inset-0 bg-card z-20 transition-transform duration-300 ease-in-out shadow-xl",
+              "absolute top-0 left-0 h-full bg-card z-20 transition-transform duration-300 ease-in-out shadow-xl",
               selectedModuleId
                 ? "translate-x-0"
                 : "-translate-x-full pointer-events-none"
@@ -212,6 +136,17 @@ const BuilderLayout = () => {
           <LivePreview />
         </div>
       </div>
+
+      {/* Create Page Dialog */}
+      <CreatePageDialog
+        open={isAddPageOpen}
+        onOpenChange={setIsAddPageOpen}
+        websiteId={websiteData?.getWebsite?.id}
+        onSuccess={(pageData) => {
+          addPage(pageData.name, pageData.slug);
+          refetch();
+        }}
+      />
     </>
   );
 };

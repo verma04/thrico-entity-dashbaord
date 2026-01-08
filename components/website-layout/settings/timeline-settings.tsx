@@ -4,23 +4,44 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import { GripVertical, Trash2, Plus } from "lucide-react";
+import {
+  GripVertical,
+  Trash2,
+  Plus,
+  Layout,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  Calendar,
+} from "lucide-react";
 
 interface TimelineSettingsProps {
   content: {
+    milestones?: Array<{
+      date: string;
+      title: string;
+      description: string;
+    }>;
     events?: Array<{
       year: string;
       title: string;
       description: string;
-    }>;
+    }>; // Legacy support
     title?: string;
     description?: string;
-    backgroundColor?: string;
+    align?: "left" | "center" | "right";
   };
   onChange: (updates: any) => void;
 }
@@ -31,147 +52,181 @@ const TimelineSettings: React.FC<TimelineSettingsProps> = ({
 }) => {
   const [openPopover, setOpenPopover] = useState<number | null>(null);
 
-  const {
-    events = [
+  // Initialize milestones from content or legacy events
+  const milestones = content.milestones ||
+    content.events?.map((e) => ({ ...e, date: e.year })) || [
       {
-        year: "2020",
+        date: "2020",
         title: "Company Founded",
         description: "Started with a vision to transform the industry",
       },
       {
-        year: "2021",
+        date: "2021",
         title: "First Product Launch",
         description: "Released our flagship product to the market",
       },
       {
-        year: "2022",
+        date: "2022",
         title: "Global Expansion",
         description: "Expanded operations to 15 countries",
       },
       {
-        year: "2023",
+        date: "2023",
         title: "1M Users Milestone",
         description: "Reached one million active users worldwide",
       },
-    ],
-    title = "Our Journey",
-    description = "A timeline of our key milestones and achievements",
-    backgroundColor = "#ffffff",
-  } = content;
+    ];
 
-  const addEvent = () => {
-    const newEvents = [
-      ...events,
+  const updateMilestone = (index: number, updates: any) => {
+    const newMilestones = [...milestones];
+    newMilestones[index] = { ...newMilestones[index], ...updates };
+    onChange({ milestones: newMilestones });
+  };
+
+  const addMilestone = () => {
+    const newMilestones = [
+      ...milestones,
       {
-        year: "2024",
+        date: new Date().getFullYear().toString(),
         title: "New Milestone",
-        description: "Another significant achievement in our journey",
+        description: "Describe this important achievement",
       },
     ];
-    onChange({ events: newEvents });
+    onChange({ milestones: newMilestones });
   };
 
-  const updateEvent = (index: number, updates: Partial<(typeof events)[0]>) => {
-    const newEvents = events.map((event, i) =>
-      i === index ? { ...event, ...updates } : event
-    );
-    onChange({ events: newEvents });
-  };
-
-  const removeEvent = (index: number) => {
-    const newEvents = events.filter((_, i) => i !== index);
-    onChange({ events: newEvents });
+  const removeMilestone = (index: number) => {
+    const newMilestones = milestones.filter((_, i) => i !== index);
+    onChange({ milestones: newMilestones });
   };
 
   const handleDragEnd = (result: any) => {
     if (!result.destination) return;
 
-    const newEvents = Array.from(events);
-    const [reorderedEvent] = newEvents.splice(result.source.index, 1);
-    newEvents.splice(result.destination.index, 0, reorderedEvent);
+    const newMilestones = Array.from(milestones);
+    const [reorderedItem] = newMilestones.splice(result.source.index, 1);
+    newMilestones.splice(result.destination.index, 0, reorderedItem);
 
-    onChange({ events: newEvents });
+    onChange({ milestones: newMilestones });
   };
 
   return (
     <div className="space-y-6">
-      <div className="space-y-4">
-        <div>
-          <Label className="text-sm font-medium">Section Title</Label>
-          <Input
-            value={title}
-            onChange={(e) => onChange({ title: e.target.value })}
-            placeholder="Our Journey"
-          />
+      {/* Header Settings */}
+      <div className="p-4 bg-slate-50 border rounded-lg space-y-4">
+        <div className="flex items-center gap-2 mb-2">
+          <Layout className="w-4 h-4 text-primary" />
+          <h3 className="font-semibold text-sm">Header Settings</h3>
         </div>
 
-        <div>
-          <Label className="text-sm font-medium">Section Description</Label>
-          <Textarea
-            value={description}
-            onChange={(e) => onChange({ description: e.target.value })}
-            placeholder="A timeline of our key milestones and achievements"
-            rows={2}
-          />
-        </div>
+        <div className="grid gap-4">
+          <div>
+            <Label className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5 block">
+              Section Title
+            </Label>
+            <Input
+              value={content.title || ""}
+              onChange={(e) => onChange({ title: e.target.value })}
+              placeholder="e.g. Our Journey"
+              className="bg-white"
+            />
+          </div>
 
-        <div>
-          <Label className="text-sm font-medium">Background Color</Label>
-          <Input
-            type="color"
-            value={backgroundColor}
-            onChange={(e) => onChange({ backgroundColor: e.target.value })}
-          />
+          <div>
+            <Label className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5 block">
+              Description
+            </Label>
+            <Textarea
+              value={content.description || ""}
+              onChange={(e) => onChange({ description: e.target.value })}
+              placeholder="Brief description of your timeline..."
+              rows={2}
+              className="bg-white"
+            />
+          </div>
+
+          <div>
+            <Label className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5 block">
+              Header Alignment
+            </Label>
+            <div className="flex items-center gap-2 p-1 bg-white border rounded-md w-fit">
+              {[
+                { value: "left", icon: AlignLeft },
+                { value: "center", icon: AlignCenter },
+                { value: "right", icon: AlignRight },
+              ].map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => onChange({ align: option.value })}
+                  className={`p-2 rounded hover:bg-slate-100 transition-colors ${
+                    (content.align || "center") === option.value
+                      ? "bg-slate-100 text-primary"
+                      : "text-slate-400"
+                  }`}
+                  title={`Align ${option.value}`}
+                >
+                  <option.icon className="w-4 h-4" />
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <Label className="text-sm font-medium">Timeline Events</Label>
-          <Button
-            onClick={addEvent}
-            size="sm"
-            className="flex items-center gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            Add Event
+      {/* Milestones Management */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-primary" />
+            <h3 className="font-semibold text-sm">Timeline Milestones</h3>
+          </div>
+          <Button onClick={addMilestone} size="sm" className="h-8">
+            <Plus className="w-3 h-3 mr-1.5" />
+            Add Milestone
           </Button>
         </div>
 
         <DragDropContext onDragEnd={handleDragEnd}>
-          <Droppable droppableId="timeline-events">
+          <Droppable droppableId="milestones">
             {(provided) => (
               <div
                 {...provided.droppableProps}
                 ref={provided.innerRef}
-                className="space-y-4"
+                className="space-y-3"
               >
-                {events.map((event, index) => (
+                {milestones.map((milestone, index) => (
                   <Draggable
-                    key={`event-${index}`}
-                    draggableId={`event-${index}`}
+                    key={`milestone-${index}`}
+                    draggableId={`milestone-${index}`}
                     index={index}
                   >
                     {(provided, snapshot) => (
                       <div
                         ref={provided.innerRef}
                         {...provided.draggableProps}
-                        className={`p-4 border rounded-lg space-y-3 bg-white ${
-                          snapshot.isDragging ? "shadow-lg" : ""
+                        className={`group bg-white border rounded-lg overflow-hidden transition-all duration-200 ${
+                          snapshot.isDragging
+                            ? "shadow-xl scale-[1.02] border-primary/50 z-50"
+                            : "hover:border-slate-300"
                         }`}
                       >
-                        <div className="flex justify-between items-center">
-                          <div className="flex items-center gap-3">
+                        {/* Drag Handle & Header */}
+                        <div className="flex items-center justify-between p-3 bg-slate-50/50 border-b gap-3">
+                          <div className="flex items-center gap-3 flex-1">
                             <div
                               {...provided.dragHandleProps}
-                              className="cursor-grab hover:cursor-grabbing"
+                              className="text-slate-400 hover:text-slate-600 cursor-grab active:cursor-grabbing p-1 hover:bg-slate-200/50 rounded"
                             >
-                              <GripVertical className="h-4 w-4 text-gray-400" />
+                              <GripVertical className="w-4 h-4" />
                             </div>
-                            <span className="text-sm font-medium">
-                              Event #{index + 1}
+                            <span className="font-medium text-sm truncate">
+                              {milestone.title || "Untitled Milestone"}
+                            </span>
+                            <span className="text-xs font-mono bg-slate-100 px-2 py-0.5 rounded text-slate-500">
+                              {milestone.date}
                             </span>
                           </div>
+
                           <Popover
                             open={openPopover === index}
                             onOpenChange={(open) =>
@@ -182,29 +237,26 @@ const TimelineSettings: React.FC<TimelineSettingsProps> = ({
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
+                                className="h-7 w-7 p-0 text-slate-400 hover:text-red-500 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity"
                               >
-                                <Trash2 className="h-4 w-4" />
+                                <Trash2 className="w-4 h-4" />
                               </Button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-64" align="end">
+                            <PopoverContent
+                              className="w-64 p-3"
+                              align="end"
+                              side="left"
+                            >
                               <div className="space-y-3">
-                                <div>
-                                  <h4 className="font-medium text-sm">
-                                    Delete Event
-                                  </h4>
-                                  <p className="text-xs text-muted-foreground">
-                                    Are you sure you want to delete "
-                                    {event.title}"? This action cannot be
-                                    undone.
-                                  </p>
-                                </div>
+                                <p className="text-xs text-slate-600 font-medium">
+                                  Delete this milestone?
+                                </p>
                                 <div className="flex gap-2">
                                   <Button
                                     size="sm"
                                     variant="outline"
                                     onClick={() => setOpenPopover(null)}
-                                    className="flex-1"
+                                    className="flex-1 h-7 text-xs"
                                   >
                                     Cancel
                                   </Button>
@@ -212,10 +264,10 @@ const TimelineSettings: React.FC<TimelineSettingsProps> = ({
                                     size="sm"
                                     variant="destructive"
                                     onClick={() => {
-                                      removeEvent(index);
+                                      removeMilestone(index);
                                       setOpenPopover(null);
                                     }}
-                                    className="flex-1"
+                                    className="flex-1 h-7 text-xs"
                                   >
                                     Delete
                                   </Button>
@@ -225,46 +277,55 @@ const TimelineSettings: React.FC<TimelineSettingsProps> = ({
                           </Popover>
                         </div>
 
-                        <div className="grid grid-cols-1 gap-3">
-                          <div>
-                            <Label className="text-xs text-gray-600">
-                              Year
-                            </Label>
-                            <Input
-                              value={event.year}
-                              onChange={(e) =>
-                                updateEvent(index, { year: e.target.value })
-                              }
-                              placeholder="2024"
-                            />
+                        {/* Content Inputs */}
+                        <div className="p-4 grid gap-4">
+                          <div className="grid grid-cols-3 gap-4">
+                            <div className="col-span-1">
+                              <Label className="text-xs text-slate-500 mb-1.5 block">
+                                Date / Year
+                              </Label>
+                              <Input
+                                value={milestone.date}
+                                onChange={(e) =>
+                                  updateMilestone(index, {
+                                    date: e.target.value,
+                                  })
+                                }
+                                placeholder="2024"
+                                className="h-9 text-sm"
+                              />
+                            </div>
+                            <div className="col-span-2">
+                              <Label className="text-xs text-slate-500 mb-1.5 block">
+                                Title
+                              </Label>
+                              <Input
+                                value={milestone.title}
+                                onChange={(e) =>
+                                  updateMilestone(index, {
+                                    title: e.target.value,
+                                  })
+                                }
+                                placeholder="Milestone Title"
+                                className="h-9 text-sm"
+                              />
+                            </div>
                           </div>
 
                           <div>
-                            <Label className="text-xs text-gray-600">
-                              Event Title
-                            </Label>
-                            <Input
-                              value={event.title}
-                              onChange={(e) =>
-                                updateEvent(index, { title: e.target.value })
-                              }
-                              placeholder="Milestone Achievement"
-                            />
-                          </div>
-
-                          <div>
-                            <Label className="text-xs text-gray-600">
+                            <Label className="text-xs text-slate-500 mb-1.5 block">
                               Description
                             </Label>
                             <Textarea
-                              value={event.description}
+                              value={milestone.description}
                               onChange={(e) =>
-                                updateEvent(index, {
+                                updateMilestone(index, {
                                   description: e.target.value,
                                 })
                               }
-                              placeholder="Describe this important milestone..."
+                              placeholder="Describe what happened..."
                               rows={2}
+                              className="text-sm resize-none bg-slate-50/30 focus:bg-white transition-colors"
                             />
                           </div>
                         </div>

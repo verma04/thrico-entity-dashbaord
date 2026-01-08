@@ -8,7 +8,15 @@ import ReactCrop, {
   makeAspectCrop,
 } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
-import { Upload, X, Image as ImageIcon, Loader2, Circle, Square, Maximize2 } from "lucide-react";
+import {
+  Upload,
+  X,
+  Image as ImageIcon,
+  Loader2,
+  Circle,
+  Square,
+  Maximize2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -79,6 +87,7 @@ interface ImageUploadWithCropProps {
   onUploadComplete?: (url: string) => void;
   onUploadError?: (error: Error) => void;
   disablePreview?: boolean;
+  customUploadHandler?: (file: File) => Promise<string>;
 }
 
 function centerAspectCrop(
@@ -147,6 +156,7 @@ export const ImageUploadWithCrop = ({
   onUploadComplete,
   onUploadError,
   disablePreview = false,
+  customUploadHandler,
 }: ImageUploadWithCropProps) => {
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [imgSrc, setImgSrc] = useState("");
@@ -154,50 +164,68 @@ export const ImageUploadWithCrop = ({
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
   const [customWidth, setCustomWidth] = useState(recommendedWidth);
   const [customHeight, setCustomHeight] = useState(recommendedHeight);
-  const [selectedAspectRatio, setSelectedAspectRatio] = useState<number | undefined>(aspectRatio);
+  const [selectedAspectRatio, setSelectedAspectRatio] = useState<
+    number | undefined
+  >(aspectRatio);
   const [imageQuality, setImageQuality] = useState(defaultQuality);
   const [outputFormat, setOutputFormat] = useState<OutputFormat>(defaultFormat);
   const [zoom, setZoom] = useState(1);
   const [isDragging, setIsDragging] = useState(false);
+  const [isCustomUploading, setIsCustomUploading] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
-  const [uploadImage, { loading: uploading }] = useUploadImage({
+  const [uploadImage, { loading: defaultUploading }] = useUploadImage({
     onCompleted: (data: any) => {
       if (data?.uploadImage) {
         const cdnUrl = `https://cdn.thrico.network/${data.uploadImage}`;
-        onImageUpdate(cdnUrl);
-        onUploadComplete?.(cdnUrl);
-        toast({
-          title: "Success",
-          description: `${label} uploaded successfully!`,
-        });
-        setIsEditorOpen(false);
-        setImgSrc("");
-        // Reset file input to allow uploading new images
-        if (fileInputRef.current) {
-          fileInputRef.current.value = "";
-        }
+        handleUploadSuccess(cdnUrl);
       }
     },
     onError: (error: any) => {
-      const err = new Error(error.message || `Failed to upload ${label.toLowerCase()}`);
-      onUploadError?.(err);
-      toast({
-        title: "Error",
-        description: err.message,
-        variant: "destructive",
-      });
+      handleUploadError(error);
     },
   });
+
+  const uploading = defaultUploading || isCustomUploading;
+
+  const handleUploadSuccess = (url: string) => {
+    onImageUpdate(url);
+    onUploadComplete?.(url);
+    toast({
+      title: "Success",
+      description: `${label} uploaded successfully!`,
+    });
+    setIsEditorOpen(false);
+    setImgSrc("");
+    // Reset file input to allow uploading new images
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const handleUploadError = (error: any) => {
+    const err = new Error(
+      error.message || `Failed to upload ${label.toLowerCase()}`
+    );
+    onUploadError?.(err);
+    toast({
+      title: "Error",
+      description: err.message,
+      variant: "destructive",
+    });
+    setIsCustomUploading(false);
+  };
 
   const validateFile = (file: File): boolean => {
     // Check file type
     if (!allowedFormats.includes(file.type)) {
       toast({
         title: "Invalid file type",
-        description: `Please upload ${allowedFormats.map(f => f.split('/')[1].toUpperCase()).join(', ')} files only`,
+        description: `Please upload ${allowedFormats
+          .map((f) => f.split("/")[1].toUpperCase())
+          .join(", ")} files only`,
         variant: "destructive",
       });
       return false;
@@ -269,13 +297,13 @@ export const ImageUploadWithCrop = ({
 
   const onImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
     const { width, height } = e.currentTarget;
-    const aspect = selectedAspectRatio || (aspectRatio ?? (width / height));
+    const aspect = selectedAspectRatio || (aspectRatio ?? width / height);
     const initialCrop = centerAspectCrop(width, height, aspect);
     setCrop(initialCrop);
-    
+
     // Also set completedCrop so the image can be saved even without manual interaction
     setCompletedCrop({
-      unit: 'px',
+      unit: "px",
       x: (initialCrop.x / 100) * width,
       y: (initialCrop.y / 100) * height,
       width: (initialCrop.width / 100) * width,
@@ -309,7 +337,7 @@ export const ImageUploadWithCrop = ({
 
     // Enable image smoothing for better quality
     ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'high';
+    ctx.imageSmoothingQuality = "high";
 
     ctx.drawImage(
       image,
@@ -324,9 +352,12 @@ export const ImageUploadWithCrop = ({
     );
 
     // Determine MIME type based on selected format
-    const mimeType = outputFormat === "jpeg" ? "image/jpeg" : 
-                     outputFormat === "webp" ? "image/webp" : 
-                     "image/png";
+    const mimeType =
+      outputFormat === "jpeg"
+        ? "image/jpeg"
+        : outputFormat === "webp"
+        ? "image/webp"
+        : "image/png";
 
     // Convert quality from 0-100 to 0-1
     const quality = imageQuality / 100;
@@ -348,22 +379,32 @@ export const ImageUploadWithCrop = ({
       const croppedBlob = await getCroppedImg();
       if (croppedBlob) {
         const extension = outputFormat === "jpeg" ? "jpg" : outputFormat;
-        const mimeType = outputFormat === "jpeg" ? "image/jpeg" : 
-                         outputFormat === "webp" ? "image/webp" : 
-                         "image/png";
+        const mimeType =
+          outputFormat === "jpeg"
+            ? "image/jpeg"
+            : outputFormat === "webp"
+            ? "image/webp"
+            : "image/png";
         const file = new File(
-          [croppedBlob], 
-          `${label.toLowerCase().replace(/\s+/g, '-')}.${extension}`, 
+          [croppedBlob],
+          `${label.toLowerCase().replace(/\s+/g, "-")}.${extension}`,
           { type: mimeType }
         );
-        await uploadImage({ variables: { file } });
+
+        if (customUploadHandler) {
+          setIsCustomUploading(true);
+          try {
+            const url = await customUploadHandler(file);
+            handleUploadSuccess(url);
+          } catch (error) {
+            handleUploadError(error);
+          }
+        } else {
+          await uploadImage({ variables: { file } });
+        }
       }
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to process image. Please try again.",
-        variant: "destructive",
-      });
+      handleUploadError(error);
     }
   };
 
@@ -378,13 +419,15 @@ export const ImageUploadWithCrop = ({
     <>
       <div className={cn("space-y-2", className)}>
         {label && <Label>{label}</Label>}
-        
+
         {currentImage && !disablePreview ? (
           <div className="space-y-3">
-            <div className={cn(
-              "border rounded-lg p-4 bg-muted/30 flex items-center justify-center",
-              previewClassName
-            )}>
+            <div
+              className={cn(
+                "border rounded-lg p-4 bg-muted/30 flex items-center justify-center",
+                previewClassName
+              )}
+            >
               <img
                 src={currentImage}
                 alt={label}
@@ -417,7 +460,9 @@ export const ImageUploadWithCrop = ({
                 aria-label={removeButtonText || "Remove image"}
               >
                 <X className="h-4 w-4" />
-                {removeButtonText && <span className="ml-2">{removeButtonText}</span>}
+                {removeButtonText && (
+                  <span className="ml-2">{removeButtonText}</span>
+                )}
               </Button>
             </div>
           </div>
@@ -426,7 +471,9 @@ export const ImageUploadWithCrop = ({
             className={cn(
               "border-2 border-dashed rounded-lg p-6 text-center transition-all duration-200",
               enableDragDrop && "cursor-pointer",
-              !uploading && enableDragDrop && "hover:border-primary/50 hover:bg-primary/5",
+              !uploading &&
+                enableDragDrop &&
+                "hover:border-primary/50 hover:bg-primary/5",
               uploading && "opacity-50 cursor-not-allowed",
               isDragging && "border-primary bg-primary/10 scale-[1.02]",
               dropzoneClassName
@@ -439,27 +486,32 @@ export const ImageUploadWithCrop = ({
             aria-label={uploadButtonText || `Upload ${label}`}
             tabIndex={uploading ? -1 : 0}
             onKeyDown={(e) => {
-              if ((e.key === 'Enter' || e.key === ' ') && !uploading) {
+              if ((e.key === "Enter" || e.key === " ") && !uploading) {
                 e.preventDefault();
                 fileInputRef.current?.click();
               }
             }}
           >
-            <ImageIcon className={cn(
-              "h-8 w-8 mx-auto mb-2 transition-colors",
-              isDragging ? "text-primary" : "text-muted-foreground"
-            )} />
-            <p className={cn(
-              "text-sm font-medium transition-colors",
-              isDragging ? "text-primary" : "text-foreground"
-            )}>
-              {isDragging 
-                ? `Drop ${label} here` 
-                : uploadButtonText || `Upload ${label}`
-              }
+            <ImageIcon
+              className={cn(
+                "h-8 w-8 mx-auto mb-2 transition-colors",
+                isDragging ? "text-primary" : "text-muted-foreground"
+              )}
+            />
+            <p
+              className={cn(
+                "text-sm font-medium transition-colors",
+                isDragging ? "text-primary" : "text-foreground"
+              )}
+            >
+              {isDragging
+                ? `Drop ${label} here`
+                : uploadButtonText || `Upload ${label}`}
             </p>
             {customDescription ? (
-              <p className="text-xs text-muted-foreground mt-2">{customDescription}</p>
+              <p className="text-xs text-muted-foreground mt-2">
+                {customDescription}
+              </p>
             ) : (
               <>
                 {!hideRecommendedSize && (
@@ -468,7 +520,8 @@ export const ImageUploadWithCrop = ({
                   </p>
                 )}
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  {enableDragDrop ? "Click or drag & drop •" : ""} Max size: {maxFileSize}MB
+                  {enableDragDrop ? "Click or drag & drop •" : ""} Max size:{" "}
+                  {maxFileSize}MB
                 </p>
               </>
             )}
@@ -486,9 +539,8 @@ export const ImageUploadWithCrop = ({
         />
       </div>
 
-      {/* Image Editor Dialog */}
       <Dialog open={isEditorOpen} onOpenChange={setIsEditorOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto z-[9999]">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto z-9999">
           <DialogHeader>
             <DialogTitle>Edit {label}</DialogTitle>
             <DialogDescription>
@@ -512,17 +564,25 @@ export const ImageUploadWithCrop = ({
                       <Button
                         key={preset.label}
                         type="button"
-                        variant={selectedAspectRatio === preset.value ? "default" : "outline"}
+                        variant={
+                          selectedAspectRatio === preset.value
+                            ? "default"
+                            : "outline"
+                        }
                         size="sm"
                         onClick={() => {
                           setSelectedAspectRatio(preset.value);
                           if (imgRef.current) {
                             const { width, height } = imgRef.current;
                             const aspect = preset.value || width / height;
-                            const newCrop = centerAspectCrop(width, height, aspect);
+                            const newCrop = centerAspectCrop(
+                              width,
+                              height,
+                              aspect
+                            );
                             setCrop(newCrop);
                             setCompletedCrop({
-                              unit: 'px',
+                              unit: "px",
                               x: (newCrop.x / 100) * width,
                               y: (newCrop.y / 100) * height,
                               width: (newCrop.width / 100) * width,
@@ -584,7 +644,11 @@ export const ImageUploadWithCrop = ({
                   <div className="col-span-2">
                     <p className="text-xs text-muted-foreground">
                       💡 Recommended: {recommendedWidth}x{recommendedHeight}px
-                      {enableZoom && zoom !== 1 && ` • Final: ${Math.round(customWidth * zoom)}x${Math.round(customHeight * zoom)}px`}
+                      {enableZoom &&
+                        zoom !== 1 &&
+                        ` • Final: ${Math.round(
+                          customWidth * zoom
+                        )}x${Math.round(customHeight * zoom)}px`}
                     </p>
                   </div>
                 </div>
@@ -610,8 +674,8 @@ export const ImageUploadWithCrop = ({
                         className="max-w-full"
                         style={{
                           transform: `scale(${zoom})`,
-                          transformOrigin: 'center',
-                          transition: 'transform 0.2s ease-out'
+                          transformOrigin: "center",
+                          transition: "transform 0.2s ease-out",
                         }}
                       />
                     </ReactCrop>
@@ -646,7 +710,8 @@ export const ImageUploadWithCrop = ({
                     className="w-full"
                   />
                   <p className="text-xs text-muted-foreground">
-                    Higher quality = larger file size. Recommended: 80-95% for web.
+                    Higher quality = larger file size. Recommended: 80-95% for
+                    web.
                   </p>
                 </div>
               )}
@@ -657,15 +722,23 @@ export const ImageUploadWithCrop = ({
                   <Label htmlFor="format">Output Format</Label>
                   <Select
                     value={outputFormat}
-                    onValueChange={(value: OutputFormat) => setOutputFormat(value)}
+                    onValueChange={(value: OutputFormat) =>
+                      setOutputFormat(value)
+                    }
                   >
                     <SelectTrigger id="format">
                       <SelectValue placeholder="Select format" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="png">PNG (Lossless, larger file)</SelectItem>
-                      <SelectItem value="jpeg">JPEG (Lossy, smaller file)</SelectItem>
-                      <SelectItem value="webp">WebP (Modern, best compression)</SelectItem>
+                      <SelectItem value="png">
+                        PNG (Lossless, larger file)
+                      </SelectItem>
+                      <SelectItem value="jpeg">
+                        JPEG (Lossy, smaller file)
+                      </SelectItem>
+                      <SelectItem value="webp">
+                        WebP (Modern, best compression)
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -690,7 +763,9 @@ export const ImageUploadWithCrop = ({
                     className="w-full"
                   />
                   <p className="text-xs text-muted-foreground">
-                    Zoom the output image. Final size: {Math.round(customWidth * zoom)}x{Math.round(customHeight * zoom)}px
+                    Zoom the output image. Final size:{" "}
+                    {Math.round(customWidth * zoom)}x
+                    {Math.round(customHeight * zoom)}px
                   </p>
                 </div>
               )}
@@ -700,20 +775,25 @@ export const ImageUploadWithCrop = ({
                 <h4 className="text-sm font-medium">File Information</h4>
                 <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
                   <div>
-                    <span className="font-medium">Format:</span> {outputFormat.toUpperCase()}
+                    <span className="font-medium">Format:</span>{" "}
+                    {outputFormat.toUpperCase()}
                   </div>
                   <div>
-                    <span className="font-medium">Quality:</span> {imageQuality}%
+                    <span className="font-medium">Quality:</span> {imageQuality}
+                    %
                   </div>
                   <div>
-                    <span className="font-medium">Dimensions:</span> {Math.round(customWidth * zoom)}x{Math.round(customHeight * zoom)}px
+                    <span className="font-medium">Dimensions:</span>{" "}
+                    {Math.round(customWidth * zoom)}x
+                    {Math.round(customHeight * zoom)}px
                   </div>
                   <div>
                     <span className="font-medium">Aspect:</span>{" "}
-                    {selectedAspectRatio 
-                      ? aspectRatioPresets.find(p => p.value === selectedAspectRatio)?.label || "Custom"
-                      : "Free"
-                    }
+                    {selectedAspectRatio
+                      ? aspectRatioPresets.find(
+                          (p) => p.value === selectedAspectRatio
+                        )?.label || "Custom"
+                      : "Free"}
                   </div>
                 </div>
               </div>
@@ -734,7 +814,7 @@ export const ImageUploadWithCrop = ({
             </Button>
             <Button onClick={handleSave} disabled={!completedCrop || uploading}>
               {uploading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              {uploading ? "Uploading..." : (saveButtonText || `Save ${label}`)}
+              {uploading ? "Uploading..." : saveButtonText || `Save ${label}`}
             </Button>
           </DialogFooter>
         </DialogContent>

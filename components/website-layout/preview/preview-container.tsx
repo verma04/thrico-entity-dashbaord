@@ -16,6 +16,7 @@ export const PreviewContainer = ({
   return (
     <div className="flex-1 overflow-auto bg-muted/30 p-4">
       <div
+        id="website-preview-container"
         className={cn(
           "mx-auto transition-all duration-300 bg-white shadow-lg overflow-hidden",
           previewDevice === "desktop" && "w-full",

@@ -1,7 +1,400 @@
+"use client";
+
 import React from "react";
 import { ModuleData } from "@/store/useWebsiteBuilderStore";
+import { cn } from "@/lib/utils";
 import { ModuleHeader } from "./module-header";
 import { ModuleContainer } from "./module-container";
+import {
+  Play,
+  Mic2,
+  Clock,
+  Calendar,
+  Share2,
+  MoreHorizontal,
+  SkipBack,
+  SkipForward,
+  Volume2,
+  Maximize2,
+  Sparkles,
+  PlayCircle,
+  Headphones,
+  ArrowRight,
+  ListMusic,
+  ChevronRight,
+} from "lucide-react";
+
+// --- Interfaces ---
+
+interface Episode {
+  id?: string;
+  number?: string;
+  title?: string;
+  date?: string;
+  duration?: string;
+  description?: string;
+  guest?: string;
+  audioUrl?: string;
+  thumbnail?: string;
+  season?: number;
+}
+
+interface LayoutProps {
+  episodes: Episode[];
+  isMobile?: boolean;
+}
+
+// --- Episode List Layout ---
+
+export const EpisodeList: React.FC<LayoutProps> = ({ episodes }) => {
+  return (
+    <div className="space-y-4 max-w-5xl mx-auto">
+      {episodes.map((episode, idx) => (
+        <div
+          key={idx}
+          className="group relative bg-white p-6 sm:p-8 rounded-[2.5rem] border border-slate-200 hover:border-slate-900/10 hover:shadow-2xl hover:shadow-blue-500/5 transition-all duration-500"
+        >
+          <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-10">
+            {/* Play Button & Number */}
+            <div className="relative flex-shrink-0">
+              <button className="w-16 h-16 bg-slate-900 text-white rounded-2xl flex items-center justify-center hover:bg-blue-600 transition-colors shadow-lg active:scale-90 group/play">
+                <Play className="w-6 h-6 fill-current ml-1 group-hover/play:scale-110 transition-transform" />
+              </button>
+              <span className="absolute -top-3 -left-3 bg-white border border-slate-200 w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-black text-slate-400">
+                {episode.number || String(idx + 1).padStart(2, "0")}
+              </span>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 min-w-0 text-center sm:text-left">
+              <div className="flex flex-wrap justify-center sm:justify-start items-center gap-3 mb-2">
+                <h3 className="text-xl font-black text-slate-900 tracking-tight group-hover:text-blue-600 transition-colors truncate max-w-md">
+                  {episode.title}
+                </h3>
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-3 py-1 rounded-lg border border-slate-100">
+                  With {episode.guest || "Guest Speaker"}
+                </span>
+              </div>
+
+              <p className="text-slate-500 text-sm leading-relaxed mb-4 line-clamp-1">
+                {episode.description ||
+                  "Join us for an in-depth conversation on the next phase of modular disruption."}
+              </p>
+
+              <div className="flex flex-wrap justify-center sm:justify-start items-center gap-x-6 gap-y-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                <span className="flex items-center gap-2">
+                  <Calendar className="w-3.5 h-3.5" />{" "}
+                  {episode.date || "Coming Soon"}
+                </span>
+                <span className="flex items-center gap-2">
+                  <Clock className="w-3.5 h-3.5" /> {episode.duration || "45m"}
+                </span>
+                <span className="flex items-center gap-2 text-blue-500">
+                  <Mic2 className="w-3.5 h-3.5" /> Season {episode.season || 1}
+                </span>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex-shrink-0 flex items-center gap-3">
+              <button className="p-3 rounded-xl border border-slate-100 text-slate-400 hover:text-slate-900 hover:bg-slate-50 transition-all">
+                <Share2 className="w-4 h-4" />
+              </button>
+              <button className="p-3 rounded-xl border border-slate-100 text-slate-400 hover:text-slate-900 hover:bg-slate-50 transition-all">
+                <MoreHorizontal className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// --- Featured Episode Layout ---
+
+export const FeaturedEpisode: React.FC<LayoutProps> = ({ episodes }) => {
+  // Use the first episode as featured or a default placeholder
+  const episode = episodes[0] || {
+    title: "The Architecture of Autonomy",
+    guest: "Dr. Elena Vance",
+    duration: "1h 12m",
+    description:
+      "Deep dive into how modular systems and autonomous agents are converging to create the next generation of resilient infrastructure.",
+  };
+
+  return (
+    <div className="relative bg-slate-900 rounded-[4rem] overflow-hidden border border-white/10 shadow-3xl group max-w-6xl mx-auto">
+      {/* Background Visuals */}
+      <div className="absolute inset-0 bg-slate-900" />
+      {/* Optional: Add a real background image logic here if available in module settings */}
+      <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent" />
+
+      <div className="relative p-10 lg:p-20">
+        <div className="flex flex-col lg:flex-row gap-16 items-center">
+          {/* Play/Thumbnail Side */}
+          <div className="relative flex-shrink-0 group/cover">
+            <div className="w-64 h-64 lg:w-80 lg:h-80 bg-slate-800 rounded-[3rem] border border-white/10 overflow-hidden shadow-2xl relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-indigo-900 opacity-40 group-hover/cover:opacity-60 transition-opacity" />
+              {episode.thumbnail ? (
+                <img
+                  src={episode.thumbnail}
+                  alt={episode.title}
+                  className="w-full h-full object-cover opacity-80"
+                />
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Mic2 className="w-24 h-24 text-white/20 group-hover/cover:scale-110 transition-transform duration-700" />
+                </div>
+              )}
+            </div>
+            <button className="absolute -bottom-8 -right-8 w-24 h-24 bg-white text-slate-900 rounded-full flex items-center justify-center shadow-2xl hover:bg-blue-600 hover:text-white transition-all active:scale-90 z-20">
+              <Play className="w-10 h-10 fill-current ml-1" />
+            </button>
+          </div>
+
+          {/* Info Side */}
+          <div className="flex-1 text-center lg:text-left">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-600/30 border border-blue-500/30 text-blue-400 text-xs font-black uppercase tracking-widest mb-10 backdrop-blur-xl">
+              <Sparkles className="w-3.5 h-3.5 animate-pulse" />
+              Featured Episode
+            </div>
+
+            <h2 className="text-4xl lg:text-6xl font-black text-white mb-6 tracking-tighter leading-tight italic">
+              {episode.title}
+            </h2>
+
+            <div className="flex flex-wrap justify-center lg:justify-start items-center gap-6 mb-10">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-xl">
+                  {episode.guest ? "👤" : "🎤"}
+                </div>
+                <span className="text-lg font-black text-blue-100 italic">
+                  {episode.guest || "Special Guest"}
+                </span>
+              </div>
+              <div className="h-px w-10 bg-white/10 hidden lg:block" />
+              <span className="text-sm font-black text-white/40 uppercase tracking-[0.2em]">
+                {episode.duration || "45m"}
+              </span>
+            </div>
+
+            <p className="text-blue-100/50 text-xl font-medium leading-relaxed max-w-2xl mb-12">
+              {episode.description}
+            </p>
+
+            {/* Player UI */}
+            <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-8 max-w-2xl">
+              <div className="flex items-center gap-8 text-white mb-8">
+                <SkipBack className="w-6 h-6 opacity-40 hover:opacity-100 cursor-pointer transition-opacity" />
+                <div className="flex-1 h-1.5 bg-white/10 rounded-full relative">
+                  <div className="absolute top-0 left-0 w-1/3 h-full bg-blue-500 rounded-full" />
+                  <div className="absolute top-1/2 left-1/3 -translate-y-1/2 -translate-x-1/2 w-4 h-4 bg-white rounded-full shadow-lg" />
+                </div>
+                <SkipForward className="w-6 h-6 opacity-40 hover:opacity-100 cursor-pointer transition-opacity" />
+              </div>
+
+              <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-white/40">
+                <span>24:12</span>
+                <div className="flex items-center gap-4">
+                  <Volume2 className="w-4 h-4" />
+                  <Maximize2 className="w-4 h-4" />
+                </div>
+                <span>{episode.duration}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// --- Player Cards Layout ---
+
+export const PlayerCards: React.FC<LayoutProps> = ({ episodes, isMobile }) => {
+  return (
+    <div
+      className={cn(
+        "grid gap-8",
+        isMobile ? "grid-cols-1" : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+      )}
+    >
+      {episodes.map((episode, idx) => (
+        <div
+          key={idx}
+          className="group relative bg-white rounded-[3.5rem] border border-slate-200 overflow-hidden hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 flex flex-col"
+        >
+          {/* Cover Art */}
+          <div className="relative h-72 overflow-hidden bg-slate-900">
+            {episode.thumbnail ? (
+              <img
+                src={episode.thumbnail}
+                alt={episode.title}
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 opacity-80"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-600 to-indigo-800">
+                <Headphones className="w-20 h-20 text-white/10 group-hover:scale-125 transition-transform duration-700" />
+              </div>
+            )}
+
+            {/* Play Button Overlay */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <button className="w-20 h-20 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full flex items-center justify-center text-white scale-0 group-hover:scale-100 transition-all duration-500 hover:bg-blue-600">
+                <PlayCircle className="w-10 h-10 ml-1" />
+              </button>
+            </div>
+
+            {/* Float Info */}
+            <div className="absolute bottom-6 left-6 right-6 flex items-center justify-between">
+              <span className="bg-slate-900/80 backdrop-blur-md text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-white/10">
+                EP {episode.number || idx + 1}
+              </span>
+              <div className="flex items-center gap-2 bg-blue-600/80 backdrop-blur-md text-white px-3 py-1.5 rounded-xl border border-blue-400/30">
+                <Volume2 className="w-3.5 h-3.5" />
+                <span className="text-[10px] font-black uppercase tracking-widest">
+                  {episode.duration || "24m"}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="p-10 flex-1 flex flex-col">
+            <h3 className="text-2xl font-black text-slate-900 tracking-tighter mb-4 leading-tight group-hover:text-blue-600 transition-colors line-clamp-2">
+              {episode.title}
+            </h3>
+
+            <p className="text-slate-500 text-sm leading-relaxed mb-8 line-clamp-3 italic">
+              "{episode.description}"
+            </p>
+
+            <div className="mt-auto pt-8 border-t border-slate-50 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-lg">
+                  {episode.guest ? "🗣️" : "👤"}
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xs font-black text-slate-900 line-clamp-1">
+                    {episode.guest || "Host"}
+                  </span>
+                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                    Featured Guest
+                  </span>
+                </div>
+              </div>
+              <ArrowRight className="w-5 h-5 text-slate-200 group-hover:text-slate-900 transition-colors" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// --- Season Grid Layout ---
+
+export const SeasonGrid: React.FC<LayoutProps> = ({ episodes, isMobile }) => {
+  // Group episodes by season
+  const groupedSeasons = episodes.reduce((acc, episode) => {
+    const seasonNum = episode.season || 1;
+    if (!acc[seasonNum]) {
+      acc[seasonNum] = {
+        number: seasonNum,
+        title: `Season ${seasonNum}`,
+        description: `Collection of episodes from season ${seasonNum}.`,
+        episodes: [],
+      };
+    }
+    acc[seasonNum].episodes.push(episode);
+    return acc;
+  }, {} as Record<number, { number: number; title: string; description: string; episodes: Episode[] }>);
+
+  const seasons = Object.values(groupedSeasons).sort(
+    (a, b) => a.number - b.number
+  );
+
+  // If no episodes, show default mock
+  if (seasons.length === 0) {
+    // Default empty state handled by parent, but just in case
+    return null;
+  }
+
+  return (
+    <div
+      className={cn(
+        "grid gap-10",
+        isMobile ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-2"
+      )}
+    >
+      {seasons.map((season, idx) => (
+        <div
+          key={idx}
+          className="group bg-slate-50 p-10 rounded-[3.5rem] border border-slate-100 hover:bg-white hover:border-blue-500/20 hover:shadow-2xl hover:shadow-blue-500/5 transition-all duration-500"
+        >
+          {/* Season Header */}
+          <div className="flex items-center justify-between mb-10">
+            <div className="flex items-center gap-5">
+              <div className="w-16 h-16 bg-slate-900 text-white rounded-3xl flex items-center justify-center shadow-lg group-hover:bg-blue-600 transition-colors">
+                <ListMusic className="w-8 h-8" />
+              </div>
+              <div>
+                <h3 className="text-2xl font-black text-slate-900 tracking-tight">
+                  {season.title}
+                </h3>
+                <p className="text-[10px] font-black text-blue-500 uppercase tracking-widest">
+                  Season {season.number} • {season.episodes.length} Episodes
+                </p>
+              </div>
+            </div>
+            <Share2 className="w-5 h-5 text-slate-300 hover:text-slate-900 cursor-pointer transition-colors" />
+          </div>
+
+          <p className="text-slate-500 text-sm leading-relaxed mb-10 font-medium">
+            {season.description}
+          </p>
+
+          {/* Episode Mini-List */}
+          <div className="space-y-3">
+            {season.episodes.slice(0, 5).map((ep, eIdx) => (
+              <div
+                key={eIdx}
+                className="bg-white p-5 rounded-2.5xl border border-slate-100 group-hover:border-slate-200 hover:border-blue-500/30 transition-all flex items-center justify-between group/item cursor-pointer"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center group-hover/item:bg-blue-600 group-hover/item:text-white transition-colors">
+                    <Play className="w-4 h-4 fill-current ml-0.5" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-black text-slate-900 group-hover/item:text-blue-600 transition-colors line-clamp-1">
+                      {ep.title}
+                    </h4>
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">
+                      {ep.date || "Now Playing"} • {ep.duration || "30m"}
+                    </span>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-slate-200 group-hover/item:text-slate-900 transition-colors" />
+              </div>
+            ))}
+            {season.episodes.length > 5 && (
+              <div className="text-center text-slate-400 text-xs py-2 italic">
+                + {season.episodes.length - 5} more episodes
+              </div>
+            )}
+          </div>
+
+          <button className="mt-10 w-full py-5 rounded-2.5xl bg-slate-900 text-white font-black uppercase tracking-widest text-[10px] hover:bg-blue-600 transition-all shadow-xl shadow-slate-900/10 active:scale-[0.98]">
+            Browse Season {season.number}
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// --- Main Module Component ---
 
 interface PodcastModuleProps {
   module: ModuleData;
@@ -11,13 +404,30 @@ interface PodcastModuleProps {
 export function PodcastModule({ module, previewDevice }: PodcastModuleProps) {
   const { layout, content } = module;
   const episodes = content.episodes || [];
-  
-  // Find featured episode and other episodes
-  const featuredEpisode = episodes.find((ep: any) => ep.isFeatured) || episodes[0];
-  const otherEpisodes = episodes.filter((ep: any) => ep !== featuredEpisode);
+  const isMobile = previewDevice === "mobile";
+
+  // Render appropriate layout
+  const renderLayout = () => {
+    switch (layout) {
+      case "episode-list":
+        return <EpisodeList episodes={episodes} isMobile={isMobile} />;
+      case "featured-episode":
+        return <FeaturedEpisode episodes={episodes} isMobile={isMobile} />;
+      case "player-cards":
+        return <PlayerCards episodes={episodes} isMobile={isMobile} />;
+      case "season-grid":
+        return <SeasonGrid episodes={episodes} isMobile={isMobile} />;
+      default:
+        // Default layout
+        return <PlayerCards episodes={episodes} isMobile={isMobile} />;
+    }
+  };
 
   return (
-    <ModuleContainer containerSettings={content.containerSettings} className="bg-white border-y">
+    <ModuleContainer
+      containerSettings={content.containerSettings}
+      className="bg-white border-y"
+    >
       <ModuleHeader
         title={content.title}
         description={content.description}
@@ -25,348 +435,15 @@ export function PodcastModule({ module, previewDevice }: PodcastModuleProps) {
         alignment="center"
       />
 
-        {episodes.length === 0 && (
-          <div className="text-center py-12 bg-gray-50 rounded-lg border">
-            <p className="text-muted-foreground">
-              No episodes added yet. Add episodes in the settings panel.
-            </p>
-          </div>
-        )}
-
-        {/* Episode Grid Layout */}
-        {layout === "episode-grid" && episodes.length > 0 && (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {episodes.map((episode: any, idx: number) => (
-              <div
-                key={idx}
-                className="bg-gray-50 rounded-lg border overflow-hidden"
-              >
-                <div className="h-32 bg-gradient-to-br from-purple-400 to-blue-500 overflow-hidden">
-                  {episode.thumbnail && <img src={episode.thumbnail} alt={episode.title} className="w-full h-full object-cover" />}
-                </div>
-                <div className="p-4">
-                  <h3 className="font-semibold mb-2">{episode.title || `Episode ${idx + 1}`}</h3>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    {episode.description || "Engaging discussion about important topics."}
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">
-                      {episode.duration || `${25 + idx * 5} min`}
-                    </span>
-                    <button className="text-purple-600 text-sm font-medium">
-                      ▶ Play
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Featured Episode Layout */}
-        {layout === "featured-episode" && episodes.length > 0 && (
-          <div className="space-y-8">
-            <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl p-8 text-white">
-              <div className="flex items-center gap-8">
-                <div className="w-32 h-32 bg-white bg-opacity-20 rounded-xl flex items-center justify-center text-4xl overflow-hidden">
-                  {featuredEpisode?.thumbnail ? (
-                    <img src={featuredEpisode.thumbnail} alt={featuredEpisode.title} className="w-full h-full object-cover" />
-                  ) : (
-                    "🎙️"
-                  )}
-                </div>
-                <div className="flex-1">
-                  <span className="bg-purple-500 bg-opacity-50 text-purple-100 text-sm px-3 py-1 rounded-full font-medium">
-                    FEATURED EPISODE
-                  </span>
-                  <h3 className="text-2xl font-bold mt-3 mb-3">
-                    {featuredEpisode?.title || "The Future of Innovation"}
-                  </h3>
-                  <p className="text-purple-100 mb-4">
-                    {featuredEpisode?.description || "Deep dive into emerging trends and technologies that will shape our industry."}
-                  </p>
-                  <div className="flex items-center gap-4">
-                    <button className="bg-white text-purple-600 px-6 py-2 rounded-lg font-medium hover:bg-purple-50 transition-colors">
-                      ▶ Play Now
-                    </button>
-                    <span className="text-purple-200 text-sm">{featuredEpisode?.duration || "45 minutes"}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            {otherEpisodes.length > 0 && (
-              <div className="grid md:grid-cols-2 gap-6">
-                {otherEpisodes.map((episode: any, idx: number) => (
-                  <div
-                    key={idx}
-                    className="bg-gray-50 p-6 rounded-lg border flex items-center gap-4"
-                  >
-                    <div className="w-16 h-16 bg-purple-100 rounded-lg flex items-center justify-center overflow-hidden">
-                      {episode.thumbnail ? (
-                        <img src={episode.thumbnail} alt={episode.title} className="w-full h-full object-cover" />
-                      ) : (
-                        "🎧"
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold mb-1">{episode.title || `Episode ${idx + 2}`}</h3>
-                      <p className="text-sm text-muted-foreground mb-2">
-                        {episode.description || "Key insights and expert perspectives."}
-                      </p>
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-muted-foreground">
-                          {episode.duration || `${30 + idx * 5} min`}
-                        </span>
-                        <button className="text-purple-600 text-sm font-medium">
-                          ▶ Play
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Series List Layout */}
-        {layout === "series-list" && episodes.length > 0 && (
-          <div className="space-y-8">
-            {[
-              "Innovation Talks",
-              "Expert Insights",
-              "Community Conversations",
-            ].map((series, seriesIdx) => (
-              <div key={series} className="bg-gray-50 rounded-xl border p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-bold text-purple-600">
-                    {series}
-                  </h3>
-                  <span className="text-sm text-muted-foreground">
-                    {8 + seriesIdx * 3} episodes
-                  </span>
-                </div>
-                <div className="space-y-4">
-                  {episodes.slice(seriesIdx * 3, (seriesIdx + 1) * 3).map((episode: any, idx: number) => (
-                    <div
-                      key={idx}
-                      className="flex items-center gap-4 p-3 bg-white rounded-lg"
-                    >
-                      <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center overflow-hidden">
-                        {episode.thumbnail ? (
-                          <img src={episode.thumbnail} alt={episode.title} className="w-full h-full object-cover" />
-                        ) : (
-                          "🎙️"
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-medium">
-                          {episode.title || `Episode ${idx + 1}: Key Topics`}
-                        </h4>
-                        <p className="text-sm text-muted-foreground">
-                          {episode.duration || `${20 + idx * 10} minutes`} {episode.date && `• ${episode.date}`}
-                        </p>
-                      </div>
-                      <button className="text-purple-600 text-sm font-medium px-3 py-1 rounded border border-purple-200">
-                        ▶ Play
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* List View Layout */}
-        {layout === "list-view" && episodes.length > 0 && (
-          <div className="space-y-6">
-            {episodes.map((episode: any, idx: number) => (
-              <div
-                key={idx}
-                className="bg-gray-50 p-6 rounded-lg border flex items-center gap-6"
-              >
-                <div className="w-16 h-16 bg-purple-100 rounded-lg flex items-center justify-center overflow-hidden">
-                  {episode.thumbnail ? (
-                    <img src={episode.thumbnail} alt={episode.title} className="w-full h-full object-cover" />
-                  ) : (
-                    "🎙️"
-                  )}
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold mb-2">
-                    {episode.title || `Episode ${idx + 1}: Topic Title`}
-                  </h3>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    {episode.description || "Description of the episode content and key discussion points."}
-                  </p>
-                  <div className="flex items-center gap-4">
-                    {episode.duration && (
-                      <span className="text-xs text-muted-foreground">
-                        {episode.duration}
-                      </span>
-                    )}
-                    {episode.date && (
-                      <span className="text-xs text-muted-foreground">
-                        {episode.date}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <button className="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors">
-                  Play ▶️
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Episode List Layout */}
-        {layout === "episode-list" && episodes.length > 0 && (
-          <div className="divide-y divide-gray-200">
-            {episodes.map((episode: any, idx: number) => (
-              <div
-                key={idx}
-                className="py-4 flex items-center gap-4 hover:bg-gray-50 px-4 rounded transition-colors"
-              >
-                <div className="w-12 h-12 bg-purple-100 rounded flex items-center justify-center text-purple-600 font-bold text-sm flex-shrink-0">
-                  {idx + 1}
-                </div>
-                <div className="w-12 h-12 bg-purple-100 rounded overflow-hidden flex-shrink-0">
-                  {episode.thumbnail ? (
-                    <img src={episode.thumbnail} alt={episode.title} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">🎙️</div>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-medium text-sm truncate">
-                    {episode.title || `Episode ${idx + 1}`}
-                  </h3>
-                  <p className="text-xs text-muted-foreground truncate">
-                    {episode.description || "Podcast episode"}
-                  </p>
-                </div>
-                <div className="text-xs text-muted-foreground hidden sm:block">
-                  {episode.duration || `${25 + idx * 5} min`}
-                </div>
-                <button className="text-purple-600 hover:text-purple-700 transition-colors flex-shrink-0">
-                  <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Player Cards Layout */}
-        {layout === "player-cards" && episodes.length > 0 && (
-          <div className="grid md:grid-cols-2 gap-6">
-            {episodes.map((episode: any, idx: number) => (
-              <div
-                key={idx}
-                className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl border border-purple-200 overflow-hidden"
-              >
-                <div className="h-48 bg-gradient-to-br from-purple-400 to-blue-500 overflow-hidden relative">
-                  {episode.thumbnail ? (
-                    <img src={episode.thumbnail} alt={episode.title} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-white text-6xl">
-                      🎧
-                    </div>
-                  )}
-                  <div className="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center">
-                    <button className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform">
-                      <svg className="w-8 h-8 text-purple-600 ml-1" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M8 5v14l11-7z" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-                <div className="p-6">
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="bg-purple-600 text-white text-xs px-2 py-1 rounded-full font-medium">
-                      EP {idx + 1}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {episode.duration || `${25 + idx * 5} min`}
-                    </span>
-                  </div>
-                  <h3 className="font-semibold mb-2 line-clamp-2">
-                    {episode.title || `Episode ${idx + 1}: Untitled`}
-                  </h3>
-                  <p className="text-sm text-muted-foreground line-clamp-3">
-                    {episode.description || "An engaging discussion covering important topics and insights."}
-                  </p>
-                  {episode.date && (
-                    <p className="text-xs text-muted-foreground mt-3">
-                      Released: {episode.date}
-                    </p>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Season Grid Layout */}
-        {layout === "season-grid" && episodes.length > 0 && (
-          <div className="space-y-8">
-            {[1, 2, 3].map((season) => {
-              const seasonEpisodes = episodes.slice((season - 1) * 4, season * 4);
-              if (seasonEpisodes.length === 0) return null;
-              
-              return (
-                <div key={season} className="bg-white border rounded-xl overflow-hidden">
-                  <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-4">
-                    <h3 className="text-xl font-bold">Season {season}</h3>
-                    <p className="text-purple-100 text-sm">{seasonEpisodes.length} episodes</p>
-                  </div>
-                  <div className="grid md:grid-cols-2 gap-4 p-6">
-                    {seasonEpisodes.map((episode: any, idx: number) => (
-                      <div
-                        key={idx}
-                        className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
-                      >
-                        <div className="w-16 h-16 bg-purple-100 rounded-lg overflow-hidden flex-shrink-0">
-                          {episode.thumbnail ? (
-                            <img src={episode.thumbnail} alt={episode.title} className="w-full h-full object-cover" />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-2xl">
-                              🎙️
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="bg-purple-600 text-white text-xs px-2 py-0.5 rounded font-medium">
-                              S{season}E{idx + 1}
-                            </span>
-                            <span className="text-xs text-muted-foreground">
-                              {episode.duration || `${20 + idx * 5} min`}
-                            </span>
-                          </div>
-                          <h4 className="font-medium text-sm truncate">
-                            {episode.title || `Episode ${idx + 1}`}
-                          </h4>
-                          <p className="text-xs text-muted-foreground truncate">
-                            {episode.description || "Episode description"}
-                          </p>
-                        </div>
-                        <button className="text-purple-600 hover:text-purple-700 transition-colors flex-shrink-0">
-                          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M8 5v14l11-7z" />
-                          </svg>
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
+      {episodes.length === 0 ? (
+        <div className="text-center py-12 bg-gray-50 rounded-lg border">
+          <p className="text-muted-foreground">
+            No episodes added yet. Add episodes in the settings panel.
+          </p>
+        </div>
+      ) : (
+        renderLayout()
+      )}
     </ModuleContainer>
   );
 }

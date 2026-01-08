@@ -21,8 +21,8 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   useGetWebsite,
-  useCreatePage,
   useUpdatePage,
+  useDeletePage,
 } from "@/graphql/actions/website";
 import { useToast } from "@/hooks/use-toast";
 import { PageListItem } from "@/components/pages/page-list-item";
@@ -45,31 +45,14 @@ const Page = () => {
     refetch,
   } = useGetWebsite({});
 
-  // Create page mutation
-  const [createPageMutation, { loading: creatingPage }] = useCreatePage({
-    onCompleted: (data) => {
-      toast({
-        title: "Success",
-        description: "Page created successfully!",
-      });
-      addPage(data.createPage.name, data.createPage.slug);
-      refetch();
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to create page",
-        variant: "destructive",
-      });
-    },
-  });
-
   // Update page mutation
   const [updatePageMutation, { loading: updatingPage }] = useUpdatePage({
     onCompleted: (data) => {
       toast({
         title: "Success",
-        description: `Page ${data.updatePage.isEnabled ? "published" : "unpublished"} successfully!`,
+        description: `Page ${
+          data.updatePage.isEnabled ? "published" : "unpublished"
+        } successfully!`,
       });
       togglePageStatus(data.updatePage.id);
       refetch();
@@ -82,6 +65,23 @@ const Page = () => {
       });
     },
   });
+  // Delete page mutation
+  const [deletePageMutation, { loading: deletingPage }] = useDeletePage({
+    onCompleted: () => {
+      toast({
+        title: "Success",
+        description: "Page deleted successfully!",
+      });
+      refetch();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete page",
+        variant: "destructive",
+      });
+    },
+  });
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState<{
@@ -90,47 +90,13 @@ const Page = () => {
     currentStatus: boolean;
   }>({ open: false, pageId: null, currentStatus: false });
 
+  const [deleteConfirmDialog, setDeleteConfirmDialog] = useState<{
+    open: boolean;
+    pageId: string | null;
+  }>({ open: false, pageId: null });
+
   // Use server pages if available, otherwise fallback to local store
   const displayPages = websiteData?.getWebsite?.pages;
-
-  const handleCreatePage = (name: string, slug: string) => {
-    if (!name || !slug) {
-      toast({
-        title: "Validation Error",
-        description: "Please fill in all fields",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!websiteData?.getWebsite?.id) {
-      toast({
-        title: "Error",
-        description: "Website not found",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const cleanSlug = slug
-      .toLowerCase()
-      .trim()
-      .replace(/[^\w\s-]/g, "")
-      .replace(/\s+/g, "-")
-      .replace(/-+/g, "-")
-      .replace(/^-+|-+$/g, "");
-
-    // Call GraphQL mutation
-    createPageMutation({
-      variables: {
-        websiteId: websiteData.getWebsite.id,
-        name: name,
-        slug: cleanSlug,
-      },
-    });
-
-    setIsCreateOpen(false);
-  };
 
   const handleEditPage = (pageId: string) => {
     setCurrentPage(pageId);
@@ -164,6 +130,23 @@ const Page = () => {
         },
       });
       setConfirmDialog({ open: false, pageId: null, currentStatus: false });
+    }
+  };
+
+  const handleDeletePage = (pageId: string) => {
+    setDeleteConfirmDialog({ open: true, pageId });
+  };
+
+  const confirmDelete = () => {
+    if (deleteConfirmDialog.pageId) {
+      deletePageMutation({
+        variables: {
+          pageId: deleteConfirmDialog.pageId,
+        },
+      });
+      // Also update local store
+      deletePage(deleteConfirmDialog.pageId);
+      setDeleteConfirmDialog({ open: false, pageId: null });
     }
   };
 
@@ -206,7 +189,8 @@ const Page = () => {
                     Unlock All Features with Premium
                   </p>
                   <p className="text-sm text-purple-700 mt-1">
-                    Upgrade to create unlimited pages, access advanced modules, and unlock all website builder features.
+                    Upgrade to create unlimited pages, access advanced modules,
+                    and unlock all website builder features.
                   </p>
                 </div>
                 <Button
@@ -240,7 +224,7 @@ const Page = () => {
                   key={page.id}
                   page={page}
                   onEdit={handleEditPage}
-                  onDelete={deletePage}
+                  onDelete={handleDeletePage}
                   onToggleStatus={handleToggleStatus}
                 />
               ))}
@@ -252,8 +236,11 @@ const Page = () => {
       <CreatePageDialog
         open={isCreateOpen}
         onOpenChange={setIsCreateOpen}
-        onCreatePage={handleCreatePage}
-        isCreating={creatingPage}
+        websiteId={websiteData?.getWebsite?.id}
+        onSuccess={(pageData) => {
+          addPage(pageData.name, pageData.slug);
+          refetch();
+        }}
       />
 
       <ConfirmDialog
@@ -268,27 +255,39 @@ const Page = () => {
         confirmText="Yes, Unpublish"
         confirmVariant="destructive"
       />
+
+      <ConfirmDialog
+        open={deleteConfirmDialog.open}
+        onOpenChange={(open) =>
+          !open && setDeleteConfirmDialog({ open: false, pageId: null })
+        }
+        onConfirm={confirmDelete}
+        title="Delete Page?"
+        description="Are you sure you want to delete this page? This action cannot be undone and all modules within this page will be permanently removed."
+        confirmText={deletingPage ? "Deleting..." : "Yes, Delete Page"}
+        confirmVariant="destructive"
+        isLoading={deletingPage}
+      />
     </div>
   );
 };
 
 export default Page;
 
-
-  const PageSkeleton = () => (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-        <div className="space-y-2 flex-1">
-          <Skeleton className="h-6 w-32" />
-          <Skeleton className="h-4 w-48" />
-        </div>
-        <Skeleton className="h-9 w-9 rounded-md" />
-      </CardHeader>
-      <CardContent>
-        <div className="flex items-center gap-2">
-          <Skeleton className="h-5 w-16" />
-          <Skeleton className="h-5 w-20" />
-        </div>
-      </CardContent>
-    </Card>
-  );
+const PageSkeleton = () => (
+  <Card>
+    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+      <div className="space-y-2 flex-1">
+        <Skeleton className="h-6 w-32" />
+        <Skeleton className="h-4 w-48" />
+      </div>
+      <Skeleton className="h-9 w-9 rounded-md" />
+    </CardHeader>
+    <CardContent>
+      <div className="flex items-center gap-2">
+        <Skeleton className="h-5 w-16" />
+        <Skeleton className="h-5 w-20" />
+      </div>
+    </CardContent>
+  </Card>
+);

@@ -39,12 +39,11 @@ export const PlanDrawer = () => {
         </div>
         <Button
           variant="ghost"
-          size="sm"
           onClick={handleClose}
-          className="absolute top-6 right-4 h-8 w-8 p-0 z-10"
+          className="absolute top-6 right-4 z-10 gap-2 text-muted-foreground hover:text-foreground"
         >
-          <X className="h-8 w-8" />
-          <span className="sr-only">Close</span>
+          Skip
+          <X className="h-5 w-5" />
         </Button>
       </div>
       <div className="flex-1 overflow-y-auto">

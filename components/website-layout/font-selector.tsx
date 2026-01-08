@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { useDrawerStore } from "@/store/drawerStore";
+import { useGetWebsite, useUpdateWebsiteFont } from "@/graphql/actions/website";
 
 const FONTS: {
   id: FontType;
@@ -142,6 +143,11 @@ const FontSelector = () => {
   const [isExpanded, setIsExpanded] = React.useState(false);
   const { isPremium } = useIsPremium();
 
+  const { data: websiteData } = useGetWebsite({});
+  const websiteId = websiteData?.getWebsite?.id;
+
+  const [updateFontMutation] = useUpdateWebsiteFont();
+
   const currentFontData = FONTS.find((f) => f.id === font) || FONTS[0];
 
   return (
@@ -254,6 +260,14 @@ const FontSelector = () => {
                   onClick={() => {
                     setFont(fontOption.id);
                     setIsExpanded(false);
+                    if (websiteId) {
+                      updateFontMutation({
+                        variables: {
+                          websiteId,
+                          font: fontOption.id,
+                        },
+                      });
+                    }
                   }}
                   className={cn(
                     "flex items-center gap-3 p-3 rounded-lg border-2 transition-all duration-200 text-left group hover:scale-[1.01] active:scale-[0.99]",

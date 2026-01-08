@@ -24,6 +24,8 @@ import {
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { useDrawerStore } from "@/store/drawerStore";
+import { ThemeCustomizer } from "./theme-customizer";
+import { Separator } from "@/components/ui/separator";
 
 const THEMES: {
   id: ThemeType;
@@ -252,6 +254,10 @@ const ThemeSelector = () => {
           Themes automatically adjust layouts and styling
         </p>
       </div>
+
+      {/* Custom Colors Section */}
+      <Separator className="my-4" />
+      <ThemeCustomizer />
     </div>
   );
 };

@@ -7,6 +7,11 @@ This documentation covers all GraphQL queries, mutations, and TypeScript hooks f
 - [Installation](#installation)
 - [Queries](#queries)
 - [Mutations](#mutations)
+- [Mutations](#mutations)
+  - [Website Settings](#website-settings)
+  - [Navbar & Footer](#navbar--footer)
+  - [Pages](#pages)
+  - [SEO](#seo)
 - [TypeScript Types](#typescript-types)
 - [Usage Examples](#usage-examples)
 
@@ -30,12 +35,14 @@ import {
 Fetch complete website data including navbar, footer, pages, and modules.
 
 **Parameters:**
+
 - `entityId: string` - The entity ID
 - `options?: QueryHookOptions` - Apollo query options
 
 **Returns:** `{ data, loading, error, refetch }`
 
 **Example:**
+
 ```typescript
 const { data, loading } = useGetWebsite("entity-123");
 const website = data?.getWebsite;
@@ -46,12 +53,14 @@ const website = data?.getWebsite;
 Fetch website data by slug (for public viewing).
 
 **Parameters:**
+
 - `slug: string` - The website slug
 - `options?: QueryHookOptions` - Apollo query options
 
 **Returns:** `{ data, loading, error, refetch }`
 
 **Example:**
+
 ```typescript
 const { data } = useGetWebsiteBySlug("my-company");
 const website = data?.getWebsiteBySlug;
@@ -62,15 +71,35 @@ const website = data?.getWebsiteBySlug;
 Fetch a single page with all its modules.
 
 **Parameters:**
+
 - `pageId: string` - The page ID
 - `options?: QueryHookOptions` - Apollo query options
 
 **Returns:** `{ data, loading, error, refetch }`
 
 **Example:**
+
 ```typescript
 const { data } = useGetPage("page-123");
 const page = data?.getPage;
+```
+
+### `useGetAllPagesSeo`
+
+Fetch SEO settings for all pages in a website.
+
+**Parameters:**
+
+- `websiteId: string` - The website ID
+- `options?: QueryHookOptions` - Apollo query options
+
+**Returns:** `{ data, loading, error, refetch }`
+
+**Example:**
+
+```typescript
+const { data } = useGetAllPagesSeo("web-123");
+const pages = data?.getAllPagesSeo;
 ```
 
 ## Mutations
@@ -82,10 +111,12 @@ const page = data?.getPage;
 Update the website theme.
 
 **Variables:**
+
 - `websiteId: string` - The website ID
 - `theme: string` - The new theme name
 
 **Example:**
+
 ```typescript
 const [updateTheme] = useUpdateWebsiteTheme();
 
@@ -102,10 +133,12 @@ await updateTheme({
 Update the website font.
 
 **Variables:**
+
 - `websiteId: string` - The website ID
 - `font: string` - The new font name
 
 **Example:**
+
 ```typescript
 const [updateFont] = useUpdateWebsiteFont();
 
@@ -122,9 +155,11 @@ await updateFont({
 Publish or unpublish the website.
 
 **Variables:**
+
 - `websiteId: string` - The website ID
 
 **Example:**
+
 ```typescript
 const [publishWebsite] = usePublishWebsite({
   onCompleted: (data) => {
@@ -144,12 +179,14 @@ await publishWebsite({
 Update navbar settings.
 
 **Variables:**
+
 - `websiteId: string` - The website ID
 - `layout?: string` - Navbar layout type
 - `content?: any` - Navbar content (JSON)
 - `isEnabled?: boolean` - Enable/disable navbar
 
 **Example:**
+
 ```typescript
 const [updateNavbar] = useUpdateNavbar();
 
@@ -174,12 +211,14 @@ await updateNavbar({
 Update footer settings.
 
 **Variables:**
+
 - `websiteId: string` - The website ID
 - `layout?: string` - Footer layout type
 - `content?: any` - Footer content (JSON)
 - `isEnabled?: boolean` - Enable/disable footer
 
 **Example:**
+
 ```typescript
 const [updateFooter] = useUpdateFooter();
 
@@ -205,11 +244,13 @@ await updateFooter({
 Create a new page.
 
 **Variables:**
+
 - `websiteId: string` - The website ID
 - `name: string` - Page name
 - `slug: string` - Page slug (URL path)
 
 **Example:**
+
 ```typescript
 const [createPage] = useCreatePage({
   onCompleted: (data) => {
@@ -231,12 +272,14 @@ await createPage({
 Update an existing page.
 
 **Variables:**
+
 - `pageId: string` - The page ID
 - `name?: string` - New page name
 - `slug?: string` - New page slug
 - `isEnabled?: boolean` - Enable/disable page
 
 **Example:**
+
 ```typescript
 const [updatePage] = useUpdatePage();
 
@@ -254,9 +297,11 @@ await updatePage({
 Delete a page.
 
 **Variables:**
+
 - `pageId: string` - The page ID
 
 **Example:**
+
 ```typescript
 const [deletePage] = useDeletePage({
   onCompleted: () => {
@@ -274,10 +319,12 @@ await deletePage({
 Reorder pages.
 
 **Variables:**
+
 - `websiteId: string` - The website ID
 - `pageIds: string[]` - Array of page IDs in new order
 
 **Example:**
+
 ```typescript
 const [reorderPages] = useReorderPages();
 
@@ -296,6 +343,7 @@ await reorderPages({
 Create a new module on a page.
 
 **Variables:**
+
 - `pageId: string` - The page ID
 - `type: string` - Module type (e.g., "hero", "about", "contact")
 - `name: string` - Module name
@@ -303,6 +351,7 @@ Create a new module on a page.
 - `content: any` - Module content (JSON)
 
 **Example:**
+
 ```typescript
 const [createModule] = useCreateModule();
 
@@ -326,6 +375,7 @@ await createModule({
 Update an existing module.
 
 **Variables:**
+
 - `moduleId: string` - The module ID
 - `name?: string` - New module name
 - `layout?: string` - New layout variant
@@ -333,6 +383,7 @@ Update an existing module.
 - `isEnabled?: boolean` - Enable/disable module
 
 **Example:**
+
 ```typescript
 const [updateModule] = useUpdateModule();
 
@@ -353,10 +404,12 @@ await updateModule({
 Reorder modules within a page.
 
 **Variables:**
+
 - `pageId: string` - The page ID
 - `moduleIds: string[]` - Array of module IDs in new order
 
 **Example:**
+
 ```typescript
 const [reorderModules] = useReorderModules();
 
@@ -364,6 +417,37 @@ await reorderModules({
   variables: {
     pageId: "page-123",
     moduleIds: ["mod-3", "mod-1", "mod-2"],
+  },
+});
+```
+
+### SEO
+
+#### `useUpdatePageSeo`
+
+Update SEO settings for a page.
+
+**Variables:**
+
+- `pageId: string` - The page ID
+- `title?: string` - Meta title
+- `description?: string` - Meta description
+- `keywords?: string[]` - Meta keywords
+- `schemaMarkup?: any` - JSON-LD schema markup
+- `includeInSitemap?: boolean` - Whether to include in sitemap
+
+**Example:**
+
+```typescript
+const [updateSeo] = useUpdatePageSeo();
+
+await updateSeo({
+  variables: {
+    pageId: "page-123",
+    title: "Eco-Friendly Products | My Store",
+    description: "Browse our sustainable collection.",
+    keywords: ["eco", "sustainable", "store"],
+    includeInSitemap: true,
   },
 });
 ```
@@ -429,7 +513,7 @@ import type { Website, Page, Module } from "@/graphql/actions/website";
 function MyComponent() {
   const { data } = useGetWebsite("entity-123");
   const website: Website | undefined = data?.getWebsite;
-  
+
   return <div>{website?.theme}</div>;
 }
 ```

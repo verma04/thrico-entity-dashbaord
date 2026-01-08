@@ -7,14 +7,7 @@ import {
 } from "@/store/useWebsiteBuilderStore";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import { Button } from "@/components/ui/button";
@@ -36,7 +29,7 @@ import EventsSettings from "./settings/events-settings";
 import FeatureHighlightsSettings from "./settings/feature-highlights-settings";
 import MediaGallerySettings from "./settings/media-gallery-settings";
 import BlogSettings from "./settings/blog-settings";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import React from "react";
 import { HeroSettings } from "./settings/hero-settings";
 import { PrivacyPolicySettings } from "./settings/privacy-policy-settings";
@@ -46,9 +39,16 @@ import { ContentSectionSettings } from "./settings/content-section-settings";
 import { ContactSettings } from "./settings/contact-settings";
 import CommunitiesSettings from "./settings/communities-settings";
 import CeoMessageSettings from "./settings/ceo-message-settings";
+import AboutSettings from "./settings/about-settings";
 import TestimonialsSettings from "./settings/testimonials-settings";
 import MarketplaceSettings from "./settings/marketplace-settings";
-import AboutSettings from "./settings/about-settings";
+import {
+  useUpdateModule,
+  useUpdateNavbar,
+  useUpdateFooter,
+  useGetWebsite,
+} from "@/graphql/actions/website";
+import { Loader2, Check } from "lucide-react";
 
 // Community Module Settings
 import { MemberSpotlightSettings } from "./settings/member-spotlight-settings";
@@ -155,13 +155,7 @@ const getAvailableLayouts = (
     ];
   }
   if (moduleType === "contact") {
-    return [
-      "simple-contact",
-      "support-focused",
-      "sales-inquiry",
-      "community-reach",
-      "location-office",
-    ];
+    return ["simple-contact"];
   }
   if (moduleType === "privacy-policy") {
     return ["simple-privacy", "legal-document", "tabbed-policy"];
@@ -176,13 +170,7 @@ const getAvailableLayouts = (
     return ["simple-accordion", "grid-cards", "highlight-feature"];
   }
   if (moduleType === "custom-content") {
-    return [
-      "details-list",
-      "alternating-grid",
-      "cards-grid",
-      "feature-showcase",
-      "text-focused",
-    ];
+    return ["details-list", "alternating-grid", "cards-grid", "text-focused"];
   }
   if (moduleType === "cta-banner") {
     return [
@@ -209,7 +197,6 @@ const getAvailableLayouts = (
       "monochrome-logos",
       "featured-logos",
       "minimal-strip",
-      "logo-marquee",
     ];
   }
   if (moduleType === "timeline") {
@@ -225,12 +212,7 @@ const getAvailableLayouts = (
     return ["horizontal-steps", "vertical-steps", "card-steps", "icon-steps"];
   }
   if (moduleType === "pricing") {
-    return [
-      "cards-pricing",
-      "table-pricing",
-      "toggle-pricing",
-      "simple-pricing",
-    ];
+    return ["cards-pricing", "table-pricing", "toggle-pricing"];
   }
   if (moduleType === "events") {
     return ["card-events", "list-events", "timeline-events", "calendar-events"];
@@ -293,10 +275,10 @@ const getAvailableLayouts = (
     ];
   }
   if (moduleType === "comparison-table") {
-    return ["table-grid"];
+    return ["standard-table", "feature-grid"];
   }
   if (moduleType === "location-map") {
-    return ["map-fullwidth"];
+    return ["full-width-map", "card-map", "split-map", "minimal-map"];
   }
   if (moduleType === "embed-block") {
     return ["fullwidth-embed"];
@@ -341,11 +323,11 @@ const getAvailableLayouts = (
   }
   if (moduleType === "milestones") {
     return [
-      "timeline-vertical",
-      "timeline-horizontal",
-      "milestone-cards",
-      "roadmap-view",
-      "achievement-list",
+      "vertical-milestones",
+      "horizontal-milestones",
+      "card-milestones",
+      "roadmap-milestones",
+      "list-milestones",
     ];
   }
   if (moduleType === "leaderboard") {
@@ -384,8 +366,8 @@ const getAvailableLayouts = (
     return [
       "research-list",
       "paper-grid",
-      "timeline-research",
-      "category-tabs",
+      "featured-research",
+      "publication-list",
     ];
   }
   if (moduleType === "benefits") {
@@ -476,6 +458,16 @@ const ModuleSettings = () => {
   } = useWebsiteBuilderStore();
 
   const [isExpanded, setIsExpanded] = React.useState(false);
+  const [updateModule, { loading: isUpdatingModule }] = useUpdateModule();
+  const [updateNavbar, { loading: isUpdatingNavbar }] = useUpdateNavbar();
+  const [updateFooter, { loading: isUpdatingFooter }] = useUpdateFooter();
+  const { data: websiteData } = useGetWebsite();
+
+  const isUpdating = isUpdatingModule || isUpdatingNavbar || isUpdatingFooter;
+  const websiteId = websiteData?.getWebsite?.id;
+
+  const [hasUnsavedChanges, setHasUnsavedChanges] = React.useState(false);
+  const [lastSavedContent, setLastSavedContent] = React.useState<any>(null);
 
   // Get current page's modules
   const currentPage = pages.find((p) => p.id === currentPageId);
@@ -501,6 +493,89 @@ const ModuleSettings = () => {
     }
   }, [selectedModuleId, selectedModule, selectModule]);
 
+  // Debounced autosave effect
+  useEffect(() => {
+    if (!selectedModule || !selectedModuleId) return;
+
+    // Initialize lastSavedContent if it's null
+    if (!lastSavedContent) {
+      setLastSavedContent({
+        name: selectedModule.name,
+        layout: selectedModule.layout,
+        content: JSON.parse(JSON.stringify(selectedModule.content)),
+      });
+      return;
+    }
+
+    // Check if anything meaningfully changed compared to last saved state
+    const currentSerializedContent = JSON.stringify(selectedModule.content);
+    const lastSerializedContent = JSON.stringify(lastSavedContent.content);
+
+    const hasChanged =
+      selectedModule.name !== lastSavedContent.name ||
+      selectedModule.layout !== lastSavedContent.layout ||
+      currentSerializedContent !== lastSerializedContent;
+
+    if (!hasChanged) return;
+
+    const timer = setTimeout(() => {
+      handleSave();
+    }, 3000); // 1 second debounce
+
+    return () => clearTimeout(timer);
+  }, [
+    selectedModule?.name,
+    selectedModule?.layout,
+    JSON.stringify(selectedModule?.content),
+  ]);
+
+  const handleSave = async () => {
+    if (!selectedModuleId || !selectedModule) return;
+
+    try {
+      setHasUnsavedChanges(false);
+
+      if (selectedModule.type === "navbar" && websiteId) {
+        await updateNavbar({
+          variables: {
+            websiteId,
+            layout: selectedModule.layout,
+            content: selectedModule.content,
+            isEnabled: selectedModule.isEnabled,
+          },
+        });
+      } else if (selectedModule.type === "footer" && websiteId) {
+        await updateFooter({
+          variables: {
+            websiteId,
+            layout: selectedModule.layout,
+            content: selectedModule.content,
+            isEnabled: selectedModule.isEnabled,
+          },
+        });
+      } else {
+        await updateModule({
+          variables: {
+            moduleId: selectedModuleId,
+            name: selectedModule.name,
+            layout: selectedModule.layout,
+            content: selectedModule.content,
+          },
+        });
+      }
+
+      // Update last saved state
+      setLastSavedContent({
+        name: selectedModule.name,
+        layout: selectedModule.layout,
+        content: JSON.parse(JSON.stringify(selectedModule.content)),
+      });
+    } catch (error) {
+      console.error("Autosave failed:", error);
+      setHasUnsavedChanges(true); // Mark as unsaved so user knows
+    }
+  };
+
   // If selectedModule is null, reset selectedModuleId to null
   if (!selectedModule) {
     if (selectedModuleId) selectModule(null);
@@ -519,68 +594,84 @@ const ModuleSettings = () => {
   return (
     <div
       className={cn(
-        "flex flex-col h-full bg-card border-l transition-all duration-300",
+        "flex flex-col h-full bg-card border-l transition-all duration-300 min-w-[340px]",
         isExpanded
           ? "w-full md:w-[800px] lg:w-[1000px] shadow-2xl z-1000"
           : "w-full"
       )}
     >
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b">
-        <div>
+      <div className="flex items-center w-full justify-between p-4 border-b ">
+        <div className="">
           <h3 className="font-semibold text-lg">{selectedModule.name}</h3>
           <p className="text-xs text-muted-foreground capitalize">
             {selectedModule.type} Module
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="p-2 hover:bg-muted rounded-lg transition-colors"
-            title={isExpanded ? "Collapse" : "Expand"}
-          >
-            {isExpanded ? (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M8 3v3a2 2 0 0 1-2 2H3" />
-                <path d="M21 8h-3a2 2 0 0 1-2-2V3" />
-                <path d="M3 16h3a2 2 0 0 1 2 2v3" />
-                <path d="M16 21v-3a2 2 0 0 1 2-2h3" />
-              </svg>
+        <div className="flex items-center gap-4">
+          {/* Saving Indicator */}
+          <div className="flex items-center gap-1.5 text-[10px] font-medium transition-all">
+            {isUpdating ? (
+              <>
+                <Loader2 className="h-3 w-3 animate-spin text-primary" />
+                <span className="text-muted-foreground">Saving...</span>
+              </>
             ) : (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M15 3h6v6" />
-                <path d="M9 21H3v-6" />
-                <path d="M21 3l-7 7" />
-                <path d="M3 21l7-7" />
-              </svg>
+              <>
+                <Check className="h-3 w-3 text-green-500" />
+                <span className="text-muted-foreground/50">Saved</span>
+              </>
             )}
-          </button>
-          <button
-            onClick={() => selectModule(null)}
-            className="p-2 hover:bg-muted rounded-full"
-          >
-            <X className="h-4 w-4" />
-          </button>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="p-2 hover:bg-muted rounded-lg transition-colors"
+              title={isExpanded ? "Collapse" : "Expand"}
+            >
+              {isExpanded ? (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M8 3v3a2 2 0 0 1-2 2H3" />
+                  <path d="M21 8h-3a2 2 0 0 1-2-2V3" />
+                  <path d="M3 16h3a2 2 0 0 1 2 2v3" />
+                  <path d="M16 21v-3a2 2 0 0 1 2-2h3" />
+                </svg>
+              ) : (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M15 3h6v6" />
+                  <path d="M9 21H3v-6" />
+                  <path d="M21 3l-7 7" />
+                  <path d="M3 21l7-7" />
+                </svg>
+              )}
+            </button>
+            <button
+              onClick={() => selectModule(null)}
+              className="p-2 hover:bg-muted rounded-full"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -667,7 +758,7 @@ const ModuleSettings = () => {
           {selectedModule.type === "hero" && (
             <HeroSettings
               content={selectedModule.content}
-              onChange={(updates) =>
+              onChange={(updates: any) =>
                 updateModuleContent(selectedModule.id, updates)
               }
               layout={selectedModule.layout}
@@ -677,7 +768,7 @@ const ModuleSettings = () => {
           {selectedModule.type === "wall-of-fame" && (
             <WallOfFameSettings
               content={selectedModule.content}
-              onChange={(updates) =>
+              onChange={(updates: any) =>
                 updateModuleContent(selectedModule.id, updates)
               }
               layout={selectedModule.layout}
@@ -687,7 +778,7 @@ const ModuleSettings = () => {
           {selectedModule.type === "communities" && (
             <CommunitiesSettings
               content={selectedModule.content}
-              onChange={(updates) =>
+              onChange={(updates: any) =>
                 updateModuleContent(selectedModule.id, updates)
               }
             />
@@ -697,9 +788,20 @@ const ModuleSettings = () => {
           {selectedModule.type === "ceo-message" && (
             <CeoMessageSettings
               content={selectedModule.content}
-              onChange={(updates) =>
+              onChange={(updates: any) =>
                 updateModuleContent(selectedModule.id, updates)
               }
+            />
+          )}
+
+          {/* MEMBER SPOTLIGHT: MEMBER EDITOR */}
+          {selectedModule.type === "member-spotlight" && (
+            <MemberSpotlightSettings
+              content={selectedModule.content}
+              onChange={(updates: any) =>
+                updateModuleContent(selectedModule.id, updates)
+              }
+              layout={selectedModule.layout}
             />
           )}
 
@@ -707,7 +809,7 @@ const ModuleSettings = () => {
           {selectedModule.type === "testimonials" && (
             <TestimonialsSettings
               content={selectedModule.content}
-              onChange={(updates) =>
+              onChange={(updates: any) =>
                 updateModuleContent(selectedModule.id, updates)
               }
             />
@@ -717,7 +819,7 @@ const ModuleSettings = () => {
           {selectedModule.type === "jobs" && (
             <JobsSettings
               content={selectedModule.content}
-              onChange={(updates) =>
+              onChange={(updates: any) =>
                 updateModuleContent(selectedModule.id, updates)
               }
             />
@@ -727,7 +829,16 @@ const ModuleSettings = () => {
           {selectedModule.type === "marketplace" && (
             <MarketplaceSettings
               content={selectedModule.content}
-              onChange={(updates) =>
+              onChange={(updates: any) =>
+                updateModuleContent(selectedModule.id, updates)
+              }
+            />
+          )}
+
+          {selectedModule.type === "location-map" && (
+            <LocationMapSettings
+              content={selectedModule.content}
+              onChange={(updates: any) =>
                 updateModuleContent(selectedModule.id, updates)
               }
             />
@@ -737,7 +848,7 @@ const ModuleSettings = () => {
           {selectedModule.type === "services" && (
             <ServicesSettings
               content={selectedModule.content}
-              onChange={(updates) =>
+              onChange={(updates: any) =>
                 updateModuleContent(selectedModule.id, updates)
               }
             />
@@ -747,7 +858,7 @@ const ModuleSettings = () => {
           {selectedModule.type === "contact" && (
             <ContactSettings
               content={selectedModule.content}
-              onChange={(updates) =>
+              onChange={(updates: any) =>
                 updateModuleContent(selectedModule.id, updates)
               }
               layout={selectedModule.layout}
@@ -758,7 +869,7 @@ const ModuleSettings = () => {
           {selectedModule.type === "privacy-policy" && (
             <PrivacyPolicySettings
               content={selectedModule.content}
-              onChange={(updates) =>
+              onChange={(updates: any) =>
                 updateModuleContent(selectedModule.id, updates)
               }
             />
@@ -768,7 +879,16 @@ const ModuleSettings = () => {
           {selectedModule.type === "team-members" && (
             <TeamSettings
               content={selectedModule.content}
-              onChange={(updates) =>
+              onChange={(updates: any) =>
+                updateModuleContent(selectedModule.id, updates)
+              }
+            />
+          )}
+
+          {selectedModule.type === "comparison-table" && (
+            <ComparisonTableSettings
+              content={selectedModule.content}
+              onChange={(updates: any) =>
                 updateModuleContent(selectedModule.id, updates)
               }
             />
@@ -778,7 +898,16 @@ const ModuleSettings = () => {
           {selectedModule.type === "terms-conditions" && (
             <PrivacyPolicySettings
               content={selectedModule.content}
-              onChange={(updates) =>
+              onChange={(updates: any) =>
+                updateModuleContent(selectedModule.id, updates)
+              }
+            />
+          )}
+
+          {selectedModule.type === "achievements" && (
+            <AchievementsSettings
+              content={selectedModule.content}
+              onChange={(updates: any) =>
                 updateModuleContent(selectedModule.id, updates)
               }
             />
@@ -788,7 +917,7 @@ const ModuleSettings = () => {
           {selectedModule.type === "faq" && (
             <FaqSettings
               content={selectedModule.content}
-              onChange={(updates) =>
+              onChange={(updates: any) =>
                 updateModuleContent(selectedModule.id, updates)
               }
             />
@@ -798,7 +927,7 @@ const ModuleSettings = () => {
           {selectedModule.type === "custom-content" && (
             <ContentSectionSettings
               content={selectedModule.content}
-              onChange={(updates) =>
+              onChange={(updates: any) =>
                 updateModuleContent(selectedModule.id, updates)
               }
             />
@@ -808,7 +937,7 @@ const ModuleSettings = () => {
           {selectedModule.type === "cta-banner" && (
             <CtaBannerSettings
               content={selectedModule.content}
-              onChange={(updates) =>
+              onChange={(updates: any) =>
                 updateModuleContent(selectedModule.id, updates)
               }
             />
@@ -818,7 +947,7 @@ const ModuleSettings = () => {
           {selectedModule.type === "stats" && (
             <StatsSettings
               content={selectedModule.content}
-              onChange={(updates) =>
+              onChange={(updates: any) =>
                 updateModuleContent(selectedModule.id, updates)
               }
             />
@@ -828,7 +957,7 @@ const ModuleSettings = () => {
           {selectedModule.type === "logo-cloud" && (
             <LogoCloudSettings
               content={selectedModule.content}
-              onChange={(updates) =>
+              onChange={(updates: any) =>
                 updateModuleContent(selectedModule.id, updates)
               }
             />
@@ -838,7 +967,7 @@ const ModuleSettings = () => {
           {selectedModule.type === "timeline" && (
             <TimelineSettings
               content={selectedModule.content}
-              onChange={(updates) =>
+              onChange={(updates: any) =>
                 updateModuleContent(selectedModule.id, updates)
               }
             />
@@ -848,7 +977,7 @@ const ModuleSettings = () => {
           {selectedModule.type === "process-steps" && (
             <ProcessStepsSettings
               content={selectedModule.content}
-              onChange={(updates) =>
+              onChange={(updates: any) =>
                 updateModuleContent(selectedModule.id, updates)
               }
             />
@@ -858,7 +987,7 @@ const ModuleSettings = () => {
           {selectedModule.type === "pricing" && (
             <PricingSettings
               content={selectedModule.content}
-              onChange={(updates) =>
+              onChange={(updates: any) =>
                 updateModuleContent(selectedModule.id, updates)
               }
             />
@@ -868,7 +997,7 @@ const ModuleSettings = () => {
           {selectedModule.type === "events" && (
             <EventsSettings
               content={selectedModule.content}
-              onChange={(updates) =>
+              onChange={(updates: any) =>
                 updateModuleContent(selectedModule.id, updates)
               }
             />
@@ -878,7 +1007,7 @@ const ModuleSettings = () => {
           {selectedModule.type === "feature-highlights" && (
             <FeatureHighlightsSettings
               content={selectedModule.content}
-              onChange={(updates) =>
+              onChange={(updates: any) =>
                 updateModuleContent(selectedModule.id, updates)
               }
             />
@@ -888,7 +1017,7 @@ const ModuleSettings = () => {
           {selectedModule.type === "media-gallery" && (
             <MediaGallerySettings
               content={selectedModule.content}
-              onChange={(updates) =>
+              onChange={(updates: any) =>
                 updateModuleContent(selectedModule.id, updates)
               }
             />
@@ -898,7 +1027,7 @@ const ModuleSettings = () => {
           {selectedModule.type === "blog" && (
             <BlogSettings
               content={selectedModule.content}
-              onChange={(updates) =>
+              onChange={(updates: any) =>
                 updateModuleContent(selectedModule.id, updates)
               }
             />
@@ -908,7 +1037,7 @@ const ModuleSettings = () => {
           {selectedModule.type === "about" && (
             <AboutSettings
               content={selectedModule.content}
-              onChange={(updates) =>
+              onChange={(updates: any) =>
                 updateModuleContent(selectedModule.id, updates)
               }
               layout={selectedModule.layout}
@@ -919,47 +1048,7 @@ const ModuleSettings = () => {
           {selectedModule.type === "member-spotlight" && (
             <MemberSpotlightSettings
               content={selectedModule.content}
-              onChange={(updates) =>
-                updateModuleContent(selectedModule.id, updates)
-              }
-              layout={selectedModule.layout}
-            />
-          )}
-
-          {selectedModule.type === "leaderboard" && (
-            <LeaderboardSettings
-              content={selectedModule.content}
-              onChange={(updates) =>
-                updateModuleContent(selectedModule.id, updates)
-              }
-              layout={selectedModule.layout}
-            />
-          )}
-
-          {selectedModule.type === "chapters" && (
-            <ChaptersSettings
-              content={selectedModule.content}
-              onChange={(updates) =>
-                updateModuleContent(selectedModule.id, updates)
-              }
-              layout={selectedModule.layout}
-            />
-          )}
-
-          {selectedModule.type === "polls" && (
-            <PollsSettings
-              content={selectedModule.content}
-              onChange={(updates) =>
-                updateModuleContent(selectedModule.id, updates)
-              }
-              layout={selectedModule.layout}
-            />
-          )}
-
-          {selectedModule.type === "social-feed" && (
-            <SocialFeedSettings
-              content={selectedModule.content}
-              onChange={(updates) =>
+              onChange={(updates: any) =>
                 updateModuleContent(selectedModule.id, updates)
               }
               layout={selectedModule.layout}
@@ -969,56 +1058,106 @@ const ModuleSettings = () => {
           {selectedModule.type === "success-stories" && (
             <SuccessStoriesSettings
               content={selectedModule.content}
-              onChange={(updates) =>
+              onChange={(updates: any) =>
                 updateModuleContent(selectedModule.id, updates)
               }
               layout={selectedModule.layout}
             />
           )}
 
-          {/* BUSINESS MODULES */}
-          {selectedModule.type === "partners" && (
-            <PartnersSettings
+          {selectedModule.type === "event-countdown" && (
+            <EventCountdownSettings
               content={selectedModule.content}
-              onChange={(updates) =>
+              onChange={(updates: any) =>
+                updateModuleContent(selectedModule.id, updates)
+              }
+            />
+          )}
+
+          {selectedModule.type === "milestones" && (
+            <MilestonesSettings
+              content={selectedModule.content}
+              onChange={(updates: any) =>
                 updateModuleContent(selectedModule.id, updates)
               }
               layout={selectedModule.layout}
             />
           )}
+
+          {selectedModule.type === "leaderboard" && (
+            <LeaderboardSettings
+              content={selectedModule.content}
+              onChange={(updates: any) =>
+                updateModuleContent(selectedModule.id, updates)
+              }
+              layout={selectedModule.layout}
+            />
+          )}
+
+          {selectedModule.type === "guidelines" && (
+            <GuidelinesSettings
+              content={selectedModule.content}
+              onChange={(updates: any) =>
+                updateModuleContent(selectedModule.id, updates)
+              }
+            />
+          )}
+
           {selectedModule.type === "members-around-world" && (
             <MembersAroundWorldSettings
               content={selectedModule.content}
-              onChange={(updates) =>
+              onChange={(updates: any) =>
                 updateModuleContent(selectedModule.id, updates)
               }
               layout={selectedModule.layout}
             />
           )}
-          {selectedModule.type === "latest-members" && (
-            <LatestMembersSettings
+          {/* RESOURCE HUB MODULES */}
+          {selectedModule.type === "chapters" && (
+            <ChaptersSettings
               content={selectedModule.content}
-              onChange={(updates) =>
+              onChange={(updates: any) =>
                 updateModuleContent(selectedModule.id, updates)
               }
               layout={selectedModule.layout}
             />
           )}
 
-          {selectedModule.type === "achievements" && (
-            <AchievementsSettings
+          {selectedModule.type === "courses" && (
+            <CoursesSettings
               content={selectedModule.content}
-              onChange={(updates) =>
+              onChange={(updates: any) =>
                 updateModuleContent(selectedModule.id, updates)
               }
               layout={selectedModule.layout}
             />
           )}
 
+          {selectedModule.type === "research" && (
+            <ResearchSettings
+              content={selectedModule.content}
+              onChange={(updates: any) =>
+                updateModuleContent(selectedModule.id, updates)
+              }
+              layout={selectedModule.layout}
+            />
+          )}
+
+          {/* PROJECT & MARKETING MODULES */}
           {selectedModule.type === "benefits" && (
             <BenefitsSettings
               content={selectedModule.content}
-              onChange={(updates) =>
+              onChange={(updates: any) =>
+                updateModuleContent(selectedModule.id, updates)
+              }
+              layout={selectedModule.layout}
+            />
+          )}
+
+          {selectedModule.type === "roadmap" && (
+            <RoadmapSettings
+              content={selectedModule.content}
+              onChange={(updates: any) =>
                 updateModuleContent(selectedModule.id, updates)
               }
               layout={selectedModule.layout}
@@ -1028,7 +1167,58 @@ const ModuleSettings = () => {
           {selectedModule.type === "case-studies" && (
             <CaseStudiesSettings
               content={selectedModule.content}
-              onChange={(updates) =>
+              onChange={(updates: any) =>
+                updateModuleContent(selectedModule.id, updates)
+              }
+              layout={selectedModule.layout}
+            />
+          )}
+
+          {/* INTERACTIVE & ENGAGEMENT MODULES */}
+          {selectedModule.type === "callout" && (
+            <CalloutSettings
+              content={selectedModule.content}
+              onChange={(updates: any) =>
+                updateModuleContent(selectedModule.id, updates)
+              }
+            />
+          )}
+
+          {selectedModule.type === "podcast" && (
+            <PodcastSettings
+              content={selectedModule.content}
+              onChange={(updates: any) =>
+                updateModuleContent(selectedModule.id, updates)
+              }
+              layout={selectedModule.layout}
+            />
+          )}
+
+          {selectedModule.type === "polls" && (
+            <PollsSettings
+              content={selectedModule.content}
+              onChange={(updates: any) =>
+                updateModuleContent(selectedModule.id, updates)
+              }
+              layout={selectedModule.layout}
+            />
+          )}
+
+          {selectedModule.type === "social-feed" && (
+            <SocialFeedSettings
+              content={selectedModule.content}
+              onChange={(updates: any) =>
+                updateModuleContent(selectedModule.id, updates)
+              }
+              layout={selectedModule.layout}
+            />
+          )}
+
+          {/* MISC MODULES */}
+          {selectedModule.type === "announcement-bar" && (
+            <AnnouncementBarSettings
+              content={selectedModule.content}
+              onChange={(updates: any) =>
                 updateModuleContent(selectedModule.id, updates)
               }
               layout={selectedModule.layout}
@@ -1038,244 +1228,108 @@ const ModuleSettings = () => {
           {selectedModule.type === "donation" && (
             <DonationSettings
               content={selectedModule.content}
-              onChange={(updates) =>
+              onChange={(updates: any) =>
                 updateModuleContent(selectedModule.id, updates)
               }
               layout={selectedModule.layout}
             />
           )}
 
-          {/* CONTENT & MEDIA MODULES */}
-          {selectedModule.type === "video-spotlight" && (
-            <VideoSpotlightSettings
-              content={selectedModule.content}
-              onChange={(updates) =>
-                updateModuleContent(selectedModule.id, updates)
-              }
-              layout={selectedModule.layout}
-            />
-          )}
-
-          {selectedModule.type === "resources" && (
-            <ResourcesSettings
-              content={selectedModule.content}
-              onChange={(updates) =>
-                updateModuleContent(selectedModule.id, updates)
-              }
-              layout={selectedModule.layout}
-            />
-          )}
-
-          {selectedModule.type === "podcast" && (
-            <PodcastSettings
-              content={selectedModule.content}
-              onChange={(updates) =>
-                updateModuleContent(selectedModule.id, updates)
-              }
-              layout={selectedModule.layout}
-            />
-          )}
-
-          {selectedModule.type === "social-proof" && (
-            <SocialProofSettings
-              content={selectedModule.content}
-              onChange={(updates) =>
-                updateModuleContent(selectedModule.id, updates)
-              }
-            />
-          )}
-
-          {/* INTERACTIVE MODULES */}
-          {selectedModule.type === "countdown-banner" && (
-            <CountdownBannerSettings
-              content={selectedModule.content}
-              onChange={(updates) =>
-                updateModuleContent(selectedModule.id, updates)
-              }
-            />
-          )}
-
-          {selectedModule.type === "comparison-table" && (
-            <ComparisonTableSettings
-              content={selectedModule.content}
-              onChange={(updates) =>
-                updateModuleContent(selectedModule.id, updates)
-              }
-            />
-          )}
-
-          {selectedModule.type === "location-map" && (
-            <LocationMapSettings
-              content={selectedModule.content}
-              onChange={(updates) =>
-                updateModuleContent(selectedModule.id, updates)
-              }
-            />
-          )}
-
-          {selectedModule.type === "embed-block" && (
-            <EmbedBlockSettings
-              content={selectedModule.content}
-              onChange={(updates) =>
-                updateModuleContent(selectedModule.id, updates)
-              }
-            />
-          )}
-
-          {selectedModule.type === "callout" && (
-            <CalloutSettings
-              content={selectedModule.content}
-              onChange={(updates) =>
-                updateModuleContent(selectedModule.id, updates)
-              }
-            />
-          )}
-
-          {/* INFORMATION MODULES */}
-          {selectedModule.type === "announcement" && (
-            <AnnouncementSettings
-              content={selectedModule.content}
-              onChange={(updates) =>
-                updateModuleContent(selectedModule.id, updates)
-              }
-            />
-          )}
-
-          {selectedModule.type === "announcement-bar" && (
-            <AnnouncementBarSettings
-              content={selectedModule.content}
-              onChange={(updates) =>
-                updateModuleContent(selectedModule.id, updates)
-              }
-              layout={selectedModule.layout}
-            />
-          )}
-
+          {/* SITEMAP: SETTINGS */}
           {selectedModule.type === "sitemap" && (
             <SitemapSettings
               content={selectedModule.content}
-              onChange={(updates) =>
+              onChange={(updates: any) =>
                 updateModuleContent(selectedModule.id, updates)
               }
             />
           )}
 
-          {selectedModule.type === "guidelines" && (
-            <GuidelinesSettings
-              content={selectedModule.content}
-              onChange={(updates) =>
-                updateModuleContent(selectedModule.id, updates)
-              }
-            />
-          )}
-
-          {/* TIMELINE & EVENTS MODULES */}
-          {selectedModule.type === "event-countdown" && (
-            <EventCountdownSettings
-              content={selectedModule.content}
-              onChange={(updates) =>
-                updateModuleContent(selectedModule.id, updates)
-              }
-            />
-          )}
-
-          {selectedModule.type === "milestones" && (
-            <MilestonesSettings
-              content={selectedModule.content}
-              onChange={(updates) =>
-                updateModuleContent(selectedModule.id, updates)
-              }
-            />
-          )}
-
-          {selectedModule.type === "roadmap" && (
-            <RoadmapSettings
-              content={selectedModule.content}
-              onChange={(updates) =>
-                updateModuleContent(selectedModule.id, updates)
-              }
-            />
-          )}
-
-          {/* LEARNING MODULES */}
-          {selectedModule.type === "courses" && (
-            <CoursesSettings
-              content={selectedModule.content}
-              onChange={(updates) =>
-                updateModuleContent(selectedModule.id, updates)
-              }
-            />
-          )}
-
-          {selectedModule.type === "research" && (
-            <ResearchSettings
-              content={selectedModule.content}
-              onChange={(updates) =>
-                updateModuleContent(selectedModule.id, updates)
-              }
-            />
-          )}
-
-          {![" navbar", "footer"].includes(selectedModule.type) && (
-            <div className="space-y-2">
-              <Label>Media</Label>
-              <div className="border border-dashed rounded-lg p-6 flex flex-col items-center justify-center text-center hover:bg-muted/50 transition cursor-pointer">
-                <span className="text-sm font-medium text-primary">
-                  Click to upload image
-                </span>
-                <span className="text-xs text-muted-foreground mt-1">
-                  or drag and drop
-                </span>
+          {/* BACKGROUND & OVERLAYS */}
+          {selectedModule.content.backgroundImage && (
+            <div className="space-y-4">
+              <hr className="border-border" />
+              <Label className="uppercase text-xs text-muted-foreground font-bold tracking-wider">
+                Background Image
+              </Label>
+              <div
+                className="relative group aspect-video rounded-xl border bg-muted flex items-center justify-center cursor-pointer overflow-hidden"
+                onClick={() => {
+                  /* Open image selection */
+                }}
+              >
+                {selectedModule.content.backgroundImage ? (
+                  <>
+                    <img
+                      src={selectedModule.content.backgroundImage}
+                      alt="Background"
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <span className="text-white text-xs font-semibold">
+                        Change Image
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex flex-col items-center gap-2 text-muted-foreground group-hover:text-foreground transition-colors">
+                    <Plus className="h-6 w-6" />
+                    <span className="text-xs font-medium">Add Background</span>
+                    <span className="text-xs text-muted-foreground mt-1">
+                      or drag and drop
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           )}
+
+          <hr className="border-border" />
+
+          <div className="space-y-3">
+            <Label className="uppercase text-xs text-muted-foreground font-bold tracking-wider">
+              Visibility
+            </Label>
+            <RadioGroup
+              value={selectedModule.visibility}
+              onValueChange={(val: any) =>
+                updateModuleVisibility(selectedModule.id, val)
+              }
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="public" id="vis-public" />
+                <Label htmlFor="vis-public" className="font-normal">
+                  Everyone
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="members" id="vis-members" />
+                <Label htmlFor="vis-members" className="font-normal">
+                  Members Only
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="admin" id="vis-admin" />
+                <Label htmlFor="vis-admin" className="font-normal">
+                  Admin Preview Only
+                </Label>
+              </div>
+            </RadioGroup>
+          </div>
+
+          {/* CONTAINER SETTINGS */}
+          {!["navbar", "footer", "cta-banner", "hero"].includes(
+            selectedModule.type
+          ) && (
+            <>
+              <hr className="border-border" />
+              <ContainerSettings
+                selectedModule={selectedModule}
+                updateModuleContent={updateModuleContent}
+              />
+            </>
+          )}
         </div>
-
-        <hr className="border-border" />
-
-        <div className="space-y-3">
-          <Label className="uppercase text-xs text-muted-foreground font-bold tracking-wider">
-            Visibility
-          </Label>
-          <RadioGroup
-            value={selectedModule.visibility}
-            onValueChange={(val: any) =>
-              updateModuleVisibility(selectedModule.id, val)
-            }
-          >
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="public" id="vis-public" />
-              <Label htmlFor="vis-public" className="font-normal">
-                Everyone
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="members" id="vis-members" />
-              <Label htmlFor="vis-members" className="font-normal">
-                Members Only
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="admin" id="vis-admin" />
-              <Label htmlFor="vis-admin" className="font-normal">
-                Admin Preview Only
-              </Label>
-            </div>
-          </RadioGroup>
-        </div>
-
-        {/* CONTAINER SETTINGS */}
-        {!["navbar", "footer", "cta-banner", "hero"].includes(
-          selectedModule.type
-        ) && (
-          <>
-            <hr className="border-border" />
-            <ContainerSettings
-              selectedModule={selectedModule}
-              updateModuleContent={updateModuleContent}
-            />
-          </>
-        )}
       </div>
     </div>
   );

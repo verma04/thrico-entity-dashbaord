@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { useUpdateFooter, useGetWebsite } from "@/graphql/actions/website";
 import { SaveIcon } from "lucide-react";
 import { ImageUploadWithCrop } from "@/components/ui/image-upload-with-crop";
 import {
@@ -78,11 +79,24 @@ const footerSchema = Yup.object().shape({
   }),
   description: Yup.string(),
   socialLinks: Yup.array().of(
-    Yup.object().shape({
-      id: Yup.string().required(),
-      platform: Yup.string().required("Platform is required"),
-      url: Yup.string().url("Must be a valid URL").required("URL is required"),
-    })
+    Yup.object().shape(
+      {
+        id: Yup.string().required(),
+        platform: Yup.string().when("url", {
+          is: (url: string) => url && url.length > 0,
+          then: (schema) => schema.required("Platform is required"),
+          otherwise: (schema) => schema.notRequired(),
+        }),
+        url: Yup.string().when("platform", {
+          is: (platform: string) => platform && platform.length > 0,
+          then: (schema) =>
+            schema.url("Must be a valid URL").required("URL is required"),
+          otherwise: (schema) =>
+            schema.url("Must be a valid URL").notRequired(),
+        }),
+      },
+      [["platform", "url"]]
+    )
   ),
   copyrightText: Yup.string(),
 });
@@ -95,6 +109,27 @@ export default function FooterManager() {
   const { toast } = useToast();
   const { globalFooter, updateModuleContent, updateModuleLayout } =
     useWebsiteBuilderStore();
+
+  // Fetch website data
+  const { data: websiteData, refetch } = useGetWebsite({});
+
+  // Update footer mutation
+  const [updateFooterMutation, { loading: isUpdating }] = useUpdateFooter({
+    onCompleted: () => {
+      toast({
+        title: "Footer Saved",
+        description: "Global footer has been updated successfully.",
+      });
+      refetch();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update footer",
+        variant: "destructive",
+      });
+    },
+  });
 
   // Initial values from global footer
   const initialValues: FooterConfig = {
@@ -110,23 +145,54 @@ export default function FooterManager() {
       `© ${new Date().getFullYear()} All rights reserved.`,
   };
 
-  const handleSubmit = (values: FooterConfig) => {
-    // Update store
-    updateModuleLayout(globalFooter.id, values.layout);
-    updateModuleContent(globalFooter.id, {
-      logoText: values.logoText,
-      logoType: values.logoType,
-      logoImage: values.logoImage,
-      description: values.description,
-      socialLinks: values.socialLinks,
-      menuItems: values.menuItems,
-      copyrightText: values.copyrightText,
-    });
+  const handleSubmit = async (values: FooterConfig) => {
+    if (!websiteData?.getWebsite?.id) {
+      toast({
+        title: "Error",
+        description: "Website not found",
+        variant: "destructive",
+      });
+      return;
+    }
 
-    toast({
-      title: "Footer Saved",
-      description: "Global footer has been updated successfully.",
-    });
+    try {
+      // Filter out empty social links (no platform and no URL)
+      const validSocialLinks = values.socialLinks.filter(
+        (link) => link.platform || link.url
+      );
+
+      // Call GraphQL mutation to update footer in database
+      await updateFooterMutation({
+        variables: {
+          websiteId: websiteData.getWebsite.id,
+          layout: values.layout,
+          content: {
+            logoText: values.logoText,
+            logoType: values.logoType,
+            logoImage: values.logoImage,
+            description: values.description,
+            socialLinks: validSocialLinks,
+            menuItems: values.menuItems,
+            copyrightText: values.copyrightText,
+          },
+        },
+      });
+
+      // Update local store for immediate UI update
+      updateModuleLayout(globalFooter.id, values.layout);
+      updateModuleContent(globalFooter.id, {
+        logoText: values.logoText,
+        logoType: values.logoType,
+        logoImage: values.logoImage,
+        description: values.description,
+        socialLinks: validSocialLinks,
+        menuItems: values.menuItems,
+        copyrightText: values.copyrightText,
+      });
+    } catch (error) {
+      // Error handling is done in the mutation's onError callback
+      console.error("Footer update failed:", error);
+    }
   };
 
   return (
@@ -148,6 +214,7 @@ export default function FooterManager() {
           {/* LIVE PREVIEW */}
           {/* ------------------------------------------------ */}
           <Card>
+            {console.log(errors)}
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-6">
               <div>
                 <CardTitle>Live Preview</CardTitle>
@@ -160,10 +227,10 @@ export default function FooterManager() {
                 type="submit"
                 size="sm"
                 className="gap-2 shadow-lg"
-                disabled={isSubmitting}
+                disabled={isUpdating}
               >
                 <SaveIcon className="h-4 w-4" />
-                {isSubmitting ? "Saving..." : "Save Footer"}
+                {isUpdating ? "Saving..." : "Save Footer"}
               </Button>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -212,31 +279,41 @@ export default function FooterManager() {
                     <SelectItem value="columns">
                       <div className="flex flex-col items-start">
                         <span className="font-medium">Multi-Column</span>
-                        <span className="text-xs text-muted-foreground">Logo + 3 columns of links</span>
+                        <span className="text-xs text-muted-foreground">
+                          Logo + 3 columns of links
+                        </span>
                       </div>
                     </SelectItem>
                     <SelectItem value="simple">
                       <div className="flex flex-col items-start">
                         <span className="font-medium">Simple</span>
-                        <span className="text-xs text-muted-foreground">Center-aligned with links</span>
+                        <span className="text-xs text-muted-foreground">
+                          Center-aligned with links
+                        </span>
                       </div>
                     </SelectItem>
                     <SelectItem value="minimal">
                       <div className="flex flex-col items-start">
                         <span className="font-medium">Minimal</span>
-                        <span className="text-xs text-muted-foreground">Single line footer</span>
+                        <span className="text-xs text-muted-foreground">
+                          Single line footer
+                        </span>
                       </div>
                     </SelectItem>
                     <SelectItem value="corporate">
                       <div className="flex flex-col items-start">
                         <span className="font-medium">Corporate</span>
-                        <span className="text-xs text-muted-foreground">Professional multi-section</span>
+                        <span className="text-xs text-muted-foreground">
+                          Professional multi-section
+                        </span>
                       </div>
                     </SelectItem>
                     <SelectItem value="newsletter">
                       <div className="flex flex-col items-start">
                         <span className="font-medium">Newsletter</span>
-                        <span className="text-xs text-muted-foreground">Newsletter signup focused</span>
+                        <span className="text-xs text-muted-foreground">
+                          Newsletter signup focused
+                        </span>
                       </div>
                     </SelectItem>
                   </SelectContent>

@@ -36,10 +36,16 @@ import { Globe, Map, Share2, FileCode, Type, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useIsPremium } from "@/hooks/useIsPremium";
 import { useDrawerStore } from "@/store/drawerStore";
+import {
+  useGetWebsite,
+  useGetAllPagesSeo,
+  useUpdatePageSeo,
+  useUpdateWebsiteFont,
+  useUpdateWebsiteTheme,
+} from "@/graphql/actions/website";
 
 const SiteSettings = () => {
   const {
-    pages,
     togglePageSitemap,
     siteSettings,
     updateSiteSettings,
@@ -48,6 +54,52 @@ const SiteSettings = () => {
     theme,
     setTheme,
   } = useWebsiteBuilderStore();
+
+  const { data: websiteData } = useGetWebsite({});
+  const websiteId = websiteData?.getWebsite?.id;
+
+  const { data: seoData, refetch: refetchSeo } = useGetAllPagesSeo(
+    websiteId || "",
+    {
+      skip: !websiteId,
+    }
+  );
+
+  const [updatePageSeoMutation] = useUpdatePageSeo({
+    onCompleted: () => {
+      refetchSeo();
+    },
+  });
+
+  const [updateFontMutation] = useUpdateWebsiteFont();
+  const [updateThemeMutation] = useUpdateWebsiteTheme();
+
+  const handleFontChange = (newFont: string) => {
+    setFont(newFont as any);
+    if (websiteId) {
+      updateFontMutation({
+        variables: {
+          websiteId,
+          font: newFont,
+        },
+      });
+    }
+  };
+
+  const handleThemeChange = (newTheme: string) => {
+    setTheme(newTheme as any);
+    if (websiteId) {
+      updateThemeMutation({
+        variables: {
+          websiteId,
+          theme: newTheme,
+        },
+      });
+    }
+  };
+
+  const pages = seoData?.getAllPagesSeo || [];
+
   const { toast } = useToast();
   const { isPremium } = useIsPremium();
   const { openDrawer } = useDrawerStore();
@@ -163,10 +215,16 @@ const SiteSettings = () => {
                           <TableCell className="text-right">
                             <div className="flex justify-end">
                               <Switch
-                                checked={page.includeInSitemap}
-                                onCheckedChange={() =>
-                                  togglePageSitemap(page.id)
-                                }
+                                checked={page.seo?.includeInSitemap ?? true}
+                                onCheckedChange={(checked) => {
+                                  togglePageSitemap(page.id);
+                                  updatePageSeoMutation({
+                                    variables: {
+                                      pageId: page.id,
+                                      includeInSitemap: checked,
+                                    },
+                                  });
+                                }}
                               />
                             </div>
                           </TableCell>
@@ -202,7 +260,7 @@ const SiteSettings = () => {
                 {/* Theme Style Selector */}
                 <div className="grid gap-2">
                   <Label htmlFor="theme-select">Theme Style</Label>
-                  <Select value={theme} onValueChange={setTheme}>
+                  <Select value={theme} onValueChange={handleThemeChange}>
                     <SelectTrigger id="theme-select">
                       <SelectValue placeholder="Select a theme" />
                     </SelectTrigger>
@@ -223,7 +281,7 @@ const SiteSettings = () => {
                 {/* Font Family Selector */}
                 <div className="grid gap-2">
                   <Label htmlFor="font-select">Font Family</Label>
-                  <Select value={font} onValueChange={setFont}>
+                  <Select value={font} onValueChange={handleFontChange}>
                     <SelectTrigger id="font-select">
                       <SelectValue placeholder="Select a font" />
                     </SelectTrigger>

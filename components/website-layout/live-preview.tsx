@@ -35,7 +35,7 @@ import { StatsRenderer } from "./preview/stats-renderer";
 import { LogoCloudRenderer } from "./preview/logo-cloud-renderer";
 import { TimelineRenderer } from "./preview/timeline-renderer";
 import { ProcessStepsRenderer } from "./preview/process-steps-renderer";
-import { PricingRenderer } from "./preview/pricing-renderer";
+
 import { EventsRenderer } from "./preview/events-renderer";
 import { FeatureHighlightsRenderer } from "./preview/feature-highlights-renderer";
 import { MediaGalleryRenderer } from "./preview/media-gallery-renderer";
@@ -88,13 +88,15 @@ import { HeroModule } from "./modules/hero-module";
 import { WallOfFameModule } from "./modules/wall-of-fame-module";
 import { MembersAroundWorldModule } from "./modules/members-around-world-module";
 import { LatestMembersModule } from "./modules/latest-members-module";
+import { PricingRenderer } from "./preview/pricing-renderer";
+import { MilestonesRenderer } from "./preview/milestones-renderer";
 
 // --- Enhanced Module Renderer Component ---
 
 interface ModuleRendererProps {
   module: ModuleData;
   theme: ThemeType;
-  previewDevice: string;
+  previewDevice: "desktop" | "tablet" | "mobile";
   isSelected?: boolean;
   onSelect?: () => void;
 }
@@ -153,6 +155,9 @@ const ModuleRenderer: React.FC<ModuleRendererProps> = ({
     ),
     "contact-info": (
       <ContactRenderer module={module} previewDevice={previewDevice as any} />
+    ),
+    milestones: (
+      <MilestonesRenderer module={module} previewDevice={previewDevice} />
     ),
 
     // Community Components
@@ -227,9 +232,6 @@ const ModuleRenderer: React.FC<ModuleRendererProps> = ({
     ),
     "event-countdown": (
       <EventCountdownModule module={module} previewDevice={previewDevice} />
-    ),
-    milestones: (
-      <MilestonesModule module={module} previewDevice={previewDevice} />
     ),
     roadmap: <RoadmapModule module={module} previewDevice={previewDevice} />,
 

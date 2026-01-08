@@ -39,25 +39,29 @@ import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { Edit2Icon, Wand2, Globe } from "lucide-react";
 import { useWebsiteBuilderStore } from "@/store/useWebsiteBuilderStore";
+import { getCustomDomain, getThricoDomain } from "@/graphql/actions/domain";
 import {
-  getCustomDomain,
-  getThricoDomain,
-} from "@/graphql/actions/domain";
+  useGetAllPagesSeo,
+  useUpdatePageSeo,
+  useGetWebsite,
+} from "@/graphql/actions/website";
 
 // SEO Preview Component
-function SeoPreview({ 
-  title, 
-  description, 
+function SeoPreview({
+  title,
+  description,
   slug,
-  baseUrl 
-}: { 
-  title: string; 
-  description: string; 
+  baseUrl,
+}: {
+  title: string;
+  description: string;
   slug: string;
   baseUrl: string;
 }) {
   const displayTitle = title || "Your Page Title - My Website";
-  const displayDescription = description || "Add a meta description to see how your page appears in search results.";
+  const displayDescription =
+    description ||
+    "Add a meta description to see how your page appears in search results.";
   const displayUrl = `${baseUrl}/${slug || "page"}`;
   const displayDomain = baseUrl.replace("https://", "").replace("http://", "");
 
@@ -95,7 +99,9 @@ function SeoPreview({
         <div className="bg-muted/30 rounded-lg p-4 space-y-1">
           <div className="flex items-center gap-2 mb-1">
             <div className="w-4 h-4 rounded-full bg-gradient-to-br from-blue-500 to-green-500" />
-            <span className="text-xs text-muted-foreground">{displayDomain}</span>
+            <span className="text-xs text-muted-foreground">
+              {displayDomain}
+            </span>
           </div>
           <div className="text-xl text-blue-600 font-normal mb-1 line-clamp-1">
             {displayTitle}
@@ -118,21 +124,27 @@ function SeoPreview({
               </span>
             </div>
             <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-              <div 
+              <div
                 className={`h-full transition-all ${
-                  titleLength === 0 ? "bg-muted-foreground" :
-                  titleLength > 60 ? "bg-destructive" :
-                  titleLength >= 50 ? "bg-yellow-600" :
-                  "bg-green-600"
+                  titleLength === 0
+                    ? "bg-muted-foreground"
+                    : titleLength > 60
+                    ? "bg-destructive"
+                    : titleLength >= 50
+                    ? "bg-yellow-600"
+                    : "bg-green-600"
                 }`}
                 style={{ width: `${Math.min((titleLength / 60) * 100, 100)}%` }}
               />
             </div>
             <p className="text-muted-foreground mt-1">
-              {titleLength === 0 ? "Add a title" :
-               titleLength > 60 ? "Too long, may be truncated" :
-               titleLength >= 50 ? "Good length" :
-               "Consider adding more detail"}
+              {titleLength === 0
+                ? "Add a title"
+                : titleLength > 60
+                ? "Too long, may be truncated"
+                : titleLength >= 50
+                ? "Good length"
+                : "Consider adding more detail"}
             </p>
           </div>
 
@@ -144,21 +156,27 @@ function SeoPreview({
               </span>
             </div>
             <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-              <div 
+              <div
                 className={`h-full transition-all ${
-                  descLength === 0 ? "bg-muted-foreground" :
-                  descLength > 160 ? "bg-destructive" :
-                  descLength >= 140 ? "bg-yellow-600" :
-                  "bg-green-600"
+                  descLength === 0
+                    ? "bg-muted-foreground"
+                    : descLength > 160
+                    ? "bg-destructive"
+                    : descLength >= 140
+                    ? "bg-yellow-600"
+                    : "bg-green-600"
                 }`}
                 style={{ width: `${Math.min((descLength / 160) * 100, 100)}%` }}
               />
             </div>
             <p className="text-muted-foreground mt-1">
-              {descLength === 0 ? "Add a description" :
-               descLength > 160 ? "Too long, may be truncated" :
-               descLength >= 140 ? "Good length" :
-               "Consider adding more detail"}
+              {descLength === 0
+                ? "Add a description"
+                : descLength > 160
+                ? "Too long, may be truncated"
+                : descLength >= 140
+                ? "Good length"
+                : "Consider adding more detail"}
             </p>
           </div>
         </div>
@@ -177,7 +195,9 @@ function SchemaPreview({ schemaMarkup }: { schemaMarkup: string }) {
     try {
       // Extract JSON from script tag if present
       let jsonStr = schemaMarkup;
-      const scriptMatch = schemaMarkup.match(/<script[^>]*>([\s\S]*?)<\/script>/);
+      const scriptMatch = schemaMarkup.match(
+        /<script[^>]*>([\s\S]*?)<\/script>/
+      );
       if (scriptMatch) {
         jsonStr = scriptMatch[1].trim();
       }
@@ -185,10 +205,10 @@ function SchemaPreview({ schemaMarkup }: { schemaMarkup: string }) {
       const parsed = JSON.parse(jsonStr);
       return { valid: true, data: parsed, error: null };
     } catch (error) {
-      return { 
-        valid: false, 
-        data: null, 
-        error: error instanceof Error ? error.message : "Invalid JSON" 
+      return {
+        valid: false,
+        data: null,
+        error: error instanceof Error ? error.message : "Invalid JSON",
       };
     }
   };
@@ -200,16 +220,23 @@ function SchemaPreview({ schemaMarkup }: { schemaMarkup: string }) {
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className={`w-2 h-2 rounded-full ${
-              valid === null ? "bg-muted-foreground" :
-              valid ? "bg-green-500" : "bg-destructive"
-            }`} />
+            <div
+              className={`w-2 h-2 rounded-full ${
+                valid === null
+                  ? "bg-muted-foreground"
+                  : valid
+                  ? "bg-green-500"
+                  : "bg-destructive"
+              }`}
+            />
             <CardTitle className="text-base">Schema Markup Preview</CardTitle>
           </div>
           {valid !== null && (
-            <span className={`text-xs font-medium ${
-              valid ? "text-green-600" : "text-destructive"
-            }`}>
+            <span
+              className={`text-xs font-medium ${
+                valid ? "text-green-600" : "text-destructive"
+              }`}
+            >
               {valid ? "Valid JSON-LD" : "Invalid JSON"}
             </span>
           )}
@@ -226,10 +253,12 @@ function SchemaPreview({ schemaMarkup }: { schemaMarkup: string }) {
             Click "Auto-Generate" or paste your schema markup to see a preview
           </div>
         )}
-        
+
         {valid === false && (
           <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
-            <p className="text-sm font-medium text-destructive mb-1">JSON Error:</p>
+            <p className="text-sm font-medium text-destructive mb-1">
+              JSON Error:
+            </p>
             <p className="text-xs text-destructive/80 font-mono">{error}</p>
           </div>
         )}
@@ -239,7 +268,9 @@ function SchemaPreview({ schemaMarkup }: { schemaMarkup: string }) {
             <div className="bg-muted/30 rounded-lg p-4 space-y-2">
               <div className="flex items-center gap-2 text-sm">
                 <span className="font-medium">Type:</span>
-                <span className="text-blue-600">@{data["@type"] || "Unknown"}</span>
+                <span className="text-blue-600">
+                  @{data["@type"] || "Unknown"}
+                </span>
               </div>
               {data.name && (
                 <div className="flex items-start gap-2 text-sm">
@@ -250,7 +281,9 @@ function SchemaPreview({ schemaMarkup }: { schemaMarkup: string }) {
               {data.description && (
                 <div className="flex items-start gap-2 text-sm">
                   <span className="font-medium">Description:</span>
-                  <span className="text-muted-foreground line-clamp-2">{data.description}</span>
+                  <span className="text-muted-foreground line-clamp-2">
+                    {data.description}
+                  </span>
                 </div>
               )}
               {data.url && (
@@ -277,24 +310,55 @@ function SchemaPreview({ schemaMarkup }: { schemaMarkup: string }) {
 }
 
 export default function SeoManager() {
-  const { pages, updatePageSeo } = useWebsiteBuilderStore();
+  const { updatePageSeo } = useWebsiteBuilderStore();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingPageId, setEditingPageId] = useState<string | null>(null);
+
+  const { data: websiteData } = useGetWebsite({});
+  const websiteId = websiteData?.getWebsite?.id;
+
+  const { data: seoData, refetch: refetchSeo } = useGetAllPagesSeo(
+    websiteId || "",
+    {
+      skip: !websiteId,
+    }
+  );
+
+  const [updatePageSeoMutation, { loading: isSaving }] = useUpdatePageSeo({
+    onCompleted: () => {
+      toast({
+        title: "Success",
+        description: "SEO settings updated successfully!",
+      });
+      refetchSeo();
+      setIsModalVisible(false);
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update SEO settings",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const pages = seoData?.getAllPagesSeo || [];
 
   // Fetch domain data
   const { data: thricoDomainData } = getThricoDomain();
   const { data: customDomainData } = getCustomDomain();
 
-  const NEXT_PUBLIC_SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "thrico.community";
-  
+  const NEXT_PUBLIC_SITE_URL =
+    process.env.NEXT_PUBLIC_SITE_URL || "thrico.community";
+
   const thricoDomainUrl = thricoDomainData?.getThricoDomain?.domain
     ? `https://${thricoDomainData.getThricoDomain.domain}.${NEXT_PUBLIC_SITE_URL}`
     : `https://your-site.${NEXT_PUBLIC_SITE_URL}`;
-  
+
   const customDomainUrl = customDomainData?.getCustomDomain?.domain
     ? `https://${customDomainData.getCustomDomain.domain}`
     : null;
-  
+
   // Use custom domain if available, otherwise use thrico domain
   const websiteUrl = customDomainUrl || thricoDomainUrl;
 
@@ -351,10 +415,15 @@ ${JSON.stringify(schema, null, 2)}
     if (!page) return;
 
     setEditingPageId(pageId);
+
+    const keywords = Array.isArray(page.seo?.keywords)
+      ? page.seo?.keywords.join(", ")
+      : (page.seo?.keywords as unknown as string) || "";
+
     form.reset({
       title: page.seo?.title || `${page.name} - My Website`,
       description: page.seo?.description || "", // Fallback to page description if exists
-      keywords: page.seo?.keywords || "",
+      keywords: keywords,
       schemaMarkup: page.seo?.schemaMarkup || "",
     });
     setIsModalVisible(true);
@@ -363,18 +432,27 @@ ${JSON.stringify(schema, null, 2)}
   const handleSave = form.handleSubmit((values) => {
     if (!editingPageId) return;
 
+    const keywordsArray = values.keywords
+      ? values.keywords.split(",").map((k) => k.trim())
+      : [];
+
+    updatePageSeoMutation({
+      variables: {
+        pageId: editingPageId,
+        title: values.title,
+        description: values.description,
+        keywords: keywordsArray,
+        schemaMarkup: values.schemaMarkup,
+      },
+    });
+
+    // Also update local store for immediate UI update
     updatePageSeo(editingPageId, {
       title: values.title,
       description: values.description,
       keywords: values.keywords,
       schemaMarkup: values.schemaMarkup,
     });
-
-    toast({
-      title: "Success",
-      description: "SEO settings updated successfully!",
-    });
-    setIsModalVisible(false);
   });
 
   return (
@@ -466,9 +544,7 @@ ${JSON.stringify(schema, null, 2)}
                   <SeoPreview
                     title={form.watch("title")}
                     description={form.watch("description")}
-                    slug={
-                      pages.find((p) => p.id === editingPageId)?.slug || ""
-                    }
+                    slug={pages.find((p) => p.id === editingPageId)?.slug || ""}
                     baseUrl={websiteUrl}
                   />
                 </div>
@@ -532,7 +608,9 @@ ${JSON.stringify(schema, null, 2)}
               {/* Schema Markup - Full Width with Preview */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-medium">Schema Markup (JSON-LD)</h3>
+                  <h3 className="text-sm font-medium">
+                    Schema Markup (JSON-LD)
+                  </h3>
                   <Button
                     type="button"
                     variant="outline"
@@ -567,8 +645,9 @@ ${JSON.stringify(schema, null, 2)}
                             />
                           </FormControl>
                           <p className="text-xs text-muted-foreground">
-                            Schema markup helps search engines understand your content
-                            better. The preview validates your JSON in real-time.
+                            Schema markup helps search engines understand your
+                            content better. The preview validates your JSON in
+                            real-time.
                           </p>
                           <FormMessage />
                         </FormItem>
@@ -583,10 +662,13 @@ ${JSON.stringify(schema, null, 2)}
                   type="button"
                   variant="outline"
                   onClick={() => setIsModalVisible(false)}
+                  disabled={isSaving}
                 >
                   Cancel
                 </Button>
-                <Button type="submit">Save Changes</Button>
+                <Button type="submit" disabled={isSaving}>
+                  {isSaving ? "Saving..." : "Save Changes"}
+                </Button>
               </DialogFooter>
             </form>
           </Form>

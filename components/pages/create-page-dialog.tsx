@@ -13,29 +13,123 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import { useCreatePage } from "@/graphql/actions/website";
+import { useToast } from "@/hooks/use-toast";
 
 interface CreatePageDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCreatePage: (name: string, slug: string) => void;
-  isCreating: boolean;
+  websiteId?: string;
+  /**
+   * Callback fired when page is successfully created
+   * @param pageData - The created page data including id, name, and slug
+   */
+  onSuccess?: (pageData: { id: string; name: string; slug: string }) => void;
+  /**
+   * Callback fired when page creation fails
+   * @param error - The error object
+   */
+  onError?: (error: Error) => void;
+  /**
+   * Whether to show toast notifications (default: true)
+   */
+  showToast?: boolean;
+  /**
+   * Custom success message (default: "Page created successfully!")
+   */
+  successMessage?: string;
 }
 
 export function CreatePageDialog({
   open,
   onOpenChange,
-  onCreatePage,
-  isCreating,
+  websiteId,
+  onSuccess,
+  onError,
+  showToast = true,
+  successMessage = "Page created successfully!",
 }: CreatePageDialogProps) {
   const [pageName, setPageName] = useState("");
   const [pageSlug, setPageSlug] = useState("");
+  const { toast } = useToast();
+
+  // Create page mutation
+  const [createPageMutation, { loading: isCreating }] = useCreatePage({
+    onCompleted: (data) => {
+      if (showToast) {
+        toast({
+          title: "Success",
+          description: successMessage,
+        });
+      }
+
+      // Reset form
+      setPageName("");
+      setPageSlug("");
+
+      // Close dialog
+      onOpenChange(false);
+
+      // Call success callback with page data if provided
+      onSuccess?.({
+        id: data.createPage.id,
+        name: data.createPage.name,
+        slug: data.createPage.slug,
+      });
+    },
+    onError: (error) => {
+      if (showToast) {
+        toast({
+          title: "Error",
+          description: error.message || "Failed to create page",
+          variant: "destructive",
+        });
+      }
+
+      // Call error callback if provided
+      onError?.(error);
+    },
+  });
 
   const handleSubmit = () => {
-    if (!pageName || !pageSlug) return;
-    onCreatePage(pageName, pageSlug);
-    // Reset form
-    setPageName("");
-    setPageSlug("");
+    if (!pageName || !pageSlug) {
+      if (showToast) {
+        toast({
+          title: "Validation Error",
+          description: "Please fill in all fields",
+          variant: "destructive",
+        });
+      }
+      return;
+    }
+
+    if (!websiteId) {
+      if (showToast) {
+        toast({
+          title: "Error",
+          description: "Website not found",
+          variant: "destructive",
+        });
+      }
+      return;
+    }
+
+    const cleanSlug = pageSlug
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-+|-+$/g, "");
+
+    // Call GraphQL mutation
+    createPageMutation({
+      variables: {
+        websiteId: websiteId,
+        name: pageName,
+        slug: cleanSlug,
+      },
+    });
   };
 
   const handleNameChange = (value: string) => {
@@ -55,9 +149,7 @@ export function CreatePageDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Create New Page</DialogTitle>
-          <DialogDescription>
-            Add a new page to your website.
-          </DialogDescription>
+          <DialogDescription>Add a new page to your website.</DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="space-y-2">
@@ -92,7 +184,10 @@ export function CreatePageDialog({
           >
             Cancel
           </Button>
-          <Button onClick={handleSubmit} disabled={isCreating}>
+          <Button
+            onClick={handleSubmit}
+            disabled={isCreating || !pageName || !pageSlug}
+          >
             {isCreating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {isCreating ? "Creating..." : "Create Page"}
           </Button>

@@ -116,7 +116,7 @@ export function TermsWithRefetch() {
       },
     },
     // Optional: Configure polling
-    pollInterval: 60000, // Refetch every 60 seconds
+
     // Optional: Configure fetch policy
     fetchPolicy: "cache-and-network",
   });

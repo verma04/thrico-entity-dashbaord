@@ -142,7 +142,7 @@ export const FooterModule = ({ content, layout }: FooterModuleProps) => {
             </div>
           </div>
           <div className="flex justify-between items-center text-xs opacity-40">
-            <p>© 2024 {content.logoText}. All rights reserved.</p>
+            <p>{content.copyrightText}</p>
             <div className="flex gap-4 items-center">
               {content.socialLinks?.map((link: any, i: number) => (
                 <a

@@ -2,9 +2,446 @@
 
 import { ModuleData } from "@/store/useWebsiteBuilderStore";
 import { cn } from "@/lib/utils";
-import { Crown, Trophy, Medal, Star } from "lucide-react";
+import {
+  Star,
+  Shield,
+  Zap,
+  Target,
+  Trophy,
+  Crown,
+  Medal,
+  TrendingUp,
+  Users,
+} from "lucide-react";
 import { ModuleHeader } from "./module-header";
 import { ModuleContainer } from "./module-container";
+
+interface Entry {
+  rank: number;
+  name: string;
+  score: string;
+  avatar?: string;
+  role?: string;
+  category?: string;
+  change?: "up" | "down" | "neutral";
+  stats?: { label: string; value: string }[];
+}
+
+interface LayoutProps {
+  content: {
+    title?: string;
+    description?: string;
+    entries: Entry[];
+  };
+}
+
+const CardRankings = ({ content }: LayoutProps) => {
+  const { entries } = content;
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {entries.map((entry, idx) => (
+        <div
+          key={idx}
+          className="group relative bg-slate-50 border border-slate-100 p-8 rounded-[2.5rem] hover:bg-white hover:border-slate-900 transition-all duration-500 hover:shadow-2xl"
+        >
+          <div className="absolute top-8 right-8 text-4xl font-black text-slate-100 group-hover:text-slate-900/5 transition-colors select-none">
+            #{entry.rank}
+          </div>
+
+          <div className="flex items-center gap-6 mb-8">
+            <div className="w-16 h-16 rounded-2xl bg-white border border-slate-100 overflow-hidden shadow-sm shrink-0">
+              {entry.avatar ? (
+                <img
+                  src={entry.avatar}
+                  alt={entry.name}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-2xl">
+                  👤
+                </div>
+              )}
+            </div>
+            <div className="min-w-0">
+              <h3 className="text-xl font-black text-slate-900 tracking-tight truncate">
+                {entry.name}
+              </h3>
+              <div className="text-[10px] font-black text-blue-600 uppercase tracking-widest mt-1">
+                {entry.role || "Community Member"}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between p-4 bg-white rounded-2xl border border-slate-100 group-hover:bg-slate-50 transition-colors">
+            <div className="flex items-center gap-2">
+              <Star className="text-yellow-500 fill-yellow-500" size={16} />
+              <span className="text-sm font-black text-slate-900">
+                {entry.score}
+              </span>
+            </div>
+            <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+              Global Pts
+            </div>
+          </div>
+
+          <div className="mt-8 flex gap-2">
+            {[1, 2, 3].map((_, i) => (
+              <div
+                key={i}
+                className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-blue-600/10 group-hover:text-blue-600 transition-colors"
+              >
+                {i === 0 ? (
+                  <Shield size={14} />
+                ) : i === 1 ? (
+                  <Zap size={14} />
+                ) : (
+                  <Target size={14} />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const PodiumView = ({ content }: LayoutProps) => {
+  const { entries } = content;
+
+  const first = entries.find((e) => e.rank === 1);
+  const second = entries.find((e) => e.rank === 2);
+  const third = entries.find((e) => e.rank === 3);
+
+  return (
+    <div className="max-w-6xl mx-auto">
+      <div className="flex flex-col md:flex-row items-end justify-center gap-8 md:gap-0 min-h-[500px] mb-20">
+        {/* Second Place */}
+        {second && (
+          <div className="w-full md:w-64 flex flex-col items-center">
+            <div className="mb-8 text-center px-4 w-full">
+              <div className="w-24 h-24 rounded-3xl overflow-hidden border-4 border-slate-300/30 mb-4 mx-auto relative group">
+                {second.avatar ? (
+                  <img
+                    src={second.avatar}
+                    alt={second.name}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-slate-800 flex items-center justify-center text-4xl">
+                    👤
+                  </div>
+                )}
+                <div className="absolute top-0 right-0 p-2 bg-slate-300 text-slate-900 rounded-bl-xl font-black text-[10px]">
+                  #2
+                </div>
+              </div>
+              <div className="text-xl font-black text-slate-900 dark:text-white truncate w-full">
+                {second.name}
+              </div>
+              <div className="text-xs font-black text-slate-500 uppercase tracking-widest mt-1">
+                {second.score} pts
+              </div>
+            </div>
+            <div className="w-full bg-slate-800/50 border-x border-t border-white/10 rounded-t-[3rem] h-[160px] flex items-center justify-center relative shadow-2xl">
+              <div className="text-6xl font-black text-white/5 absolute -bottom-4">
+                2nd
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* First Place */}
+        {first && (
+          <div className="w-full md:w-80 flex flex-col items-center relative z-20 -mt-10 md:mt-0">
+            <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-80 h-80 bg-blue-600/20 rounded-full blur-[100px] pointer-events-none" />
+            <div className="mb-10 text-center px-4 relative w-full">
+              <div className="w-32 h-32 md:w-40 md:h-40 rounded-[2.5rem] overflow-hidden border-4 border-yellow-400 shadow-[0_0_40px_rgba(250,204,21,0.3)] mb-6 mx-auto relative group">
+                {first.avatar ? (
+                  <img
+                    src={first.avatar}
+                    alt={first.name}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-slate-800 flex items-center justify-center text-6xl">
+                    👤
+                  </div>
+                )}
+                <div className="absolute -top-6 left-1/2 -translate-x-1/2 -rotate-12 group-hover:rotate-0 transition-transform duration-500">
+                  <Crown
+                    className="text-yellow-400 fill-yellow-400 drop-shadow-2xl"
+                    size={48}
+                  />
+                </div>
+                <div className="absolute top-0 right-0 p-3 bg-yellow-400 text-slate-900 rounded-bl-2xl font-black text-xs">
+                  Winner
+                </div>
+              </div>
+              <div className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter mb-1">
+                {first.name}
+              </div>
+              <div className="text-sm font-black text-blue-400 uppercase tracking-[0.2em]">
+                {first.score} pts
+              </div>
+            </div>
+            <div className="w-full bg-linear-to-b from-blue-600 to-blue-900 border-x border-t border-blue-400/30 rounded-t-[4rem] h-[260px] flex items-center justify-center relative shadow-[0_-20px_60px_rgba(37,99,235,0.2)]">
+              <div className="text-8xl font-black text-white/10 absolute -bottom-6">
+                1st
+              </div>
+              <Trophy
+                className="text-white/20 absolute top-10"
+                size={80}
+                strokeWidth={1}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Third Place */}
+        {third && (
+          <div className="w-full md:w-64 flex flex-col items-center">
+            <div className="mb-8 text-center px-4 w-full">
+              <div className="w-24 h-24 rounded-3xl overflow-hidden border-4 border-orange-400/30 mb-4 mx-auto relative group">
+                {third.avatar ? (
+                  <img
+                    src={third.avatar}
+                    alt={third.name}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-slate-800 flex items-center justify-center text-4xl">
+                    👤
+                  </div>
+                )}
+                <div className="absolute top-0 right-0 p-2 bg-orange-400 text-white rounded-bl-xl font-black text-[10px]">
+                  #3
+                </div>
+              </div>
+              <div className="text-xl font-black text-slate-900 dark:text-white truncate w-full">
+                {third.name}
+              </div>
+              <div className="text-xs font-black text-slate-500 uppercase tracking-widest mt-1">
+                {third.score} pts
+              </div>
+            </div>
+            <div className="w-full bg-slate-800/50 border-x border-t border-white/10 rounded-t-[3rem] h-[120px] flex items-center justify-center relative shadow-2xl">
+              <div className="text-6xl font-black text-white/5 absolute -bottom-4">
+                3rd
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Honorable Mentions */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-4 pt-20 border-t border-slate-200 dark:border-white/5">
+        {entries.slice(3, 9).map((entry, idx) => (
+          <div key={idx} className="flex flex-col items-center group">
+            <div className="w-12 h-12 rounded-2xl overflow-hidden border border-slate-200 dark:border-white/10 mb-3 group-hover:border-blue-500 dark:group-hover:border-white/30 transition-all">
+              {entry.avatar ? (
+                <img
+                  src={entry.avatar}
+                  alt={entry.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-xl">
+                  👤
+                </div>
+              )}
+            </div>
+            <div className="text-[10px] font-black text-slate-400 truncate w-full text-center group-hover:text-blue-600 dark:group-hover:text-white transition-colors">
+              {entry.name}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const RankList = ({ content }: LayoutProps) => {
+  const { entries } = content;
+
+  return (
+    <div className="max-w-4xl mx-auto">
+      <div className="bg-slate-50 rounded-[2.5rem] border border-slate-100 overflow-hidden shadow-sm">
+        <div className="grid grid-cols-[80px_1fr_120px_100px] gap-4 p-8 border-b border-slate-200 bg-white items-center">
+          <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">
+            Rank
+          </div>
+          <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+            Contributor
+          </div>
+          <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">
+            Points
+          </div>
+          <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">
+            Status
+          </div>
+        </div>
+
+        <div className="divide-y divide-slate-100">
+          {entries.map((entry, idx) => (
+            <div
+              key={idx}
+              className="grid grid-cols-[80px_1fr_120px_100px] gap-4 p-6 hover:bg-white transition-colors items-center group"
+            >
+              <div className="flex justify-center">
+                {entry.rank === 1 ? (
+                  <div className="w-10 h-10 rounded-2xl bg-yellow-400 flex items-center justify-center text-white shadow-lg shadow-yellow-400/30">
+                    <Trophy size={20} />
+                  </div>
+                ) : entry.rank === 2 ? (
+                  <div className="w-10 h-10 rounded-2xl bg-slate-300 flex items-center justify-center text-white">
+                    <Medal size={20} />
+                  </div>
+                ) : entry.rank === 3 ? (
+                  <div className="w-10 h-10 rounded-2xl bg-orange-400 flex items-center justify-center text-white">
+                    <Medal size={20} />
+                  </div>
+                ) : (
+                  <div className="text-xl font-black text-slate-300 group-hover:text-slate-900 transition-colors">
+                    {entry.rank}
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center gap-4 min-w-0">
+                <div className="w-12 h-12 rounded-2xl bg-slate-200 overflow-hidden border-2 border-white shadow-sm shrink-0">
+                  {entry.avatar ? (
+                    <img
+                      src={entry.avatar}
+                      alt={entry.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-xl">
+                      👤
+                    </div>
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <div className="text-base font-black text-slate-900 group-hover:text-blue-600 transition-colors truncate">
+                    {entry.name}
+                  </div>
+                  <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest truncate">
+                    {entry.category || "General Contributor"}
+                  </div>
+                </div>
+              </div>
+
+              <div className="text-right">
+                <div className="text-lg font-black text-slate-900">
+                  {entry.score}
+                </div>
+              </div>
+
+              <div className="flex justify-center">
+                {entry.change === "up" ? (
+                  <div className="flex items-center gap-1 text-green-500 font-black text-xs">
+                    <TrendingUp size={14} />
+                  </div>
+                ) : entry.change === "down" ? (
+                  <div className="text-red-400 text-xs font-black rotate-180">
+                    <TrendingUp size={14} />
+                  </div>
+                ) : (
+                  <div className="w-4 h-1 bg-slate-200 rounded-full" />
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const StatsBoard = ({ content }: LayoutProps) => {
+  const { entries } = content;
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      {entries.slice(0, 4).map((entry, idx) => (
+        <div
+          key={idx}
+          className="group bg-white p-8 md:p-10 rounded-[3rem] border border-slate-100 hover:border-slate-300 hover:shadow-2xl transition-all duration-500"
+        >
+          <div className="flex items-center gap-6 mb-10 pb-8 border-b border-slate-50">
+            <div className="relative">
+              <div className="w-20 h-20 rounded-4xl overflow-hidden border-4 border-slate-50 relative z-10">
+                {entry.avatar ? (
+                  <img
+                    src={entry.avatar}
+                    alt={entry.name}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-slate-200 flex items-center justify-center text-4xl">
+                    👤
+                  </div>
+                )}
+              </div>
+              <div className="absolute -top-3 -left-3 w-10 h-10 rounded-2xl bg-slate-900 text-white flex items-center justify-center font-black text-sm z-20 shadow-xl border-4 border-white">
+                {entry.rank}
+              </div>
+            </div>
+
+            <div className="flex-1 min-w-0">
+              <h3 className="text-2xl font-black text-slate-900 tracking-tight truncate">
+                {entry.name}
+              </h3>
+              <div className="flex items-center gap-2 mt-2">
+                <Zap className="text-yellow-500" size={14} />
+                <span className="text-sm font-black text-slate-400 uppercase tracking-widest">
+                  {entry.role || "Master Contributor"}
+                </span>
+              </div>
+            </div>
+
+            <div className="text-right hidden sm:block">
+              <div className="text-3xl font-black text-blue-600 tracking-tighter">
+                {entry.score}
+              </div>
+              <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">
+                Total Points
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
+            {(
+              entry.stats || [
+                { label: "Pull Requests", value: "142" },
+                { label: "Reviews", value: "89" },
+                { label: "Impact", value: "High" },
+                { label: "Streak", value: "12 Days" },
+              ]
+            ).map((stat, sIdx) => (
+              <div key={sIdx}>
+                <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                  {stat.label}
+                </div>
+                <div className="text-lg font-black text-slate-900 group-hover:text-blue-600 transition-colors">
+                  {stat.value}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-10 pt-8 border-t border-slate-50 text-right">
+            <button className="text-[10px] font-black uppercase tracking-widest text-slate-300 hover:text-slate-900 transition-colors">
+              Detailed Contribution Stats
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
 
 interface LeaderboardModuleProps {
   module: ModuleData;
@@ -17,390 +454,83 @@ export const LeaderboardModule = ({
 }: LeaderboardModuleProps) => {
   const { content, layout } = module;
   const rankings = content.rankings || [];
-  const isMobile = previewDevice === "mobile";
 
-  // Rank List Layout (Default)
-  if (layout === "rank-list" || !layout) {
+  // Transform rankings to entries expected by layouts
+  const entries: Entry[] = rankings.map((r: any, idx: number) => {
+    let parsedStats = [];
+    try {
+      if (typeof r.stats === "string") {
+        parsedStats = JSON.parse(r.stats);
+      } else if (Array.isArray(r.stats)) {
+        parsedStats = r.stats;
+      }
+    } catch (e) {
+      console.error("Failed to parse stats for ranking", idx);
+    }
+
+    return {
+      rank: r.rank || idx + 1,
+      name: r.name,
+      score: String(r.score || 0),
+      avatar: r.avatar,
+      role: r.role || r.badge, // Fallback to badge if role not set
+      category: r.category,
+      change: r.change,
+      stats: parsedStats,
+    };
+  });
+
+  const layoutContent = {
+    title: content.title,
+    description: content.description,
+    entries,
+  };
+
+  if (entries.length === 0) {
     return (
-      <ModuleContainer containerSettings={content.containerSettings} className="bg-slate-50 border-y">
+      <ModuleContainer>
         <ModuleHeader
-          title={content.title}
-          description={content.description}
-          layoutSettings={content.layoutSettings}
+          title={content.title || "Leaderboard"}
+          description={content.description || "Top community members"}
           alignment="center"
         />
-
-          {rankings.length === 0 && (
-            <div className="text-center py-12 bg-white rounded-lg border">
-              <p className="text-muted-foreground">
-                No leaderboard entries yet. Add entries in the settings panel.
-              </p>
-            </div>
-          )}
-
-          {rankings.length > 0 && (
-            <div className="bg-white rounded-lg border overflow-hidden">
-              {rankings.map((ranking: any, idx: number) => (
-                <div
-                  key={idx}
-                  className={`flex items-center p-4 border-b last:border-b-0 ${
-                    idx < 3
-                      ? "bg-gradient-to-r from-yellow-50 to-orange-50"
-                      : ""
-                  }`}
-                >
-                  <div className="w-8 h-8 flex items-center justify-center font-bold text-lg">
-                    {idx < 3 ? ["🥇", "🥈", "🥉"][idx] : idx + 1}
-                  </div>
-                  <div className="w-10 h-10 bg-gradient-to-br from-primary/10 to-primary/5 rounded-full ml-4 overflow-hidden flex items-center justify-center">
-                    {ranking.avatar ? (
-                      <img
-                        src={ranking.avatar}
-                        alt={ranking.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-xl">👤</span>
-                    )}
-                  </div>
-                  <div className="ml-4 flex-1">
-                    <h3 className="font-semibold">
-                      {ranking.name || `Member ${idx + 1}`}
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      {ranking.score || 1000 - idx * 50} points
-                    </p>
-                  </div>
-                  {idx < 3 && <Crown className="h-5 w-5 text-yellow-500" />}
-                </div>
-              ))}
-            </div>
-          )}
+        <div className="text-center py-12 bg-white rounded-4xl border border-dashed border-slate-200">
+          <p className="text-muted-foreground">
+            No rankings added yet. Add entries in the settings panel.
+          </p>
+        </div>
       </ModuleContainer>
     );
   }
 
-  // Podium View Layout
-  if (layout === "podium-view") {
-    const topThree = rankings.slice(0, 3);
-    const remaining = rankings.slice(3);
+  // Determine dark mode layouts if any (currently mostly light mostly, Podium has dark text fallbacks)
+  const isDark = false;
 
-    return (
-      <div className="p-12 bg-gradient-to-br from-blue-50 to-purple-50 border-y">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">
-              {content.title || "Top Champions"}
-            </h2>
-            <p className="text-muted-foreground text-lg">
-              {content.description || "Celebrating our community heroes"}
-            </p>
-          </div>
-
-          {topThree.length > 0 && (
-            <div className="flex items-end justify-center mb-12 gap-8">
-              {/* Second Place */}
-              {topThree[1] && (
-                <div className="text-center">
-                  <div className="w-20 h-20 bg-gradient-to-br from-gray-300 to-gray-400 rounded-full mx-auto mb-4 overflow-hidden border-4 border-gray-200 flex items-center justify-center">
-                    {topThree[1].avatar ? (
-                      <img
-                        src={topThree[1].avatar}
-                        alt={topThree[1].name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-3xl text-white">👤</span>
-                    )}
-                  </div>
-                  <div className="bg-gradient-to-t from-gray-400 to-gray-300 p-6 rounded-t-lg h-24 flex flex-col justify-end">
-                    <Medal className="h-6 w-6 text-white mx-auto mb-2" />
-                    <p className="font-bold text-white">{topThree[1].name}</p>
-                    <p className="text-gray-100 text-sm">
-                      {topThree[1].score} pts
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {/* First Place */}
-              {topThree[0] && (
-                <div className="text-center">
-                  <Crown className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
-                  <div className="w-24 h-24 bg-gradient-to-br from-yellow-300 to-yellow-500 rounded-full mx-auto mb-4 overflow-hidden border-4 border-yellow-200 flex items-center justify-center">
-                    {topThree[0].avatar ? (
-                      <img
-                        src={topThree[0].avatar}
-                        alt={topThree[0].name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-4xl text-white">👤</span>
-                    )}
-                  </div>
-                  <div className="bg-gradient-to-t from-yellow-500 to-yellow-400 p-6 rounded-t-lg h-32 flex flex-col justify-end">
-                    <Trophy className="h-8 w-8 text-white mx-auto mb-2" />
-                    <p className="font-bold text-white text-lg">
-                      {topThree[0].name}
-                    </p>
-                    <p className="text-yellow-100">{topThree[0].score} pts</p>
-                  </div>
-                </div>
-              )}
-
-              {/* Third Place */}
-              {topThree[2] && (
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-orange-300 to-orange-400 rounded-full mx-auto mb-4 overflow-hidden border-4 border-orange-200 flex items-center justify-center">
-                    {topThree[2].avatar ? (
-                      <img
-                        src={topThree[2].avatar}
-                        alt={topThree[2].name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-2xl text-white">👤</span>
-                    )}
-                  </div>
-                  <div className="bg-gradient-to-t from-orange-400 to-orange-300 p-6 rounded-t-lg h-20 flex flex-col justify-end">
-                    <Star className="h-5 w-5 text-white mx-auto mb-2" />
-                    <p className="font-bold text-white">{topThree[2].name}</p>
-                    <p className="text-orange-100 text-sm">
-                      {topThree[2].score} pts
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {remaining.length > 0 && (
-            <div className="bg-white rounded-lg border shadow-sm">
-              <h3 className="font-semibold text-lg p-4 border-b">
-                Other Rankings
-              </h3>
-              {remaining.map((ranking: any, idx: number) => (
-                <div
-                  key={idx}
-                  className="flex items-center p-4 border-b last:border-b-0"
-                >
-                  <span className="w-8 text-center font-bold text-muted-foreground">
-                    {idx + 4}
-                  </span>
-                  <div className="w-8 h-8 bg-gradient-to-br from-primary/10 to-primary/5 rounded-full ml-4 overflow-hidden flex items-center justify-center">
-                    {ranking.avatar ? (
-                      <img
-                        src={ranking.avatar}
-                        alt={ranking.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-sm">👤</span>
-                    )}
-                  </div>
-                  <div className="ml-4 flex-1">
-                    <p className="font-medium">{ranking.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {ranking.score} points
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  // Stats Board Layout
-  if (layout === "stats-board") {
-    return (
-      <div className="p-12 bg-slate-900 text-white border-y">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">
-              {content.title || "Performance Stats"}
-            </h2>
-            <p className="text-slate-400">
-              {content.description || "Real-time community metrics"}
-            </p>
-          </div>
-
-          {rankings.length > 0 && (
-            <div
-              className={cn(
-                "grid gap-6",
-                isMobile ? "grid-cols-1" : "grid-cols-2 lg:grid-cols-3"
-              )}
-            >
-              {rankings.map((ranking: any, idx: number) => (
-                <div
-                  key={idx}
-                  className="bg-slate-800 rounded-lg p-6 border border-slate-700"
-                >
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center">
-                      <span className="text-2xl font-bold text-blue-400">
-                        #{idx + 1}
-                      </span>
-                      {idx < 3 && (
-                        <Crown className="h-5 w-5 text-yellow-400 ml-2" />
-                      )}
-                    </div>
-                    <div className="w-12 h-12 bg-gradient-to-br from-primary/10 to-primary/5 rounded-full overflow-hidden flex items-center justify-center">
-                      {ranking.avatar ? (
-                        <img
-                          src={ranking.avatar}
-                          alt={ranking.name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <span className="text-2xl">👤</span>
-                      )}
-                    </div>
-                  </div>
-                  <h3 className="font-bold text-lg mb-2">
-                    {ranking.name || `Member ${idx + 1}`}
-                  </h3>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <p className="text-slate-400">Points</p>
-                      <p className="text-xl font-bold text-green-400">
-                        {ranking.score || 1000 - idx * 50}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-slate-400">Rank</p>
-                      <p className="text-xl font-bold text-blue-400">
-                        {idx + 1}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="mt-4 bg-slate-700 rounded-full h-2">
-                    <div
-                      className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full"
-                      style={{ width: `${Math.max(10, 100 - idx * 10)}%` }}
-                    ></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  // Card Rankings Layout
-  if (layout === "card-rankings") {
-    return (
-      <div className="p-12 bg-gradient-to-br from-purple-50 to-pink-50 border-y">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">
-              {content.title || "Top Performers"}
-            </h2>
-            <p className="text-muted-foreground">
-              {content.description || "Outstanding community members"}
-            </p>
-          </div>
-
-          {rankings.length > 0 && (
-            <div
-              className={cn(
-                "grid gap-6",
-                isMobile ? "grid-cols-1" : "grid-cols-2 lg:grid-cols-3"
-              )}
-            >
-              {rankings.map((ranking: any, idx: number) => (
-                <div
-                  key={idx}
-                  className={cn(
-                    "bg-white rounded-xl p-6 shadow-lg border-2 transition-transform hover:scale-105",
-                    idx === 0 &&
-                      "border-yellow-300 bg-gradient-to-br from-yellow-50 to-orange-50",
-                    idx === 1 &&
-                      "border-gray-300 bg-gradient-to-br from-gray-50 to-slate-50",
-                    idx === 2 &&
-                      "border-orange-300 bg-gradient-to-br from-orange-50 to-red-50",
-                    idx > 2 && "border-gray-200"
-                  )}
-                >
-                  <div className="text-center">
-                    <div className="relative inline-block mb-4">
-                      <div className="w-16 h-16 bg-gradient-to-br from-primary/10 to-primary/5 rounded-full mx-auto overflow-hidden flex items-center justify-center">
-                        {ranking.avatar ? (
-                          <img
-                            src={ranking.avatar}
-                            alt={ranking.name}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <span className="text-3xl">👤</span>
-                        )}
-                      </div>
-                      {idx < 3 && (
-                        <div
-                          className={cn(
-                            "absolute -top-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold",
-                            idx === 0 && "bg-yellow-500",
-                            idx === 1 && "bg-gray-400",
-                            idx === 2 && "bg-orange-500"
-                          )}
-                        >
-                          {idx + 1}
-                        </div>
-                      )}
-                    </div>
-                    <h3 className="font-bold text-lg mb-2">
-                      {ranking.name || `Member ${idx + 1}`}
-                    </h3>
-                    <p className="text-2xl font-bold text-primary mb-2">
-                      {ranking.score || 1000 - idx * 50}
-                    </p>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      points earned
-                    </p>
-
-                    {idx < 3 && (
-                      <div className="flex justify-center">
-                        {idx === 0 && (
-                          <Trophy className="h-6 w-6 text-yellow-500" />
-                        )}
-                        {idx === 1 && (
-                          <Medal className="h-6 w-6 text-gray-500" />
-                        )}
-                        {idx === 2 && (
-                          <Star className="h-6 w-6 text-orange-500" />
-                        )}
-                      </div>
-                    )}
-
-                    {idx > 2 && (
-                      <div className="text-lg font-bold text-muted-foreground">
-                        #{idx + 1}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  // Default fallback
   return (
-    <div className="p-12 bg-slate-50 border-y">
-      <div className="max-w-4xl mx-auto text-center">
-        <h2 className="text-2xl font-bold mb-4">Leaderboard</h2>
-        <p className="text-muted-foreground">
-          Select a layout style to display the leaderboard.
-        </p>
-      </div>
-    </div>
+    <ModuleContainer
+      className={cn(
+        isDark && "bg-slate-950 text-white py-24",
+        !isDark && "py-24"
+      )}
+      containerSettings={{ fullWidth: false }}
+    >
+      <ModuleHeader
+        title={content.title || "Leaderboard"}
+        description={content.description || "Top community members"}
+        alignment="center"
+        containerClassName="mb-16"
+      />
+
+      {layout === "card-rankings" && <CardRankings content={layoutContent} />}
+      {layout === "podium-view" && <PodiumView content={layoutContent} />}
+      {layout === "rank-list" && <RankList content={layoutContent} />}
+      {layout === "stats-board" && <StatsBoard content={layoutContent} />}
+
+      {/* Default Fallback */}
+      {(!layout ||
+        !["card-rankings", "podium-view", "rank-list", "stats-board"].includes(
+          layout
+        )) && <RankList content={layoutContent} />}
+    </ModuleContainer>
   );
 };

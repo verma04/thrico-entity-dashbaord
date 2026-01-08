@@ -11,7 +11,11 @@ import { ImageUploadWithCrop } from "@/components/ui/image-upload-with-crop";
 
 import { Store, Loader2 } from "lucide-react";
 import BillingAddress from "./billing-address";
-import { useGetEntity, useUploadEntityLogo } from "@/graphql/actions";
+import {
+  useGetEntity,
+  useUpdateEntityProfile,
+  useUploadEntityLogo,
+} from "@/graphql/actions";
 
 export default function GeneralSettings() {
   const { toast } = useToast();
@@ -24,7 +28,7 @@ export default function GeneralSettings() {
   const [tempName, setTempName] = useState(communityName);
   const [communityImage, setCommunityImage] = useState<string>("");
 
-  const [updateProfile, { loading: updatingProfile }] = useUploadEntityLogo({
+  const [updateProfile, { loading: updatingProfile }] = useUpdateEntityProfile({
     onCompleted: (data: any) => {
       if (data.updateEntityProfile.success) {
         toast({
@@ -48,6 +52,15 @@ export default function GeneralSettings() {
         description: error.message || "Failed to update profile",
         variant: "destructive",
       });
+    },
+  });
+
+  const [uploadEntityLogo] = useUploadEntityLogo({
+    onCompleted: (data: any) => {
+      // Handled in customUploadHandler
+    },
+    onError: (error: any) => {
+      // Handled in customUploadHandler
     },
   });
 
@@ -184,6 +197,29 @@ export default function GeneralSettings() {
               minWidth={256}
               minHeight={256}
               customDescription="Square logo recommended for best results. Drag & drop or click to upload."
+              customUploadHandler={async (file) => {
+                try {
+                  const { data } = await uploadEntityLogo({
+                    variables: { file },
+                  });
+                  if (data?.uploadEntityLogo?.success) {
+                    toast({
+                      title: "Success",
+                      description:
+                        data.uploadEntityLogo.message ||
+                        "Logo updated successfully!",
+                    });
+                    // Return the full URL for the preview update
+                    return `https://cdn.thrico.network/${data.uploadEntityLogo.logo}`;
+                  } else {
+                    throw new Error(
+                      data?.uploadEntityLogo?.message || "Failed to upload logo"
+                    );
+                  }
+                } catch (error: any) {
+                  throw new Error(error.message || "Failed to upload logo");
+                }
+              }}
             />
           </div>
 

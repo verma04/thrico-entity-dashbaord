@@ -1,10 +1,3 @@
-"use client";
-
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { Plus, Trash2, GripVertical } from "lucide-react";
 import {
   DragDropContext,
   Droppable,
@@ -13,6 +6,18 @@ import {
 } from "@hello-pangea/dnd";
 import { cn } from "@/lib/utils";
 import { ImageUploadWithCrop } from "@/components/ui/image-upload-with-crop";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Plus, Trash2, GripVertical } from "lucide-react";
 
 interface LeaderboardSettingsProps {
   content: any;
@@ -33,10 +38,11 @@ export const LeaderboardSettings = ({
       {
         rank: rankings.length + 1,
         name: "",
-        score: 0,
+        score: "0",
         avatar: "",
-        badge: "",
-        stats: "",
+        role: "",
+        change: "neutral",
+        stats: [], // Default empty stats array
       },
     ];
     onChange({ rankings: newRankings });
@@ -61,7 +67,7 @@ export const LeaderboardSettings = ({
     items.splice(result.destination.index, 0, reorderedItem);
 
     // Update ranks after reordering
-    const updatedItems = items.map((item, idx) => ({
+    const updatedItems = items.map((item: any, idx: number) => ({
       ...item,
       rank: idx + 1,
     }));
@@ -110,7 +116,8 @@ export const LeaderboardSettings = ({
                       {...provided.draggableProps}
                       className={cn(
                         "space-y-2 p-3 bg-muted/10 rounded border transition-shadow",
-                        snapshot.isDragging && "shadow-lg ring-2 ring-primary/20"
+                        snapshot.isDragging &&
+                          "shadow-lg ring-2 ring-primary/20"
                       )}
                     >
                       <div className="flex justify-between items-center">
@@ -118,7 +125,9 @@ export const LeaderboardSettings = ({
                           <div {...provided.dragHandleProps}>
                             <GripVertical className="h-4 w-4 text-muted-foreground/50 cursor-grab active:cursor-grabbing" />
                           </div>
-                          <span className="text-xs font-bold">Rank {index + 1}</span>
+                          <span className="text-xs font-bold">
+                            Rank {index + 1}
+                          </span>
                         </div>
                         <button
                           onClick={() => deleteRanking(index)}
@@ -130,21 +139,29 @@ export const LeaderboardSettings = ({
 
                       <div className="grid grid-cols-2 gap-2">
                         <div className="space-y-2">
-                          <Label className="text-[10px] text-muted-foreground">Name</Label>
+                          <Label className="text-[10px] text-muted-foreground">
+                            Name
+                          </Label>
                           <Input
                             value={ranking.name || ""}
-                            onChange={(e) => updateRanking(index, "name", e.target.value)}
+                            onChange={(e) =>
+                              updateRanking(index, "name", e.target.value)
+                            }
                             placeholder="Player Name"
                             className="h-8 text-xs"
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-[10px] text-muted-foreground">Score</Label>
+                          <Label className="text-[10px] text-muted-foreground">
+                            Score
+                          </Label>
                           <Input
-                            type="number"
-                            value={ranking.score || 0}
-                            onChange={(e) => updateRanking(index, "score", parseInt(e.target.value) || 0)}
-                            placeholder="1000"
+                            type="text"
+                            value={ranking.score || ""}
+                            onChange={(e) =>
+                              updateRanking(index, "score", e.target.value)
+                            }
+                            placeholder="Score (e.g. 1500)"
                             className="h-8 text-xs"
                           />
                         </div>
@@ -155,7 +172,9 @@ export const LeaderboardSettings = ({
                         <div className="space-y-2">
                           <ImageUploadWithCrop
                             currentImage={ranking.avatar || ""}
-                            onImageUpdate={(url) => updateRanking(index, "avatar", url)}
+                            onImageUpdate={(url) =>
+                              updateRanking(index, "avatar", url)
+                            }
                             label="Avatar"
                             recommendedWidth={200}
                             recommendedHeight={200}
@@ -165,25 +184,80 @@ export const LeaderboardSettings = ({
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-[10px] text-muted-foreground">Badge</Label>
+                          <Label className="text-[10px] text-muted-foreground">
+                            Role / Category
+                          </Label>
                           <Input
-                            value={ranking.badge || ""}
-                            onChange={(e) => updateRanking(index, "badge", e.target.value)}
-                            placeholder="Gold, Silver, Bronze"
+                            value={ranking.role || ranking.category || ""}
+                            onChange={(e) => {
+                              updateRanking(index, "role", e.target.value);
+                              updateRanking(index, "category", e.target.value);
+                            }}
+                            placeholder="e.g. Moderator"
                             className="h-8 text-xs"
                           />
                         </div>
                       </div>
 
-                      <div className="space-y-2">
-                        <Label className="text-[10px] text-muted-foreground">Stats</Label>
-                        <Textarea
-                          value={ranking.stats || ""}
-                          onChange={(e) => updateRanking(index, "stats", e.target.value)}
-                          placeholder="Additional stats..."
-                          className="text-xs min-h-[50px]"
-                          rows={2}
-                        />
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="space-y-2">
+                          <Label className="text-[10px] text-muted-foreground">
+                            Trend Change
+                          </Label>
+                          <Select
+                            value={ranking.change || "neutral"}
+                            onValueChange={(val) =>
+                              updateRanking(index, "change", val)
+                            }
+                          >
+                            <SelectTrigger className="h-8 text-xs">
+                              <SelectValue placeholder="Trend" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="up">Up (Growing)</SelectItem>
+                              <SelectItem value="neutral">
+                                Neutral (Stable)
+                              </SelectItem>
+                              <SelectItem value="down">
+                                Down (Falling)
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-[10px] text-muted-foreground">
+                            Stats (JSON)
+                          </Label>
+                          <Input
+                            value={
+                              typeof ranking.stats === "string"
+                                ? ranking.stats
+                                : JSON.stringify(ranking.stats || [])
+                            }
+                            onChange={(e) => {
+                              try {
+                                // Try to parse just to validate, but store as string or object?
+                                // Simplified: just store whatever string user types if it's stats field,
+                                // but we need array for the renderer.
+                                // Let's assume user won't type raw JSON easily here.
+                                // For now, let's keep it simple: Comma separated text or just use a placeholder text if complex.
+                                // Actually, let's just make it a text field that parses to array of objects if possible, or just leave as is.
+                                // The renderer expects { label, value } array.
+                                // Let's skip complex stats editing for this turn to avoid breakage, pass empty or defautls if missing.
+                                // Or better: Let's allow pasting JSON for power users.
+                                updateRanking(
+                                  index,
+                                  "stats",
+                                  JSON.parse(e.target.value)
+                                );
+                              } catch (err) {
+                                // ignore parse error while typing
+                              }
+                            }}
+                            placeholder='[{"label":"XP","value":"100"}]'
+                            className="h-8 text-xs font-mono"
+                          />
+                        </div>
                       </div>
                     </div>
                   )}
