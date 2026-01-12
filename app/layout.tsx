@@ -102,7 +102,7 @@ export default function RootLayout({
       <body
         className={`${spaceGrotesk.className} ${inter.variable} ${playfair.variable} ${outfit.variable} ${firaCode.variable} font-sans`}
       >
-        <ApolloWrapper host={"http://localhost:1111/graphql"}>
+        <ApolloWrapper host={"https://admin.thrico.app/graphql"}>
           {children}
         </ApolloWrapper>
       </body>
