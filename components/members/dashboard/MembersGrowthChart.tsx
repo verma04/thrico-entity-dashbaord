@@ -44,8 +44,16 @@ export const MembersGrowthChart = () => {
             >
               <defs>
                 <linearGradient id="colorMembers" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#2563eb" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
+                  <stop
+                    offset="5%"
+                    stopColor="hsl(var(--primary))"
+                    stopOpacity={0.3}
+                  />
+                  <stop
+                    offset="95%"
+                    stopColor="hsl(var(--primary))"
+                    stopOpacity={0}
+                  />
                 </linearGradient>
               </defs>
               <XAxis
@@ -72,7 +80,7 @@ export const MembersGrowthChart = () => {
               <Area
                 type="monotone"
                 dataKey="members"
-                stroke="#2563eb"
+                stroke="hsl(var(--primary))"
                 strokeWidth={2}
                 fillOpacity={1}
                 fill="url(#colorMembers)"

@@ -38,6 +38,7 @@ export function HeroModule({ module, previewDevice }: HeroModuleProps) {
       )}
       style={{
         color: content.containerSettings?.textColor,
+        backgroundColor: content.containerSettings?.backgroundColor,
       }}
     >
       {/* 1. CAROUSEL */}

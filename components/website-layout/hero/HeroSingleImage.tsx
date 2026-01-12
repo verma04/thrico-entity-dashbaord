@@ -23,11 +23,10 @@ const HeroSingleImage: React.FC<HeroSingleImageProps> = ({ content }) => {
       <div className="relative z-10 text-center max-w-4xl px-6 space-y-8">
         <div className="space-y-4">
           <h1 className="text-5xl md:text-7xl font-black text-white leading-tight tracking-tight">
-            {content.title || "Build Something Amazing"}
+            {content.title || ""}
           </h1>
           <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto font-light leading-relaxed">
-            {content.description ||
-              "Create, connect, and grow with the most powerful platform for building communities."}
+            {content.description || ""}
           </p>
         </div>
 
@@ -53,7 +52,6 @@ const HeroSingleImage: React.FC<HeroSingleImageProps> = ({ content }) => {
             ))}
           </div>
         )}
-
 
         {/* Feature highlights */}
         <div className="flex flex-wrap justify-center gap-8 pt-12 text-white/80">
