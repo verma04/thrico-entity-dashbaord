@@ -55,6 +55,7 @@ export const CtaBannerRenderer = ({
         containerSettings={{
           ...content.containerSettings,
           background:
+            content.containerSettings?.background ||
             content?.backgroundColor ||
             "bg-gradient-to-r from-primary to-primary/80",
         }}
@@ -88,7 +89,10 @@ export const CtaBannerRenderer = ({
       <ModuleContainer
         containerSettings={{
           ...content.containerSettings,
-          background: content?.backgroundColor || "bg-slate-50",
+          background:
+            content.containerSettings?.background ||
+            content?.backgroundColor ||
+            "bg-slate-50",
         }}
       >
         <div
@@ -142,7 +146,10 @@ export const CtaBannerRenderer = ({
       <ModuleContainer
         containerSettings={{
           ...content.containerSettings,
-          background: content?.backgroundColor || "bg-black",
+          background:
+            content.containerSettings?.background ||
+            content?.backgroundColor ||
+            "bg-black",
         }}
         className="text-white"
       >
@@ -171,7 +178,10 @@ export const CtaBannerRenderer = ({
       <ModuleContainer
         containerSettings={{
           ...content.containerSettings,
-          background: content?.backgroundColor || "bg-muted/30",
+          background:
+            content.containerSettings?.background ||
+            content?.backgroundColor ||
+            "bg-muted/30",
         }}
         className="border-y"
       >
@@ -202,7 +212,10 @@ export const CtaBannerRenderer = ({
       <ModuleContainer
         containerSettings={{
           ...content.containerSettings,
-          background: content?.backgroundColor || "bg-rose-600",
+          background:
+            content.containerSettings?.background ||
+            content?.backgroundColor ||
+            "bg-rose-600",
         }}
         className="text-white"
       >

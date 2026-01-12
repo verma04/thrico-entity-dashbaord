@@ -33,10 +33,16 @@ export const CountdownBannerModule = ({
           <div className="text-center">
             <ModuleHeader
               title={content.title || "Limited Time Offer!"}
-              description={content.description || "Don't miss out on this exclusive deal"}
+              description={
+                content.description || "Don't miss out on this exclusive deal"
+              }
               layoutSettings={content.layoutSettings}
               titleClassName="text-white text-3xl"
               descriptionClassName="opacity-90"
+              titleColor={content.titleColor}
+              descriptionColor={content.descriptionColor}
+              hideTitle={content.hideTitle}
+              hideDescription={content.hideDescription}
             />
             <div className="flex justify-center gap-4 mb-8">
               {timeUnits.map((unit) => (
@@ -188,7 +194,9 @@ export const CountdownBannerModule = ({
                       </div>
                     </div>
                     {idx < timeUnits.length - 1 && (
-                      <span className="text-2xl font-bold text-gray-300 mx-2">:</span>
+                      <span className="text-2xl font-bold text-gray-300 mx-2">
+                        :
+                      </span>
                     )}
                   </div>
                 ))}

@@ -381,11 +381,19 @@ export const SuccessStoriesModule = ({
   if (stories.length === 0) {
     return (
       <ModuleContainer>
+        title={content.title || "Success Stories"}
+        description={content.description || "Real journeys and amazing results"}
+        title={content.title || "Success Stories"}
+        description={content.description || "Real journeys and amazing results"}
         <ModuleHeader
           title={content.title || "Success Stories"}
           description={
             content.description || "Real journeys and amazing results"
           }
+          titleColor={content.titleColor}
+          descriptionColor={content.descriptionColor}
+          hideTitle={content.hideTitle}
+          hideDescription={content.hideDescription}
         />
         <div className="text-center py-12 bg-white rounded-2xl border border-dashed border-slate-200">
           <p className="text-muted-foreground">
@@ -413,6 +421,10 @@ export const SuccessStoriesModule = ({
         alignment="center"
         containerClassName={cn("mb-16", isDark && "text-white")}
         descriptionClassName={cn(isDark && "text-slate-400")}
+        titleColor={content.titleColor}
+        descriptionColor={content.descriptionColor}
+        hideTitle={content.hideTitle}
+        hideDescription={content.hideDescription}
       />
 
       {layout === "story-cards" && <StoryCards content={content as any} />}

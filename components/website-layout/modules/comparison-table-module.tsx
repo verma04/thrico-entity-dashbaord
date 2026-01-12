@@ -173,6 +173,10 @@ export const ComparisonTableModule = ({
       description={content.description}
       layoutSettings={content.layoutSettings}
       alignment="center"
+      titleColor={content.titleColor}
+      descriptionColor={content.descriptionColor}
+      hideTitle={content.hideTitle}
+      hideDescription={content.hideDescription}
     />
   );
 

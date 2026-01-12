@@ -134,6 +134,13 @@ const FONTS: {
     preview: "Strong and attention-grabbing",
     fontFamily: "Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif",
   },
+  {
+    id: "fira-code",
+    name: "Fira Code",
+    description: "Monospaced, developer",
+    preview: "Code-friendly font",
+    fontFamily: "var(--font-fira-code), monospace",
+  },
 ];
 
 const FontSelector = () => {

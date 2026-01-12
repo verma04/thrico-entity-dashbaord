@@ -1,49 +1,20 @@
 "use client";
-import React, { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
+import React, { useState, useMemo } from "react";
 import {
   ModuleAnalyticsLayout,
   KPIStat,
 } from "@/components/analytics/module-analytics-layout";
-import { Link } from "lucide-react"; // Keeping Link just in case
-import { Users, LayoutGrid, Calendar, MessageSquare, Eye } from "lucide-react";
+import { Users, LayoutGrid, MessageSquare, Eye } from "lucide-react";
 import { getCommunityStats } from "@/graphql/actions/group";
 import { GetCommunityStatsResponse } from "@/graphql/quries/group/approval";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useMemo } from "react";
 import moment from "moment";
 import { TimeRange } from "@/graphql/actions";
 
-import {
-  Area,
-  AreaChart,
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  Legend,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip as RechartsTooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { WeeklySignupsChart } from "./WeeklySignupsChart";
+import { CommunitiesStatusChart } from "./CommunitiesStatusChart";
+import { TopActiveCommunitiesChart } from "./TopActiveCommunitiesChart";
+import { CommunityPerformanceTable } from "./CommunityPerformanceTable";
 
 // Sample data for charts
 const weeklySignupsData = [
@@ -270,173 +241,25 @@ export default function Analytics() {
       onTimeRangeChange={setDateRange}
       kpiStats={kpiStats}
     >
-      {/* Charts - Second Row */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Weekly User Signups</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
-                  data={weeklySignupsData}
-                  margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-                >
-                  <defs>
-                    <linearGradient
-                      id="colorSignups"
-                      x1="0"
-                      y1="0"
-                      x2="0"
-                      y2="1"
-                    >
-                      <stop
-                        offset="5%"
-                        stopColor="hsl(var(--chart-1))"
-                        stopOpacity={0.8}
-                      />
-                      <stop
-                        offset="95%"
-                        stopColor="hsl(var(--chart-1))"
-                        stopOpacity={0}
-                      />
-                    </linearGradient>
-                  </defs>
-                  <XAxis dataKey="day" />
-                  <YAxis />
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <RechartsTooltip />
-                  <Area
-                    type="monotone"
-                    dataKey="signups"
-                    stroke="hsl(var(--chart-1))"
-                    fillOpacity={1}
-                    fill="url(#colorSignups)"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="space-y-6">
+        {/* Row 1: Main Area Chart & Distribution Pie */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+          <WeeklySignupsChart data={weeklySignupsData} />
+          <CommunitiesStatusChart
+            data={pieData}
+            totalCount={stats?.totalCommunities || 0}
+            colors={COLORS}
+          />
+        </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Top 5 Active Communities</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={topCommunitiesData}
-                  layout="vertical"
-                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                >
-                  <XAxis type="number" />
-                  <YAxis type="category" dataKey="name" width={150} />
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <RechartsTooltip />
-                  <Bar
-                    dataKey="members"
-                    fill="hsl(var(--chart-2))"
-                    radius={[0, 4, 4, 0]}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Charts - Third Row */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle>Communities by Status</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={pieData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                    label={({ name, percent }) =>
-                      `${name}: ${((percent ?? 0) * 100).toFixed(0)}%`
-                    }
-                  >
-                    {pieData.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS[index % COLORS.length]}
-                      />
-                    ))}
-                  </Pie>
-                  <RechartsTooltip />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle>Community Performance</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Community Name</TableHead>
-                    <TableHead>Slug</TableHead>
-                    <TableHead>Members</TableHead>
-                    <TableHead>Active %</TableHead>
-                    <TableHead>Last Activity</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {communityPerformanceData.map((record) => (
-                    <TableRow key={record.key}>
-                      <TableCell>
-                        <a href="#" className="text-blue-600 hover:underline">
-                          {record.name}
-                        </a>
-                      </TableCell>
-                      <TableCell>{record.slug}</TableCell>
-                      <TableCell>{record.members.toLocaleString()}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                            <div
-                              className="h-full rounded-full"
-                              style={{
-                                width: `${record.activePercentage}%`,
-                                backgroundColor: getActivityColor(
-                                  record.activePercentage
-                                ),
-                              }}
-                            />
-                          </div>
-                          <span className="text-sm">
-                            {record.activePercentage}%
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>{record.lastActivity}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Row 2: Top Lists & Detailed Performance */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+          <TopActiveCommunitiesChart data={topCommunitiesData} />
+          <CommunityPerformanceTable
+            data={communityPerformanceData}
+            getActivityColor={getActivityColor}
+          />
+        </div>
       </div>
     </ModuleAnalyticsLayout>
   );

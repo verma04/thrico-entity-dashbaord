@@ -71,33 +71,39 @@ export const ModuleAnalyticsLayout: React.FC<ModuleAnalyticsLayoutProps> = ({
           const Icon = stat.icon;
           const TrendIcon = stat.trend === "up" ? ArrowUpRight : ArrowDownRight;
           const trendColor =
-            stat.trend === "up" ? "text-gray-600" : "text-gray-500";
+            stat.trend === "up" ? "text-emerald-600" : "text-rose-600";
+          const trendBg = stat.trend === "up" ? "bg-emerald-50" : "bg-rose-50";
 
           return (
-            <Card key={index}>
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
+            <Card
+              key={index}
+              className="shadow-sm hover:shadow-md transition-shadow duration-200"
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
                   <div
-                    className={`p-2 rounded-lg ${
+                    className={`p-3 rounded-2xl ${
                       stat.bgColor || "bg-gray-100"
                     }`}
                   >
                     <Icon
-                      className={`h-5 w-5 ${stat.color || "text-gray-700"}`}
+                      className={`h-6 w-6 ${stat.color || "text-gray-700"}`}
                     />
                   </div>
                   {stat.change !== undefined && (
                     <div
-                      className={`flex items-center gap-1 text-sm font-semibold ${trendColor}`}
+                      className={`flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full ${trendBg} ${trendColor}`}
                     >
-                      <TrendIcon className="h-4 w-4" />
+                      <TrendIcon className="h-3 w-3" />
                       {Math.abs(stat.change)}%
                     </div>
                   )}
                 </div>
-                <div className="mt-4">
-                  <p className="text-sm text-muted-foreground">{stat.title}</p>
-                  <div className="text-2xl font-bold mt-1 flex items-center min-h-[32px]">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground mb-1">
+                    {stat.title}
+                  </p>
+                  <div className="text-3xl font-bold flex items-center tracking-tight">
                     {stat.value}
                   </div>
                 </div>

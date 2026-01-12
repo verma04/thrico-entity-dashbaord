@@ -7,6 +7,8 @@ import {
 } from "@/store/useWebsiteBuilderStore";
 import { MenuEditor } from "./menu-editor";
 import { ImageUploadWithCrop } from "@/components/ui/image-upload-with-crop";
+import { Switch } from "@/components/ui/switch";
+import { ContainerSettings } from "./container-settings";
 
 interface NavbarSettingsProps {
   content: ModuleData["content"];
@@ -74,11 +76,28 @@ export const NavbarSettings = ({
         )}
       </div>
 
+      {/* Positioning */}
+      <div className="flex items-center justify-between space-x-2">
+        <Label htmlFor="sticky-nav">Sticky Navigation</Label>
+        <Switch
+          id="sticky-nav"
+          checked={content.isSticky || false}
+          onCheckedChange={(checked) => onContentUpdate({ isSticky: checked })}
+        />
+      </div>
+
       {/* Menu Editor */}
       <MenuEditor
         menuItems={content.menuItems}
         onChange={(items) => onContentUpdate({ menuItems: items })}
       />
+
+      <div className="pt-4 border-t">
+        <ContainerSettings
+          selectedModule={{ id: moduleId, content }}
+          updateModuleContent={(_, updates) => onContentUpdate(updates)}
+        />
+      </div>
     </div>
   );
 };

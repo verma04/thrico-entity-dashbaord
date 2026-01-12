@@ -646,6 +646,10 @@ export function PollsModule({ module, previewDevice }: PollsModuleProps) {
         description={content.description}
         layoutSettings={content.layoutSettings}
         alignment="center"
+        titleColor={content.titleColor}
+        descriptionColor={content.descriptionColor}
+        hideTitle={content.hideTitle}
+        hideDescription={content.hideDescription}
       />
 
       {polls.length === 0 ? (

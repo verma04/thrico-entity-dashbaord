@@ -5,6 +5,7 @@ import { DynamicIcon } from "../preview/DynamicIcon";
 interface ContainerSettings {
   fullWidth?: boolean; // Container width toggle
   background?: string; // Background color
+  textColor?: string; // Text color
   backgroundImage?: string; // Background image URL
   opacity?: number; // 0-100
   button?: {
@@ -34,6 +35,7 @@ export const ModuleContainer = ({
   console.log(containerSettings?.backgroundImage);
   const fullWidth = containerSettings?.fullWidth ?? false;
   const background = containerSettings?.background || "bg-background";
+  const textColor = containerSettings?.textColor;
   const backgroundImage = containerSettings?.backgroundImage;
   const opacity = containerSettings?.opacity ?? 100;
   const button = containerSettings?.button;
@@ -100,6 +102,11 @@ export const ModuleContainer = ({
     inlineStyle.backgroundSize = "cover";
     inlineStyle.backgroundPosition = "center";
     inlineStyle.backgroundRepeat = "no-repeat";
+  }
+
+  // Handle text color
+  if (textColor) {
+    inlineStyle.color = textColor;
   }
 
   // Container width classes

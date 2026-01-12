@@ -398,6 +398,10 @@ export const RoadmapModule = ({
       title={content.title || "Our Roadmap"}
       description={content.description || "Upcoming features and goals"}
       alignment={content.alignment || "center"}
+      titleColor={content.titleColor}
+      descriptionColor={content.descriptionColor}
+      hideTitle={content.hideTitle}
+      hideDescription={content.hideDescription}
     />
   );
 

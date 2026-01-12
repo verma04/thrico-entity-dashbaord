@@ -44,6 +44,7 @@ import BlogRenderer from "./preview/blog-renderer";
 import { PartnersModule } from "./modules/partners-module";
 import { AchievementsModule } from "./modules/achievements-module";
 import { VideoSpotlightModule } from "./modules/video-spotlight-module";
+
 import { ResourcesModule } from "./modules/resources-module";
 import { SocialProofModule } from "./modules/social-proof-module";
 
@@ -191,6 +192,7 @@ const ModuleRenderer: React.FC<ModuleRendererProps> = ({
     "video-spotlight": (
       <VideoSpotlightModule module={module} previewDevice={previewDevice} />
     ),
+
     resources: (
       <ResourcesModule module={module} previewDevice={previewDevice} />
     ),

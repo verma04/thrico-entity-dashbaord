@@ -484,6 +484,10 @@ export const CaseStudiesModule = ({
       <ModuleHeader
         title={content.title}
         description={content.description}
+        titleColor={content.titleColor}
+        descriptionColor={content.descriptionColor}
+        hideTitle={content.hideTitle}
+        hideDescription={content.hideDescription}
         layoutSettings={content.layoutSettings}
         alignment="center"
       />

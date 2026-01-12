@@ -20,7 +20,7 @@ export const TestimonialsModule = ({
   layout,
 }: TestimonialsModuleProps) => {
   return (
-    <ModuleContainer 
+    <ModuleContainer
       containerSettings={content.containerSettings}
       className="bg-muted/10"
     >
@@ -30,28 +30,31 @@ export const TestimonialsModule = ({
         alignment="center"
         descriptionClassName="max-w-2xl mx-auto"
         layoutSettings={content.layoutSettings}
+        titleColor={content.titleColor}
+        descriptionColor={content.descriptionColor}
+        hideTitle={content.hideTitle}
+        hideDescription={content.hideDescription}
       />
 
+      {layout === "grid-cards" && <GridCards content={content} />}
+      {layout === "carousel" && <Carousel content={content} />}
+      {layout === "marquee" && <Marquee content={content} />}
+      {layout === "featured-large" && <FeaturedLarge content={content} />}
+      {layout === "masonry-wall" && <MasonryWall content={content} />}
+      {layout === "minimal-list" && <MinimalList content={content} />}
+      {layout === "video-testimonials" && (
+        <VideoTestimonials content={content} />
+      )}
+      {layout === "quote-wall" && <QuoteWall content={content} />}
+      {layout === "social-proof-stats" && (
+        <SocialProofStats content={content} />
+      )}
 
-        {layout === "grid-cards" && <GridCards content={content} />}
-        {layout === "carousel" && <Carousel content={content} />}
-        {layout === "marquee" && <Marquee content={content} />}
-        {layout === "featured-large" && <FeaturedLarge content={content} />}
-        {layout === "masonry-wall" && <MasonryWall content={content} />}
-        {layout === "minimal-list" && <MinimalList content={content} />}
-        {layout === "video-testimonials" && (
-          <VideoTestimonials content={content} />
-        )}
-        {layout === "quote-wall" && <QuoteWall content={content} />}
-        {layout === "social-proof-stats" && (
-          <SocialProofStats content={content} />
-        )}
-
-        {(content.testimonials || []).length === 0 && (
-          <div className="text-center py-12 text-muted-foreground">
-            <p>No testimonials yet. Add testimonials in the settings panel.</p>
-          </div>
-        )}
+      {(content.testimonials || []).length === 0 && (
+        <div className="text-center py-12 text-muted-foreground">
+          <p>No testimonials yet. Add testimonials in the settings panel.</p>
+        </div>
+      )}
     </ModuleContainer>
   );
 };

@@ -13,10 +13,12 @@ const page = () => {
       },
     },
   });
+  console.log(data);
   return (
     <>
       {loading && <TableLoading />}
-      {/* <ListingsTable listings={data?.getListing} /> */}
+
+      {!loading && <ListingsTable listings={data?.getListing || []} />}
     </>
   );
 };

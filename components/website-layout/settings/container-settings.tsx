@@ -1,6 +1,7 @@
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { ImageUploadWithCrop } from "@/components/ui/image-upload-with-crop";
+import { ColorPicker } from "../color-picker";
 import { IconPicker } from "./icon-picker";
 import { useWebsiteBuilderStore } from "@/store/useWebsiteBuilderStore";
 
@@ -61,6 +62,23 @@ export const ContainerSettings = ({
         <p className="text-[10px] text-muted-foreground">
           Fixed container centers content, full width spans entire screen
         </p>
+      </div>
+
+      {/* Text Color */}
+      <div>
+        <ColorPicker
+          label="Text Color"
+          value={selectedModule.content.containerSettings?.textColor || ""}
+          onChange={(color) =>
+            updateModuleContent(selectedModule.id, {
+              containerSettings: {
+                ...selectedModule.content.containerSettings,
+                textColor: color,
+              },
+            })
+          }
+          compact
+        />
       </div>
 
       {/* Background Selection */}

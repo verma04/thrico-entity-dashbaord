@@ -3,6 +3,7 @@
 import { ModuleData } from "@/store/useWebsiteBuilderStore";
 import { cn } from "@/lib/utils";
 import { ModuleContainer } from "./module-container";
+import { ModuleHeader } from "./module-header";
 import { Calendar, MapPin, Users, Clock, CheckCircle2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -30,29 +31,32 @@ export const EventCountdownModule = ({
       {/* Timer Large Layout */}
       {layout === "timer-large" && (
         <div className="p-12 bg-gradient-to-r from-blue-500 to-purple-600 text-white">
-          <div className="text-center max-w-4xl mx-auto">
-            <h2 className="text-4xl font-bold mb-4">
-              {content.title || "Next Event"}
-            </h2>
-            <p className="mb-8 opacity-90 text-lg">
-              {content.description || "Don't miss our upcoming event"}
-            </p>
-            <div className="flex justify-center gap-6 mb-8">
-              {timeUnits.map((unit) => (
-                <div key={unit.label} className="text-center">
-                  <div className="bg-white/20 backdrop-blur-sm rounded-lg p-6 min-w-[100px]">
-                    <div className="text-5xl font-bold">{unit.value}</div>
-                  </div>
-                  <div className="text-sm mt-3 opacity-75 uppercase tracking-wide">
-                    {unit.label}
-                  </div>
+          <ModuleHeader
+            title={content.title || "Next Event"}
+            description={content.description || "Don't miss our upcoming event"}
+            alignment="center"
+            titleClassName="text-4xl font-bold"
+            descriptionClassName="opacity-90 text-lg"
+            titleColor={content.titleColor}
+            descriptionColor={content.descriptionColor}
+            hideTitle={content.hideTitle}
+            hideDescription={content.hideDescription}
+          />
+          <div className="flex justify-center gap-6 mb-8">
+            {timeUnits.map((unit) => (
+              <div key={unit.label} className="text-center">
+                <div className="bg-white/20 backdrop-blur-sm rounded-lg p-6 min-w-[100px]">
+                  <div className="text-5xl font-bold">{unit.value}</div>
                 </div>
-              ))}
-            </div>
-            <button className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg">
-              {content.ctaText || "Register Now"}
-            </button>
+                <div className="text-sm mt-3 opacity-75 uppercase tracking-wide">
+                  {unit.label}
+                </div>
+              </div>
+            ))}
           </div>
+          <button className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg">
+            {content.ctaText || "Register Now"}
+          </button>
         </div>
       )}
 
@@ -67,17 +71,26 @@ export const EventCountdownModule = ({
                     <span className="inline-block bg-white/20 text-xs px-3 py-1 rounded-full mb-4 uppercase tracking-wider">
                       Upcoming Event
                     </span>
-                    <h3 className="text-3xl font-bold mb-4">
-                      {content.title || "Annual Tech Conference 2024"}
-                    </h3>
-                    <p className="text-indigo-100 mb-6">
-                      {content.description || "Join us for an amazing experience"}
-                    </p>
+                    <ModuleHeader
+                      title={content.title || "Annual Tech Conference 2024"}
+                      description={
+                        content.description ||
+                        "Join us for an amazing experience"
+                      }
+                      titleClassName="text-3xl font-bold"
+                      descriptionClassName="text-indigo-100"
+                      titleColor={content.titleColor}
+                      descriptionColor={content.descriptionColor}
+                      hideTitle={content.hideTitle}
+                      hideDescription={content.hideDescription}
+                    />
                   </div>
                   <div className="space-y-3">
                     <div className="flex items-center gap-3">
                       <Calendar className="w-5 h-5" />
-                      <span>{content.eventDate || "March 15, 2024 at 10:00 AM"}</span>
+                      <span>
+                        {content.eventDate || "March 15, 2024 at 10:00 AM"}
+                      </span>
                     </div>
                     <div className="flex items-center gap-3">
                       <MapPin className="w-5 h-5" />
@@ -85,7 +98,9 @@ export const EventCountdownModule = ({
                     </div>
                     <div className="flex items-center gap-3">
                       <Users className="w-5 h-5" />
-                      <span>{content.attendees || "500+ Attendees Expected"}</span>
+                      <span>
+                        {content.attendees || "500+ Attendees Expected"}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -123,12 +138,19 @@ export const EventCountdownModule = ({
       {layout === "circular-progress" && (
         <div className="py-16 bg-gradient-to-b from-gray-900 to-black text-white">
           <div className="max-w-6xl mx-auto text-center">
-            <h2 className="text-4xl font-bold mb-3">
-              {content.title || "Countdown to Launch"}
-            </h2>
-            <p className="text-gray-400 mb-12 text-lg">
-              {content.description || "Get ready for something extraordinary"}
-            </p>
+            <ModuleHeader
+              title={content.title || "Countdown to Launch"}
+              description={
+                content.description || "Get ready for something extraordinary"
+              }
+              alignment="center"
+              titleClassName="text-4xl font-bold mb-3"
+              descriptionClassName="text-gray-400 mb-12 text-lg"
+              titleColor={content.titleColor}
+              descriptionColor={content.descriptionColor}
+              hideTitle={content.hideTitle}
+              hideDescription={content.hideDescription}
+            />
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
               {timeUnits.map((unit, idx) => (
                 <div key={unit.label} className="relative">
@@ -152,7 +174,9 @@ export const EventCountdownModule = ({
                         strokeWidth="8"
                         fill="none"
                         strokeDasharray="352"
-                        strokeDashoffset={352 - (352 * (parseInt(unit.value) % 60)) / 60}
+                        strokeDashoffset={
+                          352 - (352 * (parseInt(unit.value) % 60)) / 60
+                        }
                         className={cn(
                           idx === 0 && "text-blue-500",
                           idx === 1 && "text-purple-500",
@@ -191,12 +215,18 @@ export const EventCountdownModule = ({
                   <Calendar className="w-5 h-5" />
                 </div>
                 <div className="text-left">
-                  <h4 className="font-bold text-lg">
-                    {content.title || "Webinar: Future of AI"}
-                  </h4>
-                  <p className="text-emerald-100 text-sm">
-                    {content.eventDate || "December 20, 2024 • 3:00 PM EST"}
-                  </p>
+                  <ModuleHeader
+                    title={content.title || "Webinar: Future of AI"}
+                    description={
+                      content.eventDate || "December 20, 2024 • 3:00 PM EST"
+                    }
+                    titleClassName="font-bold text-lg"
+                    descriptionClassName="text-emerald-100 text-sm"
+                    titleColor={content.titleColor}
+                    descriptionColor={content.descriptionColor}
+                    hideTitle={content.hideTitle}
+                    hideDescription={content.hideDescription}
+                  />
                 </div>
               </div>
               <div className="flex items-center gap-6">
@@ -227,20 +257,44 @@ export const EventCountdownModule = ({
         <div className="py-16 bg-white">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold mb-3 text-gray-900">
-                {content.title || "Event Timeline"}
-              </h2>
-              <p className="text-gray-600">
-                {content.description || "Track our journey to the main event"}
-              </p>
+              <ModuleHeader
+                title={content.title || "Event Timeline"}
+                description={
+                  content.description || "Track our journey to the main event"
+                }
+                alignment="center"
+                titleClassName="text-4xl font-bold mb-3 text-gray-900"
+                descriptionClassName="text-gray-600"
+                titleColor={content.titleColor}
+                descriptionColor={content.descriptionColor}
+                hideTitle={content.hideTitle}
+                hideDescription={content.hideDescription}
+              />
             </div>
             <div className="relative">
               <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gray-200"></div>
               {[
-                { phase: "Registration Opens", status: "completed", date: "Nov 1" },
-                { phase: "Early Bird Deadline", status: "completed", date: "Dec 1" },
-                { phase: "Speaker Lineup Released", status: "completed", date: "Dec 10" },
-                { phase: "Main Event", status: "upcoming", date: "Jan 15", highlight: true },
+                {
+                  phase: "Registration Opens",
+                  status: "completed",
+                  date: "Nov 1",
+                },
+                {
+                  phase: "Early Bird Deadline",
+                  status: "completed",
+                  date: "Dec 1",
+                },
+                {
+                  phase: "Speaker Lineup Released",
+                  status: "completed",
+                  date: "Dec 10",
+                },
+                {
+                  phase: "Main Event",
+                  status: "upcoming",
+                  date: "Jan 15",
+                  highlight: true,
+                },
               ].map((milestone, idx) => (
                 <div key={idx} className="relative pl-20 mb-8 last:mb-0">
                   <div

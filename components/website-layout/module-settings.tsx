@@ -67,6 +67,7 @@ import { DonationSettings } from "./settings/donation-settings";
 
 // Content & Media Module Settings
 import { VideoSpotlightSettings } from "./settings/video-spotlight-settings";
+
 import { ResourcesSettings } from "./settings/resources-settings";
 import { PodcastSettings } from "./settings/podcast-settings";
 import { SocialProofSettings } from "./settings/social-proof-settings";
@@ -109,7 +110,7 @@ const getAvailableLayouts = (
 ): LayoutType[] => {
   if (moduleType === "hero") {
     // 4 Core Hero Layouts
-    return ["carousel", "split", "video", "single-image"];
+    return ["carousel", "split", "video", "single-image", "globe-interactive"];
   }
   if (moduleType === "navbar") {
     return ["simple", "centered", "minimal", "stacked", "split"];
@@ -161,7 +162,14 @@ const getAvailableLayouts = (
     return ["simple-privacy", "legal-document", "tabbed-policy"];
   }
   if (moduleType === "team-members") {
-    return ["grid-profiles", "carousel-leaders", "minimal-list"];
+    return [
+      "grid-profiles",
+      "carousel-leaders",
+      "minimal-list",
+      "marquee",
+      "marquee-horizontal",
+      "marquee-3d",
+    ];
   }
   if (moduleType === "terms-conditions") {
     return ["simple-terms", "structured-agreement", "faq-style"];
@@ -252,7 +260,13 @@ const getAvailableLayouts = (
     return ["badge-grid", "award-wall", "timeline-awards", "carousel-badges"];
   }
   if (moduleType === "video-spotlight") {
-    return ["centered-video", "video-gallery", "playlist-view", "hero-video"];
+    return [
+      "centered-video",
+      "video-gallery",
+      "playlist-view",
+      "hero-video",
+      "hero-video-dialog",
+    ];
   }
   if (moduleType === "resources") {
     return [
@@ -390,11 +404,11 @@ const getAvailableLayouts = (
     return [
       "success-stories",
       "detailed-case",
-      "industry-focus",
-      "impact-metrics",
+      "newsletter-focus",
+      "app-showcase",
     ];
   }
-  if (moduleType === "callout") {
+  if (moduleType === "testimonials") {
     return ["info-box", "banner-style", "card-callout", "sidebar-note"];
   }
   if (moduleType === "podcast") {
@@ -596,7 +610,7 @@ const ModuleSettings = () => {
       className={cn(
         "flex flex-col h-full bg-card border-l transition-all duration-300 min-w-[340px]",
         isExpanded
-          ? "w-full md:w-[800px] lg:w-[1000px] shadow-2xl z-1000"
+          ? "w-full md:w-[800px] lg:w-[1000px] shadow-2xl z-1000 "
           : "w-full"
       )}
     >
@@ -735,8 +749,19 @@ const ModuleSettings = () => {
             />
           )}
 
+          {selectedModule.type === "video-spotlight" && (
+            <VideoSpotlightSettings
+              content={selectedModule.content}
+              onChange={(updates) =>
+                updateModuleContent(selectedModule.id, updates)
+              }
+            />
+          )}
+
           {/* Common fields for other modules */}
-          {!["navbar", "footer", "hero"].includes(selectedModule.type) && (
+          {!["navbar", "footer", "hero", "video"].includes(
+            selectedModule.type
+          ) && (
             <CommonHeaderSettings
               title={selectedModule.content.title}
               description={selectedModule.content.description}
@@ -750,6 +775,22 @@ const ModuleSettings = () => {
               layoutSettings={selectedModule.content.layoutSettings}
               onLayoutChange={(layoutSettings) =>
                 updateModuleContent(selectedModule.id, { layoutSettings })
+              }
+              titleColor={selectedModule.content.titleColor}
+              descriptionColor={selectedModule.content.descriptionColor}
+              hideTitle={selectedModule.content.hideTitle}
+              hideDescription={selectedModule.content.hideDescription}
+              onTitleColorChange={(titleColor) =>
+                updateModuleContent(selectedModule.id, { titleColor })
+              }
+              onDescriptionColorChange={(descriptionColor) =>
+                updateModuleContent(selectedModule.id, { descriptionColor })
+              }
+              onHideTitleChange={(hideTitle) =>
+                updateModuleContent(selectedModule.id, { hideTitle })
+              }
+              onHideDescriptionChange={(hideDescription) =>
+                updateModuleContent(selectedModule.id, { hideDescription })
               }
             />
           )}
@@ -1318,9 +1359,7 @@ const ModuleSettings = () => {
           </div>
 
           {/* CONTAINER SETTINGS */}
-          {!["navbar", "footer", "cta-banner", "hero"].includes(
-            selectedModule.type
-          ) && (
+          {!["navbar", "footer"].includes(selectedModule.type) && (
             <>
               <hr className="border-border" />
               <ContainerSettings

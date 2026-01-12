@@ -3,6 +3,7 @@ import {
   Inter,
   Playfair_Display,
   Outfit,
+  Fira_Code,
 } from "next/font/google";
 import "./globals.css";
 import { ApolloWrapper } from "@/graphql/hoc/ApolloWrapper";
@@ -26,6 +27,11 @@ const playfair = Playfair_Display({
 const outfit = Outfit({
   subsets: ["latin"],
   variable: "--font-outfit",
+});
+
+const firaCode = Fira_Code({
+  subsets: ["latin"],
+  variable: "--font-fira-code",
 });
 
 export const metadata: Metadata = {
@@ -94,9 +100,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${spaceGrotesk.className} ${inter.variable} ${playfair.variable} ${outfit.variable} font-sans`}
+        className={`${spaceGrotesk.className} ${inter.variable} ${playfair.variable} ${outfit.variable} ${firaCode.variable} font-sans`}
       >
-        <ApolloWrapper host={"https://admin.thrico.app/graphql"}>
+        <ApolloWrapper host={"http://localhost:1111/graphql"}>
           {children}
         </ApolloWrapper>
       </body>

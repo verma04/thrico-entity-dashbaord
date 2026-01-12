@@ -493,6 +493,10 @@ export const LeaderboardModule = ({
           title={content.title || "Leaderboard"}
           description={content.description || "Top community members"}
           alignment="center"
+          titleColor={content.titleColor}
+          descriptionColor={content.descriptionColor}
+          hideTitle={content.hideTitle}
+          hideDescription={content.hideDescription}
         />
         <div className="text-center py-12 bg-white rounded-4xl border border-dashed border-slate-200">
           <p className="text-muted-foreground">
@@ -519,6 +523,10 @@ export const LeaderboardModule = ({
         description={content.description || "Top community members"}
         alignment="center"
         containerClassName="mb-16"
+        titleColor={content.titleColor}
+        descriptionColor={content.descriptionColor}
+        hideTitle={content.hideTitle}
+        hideDescription={content.hideDescription}
       />
 
       {layout === "card-rankings" && <CardRankings content={layoutContent} />}

@@ -433,6 +433,10 @@ export function PodcastModule({ module, previewDevice }: PodcastModuleProps) {
         description={content.description}
         layoutSettings={content.layoutSettings}
         alignment="center"
+        titleColor={content.titleColor}
+        descriptionColor={content.descriptionColor}
+        hideTitle={content.hideTitle}
+        hideDescription={content.hideDescription}
       />
 
       {episodes.length === 0 ? (

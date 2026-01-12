@@ -409,6 +409,14 @@ export const AVAILABLE_MODULES: {
     category: "Media & Interactive",
   },
   {
+    type: "video",
+    name: "Video",
+    description: "Embed videos or show a video dialog with thumbnail.",
+    defaultLayout: "video-player",
+    icon: Video,
+    category: "Media & Interactive",
+  },
+  {
     type: "social-feed",
     name: "Social Media Feed",
     description: "Show recent posts from Instagram, Twitter, or LinkedIn.",
@@ -532,6 +540,7 @@ export const BASIC_MODULE_TYPES: ModuleType[] = [
   "faq",
   "blog",
   "team-members",
+  "video",
   "testimonials",
   "services",
   "pricing",

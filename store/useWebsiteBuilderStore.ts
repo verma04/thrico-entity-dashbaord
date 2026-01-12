@@ -26,7 +26,8 @@ export type FontType =
   | "georgia"
   | "comic-sans"
   | "arial-narrow"
-  | "impact";
+  | "impact"
+  | "fira-code";
 
 export type LayoutType =
   | "carousel"
@@ -42,6 +43,7 @@ export type LayoutType =
   | "dark-cinematic"
   | "newsletter-focus"
   | "app-showcase" // Hero
+  | "globe-interactive"
   | "simple"
   | "centered"
   | "minimal"
@@ -84,6 +86,8 @@ export type LayoutType =
   | "grid-profiles"
   | "carousel-leaders"
   | "minimal-list" // Team
+  | "marquee-3d"
+  | "marquee-horizontal"
   | "simple-terms"
   | "structured-agreement"
   | "faq-style" // Terms & Conditions
@@ -244,6 +248,9 @@ export type LayoutType =
   | "feature-grid"
   | "comparison-list"
   | "highlight-cards"
+  | "detailed-stats"
+  | "testimonials-strip"
+  | "logo-wall"
   | "vertical-timeline"
   | "milestone-grid"
   | "progress-steps"
@@ -296,6 +303,10 @@ export type LayoutType =
   | "dismissible-bar"
   | "countdown-alert"
   | "link-notification" // Announcement Bar layouts
+  | "video-player"
+  | "video-dialog" // Video layouts
+  | "hero-video-dialog"
+  | "footer"
   | "default";
 
 export type ModuleType =
@@ -362,6 +373,7 @@ export type ModuleType =
   | "members-around-world"
   | "wall-of-fame"
   | "announcement-bar"
+  | "video"
   | "footer";
 
 export interface MenuItem {
@@ -655,6 +667,7 @@ const THEME_DEFAULTS: Record<ThemeType, Record<ModuleType, LayoutType>> = {
     "wall-of-fame": "podium",
     "announcement-bar": "info-message",
     "results-dashboard": "default",
+    video: "video-player",
     footer: "columns",
   },
   enterprise: {
@@ -721,6 +734,7 @@ const THEME_DEFAULTS: Record<ThemeType, Record<ModuleType, LayoutType>> = {
     "wall-of-fame": "hall-grid",
     "announcement-bar": "warning-alert",
     "results-dashboard": "default",
+    video: "video-player",
     footer: "columns",
   },
   creator: {
@@ -787,6 +801,7 @@ const THEME_DEFAULTS: Record<ThemeType, Record<ModuleType, LayoutType>> = {
     "wall-of-fame": "timeline",
     "announcement-bar": "promotion-banner",
     "results-dashboard": "default",
+    video: "video-player",
     footer: "columns",
   },
   association: {
@@ -853,6 +868,7 @@ const THEME_DEFAULTS: Record<ThemeType, Record<ModuleType, LayoutType>> = {
     "wall-of-fame": "featured-cards",
     "announcement-bar": "success-message",
     "results-dashboard": "default",
+    video: "video-player",
     footer: "columns",
   },
   startup: {
@@ -919,6 +935,7 @@ const THEME_DEFAULTS: Record<ThemeType, Record<ModuleType, LayoutType>> = {
     "wall-of-fame": "podium",
     "announcement-bar": "countdown-alert",
     "results-dashboard": "default",
+    video: "video-player",
     footer: "columns",
   },
   "dark-mode": {
@@ -985,6 +1002,7 @@ const THEME_DEFAULTS: Record<ThemeType, Record<ModuleType, LayoutType>> = {
     "wall-of-fame": "hall-grid",
     "announcement-bar": "dismissible-bar",
     "results-dashboard": "default",
+    video: "video-player",
     footer: "columns",
   },
 };

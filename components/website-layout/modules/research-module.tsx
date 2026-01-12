@@ -511,6 +511,10 @@ export const ResearchModule = ({
         description={content.description}
         layoutSettings={content.layoutSettings}
         alignment="center"
+        titleColor={content.titleColor}
+        descriptionColor={content.descriptionColor}
+        hideTitle={content.hideTitle}
+        hideDescription={content.hideDescription}
       />
 
       {papers.length === 0 && (

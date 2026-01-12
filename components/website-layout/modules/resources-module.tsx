@@ -20,26 +20,33 @@ export const ResourcesModule = ({
   // Helper function to get emoji for resource type
   const getTypeEmoji = (type: string) => {
     const typeMap: Record<string, string> = {
-      'PDF': '📄',
-      'Video': '🎥',
-      'Guide': '📖',
-      'Template': '📋',
-      'Whitepaper': '📝',
-      'Ebook': '📚',
-      'Worksheet': '📊',
-      'Tool': '🛠️',
-      'Other': '📦',
+      PDF: "📄",
+      Video: "🎥",
+      Guide: "📖",
+      Template: "📋",
+      Whitepaper: "📝",
+      Ebook: "📚",
+      Worksheet: "📊",
+      Tool: "🛠️",
+      Other: "📦",
     };
-    return typeMap[type] || '📄';
+    return typeMap[type] || "📄";
   };
 
   return (
-    <ModuleContainer containerSettings={content.containerSettings} className="bg-slate-50 border-y">
+    <ModuleContainer
+      containerSettings={content.containerSettings}
+      className="bg-slate-50 border-y"
+    >
       <ModuleHeader
         title={content.title}
         description={content.description}
         layoutSettings={content.layoutSettings}
         alignment="center"
+        titleColor={content.titleColor}
+        descriptionColor={content.descriptionColor}
+        hideTitle={content.hideTitle}
+        hideDescription={content.hideDescription}
       />
 
       {resources.length === 0 && (
@@ -87,13 +94,14 @@ export const ResourcesModule = ({
                     </span>
                   )}
                 </div>
-                
+
                 <h3 className="font-semibold mb-2">
                   {resource.title || `Resource ${idx + 1}`}
                 </h3>
-                
+
                 <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                  {resource.description || "Download our comprehensive resource"}
+                  {resource.description ||
+                    "Download our comprehensive resource"}
                 </p>
 
                 {resource.category && (
@@ -139,7 +147,7 @@ export const ResourcesModule = ({
                   getTypeEmoji(resource.type)
                 )}
               </div>
-              
+
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
                   {resource.type && (
@@ -195,54 +203,72 @@ export const ResourcesModule = ({
               return acc;
             }, {});
 
-            return Object.entries(grouped).map(([category, categoryResources]: [string, any]) => (
-              <div key={category} className="bg-white rounded-xl border overflow-hidden">
-                <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-4">
-                  <h3 className="text-lg font-bold">{category}</h3>
-                  <p className="text-blue-100 text-sm">{categoryResources.length} resources</p>
-                </div>
-                <div className="grid md:grid-cols-2 gap-4 p-6">
-                  {categoryResources.map((resource: any, idx: number) => (
-                    <div
-                      key={idx}
-                      className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                    >
-                      <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-2xl flex-shrink-0 overflow-hidden">
-                        {resource.thumbnail ? (
-                          <img
-                            src={resource.thumbnail}
-                            alt={resource.title}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          getTypeEmoji(resource.type)
+            return Object.entries(grouped).map(
+              ([category, categoryResources]: [string, any]) => (
+                <div
+                  key={category}
+                  className="bg-white rounded-xl border overflow-hidden"
+                >
+                  <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-4">
+                    <h3 className="text-lg font-bold">{category}</h3>
+                    <p className="text-blue-100 text-sm">
+                      {categoryResources.length} resources
+                    </p>
+                  </div>
+                  <div className="grid md:grid-cols-2 gap-4 p-6">
+                    {categoryResources.map((resource: any, idx: number) => (
+                      <div
+                        key={idx}
+                        className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                      >
+                        <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center text-2xl flex-shrink-0 overflow-hidden">
+                          {resource.thumbnail ? (
+                            <img
+                              src={resource.thumbnail}
+                              alt={resource.title}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            getTypeEmoji(resource.type)
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium text-sm truncate">
+                            {resource.title || `Resource ${idx + 1}`}
+                          </h4>
+                          <p className="text-xs text-muted-foreground truncate">
+                            {resource.type}{" "}
+                            {resource.fileSize && `• ${resource.fileSize}`}
+                          </p>
+                        </div>
+                        {resource.url && (
+                          <a
+                            href={resource.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:text-blue-700 transition-colors"
+                          >
+                            <svg
+                              className="w-5 h-5"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                              />
+                            </svg>
+                          </a>
                         )}
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-sm truncate">
-                          {resource.title || `Resource ${idx + 1}`}
-                        </h4>
-                        <p className="text-xs text-muted-foreground truncate">
-                          {resource.type} {resource.fileSize && `• ${resource.fileSize}`}
-                        </p>
-                      </div>
-                      {resource.url && (
-                        <a
-                          href={resource.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 hover:text-blue-700 transition-colors"
-                        >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                          </svg>
-                        </a>
-                      )}
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ));
+              )
+            );
           })()}
         </div>
       )}
@@ -260,17 +286,27 @@ export const ResourcesModule = ({
                   className="w-full px-4 py-2 pl-10 border rounded-lg text-sm"
                   readOnly
                 />
-                <svg className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                <svg
+                  className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
                 </svg>
               </div>
               <div className="flex gap-2">
-                {['All', 'PDF', 'Video', 'Guide'].map((filter) => (
+                {["All", "PDF", "Video", "Guide"].map((filter) => (
                   <button
                     key={filter}
                     className={cn(
                       "px-3 py-2 text-xs font-medium rounded-lg transition-colors",
-                      filter === 'All'
+                      filter === "All"
                         ? "bg-blue-600 text-white"
                         : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                     )}
@@ -324,7 +360,10 @@ export const ResourcesModule = ({
                       <div className="flex items-center gap-4">
                         {resource.category && (
                           <span className="text-xs text-muted-foreground">
-                            Category: <span className="text-purple-600 font-medium">{resource.category}</span>
+                            Category:{" "}
+                            <span className="text-purple-600 font-medium">
+                              {resource.category}
+                            </span>
                           </span>
                         )}
                         {resource.fileSize && (

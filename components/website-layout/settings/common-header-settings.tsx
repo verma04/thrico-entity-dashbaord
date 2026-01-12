@@ -14,6 +14,8 @@ import {
   Columns,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ColorPicker } from "../color-picker";
+import { Switch } from "@/components/ui/switch";
 
 interface LayoutSettings {
   flexDirection?: "row" | "column";
@@ -34,6 +36,15 @@ interface CommonHeaderSettingsProps {
   showLayoutControls?: boolean;
   layoutSettings?: LayoutSettings;
   onLayoutChange?: (layout: LayoutSettings) => void;
+  // Style controls
+  titleColor?: string;
+  descriptionColor?: string;
+  hideTitle?: boolean;
+  hideDescription?: boolean;
+  onTitleColorChange?: (color: string) => void;
+  onDescriptionColorChange?: (color: string) => void;
+  onHideTitleChange?: (hide: boolean) => void;
+  onHideDescriptionChange?: (hide: boolean) => void;
 }
 
 export const CommonHeaderSettings = ({
@@ -52,6 +63,14 @@ export const CommonHeaderSettings = ({
     alignItems: "start",
   },
   onLayoutChange,
+  titleColor,
+  descriptionColor,
+  hideTitle = false,
+  hideDescription = false,
+  onTitleColorChange,
+  onDescriptionColorChange,
+  onHideTitleChange,
+  onHideDescriptionChange,
 }: CommonHeaderSettingsProps) => {
   const handleLayoutChange = (key: keyof LayoutSettings, value: any) => {
     if (onLayoutChange) {
@@ -243,27 +262,100 @@ export const CommonHeaderSettings = ({
         </div>
       )}
 
-      {/* Title Input */}
-      <div className="space-y-2">
-        <Label htmlFor="title-input">{titleLabel}</Label>
-        <Input
-          id="title-input"
-          value={title}
-          onChange={(e) => onTitleChange(e.target.value)}
-          placeholder={titlePlaceholder}
-        />
+      {/* Title Settings */}
+      <div className="space-y-2 p-3 border rounded-lg bg-background">
+        <div className="flex items-center justify-between">
+          <Label
+            htmlFor="title-input"
+            className="font-semibold text-xs uppercase text-muted-foreground"
+          >
+            {titleLabel}
+          </Label>
+          <div className="flex items-center gap-3">
+            <div className="scale-75 origin-right">
+              <ColorPicker
+                label=""
+                value={titleColor || ""}
+                onChange={onTitleColorChange || (() => {})}
+                compact
+              />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Label
+                htmlFor="hide-title"
+                className="text-[10px] text-muted-foreground font-normal"
+              >
+                {hideTitle ? "Hidden" : "Visible"}
+              </Label>
+              <Switch
+                id="hide-title"
+                checked={!hideTitle}
+                onCheckedChange={(checked) => onHideTitleChange?.(!checked)}
+                className="scale-75 origin-right"
+              />
+            </div>
+          </div>
+        </div>
+
+        {!hideTitle && (
+          <Input
+            id="title-input"
+            value={title}
+            onChange={(e) => onTitleChange(e.target.value)}
+            placeholder={titlePlaceholder}
+            className="h-9 text-sm"
+          />
+        )}
       </div>
 
-      {/* Description Input */}
-      <div className="space-y-2">
-        <Label htmlFor="desc-input">{descriptionLabel}</Label>
-        <Textarea
-          id="desc-input"
-          value={description}
-          onChange={(e) => onDescriptionChange(e.target.value)}
-          placeholder={descriptionPlaceholder}
-          rows={3}
-        />
+      {/* Description Settings */}
+      <div className="space-y-2 p-3 border rounded-lg bg-background">
+        <div className="flex items-center justify-between">
+          <Label
+            htmlFor="desc-input"
+            className="font-semibold text-xs uppercase text-muted-foreground"
+          >
+            {descriptionLabel}
+          </Label>
+          <div className="flex items-center gap-3">
+            <div className="scale-75 origin-right">
+              <ColorPicker
+                label=""
+                value={descriptionColor || ""}
+                onChange={onDescriptionColorChange || (() => {})}
+                compact
+              />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Label
+                htmlFor="hide-desc"
+                className="text-[10px] text-muted-foreground font-normal"
+              >
+                {hideDescription ? "Hidden" : "Visible"}
+              </Label>
+              <Switch
+                id="hide-desc"
+                checked={!hideDescription}
+                onCheckedChange={(checked) =>
+                  onHideDescriptionChange?.(!checked)
+                }
+                className="scale-75 origin-right"
+              />
+            </div>
+          </div>
+        </div>
+        {!hideDescription && (
+          <Textarea
+            id="desc-input"
+            value={description}
+            onChange={(e) => onDescriptionChange(e.target.value)}
+            placeholder={descriptionPlaceholder}
+            rows={3}
+            className="text-sm resize-none"
+          />
+        )}
       </div>
     </div>
   );

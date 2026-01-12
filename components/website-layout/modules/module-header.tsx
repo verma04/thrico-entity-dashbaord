@@ -17,6 +17,10 @@ interface ModuleHeaderProps {
   alignment?: "left" | "center" | "right";
   showIcon?: boolean;
   icon?: React.ReactNode;
+  titleColor?: string;
+  descriptionColor?: string;
+  hideTitle?: boolean;
+  hideDescription?: boolean;
   layoutSettings?: LayoutSettings;
 }
 
@@ -32,8 +36,24 @@ export const ModuleHeader = ({
   showIcon = false,
   icon,
   layoutSettings,
+  titleColor,
+  descriptionColor,
+  hideTitle,
+  hideDescription,
 }: ModuleHeaderProps) => {
-  if (!title && !description) return null;
+  const hasVisibleTitle = title && !hideTitle;
+  const hasVisibleDescription = description && !hideDescription;
+  const hasVisibleLabel = label;
+  const hasVisibleIcon = showIcon && icon;
+
+  if (
+    !hasVisibleTitle &&
+    !hasVisibleDescription &&
+    !hasVisibleLabel &&
+    !hasVisibleIcon
+  ) {
+    return null;
+  }
 
   const alignmentClasses = {
     left: "text-left",
@@ -91,14 +111,18 @@ export const ModuleHeader = ({
           {label}
         </span>
       )}
-      {title && (
-        <h2 className={cn("text-4xl font-bold mb-3", titleClassName)}>
+      {!hideTitle && title && (
+        <h2
+          className={cn("text-4xl font-bold mb-3", titleClassName)}
+          style={{ color: titleColor ? titleColor : "#000000" }}
+        >
           {title}
         </h2>
       )}
-      {description && (
+      {!hideDescription && description && (
         <p
           className={cn("text-muted-foreground text-lg", descriptionClassName)}
+          style={{ color: descriptionColor ? descriptionColor : "#000000" }}
         >
           {description}
         </p>

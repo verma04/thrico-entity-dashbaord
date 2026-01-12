@@ -1,33 +1,12 @@
 "use client";
 import React, { useState } from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
-import {
-  CalendarDays,
-  Download,
-  AppWindow,
-  Users,
-  Repeat2,
-  User,
-  BarChart3,
-  PieChart,
-  ChevronDown,
-} from "lucide-react";
-import {
-  ResponsiveContainer,
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip as RechartsTooltip,
-  PieChart as RePieChart,
-  Pie,
-  Cell,
-  Legend,
-} from "recharts";
+import { Download } from "lucide-react";
+import { FeedMetrics } from "@/components/feed/dashboard/FeedMetrics";
+import { FeedWeeklyChart } from "@/components/feed/dashboard/FeedWeeklyChart";
+import { FeedCategoryChart } from "@/components/feed/dashboard/FeedCategoryChart";
 
 const weeklySignupsData = [
   { day: "Mon", signups: 120 },
@@ -53,169 +32,39 @@ export default function FeedPage() {
   const [dateRange, setDateRange] = useState<string>("7days");
 
   return (
-    <div className="max-w-7xl mx-auto py-8 px-4">
+    <div className="max-w-7xl mx-auto py-8 px-4 space-y-6">
       {/* Top Navigation Bar */}
-      <Card className="mb-6">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-2xl">Feed Overview</CardTitle>
+      <Card className="border-none shadow-none bg-transparent">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Feed Overview</h1>
+            <p className="text-muted-foreground">
+              Monitor your feed performance and analytics.
+            </p>
+          </div>
           <div className="flex gap-2">
             <Tabs value={dateRange} onValueChange={setDateRange}>
               <TabsList>
-                <TabsTrigger value="today">
-                  <CalendarDays className="mr-2 h-4 w-4" />
-                  Today
-                </TabsTrigger>
-                <TabsTrigger value="7days">
-                  <CalendarDays className="mr-2 h-4 w-4" />
-                  Last 7 Days
-                </TabsTrigger>
-                <TabsTrigger value="30days">
-                  <CalendarDays className="mr-2 h-4 w-4" />
-                  Last 30 Days
-                </TabsTrigger>
-                <TabsTrigger value="custom">
-                  <CalendarDays className="mr-2 h-4 w-4" />
-                  Custom Range
-                </TabsTrigger>
+                <TabsTrigger value="today">Today</TabsTrigger>
+                <TabsTrigger value="7days">7 Days</TabsTrigger>
+                <TabsTrigger value="30days">30 Days</TabsTrigger>
               </TabsList>
             </Tabs>
-            <Button variant="outline" size="sm" className="ml-2">
+            <Button variant="outline" size="sm">
               <Download className="mr-2 h-4 w-4" />
-              Download CSV
+              Export
             </Button>
           </div>
-        </CardHeader>
+        </div>
       </Card>
 
       {/* Metric Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-        <Card>
-          <CardContent className="pt-6 pb-4">
-            <div className="flex items-center gap-3">
-              <AppWindow className="h-6 w-6 text-green-600" />
-              <div>
-                <div className="text-lg font-semibold">Total Feeds</div>
-                <div className="text-2xl font-bold text-green-600">128</div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  +5 new this week
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6 pb-4">
-            <div className="flex items-center gap-3">
-              <Users className="h-6 w-6 text-yellow-500" />
-              <div>
-                <div className="text-lg font-semibold">Total Comments</div>
-                <div className="text-2xl font-bold text-yellow-500">3,200</div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  12% increase
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6 pb-4">
-            <div className="flex items-center gap-3">
-              <Repeat2 className="h-6 w-6 text-blue-600" />
-              <div>
-                <div className="text-lg font-semibold">Total Reactions</div>
-                <div className="text-2xl font-bold text-blue-600">5,400</div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  +5,400 reactions
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6 pb-4">
-            <div className="flex items-center gap-3">
-              <User className="h-6 w-6 text-pink-600" />
-              <div>
-                <div className="text-lg font-semibold">Total ReShares</div>
-                <div className="text-2xl font-bold text-pink-600">1,240</div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  1,240 reshares this week
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <FeedMetrics />
 
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Weekly Feed Posts</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-72 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
-                  data={weeklySignupsData}
-                  margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-                >
-                  <defs>
-                    <linearGradient id="colorFeed" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#1890ff" stopOpacity={0.8} />
-                      <stop offset="95%" stopColor="#1890ff" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <XAxis dataKey="day" />
-                  <YAxis />
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <RechartsTooltip />
-                  <Area
-                    type="monotone"
-                    dataKey="signups"
-                    stroke="#1890ff"
-                    fillOpacity={1}
-                    fill="url(#colorFeed)"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Feed Posts by Category</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-72 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <RePieChart>
-                  <Pie
-                    data={membersByInterestData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                    label={({ name, percent }) =>
-                      `${name}: ${(percent * 100).toFixed(0)}%`
-                    }
-                  >
-                    {membersByInterestData.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS[index % COLORS.length]}
-                      />
-                    ))}
-                  </Pie>
-                  <RechartsTooltip />
-                  <Legend />
-                </RePieChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Charts Bento Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+        <FeedWeeklyChart data={weeklySignupsData} />
+        <FeedCategoryChart data={membersByInterestData} colors={COLORS} />
       </div>
     </div>
   );

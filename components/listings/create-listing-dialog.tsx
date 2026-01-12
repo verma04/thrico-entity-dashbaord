@@ -21,9 +21,19 @@ export function CreateListingDialog() {
   });
 
   const onFinish = (values: any) => {
+    // Determine the media input:
+    // If it's an array of objects with a 'file' property (our internal PhotoUploadFile), map to the file.
+    // Otherwise, assume it's already in the correct format or handle accordingly.
+    const mediaFiles = Array.isArray(values.media)
+      ? values.media.map((m: any) => (m.file ? m.file : m))
+      : [];
+
     add({
       variables: {
-        input: values,
+        input: {
+          ...values,
+          media: mediaFiles,
+        },
       },
     });
   };
