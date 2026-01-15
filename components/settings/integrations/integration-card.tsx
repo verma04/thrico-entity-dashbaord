@@ -6,6 +6,17 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { LucideIcon, Check, ExternalLink, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface IntegrationCardProps {
   title: string;
@@ -93,13 +104,34 @@ export const IntegrationCard = ({
         {/* Action Section */}
         <div className="flex sm:flex-col items-center sm:items-end justify-center sm:justify-start gap-3 sm:pl-4 sm:border-l border-muted/50 w-full sm:w-auto mt-2 sm:mt-0">
           {isConnected ? (
-            <Button
-              className="w-full sm:w-32 bg-background border-destructive/20 text-destructive hover:bg-destructive/5 hover:border-destructive/30 transition-all shadow-sm"
-              variant="outline"
-              onClick={onDisconnect}
-            >
-              Uninstall
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  className="w-full sm:w-32 bg-background border-destructive/20 text-destructive hover:bg-destructive/5 hover:border-destructive/30 transition-all shadow-sm"
+                  variant="outline"
+                >
+                  Uninstall
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Uninstall {title}?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to disconnect this integration? This
+                    action may stop data syncing and disable related features.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={onDisconnect}
+                    className="bg-destructive hover:bg-destructive/90"
+                  >
+                    Uninstall
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           ) : (
             <Button
               className={cn(
