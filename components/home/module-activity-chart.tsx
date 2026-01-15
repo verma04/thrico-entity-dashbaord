@@ -11,12 +11,12 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { useGetModuleActivity, TimeRange } from "@/graphql/actions";
 
 const COLORS = [
-  "#6b7280",
-  "#9ca3af",
-  "#4b5563",
-  "#374151",
-  "#1f2937",
-  "#111827",
+  "#60a5fa",
+  "#a78bfa",
+  "#fb923c",
+  "#4ade80",
+  "#f472b6",
+  "#facc15",
 ];
 
 interface ModuleActivityChartProps {

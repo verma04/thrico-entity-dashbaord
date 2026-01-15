@@ -27,7 +27,17 @@ export type FontType =
   | "comic-sans"
   | "arial-narrow"
   | "impact"
-  | "fira-code";
+  | "fira-code"
+  | "source-sans"
+  | "work-sans"
+  | "ubuntu"
+  | "lora"
+  | "cormorant"
+  | "bitter"
+  | "oswald"
+  | "bebas-neue"
+  | "cinzel"
+  | "pacifico";
 
 export type LayoutType =
   | "carousel"

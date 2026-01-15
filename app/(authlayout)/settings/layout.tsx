@@ -30,6 +30,7 @@ import {
   UserCheck,
   Headset,
   Coins,
+  Blocks,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -107,6 +108,11 @@ function SettingsLayout({ children }: { children: React.ReactNode }) {
       key: "/settings/currency",
       icon: Coins,
       label: "Currency",
+    },
+    {
+      key: "/settings/integrations",
+      icon: Blocks,
+      label: "Integrations",
     },
   ];
 

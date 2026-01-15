@@ -34,6 +34,7 @@ import {
 import Logo from "./logo";
 import VisitSite from "./visit";
 import LogoutModal from "./logout";
+import { DotPatternLinearGradient } from "@/components/common/dot-pattern-linear-gradient";
 
 interface MenuItem {
   key: string;
@@ -137,113 +138,116 @@ export default function SidebarLayout({
   );
 
   return (
-    <SidebarProvider defaultOpen={true}>
-      <Sidebar className="border-r border-border">
-        {/* HEADER */}
-        <SidebarHeader className="flex h-14 items-center border-b border-border px-4">
-          <Link href="/" className="flex items-center gap-2 font-semibold">
-            <Logo />
-          </Link>
-        </SidebarHeader>
+    <>
+      <DotPatternLinearGradient />
+      <SidebarProvider defaultOpen={true}>
+        <Sidebar className="border-r border-border">
+          {/* HEADER */}
+          <SidebarHeader className="flex h-14 items-center border-b border-border px-4">
+            <Link href="/" className="flex items-center gap-2 font-semibold">
+              <Logo />
+            </Link>
+          </SidebarHeader>
 
-        {/* CONTENT */}
-        <SidebarContent>
-          {/* MAIN */}
-          <SidebarGroup>
-            <SidebarGroupLabel>Main</SidebarGroupLabel>
-            <SidebarGroupContent>{renderItems(main)}</SidebarGroupContent>
-          </SidebarGroup>
-
-          {/* EXTENDED MODULES */}
-          {subscriptionFilteredItems.length > 0 && (
+          {/* CONTENT */}
+          <SidebarContent>
+            {/* MAIN */}
             <SidebarGroup>
-              <div className="flex items-center justify-between px-2 mb-2">
-                <div
-                  className="flex items-center gap-2  flex-1"
-                  // onClick={() => setExtendedCollapsed(!extendedCollapsed)}
-                >
-                  <SidebarGroupLabel className="cursor-pointer">
-                    Modules
-                  </SidebarGroupLabel>
-                  <Badge variant="secondary" className="text-[10px] h-5">
-                    {filteredExtendedItems.length}
-                  </Badge>
-                  {/* <ChevronRight
+              <SidebarGroupLabel>Main</SidebarGroupLabel>
+              <SidebarGroupContent>{renderItems(main)}</SidebarGroupContent>
+            </SidebarGroup>
+
+            {/* EXTENDED MODULES */}
+            {subscriptionFilteredItems.length > 0 && (
+              <SidebarGroup>
+                <div className="flex items-center justify-between px-2 mb-2">
+                  <div
+                    className="flex items-center gap-2  flex-1"
+                    // onClick={() => setExtendedCollapsed(!extendedCollapsed)}
+                  >
+                    <SidebarGroupLabel className="cursor-pointer">
+                      Modules
+                    </SidebarGroupLabel>
+                    <Badge variant="secondary" className="text-[10px] h-5">
+                      {filteredExtendedItems.length}
+                    </Badge>
+                    {/* <ChevronRight
                     className={`h-3 w-3 transition-transform ${
                       !extendedCollapsed ? "rotate-90" : ""
                     }`}
                   /> */}
-                </div>
-              </div>
-
-              {!extendedCollapsed && (
-                <>
-                  {/* Search Bar */}
-                  <div className="px-2 mb-2">
-                    <div className="relative">
-                      <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-                      <Input
-                        placeholder="Search  Modules..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="h-8 pl-7 pr-7 text-xs"
-                      />
-                      {searchQuery && (
-                        <button
-                          onClick={() => setSearchQuery("")}
-                          className="absolute right-2 top-1/2 -translate-y-1/2 hover:bg-muted rounded-sm p-0.5"
-                        >
-                          <X className="h-3 w-3 text-muted-foreground" />
-                        </button>
-                      )}
-                    </div>
                   </div>
+                </div>
 
-                  <SidebarGroupContent>
-                    {filteredExtendedItems.length > 0 ? (
-                      renderItems(filteredExtendedItems)
-                    ) : (
-                      <div className="px-2 py-4 text-center text-xs text-muted-foreground">
-                        No Module found
+                {!extendedCollapsed && (
+                  <>
+                    {/* Search Bar */}
+                    <div className="px-2 mb-2">
+                      <div className="relative">
+                        <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                        <Input
+                          placeholder="Search  Modules..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className="h-8 pl-7 pr-7 text-xs"
+                        />
+                        {searchQuery && (
+                          <button
+                            onClick={() => setSearchQuery("")}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 hover:bg-muted rounded-sm p-0.5"
+                          >
+                            <X className="h-3 w-3 text-muted-foreground" />
+                          </button>
+                        )}
                       </div>
-                    )}
-                  </SidebarGroupContent>
-                </>
-              )}
+                    </div>
+
+                    <SidebarGroupContent>
+                      {filteredExtendedItems.length > 0 ? (
+                        renderItems(filteredExtendedItems)
+                      ) : (
+                        <div className="px-2 py-4 text-center text-xs text-muted-foreground">
+                          No Module found
+                        </div>
+                      )}
+                    </SidebarGroupContent>
+                  </>
+                )}
+              </SidebarGroup>
+            )}
+
+            {/* SETTINGS */}
+            <SidebarGroup>
+              <SidebarGroupLabel>Management</SidebarGroupLabel>
+              <SidebarGroupContent>{renderItems(settings)}</SidebarGroupContent>
             </SidebarGroup>
-          )}
+          </SidebarContent>
 
-          {/* SETTINGS */}
-          <SidebarGroup>
-            <SidebarGroupLabel>Management</SidebarGroupLabel>
-            <SidebarGroupContent>{renderItems(settings)}</SidebarGroupContent>
-          </SidebarGroup>
-        </SidebarContent>
+          {/* FOOTER */}
+          <SidebarFooter className="border-t border-border p-4">
+            {renderItems(profile)}
+          </SidebarFooter>
+        </Sidebar>
 
-        {/* FOOTER */}
-        <SidebarFooter className="border-t border-border p-4">
-          {renderItems(profile)}
-        </SidebarFooter>
-      </Sidebar>
+        {/* MAIN CONTENT AREA */}
+        <SidebarInset>
+          <header className="flex h-14 items-center justify-between gap-4 border-b border-border bg-background px-4 lg:px-6">
+            <div className="flex items-center gap-4">
+              <SidebarTrigger />
+              <h1 className="text-lg font-semibold capitalize">
+                {pathName === "/"
+                  ? "Home"
+                  : pathName.replace("/", "").replace(/-/g, " ")}
+              </h1>
+            </div>
+            <VisitSite />
+          </header>
 
-      {/* MAIN CONTENT AREA */}
-      <SidebarInset>
-        <header className="flex h-14 items-center justify-between gap-4 border-b border-border bg-background px-4 lg:px-6">
-          <div className="flex items-center gap-4">
-            <SidebarTrigger />
-            <h1 className="text-lg font-semibold capitalize">
-              {pathName === "/"
-                ? "Home"
-                : pathName.replace("/", "").replace(/-/g, " ")}
-            </h1>
-          </div>
-          <VisitSite />
-        </header>
+          <main className="flex-1 p-4 lg:p-6 w-full min-w-0 ">{children}</main>
+        </SidebarInset>
 
-        <main className="flex-1 p-4 lg:p-6 w-full min-w-0 ">{children}</main>
-      </SidebarInset>
-
-      <LogoutModal open={logoutOpen} onOpenChange={setLogoutOpen} />
-    </SidebarProvider>
+        <LogoutModal open={logoutOpen} onOpenChange={setLogoutOpen} />
+      </SidebarProvider>
+    </>
   );
 }

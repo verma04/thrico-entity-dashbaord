@@ -50,6 +50,7 @@ import { useGetDashboardStats, TimeRange } from "@/graphql/actions";
 import { PlatformModules } from "./platform-modules";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ModuleActivityChart } from "./module-activity-chart";
+import { PlatformModuleChart } from "./platform-module-chart";
 
 export default function Dashboard() {
   const [timePeriod, setTimePeriod] = useState<TimeRange>(
@@ -71,8 +72,8 @@ export default function Dashboard() {
       change: stats?.totalUsersChange ?? 0,
       trend: (stats?.totalUsersChange ?? 0) >= 0 ? "up" : "down",
       icon: Users,
-      color: "text-gray-700",
-      bgColor: "bg-gray-100",
+      color: "text-blue-600",
+      bgColor: "bg-blue-50",
     },
     {
       title: "Active Today",
@@ -84,8 +85,8 @@ export default function Dashboard() {
       change: stats?.activeUsersChange ?? 0,
       trend: (stats?.activeUsersChange ?? 0) >= 0 ? "up" : "down",
       icon: Activity,
-      color: "text-gray-700",
-      bgColor: "bg-gray-100",
+      color: "text-green-600",
+      bgColor: "bg-green-50",
     },
     {
       title: "Page Views",
@@ -97,8 +98,8 @@ export default function Dashboard() {
       change: stats?.pageViewsChange ?? 0,
       trend: (stats?.pageViewsChange ?? 0) >= 0 ? "up" : "down",
       icon: Eye,
-      color: "text-gray-700",
-      bgColor: "bg-gray-100",
+      color: "text-purple-600",
+      bgColor: "bg-purple-50",
     },
     {
       title: "Engagement Rate",
@@ -112,19 +113,9 @@ export default function Dashboard() {
       change: stats?.engagementRateChange ?? 0,
       trend: (stats?.engagementRateChange ?? 0) >= 0 ? "up" : "down",
       icon: MousePointer,
-      color: "text-gray-700",
-      bgColor: "bg-gray-100",
+      color: "text-orange-600",
+      bgColor: "bg-orange-50",
     },
-  ];
-
-  // User Growth Data
-  const userGrowthData = [
-    { date: "Jan 15", users: 8500, active: 6200 },
-    { date: "Feb 15", users: 9200, active: 6800 },
-    { date: "Mar 15", users: 9800, active: 7200 },
-    { date: "Apr 15", users: 10500, active: 7800 },
-    { date: "May 15", users: 11200, active: 8400 },
-    { date: "Jun 15", users: 12547, active: 8942 },
   ];
 
   // Weekly Activity Data
@@ -201,52 +192,8 @@ export default function Dashboard() {
 
       {/* Charts Row 1 */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* User Growth Chart */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>User Growth</CardTitle>
-            <CardDescription>Total and active users over time</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={userGrowthData}>
-                <defs>
-                  <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#6b7280" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="#6b7280" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="colorActive" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#374151" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="#374151" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis dataKey="date" stroke="#9ca3af" fontSize={12} />
-                <YAxis stroke="#9ca3af" fontSize={12} />
-                <Tooltip />
-                <Legend />
-                <Area
-                  type="monotone"
-                  dataKey="users"
-                  stroke="#6b7280"
-                  strokeWidth={2}
-                  fillOpacity={1}
-                  fill="url(#colorUsers)"
-                  name="Total Users"
-                />
-                <Area
-                  type="monotone"
-                  dataKey="active"
-                  stroke="#374151"
-                  strokeWidth={2}
-                  fillOpacity={1}
-                  fill="url(#colorActive)"
-                  name="Active Users"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+        {/* Platform Module Chart */}
+        <PlatformModuleChart />
 
         {/* Module Distribution Pie Chart */}
         <ModuleActivityChart timeRange={timePeriod} />

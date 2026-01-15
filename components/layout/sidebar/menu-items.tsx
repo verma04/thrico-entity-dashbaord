@@ -24,6 +24,7 @@ import {
   HelpCircle,
   BookOpen,
   Newspaper,
+  Blocks,
 } from "lucide-react";
 import { useMemo } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
