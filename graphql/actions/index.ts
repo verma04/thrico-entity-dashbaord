@@ -246,4 +246,6 @@ export const useGetAllEntityInvoice = () =>
 
 // Website Actions
 export * from "./website";
-export * from "./dashboard";
+export * from "./dashbaord/dashboard-quries";
+export * from "./gamification/gamification-quiries";
+export * from "./gamification/gamification-mutation";

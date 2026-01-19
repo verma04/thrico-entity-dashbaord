@@ -1,22 +1,52 @@
-"use client";
-
-import * as React from "react";
-import { Trophy } from "lucide-react";
-import MenuItemsLayout from "@/components/layout/menu-items-layout";
+import {
+  Trophy,
+  Swords,
+  Medal,
+  BarChart2,
+  Coins,
+  Crown,
+  Settings,
+  LayoutDashboard,
+  History,
+} from "lucide-react";
+import GamificationMenuLayout from "@/components/gamification/gamification-menu-layout";
 
 function GamificationLayout({ children }: { children: React.ReactNode }) {
   const items = [
     {
-      key: "all",
-      label: "Gamification",
-      icon: <Trophy className="h-4 w-4" />,
+      key: "dashboard",
+      label: "Dashboard",
+      icon: <LayoutDashboard className="h-4 w-4" />,
+    },
+    {
+      key: "points",
+      label: "Points",
+      icon: <Coins className="h-4 w-4" />,
+    },
+    {
+      key: "badges",
+      label: "Badges",
+      icon: <Medal className="h-4 w-4" />,
+    },
+    {
+      key: "ranks",
+      label: "Ranks",
+      icon: <Crown className="h-4 w-4" />,
+    },
+    {
+      key: "leaderboard",
+      label: "Leaderboard",
+      icon: <BarChart2 className="h-4 w-4" />,
+    },
+    {
+      key: "activity-log",
+      label: "Activity Log",
+      icon: <History className="h-4 w-4" />,
     },
   ];
 
   return (
-    <MenuItemsLayout active="gamification" items={items}>
-      {children}
-    </MenuItemsLayout>
+    <GamificationMenuLayout items={items}>{children}</GamificationMenuLayout>
   );
 }
 

@@ -106,6 +106,8 @@ export default function ModuleManagement() {
     description?: string;
   } | null>(null);
 
+  console.log(data);
+
   React.useEffect(() => {
     if (
       !modulesInitialized &&

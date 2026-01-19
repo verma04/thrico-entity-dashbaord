@@ -233,6 +233,21 @@ export const extendedItems = [
     icon: <Gamepad2 size={18} />,
     children: [
       {
+        key: "gamification-dashboard",
+        label: "Dashboard",
+        path: "/gamification/",
+      },
+      {
+        key: "gamification-modules",
+        label: "Points & Rewards",
+        path: "/gamification/points",
+      },
+      {
+        key: "gamification-badges",
+        label: "Badges & Achievements",
+        path: "/gamification/badges",
+      },
+      {
         key: "gamification-leaderboard",
         label: "Leaderboards",
         path: "/gamification/leaderboard",
@@ -335,7 +350,7 @@ export const useFilteredExtendedItems = () => {
     const enabledModuleIds = new Set(
       modules
         .filter((m) => m.enabled)
-        .map((m) => m.name?.toLowerCase().replace(/'/g, "_"))
+        .map((m) => m.name?.toLowerCase().replace(/'/g, "_")),
     );
 
     // If no modules data yet (loading), return all items if no subscription data
@@ -345,7 +360,7 @@ export const useFilteredExtendedItems = () => {
 
     // Filter extendedItems to only include those with matching enabled module IDs
     return extendedItems.filter((item) =>
-      enabledModuleIds.has(item.key?.toLowerCase().replace(/'/g, "_"))
+      enabledModuleIds.has(item.key?.toLowerCase().replace(/'/g, "_")),
     );
   }, [data?.checkEntitySubscription?.modules, loading]);
 

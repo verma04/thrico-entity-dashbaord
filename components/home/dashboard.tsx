@@ -54,7 +54,7 @@ import { PlatformModuleChart } from "./platform-module-chart";
 
 export default function Dashboard() {
   const [timePeriod, setTimePeriod] = useState<TimeRange>(
-    TimeRange.LAST_7_DAYS
+    TimeRange.LAST_7_DAYS,
   );
   const { data, loading } = useGetDashboardStats(timePeriod);
 
@@ -67,7 +67,7 @@ export default function Dashboard() {
       value: loading ? (
         <Skeleton className="h-8 w-24" />
       ) : (
-        stats?.totalUsers?.toLocaleString() ?? "Loading..."
+        (stats?.totalUsers?.toLocaleString() ?? "Loading...")
       ),
       change: stats?.totalUsersChange ?? 0,
       trend: (stats?.totalUsersChange ?? 0) >= 0 ? "up" : "down",
@@ -80,7 +80,7 @@ export default function Dashboard() {
       value: loading ? (
         <Skeleton className="h-8 w-24" />
       ) : (
-        stats?.activeUsers?.toLocaleString() ?? "Loading..."
+        (stats?.activeUsers?.toLocaleString() ?? "Loading...")
       ),
       change: stats?.activeUsersChange ?? 0,
       trend: (stats?.activeUsersChange ?? 0) >= 0 ? "up" : "down",
@@ -93,7 +93,7 @@ export default function Dashboard() {
       value: loading ? (
         <Skeleton className="h-8 w-24" />
       ) : (
-        stats?.pageViews?.toLocaleString() ?? "Loading..."
+        (stats?.pageViews?.toLocaleString() ?? "Loading...")
       ),
       change: stats?.pageViewsChange ?? 0,
       trend: (stats?.pageViewsChange ?? 0) >= 0 ? "up" : "down",
@@ -200,7 +200,7 @@ export default function Dashboard() {
       </div>
 
       {/* Weekly Activity Bar Chart */}
-      <Card>
+      {/* <Card>
         <CardHeader>
           <CardTitle>Weekly Activity</CardTitle>
           <CardDescription>Posts, comments, and likes by day</CardDescription>
@@ -234,7 +234,7 @@ export default function Dashboard() {
             </BarChart>
           </ResponsiveContainer>
         </CardContent>
-      </Card>
+      </Card> */}
 
       {/* Module Overview Section */}
       <PlatformModules />

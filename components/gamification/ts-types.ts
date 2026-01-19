@@ -18,7 +18,7 @@ export interface PointRule {
   id: string;
   module: string; // Dynamic from subscription modules
   action: string;
-  triggerType: TriggerType;
+  trigger: TriggerType; // Changed from triggerType to match GraphQL schema
   points: number;
   description: string;
   isActive: boolean;
@@ -28,22 +28,24 @@ export interface PointRule {
 }
 
 // Badge types
-export type BadgeType = "ACTION_BASED" | "POINTS_BASED";
+export type BadgeType = "ACTION" | "POINTS";
 
 // Badge
 export interface Badge {
   id: string;
   name: string;
-  icon: string;
   description: string;
+  icon: string;
   type: BadgeType;
-  module?: string; // Dynamic from subscription modules
-  isActive: boolean;
-  criteria: {
+  module: string;
+  condition: {
     action?: string;
     count?: number;
     pointsRequired?: number;
   };
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Rank types

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import {
   Card,
@@ -26,7 +26,11 @@ import {
   LucideIcon,
   AlertCircle,
 } from "lucide-react";
-import { useCheckEntitySubscription } from "@/graphql/actions";
+import {
+  useCheckEntitySubscription,
+  useGetPlatformModuleActivity,
+  TimeRange,
+} from "@/graphql/actions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
@@ -56,7 +60,7 @@ const modules: Module[] = [
     icon: MessageSquare,
     href: "/discussion-forum",
     color: "bg-gray-600",
-    stats: { total: 1234, active: 856, pending: 24 },
+    stats: { total: 0, active: 0, pending: 0 },
     subscriptionKey: "forums",
   },
   {
@@ -65,7 +69,7 @@ const modules: Module[] = [
     icon: Briefcase,
     href: "/jobs",
     color: "bg-gray-600",
-    stats: { total: 87, active: 65, pending: 12 },
+    stats: { total: 0, active: 0, pending: 0 },
     subscriptionKey: "jobs",
   },
   {
@@ -74,7 +78,7 @@ const modules: Module[] = [
     icon: Tag,
     href: "/offers",
     color: "bg-gray-600",
-    stats: { total: 156, active: 142, pending: 8 },
+    stats: { total: 0, active: 0, pending: 0 },
     subscriptionKey: "offers",
   },
   {
@@ -83,7 +87,7 @@ const modules: Module[] = [
     icon: Users,
     href: "/mentorship",
     color: "bg-gray-600",
-    stats: { total: 45, active: 38, pending: 5 },
+    stats: { total: 0, active: 0, pending: 0 },
     subscriptionKey: "mentorship",
   },
   {
@@ -92,7 +96,7 @@ const modules: Module[] = [
     icon: CalendarDays,
     href: "/events",
     color: "bg-gray-600",
-    stats: { total: 32, active: 28, pending: 3 },
+    stats: { total: 0, active: 0, pending: 0 },
     subscriptionKey: "events",
   },
   {
@@ -101,7 +105,7 @@ const modules: Module[] = [
     icon: UserCircle,
     href: "/communities",
     color: "bg-gray-600",
-    stats: { total: 78, active: 72, pending: 6 },
+    stats: { total: 0, active: 0, pending: 0 },
     subscriptionKey: "communities",
   },
   {
@@ -111,12 +115,15 @@ const modules: Module[] = [
     href: "/website",
     color: "bg-gray-600",
     stats: { pages: 12, modules: 45, published: true },
-    subscriptionKey: "website", // Usually core or always enabled, but let's keep it for consistency
+    subscriptionKey: "website",
   },
 ];
 
 export function PlatformModules() {
+  const [timeRange] = useState<TimeRange>(TimeRange.LAST_7_DAYS);
   const { data, loading, error } = useCheckEntitySubscription();
+  const { data: activityData, loading: activityLoading } =
+    useGetPlatformModuleActivity(timeRange);
 
   const enabledModules = React.useMemo(() => {
     if (!data?.checkEntitySubscription?.modules) return modules;
@@ -125,16 +132,44 @@ export function PlatformModules() {
     const enabledModuleKeys = new Set(
       subscriptionModules
         .filter((m: any) => m.enabled)
-        .map((m: any) => m.name?.toLowerCase().replace(/'/g, "_"))
+        .map((m: any) => m.name?.toLowerCase().replace(/'/g, "_")),
     );
 
-    return modules.filter((module) => {
-      if (!module.subscriptionKey) return true;
-      return enabledModuleKeys.has(module.subscriptionKey.toLowerCase());
-    });
-  }, [data]);
+    // Get activity data
+    const activityModules =
+      activityData?.getPlatformModuleActivity?.modules || [];
 
-  if (loading) {
+    return modules
+      .filter((module) => {
+        if (!module.subscriptionKey) return true;
+        return enabledModuleKeys.has(module.subscriptionKey.toLowerCase());
+      })
+      .map((module) => {
+        // Find matching activity data for this module
+        const activity = activityModules.find((a) =>
+          a.name
+            .toLowerCase()
+            .includes(module.subscriptionKey?.toLowerCase() || ""),
+        );
+
+        // If we have activity data, update the stats
+        if (activity && module.subscriptionKey !== "website") {
+          return {
+            ...module,
+            stats: {
+              ...module.stats,
+              total: activity.itemCount,
+              active: activity.itemCount, // You might want to adjust this based on your data
+              pending: 0, // This would need to come from a different API endpoint
+            },
+          };
+        }
+
+        return module;
+      });
+  }, [data, activityData]);
+
+  if (loading || activityLoading) {
     return (
       <div className="space-y-4">
         <Skeleton className="h-8 w-48" />
@@ -185,7 +220,7 @@ export function PlatformModules() {
                     <Icon
                       className={`h-8 w-8  text-amber-100 ${module.color.replace(
                         "bg-",
-                        "text-"
+                        "text-",
                       )}`}
                     />
                   </div>
