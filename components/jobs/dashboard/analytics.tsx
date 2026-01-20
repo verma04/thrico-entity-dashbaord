@@ -5,7 +5,7 @@ import {
   ModuleAnalyticsLayout,
   KPIStat,
 } from "@/components/analytics/module-analytics-layout";
-// import { useGetJobStats } from "@/graphql/actions/jobs";
+import { useJobStats } from "@/graphql/actions/jobs";
 import { TimeRange } from "@/graphql/actions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Briefcase, Users, Eye, FileText } from "lucide-react";
@@ -23,19 +23,9 @@ import {
 
 export default function JobsAnalytics() {
   const [timeRange, setTimeRange] = useState<TimeRange>(TimeRange.LAST_7_DAYS);
-  // const { data, loading } = useGetJobStats(timeRange);
+  const { data, loading } = useJobStats(timeRange);
 
-  const stats = {
-    totalJobs: 100,
-    activeJobs: 50,
-    applications: 200,
-    views: 150,
-    totalJobsChange: 10,
-    activeJobsChange: 5,
-    applicationsChange: 20,
-    viewsChange: 15,
-  };
-  let loading = false;
+  const stats = data?.getJobStats;
 
   const kpiStats: KPIStat[] = [
     {
@@ -43,7 +33,7 @@ export default function JobsAnalytics() {
       value: loading ? (
         <Skeleton className="h-8 w-24" />
       ) : (
-        stats?.totalJobs?.toLocaleString() ?? "N/A"
+        (stats?.totalJobs?.toLocaleString() ?? "N/A")
       ),
       change: stats?.totalJobsChange ?? 0,
       trend: (stats?.totalJobsChange ?? 0) >= 0 ? "up" : "down",
@@ -56,7 +46,7 @@ export default function JobsAnalytics() {
       value: loading ? (
         <Skeleton className="h-8 w-24" />
       ) : (
-        stats?.activeJobs?.toLocaleString() ?? "N/A"
+        (stats?.activeJobs?.toLocaleString() ?? "N/A")
       ),
       change: stats?.activeJobsChange ?? 0,
       trend: (stats?.activeJobsChange ?? 0) >= 0 ? "up" : "down",
@@ -69,7 +59,7 @@ export default function JobsAnalytics() {
       value: loading ? (
         <Skeleton className="h-8 w-24" />
       ) : (
-        stats?.applications?.toLocaleString() ?? "N/A"
+        (stats?.totalApplications?.toLocaleString() ?? "N/A")
       ),
       change: stats?.applicationsChange ?? 0,
       trend: (stats?.applicationsChange ?? 0) >= 0 ? "up" : "down",
@@ -82,7 +72,7 @@ export default function JobsAnalytics() {
       value: loading ? (
         <Skeleton className="h-8 w-24" />
       ) : (
-        stats?.views?.toLocaleString() ?? "N/A"
+        (stats?.totalViews?.toLocaleString() ?? "N/A")
       ),
       change: stats?.viewsChange ?? 0,
       trend: (stats?.viewsChange ?? 0) >= 0 ? "up" : "down",

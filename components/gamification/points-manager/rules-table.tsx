@@ -1,28 +1,20 @@
+"use client";
+
 import React from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ColumnDef } from "@tanstack/react-table";
+import { DataTable } from "@/components/ui/data-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { renderModuleIcon } from "@/components/subscription/utils";
 import { PointRule, useTogglePointRule } from "@/graphql/actions";
-import { ConfirmDialog } from "@/components/pages/confirm-dialog";
-import { Skeleton } from "@/components/ui/skeleton";
 
 interface RulesTableProps {
   rules: PointRule[];
   selectedModule: string | "ALL";
   modules: { id: string; name: string; icon: string }[];
   onEdit: (rule: PointRule) => void;
-
   refetchRules: () => void;
   refetchStats: () => void;
   isLoading?: boolean;
@@ -37,8 +29,6 @@ export function RulesTable({
   refetchRules,
   refetchStats,
 }: RulesTableProps) {
-  const [ruleToDelete, setRuleToDelete] = React.useState<string | null>(null);
-
   const [togglePointRule, { loading: toggling }] = useTogglePointRule({
     onCompleted: () => {
       refetchRules();
@@ -60,174 +50,96 @@ export function RulesTable({
     return modules.find((m) => m.id === moduleId);
   };
 
-  if (isLoading) {
-    return (
-      <Card>
-        <CardHeader>
+  const columns: ColumnDef<PointRule>[] = [
+    {
+      accessorKey: "module",
+      header: "Module",
+      cell: ({ row }) => {
+        const moduleInfo = getModuleInfo(row.original.module);
+        return (
           <div className="flex items-center gap-2">
-            <Skeleton className="h-6 w-32" />
-            {selectedModule !== "ALL" && (
-              <Skeleton className="h-6 w-20 rounded-full" />
-            )}
+            <div className="h-8 w-8 rounded-lg bg-primary/5 flex items-center justify-center shrink-0">
+              {renderModuleIcon(
+                moduleInfo?.icon || "Settings",
+                "h-4 w-4 text-primary",
+              )}
+            </div>
+            <span className="text-sm font-medium text-foreground">
+              {moduleInfo?.name || row.original.module}
+            </span>
           </div>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>
-                  <Skeleton className="h-4 w-12" />
-                </TableHead>
-                <TableHead>
-                  <Skeleton className="h-4 w-12" />
-                </TableHead>
-                <TableHead>
-                  <Skeleton className="h-4 w-12" />
-                </TableHead>
-                <TableHead className="text-center">
-                  <Skeleton className="h-4 w-12 mx-auto" />
-                </TableHead>
-                <TableHead>
-                  <Skeleton className="h-4 w-12" />
-                </TableHead>
-                <TableHead>
-                  <Skeleton className="h-4 w-12" />
-                </TableHead>
-                <TableHead className="text-right">
-                  <Skeleton className="h-4 w-12 ml-auto" />
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {[...Array(5)].map((_, i) => (
-                <TableRow key={i}>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Skeleton className="h-5 w-5 rounded" />
-                      <Skeleton className="h-4 w-20" />
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-4 w-24" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-5 w-16 rounded-full" />
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <Skeleton className="h-4 w-8 mx-auto" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-4 w-20" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-6 w-10 rounded-full" />
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Skeleton className="h-8 w-8 ml-auto" />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-    );
-  }
+        );
+      },
+    },
+    {
+      accessorKey: "action",
+      header: "Action",
+      cell: ({ row }) => (
+        <span className="font-bold text-foreground capitalize">
+          {row.original.action.replace(/_/g, " ").toLowerCase()}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "trigger",
+      header: "Type",
+      cell: ({ row }) => (
+        <Badge
+          variant={
+            row.original.trigger === "FIRST_TIME" ? "default" : "outline"
+          }
+          className="text-[10px] uppercase font-bold"
+        >
+          {row.original.trigger === "FIRST_TIME" ? "First Time" : "Recurring"}
+        </Badge>
+      ),
+    },
+    {
+      accessorKey: "points",
+      header: () => <div className="text-center">Points</div>,
+      cell: ({ row }) => (
+        <div className="text-center font-bold text-primary font-mono">
+          +{row.original.points}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "isActive",
+      header: "Status",
+      cell: ({ row }) => (
+        <Switch
+          checked={row.original.isActive}
+          onCheckedChange={() => handleToggleActive(row.original.id)}
+          disabled={toggling}
+          className="scale-90"
+        />
+      ),
+    },
+    {
+      id: "actions",
+      header: () => <div className="text-right">Actions</div>,
+      cell: ({ row }) => (
+        <div className="flex justify-end">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-muted-foreground hover:text-primary transition-colors"
+            onClick={() => onEdit(row.original)}
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
+        </div>
+      ),
+    },
+  ];
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">
-          Point Rules{" "}
-          {selectedModule !== "ALL" && (
-            <Badge variant="secondary" className="ml-2">
-              {getModuleInfo(selectedModule)?.name}
-            </Badge>
-          )}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Module</TableHead>
-              <TableHead>Action</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead className="text-center">Points</TableHead>
-              <TableHead>Caps</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {rules.map((rule) => (
-              <TableRow key={rule.id}>
-                <TableCell>
-                  <span className="flex items-center gap-2">
-                    {renderModuleIcon(
-                      getModuleInfo(rule.module)?.icon || "Settings"
-                    )}
-                    {getModuleInfo(rule.module)?.name || rule.module}
-                  </span>
-                </TableCell>
-                <TableCell className="font-medium">{rule.action}</TableCell>
-                <TableCell>
-                  <Badge
-                    variant={
-                      rule.trigger === "FIRST_TIME" ? "default" : "outline"
-                    }
-                  >
-                    {rule.trigger === "FIRST_TIME" ? "First Time" : "Recurring"}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-center font-bold text-primary">
-                  +{rule.points}
-                </TableCell>
-                <TableCell>
-                  {rule.dailyCap || rule.weeklyCap || rule.monthlyCap ? (
-                    <span className="text-xs text-muted-foreground">
-                      {rule.dailyCap && `${rule.dailyCap}/day`}
-                      {rule.weeklyCap && ` ${rule.weeklyCap}/wk`}
-                      {rule.monthlyCap && ` ${rule.monthlyCap}/mo`}
-                    </span>
-                  ) : (
-                    <span className="text-xs text-muted-foreground">
-                      No limit
-                    </span>
-                  )}
-                </TableCell>
-                <TableCell>
-                  <Switch
-                    checked={rule.isActive}
-                    onCheckedChange={() => handleToggleActive(rule.id)}
-                    disabled={toggling}
-                  />
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onEdit(rule)}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-            {rules.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center py-8">
-                  <p className="text-muted-foreground">
-                    No point rules found. Add your first rule!
-                  </p>
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
+    <DataTable
+      columns={columns}
+      data={rules}
+      isLoading={isLoading}
+      skeletonCount={6}
+      rowClassName="h-16"
+    />
   );
 }

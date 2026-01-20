@@ -64,19 +64,16 @@ mutation ChangeJobVerification($input: ChangeJobStatusInput!) {
 }`;
 
 export const GET_JOB_STATS = gql`
-  query GetJobStats {
-    getJobStats {
+  query GetJobStats($timeRange: TimeRange!) {
+    getJobStats(timeRange: $timeRange) {
       totalJobs
       activeJobs
       totalApplications
       totalViews
-      avgApplications
-      applicationsThisWeek
-      applicationsLastWeek
-      applicationsWeeklyChange
-      viewsThisWeek
-      viewsLastWeek
-      viewsWeeklyChange
+      totalJobsChange
+      activeJobsChange
+      applicationsChange
+      viewsChange
     }
   }
 `;

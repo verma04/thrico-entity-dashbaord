@@ -1,4 +1,11 @@
 import {
+  ADD_JOB,
+  CHANGE_JOB_STATUS,
+  CHANGE_JOB_VERIFICATION,
+  GET_JOB_STATS,
+  GET_JOBS,
+} from "@/graphql/quries/jobs";
+import {
   gql,
   useMutation,
   MutationHookOptions,
@@ -7,7 +14,7 @@ import {
   QueryResult,
   useQuery,
 } from "@apollo/client";
-
+import { TimeRange } from "..";
 
 // --- GraphQL Mutation Document ---
 
@@ -70,7 +77,7 @@ export type PostJobInput = {
 // --- Apollo Client Hook ---
 
 export function useAddJob(
-  options?: MutationHookOptions<{ addJob: Job }, { input: PostJobInput }>
+  options?: MutationHookOptions<{ addJob: Job }, { input: PostJobInput }>,
 ) {
   return useMutation(ADD_JOB, {
     ...options,
@@ -146,7 +153,7 @@ export interface GetJobInput {
 // --- Apollo Client Hook ---
 
 export function useJobs(
-  options?: QueryHookOptions<{ getJob: Job[] }, { input?: GetJobInput }>
+  options?: QueryHookOptions<{ getJob: Job[] }, { input?: GetJobInput }>,
 ): QueryResult<{ getJob: Job[] }, { input?: GetJobInput }> {
   return useQuery(GET_JOBS, options);
 }
@@ -156,21 +163,26 @@ export type JobStats = {
   activeJobs: number;
   totalApplications: number;
   totalViews: number;
-  avgApplications: number;
-  applicationsThisWeek: number;
-  applicationsLastWeek: number;
-  applicationsWeeklyChange: number;
-  viewsThisWeek: number;
-  viewsLastWeek: number;
-  viewsWeeklyChange: number;
+  totalJobsChange: number;
+  activeJobsChange: number;
+  applicationsChange: number;
+  viewsChange: number;
+};
+
+export type GetJobStatsResponse = {
+  getJobStats: JobStats;
 };
 
 // --- Apollo Client Hook ---
 
 export function useJobStats(
-  options?: QueryHookOptions<{ getJobStats: JobStats }>
-): QueryResult<{ getJobStats: JobStats }> {
-  return useQuery(GET_JOB_STATS, options);
+  timeRange: TimeRange,
+  options?: QueryHookOptions<GetJobStatsResponse, { timeRange: TimeRange }>,
+): QueryResult<GetJobStatsResponse, { timeRange: TimeRange }> {
+  return useQuery(GET_JOB_STATS, {
+    variables: { timeRange },
+    ...options,
+  });
 }
 
 export function useChangeJobStatus(options?: MutationHookOptions<any, any>) {
@@ -216,7 +228,7 @@ export function useChangeJobStatus(options?: MutationHookOptions<any, any>) {
 }
 
 export function useChangeJobVerification(
-  options?: MutationHookOptions<any, any>
+  options?: MutationHookOptions<any, any>,
 ) {
   return useMutation(CHANGE_JOB_VERIFICATION, {
     ...options,

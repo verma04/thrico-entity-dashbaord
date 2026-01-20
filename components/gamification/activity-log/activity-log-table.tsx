@@ -1,17 +1,9 @@
-import React from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { ColumnDef } from "@tanstack/react-table";
+import { DataTable } from "@/components/ui/data-table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
-import { GamificationActivityLogEntry } from "@/graphql/actions";
-import { Skeleton } from "@/components/ui/skeleton";
+import { GamificationActivityLogEntry } from "@/graphql/actions/gamification/gamification-quiries";
+import { History } from "lucide-react";
 
 interface ActivityLogTableProps {
   logs: GamificationActivityLogEntry[];
@@ -19,82 +11,80 @@ interface ActivityLogTableProps {
 }
 
 export function ActivityLogTable({ logs, isLoading }: ActivityLogTableProps) {
-  if (isLoading) {
-    return (
-      <div className="space-y-3">
-        {[1, 2, 3, 4, 5].map((i) => (
-          <Skeleton key={i} className="h-16 w-full" />
-        ))}
-      </div>
-    );
-  }
+  const columns: ColumnDef<GamificationActivityLogEntry>[] = [
+    {
+      accessorKey: "user",
+      header: "User",
+      cell: ({ row }) => {
+        const user = row.original.user;
+        return (
+          <div className="flex items-center gap-3">
+            <Avatar className="h-8 w-8 border border-white shadow-sm shrink-0">
+              <AvatarImage
+                src={`https://cdn.thrico.network/${user.avatar}`}
+                alt={user.firstName}
+              />
+              <AvatarFallback className="text-[10px] bg-primary/5 text-primary">
+                {user.firstName.substring(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col">
+              <span className="text-sm font-semibold text-foreground leading-tight">
+                {user.firstName} {user.lastName}
+              </span>
+              <span className="text-[10px] text-muted-foreground font-mono">
+                ID: {user.id.substring(0, 8)}...
+              </span>
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "type",
+      header: "Activity Type",
+      cell: ({ row }) => (
+        <span className="text-xs font-medium text-foreground capitalize">
+          {row.original.type.replace(/_/g, " ").toLowerCase()}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "points",
+      header: "Points",
+      cell: ({ row }) => {
+        const points = row.original.points;
+        const isPositive = points > 0;
+        return (
+          <span
+            className={`font-mono text-sm font-bold ${
+              isPositive ? "text-emerald-600" : "text-rose-600"
+            }`}
+          >
+            {isPositive ? "+" : ""}
+            {points}
+          </span>
+        );
+      },
+    },
+    {
+      accessorKey: "createdAt",
+      header: "Date",
+      cell: ({ row }) => (
+        <span className="text-xs text-muted-foreground">
+          {format(new Date(row.original.createdAt), "MMM d, yyyy · hh:mm a")}
+        </span>
+      ),
+    },
+  ];
 
   return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>User</TableHead>
-            <TableHead>Activity</TableHead>
-            <TableHead>Points</TableHead>
-            <TableHead>Date</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {logs.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={4} className="h-24 text-center">
-                No activity logs found.
-              </TableCell>
-            </TableRow>
-          ) : (
-            logs.map((log) => (
-              <TableRow
-                key={log.id}
-                className="group hover:bg-muted/50 transition-colors"
-              >
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-9 w-9 border-2 border-background shadow-sm">
-                      <AvatarImage
-                        src={`https://cdn.thrico.network/${log.user.avatar}`}
-                      />
-                      <AvatarFallback>
-                        {log.user.firstName[0]}
-                        {log.user.lastName[0]}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex flex-col">
-                      <span className="font-medium text-sm">
-                        {log.user.firstName} {log.user.lastName}
-                      </span>
-                      <span className="text-[10px] text-muted-foreground font-mono">
-                        {log.user.id.slice(0, 8)}...
-                      </span>
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Badge variant="secondary" className="font-medium">
-                    {log.type.replace(/_/g, " ")}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <span
-                    className={`font-bold font-mono ${log.points >= 0 ? "text-green-600" : "text-red-600"}`}
-                  >
-                    {log.points >= 0 ? "+" : ""}
-                    {log.points}
-                  </span>
-                </TableCell>
-                <TableCell className="text-muted-foreground text-sm">
-                  {format(new Date(log.createdAt), "MMM d, yyyy • HH:mm")}
-                </TableCell>
-              </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
-    </div>
+    <DataTable
+      columns={columns}
+      data={logs}
+      isLoading={isLoading}
+      skeletonCount={8}
+      rowClassName="h-16"
+    />
   );
 }
