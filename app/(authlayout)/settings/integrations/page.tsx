@@ -3,6 +3,7 @@ import { Separator } from "@/components/ui/separator";
 import { SlackIntegrationCard } from "@/components/settings/integrations/slack-integration-card";
 import { ZoomIntegrationCard } from "@/components/settings/integrations/zoom-integration-card";
 import { GoogleMeetIntegrationCard } from "@/components/settings/integrations/google-meet-integration-card";
+import { SendGridIntegrationCard } from "@/components/settings/integrations/sendgrid-integration-card";
 import { IntegrationCard } from "@/components/settings/integrations/integration-card";
 import { Users, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -54,6 +55,11 @@ const IntegrationsPage = () => {
       name: "Google Meet",
       component: <GoogleMeetIntegrationCard />,
     },
+    {
+      id: "sendgrid",
+      name: "SendGrid",
+      component: <SendGridIntegrationCard />,
+    },
     // {
     //   id: "teams",
     //   name: "Microsoft Teams",
@@ -76,7 +82,7 @@ const IntegrationsPage = () => {
   ];
 
   const filteredIntegrations = allIntegrations.filter((integration) =>
-    integration.name.toLowerCase().includes(searchQuery.toLowerCase())
+    integration.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   return (
