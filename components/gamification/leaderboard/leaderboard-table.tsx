@@ -90,7 +90,7 @@ export function LeaderboardTable({
           ) : (
             entries.map((entry) => (
               <TableRow
-                key={entry?.user.id}
+                key={entry?.user?.id}
                 className={`group transition-colors h-20 ${getRankBg(
                   entry?.rank,
                 )}`}
@@ -102,20 +102,20 @@ export function LeaderboardTable({
                 </TableCell>
                 <TableCell>
                   <Link
-                    href={`/members/${entry?.user.id}`}
+                    href={`/members/${entry?.user?.id}`}
                     className="flex items-center gap-3 hover:underline underline-offset-4 decoration-primary/30"
                   >
                     <Avatar className="h-10 w-10 border-2 border-white shadow-sm">
                       <AvatarImage
-                        src={`https://cdn.thrico.network/${entry?.user.avatar}`}
-                        alt={entry?.user.firstName}
+                        src={`https://cdn.thrico.network/${entry?.user?.avatar}`}
+                        alt={entry?.user?.firstName}
                       />
                       <AvatarFallback className="bg-primary/5 text-primary text-xs">
-                        {entry?.user.firstName.substring(0, 2).toUpperCase()}
+                        {entry?.user?.firstName?.substring(0, 2)?.toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     <span className="font-semibold text-foreground">
-                      {entry?.user.firstName} {entry?.user.lastName}
+                      {entry?.user?.firstName} {entry?.user?.lastName}
                     </span>
                   </Link>
                 </TableCell>
