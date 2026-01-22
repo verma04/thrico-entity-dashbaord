@@ -27,15 +27,23 @@ import {
   Globe,
   Mail,
   Award,
+  Loader2,
 } from "lucide-react";
 
 interface MentorListProps {
-  onEdit: (mentor: Mentor) => void;
+  onEdit: (mentor: Mentor | any) => void;
+  mentors: any[];
+  isLoading?: boolean;
+  onRefetch?: () => void;
 }
 
-export const MentorList: React.FC<MentorListProps> = ({ onEdit }) => {
+export const MentorList: React.FC<MentorListProps> = ({
+  onEdit,
+  mentors,
+  isLoading,
+  onRefetch,
+}) => {
   const {
-    getFilteredMentors,
     deleteMentor,
     toggleActive,
     toggleFeatured,
@@ -43,9 +51,8 @@ export const MentorList: React.FC<MentorListProps> = ({ onEdit }) => {
     approveMentor,
     rejectMentor,
   } = useMentorStore();
-  const mentors = getFilteredMentors();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [mentorToDelete, setMentorToDelete] = useState<Mentor | null>(null);
+  const [mentorToDelete, setMentorToDelete] = useState<any | null>(null);
 
   const handleDeleteClick = (mentor: Mentor) => {
     setMentorToDelete(mentor);
@@ -70,6 +77,15 @@ export const MentorList: React.FC<MentorListProps> = ({ onEdit }) => {
     return variants[status];
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 px-4">
+        <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+        <p className="text-muted-foreground">Loading mentors...</p>
+      </div>
+    );
+  }
+
   if (mentors.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 px-4 border-2 border-dashed rounded-lg">
@@ -82,11 +98,18 @@ export const MentorList: React.FC<MentorListProps> = ({ onEdit }) => {
     <>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {mentors.map((mentor) => (
-          <div key={mentor.id} className="p-5 border rounded-lg bg-card hover:shadow-md transition">
+          <div
+            key={mentor.id}
+            className="p-5 border rounded-lg bg-card hover:shadow-md transition"
+          >
             {/* Image */}
             {mentor.image && (
               <div className="mb-4 rounded-full overflow-hidden w-20 h-20 mx-auto">
-                <img src={mentor.image} alt={mentor.name} className="w-full h-full object-cover" />
+                <img
+                  src={mentor.image}
+                  alt={mentor.name}
+                  className="w-full h-full object-cover"
+                />
               </div>
             )}
 
@@ -95,18 +118,28 @@ export const MentorList: React.FC<MentorListProps> = ({ onEdit }) => {
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1 text-center">
                   <h3 className="font-semibold text-lg">{mentor.name}</h3>
-                  <p className="text-sm text-muted-foreground">{mentor.title}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {mentor.title}
+                  </p>
                 </div>
                 <div className="flex gap-1">
-                  {mentor.isFeatured && <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />}
-                  {mentor.isTrending && <TrendingUp className="h-5 w-5 text-blue-500" />}
+                  {mentor.isFeatured && (
+                    <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
+                  )}
+                  {mentor.isTrending && (
+                    <TrendingUp className="h-5 w-5 text-blue-500" />
+                  )}
                 </div>
               </div>
 
               {/* Badges */}
               <div className="flex flex-wrap gap-2 justify-center">
-                <Badge {...getStatusBadge(mentor.status)}>{getStatusBadge(mentor.status).label}</Badge>
-                <Badge variant="outline">{mentor.source === "admin" ? "Admin" : "User"}</Badge>
+                <Badge {...getStatusBadge(mentor.status)}>
+                  {getStatusBadge(mentor.status).label}
+                </Badge>
+                <Badge variant="outline">
+                  {mentor.source === "admin" ? "Admin" : "User"}
+                </Badge>
                 <Badge variant="outline">{mentor.categoryName}</Badge>
                 {mentor.yearsOfExperience && (
                   <Badge variant="secondary" className="gap-1">
@@ -117,19 +150,23 @@ export const MentorList: React.FC<MentorListProps> = ({ onEdit }) => {
               </div>
 
               {/* Bio */}
-              <p className="text-sm text-muted-foreground line-clamp-2 text-center">{mentor.bio}</p>
+              <p className="text-sm text-muted-foreground line-clamp-2 text-center">
+                {mentor.bio}
+              </p>
 
               {/* Expertise */}
               {mentor.expertise && mentor.expertise.length > 0 && (
                 <div className="flex flex-wrap gap-1 justify-center">
-                  {mentor.expertise.slice(0, 3).map((skill, idx) => (
-                    <span
-                      key={idx}
-                      className="text-xs px-2 py-1 rounded-full bg-muted"
-                    >
-                      {skill}
-                    </span>
-                  ))}
+                  {mentor.expertise
+                    .slice(0, 3)
+                    .map((skill: string, idx: number) => (
+                      <span
+                        key={idx}
+                        className="text-xs px-2 py-1 rounded-full bg-muted"
+                      >
+                        {skill}
+                      </span>
+                    ))}
                   {mentor.expertise.length > 3 && (
                     <span className="text-xs px-2 py-1 rounded-full bg-muted">
                       +{mentor.expertise.length - 3} more
@@ -141,17 +178,30 @@ export const MentorList: React.FC<MentorListProps> = ({ onEdit }) => {
               {/* Contact Info */}
               <div className="flex gap-2 justify-center text-xs text-muted-foreground">
                 {mentor.email && (
-                  <a href={`mailto:${mentor.email}`} className="flex items-center gap-1 hover:text-foreground">
+                  <a
+                    href={`mailto:${mentor.email}`}
+                    className="flex items-center gap-1 hover:text-foreground"
+                  >
                     <Mail className="h-3 w-3" />
                   </a>
                 )}
                 {mentor.linkedin && (
-                  <a href={mentor.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 hover:text-foreground">
+                  <a
+                    href={mentor.linkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 hover:text-foreground"
+                  >
                     <Linkedin className="h-3 w-3" />
                   </a>
                 )}
                 {mentor.website && (
-                  <a href={mentor.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 hover:text-foreground">
+                  <a
+                    href={mentor.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 hover:text-foreground"
+                  >
                     <Globe className="h-3 w-3" />
                   </a>
                 )}
@@ -201,7 +251,9 @@ export const MentorList: React.FC<MentorListProps> = ({ onEdit }) => {
                   onClick={() => toggleFeatured(mentor.id)}
                   className={mentor.isFeatured ? "text-yellow-500" : ""}
                 >
-                  <Star className={`h-4 w-4 ${mentor.isFeatured ? "fill-current" : ""}`} />
+                  <Star
+                    className={`h-4 w-4 ${mentor.isFeatured ? "fill-current" : ""}`}
+                  />
                 </Button>
 
                 <Button
@@ -213,7 +265,11 @@ export const MentorList: React.FC<MentorListProps> = ({ onEdit }) => {
                   <TrendingUp className="h-4 w-4" />
                 </Button>
 
-                <Button variant="ghost" size="icon" onClick={() => onEdit(mentor)}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onEdit(mentor)}
+                >
                   <Edit className="h-4 w-4" />
                 </Button>
 
@@ -241,7 +297,10 @@ export const MentorList: React.FC<MentorListProps> = ({ onEdit }) => {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+            >
               Cancel
             </Button>
             <Button variant="destructive" onClick={handleDeleteConfirm}>

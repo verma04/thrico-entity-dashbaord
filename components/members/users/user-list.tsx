@@ -1,91 +1,55 @@
 "use client";
 
-import { useState } from "react";
-import {
-  type ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  getFilteredRowModel,
-  useReactTable,
-  type SortingState,
-  type ColumnFiltersState,
-} from "@tanstack/react-table";
+import React from "react";
+import { type ColumnDef } from "@tanstack/react-table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
 import UserActions from "./user-actions";
-import type { userStatus } from "@/types/user-types";
+import { DataTable } from "@/components/ui/data-table";
+import { format } from "date-fns";
+import { Mail, MapPin } from "lucide-react";
+import { UserDetail } from "@/graphql/actions";
 
 const getStatusColor = (status: string) => {
   switch (status) {
     case "APPROVED":
-      return "bg-green-100 text-green-800";
+      return "bg-green-500/10 text-green-600 border-none shadow-none font-semibold";
     case "PENDING":
-      return "bg-yellow-100 text-yellow-800";
+      return "bg-yellow-500/10 text-yellow-600 border-none shadow-none font-semibold";
     case "BLOCKED":
-      return "bg-red-100 text-red-800";
+      return "bg-red-500/10 text-red-600 border-none shadow-none font-semibold";
     case "REJECTED":
-      return "bg-purple-100 text-purple-800";
+      return "bg-purple-500/10 text-purple-600 border-none shadow-none font-semibold";
     case "DISABLED":
-      return "bg-orange-100 text-orange-800";
+      return "bg-orange-500/10 text-orange-600 border-none shadow-none font-semibold";
     default:
-      return "bg-gray-100 text-gray-800";
+      return "bg-gray-500/10 text-gray-600 border-none shadow-none font-semibold";
   }
 };
 
-const getVerificationBadge = (verified: boolean) => {
-  return (
-    <Badge variant={verified ? "default" : "secondary"}>
-      {verified ? "Verified" : "Unverified"}
-    </Badge>
-  );
-};
-
-export function UserList({ users }: { users: userStatus[] }) {
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [searchValue, setSearchValue] = useState("");
-
-  const columns: ColumnDef<userStatus>[] = [
-    {
-      accessorKey: "verification",
-      header: "Verification",
-      cell: ({ row }) =>
-        getVerificationBadge(row.original.verification?.isVerified || false),
-    },
+export function UserList({ users }: { users: UserDetail[] }) {
+  const columns: ColumnDef<UserDetail>[] = [
     {
       accessorKey: "user.firstName",
-      header: "User",
+      header: "Member",
       cell: ({ row }) => (
         <div className="flex items-center gap-3">
-          <Avatar className="h-10 w-10">
+          <Avatar className="h-10 w-10 border border-border/50">
             <AvatarImage
               src={`https://cdn.thrico.network/${row.original.user?.avatar}`}
               alt={row.original.user?.firstName}
             />
-            <AvatarFallback>
+            <AvatarFallback className="bg-primary/5 text-primary text-xs">
               {row.original.user?.firstName?.[0]}
               {row.original.user?.lastName?.[0]}
             </AvatarFallback>
           </Avatar>
-          <div>
-            <p className="font-medium">
+          <div className="flex flex-col">
+            <p className="font-semibold text-sm leading-tight">
               {row.original.user?.firstName} {row.original.user?.lastName}
             </p>
-            <p className="text-sm text-muted-foreground">
-              {row.original.user?.about?.currentPosition}
+            <p className="text-xs text-muted-foreground leading-tight mt-0.5">
+              {row.original.user?.about?.currentPosition || "Community Member"}
             </p>
           </div>
         </div>
@@ -93,14 +57,17 @@ export function UserList({ users }: { users: userStatus[] }) {
     },
     {
       accessorKey: "user.email",
-      header: "Contact",
+      header: "Contact Info",
       cell: ({ row }) => (
-        <div className="space-y-1">
-          <p className="text-sm">{row.original.user?.email}</p>
-          <p className="text-xs text-muted-foreground">
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Mail className="h-3 w-3" />
+            <span>{row.original.user?.email}</span>
+          </div>
+          <div className="text-[10px] text-muted-foreground/70 pl-4.5">
             +{row.original.user?.profile?.phone?.countryCode}-
             {row.original.user?.profile?.phone?.phoneNumber}
-          </p>
+          </div>
         </div>
       ),
     },
@@ -108,9 +75,10 @@ export function UserList({ users }: { users: userStatus[] }) {
       accessorKey: "user.location.name",
       header: "Location",
       cell: ({ row }) => (
-        <span className="text-sm text-muted-foreground">
-          {row.original.user?.location?.name}
-        </span>
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <MapPin className="h-3 w-3" />
+          <span>{row.original.user?.location?.name || "Remote"}</span>
+        </div>
       ),
     },
     {
@@ -123,135 +91,51 @@ export function UserList({ users }: { users: userStatus[] }) {
       ),
     },
     {
-      accessorKey: "createdAt",
-      header: "Joined",
+      accessorKey: "verification.isVerified",
+      header: "Verification",
       cell: ({ row }) => (
-        <span className="text-sm text-muted-foreground">
-          {row.original.user?.createdAt
-            ? new Date(row.original.user.createdAt).toLocaleDateString()
-            : "-"}
-        </span>
+        <Badge
+          variant={
+            row.original.verification?.isVerified ? "default" : "secondary"
+          }
+          className="text-[10px] h-5"
+        >
+          {row.original.verification?.isVerified ? "Verified" : "Unverified"}
+        </Badge>
       ),
     },
     {
-      accessorKey: "lastActive",
-      header: "Last Active",
+      accessorKey: "createdAt",
+      header: "Joined Date",
       cell: ({ row }) => (
-        <span className="text-sm text-muted-foreground">
-          {row.original.lastActive
-            ? new Date(row.original.lastActive).toLocaleDateString()
+        <span className="text-xs text-muted-foreground whitespace-nowrap">
+          {row.original.user?.createdAt
+            ? format(
+                new Date(Number(row.original.user.createdAt)),
+                "MMM d, yyyy",
+              )
             : "-"}
         </span>
       ),
     },
     {
       id: "actions",
-      cell: ({ row }) => <UserActions user={row.original} />,
+      header: "",
+      cell: ({ row }) => (
+        <div className="flex justify-end">
+          <UserActions user={row.original} />
+        </div>
+      ),
     },
   ];
 
-  const table = useReactTable({
-    data: users,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    state: {
-      sorting,
-      columnFilters,
-      globalFilter: searchValue,
-    },
-    onGlobalFilterChange: setSearchValue,
-  });
-
   return (
     <div className="space-y-4">
-      <div className="flex gap-2">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search users..."
-            className="pl-10"
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-          />
-        </div>
-      </div>
-
-      <div className="rounded-lg border">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table?.getRowModel().rows &&
-            table.getRowModel().rows.length > 0 ? (
-              table?.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center text-muted-foreground"
-                >
-                  No users found
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
-
-      <div className="flex items-center justify-between">
-        <div className="text-sm text-muted-foreground">
-          Page {table.getState().pagination.pageIndex + 1} of{" "}
-          {table.getPageCount()}
-        </div>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            Previous
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            Next
-          </Button>
-        </div>
-      </div>
+      <DataTable
+        columns={columns}
+        data={users || []}
+        rowClassName="hover:bg-muted/30 transition-colors"
+      />
     </div>
   );
 }

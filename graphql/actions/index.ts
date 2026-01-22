@@ -17,6 +17,8 @@ import {
   CHANGE_ENTITY_CURRENCY,
 } from "../quries";
 import { GET_MEMBERS_TERMS_AND_CONDITIONS } from "../quries/user";
+export * from "./membership/membership-queries";
+export * from "./membership/membership-mutations";
 
 // import { CHECK_PAYMENTS } from "../../../payments/graphql/quries";
 
@@ -122,8 +124,7 @@ export const useUpdateEntitySettings = (options: any) =>
     awaitRefetchQueries: true, // ensures mutation waits until refetch is complete
   });
 
-export const useMembersTermsAndConditions = () =>
-  useQuery(GET_MEMBERS_TERMS_AND_CONDITIONS);
+// Membership terms are exported via membership-queries
 
 // export const getDiscussionForumTermsAndConditions = () =>
 //   useQuery(GET_DISCUSSION_FORUM_TERMS_AND_CONDITIONS);
@@ -249,3 +250,5 @@ export * from "./website";
 export * from "./dashbaord/dashboard-quries";
 export * from "./gamification/gamification-quiries";
 export * from "./gamification/gamification-mutation";
+
+// Redundant membership actions removed (moved to /membership folder)

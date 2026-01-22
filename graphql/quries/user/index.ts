@@ -171,14 +171,32 @@ export const GET_MEMBERS_TERMS_AND_CONDITIONS = gql`
 `;
 
 export const GET_USER_ANALYTICS = gql`
-  query GetUserAnalytics {
-    getUserAnalytics {
+  query GetUserAnalytics($timeRange: TimeRange) {
+    getUserAnalytics(timeRange: $timeRange) {
       totalMembers
       verifiedMembers
       verifiedPercent
       activeMembers
       activePercent
       newMembersThisMonth
+    }
+  }
+`;
+
+export const GET_USER_GROWTH = gql`
+  query GetUserGrowth($timeRange: TimeRange!) {
+    getUserGrowth(timeRange: $timeRange) {
+      date
+      count
+    }
+  }
+`;
+
+export const GET_USER_ROLE_DISTRIBUTION = gql`
+  query GetUserRoleDistribution($timeRange: TimeRange!) {
+    getUserRoleDistribution(timeRange: $timeRange) {
+      name
+      value
     }
   }
 `;

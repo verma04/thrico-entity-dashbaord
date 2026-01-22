@@ -16,7 +16,7 @@ function MembersLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <MenuItemsLayout active="members" items={items}>
-      <CardContent className="pt-6">{children}</CardContent>
+      <CardContent className="">{children}</CardContent>
     </MenuItemsLayout>
   );
 }

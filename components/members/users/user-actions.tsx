@@ -1,15 +1,19 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import type { userStatus } from "@/types/user-types"
-import { Button } from "@/components/ui/button"
+import { useState } from "react";
+import {
+  UserDetail,
+  useChangeUserStatus,
+  useChangeUserVerification,
+} from "@/graphql/actions";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
@@ -17,32 +21,87 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import { MoreHorizontal, Eye, Check, X, Lock, Unlock, AlertCircle, RefreshCw, Shield } from "lucide-react"
-import UserDetailsDrawer from "./user-details-drawer"
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  MoreHorizontal,
+  Eye,
+  Check,
+  X,
+  Lock,
+  Unlock,
+  AlertCircle,
+  RefreshCw,
+  Shield,
+} from "lucide-react";
+import UserDetailsDrawer from "./user-details-drawer";
 
-export default function UserActions({ user }: { user: userStatus }) {
-  const [isActionModalOpen, setIsActionModalOpen] = useState(false)
-  const [isDetailsOpen, setIsDetailsOpen] = useState(false)
-  const [selectedAction, setSelectedAction] = useState<string | null>(null)
-  const [reason, setReason] = useState("")
+export default function UserActions({ user }: { user: UserDetail }) {
+  const [isActionModalOpen, setIsActionModalOpen] = useState(false);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [selectedAction, setSelectedAction] = useState<string | null>(null);
+  const [reason, setReason] = useState("");
+
+  const [changeStatus, { loading: isStatusLoading }] = useChangeUserStatus({
+    onCompleted: () => {
+      setIsActionModalOpen(false);
+      setReason("");
+      setSelectedAction(null);
+    },
+  });
+
+  const [changeVerification, { loading: isVerificationLoading }] =
+    useChangeUserVerification({
+      onCompleted: () => {
+        setIsActionModalOpen(false);
+        setReason("");
+        setSelectedAction(null);
+      },
+    });
+
+  const isLoading = isStatusLoading || isVerificationLoading;
 
   const handleAction = (action: string) => {
-    setSelectedAction(action)
-    setIsActionModalOpen(true)
-  }
+    setSelectedAction(action);
+    setIsActionModalOpen(true);
+  };
 
   const confirmAction = () => {
-    // TODO: Implement action API call
-    console.log(`Action: ${selectedAction}, Reason: ${reason}`)
-    setIsActionModalOpen(false)
-    setReason("")
-    setSelectedAction(null)
-  }
+    if (["VERIFY", "UNVERIFY"].includes(selectedAction || "")) {
+      changeVerification({
+        variables: {
+          input: {
+            userId: user.id,
+            action: selectedAction,
+            reason,
+          },
+        },
+      });
+      return;
+    }
 
-  const isReasonRequired = selectedAction && ["BLOCK", "APPROVE", "REJECT", "FLAG", "VERIFY"].includes(selectedAction)
+    // Mapping UI labels to GraphQL status enums
+    let targetStatus = selectedAction;
+    if (selectedAction === "REAPPROVE") targetStatus = "APPROVED";
+    if (selectedAction === "ENABLE") targetStatus = "APPROVED";
+    if (selectedAction === "DISABLE") targetStatus = "DISABLED";
+    if (selectedAction === "UNBLOCK") targetStatus = "APPROVED";
+
+    changeStatus({
+      variables: {
+        input: {
+          userId: user.id,
+          action: targetStatus,
+          reason,
+        },
+      },
+    });
+  };
+
+  const isReasonRequired =
+    selectedAction &&
+    ["BLOCK", "APPROVE", "REJECT", "FLAG", "VERIFY"].includes(selectedAction);
 
   const actions = [
     {
@@ -51,13 +110,23 @@ export default function UserActions({ user }: { user: userStatus }) {
       onClick: () => setIsDetailsOpen(true),
     },
     { type: "separator" },
-  ]
+  ];
 
   if (user.status === "PENDING") {
     actions.push(
-      { label: "Approve", icon: Check, onClick: () => handleAction("APPROVE"), color: "text-green-600" },
-      { label: "Reject", icon: X, onClick: () => handleAction("REJECT"), color: "text-red-600" },
-    )
+      {
+        label: "Approve",
+        icon: Check,
+        onClick: () => handleAction("APPROVE"),
+        color: "text-green-600",
+      },
+      {
+        label: "Reject",
+        icon: X,
+        onClick: () => handleAction("REJECT"),
+        color: "text-red-600",
+      },
+    );
   }
 
   if (user.status === "BLOCKED") {
@@ -66,17 +135,22 @@ export default function UserActions({ user }: { user: userStatus }) {
       icon: Unlock,
       onClick: () => handleAction("UNBLOCK"),
       color: "text-green-600",
-    })
+    });
   } else if (user.status === "REJECTED") {
     actions.push(
-      { label: "Block", icon: Lock, onClick: () => handleAction("BLOCK"), color: "text-red-600" },
+      {
+        label: "Block",
+        icon: Lock,
+        onClick: () => handleAction("BLOCK"),
+        color: "text-red-600",
+      },
       {
         label: "Re-approve",
         icon: RefreshCw,
         onClick: () => handleAction("REAPPROVE"),
         color: "text-blue-600",
       },
-    )
+    );
   }
 
   if (user.status === "APPROVED") {
@@ -84,10 +158,16 @@ export default function UserActions({ user }: { user: userStatus }) {
       {
         label: user.verification?.isVerified ? "Remove Verification" : "Verify",
         icon: Shield,
-        onClick: () => handleAction(user.verification?.isVerified ? "UNVERIFY" : "VERIFY"),
+        onClick: () =>
+          handleAction(user.verification?.isVerified ? "UNVERIFY" : "VERIFY"),
       },
-      { label: "Disable", icon: Lock, onClick: () => handleAction("DISABLE"), color: "text-orange-600" },
-    )
+      {
+        label: "Disable",
+        icon: Lock,
+        onClick: () => handleAction("DISABLE"),
+        color: "text-orange-600",
+      },
+    );
   }
 
   if (user.status === "DISABLED") {
@@ -96,7 +176,7 @@ export default function UserActions({ user }: { user: userStatus }) {
       icon: Check,
       onClick: () => handleAction("ENABLE"),
       color: "text-green-600",
-    })
+    });
   }
 
   actions.push(
@@ -107,7 +187,7 @@ export default function UserActions({ user }: { user: userStatus }) {
       onClick: () => handleAction("FLAG"),
       color: "text-orange-600",
     },
-  )
+  );
 
   return (
     <>
@@ -148,10 +228,14 @@ export default function UserActions({ user }: { user: userStatus }) {
                 "This will temporarily disable the user's account. They will not be able to log in until re-enabled."}
               {selectedAction === "ENABLE" &&
                 "This will re-enable the user's account and restore their access to the platform."}
-              {selectedAction === "FLAG" && "This will flag the user's account for further review by the admin team."}
-              {selectedAction === "VERIFY" && "This will add a verification badge to the user's profile."}
-              {selectedAction === "UNVERIFY" && "This will remove the verification badge from the user's profile."}
-              {selectedAction === "REAPPROVE" && "This will change the user's status from rejected to approved."}
+              {selectedAction === "FLAG" &&
+                "This will flag the user's account for further review by the admin team."}
+              {selectedAction === "VERIFY" &&
+                "This will add a verification badge to the user's profile."}
+              {selectedAction === "UNVERIFY" &&
+                "This will remove the verification badge from the user's profile."}
+              {selectedAction === "REAPPROVE" &&
+                "This will change the user's status from rejected to approved."}
             </DialogDescription>
           </DialogHeader>
 
@@ -174,21 +258,24 @@ export default function UserActions({ user }: { user: userStatus }) {
             <Button
               variant="outline"
               onClick={() => {
-                setIsActionModalOpen(false)
-                setReason("")
+                setIsActionModalOpen(false);
+                setReason("");
               }}
             >
               Cancel
             </Button>
             <Button
               onClick={confirmAction}
-              disabled={isReasonRequired && !reason.trim()}
+              disabled={(isReasonRequired && !reason.trim()) || isLoading}
               variant={
-                selectedAction?.includes("BLOCK") || selectedAction === "REJECT" || selectedAction === "DISABLE"
+                selectedAction?.includes("BLOCK") ||
+                selectedAction === "REJECT" ||
+                selectedAction === "DISABLE"
                   ? "destructive"
                   : "default"
               }
             >
+              {isLoading && <RefreshCw className="h-4 w-4 animate-spin mr-2" />}
               {selectedAction === "APPROVE" && "Approve"}
               {selectedAction === "REJECT" && "Reject"}
               {selectedAction === "BLOCK" && "Block"}
@@ -204,7 +291,11 @@ export default function UserActions({ user }: { user: userStatus }) {
         </DialogContent>
       </Dialog>
 
-      <UserDetailsDrawer open={isDetailsOpen} onOpenChange={setIsDetailsOpen} user={user} />
+      <UserDetailsDrawer
+        open={isDetailsOpen}
+        onOpenChange={setIsDetailsOpen}
+        user={user}
+      />
     </>
-  )
+  );
 }

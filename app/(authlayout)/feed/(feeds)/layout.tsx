@@ -15,6 +15,7 @@ import {
 
 import PostModal from "@/components/feed/add-feed";
 import { useNumberOfFeeds } from "@/graphql/actions/feed";
+import { NavTabs } from "@/components/shared/nav-tabs";
 
 function RootLayout({ children }: { children: React.ReactNode }) {
   const { data: feed } = useNumberOfFeeds();
@@ -60,28 +61,14 @@ function RootLayout({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <Card className="mt-8">
-      <CardHeader className="pb-0 flex flex-row items-center justify-between">
-        <Tabs value={activeTab} onValueChange={onChange} className="w-full">
-          <TabsList className="flex gap-2">
-            {items.map((item) => (
-              <TabsTrigger
-                key={item.key}
-                value={item.key}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium"
-              >
-                {item.icon}
-                {item.label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
-        <div className="ml-4">
-          <PostModal />
-        </div>
-      </CardHeader>
-      <CardContent className="pt-6">{children}</CardContent>
-    </Card>
+    <div className="space-y-6">
+      <div className="flex flex-col gap-4">
+        <NavTabs items={items} activeKey={activeTab} />
+      </div>
+      <div className="transition-all duration-500 animate-in fade-in slide-in-from-bottom-4">
+        {children}
+      </div>
+    </div>
   );
 }
 

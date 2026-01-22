@@ -172,6 +172,22 @@ export function OffersManager() {
         editingOffer={editingOffer}
         categories={categories}
         isLoading={isCreating || isUpdating}
+        onSave={(values) => {
+          if (editingOffer) {
+            updateOffer({
+              variables: {
+                id: editingOffer.id,
+                input: values,
+              },
+            });
+          } else {
+            createOffer({
+              variables: {
+                input: values,
+              },
+            });
+          }
+        }}
       />
     </div>
   );

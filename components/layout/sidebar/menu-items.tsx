@@ -242,11 +242,7 @@ export const extendedItems = [
         label: "Points & Rewards",
         path: "/gamification/points",
       },
-      {
-        key: "gamification-badges",
-        label: "Badges & Achievements",
-        path: "/gamification/badges",
-      },
+
       {
         key: "gamification-leaderboard",
         label: "Leaderboards",
