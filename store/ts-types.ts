@@ -15,7 +15,7 @@ export interface Question {
     | "ISOPTION"
     | "DATE"
     | "TIME"
-    | "YES-NO"
+    | "YES_NO"
     | "LEGAL";
   question: string;
   description?: string;
@@ -60,7 +60,7 @@ export type RemoveQuestionFn = (id: string | number) => void;
 export type UpdateOptionFn = (
   questionId: string | number,
   index: number,
-  value: string
+  value: string,
 ) => void;
 
 export type AddOptionFn = (questionId: string | number) => void;
@@ -68,12 +68,12 @@ export type AddOptionFn = (questionId: string | number) => void;
 export type UpdateQuestionFn = (
   id: string | number,
   field: keyof Question,
-  value: any
+  value: any,
 ) => void;
 
 export type UpdateFormSettingFn = (
   key: keyof FormSettings,
-  value: string | number
+  value: string | number,
 ) => void;
 
 export type AnswerMapFn = (questionId: string | number, value: any) => any;

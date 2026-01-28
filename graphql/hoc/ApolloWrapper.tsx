@@ -24,21 +24,17 @@ export function ApolloWrapper({ children }: Props) {
     const errorControl = onError(({ graphQLErrors, networkError }) => {
       if (graphQLErrors) {
         graphQLErrors.forEach(({ message, extensions }) => {
-          toast({
-            title: "Error",
+          toast.error("Error", {
             description:
               extensions?.code === "INTERNAL_SERVER_ERROR"
                 ? "Something went wrong"
                 : message,
-            variant: "destructive",
           });
         });
       }
       if (networkError) {
-        toast({
-          title: "Network Error",
+        toast.error("Network Error", {
           description: networkError.message,
-          variant: "destructive",
         });
       }
     });
@@ -64,7 +60,7 @@ export function ApolloWrapper({ children }: Props) {
         });
 
         return forward(operation);
-      }
+      },
     );
     return new ApolloClient({
       link: ApolloLink.from([authMiddleware, errorControl, uploadLink]),

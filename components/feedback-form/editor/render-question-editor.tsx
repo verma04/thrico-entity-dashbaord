@@ -20,7 +20,7 @@ export const RenderQuestionEditor = (
   question: Question,
   updateQuestion: any,
   updateOption: UpdateOptionFn,
-  addOption: AddOptionFn
+  addOption: AddOptionFn,
 ) => {
   switch (question.type) {
     case "SHORT_TEXT":
@@ -28,7 +28,8 @@ export const RenderQuestionEditor = (
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor={`question-${question.id}`}>
-              Question {question.required && <span className="text-destructive">*</span>}
+              Question{" "}
+              {question.required && <span className="text-destructive">*</span>}
             </Label>
             <Input
               id={`question-${question.id}`}
@@ -57,7 +58,8 @@ export const RenderQuestionEditor = (
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor={`question-${question.id}`}>
-              Question {question.required && <span className="text-destructive">*</span>}
+              Question{" "}
+              {question.required && <span className="text-destructive">*</span>}
             </Label>
             <Input
               id={`question-${question.id}`}
@@ -87,7 +89,7 @@ export const RenderQuestionEditor = (
     case "NUMBER":
     case "DATE":
     case "TIME":
-    case "YES-NO":
+    case "YES_NO":
       return (
         <div className="space-y-2">
           <Label htmlFor={`question-${question.id}`}>Question</Label>
@@ -139,7 +141,7 @@ export const RenderQuestionEditor = (
                   updateQuestion(
                     question.id,
                     "max",
-                    Math.min(10, Math.max(1, Number(e.target.value)))
+                    Math.min(10, Math.max(1, Number(e.target.value))),
                   )
                 }
               />
@@ -206,7 +208,7 @@ export const RenderQuestionEditor = (
                     size="icon"
                     onClick={() => {
                       const newOptions = question?.options?.filter(
-                        (_, i) => i !== index
+                        (_, i) => i !== index,
                       );
                       updateQuestion(question.id, "options", newOptions);
                     }}
@@ -274,7 +276,7 @@ export const RenderQuestionEditor = (
                     size="icon"
                     onClick={() => {
                       const newOptions = question?.options?.filter(
-                        (_, i) => i !== index
+                        (_, i) => i !== index,
                       );
                       updateQuestion(question.id, "options", newOptions);
                     }}

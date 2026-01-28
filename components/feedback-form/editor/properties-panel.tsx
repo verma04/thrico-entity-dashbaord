@@ -1,6 +1,7 @@
 "use client";
 
 import { useFormStore } from "@/store/useFormStore";
+import { useSurveyEditor } from "../hooks/use-survey-editor";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -27,16 +28,19 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Loader2 } from "lucide-react";
+import { useState } from "react";
 
 export function PropertiesPanel() {
+  const { questions, selectedQuestionId } = useFormStore();
   const {
-    questions,
-    selectedQuestionId,
     updateQuestion,
     updateOption,
     addOption,
-    removeQuestion,
-  } = useFormStore();
+    deleteQuestion,
+    isDeletingQuestion,
+  } = useSurveyEditor();
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const question = questions.find((q) => q.id === selectedQuestionId);
 
@@ -54,7 +58,10 @@ export function PropertiesPanel() {
         <h3 className="font-semibold text-sm uppercase tracking-wide text-gray-500">
           Question Settings
         </h3>
-        <AlertDialog>
+        <AlertDialog
+          open={isDeleteDialogOpen}
+          onOpenChange={setIsDeleteDialogOpen}
+        >
           <AlertDialogTrigger asChild>
             <Button
               variant="ghost"
@@ -74,12 +81,22 @@ export function PropertiesPanel() {
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogCancel disabled={isDeletingQuestion}>
+                Cancel
+              </AlertDialogCancel>
               <AlertDialogAction
-                onClick={() => removeQuestion(question.id)}
-                className="bg-red-600 hover:bg-red-700"
+                onClick={async (e) => {
+                  e.preventDefault();
+                  await deleteQuestion(question.id);
+                  setIsDeleteDialogOpen(false);
+                }}
+                className="bg-red-600 hover:bg-red-700 gap-2"
+                disabled={isDeletingQuestion}
               >
-                Delete
+                {isDeletingQuestion && (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                )}
+                {isDeletingQuestion ? "Deleting..." : "Delete"}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

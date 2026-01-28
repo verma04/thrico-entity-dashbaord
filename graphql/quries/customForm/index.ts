@@ -28,12 +28,21 @@ const custom = `
       }
       status
       title
+      startDate
       endDate
 `;
 
 export const ADD_CUSTOM_FORM = gql`
  mutation AddCustomForm($input: InputCustomForm!) {
   addCustomForm(input: $input) {
+ ${custom}
+    }
+  }
+`;
+
+export const UPDATE_CUSTOM_FORM = gql`
+ mutation UpdateCustomForm($input: inputUpdateCustomForm!) {
+  updateCustomForm(input: $input) {
  ${custom}
     }
   }

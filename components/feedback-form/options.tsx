@@ -49,5 +49,5 @@ export const options = [
   { key: "DATE", label: "Date", icon: <Calendar size={18} /> },
   { key: "TIME", label: "Time", icon: <Clock size={18} /> },
 
-  { key: "YES-NO", label: "Yes/No", icon: <CheckCircle size={18} /> },
+  { key: "YES_NO", label: "Yes/No", icon: <CheckCircle size={18} /> },
 ];

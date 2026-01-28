@@ -25,6 +25,7 @@ import {
   BookOpen,
   Newspaper,
   Blocks,
+  ClipboardList,
 } from "lucide-react";
 import { useMemo } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -169,6 +170,16 @@ export const extendedItems = [
     children: [
       { key: "all-polls", label: "Manage Feedback", path: "/feedback" },
       { key: "polls-settings", label: "Settings", path: "/polls/settings" },
+    ],
+  },
+  {
+    key: "surveys",
+    label: "Surveys",
+    path: "/surveys",
+    icon: <ClipboardList size={18} />,
+    children: [
+      { key: "all-surveys", label: "Manage Surveys", path: "/surveys" },
+      { key: "surveys-settings", label: "Settings", path: "/surveys/settings" },
     ],
   },
 

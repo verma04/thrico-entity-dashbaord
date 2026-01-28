@@ -113,7 +113,7 @@ export function QuestionPreview({
                   key={idx}
                   className={cn(
                     "flex items-center p-3 border-2 rounded-md cursor-pointer transition-all duration-200 group relative overflow-hidden",
-                    "w-full max-w-md hover:bg-black/5"
+                    "w-full max-w-md hover:bg-black/5",
                   )}
                   style={{
                     borderColor: `${formSettings?.primaryColor || "#000000"}40`,
@@ -197,7 +197,7 @@ export function QuestionPreview({
           </div>
         );
 
-      case "YES-NO":
+      case "YES_NO":
         return (
           <div className="flex gap-6">
             {["Yes", "No"].map((opt, idx) => (

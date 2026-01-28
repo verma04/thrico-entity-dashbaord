@@ -76,7 +76,7 @@ export default function SidebarLayout({
       const childrenMatch = item.children?.some(
         (child) =>
           typeof child.label === "string" &&
-          child.label.toLowerCase().includes(query)
+          child.label.toLowerCase().includes(query),
       );
       return labelMatch || childrenMatch;
     });

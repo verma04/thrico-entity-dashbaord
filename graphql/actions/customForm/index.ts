@@ -1,5 +1,9 @@
 import { useMutation, useQuery } from "@apollo/client";
-import { ADD_CUSTOM_FORM, GET_ALL_CUSTOM_FORM } from "../../quries/customForm";
+import {
+  ADD_CUSTOM_FORM,
+  GET_ALL_CUSTOM_FORM,
+  UPDATE_CUSTOM_FORM,
+} from "../../quries/customForm";
 
 export const AddCustomForm = (options: any) =>
   useMutation(ADD_CUSTOM_FORM, {
@@ -29,6 +33,11 @@ export const AddCustomForm = (options: any) =>
         console.log(error);
       }
     },
+  });
+
+export const UpdateCustomForm = (options: any) =>
+  useMutation(UPDATE_CUSTOM_FORM, {
+    ...options,
   });
 
 export const getCustomForms = (options: any) =>

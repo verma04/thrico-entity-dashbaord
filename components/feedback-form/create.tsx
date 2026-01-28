@@ -4,7 +4,9 @@ import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, Eye } from "lucide-react";
+import { AutosaveIndicator } from "./autosave-indicator";
 import { useFormStore } from "@/store/useFormStore";
+import { useSurveyEditor } from "./hooks/use-survey-editor";
 import Settings from "./settings";
 import Preview from "./preview/preview";
 import { QuestionListSidebar } from "./editor/question-list-sidebar";
@@ -17,18 +19,13 @@ interface NewFormPageProps {
 }
 
 export default function NewFormPage({ onPublish, onClose }: NewFormPageProps) {
-  const {
-    formSettings,
-    formTitle,
-    setFormTitle,
-    formDescription,
-    updateFormSetting,
-    questions,
-  } = useFormStore();
+  const { formSettings, formTitle, setFormTitle, formDescription, questions } =
+    useFormStore();
+  const { updateFormSetting } = useSurveyEditor();
   const [activeTab, setActiveTab] = useState("edit");
 
   return (
-    <div className="h-[calc(100vh)] bg-gray-50 flex flex-col">
+    <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
       {/* Top Bar for Tabs */}
       <div className="bg-white border-b px-4 h-16 flex items-center justify-between shrink-0 z-10 sticky top-0 relative shadow-sm">
         <div className="flex items-center gap-4 w-1/3">
@@ -48,9 +45,9 @@ export default function NewFormPage({ onPublish, onClose }: NewFormPageProps) {
               className="font-semibold text-sm text-gray-900 leading-none border-none hover:bg-gray-100 p-1 rounded focus:bg-white focus:ring-2 focus:ring-primary/20 transition-all outline-none w-full max-w-[200px]"
               placeholder="Untitled Form"
             />
-            <span className="text-[10px] text-gray-500 uppercase tracking-wider font-medium mt-1 px-1">
+            {/* <span className="text-[10px] text-gray-500 uppercase tracking-wider font-medium mt-1 px-1">
               Draft
-            </span>
+            </span> */}
           </div>
         </div>
 
@@ -69,10 +66,10 @@ export default function NewFormPage({ onPublish, onClose }: NewFormPageProps) {
                   className="bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-black text-gray-500 border-b-2 border-transparent data-[state=active]:border-black rounded-none px-2 py-2 transition-all font-medium capitalize"
                 >
                   {tab === "edit"
-                    ? "Create"
+                    ? "Edit"
                     : tab === "preview"
-                    ? "Connect"
-                    : "Share"}
+                      ? "Preview"
+                      : "Settings"}
                 </TabsTrigger>
               ))}
             </TabsList>
@@ -91,11 +88,12 @@ export default function NewFormPage({ onPublish, onClose }: NewFormPageProps) {
           </Button>
           <Button
             size="sm"
-            className="bg-black hover:bg-gray-800 text-white px-6 rounded-md font-medium"
+            className="rounded-xl px-6 font-bold bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20"
             onClick={onPublish}
           >
             Publish
           </Button>
+          <AutosaveIndicator isSaving={false} />
         </div>
       </div>
 

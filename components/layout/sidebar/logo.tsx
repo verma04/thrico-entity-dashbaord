@@ -11,7 +11,7 @@ const Logo = () => {
 
   if (src) {
     return (
-      <div className="relative w-[60px] h-[30px]">
+      <div className="relative w-[100px] h-[40px]">
         <Image
           alt={`Logo for ${name}`}
           src={src || "/placeholder.svg"}

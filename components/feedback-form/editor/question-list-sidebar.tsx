@@ -1,6 +1,7 @@
 "use client";
 
 import { useFormStore } from "@/store/useFormStore";
+import { useSurveyEditor } from "../hooks/use-survey-editor";
 import {
   DragDropContext,
   Droppable,
@@ -9,31 +10,14 @@ import {
 } from "@hello-pangea/dnd";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Plus, ChevronsUpDown, Check } from "lucide-react";
+import { Plus, Loader2 } from "lucide-react";
 import { options } from "../options";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
+import { QuestionTypeModal } from "./question-type-modal";
 import { useState } from "react";
 
 export function QuestionListSidebar() {
-  const {
-    questions,
-    selectedQuestionId,
-    selectQuestion,
-    reorderQuestions,
-    addQuestion,
-  } = useFormStore();
+  const { questions, selectedQuestionId, selectQuestion } = useFormStore();
+  const { addQuestion, reorderQuestions, isAddingQuestion } = useSurveyEditor();
   const [open, setOpen] = useState(false);
 
   const handleDragEnd = (result: DropResult) => {
@@ -48,47 +32,27 @@ export function QuestionListSidebar() {
   return (
     <div className="w-[250px] border-r h-full flex flex-col bg-white">
       <div className="p-4 border-b">
-        <Popover open={open} onOpenChange={setOpen}>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              role="combobox"
-              aria-expanded={open}
-              className="w-full justify-between bg-black text-white hover:bg-gray-800 hover:text-white"
-            >
-              <div className="flex items-center gap-2">
-                <Plus size={16} />
-                Add Question
-              </div>
-              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-[220px] p-0" align="start">
-            <Command>
-              <CommandInput placeholder="Search question type..." />
-              <CommandList className="h-[300px]">
-                <CommandEmpty>No results found.</CommandEmpty>
-                <CommandGroup heading="Suggestions">
-                  {options.map((option) => (
-                    <CommandItem
-                      key={option.key}
-                      onSelect={() => {
-                        addQuestion(option.key as any);
-                        setOpen(false);
-                      }}
-                      className="cursor-pointer"
-                    >
-                      {option.icon && (
-                        <span className="mr-2 opacity-70">{option.icon}</span>
-                      )}
-                      <span>{option.label}</span>
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </CommandList>
-            </Command>
-          </PopoverContent>
-        </Popover>
+        <Button
+          variant="outline"
+          className="w-full justify-between bg-black text-white hover:bg-gray-800 hover:text-white mb-2"
+          disabled={isAddingQuestion}
+          onClick={() => setOpen(true)}
+        >
+          <div className="flex items-center gap-2">
+            {isAddingQuestion ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Plus size={16} />
+            )}
+            {isAddingQuestion ? "Adding..." : "Add Question"}
+          </div>
+        </Button>
+
+        <QuestionTypeModal
+          open={open}
+          onOpenChange={setOpen}
+          onSelect={(type: string) => addQuestion(type)}
+        />
       </div>
 
       <div className="flex-1 overflow-y-auto p-2">
@@ -116,7 +80,7 @@ export function QuestionListSidebar() {
                           "p-3 rounded-md border text-sm cursor-pointer flex items-center gap-2 hover:bg-gray-50 transition-colors",
                           selectedQuestionId === q.id
                             ? "border-primary bg-primary/5 ring-1 ring-primary"
-                            : "bg-white border-border"
+                            : "bg-white border-border",
                         )}
                       >
                         <div className="flex items-center justify-center w-6 h-6 rounded bg-gray-100 text-xs font-medium text-gray-500">

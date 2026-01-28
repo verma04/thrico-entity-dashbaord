@@ -20,7 +20,7 @@ type Options = {
 
 export default function withAuth<P>(
   WrappedComponent: React.ComponentType<P>,
-  options: Options = { ssr: false }
+  options: Options = { ssr: false },
 ) {
   const WithAuth = (props: React.PropsWithChildren<P>) => {
     const ACCOUNTS_URL =
