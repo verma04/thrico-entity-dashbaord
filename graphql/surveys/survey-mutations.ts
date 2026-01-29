@@ -518,3 +518,53 @@ export function useCreateSurveyFromTemplate(
     },
   );
 }
+
+// ---------------------------------------------------------
+// SHARE SURVEY AS FEED
+// ---------------------------------------------------------
+
+export interface ShareSurveyAsFeedInput {
+  surveyId: string;
+  shouldShare: boolean;
+  description?: string;
+}
+
+export interface ShareSurveyAsFeedData {
+  shareSurveyAsFeed: Survey;
+}
+
+const SHARE_SURVEY_AS_FEED = gql`
+  mutation ShareSurveyAsFeed(
+    $surveyId: ID!
+    $shouldShare: Boolean!
+    $description: String
+  ) {
+    shareSurveyAsFeed(
+      surveyId: $surveyId
+      shouldShare: $shouldShare
+      description: $description
+    ) {
+      id
+      formId
+      title
+      description
+      status
+      startDate
+      endDate
+      createdAt
+      updatedAt
+      sharedAsFeed
+    }
+  }
+`;
+
+export function useShareSurveyAsFeed(
+  options?: MutationHookOptions<ShareSurveyAsFeedData, ShareSurveyAsFeedInput>,
+) {
+  return useMutation<ShareSurveyAsFeedData, ShareSurveyAsFeedInput>(
+    SHARE_SURVEY_AS_FEED,
+    {
+      ...options,
+    },
+  );
+}

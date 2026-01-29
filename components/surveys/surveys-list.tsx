@@ -14,6 +14,14 @@ import {
   SheetFooter,
 } from "@/components/ui/sheet";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   Card,
   CardContent,
   CardDescription,
@@ -52,6 +60,7 @@ import {
   useEditSurvey,
   usePublishSurvey,
   useDraftSurvey,
+  useShareSurveyAsFeed,
 } from "@/graphql/surveys/survey-mutations";
 import Link from "next/link";
 import {
@@ -61,9 +70,14 @@ import {
   MessageSquare,
   Copy,
   Loader2,
+  Share,
 } from "lucide-react";
 
-export function SurveysList() {
+export function SurveysList({
+  shareSurveyAsFeed,
+}: {
+  shareSurveyAsFeed?: boolean;
+}) {
   const router = useRouter();
   const [surveyToDelete, setSurveyToDelete] = useState<string | null>(null);
   const [editingDetailsSurvey, setEditingDetailsSurvey] =
@@ -75,6 +89,20 @@ export function SurveysList() {
     description: "",
     startDate: null as moment.Moment | null,
     endDate: null as moment.Moment | null,
+  });
+
+  const [sharingSurvey, setSharingSurvey] = useState<Survey | null>(null);
+  const [shareDescription, setShareDescription] = useState("");
+
+  const [shareSurvey, { loading: isSharing }] = useShareSurveyAsFeed({
+    onCompleted: () => {
+      toast.success("Survey shared to feed successfully");
+      setSharingSurvey(null);
+      setShareDescription("");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to share survey");
+    },
   });
 
   useEffect(() => {
@@ -239,6 +267,15 @@ export function SurveysList() {
                 <Copy className="h-4 w-4" />
                 Copy survey ID
               </DropdownMenuItem>
+              {!shareSurveyAsFeed && (
+                <DropdownMenuItem
+                  onClick={() => setSharingSurvey(row.original)}
+                  className="gap-2"
+                >
+                  <Share className="h-4 w-4" />
+                  Share to Feed
+                </DropdownMenuItem>
+              )}
               {row.original.status === "DRAFT" ? (
                 <DropdownMenuItem
                   className="gap-2"
@@ -379,6 +416,89 @@ export function SurveysList() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog
+        open={!!sharingSurvey}
+        onOpenChange={(val) => !val && setSharingSurvey(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Share Survey to Feed</DialogTitle>
+            <DialogDescription>
+              Add a description to your post. This will share the survey to your
+              feed.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {sharingSurvey && (
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base font-medium">
+                    {sharingSurvey.title}
+                  </CardTitle>
+                  <CardDescription className="line-clamp-2">
+                    {sharingSurvey.description || "No description provided."}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <Badge variant="secondary" className="text-xs">
+                        {sharingSurvey.status}
+                      </Badge>
+                    </div>
+                    {sharingSurvey.startDate && (
+                      <div className="flex items-center gap-1">
+                        <span>
+                          Starts{" "}
+                          {format(new Date(sharingSurvey.startDate), "PPP")}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+            <div className="space-y-2">
+              <Label htmlFor="share-desc">Message</Label>
+              <Textarea
+                id="share-desc"
+                placeholder="Say something about this survey..."
+                value={shareDescription}
+                onChange={(e) => setShareDescription(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSharingSurvey(null)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                if (sharingSurvey) {
+                  shareSurvey({
+                    variables: {
+                      surveyId: sharingSurvey.id,
+                      shouldShare: true,
+                      description: shareDescription,
+                    },
+                  });
+                }
+              }}
+              disabled={isSharing}
+            >
+              {isSharing ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Sharing...
+                </>
+              ) : (
+                "Share"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Sheet
         open={!!editingDetailsSurvey}

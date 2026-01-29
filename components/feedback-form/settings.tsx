@@ -12,7 +12,7 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
 import React from "react";
-import { FormSettings, UpdateFormSettingFn } from "../../../store/ts-types";
+import { FormSettings, UpdateFormSettingFn } from "@/store/ts-types";
 
 type SettingsProps = {
   formSettings: FormSettings;

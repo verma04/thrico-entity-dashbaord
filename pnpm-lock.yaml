@@ -197,6 +197,9 @@ dependencies:
   tailwind-merge:
     specifier: ^3.4.0
     version: 3.4.0
+  thrico-entity-dashboard:
+    specifier: 'link:'
+    version: 'link:'
   use-debounce:
     specifier: ^10.1.0
     version: 10.1.0(react@19.2.0)

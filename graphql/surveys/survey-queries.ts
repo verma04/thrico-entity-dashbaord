@@ -110,6 +110,69 @@ export function useGetSurvey(
 ) {
   return useQuery<GetSurveyData, { id: string }>(GET_SURVEY, options);
 }
+export interface Question {
+  id: string;
+  formId: string;
+  type: string;
+  question: string;
+  description?: string;
+  order: number;
+  required: boolean;
+  maxLength?: number;
+  min?: number;
+  max?: number;
+  scale?: number;
+  ratingType?: string;
+  options?: string[];
+  labels?: any;
+  allowMultiple?: boolean;
+  legalText?: string;
+}
+
+export interface Survey {
+  id: string;
+  formId?: string;
+  title: string;
+  description?: string;
+  status: string;
+  sharedAsFeed?: boolean;
+  startDate?: string;
+  endDate?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  previewType?: string;
+  appearance?: any;
+  questions?: Question[];
+  fields?: Question[];
+}
+
+export interface Pagination {
+  totalCount: number;
+  limit?: number;
+  offset?: number;
+}
+
+export interface GetSurveysInput {
+  limit?: number | null;
+  offset?: number | null;
+  search?: string | null;
+  status?: string | null;
+}
+
+export interface GetSurveysData {
+  getSurveys: {
+    pagination: Pagination;
+    surveys: Survey[];
+  };
+}
+
+// ---------------------------------------------------------
+// GET SINGLE SURVEY
+// ---------------------------------------------------------
+
+export interface GetSurveyData {
+  getSurvey: Survey;
+}
 
 // ---------------------------------------------------------
 // GET CUSTOM FORM
@@ -177,6 +240,7 @@ export const GET_SURVEYS = gql`
         endDate
         createdAt
         updatedAt
+        sharedAsFeed
       }
     }
   }
