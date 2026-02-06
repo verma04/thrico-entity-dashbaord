@@ -197,15 +197,15 @@ export function CommunityCreationForm({
                       <div className="space-y-2">
                         <Label>Cover Image</Label>
                         <div className="relative">
-                          <div className="aspect-[3/1] overflow-hidden rounded-lg bg-muted border-2 border-dashed">
+                          <div className="aspect-3/2 overflow-hidden rounded-lg bg-muted border-2 border-dashed">
                             <Image
                               src={
                                 imageUrl ||
-                                "https://cdn.thrico.network/defaultEventCover.png"
+                                "https://cdn.thrico.network/default_communities.png"
                               }
                               alt="Community cover"
-                              width={600}
-                              height={200}
+                              width={1536}
+                              height={1024}
                               className="object-cover w-full h-full"
                             />
                           </div>
@@ -232,7 +232,8 @@ export function CommunityCreationForm({
                           />
                         </div>
                         <p className="text-xs text-muted-foreground">
-                          Recommended size: 1200 x 400px. Max file size: 5MB.
+                          Recommended size: 1536 x 1024px (3:2 ratio). Max file
+                          size: 5MB.
                         </p>
                       </div>
 
@@ -573,7 +574,7 @@ export function CommunityCreationForm({
                           onCheckedChange={(checked) =>
                             handleInputChange(
                               "requireAdminApprovalForPosts",
-                              checked
+                              checked,
                             )
                           }
                         />
@@ -640,7 +641,7 @@ export function CommunityCreationForm({
                           onCheckedChange={(checked) =>
                             handleInputChange(
                               "enableRatingsAndReviews",
-                              checked
+                              checked,
                             )
                           }
                         />

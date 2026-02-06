@@ -12,6 +12,8 @@ import {
   Users,
   Zap,
   Star,
+  History,
+  ScrollText,
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -80,7 +82,7 @@ export default function GamificationOverview() {
           <TrendingUp className="h-5 w-5 text-blue-500" /> Platform Performance
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="bg-gradient-to-br from-blue-500/10 to-indigo-500/10 border-blue-100">
+          <Card className="bg-linear-to-br from-blue-500/10 to-indigo-500/10 border-blue-100">
             <CardContent className="pt-6">
               <div className="flex items-center gap-4">
                 <div className="p-3 bg-blue-500/20 rounded-xl">
@@ -100,7 +102,7 @@ export default function GamificationOverview() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-yellow-500/10 to-orange-500/10 border-yellow-100">
+          <Card className="bg-linear-to-br from-yellow-500/10 to-orange-500/10 border-yellow-100">
             <CardContent className="pt-6">
               <div className="flex items-center gap-4">
                 <div className="p-3 bg-yellow-500/20 rounded-xl">
@@ -121,7 +123,7 @@ export default function GamificationOverview() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-purple-100">
+          <Card className="bg-linear-to-br from-purple-500/10 to-pink-500/10 border-purple-100">
             <CardContent className="pt-6">
               <div className="flex items-center gap-4">
                 <div className="p-3 bg-purple-500/20 rounded-xl">
@@ -289,6 +291,18 @@ export default function GamificationOverview() {
               <div>
                 <p className="font-medium">Leaderboard</p>
                 <p className="text-xs text-muted-foreground">View top users</p>
+              </div>
+            </Link>
+            <Link
+              href="/gamification/user-history"
+              className="flex items-center gap-3 p-3 rounded-lg border hover:bg-muted transition-colors"
+            >
+              <ScrollText className="h-5 w-5 text-emerald-500" />
+              <div>
+                <p className="font-medium">Full History</p>
+                <p className="text-xs text-muted-foreground">
+                  Detailed activity log
+                </p>
               </div>
             </Link>
             <Link

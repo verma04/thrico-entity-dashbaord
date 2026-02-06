@@ -34,7 +34,7 @@ export function ImageCropper({
     (_: any, croppedAreaPixels: any) => {
       setCroppedAreaPixels(croppedAreaPixels);
     },
-    []
+    [],
   );
 
   const handleDone = async () => {
@@ -59,7 +59,7 @@ export function ImageCropper({
             image={image}
             crop={crop}
             zoom={zoom}
-            aspect={3 / 1}
+            aspect={3 / 2}
             onCropChange={setCrop}
             onZoomChange={setZoom}
             onCropComplete={onCropCompleteCallback}
@@ -111,7 +111,7 @@ const getCroppedImg = (imageSrc: string, pixelCrop: any): Promise<string> => {
         0,
         0,
         pixelCrop.width,
-        pixelCrop.height
+        pixelCrop.height,
       );
 
       resolve(canvas.toDataURL("image/jpeg"));

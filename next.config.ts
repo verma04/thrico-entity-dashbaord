@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "cdn.thrico.network",
       },
+      {
+        protocol: "https",
+        hostname: "thrico.blr1.digitaloceanspaces.com",
+      },
     ],
   },
   output: "standalone",

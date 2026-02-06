@@ -36,7 +36,6 @@ export default function EditSurveyPage() {
       router.push("/surveys/all");
     },
     onError: (err) => {
-      l;
       toast.error(err.message || "Failed to update survey");
     },
   });

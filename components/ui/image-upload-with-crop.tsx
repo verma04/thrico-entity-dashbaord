@@ -88,12 +88,13 @@ interface ImageUploadWithCropProps {
   onUploadError?: (error: Error) => void;
   disablePreview?: boolean;
   customUploadHandler?: (file: File) => Promise<string>;
+  returnKeyOnly?: boolean;
 }
 
 function centerAspectCrop(
   mediaWidth: number,
   mediaHeight: number,
-  aspect: number
+  aspect: number,
 ) {
   return centerCrop(
     makeAspectCrop(
@@ -103,10 +104,10 @@ function centerAspectCrop(
       },
       aspect,
       mediaWidth,
-      mediaHeight
+      mediaHeight,
     ),
     mediaWidth,
-    mediaHeight
+    mediaHeight,
   );
 }
 
@@ -122,10 +123,10 @@ export const ImageUploadWithCrop = ({
   currentImage,
   onImageUpdate,
   label = "Image",
-  recommendedWidth = 150,
-  recommendedHeight = 150,
+  recommendedWidth = 2048,
+  recommendedHeight = 2048,
   aspectRatio,
-  maxFileSize = 5,
+  maxFileSize = 20,
   allowedFormats = ["image/jpeg", "image/png", "image/jpg", "image/webp"],
   showDimensions = true,
   className,
@@ -148,7 +149,7 @@ export const ImageUploadWithCrop = ({
   minWidth = 10,
   minHeight = 10,
   enableZoom = false,
-  defaultQuality = 90,
+  defaultQuality = 100,
   defaultFormat = "png",
   hideRecommendedSize = false,
   customDescription,
@@ -157,6 +158,7 @@ export const ImageUploadWithCrop = ({
   onUploadError,
   disablePreview = false,
   customUploadHandler,
+  returnKeyOnly = false,
 }: ImageUploadWithCropProps) => {
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [imgSrc, setImgSrc] = useState("");
@@ -179,8 +181,10 @@ export const ImageUploadWithCrop = ({
   const [uploadImage, { loading: defaultUploading }] = useUploadImage({
     onCompleted: (data: any) => {
       if (data?.uploadImage) {
-        const cdnUrl = `https://cdn.thrico.network/${data.uploadImage}`;
-        handleUploadSuccess(cdnUrl);
+        const result = returnKeyOnly
+          ? data.uploadImage
+          : `https://cdn.thrico.network/${data.uploadImage}`;
+        handleUploadSuccess(result);
       }
     },
     onError: (error: any) => {
@@ -207,7 +211,7 @@ export const ImageUploadWithCrop = ({
 
   const handleUploadError = (error: any) => {
     const err = new Error(
-      error.message || `Failed to upload ${label.toLowerCase()}`
+      error.message || `Failed to upload ${label.toLowerCase()}`,
     );
     onUploadError?.(err);
     toast({
@@ -296,10 +300,16 @@ export const ImageUploadWithCrop = ({
   };
 
   const onImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    const { width, height } = e.currentTarget;
+    const { width, height, naturalWidth, naturalHeight } = e.currentTarget;
     const aspect = selectedAspectRatio || (aspectRatio ?? width / height);
     const initialCrop = centerAspectCrop(width, height, aspect);
     setCrop(initialCrop);
+
+    // Set custom dimensions to natural crop size initially to preserve quality
+    const pixelWidth = Math.round((initialCrop.width / 100) * naturalWidth);
+    const pixelHeight = Math.round((initialCrop.height / 100) * naturalHeight);
+    setCustomWidth(pixelWidth);
+    setCustomHeight(pixelHeight);
 
     // Also set completedCrop so the image can be saved even without manual interaction
     setCompletedCrop({
@@ -323,9 +333,10 @@ export const ImageUploadWithCrop = ({
     const scaleX = image.naturalWidth / image.width;
     const scaleY = image.naturalHeight / image.height;
 
-    // Apply zoom to dimensions
-    const finalWidth = Math.round(customWidth * zoom);
-    const finalHeight = Math.round(customHeight * zoom);
+    // Use natural pixels of the crop area for the final output dimensions
+    // This ensures no quality loss from resampling.
+    const finalWidth = Math.round(crop.width * scaleX * zoom);
+    const finalHeight = Math.round(crop.height * scaleY * zoom);
 
     canvas.width = finalWidth;
     canvas.height = finalHeight;
@@ -348,7 +359,7 @@ export const ImageUploadWithCrop = ({
       0,
       0,
       finalWidth,
-      finalHeight
+      finalHeight,
     );
 
     // Determine MIME type based on selected format
@@ -356,8 +367,8 @@ export const ImageUploadWithCrop = ({
       outputFormat === "jpeg"
         ? "image/jpeg"
         : outputFormat === "webp"
-        ? "image/webp"
-        : "image/png";
+          ? "image/webp"
+          : "image/png";
 
     // Convert quality from 0-100 to 0-1
     const quality = imageQuality / 100;
@@ -368,7 +379,7 @@ export const ImageUploadWithCrop = ({
           resolve(blob);
         },
         mimeType,
-        quality
+        quality,
       );
     });
   };
@@ -383,12 +394,17 @@ export const ImageUploadWithCrop = ({
           outputFormat === "jpeg"
             ? "image/jpeg"
             : outputFormat === "webp"
-            ? "image/webp"
-            : "image/png";
-        const file = new File(
-          [croppedBlob],
-          `${label.toLowerCase().replace(/\s+/g, "-")}.${extension}`,
-          { type: mimeType }
+              ? "image/webp"
+              : "image/png";
+
+        const fileName = `${label.toLowerCase().replace(/\s+/g, "-")}.${extension}`;
+        const file = new File([croppedBlob], fileName, { type: mimeType });
+
+        console.log(
+          `[ImageUpload] Uploading: ${fileName}`,
+          `Size: ${(file.size / 1024 / 1024).toFixed(2)}MB`,
+          `Type: ${mimeType}`,
+          `Dimensions: ${customWidth}x${customHeight}`,
         );
 
         if (customUploadHandler) {
@@ -425,7 +441,7 @@ export const ImageUploadWithCrop = ({
             <div
               className={cn(
                 "border rounded-lg p-4 bg-muted/30 flex items-center justify-center",
-                previewClassName
+                previewClassName,
               )}
             >
               <img
@@ -433,7 +449,7 @@ export const ImageUploadWithCrop = ({
                 alt={label}
                 className={cn(
                   "max-h-32 max-w-full object-contain",
-                  circularCrop && "rounded-full"
+                  circularCrop && "rounded-full",
                 )}
               />
             </div>
@@ -476,7 +492,7 @@ export const ImageUploadWithCrop = ({
                 "hover:border-primary/50 hover:bg-primary/5",
               uploading && "opacity-50 cursor-not-allowed",
               isDragging && "border-primary bg-primary/10 scale-[1.02]",
-              dropzoneClassName
+              dropzoneClassName,
             )}
             onClick={() => !uploading && fileInputRef.current?.click()}
             onDragOver={handleDragOver}
@@ -495,13 +511,13 @@ export const ImageUploadWithCrop = ({
             <ImageIcon
               className={cn(
                 "h-8 w-8 mx-auto mb-2 transition-colors",
-                isDragging ? "text-primary" : "text-muted-foreground"
+                isDragging ? "text-primary" : "text-muted-foreground",
               )}
             />
             <p
               className={cn(
                 "text-sm font-medium transition-colors",
-                isDragging ? "text-primary" : "text-foreground"
+                isDragging ? "text-primary" : "text-foreground",
               )}
             >
               {isDragging
@@ -578,7 +594,7 @@ export const ImageUploadWithCrop = ({
                             const newCrop = centerAspectCrop(
                               width,
                               height,
-                              aspect
+                              aspect,
                             );
                             setCrop(newCrop);
                             setCompletedCrop({
@@ -647,7 +663,7 @@ export const ImageUploadWithCrop = ({
                       {enableZoom &&
                         zoom !== 1 &&
                         ` • Final: ${Math.round(
-                          customWidth * zoom
+                          customWidth * zoom,
                         )}x${Math.round(customHeight * zoom)}px`}
                     </p>
                   </div>
@@ -662,7 +678,18 @@ export const ImageUploadWithCrop = ({
                     <ReactCrop
                       crop={crop}
                       onChange={(_, percentCrop) => setCrop(percentCrop)}
-                      onComplete={(c) => setCompletedCrop(c)}
+                      onComplete={(c) => {
+                        setCompletedCrop(c);
+                        if (imgRef.current) {
+                          const scaleX =
+                            imgRef.current.naturalWidth / imgRef.current.width;
+                          const scaleY =
+                            imgRef.current.naturalHeight /
+                            imgRef.current.height;
+                          setCustomWidth(Math.round(c.width * scaleX));
+                          setCustomHeight(Math.round(c.height * scaleY));
+                        }
+                      }}
                       aspect={selectedAspectRatio}
                       circularCrop={circularCrop}
                     >
@@ -791,7 +818,7 @@ export const ImageUploadWithCrop = ({
                     <span className="font-medium">Aspect:</span>{" "}
                     {selectedAspectRatio
                       ? aspectRatioPresets.find(
-                          (p) => p.value === selectedAspectRatio
+                          (p) => p.value === selectedAspectRatio,
                         )?.label || "Custom"
                       : "Free"}
                   </div>

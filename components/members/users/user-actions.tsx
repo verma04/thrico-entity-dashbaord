@@ -126,16 +126,30 @@ export default function UserActions({ user }: { user: UserDetail }) {
         onClick: () => handleAction("REJECT"),
         color: "text-red-600",
       },
+      {
+        label: "Block",
+        icon: Lock,
+        onClick: () => handleAction("BLOCK"),
+        color: "text-red-700",
+      },
     );
   }
 
   if (user.status === "BLOCKED") {
-    actions.push({
-      label: "Unblock",
-      icon: Unlock,
-      onClick: () => handleAction("UNBLOCK"),
-      color: "text-green-600",
-    });
+    actions.push(
+      {
+        label: "Unblock",
+        icon: Unlock,
+        onClick: () => handleAction("UNBLOCK"),
+        color: "text-green-600",
+      },
+      {
+        label: "Reject",
+        icon: X,
+        onClick: () => handleAction("REJECT"),
+        color: "text-red-600",
+      },
+    );
   } else if (user.status === "REJECTED") {
     actions.push(
       {
@@ -162,6 +176,12 @@ export default function UserActions({ user }: { user: UserDetail }) {
           handleAction(user.verification?.isVerified ? "UNVERIFY" : "VERIFY"),
       },
       {
+        label: "Block",
+        icon: Lock,
+        onClick: () => handleAction("BLOCK"),
+        color: "text-red-600",
+      },
+      {
         label: "Disable",
         icon: Lock,
         onClick: () => handleAction("DISABLE"),
@@ -171,21 +191,30 @@ export default function UserActions({ user }: { user: UserDetail }) {
   }
 
   if (user.status === "DISABLED") {
-    actions.push({
-      label: "Enable",
-      icon: Check,
-      onClick: () => handleAction("ENABLE"),
-      color: "text-green-600",
-    });
+    actions.push(
+      {
+        label: "Enable",
+        icon: Check,
+        onClick: () => handleAction("ENABLE"),
+        color: "text-green-600",
+      },
+      {
+        label: "Block",
+        icon: Lock,
+        onClick: () => handleAction("BLOCK"),
+        color: "text-red-600",
+      },
+    );
   }
 
   actions.push(
     { type: "separator" },
+
     {
-      label: "Flag for Review",
-      icon: AlertCircle,
-      onClick: () => handleAction("FLAG"),
-      color: "text-orange-600",
+      label: "Block",
+      icon: Lock,
+      onClick: () => handleAction("BLOCK"),
+      color: "text-red-600",
     },
   );
 

@@ -25,12 +25,14 @@ export function CommunityPreview({
   return (
     <Card className="overflow-hidden shadow-md">
       <CardContent className="p-0">
-        <div className="aspect-[3/1] overflow-hidden bg-muted rounded-t-lg">
+        <div className="aspect-3/2 overflow-hidden bg-muted rounded-t-lg">
           <Image
-            src={imageUrl || "https://cdn.thrico.network/defaultEventCover.png"}
+            src={
+              imageUrl || "https://cdn.thrico.network/default_communities.png"
+            }
             alt="Community cover"
-            width={600}
-            height={200}
+            width={1536}
+            height={1024}
             className="object-cover w-full h-full"
           />
         </div>

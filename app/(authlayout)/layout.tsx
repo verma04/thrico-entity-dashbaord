@@ -8,7 +8,7 @@ import NoSubscription from "@/components/subscription/no-subscription";
 import TrialBanner from "@/components/subscription/trial-banner";
 import KycForm from "@/components/kyc-form/kyc-form";
 import { PlanDrawer } from "@/components/layout/plan-drawer";
-import { Toaster } from "@/components/ui/sonner";
+
 import SidebarLayout from "@/components/layout/sidebar/sidebar";
 import { useSearchParams } from "next/navigation";
 import { useDrawerStore } from "@/store/drawerStore";

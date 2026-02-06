@@ -395,3 +395,66 @@ export function useGetGamificationActivityLog(
     { input: GamificationActivityLogInput }
   >(GET_GAMIFICATION_ACTIVITY_LOG, options);
 }
+export interface UserGamificationActivityLogEntry {
+  id: string;
+  type: string;
+  points: number;
+  createdAt: string;
+  user: {
+    firstName: string;
+    lastName: string;
+    avatar?: string;
+  };
+  gamificationId?: string;
+  ruleAction?: string;
+  ruleDescription?: string;
+  badgeName?: string;
+  badgeDescription?: string;
+  badgeIcon?: string;
+}
+
+export interface UserGamificationActivityLogInput {
+  limit?: number | null;
+  offset?: number | null;
+  userId?: string | null;
+}
+
+export interface GetUserGamificationActivityLogResponse {
+  getUserGamificationActivityLog: UserGamificationActivityLogEntry[];
+}
+
+export const GET_USER_GAMIFICATION_ACTIVITY_LOG = gql`
+  query GetUserGamificationActivityLog(
+    $input: UserGamificationActivityLogInput!
+  ) {
+    getUserGamificationActivityLog(input: $input) {
+      id
+      type
+      points
+      createdAt
+      user {
+        firstName
+        lastName
+        avatar
+      }
+      gamificationId
+      ruleAction
+      ruleDescription
+      badgeName
+      badgeDescription
+      badgeIcon
+    }
+  }
+`;
+
+export function useGetUserGamificationActivityLog(
+  options?: QueryHookOptions<
+    GetUserGamificationActivityLogResponse,
+    { input: UserGamificationActivityLogInput }
+  >,
+) {
+  return useQuery<
+    GetUserGamificationActivityLogResponse,
+    { input: UserGamificationActivityLogInput }
+  >(GET_USER_GAMIFICATION_ACTIVITY_LOG, options);
+}

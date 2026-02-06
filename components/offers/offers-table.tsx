@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { Offer } from "@/graphql/actions/offers";
-import { Edit2, Trash2, Eye, Calendar, Tag } from "lucide-react";
+import { Edit2, Trash2, Eye, Calendar, Tag, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { OfferActions } from "./offer-actions";
 
@@ -99,6 +99,15 @@ export function OffersTable({
       },
     },
     {
+      accessorKey: "discount",
+      header: "Discount",
+      cell: ({ row }) => (
+        <Badge variant="secondary" className="font-bold">
+          {row.original.discount}
+        </Badge>
+      ),
+    },
+    {
       id: "validity",
       header: "Validity",
       cell: ({ row }) => {
@@ -141,6 +150,25 @@ export function OffersTable({
               </span>
             </div>
           </div>
+        );
+      },
+    },
+    {
+      accessorKey: "website",
+      header: "Link",
+      cell: ({ row }) => {
+        const website = row.original.website;
+        return website ? (
+          <a
+            href={website}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-500 hover:text-blue-700 transition-colors"
+          >
+            <ExternalLink className="h-4 w-4" />
+          </a>
+        ) : (
+          <span className="text-muted-foreground text-xs">-</span>
         );
       },
     },

@@ -26,6 +26,8 @@ import {
   Newspaper,
   Blocks,
   ClipboardList,
+  Shield,
+  Store,
 } from "lucide-react";
 import { useMemo } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -67,6 +69,12 @@ export const settings = [
     label: "Manage Website",
     path: "/app-layout/pages",
     icon: <PaintbrushVerticalIcon size={18} />,
+  },
+  {
+    key: "moderation",
+    label: "Moderation",
+    path: "/settings/moderation",
+    icon: <Shield size={18} />,
   },
 ];
 
@@ -138,6 +146,34 @@ export const extendedItems = [
         key: "marketplace-settings",
         label: "Settings",
         path: "/listing/settings",
+      },
+    ],
+  },
+  {
+    key: "shop",
+    label: "Shop",
+    path: "/shop",
+    icon: <Store size={18} />,
+    children: [
+      {
+        key: "shop-dashboard",
+        label: "Dashboard",
+        path: "/shop",
+      },
+      {
+        key: "shop-products",
+        label: "Products",
+        path: "/shop/all",
+      },
+      {
+        key: "shop-banners",
+        label: "Banners",
+        path: "/shop/banners",
+      },
+      {
+        key: "shop-settings",
+        label: "Settings",
+        path: "/shop/settings",
       },
     ],
   },

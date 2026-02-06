@@ -69,6 +69,8 @@ export type AddListingVars = {
     interests?: string[];
     categories?: string[];
     location: LocationObject;
+    media?: { url: string }[];
+    currency?: string;
   };
 };
 
@@ -85,6 +87,8 @@ export type EditListingVars = {
     categories?: string[];
     location: LocationObject;
     reason?: string;
+    media?: { url: string }[];
+    currency?: string;
   };
 };
 
@@ -126,7 +130,7 @@ export function useGetListingStatsById(
   options: QueryHookOptions<
     { getListingStatsById: ListingStatsById },
     { input: { listingId: string } }
-  >
+  >,
 ) {
   return useQuery<
     { getListingStatsById: ListingStatsById },
@@ -138,11 +142,11 @@ export function useListings(
   options?: QueryHookOptions<
     { getListing: MarketPlaceListing[] },
     GetListingsVars
-  >
+  >,
 ) {
   return useQuery<{ getListing: MarketPlaceListing[] }, GetListingsVars>(
     GET_LISTINGS,
-    options
+    options,
   );
 }
 
@@ -150,7 +154,7 @@ export function useListingDetails(
   options: QueryHookOptions<
     { getListingDetailsByID: MarketPlaceListing },
     GetListingDetailsVars
-  >
+  >,
 ) {
   return useQuery<
     { getListingDetailsByID: MarketPlaceListing },
@@ -162,7 +166,7 @@ export function useAddListing(
   options?: MutationHookOptions<
     { addListing: MarketPlaceListing },
     AddListingVars
-  >
+  >,
 ) {
   return useMutation(ADD_LISTING, {
     ...options,
@@ -225,13 +229,13 @@ export function useEditListing(
   options?: MutationHookOptions<
     { editListing: MarketPlaceListing },
     EditListingVars
-  >
+  >,
 ) {
   return useMutation(EDIT_LISTING, options as MutationHookOptions<any, any>);
 }
 
 export function useChangeListingStatus(
-  options?: MutationHookOptions<any, any>
+  options?: MutationHookOptions<any, any>,
 ) {
   return useMutation(CHANGE_LISTING_STATUS, {
     ...options,
@@ -275,7 +279,7 @@ export function useChangeListingStatus(
 }
 
 export function useChangeListingVerification(
-  options?: MutationHookOptions<any, any>
+  options?: MutationHookOptions<any, any>,
 ) {
   return useMutation(CHANGE_LISTING_VERIFICATION, {
     ...options,

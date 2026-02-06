@@ -31,6 +31,7 @@ import {
   Headset,
   Coins,
   Blocks,
+  ShieldCheck,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -53,6 +54,11 @@ function SettingsLayout({ children }: { children: React.ReactNode }) {
       key: "/settings/domains",
       icon: Earth,
       label: "Domains",
+    },
+    {
+      key: "/settings/moderation",
+      icon: ShieldCheck,
+      label: "Moderation",
     },
     {
       key: "/settings/subscription",

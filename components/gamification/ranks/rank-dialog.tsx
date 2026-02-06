@@ -18,26 +18,125 @@ import { cn } from "@/lib/utils";
 import { Rank } from "@/graphql/actions";
 
 const RANK_ICONS = [
-  "🐣",
-  "👶",
-  "🔍",
-  "📝",
-  "🎯",
-  "👑",
-  "💎",
+  // Achievements & Medals
   "🏆",
+  "🥇",
+  "🥈",
+  "🥉",
+  "🎖️",
+  "🏅",
   "⭐",
   "🌟",
-  "🚀",
-  "💪",
-  "🎓",
-  "🔥",
+  "✨",
+  "�",
+  "�",
+  "💎",
+  "�",
+  "🔮",
+  "🎯",
+  "🎪",
+  "🎭",
+  "🎨",
+  // Power & Energy
+  "�",
   "⚡",
+  "�",
+  "💪",
+  "🚀",
+  "🛡️",
+  "⚔️",
+  "🗡️",
+  // Animals - Powerful
   "🦁",
+  "🐯",
   "🦅",
   "🐲",
-  "🌈",
-  "🎖️",
+  "🐉",
+  "🦈",
+  "🐺",
+  "🦊",
+  "🦄",
+  "🐻",
+  // Animals - Cute/Beginner
+  "🐣",
+  "🐥",
+  "🐤",
+  "🐰",
+  "🐱",
+  "🐶",
+  "🐨",
+  "🐼",
+  "🐸",
+  "🦋",
+  // Nature & Elements
+  "�",
+  "🌊",
+  "🌸",
+  "🌺",
+  "🌻",
+  "🍀",
+  "🌙",
+  "☀️",
+  "⛈️",
+  "❄️",
+  // Objects & Tools
+  "�",
+  "🔍",
+  "�",
+  "📖",
+  "🎓",
+  "🔑",
+  "🔒",
+  "�",
+  "🧭",
+  "⏳",
+  // Food & Fun
+  "🍕",
+  "🍔",
+  "🎂",
+  "🍩",
+  "🍭",
+  "🎁",
+  "🎈",
+  "🎉",
+  "🎊",
+  // People & Gestures
+  "👶",
+  "👤",
+  "🧙",
+  "�‍🚀",
+  "🦸",
+  "�",
+  "👻",
+  "💀",
+  "👽",
+  // Hearts & Love
+  "❤️",
+  "💖",
+  "💗",
+  "💙",
+  "💚",
+  "💜",
+  "�",
+  "🤍",
+  // Sports & Games
+  "⚽",
+  "🏀",
+  "🎮",
+  "🎲",
+  "♟️",
+  "🎳",
+  "�",
+  "⚾",
+  // Miscellaneous
+  "🌍",
+  "🗺️",
+  "🏰",
+  "�️",
+  "🌋",
+  "🎵",
+  "🎸",
+  "🎹",
 ];
 
 interface RankDialogProps {
@@ -113,7 +212,7 @@ export function RankDialog({
                     "w-10 h-10 text-xl rounded-lg border-2 transition-all",
                     formik.values.icon === icon
                       ? "border-primary bg-primary/10"
-                      : "border-transparent hover:bg-gray-100"
+                      : "border-transparent hover:bg-gray-100",
                   )}
                 >
                   {icon}
@@ -184,8 +283,8 @@ export function RankDialog({
               {isLoading
                 ? "Saving..."
                 : editingRank
-                ? "Save Changes"
-                : "Create Rank"}
+                  ? "Save Changes"
+                  : "Create Rank"}
             </Button>
           </DialogFooter>
         </form>
