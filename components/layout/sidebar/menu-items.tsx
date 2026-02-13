@@ -28,6 +28,7 @@ import {
   ClipboardList,
   Shield,
   Store,
+  Currency,
 } from "lucide-react";
 import { useMemo } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -75,6 +76,12 @@ export const settings = [
     label: "Moderation",
     path: "/settings/moderation",
     icon: <Shield size={18} />,
+  },
+  {
+    key: "currency",
+    label: "Currency",
+    path: "/settings/currency",
+    icon: <Currency size={18} />,
   },
 ];
 
