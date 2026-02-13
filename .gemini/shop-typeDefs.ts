@@ -193,3 +193,4 @@ export const shopTypeDefs = `#graphql
     reorderShopBanners(bannerOrders: [BannerOrderInput!]!): [ShopBanner!]!
   }
 `;
+a

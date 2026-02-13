@@ -104,7 +104,6 @@ export const GET_SURVEY = gql`
     }
   }
 `;
-
 export function useGetSurvey(
   options?: QueryHookOptions<GetSurveyData, { id: string }>,
 ) {

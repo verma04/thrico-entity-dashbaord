@@ -54,6 +54,7 @@ export function useSurveyEditor() {
         variables: {
           updateFormSettingsId: surveyId,
           input,
+          
         },
       });
     }, 1000),

@@ -202,21 +202,6 @@ export const CHECK_ENTITY_SUBSCRIPTIONS = gql`
   }
 `;
 
-export const GET_CURRENCY = gql`
-  query GetEntityCurrency {
-    getEntityCurrency
-  }
-`;
-
-export const CHANGE_ENTITY_CURRENCY = gql`
-  mutation ChangeEntityCurrency($currency: String!) {
-    changeEntityCurrency(currency: $currency) {
-      success
-      message
-    }
-  }
-`;
-
 export const UPLOAD_ENTITY_LOGO = gql`
   mutation UploadEntityLogo($file: Upload!) {
     uploadEntityLogo(file: $file) {
@@ -314,3 +299,4 @@ export interface GetAllEntityInvoiceResponse {
 }
 
 export * from "./dashboard";
+export * from "./currency/currency-queries";

@@ -5,7 +5,6 @@ import {
   CHANGE_ENTITY_DOMAIN,
   CHECK_ENTITY_SUBSCRIPTIONS,
   ENTITY_KYC,
-  GET_CURRENCY,
   GET_ENTITY_SETTINGS,
   GET_KYC_COUNTRIES,
   GET_ORGANIZATION,
@@ -14,7 +13,6 @@ import {
   UPDATE_ENTITY_SETTINGS,
   UPLOAD_ENTITY_LOGO,
   UPDATE_ENTITY_PROFILE,
-  CHANGE_ENTITY_CURRENCY,
 } from "../quries";
 import { GET_MEMBERS_TERMS_AND_CONDITIONS } from "../quries/user";
 export * from "./membership/membership-queries";
@@ -166,11 +164,6 @@ export interface CheckEntitySubscriptionQuery {
   checkEntitySubscription: SubscriptionDetails | null;
 }
 
-export const useEntityCurrency = () => useQuery(GET_CURRENCY);
-
-export const useChangeEntityCurrency = (onCompleted: any) =>
-  useMutation(CHANGE_ENTITY_CURRENCY, onCompleted);
-
 export const useUploadEntityLogo = (options: any) =>
   useMutation(UPLOAD_ENTITY_LOGO, {
     ...options,
@@ -250,5 +243,6 @@ export * from "./website";
 export * from "./dashbaord/dashboard-quries";
 export * from "./gamification/gamification-quiries";
 export * from "./gamification/gamification-mutation";
+export * from "./currency";
 
 // Redundant membership actions removed (moved to /membership folder)
