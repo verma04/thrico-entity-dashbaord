@@ -13,6 +13,7 @@ import {
   UPDATE_ENTITY_SETTINGS,
   UPLOAD_ENTITY_LOGO,
   UPDATE_ENTITY_PROFILE,
+  UPDATE_USER_PROFILE,
 } from "../quries";
 import { GET_MEMBERS_TERMS_AND_CONDITIONS } from "../quries/user";
 export * from "./membership/membership-queries";
@@ -238,11 +239,21 @@ import { GET_ALL_ENTITY_INVOICE, GetAllEntityInvoiceResponse } from "../quries";
 export const useGetAllEntityInvoice = () =>
   useQuery<GetAllEntityInvoiceResponse>(GET_ALL_ENTITY_INVOICE);
 
-// Website Actions
+export const useUpdateUserProfile = (options: any) =>
+  useMutation(UPDATE_USER_PROFILE, {
+    ...options,
+    refetchQueries: [{ query: GET_USER }],
+    awaitRefetchQueries: true,
+  });
+
 export * from "./website";
 export * from "./dashbaord/dashboard-quries";
 export * from "./gamification/gamification-quiries";
 export * from "./gamification/gamification-mutation";
 export * from "./currency";
-
-// Redundant membership actions removed (moved to /membership folder)
+export * from "./rewards";
+export * from "./reports";
+export * from "./settings";
+export * from "./settings/roles";
+export * from "./audit";
+export * from "./communities";

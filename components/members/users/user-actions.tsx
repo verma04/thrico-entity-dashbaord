@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   UserDetail,
   useChangeUserStatus,
@@ -34,12 +35,12 @@ import {
   AlertCircle,
   RefreshCw,
   Shield,
+  ExternalLink,
 } from "lucide-react";
-import UserDetailsDrawer from "./user-details-drawer";
 
 export default function UserActions({ user }: { user: UserDetail }) {
+  const router = useRouter();
   const [isActionModalOpen, setIsActionModalOpen] = useState(false);
-  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [selectedAction, setSelectedAction] = useState<string | null>(null);
   const [reason, setReason] = useState("");
 
@@ -103,11 +104,19 @@ export default function UserActions({ user }: { user: UserDetail }) {
     selectedAction &&
     ["BLOCK", "APPROVE", "REJECT", "FLAG", "VERIFY"].includes(selectedAction);
 
-  const actions = [
+  interface Action {
+    label?: string;
+    icon?: any;
+    onClick?: () => void;
+    color?: string;
+    type?: "separator";
+  }
+
+  const actions: Action[] = [
     {
-      label: "View Details",
-      icon: Eye,
-      onClick: () => setIsDetailsOpen(true),
+      label: "View Profile",
+      icon: ExternalLink,
+      onClick: () => router.push(`/members/${user.id}`),
     },
     { type: "separator" },
   ];
@@ -320,11 +329,6 @@ export default function UserActions({ user }: { user: UserDetail }) {
         </DialogContent>
       </Dialog>
 
-      <UserDetailsDrawer
-        open={isDetailsOpen}
-        onOpenChange={setIsDetailsOpen}
-        user={user}
-      />
     </>
   );
 }

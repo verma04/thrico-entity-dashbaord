@@ -404,3 +404,61 @@ export const PROMOTE_USER = gql`
     }
   }
 `;
+
+export const GET_GAMIFICATION_SUMMARY = gql`
+  query GetGamificationSummary($userId: ID!) {
+    getUserGamificationSummary(input: { userId: $userId }) {
+      totalPointsEarned
+      totalBadgesEarned
+      rankPosition
+      currentStreak
+    }
+  }
+`;
+
+export const GET_USER_ACTIVITY_LOG = gql`
+  query GetUserActivity($userId: ID!, $limit: Int, $offset: Int) {
+    getUserActivityLog(input: { 
+      userId: $userId, 
+      limit: $limit, 
+      offset: $offset 
+    }) {
+      id
+      type
+      points
+      createdAt
+      ruleAction
+      ruleDescription
+      badgeName
+    }
+  }
+`;
+
+export const GET_USER_EARNED_BADGES = gql`
+  query GetUserBadges($userId: ID!, $limit: Int, $cursor: String) {
+    getUserEarnedBadges(input: { 
+      userId: $userId, 
+      limit: $limit, 
+      cursor: $cursor 
+    }) {
+      edges {
+        cursor
+        node {
+          id
+          name
+          description
+          icon
+          userProgress {
+            isCompleted
+            earnedAt
+            progress
+          }
+        }
+      }
+      pageInfo {
+        hasNextPage
+        totalCount
+      }
+    }
+  }
+`;

@@ -1,7 +1,5 @@
 "use client"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Globe2, CheckCircle2 } from "lucide-react"
+import { Globe2 } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { getThricoDomain } from "@/graphql/actions/domain"
 import DomainChange from "./domain-change"
@@ -10,31 +8,32 @@ export const ThricoDomain = () => {
   const { data, loading } = getThricoDomain()
 
   if (loading) {
-    return <Skeleton className="h-24 rounded-lg" />
+    return <Skeleton className="h-24 rounded-xl border border-slate-200/80 bg-white" />
   }
 
   const domain = data?.getThricoDomain?.domain
 
   return (
-    <Card className="overflow-hidden border-l-4 border-l-primary transition-all hover:shadow-md">
-      <CardHeader className="flex flex-row items-center justify-between gap-4 pb-3">
-        <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-primary/10 p-2">
-            <Globe2 className="h-5 w-5 text-primary" />
-          </div>
-          <div>
-            <p className="text-sm font-medium text-muted-foreground">Thrico Domain</p>
-            <p className="font-mono text-sm font-medium">{`https://${domain}.thrico.community`}</p>
-          </div>
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl border border-slate-200/80 bg-white shadow-sm transition-all duration-200 hover:border-slate-300">
+      <div className="flex items-center gap-4">
+        <div className="h-10 w-10 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0">
+          <Globe2 className="h-5 w-5 text-blue-600" />
         </div>
-        <Badge variant="outline" className="gap-1 bg-green-50 text-green-700">
-          <CheckCircle2 className="h-3 w-3" />
-          Active
-        </Badge>
-      </CardHeader>
-      <CardContent>
+        <div>
+          <div className="flex items-center gap-2">
+            <p className="text-[14px] font-semibold text-slate-900 leading-none tracking-tight">
+              https://{domain}.thrico.community
+            </p>
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200 text-[10px] font-semibold text-slate-500 uppercase tracking-widest">
+              Primary System Edge
+            </span>
+          </div>
+          <p className="text-[12px] text-slate-500 mt-1.5">Default subdomain provided by Thrico</p>
+        </div>
+      </div>
+      <div>
         <DomainChange />
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }

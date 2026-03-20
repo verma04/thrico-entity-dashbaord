@@ -6,7 +6,6 @@ import {
   flexRender,
   getCoreRowModel,
   getSortedRowModel,
-  getFilteredRowModel,
   getPaginationRowModel,
   SortingState,
   useReactTable,
@@ -20,62 +19,56 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
+import { ChevronUp, ChevronDown, ChevronsUpDown, Calendar, Globe, MapPin, ExternalLink } from "lucide-react";
 
 import moment from "moment";
 
 import { communityEntity } from "./ts-types";
 import Actions from "./Actions";
 import { getStatusTag, getVerificationTag } from "../discussion-forum/utils";
+import { cn } from "@/lib/utils";
 
 export default function List({ data }: { data: communityEntity[] }) {
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [globalFilter, setGlobalFilter] = useState("");
 
   const columns: ColumnDef<communityEntity>[] = [
     {
       accessorKey: "title",
-      header: ({ column }) => {
-        return (
-          <div
-            className="flex items-center gap-2 cursor-pointer select-none py-2"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Community
-            {column.getCanSort() && (
-              <div className="flex flex-col">
-                {{
-                  asc: <ChevronUp className="w-3 h-3 text-primary" />,
-                  desc: <ChevronDown className="w-3 h-3 text-primary" />,
-                }[column.getIsSorted() as string] ?? (
-                  <ChevronsUpDown className="w-3 h-3 opacity-50" />
-                )}
-              </div>
-            )}
-          </div>
-        );
-      },
+      header: ({ column }) => (
+        <div
+          className="flex items-center gap-2 cursor-pointer select-none group"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          <span className="font-semibold uppercase text-[11px] tracking-wider text-slate-400 group-hover:text-indigo-600 transition-colors">Community Space</span>
+          {column.getCanSort() && (
+            <ChevronsUpDown className="w-3 h-3 opacity-30 group-hover:opacity-100 transition-opacity" />
+          )}
+        </div>
+      ),
       cell: ({ row }) => {
         const record = row.original;
         return (
-          <div className="flex items-center gap-3">
-            <Avatar className="h-[50px] w-[100px] rounded-lg object-contain shadow-sm">
-              <AvatarImage
-                src={`https://cdn.thrico.network/${record?.cover}`}
-                alt={record?.title}
-              />
-              <AvatarFallback className="rounded-lg bg-primary/5 text-primary font-bold">
-                {record?.title?.substring(0, 2).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
+          <div className="flex items-center gap-4 py-1">
+            <div className="relative group/avatar">
+              <Avatar className="h-10 w-10 rounded-lg overflow-hidden border border-slate-200 bg-slate-50">
+                <AvatarImage
+                  src={`https://cdn.thrico.network/${record?.cover}`}
+                  alt={record?.title}
+                  className="object-cover"
+                />
+                <AvatarFallback className="rounded-lg bg-slate-100 text-slate-600 font-semibold text-xs">
+                  {record?.title?.substring(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+            </div>
             <div className="flex flex-col gap-0.5">
-              <div className="font-semibold text-foreground leading-tight">
+              <p className="font-semibold text-slate-900 leading-tight text-sm group-hover:text-indigo-600 transition-colors">
                 {record?.title}
-              </div>
-              <div className="text-xs text-muted-foreground line-clamp-1 max-w-[200px]">
-                {record?.tagline || "No tagline provided"}
+              </p>
+              <div className="flex items-center gap-1.5 text-[10px] font-medium text-slate-500 uppercase tracking-wide">
+                <Globe className="h-3 w-3 text-slate-400" />
+                <span className="line-clamp-1 max-w-[150px]">{record?.tagline || "Global ecosystem"}</span>
               </div>
             </div>
           </div>
@@ -84,54 +77,51 @@ export default function List({ data }: { data: communityEntity[] }) {
     },
     {
       accessorKey: "description",
-      header: "Description",
+      header: () => <span className="font-semibold uppercase text-[11px] tracking-wider text-slate-400">Context</span>,
       cell: ({ row }) => (
-        <div className="text-sm text-muted-foreground line-clamp-2 max-w-[250px] leading-snug">
-          {row.getValue("description") || "No description available"}
-        </div>
+        <p className="text-xs text-slate-500 font-normal line-clamp-2 max-w-[300px] leading-relaxed">
+          {row.getValue("description") || "No contextual information provided."}
+        </p>
       ),
     },
     {
       accessorKey: "status",
-      header: "Status",
+      header: () => <span className="font-semibold uppercase text-[11px] tracking-wider text-slate-400">Status</span>,
       cell: ({ row }) => (
-        <div className="flex justify-start">
+        <div className="scale-90 origin-left">
           {getStatusTag(row.getValue("status"))}
         </div>
       ),
     },
     {
       id: "verification",
-      header: "Verification",
+      header: () => <span className="font-semibold uppercase text-[11px] tracking-wider text-slate-400">Verified</span>,
       cell: ({ row }) => (
-        <div className="flex justify-start">
+        <div className="scale-90 origin-left">
           {getVerificationTag(row.original.verification?.isVerified || false)}
         </div>
       ),
     },
     {
       accessorKey: "createdAt",
-      header: "Created At",
+      header: () => <span className="font-semibold uppercase text-[11px] tracking-wider text-slate-400">Registry Date</span>,
       cell: ({ row }) => (
-        <div className="text-sm whitespace-nowrap">
-          {moment(row.getValue("createdAt")).format("MMM DD, YYYY")}
-        </div>
-      ),
-    },
-    {
-      accessorKey: "updatedAt",
-      header: "Last Update",
-      cell: ({ row }) => (
-        <div className="text-sm text-muted-foreground whitespace-nowrap">
-          {moment(row.getValue("updatedAt")).fromNow()}
+        <div className="flex flex-col">
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-600">
+             <Calendar className="h-3.5 w-3.5 text-slate-400" />
+             <span>{moment(row.getValue("createdAt")).format("MMM DD, YYYY")}</span>
+          </div>
+          <span className="text-[9px] text-slate-400 font-medium uppercase tracking-tight pl-5">
+            Initial Launch
+          </span>
         </div>
       ),
     },
     {
       id: "actions",
-      header: "Actions",
+      header: "",
       cell: ({ row }) => (
-        <div className="flex justify-end pr-4">
+        <div className="flex justify-end pr-2">
           <Actions {...row.original} />
         </div>
       ),
@@ -143,14 +133,11 @@ export default function List({ data }: { data: communityEntity[] }) {
     columns,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     state: {
       sorting,
-      globalFilter,
     },
     onSortingChange: setSorting,
-    onGlobalFilterChange: setGlobalFilter,
     initialState: {
       pagination: {
         pageSize: 10,
@@ -159,55 +146,16 @@ export default function List({ data }: { data: communityEntity[] }) {
   });
 
   return (
-    <div className="flex flex-col gap-5 p-2 sm:p-6 bg-background/50 animate-in fade-in duration-500">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="relative w-full sm:max-w-md group">
-          <Input
-            placeholder="Search communities by name or description..."
-            value={globalFilter}
-            onChange={(e) => setGlobalFilter(e.target.value)}
-            className="w-full bg-background border-muted-foreground/20 focus-visible:ring-primary shadow-sm h-10 pl-4"
-          />
-          {globalFilter && (
-            <button
-              onClick={() => setGlobalFilter("")}
-              className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <span className="sr-only">Clear search</span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M18 6 6 18" />
-                <path d="m6 6 12 12" />
-              </svg>
-            </button>
-          )}
-        </div>
-        <div className="flex items-center gap-2 bg-muted/30 px-3 py-1.5 rounded-full border border-border/50 shadow-sm">
-          <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-          <span className="text-xs font-medium text-muted-foreground">
-            {table.getFilteredRowModel().rows.length} Total Communities
-          </span>
-        </div>
-      </div>
-
-      <div className="rounded-xl border border-border/60 bg-card shadow-lg shadow-black/5 overflow-hidden">
+    <div className="space-y-4">
+      <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
         <Table>
-          <TableHeader className="bg-muted/50 border-b border-border">
+          <TableHeader className="bg-slate-50/50">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="hover:bg-transparent">
+              <TableRow key={headerGroup.id} className="hover:bg-transparent border-b-slate-100">
                 {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
-                    className="h-12 font-bold text-foreground"
+                    className="h-14 px-6"
                   >
                     {header.isPlaceholder
                       ? null
@@ -225,10 +173,10 @@ export default function List({ data }: { data: communityEntity[] }) {
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  className="hover:bg-muted/30 transition-all border-b border-border/40 last:border-0"
+                  className="group hover:bg-slate-50/80 transition-all duration-300 border-b-slate-50 last:border-0"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="py-4">
+                    <TableCell key={cell.id} className="px-6 py-4">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -241,34 +189,18 @@ export default function List({ data }: { data: communityEntity[] }) {
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-40 text-center"
+                  className="h-60 text-center"
                 >
-                  <div className="flex flex-col items-center justify-center gap-3 text-muted-foreground">
-                    <div className="p-3 bg-muted rounded-full">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="lucide lucide-search-x"
-                      >
-                        <path d="m21 21-4.3-4.3" />
-                        <circle cx="10" cy="10" r="7" />
-                        <path d="m8 8 4 4" />
-                        <path d="m12 8-4 4" />
-                      </svg>
+                  <div className="flex flex-col items-center justify-center gap-3 text-slate-400">
+                    <div className="p-4 bg-slate-50 rounded-full border border-slate-100">
+                       <MapPin className="h-6 w-6 text-slate-300" />
                     </div>
                     <div>
-                      <p className="font-semibold text-foreground">
-                        No matching communities
+                      <p className="font-semibold uppercase text-[11px] tracking-wider text-slate-600">
+                        No Ecosystem Data
                       </p>
-                      <p className="text-sm">
-                        Try adjusting your search criteria
+                      <p className="text-xs font-medium mt-1">
+                        Try expanding your search parameters.
                       </p>
                     </div>
                   </div>
@@ -279,50 +211,46 @@ export default function List({ data }: { data: communityEntity[] }) {
         </Table>
       </div>
 
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-2 border-t border-border pt-6">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <span className="hidden sm:inline">Viewing page</span>
-          <span className="font-medium text-foreground px-2 py-0.5 bg-muted rounded border border-border/50">
-            {table.getState().pagination.pageIndex + 1}
-          </span>
-          <span>of</span>
-          <span className="font-medium text-foreground px-2 py-0.5 bg-muted rounded border border-border/50">
-            {table.getPageCount() || 1}
-          </span>
-        </div>
+      {/* Premium Pagination */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-6 px-4 py-2">
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 mr-2">
-            <span className="text-xs text-muted-foreground">
-              Rows per page:
-            </span>
+          <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+            Page <span className="text-slate-900 font-semibold">{table.getState().pagination.pageIndex + 1}</span> of {table.getPageCount() || 1}
+          </p>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 pr-4 border-r border-slate-100">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Rows:</span>
             <select
               value={table.getState().pagination.pageSize}
               onChange={(e) => table.setPageSize(Number(e.target.value))}
-              className="bg-transparent text-xs font-medium border-b border-muted-foreground/30 focus:outline-none"
+              className="bg-transparent text-xs font-semibold text-slate-700 focus:outline-none appearance-none cursor-pointer"
             >
-              {[5, 10, 20, 30, 40, 50].map((pageSize) => (
+              {[5, 10, 20, 50].map((pageSize) => (
                 <option key={pageSize} value={pageSize}>
                   {pageSize}
                 </option>
               ))}
             </select>
           </div>
+
           <div className="flex gap-2">
             <Button
               variant="outline"
               size="sm"
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
-              className="h-9 px-3 border-border/60 shadow-sm"
+              className="h-9 px-4 rounded-lg border-slate-200 hover:bg-slate-50 font-semibold shadow-none text-xs disabled:opacity-30"
             >
               Previous
             </Button>
             <Button
-              variant="outline"
+              variant="default"
               size="sm"
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
-              className="h-9 px-3 border-border/60 shadow-sm"
+              className="h-9 px-4 rounded-lg bg-slate-900 hover:bg-black font-semibold shadow-none text-xs disabled:opacity-30"
             >
               Next
             </Button>
@@ -331,4 +259,8 @@ export default function List({ data }: { data: communityEntity[] }) {
       </div>
     </div>
   );
+}
+
+function filteredDataCount(data: any[]) {
+  return data?.length || 0;
 }

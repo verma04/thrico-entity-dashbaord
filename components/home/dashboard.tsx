@@ -3,15 +3,52 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+  Users,
+  Activity,
+  Eye,
+  MousePointer,
+  TrendingUp,
+  Zap,
+  ShieldCheck,
+  Sparkles,
+  LayoutGrid,
+  RotateCcw,
+  Globe,
+  ArrowRight,
+  Timer,
+  Layout,
+  Layers,
+  Search,
+} from "lucide-react";
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Cell,
+  PieChart,
+  Pie,
+} from "recharts";
+import { useGetDashboardStats, TimeRange } from "@/graphql/actions";
+import { PlatformModules } from "./platform-modules";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ModuleActivityChart } from "./module-activity-chart";
+import { PlatformModuleChart } from "./platform-module-chart";
+import { AiModerationDashboardWidget } from "@/components/moderation/ai-moderation-dashboard-widget";
+import { ModerationSummaryWidget } from "@/components/moderation/moderation-summary-widget";
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import {
+  EcosystemKPI,
+  EcosystemCard,
+  EcosystemStatusIndicator,
+} from "@/components/layout/ecosystem/ecosystem-analytics";
+import { cn } from "@/lib/utils";
 import {
   Select,
   SelectContent,
@@ -19,225 +56,178 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Briefcase,
-  Users,
-  Activity,
-  Eye,
-  MousePointer,
-  ArrowUpRight,
-  ArrowDownRight,
-  TrendingUp,
-} from "lucide-react";
-import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  AreaChart,
-  Area,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
-import { useGetDashboardStats, TimeRange } from "@/graphql/actions";
-import { PlatformModules } from "./platform-modules";
-import { Skeleton } from "@/components/ui/skeleton";
-import { ModuleActivityChart } from "./module-activity-chart";
-import { PlatformModuleChart } from "./platform-module-chart";
+import { Button } from "@/components/ui/button";
 
 export default function Dashboard() {
   const [timePeriod, setTimePeriod] = useState<TimeRange>(
     TimeRange.LAST_7_DAYS,
   );
-  const { data, loading } = useGetDashboardStats(timePeriod);
+  const { data, loading, refetch } = useGetDashboardStats(timePeriod);
 
   const stats = data?.getDashboardStats;
 
-  // KPI Stats
-  const kpiStats = [
+  const kpis = [
     {
-      title: "Total Users",
-      value: loading ? (
-        <Skeleton className="h-8 w-24" />
-      ) : (
-        (stats?.totalUsers?.toLocaleString() ?? "Loading...")
-      ),
-      change: stats?.totalUsersChange ?? 0,
-      trend: (stats?.totalUsersChange ?? 0) >= 0 ? "up" : "down",
+      title: "Aggregate Nodes (Users)",
+      value: loading ? "..." : (stats?.totalUsers?.toLocaleString() ?? "0"),
+      trend: stats?.totalUsersChange ?? 0,
       icon: Users,
-      color: "text-blue-600",
-      bgColor: "bg-blue-50",
+      color: "text-indigo-500",
+      bg: "bg-indigo-500/10",
     },
     {
-      title: "Active Today",
-      value: loading ? (
-        <Skeleton className="h-8 w-24" />
-      ) : (
-        (stats?.activeUsers?.toLocaleString() ?? "Loading...")
-      ),
-      change: stats?.activeUsersChange ?? 0,
-      trend: (stats?.activeUsersChange ?? 0) >= 0 ? "up" : "down",
+      title: "Real-time Presence",
+      value: loading ? "..." : (stats?.activeUsers?.toLocaleString() ?? "0"),
+      trend: stats?.activeUsersChange ?? 0,
       icon: Activity,
-      color: "text-green-600",
-      bgColor: "bg-green-50",
+      color: "text-emerald-500",
+      bg: "bg-emerald-500/10",
     },
     {
-      title: "Page Views",
-      value: loading ? (
-        <Skeleton className="h-8 w-24" />
-      ) : (
-        (stats?.pageViews?.toLocaleString() ?? "Loading...")
-      ),
-      change: stats?.pageViewsChange ?? 0,
-      trend: (stats?.pageViewsChange ?? 0) >= 0 ? "up" : "down",
+      title: "Network Propagation",
+      value: loading ? "..." : (stats?.pageViews?.toLocaleString() ?? "0"),
+      trend: stats?.pageViewsChange ?? 0,
       icon: Eye,
-      color: "text-purple-600",
-      bgColor: "bg-purple-50",
+      color: "text-violet-500",
+      bg: "bg-violet-500/10",
     },
     {
-      title: "Engagement Rate",
-      value: loading ? (
-        <Skeleton className="h-8 w-24" />
-      ) : stats ? (
-        `${stats.engagementRate}%`
-      ) : (
-        "Loading..."
-      ),
-      change: stats?.engagementRateChange ?? 0,
-      trend: (stats?.engagementRateChange ?? 0) >= 0 ? "up" : "down",
+      title: "Engagement Velocity",
+      value: loading ? "..." : `${stats?.engagementRate ?? 0}%`,
+      trend: stats?.engagementRateChange ?? 0,
       icon: MousePointer,
-      color: "text-orange-600",
-      bgColor: "bg-orange-50",
+      color: "text-amber-500",
+      bg: "bg-amber-500/10",
     },
-  ];
-
-  // Weekly Activity Data
-  const weeklyActivityData = [
-    { day: "Mon", posts: 245, comments: 420, likes: 680 },
-    { day: "Tue", posts: 312, comments: 485, likes: 750 },
-    { day: "Wed", posts: 280, comments: 445, likes: 690 },
-    { day: "Thu", posts: 356, comments: 520, likes: 820 },
-    { day: "Fri", posts: 298, comments: 465, likes: 710 },
-    { day: "Sat", posts: 189, comments: 320, likes: 520 },
-    { day: "Sun", posts: 156, comments: 280, likes: 450 },
   ];
 
   return (
-    <div className="p-6 space-y-6 w-full">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">Platform Dashboard</h1>
-          <p className="text-muted-foreground">
-            Monitor your platform's performance and activity
-          </p>
-        </div>
-        <Select
-          value={timePeriod}
-          onValueChange={(val) => setTimePeriod(val as TimeRange)}
-        >
-          <SelectTrigger className="w-[140px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={TimeRange.LAST_24_HOURS}>
-              Last 24 hours
-            </SelectItem>
-            <SelectItem value={TimeRange.LAST_7_DAYS}>Last 7 days</SelectItem>
-            <SelectItem value={TimeRange.LAST_30_DAYS}>Last 30 days</SelectItem>
-            <SelectItem value={TimeRange.LAST_90_DAYS}>Last 90 days</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+    <EcosystemWrapper anonymized-1="platform-intelligence">
+      <EcosystemHeader
+        title="Command Intelligence"
+        badgeText="Global Presence"
+        description="Monitor architectural node expansion, propagation velocity, and cross-module telemetry across the global platform registry."
+        icon={LayoutGrid}
+      />
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {kpiStats.map((stat, index) => {
-          const Icon = stat.icon;
-          const TrendIcon = stat.trend === "up" ? ArrowUpRight : ArrowDownRight;
-          return (
-            <Card key={index}>
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-between">
-                  <div className={`p-2 rounded-lg ${stat.bgColor}`}>
-                    <Icon className={`h-5 w-5 ${stat.color}`} />
-                  </div>
-                  <div
-                    className={`flex items-center gap-1 text-sm font-semibold ${
-                      stat.trend === "up" ? "text-gray-600" : "text-gray-500"
-                    }`}
+      <EcosystemActionBar shadow="none">
+        <div className="flex items-center justify-between w-full">
+          <div className="flex items-center gap-6">
+            <EcosystemStatusIndicator
+              status="active"
+              label="Reality Core: Operational"
+            />
+            <div className="h-4 w-px bg-slate-200" />
+            <div className="hidden md:flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
+              <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
+              <span>Verified Network Integrity</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Select
+              value={timePeriod}
+              onValueChange={(val) => setTimePeriod(val as TimeRange)}
+            >
+              <SelectTrigger className="h-10 w-[180px] rounded-xl border-slate-200 font-bold text-slate-600 bg-white shadow-sm">
+                <Timer className="h-4 w-4 mr-2 text-indigo-500" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="rounded-2xl border-slate-100 shadow-2xl">
+                {Object.values(TimeRange).map((tr) => (
+                  <SelectItem
+                    key={tr}
+                    value={tr}
+                    className="font-bold uppercase text-[10px]"
                   >
-                    <TrendIcon className="h-4 w-4" />
-                    {Math.abs(stat.change)}%
-                  </div>
+                    {tr.replace(/_/g, " ")}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <div className="h-4 w-px bg-slate-200 mx-1" />
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-10 w-10 text-slate-400 hover:text-indigo-600 rounded-xl transition-all shadow-sm bg-white"
+              onClick={() => refetch()}
+            >
+              <RotateCcw className={cn("h-4 w-4", loading && "animate-spin")} />
+            </Button>
+          </div>
+        </div>
+      </EcosystemActionBar>
+
+      <EcosystemContainer className="space-y-12 p-4 lg:p-6">
+        {/* KPI Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {kpis.map((kpi, i) => (
+            <EcosystemKPI key={i} {...kpi} trendLabel="Registry" />
+          ))}
+        </div>
+
+        {/* Moderation Widgets */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+          <div className="lg:col-span-6">
+            <ModerationSummaryWidget />
+          </div>
+          <div className="lg:col-span-6">
+            <AiModerationDashboardWidget />
+          </div>
+        </div>
+
+        {/* Charts Section */}
+        <div className="space-y-12">
+          {/* Main Analytics Grid */}
+          <div className="grid  gap-10">
+            {/* Platform Engagement Matrix - 8 columns */}
+            <div className="lg:col-span-8">
+              <EcosystemCard
+                title="Cross-Module Velocity"
+                description="Temporal engagement propagation across registry tiers"
+                icon={TrendingUp}
+                decorationIcon={Layers}
+              >
+                <div className="h-[400px] w-full p-0 pr-0 mb-10">
+                  <PlatformModuleChart />
                 </div>
-                <div className="mt-4">
-                  <p className="text-sm text-muted-foreground">{stat.title}</p>
-                  <div className="text-2xl font-bold mt-1 flex items-center min-h-[32px]">
-                    {stat.value}
-                  </div>
+              </EcosystemCard>
+            </div>
+          </div>
+
+          {/* Module Registry Section */}
+          <div className="pt-8 border-t border-slate-100">
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-4">
+                <div className="h-12 w-12 rounded-2xl bg-slate-900 shadow-lg shadow-slate-200 flex items-center justify-center text-white ring-8 ring-slate-50">
+                  <Layout className="h-6 w-6" />
                 </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+                <div>
+                  <h2 className="text-2xl font-black text-slate-900 tracking-tight italic uppercase">
+                    Foundational Modules
+                  </h2>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] leading-none mt-1.5 flex items-center gap-2">
+                    <span className="h-1.5 w-1.5 rounded-full bg-indigo-500 animate-pulse" />
+                    Registry Level Module Telemetry & Control
+                  </p>
+                </div>
+              </div>
+              <div className="hidden md:flex items-center gap-3">
+                <div className="px-4 py-2 rounded-xl bg-white border border-slate-100 shadow-sm flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-emerald-500" />
+                  <span className="text-[11px] font-bold text-slate-600 uppercase tracking-tight">
+                    Systems Online
+                  </span>
+                </div>
+              </div>
+            </div>
 
-      {/* Charts Row 1 */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Platform Module Chart */}
-        <PlatformModuleChart />
-
-        {/* Module Distribution Pie Chart */}
-        <ModuleActivityChart timeRange={timePeriod} />
-      </div>
-
-      {/* Weekly Activity Bar Chart */}
-      {/* <Card>
-        <CardHeader>
-          <CardTitle>Weekly Activity</CardTitle>
-          <CardDescription>Posts, comments, and likes by day</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={weeklyActivityData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-              <XAxis dataKey="day" stroke="#9ca3af" fontSize={12} />
-              <YAxis stroke="#9ca3af" fontSize={12} />
-              <Tooltip />
-              <Legend />
-              <Bar
-                dataKey="posts"
-                fill="#6b7280"
-                name="Posts"
-                radius={[4, 4, 0, 0]}
-              />
-              <Bar
-                dataKey="comments"
-                fill="#9ca3af"
-                name="Comments"
-                radius={[4, 4, 0, 0]}
-              />
-              <Bar
-                dataKey="likes"
-                fill="#d1d5db"
-                name="Likes"
-                radius={[4, 4, 0, 0]}
-              />
-            </BarChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card> */}
-
-      {/* Module Overview Section */}
-      <PlatformModules />
-    </div>
+            <div className="bg-white/50 backdrop-blur-sm rounded-[2.5rem] border border-slate-100 shadow-sm p-2">
+              <PlatformModules />
+            </div>
+          </div>
+        </div>
+      </EcosystemContainer>
+    </EcosystemWrapper>
   );
 }

@@ -1,3 +1,4 @@
+import localFont from "next/font/local";
 import {
   Space_Grotesk,
   Inter,
@@ -26,7 +27,88 @@ import {
 import "./globals.css";
 import { ApolloWrapper } from "@/graphql/hoc/ApolloWrapper";
 import type { Metadata } from "next";
-import { DotPatternLinearGradient } from "@/components/common/dot-pattern-linear-gradient";
+
+const roobert = localFont({
+  src: [
+    {
+      path: "../public/font/Roobert-Light.otf",
+      weight: "300",
+      style: "normal",
+    },
+    {
+      path: "../public/font/Roobert-LightItalic.otf",
+      weight: "300",
+      style: "italic",
+    },
+    {
+      path: "../public/font/Roobert-Regular.otf",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../public/font/Roobert-RegularItalic.otf",
+      weight: "400",
+      style: "italic",
+    },
+    {
+      path: "../public/font/Roobert-Medium.otf",
+      weight: "500",
+      style: "normal",
+    },
+    {
+      path: "../public/font/Roobert-MediumItalic.otf",
+      weight: "500",
+      style: "italic",
+    },
+    {
+      path: "../public/font/Roobert-SemiBold.otf",
+      weight: "600",
+      style: "normal",
+    },
+    {
+      path: "../public/font/Roobert-BoldItalic.otf",
+      weight: "700",
+      style: "italic",
+    },
+    {
+      path: "../public/font/Roobert-Heavy.otf",
+      weight: "900",
+      style: "normal",
+    },
+    {
+      path: "../public/font/Roobert-HeavyItalic.otf",
+      weight: "900",
+      style: "italic",
+    },
+  ],
+  variable: "--font-roobert",
+});
+
+const avantGarde = localFont({
+  src: [
+    {
+      path: "../public/font/ITC Avant Garde Gothic LT Medium.ttf",
+      weight: "500",
+      style: "normal",
+    },
+    {
+      path: "../public/font/ITC Avant Garde Gothic LT Demi.ttf",
+      weight: "600",
+      style: "normal",
+    },
+    {
+      path: "../public/font/ITC Avant Garde Gothic LT Bold.ttf",
+      weight: "700",
+      style: "normal",
+    },
+    {
+      path: "../public/font/ITC Avant Garde Gothic LT Bold Oblique.otf",
+      weight: "700",
+      style: "italic",
+    },
+  ],
+  variable: "--font-avant-garde",
+});
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -169,7 +251,7 @@ export const metadata: Metadata = {
   creator: "Thrico",
   publisher: "Thrico",
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_BASE_URL || "https://admin.thrico.app"
+    process.env.NEXT_PUBLIC_BASE_URL || "https://admin.thrico.app",
   ),
   openGraph: {
     type: "website",
@@ -217,7 +299,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${spaceGrotesk.className} ${inter.variable} ${playfair.variable} ${outfit.variable} ${firaCode.variable} ${roboto.variable} ${openSans.variable} ${montserrat.variable} ${lato.variable} ${poppins.variable} ${nunito.variable} ${sourceSans3.variable} ${workSans.variable} ${ubuntu.variable} ${merriweather.variable} ${lora.variable} ${cormorantGaramond.variable} ${bitter.variable} ${oswald.variable} ${raleway.variable} ${bebasNeue.variable} ${cinzel.variable} ${pacifico.variable} font-sans`}
+        className={`${roobert.variable} ${avantGarde.variable} ${spaceGrotesk.className} ${inter.variable} ${playfair.variable} ${outfit.variable} ${firaCode.variable} ${roboto.variable} ${openSans.variable} ${montserrat.variable} ${lato.variable} ${poppins.variable} ${nunito.variable} ${sourceSans3.variable} ${workSans.variable} ${ubuntu.variable} ${merriweather.variable} ${lora.variable} ${cormorantGaramond.variable} ${bitter.variable} ${oswald.variable} ${raleway.variable} ${bebasNeue.variable} ${cinzel.variable} ${pacifico.variable} font-sans`}
       >
         <ApolloWrapper>{children}</ApolloWrapper>
       </body>

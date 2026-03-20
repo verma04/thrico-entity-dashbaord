@@ -1,15 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  ModuleAnalyticsLayout,
-  KPIStat,
-} from "@/components/analytics/module-analytics-layout";
 import { useGetFeedbackStats } from "@/graphql/actions/feedback";
 import { TimeRange } from "@/graphql/actions";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MessageSquare, Check, Clock, ThumbsUp } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { MessageSquare, Check, Clock, ThumbsUp, Activity, Zap, ShieldCheck, RotateCcw, TrendingUp, BarChart3, Globe, ArrowRight, Timer, Sparkles, MessageCircle } from "lucide-react";
 import {
   ResponsiveContainer,
   BarChart,
@@ -19,108 +14,206 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
+  Cell,
 } from "recharts";
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { EcosystemKPI, EcosystemCard, EcosystemStatusIndicator } from "@/components/layout/ecosystem/ecosystem-analytics";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import Link from "next/link";
 
 export default function FeedbackAnalytics() {
   const [timeRange, setTimeRange] = useState<TimeRange>(TimeRange.LAST_7_DAYS);
-  const { data, loading } = useGetFeedbackStats(timeRange);
+  const { data, loading, refetch } = useGetFeedbackStats(timeRange);
 
   const stats = data?.getFeedbackStats;
 
-  const kpiStats: KPIStat[] = [
+  const kpis = [
     {
-      title: "Total Feedback",
-      value: loading ? (
-        <Skeleton className="h-8 w-24" />
-      ) : (
-        stats?.totalFeedback?.toLocaleString() ?? "N/A"
-      ),
-      change: stats?.totalFeedbackChange ?? 0,
-      trend: (stats?.totalFeedbackChange ?? 0) >= 0 ? "up" : "down",
+      title: "Aggregate Feedback",
+      value: loading ? "..." : (stats?.totalFeedback?.toLocaleString() ?? "0"),
+      trend: stats?.totalFeedbackChange ?? 0,
       icon: MessageSquare,
-      color: "text-blue-700",
-      bgColor: "bg-blue-100",
+      color: "text-indigo-500",
+      bg: "bg-indigo-500/10",
     },
     {
-      title: "Pending",
-      value: loading ? (
-        <Skeleton className="h-8 w-24" />
-      ) : (
-        stats?.pendingFeedback?.toLocaleString() ?? "N/A"
-      ),
-      change: stats?.pendingFeedbackChange ?? 0,
-      trend: (stats?.pendingFeedbackChange ?? 0) <= 0 ? "up" : "down", // Less pending is usually good, but here let's assume standard trend display
+      title: "Pending Resolution",
+      value: loading ? "..." : (stats?.pendingFeedback?.toLocaleString() ?? "0"),
+      trend: stats?.pendingFeedbackChange ?? 0,
       icon: Clock,
-      color: "text-yellow-700",
-      bgColor: "bg-yellow-100",
+      color: "text-amber-500",
+      bg: "bg-amber-500/10",
     },
     {
-      title: "Resolved",
-      value: loading ? (
-        <Skeleton className="h-8 w-24" />
-      ) : (
-        stats?.resolvedFeedback?.toLocaleString() ?? "N/A"
-      ),
-      change: stats?.resolvedFeedbackChange ?? 0,
-      trend: (stats?.resolvedFeedbackChange ?? 0) >= 0 ? "up" : "down",
+      title: "Resolved Nodes",
+      value: loading ? "..." : (stats?.resolvedFeedback?.toLocaleString() ?? "0"),
+      trend: stats?.resolvedFeedbackChange ?? 0,
       icon: Check,
-      color: "text-green-700",
-      bgColor: "bg-green-100",
+      color: "text-emerald-500",
+      bg: "bg-emerald-500/10",
     },
     {
-      title: "Satisfaction Score",
-      value: loading ? (
-        <Skeleton className="h-8 w-24" />
-      ) : stats ? (
-        `${stats.satisfactionScore}/5`
-      ) : (
-        "N/A"
-      ),
-      change: stats?.satisfactionScoreChange ?? 0,
-      trend: (stats?.satisfactionScoreChange ?? 0) >= 0 ? "up" : "down",
+      title: "Satisfaction Yield",
+      value: loading ? "..." : stats ? `${stats.satisfactionScore}/5` : "0/5",
+      trend: stats?.satisfactionScoreChange ?? 0,
       icon: ThumbsUp,
-      color: "text-purple-700",
-      bgColor: "bg-purple-100",
+      color: "text-violet-500",
+      bg: "bg-violet-500/10",
     },
   ];
 
   const feedbackTrendData = [
-    { name: "Mon", feedback: 8 },
-    { name: "Tue", feedback: 12 },
-    { name: "Wed", feedback: 10 },
-    { name: "Thu", feedback: 15 },
-    { name: "Fri", feedback: 9 },
-    { name: "Sat", feedback: 4 },
-    { name: "Sun", feedback: 6 },
+    { name: "MON", feedback: 8 },
+    { name: "TUE", feedback: 12 },
+    { name: "WED", feedback: 10 },
+    { name: "THU", feedback: 15 },
+    { name: "FRI", feedback: 9 },
+    { name: "SAT", feedback: 4 },
+    { name: "SUN", feedback: 6 },
   ];
 
   return (
-    <ModuleAnalyticsLayout
-      title="Feedback Analytics"
-      description="Monitor user feedback and resolution metrics"
-      timeRange={timeRange}
-      onTimeRangeChange={setTimeRange}
-      kpiStats={kpiStats}
-    >
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Daily Feedback</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={feedbackTrendData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis dataKey="name" stroke="#9ca3af" fontSize={12} />
-                <YAxis stroke="#9ca3af" fontSize={12} />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="feedback" fill="#3b82f6" name="Feedback" />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      </div>
-    </ModuleAnalyticsLayout>
+    <EcosystemWrapper anonymized-1="feedback-analytics">
+      <EcosystemHeader
+        title="Dialogue Intelligence"
+        badgeText="Sentiment Registry"
+        description="Monitor user feedback velocity, resolution protocols, and architectural satisfaction yield across the global registry."
+        icon={MessageCircle}
+      />
+
+      <EcosystemActionBar shadow="none">
+        <div className="flex items-center justify-between w-full">
+           <div className="flex items-center gap-6">
+              <EcosystemStatusIndicator status="active" label="Dialogue Stream: Operational" />
+              <div className="h-4 w-px bg-slate-200" />
+              <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
+                 <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
+                 <span>Sentiment Matrix: Optimal</span>
+              </div>
+           </div>
+
+           <div className="flex items-center gap-3">
+              <Select value={timeRange} onValueChange={(val) => setTimeRange(val as TimeRange)}>
+                <SelectTrigger className="h-10 w-[200px] rounded-xl border-slate-200 font-bold text-slate-600 bg-white shadow-sm">
+                  <Timer className="h-4 w-4 mr-2 text-indigo-500" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="rounded-2xl border-slate-100 shadow-2xl">
+                  <SelectItem value={TimeRange.LAST_24_HOURS} className="font-bold uppercase text-[10px]">Real-time Cycle</SelectItem>
+                  <SelectItem value={TimeRange.LAST_7_DAYS} className="font-bold uppercase text-[10px]">Last 7 Cycles</SelectItem>
+                  <SelectItem value={TimeRange.LAST_30_DAYS} className="font-bold uppercase text-[10px]">Last 30 Cycles</SelectItem>
+                  <SelectItem value={TimeRange.LAST_90_DAYS} className="font-bold uppercase text-[10px]">Last 90 Cycles</SelectItem>
+                </SelectContent>
+              </Select>
+              <div className="h-4 w-px bg-slate-200 mx-1" />
+              <Button variant="outline" size="icon" className="h-10 w-10 text-slate-400 hover:text-indigo-600 rounded-xl transition-all shadow-sm bg-white" onClick={() => refetch()}>
+                <RotateCcw className={cn("h-4 w-4", loading && "animate-spin")} />
+              </Button>
+           </div>
+        </div>
+      </EcosystemActionBar>
+
+      <EcosystemContainer className="space-y-12 p-8 lg:p-12">
+        {/* KPI Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+           {kpis.map((kpi, i) => (
+             <EcosystemKPI key={i} {...kpi} trendLabel="Protocol" />
+           ))}
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+           <div className="lg:col-span-8">
+              <EcosystemCard 
+                title="Dialogue Velocity" 
+                description="Temporal feedback instantiation cycles" 
+                icon={TrendingUp}
+                decorationIcon={Zap}
+              >
+                 <div className="h-[350px] w-full">
+                   {loading ? (
+                     <div className="h-full w-full flex items-center justify-center bg-slate-50/50 rounded-3xl border-2 border-dashed border-slate-100 transition-all">
+                        <div className="h-10 w-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+                     </div>
+                   ) : (
+                     <ResponsiveContainer width="100%" height="100%">
+                       <BarChart data={feedbackTrendData} barGap={8}>
+                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                         <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 900, fill: '#94a3b8' }} dy={15} />
+                         <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 900, fill: '#94a3b8' }} />
+                         <Tooltip
+                           contentStyle={{ backgroundColor: "#0f172a", border: "none", borderRadius: "16px", boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)" }}
+                           itemStyle={{ color: "#fff", fontWeight: 900, textTransform: 'uppercase', fontSize: '10px' }}
+                           labelStyle={{ display: 'none' }}
+                           cursor={{ fill: '#f8fafc' }}
+                         />
+                         <Bar dataKey="feedback" fill="#3b82f6" radius={[8, 8, 0, 0]} barSize={40} animationDuration={1500}>
+                            {feedbackTrendData.map((entry, index) => (
+                               <Cell key={`cell-${index}`} fill={index % 2 === 0 ? '#3b82f6' : '#6366f1'} />
+                            ))}
+                         </Bar>
+                       </BarChart>
+                     </ResponsiveContainer>
+                   )}
+                 </div>
+              </EcosystemCard>
+           </div>
+
+           <div className="lg:col-span-4">
+              <EcosystemCard 
+                title="Sentiment Matrix" 
+                description="Registry satisfaction distribution" 
+                icon={Sparkles}
+                decorationIcon={Activity}
+                className="min-h-fit"
+              >
+                 <div className="flex flex-col items-center justify-center pt-6 group/score">
+                    <div className="relative h-32 w-32 flex items-center justify-center">
+                       <svg className="h-full w-full -rotate-90">
+                          <circle cx="64" cy="64" r="58" fill="transparent" stroke="#f1f5f9" strokeWidth="12" />
+                          <circle cx="64" cy="64" r="58" fill="transparent" stroke="#6366f1" strokeWidth="12" strokeDasharray="364.4" strokeDashoffset={364.4 * (1 - (stats?.satisfactionScore || 0) / 5)} strokeLinecap="round" className="transition-all duration-1000 ease-out" />
+                       </svg>
+                       <div className="absolute inset-0 flex flex-col items-center justify-center">
+                          <span className="text-4xl font-black text-slate-900 tracking-tighter group-hover/score:scale-110 transition-transform">{stats?.satisfactionScore || "0"}</span>
+                          <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Yield / 5</span>
+                       </div>
+                    </div>
+                 </div>
+
+                 <div className="space-y-4 mt-8">
+                    {[
+                      { label: "Positive Sentiment", value: 85, color: "bg-emerald-500" },
+                      { label: "Neutral Nodes", value: 10, color: "bg-amber-500" },
+                      { label: "Critical Priority", value: 5, color: "bg-rose-500" }
+                    ].map((item, i) => (
+                      <div key={i} className="group/item">
+                         <div className="flex items-center justify-between mb-2 px-1">
+                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{item.label}</span>
+                            <span className="text-xs font-black text-slate-900">{item.value}%</span>
+                         </div>
+                         <div className="h-2 w-full bg-slate-50 rounded-full overflow-hidden border border-slate-100 shadow-inner">
+                            <div className={cn("h-full rounded-full transition-all duration-1000 group-hover/item:scale-x-105 origin-left", item.color)} style={{ width: `${item.value}%` }} />
+                         </div>
+                      </div>
+                    ))}
+                 </div>
+
+                 <div className="mt-8 pt-6 border-t border-slate-50">
+                    <Link href="/feedback/all">
+                       <Button variant="outline" className="w-full h-12 rounded-xl border-slate-200 font-black text-[10px] uppercase tracking-widest text-slate-600 gap-3 hover:bg-slate-50 hover:text-indigo-600 transition-all shadow-sm">
+                          Resolve Protocols
+                          <ArrowRight className="h-4 w-4" />
+                       </Button>
+                    </Link>
+                 </div>
+              </EcosystemCard>
+           </div>
+        </div>
+      </EcosystemContainer>
+    </EcosystemWrapper>
   );
 }

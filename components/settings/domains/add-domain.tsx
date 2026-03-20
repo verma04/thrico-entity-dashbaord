@@ -24,6 +24,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useRouter } from "next/navigation";
 import { addCustomDomain } from "@/graphql/actions/domain";
+import { Plus, Loader2 } from "lucide-react";
 
 const domainSchema = z.object({
   website: z
@@ -73,55 +74,80 @@ export const AddDomain = () => {
 
   return (
     <>
-      <Button onClick={() => setIsOpen(true)} variant="default">
+      <Button
+        onClick={() => setIsOpen(true)}
+        className="h-8 px-4 text-[12px] font-semibold bg-slate-900 hover:bg-black text-white gap-2 shadow-sm"
+      >
+        <Plus className="h-4 w-4" />
         Connect Domain
       </Button>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Connect your domain</DialogTitle>
-            <DialogDescription>
-              Add a domain you own to your Thrico workspace
-            </DialogDescription>
-          </DialogHeader>
+        <DialogContent className="sm:max-w-md p-0 overflow-hidden border-slate-200 shadow-xl rounded-xl">
+          <div className="px-6 pt-6 pb-4 border-b border-slate-100 bg-slate-50/50">
+            <DialogHeader>
+              <DialogTitle className="text-[16px] font-semibold text-slate-900 tracking-tight">
+                Connect your domain
+              </DialogTitle>
+              <DialogDescription className="text-[13px] text-slate-500 mt-1">
+                Attach an external domain namespace to this workspace environment.
+              </DialogDescription>
+            </DialogHeader>
+          </div>
 
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="website"
-                render={({ field }) => (
-                  <FormItem>
-                    <Label htmlFor="domain">Domain</Label>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        id="domain"
-                        placeholder="example.com"
-                        disabled={loading}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+          <div className="p-6">
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <FormField
+                  control={form.control}
+                  name="website"
+                  render={({ field }) => (
+                    <FormItem className="space-y-2">
+                      <Label htmlFor="domain" className="text-[12px] font-semibold text-slate-700">
+                        Domain namespace
+                      </Label>
+                      <FormControl>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[13px] font-mono">
+                            https://
+                          </span>
+                          <Input
+                            {...field}
+                            id="domain"
+                            placeholder="acme-corp.com"
+                            disabled={loading}
+                            autoFocus
+                            className="pl-[72px] h-10 border-slate-200 focus:border-slate-300 focus:ring-slate-200 rounded-lg text-[13px] font-mono shadow-sm"
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage className="text-[11px] font-medium" />
+                    </FormItem>
+                  )}
+                />
 
-              <DialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsOpen(false)}
-                  disabled={loading}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={loading}>
-                  {loading ? "Adding..." : "Add Domain"}
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
+                <DialogFooter className="gap-2 sm:gap-0 pt-2 border-t border-slate-100">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => setIsOpen(false)}
+                    disabled={loading}
+                    className="h-9 px-4 text-[12px] font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={loading}
+                    className="h-9 px-6 text-[12px] font-semibold bg-slate-900 hover:bg-black text-white shadow-sm gap-2"
+                  >
+                    {loading && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                    {loading ? "Provisioning..." : "Connect"}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </Form>
+          </div>
         </DialogContent>
       </Dialog>
     </>

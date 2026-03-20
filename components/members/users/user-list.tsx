@@ -9,21 +9,22 @@ import { DataTable } from "@/components/ui/data-table";
 import { format } from "date-fns";
 import { Mail, MapPin } from "lucide-react";
 import { UserDetail } from "@/graphql/actions";
+import { cn } from "@/lib/utils";
 
 const getStatusColor = (status: string) => {
   switch (status) {
     case "APPROVED":
-      return "bg-green-500/10 text-green-600 border-none shadow-none font-semibold";
+      return "text-emerald-700 bg-emerald-50 border-emerald-100 shadow-sm shadow-emerald-50/50";
     case "PENDING":
-      return "bg-yellow-500/10 text-yellow-600 border-none shadow-none font-semibold";
+      return "text-amber-700 bg-amber-50 border-amber-100 shadow-sm shadow-amber-50/50";
     case "BLOCKED":
-      return "bg-red-500/10 text-red-600 border-none shadow-none font-semibold";
+      return "text-rose-700 bg-rose-50 border-rose-100 shadow-sm shadow-rose-50/50";
     case "REJECTED":
-      return "bg-purple-500/10 text-purple-600 border-none shadow-none font-semibold";
+      return "text-slate-700 bg-slate-50 border-slate-100 shadow-sm shadow-slate-50/50";
     case "DISABLED":
-      return "bg-orange-500/10 text-orange-600 border-none shadow-none font-semibold";
+      return "text-orange-700 bg-orange-50 border-orange-100 shadow-sm shadow-orange-50/50";
     default:
-      return "bg-gray-500/10 text-gray-600 border-none shadow-none font-semibold";
+      return "text-slate-500 bg-slate-50 border-slate-100";
   }
 };
 
@@ -44,11 +45,11 @@ export function UserList({ users }: { users: UserDetail[] }) {
               {row.original.user?.lastName?.[0]}
             </AvatarFallback>
           </Avatar>
-          <div className="flex flex-col">
-            <p className="font-semibold text-sm leading-tight">
+          <div className="flex flex-col gap-0.5">
+            <p className="font-black text-slate-800 leading-tight tracking-tight text-sm">
               {row.original.user?.firstName} {row.original.user?.lastName}
             </p>
-            <p className="text-xs text-muted-foreground leading-tight mt-0.5">
+            <p className="text-[10px] font-bold text-slate-400 leading-tight mt-0.5 uppercase tracking-wider">
               {row.original.user?.about?.currentPosition || "Community Member"}
             </p>
           </div>
@@ -60,11 +61,11 @@ export function UserList({ users }: { users: UserDetail[] }) {
       header: "Contact Info",
       cell: ({ row }) => (
         <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Mail className="h-3 w-3" />
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-600">
+            <Mail className="h-3 w-3 text-blue-500" />
             <span>{row.original.user?.email}</span>
           </div>
-          <div className="text-[10px] text-muted-foreground/70 pl-4.5">
+          <div className="text-[10px] text-slate-400 font-bold pl-4.5 italic">
             +{row.original.user?.profile?.phone?.countryCode}-
             {row.original.user?.profile?.phone?.phoneNumber}
           </div>
@@ -85,7 +86,7 @@ export function UserList({ users }: { users: UserDetail[] }) {
       accessorKey: "status",
       header: "Status",
       cell: ({ row }) => (
-        <Badge className={getStatusColor(row.original.status)}>
+        <Badge className={cn("text-[9px] uppercase font-black px-2 py-0.5 h-5 rounded-md border-2", getStatusColor(row.original.status))}>
           {row.original.status}
         </Badge>
       ),
@@ -98,7 +99,12 @@ export function UserList({ users }: { users: UserDetail[] }) {
           variant={
             row.original.verification?.isVerified ? "default" : "secondary"
           }
-          className="text-[10px] h-5"
+          className={cn(
+            "text-[9px] h-5 px-2 font-black uppercase tracking-tight",
+            row.original.verification?.isVerified 
+              ? "bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-100" 
+              : "bg-slate-100 text-slate-400 border-none"
+          )}
         >
           {row.original.verification?.isVerified ? "Verified" : "Unverified"}
         </Badge>

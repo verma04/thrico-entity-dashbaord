@@ -10,6 +10,17 @@ import {
   User,
   TrendingUp,
   TrendingDown,
+  Activity,
+  Zap,
+  ShieldCheck,
+  RotateCcw,
+  Sparkles,
+  Search,
+  ArrowRight,
+  MessageCircle,
+  Hash,
+  BarChart3,
+  Globe,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -33,6 +44,12 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
 // Sample data for charts
 const weeklySignupsData = [
@@ -61,6 +78,7 @@ const communityPerformanceData = [
     members: 12500,
     activePercentage: 78,
     lastActivity: "2 hours ago",
+    icon: "📸",
   },
   {
     key: "2",
@@ -69,6 +87,7 @@ const communityPerformanceData = [
     members: 9800,
     activePercentage: 82,
     lastActivity: "1 hour ago",
+    icon: "💻",
   },
   {
     key: "3",
@@ -77,6 +96,7 @@ const communityPerformanceData = [
     members: 8700,
     activePercentage: 65,
     lastActivity: "3 hours ago",
+    icon: "💪",
   },
   {
     key: "4",
@@ -85,6 +105,7 @@ const communityPerformanceData = [
     members: 7600,
     activePercentage: 58,
     lastActivity: "5 hours ago",
+    icon: "📚",
   },
   {
     key: "5",
@@ -93,6 +114,7 @@ const communityPerformanceData = [
     members: 6500,
     activePercentage: 72,
     lastActivity: "4 hours ago",
+    icon: "✈️",
   },
   {
     key: "6",
@@ -101,6 +123,7 @@ const communityPerformanceData = [
     members: 5400,
     activePercentage: 67,
     lastActivity: "6 hours ago",
+    icon: "🍳",
   },
   {
     key: "7",
@@ -109,314 +132,286 @@ const communityPerformanceData = [
     members: 11200,
     activePercentage: 88,
     lastActivity: "30 minutes ago",
+    icon: "🎮",
   },
 ];
 
 // Helper function to get color based on activity percentage
 function getActivityColor(percentage: number) {
-  if (percentage >= 80) return "hsl(var(--chart-1))";
-  if (percentage >= 60) return "hsl(var(--chart-2))";
-  if (percentage >= 40) return "hsl(var(--chart-3))";
-  return "hsl(var(--chart-4))";
+  if (percentage >= 80) return "#10b981";
+  if (percentage >= 60) return "#3b82f6";
+  if (percentage >= 40) return "#f59e0b";
+  return "#ef4444";
 }
 
 // Colors for pie chart
 const COLORS = [
-  "hsl(var(--chart-1))",
-  "hsl(var(--chart-2))",
-  "hsl(var(--chart-3))",
-  "hsl(var(--chart-4))",
-  "hsl(var(--chart-5))",
+  "#6366f1",
+  "#c084fc",
+  "#fbbf24",
+  "#2dd4bf",
+  "#f472b6",
 ];
 
 export default function DiscussionForum() {
   const [dateRange, setDateRange] = useState<string>("7days");
 
-  const getDateRangeLabel = (value: string) => {
-    const labels: Record<string, string> = {
-      today: "Today",
-      "7days": "Last 7 Days",
-      "30days": "Last 30 Days",
-      custom: "Custom Range",
-    };
-    return labels[value] || "Last 7 Days";
-  };
-
   return (
-    <div className="space-y-6">
-      {/* Top Navigation Bar */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">
-                Discussion Forums
-              </h1>
-              <p className="text-muted-foreground mt-1">
-                Manage and monitor your community discussions
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
+    <EcosystemWrapper anonymized-1="discussion-forums">
+      <EcosystemHeader
+        title="Dialogue Protocol"
+        badgeText="Community Hub"
+        description="Orchestrate and monitor high-frequency community discussions. Track sentiment, engagement velocity, and architectural discourse."
+        icon={MessageCircle}
+      />
+
+      <EcosystemActionBar shadow="none">
+        <div className="flex items-center justify-between w-full">
+           <div className="flex items-center gap-6">
+              <div className="flex items-center gap-3">
+                 <div className="h-3 w-3 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+                 <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                    Discussion Engine: Energized
+                 </span>
+              </div>
+              <div className="h-4 w-px bg-slate-200" />
+              <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
+                 <Globe className="h-3.5 w-3.5 text-indigo-500" />
+                 <span>Global Propagation Stable</span>
+              </div>
+           </div>
+
+           <div className="flex items-center gap-3">
               <Select value={dateRange} onValueChange={setDateRange}>
-                <SelectTrigger className="w-[180px]">
-                  <Calendar className="h-4 w-4 mr-2" />
+                <SelectTrigger className="h-10 w-[180px] rounded-xl border-slate-200 font-bold text-slate-600 bg-white">
+                  <Calendar className="h-4 w-4 mr-2 text-indigo-500" />
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="today">Today</SelectItem>
-                  <SelectItem value="7days">Last 7 Days</SelectItem>
-                  <SelectItem value="30days">Last 30 Days</SelectItem>
-                  <SelectItem value="custom">Custom Range</SelectItem>
+                <SelectContent className="rounded-2xl border-slate-100 shadow-2xl">
+                  <SelectItem value="today" className="font-bold uppercase text-[10px]">Today</SelectItem>
+                  <SelectItem value="7days" className="font-bold uppercase text-[10px]">Last 7 Cycles</SelectItem>
+                  <SelectItem value="30days" className="font-bold uppercase text-[10px]">Last 30 Cycles</SelectItem>
                 </SelectContent>
               </Select>
-              <Button className="gap-2">
-                <Download className="h-4 w-4" />
-                Download CSV
+              <Button variant="outline" className="h-10 px-4 rounded-xl border-slate-200 font-bold text-slate-600 gap-2 hover:bg-slate-50 transition-all">
+                <Download className="h-4 w-4 text-emerald-500" />
+                Export Manifest
               </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+           </div>
+        </div>
+      </EcosystemActionBar>
 
-      {/* Metric Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Forums</CardTitle>
-            <div className="rounded-full p-2 bg-green-50 dark:bg-green-950">
-              <LayoutGrid className="h-4 w-4 text-green-600 dark:text-green-400" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-              128
-            </div>
-            <div className="flex items-center text-xs text-green-600 dark:text-green-400 mt-1">
-              <TrendingUp className="h-3 w-3 mr-1" />
-              +3 new this week
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Active Threads
-            </CardTitle>
-            <div className="rounded-full p-2 bg-amber-50 dark:bg-amber-950">
-              <Users className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">
-              542
-            </div>
-            <div className="flex items-center text-xs text-amber-600 dark:text-amber-400 mt-1">
-              <TrendingUp className="h-3 w-3 mr-1" />
-              18% increase
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Posts This Week
-            </CardTitle>
-            <div className="rounded-full p-2 bg-blue-50 dark:bg-blue-950">
-              <MessageSquare className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-              3,200
-            </div>
-            <div className="flex items-center text-xs text-blue-600 dark:text-blue-400 mt-1">
-              <TrendingUp className="h-3 w-3 mr-1" />
-              +3200 posts
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Users</CardTitle>
-            <div className="rounded-full p-2 bg-pink-50 dark:bg-pink-950">
-              <User className="h-4 w-4 text-pink-600 dark:text-pink-400" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-pink-600 dark:text-pink-400">
-              1,240
-            </div>
-            <div className="flex items-center text-xs text-pink-600 dark:text-pink-400 mt-1">
-              <TrendingUp className="h-3 w-3 mr-1" />
-              1240 users this week
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Charts - Second Row */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Weekly New Threads</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
-                  data={weeklySignupsData}
-                  margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-                >
-                  <defs>
-                    <linearGradient
-                      id="colorThreads"
-                      x1="0"
-                      y1="0"
-                      x2="0"
-                      y2="1"
-                    >
-                      <stop
-                        offset="5%"
-                        stopColor="hsl(var(--primary))"
-                        stopOpacity={0.8}
-                      />
-                      <stop
-                        offset="95%"
-                        stopColor="hsl(var(--primary))"
-                        stopOpacity={0}
-                      />
-                    </linearGradient>
-                  </defs>
-                  <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" />
-                  <YAxis stroke="hsl(var(--muted-foreground))" />
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    stroke="hsl(var(--border))"
-                  />
-                  <RechartsTooltip
-                    contentStyle={{
-                      backgroundColor: "hsl(var(--background))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: "var(--radius)",
-                    }}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="signups"
-                    stroke="hsl(var(--primary))"
-                    fillOpacity={1}
-                    fill="url(#colorThreads)"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Posts by Category</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={membersByInterestData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                    label={({ name, percent }) =>
-                      `${name}: ${(percent * 100).toFixed(0)}%`
-                    }
-                  >
-                    {membersByInterestData.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS[index % COLORS.length]}
-                      />
-                    ))}
-                  </Pie>
-                  <RechartsTooltip
-                    contentStyle={{
-                      backgroundColor: "hsl(var(--background))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: "var(--radius)",
-                    }}
-                  />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Top Forums Performance Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Top Forums Performance</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {communityPerformanceData.map((forum) => (
-              <div
-                key={forum.key}
-                className="flex items-center justify-between p-4 rounded-lg border hover:bg-accent transition-colors"
-              >
-                <div className="flex-1">
-                  <a
-                    href="#"
-                    className="font-medium hover:underline text-primary"
-                  >
-                    {forum.name}
-                  </a>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {forum.slug}
-                  </p>
+      <EcosystemContainer className="space-y-12 p-8 lg:p-12">
+        {/* Metric Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+           {[
+             { label: "Aggregate Forums", value: "128", trend: "+3 new", icon: LayoutGrid, color: "text-emerald-500", bg: "bg-emerald-500/10" },
+             { label: "Active Threads", value: "542", trend: "18% velocity", icon: Hash, color: "text-amber-500", bg: "bg-amber-500/10" },
+             { label: "Temporal Posts", value: "3,200", trend: "+24% delta", icon: MessageSquare, color: "text-blue-500", bg: "bg-blue-500/10" },
+             { label: "Engaged Entities", value: "1,240", trend: "High stability", icon: Users, color: "text-indigo-500", bg: "bg-indigo-500/10" }
+           ].map((stat, i) => (
+             <div key={i} className="p-8 rounded-[2.5rem] bg-white border border-slate-100 shadow-xl shadow-slate-200/50 group hover:shadow-2xl hover:translate-y-[-4px] transition-all duration-500 relative overflow-hidden">
+                <div className={cn("inline-flex p-4 rounded-2xl mb-6 transition-all duration-500 group-hover:scale-110", stat.bg)}>
+                   <stat.icon className={cn("h-6 w-6", stat.color)} />
                 </div>
-                <div className="flex items-center gap-8">
-                  <div className="text-right">
-                    <p className="text-sm font-medium">
-                      {forum.members.toLocaleString()}
-                    </p>
-                    <p className="text-xs text-muted-foreground">members</p>
-                  </div>
-                  <div className="w-32">
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1 bg-muted rounded-full h-2">
-                        <div
-                          className="h-2 rounded-full transition-all"
-                          style={{
-                            width: `${forum.activePercentage}%`,
-                            backgroundColor: getActivityColor(
-                              forum.activePercentage
-                            ),
-                          }}
-                        />
-                      </div>
-                      <span className="text-sm font-medium w-10 text-right">
-                        {forum.activePercentage}%
-                      </span>
-                    </div>
-                  </div>
-                  <div className="text-right w-24">
-                    <p className="text-xs text-muted-foreground">
-                      {forum.lastActivity}
-                    </p>
-                  </div>
+                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{stat.label}</h4>
+                <div className="flex items-baseline gap-3">
+                   <span className="text-3xl font-black text-slate-900">{stat.value}</span>
+                   <span className={cn("text-[9px] font-black uppercase tracking-tighter opacity-70", stat.color)}>
+                      {stat.trend}
+                   </span>
                 </div>
+             </div>
+           ))}
+        </div>
+
+        {/* Analytic Array */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+           <div className="lg:col-span-8 space-y-8">
+              <div className="flex items-center gap-3 px-1">
+                 <div className="h-10 w-10 rounded-xl bg-slate-900 flex items-center justify-center text-white">
+                    <Activity className="h-5 w-5" />
+                 </div>
+                 <div>
+                    <h3 className="text-xl font-black text-slate-900 tracking-tight italic uppercase">Emission Velocity</h3>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] leading-none mt-1">Foundational thread instantiation cycles</p>
+                 </div>
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+              <div className="p-10 rounded-[3rem] bg-white border border-slate-100 shadow-xl shadow-slate-200/50">
+                 <div className="h-[350px] w-full">
+                   <ResponsiveContainer width="100%" height="100%">
+                     <AreaChart
+                       data={weeklySignupsData}
+                       margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+                     >
+                       <defs>
+                         <linearGradient id="colorThreads" x1="0" y1="0" x2="0" y2="1">
+                           <stop offset="5%" stopColor="#6366f1" stopOpacity={0.15}/>
+                           <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                         </linearGradient>
+                       </defs>
+                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                       <XAxis 
+                         dataKey="day" 
+                         axisLine={false} 
+                         tickLine={false} 
+                         tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }}
+                       />
+                       <YAxis 
+                         axisLine={false} 
+                         tickLine={false} 
+                         tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }}
+                       />
+                       <RechartsTooltip
+                         contentStyle={{
+                           backgroundColor: "#0f172a",
+                           border: "none",
+                           borderRadius: "16px",
+                           boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
+                         }}
+                         itemStyle={{ color: "#fff", fontWeight: 900, textTransform: "uppercase", fontSize: "10px" }}
+                         labelStyle={{ display: "none" }}
+                       />
+                       <Area
+                         type="monotone"
+                         dataKey="signups"
+                         stroke="#6366f1"
+                         strokeWidth={4}
+                         fillOpacity={1}
+                         fill="url(#colorThreads)"
+                       />
+                     </AreaChart>
+                   </ResponsiveContainer>
+                 </div>
+              </div>
+           </div>
+
+           <div className="lg:col-span-4 space-y-8">
+              <div className="flex items-center gap-3 px-1">
+                 <div className="h-10 w-10 rounded-xl bg-slate-900 flex items-center justify-center text-white">
+                    <BarChart3 className="h-5 w-5" />
+                 </div>
+                 <div>
+                    <h3 className="text-xl font-black text-slate-900 tracking-tight italic uppercase">Taxonomy Distribution</h3>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] leading-none mt-1">Domain-specific engagement</p>
+                 </div>
+              </div>
+              <div className="p-10 rounded-[3rem] bg-white border border-slate-100 shadow-xl shadow-slate-200/50 flex items-center justify-center">
+                 <div className="h-[350px] w-full">
+                   <ResponsiveContainer width="100%" height="100%">
+                     <PieChart>
+                       <Pie
+                         data={membersByInterestData}
+                         cx="50%"
+                         cy="50%"
+                         innerRadius={60}
+                         outerRadius={100}
+                         paddingAngle={8}
+                         dataKey="value"
+                         stroke="none"
+                       >
+                         {membersByInterestData.map((entry, index) => (
+                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} cornerRadius={8} />
+                         ))}
+                       </Pie>
+                       <RechartsTooltip
+                         contentStyle={{
+                           backgroundColor: "#fff",
+                           border: "1px solid #f1f5f9",
+                           borderRadius: "16px",
+                           boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                         }}
+                         itemStyle={{ color: "#0f172a", fontWeight: 900, fontSize: "10px", textTransform: "uppercase" }}
+                       />
+                       <Legend 
+                         verticalAlign="bottom" 
+                         height={36} 
+                         formatter={(value) => <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">{value}</span>}
+                       />
+                     </PieChart>
+                   </ResponsiveContainer>
+                 </div>
+              </div>
+           </div>
+        </div>
+
+        {/* Performance Matrix Table */}
+        <div className="space-y-8">
+           <div className="flex items-center justify-between px-1">
+              <div className="flex items-center gap-3">
+                 <div className="h-12 w-12 rounded-[1.5rem] bg-slate-900 flex items-center justify-center text-white shadow-xl shadow-slate-200">
+                    <Zap className="h-6 w-6" />
+                 </div>
+                 <div>
+                    <h3 className="text-2xl font-black text-slate-900 tracking-tight italic uppercase">Forum Performance Manifest</h3>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] leading-none mt-1">High-tier forum engagement metrics</p>
+                 </div>
+              </div>
+              <Button variant="outline" className="h-12 px-8 rounded-2xl border-slate-200 font-black text-slate-600 gap-3 hover:bg-slate-50 transition-all uppercase text-[10px] tracking-widest">
+                 View Archival Logs
+                 <ArrowRight className="h-4 w-4" />
+              </Button>
+           </div>
+
+           <div className="rounded-[2.5rem] border border-slate-100 bg-white shadow-xl shadow-slate-200/50 overflow-hidden">
+             <div className="divide-y divide-slate-50">
+               {communityPerformanceData.map((forum) => (
+                 <div
+                   key={forum.key}
+                   className="flex items-center justify-between p-8 group hover:bg-slate-50/80 transition-all duration-300"
+                 >
+                   <div className="flex items-center gap-8 flex-1">
+                      <div className="h-16 w-16 bg-white rounded-2xl flex items-center justify-center text-3xl shadow-lg border border-slate-50 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+                         {forum.icon}
+                      </div>
+                      <div className="space-y-1">
+                         <h4 className="text-lg font-black text-slate-900 tracking-tight italic uppercase group-hover:text-indigo-600 transition-colors">
+                           {forum.name}
+                         </h4>
+                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                           Identifier: {forum.slug}
+                         </p>
+                      </div>
+                   </div>
+                   
+                   <div className="flex items-center gap-16">
+                     <div className="text-right space-y-1">
+                       <p className="text-xl font-black text-slate-900">
+                         {forum.members.toLocaleString()}
+                       </p>
+                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Population</p>
+                     </div>
+
+                     <div className="w-48 space-y-3">
+                       <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Activity Velocity</span>
+                          <span className="text-[10px] font-black text-slate-900 leading-none">{forum.activePercentage}%</span>
+                       </div>
+                       <div className="h-2 bg-slate-100 rounded-full overflow-hidden p-0.5">
+                         <div
+                           className="h-full rounded-full transition-all duration-1000 group-hover:animate-pulse"
+                           style={{
+                             width: `${forum.activePercentage}%`,
+                             backgroundColor: getActivityColor(forum.activePercentage),
+                             boxShadow: `0 0 10px ${getActivityColor(forum.activePercentage)}40`
+                           }}
+                         />
+                       </div>
+                     </div>
+
+                     <div className="text-right w-32 space-y-1">
+                       <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest italic leading-none">Last Emission</p>
+                       <p className="text-sm font-bold text-slate-400">
+                         {forum.lastActivity}
+                       </p>
+                     </div>
+                   </div>
+                 </div>
+               ))}
+             </div>
+           </div>
+        </div>
+      </EcosystemContainer>
+    </EcosystemWrapper>
   );
 }

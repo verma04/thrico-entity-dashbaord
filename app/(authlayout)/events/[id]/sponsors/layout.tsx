@@ -34,10 +34,6 @@ export default function SponsorshipLayout({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Sponsorship</h2>
-        <Button className="gap-2">
-          <Plus className="h-4 w-4" />
-          Add {activeTab === "tier" ? "Tier" : "Special Sponsor"}
-        </Button>
       </div>
 
       <Tabs value={activeTab} onValueChange={onTabChange}>

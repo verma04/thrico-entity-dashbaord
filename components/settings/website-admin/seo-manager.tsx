@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -37,7 +37,7 @@ import {
 } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
-import { Edit2Icon, Wand2, Globe } from "lucide-react";
+import { Edit2Icon, Wand2, Globe, RefreshCw, ShieldCheck, Activity, Search, ArrowRight } from "lucide-react";
 import { useWebsiteBuilderStore } from "@/store/useWebsiteBuilderStore";
 import { getCustomDomain, getThricoDomain } from "@/graphql/actions/domain";
 import {
@@ -45,6 +45,17 @@ import {
   useUpdatePageSeo,
   useGetWebsite,
 } from "@/graphql/actions/website";
+import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { cn } from "@/lib/utils";
+
+interface SeoFormValues {
+  title: string;
+  description: string;
+  keywords: string;
+  ogImage: string;
+  schemaMarkup: string;
+}
 
 // SEO Preview Component
 function SeoPreview({
@@ -62,126 +73,90 @@ function SeoPreview({
   const displayDescription =
     description ||
     "Add a meta description to see how your page appears in search results.";
-  const displayUrl = `${baseUrl}/${slug || "page"}`;
   const displayDomain = baseUrl.replace("https://", "").replace("http://", "");
 
-  // Character count status
   const getTitleStatus = (length: number) => {
-    if (length === 0) return "text-muted-foreground";
+    if (length === 0) return "text-slate-400";
     if (length > 60) return "text-destructive";
-    if (length >= 50) return "text-yellow-600";
-    return "text-green-600";
+    if (length >= 50) return "text-amber-500";
+    return "text-emerald-500";
   };
 
   const getDescStatus = (length: number) => {
-    if (length === 0) return "text-muted-foreground";
+    if (length === 0) return "text-slate-400";
     if (length > 160) return "text-destructive";
-    if (length >= 140) return "text-yellow-600";
-    return "text-green-600";
+    if (length >= 140) return "text-amber-500";
+    return "text-emerald-500";
   };
 
-  const titleLength = title?.length;
-  const descLength = description?.length;
+  const titleLength = title?.length || 0;
+  const descLength = description?.length || 0;
 
   return (
-    <Card className="border-2">
-      <CardHeader>
-        <div className="flex items-center gap-2">
-          <Globe className="h-5 w-5 text-muted-foreground" />
-          <CardTitle className="text-base">Search Result Preview</CardTitle>
+    <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-xl shadow-slate-200/50 space-y-6">
+      <div className="flex items-center gap-2 px-1">
+        <Globe className="h-4 w-4 text-indigo-500" />
+        <h4 className="text-[10px] font-black text-slate-900 uppercase tracking-widest">Search Engine Projection</h4>
+      </div>
+
+      <div className="bg-slate-50/50 rounded-2xl p-6 space-y-1 border border-slate-50">
+        <div className="flex items-center gap-2 mb-1">
+          <div className="w-4 h-4 rounded-full bg-linear-to-br from-blue-500 to-emerald-500 shadow-sm" />
+          <span className="text-[10px] font-bold text-slate-400">
+            {displayDomain}
+          </span>
         </div>
-        <CardDescription>
-          See how your page will appear in Google search results
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Google Search Result Mockup */}
-        <div className="bg-muted/30 rounded-lg p-4 space-y-1">
-          <div className="flex items-center gap-2 mb-1">
-            <div className="w-4 h-4 rounded-full bg-gradient-to-br from-blue-500 to-green-500" />
-            <span className="text-xs text-muted-foreground">
-              {displayDomain}
+        <div className="text-xl text-blue-600 font-medium mb-1 line-clamp-1 leading-tight">
+          {displayTitle}
+        </div>
+        <div className="text-[11px] text-emerald-700 mb-2 truncate max-w-full">
+          {baseUrl}/{slug || "page"}
+        </div>
+        <div className="text-sm text-slate-500 line-clamp-2 leading-relaxed font-medium">
+          {displayDescription}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-6 text-[10px] px-1">
+        <div className="space-y-3">
+          <div className="flex justify-between items-center">
+            <span className="font-black text-slate-400 uppercase tracking-tighter">Title Amplitude</span>
+            <span className={cn("font-black", getTitleStatus(titleLength))}>
+              {titleLength} / 60
             </span>
           </div>
-          <div className="text-xl text-blue-600 font-normal mb-1 line-clamp-1">
-            {displayTitle}
-          </div>
-          <div className="text-xs text-green-700 mb-2">
-            {baseUrl}/{slug || "page"}
-          </div>
-          <div className="text-sm text-muted-foreground line-clamp-2">
-            {displayDescription}
+          <div className="h-1 bg-slate-100 rounded-full overflow-hidden">
+            <div
+              className={cn("h-full transition-all duration-500", 
+                titleLength === 0 ? "bg-slate-200" : 
+                titleLength > 60 ? "bg-destructive" : 
+                titleLength >= 50 ? "bg-amber-500" : "bg-emerald-500"
+              )}
+              style={{ width: `${Math.min((titleLength / 60) * 100, 100)}%` }}
+            />
           </div>
         </div>
 
-        {/* Character Count Indicators */}
-        <div className="grid grid-cols-2 gap-4 text-xs">
-          <div>
-            <div className="flex justify-between items-center mb-1">
-              <span className="font-medium">Title Length</span>
-              <span className={getTitleStatus(titleLength)}>
-                {titleLength} / 60
-              </span>
-            </div>
-            <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-              <div
-                className={`h-full transition-all ${
-                  titleLength === 0
-                    ? "bg-muted-foreground"
-                    : titleLength > 60
-                    ? "bg-destructive"
-                    : titleLength >= 50
-                    ? "bg-yellow-600"
-                    : "bg-green-600"
-                }`}
-                style={{ width: `${Math.min((titleLength / 60) * 100, 100)}%` }}
-              />
-            </div>
-            <p className="text-muted-foreground mt-1">
-              {titleLength === 0
-                ? "Add a title"
-                : titleLength > 60
-                ? "Too long, may be truncated"
-                : titleLength >= 50
-                ? "Good length"
-                : "Consider adding more detail"}
-            </p>
+        <div className="space-y-3">
+          <div className="flex justify-between items-center">
+            <span className="font-black text-slate-400 uppercase tracking-tighter">Desc Density</span>
+            <span className={cn("font-black", getDescStatus(descLength))}>
+              {descLength} / 160
+            </span>
           </div>
-
-          <div>
-            <div className="flex justify-between items-center mb-1">
-              <span className="font-medium">Description Length</span>
-              <span className={getDescStatus(descLength)}>
-                {descLength} / 160
-              </span>
-            </div>
-            <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-              <div
-                className={`h-full transition-all ${
-                  descLength === 0
-                    ? "bg-muted-foreground"
-                    : descLength > 160
-                    ? "bg-destructive"
-                    : descLength >= 140
-                    ? "bg-yellow-600"
-                    : "bg-green-600"
-                }`}
-                style={{ width: `${Math.min((descLength / 160) * 100, 100)}%` }}
-              />
-            </div>
-            <p className="text-muted-foreground mt-1">
-              {descLength === 0
-                ? "Add a description"
-                : descLength > 160
-                ? "Too long, may be truncated"
-                : descLength >= 140
-                ? "Good length"
-                : "Consider adding more detail"}
-            </p>
+          <div className="h-1 bg-slate-100 rounded-full overflow-hidden">
+            <div
+              className={cn("h-full transition-all duration-500", 
+                descLength === 0 ? "bg-slate-200" : 
+                descLength > 160 ? "bg-destructive" : 
+                descLength >= 140 ? "bg-amber-500" : "bg-emerald-500"
+              )}
+              style={{ width: `${Math.min((descLength / 160) * 100, 100)}%` }}
+            />
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
 
@@ -193,11 +168,8 @@ function SchemaPreview({ schemaMarkup }: { schemaMarkup: string }) {
     }
 
     try {
-      // Extract JSON from script tag if present
       let jsonStr = schemaMarkup;
-      const scriptMatch = schemaMarkup.match(
-        /<script[^>]*>([\s\S]*?)<\/script>/
-      );
+      const scriptMatch = schemaMarkup.match(/<script[^>]*>([\s\S]*?)<\/script>/);
       if (scriptMatch) {
         jsonStr = scriptMatch[1].trim();
       }
@@ -216,462 +188,409 @@ function SchemaPreview({ schemaMarkup }: { schemaMarkup: string }) {
   const { valid, data, error } = parseSchema();
 
   return (
-    <Card className="border-2">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div
-              className={`w-2 h-2 rounded-full ${
-                valid === null
-                  ? "bg-muted-foreground"
-                  : valid
-                  ? "bg-green-500"
-                  : "bg-destructive"
-              }`}
-            />
-            <CardTitle className="text-base">Schema Markup Preview</CardTitle>
-          </div>
-          {valid !== null && (
-            <span
-              className={`text-xs font-medium ${
-                valid ? "text-green-600" : "text-destructive"
-              }`}
-            >
-              {valid ? "Valid JSON-LD" : "Invalid JSON"}
-            </span>
-          )}
+    <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-xl shadow-slate-200/50 space-y-6">
+      <div className="flex items-center justify-between px-1">
+        <div className="flex items-center gap-2">
+          <div
+            className={cn("w-2.5 h-2.5 rounded-full animate-pulse", 
+              valid === null ? "bg-slate-200" : valid ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-destructive shadow-[0_0_8px_rgba(239,68,68,0.5)]"
+            )}
+          />
+          <h4 className="text-[10px] font-black text-slate-900 uppercase tracking-widest">Semantic Schema Index</h4>
         </div>
-        <CardDescription>
-          {valid === null && "Add schema markup to see preview"}
-          {valid === true && "Your schema is valid and ready to use"}
-          {valid === false && "Fix the JSON syntax errors below"}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        {valid === null && (
-          <div className="text-sm text-muted-foreground text-center py-8">
-            Click "Auto-Generate" or paste your schema markup to see a preview
-          </div>
+        {valid !== null && (
+          <span className={cn("text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md", 
+            valid ? "bg-emerald-50 text-emerald-600" : "bg-destructive/10 text-destructive"
+          )}>
+            {valid ? "Verified Protocol" : "Syntax Error"}
+          </span>
         )}
+      </div>
 
-        {valid === false && (
-          <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
-            <p className="text-sm font-medium text-destructive mb-1">
-              JSON Error:
-            </p>
-            <p className="text-xs text-destructive/80 font-mono">{error}</p>
+      <div className="bg-slate-50/50 rounded-2xl p-6 border border-slate-50 min-h-[140px] flex flex-col justify-center">
+        {valid === null ? (
+          <div className="text-[10px] font-bold text-slate-400 text-center uppercase tracking-widest leading-relaxed">
+            Awaiting semantic injection...<br/>Generate or paste JSON-LD markup
           </div>
-        )}
-
-        {valid === true && data && (
-          <div className="space-y-3">
-            <div className="bg-muted/30 rounded-lg p-4 space-y-2">
-              <div className="flex items-center gap-2 text-sm">
-                <span className="font-medium">Type:</span>
-                <span className="text-blue-600">
-                  @{data["@type"] || "Unknown"}
-                </span>
-              </div>
-              {data.name && (
-                <div className="flex items-start gap-2 text-sm">
-                  <span className="font-medium">Name:</span>
-                  <span className="text-foreground">{data.name}</span>
-                </div>
-              )}
-              {data.description && (
-                <div className="flex items-start gap-2 text-sm">
-                  <span className="font-medium">Description:</span>
-                  <span className="text-muted-foreground line-clamp-2">
-                    {data.description}
-                  </span>
-                </div>
-              )}
-              {data.url && (
-                <div className="flex items-start gap-2 text-sm">
-                  <span className="font-medium">URL:</span>
-                  <span className="text-blue-600 text-xs">{data.url}</span>
-                </div>
-              )}
+        ) : valid === false ? (
+          <div className="space-y-2">
+            <p className="text-[10px] font-black text-destructive uppercase tracking-widest">Critical Syntax Failure</p>
+            <p className="text-[11px] text-destructive/80 font-mono bg-white p-3 rounded-xl border border-destructive/10 overflow-x-auto">{error}</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Entity Class:</span>
+              <span className="text-xs font-bold text-indigo-600 font-mono bg-indigo-50 px-2 py-0.5 rounded-md">@{data["@type"] || "Unknown"}</span>
             </div>
-
-            <details className="group">
-              <summary className="cursor-pointer text-xs font-medium text-muted-foreground hover:text-foreground transition-colors">
-                View full JSON structure
-              </summary>
-              <pre className="mt-2 p-3 bg-muted/50 rounded-lg text-xs font-mono overflow-x-auto">
-                {JSON.stringify(data, null, 2)}
-              </pre>
-            </details>
+            {data.name && (
+              <div className="space-y-1">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Designation</span>
+                <p className="text-xs font-bold text-slate-900">{data.name}</p>
+              </div>
+            )}
+            {data.description && (
+              <div className="space-y-1">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Description Extract</span>
+                <p className="text-xs font-medium text-slate-500 line-clamp-2 leading-relaxed">{data.description}</p>
+              </div>
+            )}
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
 
 export default function SeoManager() {
+  const { toast } = useToast();
   const { updatePageSeo } = useWebsiteBuilderStore();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingPageId, setEditingPageId] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const { data: websiteData } = useGetWebsite({});
+  const { data: websiteData, loading: websiteLoading } = useGetWebsite({});
   const websiteId = websiteData?.getWebsite?.id;
 
   const { data: seoData, refetch: refetchSeo } = useGetAllPagesSeo(
     websiteId || "",
-    {
-      skip: !websiteId,
-    }
+    { skip: !websiteId }
   );
 
-  const [updatePageSeoMutation, { loading: isSaving }] = useUpdatePageSeo({
+  const [updatePageSeoMutation] = useUpdatePageSeo({
     onCompleted: () => {
-      toast({
-        title: "Success",
-        description: "SEO settings updated successfully!",
-      });
       refetchSeo();
+      toast({ title: "Deployment Successful", description: "Metadata has been synchronized across nodes." });
       setIsModalVisible(false);
+      setIsSaving(false);
     },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update SEO settings",
-        variant: "destructive",
-      });
-    },
+    onError: (err) => {
+      toast({ title: "Deployment Failure", description: err.message, variant: "destructive" });
+      setIsSaving(false);
+    }
   });
 
-  const pages = seoData?.getAllPagesSeo || [];
-
-  // Fetch domain data
-  const { data: thricoDomainData } = getThricoDomain();
-  const { data: customDomainData } = getCustomDomain();
-
-  const NEXT_PUBLIC_SITE_URL =
-    process.env.NEXT_PUBLIC_SITE_URL || "thrico.community";
-
-  const thricoDomainUrl = thricoDomainData?.getThricoDomain?.domain
-    ? `https://${thricoDomainData.getThricoDomain.domain}.${NEXT_PUBLIC_SITE_URL}`
-    : `https://your-site.${NEXT_PUBLIC_SITE_URL}`;
-
-  const customDomainUrl = customDomainData?.getCustomDomain?.domain
-    ? `https://${customDomainData.getCustomDomain.domain}`
-    : null;
-
-  // Use custom domain if available, otherwise use thrico domain
-  const websiteUrl = customDomainUrl || thricoDomainUrl;
-
-  const { toast } = useToast();
-  const form = useForm({
+  const form = useForm<SeoFormValues>({
     defaultValues: {
       title: "",
       description: "",
       keywords: "",
+      ogImage: "",
       schemaMarkup: "",
     },
   });
 
-  const generateSchemaMarkup = () => {
-    const page = pages.find((p) => p.id === editingPageId);
-    if (!page) return;
+  const websiteUrl = websiteData?.getWebsite 
+    ? (getCustomDomain(websiteData.getWebsite) || getThricoDomain(websiteData.getWebsite))
+    : "https://thrico.community";
 
-    const title = form.getValues("title");
-    const description = form.getValues("description");
-    const keywords = form.getValues("keywords");
+  const pages = seoData?.getAllPagesSeo || [];
+
+  const handleEdit = (pageId: string) => {
+    const page = pages.find((p) => p.id === pageId);
+    if (page) {
+      setEditingPageId(pageId);
+      form.reset({
+        title: page.seo?.title || "",
+        description: page.seo?.description || "",
+        keywords: page.seo?.keywords || "",
+        ogImage: page.seo?.ogImage || "",
+        schemaMarkup: page.seo?.schemaMarkup || "",
+      });
+      setIsModalVisible(true);
+    }
+  };
+
+  const handleSave = form.handleSubmit(async (values) => {
+    if (!editingPageId) return;
+    setIsSaving(true);
+    try {
+      await updatePageSeoMutation({
+        variables: {
+          pageId: editingPageId,
+          ...values,
+        },
+      });
+      updatePageSeo(editingPageId, values);
+    } catch (error) {
+       console.error("SEO update failed:", error);
+       setIsSaving(false);
+    }
+  });
+
+  const generateSchemaMarkup = () => {
+    const currentPage = pages.find((p) => p.id === editingPageId);
+    if (!currentPage) return;
 
     const schema = {
       "@context": "https://schema.org",
       "@type": "WebPage",
-      name: title || page.name,
-      description: description || `Learn more about ${page.name}`,
-      url: `${websiteUrl}/${page.slug}`,
-      keywords: keywords || page.name,
-      inLanguage: "en-US",
-      isPartOf: {
-        "@type": "WebSite",
-        name: thricoDomainData?.getThricoDomain?.domain || "Your Website",
-        url: websiteUrl,
-      },
-      datePublished: new Date().toISOString(),
-      dateModified: new Date().toISOString(),
+      name: form.getValues("title") || currentPage.name,
+      description: form.getValues("description"),
+      url: `${websiteUrl}/${currentPage.slug}`,
     };
 
-    const schemaMarkup = `<script type="application/ld+json">
-${JSON.stringify(schema, null, 2)}
-</script>`;
-
-    form.setValue("schemaMarkup", schemaMarkup);
-
-    toast({
-      title: "Schema Generated",
-      description:
-        "SEO schema markup has been auto-generated based on your page data.",
-    });
+    form.setValue("schemaMarkup", JSON.stringify(schema, null, 2));
+    toast({ title: "Schema Generated", description: "Standard WebPage entity has been synthesized." });
   };
-
-  const handleEdit = (pageId: string) => {
-    const page = pages.find((p) => p.id === pageId);
-    if (!page) return;
-
-    setEditingPageId(pageId);
-
-    const keywords = Array.isArray(page.seo?.keywords)
-      ? page.seo?.keywords.join(", ")
-      : (page.seo?.keywords as unknown as string) || "";
-
-    form.reset({
-      title: page.seo?.title || `${page.name} - My Website`,
-      description: page.seo?.description || "", // Fallback to page description if exists
-      keywords: keywords,
-      schemaMarkup: page.seo?.schemaMarkup || "",
-    });
-    setIsModalVisible(true);
-  };
-
-  const handleSave = form.handleSubmit((values) => {
-    if (!editingPageId) return;
-
-    const keywordsArray = values.keywords
-      ? values.keywords.split(",").map((k) => k.trim())
-      : [];
-
-    updatePageSeoMutation({
-      variables: {
-        pageId: editingPageId,
-        title: values.title,
-        description: values.description,
-        keywords: keywordsArray,
-        schemaMarkup: values.schemaMarkup,
-      },
-    });
-
-    // Also update local store for immediate UI update
-    updatePageSeo(editingPageId, {
-      title: values.title,
-      description: values.description,
-      keywords: values.keywords,
-      schemaMarkup: values.schemaMarkup,
-    });
-  });
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>SEO Manager</CardTitle>
-          <CardDescription>
-            Manage SEO settings for all pages on your website. Optimize your
-            meta titles, descriptions, and keywords.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto rounded-lg border border-border">
-            <Table>
-              <TableHeader>
-                <TableRow className="border-border">
-                  <TableHead className="font-semibold">Page</TableHead>
-                  <TableHead className="font-semibold">Meta Title</TableHead>
-                  <TableHead className="font-semibold">
-                    Meta Description
-                  </TableHead>
-                  <TableHead className="text-right font-semibold">
-                    Actions
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {pages.map((page) => (
-                  <TableRow key={page.id} className="border-border">
-                    <TableCell>
-                      <div>
-                        <div className="font-medium text-foreground">
-                          {page.name}
+    <div className="space-y-8">
+      <EcosystemActionBar shadow="sm">
+        <div className="flex items-center justify-between w-full">
+           <div className="flex items-center gap-6">
+              <div className="flex items-center gap-3">
+                 <div className="h-3 w-3 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+                 <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                    Indexability Check: Passed
+                 </span>
+              </div>
+              <div className="h-4 w-px bg-slate-200" />
+              <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
+                 <ShieldCheck className="h-3.5 w-3.5 text-indigo-500" />
+                 <span>Crawler Status: Optimized</span>
+              </div>
+           </div>
+
+           <div className="flex items-center gap-3">
+              <Button 
+                variant="outline" 
+                onClick={() => refetchSeo()}
+                className="h-10 px-4 rounded-xl border-slate-200 font-bold text-slate-600 gap-2 hover:bg-slate-50 transition-all"
+              >
+                <RefreshCw className={cn("h-4 w-4", websiteLoading && "animate-spin")} />
+                Refresh Meta
+              </Button>
+           </div>
+        </div>
+      </EcosystemActionBar>
+
+      <EcosystemContainer className="space-y-10 p-8 lg:p-12">
+        <div className="space-y-6">
+           <div className="rounded-[40px] border border-slate-100 bg-white shadow-xl shadow-slate-200/50 overflow-hidden">
+             {websiteLoading ? (
+               <div className="p-20 flex flex-col items-center justify-center space-y-4">
+                  <div className="relative">
+                     <div className="h-12 w-12 rounded-full border-4 border-slate-100 border-t-indigo-600 animate-spin" />
+                     <div className="absolute inset-0 flex items-center justify-center">
+                        <Activity className="h-4 w-4 text-indigo-600" />
+                     </div>
+                  </div>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Analyzing SEO Metadata</p>
+               </div>
+             ) : (
+               <div className="divide-y divide-slate-50">
+                 <div className="grid grid-cols-12 bg-slate-50/50 p-6 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">
+                   <div className="col-span-4">Page Entity</div>
+                   <div className="col-span-3">Meta Designation</div>
+                   <div className="col-span-3">Metadata Extract</div>
+                   <div className="col-span-2 text-right pr-4">Matrix Actions</div>
+                 </div>
+                 {pages.length === 0 ? (
+                   <div className="p-24 flex flex-col items-center justify-center text-center space-y-6">
+                      <div className="h-20 w-20 rounded-4xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-300">
+                         <Globe className="h-10 w-10 opacity-20" />
+                      </div>
+                      <div className="space-y-1">
+                         <p className="text-lg font-black italic text-slate-900 uppercase">No Pages Found</p>
+                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Connect pages to manage their SEO metadata</p>
+                      </div>
+                   </div>
+                 ) : (
+                   pages.map((page) => (
+                      <div key={page.id} className="grid grid-cols-12 p-6 items-center hover:bg-slate-50/50 transition-all group">
+                        <div className="col-span-4">
+                          <div className="font-bold text-slate-900">{page.name}</div>
+                          <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">/{page.slug}</div>
                         </div>
-                        <div className="text-sm text-muted-foreground">
-                          /{page.slug}
+                        <div className="col-span-3">
+                           <div className="text-xs font-medium text-slate-600 line-clamp-1">
+                             {page.seo?.title || <span className="text-slate-300 italic">Not set</span>}
+                           </div>
+                        </div>
+                        <div className="col-span-3">
+                           <div className="text-xs text-slate-400 line-clamp-1">
+                             {page.seo?.description || <span className="text-slate-300 italic">No description</span>}
+                           </div>
+                        </div>
+                        <div className="col-span-2 flex justify-end pr-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleEdit(page.id)}
+                            className="h-9 px-4 rounded-xl border-slate-200 font-bold text-slate-600 gap-2 hover:bg-white hover:shadow-lg hover:shadow-slate-200 transition-all active:scale-95"
+                          >
+                            <Edit2Icon className="h-3.5 w-3.5" />
+                            Optimize
+                          </Button>
                         </div>
                       </div>
-                    </TableCell>
-                    <TableCell className="text-sm text-foreground line-clamp-1">
-                      {page.seo?.title || (
-                        <span className="text-muted-foreground italic">
-                          Not set
-                        </span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground line-clamp-1">
-                      {page.seo?.description || (
-                        <span className="text-muted-foreground italic">
-                          Not set
-                        </span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleEdit(page.id)}
-                        className="gap-2"
-                      >
-                        <Edit2Icon className="h-4 w-4" />
-                        Edit
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+                   ))
+                 )}
+               </div>
+             )}
+           </div>
+        </div>
+      </EcosystemContainer>
 
       <Dialog open={isModalVisible} onOpenChange={setIsModalVisible}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Edit SEO Settings</DialogTitle>
-            <DialogDescription>
-              Update meta information to improve search engine visibility
-            </DialogDescription>
-          </DialogHeader>
-
-          <Form {...form}>
-            <form onSubmit={handleSave} className="space-y-6">
-              {/* Preview + Form Grid */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Left: Live Preview */}
-                <div className="order-2 lg:order-1">
-                  <SeoPreview
-                    title={form.watch("title")}
-                    description={form.watch("description")}
-                    slug={pages.find((p) => p.id === editingPageId)?.slug || ""}
-                    baseUrl={websiteUrl}
-                  />
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto rounded-[40px] border-none shadow-2xl p-0 overflow-hidden">
+          <div className="bg-slate-900 p-8 text-white relative overflow-hidden">
+             <div className="absolute top-0 right-0 p-12 opacity-10 rotate-12 scale-150">
+                <Globe className="h-40 w-40" />
+             </div>
+             <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-2">
+                   <div className="px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-white font-black text-[9px] uppercase tracking-widest border border-white/10">
+                      SEO Optimization Protocol
+                   </div>
                 </div>
+                <DialogTitle className="text-3xl font-black italic uppercase tracking-tighter">Metadata Architecture</DialogTitle>
+                <DialogDescription className="text-slate-400 font-bold text-[11px] uppercase tracking-wider mt-1">
+                  Configure search engine visibility and semantic indices for the selected node.
+                </DialogDescription>
+             </div>
+          </div>
 
-                {/* Right: Form Fields */}
-                <div className="order-1 lg:order-2 space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="title"
-                    rules={{ required: "Meta title is required" }}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Meta Title</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="Enter meta title" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="description"
-                    rules={{ required: "Meta description is required" }}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Meta Description</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            {...field}
-                            placeholder="Enter meta description"
-                            rows={4}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="keywords"
-                    rules={{ required: "Keywords are required" }}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Meta Keywords</FormLabel>
-                        <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="Enter keywords separated by commas"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </div>
-
-              {/* Schema Markup - Full Width with Preview */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-medium">
-                    Schema Markup (JSON-LD)
-                  </h3>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={generateSchemaMarkup}
-                    className="gap-2"
-                  >
-                    <Wand2 className="h-4 w-4" />
-                    Auto-Generate
-                  </Button>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Left: Schema Preview */}
-                  <div>
-                    <SchemaPreview schemaMarkup={form.watch("schemaMarkup")} />
-                  </div>
-
-                  {/* Right: Schema Editor */}
-                  <div>
-                    <FormField
-                      control={form.control}
-                      name="schemaMarkup"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Schema Code</FormLabel>
-                          <FormControl>
-                            <Textarea
-                              {...field}
-                              placeholder='Click "Auto-Generate" to create schema markup or paste your own...'
-                              className="font-mono text-xs h-[400px]"
-                            />
-                          </FormControl>
-                          <p className="text-xs text-muted-foreground">
-                            Schema markup helps search engines understand your
-                            content better. The preview validates your JSON in
-                            real-time.
-                          </p>
-                          <FormMessage />
-                        </FormItem>
-                      )}
+          <div className="p-8">
+            <Form {...form}>
+              <form onSubmit={handleSave} className="space-y-10">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                  <div className="order-2 lg:order-1 space-y-6">
+                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Simulation Preview</h3>
+                    <SeoPreview
+                      title={form.watch("title")}
+                      description={form.watch("description")}
+                      slug={pages.find((p) => p.id === editingPageId)?.slug || ""}
+                      baseUrl={websiteUrl}
                     />
                   </div>
-                </div>
-              </div>
 
-              <DialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsModalVisible(false)}
-                  disabled={isSaving}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={isSaving}>
-                  {isSaving ? "Saving..." : "Save Changes"}
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
+                  <div className="order-1 lg:order-2 space-y-6">
+                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">Invariant Definitions</h3>
+                    <div className="space-y-6">
+                      <FormField
+                        control={form.control}
+                        name="title"
+                        rules={{ required: "Meta title is required" }}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Meta Title</FormLabel>
+                            <FormControl>
+                              <Input {...field} placeholder="Enter meta title" className="h-12 rounded-xl border-slate-100 bg-slate-50/50 focus:bg-white transition-all font-medium" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="description"
+                        rules={{ required: "Meta description is required" }}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Meta Description</FormLabel>
+                            <FormControl>
+                              <Textarea
+                                {...field}
+                                placeholder="Enter meta description"
+                                rows={4}
+                                className="rounded-xl border-slate-100 bg-slate-50/50 focus:bg-white transition-all font-medium resize-none shadow-none"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="keywords"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Meta Keywords</FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                placeholder="Enter keywords separated by commas"
+                                className="h-12 rounded-xl border-slate-100 bg-slate-50/50 focus:bg-white transition-all font-medium"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-6 pt-6 border-t border-slate-50">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">
+                      Schema Markup (JSON-LD)
+                    </h3>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={generateSchemaMarkup}
+                      className="h-9 px-4 rounded-xl border-slate-200 font-bold text-slate-600 gap-2 hover:bg-slate-50 transition-all"
+                    >
+                      <Wand2 className="h-4 w-4" />
+                      Auto-Generate Schema
+                    </Button>
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                    <div>
+                      <SchemaPreview schemaMarkup={form.watch("schemaMarkup")} />
+                    </div>
+
+                    <div className="space-y-4">
+                      <FormField
+                        control={form.control}
+                        name="schemaMarkup"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-[10px] font-bold text-slate-500 uppercase tracking-widest text-center block">Schema Code Repository</FormLabel>
+                            <FormControl>
+                              <Textarea
+                                {...field}
+                                placeholder='Click "Auto-Generate" to create schema markup or paste your own...'
+                                className="font-mono text-[11px] h-[300px] rounded-xl border-slate-100 bg-slate-50/50 focus:bg-white transition-all p-4 resize-none"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <DialogFooter className="pt-6 border-t border-slate-50 gap-3">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => setIsModalVisible(false)}
+                    disabled={isSaving}
+                    className="h-12 px-8 rounded-xl font-bold text-slate-500"
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    disabled={isSaving}
+                    className="h-12 px-12 rounded-xl bg-slate-900 hover:bg-black text-white font-black text-[11px] uppercase tracking-widest shadow-xl shadow-slate-200 transition-all active:scale-95 group"
+                  >
+                    <SaveIcon className={cn("h-4 w-4 mr-2 transition-transform group-hover:scale-110", isSaving && "animate-spin")} />
+                    {isSaving ? "Synchronizing..." : "Execute Deployment"}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </Form>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

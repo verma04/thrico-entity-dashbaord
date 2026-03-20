@@ -93,7 +93,7 @@ export function EventPreview({ eventData, coverImage }: EventPreviewProps) {
       {/* Cover Image */}
       <div className="relative h-[200px] overflow-hidden">
         <Image
-          src={coverImage || "https://cdn.thrico.network/defaultEventCover.png"}
+          src={coverImage || "https://cdn.thrico.network/default_event.png"}
           alt="Event cover"
           fill
           className="object-cover"

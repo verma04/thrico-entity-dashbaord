@@ -16,6 +16,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { renderModuleIcon } from "@/components/subscription/utils";
 import { Badge, useToggleBadge } from "@/graphql/actions";
 import { ConfirmDialog } from "@/components/pages/confirm-dialog";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 
 interface BadgeListProps {
   badges: Badge[];
@@ -55,40 +56,37 @@ export function BadgeList({
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <Skeleton className="h-6 w-32" />
-        </CardHeader>
-        <CardContent>
+      <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">
+        <div className="rounded-xl border border-border/50 bg-white shadow-sm overflow-hidden">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>
-                  <Skeleton className="h-4 w-12" />
+              <TableRow className="bg-slate-50/50 hover:bg-slate-50/50">
+                <TableHead className="font-bold text-slate-700 h-14">
+                  Badge
                 </TableHead>
-                <TableHead>
-                  <Skeleton className="h-4 w-12" />
+                <TableHead className="font-bold text-slate-700 h-14">
+                  Module
                 </TableHead>
-                <TableHead>
-                  <Skeleton className="h-4 w-12" />
+                <TableHead className="font-bold text-slate-700 h-14">
+                  Type
                 </TableHead>
-                <TableHead>
-                  <Skeleton className="h-4 w-12" />
+                <TableHead className="font-bold text-slate-700 h-14">
+                  Criteria
                 </TableHead>
-                <TableHead>
-                  <Skeleton className="h-4 w-12" />
+                <TableHead className="font-bold text-slate-700 h-14">
+                  Status
                 </TableHead>
-                <TableHead className="text-right">
-                  <Skeleton className="h-4 w-12 ml-auto" />
+                <TableHead className="text-right font-bold text-slate-700 h-14">
+                  Actions
                 </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {[...Array(5)].map((_, i) => (
-                <TableRow key={i}>
+                <TableRow key={i} className="h-20">
                   <TableCell>
                     <div className="flex items-center gap-3">
-                      <Skeleton className="h-8 w-8 rounded-full" />
+                      <Skeleton className="h-10 w-10 rounded-xl" />
                       <div className="space-y-2">
                         <Skeleton className="h-4 w-24" />
                         <Skeleton className="h-3 w-32" />
@@ -114,52 +112,65 @@ export function BadgeList({
               ))}
             </TableBody>
           </Table>
-        </CardContent>
-      </Card>
+        </div>
+      </EcosystemContainer>
     );
   }
 
   if (badges.length === 0) {
     return (
-      <Card>
-        <CardContent className="py-12 text-center">
-          <Award className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-          <p className="text-muted-foreground">
+      <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">
+        <div className="rounded-xl border border-border/50 bg-white shadow-sm p-12 text-center">
+          <Award className="h-12 w-12 mx-auto text-muted-foreground mb-4 opacity-20" />
+          <p className="text-slate-500 font-medium">
             No badges found. Create your first badge!
           </p>
-        </CardContent>
-      </Card>
+        </div>
+      </EcosystemContainer>
     );
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">Badges</CardTitle>
-      </CardHeader>
-      <CardContent>
+    <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">
+      <div className="rounded-xl border border-border/50 bg-white shadow-sm overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>Badge</TableHead>
-              <TableHead>Module</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Criteria</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+            <TableRow className="bg-slate-50/50 hover:bg-slate-50/50">
+              <TableHead className="font-bold text-slate-700 h-14">
+                Badge
+              </TableHead>
+              <TableHead className="font-bold text-slate-700 h-14">
+                Module
+              </TableHead>
+              <TableHead className="font-bold text-slate-700 h-14">
+                Type
+              </TableHead>
+              <TableHead className="font-bold text-slate-700 h-14">
+                Criteria
+              </TableHead>
+              <TableHead className="font-bold text-slate-700 h-14">
+                Status
+              </TableHead>
+              <TableHead className="text-right font-bold text-slate-700 h-14">
+                Actions
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {badges.map((badge) => {
               const moduleInfo = getModuleInfo(badge.module);
               return (
-                <TableRow key={badge.id}>
+                <TableRow key={badge.id} className="h-20 hover:bg-slate-50/30">
                   <TableCell>
                     <div className="flex items-center gap-3">
-                      <span className="text-2xl">{badge.icon}</span>
+                      <div className="h-12 w-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-2xl shadow-sm">
+                        {badge.icon}
+                      </div>
                       <div>
-                        <div className="font-medium">{badge.name}</div>
-                        <div className="text-xs text-muted-foreground line-clamp-1">
+                        <div className="font-bold text-slate-900">
+                          {badge.name}
+                        </div>
+                        <div className="text-xs text-slate-500 line-clamp-1 max-w-[200px]">
                           {badge.description}
                         </div>
                       </div>
@@ -167,31 +178,51 @@ export function BadgeList({
                   </TableCell>
                   <TableCell>
                     {moduleInfo ? (
-                      <span className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-100 border border-slate-200 rounded-lg w-fit">
                         {renderModuleIcon(moduleInfo.icon || "Settings")}
-                        {moduleInfo.name}
-                      </span>
+                        <span className="text-xs font-bold text-slate-700">
+                          {moduleInfo.name}
+                        </span>
+                      </div>
                     ) : (
-                      <span className="text-muted-foreground">Global</span>
+                      <div className="flex items-center gap-2 px-3 py-1.5 bg-indigo-50 border border-indigo-100 rounded-lg w-fit">
+                        <span className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
+                        <span className="text-xs font-bold text-indigo-700">
+                          Global
+                        </span>
+                      </div>
                     )}
                   </TableCell>
                   <TableCell>
-                    <UIBadge variant="outline">{badge.type}</UIBadge>
+                    <UIBadge
+                      variant="outline"
+                      className="rounded-lg font-bold text-[10px] uppercase tracking-wider py-1 border-slate-200"
+                    >
+                      {badge.type}
+                    </UIBadge>
                   </TableCell>
                   <TableCell>
-                    <div className="text-sm">
+                    <div className="text-sm font-medium text-slate-600 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100 w-fit">
                       {badge.type === "ACTION" ? (
-                        <span>
-                          {badge.condition?.action || badge.action}{" "}
-                          <span className="text-muted-foreground">
-                            ({badge.condition?.count || badge.targetValue})
+                        <div className="flex items-center gap-1.5">
+                          <span className="capitalize">
+                            {badge.condition?.action ||
+                              badge.action?.replace(/_/g, " ")}
                           </span>
-                        </span>
+                          <span className="text-[10px] px-1.5 py-0.5 bg-white border border-slate-200 rounded text-slate-400 font-bold">
+                            {badge.condition?.count || badge.targetValue}
+                          </span>
+                        </div>
                       ) : (
-                        <span>
-                          {badge.condition?.pointsRequired || badge.targetValue}{" "}
-                          points
-                        </span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-bold text-indigo-600">
+                            {badge.condition?.pointsRequired ||
+                              badge.targetValue}
+                          </span>
+                          <span className="text-[10px] items-center text-slate-400 uppercase tracking-widest font-bold">
+                            pts
+                          </span>
+                        </div>
                       )}
                     </div>
                   </TableCell>
@@ -200,13 +231,15 @@ export function BadgeList({
                       checked={badge.isActive}
                       onCheckedChange={() => handleToggleActive(badge.id)}
                       disabled={toggling}
+                      className="data-[state=checked]:bg-emerald-500"
                     />
                   </TableCell>
                   <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
+                    <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Button
                         variant="ghost"
                         size="icon"
+                        className="h-9 w-9 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl"
                         onClick={() => onEdit(badge)}
                       >
                         <Pencil className="h-4 w-4" />
@@ -218,7 +251,7 @@ export function BadgeList({
             })}
           </TableBody>
         </Table>
-      </CardContent>
-    </Card>
+      </div>
+    </EcosystemContainer>
   );
 }

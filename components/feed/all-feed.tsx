@@ -48,27 +48,33 @@ export default function AdminFeed() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div id="scrollableDiv" className="h-[800px] ">
+    <div className="bg-transparent">
+      <div className="px-4 py-6">
         <InfiniteScroll
           dataLength={data?.getAllFeed?.length || 0}
           next={loadMoreData}
           hasMore={hasMore}
           loader={
             isFetchingMore ? (
-              <div className="space-y-4">
-                <Skeleton className="h-20 w-full" />
+              <div className="space-y-6 mt-6 pb-20">
+                <Skeleton className="h-[200px] w-full rounded-[24px]" />
+                <Skeleton className="h-[200px] w-full rounded-[24px]" />
               </div>
             ) : null
           }
           endMessage={
-            <div className="text-center py-8 text-muted-foreground">
-              It is all, nothing more 🤐
+            <div className="flex flex-col items-center justify-center py-20 animate-in fade-in slide-in-from-bottom-4 duration-700">
+              <div className="h-12 w-12 rounded-2xl bg-zinc-100 flex items-center justify-center mb-4">
+                <span className="text-xl">✨</span>
+              </div>
+              <p className="text-[13px] font-bold text-zinc-400 uppercase tracking-widest text-center">
+                You've reached the end of the feed
+              </p>
+              <div className="mt-2 h-1 w-12 rounded-full bg-zinc-100" />
             </div>
           }
-          scrollableTarget="scrollableDiv"
         >
-          <div className="space-y-4">
+          <div className="max-w-2xl mx-auto space-y-6 pb-20">
             {data?.getAllFeed?.map((item) => (
               <Feed key={item.id} feed={item} />
             ))}

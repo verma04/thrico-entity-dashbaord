@@ -3,14 +3,15 @@
 import { useEffect } from "react";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
-
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  SaveIcon,
+  ShieldCheck,
+  Activity,
+  Globe,
+  Layout,
+  Layers,
+  Wand2,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,8 +26,6 @@ import {
 
 import { useToast } from "@/hooks/use-toast";
 import { useUpdateNavbar, useGetWebsite } from "@/graphql/actions/website";
-
-import { SaveIcon } from "lucide-react";
 import { ImageUploadWithCrop } from "@/components/ui/image-upload-with-crop";
 
 import {
@@ -35,6 +34,9 @@ import {
 } from "@/store/useWebsiteBuilderStore";
 import { LivePreviewNavbar } from "@/components/website-layout/preview/live-preview-navbar";
 import { MenuEditor } from "@/components/website-layout/settings/menu-editor";
+import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { cn } from "@/lib/utils";
 
 // ------------------------------------------------
 // TYPES
@@ -93,7 +95,7 @@ export default function NavigationManager() {
     useWebsiteBuilderStore();
 
   // Fetch website data
-  const { data: websiteData, refetch } = useGetWebsite({});
+  const { data: websiteData, refetch, loading: websiteLoading } = useGetWebsite({});
 
   // Update navbar mutation
   const [updateNavbarMutation, { loading: isUpdating }] = useUpdateNavbar({
@@ -133,7 +135,6 @@ export default function NavigationManager() {
     }
 
     try {
-      // Call GraphQL mutation to update navbar in database
       await updateNavbarMutation({
         variables: {
           websiteId: websiteData.getWebsite.id,
@@ -147,7 +148,6 @@ export default function NavigationManager() {
         },
       });
 
-      // Update local store for immediate UI update
       updateModuleLayout(globalHeader.id, values.layout);
       updateModuleContent(globalHeader.id, {
         logoText: values.logoText,
@@ -156,7 +156,6 @@ export default function NavigationManager() {
         menuItems: values.menuItems,
       });
     } catch (error) {
-      // Error handling is done in the mutation's onError callback
       console.error("Navbar update failed:", error);
     }
   };
@@ -169,173 +168,213 @@ export default function NavigationManager() {
       enableReinitialize
     >
       {({ values, setFieldValue, errors, touched, isSubmitting }) => (
-        <Form className="space-y-6">
-          {/* ------------------------------------------------ */}
-          {/* SAVE BUTTON (TOP) */}
-          {/* ------------------------------------------------ */}
-
-          {/* ------------------------------------------------ */}
-          {/* LIVE PREVIEW */}
-          {/* ------------------------------------------------ */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-6">
-              <div>
-                <CardTitle>Live Preview</CardTitle>
-                <CardDescription>
-                  See how your navigation will look on your website
-                </CardDescription>
-              </div>
-
-              <Button
-                type="submit"
-                size="sm"
-                className="gap-2 shadow-lg"
-                disabled={isUpdating}
-              >
-                <SaveIcon className="h-4 w-4" />
-                {isUpdating ? "Saving..." : "Save Navigation"}
-              </Button>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="border rounded-lg overflow-hidden bg-background">
-                <LivePreviewNavbar
-                  content={{
-                    logoText: values.logoText,
-                    logoType: values.logoType,
-                    logoImage: values.logoImage,
-                    menuItems: values.menuItems,
-                  }}
-                  layout={values.layout}
-                  previewDevice="desktop"
-                />
-              </div>
-              <div className="text-xs text-muted-foreground text-center">
-                Preview updates automatically as you make changes
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* ------------------------------------------------ */}
-          {/* LAYOUT & BRANDING */}
-          {/* ------------------------------------------------ */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Layout & Branding</CardTitle>
-              <CardDescription>
-                Configure the look of your navigation bar
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Layout Selector */}
-              <div className="grid gap-6 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="layout">Layout Variant</Label>
-                  <Select
-                    value={values.layout}
-                    onValueChange={(value) => setFieldValue("layout", value)}
-                  >
-                    <SelectTrigger id="layout">
-                      <SelectValue placeholder="Select a layout" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="simple">
-                        Simple (Right Aligned)
-                      </SelectItem>
-                      <SelectItem value="centered">Centered Logo</SelectItem>
-                      <SelectItem value="minimal">
-                        Minimal (Hamburger)
-                      </SelectItem>
-                      <SelectItem value="stacked">
-                        Stacked (Two Rows)
-                      </SelectItem>
-                      <SelectItem value="split">Split</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {errors.layout && touched.layout && (
-                    <p className="text-xs text-red-500">{errors.layout}</p>
-                  )}
+        <Form className="space-y-8">
+          <EcosystemActionBar shadow="sm">
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center gap-6">
+                <div className="flex items-center gap-3">
+                  <div className="h-3 w-3 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                    Navigation Nodes: Active
+                  </span>
                 </div>
-
-                {/* Logo Type Selector */}
-                <div className="space-y-2">
-                  <Label htmlFor="logoType">Logo Type</Label>
-                  <Select
-                    value={values.logoType}
-                    onValueChange={(value) => setFieldValue("logoType", value)}
-                  >
-                    <SelectTrigger id="logoType">
-                      <SelectValue placeholder="Select logo type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="text">Text Logo</SelectItem>
-                      <SelectItem value="image">Image Logo</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {errors.logoType && touched.logoType && (
-                    <p className="text-xs text-red-500">{errors.logoType}</p>
-                  )}
+                <div className="h-4 w-px bg-slate-200" />
+                <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
+                  <ShieldCheck className="h-3.5 w-3.5 text-indigo-500" />
+                  <span>Protocol: Valid</span>
                 </div>
               </div>
 
-              {/* Logo Content */}
-              <div className="space-y-4">
-                {/* Text Logo */}
-                {(values.logoType === "text" || !values.logoType) && (
-                  <div className="space-y-2">
-                    <Label htmlFor="logoText">Logo Text</Label>
-                    <Field
-                      name="logoText"
-                      as={Input}
-                      id="logoText"
-                      placeholder="My Brand"
-                    />
-                    {errors.logoText && touched.logoText && (
-                      <p className="text-xs text-red-500">{errors.logoText}</p>
-                    )}
-                  </div>
-                )}
-
-                {/* Image Logo */}
-                {values.logoType === "image" && (
-                  <div className="space-y-2">
-                    <ImageUploadWithCrop
-                      label="Logo Image"
-                      currentImage={values.logoImage}
-                      onImageUpdate={(imageUrl: string) =>
-                        setFieldValue("logoImage", imageUrl)
-                      }
-                      recommendedWidth={150}
-                      recommendedHeight={50}
-                      aspectRatio={3}
-                      showDimensions
-                    />
-                    {errors.logoImage && touched.logoImage && (
-                      <p className="text-xs text-red-500">{errors.logoImage}</p>
-                    )}
-                  </div>
-                )}
+              <div className="flex items-center gap-3">
+                <Button
+                  type="submit"
+                  disabled={isUpdating}
+                  className="h-10 px-8 rounded-xl bg-slate-900 hover:bg-black text-white font-black text-[11px] uppercase tracking-wider gap-3 shadow-xl shadow-slate-200 transition-all active:scale-95 group"
+                >
+                  <SaveIcon className="h-4 w-4 transition-transform group-hover:scale-110" />
+                  {isUpdating ? "Synchronizing..." : "Save Navigation"}
+                </Button>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </EcosystemActionBar>
 
-          {/* ------------------------------------------------ */}
-          {/* MENU EDITOR */}
-          {/* ------------------------------------------------ */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Menu Items</CardTitle>
-              <CardDescription>Customize your navigation links</CardDescription>
-            </CardHeader>
+          <EcosystemContainer className="space-y-12 p-8 lg:p-12">
+            {/* Live Preview Section */}
+            <div className="space-y-6">
+              <div className="flex items-center gap-3 px-1">
+                <div className="h-10 w-10 rounded-xl bg-slate-900 flex items-center justify-center text-white font-black italic">
+                  VP
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-slate-900 tracking-tight italic uppercase leading-none">
+                    Visual Protocol
+                  </h3>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+                    Real-time architectural simulation
+                  </p>
+                </div>
+              </div>
 
-            <CardContent>
-              <MenuEditor
-                menuItems={values.menuItems}
-                onChange={(items) => setFieldValue("menuItems", items)}
-              />
-            </CardContent>
-          </Card>
+              <div className="rounded-[2.5rem] border border-slate-100 bg-white shadow-xl shadow-slate-200/50 p-6 overflow-hidden">
+                <div className="border border-slate-50 rounded-2xl overflow-hidden bg-slate-50/30">
+                  <LivePreviewNavbar
+                    content={{
+                      logoText: values.logoText,
+                      logoType: values.logoType,
+                      logoImage: values.logoImage,
+                      menuItems: values.menuItems,
+                    }}
+                    layout={values.layout}
+                    previewDevice="desktop"
+                  />
+                </div>
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] text-center mt-6 italic opacity-60">
+                  Synchronized Simulation Active
+                </p>
+              </div>
+            </div>
 
-          {/* Save button moved to top */}
+            {/* Layout & Branding Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 pt-4">
+              <div className="space-y-6">
+                <div className="flex items-center gap-3 px-1">
+                  <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-900">
+                    <Layout className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-black text-slate-900 tracking-tight italic uppercase leading-none">
+                      Architecture
+                    </h3>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+                      Layout & Branding definitions
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-8 bg-slate-50/50 p-8 rounded-[2rem] border border-slate-100">
+                  <div className="grid gap-6 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="layout"
+                        className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1"
+                      >
+                        Layout Variant
+                      </Label>
+                      <Select
+                        value={values.layout}
+                        onValueChange={(value) =>
+                          setFieldValue("layout", value)
+                        }
+                      >
+                        <SelectTrigger
+                          id="layout"
+                          className="h-12 rounded-xl border-slate-100 bg-white font-medium"
+                        >
+                          <SelectValue placeholder="Select a layout" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl border-slate-100 shadow-xl">
+                          <SelectItem value="simple">
+                            Simple (Right Aligned)
+                          </SelectItem>
+                          <SelectItem value="centered">Centered Logo</SelectItem>
+                          <SelectItem value="minimal">
+                            Minimal (Hamburger)
+                          </SelectItem>
+                          <SelectItem value="stacked">
+                            Stacked (Two Rows)
+                          </SelectItem>
+                          <SelectItem value="split">Split</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="logoType"
+                        className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1"
+                      >
+                        Logo Type
+                      </Label>
+                      <Select
+                        value={values.logoType}
+                        onValueChange={(value) =>
+                          setFieldValue("logoType", value)
+                        }
+                      >
+                        <SelectTrigger
+                          id="logoType"
+                          className="h-12 rounded-xl border-slate-100 bg-white font-medium"
+                        >
+                          <SelectValue placeholder="Select logo type" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl border-slate-100 shadow-xl">
+                          <SelectItem value="text">Text Logo</SelectItem>
+                          <SelectItem value="image">Image Logo</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4 pt-4">
+                    {values.logoType === "image" ? (
+                      <div className="space-y-2">
+                        <ImageUploadWithCrop
+                          label="Logo Image Asset"
+                          currentImage={values.logoImage}
+                          onImageUpdate={(imageUrl: string) =>
+                            setFieldValue("logoImage", imageUrl)
+                          }
+                          recommendedWidth={150}
+                          recommendedHeight={50}
+                          aspectRatio={3}
+                          showDimensions
+                        />
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="logoText"
+                          className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1"
+                        >
+                          Logo Text Invariant
+                        </Label>
+                        <Field
+                          name="logoText"
+                          as={Input}
+                          id="logoText"
+                          placeholder="My Brand"
+                          className="h-12 rounded-xl border-slate-100 bg-white font-medium"
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <div className="flex items-center gap-3 px-1">
+                  <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-900">
+                    <Layers className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-black text-slate-900 tracking-tight italic uppercase leading-none">
+                      Node Manifest
+                    </h3>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+                      Hierarchical link orchestration
+                    </p>
+                  </div>
+                </div>
+
+                <div className="bg-slate-50/50 p-6 rounded-[2rem] border border-slate-100">
+                  <MenuEditor
+                    menuItems={values.menuItems}
+                    onChange={(items) => setFieldValue("menuItems", items)}
+                  />
+                </div>
+              </div>
+            </div>
+          </EcosystemContainer>
         </Form>
       )}
     </Formik>

@@ -29,3 +29,25 @@ export interface UpgradePlanSummary {
   creditAppliedMonthly: string;
   creditAppliedYearly: string;
 }
+
+export interface AddonPricing {
+  countryCode: string;
+  addonPricingId: string;
+  type: string;
+  name: string;
+  description: string;
+  unitLabel: string;
+  monthlyUnitPrice: number;
+  yearlyUnitPrice: number;
+  isActive: boolean;
+  order: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GetAddonPricingQuery {
+  getAddonPricing: {
+    addons: AddonPricing[];
+    currency: string;
+  };
+}

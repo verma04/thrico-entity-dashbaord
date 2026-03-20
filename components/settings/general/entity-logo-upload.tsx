@@ -21,8 +21,7 @@ export const EntityLogoUpload = ({
   });
 
   return (
-    <div>
-      <h3 className="text-sm font-medium mb-4">Entity Logo</h3>
+    <div className="w-full">
       <ImageUploadWithCrop
         currentImage={currentImage}
         onImageUpdate={onImageUpdate}
@@ -68,7 +67,6 @@ export const EntityLogoUpload = ({
           }
         }}
       />
-      <Separator className="mt-8" />
     </div>
   );
 };

@@ -1,0 +1,88 @@
+import { useQuery, useMutation } from "@apollo/client";
+import { GET_ALL_MOMENTS, GET_MOMENT_DETAILS, GET_MOMENT_DASHBOARD_KPIs, ADMIN_DELETE_MOMENT } from "../../quries/moments";
+import { TimeRange } from "../dashboard";
+
+export interface Moment {
+  id: string;
+  caption: string;
+  videoUrl: string;
+  thumbnailUrl: string;
+  status: string;
+  createdAt: string;
+  owner: {
+    firstName: string;
+    lastName: string;
+  };
+}
+
+export interface MomentDetails extends Moment {
+  totalViews: number;
+  totalReactions: number;
+  detectedCategory: string;
+  extractedKeywords: string[];
+  sentimentScore: number;
+  owner: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    avatar: string;
+  };
+}
+
+export interface MomentAnalytics {
+  totalMoments: number;
+  totalViews: number;
+  totalReactions: number;
+  totalComments: number;
+  activeCreators: number;
+  growth: {
+    date: string;
+    count: number;
+  }[];
+  engagement: {
+    name: string;
+    value: number;
+  }[];
+}
+
+export interface GetAllMomentsResponse {
+  getAllMoments: {
+    data: Moment[];
+    meta: {
+      currentPage: number;
+      totalPages: number;
+      totalItems: number;
+      hasNextPage: boolean;
+    };
+  };
+}
+
+export interface GetMomentDetailsResponse {
+  getMomentDetailsById: MomentDetails;
+}
+
+export interface GetMomentDashboardKPIsResponse {
+  getMomentAnalytics: MomentAnalytics;
+}
+
+export const useGetAllMoments = (variables?: { pagination?: { page?: number; limit?: number } }) =>
+  useQuery<GetAllMomentsResponse>(GET_ALL_MOMENTS, {
+    variables,
+  });
+
+export const useGetMomentDetails = (id: string) =>
+  useQuery<GetMomentDetailsResponse>(GET_MOMENT_DETAILS, {
+    variables: { input: { id } },
+  });
+
+export const useGetMomentDashboardKPIs = (timeRange: TimeRange) =>
+  useQuery<GetMomentDashboardKPIsResponse, { timeRange: TimeRange }>(GET_MOMENT_DASHBOARD_KPIs, {
+    variables: { timeRange },
+  });
+
+export const useAdminDeleteMoment = () => {
+  const [deleteMoment, { loading }] = useMutation(ADMIN_DELETE_MOMENT, {
+    refetchQueries: [{ query: GET_ALL_MOMENTS }],
+  });
+  return { deleteMoment, loading };
+};

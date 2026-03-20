@@ -1,25 +1,19 @@
 import React, { useState } from "react";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import {
   TabletSmartphone,
   Users2,
   ShieldAlert,
   Check,
-  Star,
   ChevronDown,
   ChevronUp,
+  ArrowUpRight,
 } from "lucide-react";
 import { formatPrice, renderModuleIcon } from "../utils";
 import { CountryPackage } from "../ts-types";
+import { cn } from "@/lib/utils";
 
-function getYearlySavings(
-  monthlyPrice: number,
-  yearlyPrice: number,
-  currency: string
-): number {
+function getYearlySavings(monthlyPrice: number, yearlyPrice: number): number {
   if (!monthlyPrice || !yearlyPrice) return 0;
   const totalMonthly = monthlyPrice * 12;
   const savings = totalMonthly - yearlyPrice;
@@ -40,129 +34,124 @@ const PackageCard: React.FC<PackageCardProps> = ({
   setActivePackage,
 }) => {
   const [showAllModules, setShowAllModules] = useState(false);
-  const moduleLimit = 3; // Show only 3 modules by default
+  const moduleLimit = 5;
   const hasMoreModules = pkg.modules.length > moduleLimit;
-  const visibleModules = showAllModules
-    ? pkg.modules
-    : pkg.modules.slice(0, moduleLimit);
-
-  const savings = getYearlySavings(
-    pkg.monthlyPrice,
-    pkg.yearlyPrice,
-    pkg.currency
-  );
+  const visibleModules = showAllModules ? pkg.modules : pkg.modules.slice(0, moduleLimit);
+  const savings = getYearlySavings(pkg.monthlyPrice, pkg.yearlyPrice);
+  const isLoading = activePackage?.packageId === pkg.packageId;
+  const isPopular = pkg.isPopular;
 
   return (
-    <div className="w-[300px] relative">
-      {pkg.isPopular && (
-        <Badge
-          variant="default"
-          className="absolute left-1/2 -translate-x-1/2 -top-0 z-10 bg-gradient-to-r from-blue-600 via-blue-500 to-purple-600 text-white px-3 py-2 text-sm font-bold rounded-full shadow-lg shadow-blue-500/50 animate-pulse"
-        >
-          ⭐ Most Popular
-        </Badge>
+    <div
+      className={cn(
+        "relative flex flex-col rounded-xl border bg-white shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md",
+        isPopular ? "border-slate-900 ring-1 ring-slate-900/10" : "border-slate-200/80"
       )}
-      <Card
-        className={`mt-6 flex flex-col items-center p-6 border-2 transition-all duration-300 ${
-          pkg.isPopular 
-            ? "border-blue-500 shadow-2xl shadow-blue-500/30 bg-gradient-to-br from-blue-50/50 to-purple-50/50 dark:from-blue-950/20 dark:to-purple-950/20" 
-            : "border-muted shadow-lg"
-        }`}
-      >
-        <div className="text-center mb-4 h-24 flex flex-col justify-center items-center">
-          <div className="flex items-center justify-center mb-2">
-            <span className="text-2xl font-bold">{pkg.name}</span>
-            {pkg.isPopular && (
-              <Star className="ml-2 text-yellow-400 fill-yellow-400 drop-shadow-lg" size={24} />
-            )}
-          </div>
-          <div>
-            <span className="text-3xl font-bold">
-              {formatPrice(
-                pkg.monthlyPrice,
-                pkg.yearlyPrice,
-                isYearly,
-                pkg.currency
-              )}
-            </span>
-            {isYearly && Number(savings) > 0 && (
-              <span className="block text-green-600 font-semibold text-sm mt-1">
-                Save {savings}% annually
-              </span>
-            )}
-          </div>
+    >
+      {isPopular && (
+        <div className="bg-slate-900 px-5 py-1.5">
+          <span className="text-[10px] font-semibold text-white uppercase tracking-widest">
+            Most Popular
+          </span>
         </div>
-        <div className="w-full flex flex-col gap-2 mb-4">
-          <div className="flex items-center gap-2">
-            <TabletSmartphone size={16} />
-            <span className="text-sm">
-              {pkg.accessType === "WebOnly"
-                ? "Web Access Only"
-                : "Web + Mobile App"}
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Users2 size={16} />
-            <span className="text-sm">Up to {pkg.numberOfUsers} members</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <ShieldAlert size={16} />
-            <span className="text-sm">
-              {pkg.adminUsers} admin user{pkg.adminUsers > 1 ? "s" : ""}
-            </span>
-          </div>
+      )}
+
+      {/* Header */}
+      <div className="px-5 pt-5 pb-4 border-b border-slate-100">
+        <h3 className="text-[15px] font-semibold text-slate-900 tracking-tight">{pkg.name}</h3>
+        <div className="flex items-baseline gap-1.5 mt-3">
+          <span className="text-[26px] font-bold text-slate-900 leading-none tabular-nums tracking-tight">
+            {formatPrice(pkg.monthlyPrice, pkg.yearlyPrice, isYearly, pkg.currency)}
+          </span>
+          <span className="text-[12px] text-slate-400">/ {isYearly ? "yr" : "mo"}</span>
         </div>
-        <Separator className="my-3" />
-        <div className="w-full flex flex-col gap-2 mb-2">
+        {isYearly && savings > 0 && (
+          <span className="inline-block mt-2 text-[11px] font-semibold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-md">
+            Save {savings}% vs monthly
+          </span>
+        )}
+      </div>
+
+      {/* Specs */}
+      <div className="px-5 py-3 border-b border-slate-100 space-y-2">
+        <div className="flex items-center gap-2 text-[12px] text-slate-600">
+          <TabletSmartphone className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+          {pkg.accessType === "WebOnly" ? "Web Only" : "Web + Mobile"}
+        </div>
+        <div className="flex items-center gap-2 text-[12px] text-slate-600">
+          <Users2 className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+          Up to {pkg.numberOfUsers} members
+        </div>
+        <div className="flex items-center gap-2 text-[12px] text-slate-600">
+          <ShieldAlert className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+          {pkg.adminUsers} admin{pkg.adminUsers > 1 ? "s" : ""}
+        </div>
+      </div>
+
+      {/* Benefits */}
+      {pkg.benefits.filter((b) => b.trim()).length > 0 && (
+        <div className="px-5 py-3 border-b border-slate-100 space-y-2">
           {pkg.benefits
-            .filter((benefit) => benefit.trim() !== "")
-            .map((benefit, index) => (
-              <div key={index} className="flex items-center gap-2">
-                <Check className="text-green-500" size={16} />
-                <span className="text-sm">{benefit}</span>
+            .filter((b) => b.trim())
+            .map((benefit, i) => (
+              <div key={i} className="flex items-start gap-2 text-[12px] text-slate-700">
+                <Check className="h-3.5 w-3.5 text-emerald-500 mt-0.5 shrink-0" />
+                {benefit}
               </div>
             ))}
         </div>
-        <div className="w-full flex flex-col gap-2 mb-2">
-          {visibleModules.map((module, index) => (
-            <div key={index} className="flex items-center gap-2">
-              {renderModuleIcon(module.icon)}
-              <span className="text-sm">{module.name}</span>
-            </div>
-          ))}
+      )}
 
-          {hasMoreModules && (
-            <button
-              onClick={() => setShowAllModules(!showAllModules)}
-              className="flex items-center gap-1 text-sm text-primary hover:text-primary/80 mt-2 transition-colors"
-            >
-              {showAllModules ? (
-                <>
-                  <ChevronUp size={14} />
-                  Show Less
-                </>
-              ) : (
-                <>
-                  <ChevronDown size={14} />
-                  Show {pkg.modules.length - moduleLimit} More
-                </>
-              )}
-            </button>
-          )}
-        </div>
+      {/* Modules */}
+      <div className="px-5 py-3 flex-1 space-y-2">
+        <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
+          Modules
+        </p>
+        {visibleModules.map((module, i) => (
+          <div key={i} className="flex items-center gap-2 text-[12px] text-slate-600">
+            {renderModuleIcon(module.icon)}
+            {module.name}
+          </div>
+        ))}
+        {hasMoreModules && (
+          <button
+            onClick={() => setShowAllModules(!showAllModules)}
+            className="flex items-center gap-1 text-[12px] text-slate-400 hover:text-slate-700 transition-colors mt-1"
+          >
+            {showAllModules ? (
+              <>
+                <ChevronUp className="h-3.5 w-3.5" /> Less
+              </>
+            ) : (
+              <>
+                <ChevronDown className="h-3.5 w-3.5" /> {pkg.modules.length - moduleLimit} more
+              </>
+            )}
+          </button>
+        )}
+      </div>
+
+      {/* CTA */}
+      <div className="px-5 pb-5 pt-3">
         <Button
-          className={`mt-4 w-full font-semibold transition-all duration-300 ${
-            pkg.isPopular 
-              ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl hover:scale-[1.02]" 
-              : ""
-          }`}
-          loading={activePackage?.packageId === pkg.packageId}
+          loading={isLoading}
           onClick={() => setActivePackage(pkg)}
-          variant={pkg.isPopular ? "default" : "outline"}
+          className={cn(
+            "w-full h-9 text-[12px] font-semibold gap-2",
+            isPopular
+              ? "bg-slate-900 hover:bg-black text-white"
+              : "bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 shadow-sm"
+          )}
+          variant="ghost"
         >
-          {pkg.isPopular ? "🚀 Get Started" : "Get Started"}
+          {!isLoading && (
+            <>
+              Get Started
+              <ArrowUpRight className="h-3.5 w-3.5" />
+            </>
+          )}
         </Button>
-      </Card>
+      </div>
     </div>
   );
 };

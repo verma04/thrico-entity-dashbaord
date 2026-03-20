@@ -35,16 +35,65 @@ export const UPDATE_TRAIL_TO_PACKAGE = gql`
   }
 `;
 
+export const GET_UPDATE_TO_YEARLY_SUMMARY = gql`
+  query GetUpdateToYearlySummary {
+    getUpdateToYearlySummary {
+      basePrice
+      addonsPrice
+      taxAmount
+      totalAmount
+      taxName
+      taxPercentage
+      addons {
+        addonId
+        name
+        type
+        quantity
+        unitPrice
+        totalPrice
+      }
+      planName
+      billingCycle
+    }
+  }
+`;
+
 export const UPDATE_TO_YEARLY = gql`
-  mutation UpdateToYearly($input: UpdateToYearlyInput!) {
-    updateToYearly(input: $input) {
-      id
-      entity
-      amount
-      currency
-      receipt
+  mutation UpdateToYearly {
+    updateToYearly {
+      subscriptionId
+      packageId
+      planName
+      planType
+      billingCycle
+      price
+      startDate
+      endDate
       status
-      created_at
+      billingId
+      billStatus
+      billAmount
+      razorpayOrder {
+        id
+        entity
+        amount
+        currency
+        receipt
+        status
+        created_at
+      }
+      addons {
+        addonId
+        name
+        type
+        quantity
+        unitPrice
+        totalPrice
+      }
+      taxAmount
+      totalAmount
+      taxName
+      taxPercentage
     }
   }
 `;
@@ -102,6 +151,18 @@ export const GET_PLAN_OVERVIEW = gql`
         packageId
         currency
       }
+      addons {
+        addonId
+        type
+        name
+        quantity
+        unitPrice
+        totalPrice
+        isActive
+        addedAt
+        removedAt
+        effectiveFrom
+      }
     }
   }
 `;
@@ -141,6 +202,59 @@ export const UPGRADE_PLAN = gql`
       receipt
       status
       created_at
+    }
+  }
+`;
+
+export const GET_ADDON_PRICING = gql`
+  query GetAddonPricing {
+    getAddonPricing {
+      addons {
+        countryCode
+        addonPricingId
+        type
+        name
+        description
+        unitLabel
+        monthlyUnitPrice
+        yearlyUnitPrice
+        isActive
+        order
+        createdAt
+        updatedAt
+      }
+      currency
+    }
+  }
+`;
+
+export const ADD_ADDON = gql`
+  mutation AddAddon($input: AddAddonInput!) {
+    addAddon(input: $input) {
+      success
+      message
+      billingId
+      amount
+      currency
+      razorpayOrder {
+        id
+        amount
+        currency
+      }
+    }
+  }
+`;
+
+export const GET_COUNTRY = gql`
+  query Country {
+    country {
+      code
+      name
+      currency
+      taxName
+      taxPercentage
+      taxType
+      taxIncluded
     }
   }
 `;

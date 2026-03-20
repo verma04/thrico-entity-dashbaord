@@ -24,22 +24,22 @@ interface FeedWeeklyChartProps {
 
 export const FeedWeeklyChart: React.FC<FeedWeeklyChartProps> = ({ data }) => {
   return (
-    <Card className="md:col-span-8 shadow-sm hover:shadow-md transition-shadow duration-200">
+    <Card className="lg:col-span-2 border-none shadow-sm ring-1 ring-border/50">
       <CardHeader>
         <CardTitle>Weekly Feed Posts</CardTitle>
         <CardDescription>Activity over the last 7 days</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="h-[350px] w-full">
+        <div className="h-[300px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
               data={data}
-              margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+              margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
             >
               <defs>
                 <linearGradient id="colorFeed" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#1890ff" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#1890ff" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <XAxis
@@ -47,25 +47,29 @@ export const FeedWeeklyChart: React.FC<FeedWeeklyChartProps> = ({ data }) => {
                 fontSize={12}
                 tickLine={false}
                 axisLine={false}
+                tick={{ fill: "#888888" }}
+                dy={10}
               />
               <YAxis
                 fontSize={12}
                 tickLine={false}
                 axisLine={false}
+                tick={{ fill: "#888888" }}
                 tickFormatter={(value) => `${value}`}
               />
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#88888820" />
               <RechartsTooltip
+                cursor={{ fill: "#88888810" }}
                 contentStyle={{
-                  backgroundColor: "rgba(255, 255, 255, 0.9)",
-                  border: "1px solid #e2e8f0",
-                  borderRadius: "8px",
+                  borderRadius: "12px",
+                  border: "none",
+                  boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)",
                 }}
               />
               <Area
                 type="monotone"
                 dataKey="signups"
-                stroke="#1890ff"
+                stroke="#3b82f6"
                 strokeWidth={2}
                 fillOpacity={1}
                 fill="url(#colorFeed)"

@@ -1,15 +1,16 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-
 import { EventsCreationForm } from "./events-creation-form";
 import { useAddEvent } from "@/graphql/actions/events";
+import { AnimatePresence, motion } from "framer-motion";
 
 const Create = ({}) => {
   const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const [cover, setCover] = useState<string>();
 
   const [add, { loading }] = useAddEvent({
     onCompleted: (data) => {
@@ -18,24 +19,20 @@ const Create = ({}) => {
     },
   });
 
-  const [open, setOpen] = useState(false);
-  const [cover, setCover] = useState<string>();
-
   const onClose = () => {
     setOpen(false);
   };
 
   const onFinish = (values: any) => {
-    // Transform form values to match the event input structure
     const eventInput = {
       title: values.title,
       location: values.location,
       description: values.description,
-      startDate: values.startDate?.toISOString(),
-      endDate: values.endDate?.toISOString(),
-      startTime: values.startTime?.format("HH:mm"),
+      startDate: values.startDate || undefined,
+      endDate: values.endDate || undefined,
+      startTime: values.startTime || undefined,
       type: values.type,
-      lastDateOfRegistration: values.lastDateOfRegistration?.toISOString(),
+      lastDateOfRegistration: values.lastDateOfRegistration || undefined,
       coverImage: cover,
     };
 
@@ -52,21 +49,26 @@ const Create = ({}) => {
     <>
       <Button onClick={() => setOpen(true)}>Create</Button>
 
-      <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent
-          side="bottom"
-          className="h-screen p-0 border-none flex flex-col"
-        >
-          <EventsCreationForm
-            initialValues={{}}
-            loading={loading}
-            onFinish={onFinish}
-            onCancel={onClose}
-            cover={cover}
-            setCover={setCover}
-          />
-        </SheetContent>
-      </Sheet>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: "100%" }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: "100%" }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="fixed inset-0 z-50 bg-background"
+          >
+            <EventsCreationForm
+              initialValues={{}}
+              loading={loading}
+              onFinish={onFinish}
+              onCancel={onClose}
+              cover={cover}
+              setCover={setCover}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 };

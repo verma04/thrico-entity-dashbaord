@@ -14,7 +14,11 @@ import { Input } from "@/components/ui/input";
 import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit2, Trash2 } from "lucide-react";
+import { Plus, Edit2, Trash2, FolderTree, Search } from "lucide-react";
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { CategoryDialog } from "./category-dialog";
 import { toast } from "sonner";
 
@@ -189,35 +193,54 @@ export function CategoriesManager() {
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="relative w-full sm:w-64">
+    <EcosystemWrapper>
+      <EcosystemHeader
+        title="Offer Categories"
+        badgeText="Organization"
+        description="Manage categories to organize your offers and improve discoverability."
+        icon={FolderTree}
+        actions={
+          <Button
+            onClick={() => {
+              setEditingCategory(null);
+              setIsDialogOpen(true);
+            }}
+            className="font-semibold text-xs px-6 h-10 rounded-lg shadow-sm gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Add Category
+          </Button>
+        }
+      />
+
+      <EcosystemActionBar>
+        <div className="flex items-center gap-2 relative z-10 w-full md:max-w-[400px] group">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
           <Input
             placeholder="Search categories..."
-            className="bg-background"
+            className="pl-12 h-12 bg-slate-50 border-slate-200 rounded-xl focus-visible:ring-4 focus-visible:ring-indigo-500/5 transition-all font-medium text-slate-700 placeholder:text-slate-400 border shadow-sm w-full"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <Button
-          className="gap-2"
-          onClick={() => {
-            setEditingCategory(null);
-            setIsDialogOpen(true);
-          }}
-        >
-          <Plus className="h-4 w-4" />
-          Add Category
-        </Button>
-      </div>
 
-      <DataTable
-        columns={columns}
-        data={filteredCategories}
-        isLoading={loading}
-        skeletonCount={3}
-        rowClassName="h-16 group"
-      />
+        <div className="flex items-center gap-4 pr-4 ml-auto">
+          <div className="flex items-center gap-2.5 px-4 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs font-semibold text-slate-600 uppercase tracking-wide whitespace-nowrap shadow-inner">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            {filteredCategories.length} Categories
+          </div>
+        </div>
+      </EcosystemActionBar>
+
+      <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">
+        <DataTable
+          columns={columns}
+          data={filteredCategories}
+          isLoading={loading}
+          skeletonCount={3}
+          rowClassName="h-16 group"
+        />
+      </EcosystemContainer>
 
       <CategoryDialog
         isOpen={isDialogOpen}
@@ -257,6 +280,6 @@ export function CategoriesManager() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </EcosystemWrapper>
   );
 }

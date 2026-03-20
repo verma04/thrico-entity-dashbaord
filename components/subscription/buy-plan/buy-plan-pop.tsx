@@ -29,6 +29,7 @@ import { useCheckEntitySubscription } from "@/graphql/actions";
 import {
   useUpdateTrialToPackage,
   useVerifyRazorpayPayment,
+  useCountry,
 } from "@/graphql/actions/plan";
 import { useSubscriptionStore } from "@/store/subscriptionStore";
 
@@ -64,6 +65,31 @@ export default function BuyPlanPopUp({
 
   const { Razorpay } = useRazorpay();
   const { refetch, loading: statusLoader } = useCheckEntitySubscription();
+  const { data: countryData } = useCountry();
+
+  const country = countryData?.country;
+  const taxPercentage = country?.taxPercentage || 0;
+  const taxName = country?.taxName || "Tax";
+  const taxIncluded = country?.taxIncluded || false;
+
+  const basePrice =
+    billingCycle === "monthly"
+      ? activePackage?.monthlyPrice
+      : activePackage?.yearlyPrice;
+
+  // Tax calculation logic
+  let taxAmount = 0;
+  let subtotal = basePrice || 0;
+  let finalTotal = basePrice || 0;
+
+  if (taxIncluded) {
+    taxAmount = subtotal - subtotal / (1 + taxPercentage / 100);
+    subtotal = subtotal - taxAmount;
+    finalTotal = basePrice || 0;
+  } else {
+    taxAmount = subtotal * (taxPercentage / 100);
+    finalTotal = subtotal + taxAmount;
+  }
 
   // Inject global styles for Razorpay z-index
   useEffect(() => {
@@ -374,9 +400,17 @@ export default function BuyPlanPopUp({
                   </span>
                   <span className="font-medium">
                     {activePackage?.currency}
-                    {billingCycle === "monthly"
-                      ? activePackage?.monthlyPrice
-                      : activePackage?.yearlyPrice}
+                    {subtotal.toFixed(2)}
+                  </span>
+                </div>
+
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">
+                    {taxName} ({taxPercentage}%{taxIncluded ? " Included" : ""})
+                  </span>
+                  <span className="font-medium text-primary">
+                    {activePackage?.currency}
+                    {taxAmount.toFixed(2)}
                   </span>
                 </div>
 
@@ -386,9 +420,7 @@ export default function BuyPlanPopUp({
                   <span className="font-medium">Total due today</span>
                   <span className="text-xl font-bold">
                     {activePackage?.currency}
-                    {billingCycle === "monthly"
-                      ? activePackage?.monthlyPrice
-                      : activePackage?.yearlyPrice}
+                    {finalTotal.toFixed(2)}
                   </span>
                 </div>
 

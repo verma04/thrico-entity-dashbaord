@@ -18,13 +18,12 @@ const details = `
         lastName
         email
         avatar
-        location
+       location 
         about {
           social {
             url
             platform
           }
-          pronouns
           headline
           currentPosition
           about
@@ -32,6 +31,7 @@ const details = `
         profile {
           country
           language
+          skills 
           phone {
             areaCode
             countryCode
@@ -115,8 +115,17 @@ mutation ChangeUserVerification($input: statusInput) {
 export const GET_USER_DETIALS = gql`
   query GetUserDetailsById($input: inputId) {
     getUserDetailsById(input: $input) {
+      verification {
+        id
+        isVerifiedAt
+        isVerified
+        verificationReason
+      }
       isApproved
       isRequested
+      lastActive
+      id
+      isOnline
       status
       userKyc {
         referralSource
@@ -125,26 +134,49 @@ export const GET_USER_DETIALS = gql`
       }
       user {
         id
+        email
         firstName
         lastName
-        email
-        avatar
         location
-        profile {
-          country
-          language
-          phone {
-            areaCode
-            countryCode
-            isoCode
-            phoneNumber
-          }
-          timeZone
-
-          gender
-          pronouns
+        avatar
+        cover
+        lastLoginAt
+        about {
           headline
-          currentPosition
+          social {
+            url
+            platform
+          }
+        }
+        profile {
+          DOB
+          skills
+          language
+          gender
+          experience {
+            id
+            company {
+              name
+            }
+            duration
+            employmentType
+            locationType
+            title
+            startDate
+            currentlyWorking
+            location
+          }
+          education {
+            id
+            school {
+              name
+            }
+            degree
+            grade
+            activities
+            description
+            duration
+          }
         }
       }
     }
@@ -197,6 +229,21 @@ export const GET_USER_ROLE_DISTRIBUTION = gql`
     getUserRoleDistribution(timeRange: $timeRange) {
       name
       value
+    }
+  }
+`;
+
+export const GET_USER_STATS = gql`
+  query GetUserStats($userId: ID!) {
+    getUserStats(input: { userId: $userId }) {
+      totalPosts
+      totalComments
+      totalConnections
+      totalGroups
+      totalEvents
+      totalListings
+      totalOffers
+      totalJobs
     }
   }
 `;

@@ -18,8 +18,7 @@ export const FaviconUpload = ({
   const [uploadImage] = useUploadImage();
 
   return (
-    <div>
-      <h3 className="text-sm font-medium mb-4">Favicon</h3>
+    <div className="w-full">
       <ImageUploadWithCrop
         currentImage={currentImage}
         onImageUpdate={onImageUpdate}
@@ -63,7 +62,6 @@ export const FaviconUpload = ({
           }
         }}
       />
-      <Separator className="mt-8" />
     </div>
   );
 };

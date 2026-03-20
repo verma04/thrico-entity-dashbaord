@@ -21,8 +21,7 @@ import { cn } from "@/lib/utils";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import React, { useEffect } from "react";
-import { Badge as BadgeData } from "../ts-types";
-import { GamificationTrigger } from "@/graphql/actions";
+import { Badge, GamificationTrigger } from "@/graphql/actions";
 import { renderModuleIcon } from "@/components/subscription/utils";
 
 const ICON_CATEGORIES = [
@@ -49,13 +48,13 @@ const ICON_CATEGORIES = [
       "💎",
       "💠",
       "🔮",
-      "�",
+      "💫",
       "💍",
       "⚡",
       "🔥",
       "🌈",
       "🦄",
-      "�",
+      "🍭",
       "🔱",
       "⚔️",
     ],
@@ -66,11 +65,11 @@ const ICON_CATEGORIES = [
       "🚀",
       "📈",
       "🆙",
-      "�",
+      "⚡",
       "🌱",
-      "�",
+      "🔥",
       "🏃",
-      "�️",
+      "🏋️",
       "💡",
       "📡",
       "🛸",
@@ -79,24 +78,22 @@ const ICON_CATEGORIES = [
   },
   {
     name: "Skill & Action",
-    icons: ["�", "📝", "�", "�🎭", "🎸", "�", "🕹️", "�", "🧪", "�️", "🎯", "🏹"],
+    icons: ["🎨", "📝", "💻", "🎭", "🎸", "🎤", "🕹️", "🧩", "🧪", "🛠️", "🎯", "🏹"],
   },
   {
     name: "Social & Community",
-    icons: ["🤝", "�", "❤️", "�", "💬", "📣", "🦋", "�", "�", "�", "�", "�"],
+    icons: ["🤝", "🌍", "❤️", "🎈", "💬", "📣", "🦋", "🌸", "🍔", "🍕", "🥂", "🎉"],
   },
 ];
-
-const ALL_ICONS = ICON_CATEGORIES.flatMap((c) => c.icons);
 
 interface BadgeDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  editingBadge: BadgeData | null;
+  editingBadge: Badge | null;
   subscriptionModules: { id: string; name: string; icon: string }[];
   triggers: GamificationTrigger[];
   isLoading: boolean;
-  onSave: (badge: Partial<BadgeData>) => void;
+  onSave: (badge: Partial<Badge>) => void;
 }
 
 const validationSchema = Yup.object({
@@ -109,7 +106,7 @@ const validationSchema = Yup.object({
     then: (schema) => schema.required("Module is required"),
     otherwise: (schema) => schema.optional(),
   }),
-  criteria: Yup.object().when("type", {
+  condition: Yup.object().when("type", {
     is: "ACTION",
     then: (schema) =>
       schema.shape({
@@ -144,7 +141,7 @@ export function BadgeDialog({
       type: "ACTION" as "ACTION" | "POINTS",
       module: "",
       isActive: true,
-      criteria: {
+      condition: {
         action: "",
         count: 1,
         pointsRequired: 100,
@@ -163,10 +160,8 @@ export function BadgeDialog({
     (t) => t.moduleId === formik.values.module,
   );
 
-  // Reset form when dialog opens/closes or dependency changes if needed
   useEffect(() => {
     if (isOpen && !editingBadge) {
-      // Set default module if creating new
       if (subscriptionModules.length > 0 && !formik.values.module) {
         formik.setFieldValue("module", subscriptionModules[0].id);
       }
@@ -189,7 +184,6 @@ export function BadgeDialog({
             <div className="space-y-4">
               <Label>Badge Identity</Label>
 
-              {/* Premium Preview Card */}
               <div className="relative overflow-hidden rounded-2xl border bg-linear-to-br from-primary/5 via-background to-primary/10 p-6 shadow-sm ring-1 ring-inset ring-primary/10">
                 <div className="flex items-center gap-6">
                   <div className="relative">
@@ -321,7 +315,7 @@ export function BadgeDialog({
                     value={formik.values.module}
                     onValueChange={(v) => {
                       formik.setFieldValue("module", v);
-                      formik.setFieldValue("criteria.action", ""); // Reset action when module changes
+                      formik.setFieldValue("condition.action", "");
                     }}
                   >
                     <SelectTrigger>
@@ -345,11 +339,11 @@ export function BadgeDialog({
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="criteria.action">Action</Label>
+                    <Label htmlFor="condition.action">Action</Label>
                     <Select
-                      value={formik.values.criteria?.action}
+                      value={formik.values.condition?.action}
                       onValueChange={(v) =>
-                        formik.setFieldValue("criteria.action", v)
+                        formik.setFieldValue("condition.action", v)
                       }
                       disabled={!formik.values.module}
                     >
@@ -364,25 +358,25 @@ export function BadgeDialog({
                         ))}
                       </SelectContent>
                     </Select>
-                    {formik.touched.criteria?.action &&
-                      (formik.errors.criteria as any)?.action && (
+                    { (formik.touched.condition as any)?.action &&
+                      (formik.errors.condition as any)?.action && (
                         <p className="text-sm text-red-500">
-                          {(formik.errors.criteria as any)?.action}
+                          {(formik.errors.condition as any)?.action}
                         </p>
                       )}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="criteria.count">Required Count</Label>
+                    <Label htmlFor="condition.count">Required Count</Label>
                     <Input
                       type="number"
                       min={1}
-                      id="criteria.count"
-                      {...formik.getFieldProps("criteria.count")}
+                      id="condition.count"
+                      {...formik.getFieldProps("condition.count")}
                     />
-                    {formik.touched.criteria?.count &&
-                      (formik.errors.criteria as any)?.count && (
+                    {(formik.touched.condition as any)?.count &&
+                      (formik.errors.condition as any)?.count && (
                         <p className="text-sm text-red-500">
-                          {(formik.errors.criteria as any)?.count}
+                          {(formik.errors.condition as any)?.count}
                         </p>
                       )}
                   </div>
@@ -392,18 +386,18 @@ export function BadgeDialog({
 
             {formik.values.type === "POINTS" && (
               <div className="space-y-2">
-                <Label htmlFor="criteria.pointsRequired">Points Required</Label>
+                <Label htmlFor="condition.pointsRequired">Points Required</Label>
                 <Input
                   type="number"
                   min={1}
-                  id="criteria.pointsRequired"
+                  id="condition.pointsRequired"
                   placeholder="e.g., 1000"
-                  {...formik.getFieldProps("criteria.pointsRequired")}
+                  {...formik.getFieldProps("condition.pointsRequired")}
                 />
-                {formik.touched.criteria?.pointsRequired &&
-                  (formik.errors.criteria as any)?.pointsRequired && (
+                {(formik.touched.condition as any)?.pointsRequired &&
+                  (formik.errors.condition as any)?.pointsRequired && (
                     <p className="text-sm text-red-500">
-                      {(formik.errors.criteria as any)?.pointsRequired}
+                      {(formik.errors.condition as any)?.pointsRequired}
                     </p>
                   )}
               </div>

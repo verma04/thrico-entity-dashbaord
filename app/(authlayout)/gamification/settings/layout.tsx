@@ -3,7 +3,11 @@
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePathname, useRouter } from "next/navigation";
-import { ScrollText, MessageCircleQuestion, Gamepad2 } from "lucide-react";
+import { ScrollText, MessageCircleQuestion, Gamepad2, Layers } from "lucide-react";
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 
 function GamificationSettingsLayout({
   children,
@@ -15,9 +19,10 @@ function GamificationSettingsLayout({
 
   // Extract active tab from pathname
   const getActiveTab = () => {
+    if (pathname.includes("/general")) return "general";
     if (pathname.includes("/term_and_conditions")) return "terms";
     if (pathname.includes("/faq")) return "faq";
-    return "terms"; // Default to terms
+    return "general"; // Default to general
   };
 
   const activeTab = getActiveTab();
@@ -25,6 +30,9 @@ function GamificationSettingsLayout({
   const handleTabChange = (value: string) => {
     const basePath = "/gamification/settings";
     switch (value) {
+      case "general":
+        router.push(`${basePath}/general`);
+        break;
       case "terms":
         router.push(`${basePath}/term_and_conditions`);
         break;
@@ -35,40 +43,68 @@ function GamificationSettingsLayout({
   };
 
   return (
-    <div className="flex flex-col h-full space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b">
-        <div>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 rounded-lg bg-primary/10 ring-1 ring-primary/20">
-              <Gamepad2 className="h-6 w-6 text-primary" />
-            </div>
-            <h1 className="text-3xl font-bold">Gamification Settings</h1>
-          </div>
-          <p className="text-muted-foreground">
-            Configure gamification module terms and FAQs
-          </p>
-        </div>
-      </div>
+    <EcosystemWrapper>
+      <EcosystemHeader
+        title="Gamification Content"
+        badgeText="Settings"
+        description="Manage the legal terms, conditions, and frequently asked questions for your gamification modules."
+        icon={Gamepad2}
+      />
 
-      {/* Tabs & Content */}
-      <Card className="border-none shadow-sm ring-1 ring-border/50">
-        <Tabs value={activeTab} onValueChange={handleTabChange}>
-          <TabsList className="m-4 grid w-full max-w-md grid-cols-2">
-            <TabsTrigger value="terms" className="gap-2">
-              <ScrollText className="h-4 w-4" />
-              <span className="hidden sm:inline">Terms</span>
+      <EcosystemActionBar>
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+          <TabsList className="bg-transparent h-auto p-0 gap-8">
+            <TabsTrigger 
+              value="general" 
+              className="px-0 py-4 bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-indigo-500 rounded-none gap-2"
+            >
+              <div className="flex items-center gap-2 group">
+                <div className="h-8 w-8 rounded-lg bg-slate-50 flex items-center justify-center group-data-[state=active]:bg-indigo-500/10 transition-colors">
+                  <Layers className="h-4 w-4 text-slate-400 group-data-[state=active]:text-indigo-600" />
+                </div>
+                <span className="text-sm font-bold text-slate-500 group-data-[state=active]:text-slate-900 transition-colors">
+                  General Config
+                </span>
+              </div>
             </TabsTrigger>
 
-            <TabsTrigger value="faq" className="gap-2">
-              <MessageCircleQuestion className="h-4 w-4" />
-              <span className="hidden sm:inline">FAQ</span>
+            <TabsTrigger
+              value="terms"
+              className="px-0 py-4 bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-indigo-500 rounded-none gap-2"
+            >
+              <div className="flex items-center gap-2 group">
+                <div className="h-8 w-8 rounded-lg bg-slate-50 flex items-center justify-center group-data-[state=active]:bg-indigo-500/10 transition-colors">
+                  <ScrollText className="h-4 w-4 text-slate-400 group-data-[state=active]:text-indigo-600" />
+                </div>
+                <span className="text-sm font-bold text-slate-500 group-data-[state=active]:text-slate-900 transition-colors">
+                  Terms & Conditions
+                </span>
+              </div>
+            </TabsTrigger>
+
+            <TabsTrigger
+              value="faq"
+              className="px-0 py-4 bg-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-indigo-500 rounded-none gap-2"
+            >
+              <div className="flex items-center gap-2 group">
+                <div className="h-8 w-8 rounded-lg bg-slate-50 flex items-center justify-center group-data-[state=active]:bg-indigo-500/10 transition-colors">
+                  <MessageCircleQuestion className="h-4 w-4 text-slate-400 group-data-[state=active]:text-indigo-600" />
+                </div>
+                <span className="text-sm font-bold text-slate-500 group-data-[state=active]:text-slate-900 transition-colors">
+                  Knowledge Base & FAQ
+                </span>
+              </div>
             </TabsTrigger>
           </TabsList>
         </Tabs>
-        <div className="p-6">{children}</div>
-      </Card>
-    </div>
+      </EcosystemActionBar>
+
+      <EcosystemContainer className="p-8">
+        <div className="max-w-4xl mx-auto">
+          {children}
+        </div>
+      </EcosystemContainer>
+    </EcosystemWrapper>
   );
 }
 

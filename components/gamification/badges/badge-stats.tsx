@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Award, Star, Trophy } from "lucide-react";
-import { Badge } from "../ts-types";
+import { Badge } from "@/graphql/actions";
 
 interface BadgeStatsProps {
   badges: Badge[];

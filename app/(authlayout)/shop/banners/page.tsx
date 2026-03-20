@@ -4,6 +4,11 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
+import { ImageIcon } from "lucide-react";
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { arrayMove } from "@dnd-kit/sortable";
 import {
   useShopBanners,
@@ -78,29 +83,39 @@ export default function BannerManagerPage() {
   };
 
   return (
-    <div className="p-6 space-y-8 max-w-6xl mx-auto min-h-screen">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-6 border-border/50">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Shop Banners</h1>
-          <p className="text-muted-foreground mt-1 text-lg">
-            Manage your store's featured images and marketing carousel.
-          </p>
-        </div>
-        <Button
-          size="lg"
-          onClick={() => setIsDialogOpen(true)}
-          className="shadow-md hover:shadow-lg transition-shadow"
-        >
-          <Plus className="mr-2 h-5 w-5" /> Add New Banner
-        </Button>
-      </div>
-
-      <BannerList
-        banners={banners}
-        loading={loading}
-        onRemove={handleRemoveBanner}
-        onReorder={handleReorder}
+    <EcosystemWrapper>
+      <EcosystemHeader
+        title="Shop Banners"
+        badgeText="Marketing Assets"
+        description="Manage your store's featured images and marketing carousel."
+        icon={ImageIcon}
+        actions={
+          <Button
+            onClick={() => setIsDialogOpen(true)}
+            className="font-semibold text-xs px-6 h-10 rounded-lg shadow-sm gap-2"
+          >
+            <Plus className="h-4 w-4" /> Add New Banner
+          </Button>
+        }
       />
+
+      <EcosystemActionBar>
+        <div className="flex items-center gap-2 relative z-10 ml-auto pr-4">
+          <div className="flex items-center gap-2.5 px-4 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs font-semibold text-slate-600 uppercase tracking-wide whitespace-nowrap">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            {banners.length} Banners
+          </div>
+        </div>
+      </EcosystemActionBar>
+
+      <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">
+        <BannerList
+          banners={banners}
+          loading={loading}
+          onRemove={handleRemoveBanner}
+          onReorder={handleReorder}
+        />
+      </EcosystemContainer>
 
       <BannerDialog
         isOpen={isDialogOpen}
@@ -108,6 +123,6 @@ export default function BannerManagerPage() {
         onSubmit={handleCreateBanner}
         isLoading={creating}
       />
-    </div>
+    </EcosystemWrapper>
   );
 }

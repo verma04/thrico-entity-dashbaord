@@ -6,7 +6,7 @@ export default function GamificationSettingsPage() {
   const router = useRouter();
 
   useEffect(() => {
-    router.push("/gamification/settings/term_and_conditions");
+    router.push("/gamification/settings/general");
   }, [router]);
 
   return null;

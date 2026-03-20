@@ -67,7 +67,7 @@ export const profileMenuItems = [
       {
         key: "profile",
         icon: <User2 size={18} />,
-        label: menuLink("/settings", "Your profile"),
+        label: menuLink("/settings/profile", "Your profilesss"),
       },
       {
         key: "notifications",

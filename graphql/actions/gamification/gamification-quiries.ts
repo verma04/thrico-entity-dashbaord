@@ -1,4 +1,9 @@
 import { gql, QueryHookOptions, useQuery } from "@apollo/client";
+import {
+  GET_GAMIFICATION_SUMMARY,
+  GET_USER_ACTIVITY_LOG,
+  GET_USER_EARNED_BADGES,
+} from "../../quries/gamification";
 
 export interface GamificationModule {
   id: string;
@@ -458,3 +463,34 @@ export function useGetUserGamificationActivityLog(
     { input: UserGamificationActivityLogInput }
   >(GET_USER_GAMIFICATION_ACTIVITY_LOG, options);
 }
+
+export const useGetGamificationSummary = (userId: string, options?: any) =>
+  useQuery(GET_GAMIFICATION_SUMMARY, {
+    variables: { userId },
+    skip: !userId,
+    ...options,
+  });
+
+export const useGetUserActivityLog = (
+  userId: string,
+  limit?: number,
+  offset?: number,
+  options?: any,
+) =>
+  useQuery(GET_USER_ACTIVITY_LOG, {
+    variables: { userId, limit, offset },
+    skip: !userId,
+    ...options,
+  });
+
+export const useGetUserEarnedBadges = (
+  userId: string,
+  limit?: number,
+  cursor?: string,
+  options?: any,
+) =>
+  useQuery(GET_USER_EARNED_BADGES, {
+    variables: { userId, limit, cursor },
+    skip: !userId,
+    ...options,
+  });

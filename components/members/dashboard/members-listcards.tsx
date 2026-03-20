@@ -15,6 +15,7 @@ import {
   UserCog,
   ExternalLink,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useGetAllUser, UserDetail } from "@/graphql/actions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDistanceToNow } from "date-fns";
@@ -35,6 +36,7 @@ export const MembersListCards = ({
   manualData,
   loading: manualLoading,
 }: MembersListCardsProps) => {
+  const router = useRouter();
   const { data, loading: queryLoading } = useGetAllUser();
 
   const loading = manualLoading ?? queryLoading;
@@ -94,16 +96,22 @@ export const MembersListCards = ({
 
             <div className="px-6 pb-6 -mt-12">
               <div className="flex items-end justify-between mb-4">
-                <Avatar className="h-24 w-24 rounded-2xl border-4 border-background shadow-lg group-hover:scale-105 transition-transform duration-300">
-                  <AvatarImage
-                    src={`https://cdn.thrico.network/${member.user.avatar}`}
-                    alt={member.user.firstName}
-                  />
-                  <AvatarFallback className="text-2xl bg-primary/10 text-primary">
-                    {member.user.firstName[0]}
-                    {member.user.lastName[0]}
-                  </AvatarFallback>
-                </Avatar>
+                <button 
+                  onClick={() => router.push(`/members/${member.id}`)}
+                  className="relative group/avatar"
+                >
+                  <Avatar className="h-24 w-24 rounded-2xl border-4 border-background shadow-lg group-hover/avatar:scale-105 transition-transform duration-300 cursor-pointer">
+                    <AvatarImage
+                      src={`https://cdn.thrico.network/${member.user.avatar}`}
+                      alt={member.user.firstName}
+                    />
+                    <AvatarFallback className="text-2xl bg-primary/10 text-primary">
+                      {member.user.firstName[0]}
+                      {member.user.lastName[0]}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="absolute inset-0 rounded-2xl bg-black/0 group-hover/avatar:bg-black/5 transition-colors" />
+                </button>
 
                 <div className="flex gap-2 mb-2">
                   <Badge
@@ -118,9 +126,12 @@ export const MembersListCards = ({
               </div>
 
               <div className="space-y-1">
-                <h3 className="text-xl font-bold tracking-tight">
+                <button 
+                  onClick={() => router.push(`/members/${member.id}`)}
+                  className="text-xl font-bold tracking-tight hover:text-primary transition-colors text-left"
+                >
                   {member.user.firstName} {member.user.lastName}
-                </h3>
+                </button>
                 <div className="flex items-center text-sm text-muted-foreground gap-2">
                   <Briefcase className="h-3.5 w-3.5" />
                   <span>

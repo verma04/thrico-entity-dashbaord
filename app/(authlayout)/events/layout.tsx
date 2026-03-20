@@ -1,9 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { List, Settings } from "lucide-react";
+import { List, Tag, CalendarPlus } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
-import { Card } from "@/components/ui/card";
 
 function EventsLayout({ children }: { children: React.ReactNode }) {
   const items = [
@@ -11,6 +10,11 @@ function EventsLayout({ children }: { children: React.ReactNode }) {
       key: "all",
       label: "All Events",
       icon: <List className="h-4 w-4" />,
+    },
+    {
+      key: "categories",
+      label: "Categories",
+      icon: <Tag className="h-4 w-4" />,
     },
   ];
 

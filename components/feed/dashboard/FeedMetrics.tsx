@@ -13,9 +13,8 @@ export const FeedMetrics = () => {
       trend: "up",
       icon: AppWindow,
       color: "text-emerald-600",
-      bgColor: "bg-emerald-50",
-      trendColor: "text-emerald-600",
-      trendBg: "bg-emerald-100/50",
+      bgColor: "bg-emerald-500/10",
+      description: "5% from last month"
     },
     {
       title: "Total Comments",
@@ -24,9 +23,8 @@ export const FeedMetrics = () => {
       trend: "up",
       icon: Users,
       color: "text-yellow-600",
-      bgColor: "bg-yellow-50",
-      trendColor: "text-yellow-600",
-      trendBg: "bg-yellow-100/50",
+      bgColor: "bg-yellow-500/10",
+      description: "12% from last month"
     },
     {
       title: "Total Reactions",
@@ -35,9 +33,8 @@ export const FeedMetrics = () => {
       trend: "up",
       icon: Repeat2,
       color: "text-blue-600",
-      bgColor: "bg-blue-50",
-      trendColor: "text-blue-600",
-      trendBg: "bg-blue-100/50",
+      bgColor: "bg-blue-500/10",
+      description: "8% from last month"
     },
     {
       title: "Total ReShares",
@@ -46,41 +43,38 @@ export const FeedMetrics = () => {
       trend: "up",
       icon: User,
       color: "text-pink-600",
-      bgColor: "bg-pink-50",
-      trendColor: "text-pink-600",
-      trendBg: "bg-pink-100/50",
+      bgColor: "bg-pink-500/10",
+      description: "15% from last month"
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {metrics.map((stat, index) => {
         const Icon = stat.icon;
         return (
           <Card
             key={index}
-            className="shadow-sm hover:shadow-md transition-shadow duration-200"
+            className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden group"
           >
             <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className={`p-3 rounded-2xl ${stat.bgColor}`}>
-                  <Icon className={`h-6 w-6 ${stat.color}`} />
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    {stat.title}
+                  </p>
+                  <h3 className="text-3xl font-bold mt-1">{stat.value}</h3>
                 </div>
                 <div
-                  className={`flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full ${stat.trendBg} ${stat.trendColor}`}
+                  className={`${stat.bgColor} p-2.5 rounded-xl transition-transform group-hover:scale-110`}
                 >
-                  <ArrowUpRight className="h-3 w-3" />
-                  {stat.change}%
+                  <Icon className={`h-5 w-5 ${stat.color}`} />
                 </div>
               </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground mb-1">
-                  {stat.title}
-                </p>
-                <div className="text-3xl font-bold flex items-center tracking-tight">
-                  {stat.value}
-                </div>
-              </div>
+              <p className="mt-4 text-xs text-muted-foreground flex items-center gap-1">
+                <ArrowUpRight className="h-3 w-3 text-green-500" />
+                {stat.description}
+              </p>
             </CardContent>
           </Card>
         );

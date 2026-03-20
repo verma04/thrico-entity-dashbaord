@@ -6,7 +6,7 @@ import { useGetEntity, useGetUser } from "@/graphql/actions";
 import withAuth from "@/lib/withAuth";
 import NoSubscription from "@/components/subscription/no-subscription";
 import TrialBanner from "@/components/subscription/trial-banner";
-import KycForm from "@/components/kyc-form/kyc-form";
+
 import { PlanDrawer } from "@/components/layout/plan-drawer";
 
 import SidebarLayout from "@/components/layout/sidebar/sidebar";
@@ -21,7 +21,7 @@ function RootLayout({ children }: { children: React.ReactNode }) {
     data: { getUser },
     loading: loadingUser,
   } = useGetUser();
-  const check = data?.getEntity;
+
   const searchParams = useSearchParams();
   const showDrawer = searchParams.has("choose-plan");
   const { isOpen: drawerOpen, openDrawer } = useDrawerStore();
@@ -34,25 +34,21 @@ function RootLayout({ children }: { children: React.ReactNode }) {
     <>
       {!loading && !loadingUser && (
         <>
-          {check ? (
+          <>
+            <TrialBanner />
+            <WelcomeCelebration />
+            {/* <Toaster /> */}
             <>
-              <TrialBanner />
-              <WelcomeCelebration />
-              {/* <Toaster /> */}
-              <>
-                {!data?.getEntity?.subscription?.status && <NoSubscription />}
-                <SidebarLayout>
-                  {data?.getEntity?.subscription?.status && <>{children}</>}
-                </SidebarLayout>
+              {!data?.getEntity?.subscription?.status && <NoSubscription />}
+              <SidebarLayout>
+                {data?.getEntity?.subscription?.status && <>{children}</>}
+              </SidebarLayout>
 
-                {/* Plan Drawer Component */}
-                <PlanDrawer />
-                <DomainStatusAlert />
-              </>
+              {/* Plan Drawer Component */}
+              <PlanDrawer />
+              <DomainStatusAlert />
             </>
-          ) : (
-            <KycForm data={{ user: getUser }} />
-          )}
+          </>
         </>
       )}
     </>

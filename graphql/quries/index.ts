@@ -4,10 +4,37 @@ export const GET_USER = gql`
   query GetUser {
     getUser {
       id
-      status
       email
+
       firstName
       lastName
+      status
+      memberStatus
+      permissions {
+        website
+        moderation
+        reports
+        settings
+        subscription
+        platformFeatures
+        appearance
+        auditLogs
+        domain
+        permissions
+        adminUsers
+      }
+      modulePermissions {
+        module
+        canRead
+        canEdit
+        canCreate
+        canDelete
+      }
+      role {
+        name
+        description
+        isSystem
+      }
     }
   }
 `;
@@ -226,7 +253,17 @@ export const UPDATE_ENTITY_PROFILE = gql`
   }
 `;
 
-// GetAllEntityInvoice Query
+// UPDATE_USER_PROFILE Mutation
+export const UPDATE_USER_PROFILE = gql`
+  mutation UpdateUserProfile($input: UserInput!) {
+    updateUserProfile(input: $input) {
+      id
+      firstName
+      lastName
+      email
+    }
+  }
+`;
 
 export const GET_ALL_ENTITY_INVOICE = gql`
   query GetAllEntityInvoice {
@@ -300,3 +337,6 @@ export interface GetAllEntityInvoiceResponse {
 
 export * from "./dashboard";
 export * from "./currency/currency-queries";
+export * from "./rewards/rewards-queries";
+export * from "./reports";
+export * from "./audit";

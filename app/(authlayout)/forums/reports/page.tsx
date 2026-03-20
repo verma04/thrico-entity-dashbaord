@@ -1,7 +1,9 @@
+"use client";
+
 import React from "react";
+import Reports from "../../../../components/reports/Reports";
+import { ReportModule } from "@/graphql/actions";
 
-const page = () => {
-  return <></>;
-};
-
-export default page;
+export default function CommunityReportsPage() {
+  return <Reports preselectedModule={ReportModule.DISCUSSION_FORUM} />;
+}

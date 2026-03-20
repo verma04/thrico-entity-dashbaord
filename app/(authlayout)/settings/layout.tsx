@@ -34,12 +34,19 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import Link from "next/link";
+import { useUserStore } from "@/store/store";
+import { useMemo } from "react";
 
 function SettingsLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
 
   const menuItems = [
+    {
+      key: "/settings/profile",
+      icon: UserCheck,
+      label: "Your Profile",
+    },
     {
       key: "/settings",
       icon: Home,
@@ -85,11 +92,7 @@ function SettingsLayout({ children }: { children: React.ReactNode }) {
       icon: HandCoins,
       label: "Taxes & Duties",
     },
-    {
-      key: "/settings/notifications",
-      icon: Bell,
-      label: "Notifications",
-    },
+
     {
       key: "/settings/languages",
       icon: Languages,
@@ -110,17 +113,42 @@ function SettingsLayout({ children }: { children: React.ReactNode }) {
       icon: Headset,
       label: "Contact Support",
     },
-    {
-      key: "/settings/currency",
-      icon: Coins,
-      label: "Currency",
-    },
+
     {
       key: "/settings/integrations",
       icon: Blocks,
       label: "Integrations",
     },
   ];
+  const user = useUserStore((state) => state.user);
+  const isSuperAdmin = user?.isSuperAdmin;
+  const isSystemRole = user?.role?.isSystem;
+  const permissions = user?.permissions;
+
+  const filteredMenuItems = useMemo(() => {
+    if (isSuperAdmin || isSystemRole) return menuItems;
+
+    return menuItems.filter((item) => {
+      if (item.key === "/settings/profile") return true;
+      if (item.key === "/settings") return permissions?.settings;
+      if (item.key === "/settings/appearance") return permissions?.appearance;
+      if (item.key === "/settings/domains") return permissions?.domain;
+      if (item.key === "/settings/moderation") return permissions?.moderation;
+      if (item.key === "/settings/subscription") return permissions?.subscription;
+      if (item.key === "/settings/modules") return permissions?.platformFeatures;
+      if (item.key === "/settings/billing") return permissions?.subscription;
+      if (item.key === "/settings/users") return permissions?.adminUsers;
+      if (item.key === "/settings/taxes") return permissions?.settings;
+      if (item.key === "/settings/languages") return permissions?.settings;
+      if (item.key === "/settings/privacy") return permissions?.settings;
+      if (item.key === "/settings/policies") return permissions?.settings;
+      if (item.key === "/settings/integrations") return permissions?.platformFeatures;
+      return true;
+    });
+  }, [user, isSuperAdmin, isSystemRole, permissions, menuItems]);
+
+  const configItems = filteredMenuItems.filter((_, idx) => idx < 7);
+  const advancedItems = filteredMenuItems.filter((_, idx) => idx >= 7);
 
   return (
     <div className="fixed inset-0 flex z-50">
@@ -148,7 +176,7 @@ function SettingsLayout({ children }: { children: React.ReactNode }) {
               <SidebarGroupLabel>Configuration</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {menuItems.slice(0, 6).map((item) => {
+                  {configItems.map((item) => {
                     const Icon = item.icon;
                     return (
                       <SidebarMenuItem key={item.key}>
@@ -172,7 +200,7 @@ function SettingsLayout({ children }: { children: React.ReactNode }) {
               <SidebarGroupLabel>Advanced</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {menuItems.slice(6).map((item) => {
+                  {advancedItems.map((item) => {
                     const Icon = item.icon;
                     return (
                       <SidebarMenuItem key={item.key}>

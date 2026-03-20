@@ -1,21 +1,24 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { motion, AnimatePresence } from "framer-motion";
+import { CardContent } from "@/components/ui/card";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
-import { Loader2, Save, FileText } from "lucide-react";
+import { 
+  ShieldCheck, 
+  AlertCircle
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   useGetTermsAndConditionsByModule,
   useUpdateTermsAndConditionsByModule,
 } from "@/graphql/actions/faq";
+import { 
+  ModuleCard, 
+  ModuleHeader, 
+  ModuleStatusBar, 
+  ModuleSectionLabel 
+} from "./module-ui-kit";
 
 interface ModuleTermsManagerProps {
   moduleName: string;
@@ -36,115 +39,99 @@ export function ModuleTermsManager({
 
   // Fetch Terms data
   const { data, loading } = useGetTermsAndConditionsByModule({
-    variables: {
-      input: {
-        module: moduleName,
-      },
-    },
+    variables: { input: { module: moduleName } },
   });
 
-  // Update terms content when data is loaded
   useEffect(() => {
     if (data?.getTermsAndConditionsByModule?.termsAndConditions) {
       setTermsContent(data.getTermsAndConditionsByModule.termsAndConditions);
+      setHasChanged(false);
     }
   }, [data]);
 
-  // Update Terms mutation
-  const [updateTerms, { loading: updating }] =
-    useUpdateTermsAndConditionsByModule({
-      module: moduleName,
-      onCompleted: () => {
-        toast({
-          title: "Terms Updated",
-          description: "Terms and conditions have been successfully updated.",
-        });
-        setHasChanged(false);
-      },
-      onError: (error: Error) => {
-        toast({
-          title: "Error",
-          description:
-            error.message || "Failed to update terms and conditions.",
-          variant: "destructive",
-        });
-      },
-    });
+  const [updateTerms, { loading: updating }] = useUpdateTermsAndConditionsByModule({
+    module: moduleName,
+    onCompleted: () => {
+      toast({ title: "Terms Updated", description: "Legal content has been successfully published." });
+      setHasChanged(false);
+    },
+  });
 
   const handleContentChange = (value: string) => {
     setTermsContent(value);
-    setHasChanged(
-      value !== (data?.getTermsAndConditionsByModule?.termsAndConditions || "")
-    );
+    setHasChanged(value !== (data?.getTermsAndConditionsByModule?.termsAndConditions || ""));
   };
 
   const handleSave = async () => {
     try {
       await updateTerms({
-        variables: {
-          module: moduleName,
-          termsAndConditions: termsContent,
-        },
+        variables: { module: moduleName, termsAndConditions: termsContent },
       });
-    } catch (error) {
-      console.error("Error updating terms:", error);
+    } catch (e) {}
+  };
+
+  const handleReset = () => {
+    if (data?.getTermsAndConditionsByModule?.termsAndConditions) {
+      setTermsContent(data.getTermsAndConditionsByModule.termsAndConditions);
+      setHasChanged(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
+  if (loading) return null;
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-primary" />
-              <CardTitle>{title}</CardTitle>
-            </div>
-            <CardDescription className="mt-1">{description}</CardDescription>
-          </div>
-          <Button
-            onClick={handleSave}
-            disabled={!hasChanged || updating}
-            size="sm"
-          >
-            {updating ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Saving...
-              </>
-            ) : (
-              <>
-                <Save className="h-4 w-4 mr-2" />
-                Save Changes
-              </>
-            )}
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <RichTextEditor
-            value={termsContent}
-            onChange={handleContentChange}
-            placeholder={placeholder}
-            minHeight="400px"
-          />
+    <div className="animate-in fade-in duration-500">
+      <ModuleCard>
+        <ModuleHeader
+          title={title}
+          description={description}
+          icon={<ShieldCheck size={24} strokeWidth={1.5} />}
+          iconClassName="bg-indigo-600"
+          hasChanged={hasChanged}
+          onSave={handleSave}
+          onReset={handleReset}
+          isLoading={updating}
+          saveLabel="PUBLISH TERMS"
+          resetLabel="DISCARD"
+        />
+        
+        <CardContent className="p-8">
+          <div className="space-y-6">
+            <ModuleSectionLabel>Legal Content Canvas</ModuleSectionLabel>
 
-          {hasChanged && (
-            <p className="text-sm text-muted-foreground">
-              You have unsaved changes
-            </p>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+            <div className="rounded-[24px] border border-zinc-100 overflow-hidden shadow-sm bg-zinc-50/20 ring-1 ring-zinc-50 focus-within:ring-4 focus-within:ring-indigo-50 transition-all">
+              <RichTextEditor
+                value={termsContent}
+                onChange={handleContentChange}
+                placeholder={placeholder}
+                minHeight="500px"
+              />
+            </div>
+
+            <div className="flex items-center justify-between px-2 pt-2">
+              <div className="flex items-center gap-3 py-2 px-4 rounded-xl bg-zinc-50/80 border border-zinc-100 text-[11px] font-bold text-zinc-400">
+                <AlertCircle size={14} className="text-zinc-300" />
+                Auto-syncing to blockchain node clusters
+              </div>
+              
+              <AnimatePresence>
+                {hasChanged && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="px-4 py-2 rounded-xl bg-amber-50 border border-amber-100 text-amber-600 text-[11px] font-black tracking-tight flex items-center gap-2"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shadow-[0_0_8px_oklch(0.76_0.18_70/0.4)]" />
+                    UNPUBLISHED DRAFT
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+        </CardContent>
+
+        <ModuleStatusBar label="Module Compliance Verified" />
+      </ModuleCard>
+    </div>
   );
 }

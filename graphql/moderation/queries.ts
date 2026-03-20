@@ -97,3 +97,30 @@ export const GET_MODERATION_STATS = gql`
     }
   }
 `;
+
+export const GET_AI_MODERATION_DASHBOARD = gql`
+  query GetAiModerationDashboard {
+    getAiModerationDashboard {
+      totalPosts
+      pendingModeration
+      flaggedContent
+      rejectedPosts
+    }
+  }
+`;
+
+export const GET_AI_MODERATION_LOGS = gql`
+  query GetAiModerationLogs($limit: Int, $offset: Int) {
+    getAiModerationLogs(limit: $limit, offset: $offset) {
+      items {
+        id
+        contentId
+        classification
+        confidence
+        model
+        createdAt
+      }
+      totalCount
+    }
+  }
+`;

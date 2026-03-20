@@ -34,26 +34,32 @@ export default function BillingAddress() {
 
   return (
     <>
-      <div className="flex items-start justify-between py-4 px-0">
-        <div className="flex items-start gap-3">
-          <MapPin className="w-5 h-5 mt-0.5 text-muted-foreground flex-shrink-0" />
+    <div className="group/billing p-6 rounded-2xl bg-muted/20 border border-border/40 hover:border-primary/30 transition-all duration-300">
+      <div className="flex items-start justify-between">
+        <div className="flex items-start gap-4">
+          <div className="p-3 rounded-xl bg-orange-500/5 text-orange-600 border border-orange-500/10 group-hover/billing:scale-110 transition-transform">
+            <MapPin className="w-6 h-6" />
+          </div>
           <div className="space-y-1">
-            <p className="font-medium text-sm">Billing address</p>
-            <p className="text-sm text-muted-foreground">{country}</p>
+            <p className="font-black text-lg tracking-tight">Legal Address</p>
+            <p className="text-sm text-muted-foreground font-bold max-w-md leading-relaxed uppercase tracking-wide">
+              {country || "No address provided"}
+            </p>
           </div>
         </div>
         <Button
-          variant="ghost"
+          variant="outline"
           size="sm"
           onClick={() => {
             form.reset({ country });
             setIsOpen(true);
           }}
-          className="h-8 w-8 p-0"
+          className="font-black px-6 rounded-full border-primary/20 hover:bg-primary hover:text-primary-foreground group-hover/billing:shadow-lg group-hover/billing:shadow-primary/10 transition-all"
         >
-          <Edit2 className="w-4 h-4" />
+          Update Address
         </Button>
       </div>
+    </div>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="sm:max-w-md">

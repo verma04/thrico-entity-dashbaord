@@ -3,15 +3,6 @@
 import React from "react";
 import Link from "next/link";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
   ShoppingBag,
   TrendingUp,
   Package,
@@ -21,156 +12,150 @@ import {
   Image as ImageIcon,
   Layers,
   AlertCircle,
+  Zap,
+  ShieldCheck,
+  Activity,
+  Sparkles,
+  LayoutGrid,
 } from "lucide-react";
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { EcosystemKPI, EcosystemCard, EcosystemStatusIndicator } from "@/components/layout/ecosystem/ecosystem-analytics";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export default function ShopDashboardPage() {
-  // Mock data for initial version
-  const stats = [
-    {
-      title: "Total Views",
-      value: "1,234",
-      change: "+12% from last week",
-      icon: <Eye className="h-4 w-4 text-blue-500" />,
-      className: "border-blue-100 bg-blue-50/30",
-    },
-    {
-      title: "Total Products",
-      value: "156",
-      change: "12 low stock",
-      icon: <Package className="h-4 w-4 text-orange-500" />,
-      className: "border-orange-100 bg-orange-50/30",
-    },
-    {
-      title: "Active Banners",
-      value: "5",
-      change: "Currently live",
-      icon: <ImageIcon className="h-4 w-4 text-purple-500" />,
-      className: "border-purple-100 bg-purple-50/30",
-    },
-    {
-      title: "Categories",
-      value: "8",
-      change: "Active categories",
-      icon: <Layers className="h-4 w-4 text-green-500" />,
-      className: "border-green-100 bg-green-50/30",
-    },
+  const kpis = [
+    { title: "Propagation Count", value: "1,234", trend: 12, icon: Eye, color: "text-indigo-500", bg: "bg-indigo-500/10" },
+    { title: "Aggregate Products", value: "156", trend: -2, icon: Package, color: "text-emerald-500", bg: "bg-emerald-500/10" },
+    { title: "Active Banners", value: "5", trend: 0, icon: ImageIcon, color: "text-violet-500", bg: "bg-violet-500/10" },
+    { title: "Registry Tiers", value: "8", trend: 0, icon: Layers, color: "text-amber-500", bg: "bg-amber-500/10" },
+  ];
+
+  const quickActions = [
+    { label: "Manage Banners", href: "/shop/banners" },
+    { label: "Manage Categories", href: "#" },
+    { label: "Product Tags", href: "#" },
+    { label: "Collections", href: "#" },
+    { label: "SEO Settings", href: "#" },
   ];
 
   return (
-    <div className="p-6 space-y-8 max-w-[1600px] mx-auto">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Shop Overview</h1>
-          <p className="text-muted-foreground">
-            Monitor your catalog performance and manage products.
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Link href="/shop/all">
-            <Button variant="outline">
-              <ShoppingBag className="mr-2 h-4 w-4" />
-              View Products
-            </Button>
-          </Link>
-          <Link href="/shop/all?action=create">
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Product
-            </Button>
-          </Link>
-        </div>
-      </div>
+    <EcosystemWrapper anonymized-1="shop-intelligence">
+      <EcosystemHeader
+        title="Commerce Intelligence"
+        badgeText="Catalog Registry"
+        description="Monitor product instantiation velocity, engagement protocols, and architectural commerce expansion across the global shop registry."
+        icon={ShoppingBag}
+      />
 
-      {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat, index) => (
-          <Card key={index} className={stat.className}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                {stat.title}
-              </CardTitle>
-              {stat.icon}
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {stat.change}
-              </p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        {/* Engagement Overview Chart Placeholder */}
-        <Card className="col-span-4 lg:col-span-7">
-          <CardHeader>
-            <CardTitle>Catalog Engagement</CardTitle>
-            <CardDescription>
-              User interaction with your products over the last 30 days.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="pl-2">
-            <div className="h-[300px] flex items-center justify-center bg-muted/20 border border-dashed rounded-lg">
-              <div className="text-center text-muted-foreground">
-                <TrendingUp className="h-10 w-10 mx-auto mb-2 opacity-20" />
-                <p>Views & Engagement Chart Visualization</p>
-                <p className="text-xs">(Coming Soon)</p>
+      <EcosystemActionBar shadow="none">
+        <div className="flex items-center justify-between w-full">
+           <div className="flex items-center gap-6">
+              <EcosystemStatusIndicator status="active" label="Commerce Stream: Operational" />
+              <div className="h-4 w-px bg-slate-200" />
+              <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
+                 <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
+                 <span>Verified Shop Node</span>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+           </div>
 
-      {/* Actions / Tips */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-none">
-          <CardHeader>
-            <CardTitle className="text-md flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 text-primary" />
-              Inventory Alert
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              12 products are running low on stock. Restock them to ensure they
-              remain visible in your store.
-            </p>
-            <Link href="/shop/all?filter=low-stock">
-              <Button variant="secondary" size="sm" className="w-full">
-                View Low Stock Items
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle className="text-md">Quick Actions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
-              <Link href="/shop/banners">
-                <Button variant="outline" size="sm">
-                  Manage Banners
-                </Button>
+           <div className="flex items-center gap-3">
+              <Link href="/shop/all">
+                 <Button variant="outline" className="h-10 px-4 rounded-xl border-slate-200 font-black text-[10px] uppercase tracking-widest text-slate-600 gap-3 hover:bg-slate-50 transition-all shadow-sm">
+                    <ShoppingBag className="h-4 w-4 text-indigo-500" />
+                    Registry
+                 </Button>
               </Link>
-              <Button variant="outline" size="sm">
-                Manage Categories
-              </Button>
-              <Button variant="outline" size="sm">
-                Product Tags
-              </Button>
-              <Button variant="outline" size="sm">
-                Collections
-              </Button>
-              <Button variant="outline" size="sm">
-                SEO Settings
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+              <div className="h-4 w-px bg-slate-200 mx-1" />
+              <Link href="/shop/all?action=create">
+                 <Button className="h-10 px-6 rounded-xl bg-slate-900 border-slate-800 font-black text-[10px] uppercase tracking-widest gap-2 shadow-xl hover:bg-black transition-all active:scale-95 group">
+                    <Plus className="h-4 w-4 transition-transform group-hover:rotate-90" />
+                    Provision Product
+                 </Button>
+              </Link>
+           </div>
+        </div>
+      </EcosystemActionBar>
+
+      <EcosystemContainer className="space-y-12 p-8 lg:p-12">
+        {/* KPI Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+           {kpis.map((kpi, i) => (
+             <EcosystemKPI key={i} {...kpi} trendLabel="Yield" />
+           ))}
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+           {/* Chart Section */}
+           <div className="lg:col-span-8">
+              <EcosystemCard 
+                title="Catalog Engagement" 
+                description="Temporal product instantiation & engagement telemetry" 
+                icon={TrendingUp}
+                decorationIcon={Zap}
+                className="min-h-[400px] flex items-center justify-center text-center"
+              >
+                 <div className="flex flex-col items-center justify-center space-y-6 max-w-md mx-auto">
+                    <div className="w-20 h-20 rounded-[2rem] bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-300 shadow-inner group-hover:scale-110 transition-transform duration-700">
+                       <Activity className="h-10 w-10 animate-pulse" />
+                    </div>
+                    <div>
+                       <h3 className="text-xl font-black text-slate-900 tracking-tight italic uppercase mb-2">Engagment Matrix Pending</h3>
+                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] leading-relaxed">
+                          High-frequency consumer telemetry is currently being aggregated. Visual matrices will manifest as ingestion cycles complete.
+                       </p>
+                    </div>
+                 </div>
+              </EcosystemCard>
+           </div>
+
+           {/* Alerts & Quick Actions */}
+           <div className="lg:col-span-4 space-y-8">
+              <EcosystemCard 
+                title="Node Alert" 
+                description="Inventory anomaly detection" 
+                icon={AlertCircle}
+                decorationIcon={Package}
+                className="min-h-fit border-rose-100/50 bg-rose-50/10"
+              >
+                 <div className="p-6 rounded-[2rem] bg-white border border-rose-100 shadow-xl shadow-rose-200/20 relative overflow-hidden group/alert">
+                    <p className="text-sm font-black text-slate-900 leading-tight uppercase tracking-tighter mb-4">
+                       12 Registry items are currently below the required stock protocol.
+                    </p>
+                    <Link href="/shop/all?filter=low-stock">
+                       <Button variant="outline" className="w-full h-11 rounded-xl border-rose-200 font-black text-[9px] uppercase tracking-widest text-rose-600 hover:bg-rose-600 hover:text-white transition-all shadow-sm">
+                          View Anomalies
+                       </Button>
+                    </Link>
+                 </div>
+              </EcosystemCard>
+
+              <EcosystemCard 
+                title="Quick Protocols" 
+                description="Registry management shortcuts" 
+                icon={Zap}
+                decorationIcon={LayoutGrid}
+                className="min-h-fit"
+              >
+                 <div className="grid grid-cols-1 gap-3">
+                    {quickActions.map((action, i) => (
+                      <Link key={i} href={action.href}>
+                         <div className="group/btn flex items-center justify-between p-4 rounded-xl bg-slate-50 border border-slate-100 hover:bg-white hover:border-indigo-200 hover:shadow-lg transition-all duration-300">
+                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest group-hover/btn:text-indigo-600">
+                               {action.label}
+                            </span>
+                            <ArrowRight className="h-3.5 w-3.5 text-slate-300 group-hover/btn:text-indigo-600 group-hover/btn:translate-x-1 transition-all" />
+                         </div>
+                      </Link>
+                    ))}
+                 </div>
+              </EcosystemCard>
+           </div>
+        </div>
+      </EcosystemContainer>
+    </EcosystemWrapper>
   );
 }

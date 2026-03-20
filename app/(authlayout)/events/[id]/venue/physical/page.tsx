@@ -138,73 +138,16 @@ function AddVenueModal() {
   );
 }
 
-function PhysicalVenuePage() {
+import { useParams } from "next/navigation";
+import { EventVenuesList } from "@/components/events/detail/event-venues";
+
+export default function PhysicalVenuePage() {
+  const params = useParams();
+  const eventId = params?.id as string;
+
   return (
-    <Card className="border-none shadow-sm ring-1 ring-border/50">
-      <CardHeader className="bg-muted/30">
-        <CardTitle>Physical Venue Details</CardTitle>
-        <CardDescription>
-          Configure the physical location and rooms for your event
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="pt-6 space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <Label htmlFor="venueName">Venue Name</Label>
-            <Input
-              id="venueName"
-              defaultValue="San Francisco Convention Center"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="venueHall">Hall/Room</Label>
-            <Input id="venueHall" defaultValue="Grand Ballroom" />
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="venueAddress">Address</Label>
-          <Textarea
-            id="venueAddress"
-            rows={3}
-            defaultValue="747 Howard St, San Francisco, CA 94103, United States"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label>Map Location</Label>
-          <div className="border-2 border-dashed rounded-lg h-[300px] flex flex-col items-center justify-center text-muted-foreground">
-            <MapPin className="h-8 w-8 mb-2" />
-            <p className="text-sm">Interactive map would be displayed here</p>
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <Label>Venue Rooms</Label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[
-              { name: "Main Hall", capacity: "1000" },
-              { name: "Room A", capacity: "250" },
-              { name: "Room B", capacity: "250" },
-              { name: "Workshop Hall", capacity: "150" },
-            ].map((room) => (
-              <Card key={room.name}>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base">{room.name}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    Capacity: {room.capacity}
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
-            <AddVenueModal />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="w-full">
+      <EventVenuesList eventId={eventId} />
+    </div>
   );
 }
-
-export default PhysicalVenuePage;

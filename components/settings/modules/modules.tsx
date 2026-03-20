@@ -3,22 +3,24 @@
 import React from "react";
 import { useState } from "react";
 import type { DropResult } from "@hello-pangea/dnd";
-import { Search, Puzzle, AlertCircle } from "lucide-react";
+import { Search, Puzzle, AlertCircle, Save, Star, Smartphone, LayoutGrid, Loader2 } from "lucide-react";
 import * as LucideIcons from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import MobileNavigation from "./mobile-navigation";
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 
 import { gql, useMutation } from "@apollo/client";
 import {
@@ -27,9 +29,7 @@ import {
 } from "@/graphql/actions";
 
 interface UpdateEntityModuleResponse {
-  updateEntityModule: {
-    success: boolean;
-  };
+  updateEntityModule: { success: boolean };
 }
 
 const UPDATE_ENTITY_MODULE = gql`
@@ -41,28 +41,8 @@ const UPDATE_ENTITY_MODULE = gql`
 `;
 
 const moduleData = [
-  {
-    id: "1",
-    name: "Directory",
-    enabled: true,
-    required: true,
-    category: "Core",
-    showInMobileNavigation: true,
-    showInWebNavigation: true,
-    icon: null,
-    isPopular: false,
-  },
-  {
-    id: "2",
-    name: "Communities",
-    enabled: true,
-    required: false,
-    category: "Social",
-    showInMobileNavigation: true,
-    showInWebNavigation: true,
-    icon: null,
-    isPopular: true,
-  },
+  { id: "1", name: "Directory", enabled: true, required: true, category: "Core", showInMobileNavigation: true, showInWebNavigation: true, icon: null, isPopular: false },
+  { id: "2", name: "Communities", enabled: true, required: false, category: "Social", showInMobileNavigation: true, showInWebNavigation: true, icon: null, isPopular: true },
 ];
 
 interface ModuleItem {
@@ -79,11 +59,13 @@ interface ModuleItem {
 
 const getNavIcon = (icon: string | null) => {
   if (!icon || typeof icon !== "string" || !(icon in LucideIcons)) {
-    return <Puzzle className="h-4 w-4 text-primary" />;
+    return <Puzzle className="h-4 w-4 text-slate-500" />;
   }
   const IconComponent = (LucideIcons as any)[icon] as React.ElementType;
-  return <IconComponent className="h-4 w-4 text-primary" />;
+  return <IconComponent className="h-4 w-4 text-slate-500" />;
 };
+
+type ActiveTab = "management" | "navigation";
 
 export default function ModuleManagement() {
   const [updateEntityModule, { loading: updateLoading }] = useMutation<
@@ -98,22 +80,16 @@ export default function ModuleManagement() {
   const [modulesInitialized, setModulesInitialized] = useState(false);
   const [saving, setSaving] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState("management");
-  const [userRole, setUserRole] = useState("admin");
+  const [activeTab, setActiveTab] = useState<ActiveTab>("management");
+  const [userRole] = useState("admin");
   const [notification, setNotification] = useState<{
     type: "success" | "error";
     message: string;
     description?: string;
   } | null>(null);
 
-  console.log(data);
-
   React.useEffect(() => {
-    if (
-      !modulesInitialized &&
-      subscription &&
-      Array.isArray(subscription.modules)
-    ) {
+    if (!modulesInitialized && subscription && Array.isArray(subscription.modules)) {
       setModules(
         subscription.modules.map((m: any) => ({
           id: m.id,
@@ -135,76 +111,51 @@ export default function ModuleManagement() {
   }, [subscription, modulesInitialized]);
 
   const toggleModule = (id: string) => {
-    if (userRole === "directory") {
-      return;
-    }
-    setModules((prevModules) => {
-      return prevModules.map((module) => {
-        if (module.id === id && !module.required) {
-          if (module.enabled) {
-            return { ...module, enabled: false, showInMobileNavigation: false };
-          } else {
-            return { ...module, enabled: true };
-          }
+    if (userRole === "directory") return;
+    setModules((prev) =>
+      prev.map((m) => {
+        if (m.id === id && !m.required) {
+          return m.enabled
+            ? { ...m, enabled: false, showInMobileNavigation: false }
+            : { ...m, enabled: true };
         }
-        return module;
-      });
-    });
+        return m;
+      })
+    );
   };
 
   const toggleNavigation = (id: string) => {
-    if (userRole === "directory") {
-      return;
-    }
-    setModules((prevModules) => {
-      const currentNavigationCount = prevModules.filter(
-        (m) => m.showInMobileNavigation
-      ).length;
-      return prevModules.map((module) => {
-        if (module.id === id) {
-          if (module.showInMobileNavigation) {
-            return { ...module, showInMobileNavigation: false };
-          }
-          if (currentNavigationCount < 3) {
-            return { ...module, showInMobileNavigation: true };
-          }
-          return module;
-        }
-        return module;
+    if (userRole === "directory") return;
+    setModules((prev) => {
+      const currentCount = prev.filter((m) => m.showInMobileNavigation).length;
+      return prev.map((m) => {
+        if (m.id !== id) return m;
+        if (m.showInMobileNavigation) return { ...m, showInMobileNavigation: false };
+        if (currentCount < 3) return { ...m, showInMobileNavigation: true };
+        return m;
       });
     });
   };
 
   const saveChanges = async () => {
     setSaving(true);
-    const input: InputUpdateEntityModule[] = modules.map((m, idx) => {
-      return {
-        icon: m.icon ?? null,
-        id: m.id ?? null,
-        name: m.name ?? null,
-        isEnabled: m.enabled ?? null,
-        showInMobileNavigation: m.showInMobileNavigation ?? null,
-        showInMobileNavigationSortNumber: m.showInMobileNavigation
-          ? idx
-          : undefined,
-        showInWebNavigation: m.showInWebNavigation ?? null,
-        isPopular: m.isPopular ?? null,
-      };
-    });
+    const input: InputUpdateEntityModule[] = modules.map((m, idx) => ({
+      icon: m.icon ?? null,
+      id: m.id ?? null,
+      name: m.name ?? null,
+      isEnabled: m.enabled ?? null,
+      showInMobileNavigation: m.showInMobileNavigation ?? null,
+      showInMobileNavigationSortNumber: m.showInMobileNavigation ? idx : undefined,
+      showInWebNavigation: m.showInWebNavigation ?? null,
+      isPopular: m.isPopular ?? null,
+    }));
     try {
       const response = await updateEntityModule({ variables: { input } });
       if (response.data?.updateEntityModule.success) {
-        setNotification({
-          type: "success",
-          message: "Changes saved successfully!",
-        });
+        setNotification({ type: "success", message: "Changes saved successfully" });
         setTimeout(() => setNotification(null), 3000);
       } else {
-        setNotification({
-          type: "error",
-          message: "Save failed",
-          description: "Mutation did not succeed",
-        });
+        setNotification({ type: "error", message: "Save failed", description: "Mutation did not succeed" });
       }
     } catch (err: unknown) {
       setNotification({
@@ -222,246 +173,287 @@ export default function ModuleManagement() {
 
   const navigationModules = modules
     .filter((m) => m.showInMobileNavigation)
-    .sort(
-      (a, b) =>
-        (a.showInMobileNavigationSortNumber ?? 0) -
-        (b.showInMobileNavigationSortNumber ?? 0)
-    );
+    .sort((a, b) => (a.showInMobileNavigationSortNumber ?? 0) - (b.showInMobileNavigationSortNumber ?? 0));
 
   const onDragEnd = (result: DropResult) => {
     if (!result.destination) return;
     const navModules = Array.from(navigationModules);
     const [removed] = navModules.splice(result.source.index, 1);
-    if (removed) {
-      navModules.splice(result.destination.index, 0, removed);
-    }
-    setModules((prev) => {
-      const updated = prev.map((m) => {
+    if (removed) navModules.splice(result.destination.index, 0, removed);
+    setModules((prev) =>
+      prev.map((m) => {
         const idx = navModules.findIndex((nm) => nm.id === m.id);
-        if (idx !== -1) {
-          return { ...m, showInMobileNavigationSortNumber: idx };
-        }
-        return m;
-      });
-      return updated;
-    });
+        return idx !== -1 ? { ...m, showInMobileNavigationSortNumber: idx } : m;
+      })
+    );
   };
-
-  type NavigationColumn = {
-    title: string;
-    key: string;
-    dataIndex?: string;
-    render?: (
-      value: unknown,
-      record: ModuleItem,
-      index: number
-    ) => React.ReactNode;
-  };
-
-  const navigationColumns: NavigationColumn[] = [
-    {
-      title: "Position",
-      key: "position",
-      render: (_: unknown, __: ModuleItem, index: number) => (
-        <Badge variant="outline">{index + 1}</Badge>
-      ),
-    },
-    {
-      title: "Module",
-      dataIndex: "name",
-      key: "name",
-    },
-    {
-      title: "Icon",
-      key: "icon",
-      render: (_: unknown, record: ModuleItem) => getNavIcon(record.icon),
-    },
-  ];
 
   const filteredModules = modules.filter((m) =>
     m.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const enabledCount = modules.filter((m) => m.enabled).length;
+  const navCount = modules.filter((m) => m.showInMobileNavigation).length;
+
+  // --- Loading state ---
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="space-y-3 text-center">
-          <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin mx-auto"></div>
-          <p className="text-sm text-muted-foreground">Loading modules...</p>
+      <EcosystemWrapper>
+        <div className="rounded-xl border border-slate-200/80 bg-white shadow-sm p-5 animate-pulse space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded-lg bg-slate-100" />
+            <div className="space-y-2">
+              <div className="h-4 w-40 bg-slate-100 rounded" />
+              <div className="h-3 w-64 bg-slate-100 rounded" />
+            </div>
+          </div>
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="h-12 bg-slate-50 rounded-lg" />
+          ))}
         </div>
-      </div>
+      </EcosystemWrapper>
     );
   }
 
+  // --- Error state ---
   if (error) {
     return (
-      <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Failed to load modules</AlertTitle>
-        <AlertDescription>{error.message}</AlertDescription>
-      </Alert>
+      <EcosystemWrapper>
+        <div className="flex items-start gap-3 px-4 py-3.5 rounded-xl border bg-red-50 border-red-200">
+          <AlertCircle className="h-4 w-4 text-red-600 mt-0.5 shrink-0" />
+          <div>
+            <p className="text-[13px] font-semibold text-red-800">Failed to load modules</p>
+            <p className="text-[12px] text-red-600 mt-0.5">{error.message}</p>
+          </div>
+        </div>
+      </EcosystemWrapper>
     );
   }
 
   return (
-    <div className="space-y-6 mb-10">
+    <EcosystemWrapper>
+      {/* Page header */}
+      <EcosystemHeader
+        title="Modules"
+        description="Activate, configure and sequence modular capabilities across your entity."
+        icon={Puzzle}
+        badgeText="Platform"
+        showLiveIndicator={false}
+      />
+
+      {/* Notification toast */}
       {notification && (
-        <Alert
-          variant={notification.type === "error" ? "destructive" : "default"}
-        >
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>{notification.message}</AlertTitle>
-          {notification.description && (
-            <AlertDescription>{notification.description}</AlertDescription>
+        <div
+          className={cn(
+            "flex items-start gap-3 px-4 py-3 rounded-xl border",
+            notification.type === "error"
+              ? "bg-red-50 border-red-200"
+              : "bg-emerald-50 border-emerald-200"
           )}
-        </Alert>
+        >
+          <div
+            className={cn(
+              "w-1.5 h-4 rounded-full shrink-0 mt-0.5",
+              notification.type === "error" ? "bg-red-500" : "bg-emerald-500"
+            )}
+          />
+          <div>
+            <p
+              className={cn(
+                "text-[12px] font-semibold leading-none",
+                notification.type === "error" ? "text-red-700" : "text-emerald-700"
+              )}
+            >
+              {notification.message}
+            </p>
+            {notification.description && (
+              <p className="text-[11px] text-slate-400 mt-1">{notification.description}</p>
+            )}
+          </div>
+        </div>
       )}
 
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Module Management</CardTitle>
+      {/* Main card */}
+      <div className="rounded-xl border border-slate-200/80 bg-white shadow-sm overflow-hidden">
+        {/* Card header with tabs + stats */}
+        <div className="px-5 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg">
+            <button
+              onClick={() => setActiveTab("management")}
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-semibold transition-all duration-150",
+                activeTab === "management"
+                  ? "bg-white text-slate-900 shadow-sm border border-slate-200"
+                  : "text-slate-500 hover:text-slate-700"
+              )}
+            >
+              <LayoutGrid className="h-3.5 w-3.5" />
+              Module Registry
+            </button>
+            <button
+              onClick={() => setActiveTab("navigation")}
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-semibold transition-all duration-150",
+                activeTab === "navigation"
+                  ? "bg-white text-slate-900 shadow-sm border border-slate-200"
+                  : "text-slate-500 hover:text-slate-700"
+              )}
+            >
+              <Smartphone className="h-3.5 w-3.5" />
+              Mobile Navigation
+            </button>
+          </div>
+
+          <div className="flex items-center gap-3">
+            {/* Stat pills */}
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-semibold text-slate-500 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-md">
+                {enabledCount} / {modules.length} enabled
+              </span>
+              <span className="text-[11px] font-semibold text-slate-500 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-md">
+                {navCount} / 3 in nav
+              </span>
+            </div>
             <Button
               onClick={saveChanges}
               disabled={userRole === "directory" || saving}
-              size="lg"
+              className="h-8 px-4 text-[12px] font-semibold bg-slate-900 hover:bg-black text-white gap-2"
             >
+              {saving ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Save className="h-3.5 w-3.5" />
+              )}
               {saving ? "Saving..." : "Save Changes"}
             </Button>
           </div>
-        </CardHeader>
-        <CardContent>
-          <Tabs
-            value={activeTab}
-            onValueChange={setActiveTab}
-            className="w-full"
-          >
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="management">Modules</TabsTrigger>
-              <TabsTrigger value="navigation">Mobile Navigation</TabsTrigger>
-            </TabsList>
+        </div>
 
-            <TabsContent value="management" className="space-y-4 mt-6">
-              <div className="flex gap-2">
-                <div className="relative flex-1 max-w-sm">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search modules..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
+        {/* Tab content */}
+        {activeTab === "management" && (
+          <div className="p-5 space-y-4">
+            {/* Search */}
+            <div className="relative max-w-sm">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+              <Input
+                placeholder="Search modules..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-9 h-8 text-[13px] border-slate-200 bg-slate-50 focus:bg-white"
+              />
+            </div>
+
+            {/* Column headers */}
+            <div className="grid grid-cols-[1fr_auto_auto_auto] items-center gap-4 px-3 pb-1 border-b border-slate-100">
+              <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Module</span>
+              <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest text-center w-16">Popular</span>
+              <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest text-center w-16">Enabled</span>
+              <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest text-center w-16">Mobile Nav</span>
+            </div>
+
+            {/* Module rows */}
+            <div className="space-y-1">
+              {filteredModules.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 text-slate-400">
+                  <Puzzle className="h-8 w-8 mb-2 opacity-30" />
+                  <p className="text-[13px]">No modules found</p>
                 </div>
-              </div>
-
-              <div className="space-y-3">
-                {filteredModules.length === 0 ? (
-                  <div className="text-center py-12 text-muted-foreground">
-                    <Puzzle className="h-12 w-12 mx-auto mb-3 opacity-20" />
-                    <p>No modules found</p>
-                  </div>
-                ) : (
-                  filteredModules.map((module) => (
-                    <div
-                      key={module.id}
-                      className="flex items-center gap-4 p-4 border rounded-lg hover:bg-muted/30 transition-colors"
-                    >
-                      {/* Icon */}
-                      <div className="flex-shrink-0">
+              ) : (
+                filteredModules.map((module) => (
+                  <div
+                    key={module.id}
+                    className="grid grid-cols-[1fr_auto_auto_auto] items-center gap-4 px-3 py-3 rounded-lg border border-transparent hover:bg-slate-50 hover:border-slate-100 transition-colors group"
+                  >
+                    {/* Module info */}
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="h-7 w-7 rounded-md bg-slate-100 border border-slate-200/60 flex items-center justify-center shrink-0">
                         {getNavIcon(module.icon)}
                       </div>
-
-                      {/* Module Info */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">{module.name}</span>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-[13px] font-medium text-slate-800 truncate">
+                            {module.name}
+                          </span>
                           {module.required && (
-                            <Badge variant="secondary" className="text-xs">
+                            <span className="text-[10px] font-semibold text-slate-500 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded uppercase tracking-wide">
                               Required
-                            </Badge>
-                          )}
-                          {module.isPopular && (
-                            <Badge
-                              variant="default"
-                              className="text-xs bg-amber-500 hover:bg-amber-600"
-                            >
-                              Popular
-                            </Badge>
+                            </span>
                           )}
                         </div>
                       </div>
+                    </div>
 
-                      {/* Toggle Popular */}
+                    {/* Popular toggle */}
+                    <div className="w-16 flex justify-center">
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
+                            <button
+                              onClick={() =>
                                 setModules((prev) =>
                                   prev.map((m) =>
-                                    m.id === module.id
-                                      ? { ...m, isPopular: !m.isPopular }
-                                      : m
+                                    m.id === module.id ? { ...m, isPopular: !m.isPopular } : m
                                   )
-                                );
-                              }}
-                              className="gap-2"
+                                )
+                              }
+                              className={cn(
+                                "h-6 w-6 rounded flex items-center justify-center transition-colors",
+                                module.isPopular
+                                  ? "text-amber-500 bg-amber-50 border border-amber-200"
+                                  : "text-slate-300 hover:text-amber-400 hover:bg-amber-50 border border-transparent hover:border-amber-100"
+                              )}
                             >
-                              {module.isPopular ? "★" : "☆"}
-                            </Button>
+                              <Star className="h-3.5 w-3.5" fill={module.isPopular ? "currentColor" : "none"} />
+                            </button>
                           </TooltipTrigger>
                           <TooltipContent>
-                            {module.isPopular
-                              ? "Remove from popular"
-                              : "Mark as popular"}
+                            {module.isPopular ? "Remove from popular" : "Mark as popular"}
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
+                    </div>
 
-                      {/* Module Status Toggle */}
+                    {/* Enabled toggle */}
+                    <div className="w-16 flex justify-center">
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <div className="flex items-center gap-2">
+                            <div>
                               <Switch
                                 checked={module.enabled}
                                 onCheckedChange={() => toggleModule(module.id)}
-                                disabled={
-                                  module.required || userRole === "directory"
-                                }
+                                disabled={module.required || userRole === "directory"}
+                                className="scale-90"
                               />
                             </div>
                           </TooltipTrigger>
                           <TooltipContent>
                             {module.required
-                              ? "Required module"
+                              ? "Required — cannot disable"
                               : module.enabled
-                              ? "Click to disable"
-                              : "Click to enable"}
+                              ? "Disable module"
+                              : "Enable module"}
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
+                    </div>
 
-                      {/* Mobile Navigation Toggle */}
+                    {/* Mobile nav toggle */}
+                    <div className="w-16 flex justify-center">
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <div className="flex items-center gap-2">
+                            <div>
                               <Switch
                                 checked={module.showInMobileNavigation}
-                                onCheckedChange={() =>
-                                  toggleNavigation(module.id)
-                                }
+                                onCheckedChange={() => toggleNavigation(module.id)}
                                 disabled={
                                   userRole === "directory" ||
                                   !module.enabled ||
                                   (!module.showInMobileNavigation &&
-                                    modules.filter(
-                                      (m) => m.showInMobileNavigation
-                                    ).length >= 3)
+                                    modules.filter((m) => m.showInMobileNavigation).length >= 3)
                                 }
+                                className="scale-90"
                               />
                             </div>
                           </TooltipTrigger>
@@ -469,35 +461,35 @@ export default function ModuleManagement() {
                             {!module.enabled
                               ? "Enable module first"
                               : module.showInMobileNavigation
-                              ? "In navigation"
-                              : modules.filter((m) => m.showInMobileNavigation)
-                                  .length >= 3
-                              ? "Max 3 modules"
+                              ? "Remove from nav"
+                              : modules.filter((m) => m.showInMobileNavigation).length >= 3
+                              ? "Max 3 nav slots"
                               : "Add to navigation"}
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
                     </div>
-                  ))
-                )}
-              </div>
-            </TabsContent>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
 
-            <TabsContent value="navigation" className="mt-6">
-              <MobileNavigation
-                modules={modules}
-                navigationColumns={navigationColumns}
-                navigationModules={navigationModules}
-                userRole={userRole}
-                saving={saving}
-                saveChanges={saveChanges}
-                onDragEnd={onDragEnd}
-                toggleNavigation={toggleNavigation}
-              />
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
-    </div>
+        {activeTab === "navigation" && (
+          <div className="p-5">
+            <MobileNavigation
+              modules={modules}
+              navigationModules={navigationModules}
+              userRole={userRole}
+              saving={saving}
+              saveChanges={saveChanges}
+              onDragEnd={onDragEnd}
+              toggleNavigation={toggleNavigation}
+            />
+          </div>
+        )}
+      </div>
+    </EcosystemWrapper>
   );
 }

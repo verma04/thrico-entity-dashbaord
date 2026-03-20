@@ -10,7 +10,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Loader2, Lock, Sparkles } from "lucide-react";
+import { Plus, Loader2, Lock, Sparkles, Layout, ShieldCheck, Activity, RotateCcw, Search, Filter, ArrowRight, Layers } from "lucide-react";
 import { useWebsiteBuilderStore } from "@/store/useWebsiteBuilderStore";
 import { useIsPremium } from "@/hooks/useIsPremium";
 import {
@@ -29,6 +29,11 @@ import { PageListItem } from "@/components/pages/page-list-item";
 import { CreatePageDialog } from "@/components/pages/create-page-dialog";
 import { ConfirmDialog } from "@/components/pages/confirm-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { cn } from "@/lib/utils";
 
 const Page = () => {
   const router = useRouter();
@@ -96,7 +101,7 @@ const Page = () => {
   }>({ open: false, pageId: null });
 
   // Use server pages if available, otherwise fallback to local store
-  const displayPages = websiteData?.getWebsite?.pages;
+  const displayPages = websiteData?.getWebsite?.pages || [];
 
   const handleEditPage = (pageId: string) => {
     setCurrentPage(pageId);
@@ -104,7 +109,7 @@ const Page = () => {
   };
 
   const handleToggleStatus = (pageId: string, currentStatus: boolean) => {
-    const page = displayPages?.find((p) => p.id === pageId);
+    const page = displayPages?.find((p: any) => p.id === pageId);
     if (!page || page.slug === "home") return;
 
     // If page is currently active (enabled), show confirmation before making it draft
@@ -151,87 +156,141 @@ const Page = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto py-8">
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>Page Management</CardTitle>
-              <CardDescription>
-                Manage your website structure and pages.
-              </CardDescription>
-            </div>
-            {isPremium ? (
-              <Button onClick={() => setIsCreateOpen(true)}>
-                <Plus className="mr-2 h-4 w-4" /> Create New Page
+    <div className="space-y-8">
+      <EcosystemActionBar shadow="sm">
+        <div className="flex items-center justify-between w-full">
+           <div className="flex items-center gap-6">
+              <div className="flex items-center gap-3">
+                 <div className="h-3 w-3 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+                 <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                    Routing Engine Active
+                 </span>
+              </div>
+              <div className="h-4 w-px bg-slate-200" />
+              <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
+                 <ShieldCheck className="h-3.5 w-3.5 text-indigo-500" />
+                 <span>Namespace Safety: Valid</span>
+              </div>
+           </div>
+
+           <div className="flex items-center gap-3">
+              <Button 
+                variant="outline" 
+                onClick={() => refetch()}
+                className="h-10 px-4 rounded-xl border-slate-200 font-bold text-slate-600 gap-2 hover:bg-slate-50 transition-all"
+              >
+                <RotateCcw className={cn("h-4 w-4", websiteLoading && "animate-spin")} />
+                Sync Manifest
               </Button>
-            ) : (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button disabled className="cursor-not-allowed opacity-60">
-                    <Lock className="mr-2 h-4 w-4" /> Create New Page
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="text-xs">Upgrade to create additional pages</p>
-                </TooltipContent>
-              </Tooltip>
-            )}
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {!isPremium && (
-            <Alert className="bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200">
-              <Sparkles className="h-4 w-4 text-purple-600" />
-              <AlertDescription className="flex items-center justify-between">
-                <div className="flex-1">
-                  <p className="font-medium text-purple-900">
-                    Unlock All Features with Premium
-                  </p>
-                  <p className="text-sm text-purple-700 mt-1">
-                    Upgrade to create unlimited pages, access advanced modules,
-                    and unlock all website builder features.
-                  </p>
+              {isPremium ? (
+                <Button 
+                   onClick={() => setIsCreateOpen(true)}
+                   className="h-10 px-8 rounded-xl bg-slate-900 hover:bg-black text-white font-black text-[11px] uppercase tracking-wider gap-3 shadow-xl shadow-slate-200 transition-all active:scale-95 group"
+                >
+                   <Plus className="h-4 w-4 transition-transform group-hover:scale-110" />
+                   New Invariant Page
+                </Button>
+              ) : (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button disabled className="h-10 px-8 rounded-xl bg-slate-100 text-slate-400 font-black text-[11px] uppercase tracking-wider gap-3 cursor-not-allowed">
+                      <Lock className="h-4 w-4" /> New Invariant Page
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent className="rounded-xl border-slate-200 bg-white font-bold text-slate-900 shadow-xl">
+                    <p className="text-xs">Upgrade for architectural expansion</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
+           </div>
+        </div>
+      </EcosystemActionBar>
+
+      <EcosystemContainer className="space-y-10 p-8 lg:p-12">
+        {!isPremium && (
+          <div className="p-8 rounded-[2.5rem] bg-indigo-600 shadow-2xl shadow-indigo-200 overflow-hidden relative border-none">
+             <div className="absolute top-0 right-0 p-8 opacity-10 scale-150 rotate-12">
+                <Sparkles className="h-32 w-32 text-indigo-100" />
+             </div>
+             <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
+                <div className="space-y-3">
+                   <div className="flex items-center gap-3 mb-2">
+                      <div className="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-indigo-100 font-black text-[9px] uppercase tracking-widest border border-white/20">
+                         System Upgrade Available
+                      </div>
+                   </div>
+                   <h3 className="text-3xl font-black text-white tracking-tighter uppercase italic">Unlock Master Architecture</h3>
+                   <p className="text-[11px] font-bold text-indigo-100/80 uppercase tracking-tight max-w-xl leading-relaxed">
+                      Evolve your platform with unlimited page definitions, architectural nesting, and high-tier module access.
+                   </p>
                 </div>
                 <Button
-                  size="sm"
-                  className="ml-4 bg-purple-600 hover:bg-purple-700"
-                  onClick={() => router.push("/settings/subscription")}
+                   className="h-14 px-10 rounded-2xl bg-white hover:bg-indigo-50 text-indigo-600 font-black text-[12px] uppercase tracking-widest shadow-2xl transition-all active:scale-95 gap-3"
+                   onClick={() => router.push("/settings/subscription")}
                 >
-                  <Sparkles className="mr-2 h-4 w-4" />
-                  Upgrade Now
+                   Elevate Protocol
+                   <ArrowRight className="h-4 w-4" />
                 </Button>
-              </AlertDescription>
-            </Alert>
-          )}
-          {websiteLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-              <span className="ml-2 text-muted-foreground">
-                Loading pages...
-              </span>
-            </div>
-          ) : (
-            <div className="rounded-md border">
-              <div className="grid grid-cols-12 bg-muted/50 p-4 text-sm font-medium text-muted-foreground border-b">
-                <div className="col-span-4">Page Name</div>
-                <div className="col-span-3">Slug</div>
-                <div className="col-span-2 text-center">Status</div>
-                <div className="col-span-3 text-right">Actions</div>
+             </div>
+          </div>
+        )}
+
+        <div className="space-y-6">
+           <div className="flex items-center gap-3 px-1">
+              <div className="h-10 w-10 rounded-xl bg-slate-900 flex items-center justify-center text-white">
+                 <Layers className="h-5 w-5" />
               </div>
-              {displayPages?.map((page) => (
-                <PageListItem
-                  key={page.id}
-                  page={page}
-                  onEdit={handleEditPage}
-                  onDelete={handleDeletePage}
-                  onToggleStatus={handleToggleStatus}
-                />
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+              <div>
+                 <h3 className="text-xl font-black text-slate-900 tracking-tight italic uppercase">Hierarchy Manifest</h3>
+                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-1">{displayPages.length} active route definitions</p>
+              </div>
+           </div>
+
+           <div className="rounded-[2.5rem] border border-slate-100 bg-white shadow-xl shadow-slate-200/50 overflow-hidden">
+             {websiteLoading ? (
+               <div className="p-20 flex flex-col items-center justify-center space-y-4">
+                  <div className="relative">
+                     <div className="h-12 w-12 rounded-full border-4 border-slate-100 border-t-indigo-600 animate-spin" />
+                     <div className="absolute inset-0 flex items-center justify-center">
+                        <Activity className="h-4 w-4 text-indigo-600" />
+                     </div>
+                  </div>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Synchronizing Namespace</p>
+               </div>
+             ) : (
+               <div className="divide-y divide-slate-50">
+                 <div className="grid grid-cols-12 bg-slate-50/50 p-6 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">
+                   <div className="col-span-4">Designation</div>
+                   <div className="col-span-3">Namespace Slug</div>
+                   <div className="col-span-2 text-center">Protocol Status</div>
+                   <div className="col-span-3 text-right pr-4">Matrix Actions</div>
+                 </div>
+                 {displayPages.length === 0 ? (
+                   <div className="p-24 flex flex-col items-center justify-center text-center space-y-6">
+                      <div className="h-20 w-20 rounded-[2rem] bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-300">
+                         <Layout className="h-10 w-10 opacity-20" />
+                      </div>
+                      <div className="space-y-1">
+                         <p className="text-lg font-black italic text-slate-900 uppercase">Void Detected</p>
+                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">No architectural pages have been instantiated</p>
+                      </div>
+                   </div>
+                 ) : (
+                   displayPages.map((page: any) => (
+                     <PageListItem
+                       key={page.id}
+                       page={page}
+                       onEdit={handleEditPage}
+                       onDelete={handleDeletePage}
+                       onToggleStatus={handleToggleStatus}
+                     />
+                   ))
+                 )}
+               </div>
+             )}
+           </div>
+        </div>
+      </EcosystemContainer>
 
       <CreatePageDialog
         open={isCreateOpen}
@@ -250,9 +309,9 @@ const Page = () => {
           setConfirmDialog({ open: false, pageId: null, currentStatus: false })
         }
         onConfirm={confirmToggle}
-        title="Unpublish Page?"
-        description="Are you sure you want to change this page to draft status? The page will be unpublished and removed from your live website."
-        confirmText="Yes, Unpublish"
+        title="Unpublish Namespace?"
+        description="This action will restrict access to this URI segment. The node will remain in archival status but will not be resolvable by community entities."
+        confirmText="Confirm Strike"
         confirmVariant="destructive"
       />
 
@@ -262,9 +321,9 @@ const Page = () => {
           !open && setDeleteConfirmDialog({ open: false, pageId: null })
         }
         onConfirm={confirmDelete}
-        title="Delete Page?"
-        description="Are you sure you want to delete this page? This action cannot be undone and all modules within this page will be permanently removed."
-        confirmText={deletingPage ? "Deleting..." : "Yes, Delete Page"}
+        title="Purge Node?"
+        description="This will permanently delete the architectural node and all nested invariants. This action is terminal and cannot be reversed."
+        confirmText={deletingPage ? "Purging..." : "Execute Purge"}
         confirmVariant="destructive"
         isLoading={deletingPage}
       />
@@ -273,21 +332,3 @@ const Page = () => {
 };
 
 export default Page;
-
-const PageSkeleton = () => (
-  <Card>
-    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-      <div className="space-y-2 flex-1">
-        <Skeleton className="h-6 w-32" />
-        <Skeleton className="h-4 w-48" />
-      </div>
-      <Skeleton className="h-9 w-9 rounded-md" />
-    </CardHeader>
-    <CardContent>
-      <div className="flex items-center gap-2">
-        <Skeleton className="h-5 w-16" />
-        <Skeleton className="h-5 w-20" />
-      </div>
-    </CardContent>
-  </Card>
-);

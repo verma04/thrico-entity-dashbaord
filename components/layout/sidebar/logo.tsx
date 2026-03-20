@@ -23,7 +23,11 @@ const Logo = () => {
     );
   }
 
-  return <span className="text-lg font-bold text-foreground">{name}</span>;
+  return (
+    <span className="text-2xl font-black text-foreground tracking-tighter">
+      {name.toLowerCase()}
+    </span>
+  );
 };
 
 export default Logo;

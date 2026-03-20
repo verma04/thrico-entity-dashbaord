@@ -2,16 +2,21 @@
 
 import { Formik, Form, Field, FormikProps } from "formik";
 import * as Yup from "yup";
-import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
+  SaveIcon,
+  ShieldCheck,
+  Activity,
+  Globe,
+  Layout,
+  Layers,
+  Wand2,
+  Share2,
+  FileText,
+} from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -20,10 +25,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
 import { useToast } from "@/hooks/use-toast";
 import { useUpdateFooter, useGetWebsite } from "@/graphql/actions/website";
-import { SaveIcon } from "lucide-react";
 import { ImageUploadWithCrop } from "@/components/ui/image-upload-with-crop";
+
 import {
   useWebsiteBuilderStore,
   LayoutType,
@@ -31,6 +37,9 @@ import {
 import { LivePreviewFooter } from "@/components/website-layout/preview/live-preview-footer";
 import { SocialLinksEditor } from "@/components/website-layout/settings/social-links-editor";
 import { MenuEditor } from "@/components/website-layout/settings/menu-editor";
+import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { cn } from "@/lib/utils";
 
 // ------------------------------------------------
 // TYPES
@@ -91,8 +100,7 @@ const footerSchema = Yup.object().shape({
           is: (platform: string) => platform && platform.length > 0,
           then: (schema) =>
             schema.url("Must be a valid URL").required("URL is required"),
-          otherwise: (schema) =>
-            schema.url("Must be a valid URL").notRequired(),
+          otherwise: (schema) => schema.url("Must be a valid URL").notRequired(),
         }),
       },
       [["platform", "url"]]
@@ -156,12 +164,10 @@ export default function FooterManager() {
     }
 
     try {
-      // Filter out empty social links (no platform and no URL)
       const validSocialLinks = values.socialLinks.filter(
         (link) => link.platform || link.url
       );
 
-      // Call GraphQL mutation to update footer in database
       await updateFooterMutation({
         variables: {
           websiteId: websiteData.getWebsite.id,
@@ -178,7 +184,6 @@ export default function FooterManager() {
         },
       });
 
-      // Update local store for immediate UI update
       updateModuleLayout(globalFooter.id, values.layout);
       updateModuleContent(globalFooter.id, {
         logoText: values.logoText,
@@ -190,7 +195,6 @@ export default function FooterManager() {
         copyrightText: values.copyrightText,
       });
     } catch (error) {
-      // Error handling is done in the mutation's onError callback
       console.error("Footer update failed:", error);
     }
   };
@@ -209,247 +213,264 @@ export default function FooterManager() {
         touched,
         isSubmitting,
       }: FormikProps<FooterConfig>) => (
-        <Form className="space-y-6">
-          {/* ------------------------------------------------ */}
-          {/* LIVE PREVIEW */}
-          {/* ------------------------------------------------ */}
-          <Card>
-            {console.log(errors)}
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-6">
-              <div>
-                <CardTitle>Live Preview</CardTitle>
-                <CardDescription>
-                  See how your footer will look on your website
-                </CardDescription>
+        <Form className="space-y-8">
+          <EcosystemActionBar shadow="sm">
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center gap-6">
+                <div className="flex items-center gap-3">
+                  <div className="h-3 w-3 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                    Footer Nodes: Active
+                  </span>
+                </div>
+                <div className="h-4 w-px bg-slate-200" />
+                <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
+                  <ShieldCheck className="h-3.5 w-3.5 text-indigo-500" />
+                  <span>Protocol: Valid</span>
+                </div>
               </div>
 
-              <Button
-                type="submit"
-                size="sm"
-                className="gap-2 shadow-lg"
-                disabled={isUpdating}
-              >
-                <SaveIcon className="h-4 w-4" />
-                {isUpdating ? "Saving..." : "Save Footer"}
-              </Button>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="border rounded-lg overflow-hidden bg-background shadow-sm">
-                <LivePreviewFooter
-                  content={{
-                    logoText: values.logoText,
-                    logoType: values.logoType,
-                    logoImage: values.logoImage,
-                    description: values.description,
-                    socialLinks: values.socialLinks,
-                    menuItems: values.menuItems,
-                    copyrightText: values.copyrightText,
-                  }}
-                  layout={values.layout}
-                />
-              </div>
-              <div className="text-xs text-muted-foreground text-center">
-                Preview updates automatically as you make changes
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* ------------------------------------------------ */}
-          {/* LAYOUT & BRANDING */}
-          {/* ------------------------------------------------ */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Layout & Branding</CardTitle>
-              <CardDescription>
-                Configure the look of your footer
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Layout Selector */}
-              <div className="space-y-2">
-                <Label htmlFor="layout">Layout Variant</Label>
-                <Select
-                  value={values.layout}
-                  onValueChange={(value) => setFieldValue("layout", value)}
+              <div className="flex items-center gap-3">
+                <Button
+                  type="submit"
+                  disabled={isUpdating}
+                  className="h-10 px-8 rounded-xl bg-slate-900 hover:bg-black text-white font-black text-[11px] uppercase tracking-wider gap-3 shadow-xl shadow-slate-200 transition-all active:scale-95 group"
                 >
-                  <SelectTrigger id="layout" className="w-full">
-                    <SelectValue placeholder="Select a layout" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="columns">
-                      <div className="flex flex-col items-start">
-                        <span className="font-medium">Multi-Column</span>
-                        <span className="text-xs text-muted-foreground">
-                          Logo + 3 columns of links
-                        </span>
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="simple">
-                      <div className="flex flex-col items-start">
-                        <span className="font-medium">Simple</span>
-                        <span className="text-xs text-muted-foreground">
-                          Center-aligned with links
-                        </span>
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="minimal">
-                      <div className="flex flex-col items-start">
-                        <span className="font-medium">Minimal</span>
-                        <span className="text-xs text-muted-foreground">
-                          Single line footer
-                        </span>
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="corporate">
-                      <div className="flex flex-col items-start">
-                        <span className="font-medium">Corporate</span>
-                        <span className="text-xs text-muted-foreground">
-                          Professional multi-section
-                        </span>
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="newsletter">
-                      <div className="flex flex-col items-start">
-                        <span className="font-medium">Newsletter</span>
-                        <span className="text-xs text-muted-foreground">
-                          Newsletter signup focused
-                        </span>
-                      </div>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-                {errors.layout && touched.layout && (
-                  <p className="text-xs text-red-500">{errors.layout}</p>
-                )}
+                  <SaveIcon className="h-4 w-4 transition-transform group-hover:scale-110" />
+                  {isUpdating ? "Synchronizing..." : "Save Footer"}
+                </Button>
+              </div>
+            </div>
+          </EcosystemActionBar>
+
+          <EcosystemContainer className="space-y-12 p-8 lg:p-12">
+            {/* Live Preview Section */}
+            <div className="space-y-6">
+              <div className="flex items-center gap-3 px-1">
+                <div className="h-10 w-10 rounded-xl bg-slate-900 flex items-center justify-center text-white font-black italic">
+                  VP
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-slate-900 tracking-tight italic uppercase leading-none">
+                    Visual Protocol
+                  </h3>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+                    Real-time architectural simulation
+                  </p>
+                </div>
               </div>
 
-              {/* Logo Type Selector */}
-              <div className="space-y-2">
-                <Label htmlFor="logoType">Logo Type</Label>
-                <Select
-                  value={values.logoType}
-                  onValueChange={(value) => setFieldValue("logoType", value)}
-                >
-                  <SelectTrigger id="logoType">
-                    <SelectValue placeholder="Select logo type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="text">Text Logo</SelectItem>
-                    <SelectItem value="image">Image Logo</SelectItem>
-                  </SelectContent>
-                </Select>
-                {errors.logoType && touched.logoType && (
-                  <p className="text-xs text-red-500">{errors.logoType}</p>
-                )}
+              <div className="rounded-[2.5rem] border border-slate-100 bg-white shadow-xl shadow-slate-200/50 p-6 overflow-hidden">
+                <div className="border border-slate-50 rounded-2xl overflow-hidden bg-slate-50/30">
+                  <LivePreviewFooter
+                    content={{
+                      logoText: values.logoText,
+                      logoType: values.logoType,
+                      logoImage: values.logoImage,
+                      description: values.description,
+                      socialLinks: values.socialLinks,
+                      menuItems: values.menuItems,
+                      copyrightText: values.copyrightText,
+                    }}
+                    layout={values.layout}
+                  />
+                </div>
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] text-center mt-6 italic opacity-60">
+                  Synchronized Simulation Active
+                </p>
               </div>
+            </div>
 
-              {/* Logo Content */}
-              <div className="space-y-4">
-                {/* Text Logo */}
-                {(values.logoType === "text" || !values.logoType) && (
+            {/* Layout & Branding Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 pt-4">
+              <div className="space-y-6">
+                <div className="flex items-center gap-3 px-1">
+                  <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-900">
+                    <Layout className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-black text-slate-900 tracking-tight italic uppercase leading-none">
+                      Architecture
+                    </h3>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+                      Footer & Branding definitions
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-8 bg-slate-50/50 p-8 rounded-[2rem] border border-slate-100">
                   <div className="space-y-2">
-                    <Label htmlFor="logoText">Logo Text</Label>
+                    <Label
+                      htmlFor="layout"
+                      className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1"
+                    >
+                      Layout Variant
+                    </Label>
+                    <Select
+                      value={values.layout}
+                      onValueChange={(value) => setFieldValue("layout", value)}
+                    >
+                      <SelectTrigger
+                        id="layout"
+                        className="h-12 rounded-xl border-slate-100 bg-white font-medium"
+                      >
+                        <SelectValue placeholder="Select a layout" />
+                      </SelectTrigger>
+                      <SelectContent className="rounded-xl border-slate-100 shadow-xl">
+                        <SelectItem value="columns">Multi-Column</SelectItem>
+                        <SelectItem value="simple">Simple</SelectItem>
+                        <SelectItem value="minimal">Minimal</SelectItem>
+                        <SelectItem value="corporate">Corporate</SelectItem>
+                        <SelectItem value="newsletter">Newsletter</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="grid gap-6 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="logoType"
+                        className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1"
+                      >
+                        Logo Type
+                      </Label>
+                      <Select
+                        value={values.logoType}
+                        onValueChange={(value) =>
+                          setFieldValue("logoType", value)
+                        }
+                      >
+                        <SelectTrigger
+                          id="logoType"
+                          className="h-12 rounded-xl border-slate-100 bg-white font-medium"
+                        >
+                          <SelectValue placeholder="Select logo type" />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl border-slate-100 shadow-xl">
+                          <SelectItem value="text">Text Logo</SelectItem>
+                          <SelectItem value="image">Image Logo</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="logoText"
+                        className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1"
+                      >
+                        Logo Text
+                      </Label>
+                      <Field
+                        name="logoText"
+                        as={Input}
+                        id="logoText"
+                        placeholder="My Brand"
+                        className="h-12 rounded-xl border-slate-100 bg-white font-medium"
+                        disabled={values.logoType === "image"}
+                      />
+                    </div>
+                  </div>
+
+                  {values.logoType === "image" && (
+                    <div className="space-y-2">
+                      <ImageUploadWithCrop
+                        label="Logo Image Asset"
+                        currentImage={values.logoImage}
+                        onImageUpdate={(imageUrl: string) =>
+                          setFieldValue("logoImage", imageUrl)
+                        }
+                        recommendedWidth={150}
+                        recommendedHeight={50}
+                        aspectRatio={3}
+                        showDimensions
+                      />
+                    </div>
+                  )}
+
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="description"
+                      className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1"
+                    >
+                      Description Invariant
+                    </Label>
                     <Field
-                      name="logoText"
-                      as={Input}
-                      id="logoText"
-                      placeholder="My Brand"
+                      name="description"
+                      as={Textarea}
+                      id="description"
+                      placeholder="A brief description about your company..."
+                      rows={3}
+                      className="rounded-xl border-slate-100 bg-white font-medium resize-none shadow-sm focus:ring-slate-900"
                     />
-                    {errors.logoText && touched.logoText && (
-                      <p className="text-xs text-red-500">{errors.logoText}</p>
-                    )}
                   </div>
-                )}
 
-                {/* Image Logo */}
-                {values.logoType === "image" && (
                   <div className="space-y-2">
-                    <ImageUploadWithCrop
-                      label="Logo Image"
-                      currentImage={values.logoImage}
-                      onImageUpdate={(imageUrl: string) =>
-                        setFieldValue("logoImage", imageUrl)
-                      }
-                      recommendedWidth={150}
-                      recommendedHeight={50}
-                      aspectRatio={3}
-                      showDimensions
+                    <Label
+                      htmlFor="copyrightText"
+                      className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1"
+                    >
+                      Copyright Text
+                    </Label>
+                    <Field
+                      name="copyrightText"
+                      as={Input}
+                      id="copyrightText"
+                      placeholder="© 2025 All rights reserved."
+                      className="h-12 rounded-xl border-slate-100 bg-white font-medium shadow-sm focus:ring-slate-900"
                     />
-                    {errors.logoImage && touched.logoImage && (
-                      <p className="text-xs text-red-500">{errors.logoImage}</p>
-                    )}
                   </div>
-                )}
+                </div>
               </div>
 
-              {/* Description */}
-              <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Field
-                  name="description"
-                  as={Textarea}
-                  id="description"
-                  placeholder="A brief description about your company..."
-                  rows={3}
-                />
-                {errors.description && touched.description && (
-                  <p className="text-xs text-red-500">{errors.description}</p>
-                )}
+              <div className="space-y-12">
+                <div className="space-y-6">
+                  <div className="flex items-center gap-3 px-1">
+                    <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-900">
+                      <Layers className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-black text-slate-900 tracking-tight italic uppercase leading-none">
+                        Node Manifest
+                      </h3>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+                        Hierarchical link orchestration
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="bg-slate-50/50 p-6 rounded-[2rem] border border-slate-100">
+                    <MenuEditor
+                      menuItems={values.menuItems}
+                      onChange={(items) => setFieldValue("menuItems", items)}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  <div className="flex items-center gap-3 px-1">
+                    <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-900">
+                      <Share2 className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-black text-slate-900 tracking-tight italic uppercase leading-none">
+                        Social Bridges
+                      </h3>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+                        External platform connections
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="bg-slate-50/50 p-6 rounded-[2rem] border border-slate-100">
+                    <SocialLinksEditor
+                      links={values.socialLinks}
+                      onChange={(links) => setFieldValue("socialLinks", links)}
+                    />
+                  </div>
+                </div>
               </div>
-
-              {/* Copyright Text */}
-              <div className="space-y-2">
-                <Label htmlFor="copyrightText">Copyright Text</Label>
-                <Field
-                  name="copyrightText"
-                  as={Input}
-                  id="copyrightText"
-                  placeholder="© 2025 All rights reserved."
-                />
-                {errors.copyrightText && touched.copyrightText && (
-                  <p className="text-xs text-red-500">{errors.copyrightText}</p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* ------------------------------------------------ */}
-          {/* NAVIGATION LINKS */}
-          {/* ------------------------------------------------ */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Footer Navigation</CardTitle>
-              <CardDescription>
-                Add navigation links and columns to your footer
-              </CardDescription>
-            </CardHeader>
-
-            <CardContent>
-              <MenuEditor
-                menuItems={values.menuItems}
-                onChange={(items) => setFieldValue("menuItems", items)}
-              />
-            </CardContent>
-          </Card>
-
-          {/* ------------------------------------------------ */}
-          {/* SOCIAL LINKS */}
-          {/* ------------------------------------------------ */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Social Media</CardTitle>
-              <CardDescription>
-                Connect your social media profiles
-              </CardDescription>
-            </CardHeader>
-
-            <CardContent>
-              <SocialLinksEditor
-                links={values.socialLinks}
-                onChange={(links) => setFieldValue("socialLinks", links)}
-              />
-            </CardContent>
-          </Card>
+            </div>
+          </EcosystemContainer>
         </Form>
       )}
     </Formik>

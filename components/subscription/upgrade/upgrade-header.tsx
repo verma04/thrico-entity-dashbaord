@@ -1,52 +1,38 @@
-import { Badge } from "@/components/ui/badge";
-import { Sparkles } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 
 interface UpgradeHeaderProps {
   subscriptionType?: string;
   isHighTier?: boolean;
 }
 
-export const UpgradeHeader = ({
-  subscriptionType,
-  isHighTier,
-}: UpgradeHeaderProps) => {
+export const UpgradeHeader = ({ subscriptionType, isHighTier }: UpgradeHeaderProps) => {
   return (
-    <div className="text-center mb-12">
-      <Badge
-        variant="secondary"
-        className="mb-4 bg-primary/10 text-primary border-0"
-      >
-        <Sparkles className="mr-1.5 h-3.5 w-3.5" />
-        {isHighTier ? "Maximum Potential Reached" : "Upgrade Your Plan"}
-      </Badge>
-      <h1 className="text-4xl font-bold text-foreground mb-4 text-balance">
-        {isHighTier
-          ? "You're on our highest tier plan!"
-          : "Choose the perfect plan for your team"}
-      </h1>
-
-      {isHighTier && (
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
-          You've unlocked all our premium features and reached the maximum tier.
-          If your organization needs even more scale, custom integrations, or
-          white-label solutions, our enterprise team is here to help.
+    <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-1">
+      <div>
+        <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5">
+          {isHighTier ? "Maximum Tier" : "Available Plans"}
         </p>
-      )}
-
-      {!isHighTier && subscriptionType === "trail" && (
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
-          Your trial includes 14 days of full access. Upgrade to unlock advanced
-          modules, exclusive features, and higher limits tailored for your team.
-          Each plan offers unique benefits to help your organization grow.
+        <h2 className="text-[20px] font-semibold text-slate-900 tracking-tight leading-tight">
+          {isHighTier
+            ? "You're on our highest tier"
+            : "Choose the right plan for your team"}
+        </h2>
+        <p className="text-[13px] text-slate-400 mt-1.5 max-w-lg leading-relaxed">
+          {isHighTier
+            ? "You've unlocked all features. For custom scale or white-label solutions, contact our enterprise team."
+            : subscriptionType === "trail"
+            ? "Your 14-day trial includes full access. Upgrade to unlock advanced modules and higher limits."
+            : "Explore plans to unlock additional modules, advanced features, and higher limits."}
         </p>
-      )}
-
-      {!isHighTier && subscriptionType === "paid" && (
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
-          Explore our plans to unlock additional modules, advanced features, and
-          higher limits. Upgrade to get even more value and flexibility for your
-          growing organization.
-        </p>
+      </div>
+      {!isHighTier && (
+        <a
+          href="#custom"
+          className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-slate-500 hover:text-slate-900 transition-colors shrink-0"
+        >
+          Need custom?
+          <ArrowUpRight className="h-3.5 w-3.5" />
+        </a>
       )}
     </div>
   );

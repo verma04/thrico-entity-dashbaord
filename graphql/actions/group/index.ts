@@ -10,6 +10,13 @@ import {
   UPDATE_COMMUNITY_PERMISSIONS,
   UPDATE_COMMUNITY_RULES,
   GET_COMMUNITY_STATS,
+  GET_COMMUNITY_SIGNUP_TREND,
+  GET_TOP_ACTIVE_COMMUNITIES,
+  GET_COMMUNITY_ACTIVITY_TREND,
+  GetCommunityStatsResponse,
+  GetCommunitySignupTrendResponse,
+  GetTopActiveCommunitiesResponse,
+  GetCommunityActivityTrendResponse,
 } from "../../quries/group/approval";
 
 export const addCommunity = (options: any) =>
@@ -286,4 +293,21 @@ export const getCommunityRequest = (options: any) =>
   useQuery(GET_COMMUNITY_REQUEST, options);
 
 export const getCommunityStats = (options: any) =>
-  useQuery(GET_COMMUNITY_STATS, options);
+  useQuery<GetCommunityStatsResponse>(GET_COMMUNITY_STATS, options);
+
+export const useCommunitySignupTrend = (options?: any) =>
+  useQuery<GetCommunitySignupTrendResponse>(GET_COMMUNITY_SIGNUP_TREND, {
+    fetchPolicy: "network-only",
+    ...options,
+  });
+
+export const useTopActiveCommunities = (limit: number = 5) =>
+  useQuery<GetTopActiveCommunitiesResponse>(GET_TOP_ACTIVE_COMMUNITIES, {
+    variables: { limit },
+    fetchPolicy: "network-only",
+  });
+
+export const useCommunityActivityTrend = () =>
+  useQuery<GetCommunityActivityTrendResponse>(GET_COMMUNITY_ACTIVITY_TREND, {
+    fetchPolicy: "network-only",
+  });

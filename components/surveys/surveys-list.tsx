@@ -4,6 +4,15 @@ import { useEffect, useState } from "react";
 import moment from "moment";
 import { useGetSurveys, Survey } from "@/graphql/surveys/survey-queries";
 import { toast } from "sonner";
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { ClipboardList, Sparkles, Filter, Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import Link from "next/link";
+import NewForm from "../feedback-form/new-feed-back-form";
 import {
   useDeleteSurvey,
   useEditSurvey,
@@ -140,24 +149,66 @@ export function SurveysList({
     !isUpdating;
 
   return (
-    <div className="px-6 py-6">
-      <SurveysTable
-        surveys={surveys}
-        loading={loading}
-        onEditDetails={setEditingDetailsSurvey}
-        onDelete={setSurveyToDelete}
-        onPublish={(id) =>
-          publishSurvey({ variables: { publishSurveyId: id } })
+    <EcosystemWrapper>
+      <EcosystemHeader
+        title="Surveys"
+        badgeText="Community Feedback"
+        description="Manage and create surveys for your community."
+        icon={ClipboardList}
+        actions={
+          <div className="flex items-center gap-3 relative ml-auto pr-2">
+            <Link href="/surveys/templates">
+              <Button variant="outline" className="font-semibold text-xs px-6 h-10 rounded-lg shadow-sm gap-2">
+                <Sparkles className="h-4 w-4 text-indigo-500" />
+                Browse Templates
+              </Button>
+            </Link>
+            <NewForm />
+          </div>
         }
-        onDraft={(id) => draftSurvey({ variables: { draftSurveyId: id } })}
-        onShare={setSharingSurvey}
-        shareSurveyAsFeed={shareSurveyAsFeed}
       />
-      {error && (
-        <div className="mt-4 p-4 rounded-lg bg-destructive/10 text-destructive text-sm">
-          Failed to load surveys. Please try again later.
+
+      <EcosystemActionBar>
+        <div className="relative w-full md:max-w-[400px] group">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
+          <Input
+            placeholder="Search surveys..."
+            className="pl-12 h-12 bg-slate-50 border-slate-200 rounded-xl focus-visible:ring-4 focus-visible:ring-indigo-500/5 transition-all font-medium text-slate-700 placeholder:text-slate-400 border shadow-sm"
+          />
         </div>
-      )}
+
+        <div className="flex items-center gap-4 pr-4 ml-auto">
+          <Button variant="outline" size="icon" className="h-10 w-10 shrink-0 rounded-lg border border-slate-200 text-slate-400 hover:text-indigo-600 hover:bg-slate-50 shadow-sm md:hidden">
+            <Filter className="h-4 w-4" />
+          </Button>
+          <div className="flex items-center gap-2.5 px-4 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs font-semibold text-slate-600 uppercase tracking-wide whitespace-nowrap shadow-inner">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            {surveys.length} Surveys
+          </div>
+        </div>
+      </EcosystemActionBar>
+
+      <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">
+        <div className="rounded-xl border border-border/50 bg-white shadow-sm overflow-hidden">
+          <SurveysTable
+            surveys={surveys}
+            loading={loading}
+            onEditDetails={setEditingDetailsSurvey}
+            onDelete={setSurveyToDelete}
+            onPublish={(id) =>
+              publishSurvey({ variables: { publishSurveyId: id } })
+            }
+            onDraft={(id) => draftSurvey({ variables: { draftSurveyId: id } })}
+            onShare={setSharingSurvey}
+            shareSurveyAsFeed={shareSurveyAsFeed}
+          />
+        </div>
+        {error && (
+          <div className="mt-6 p-4 rounded-lg bg-destructive/10 text-destructive text-sm font-semibold border border-destructive/20 shadow-sm">
+            Failed to load surveys. Please try again later.
+          </div>
+        )}
+      </EcosystemContainer>
 
       <SurveySheet
         survey={editingDetailsSurvey}
@@ -196,6 +247,6 @@ export function SurveysList({
         shareDescription={shareDescription}
         onShareDescriptionChange={setShareDescription}
       />
-    </div>
+    </EcosystemWrapper>
   );
 }

@@ -10,6 +10,8 @@ import {
   PaginatedContentReportResponse,
   ModerationSettings,
   ModerationStats,
+  AiModerationDashboard,
+  PaginatedAiModerationLogResponse,
   ReportStatus,
 } from "./types";
 import {
@@ -18,6 +20,8 @@ import {
   GET_CONTENT_REPORTS,
   GET_MODERATION_SETTINGS,
   GET_MODERATION_STATS,
+  GET_AI_MODERATION_DASHBOARD,
+  GET_AI_MODERATION_LOGS,
 } from "./queries";
 import {
   ADD_BANNED_WORD,
@@ -95,6 +99,25 @@ export function useGetModerationStats(
   return useQuery<{ getModerationStats: ModerationStats }>(
     GET_MODERATION_STATS,
     options,
+  );
+}
+
+export function useGetAiModerationDashboard(
+  options?: QueryHookOptions<{ getAiModerationDashboard: AiModerationDashboard }>,
+) {
+  return useQuery<{ getAiModerationDashboard: AiModerationDashboard }>(
+    GET_AI_MODERATION_DASHBOARD,
+    options,
+  );
+}
+
+export function useGetAiModerationLogs(
+  variables?: { limit?: number; offset?: number },
+  options?: QueryHookOptions<{ getAiModerationLogs: PaginatedAiModerationLogResponse }>,
+) {
+  return useQuery<{ getAiModerationLogs: PaginatedAiModerationLogResponse }>(
+    GET_AI_MODERATION_LOGS,
+    { variables, ...options },
   );
 }
 

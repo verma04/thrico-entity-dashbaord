@@ -14,10 +14,7 @@ const page = () => {
     },
   });
   return (
-    <>
-      {loading && <TableLoading />}
-      {!loading && <List data={data?.getDiscussionForumCategory} />}
-    </>
+    <List data={data?.getDiscussionForumCategory || []} loading={loading} />
   );
 };
 

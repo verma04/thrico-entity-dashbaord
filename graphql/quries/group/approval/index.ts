@@ -182,6 +182,41 @@ export const GET_COMMUNITY_STATS = gql`
   }
 `;
 
+export const GET_COMMUNITY_SIGNUP_TREND = gql`
+  query GetCommunitySignupTrend($input: CommunityStatsInput) {
+    getCommunitySignupTrend(input: $input) {
+      name
+      signups
+      views
+    }
+  }
+`;
+
+export const GET_TOP_ACTIVE_COMMUNITIES = gql`
+  query GetTopActiveCommunities($limit: Int) {
+    getTopActiveCommunities(limit: $limit) {
+      id
+      name
+      slug
+      members
+      views
+      status
+      avatar
+      lastActivity
+    }
+  }
+`;
+
+export const GET_COMMUNITY_ACTIVITY_TREND = gql`
+  query GetCommunityActivityTrend {
+    getCommunityActivityTrend {
+      name
+      registered
+      checkedIn
+    }
+  }
+`;
+
 export interface CommunityStatsInput {
   startDate?: string | null;
   endDate?: string | null;
@@ -205,4 +240,39 @@ export interface CommunityStats {
 
 export interface GetCommunityStatsResponse {
   getCommunityStats: CommunityStats;
+}
+
+export interface CommunitySignupTrend {
+  name: string;
+  signups: number;
+  views: number;
+}
+
+export interface GetCommunitySignupTrendResponse {
+  getCommunitySignupTrend: CommunitySignupTrend[];
+}
+
+export interface TopCommunity {
+  id: string;
+  name: string;
+  slug: string;
+  members: number;
+  views: number;
+  status: string;
+  avatar?: string;
+  lastActivity?: string;
+}
+
+export interface GetTopActiveCommunitiesResponse {
+  getTopActiveCommunities: TopCommunity[];
+}
+
+export interface CommunityActivity {
+  name: string;
+  registered: number;
+  checkedIn: number;
+}
+
+export interface GetCommunityActivityTrendResponse {
+  getCommunityActivityTrend: CommunityActivity[];
 }

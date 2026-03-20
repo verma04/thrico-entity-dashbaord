@@ -32,7 +32,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Globe, Map, Share2, FileCode, Type, Lock } from "lucide-react";
+import {
+  Globe,
+  Map,
+  Share2,
+  FileCode,
+  Type,
+  Lock,
+  Settings as SettingsIcon,
+  ShieldCheck,
+  SaveIcon,
+  Sparkles,
+  Zap,
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useIsPremium } from "@/hooks/useIsPremium";
 import { useDrawerStore } from "@/store/drawerStore";
@@ -43,6 +55,9 @@ import {
   useUpdateWebsiteFont,
   useUpdateWebsiteTheme,
 } from "@/graphql/actions/website";
+import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { cn } from "@/lib/utils";
 
 const SiteSettings = () => {
   const {
@@ -103,45 +118,47 @@ const SiteSettings = () => {
   const { toast } = useToast();
   const { isPremium } = useIsPremium();
   const { openDrawer } = useDrawerStore();
+
   const PremiumLock = ({
     title,
     description,
+    icon: Icon,
   }: {
     title: string;
     description: string;
+    icon: any;
   }) => (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-muted-foreground">
-          <Lock className="h-5 w-5" /> {title}
-        </CardTitle>
-        <CardDescription>Premium Feature</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="flex flex-col items-center justify-center p-8 text-center space-y-4 bg-muted/20 rounded-lg border border-dashed">
-          <div className="p-4 bg-muted rounded-full">
-            <Lock className="h-8 w-8 text-muted-foreground" />
+    <div className="relative group overflow-hidden rounded-[2.5rem] border border-slate-100 bg-white p-12 shadow-xl shadow-slate-200/50">
+      <div className="absolute top-0 right-0 p-8">
+        <Lock className="h-6 w-6 text-slate-200 group-hover:text-indigo-500 transition-colors" />
+      </div>
+      <div className="flex flex-col items-center justify-center text-center space-y-6 max-w-lg mx-auto">
+        <div className="p-6 bg-slate-50 rounded-3xl relative">
+          <Icon className="h-10 w-10 text-slate-400" />
+          <div className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full bg-white flex items-center justify-center shadow-lg">
+            <Lock className="h-3 w-3 text-indigo-500" />
           </div>
-          <div>
-            <h3 className="text-lg font-semibold">Unlock {title}</h3>
-            <p className="text-muted-foreground max-w-sm mt-2">{description}</p>
-          </div>
-          <Button
-            onClick={() => openDrawer()}
-            variant="default"
-            className="mt-4"
-          >
-            Upgrade Subscription
-          </Button>
         </div>
-      </CardContent>
-    </Card>
+        <div>
+          <h3 className="text-2xl font-black text-slate-900 tracking-tight italic uppercase">
+            {title} Restricted
+          </h3>
+          <p className="text-slate-400 font-medium mt-3 leading-relaxed">
+            {description}
+          </p>
+        </div>
+        <Button
+          onClick={() => openDrawer()}
+          className="h-12 px-10 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs uppercase tracking-widest flex items-center gap-3 shadow-xl shadow-indigo-200 transition-all active:scale-95 group"
+        >
+          <Sparkles className="h-4 w-4 transition-transform group-hover:rotate-12" />
+          Access Premium Matrix
+        </Button>
+      </div>
+    </div>
   );
 
   const handleSaveSettings = () => {
-    // In a real app, we might trigger an API save here.
-    // Since it's Zustand + Persist, it's already "saved" on change,
-    // but a manual toast helps user confidence.
     toast({
       title: "Settings Saved",
       description: "Your site configuration has been updated successfully.",
@@ -149,335 +166,298 @@ const SiteSettings = () => {
   };
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto py-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">
-            Site Configuration
-          </h2>
-          <p className="text-muted-foreground">
-            Manage your sitemap, analytics, and global settings.
-          </p>
+    <div className="space-y-8 pb-12">
+      <EcosystemActionBar shadow="sm">
+        <div className="flex items-center justify-between w-full">
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-3">
+              <div className="h-3 w-3 rounded-full bg-indigo-500 animate-pulse shadow-[0_0_10px_rgba(99,102,241,0.5)]" />
+              <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                Configuration Nexus: Active
+              </span>
+            </div>
+            <div className="h-4 w-px bg-slate-200" />
+            <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
+              <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
+              <span>Core Status: Verified</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Button
+              onClick={handleSaveSettings}
+              className="h-10 px-8 rounded-xl bg-slate-900 hover:bg-black text-white font-black text-[11px] uppercase tracking-wider gap-3 shadow-xl shadow-slate-200 transition-all active:scale-95 group"
+            >
+              <SaveIcon className="h-4 w-4 transition-transform group-hover:scale-110" />
+              Commit Configuration
+            </Button>
+          </div>
         </div>
-        <Button onClick={handleSaveSettings}>Save Changes</Button>
-      </div>
+      </EcosystemActionBar>
 
-      <Tabs defaultValue="sitemap" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="sitemap" className="gap-2">
-            <Map className="h-4 w-4" /> Sitemap Manager
-          </TabsTrigger>
-          <TabsTrigger value="layout" className="gap-2">
-            <Type className="h-4 w-4" /> Layout
-          </TabsTrigger>
-          <TabsTrigger value="general" className="gap-2">
-            <SettingsIcon className="h-4 w-4" /> General Settings
-          </TabsTrigger>
-        </TabsList>
+      <EcosystemContainer className="p-0 overflow-hidden border-none shadow-none bg-transparent">
+        <Tabs defaultValue="sitemap" className="w-full">
+          <div className="flex justify-center mb-10">
+            <TabsList className="h-14 p-1 bg-slate-100/50 rounded-2xl border border-slate-100 shadow-inner backdrop-blur-xl">
+              <TabsTrigger
+                value="sitemap"
+                className="rounded-xl px-8 h-full data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-lg text-slate-400 font-black text-[10px] uppercase tracking-widest transition-all gap-2"
+              >
+                <Map className="h-3.5 w-3.5" /> Sitemap
+              </TabsTrigger>
+              <TabsTrigger
+                value="layout"
+                className="rounded-xl px-8 h-full data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-lg text-slate-400 font-black text-[10px] uppercase tracking-widest transition-all gap-2"
+              >
+                <Type className="h-3.5 w-3.5" /> Identity
+              </TabsTrigger>
+              <TabsTrigger
+                value="general"
+                className="rounded-xl px-8 h-full data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-lg text-slate-400 font-black text-[10px] uppercase tracking-widest transition-all gap-2"
+              >
+                <SettingsIcon className="h-3.5 w-3.5" /> Parameters
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
-        {/* --- SITEMAP TAB --- */}
-        <TabsContent value="sitemap" className="mt-6">
-          {!isPremium ? (
-            <PremiumLock
-              title="Sitemap Manager"
-              description="Control which pages are visible to search engines and manage your sitemap.xml structure."
-            />
-          ) : (
-            <Card>
-              <CardHeader>
-                <CardTitle>Sitemap Inclusion</CardTitle>
-                <CardDescription>
-                  Choose which pages should be visible to search engines in your
-                  sitemap.xml.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Page</TableHead>
-                        <TableHead>Slug</TableHead>
-                        <TableHead className="text-right">
-                          Include in Sitemap
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {pages.map((page) => (
-                        <TableRow key={page.id}>
-                          <TableCell className="font-medium">
-                            {page.name}
-                          </TableCell>
-                          <TableCell className="text-muted-foreground font-mono text-xs">
-                            /{page.slug}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end">
-                              <Switch
-                                checked={page.seo?.includeInSitemap ?? true}
-                                onCheckedChange={(checked) => {
-                                  togglePageSitemap(page.id);
-                                  updatePageSeoMutation({
-                                    variables: {
-                                      pageId: page.id,
-                                      includeInSitemap: checked,
-                                    },
-                                  });
-                                }}
-                              />
-                            </div>
-                          </TableCell>
+          <div className="max-w-5xl mx-auto px-4">
+            <TabsContent value="sitemap" className="mt-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              {!isPremium ? (
+                <PremiumLock
+                  title="Sitemap Manager"
+                  icon={Map}
+                  description="Optimize your site's discovery architecture. Control search engine indexing and hierarchical visibility mapping."
+                />
+              ) : (
+                <div className="space-y-6">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="h-10 w-10 rounded-xl bg-slate-900 flex items-center justify-center text-white">
+                      <Map className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-black text-slate-900 tracking-tight italic uppercase leading-none">Indexing Matrix</h3>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Hierarchical crawl orchestrator</p>
+                    </div>
+                  </div>
+                  
+                  <div className="rounded-[2.5rem] border border-slate-100 bg-white shadow-xl shadow-slate-200/50 overflow-hidden">
+                    <Table>
+                      <TableHeader className="bg-slate-50/50 border-b border-slate-100">
+                        <TableRow className="hover:bg-transparent">
+                          <TableHead className="py-6 px-10 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Resource Name</TableHead>
+                          <TableHead className="py-6 px-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Node Address</TableHead>
+                          <TableHead className="py-6 px-10 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-right">Visibility Protocol</TableHead>
                         </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {pages.map((page) => (
+                          <TableRow key={page.id} className="group border-b border-slate-50 last:border-0">
+                            <TableCell className="py-6 px-10">
+                              <span className="text-sm font-black text-slate-900 italic uppercase">{page.name}</span>
+                            </TableCell>
+                            <TableCell className="py-6 px-6">
+                              <span className="text-[11px] font-bold text-slate-400 font-mono bg-slate-50 px-3 py-1 rounded-lg">/{page.slug}</span>
+                            </TableCell>
+                            <TableCell className="py-6 px-10 text-right">
+                              <div className="flex justify-end pr-2">
+                                <Switch
+                                  checked={page.seo?.includeInSitemap ?? true}
+                                  onCheckedChange={(checked) => {
+                                    togglePageSitemap(page.id);
+                                    updatePageSeoMutation({
+                                      variables: {
+                                        pageId: page.id,
+                                        includeInSitemap: checked,
+                                      },
+                                    });
+                                  }}
+                                  className="data-[state=checked]:bg-emerald-500"
+                                />
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="layout" className="mt-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              {!isPremium ? (
+                <PremiumLock
+                  title="Identity & Form"
+                  icon={Type}
+                  description="Customize the aesthetic DNA of your platform. Access exclusive typography systems and high-fidelity global themes."
+                />
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="h-10 w-10 rounded-xl bg-slate-900 flex items-center justify-center text-white">
+                        <Zap className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-black text-slate-900 tracking-tight italic uppercase leading-none">Global Theme</h3>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Foundational visual identity</p>
+                      </div>
+                    </div>
+                    
+                    <div className="rounded-[2.5rem] border border-slate-100 bg-white p-10 shadow-xl shadow-slate-200/50 space-y-6">
+                      <div className="space-y-2">
+                        <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Theme Archetype</Label>
+                        <Select value={theme} onValueChange={handleThemeChange}>
+                          <SelectTrigger className="h-14 rounded-2xl border-slate-100 bg-slate-50 font-black italic uppercase text-xs tracking-wider">
+                            <SelectValue placeholder="Commit Theme" />
+                          </SelectTrigger>
+                          <SelectContent className="rounded-2xl border-slate-100 shadow-2xl p-2">
+                            {["academia", "enterprise", "creator", "association", "startup", "dark-mode"].map((t) => (
+                              <SelectItem key={t} value={t} className="rounded-xl py-3 font-bold uppercase text-[10px] tracking-widest leading-none mb-1 last:mb-0 cursor-pointer">
+                                {t}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <p className="text-[10px] font-medium text-slate-400 leading-relaxed px-1">
+                        Theme archetype applies foundational styling across all architectural modules.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="h-10 w-10 rounded-xl bg-slate-900 flex items-center justify-center text-white">
+                        <Type className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-black text-slate-900 tracking-tight italic uppercase leading-none">Typography</h3>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Core font family definition</p>
+                      </div>
+                    </div>
+                    
+                    <div className="rounded-[2.5rem] border border-slate-100 bg-white p-10 shadow-xl shadow-slate-200/50 space-y-6">
+                      <div className="space-y-2">
+                        <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Font Protocol</Label>
+                        <Select value={font} onValueChange={handleFontChange}>
+                          <SelectTrigger className="h-14 rounded-2xl border-slate-100 bg-slate-50 font-black italic uppercase text-xs tracking-wider">
+                            <SelectValue placeholder="Commit Font" />
+                          </SelectTrigger>
+                          <SelectContent className="rounded-2xl border-slate-100 shadow-2xl p-2 max-h-[300px]">
+                            {["inter", "roboto", "poppins", "playfair", "montserrat", "lato", "open-sans", "raleway", "merriweather", "nunito"].map((f) => (
+                              <SelectItem key={f} value={f} className="rounded-xl py-3 font-bold uppercase text-[10px] tracking-widest leading-none mb-1 last:mb-0 cursor-pointer">
+                                {f}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <p className="text-[10px] font-medium text-slate-400 leading-relaxed px-1">
+                        The typography protocol will be projected across all interface nodes.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="general" className="mt-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              {!isPremium ? (
+                <PremiumLock
+                  title="Global Parameters"
+                  icon={SettingsIcon}
+                  description="Deploy advanced analytics and cross-platform branding anchors. Unlock the full potential of your site's data ecosystem."
+                />
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                  <div className="lg:col-span-2 space-y-10">
+                    <div className="space-y-6">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="h-10 w-10 rounded-xl bg-slate-900 flex items-center justify-center text-white">
+                          <FileCode className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <h3 className="text-xl font-black text-slate-900 tracking-tight italic uppercase leading-none">Integrations</h3>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">External protocol mapping</p>
+                        </div>
+                      </div>
+                      
+                      <div className="rounded-[2.5rem] border border-slate-100 bg-white p-10 shadow-xl shadow-slate-200/50">
+                        <div className="space-y-6">
+                          <div className="space-y-2">
+                            <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">GA4 Measurement Protocol ID</Label>
+                            <Input
+                              placeholder="G-XXXXXX"
+                              value={siteSettings?.googleAnalyticsId || ""}
+                              onChange={(e) => updateSiteSettings({ googleAnalyticsId: e.target.value })}
+                              className="h-14 rounded-2xl border-slate-100 bg-slate-50 font-bold text-xs shadow-inner focus:bg-white transition-all"
+                            />
+                            <p className="text-[10px] font-medium text-slate-400 px-1 mt-2">Found in GA4 Property Stream details.</p>
+                          </div>
+
+                          <div className="h-px bg-slate-100 my-8" />
+
+                          <div className="space-y-2">
+                            <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Favicon Asset Invariant</Label>
+                            <Input
+                              placeholder="https://resource.cdn/favicon.png"
+                              value={siteSettings?.favicon || ""}
+                              onChange={(e) => updateSiteSettings({ favicon: e.target.value })}
+                              className="h-14 rounded-2xl border-slate-100 bg-slate-50 font-bold text-xs shadow-inner focus:bg-white transition-all"
+                            />
+                            <p className="text-[10px] font-medium text-slate-400 px-1 mt-2">Static URL for website browser representation.</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="h-10 w-10 rounded-xl bg-slate-900 flex items-center justify-center text-white">
+                        <Share2 className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-black text-slate-900 tracking-tight italic uppercase leading-none">Bridges</h3>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Social link orchestration</p>
+                      </div>
+                    </div>
+                    
+                    <div className="rounded-[2.5rem] border border-slate-100 bg-white p-10 shadow-xl shadow-slate-200/50 space-y-8">
+                      {[
+                        { key: "twitter", label: "Twitter / X", placeholder: "X://handle" },
+                        { key: "linkedin", label: "LinkedIn", placeholder: "in://username" },
+                        { key: "github", label: "GitHub", placeholder: "git://username" },
+                        { key: "instagram", label: "Instagram", placeholder: "ig://username" }
+                      ].map((social) => (
+                        <div key={social.key} className="space-y-2">
+                          <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">{social.label}</Label>
+                          <Input
+                            placeholder={social.placeholder}
+                            value={(siteSettings?.socialLinks as any)?.[social.key] || ""}
+                            onChange={(e) =>
+                              updateSiteSettings({
+                                socialLinks: {
+                                  ...siteSettings.socialLinks,
+                                  [social.key]: e.target.value,
+                                },
+                              })
+                            }
+                            className="h-12 rounded-xl border-slate-100 bg-slate-50 font-bold text-xs shadow-inner"
+                          />
+                        </div>
                       ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-
-        {/* --- LAYOUT TAB --- */}
-        <TabsContent value="layout" className="mt-6 space-y-6">
-          {!isPremium ? (
-            <PremiumLock
-              title="Theme & Typography"
-              description="Customize your site's visual identity with premium themes and font pairings."
-            />
-          ) : (
-            /* TYPOGRAPHY & THEME */
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Type className="h-5 w-5" /> Typography & Theme
-                </CardTitle>
-                <CardDescription>
-                  Choose a theme style and font family for your entire website.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Theme Style Selector */}
-                <div className="grid gap-2">
-                  <Label htmlFor="theme-select">Theme Style</Label>
-                  <Select value={theme} onValueChange={handleThemeChange}>
-                    <SelectTrigger id="theme-select">
-                      <SelectValue placeholder="Select a theme" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="academia">Academia</SelectItem>
-                      <SelectItem value="enterprise">Enterprise</SelectItem>
-                      <SelectItem value="creator">Creator</SelectItem>
-                      <SelectItem value="association">Association</SelectItem>
-                      <SelectItem value="startup">Startup</SelectItem>
-                      <SelectItem value="dark-mode">Dark Mode</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <p className="text-[10px] text-muted-foreground">
-                    Theme affects default layouts and styling for all modules.
-                  </p>
-                </div>
-
-                {/* Font Family Selector */}
-                <div className="grid gap-2">
-                  <Label htmlFor="font-select">Font Family</Label>
-                  <Select value={font} onValueChange={handleFontChange}>
-                    <SelectTrigger id="font-select">
-                      <SelectValue placeholder="Select a font" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="inter">Inter</SelectItem>
-                      <SelectItem value="roboto">Roboto</SelectItem>
-                      <SelectItem value="poppins">Poppins</SelectItem>
-                      <SelectItem value="playfair">Playfair Display</SelectItem>
-                      <SelectItem value="montserrat">Montserrat</SelectItem>
-                      <SelectItem value="lato">Lato</SelectItem>
-                      <SelectItem value="open-sans">Open Sans</SelectItem>
-                      <SelectItem value="raleway">Raleway</SelectItem>
-                      <SelectItem value="merriweather">Merriweather</SelectItem>
-                      <SelectItem value="nunito">Nunito</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <p className="text-[10px] text-muted-foreground">
-                    This font will be applied across all pages and modules.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-
-        {/* --- GENERAL SETTINGS TAB --- */}
-        <TabsContent value="general" className="mt-6 space-y-6">
-          {!isPremium ? (
-            <PremiumLock
-              title="General Settings"
-              description="Setup Google Analytics, custom favicons, and social media links."
-            />
-          ) : (
-            <>
-              {/* GOOGLE ANALYTICS */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <FileCode className="h-5 w-5" /> Analytics & Integrations
-                  </CardTitle>
-                  <CardDescription>
-                    Connect 3rd party tools to your website.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="ga-id">
-                      Google Analytics Measurement ID
-                    </Label>
-                    <Input
-                      id="ga-id"
-                      placeholder="G-XXXXXXXXXX"
-                      value={siteSettings?.googleAnalyticsId || ""}
-                      onChange={(e) =>
-                        updateSiteSettings({
-                          googleAnalyticsId: e.target.value,
-                        })
-                      }
-                    />
-                    <p className="text-[10px] text-muted-foreground">
-                      The ID starting with "G-" found in your GA4 property
-                      stream details.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* BRANDING */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Globe className="h-5 w-5" /> Branding
-                  </CardTitle>
-                  <CardDescription>
-                    Global assets for your website.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="favicon">Favicon URL</Label>
-                    <div className="flex gap-2">
-                      <Input
-                        id="favicon"
-                        placeholder="https://example.com/icon.png"
-                        value={siteSettings?.favicon || ""}
-                        onChange={(e) =>
-                          updateSiteSettings({ favicon: e.target.value })
-                        }
-                      />
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-
-              {/* SOCIAL LINKS */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Share2 className="h-5 w-5" /> Social Links
-                  </CardTitle>
-                  <CardDescription>
-                    These links usually appear in your Footer or Contact
-                    sections.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Twitter / X</Label>
-                      <Input
-                        placeholder="https://twitter.com/username"
-                        value={siteSettings?.socialLinks?.twitter || ""}
-                        onChange={(e) =>
-                          updateSiteSettings({
-                            socialLinks: {
-                              ...siteSettings.socialLinks,
-                              twitter: e.target.value,
-                            },
-                          })
-                        }
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>LinkedIn</Label>
-                      <Input
-                        placeholder="https://linkedin.com/in/username"
-                        value={siteSettings?.socialLinks?.linkedin || ""}
-                        onChange={(e) =>
-                          updateSiteSettings({
-                            socialLinks: {
-                              ...siteSettings.socialLinks,
-                              linkedin: e.target.value,
-                            },
-                          })
-                        }
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>GitHub</Label>
-                      <Input
-                        placeholder="https://github.com/username"
-                        value={siteSettings?.socialLinks?.github || ""}
-                        onChange={(e) =>
-                          updateSiteSettings({
-                            socialLinks: {
-                              ...siteSettings.socialLinks,
-                              github: e.target.value,
-                            },
-                          })
-                        }
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Instagram</Label>
-                      <Input
-                        placeholder="https://instagram.com/username"
-                        value={siteSettings?.socialLinks?.instagram || ""}
-                        onChange={(e) =>
-                          updateSiteSettings({
-                            socialLinks: {
-                              ...siteSettings.socialLinks,
-                              instagram: e.target.value,
-                            },
-                          })
-                        }
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </>
-          )}
-        </TabsContent>
-      </Tabs>
+                </div>
+              )}
+            </TabsContent>
+          </div>
+        </Tabs>
+      </EcosystemContainer>
     </div>
   );
 };
-
-function SettingsIcon(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
-      <circle cx="12" cy="12" r="3" />
-    </svg>
-  );
-}
 
 export default SiteSettings;

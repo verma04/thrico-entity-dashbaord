@@ -80,3 +80,26 @@ export interface ModerationStats {
   blockedLinksCount: number;
   autoModeratedToday: number;
 }
+
+export interface AiModerationDashboard {
+  __typename?: "AiModerationDashboard";
+  totalPosts: number;
+  pendingModeration: number;
+  flaggedContent: number;
+  rejectedPosts: number;
+}
+
+export interface AiModerationLog {
+  id: string;
+  contentId: string;
+  entityId: string;
+  classification?: string;
+  confidence?: number;
+  model?: string;
+  createdAt: string;
+}
+
+export interface PaginatedAiModerationLogResponse {
+  items: AiModerationLog[];
+  totalCount: number;
+}

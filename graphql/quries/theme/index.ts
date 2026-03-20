@@ -33,7 +33,7 @@ export const GET_THEME = gql`
 `;
 
 export const EDIT_THEME = gql`
-  mutation EditEntityTheme($input: editEntityTheme) {
+  mutation EditEntityTheme($input: EditEntityTheme) {
     editEntityTheme(input: $input) {
       Button {
         colorPrimary

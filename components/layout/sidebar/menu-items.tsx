@@ -19,6 +19,7 @@ import {
   Gift,
   Trophy,
   Gamepad2,
+  Dices,
   GraduationCap,
   PartyPopper,
   HelpCircle,
@@ -29,10 +30,13 @@ import {
   Shield,
   Store,
   Currency,
+  Video,
+  History,
 } from "lucide-react";
 import { useMemo } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useGetUser, useCheckEntitySubscription } from "@/graphql/actions";
+import { useUserStore } from "@/store/store";
 
 const menuLink = (href: string, text: string) => (
   <Link
@@ -43,7 +47,7 @@ const menuLink = (href: string, text: string) => (
   </Link>
 );
 
-export const main = [
+export const playground = [
   {
     key: "home",
     label: "Home",
@@ -56,13 +60,16 @@ export const main = [
     path: "/feed",
     icon: <ChartBarIcon size={18} />,
   },
+
   {
     key: "members",
-    label: "Memberships",
+    label: "Members",
     path: "/members",
     icon: <Users size={18} />,
   },
 ];
+
+export const main = playground;
 
 export const settings = [
   {
@@ -78,10 +85,16 @@ export const settings = [
     icon: <Shield size={18} />,
   },
   {
-    key: "currency",
-    label: "Currency",
-    path: "/settings/currency",
-    icon: <Currency size={18} />,
+    key: "reports",
+    label: "Reports",
+    path: "/reports",
+    icon: <ClipboardList size={18} />,
+  },
+  {
+    key: "audit-logs",
+    label: "Audit Logs",
+    path: "/audit-logs",
+    icon: <History size={18} />,
   },
 ];
 
@@ -96,6 +109,11 @@ export const extendedItems = [
         key: "communities-approval",
         label: "Manage Approvals",
         path: "/communities/all",
+      },
+      {
+        key: "communities-reports",
+        label: "Reports",
+        path: "/communities/reports",
       },
       {
         key: "communities-settings",
@@ -281,40 +299,6 @@ export const extendedItems = [
     ],
   },
   {
-    key: "gamification",
-    label: "Gamification",
-    path: "/gamification",
-    icon: <Gamepad2 size={18} />,
-    children: [
-      {
-        key: "gamification-dashboard",
-        label: "Dashboard",
-        path: "/gamification/",
-      },
-      {
-        key: "gamification-modules",
-        label: "Points & Rewards",
-        path: "/gamification/points",
-      },
-
-      {
-        key: "gamification-leaderboard",
-        label: "Leaderboards",
-        path: "/gamification/leaderboard",
-      },
-      {
-        key: "gamification-badges",
-        label: "Badges & Achievements",
-        path: "/gamification/badges",
-      },
-      {
-        key: "gamification-settings",
-        label: "Settings",
-        path: "/gamification/settings",
-      },
-    ],
-  },
-  {
     key: "celebrations",
     label: "Celebrations",
     path: "/celebrations",
@@ -330,11 +314,26 @@ export const extendedItems = [
         label: "Anniversaries",
         path: "/celebrations/anniversaries",
       },
-      {
-        key: "celebrations-settings",
-        label: "Settings",
-        path: "/celebrations/settings",
-      },
+    ],
+  },
+  {
+    key: "news",
+    label: "News & Blogs",
+    path: "/news",
+    icon: <Newspaper size={18} />,
+    children: [
+      { key: "news-manage", label: "Manage Articles", path: "/news" },
+      { key: "news-settings", label: "Settings", path: "/news/settings" },
+    ],
+  },
+  {
+    key: "stories",
+    label: "Stories",
+    path: "/stories",
+    icon: <Video size={18} />,
+    children: [
+      { key: "stories-manage", label: "Manage Stories", path: "/stories" },
+      { key: "stories-settings", label: "Settings", path: "/stories/settings" },
     ],
   },
   {
@@ -343,96 +342,152 @@ export const extendedItems = [
     path: "/faq",
     icon: <HelpCircle size={18} />,
     children: [
-      {
-        key: "faq-manage",
-        label: "Manage FAQs",
-        path: "/faq",
-      },
-      {
-        key: "faq-categories",
-        label: "Categories",
-        path: "/faq/categories",
-      },
-      {
-        key: "faq-settings",
-        label: "Settings",
-        path: "/faq/settings",
-      },
+      { key: "faq-manage", label: "Manage FAQ", path: "/faq" },
+      { key: "faq-settings", label: "Settings", path: "/faq/settings" },
     ],
   },
+];
 
+export const gamification = [
   {
-    key: "news",
-    label: "News",
-    path: "/news",
-    icon: <Newspaper size={18} />,
+    key: "gamification",
+    label: "Engagement Activities",
+    path: "/gamification",
+    icon: <Gamepad2 size={18} />,
     children: [
-      {
-        key: "news-articles",
-        label: "Manage Articles",
-        path: "/news",
-      },
-      {
-        key: "news-categories",
-        label: "Categories",
-        path: "/news/categories",
-      },
-      {
-        key: "news-settings",
-        label: "Settings",
-        path: "/news/settings",
-      },
+      { key: "engagement-points", label: "Point Rules", path: "/gamification/points" },
+      { key: "engagement-badges", label: "Badges", path: "/gamification/badges" },
+      { key: "engagement-ranks", label: "Ranks", path: "/gamification/ranks" },
+      { key: "engagement-faq", label: "Manage FAQ", path: "/gamification/settings/faq" },
+    ],
+  },
+  {
+    key: "games",
+    label: "Engagement Games",
+    path: "/rewards/engagement/spin-wheel",
+    icon: <Dices size={18} />,
+    children: [
+      { key: "game-spin-wheel", label: "Spin Wheel", path: "/rewards/engagement/spin-wheel" },
+      { key: "game-scratch-card", label: "Scratch Card", path: "/rewards/engagement/scratch-card" },
+      { key: "game-match-win", label: "Match & Win", path: "/rewards/engagement/match-win" },
+    ],
+  },
+  {
+    key: "currency",
+    label: "Currency",
+    path: "/currency",
+    icon: <Currency size={18} />,
+  },
+  {
+    key: "rewards",
+    label: "Loyalty & Vouchers",
+    path: "/rewards/vouchers/coupons",
+    icon: <Gift size={18} />,
+    children: [
+      { key: "vouchers-coupons", label: "Manage Coupons", path: "/rewards/vouchers/coupons" },
+      { key: "vouchers-inventory", label: "Inventory Audit", path: "/rewards/vouchers/inventory" },
+      { key: "vouchers-redemptions", label: "Audit Ledger", path: "/rewards/vouchers/redemptions" },
+      { key: "vouchers-settings", label: "Settings", path: "/gamification/settings" },
     ],
   },
 ];
 
 /**
- * Hook to filter extended menu items based on subscription modules.
- * Only shows menu items where the key matches an enabled module id from subscription.
+ * Hook to filter extended menu items based on subscription AND user module permissions.
  */
 export const useFilteredExtendedItems = () => {
-  const { data, loading } = useCheckEntitySubscription();
+  const { data, loading: subLoading } = useCheckEntitySubscription();
+  const user = useUserStore((state) => state.user);
 
-  const filteredItems = useMemo(() => {
+  const filterItems = (items: any[]) => {
     const modules = data?.checkEntitySubscription?.modules || [];
+    const modulePermissions = user?.modulePermissions || [];
+    const isSuperAdmin = user?.isSuperAdmin;
+    const isSystemRole = user?.role?.isSystem;
 
-    // Normalize module names: lowercase and replace single quotes with underscores
     const enabledModuleIds = new Set(
       modules
         .filter((m) => m.enabled)
         .map((m) => m.name?.toLowerCase().replace(/'/g, "_")),
     );
 
-    // If no modules data yet (loading), return all items if no subscription data
-    if (modules.length === 0 && !loading) {
-      return extendedItems;
-    }
+    return items.filter((item) => {
+      const moduleKey = item.key?.toLowerCase().replace(/'/g, "_");
 
-    // Filter extendedItems to only include those with matching enabled module IDs
-    return extendedItems.filter((item) =>
-      enabledModuleIds.has(item.key?.toLowerCase().replace(/'/g, "_")),
-    );
-  }, [data?.checkEntitySubscription?.modules, loading]);
+      const isSubscribed =
+        moduleKey === "loyalty" ||
+        moduleKey === "games" ||
+        moduleKey === "rewards_admin" ||
+        item.key === "rewards" ||
+        item.key === "currency"
+          ? enabledModuleIds.has("rewards")
+          : enabledModuleIds.has(moduleKey);
+
+      if (!isSubscribed) return false;
+      if (isSuperAdmin || isSystemRole) return true;
+
+      return modulePermissions.some(
+        (mp: any) => mp.module === item.key?.toUpperCase() && mp.canRead,
+      );
+    });
+  };
+
+  const filteredExtended = useMemo(
+    () => filterItems(extendedItems),
+    [data?.checkEntitySubscription?.modules, user, subLoading],
+  );
+
+  const filteredGamification = useMemo(
+    () => filterItems(gamification),
+    [data?.checkEntitySubscription?.modules, user, subLoading],
+  );
 
   return {
-    filteredItems,
-    loading,
-    allModules: data?.checkEntitySubscription?.modules || [],
+    extendedItems: filteredExtended,
+    gamificationItems: filteredGamification,
+    loading: subLoading,
   };
 };
 
-export const UserAvatar = () => {
-  const { data, loading } = useGetUser();
-  const user = data?.getUser;
+/**
+ * Hook to filter management menu items based on user system permissions.
+ */
+export const useFilteredManagementItems = () => {
+  const user = useUserStore((state) => state.user);
+  const isSuperAdmin = user?.isSuperAdmin;
+  const isSystemRole = user?.role?.isSystem;
+  const permissions = user?.permissions;
 
-  const getInitials = (name?: string) => {
-    if (!name) return "U";
-    const parts = name.trim().split(" ");
-    if (parts.length >= 2) {
-      return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
-    }
-    return name.substring(0, 2).toUpperCase();
+  const filteredItems = useMemo(() => {
+    if (isSuperAdmin || isSystemRole) return settings;
+
+    return settings.filter((item) => {
+      if (item.key === "cms") return permissions?.website;
+      if (item.key === "moderation") return permissions?.moderation;
+      if (item.key === "reports") return permissions?.reports;
+      if (item.key === "audit-logs") return permissions?.auditLogs;
+      return true;
+    });
+  }, [user, isSuperAdmin, isSystemRole, permissions]);
+
+  return {
+    managementItems: filteredItems,
   };
+};
+
+const getInitials = (name?: string) => {
+  if (!name) return "AU";
+  return name
+    .split(" ")
+    .map((word) => word[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+};
+
+export const UserAvatar = () => {
+  const { data } = useGetUser();
+  const user = data?.getUser;
 
   return (
     <Avatar className="w-6 h-6">
@@ -455,6 +510,8 @@ export const UserName = () => {
   );
 };
 
+export const UserDetails = UserName;
+
 export const profile = [
   {
     key: "sub1",
@@ -464,7 +521,7 @@ export const profile = [
       {
         key: "system-activity",
         label: "System Activity",
-        path: "/system-activity",
+        path: "/audit-logs",
         icon: <GitPullRequest size={18} />,
       },
       {
@@ -489,7 +546,7 @@ export const profile = [
       {
         key: "profile",
         label: "Your profile",
-        path: "/profile",
+        path: "/settings/profile",
         icon: <User2 size={18} />,
       },
       {

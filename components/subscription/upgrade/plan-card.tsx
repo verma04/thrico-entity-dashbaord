@@ -1,17 +1,16 @@
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { CountryPackage } from "../ts-types";
 import { formatPrice, renderModuleIcon } from "../utils";
 import {
-  ArrowUpIcon,
-  ShieldAlertIcon,
+  ArrowUpRight,
+  ShieldAlert,
   TabletSmartphone,
-  Users2Icon,
+  Users2,
   Check,
   ChevronDown,
   ChevronUp,
+  Loader2,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -37,124 +36,138 @@ export const PlanCard = ({
   isActivePackage,
 }: PlanCardProps) => {
   const [showAllModules, setShowAllModules] = useState(false);
-  const moduleLimit = 8; // Show only 3 modules by default
+  const moduleLimit = 6;
   const hasMoreModules = pkg.modules.length > moduleLimit;
-  const visibleModules = showAllModules
-    ? pkg.modules
-    : pkg.modules.slice(0, moduleLimit);
+  const visibleModules = showAllModules ? pkg.modules : pkg.modules.slice(0, moduleLimit);
+
+  const isPopular = pkg.isPopular;
+
   return (
     <div
       className={cn(
-        "relative w-full max-w-xs bg-background border rounded-xl shadow-sm flex flex-col p-6"
+        "relative flex flex-col rounded-xl border bg-white shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md",
+        isPopular ? "border-slate-900 ring-1 ring-slate-900/10" : "border-slate-200/80"
       )}
     >
-      <Badge
-        variant="default"
-        className="absolute top-0 right-0 mt-2 mr-2 z-10"
-      >
-        Upgrade
-      </Badge>
-
-      <div className="text-center mb-4">
-        <h3 className="text-xl font-bold mb-1">{pkg.name}</h3>
-        <div className="mt-2">
-          <div className="text-3xl font-bold mb-0">
-            {formatPrice(
-              pkg.monthlyPrice,
-              pkg.yearlyPrice,
-              isYearly,
-              pkg.currency
-            )}
-          </div>
-          {isYearly && savings > 0 && (
-            <div className="text-green-600 font-semibold text-sm mt-1">
-              Save {savings}% annually
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-2 mb-2">
-        <div className="flex items-center gap-2">
-          <TabletSmartphone size={16} />
-          <span>
-            {pkg.accessType === "WebOnly"
-              ? "Web Access Only"
-              : "Web + Mobile App"}
+      {/* Popular ribbon */}
+      {isPopular && (
+        <div className="bg-slate-900 px-5 py-1.5 flex items-center gap-2">
+          <span className="text-[10px] font-semibold text-white uppercase tracking-widest">
+            Most Popular
           </span>
         </div>
-        <div className="flex items-center gap-2">
-          <Users2Icon size={16} />
-          <span>{pkg.numberOfUsers} users</span>
+      )}
+
+      {/* Header */}
+      <div className={cn("px-5 pt-5 pb-4", isPopular && "border-b border-slate-100")}>
+        <h3 className="text-[15px] font-semibold text-slate-900 tracking-tight">{pkg.name}</h3>
+        <div className="flex items-baseline gap-1.5 mt-3">
+          <span className="text-[28px] font-bold text-slate-900 leading-none tabular-nums tracking-tight">
+            {formatPrice(pkg.monthlyPrice, pkg.yearlyPrice, isYearly, pkg.currency)}
+          </span>
+          <span className="text-[12px] text-slate-400">
+            / {isYearly ? "yr" : "mo"}
+          </span>
+        </div>
+        {isYearly && savings > 0 && (
+          <span className="inline-block mt-2 text-[11px] font-semibold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-md">
+            Save {savings}% vs monthly
+          </span>
+        )}
+      </div>
+
+      {/* Specs */}
+      <div className="px-5 py-3 border-b border-slate-100 space-y-2">
+        <div className="flex items-center gap-2 text-[12px] text-slate-600">
+          <TabletSmartphone className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+          {pkg.accessType === "WebOnly" ? "Web Only" : "Web + Mobile"}
+        </div>
+        <div className="flex items-center gap-2 text-[12px] text-slate-600">
+          <Users2 className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+          {pkg.numberOfUsers} members
           {extraUsers > 0 && (
-            <Badge variant="secondary" className="ml-1">
-              +{extraUsers}
-            </Badge>
+            <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-100 px-1.5 py-0.5 rounded">
+              +{extraUsers} more
+            </span>
           )}
         </div>
-        <div className="flex items-center gap-2">
-          <ShieldAlertIcon size={16} />
-          <span>
-            {pkg.adminUsers} admin user
-            {pkg.adminUsers > 1 ? "s" : ""}
-          </span>
+        <div className="flex items-center gap-2 text-[12px] text-slate-600">
+          <ShieldAlert className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+          {pkg.adminUsers} admin{pkg.adminUsers > 1 ? "s" : ""}
           {extraAdmins > 0 && (
-            <Badge variant="secondary" className="ml-1">
-              +{extraAdmins}
-            </Badge>
+            <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-100 px-1.5 py-0.5 rounded">
+              +{extraAdmins} more
+            </span>
           )}
         </div>
       </div>
 
-      <Separator className="my-3" />
+      {/* Benefits */}
+      {pkg.benefits.filter((b) => b.trim()).length > 0 && (
+        <div className="px-5 py-3 border-b border-slate-100 space-y-2">
+          {pkg.benefits
+            .filter((b) => b.trim())
+            .map((benefit, i) => (
+              <div key={i} className="flex items-start gap-2 text-[12px] text-slate-700">
+                <Check className="h-3.5 w-3.5 text-emerald-500 mt-0.5 shrink-0" />
+                {benefit}
+              </div>
+            ))}
+        </div>
+      )}
 
-      <div className="flex flex-col gap-1 mb-2">
-        {pkg.benefits
-          .filter((benefit) => benefit.trim() !== "")
-          .map((benefit, index) => (
-            <div key={index} className="flex items-start gap-2">
-              <Check className="text-green-500 mt-1" size={16} />
-              <span>{benefit}</span>
-            </div>
-          ))}
-      </div>
-
-      <div className="flex flex-col gap-1 mb-4">
-        {visibleModules.map((module, index) => (
-          <div key={index} className="flex items-start gap-2">
+      {/* Modules */}
+      <div className="px-5 py-3 flex-1 space-y-2">
+        <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
+          Modules
+        </p>
+        {visibleModules.map((module, i) => (
+          <div key={i} className="flex items-center gap-2 text-[12px] text-slate-600">
             {renderModuleIcon(module.icon)}
-            <span className="text-sm">{module.name}</span>
+            {module.name}
           </div>
         ))}
-
         {hasMoreModules && (
           <button
             onClick={() => setShowAllModules(!showAllModules)}
-            className="flex items-center gap-1 text-sm text-primary hover:text-primary/80 mt-2 transition-colors"
+            className="flex items-center gap-1 text-[12px] text-slate-400 hover:text-slate-700 transition-colors mt-1"
           >
             {showAllModules ? (
               <>
-                <ChevronUp size={14} />
-                Show Less
+                <ChevronUp className="h-3.5 w-3.5" /> Show less
               </>
             ) : (
               <>
-                <ChevronDown size={14} />
-                Show {pkg.modules.length - moduleLimit} More
+                <ChevronDown className="h-3.5 w-3.5" /> {pkg.modules.length - moduleLimit} more
               </>
             )}
           </button>
         )}
       </div>
 
-      <Button
-        onClick={() => onUpgrade(pkg)}
-        disabled={isLoading && isActivePackage}
-        className="w-full mt-auto"
-      >
-        <ArrowUpIcon size={16} className="mr-2" />
-        {isLoading && isActivePackage ? "Loading..." : "Upgrade"}
-      </Button>
+      {/* CTA */}
+      <div className="px-5 pb-5 pt-3">
+        <Button
+          onClick={() => onUpgrade(pkg)}
+          disabled={isLoading && isActivePackage}
+          className={cn(
+            "w-full h-9 text-[12px] font-semibold gap-2",
+            isPopular
+              ? "bg-slate-900 hover:bg-black text-white"
+              : "bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 shadow-sm"
+          )}
+          variant="ghost"
+        >
+          {isLoading && isActivePackage ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <>
+              Upgrade to {pkg.name}
+              <ArrowUpRight className="h-3.5 w-3.5" />
+            </>
+          )}
+        </Button>
+      </div>
     </div>
   );
 };

@@ -141,7 +141,7 @@ export function EventsCreationForm({
             <Button
               size="sm"
               onClick={() => formik.handleSubmit()}
-              disabled={loading || !formik.isValid}
+              disabled={loading}
               className="shadow-sm border-primary/20"
             >
               {loading ? (
@@ -165,8 +165,15 @@ export function EventsCreationForm({
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <div className="lg:col-span-8 space-y-8">
-              <form className="space-y-8">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  formik.handleSubmit();
+                }}
+                className="space-y-8"
+              >
                 {/* Cover Image Card */}
+                {console.log(formik.errors)}
                 <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden">
                   <CardHeader className="bg-muted/30 pb-4">
                     <CardTitle className="text-xl">Event Cover Image</CardTitle>
@@ -181,7 +188,7 @@ export function EventsCreationForm({
                           <Image
                             src={
                               imageUrl ||
-                              "https://cdn.thrico.network/defaultEventCover.png"
+                              "https://cdn.thrico.network/default_event.png"
                             }
                             alt="Event cover"
                             width={600}
@@ -243,7 +250,7 @@ export function EventsCreationForm({
                           className={cn(
                             formik.touched.title &&
                               formik.errors.title &&
-                              "border-destructive"
+                              "border-destructive",
                           )}
                         />
                         {formik.touched.title && formik.errors.title && (
@@ -270,7 +277,7 @@ export function EventsCreationForm({
                               "pl-10",
                               formik.touched.location &&
                                 formik.errors.location &&
-                                "border-destructive"
+                                "border-destructive",
                             )}
                             initialValue={
                               formik.values.location
@@ -285,7 +292,7 @@ export function EventsCreationForm({
                             onChange={(loc) =>
                               formik.setFieldValue(
                                 "location",
-                                loc.address || loc.name
+                                loc.address || loc.name,
                               )
                             }
                           />
@@ -314,7 +321,7 @@ export function EventsCreationForm({
                           "min-h-[160px] resize-none",
                           formik.touched.description &&
                             formik.errors.description &&
-                            "border-destructive"
+                            "border-destructive",
                         )}
                         value={formik.values.description}
                         onChange={formik.handleChange}
@@ -409,7 +416,7 @@ export function EventsCreationForm({
                             className={cn(
                               formik.touched.type &&
                                 formik.errors.type &&
-                                "border-destructive"
+                                "border-destructive",
                             )}
                           >
                             <SelectValue placeholder="Select event type" />

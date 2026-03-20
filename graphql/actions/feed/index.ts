@@ -7,9 +7,36 @@ import {
   GET_FEED_COMMENTS,
   LIKE_FEED,
   NUMBER_OF_FEED,
+  GET_ADMIN_FEED,
+  GET_JOB_FEED,
+  GET_MOMENTS_FEED,
+  GET_LISTING_FEED,
+  GET_PINNED_FEED,
+  GET_FEED_INTELLIGENCE_KPI,
+  GET_FEED_YIELD_VELOCITY,
+  GET_FEED_INTEREST_MATRIX,
+  GET_PROMOTED_NODE_EVENTS,
+  DELETE_FEED,
+  PIN_FEED,
 } from "../../quries/feed";
 
 export const useAllFeed = (options: any) => useQuery(GET_ALL_FEED, options);
+
+export const useAdminFeed = (options: any) => useQuery(GET_ADMIN_FEED, options);
+
+export const useJobFeed = (options: any) => useQuery(GET_JOB_FEED, options);
+
+export const useMomentsFeed = (options: any) =>
+  useQuery(GET_MOMENTS_FEED, options);
+
+export const useListingFeed = (options: any) =>
+  useQuery(GET_LISTING_FEED, options);
+
+export const usePinnedFeed = (options: any) => useQuery(GET_PINNED_FEED, options);
+
+export const useDeleteFeed = (options: any) => useMutation(DELETE_FEED, options);
+
+export const usePinFeed = (options: any) => useMutation(PIN_FEED, options);
 
 export const useNumberOfFeeds = () => useQuery(NUMBER_OF_FEED);
 
@@ -115,3 +142,65 @@ export const useDeleteCommentFeed = (options: any) =>
 
 export const useFeedComment = (options: any) =>
   useQuery(GET_FEED_COMMENTS, options);
+
+// ==========================================
+// FEED INTELLIGENCE (DASHBOARD) HOOKS
+// ==========================================
+
+export interface FeedIntelligenceKPI {
+  aggregateReach: string;
+  activeDialogue: string;
+  networkVelocity: string;
+  engagementYield: string;
+  reachTrend: number;
+  dialogueTrend: number;
+  velocityTrend: number;
+  yieldTrend: number;
+}
+
+export interface FeedYieldVelocity {
+  day: string;
+  signups: number;
+}
+
+export interface FeedInterestMatrix {
+  name: string;
+  value: number;
+  color: string;
+}
+
+export interface FeedPromotedEvent {
+  title: string;
+  date: string;
+  time: string;
+  location: string;
+  description: string;
+}
+
+export interface GetFeedIntelligenceKPIData {
+  getFeedIntelligenceKPI: FeedIntelligenceKPI;
+}
+
+export interface GetFeedYieldVelocityData {
+  getFeedYieldVelocity: FeedYieldVelocity[];
+}
+
+export interface GetFeedInterestMatrixData {
+  getFeedInterestMatrix: FeedInterestMatrix[];
+}
+
+export interface GetPromotedNodeEventsData {
+  getPromotedNodeEvents: FeedPromotedEvent[];
+}
+
+export const useGetFeedIntelligenceKPI = (options?: any) =>
+  useQuery<GetFeedIntelligenceKPIData>(GET_FEED_INTELLIGENCE_KPI, options);
+
+export const useGetFeedYieldVelocity = (options?: any) =>
+  useQuery<GetFeedYieldVelocityData>(GET_FEED_YIELD_VELOCITY, options);
+
+export const useGetFeedInterestMatrix = (options?: any) =>
+  useQuery<GetFeedInterestMatrixData>(GET_FEED_INTEREST_MATRIX, options);
+
+export const useGetPromotedNodeEvents = (options?: any) =>
+  useQuery<GetPromotedNodeEventsData>(GET_PROMOTED_NODE_EVENTS, options);

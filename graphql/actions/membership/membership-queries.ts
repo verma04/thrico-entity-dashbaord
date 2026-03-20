@@ -6,6 +6,7 @@ import {
   GET_USER_ROLE_DISTRIBUTION,
   GET_ALL_USER,
   GET_USER_DETIALS,
+  GET_USER_STATS,
 } from "../../quries/user";
 import { TimeRange } from "../dashbaord/dashboard-quries";
 
@@ -126,3 +127,10 @@ export const useGetUserDetailsById = (options: any) =>
 
 export const useMembersTermsAndConditions = () =>
   useQuery(GET_MEMBERS_TERMS_AND_CONDITIONS);
+
+export const useGetUserStats = (userId: string, options?: any) =>
+  useQuery(GET_USER_STATS, {
+    variables: { userId },
+    skip: !userId,
+    ...options,
+  });

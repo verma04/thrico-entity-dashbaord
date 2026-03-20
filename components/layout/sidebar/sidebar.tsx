@@ -1,18 +1,15 @@
 "use client";
 
-import type React from "react";
-
-import { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronRight, Search, X } from "lucide-react";
+import { ChevronRight, Search, X, Users, BellDotIcon } from "lucide-react";
 
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
-  SidebarGroupLabel,
   SidebarGroupContent,
   SidebarHeader,
   SidebarMenu,
@@ -21,16 +18,24 @@ import {
   SidebarProvider,
   SidebarTrigger,
   SidebarInset,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import { useGetUser, useCheckEntitySubscription } from "@/graphql/actions";
 
 import {
   main,
   useFilteredExtendedItems,
+  useFilteredManagementItems,
   profile,
   settings,
+  UserAvatar,
+  UserName,
 } from "./menu-items";
+import { useUserStore } from "@/store/store";
 import Logo from "./logo";
 import VisitSite from "./visit";
 import LogoutModal from "./logout";
@@ -43,210 +48,521 @@ interface MenuItem {
   path?: string;
   children?: MenuItem[];
   isLogout?: boolean;
+  badge?: string;
 }
 
-export default function SidebarLayout({
-  children,
+/* ─── Section Label ─────────────────────────────────────────────────────── */
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="px-3 mb-1.5 mt-1 group-data-[collapsible=icon]:hidden">
+      <span
+        style={{
+          fontSize: "9px",
+          letterSpacing: "0.12em",
+          fontWeight: 700,
+          textTransform: "uppercase",
+          color: "oklch(0.556 0 0 / 45%)",
+        }}
+      >
+        {children}
+      </span>
+    </div>
+  );
+}
+
+/* ─── Menu Item Renderer ─────────────────────────────────────────────────── */
+function MenuItemRow({
+  item,
+  pathName,
+  openGroup,
+  toggleGroup,
+  setLogoutOpen,
+  depth = 0,
+  searchQuery = "",
 }: {
-  children: React.ReactNode;
+  item: MenuItem;
+  pathName: string;
+  openGroup: string | null;
+  toggleGroup: (key: string) => void;
+  setLogoutOpen: (v: boolean) => void;
+  depth?: number;
+  searchQuery?: string;
 }) {
+  const { state } = useSidebar();
+  const isCollapsed = state === "collapsed";
+
+  const hasChildren = !!(item.children && item.children.length > 0);
+  const isOpen = openGroup === item.key || Boolean(searchQuery.trim());
+  const isActive =
+    pathName === item.path ||
+    (hasChildren && item.children?.some((c) => pathName === c.path));
+
+  // Raw label string for tooltip
+  const tooltipLabel = typeof item.label === "string" ? item.label : undefined;
+
+  const iconEl = item.icon
+    ? React.cloneElement(
+        item.icon as React.ReactElement<{
+          size?: number;
+          className?: string;
+        }>,
+        {
+          size: depth > 0 ? 14 : 16,
+          className: cn(
+            "shrink-0 transition-all duration-200",
+            isActive
+              ? "text-indigo-600"
+              : "text-zinc-400 group-hover:text-zinc-600",
+          ),
+        },
+      )
+    : null;
+
+  /* Base row styles — the icon size override from shadcn kicks in via
+     group-data-[collapsible=icon]:size-8! on SidebarMenuButton */
+  const rowBase = cn(
+    "group relative flex items-center w-full transition-all duration-150 cursor-pointer select-none",
+    depth === 0 ? "h-9 px-3 rounded-xl gap-2.5" : "h-8 px-2.5 rounded-lg gap-2",
+    isActive
+      ? "bg-indigo-50 shadow-[inset_0_0_0_1px_oklch(0.55_0.24_264/0.12)]"
+      : "hover:bg-zinc-50",
+  );
+
+  /* Active left bar — hidden when collapsed (icon-only) */
+  const activeBar = isActive && depth === 0 && (
+    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-full bg-indigo-500 pointer-events-none group-data-[collapsible=icon]:hidden" />
+  );
+
+  /* ── Children (expandable group) ── */
+  if (hasChildren) {
+    // In collapsed mode: show first child's icon if no parent icon, else parent icon
+    return (
+      <SidebarMenuItem>
+        <SidebarMenuButton
+          asChild={false}
+          isActive={isActive}
+          tooltip={tooltipLabel}
+          className={cn(
+            rowBase,
+            "justify-between h-auto! py-0 group-data-[collapsible=icon]:size-9! group-data-[collapsible=icon]:p-0! group-data-[collapsible=icon]:justify-center",
+          )}
+          onClick={() => !isCollapsed && toggleGroup(item.key)}
+        >
+          <span
+            className={cn(
+              "flex items-center gap-2.5 flex-1 min-w-0 h-9",
+              "group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:flex-none group-data-[collapsible=icon]:h-9 group-data-[collapsible=icon]:w-9",
+            )}
+          >
+            {activeBar}
+            {iconEl}
+            <span className="truncate text-[13px] leading-none tracking-tight transition-colors duration-200 group-data-[collapsible=icon]:hidden font-medium text-inherit">
+              {item.label}
+            </span>
+          </span>
+          <ChevronRight
+            size={13}
+            className={cn(
+              "shrink-0 text-zinc-400 transition-transform duration-200 group-data-[collapsible=icon]:hidden",
+              isOpen && "rotate-90 text-indigo-500",
+            )}
+          />
+        </SidebarMenuButton>
+
+        {isOpen && !isCollapsed && (
+          <div className="ml-4 pl-3 border-l border-zinc-100 mt-0.5 mb-0.5 space-y-0.5 group-data-[collapsible=icon]:hidden">
+            {item.children!.map((child) => (
+              <MenuItemRow
+                key={child.key}
+                item={child}
+                pathName={pathName}
+                openGroup={openGroup}
+                toggleGroup={toggleGroup}
+                setLogoutOpen={setLogoutOpen}
+                depth={depth + 1}
+                searchQuery={searchQuery}
+              />
+            ))}
+          </div>
+        )}
+      </SidebarMenuItem>
+    );
+  }
+
+  /* ── Logout ── */
+  if (item.isLogout) {
+    return (
+      <SidebarMenuItem>
+        <SidebarMenuButton
+          asChild={false}
+          isActive={false}
+          tooltip={tooltipLabel}
+          className={cn(
+            rowBase,
+            "text-red-400 hover:text-red-600 hover:bg-red-50",
+            "group-data-[collapsible=icon]:size-9! group-data-[collapsible=icon]:p-0! group-data-[collapsible=icon]:justify-center",
+          )}
+          onClick={() => setLogoutOpen(true)}
+        >
+          {iconEl}
+          <span className="text-[13px] leading-none tracking-tight font-medium truncate group-data-[collapsible=icon]:hidden">
+            {item.label}
+          </span>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+    );
+  }
+
+  /* ── Regular nav link ── */
+  return (
+    <SidebarMenuItem>
+      <SidebarMenuButton
+        asChild
+        isActive={isActive}
+        tooltip={tooltipLabel}
+        className={cn(
+          rowBase,
+          "group-data-[collapsible=icon]:size-9! group-data-[collapsible=icon]:p-0! group-data-[collapsible=icon]:justify-center",
+        )}
+      >
+        <Link
+          href={item.path || "#"}
+          className="flex items-center gap-2.5 flex-1 min-w-0 group-data-[collapsible=icon]:justify-center"
+        >
+          {activeBar}
+          {iconEl}
+          <span
+            className={cn(
+              "text-[13px] leading-none tracking-tight transition-colors duration-200 truncate group-data-[collapsible=icon]:hidden",
+              isActive
+                ? "text-zinc-900 font-semibold"
+                : "text-zinc-500 group-hover:text-zinc-800 font-medium",
+            )}
+          >
+            {item.label}
+          </span>
+          {item.badge && (
+            <Badge
+              variant="outline"
+              className="ml-auto text-[9px] h-4 px-1.5 bg-indigo-50/60 text-indigo-500 border-indigo-100 rounded-full font-semibold shrink-0 group-data-[collapsible=icon]:hidden"
+            >
+              {item.badge}
+            </Badge>
+          )}
+        </Link>
+      </SidebarMenuButton>
+    </SidebarMenuItem>
+  );
+}
+
+/* ─── Inner Layout (needs useSidebar) ───────────────────────────────────── */
+function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
   const pathName = usePathname();
   const [openGroup, setOpenGroup] = useState<string | null>(null);
   const [logoutOpen, setLogoutOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [extendedCollapsed, setExtendedCollapsed] = useState(false);
+  const { state } = useSidebar();
+  const isCollapsed = state === "collapsed";
 
-  // Get subscription-filtered extended items
-  const { filteredItems: subscriptionFilteredItems, loading: modulesLoading } =
+  const { extendedItems: subscriptionFilteredItems, gamificationItems } =
     useFilteredExtendedItems();
+  const { managementItems: managementFolders } = useFilteredManagementItems();
 
   const toggleGroup = (key: string) => {
     setOpenGroup((prev) => (prev === key ? null : key));
   };
 
-  // Filter extended items based on search query (on top of subscription filtering)
-  const filteredExtendedItems = useMemo(() => {
-    if (!searchQuery.trim()) return subscriptionFilteredItems;
+  const filterList = useCallback(
+    (list: MenuItem[], query: string): MenuItem[] => {
+      if (!query.trim()) return list;
+      const q = query.toLowerCase();
 
-    const query = searchQuery.toLowerCase();
-    return subscriptionFilteredItems.filter((item) => {
-      const labelMatch =
-        typeof item.label === "string" &&
-        item.label.toLowerCase().includes(query);
-      const childrenMatch = item.children?.some(
-        (child) =>
-          typeof child.label === "string" &&
-          child.label.toLowerCase().includes(query),
-      );
-      return labelMatch || childrenMatch;
-    });
-  }, [searchQuery, subscriptionFilteredItems]);
+      return list
+        .map((item) => {
+          const labelMatch =
+            typeof item.label === "string" &&
+            item.label.toLowerCase().includes(q);
+          const filteredChildren = item.children
+            ? filterList(item.children, query)
+            : undefined;
+          const childrenMatch = filteredChildren && filteredChildren.length > 0;
+
+          if (labelMatch || childrenMatch) {
+            return {
+              ...item,
+              children: labelMatch ? item.children : filteredChildren,
+            };
+          }
+          return null;
+        })
+        .filter(Boolean) as MenuItem[];
+    },
+    [],
+  );
+
+  const filteredMain = useMemo(
+    () => filterList(main, searchQuery),
+    [searchQuery, filterList],
+  );
+  const filteredExtendedItems = useMemo(
+    () => filterList(subscriptionFilteredItems, searchQuery),
+    [searchQuery, subscriptionFilteredItems, filterList],
+  );
+  const filteredSettings = useMemo(
+    () => filterList(managementFolders, searchQuery),
+    [searchQuery, managementFolders, filterList],
+  );
+  const filteredGamification = useMemo(
+    () => filterList(gamificationItems, searchQuery),
+    [searchQuery, gamificationItems, filterList],
+  );
+  const filteredProfile = useMemo(
+    () => filterList(profile, searchQuery),
+    [searchQuery, filterList],
+  );
 
   const renderItems = (items: MenuItem[]) => (
-    <SidebarMenu>
-      {items.map((item) => {
-        const hasChildren = item.children && item.children.length > 0;
-        const isOpen = openGroup === item.key;
-
-        return (
-          <SidebarMenuItem key={item.key}>
-            <SidebarMenuButton
-              asChild={!hasChildren && !item.isLogout}
-              isActive={pathName === item.path}
-              onClick={() => {
-                if (hasChildren) {
-                  toggleGroup(item.key);
-                } else if (item.isLogout) {
-                  setLogoutOpen(true);
-                }
-              }}
-            >
-              {hasChildren ? (
-                <div className="flex w-full items-center justify-between cursor-pointer">
-                  <div className="flex items-center gap-2">
-                    {item.icon}
-                    <span>{item.label}</span>
-                  </div>
-                  <ChevronRight
-                    className={`h-4 w-4 transition-transform ${
-                      isOpen ? "rotate-90" : ""
-                    }`}
-                  />
-                </div>
-              ) : item.isLogout ? (
-                <div className="flex items-center gap-2 cursor-pointer">
-                  {item.icon}
-                  <span>{item.label}</span>
-                </div>
-              ) : (
-                <Link href={item.path || "#"}>
-                  {item.icon}
-                  <span>{item.label}</span>
-                </Link>
-              )}
-            </SidebarMenuButton>
-
-            {hasChildren && isOpen && (
-              <div className="ml-4 border-l border-border pl-3 space-y-1 mt-1">
-                {renderItems(item.children!)}
-              </div>
-            )}
-          </SidebarMenuItem>
-        );
-      })}
+    <SidebarMenu className="gap-0.5">
+      {items.map((item) => (
+        <MenuItemRow
+          key={item.key}
+          item={item}
+          pathName={pathName}
+          openGroup={openGroup}
+          toggleGroup={toggleGroup}
+          setLogoutOpen={setLogoutOpen}
+          searchQuery={searchQuery}
+        />
+      ))}
     </SidebarMenu>
   );
 
   return (
     <>
-      <DotPatternLinearGradient />
-      <SidebarProvider defaultOpen={true}>
-        <Sidebar className="border-r border-border">
-          {/* HEADER */}
-          <SidebarHeader className="flex h-14 items-center border-b border-border px-4">
-            <Link href="/" className="flex items-center gap-2 font-semibold">
+      {/* ── SIDEBAR ── */}
+      <Sidebar
+        collapsible="icon"
+        className="border-r border-zinc-100 bg-white"
+        style={{ "--sidebar-width": "232px" } as React.CSSProperties}
+      >
+        {/* HEADER */}
+        <SidebarHeader className="h-14 flex flex-row items-center justify-between px-3 border-b border-zinc-50 overflow-hidden">
+          {!isCollapsed && (
+            <Link
+              href="/"
+              className="flex items-center gap-2.5 flex-1 min-w-0 overflow-hidden"
+            >
               <Logo />
             </Link>
-          </SidebarHeader>
+          )}
+          <SidebarTrigger className="h-7 w-7 rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-all duration-150 flex items-center justify-center shrink-0" />
+        </SidebarHeader>
 
-          {/* CONTENT */}
-          <SidebarContent>
-            {/* MAIN */}
-            <SidebarGroup>
-              <SidebarGroupLabel>Main</SidebarGroupLabel>
-              <SidebarGroupContent>{renderItems(main)}</SidebarGroupContent>
-            </SidebarGroup>
-
-            {/* EXTENDED MODULES */}
-            {subscriptionFilteredItems.length > 0 && (
-              <SidebarGroup>
-                <div className="flex items-center justify-between px-2 mb-2">
-                  <div
-                    className="flex items-center gap-2  flex-1"
-                    // onClick={() => setExtendedCollapsed(!extendedCollapsed)}
+        {/* CONTENT */}
+        <SidebarContent className="py-3 px-2 overflow-x-hidden">
+          {/* SEARCH — global search */}
+          {!isCollapsed && (
+            <div className="px-2 mb-4 mt-1 group-data-[collapsible=icon]:hidden">
+              <div className="relative">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-zinc-400 pointer-events-none" />
+                <Input
+                  placeholder="Search sidebar…"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="h-8 bg-zinc-50 border-zinc-100 pl-7 pr-7 text-xs rounded-xl focus-visible:ring-1 focus-visible:ring-indigo-300 placeholder:text-zinc-400 text-zinc-700"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 transition-colors"
                   >
-                    <SidebarGroupLabel className="cursor-pointer">
-                      Modules
-                    </SidebarGroupLabel>
-                    <Badge variant="secondary" className="text-[10px] h-5">
-                      {filteredExtendedItems.length}
-                    </Badge>
-                    {/* <ChevronRight
-                    className={`h-3 w-3 transition-transform ${
-                      !extendedCollapsed ? "rotate-90" : ""
-                    }`}
-                  /> */}
-                  </div>
-                </div>
-
-                {!extendedCollapsed && (
-                  <>
-                    {/* Search Bar */}
-                    <div className="px-2 mb-2">
-                      <div className="relative">
-                        <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-                        <Input
-                          placeholder="Search  Modules..."
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          className="h-8 pl-7 pr-7 text-xs"
-                        />
-                        {searchQuery && (
-                          <button
-                            onClick={() => setSearchQuery("")}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 hover:bg-muted rounded-sm p-0.5"
-                          >
-                            <X className="h-3 w-3 text-muted-foreground" />
-                          </button>
-                        )}
-                      </div>
-                    </div>
-
-                    <SidebarGroupContent>
-                      {filteredExtendedItems.length > 0 ? (
-                        renderItems(filteredExtendedItems)
-                      ) : (
-                        <div className="px-2 py-4 text-center text-xs text-muted-foreground">
-                          No Module found
-                        </div>
-                      )}
-                    </SidebarGroupContent>
-                  </>
+                    <X className="h-3 w-3" />
+                  </button>
                 )}
-              </SidebarGroup>
+              </div>
+            </div>
+          )}
+
+          {/* MAIN */}
+          {filteredMain.length > 0 && (
+            <SidebarGroup className="mb-1 p-0">
+              <SectionLabel>Playground</SectionLabel>
+              <SidebarGroupContent>
+                {renderItems(filteredMain)}
+              </SidebarGroupContent>
+            </SidebarGroup>
+          )}
+
+          {/* PRODUCTS / EXTENDED MODULES */}
+          {filteredExtendedItems.length > 0 && (
+            <SidebarGroup className="mb-1 p-0">
+              {/* Section header — hidden when collapsed */}
+              <div className="flex items-center gap-2 px-3 mb-1.5 mt-1 group-data-[collapsible=icon]:hidden">
+                <span
+                  style={{
+                    fontSize: "9px",
+                    letterSpacing: "0.12em",
+                    fontWeight: 700,
+                    textTransform: "uppercase",
+                    color: "oklch(0.556 0 0 / 45%)",
+                  }}
+                >
+                  Products
+                </span>
+                <span
+                  className="inline-flex items-center justify-center rounded-full text-[9px] font-bold px-1.5 h-4"
+                  style={{
+                    background: "oklch(0.55 0.24 264 / 0.08)",
+                    color: "oklch(0.45 0.24 264)",
+                  }}
+                >
+                  {filteredExtendedItems.length}
+                </span>
+              </div>
+              <SidebarGroupContent>
+                {renderItems(filteredExtendedItems)}
+              </SidebarGroupContent>
+            </SidebarGroup>
+          )}
+
+          {/* GAMIFICATION */}
+          {filteredGamification.length > 0 && (
+            <SidebarGroup className="mb-1 p-0">
+              <div className="flex items-center gap-2 px-3 mb-1.5 mt-1 group-data-[collapsible=icon]:hidden">
+                <span
+                  style={{
+                    fontSize: "9px",
+                    letterSpacing: "0.12em",
+                    fontWeight: 700,
+                    textTransform: "uppercase",
+                    color: "oklch(0.556 0 0 / 45%)",
+                  }}
+                >
+                  Gamification
+                </span>
+                <span
+                  className="inline-flex items-center justify-center rounded-full text-[9px] font-bold px-1.5 h-4"
+                  style={{
+                    background: "oklch(0.55 0.24 264 / 0.08)",
+                    color: "oklch(0.45 0.24 264)",
+                  }}
+                >
+                  {filteredGamification.length}
+                </span>
+              </div>
+              <SidebarGroupContent>
+                {renderItems(filteredGamification)}
+              </SidebarGroupContent>
+            </SidebarGroup>
+          )}
+
+          {/* MANAGEMENT */}
+          {filteredSettings.length > 0 && (
+            <SidebarGroup className="p-0">
+              <SectionLabel>Management</SectionLabel>
+              <SidebarGroupContent>
+                {renderItems(filteredSettings)}
+              </SidebarGroupContent>
+            </SidebarGroup>
+          )}
+
+          {/* NO RESULTS FALLBACK */}
+          {searchQuery.trim() &&
+            filteredMain.length === 0 &&
+            filteredExtendedItems.length === 0 &&
+            filteredGamification.length === 0 &&
+            filteredSettings.length === 0 &&
+            filteredProfile.length === 0 && (
+              <div className="px-3 py-5 text-center group-data-[collapsible=icon]:hidden">
+                <p className="text-[11px] text-zinc-400">No matching items</p>
+              </div>
             )}
 
-            {/* SETTINGS */}
-            <SidebarGroup>
-              <SidebarGroupLabel>Management</SidebarGroupLabel>
-              <SidebarGroupContent>{renderItems(settings)}</SidebarGroupContent>
+        </SidebarContent>
+
+        {/* FOOTER */}
+        {filteredProfile.length > 0 && (
+          <SidebarFooter className="border-t border-zinc-50 p-2 pt-3 pb-3">
+            <SidebarGroup className="p-0">
+              <SectionLabel>Support</SectionLabel>
+              {renderItems(filteredProfile)}
             </SidebarGroup>
-          </SidebarContent>
-
-          {/* FOOTER */}
-          <SidebarFooter className="border-t border-border p-4">
-            {renderItems(profile)}
           </SidebarFooter>
-        </Sidebar>
+        )}
+      </Sidebar>
 
-        {/* MAIN CONTENT AREA */}
-        <SidebarInset>
-          <header className="flex h-14 items-center justify-between gap-4 border-b border-border bg-background px-4 lg:px-6">
-            <div className="flex items-center gap-4">
-              <SidebarTrigger />
-              <h1 className="text-lg font-semibold capitalize">
+      {/* ── MAIN CONTENT ── */}
+      <SidebarInset className="bg-[#FAFBFC]">
+        <header className="flex h-16 items-center justify-between gap-4 border-b border-zinc-100/80 bg-white/70 backdrop-blur-xl px-6 sticky top-0 z-40 shadow-[0_1px_2px_0_rgba(0,0,0,0.02)]">
+          <div className="flex items-center gap-4">
+            <SidebarTrigger className="-ml-2 h-8 w-8 rounded-xl text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-all duration-200" />
+
+            <div className="h-4 w-px bg-zinc-200/60 hidden sm:block" />
+
+            <div className="hidden sm:flex items-center gap-2 text-[13px]">
+              <span className="font-semibold text-zinc-800 capitalize tracking-tight">
                 {pathName === "/"
-                  ? "Home"
-                  : pathName.replace("/", "").replace(/-/g, " ")}
-              </h1>
+                  ? "Dashboard"
+                  : pathName
+                      .split("/")
+                      .filter(Boolean)
+                      .join(" / ")
+                      .replace(/-/g, " ")}
+              </span>
             </div>
+          </div>
+
+          <div className="flex items-center gap-3">
             <VisitSite />
-          </header>
+            <div className="h-4 w-px bg-zinc-200/60 mx-1" />
 
-          <main className="flex-1 p-4 lg:p-6 w-full min-w-0 ">{children}</main>
-        </SidebarInset>
+            <button className="relative flex h-9 w-9 items-center justify-center rounded-xl text-zinc-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200 group">
+              <Search
+                size={16}
+                className="group-hover:scale-110 transition-transform"
+              />
+            </button>
 
-        <LogoutModal open={logoutOpen} onOpenChange={setLogoutOpen} />
+            <button className="relative flex h-9 w-9 items-center justify-center rounded-xl text-zinc-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200 group">
+              <span className="absolute top-2 right-2 h-1.5 w-1.5 rounded-full bg-rose-500 shadow-[0_0_0_2px_white]" />
+              <BellDotIcon
+                size={16}
+                className="group-hover:scale-110 transition-transform"
+              />
+            </button>
+
+            <div className="h-4 w-px bg-zinc-200/60 mx-1" />
+
+            <button className="flex items-center gap-2 h-9 pl-1.5 pr-4 rounded-xl bg-zinc-50 border border-zinc-100 hover:bg-zinc-100 hover:border-zinc-200 transition-all duration-200">
+              <div className="h-6 w-6">
+                <UserAvatar />
+              </div>
+              <span className="text-[12px] font-bold text-zinc-700 leading-none truncate max-w-[120px]">
+                <UserName />
+              </span>
+            </button>
+          </div>
+        </header>
+
+        <main className="flex-1 p-4 lg:p-6 w-full min-w-0">{children}</main>
+      </SidebarInset>
+
+      <LogoutModal open={logoutOpen} onOpenChange={setLogoutOpen} />
+    </>
+  );
+}
+
+/* ─── Root Export ────────────────────────────────────────────────────────── */
+export default function SidebarLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <>
+      <DotPatternLinearGradient />
+      <SidebarProvider defaultOpen={true}>
+        <SidebarLayoutInner>{children}</SidebarLayoutInner>
       </SidebarProvider>
     </>
   );

@@ -14,10 +14,7 @@ const Forum = ({ status }: { status: discussionForumStatus }) => {
     },
   });
   return (
-    <>
-      {loading && <TableLoading />}
-      {!loading && <List data={data?.getDiscussionForum} />}
-    </>
+    <List data={data?.getDiscussionForum || []} loading={loading} />
   );
 };
 

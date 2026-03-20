@@ -44,19 +44,25 @@ const UserDetails = ({
   );
 
   return (
-    <div className="flex gap-3">
+    <div className="flex gap-4 p-3 rounded-2xl hover:bg-zinc-50 transition-colors group">
       <UserAvatar
-        size={48}
+        size={36}
         src={addedBy === "USER" ? user?.avatar : data?.getEntity?.logo}
+        className="rounded-lg shadow-sm shrink-0 mt-0.5"
       />
-      <div className="flex-1">
-        <div className="font-semibold text-sm">
-          {addedBy === "USER" && (
-            <span>
-              {user?.firstName} {user?.lastName}
-            </span>
-          )}
-          {addedBy === "ENTITY" && <span>{data?.getEntity?.name}</span>}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="font-bold text-[13px] text-zinc-900 leading-none">
+            {addedBy === "USER" ? (
+              `${user?.firstName} ${user?.lastName}`
+            ) : (
+              data?.getEntity?.name
+            )}
+          </span>
+          <span className="text-zinc-300 select-none text-[10px]">•</span>
+          <span className="text-[11px] font-medium text-zinc-400">
+            {moment(createdAt).fromNow()}
+          </span>
         </div>
 
         {editingId === id ? (
@@ -65,43 +71,33 @@ const UserDetails = ({
               rows={3}
               value={editValue}
               onChange={(e) => setEditValue(e.target.value)}
-              className="resize-none"
+              className="resize-none rounded-xl border-zinc-200 focus:ring-zinc-900"
             />
             <div className="flex gap-2">
-              <Button type="primary" size="sm">
+              <Button size="sm" className="rounded-full px-4 font-bold h-8">
                 Save
               </Button>
-              <Button variant="outline" size="sm" onClick={handleCancelEdit}>
+              <Button variant="outline" size="sm" className="rounded-full px-4 font-bold h-8" onClick={handleCancelEdit}>
                 Cancel
               </Button>
             </div>
           </div>
         ) : (
-          <p className="text-sm text-foreground mt-1">{content}</p>
+          <p className="text-[14px] leading-relaxed text-zinc-600 font-medium wrap-break-word">
+            {content}
+          </p>
         )}
 
-        <div className="flex items-center gap-2 mt-2">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span className="text-xs text-muted-foreground">
-                  {moment(createdAt).fromNow()}
-                </span>
-              </TooltipTrigger>
-              <TooltipContent>
-                {moment(createdAt).format("YYYY-MM-DD HH:mm:ss")}
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-
+        <div className="flex items-center gap-3 mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
           {editingId !== id && (
-            <div className="flex gap-1 ml-2">
-              <Button variant="ghost" size="sm" onClick={() => handleEdit(id)}>
-                <Edit2 className="h-3 w-3" />
+            <div className="flex items-center gap-1">
+              <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100" onClick={() => handleEdit(id)}>
+                <Edit2 className="h-3.5 w-3.5" />
               </Button>
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon"
+                className="h-7 w-7 rounded-full text-zinc-400 hover:text-red-500 hover:bg-red-50"
                 onClick={() =>
                   deleteComment({
                     variables: {
@@ -113,7 +109,7 @@ const UserDetails = ({
                 }
                 loading={deleteBtnLoading}
               >
-                <Trash2 className="h-3 w-3" />
+                <Trash2 className="h-3.5 w-3.5" />
               </Button>
             </div>
           )}

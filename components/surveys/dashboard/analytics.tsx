@@ -1,10 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  ModuleAnalyticsLayout,
-  KPIStat,
-} from "@/components/analytics/module-analytics-layout";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   ClipboardList,
@@ -13,8 +9,18 @@ import {
   BarChart3,
   TrendingUp,
   Layout,
+  Activity,
+  Zap,
+  ShieldCheck,
+  RotateCcw,
+  Sparkles,
+  Search,
+  ArrowRight,
+  PieChart as PieChartIcon,
+  Timer,
+  Globe,
+  LayoutGrid,
 } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
   ResponsiveContainer,
   BarChart,
@@ -35,65 +41,51 @@ import Link from "next/link";
 
 import { TimeRange } from "@/graphql/actions/dashboard";
 import { useGetSurveyStats } from "@/graphql/surveys/survey-queries";
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { EcosystemKPI, EcosystemCard, EcosystemStatusIndicator } from "@/components/layout/ecosystem/ecosystem-analytics";
+import { cn } from "@/lib/utils";
 
 export default function SurveyAnalytics() {
   const [timeRange, setTimeRange] = useState<TimeRange>(TimeRange.LAST_7_DAYS);
-  const { data, loading } = useGetSurveyStats(timeRange);
+  const { data, loading, refetch } = useGetSurveyStats(timeRange);
 
   const stats = data?.getSurveyStats;
 
-  const kpiStats: KPIStat[] = [
+  const kpis = [
     {
-      title: "Total Surveys",
-      value: loading ? (
-        <Skeleton className="h-8 w-24" />
-      ) : (
-        (stats?.totalSurveys?.toLocaleString() ?? "0")
-      ),
-      change: stats?.totalSurveysChange ?? 0,
-      trend: (stats?.totalSurveysChange ?? 0) >= 0 ? "up" : "down",
+      title: "Aggregate Surveys",
+      value: loading ? "..." : (stats?.totalSurveys?.toLocaleString() ?? "0"),
+      trend: stats?.totalSurveysChange ?? 0,
       icon: ClipboardList,
-      color: "text-blue-700",
-      bgColor: "bg-blue-50",
+      color: "text-indigo-500",
+      bg: "bg-indigo-500/10",
     },
     {
-      title: "Active Surveys",
-      value: loading ? (
-        <Skeleton className="h-8 w-24" />
-      ) : (
-        (stats?.activeSurveys?.toLocaleString() ?? "0")
-      ),
-      change: stats?.activeSurveysChange ?? 0,
-      trend: (stats?.activeSurveysChange ?? 0) >= 0 ? "up" : "down",
-      icon: TrendingUp,
-      color: "text-green-700",
-      bgColor: "bg-green-50",
+      title: "Active Protocols",
+      value: loading ? "..." : (stats?.activeSurveys?.toLocaleString() ?? "0"),
+      trend: stats?.activeSurveysChange ?? 0,
+      icon: Activity,
+      color: "text-emerald-500",
+      bg: "bg-emerald-500/10",
     },
     {
-      title: "Total Responses",
-      value: loading ? (
-        <Skeleton className="h-8 w-24" />
-      ) : (
-        (stats?.totalResponses?.toLocaleString() ?? "0")
-      ),
-      change: stats?.totalResponsesChange ?? 0,
-      trend: (stats?.totalResponsesChange ?? 0) >= 0 ? "up" : "down",
+      title: "Response Yield",
+      value: loading ? "..." : (stats?.totalResponses?.toLocaleString() ?? "0"),
+      trend: stats?.totalResponsesChange ?? 0,
       icon: Users,
-      color: "text-purple-700",
-      bgColor: "bg-purple-50",
+      color: "text-violet-500",
+      bg: "bg-violet-500/10",
     },
     {
-      title: "Completion Rate",
-      value: loading ? (
-        <Skeleton className="h-8 w-24" />
-      ) : (
-        `${stats?.completionRate?.toFixed(1) ?? "0"}%`
-      ),
-      change: stats?.completionRateChange ?? 0,
-      trend: (stats?.completionRateChange ?? 0) >= 0 ? "up" : "down",
-      icon: CheckCircle2,
-      color: "text-orange-700",
-      bgColor: "bg-orange-50",
+      title: "Completion Velocity",
+      value: loading ? "..." : `${stats?.completionRate?.toFixed(1) ?? "0"}%`,
+      trend: stats?.completionRateChange ?? 0,
+      icon: Zap,
+      color: "text-amber-500",
+      bg: "bg-amber-500/10",
     },
   ];
 
@@ -112,150 +104,145 @@ export default function SurveyAnalytics() {
           item.status === "PUBLISHED"
             ? "#10b981"
             : item.status === "DRAFT"
-              ? "#6b7280"
+              ? "#6366f1"
               : "#ef4444",
       }),
     ) || [];
 
   return (
-    <ModuleAnalyticsLayout
-      title="Surveys Dashboard"
-      description="Monitor survey engagement and response trends"
-      timeRange={timeRange}
-      onTimeRangeChange={setTimeRange}
-      kpiStats={kpiStats}
-    >
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Chart - Responses Trend */}
-        <Card className="lg:col-span-2 shadow-sm border-none bg-card/50 backdrop-blur-sm">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <div>
-              <CardTitle className="text-lg font-semibold flex items-center gap-2">
-                <BarChart3 className="h-5 w-5 text-primary" />
-                Response Trends
-              </CardTitle>
-            </div>
-            <Link href="/surveys/all">
-              <Button variant="outline" size="sm" className="gap-2">
-                <Layout className="h-4 w-4" />
-                View All Surveys
-              </Button>
-            </Link>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px] w-full pt-4">
-              {loading ? (
-                <Skeleton className="h-full w-full rounded-xl" />
-              ) : (
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={responseTrendData}>
-                    <CartesianGrid
-                      strokeDasharray="3 3"
-                      vertical={false}
-                      stroke="#e5e7eb"
-                    />
-                    <XAxis
-                      dataKey="name"
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fill: "#6b7280", fontSize: 12 }}
-                      dy={10}
-                    />
-                    <YAxis
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fill: "#6b7280", fontSize: 12 }}
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        borderRadius: "12px",
-                        border: "none",
-                        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                      }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="responses"
-                      stroke="#8b5cf6"
-                      strokeWidth={3}
-                      dot={{
-                        r: 4,
-                        fill: "#8b5cf6",
-                        strokeWidth: 2,
-                        stroke: "#fff",
-                      }}
-                      activeDot={{ r: 6, strokeWidth: 0 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+    <EcosystemWrapper anonymized-1="surveys-analytics">
+      <EcosystemHeader
+        title="Insight Intelligence"
+        badgeText="Sentiment Registry"
+        description="Monitor community sentiment instantiation velocity, response protocols, and architectural feedback expansion across the global registry node."
+        icon={BarChart3}
+      />
 
-        {/* Status Distribution */}
-        <Card className="shadow-sm border-none bg-card/50 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold">
-              Survey Status
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[250px] w-full">
-              {loading ? (
-                <Skeleton className="h-full w-full rounded-full" />
-              ) : (
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={surveyStatusData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={80}
-                      paddingAngle={8}
-                      dataKey="value"
-                    >
-                      {surveyStatusData.map((entry: any, index: number) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      contentStyle={{
-                        borderRadius: "12px",
-                        border: "none",
-                        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                      }}
-                    />
-                    <Legend verticalAlign="bottom" height={36} />
-                  </PieChart>
-                </ResponsiveContainer>
-              )}
-            </div>
-            {!loading && (
-              <div className="space-y-3 mt-4">
-                {surveyStatusData.map((item: any) => (
-                  <div
-                    key={item.name}
-                    className="flex items-center justify-between text-sm"
-                  >
-                    <div className="flex items-center gap-2 font-medium">
-                      <div
-                        className="w-2 h-2 rounded-full"
-                        style={{ backgroundColor: item.color }}
-                      />
-                      {item.name}
-                    </div>
-                    <span className="text-muted-foreground">
-                      {item.value} Surveys
-                    </span>
-                  </div>
-                ))}
+      <EcosystemActionBar shadow="none">
+        <div className="flex items-center justify-between w-full">
+           <div className="flex items-center gap-6">
+              <EcosystemStatusIndicator status="active" label="Insight Stream: Operational" />
+              <div className="h-4 w-px bg-slate-200" />
+              <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
+                 <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
+                 <span>Verified Analytical Registry</span>
               </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-    </ModuleAnalyticsLayout>
+           </div>
+
+           <div className="flex items-center gap-3">
+              <Link href="/surveys/all">
+                 <Button variant="outline" className="h-10 px-6 rounded-xl border-slate-200 font-black text-[10px] uppercase tracking-widest text-slate-600 gap-3 hover:bg-slate-50 transition-all shadow-sm">
+                    Registry
+                    <ArrowRight className="h-4 w-4" />
+                 </Button>
+              </Link>
+              <div className="h-4 w-px bg-slate-200 mx-1" />
+              <Button variant="outline" size="icon" className="h-10 w-10 text-slate-400 hover:text-indigo-600 rounded-xl transition-all shadow-sm bg-white" onClick={() => refetch()}>
+                <RotateCcw className={cn("h-4 w-4", loading && "animate-spin")} />
+              </Button>
+           </div>
+        </div>
+      </EcosystemActionBar>
+
+      <EcosystemContainer className="space-y-12 p-8 lg:p-12">
+        {/* KPI Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+           {kpis.map((kpi, i) => (
+             <EcosystemKPI key={i} {...kpi} trendLabel="Registry" />
+           ))}
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+           {/* Chart Section */}
+           <div className="lg:col-span-8">
+              <EcosystemCard 
+                title="Yield Velocity" 
+                description="Temporal response instantiation cycles" 
+                icon={TrendingUp}
+                decorationIcon={Zap}
+              >
+                 <div className="h-[350px] w-full">
+                    {loading ? (
+                       <div className="h-full w-full flex items-center justify-center bg-slate-50/50 rounded-3xl border-2 border-dashed border-slate-100 transition-all">
+                          <div className="h-10 w-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+                       </div>
+                    ) : (
+                       <ResponsiveContainer width="100%" height="100%">
+                         <LineChart data={responseTrendData}>
+                           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                           <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 900, fill: '#94a3b8' }} dy={15} />
+                           <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 900, fill: '#94a3b8' }} />
+                           <Tooltip
+                             contentStyle={{ backgroundColor: "#0f172a", border: "none", borderRadius: "16px", boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)" }}
+                             itemStyle={{ color: "#fff", fontWeight: 900, textTransform: 'uppercase', fontSize: '10px' }}
+                             labelStyle={{ display: 'none' }}
+                           />
+                           <Line 
+                             type="monotone" 
+                             dataKey="responses" 
+                             stroke="#6366f1" 
+                             strokeWidth={4} 
+                             dot={{ r: 6, fill: "#fff", strokeWidth: 3, stroke: "#6366f1" }} 
+                             activeDot={{ r: 8, strokeWidth: 0, fill: "#6366f1" }}
+                             animationDuration={1500}
+                           />
+                         </LineChart>
+                       </ResponsiveContainer>
+                    )}
+                 </div>
+              </EcosystemCard>
+           </div>
+
+           {/* Distribution Section */}
+           <div className="lg:col-span-4">
+              <EcosystemCard 
+                title="Status Matrix" 
+                description="Registry tier allocation" 
+                icon={Sparkles}
+                decorationIcon={LayoutGrid}
+                className="min-h-fit"
+              >
+                 <div className="h-[250px] w-full mb-8 relative flex items-center justify-center">
+                    <ResponsiveContainer width="100%" height="100%">
+                       <PieChart>
+                         <Pie
+                           data={surveyStatusData}
+                           cx="50%"
+                           cy="50%"
+                           innerRadius={70}
+                           outerRadius={100}
+                           paddingAngle={8}
+                           dataKey="value"
+                           animationDuration={1500}
+                         >
+                           {surveyStatusData.map((entry: any, index: number) => (
+                             <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
+                           ))}
+                         </Pie>
+                         <Tooltip />
+                       </PieChart>
+                    </ResponsiveContainer>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                       <span className="text-3xl font-black text-slate-900 tracking-tighter">{stats?.totalSurveys || "0"}</span>
+                       <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none">Total</span>
+                    </div>
+                 </div>
+                 
+                 <div className="space-y-4">
+                    {surveyStatusData.map((item: any, i: number) => (
+                      <div key={i} className="group/item flex items-center justify-between p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:bg-white hover:shadow-lg transition-all duration-300">
+                         <div className="flex items-center gap-3">
+                            <div className="h-2.5 w-2.5 rounded-full shadow-lg" style={{ backgroundColor: item.color }} />
+                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{item.name}</span>
+                         </div>
+                         <span className="text-sm font-black text-slate-900">{item.value}</span>
+                      </div>
+                    ))}
+                 </div>
+              </EcosystemCard>
+           </div>
+        </div>
+      </EcosystemContainer>
+    </EcosystemWrapper>
   );
 }

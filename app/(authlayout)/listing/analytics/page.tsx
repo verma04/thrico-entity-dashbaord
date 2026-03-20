@@ -1,502 +1,235 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState, useEffect } from "react";
+import { Store, Users, Eye, ThumbsUp, Activity, Zap, ShieldCheck, RotateCcw, TrendingUp, BarChart3, Globe, ArrowRight, Timer, Sparkles, LayoutGrid } from "lucide-react";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { Store, Users, Eye, ThumbsUp } from "lucide-react";
-import {
-  LineChart,
-  Line,
+  ResponsiveContainer,
   BarChart,
   Bar,
-  PieChart,
-  Pie,
-  Cell,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   Legend,
-  ResponsiveContainer,
+  Cell,
+  PieChart,
+  Pie,
 } from "recharts";
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { EcosystemKPI, EcosystemCard, EcosystemStatusIndicator } from "@/components/layout/ecosystem/ecosystem-analytics";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import Link from "next/link";
 
-interface CategoryData {
-  category: string;
-  count: number;
-  percentage: number;
-}
-
-interface ConditionData {
-  condition: string;
-  count: number;
-  percentage: number;
-}
-
-interface UserData {
-  username: string;
-  listingsCount: number;
-  viewsCount: number;
-  likesCount: number;
-}
-
-interface TrendData {
-  date: string;
-  listings: number;
-  views: number;
-  likes: number;
-}
-
-const COLORS = [
-  "#0088FE",
-  "#00C49F",
-  "#FFBB28",
-  "#FF8042",
-  "#8884D8",
-  "#82CA9D",
-  "#FFC658",
-];
-
-const Analytics = () => {
+export default function ListingAnalytics() {
   const [timeRange, setTimeRange] = useState("month");
-  const [categoryData, setCategoryData] = useState<CategoryData[]>([]);
-  const [conditionData, setConditionData] = useState<ConditionData[]>([]);
-  const [userData, setUserData] = useState<UserData[]>([]);
-  const [trendData, setTrendData] = useState<TrendData[]>([]);
+  
+  // Prepare Mock Data
+  const kpis = [
+    { title: "Total Listings", value: "1,024", trend: 12, icon: Store, color: "text-indigo-500", bg: "bg-indigo-500/10" },
+    { title: "Total Users", value: "256", trend: 8, icon: Users, color: "text-emerald-500", bg: "bg-emerald-500/10" },
+    { title: "Total Views", value: "125.4k", trend: 24, icon: Eye, color: "text-violet-500", bg: "bg-violet-500/10" },
+    { title: "Interactions", value: "8.4k", trend: 5, icon: ThumbsUp, color: "text-amber-500", bg: "bg-amber-500/10" },
+  ];
 
-  // Mock data - in a real app, this would come from an API
-  useEffect(() => {
-    // Category data
-    const mockCategoryData: CategoryData[] = [
-      { category: "Vehicles", count: 245, percentage: 24.5 },
-      { category: "Electronics", count: 198, percentage: 19.8 },
-      { category: "Real Estate", count: 156, percentage: 15.6 },
-      { category: "Furniture", count: 132, percentage: 13.2 },
-      { category: "Clothing", count: 98, percentage: 9.8 },
-      { category: "Services", count: 87, percentage: 8.7 },
-      { category: "Other", count: 84, percentage: 8.4 },
-    ];
-
-    // Condition data
-    const mockConditionData: ConditionData[] = [
-      { condition: "New", count: 420, percentage: 42.0 },
-      { condition: "Used - Like New", count: 210, percentage: 21.0 },
-      { condition: "Used - Good", count: 180, percentage: 18.0 },
-      { condition: "Used - Fair", count: 110, percentage: 11.0 },
-      { condition: "Refurbished", count: 50, percentage: 5.0 },
-      { condition: "For parts", count: 30, percentage: 3.0 },
-    ];
-
-    // Top users data
-    const mockUserData: UserData[] = [
-      {
-        username: "john_doe",
-        listingsCount: 45,
-        viewsCount: 12500,
-        likesCount: 780,
-      },
-      {
-        username: "jane_smith",
-        listingsCount: 38,
-        viewsCount: 9800,
-        likesCount: 620,
-      },
-      {
-        username: "robert_johnson",
-        listingsCount: 32,
-        viewsCount: 8200,
-        likesCount: 540,
-      },
-      {
-        username: "emily_davis",
-        listingsCount: 29,
-        viewsCount: 7500,
-        likesCount: 490,
-      },
-      {
-        username: "michael_wilson",
-        listingsCount: 25,
-        viewsCount: 6800,
-        likesCount: 420,
-      },
-      {
-        username: "sarah_brown",
-        listingsCount: 22,
-        viewsCount: 5900,
-        likesCount: 380,
-      },
-      {
-        username: "david_miller",
-        listingsCount: 20,
-        viewsCount: 5200,
-        likesCount: 340,
-      },
-      {
-        username: "lisa_taylor",
-        listingsCount: 18,
-        viewsCount: 4800,
-        likesCount: 310,
-      },
-      {
-        username: "james_anderson",
-        listingsCount: 16,
-        viewsCount: 4200,
-        likesCount: 280,
-      },
-      {
-        username: "jennifer_thomas",
-        listingsCount: 15,
-        viewsCount: 3900,
-        likesCount: 260,
-      },
-    ];
-
-    // Trend data for the last 30 days
-    const mockTrendData: TrendData[] = Array.from({ length: 30 }, (_, i) => {
-      const date = new Date();
-      date.setDate(date.getDate() - (29 - i));
-
-      return {
-        date: date.toISOString().split("T")[0],
-        listings: Math.floor(Math.random() * 20) + 10,
-        views: Math.floor(Math.random() * 1000) + 500,
-        likes: Math.floor(Math.random() * 100) + 50,
-      };
-    });
-
-    setCategoryData(mockCategoryData);
-    setConditionData(mockConditionData);
-    setUserData(mockUserData);
-    setTrendData(mockTrendData);
-  }, []);
-
-  // Calculate totals
-  const totalListings = categoryData.reduce((sum, item) => sum + item.count, 0);
-  const totalViews = userData.reduce((sum, item) => sum + item.viewsCount, 0);
-  const totalLikes = userData.reduce((sum, item) => sum + item.likesCount, 0);
-
-  // Prepare data for charts
-  const categoryPieData = categoryData.map((item) => ({
-    name: item.category,
-    value: item.count,
+  const trendData = Array.from({ length: 15 }, (_, i) => ({
+    name: `D${i+1}`,
+    views: Math.floor(Math.random() * 1000) + 500,
+    listings: Math.floor(Math.random() * 20) + 10,
   }));
 
-  const conditionPieData = conditionData.map((item) => ({
-    name: item.condition,
-    value: item.count,
-  }));
+  const categoryData = [
+    { name: "Vehicles", value: 45, color: "#6366f1" },
+    { name: "Electronics", value: 30, color: "#a78bfa" },
+    { name: "Real Estate", value: 15, color: "#10b981" },
+    { name: "Other", value: 10, color: "#f59e0b" }
+  ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Analytics Dashboard</h1>
-        <div className="flex gap-4">
-          <Select defaultValue="month" onValueChange={setTimeRange}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select time range" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="week">This Week</SelectItem>
-              <SelectItem value="month">This Month</SelectItem>
-              <SelectItem value="quarter">This Quarter</SelectItem>
-              <SelectItem value="year">This Year</SelectItem>
-            </SelectContent>
-          </Select>
+    <EcosystemWrapper anonymized-1="listing-analytics">
+      <EcosystemHeader
+        title="Listing Analytics"
+        badgeText="Overview"
+        description="Monitor how your community is interacting with listings. Track traffic, engagement, and category distribution."
+        icon={Store}
+      />
+
+      <EcosystemActionBar shadow="none">
+        <div className="flex items-center justify-between w-full">
+           <div className="flex items-center gap-6">
+              <EcosystemStatusIndicator status="active" label="Syncing live data..." />
+              <div className="h-4 w-px bg-slate-200" />
+              <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
+                 <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
+                 <span>Verified Secure</span>
+              </div>
+           </div>
+
+           <div className="flex items-center gap-3">
+              <Select value={timeRange} onValueChange={setTimeRange}>
+                <SelectTrigger className="h-10 w-[200px] rounded-xl border-slate-200 font-bold text-slate-600 bg-white shadow-sm">
+                  <Timer className="h-4 w-4 mr-2 text-indigo-500" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="rounded-2xl border-slate-100 shadow-2xl">
+                  <SelectItem value="week" className="font-bold uppercase text-[10px]">Today</SelectItem>
+                  <SelectItem value="month" className="font-bold uppercase text-[10px]">Last 30 Days</SelectItem>
+                  <SelectItem value="quarter" className="font-bold uppercase text-[10px]">Last 3 Months</SelectItem>
+                </SelectContent>
+              </Select>
+              <div className="h-4 w-px bg-slate-200 mx-1" />
+              <Button variant="outline" size="icon" className="h-10 w-10 text-slate-400 hover:text-indigo-600 rounded-xl transition-all shadow-sm bg-white">
+                <RotateCcw className="h-4 w-4" />
+              </Button>
+           </div>
         </div>
-      </div>
+      </EcosystemActionBar>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Listings
-            </CardTitle>
-            <Store className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalListings}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{userData.length}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Views</CardTitle>
-            <Eye className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {totalViews.toLocaleString()}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Likes</CardTitle>
-            <ThumbsUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {totalLikes.toLocaleString()}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Separator className="my-6" />
-
-      <div>
-        <h2 className="text-xl font-semibold mb-4">Listing Trends</h2>
-        <div className="grid gap-4 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Daily Views</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={trendData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Line
-                    type="monotone"
-                    dataKey="views"
-                    stroke="#8884d8"
-                    strokeWidth={2}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Daily New Listings</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={trendData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="listings" fill="#82ca9d" />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
+      <EcosystemContainer className="space-y-12 p-8 lg:p-12">
+        {/* KPI Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+           {kpis.map((kpi, i) => (
+             <EcosystemKPI key={i} {...kpi} trendLabel="Last Month" />
+           ))}
         </div>
-      </div>
 
-      <Separator className="my-6" />
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+           {/* Chart Section */}
+           <div className="lg:col-span-8">
+              <EcosystemCard 
+                title="Traffic Trends" 
+                description="Views and activity over time" 
+                icon={TrendingUp}
+                decorationIcon={Zap}
+              >
+                 <div className="h-[350px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={trendData}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 900, fill: '#94a3b8' }} dy={15} />
+                        <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 900, fill: '#94a3b8' }} />
+                        <Tooltip
+                          contentStyle={{ backgroundColor: "#0f172a", border: "none", borderRadius: "16px", boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)" }}
+                          itemStyle={{ color: "#fff", fontWeight: 900, textTransform: 'uppercase', fontSize: '10px' }}
+                          labelStyle={{ display: 'none' }}
+                        />
+                        <Bar dataKey="views" fill="#6366f1" radius={[8, 8, 0, 0]} barSize={40}>
+                           {trendData.map((entry, index) => (
+                             <Cell key={`cell-${index}`} fill={index % 2 === 0 ? '#6366f1' : '#a78bfa'} />
+                           ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                 </div>
+              </EcosystemCard>
+           </div>
 
-      <div>
-        <h2 className="text-xl font-semibold mb-4">
-          Category & Condition Distribution
-        </h2>
-        <div className="grid gap-4 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Listings by Category</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={categoryPieData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }) =>
-                      `${name}: ${(percent * 100).toFixed(0)}%`
-                    }
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {categoryPieData.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS[index % COLORS.length]}
-                      />
+           {/* Distribution Section */}
+           <div className="lg:col-span-4">
+              <EcosystemCard 
+                title="Category Mix" 
+                description="Breakdown by type" 
+                icon={Sparkles}
+                decorationIcon={LayoutGrid}
+                className="min-h-fit"
+              >
+                 <div className="h-[250px] w-full mb-8 relative flex items-center justify-center">
+                    <ResponsiveContainer width="100%" height="100%">
+                       <PieChart>
+                         <Pie
+                           data={categoryData}
+                           cx="50%"
+                           cy="50%"
+                           innerRadius={70}
+                           outerRadius={100}
+                           paddingAngle={8}
+                           dataKey="value"
+                         >
+                           {categoryData.map((entry, index) => (
+                             <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
+                           ))}
+                         </Pie>
+                       </PieChart>
+                    </ResponsiveContainer>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                       <span className="text-3xl font-black text-slate-900 tracking-tighter">100%</span>
+                       <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none">Total</span>
+                    </div>
+                 </div>
+                 
+                 <div className="space-y-4">
+                    {categoryData.map((item, i) => (
+                      <div key={i} className="group/item flex items-center justify-between p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:bg-white hover:shadow-lg transition-all duration-300">
+                         <div className="flex items-center gap-3">
+                            <div className="h-2.5 w-2.5 rounded-full shadow-lg" style={{ backgroundColor: item.color }} />
+                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{item.name}</span>
+                         </div>
+                         <span className="text-sm font-black text-slate-900">{item.value}%</span>
+                      </div>
                     ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
+                 </div>
+              </EcosystemCard>
+           </div>
+        </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Listings by Condition</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={conditionPieData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }) =>
-                      `${name}: ${(percent * 100).toFixed(0)}%`
-                    }
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {conditionPieData.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS[index % COLORS.length]}
-                      />
+        {/* Master Registry Table */}
+        <div className="space-y-8">
+           <div className="flex items-center gap-3 px-1">
+              <div className="h-10 w-10 rounded-xl bg-slate-900 flex items-center justify-center text-white">
+                 <LayoutGrid className="h-5 w-5" />
+              </div>
+              <div>
+                 <h2 className="text-xl font-black text-slate-900 tracking-tight italic uppercase">Top Creators</h2>
+                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] leading-none mt-1">Activity by individual users</p>
+              </div>
+           </div>
+
+           <div className="p-1 rounded-[3.5rem] bg-slate-50 border border-slate-100 shadow-inner overflow-hidden">
+              <div className="bg-white rounded-[3.2rem] overflow-hidden">
+                <Table>
+                  <TableHeader className="bg-slate-50/50">
+                    <TableRow className="hover:bg-transparent border-slate-100">
+                      <TableHead className="py-6 px-10 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">User</TableHead>
+                      <TableHead className="text-right py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Listings</TableHead>
+                      <TableHead className="text-right py-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Views</TableHead>
+                      <TableHead className="text-right py-6 px-10 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Likes</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {[
+                      { username: "john_doe", list: 45, views: "12.5k", likes: 780 },
+                      { username: "jane_smith", list: 38, views: "9.8k", likes: 620 },
+                      { username: "robert_v", list: 32, views: "8.2k", likes: 540 }
+                    ].map((user, i) => (
+                      <TableRow key={i} className="hover:bg-slate-50 transition-colors border-slate-50 group">
+                         <TableCell className="py-6 px-10">
+                            <div className="flex items-center gap-3">
+                               <div className="h-10 w-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400 font-black text-xs group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                                  {user.username.charAt(0).toUpperCase()}
+                               </div>
+                               <span className="font-black text-slate-900 tracking-tighter uppercase">{user.username}</span>
+                            </div>
+                         </TableCell>
+                         <TableCell className="text-right font-black text-slate-900">{user.list}</TableCell>
+                         <TableCell className="text-right font-black text-slate-400">{user.views}</TableCell>
+                         <TableCell className="text-right px-10">
+                            <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-tighter">{user.likes}</span>
+                         </TableCell>
+                      </TableRow>
                     ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
+                  </TableBody>
+                </Table>
+              </div>
+           </div>
         </div>
-      </div>
-
-      <Separator className="my-6" />
-
-      <div>
-        <h2 className="text-xl font-semibold mb-4">Top Categories</h2>
-        <div className="grid gap-4 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Top Categories</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Category</TableHead>
-                    <TableHead className="text-right">Listings</TableHead>
-                    <TableHead className="text-right">Percentage</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {categoryData.map((item) => (
-                    <TableRow key={item.category}>
-                      <TableCell className="font-medium">
-                        {item.category}
-                      </TableCell>
-                      <TableCell className="text-right">{item.count}</TableCell>
-                      <TableCell className="text-right">
-                        {item.percentage}%
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Top Conditions</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Condition</TableHead>
-                    <TableHead className="text-right">Listings</TableHead>
-                    <TableHead className="text-right">Percentage</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {conditionData.map((item) => (
-                    <TableRow key={item.condition}>
-                      <TableCell className="font-medium">
-                        {item.condition}
-                      </TableCell>
-                      <TableCell className="text-right">{item.count}</TableCell>
-                      <TableCell className="text-right">
-                        {item.percentage}%
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
-      <Separator className="my-6" />
-
-      <div>
-        <h2 className="text-xl font-semibold mb-4">Top Users</h2>
-        <Card>
-          <CardHeader>
-            <CardTitle>Top Users by Listings</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Username</TableHead>
-                  <TableHead className="text-right">Listings</TableHead>
-                  <TableHead className="text-right">Views</TableHead>
-                  <TableHead className="text-right">Likes</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {userData.map((user) => (
-                  <TableRow key={user.username}>
-                    <TableCell className="font-medium">
-                      {user.username}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {user.listingsCount}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {user.viewsCount.toLocaleString()}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {user.likesCount}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+      </EcosystemContainer>
+    </EcosystemWrapper>
   );
-};
-
-export default Analytics;
+}

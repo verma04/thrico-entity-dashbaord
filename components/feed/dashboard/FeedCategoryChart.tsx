@@ -27,13 +27,13 @@ export const FeedCategoryChart: React.FC<FeedCategoryChartProps> = ({
   colors,
 }) => {
   return (
-    <Card className="md:col-span-4 shadow-sm hover:shadow-md transition-shadow duration-200">
+    <Card className="border-none shadow-sm ring-1 ring-border/50">
       <CardHeader>
         <CardTitle>Feed Posts by Category</CardTitle>
         <CardDescription>Topic distribution</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="h-[350px] w-full relative">
+        <div className="h-[300px] w-full relative">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
@@ -53,7 +53,13 @@ export const FeedCategoryChart: React.FC<FeedCategoryChartProps> = ({
                   />
                 ))}
               </Pie>
-              <RechartsTooltip />
+              <RechartsTooltip
+                contentStyle={{
+                  borderRadius: "12px",
+                  border: "none",
+                  boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)",
+                }}
+              />
               <Legend verticalAlign="bottom" height={36} />
             </PieChart>
           </ResponsiveContainer>

@@ -2,17 +2,12 @@
 
 import React, { useState } from "react";
 import {
-  ModuleAnalyticsLayout,
-  KPIStat,
-} from "@/components/analytics/module-analytics-layout";
-import {
   TimeRange,
   useGetCurrencyTransactions,
   useGetEntityCurrencyConfig,
+  useGetUser,
 } from "@/graphql/actions";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Coins, CreditCard, Activity, History } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Coins, CreditCard, Activity, History, Settings2, Zap, LayoutGrid } from "lucide-react";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -22,8 +17,11 @@ import {
   CartesianGrid,
   Tooltip,
 } from "recharts";
-import { format } from "date-fns";
-import { useGetUser } from "@/graphql/actions";
+import {
+  EcosystemKPI,
+  EcosystemCard,
+  EcosystemGrid,
+} from "@/components/layout/ecosystem/ecosystem-analytics";
 
 export function CurrencyDashboard() {
   const [timeRange, setTimeRange] = useState<TimeRange>(TimeRange.LAST_7_DAYS);
@@ -41,66 +39,62 @@ export function CurrencyDashboard() {
   const config = configData?.getEntityCurrencyConfig;
   const currencyName = config?.currencyName || "EC";
 
-  const kpiStats: KPIStat[] = [
+  const kpis = [
     {
       title: `Total ${currencyName} Earned`,
-      value: configLoading ? <Skeleton className="h-8 w-24" /> : "124,500",
-      change: 12,
-      trend: "up",
+      value: configLoading ? "..." : "124,500",
+      trend: 12,
       icon: Coins,
-      color: "text-emerald-700",
-      bgColor: "bg-emerald-100",
+      color: "text-indigo-500",
+      bg: "bg-indigo-500/10",
     },
-
     {
       title: "Redemption Volume",
-      value: configLoading ? <Skeleton className="h-8 w-24" /> : "42,100",
-      change: -2,
-      trend: "down",
+      value: configLoading ? "..." : "42,100",
+      trend: -2,
       icon: CreditCard,
-      color: "text-purple-700",
-      bgColor: "bg-purple-100",
+      color: "text-violet-500",
+      bg: "bg-violet-500/10",
     },
     {
       title: "Active Users",
-      value: configLoading ? <Skeleton className="h-8 w-24" /> : "1,240",
-      change: 8,
-      trend: "up",
+      value: configLoading ? "..." : "1,240",
+      trend: 8,
       icon: Activity,
-      color: "text-orange-700",
-      bgColor: "bg-orange-100",
+      color: "text-amber-500",
+      bg: "bg-amber-500/10",
     },
   ];
 
   // Derive chart data from transactions if available, otherwise use mock
   const chartData = [
-    { date: "2024-01-01", amount: 4000 },
-    { date: "2024-01-02", amount: 3000 },
-    { date: "2024-01-03", amount: 5000 },
-    { date: "2024-01-04", amount: 2780 },
-    { date: "2024-01-05", amount: 1890 },
-    { date: "2024-01-06", amount: 2390 },
-    { date: "2024-01-07", amount: 3490 },
+    { name: "JAN", amount: 4000 },
+    { name: "FEB", amount: 3000 },
+    { name: "MAR", amount: 5000 },
+    { name: "APR", amount: 2780 },
+    { name: "MAY", amount: 1890 },
+    { name: "JUN", amount: 2390 },
+    { name: "JUL", amount: 3490 },
   ];
 
   return (
-    <ModuleAnalyticsLayout
-      title="Currency Insights"
-      description={`Track ${currencyName} circulation and global TC conversion rates`}
-      timeRange={timeRange}
-      onTimeRangeChange={setTimeRange}
-      kpiStats={kpiStats}
-    >
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <History className="h-5 w-5 text-primary" />
-              Sovereign Currency Flow
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px] w-full">
+    <div className="space-y-8">
+      {/* KPI Grid */}
+      <EcosystemGrid cols={3} className="gap-8">
+        {kpis.map((kpi, i) => (
+          <EcosystemKPI key={i} {...kpi} trendLabel="Economy" />
+        ))}
+      </EcosystemGrid>
+
+      <EcosystemGrid cols={12} className="gap-10">
+        <div className="lg:col-span-8">
+          <EcosystemCard
+            title="Sovereign Currency Flow"
+            description="Temporal circulation velocity"
+            icon={History}
+            decorationIcon={Zap}
+          >
+            <div className="h-[350px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData}>
                   <defs>
@@ -111,83 +105,105 @@ export function CurrencyDashboard() {
                       x2="0"
                       y2="1"
                     >
-                      <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+                      <stop offset="5%" stopColor="#6366f1" stopOpacity={0.1} />
+                      <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid
                     strokeDasharray="3 3"
                     vertical={false}
-                    stroke="#e5e7eb"
+                    stroke="#f1f5f9"
                   />
-                  <XAxis dataKey="date" hide />
-                  <YAxis
-                    stroke="#9ca3af"
-                    fontSize={12}
-                    tickLine={false}
+                  <XAxis
+                    dataKey="name"
                     axisLine={false}
-                    tickFormatter={(value) => `${value}`}
+                    tickLine={false}
+                    tick={{ fontSize: 10, fontWeight: 900, fill: "#94a3b8" }}
+                    dy={15}
+                  />
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 10, fontWeight: 900, fill: "#94a3b8" }}
                   />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "#fff",
-                      borderRadius: "8px",
-                      border: "1px solid #e5e7eb",
+                      backgroundColor: "#0f172a",
+                      border: "none",
+                      borderRadius: "16px",
                     }}
+                    itemStyle={{
+                      color: "#fff",
+                      fontWeight: 900,
+                      fontSize: "10px",
+                    }}
+                    labelStyle={{ display: "none" }}
                   />
                   <Area
                     type="monotone"
                     dataKey="amount"
-                    stroke="#8b5cf6"
-                    strokeWidth={2}
+                    stroke="#6366f1"
+                    strokeWidth={4}
                     fillOpacity={1}
                     fill="url(#colorAmount)"
                   />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
-          </CardContent>
-        </Card>
+          </EcosystemCard>
+        </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Quick Configurations</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="p-4 rounded-xl border bg-muted/30 space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Local Name</span>
-                <span className="font-bold">
-                  {config?.currencyName || "N/A"}
-                </span>
+        <div className="lg:col-span-4">
+          <EcosystemCard
+            title="Quick Configurations"
+            description="Active ledger parameters"
+            icon={Settings2}
+            decorationIcon={LayoutGrid}
+            className="min-h-fit"
+          >
+            <div className="space-y-6">
+              <div className="p-5 rounded-2xl border border-slate-100 bg-slate-50/50 space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">
+                    Local Name
+                  </span>
+                  <span className="text-sm font-black text-slate-900">
+                    {config?.currencyName || "N/A"}
+                  </span>
+                </div>
+                <div className="h-px w-full bg-slate-100" />
+                <div className="flex justify-between items-center">
+                  <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">
+                    Normalization
+                  </span>
+                  <span className="text-sm font-black text-slate-900">
+                    {config?.normalizationFactor || "N/A"}
+                  </span>
+                </div>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Normalization</span>
-                <span className="font-bold">
-                  {config?.normalizationFactor || "N/A"}
-                </span>
-              </div>
-            </div>
 
-            <div className="space-y-2">
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Spending Policy
-              </p>
-              <div className="flex items-center gap-2">
-                <div className="h-2 flex-1 rounded-full bg-muted overflow-hidden">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between px-1">
+                  <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">
+                    Spending Policy Limit
+                  </span>
+                  <span className="text-[11px] font-black text-slate-900">
+                    {config?.maxTcPercentage || 30}% TC Cap
+                  </span>
+                </div>
+                <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200">
                   <div
-                    className="h-full bg-purple-500"
-                    style={{ width: `${config?.maxTcPercentage || 30}%` }}
+                    className="h-full bg-indigo-500 rounded-full transition-all duration-1000 origin-left"
+                    style={{
+                      width: `${config?.maxTcPercentage || 30}%`,
+                    }}
                   />
                 </div>
-                <span className="text-xs font-bold">
-                  {config?.maxTcPercentage || 30}% TC Cap
-                </span>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      </div>
-    </ModuleAnalyticsLayout>
+          </EcosystemCard>
+        </div>
+      </EcosystemGrid>
+    </div>
   );
 }
