@@ -30,7 +30,7 @@ function TabButton({
         "group/tab relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12.5px] font-medium transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/50 whitespace-nowrap",
         isActive
           ? "text-indigo-700"
-          : "text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100/70"
+          : "text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100/70",
       )}
     >
       {/* Animated pill background */}
@@ -46,13 +46,18 @@ function TabButton({
       <span
         className={cn(
           "relative z-10 shrink-0 transition-all duration-200",
-          isActive ? "text-indigo-600" : "text-zinc-400 group-hover/tab:text-zinc-600"
+          isActive
+            ? "text-indigo-600"
+            : "text-zinc-400 group-hover/tab:text-zinc-600",
         )}
       >
         {React.isValidElement(item.icon)
-          ? React.cloneElement(item.icon as React.ReactElement<{ className?: string }>, {
-              className: "h-3.5 w-3.5",
-            })
+          ? React.cloneElement(
+              item.icon as React.ReactElement<{ className?: string }>,
+              {
+                className: "h-3.5 w-3.5",
+              },
+            )
           : item.icon}
       </span>
 
@@ -106,7 +111,7 @@ const MenuItemsLayout = ({
     if (activeIndex === -1 || activeIndex === pathParts.length - 1) {
       if (hideDefaultTabs) {
         const defaultRootItem = items.find(
-          (i) => i.key === "dashboard" || i.key === ""
+          (i) => i.key === "dashboard" || i.key === "",
         );
         if (defaultRootItem) return defaultRootItem.key;
       }
@@ -130,20 +135,22 @@ const MenuItemsLayout = ({
           section: "System",
         },
         ...items,
-        ...(showAdminTabs ? [
-          {
-            key: "reports",
-            label: "Reports",
-            icon: <AlertTriangle className="h-3.5 w-3.5" />,
-            section: "Admin",
-          },
-          {
-            key: "settings",
-            label: "Settings",
-            icon: <Wrench className="h-3.5 w-3.5" />,
-            section: "Admin",
-          },
-        ] : []),
+        ...(showAdminTabs
+          ? [
+              {
+                key: "reports",
+                label: "Report & Feedback",
+                icon: <AlertTriangle className="h-3.5 w-3.5" />,
+                section: "Admin",
+              },
+              {
+                key: "settings",
+                label: "Settings",
+                icon: <Wrench className="h-3.5 w-3.5" />,
+                section: "Admin",
+              },
+            ]
+          : []),
       ];
 
   const menuitems: MenuItem[] = hideDefaultTabs ? items : defaultTabs;
@@ -161,7 +168,7 @@ const MenuItemsLayout = ({
       acc[section].push(item);
       return acc;
     },
-    {} as Record<string, MenuItem[]>
+    {} as Record<string, MenuItem[]>,
   );
 
   const sectionOrder = ["System", "Vouchers", "Engagement", "Admin", "General"];
@@ -191,9 +198,7 @@ const MenuItemsLayout = ({
                 )}
 
                 {/* Section label pill — only when multiple sections */}
-                {showSectionLabels && (
-                  <SectionDivider label={sectionName} />
-                )}
+                {showSectionLabels && <SectionDivider label={sectionName} />}
 
                 {/* Tab buttons for this section */}
                 <div className="flex items-center gap-0.5 ml-1">
@@ -201,7 +206,10 @@ const MenuItemsLayout = ({
                     <TabButton
                       key={item.key}
                       item={item}
-                      isActive={activeTab === item.key || fullKey.startsWith(item.key + "/")}
+                      isActive={
+                        activeTab === item.key ||
+                        fullKey.startsWith(item.key + "/")
+                      }
                       onClick={() => onChange(item.key)}
                     />
                   ))}

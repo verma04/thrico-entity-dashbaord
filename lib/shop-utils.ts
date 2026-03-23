@@ -5,15 +5,15 @@
 
 export const CATEGORY_DEFAULT_IMAGES: Record<string, string> = {
   clothing:
-    "https://thrico.blr1.cdn.digitaloceanspaces.com/shop_product_clothing.png",
+    "https://cdn.thrico.network/shop_product_clothing.png",
   electronics:
-    "https://thrico.blr1.cdn.digitaloceanspaces.com/shop_product_electronics.png",
+    "https://cdn.thrico.network/shop_product_electronics.png",
   digital:
-    "https://thrico.blr1.cdn.digitaloceanspaces.com/shop_product_digital_goods.png",
+    "https://cdn.thrico.network/shop_product_digital_goods.png",
   services:
-    "https://thrico.blr1.cdn.digitaloceanspaces.com/shop_product_services.png",
+    "https://cdn.thrico.network/shop_product_services.png",
   merch:
-    "https://thrico.blr1.cdn.digitaloceanspaces.com/shop_product_merchandise.png",
+    "https://cdn.thrico.network/shop_product_merchandise.png",
 };
 
 /**

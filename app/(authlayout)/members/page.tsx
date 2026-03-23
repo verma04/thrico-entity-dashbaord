@@ -42,7 +42,7 @@ import {
 } from "@/components/layout/ecosystem/ecosystem-analytics";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { useGetMembersStats } from "@/graphql/actions";
+// import { useGetMembersStats } from "@/graphql/actions";
 
 export default function MembersPage() {
   let loading = true;

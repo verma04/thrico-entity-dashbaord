@@ -86,7 +86,7 @@ export const settings = [
   },
   {
     key: "reports",
-    label: "Reports",
+    label: "Report & Feedback",
     path: "/reports",
     icon: <ClipboardList size={18} />,
   },
@@ -355,10 +355,22 @@ export const gamification = [
     path: "/gamification",
     icon: <Gamepad2 size={18} />,
     children: [
-      { key: "engagement-points", label: "Point Rules", path: "/gamification/points" },
-      { key: "engagement-badges", label: "Badges", path: "/gamification/badges" },
+      {
+        key: "engagement-points",
+        label: "Point Rules",
+        path: "/gamification/points",
+      },
+      {
+        key: "engagement-badges",
+        label: "Badges",
+        path: "/gamification/badges",
+      },
       { key: "engagement-ranks", label: "Ranks", path: "/gamification/ranks" },
-      { key: "engagement-faq", label: "Manage FAQ", path: "/gamification/settings/faq" },
+      {
+        key: "engagement-faq",
+        label: "Manage FAQ",
+        path: "/gamification/settings/faq",
+      },
     ],
   },
   {
@@ -367,9 +379,21 @@ export const gamification = [
     path: "/rewards/engagement/spin-wheel",
     icon: <Dices size={18} />,
     children: [
-      { key: "game-spin-wheel", label: "Spin Wheel", path: "/rewards/engagement/spin-wheel" },
-      { key: "game-scratch-card", label: "Scratch Card", path: "/rewards/engagement/scratch-card" },
-      { key: "game-match-win", label: "Match & Win", path: "/rewards/engagement/match-win" },
+      {
+        key: "game-spin-wheel",
+        label: "Spin Wheel",
+        path: "/rewards/engagement/spin-wheel",
+      },
+      {
+        key: "game-scratch-card",
+        label: "Scratch Card",
+        path: "/rewards/engagement/scratch-card",
+      },
+      {
+        key: "game-match-win",
+        label: "Match & Win",
+        path: "/rewards/engagement/match-win",
+      },
     ],
   },
   {
@@ -384,10 +408,26 @@ export const gamification = [
     path: "/rewards/vouchers/coupons",
     icon: <Gift size={18} />,
     children: [
-      { key: "vouchers-coupons", label: "Manage Coupons", path: "/rewards/vouchers/coupons" },
-      { key: "vouchers-inventory", label: "Inventory Audit", path: "/rewards/vouchers/inventory" },
-      { key: "vouchers-redemptions", label: "Audit Ledger", path: "/rewards/vouchers/redemptions" },
-      { key: "vouchers-settings", label: "Settings", path: "/gamification/settings" },
+      {
+        key: "vouchers-coupons",
+        label: "Manage Coupons",
+        path: "/rewards/vouchers/coupons",
+      },
+      {
+        key: "vouchers-inventory",
+        label: "Inventory Audit",
+        path: "/rewards/vouchers/inventory",
+      },
+      {
+        key: "vouchers-redemptions",
+        label: "Audit Ledger",
+        path: "/rewards/vouchers/redemptions",
+      },
+      {
+        key: "vouchers-settings",
+        label: "Settings",
+        path: "/gamification/settings",
+      },
     ],
   },
 ];
