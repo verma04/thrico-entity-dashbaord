@@ -38,10 +38,23 @@ import {
   ExternalLink,
 } from "lucide-react";
 
+enum Action {
+  APPROVE = "APPROVE",
+  BLOCK = "BLOCK",
+  DISABLE = "DISABLE",
+  ENABLE = "ENABLE",
+  UNBLOCK = "UNBLOCK",
+  REJECT = "REJECT",
+  FLAG = "FLAG",
+  VERIFY = "VERIFY",
+  UNVERIFY = "UNVERIFY",
+  REAPPROVE = "REAPPROVE",
+}
+
 export default function UserActions({ user }: { user: UserDetail }) {
   const router = useRouter();
   const [isActionModalOpen, setIsActionModalOpen] = useState(false);
-  const [selectedAction, setSelectedAction] = useState<string | null>(null);
+  const [selectedAction, setSelectedAction] = useState<Action | null>(null);
   const [reason, setReason] = useState("");
 
   const [changeStatus, { loading: isStatusLoading }] = useChangeUserStatus({
@@ -63,13 +76,13 @@ export default function UserActions({ user }: { user: UserDetail }) {
 
   const isLoading = isStatusLoading || isVerificationLoading;
 
-  const handleAction = (action: string) => {
+  const handleAction = (action: Action) => {
     setSelectedAction(action);
     setIsActionModalOpen(true);
   };
 
   const confirmAction = () => {
-    if (["VERIFY", "UNVERIFY"].includes(selectedAction || "")) {
+    if (selectedAction === Action.VERIFY || selectedAction === Action.UNVERIFY) {
       changeVerification({
         variables: {
           input: {
@@ -82,18 +95,11 @@ export default function UserActions({ user }: { user: UserDetail }) {
       return;
     }
 
-    // Mapping UI labels to GraphQL status enums
-    let targetStatus = selectedAction;
-    if (selectedAction === "REAPPROVE") targetStatus = "APPROVED";
-    if (selectedAction === "ENABLE") targetStatus = "APPROVED";
-    if (selectedAction === "DISABLE") targetStatus = "DISABLED";
-    if (selectedAction === "UNBLOCK") targetStatus = "APPROVED";
-
     changeStatus({
       variables: {
         input: {
           userId: user.id,
-          action: targetStatus,
+          action: selectedAction,
           reason,
         },
       },
@@ -102,9 +108,15 @@ export default function UserActions({ user }: { user: UserDetail }) {
 
   const isReasonRequired =
     selectedAction &&
-    ["BLOCK", "APPROVE", "REJECT", "FLAG", "VERIFY"].includes(selectedAction);
+    [
+      Action.BLOCK,
+      Action.APPROVE,
+      Action.REJECT,
+      Action.FLAG,
+      Action.VERIFY,
+    ].includes(selectedAction);
 
-  interface Action {
+  interface ActionItem {
     label?: string;
     icon?: any;
     onClick?: () => void;
@@ -112,7 +124,7 @@ export default function UserActions({ user }: { user: UserDetail }) {
     type?: "separator";
   }
 
-  const actions: Action[] = [
+  const actions: ActionItem[] = [
     {
       label: "View Profile",
       icon: ExternalLink,
@@ -126,19 +138,19 @@ export default function UserActions({ user }: { user: UserDetail }) {
       {
         label: "Approve",
         icon: Check,
-        onClick: () => handleAction("APPROVE"),
+        onClick: () => handleAction(Action.APPROVE),
         color: "text-green-600",
       },
       {
         label: "Reject",
         icon: X,
-        onClick: () => handleAction("REJECT"),
+        onClick: () => handleAction(Action.REJECT),
         color: "text-red-600",
       },
       {
         label: "Block",
         icon: Lock,
-        onClick: () => handleAction("BLOCK"),
+        onClick: () => handleAction(Action.BLOCK),
         color: "text-red-700",
       },
     );
@@ -149,13 +161,13 @@ export default function UserActions({ user }: { user: UserDetail }) {
       {
         label: "Unblock",
         icon: Unlock,
-        onClick: () => handleAction("UNBLOCK"),
+        onClick: () => handleAction(Action.UNBLOCK),
         color: "text-green-600",
       },
       {
         label: "Reject",
         icon: X,
-        onClick: () => handleAction("REJECT"),
+        onClick: () => handleAction(Action.REJECT),
         color: "text-red-600",
       },
     );
@@ -164,13 +176,13 @@ export default function UserActions({ user }: { user: UserDetail }) {
       {
         label: "Block",
         icon: Lock,
-        onClick: () => handleAction("BLOCK"),
+        onClick: () => handleAction(Action.BLOCK),
         color: "text-red-600",
       },
       {
         label: "Re-approve",
         icon: RefreshCw,
-        onClick: () => handleAction("REAPPROVE"),
+        onClick: () => handleAction(Action.REAPPROVE),
         color: "text-blue-600",
       },
     );
@@ -182,18 +194,20 @@ export default function UserActions({ user }: { user: UserDetail }) {
         label: user.verification?.isVerified ? "Remove Verification" : "Verify",
         icon: Shield,
         onClick: () =>
-          handleAction(user.verification?.isVerified ? "UNVERIFY" : "VERIFY"),
+          handleAction(
+            user.verification?.isVerified ? Action.UNVERIFY : Action.VERIFY,
+          ),
       },
       {
         label: "Block",
         icon: Lock,
-        onClick: () => handleAction("BLOCK"),
+        onClick: () => handleAction(Action.BLOCK),
         color: "text-red-600",
       },
       {
         label: "Disable",
         icon: Lock,
-        onClick: () => handleAction("DISABLE"),
+        onClick: () => handleAction(Action.DISABLE),
         color: "text-orange-600",
       },
     );
@@ -204,13 +218,13 @@ export default function UserActions({ user }: { user: UserDetail }) {
       {
         label: "Enable",
         icon: Check,
-        onClick: () => handleAction("ENABLE"),
+        onClick: () => handleAction(Action.ENABLE),
         color: "text-green-600",
       },
       {
         label: "Block",
         icon: Lock,
-        onClick: () => handleAction("BLOCK"),
+        onClick: () => handleAction(Action.BLOCK),
         color: "text-red-600",
       },
     );
@@ -222,7 +236,7 @@ export default function UserActions({ user }: { user: UserDetail }) {
     {
       label: "Block",
       icon: Lock,
-      onClick: () => handleAction("BLOCK"),
+      onClick: () => handleAction(Action.BLOCK),
       color: "text-red-600",
     },
   );
@@ -254,25 +268,25 @@ export default function UserActions({ user }: { user: UserDetail }) {
           <DialogHeader>
             <DialogTitle>Confirm Action</DialogTitle>
             <DialogDescription>
-              {selectedAction === "APPROVE" &&
+              {selectedAction === Action.APPROVE &&
                 "This will approve the user's account and grant them access to the platform."}
-              {selectedAction === "REJECT" &&
+              {selectedAction === Action.REJECT &&
                 "This will reject the user's registration. They will need to register again to access the platform."}
-              {selectedAction === "BLOCK" &&
+              {selectedAction === Action.BLOCK &&
                 "This will block the user from accessing the platform. They will not be able to log in."}
-              {selectedAction === "UNBLOCK" &&
+              {selectedAction === Action.UNBLOCK &&
                 "This will unblock the user's account and restore their access to the platform."}
-              {selectedAction === "DISABLE" &&
+              {selectedAction === Action.DISABLE &&
                 "This will temporarily disable the user's account. They will not be able to log in until re-enabled."}
-              {selectedAction === "ENABLE" &&
+              {selectedAction === Action.ENABLE &&
                 "This will re-enable the user's account and restore their access to the platform."}
-              {selectedAction === "FLAG" &&
+              {selectedAction === Action.FLAG &&
                 "This will flag the user's account for further review by the admin team."}
-              {selectedAction === "VERIFY" &&
+              {selectedAction === Action.VERIFY &&
                 "This will add a verification badge to the user's profile."}
-              {selectedAction === "UNVERIFY" &&
+              {selectedAction === Action.UNVERIFY &&
                 "This will remove the verification badge from the user's profile."}
-              {selectedAction === "REAPPROVE" &&
+              {selectedAction === Action.REAPPROVE &&
                 "This will change the user's status from rejected to approved."}
             </DialogDescription>
           </DialogHeader>
@@ -306,24 +320,24 @@ export default function UserActions({ user }: { user: UserDetail }) {
               onClick={confirmAction}
               disabled={(isReasonRequired && !reason.trim()) || isLoading}
               variant={
-                selectedAction?.includes("BLOCK") ||
-                selectedAction === "REJECT" ||
-                selectedAction === "DISABLE"
+                selectedAction === Action.BLOCK ||
+                selectedAction === Action.REJECT ||
+                selectedAction === Action.DISABLE
                   ? "destructive"
                   : "default"
               }
             >
               {isLoading && <RefreshCw className="h-4 w-4 animate-spin mr-2" />}
-              {selectedAction === "APPROVE" && "Approve"}
-              {selectedAction === "REJECT" && "Reject"}
-              {selectedAction === "BLOCK" && "Block"}
-              {selectedAction === "UNBLOCK" && "Unblock"}
-              {selectedAction === "DISABLE" && "Disable"}
-              {selectedAction === "ENABLE" && "Enable"}
-              {selectedAction === "FLAG" && "Flag"}
-              {selectedAction === "VERIFY" && "Verify"}
-              {selectedAction === "UNVERIFY" && "Remove Verification"}
-              {selectedAction === "REAPPROVE" && "Re-approve"}
+              {selectedAction === Action.APPROVE && "Approve"}
+              {selectedAction === Action.REJECT && "Reject"}
+              {selectedAction === Action.BLOCK && "Block"}
+              {selectedAction === Action.UNBLOCK && "Unblock"}
+              {selectedAction === Action.DISABLE && "Disable"}
+              {selectedAction === Action.ENABLE && "Enable"}
+              {selectedAction === Action.FLAG && "Flag"}
+              {selectedAction === Action.VERIFY && "Verify"}
+              {selectedAction === Action.UNVERIFY && "Remove Verification"}
+              {selectedAction === Action.REAPPROVE && "Re-approve"}
             </Button>
           </DialogFooter>
         </DialogContent>

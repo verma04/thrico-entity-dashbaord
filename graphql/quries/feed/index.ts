@@ -10,463 +10,463 @@ export const NUMBER_OF_FEED = gql`
   }
 `;
 export const GET_ALL_FEED = gql`
-query GetAllFeed($input: PaginationInput) {
-  getAllFeed(input: $input) {
-    isLiked
-    id
-    description
-    user {
-      firstName
-      avatar
-      lastName
+  query GetAllFeed($input: PaginationInput) {
+    getAllFeed(input: $input) {
+      isLiked
       id
-    }
-    createdAt
-    totalComment
-    totalReactions
-    totalReShare
-    isWishList
-    isOwner
-    source
-    media {
-      url
-    }
-    privacy
-    addedBy
-    poll {
-      id
-      title
-      question
-      resultVisibility
-      options {
+      description
+      user {
+        firstName
+        avatar
+        lastName
         id
-        text
-        order
-        votes
       }
-      updatedAt
       createdAt
-      endDate
-      status
-      totalVotes
-      isVoted
-      votedOptionId
-    }
-    moment {
-      id
-      videoUrl
-      hlsUrl
-      thumbnailUrl
-      optimizedVideoUrl
-      caption
-      createdAt
-      updatedAt
-      totalReshares
-      totalComments
+      totalComment
       totalReactions
-    }
-    job {
-      title
-      description
-      location
-      jobType
-      salary
-      experienceLevel
-      workplaceType
-      applicationDeadline
-    }
-    marketPlace {
-      id
-      addedBy
-      entityId
-      title
-      price
-      condition
-      status
-      sku
-      slug
-      description
-      category
-      isApproved
-      isExpired
-      createdAt
-      updatedAt
-      tag
-      isFeatured
-      numberOfViews
-      interests
-      categories
-      location {
-        name
-        latitude
-        longitude
-        address
-        lat
-        lng
-      }
+      totalReShare
+      isWishList
+      isOwner
+      source
       media {
         url
       }
+      privacy
+      addedBy
+      poll {
+        id
+        title
+        question
+        resultVisibility
+        options {
+          id
+          text
+          order
+          votes
+        }
+        updatedAt
+        createdAt
+        endDate
+        status
+        totalVotes
+        isVoted
+        votedOptionId
+      }
+      moment {
+        id
+        videoUrl
+        hlsUrl
+        thumbnailUrl
+        optimizedVideoUrl
+        caption
+        createdAt
+        updatedAt
+        totalReshares
+        totalComments
+        totalReactions
+      }
+      job {
+        title
+        description
+        location
+        jobType
+        salary
+        experienceLevel
+        workplaceType
+        applicationDeadline
+      }
+      marketPlace {
+        id
+        addedBy
+        entityId
+        title
+        price
+        condition
+        status
+        sku
+        slug
+        description
+        category
+        isApproved
+        isExpired
+        createdAt
+        updatedAt
+        tag
+        isFeatured
+        numberOfViews
+        interests
+        categories
+        location {
+          name
+          latitude
+          longitude
+          address
+          lat
+          lng
+        }
+        media {
+          url
+        }
+      }
+      isPinned
+      pinnedAt
     }
-    isPinned
-    pinnedAt
   }
-}
 `;
 
 export const GET_ADMIN_FEED = gql`
-query GetAdminFeed($input: PaginationInput) {
-  getAdminFeed(input: $input) {
-    isLiked
-    id
-    description
-    user {
-      firstName
-      avatar
-      lastName
+  query GetAdminFeed($input: PaginationInput) {
+    getAdminFeed(input: $input) {
+      isLiked
       id
-    }
-    createdAt
-    totalComment
-    totalReactions
-    totalReShare
-    isWishList
-    isOwner
-    source
-    media {
-      url
-    }
-    privacy
-    addedBy
-    poll {
-      id
-      title
-      question
-      resultVisibility
-      options {
+      description
+      user {
+        firstName
+        avatar
+        lastName
         id
-        text
-        order
-        votes
       }
-      updatedAt
       createdAt
-      endDate
-      status
-      totalVotes
-      isVoted
-      votedOptionId
-    }
-    moment {
-      id
-      videoUrl
-      hlsUrl
-      thumbnailUrl
-      optimizedVideoUrl
-      caption
-      createdAt
-      updatedAt
-      totalReshares
-      totalComments
+      totalComment
       totalReactions
-    }
-    job {
-      title
-      description
-      location
-      jobType
-      salary
-      experienceLevel
-      workplaceType
-      applicationDeadline
-    }
-    marketPlace {
-      id
-      addedBy
-      entityId
-      title
-      price
-      condition
-      status
-      sku
-      slug
-      description
-      category
-      isApproved
-      isExpired
-      createdAt
-      updatedAt
-      tag
-      isFeatured
-      numberOfViews
-      interests
-      categories
-      location {
-        name
-        latitude
-        longitude
-        address
-        lat
-        lng
-      }
+      totalReShare
+      isWishList
+      isOwner
+      source
       media {
         url
       }
+      privacy
+      addedBy
+      poll {
+        id
+        title
+        question
+        resultVisibility
+        options {
+          id
+          text
+          order
+          votes
+        }
+        updatedAt
+        createdAt
+        endDate
+        status
+        totalVotes
+        isVoted
+        votedOptionId
+      }
+      moment {
+        id
+        videoUrl
+        hlsUrl
+        thumbnailUrl
+        optimizedVideoUrl
+        caption
+        createdAt
+        updatedAt
+        totalReshares
+        totalComments
+        totalReactions
+      }
+      job {
+        title
+        description
+        location
+        jobType
+        salary
+        experienceLevel
+        workplaceType
+        applicationDeadline
+      }
+      marketPlace {
+        id
+        addedBy
+        entityId
+        title
+        price
+        condition
+        status
+        sku
+        slug
+        description
+        category
+        isApproved
+        isExpired
+        createdAt
+        updatedAt
+        tag
+        isFeatured
+        numberOfViews
+        interests
+        categories
+        location {
+          name
+          latitude
+          longitude
+          address
+          lat
+          lng
+        }
+        media {
+          url
+        }
+      }
+      isPinned
+      pinnedAt
     }
-    isPinned
-    pinnedAt
   }
-}
 `;
 
 export const GET_JOB_FEED = gql`
-query GetJobFeed($input: PaginationInput) {
-  getJobFeed(input: $input) {
-    isLiked
-    id
-    description
-    user {
-      firstName
-      avatar
-      lastName
+  query GetJobFeed($input: PaginationInput) {
+    getJobFeed(input: $input) {
+      isLiked
       id
-    }
-    createdAt
-    totalComment
-    totalReactions
-    totalReShare
-    isWishList
-    isOwner
-    source
-    media {
-      url
-    }
-    privacy
-    addedBy
-    job {
-      title
       description
-      location
-      jobType
-      salary
-      experienceLevel
-      workplaceType
-      applicationDeadline
+      user {
+        firstName
+        avatar
+        lastName
+        id
+      }
+      createdAt
+      totalComment
+      totalReactions
+      totalReShare
+      isWishList
+      isOwner
+      source
+      media {
+        url
+      }
+      privacy
+      addedBy
+      job {
+        title
+        description
+        location
+        jobType
+        salary
+        experienceLevel
+        workplaceType
+        applicationDeadline
+      }
+      isPinned
+      pinnedAt
     }
-    isPinned
-    pinnedAt
   }
-}
 `;
 
 export const GET_MOMENTS_FEED = gql`
-query GetMomentsFeed($input: PaginationInput) {
-  getMomentsFeed(input: $input) {
-    isLiked
-    id
-    description
-    user {
-      firstName
-      avatar
-      lastName
+  query GetMomentsFeed($input: PaginationInput) {
+    getMomentsFeed(input: $input) {
+      isLiked
       id
-    }
-    createdAt
-    totalComment
-    totalReactions
-    totalReShare
-    isWishList
-    isOwner
-    source
-    media {
-      url
-    }
-    privacy
-    addedBy
-    moment {
-      id
-      videoUrl
-      hlsUrl
-      thumbnailUrl
-      optimizedVideoUrl
-      caption
+      description
+      user {
+        firstName
+        avatar
+        lastName
+        id
+      }
       createdAt
-      updatedAt
-      totalReshares
-      totalComments
+      totalComment
       totalReactions
+      totalReShare
+      isWishList
+      isOwner
+      source
+      media {
+        url
+      }
+      privacy
+      addedBy
+      moment {
+        id
+        videoUrl
+        hlsUrl
+        thumbnailUrl
+        optimizedVideoUrl
+        caption
+        createdAt
+        updatedAt
+        totalReshares
+        totalComments
+        totalReactions
+      }
+      isPinned
+      pinnedAt
     }
-    isPinned
-    pinnedAt
   }
-}
 `;
 
 export const GET_LISTING_FEED = gql`
-query GetListingFeed($input: PaginationInput) {
-  getListingFeed(input: $input) {
-    isLiked
-    id
-    description
-    user {
-      firstName
-      avatar
-      lastName
+  query GetListingFeed($input: PaginationInput) {
+    getListingFeed(input: $input) {
+      isLiked
       id
-    }
-    createdAt
-    totalComment
-    totalReactions
-    totalReShare
-    isWishList
-    isOwner
-    source
-     media {
-      url
-    }
-    privacy
-    addedBy
-    marketPlace {
-      id
-      addedBy
-      entityId
-      title
-      price
-      condition
-      status
-      sku
-      slug
       description
-      category
-      isApproved
-      isExpired
-      createdAt
-      updatedAt
-      tag
-      isFeatured
-      numberOfViews
-      interests
-      categories
-      location {
-        name
-        latitude
-        longitude
-        address
-        lat
-        lng
+      user {
+        firstName
+        avatar
+        lastName
+        id
       }
+      createdAt
+      totalComment
+      totalReactions
+      totalReShare
+      isWishList
+      isOwner
+      source
       media {
         url
       }
+      privacy
+      addedBy
+      marketPlace {
+        id
+        addedBy
+        entityId
+        title
+        price
+        condition
+        status
+        sku
+        slug
+        description
+        category
+        isApproved
+        isExpired
+        createdAt
+        updatedAt
+        tag
+        isFeatured
+        numberOfViews
+        interests
+        categories
+        location {
+          name
+          latitude
+          longitude
+          address
+          lat
+          lng
+        }
+        media {
+          url
+        }
+      }
+      isPinned
+      pinnedAt
     }
-    isPinned
-    pinnedAt
   }
-}
 `;
 export const GET_PINNED_FEED = gql`
-query GetPinnedFeed($input: PaginationInput) {
-  getPinnedFeed(input: $input) {
-    isLiked
-    id
-    description
-    user {
-      firstName
-      avatar
-      lastName
+  query GetPinnedFeed($input: PaginationInput) {
+    getPinnedFeed(input: $input) {
+      isLiked
       id
-    }
-    createdAt
-    totalComment
-    totalReactions
-    totalReShare
-    isWishList
-    isOwner
-    source
-    media {
-      url
-    }
-    privacy
-    addedBy
-    poll {
-      id
-      title
-      question
-      resultVisibility
-      options {
+      description
+      user {
+        firstName
+        avatar
+        lastName
         id
-        text
-        order
-        votes
       }
-      updatedAt
       createdAt
-      endDate
-      status
-      totalVotes
-      isVoted
-      votedOptionId
-    }
-    moment {
-      id
-      videoUrl
-      hlsUrl
-      thumbnailUrl
-      optimizedVideoUrl
-      caption
-      createdAt
-      updatedAt
-      totalReshares
-      totalComments
+      totalComment
       totalReactions
-    }
-    job {
-      title
-      description
-      location
-      jobType
-      salary
-      experienceLevel
-      workplaceType
-      applicationDeadline
-    }
-    marketPlace {
-      id
-      addedBy
-      entityId
-      title
-      price
-      condition
-      status
-      sku
-      slug
-      description
-      category
-      isApproved
-      isExpired
-      createdAt
-      updatedAt
-      tag
-      isFeatured
-      numberOfViews
-      interests
-      categories
-      location {
-        name
-        latitude
-        longitude
-        address
-        lat
-        lng
-      }
+      totalReShare
+      isWishList
+      isOwner
+      source
       media {
         url
       }
+      privacy
+      addedBy
+      poll {
+        id
+        title
+        question
+        resultVisibility
+        options {
+          id
+          text
+          order
+          votes
+        }
+        updatedAt
+        createdAt
+        endDate
+        status
+        totalVotes
+        isVoted
+        votedOptionId
+      }
+      moment {
+        id
+        videoUrl
+        hlsUrl
+        thumbnailUrl
+        optimizedVideoUrl
+        caption
+        createdAt
+        updatedAt
+        totalReshares
+        totalComments
+        totalReactions
+      }
+      job {
+        title
+        description
+        location
+        jobType
+        salary
+        experienceLevel
+        workplaceType
+        applicationDeadline
+      }
+      marketPlace {
+        id
+        addedBy
+        entityId
+        title
+        price
+        condition
+        status
+        sku
+        slug
+        description
+        category
+        isApproved
+        isExpired
+        createdAt
+        updatedAt
+        tag
+        isFeatured
+        numberOfViews
+        interests
+        categories
+        location {
+          name
+          latitude
+          longitude
+          address
+          lat
+          lng
+        }
+        media {
+          url
+        }
+      }
+      isPinned
+      pinnedAt
     }
-    isPinned
-    pinnedAt
   }
-}
 `;
 
 export const ADD_FEED = gql`
@@ -479,7 +479,9 @@ export const ADD_FEED = gql`
       isLiked
       isWishList
       isOwner
-      media
+      media {
+        url
+      }
       totalComment
       totalReactions
       totalReShare
@@ -553,13 +555,13 @@ export const GET_FEED_COMMENTS = gql`
   }
 `;
 export const PIN_FEED = gql`
-mutation PinFeed($input: PinFeedInput) {
-  pinFeed(input: $input) {
-    id
-    isPinned
-    pinnedAt
+  mutation PinFeed($input: PinFeedInput) {
+    pinFeed(input: $input) {
+      id
+      isPinned
+      pinnedAt
+    }
   }
-}
 `;
 
 export const DELETE_COMMENT_FEED = gql`
