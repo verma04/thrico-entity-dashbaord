@@ -118,7 +118,7 @@ const GamificationMenuLayout = ({
     {} as Record<string, MenuItem[]>
   );
 
-  const sectionOrder = ["System", "Vouchers", "Engagement", "Admin", "General"];
+  const sectionOrder = ["System", "Vouchers", "General", "Engagement", "Admin"];
   const sortedSectionNames = Object.keys(sections).sort((a, b) => {
     const ia = sectionOrder.indexOf(a);
     const ib = sectionOrder.indexOf(b);
