@@ -56,7 +56,7 @@ const BuilderLayout = () => {
 
   return (
     <>
-      <div className="flex bg-background h-[calc(100vh-6rem)] overflow-hidden border rounded-xl w-full shadow-sm">
+      <div className="flex bg-background h-full w-full overflow-hidden">
         {/* --- LEFT PANEL: CONTROLS --- */}
         <div className="w-[340px] flex flex-col border-r bg-card relative shrink-0">
           {/* Page Selector Dropdown */}

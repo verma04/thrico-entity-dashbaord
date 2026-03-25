@@ -4,6 +4,7 @@ import {
   CHANGE_USER_VERIFICATION,
   GET_ALL_USER,
   UPDATE_MEMBERS_TERMS_AND_CONDITIONS,
+  BULK_CHANGE_USER_STATUS,
 } from "../../quries/user";
 
 // ---------------------------------------------------------
@@ -37,3 +38,18 @@ export const useChangeUserVerification = (options: any) =>
 
 export const useUpdateMemberTermsAndConditions = (options: any) =>
   useMutation(UPDATE_MEMBERS_TERMS_AND_CONDITIONS, options || {});
+
+export const useBulkChangeUserStatus = (options: any) =>
+  useMutation(BULK_CHANGE_USER_STATUS, {
+    ...options,
+    refetchQueries: [
+      { query: GET_ALL_USER, variables: { input: { status: "ALL" } } },
+      { query: GET_ALL_USER, variables: { input: { status: "PENDING" } } },
+      { query: GET_ALL_USER, variables: { input: { status: "APPROVED" } } },
+      { query: GET_ALL_USER, variables: { input: { status: "BLOCKED" } } },
+      { query: GET_ALL_USER, variables: { input: { status: "REJECTED" } } },
+      { query: GET_ALL_USER, variables: { input: { status: "FLAGGED" } } },
+      { query: GET_ALL_USER, variables: { input: { status: "DISABLED" } } },
+    ],
+    awaitRefetchQueries: true,
+  });

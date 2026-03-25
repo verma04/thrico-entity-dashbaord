@@ -112,6 +112,15 @@ mutation ChangeUserVerification($input: statusInput) {
        ${details}
   }
 }`;
+
+export const BULK_CHANGE_USER_STATUS = gql`
+  mutation BulkChangeUserStatus($input: bulkStatusInput) {
+    bulkChangeUserStatus(input: $input) {
+      ${details}
+    }
+  }
+`;
+
 export const GET_USER_DETIALS = gql`
   query GetUserDetailsById($input: inputId) {
     getUserDetailsById(input: $input) {

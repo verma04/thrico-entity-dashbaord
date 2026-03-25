@@ -54,6 +54,8 @@ interface DataTableProps<TData, TValue> {
   pageIndex?: number;
   onPageChange?: (page: number) => void;
   onPageSizeChange?: (size: number) => void;
+  rowSelection?: any;
+  onRowSelectionChange?: any;
 }
 
 export function DataTable<TData, TValue>({
@@ -70,6 +72,8 @@ export function DataTable<TData, TValue>({
   pageIndex,
   onPageChange,
   onPageSizeChange,
+  rowSelection,
+  onRowSelectionChange,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -77,7 +81,10 @@ export function DataTable<TData, TValue>({
   );
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = React.useState({});
+  const [internalRowSelection, setInternalRowSelection] = React.useState({});
+
+  const actualRowSelection = rowSelection !== undefined ? rowSelection : internalRowSelection;
+  const actualOnRowSelectionChange = onRowSelectionChange || setInternalRowSelection;
 
   const table = useReactTable({
     data,
@@ -91,7 +98,7 @@ export function DataTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
+    onRowSelectionChange: actualOnRowSelectionChange,
     manualPagination: manualPagination,
     pageCount: pageCount,
     initialState: {
@@ -103,7 +110,7 @@ export function DataTable<TData, TValue>({
       sorting,
       columnFilters,
       columnVisibility,
-      rowSelection,
+      rowSelection: actualRowSelection,
       ...(manualPagination && pageIndex !== undefined
         ? {
             pagination: {

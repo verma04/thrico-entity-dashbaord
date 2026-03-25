@@ -22,6 +22,7 @@ import {
   EcosystemCard,
   EcosystemGrid,
 } from "@/components/layout/ecosystem/ecosystem-analytics";
+import { formatNumber } from "@/lib/formatNumber";
 
 export function CurrencyDashboard() {
   const [timeRange, setTimeRange] = useState<TimeRange>(TimeRange.LAST_7_DAYS);
@@ -125,6 +126,7 @@ export function CurrencyDashboard() {
                     axisLine={false}
                     tickLine={false}
                     tick={{ fontSize: 10, fontWeight: 900, fill: "#94a3b8" }}
+                    tickFormatter={formatNumber}
                   />
                   <Tooltip
                     contentStyle={{
@@ -138,6 +140,10 @@ export function CurrencyDashboard() {
                       fontSize: "10px",
                     }}
                     labelStyle={{ display: "none" }}
+                    formatter={(value: any) => [
+                      value ? formatNumber(Number(value)) : "0",
+                      "Amount",
+                    ]}
                   />
                   <Area
                     type="monotone"

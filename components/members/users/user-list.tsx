@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { type ColumnDef } from "@tanstack/react-table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -8,8 +8,10 @@ import UserActions from "./user-actions";
 import { DataTable } from "@/components/ui/data-table";
 import { format } from "date-fns";
 import { Mail, MapPin } from "lucide-react";
-import { UserDetail } from "@/graphql/actions";
+import { UserDetail, useBulkChangeUserStatus } from "@/graphql/actions";
 import { cn } from "@/lib/utils";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -29,7 +31,57 @@ const getStatusColor = (status: string) => {
 };
 
 export function UserList({ users }: { users: UserDetail[] }) {
+  const [rowSelection, setRowSelection] = useState({});
+  const [bulkChangeStatus, { loading: bulkLoading }] = useBulkChangeUserStatus({
+    onCompleted: () => {
+      setRowSelection({});
+    },
+  });
+
+  const selectedRowsIds = Object.keys(rowSelection)
+    .filter((key) => (rowSelection as any)[key])
+    .map((key) => users[Number(key)]?.id)
+    .filter(Boolean);
+
+  const handleBulkAction = async (statusAction: string) => {
+    if (!selectedRowsIds.length) return;
+    try {
+      await bulkChangeStatus({
+        variables: {
+          input: {
+            action: statusAction,
+            reason: "Bulk action from dashboard",
+            userIds: selectedRowsIds,
+          },
+        },
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const columns: ColumnDef<UserDetail>[] = [
+    {
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={table.getIsAllPageRowsSelected()}
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+          className="translate-y-[2px]"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+          className="translate-y-[2px]"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
     {
       accessorKey: "user.firstName",
       header: "Member",
@@ -86,7 +138,12 @@ export function UserList({ users }: { users: UserDetail[] }) {
       accessorKey: "status",
       header: "Status",
       cell: ({ row }) => (
-        <Badge className={cn("text-[9px] uppercase font-black px-2 py-0.5 h-5 rounded-md border-2", getStatusColor(row.original.status))}>
+        <Badge
+          className={cn(
+            "text-[9px] uppercase font-black px-2 py-0.5 h-5 rounded-md border-2",
+            getStatusColor(row.original.status),
+          )}
+        >
           {row.original.status}
         </Badge>
       ),
@@ -101,9 +158,9 @@ export function UserList({ users }: { users: UserDetail[] }) {
           }
           className={cn(
             "text-[9px] h-5 px-2 font-black uppercase tracking-tight",
-            row.original.verification?.isVerified 
-              ? "bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-100" 
-              : "bg-slate-100 text-slate-400 border-none"
+            row.original.verification?.isVerified
+              ? "bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-100"
+              : "bg-slate-100 text-slate-400 border-none",
           )}
         >
           {row.original.verification?.isVerified ? "Verified" : "Unverified"}
@@ -137,9 +194,47 @@ export function UserList({ users }: { users: UserDetail[] }) {
 
   return (
     <div className="space-y-4">
+      {Object.keys(rowSelection).length > 0 && (
+        <div className="flex items-center gap-2 bg-indigo-50/50 p-2.5 border border-indigo-100 rounded-xl shadow-sm animate-in fade-in slide-in-from-top-2">
+          <span className="text-xs font-bold text-indigo-700 px-3 py-1 bg-indigo-100 rounded-lg">
+            {selectedRowsIds.length} selected
+          </span>
+          <div className="h-4 w-px bg-indigo-200 mx-1" />
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-8 text-xs font-bold border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+            onClick={() => handleBulkAction("APPROVE")}
+            disabled={bulkLoading}
+          >
+            Approve Selected
+          </Button>
+
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-8 text-xs font-bold border-rose-200 text-rose-700 hover:bg-rose-50"
+            onClick={() => handleBulkAction("BLOCK")}
+            disabled={bulkLoading}
+          >
+            Block Selected
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-8 text-xs font-bold border-slate-200 text-slate-700 hover:bg-slate-50"
+            onClick={() => handleBulkAction("REJECT")}
+            disabled={bulkLoading}
+          >
+            Reject Selected
+          </Button>
+        </div>
+      )}
       <DataTable
         columns={columns}
         data={users || []}
+        rowSelection={rowSelection}
+        onRowSelectionChange={setRowSelection}
         rowClassName="hover:bg-muted/30 transition-colors"
       />
     </div>
