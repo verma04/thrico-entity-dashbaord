@@ -3,6 +3,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { LucideIcon, TrendingUp, TrendingDown, Activity } from "lucide-react";
+import { formatNumber } from "@/lib/formatNumber";
 
 // ---------------------------------------------------------------------------
 // KPI Stat Card
@@ -28,6 +29,9 @@ export function EcosystemKPI({
 }: EcosystemKPIProps) {
   const isPositive = trend !== undefined && trend > 0;
   const isNegative = trend !== undefined && trend < 0;
+
+  const formattedValue =
+    typeof value === "number" ? formatNumber(value) : value;
 
   return (
     <div className="group relative flex flex-col gap-6 rounded-4xl border border-slate-100 bg-white/50 backdrop-blur-xl px-6 py-7 shadow-sm transition-all duration-500 hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.06)] hover:-translate-y-1 overflow-hidden ring-1 ring-slate-100/50">
@@ -58,7 +62,7 @@ export function EcosystemKPI({
       <div className="flex flex-col gap-1 relative z-10">
         <div className="flex items-center gap-3">
           <span className="text-[32px] font-black text-slate-900 leading-tight tracking-tight tabular-nums group-hover:text-indigo-600 transition-colors duration-300">
-            {value}
+            {formattedValue}
           </span>
           {trend !== undefined && trend !== 0 && (
             <div
