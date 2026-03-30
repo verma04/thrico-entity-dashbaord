@@ -1,102 +1,124 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ChevronUp, ChevronDown, AlertTriangle } from "lucide-react";
-// Adjust import path if needed aliases are usually @/
+import { motion, AnimatePresence } from "framer-motion";
+import { AlertCircle, ChevronRight, X, ExternalLink, ShieldAlert } from "lucide-react";
 import Link from "next/link";
 import { getCustomDomain } from "@/graphql/actions/domain";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 export default function DomainStatusAlert() {
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isDismissed, setIsDismissed] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   const { data, loading } = getCustomDomain();
 
   const domain = data?.getCustomDomain;
 
-  // Logic to determine if we should show the alert
-  // Show if:
-  // 1. Data is loaded
-  // 2. We have a domain
-  // 3. The domain is NOT verified
   const shouldShow = useMemo(() => {
-    if (loading || !domain) return false;
-    // If domain exists but is not verified, show alert
-    // If check logic needs to be more complex (e.g. DNS issues), add here
+    if (loading || !domain || isDismissed) return false;
     return !domain.isVerified;
-  }, [loading, domain]);
+  }, [loading, domain, isDismissed]);
 
   if (!shouldShow) return null;
 
-  const toggleExpand = () => setIsExpanded((prev) => !prev);
-
   return (
-    // Positioning it above the TrialBanner if both exist, or similar position.
-    // Using bottom-5 right-5 might overlap if TrialBanner is there.
-    // Maybe stack them? specific offset?
-    // For now, let's put it at fixed bottom-5 left-5 to avoid collision or stack vertically.
-    // The requirement said "hightlisght that your cutsom domain or things... like system erro elert".
-    // A bottom-right stack is common. TrialBanner is bottom-5 right-5.
-    // Let's put this one slightly higher or on the left.
-    // Let's try bottom-5 left-5 for now to differentiate "System/Config" (left) vs "Marketing/Trial" (right).
-    <div className="fixed bottom-5 right-5 w-full max-w-sm z-[20]">
-      <Card
-        className={`overflow-hidden bg-white border border-amber-200 shadow-xl transition-all duration-300 ${
-          isExpanded ? "shadow-amber-100/50" : "shadow-gray-200/50"
-        }`}
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
+        className="fixed bottom-6 left-6 z-100 w-full max-w-[340px]"
       >
-        <div
-          className="relative bg-gradient-to-r from-amber-50 via-orange-50 to-red-50 border-b border-amber-100 p-4 cursor-pointer group"
-          onClick={toggleExpand}
+        <div 
+          className={cn(
+            "relative overflow-hidden rounded-2xl border border-border bg-background/80 backdrop-blur-xl shadow-2xl transition-all duration-300",
+            isExpanded ? "ring-1 ring-amber-500/20" : "hover:border-amber-500/30"
+          )}
         >
-          <div className="relative flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-amber-100 border border-amber-200">
-                <AlertTriangle className="w-5 h-5 text-amber-600" />
-              </div>
-              <div>
-                <p className="text-amber-700/80 text-xs font-medium uppercase tracking-wide">
-                  System Alert
-                </p>
-                <p className="text-gray-900 text-sm font-semibold">
-                  Domain Verification Pending
-                </p>
-              </div>
+          {/* Status Bar */}
+          <div className="absolute top-0 left-0 w-1 h-full bg-amber-500/80" />
+
+          {/* Header/Summary */}
+          <div className="p-4 flex items-start gap-3.5">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600 border border-amber-500/20">
+              <ShieldAlert className="h-5 w-5" />
             </div>
-            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white/50 hover:bg-white transition-colors border border-amber-100">
-              {isExpanded ? (
-                <ChevronDown className="text-amber-600 w-5 h-5" />
-              ) : (
-                <ChevronUp className="text-amber-600 w-5 h-5" />
-              )}
+            
+            <div className="flex-1 min-w-0 pr-6">
+              <div className="flex items-center gap-1.5 mb-0.5">
+                <span className="text-[10px] font-bold text-amber-600 uppercase tracking-widest">Action Required</span>
+                <div className="h-1 w-1 rounded-full bg-amber-500 animate-pulse" />
+              </div>
+              <h3 className="text-[13.5px] font-semibold text-foreground tracking-tight leading-none mb-1">
+                Domain Verification
+              </h3>
+              <p className="text-[11.5px] text-muted-foreground line-clamp-1">
+                {domain?.domain} needs setup
+              </p>
             </div>
+
+            <button 
+              onClick={() => setIsDismissed(true)}
+              className="absolute top-3 right-3 p-1.5 rounded-lg text-muted-foreground/40 hover:text-foreground hover:bg-accent transition-all"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
           </div>
-        </div>
 
-        {/* Expandable Content */}
-        <div
-          className={`bg-white overflow-hidden transition-all duration-300 ease-out ${
-            isExpanded ? "max-h-[200px] opacity-100" : "max-h-0 opacity-0"
-          }`}
-        >
-          <div className="p-5">
-            <p className="text-gray-600 text-sm mb-4">
-              Your custom domain <strong>{domain?.domain}</strong> is not yet
-              verified. features may be limited until DNS records are
-              propagated.
-            </p>
-
-            <Link href={"/settings/domains"}>
-              <Button
-                variant="outline"
-                className="w-full border-amber-200 text-amber-700 hover:bg-amber-50 hover:text-amber-800"
+          {/* Actions */}
+          <div className="px-4 pb-4 flex items-center gap-2">
+            <Link href="/settings/domains" className="flex-1">
+              <Button 
+                size="sm" 
+                className="w-full h-8 px-3 text-[12px] font-semibold bg-amber-500 hover:bg-amber-600 text-white border-none shadow-sm shadow-amber-500/20 rounded-lg group"
+                onClick={() => setIsExpanded(false)}
               >
-                Verify Domain
+                Verify Now
+                <ChevronRight className="ml-1 h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
               </Button>
             </Link>
+            
+            <button 
+              onClick={() => setIsExpanded(!isExpanded)}
+              className={cn(
+                "h-8 px-3 text-[11px] font-medium rounded-lg border border-border hover:bg-accent transition-all shrink-0",
+                isExpanded && "bg-accent text-foreground"
+              )}
+            >
+              {isExpanded ? "Less" : "Details"}
+            </button>
           </div>
+
+          {/* Expanded Content */}
+          <AnimatePresence>
+            {isExpanded && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="overflow-hidden bg-muted/30 border-t border-border/50"
+              >
+                <div className="p-4 space-y-3">
+                  <p className="text-[12px] text-muted-foreground leading-relaxed">
+                    Connecting your custom domain ensures your community members recognize your brand. Setup usually takes less than 5 minutes.
+                  </p>
+                  
+                  <div className="rounded-lg bg-background/50 border border-border/50 p-2.5 flex items-center justify-between group cursor-pointer hover:border-amber-500/30 transition-all">
+                    <div className="flex items-center gap-2">
+                      <div className="h-6 w-6 rounded bg-amber-500/5 flex items-center justify-center">
+                        <ExternalLink className="h-3 w-3 text-amber-600" />
+                      </div>
+                      <span className="text-[11px] font-medium text-foreground">View DNS Instructions</span>
+                    </div>
+                    <ChevronRight className="h-3 w-3 text-muted-foreground/30 group-hover:text-amber-500 transition-colors" />
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-      </Card>
-    </div>
+      </motion.div>
+    </AnimatePresence>
   );
 }

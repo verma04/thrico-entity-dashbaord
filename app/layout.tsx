@@ -27,6 +27,7 @@ import {
 import "./globals.css";
 import { ApolloWrapper } from "@/graphql/hoc/ApolloWrapper";
 import type { Metadata } from "next";
+import { Toaster } from "sonner";
 
 const roobert = localFont({
   src: [
@@ -301,6 +302,7 @@ export default function RootLayout({
       <body
         className={`${roobert.variable} ${avantGarde.variable} ${spaceGrotesk.className} ${inter.variable} ${playfair.variable} ${outfit.variable} ${firaCode.variable} ${roboto.variable} ${openSans.variable} ${montserrat.variable} ${lato.variable} ${poppins.variable} ${nunito.variable} ${sourceSans3.variable} ${workSans.variable} ${ubuntu.variable} ${merriweather.variable} ${lora.variable} ${cormorantGaramond.variable} ${bitter.variable} ${oswald.variable} ${raleway.variable} ${bebasNeue.variable} ${cinzel.variable} ${pacifico.variable} font-sans`}
       >
+        <Toaster position="top-right" />
         <ApolloWrapper>{children}</ApolloWrapper>
       </body>
     </html>

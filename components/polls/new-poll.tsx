@@ -22,13 +22,7 @@ import {
 } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -54,7 +48,7 @@ const pollSchema = Yup.object().shape({
           .required("Option is required")
           .min(1, "Option cannot be empty")
           .max(100, "Option must be less than 100 characters"),
-      })
+      }),
     )
     .min(2, "At least 2 options are required")
     .max(10, "Maximum 10 options allowed"),
@@ -149,7 +143,7 @@ export default function NewPoll({
                 ? "bg-zinc-900 text-white shadow-lg shadow-zinc-900/20"
                 : step > i
                   ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
-                  : "bg-zinc-50 text-zinc-400 border border-zinc-100 hover:text-zinc-600 hover:border-zinc-200"
+                  : "bg-zinc-50 text-zinc-400 border border-zinc-100 hover:text-zinc-600 hover:border-zinc-200",
             )}
           >
             <span
@@ -159,7 +153,7 @@ export default function NewPoll({
                   ? "bg-white/20 text-white"
                   : step > i
                     ? "bg-emerald-100 text-emerald-600"
-                    : "bg-zinc-100 text-zinc-400"
+                    : "bg-zinc-100 text-zinc-400",
               )}
             >
               {step > i ? "✓" : i + 1}
@@ -170,7 +164,7 @@ export default function NewPoll({
             <div
               className={cn(
                 "w-6 h-px mx-1 transition-colors duration-300",
-                step > i ? "bg-emerald-200" : "bg-zinc-200"
+                step > i ? "bg-emerald-200" : "bg-zinc-200",
               )}
             />
           )}
@@ -284,9 +278,7 @@ export default function NewPoll({
                       size="icon"
                       className="h-7 w-7 rounded-lg text-zinc-300 hover:text-zinc-600"
                       onClick={() => moveOption(index, index + 1)}
-                      disabled={
-                        index === formik.values.options.length - 1
-                      }
+                      disabled={index === formik.values.options.length - 1}
                     >
                       <ArrowDown className="h-3.5 w-3.5" />
                     </Button>
@@ -350,7 +342,7 @@ export default function NewPoll({
                 "w-full flex items-center gap-4 p-4 rounded-2xl border-2 transition-all duration-200 text-left",
                 resultVisibility === opt.value
                   ? "border-indigo-200 bg-indigo-50/50 shadow-sm shadow-indigo-500/5"
-                  : "border-zinc-100 bg-zinc-50/30 hover:border-zinc-200 hover:bg-white"
+                  : "border-zinc-100 bg-zinc-50/30 hover:border-zinc-200 hover:bg-white",
               )}
             >
               <div
@@ -358,7 +350,7 @@ export default function NewPoll({
                   "h-5 w-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all",
                   resultVisibility === opt.value
                     ? "border-indigo-500 bg-indigo-500"
-                    : "border-zinc-300"
+                    : "border-zinc-300",
                 )}
               >
                 {resultVisibility === opt.value && (
@@ -371,7 +363,7 @@ export default function NewPoll({
                     "text-[13px] font-bold transition-colors",
                     resultVisibility === opt.value
                       ? "text-indigo-700"
-                      : "text-zinc-700"
+                      : "text-zinc-700",
                   )}
                 >
                   {opt.label}

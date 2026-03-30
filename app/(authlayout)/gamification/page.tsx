@@ -101,8 +101,8 @@ export default function GamificationOverview() {
       />
 
       <EcosystemActionBar shadow="none">
-        <div className="flex items-center justify-between w-full">
-          <div className="flex items-center gap-6">
+        <EcosystemActionBar.Group>
+          <EcosystemActionBar.Item>
             <div className="flex items-center gap-3">
               <div
                 className={cn(
@@ -116,17 +116,23 @@ export default function GamificationOverview() {
                 Platform {settings.isEnabled ? "Energized" : "Static"}
               </span>
             </div>
-            <div className="h-4 w-px bg-slate-200" />
+          </EcosystemActionBar.Item>
+          <EcosystemActionBar.Separator />
+          <EcosystemActionBar.Item>
             <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
               <ShieldCheck className="h-3.5 w-3.5 text-indigo-500" />
               <span>Invariants Locked</span>
             </div>
-          </div>
+          </EcosystemActionBar.Item>
+        </EcosystemActionBar.Group>
 
-          <div className="flex items-center gap-3">
+        <EcosystemActionBar.Group align="right">
+          <EcosystemActionBar.Item>
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mr-2">
               Cycles: {new Date().toLocaleDateString()}
             </p>
+          </EcosystemActionBar.Item>
+          <EcosystemActionBar.Item>
             <Button
               variant="outline"
               className="h-10 px-4 rounded-xl border-slate-200 font-bold hover:bg-slate-50 transition-all gap-2"
@@ -134,8 +140,8 @@ export default function GamificationOverview() {
               <Activity className="h-4 w-4 text-emerald-500" />
               Live telemetry
             </Button>
-          </div>
-        </div>
+          </EcosystemActionBar.Item>
+        </EcosystemActionBar.Group>
       </EcosystemActionBar>
 
       <EcosystemContainer className="space-y-12 p-8 lg:p-12">
@@ -223,7 +229,7 @@ export default function GamificationOverview() {
             {gamificationStats?.mostPopularBadge && (
               <div className="p-8 rounded-[2.5rem] bg-indigo-50/50 border border-indigo-100 flex items-center justify-between group hover:bg-white hover:shadow-xl hover:shadow-indigo-500/10 transition-all duration-500 border-dashed">
                 <div className="flex items-center gap-8">
-                  <div className="h-20 w-20 bg-white rounded-[1.5rem] flex items-center justify-center shadow-xl border border-slate-100 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 text-5xl">
+                  <div className="h-20 w-20 bg-white rounded-3xl flex items-center justify-center shadow-xl border border-slate-100 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 text-5xl">
                     {gamificationStats.mostPopularBadge.icon || "🏆"}
                   </div>
                   <div>
@@ -245,7 +251,7 @@ export default function GamificationOverview() {
               <div className="p-8 rounded-[2.5rem] bg-orange-50/50 border border-orange-100 flex items-center justify-between group hover:bg-white hover:shadow-xl hover:shadow-orange-500/10 transition-all duration-500 border-dashed">
                 <div className="flex items-center gap-8">
                   <div
-                    className="h-20 w-20 rounded-[1.5rem] flex items-center justify-center shadow-xl border border-slate-100 group-hover:scale-110 group-hover:-rotate-6 transition-all duration-500"
+                    className="h-20 w-20 rounded-3xl flex items-center justify-center shadow-xl border border-slate-100 group-hover:scale-110 group-hover:-rotate-6 transition-all duration-500"
                     style={{
                       backgroundColor: `${gamificationStats.topRank.color}15`,
                     }}
@@ -345,7 +351,7 @@ export default function GamificationOverview() {
               </h3>
             </div>
             <div className="p-10 rounded-[3.5rem] bg-slate-900 border border-white/5 space-y-6">
-              <div className="flex items-center justify-between p-6 rounded-3xl bg-white/5 border border-white/10 hover:bg-white/[0.08] transition-colors">
+              <div className="flex items-center justify-between p-6 rounded-3xl bg-white/5 border border-white/10 hover:bg-white/8 transition-colors">
                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
                   CORE ENGINE STATE
                 </span>
@@ -360,7 +366,7 @@ export default function GamificationOverview() {
                   {settings.isEnabled ? "Energized" : "Offline"}
                 </div>
               </div>
-              <div className="flex items-center justify-between p-6 rounded-3xl bg-white/5 border border-white/10 hover:bg-white/[0.08] transition-colors">
+              <div className="flex items-center justify-between p-6 rounded-3xl bg-white/5 border border-white/10 hover:bg-white/8 transition-colors">
                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
                   LOGIN YIELD SYSTEM
                 </span>
@@ -375,7 +381,7 @@ export default function GamificationOverview() {
                   {reloginConfig.isEnabled ? "Stable" : "Locked"}
                 </div>
               </div>
-              <div className="flex items-center justify-between p-6 rounded-3xl bg-white/5 border border-white/10 hover:bg-white/[0.08] transition-colors">
+              <div className="flex items-center justify-between p-6 rounded-3xl bg-white/5 border border-white/10 hover:bg-white/8 transition-colors">
                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
                   DAILY EMISSION CAP
                 </span>
@@ -386,7 +392,7 @@ export default function GamificationOverview() {
                   </span>
                 </div>
               </div>
-              <div className="flex items-center justify-between p-6 rounded-3xl bg-white/5 border border-white/10 hover:bg-white/[0.08] transition-colors">
+              <div className="flex items-center justify-between p-6 rounded-3xl bg-white/5 border border-white/10 hover:bg-white/8 transition-colors">
                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
                   POINT DECAY PROTOCOL
                 </span>

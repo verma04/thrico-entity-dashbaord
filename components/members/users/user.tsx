@@ -16,7 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import {
   Select,
-  SelectContent,
+SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -119,77 +119,67 @@ const User = ({ status: initialStatus }: any) => {
         }
       />
 
-      <EcosystemActionBar>
-        <div className="relative w-full md:w-96 group">
-          <div className="absolute left-4 top-1/2 -translate-y-1/2">
-            <Search className="h-5 w-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
-          </div>
-          <Input
-            placeholder="Search by name, email or ID..."
-            className="pl-12 h-12 bg-slate-50 border-slate-200 rounded-xl focus-visible:ring-4 focus-visible:ring-indigo-500/5 transition-all font-medium text-slate-700 placeholder:text-slate-400 border shadow-sm"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
+      <EcosystemActionBar shadow="none">
+        <EcosystemActionBar.Group>
+          <EcosystemActionBar.Item grow className="max-w-md">
+            <EcosystemActionBar.Search
+              value={search}
+              onChange={setSearch}
+              placeholder="Search members by name, email or ID..."
+            />
+          </EcosystemActionBar.Item>
+        </EcosystemActionBar.Group>
 
-        <div className="h-8 w-px bg-slate-100 hidden md:block" />
+        <EcosystemActionBar.Separator />
 
-        <div className="flex items-center gap-3">
-          <Select value={status} onValueChange={setStatus}>
-            <SelectTrigger className="w-[180px] h-12 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition-colors shadow-sm font-semibold text-slate-600 focus:ring-4 focus:ring-indigo-500/5">
-              <div className="flex items-center gap-2.5">
-                <div
-                  className={cn(
-                    "h-2 w-2 rounded-full",
-                    status === "APPROVED"
-                      ? "bg-emerald-500"
-                      : status === "PENDING"
-                        ? "bg-amber-500"
-                        : "bg-slate-300",
-                  )}
-                />
-                <SelectValue placeholder="Status Filter" />
-              </div>
-            </SelectTrigger>
-            <SelectContent className="rounded-xl border-slate-200 shadow-xl p-1">
-              <SelectItem
-                value="ALL"
-                className="font-semibold rounded-lg py-2.5"
-              >
-                All Members
-              </SelectItem>
-              <SelectItem
-                value="APPROVED"
-                className="font-semibold rounded-lg py-2.5"
-              >
-                Approved
-              </SelectItem>
-              <SelectItem
-                value="PENDING"
-                className="font-semibold rounded-lg py-2.5"
-              >
-                Pending
-              </SelectItem>
-              <SelectItem
-                value="BLOCKED"
-                className="font-semibold rounded-lg py-2.5"
-              >
-                Blocked
-              </SelectItem>
-            </SelectContent>
-          </Select>
+        <EcosystemActionBar.Group>
+          <EcosystemActionBar.Item>
+            <Select value={status} onValueChange={setStatus}>
+              <SelectTrigger className="w-[180px] h-12 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition-colors shadow-sm font-semibold text-slate-600 focus:ring-4 focus:ring-indigo-500/5">
+                <div className="flex items-center gap-2.5">
+                  <div
+                    className={cn(
+                      "h-2 w-2 rounded-full",
+                      status === "APPROVED"
+                        ? "bg-emerald-500"
+                        : status === "PENDING"
+                          ? "bg-amber-500"
+                          : "bg-slate-300",
+                    )}
+                  />
+                  <SelectValue placeholder="Status Filter" />
+                </div>
+              </SelectTrigger>
+              <SelectContent className="rounded-xl border-slate-200 shadow-xl p-1">
+                <SelectItem value="ALL" className="font-semibold rounded-lg py-2.5">
+                  All Members
+                </SelectItem>
+                <SelectItem value="APPROVED" className="font-semibold rounded-lg py-2.5">
+                  Approved
+                </SelectItem>
+                <SelectItem value="PENDING" className="font-semibold rounded-lg py-2.5">
+                  Pending
+                </SelectItem>
+                <SelectItem value="BLOCKED" className="font-semibold rounded-lg py-2.5">
+                  Blocked
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </EcosystemActionBar.Item>
 
-          <div className="hidden lg:flex items-center gap-2 px-4 py-2 bg-slate-50 rounded-xl border border-slate-200 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
-            <Filter className="h-3 w-3" />
-            Advanced
-          </div>
-        </div>
-        <div className="flex items-center gap-2 relative z-10 ml-auto mr-4">
-          <div className="flex items-center gap-2.5 px-4 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs font-semibold text-slate-600 uppercase tracking-wide whitespace-nowrap">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+          <EcosystemActionBar.Item className="hidden lg:flex">
+            <div className="flex items-center gap-2 px-4 py-2 bg-slate-50 rounded-xl border border-slate-200 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
+              <Filter className="h-3 w-3" />
+              Advanced
+            </div>
+          </EcosystemActionBar.Item>
+        </EcosystemActionBar.Group>
+
+        <EcosystemActionBar.Group align="right">
+          <EcosystemActionBar.Status active={filteredUsers.length > 0}>
             {filteredUsers.length} Members
-          </div>
-        </div>
+          </EcosystemActionBar.Status>
+        </EcosystemActionBar.Group>
       </EcosystemActionBar>
 
       <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">

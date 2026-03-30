@@ -257,3 +257,5 @@ export * from "./settings";
 export * from "./settings/roles";
 export * from "./audit";
 export * from "./communities";
+export * from "./email";
+export * from "./contacts";

@@ -1,7 +1,14 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Globe, Lock, Zap, ArrowUpRight, Plus, ExternalLink } from "lucide-react";
+import {
+  Globe,
+  Lock,
+  Zap,
+  ArrowUpRight,
+  Plus,
+  ExternalLink,
+} from "lucide-react";
 
 import { ThricoDomain } from "./thrico-domain";
 import { CustomDomain } from "./custom-domain";
@@ -39,7 +46,9 @@ export const DomainsPage = () => {
                 <h2 className="text-[14px] font-semibold text-slate-900 leading-none tracking-tight">
                   Domain Provisioning
                 </h2>
-                <p className="text-[11px] text-slate-400 mt-1">Configure your custom namespace</p>
+                <p className="text-[11px] text-slate-400 mt-1">
+                  Configure your custom namespace
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -62,8 +71,9 @@ export const DomainsPage = () => {
 
           <div className="p-5 space-y-6">
             <p className="text-[13px] text-slate-500 leading-relaxed max-w-2xl">
-              Connect a domain you already own or procure a new one. A custom domain ensures your brand
-              remains consistent and trusted by your global user base.
+              Connect a domain you already own or procure a new one. A custom
+              domain ensures your brand remains consistent and trusted by your
+              global user base.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -100,7 +110,7 @@ export const DomainsPage = () => {
             {hasCustomDomain ? "2" : "1"} Total
           </span>
         </div>
-        
+
         <div className="grid grid-cols-1 gap-3">
           <ThricoDomain />
           <CustomDomain />
@@ -116,7 +126,9 @@ const FeatureCard = ({ icon: Icon, iconColor, title, desc }: any) => (
       <div className="h-6 w-6 rounded-md bg-white border border-slate-200/60 flex items-center justify-center shrink-0">
         <Icon className={cn("h-3.5 w-3.5", iconColor)} />
       </div>
-      <span className="text-[12px] font-semibold text-slate-800 uppercase tracking-tight">{title}</span>
+      <span className="text-[12px] font-semibold text-slate-800 uppercase tracking-tight">
+        {title}
+      </span>
     </div>
     <p className="text-[11px] text-slate-400 leading-relaxed font-medium">
       {desc}

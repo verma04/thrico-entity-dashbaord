@@ -32,6 +32,41 @@ import {
   Currency,
   Video,
   History,
+  LayoutDashboard,
+  Rss,
+  Cpu,
+  Layers,
+  UserCog,
+  ShieldAlert,
+  Key,
+  Globe,
+  Languages,
+  BadgeCheck,
+  Target,
+  LineChart,
+  Wallet,
+  Coins,
+  ShieldCheck,
+  Undo2,
+  Search,
+  FileSearch,
+  Ticket,
+  Percent,
+  Box,
+  CheckCircle,
+  Megaphone,
+  Briefcase,
+  FileText,
+  BarChart4,
+  CheckSquare,
+  UserCheck,
+  Zap,
+  Tag,
+  Info,
+  LifeBuoy,
+  LogOut,
+  Bell,
+  Mail,
 } from "lucide-react";
 import { useMemo } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -47,350 +82,142 @@ const menuLink = (href: string, text: string) => (
   </Link>
 );
 
-export const playground = [
+// --- 1. HOME ---
+export const homeItems = [
   {
-    key: "home",
-    label: "Home",
+    key: "home-dashboard",
+    label: "Dashboard",
     path: "/",
     icon: <Home size={18} />,
   },
-  {
-    key: "feed",
-    label: "Feed",
-    path: "/feed",
-    icon: <ChartBarIcon size={18} />,
-  },
+];
 
+// --- 2. COMMUNITY INTELLIGENCE ---
+export const communityIntelligence = [
   {
     key: "members",
     label: "Members",
     path: "/members",
     icon: <Users size={18} />,
+    children: [
+      { key: "members-dash", label: "Dashboard", path: "/members" },
+      { key: "members-manage", label: "Manage Members", path: "/members/all" },
+      { key: "members-reported", label: "Reported", path: "/members/reports" },
+      { key: "members-settings", label: "Settings", path: "/members/settings" },
+    ],
   },
 ];
 
-export const main = playground;
-
-export const settings = [
+// --- 2. CONTENT MODERATION ---
+export const contentModeration = [
   {
-    key: "cms",
-    label: "Manage Website",
-    path: "/app-layout/pages",
-    icon: <PaintbrushVerticalIcon size={18} />,
-  },
-  {
-    key: "moderation",
-    label: "Moderation",
+    key: "mod-dashboard",
+    label: "Dashboard",
     path: "/settings/moderation",
-    icon: <Shield size={18} />,
+    icon: <LayoutDashboard size={18} />,
   },
   {
-    key: "reports",
-    label: "Report & Feedback",
+    key: "feed",
+    label: "Feed (Posts, Photos, Videos)",
+    path: "/feed",
+    icon: <Rss size={18} />,
+    children: [
+      { key: "feed-dash", label: "Dashboard", path: "/feed" },
+      { key: "feed-manage", label: "Manage Posts", path: "/feed/manage" },
+      { key: "feed-overall", label: "Overall Posts", path: "/feed/all" },
+      { key: "feed-pinned", label: "Pinned Post", path: "/feed/pinned" },
+      { key: "feed-admin", label: "Admin Posts", path: "/feed/admin" },
+      { key: "feed-moments", label: "Moments (Videos)", path: "/moments" },
+      { key: "feed-jobs", label: "Jobs", path: "/jobs" },
+      { key: "feed-listings", label: "Listings", path: "/listing" },
+      { key: "feed-reported", label: "Reported", path: "/feed/reported" },
+      { key: "feed-settings", label: "Settings", path: "/feed/settings" },
+    ],
+  },
+  {
+    key: "mod-reported",
+    label: "Reported Items",
     path: "/reports",
-    icon: <ClipboardList size={18} />,
+    icon: <ShieldAlert size={18} />,
   },
   {
-    key: "audit-logs",
-    label: "Audit Logs",
-    path: "/audit-logs",
-    icon: <History size={18} />,
-  },
-];
-
-export const extendedItems = [
-  {
-    key: "communities",
-    label: "Communities",
-    path: "/communities",
-    icon: <Users size={18} />,
+    key: "mod-manual",
+    label: "Manual Setup",
+    icon: <Settings size={18} />,
     children: [
       {
-        key: "communities-approval",
-        label: "Manage Approvals",
-        path: "/communities/all",
+        key: "mod-banned",
+        label: "Banned words",
+        path: "/settings/moderation/banned-words",
       },
       {
-        key: "communities-reports",
-        label: "Reports",
-        path: "/communities/reports",
+        key: "mod-links",
+        label: "Blocked Links",
+        path: "/settings/moderation/blocked-links",
       },
+    ],
+  },
+  {
+    key: "mod-ai",
+    label: "AI Moderation",
+    icon: <Cpu size={18} />,
+    children: [
       {
-        key: "communities-settings",
+        key: "mod-ai-settings",
         label: "Settings",
-        path: "/communities/settings",
+        path: "/settings/moderation/ai",
       },
-    ],
-  },
-  {
-    key: "events",
-    label: "Events",
-    path: "/events",
-    icon: <BellDotIcon size={18} />,
-    children: [
-      {
-        key: "events-manage",
-        label: "Manage Events",
-        path: "/events",
-      },
-      {
-        key: "events-categories",
-        label: "Categories",
-        path: "/events/categories",
-      },
-      {
-        key: "events-settings",
-        label: "Settings",
-        path: "/events/settings",
-      },
-    ],
-  },
-
-  {
-    key: "jobs",
-    label: "Jobs",
-    path: "/jobs",
-    icon: <Rocket size={18} />,
-    children: [
-      { key: "job-approval", label: "Manage Approvals", path: "/jobs" },
-      { key: "job-settings", label: "Settings", path: "/jobs/settings" },
-    ],
-  },
-  {
-    key: "listing",
-    label: "Marketplace",
-    path: "/listing",
-    icon: <ShoppingBag size={18} />,
-    children: [
-      {
-        key: "marketplace-listings",
-        label: "Manage Listings",
-        path: "/listing",
-      },
-      {
-        key: "marketplace-settings",
-        label: "Settings",
-        path: "/listing/settings",
-      },
-    ],
-  },
-  {
-    key: "shop",
-    label: "Shop",
-    path: "/shop",
-    icon: <Store size={18} />,
-    children: [
-      {
-        key: "shop-dashboard",
-        label: "Dashboard",
-        path: "/shop",
-      },
-      {
-        key: "shop-products",
-        label: "Products",
-        path: "/shop/all",
-      },
-      {
-        key: "shop-banners",
-        label: "Banners",
-        path: "/shop/banners",
-      },
-      {
-        key: "shop-settings",
-        label: "Settings",
-        path: "/shop/settings",
-      },
-    ],
-  },
-  {
-    key: "forums",
-    label: "Forums",
-    path: "/forums",
-    icon: <MessageSquare size={18} />,
-    children: [
-      { key: "all-forums", label: "Manage Forums", path: "/forums" },
-      { key: "forums-settings", label: "Settings", path: "/forums/settings" },
-    ],
-  },
-  {
-    key: "polls",
-    label: "Polls",
-    path: "/polls",
-    icon: <BarChart3 size={18} />,
-    children: [
-      { key: "all-polls", label: "Manage Polls", path: "/polls" },
-      { key: "polls-settings", label: "Settings", path: "/polls/settings" },
-    ],
-  },
-
-  {
-    key: "feedback",
-    label: "Feedback",
-    path: "/feedback",
-    icon: <BarChart3 size={18} />,
-    children: [
-      { key: "all-polls", label: "Manage Feedback", path: "/feedback" },
-      { key: "polls-settings", label: "Settings", path: "/polls/settings" },
-    ],
-  },
-  {
-    key: "surveys",
-    label: "Surveys",
-    path: "/surveys",
-    icon: <ClipboardList size={18} />,
-    children: [
-      { key: "all-surveys", label: "Manage Surveys", path: "/surveys" },
-      { key: "surveys-settings", label: "Settings", path: "/surveys/settings" },
-    ],
-  },
-
-  {
-    key: "mentorship",
-    label: "Mentorship",
-    path: "/mentorship",
-    icon: <GraduationCap size={18} />,
-    children: [
-      {
-        key: "mentorship-programs",
-        label: "Manage Programs",
-        path: "/mentorship",
-      },
-      {
-        key: "mentorship-settings",
-        label: "Settings",
-        path: "/mentorship/settings",
-      },
-    ],
-  },
-  {
-    key: "offers",
-    label: "Offers & Deals",
-    path: "/offers",
-    icon: <Gift size={18} />,
-    children: [
-      {
-        key: "offers-manage",
-        label: "Manage Offers",
-        path: "/offers",
-      },
-      {
-        key: "offers-settings",
-        label: "Settings",
-        path: "/offers/settings",
-      },
-    ],
-  },
-  {
-    key: "wall-of-fame",
-    label: "Wall of Fame",
-    path: "/wall-of-fame",
-    icon: <Trophy size={18} />,
-    children: [
-      {
-        key: "wall-manage",
-        label: "Manage Honorees",
-        path: "/wall-of-fame",
-      },
-      {
-        key: "wall-settings",
-        label: "Settings",
-        path: "/wall-of-fame/settings",
-      },
-    ],
-  },
-  {
-    key: "celebrations",
-    label: "Celebrations",
-    path: "/celebrations",
-    icon: <PartyPopper size={18} />,
-    children: [
-      {
-        key: "celebrations-birthdays",
-        label: "Birthdays",
-        path: "/celebrations/birthdays",
-      },
-      {
-        key: "celebrations-anniversaries",
-        label: "Anniversaries",
-        path: "/celebrations/anniversaries",
-      },
-    ],
-  },
-  {
-    key: "news",
-    label: "News & Blogs",
-    path: "/news",
-    icon: <Newspaper size={18} />,
-    children: [
-      { key: "news-manage", label: "Manage Articles", path: "/news" },
-      { key: "news-settings", label: "Settings", path: "/news/settings" },
-    ],
-  },
-  {
-    key: "stories",
-    label: "Stories",
-    path: "/stories",
-    icon: <Video size={18} />,
-    children: [
-      { key: "stories-manage", label: "Manage Stories", path: "/stories" },
-      { key: "stories-settings", label: "Settings", path: "/stories/settings" },
-    ],
-  },
-  {
-    key: "faq",
-    label: "FAQ",
-    path: "/faq",
-    icon: <HelpCircle size={18} />,
-    children: [
-      { key: "faq-manage", label: "Manage FAQ", path: "/faq" },
-      { key: "faq-settings", label: "Settings", path: "/faq/settings" },
     ],
   },
 ];
 
-export const gamification = [
+// --- 3. GAMIFICATION ENGINE ---
+export const gamificationEngine = [
   {
-    key: "gamification",
+    key: "engagement-activities",
     label: "Engagement Activities",
     path: "/gamification",
+    icon: <Target size={18} />,
+    children: [
+      { key: "eng-dash", label: "Dashboard", path: "/gamification" },
+      { key: "eng-points", label: "Points", path: "/gamification/points" },
+      { key: "eng-badges", label: "Badges", path: "/gamification/badges" },
+      { key: "eng-ranks", label: "Ranks", path: "/gamification/ranks" },
+      {
+        key: "eng-leaderboard",
+        label: "Leaderboard",
+        path: "/gamification/leaderboard",
+      },
+      {
+        key: "eng-log",
+        label: "Activity Log",
+        path: "/gamification/activity-log",
+      },
+      {
+        key: "eng-history",
+        label: "Full History",
+        path: "/gamification/history",
+      },
+    ],
+  },
+  {
+    key: "engagement-games",
+    label: "Engagement Games",
+    path: "/rewards/engagement/spin-wheel",
     icon: <Gamepad2 size={18} />,
     children: [
       {
-        key: "engagement-points",
-        label: "Point Rules",
-        path: "/gamification/points",
-      },
-      {
-        key: "engagement-badges",
-        label: "Badges",
-        path: "/gamification/badges",
-      },
-      { key: "engagement-ranks", label: "Ranks", path: "/gamification/ranks" },
-      {
-        key: "engagement-faq",
-        label: "Manage FAQ",
-        path: "/gamification/settings/faq",
-      },
-    ],
-  },
-  {
-    key: "games",
-    label: "Engagement Games",
-    path: "/rewards/engagement/spin-wheel",
-    icon: <Dices size={18} />,
-    children: [
-      {
-        key: "game-spin-wheel",
+        key: "game-spin",
         label: "Spin Wheel",
         path: "/rewards/engagement/spin-wheel",
       },
       {
-        key: "game-scratch-card",
+        key: "game-scratch",
         label: "Scratch Card",
         path: "/rewards/engagement/scratch-card",
       },
       {
-        key: "game-match-win",
+        key: "game-match",
         label: "Match & Win",
         path: "/rewards/engagement/match-win",
       },
@@ -400,91 +227,535 @@ export const gamification = [
     key: "currency",
     label: "Currency",
     path: "/currency",
-    icon: <Currency size={18} />,
+    icon: <Coins size={18} />,
+    children: [
+      { key: "cur-dash", label: "Dashboard", path: "/currency" },
+      { key: "cur-economics", label: "Economics", path: "/currency/economics" },
+      { key: "cur-abuse", label: "Anti-Abuse", path: "/currency/anti-abuse" },
+      {
+        key: "cur-redemption",
+        label: "Redemption Logic",
+        path: "/currency/redemption",
+      },
+      { key: "cur-trace", label: "Quick Trace", path: "/currency/trace" },
+      { key: "cur-audit", label: "Audit Log", path: "/currency/audit" },
+    ],
   },
   {
     key: "rewards",
-    label: "Loyalty & Vouchers",
-    path: "/rewards/vouchers/coupons",
+    label: "Rewards",
+    path: "/rewards",
     icon: <Gift size={18} />,
     children: [
+      { key: "rew-dash", label: "Dashboard", path: "/rewards" },
+      { key: "rew-analytics", label: "Analytics", path: "/rewards/analytics" },
+      { key: "rew-fraud", label: "Fraud", path: "/rewards/fraud" },
       {
-        key: "vouchers-coupons",
+        key: "rew-coupons-manage",
         label: "Manage Coupons",
         path: "/rewards/vouchers/coupons",
       },
       {
-        key: "vouchers-inventory",
+        key: "rew-vouchers-all",
+        label: "All Vouchers",
+        path: "/rewards/vouchers/all",
+      },
+      {
+        key: "rew-coupons",
+        label: "Coupons",
+        path: "/rewards/vouchers/coupons-audit",
+      },
+      {
+        key: "rew-vouchers",
+        label: "Vouchers",
+        path: "/rewards/vouchers/vouchers-audit",
+      },
+      {
+        key: "rew-inventory",
         label: "Inventory Audit",
         path: "/rewards/vouchers/inventory",
       },
       {
-        key: "vouchers-redemptions",
-        label: "Audit Ledger",
+        key: "rew-ledger",
+        label: "Redemption Ledger",
         path: "/rewards/vouchers/redemptions",
       },
       {
-        key: "vouchers-settings",
-        label: "Settings",
-        path: "/gamification/settings",
+        key: "rew-engagement",
+        label: "Engagement",
+        path: "/rewards/engagement",
+      },
+      { key: "rew-settings", label: "Settings", path: "/rewards/settings" },
+    ],
+  },
+];
+
+// --- 4. MODULES ---
+export const modules = [
+  {
+    key: "communities",
+    label: "Communities",
+    path: "/communities",
+    icon: <Users size={18} />,
+    children: [
+      { key: "com-dash", label: "Dashboard", path: "/communities" },
+      {
+        key: "com-create",
+        label: "Create Communities",
+        path: "/communities/create",
+      },
+      {
+        key: "com-manage",
+        label: "Manage Communities",
+        path: "/communities/all",
+      },
+      {
+        key: "com-reported",
+        label: "Reported Items",
+        path: "/communities/reports",
+      },
+      { key: "com-settings", label: "Settings", path: "/communities/settings" },
+    ],
+  },
+  {
+    key: "events",
+    label: "Events",
+    path: "/events",
+    icon: <Calendar size={18} />,
+    children: [
+      { key: "ev-dash", label: "Dashboard", path: "/events" },
+      { key: "ev-create", label: "Create Events", path: "/events/create" },
+      { key: "ev-manage", label: "Manage Events", path: "/events/all" },
+      {
+        key: "ev-cats",
+        label: "Manage Categories",
+        path: "/events/categories",
+      },
+      { key: "ev-reported", label: "Reported Items", path: "/events/reports" },
+      { key: "ev-settings", label: "Settings", path: "/events/settings" },
+    ],
+  },
+  {
+    key: "jobs",
+    label: "Jobs",
+    path: "/jobs",
+    icon: <Briefcase size={18} />,
+    children: [
+      { key: "job-dash", label: "Dashboard", path: "/jobs" },
+      { key: "job-create", label: "Create Jobs", path: "/jobs/create" },
+      { key: "job-manage", label: "Manage Jobs", path: "/jobs/all" },
+      { key: "job-reported", label: "Reported Items", path: "/jobs/reports" },
+      { key: "job-settings", label: "Settings", path: "/jobs/settings" },
+    ],
+  },
+  {
+    key: "listing",
+    label: "Marketplace",
+    path: "/listing",
+    icon: <ShoppingBag size={18} />,
+    children: [
+      { key: "market-dash", label: "Dashboard", path: "/listing" },
+      {
+        key: "market-create",
+        label: "Create Listings",
+        path: "/listing/create",
+      },
+      { key: "market-manage", label: "Manage Listings", path: "/listing/all" },
+      {
+        key: "market-reported",
+        label: "Reported Items",
+        path: "/listing/reports",
+      },
+      { key: "market-settings", label: "Settings", path: "/listing/settings" },
+    ],
+  },
+  {
+    key: "shop",
+    label: "Shop",
+    path: "/shop",
+    icon: <Store size={18} />,
+    children: [
+      { key: "shop-dash", label: "Dashboard", path: "/shop" },
+      { key: "shop-create", label: "Create Products", path: "/shop/create" },
+      { key: "shop-banners", label: "Manage Banners", path: "/shop/banners" },
+      { key: "shop-reported", label: "Reported Items", path: "/shop/reports" },
+      { key: "shop-settings", label: "Settings", path: "/shop/settings" },
+    ],
+  },
+  {
+    key: "forums",
+    label: "Forums",
+    path: "/forums",
+    icon: <MessageSquare size={18} />,
+    children: [
+      { key: "for-dash", label: "Dashboard", path: "/forums" },
+      {
+        key: "for-topics",
+        label: "Create Topics",
+        path: "/forums/topics/create",
+      },
+      { key: "for-posts", label: "Create Posts", path: "/forums/posts/create" },
+      { key: "for-manage", label: "Manage Forums", path: "/forums/all" },
+      {
+        key: "for-cats",
+        label: "Manage Categories",
+        path: "/forums/categories",
+      },
+      { key: "for-reported", label: "Reported Items", path: "/forums/reports" },
+      { key: "for-settings", label: "Settings", path: "/forums/settings" },
+    ],
+  },
+  {
+    key: "polls",
+    label: "Polls",
+    path: "/polls",
+    icon: <BarChart3 size={18} />,
+    children: [
+      { key: "poll-dash", label: "Dashboard", path: "/polls" },
+      { key: "poll-create", label: "Create Polls", path: "/polls/create" },
+      { key: "poll-manage", label: "Manage Polls", path: "/polls/all" },
+      { key: "poll-settings", label: "Settings", path: "/polls/settings" },
+    ],
+  },
+  {
+    key: "surveys",
+    label: "Surveys",
+    path: "/surveys",
+    icon: <ClipboardList size={18} />,
+    children: [
+      { key: "sur-create", label: "Create Surveys", path: "/surveys/create" },
+      { key: "sur-manage", label: "Manage Surveys", path: "/surveys/all" },
+      {
+        key: "sur-reported",
+        label: "Reported Items",
+        path: "/surveys/reports",
+      },
+      { key: "sur-settings", label: "Settings", path: "/surveys/settings" },
+    ],
+  },
+  {
+    key: "mentorship",
+    label: "Mentorship",
+    path: "/mentorship",
+    icon: <GraduationCap size={18} />,
+    children: [
+      { key: "ment-dash", label: "Dashboard", path: "/mentorship" },
+      { key: "ment-manage", label: "Manage Programs", path: "/mentorship/all" },
+      {
+        key: "ment-requests",
+        label: "User Requests",
+        path: "/mentorship/requests",
+      },
+      {
+        key: "ment-cats",
+        label: "Manage Categories",
+        path: "/mentorship/categories",
+      },
+      {
+        key: "ment-skills",
+        label: "Manage Skills",
+        path: "/mentorship/skills",
+      },
+      {
+        key: "ment-reported",
+        label: "Reported Items",
+        path: "/mentorship/reports",
+      },
+      { key: "ment-settings", label: "Settings", path: "/mentorship/settings" },
+    ],
+  },
+  {
+    key: "offers",
+    label: "Offers",
+    path: "/offers",
+    icon: <Tag size={18} />,
+    children: [
+      { key: "off-dash", label: "Dashboard", path: "/offers" },
+      { key: "off-manage", label: "Manage Offers", path: "/offers/all" },
+      {
+        key: "off-cats",
+        label: "Manage Categories",
+        path: "/offers/categories",
+      },
+      { key: "off-reported", label: "Reported Items", path: "/offers/reports" },
+      { key: "off-settings", label: "Settings", path: "/offers/settings" },
+    ],
+  },
+];
+
+// --- 5. ADMIN SETTINGS ---
+export const adminSettings = [
+  {
+    key: "configuration",
+    label: "Configuration",
+    icon: <Settings size={18} />,
+    children: [
+      { key: "conf-gen", label: "General", path: "/settings/general" },
+      { key: "conf-app", label: "Appearance", path: "/settings/appearance" },
+      { key: "conf-dom", label: "Domain", path: "/settings/domains" },
+      { key: "conf-web", label: "Manage Websites", path: "/app-layout/pages" },
+      { key: "conf-mod", label: "Module", path: "/settings/modules" },
+      { key: "conf-lang", label: "Languages", path: "/settings/languages" },
+      {
+        key: "conf-int",
+        label: "Integrations",
+        path: "/settings/integrations",
+      },
+    ],
+  },
+
+  {
+    key: "branded-email",
+    label: "Email Broadcast",
+    path: "/email/usage",
+    icon: <Mail size={18} />,
+    children: [
+      { key: "email-dash", label: "Usage Dashboard", path: "/email/usage" },
+      {
+        key: "email-templates",
+        label: "Manage Templates",
+        path: "/email/templates",
+      },
+      {
+        key: "email-settings",
+        label: "Outbound Settings",
+        path: "/email/settings",
+      },
+    ],
+  },
+  {
+    key: "customisation",
+    label: "Customisation",
+    icon: <PaintBucketIcon size={18} />,
+    children: [
+      {
+        key: "cust-logo",
+        label: "Setup Logo",
+        path: "/settings/appearance#logo",
+      },
+      {
+        key: "cust-brand",
+        label: "Setup Branding",
+        path: "/settings/appearance#branding",
+      },
+      {
+        key: "cust-dom",
+        label: "Setup Domain",
+        path: "/settings/domain#setup",
+      },
+      {
+        key: "cust-web",
+        label: "Setup Website",
+        path: "/app-layout/pages#setup",
+      },
+      {
+        key: "cust-mod",
+        label: "Setup Modules",
+        path: "/settings/modules#setup",
+      },
+      {
+        key: "cust-lang",
+        label: "Setup Languages",
+        path: "/settings/languages#setup",
+      },
+      {
+        key: "cust-int",
+        label: "Setup Integrations",
+        path: "/settings/integrations#setup",
+      },
+    ],
+  },
+  {
+    key: "team",
+    label: "Team",
+    icon: <UserCog size={18} />,
+    children: [
+      {
+        key: "team-users",
+        label: "Users & Permissions",
+        path: "/settings/users",
+      },
+    ],
+  },
+  {
+    key: "account",
+    label: "Account",
+    icon: <CreditCard size={18} />,
+    children: [
+      { key: "acc-bill", label: "Billing Info", path: "/settings/billing" },
+      {
+        key: "acc-plan",
+        label: "Subscription & Plan",
+        path: "/settings/subscription",
+      },
+      { key: "acc-inv", label: "Invoices", path: "/settings/invoices" },
+      { key: "acc-audit", label: "Audit Logs", path: "/audit-logs" },
+      { key: "acc-export", label: "Export Data", path: "/settings/export" },
+    ],
+  },
+  {
+    key: "policies",
+    label: "Policies & Terms",
+    icon: <ShieldCheck size={18} />,
+    children: [
+      {
+        key: "pol-privacy",
+        label: "Privacy Policy",
+        path: "/settings/policies/privacy",
+      },
+      {
+        key: "pol-terms",
+        label: "Terms of Use",
+        path: "/settings/policies/terms",
+      },
+      { key: "pol-taxes", label: "Taxes & Duties", path: "/settings/taxes" },
+    ],
+  },
+  {
+    key: "learnings",
+    label: "Learnings",
+    path: "/learnings",
+    icon: <BookOpen size={18} />,
+  },
+  {
+    key: "support",
+    label: "Contact Support",
+    icon: <LifeBuoy size={18} />,
+    children: [
+      { key: "sup-feed", label: "Feedback", path: "/feedback" },
+      {
+        key: "sup-manager",
+        label: "Dedicated Account Manager",
+        path: "/support/manager",
       },
     ],
   },
 ];
 
+// --- 6. PROFILE ---
+export const profile = (userName: string = "Deepak Rai") => [
+  {
+    key: "user-profile-root",
+    label: userName,
+    icon: <UserAvatar />,
+    children: [
+      {
+        key: "prof-settings",
+        label: "Profile Settings",
+        path: "/settings/profile",
+        icon: <User2 size={16} />,
+      },
+      {
+        key: "prof-notif",
+        label: "Activity & Notifications",
+        icon: <Bell size={16} />,
+        children: [
+          { key: "notif-list", label: "Notifications", path: "/notifications" },
+        ],
+      },
+      {
+        key: "logout",
+        label: "Logout",
+        path: "/logout",
+        icon: <LogOut size={16} />,
+        isLogout: true,
+      },
+    ],
+  },
+];
+
+// --- Legacy exports for compatibility while refactoring sidebar.tsx ---
+export const main = homeItems;
+export const settings = adminSettings;
+export const extendedItems = modules;
+export const gamification = gamificationEngine;
+
 /**
- * Hook to filter extended menu items based on subscription AND user module permissions.
+ * Hook to filter menu items based on subscription AND user module permissions.
  */
 export const useFilteredExtendedItems = () => {
   const { data, loading: subLoading } = useCheckEntitySubscription();
   const user = useUserStore((state) => state.user);
 
-  const filterItems = (items: any[]) => {
-    const modules = data?.checkEntitySubscription?.modules || [];
+  const filterItems = (items: any[], isHome: boolean = false) => {
+    const modulesSub = data?.checkEntitySubscription?.modules || [];
     const modulePermissions = user?.modulePermissions || [];
     const isSuperAdmin = user?.isSuperAdmin;
     const isSystemRole = user?.role?.isSystem;
 
     const enabledModuleIds = new Set(
-      modules
+      modulesSub
         .filter((m) => m.enabled)
         .map((m) => m.name?.toLowerCase().replace(/'/g, "_")),
     );
 
     return items.filter((item) => {
+      // 1. Super admin and system roles can see everything that is subscribed (or core)
+      const isSuperAdmin = user?.isSuperAdmin;
+      const isSystemRole = user?.role?.isSystem;
+
+      // 2. Home items and Dashboard should always be visible
+      if (
+        isHome ||
+        item.key === "home-dashboard" ||
+        item.key === "community-intelligence" ||
+        item.key === "mod-dashboard" ||
+        item.key === "mod-reported" ||
+        item.key === "mod-manual" ||
+        item.key === "mod-ai"
+      ) {
+        return true;
+      }
+
       const moduleKey = item.key?.toLowerCase().replace(/'/g, "_");
 
-      const isSubscribed =
-        moduleKey === "loyalty" ||
-        moduleKey === "games" ||
-        moduleKey === "rewards_admin" ||
+      // Special cases for mapping keys to module names in subscription
+      let subKey = moduleKey;
+      if (
         item.key === "rewards" ||
-        item.key === "currency"
-          ? enabledModuleIds.has("rewards")
-          : enabledModuleIds.has(moduleKey);
+        item.key === "currency" ||
+        item.key === "engagement-games" ||
+        item.key === "engagement-activities"
+      ) {
+        subKey = "rewards";
+      }
 
+      const isSubscribed = enabledModuleIds.has(subKey);
       if (!isSubscribed) return false;
+
       if (isSuperAdmin || isSystemRole) return true;
 
+      // 3. Regular users need explicit module permissions
       return modulePermissions.some(
         (mp: any) => mp.module === item.key?.toUpperCase() && mp.canRead,
       );
     });
   };
 
-  const filteredExtended = useMemo(
-    () => filterItems(extendedItems),
-    [data?.checkEntitySubscription?.modules, user, subLoading],
+  const filteredHome = useMemo(
+    () => filterItems(homeItems, true),
+    [data, user],
   );
-
+  const filteredCommunity = useMemo(
+    () => filterItems(communityIntelligence, true),
+    [data, user],
+  );
+  const filteredModeration = useMemo(
+    () => filterItems(contentModeration),
+    [data, user],
+  );
   const filteredGamification = useMemo(
-    () => filterItems(gamification),
-    [data?.checkEntitySubscription?.modules, user, subLoading],
+    () => filterItems(gamificationEngine),
+    [data, user],
   );
+  const filteredModules = useMemo(() => filterItems(modules), [data, user]);
 
   return {
-    extendedItems: filteredExtended,
-    gamificationItems: filteredGamification,
+    homeItems: filteredHome,
+    communityIntelligence: filteredCommunity,
+    contentModeration: filteredModeration as any[],
+    gamificationEngine: filteredGamification as any[],
+    modules: filteredModules as any[],
     loading: subLoading,
   };
 };
@@ -499,13 +770,12 @@ export const useFilteredManagementItems = () => {
   const permissions = user?.permissions;
 
   const filteredItems = useMemo(() => {
-    if (isSuperAdmin || isSystemRole) return settings;
+    if (isSuperAdmin || isSystemRole) return adminSettings;
 
-    return settings.filter((item) => {
-      if (item.key === "cms") return permissions?.website;
-      if (item.key === "moderation") return permissions?.moderation;
-      if (item.key === "reports") return permissions?.reports;
-      if (item.key === "audit-logs") return permissions?.auditLogs;
+    return adminSettings.filter((item) => {
+      // Basic permission check - can be expanded
+      if (item.key === "configuration" && !permissions?.website) return false;
+      if (item.key === "team" && !isSuperAdmin) return false;
       return true;
     });
   }, [user, isSuperAdmin, isSystemRole, permissions]);
@@ -534,7 +804,7 @@ export const UserAvatar = () => {
       {user?.profilePicture && (
         <AvatarImage src={user.profilePicture} alt={user?.name || "User"} />
       )}
-      <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-xs font-bold">
+      <AvatarFallback className="bg-linear-to-br from-blue-500 to-purple-600 text-white text-[10px] font-bold">
         {getInitials(user?.firstName || user?.lastName)}
       </AvatarFallback>
     </Avatar>
@@ -542,78 +812,11 @@ export const UserAvatar = () => {
 };
 
 export const UserName = () => {
-  const { data, loading } = useGetUser();
+  const { data } = useGetUser();
+  const user = data?.getUser;
   return (
-    <span>
-      {data?.getUser?.firstName + " " + data?.getUser.lastName || "Admin User"}
-    </span>
+    <span>{user ? `${user.firstName} ${user.lastName}` : "Deepak Rai"}</span>
   );
 };
 
 export const UserDetails = UserName;
-
-export const profile = [
-  {
-    key: "sub1",
-    icon: <Settings size={18} />,
-    label: "Admin Settings",
-    children: [
-      {
-        key: "system-activity",
-        label: "System Activity",
-        path: "/audit-logs",
-        icon: <GitPullRequest size={18} />,
-      },
-      {
-        key: "plan",
-        label: "Plan Overview",
-        path: "/settings/subscription",
-        icon: <CreditCard size={18} />,
-      },
-      {
-        key: "settings",
-        label: "All Settings",
-        path: "/settings",
-        icon: <Settings size={18} />,
-      },
-    ],
-  },
-  {
-    key: "user",
-    icon: <UserAvatar />,
-    label: <UserName />,
-    children: [
-      {
-        key: "profile",
-        label: "Your profile",
-        path: "/settings/profile",
-        icon: <User2 size={18} />,
-      },
-      {
-        key: "notifications",
-        label: "Activity & notifications",
-        path: "/notifications",
-        icon: <BellDotIcon size={18} />,
-      },
-      {
-        key: "theme",
-        label: "Theme",
-        path: "/theme",
-        icon: <PaintBucketIcon size={18} />,
-      },
-      {
-        key: "upgrade",
-        label: "Upgrade Plan",
-        path: "/settings/subscription",
-        icon: <Rocket size={18} />,
-      },
-      {
-        key: "logout",
-        label: "Logout",
-        path: "/logout",
-        icon: <LogOutIcon size={18} />,
-        isLogout: true,
-      },
-    ],
-  },
-];

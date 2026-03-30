@@ -121,20 +121,24 @@ export default function MembersPage() {
       />
 
       <EcosystemActionBar shadow="none">
-        <div className="flex items-center justify-between w-full">
-          <div className="flex items-center gap-6">
+        <EcosystemActionBar.Group>
+          <EcosystemActionBar.Item>
             <EcosystemStatusIndicator
               status="active"
               label="Identity Stream: Operational"
             />
-            <div className="h-4 w-px bg-slate-200" />
+          </EcosystemActionBar.Item>
+          <EcosystemActionBar.Separator />
+          <EcosystemActionBar.Item>
             <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
               <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
               <span>Verified Node Registry</span>
             </div>
-          </div>
+          </EcosystemActionBar.Item>
+        </EcosystemActionBar.Group>
 
-          <div className="flex items-center gap-4">
+        <EcosystemActionBar.Group align="right">
+          <EcosystemActionBar.Item>
             <Button
               variant="outline"
               className="h-10 px-4 rounded-xl border-slate-200 font-bold hover:bg-slate-50 transition-all gap-2"
@@ -142,8 +146,8 @@ export default function MembersPage() {
               <Activity className="h-4 w-4 text-emerald-500" />
               Live telemetry
             </Button>
-          </div>
-        </div>
+          </EcosystemActionBar.Item>
+        </EcosystemActionBar.Group>
       </EcosystemActionBar>
 
       <EcosystemContainer className="space-y-12 p-8 lg:p-12">

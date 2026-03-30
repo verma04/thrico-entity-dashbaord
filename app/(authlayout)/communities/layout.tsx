@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { List } from "lucide-react";
+import { List, Plus } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 
@@ -11,6 +11,11 @@ function CommunitiesLayout({ children }: { children: React.ReactNode }) {
       key: "all",
       label: "All Communities",
       icon: <List className="h-4 w-4" />,
+    },
+    {
+      key: "create",
+      label: "Create Community",
+      icon: <Plus className="h-4 w-4" />,
     },
   ];
 

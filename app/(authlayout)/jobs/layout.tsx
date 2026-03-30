@@ -1,7 +1,7 @@
 "use client";
 import * as React from "react";
 
-import { List } from "lucide-react";
+import { List, Plus } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
 interface TabItem {
   key: string;
@@ -14,6 +14,11 @@ function JobsLayout({ children }: { children: React.ReactNode }) {
       key: "all",
       label: "All Jobs",
       icon: <List size={18} />,
+    },
+    {
+      key: "create",
+      label: "Create Job",
+      icon: <Plus size={18} />,
     },
   ];
 

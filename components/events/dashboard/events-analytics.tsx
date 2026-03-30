@@ -32,10 +32,11 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  PieChart,
+  PieChart as ReChartsPieChart,
   Pie,
   Cell,
 } from "recharts";
+import { PieChart } from "lucide-react";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
@@ -77,7 +78,7 @@ export default function EventsAnalytics() {
 
   const kpis = [
     {
-      title: "Aggregate Events",
+      title: "Total Events",
       value: loading ? "..." : (stats?.totalEvents?.toLocaleString() ?? "0"),
       trend: stats?.totalEventsChange ?? 0,
       icon: Calendar,
@@ -85,7 +86,7 @@ export default function EventsAnalytics() {
       bg: "bg-indigo-500/10",
     },
     {
-      title: "Active Mandates",
+      title: "Active Events",
       value: loading ? "..." : (stats?.activeEvents?.toLocaleString() ?? "0"),
       trend: stats?.activeEventsChange ?? 0,
       icon: Activity,
@@ -93,7 +94,7 @@ export default function EventsAnalytics() {
       bg: "bg-emerald-500/10",
     },
     {
-      title: "Attendee Yield",
+      title: "Total Attendees",
       value: loading ? "..." : (stats?.totalAttendees?.toLocaleString() ?? "0"),
       trend: stats?.attendeesChange ?? 0,
       icon: Users,
@@ -101,7 +102,7 @@ export default function EventsAnalytics() {
       bg: "bg-violet-500/10",
     },
     {
-      title: "Propagation Count",
+      title: "Event Views",
       value: loading ? "..." : (stats?.totalViews?.toLocaleString() ?? "0"),
       trend: stats?.viewsChange ?? 0,
       icon: Eye,
@@ -137,9 +138,9 @@ export default function EventsAnalytics() {
   return (
     <EcosystemWrapper anonymized-1="events-analytics">
       <EcosystemHeader
-        title="Event Intelligence"
-        badgeText="Temporal Registry"
-        description="Monitor community instantiation velocity, attendee engagement protocols, and architectural event expansion across the global registry node."
+        title="Events Overview"
+        badgeText="Live Status"
+        description="Track your community events, attendee growth, and engagement in real-time."
         icon={Calendar}
       />
 
@@ -148,12 +149,12 @@ export default function EventsAnalytics() {
           <div className="flex items-center gap-6">
             <EcosystemStatusIndicator
               status="active"
-              label="Event Stream: Synchronized"
+              label="Ready to go"
             />
-            <div className="h-4 w-px bg-slate-200" />
-            <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
+            <div className="h-4 w-px bg-border" />
+            <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest italic">
               <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
-              <span>Verified Registry Node</span>
+              <span>Verified System</span>
             </div>
           </div>
 
@@ -198,7 +199,6 @@ export default function EventsAnalytics() {
               variant="outline"
               size="icon"
               className="h-10 w-10 text-slate-400 hover:text-indigo-600 rounded-xl transition-all shadow-sm bg-white"
-              onClick={() => refetch()}
             >
               <RotateCcw className={cn("h-4 w-4", loading && "animate-spin")} />
             </Button>
@@ -210,7 +210,7 @@ export default function EventsAnalytics() {
         {/* KPI Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {kpis.map((kpi, i) => (
-            <EcosystemKPI key={i} {...kpi} trendLabel="Registry Protocol" />
+            <EcosystemKPI key={i} {...kpi} trendLabel="vs last period" />
           ))}
         </div>
 
@@ -218,8 +218,8 @@ export default function EventsAnalytics() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           <div className="lg:col-span-8 space-y-10">
             <EcosystemCard
-              title="Registration Velocity"
-              description="Temporal attendee instantiation cycles"
+              title="Registration Trend"
+              description="Daily sign-ups over time"
               icon={TrendingUp}
               decorationIcon={Zap}
             >
@@ -306,8 +306,8 @@ export default function EventsAnalytics() {
             </EcosystemCard>
 
             <EcosystemCard
-              title="Registry Performance"
-              description="Top performing event nodes by yield"
+              title="Top Performing Events"
+              description="Events with the highest attendance"
               icon={BarChart3}
               decorationIcon={Sparkles}
             >
@@ -362,14 +362,14 @@ export default function EventsAnalytics() {
 
           <div className="lg:col-span-4 space-y-10">
             <EcosystemCard
-              title="Node Distribution"
-              description="Taxonomy allocation matrix"
+              title="Event Types"
+              description="Distribution of event formats"
               icon={PieChart}
               decorationIcon={Globe}
             >
               <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
+                  <ReChartsPieChart>
                     <Pie
                       data={eventTypeDistribution}
                       cx="50%"
@@ -389,7 +389,7 @@ export default function EventsAnalytics() {
                       ))}
                     </Pie>
                     <Tooltip />
-                  </PieChart>
+                  </ReChartsPieChart>
                 </ResponsiveContainer>
               </div>
               <div className="space-y-4">

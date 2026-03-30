@@ -12,7 +12,7 @@ export function EcosystemContainer({ children, className }: EcosystemContainerPr
   return (
     <div
       className={cn(
-        "rounded-xl border border-slate-200/80 bg-white shadow-sm overflow-hidden min-h-[500px]",
+        "rounded-xl border border-border bg-card shadow-sm",
         className
       )}
     >

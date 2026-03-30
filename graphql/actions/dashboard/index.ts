@@ -2,6 +2,7 @@ import { useQuery } from "@apollo/client";
 import {
   GET_DASHBOARD_STATS,
   GET_MODULE_ACTIVITY,
+  GET_COMMUNITY_KPIS,
 } from "../../quries/dashboard";
 
 export enum TimeRange {
@@ -51,6 +52,64 @@ export const useGetDashboardStats = (timeRange: TimeRange, options?: any) =>
 export const useGetModuleActivity = (timeRange: TimeRange, options?: any) =>
   useQuery<GetModuleActivityResponse, { timeRange: TimeRange }>(
     GET_MODULE_ACTIVITY,
+    {
+      variables: { timeRange },
+      ...options,
+    }
+  );
+
+export interface CommunityKPIData {
+  value: string | number;
+  change: number;
+  trend: number[];
+}
+
+export interface ContentTypeBreakdown {
+  type: string;
+  count: number;
+  percentage: number;
+}
+
+export interface ModerationStat {
+  type: string;
+  count: number;
+  status: string;
+}
+
+export interface ModulePerformance {
+  module: string;
+  value: string | number;
+  subtext: string;
+}
+
+export interface CommunityKPIs {
+  dailyActiveUsers: CommunityKPIData;
+  monthlyActiveUsers: CommunityKPIData;
+  engagementRate: CommunityKPIData;
+  retentionRate: CommunityKPIData;
+  newMembers: CommunityKPIData;
+  churnRate: CommunityKPIData;
+  healthIndex: CommunityKPIData;
+  communityNPS: CommunityKPIData;
+  totalPosts: CommunityKPIData;
+  contributionFrequency: CommunityKPIData;
+  interactionReciprocity: CommunityKPIData;
+  contentReach: CommunityKPIData;
+  contentTypeBreakdown: ContentTypeBreakdown[];
+  memberActivationRate: CommunityKPIData;
+  communityAdvocacyIndex: CommunityKPIData;
+  superfanRatio: CommunityKPIData;
+  moderationStats: ModerationStat[];
+  modulePerformance: ModulePerformance[];
+}
+
+export interface GetCommunityKPIsResponse {
+  getCommunityKPIs: CommunityKPIs;
+}
+
+export const useGetCommunityKPIs = (timeRange: TimeRange, options?: any) =>
+  useQuery<GetCommunityKPIsResponse, { timeRange: TimeRange }>(
+    GET_COMMUNITY_KPIS,
     {
       variables: { timeRange },
       ...options,

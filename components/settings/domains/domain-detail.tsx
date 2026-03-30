@@ -31,6 +31,7 @@ import {
   Info,
   Clock,
   RefreshCw,
+  Loader2,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {
@@ -59,6 +60,7 @@ export const DomainDetail = ({ id }: DomainDetailProps) => {
       router.push("/settings/domains");
     },
   });
+  console.log();
 
   const [check, { loading: checking }] = checkUpdatedDnsRecord({});
 
@@ -67,7 +69,9 @@ export const DomainDetail = ({ id }: DomainDetailProps) => {
       <div className="flex items-start gap-3 px-4 py-3.5 rounded-xl border bg-red-50 border-red-200">
         <AlertCircle className="h-4 w-4 text-red-600 mt-0.5 shrink-0" />
         <div>
-          <p className="text-[13px] font-semibold text-red-800">Domain not found</p>
+          <p className="text-[13px] font-semibold text-red-800">
+            Domain not found
+          </p>
           <p className="text-[12px] text-red-600 mt-0.5">{error.message}</p>
         </div>
       </div>
@@ -135,7 +139,9 @@ export const DomainDetail = ({ id }: DomainDetailProps) => {
                 </span>
               )}
             </div>
-            <p className="text-[12px] text-slate-400 mt-1.5">DNS configuration and active status</p>
+            <p className="text-[12px] text-slate-400 mt-1.5">
+              DNS configuration and active status
+            </p>
           </div>
         </div>
 
@@ -179,7 +185,8 @@ export const DomainDetail = ({ id }: DomainDetailProps) => {
                   Domain configuration complete
                 </h3>
                 <p className="text-[11px] text-emerald-700 mt-0.5 max-w-md">
-                  DNS records are actively routing successfully to our edge infrastructure.
+                  DNS records are actively routing successfully to our edge
+                  infrastructure.
                 </p>
               </div>
             </div>
@@ -223,15 +230,21 @@ export const DomainDetail = ({ id }: DomainDetailProps) => {
               <div className="flex items-start gap-3 p-3.5 bg-slate-50 border border-slate-100 rounded-lg">
                 <AlertCircle className="h-4 w-4 text-slate-400 mt-0.5 shrink-0" />
                 <div className="space-y-2 text-[12px] text-slate-600">
-                  <p className="font-semibold text-slate-800">Setup Instructions</p>
+                  <p className="font-semibold text-slate-800">
+                    Setup Instructions
+                  </p>
                   <ol className="list-decimal pl-4 space-y-1 text-slate-500">
                     <li>
-                      Log in to your registrar and open DNS management for <strong className="text-slate-700">{domainDetails.domain}</strong>
+                      Log in to your registrar and open DNS management for{" "}
+                      <strong className="text-slate-700">
+                        {domainDetails.domain}
+                      </strong>
                     </li>
                     <li>Add the records listed below EXACTLY as they appear</li>
                   </ol>
                   <div className="text-[11px] text-slate-400 pt-1 border-t border-slate-200/50 mt-2 flex items-center gap-1">
-                    <Info className="h-3 w-3 inline" /> Propagation across global networks can take up to 48h.
+                    <Info className="h-3 w-3 inline" /> Propagation across
+                    global networks can take up to 48h.
                   </div>
                 </div>
               </div>
@@ -241,15 +254,26 @@ export const DomainDetail = ({ id }: DomainDetailProps) => {
                 <Table>
                   <TableHeader className="bg-slate-50 border-b border-slate-200">
                     <TableRow className="hover:bg-transparent">
-                      <TableHead className="font-semibold text-slate-600 text-[11px] tracking-widest uppercase h-9">Type</TableHead>
-                      <TableHead className="font-semibold text-slate-600 text-[11px] tracking-widest uppercase h-9">Name</TableHead>
-                      <TableHead className="font-semibold text-slate-600 text-[11px] tracking-widest uppercase h-9">Value</TableHead>
-                      <TableHead className="text-right font-semibold text-slate-600 text-[11px] tracking-widest uppercase h-9">Status</TableHead>
+                      <TableHead className="font-semibold text-slate-600 text-[11px] tracking-widest uppercase h-9">
+                        Type
+                      </TableHead>
+                      <TableHead className="font-semibold text-slate-600 text-[11px] tracking-widest uppercase h-9">
+                        Name
+                      </TableHead>
+                      <TableHead className="font-semibold text-slate-600 text-[11px] tracking-widest uppercase h-9">
+                        Value
+                      </TableHead>
+                      <TableHead className="text-right font-semibold text-slate-600 text-[11px] tracking-widest uppercase h-9">
+                        Status
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {dnsRecords.map((record) => (
-                      <TableRow key={record.key} className="hover:bg-slate-50/50 transition-colors group">
+                      <TableRow
+                        key={record.key}
+                        className="hover:bg-slate-50/50 transition-colors group"
+                      >
                         <TableCell className="font-mono text-[12px] font-semibold text-slate-700">
                           {record.type}
                         </TableCell>
@@ -292,7 +316,9 @@ export const DomainDetail = ({ id }: DomainDetailProps) => {
 
               {/* Action */}
               <div className="flex items-center justify-end gap-3 pt-3">
-                <p className="text-[11px] text-slate-400 select-none">Waiting for propagation...</p>
+                <p className="text-[11px] text-slate-400 select-none">
+                  Waiting for propagation...
+                </p>
                 <Button
                   onClick={() => check({ variables: { input: { id } } })}
                   loading={checking}
@@ -305,7 +331,7 @@ export const DomainDetail = ({ id }: DomainDetailProps) => {
                     <RefreshCw className="h-3.5 w-3.5" />
                   )}
                   {checking ? "Scanning network..." : "Re-Verify DNS"}
-               </Button>
+                </Button>
               </div>
             </div>
           </>
@@ -322,7 +348,12 @@ export const DomainDetail = ({ id }: DomainDetailProps) => {
                 Detach Custom Domain
               </AlertDialogTitle>
               <AlertDialogDescription className="text-[13px] text-slate-500 mt-2 leading-relaxed">
-                You are about to permanently detach <strong className="text-slate-700 font-mono">{domainDetails.domain}</strong> from this environment. This action prevents further routing and terminates TLS automation.
+                You are about to permanently detach{" "}
+                <strong className="text-slate-700 font-mono">
+                  {domainDetails.domain}
+                </strong>{" "}
+                from this environment. This action prevents further routing and
+                terminates TLS automation.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter className="sm:justify-end gap-2 border-t border-slate-100 pt-4 mt-6">

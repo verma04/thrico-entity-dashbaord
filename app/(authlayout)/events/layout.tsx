@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { List, Tag, CalendarPlus } from "lucide-react";
+import { List, Tag, Plus } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
 
 function EventsLayout({ children }: { children: React.ReactNode }) {
@@ -15,6 +15,11 @@ function EventsLayout({ children }: { children: React.ReactNode }) {
       key: "categories",
       label: "Categories",
       icon: <Tag className="h-4 w-4" />,
+    },
+    {
+      key: "create",
+      label: "Create Event",
+      icon: <Plus className="h-4 w-4" />,
     },
   ];
 

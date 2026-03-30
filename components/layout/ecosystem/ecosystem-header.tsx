@@ -9,11 +9,13 @@ interface EcosystemHeaderProps {
   description: string;
   icon: LucideIcon;
   badgeText?: string;
+  breadcrumb?: string;
   showLiveIndicator?: boolean;
   actions?: React.ReactNode;
   children?: React.ReactNode;
   iconClassName?: string;
-  headerClassName?: string;
+  className?: string;
+  dark?: boolean;
 }
 
 export function EcosystemHeader({
@@ -21,50 +23,76 @@ export function EcosystemHeader({
   description,
   icon: Icon,
   badgeText = "Ecosystem Hub",
+  breadcrumb: _breadcrumb,
   showLiveIndicator = true,
   actions,
   children,
   iconClassName,
-  headerClassName,
+  className,
+  dark = false,
 }: EcosystemHeaderProps) {
   return (
     <div
       className={cn(
-        "flex flex-col sm:flex-row sm:items-center justify-between gap-6 py-4 animate-in fade-in duration-500",
-        headerClassName,
+        "flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-1",
+        className,
       )}
     >
       {/* Left: Icon + Text */}
-      <div className="flex items-center gap-4 min-w-0">
+      <div className="flex items-center gap-3.5 min-w-0">
         {/* Icon */}
         <div className="relative shrink-0">
           <div
             className={cn(
-              "h-11 w-11 rounded-2xl bg-zinc-900 flex items-center justify-center shadow-lg ring-1 ring-black/5",
+              "h-10 w-10 rounded-xl flex items-center justify-center border transition-colors",
+              dark
+                ? "bg-white/10 text-white border-white/15"
+                : "bg-primary text-primary-foreground border-primary/20",
               iconClassName,
             )}
           >
-            <Icon className="h-5 w-5 text-white" strokeWidth={1.5} />
+            <Icon className="h-[18px] w-[18px]" strokeWidth={1.8} />
           </div>
           {showLiveIndicator && (
-            <span className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-emerald-500 border-2 border-white shadow-sm">
-              <span className="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-60" />
+            <span
+              className={cn(
+                "absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-emerald-500 border-2",
+                dark ? "border-background" : "border-background"
+              )}
+            >
+              <span className="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-30" />
             </span>
           )}
         </div>
 
         {/* Title + Badge + Description */}
         <div className="min-w-0">
-          <div className="flex items-baseline gap-2.5 flex-wrap">
-            <h1 className="text-[22px] font-black text-zinc-900 tracking-tight leading-none">
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <h1
+              className={cn(
+                "text-lg font-semibold tracking-tight leading-none",
+                dark ? "text-white" : "text-foreground"
+              )}
+            >
               {title}
             </h1>
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-zinc-100 border border-zinc-200/80 text-[10px] font-bold uppercase tracking-widest text-zinc-500 leading-none">
-              <span className="w-1 h-1 rounded-full bg-zinc-400 inline-block" />
+            <span
+              className={cn(
+                "inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[10px] font-medium leading-none",
+                dark
+                  ? "bg-white/8 border-white/15 text-white/60"
+                  : "bg-muted border-border text-muted-foreground"
+              )}
+            >
               {badgeText}
             </span>
           </div>
-          <p className="mt-1 text-[13px] text-zinc-400 font-medium leading-snug truncate max-w-sm">
+          <p
+            className={cn(
+              "mt-1 text-[13px] leading-relaxed truncate max-w-md",
+              dark ? "text-white/50" : "text-muted-foreground"
+            )}
+          >
             {description}
           </p>
         </div>
@@ -72,7 +100,7 @@ export function EcosystemHeader({
 
       {/* Right: Children + Actions */}
       {(children || actions) && (
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-2 shrink-0">
           {children}
           {actions && (
             <div className="flex items-center gap-2">{actions}</div>

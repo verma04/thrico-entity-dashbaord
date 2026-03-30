@@ -1,9 +1,30 @@
 "use client";
 
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { ChevronRight, Search, X, Users, BellDotIcon } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import {
+  ChevronRight,
+  Search,
+  X,
+  BellDotIcon,
+  User2,
+  Settings,
+  CreditCard,
+  Bell,
+  PaintBucket,
+  LogOut,
+  ChevronDown,
+} from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  DropdownMenuGroup,
+} from "@/components/ui/dropdown-menu";
 
 import {
   Sidebar,
@@ -21,17 +42,23 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  CommandDialog,
+  CommandInput,
+  CommandList,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+  CommandSeparator,
+} from "@/components/ui/command";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { useGetUser, useCheckEntitySubscription } from "@/graphql/actions";
+import { useGetUser } from "@/graphql/actions";
 
 import {
-  main,
   useFilteredExtendedItems,
   useFilteredManagementItems,
   profile,
-  settings,
   UserAvatar,
   UserName,
 } from "./menu-items";
@@ -39,7 +66,6 @@ import { useUserStore } from "@/store/store";
 import Logo from "./logo";
 import VisitSite from "./visit";
 import LogoutModal from "./logout";
-import { DotPatternLinearGradient } from "@/components/common/dot-pattern-linear-gradient";
 
 interface MenuItem {
   key: string;
@@ -51,26 +77,18 @@ interface MenuItem {
   badge?: string;
 }
 
-/* ─── Section Label ─────────────────────────────────────────────────────── */
+/* ─── Section Label ──────────────────────────────────────────────── */
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <div className="px-3 mb-1.5 mt-1 group-data-[collapsible=icon]:hidden">
-      <span
-        style={{
-          fontSize: "9px",
-          letterSpacing: "0.12em",
-          fontWeight: 700,
-          textTransform: "uppercase",
-          color: "oklch(0.556 0 0 / 45%)",
-        }}
-      >
+    <div className="px-3 mb-1 mt-0.5 group-data-[collapsible=icon]:hidden">
+      <span className="text-[10px] font-medium uppercase tracking-[0.08em] text-muted-foreground/50">
         {children}
       </span>
     </div>
   );
 }
 
-/* ─── Menu Item Renderer ─────────────────────────────────────────────────── */
+/* ─── Menu Item Renderer ─────────────────────────────────────────── */
 function MenuItemRow({
   item,
   pathName,
@@ -97,7 +115,6 @@ function MenuItemRow({
     pathName === item.path ||
     (hasChildren && item.children?.some((c) => pathName === c.path));
 
-  // Raw label string for tooltip
   const tooltipLabel = typeof item.label === "string" ? item.label : undefined;
 
   const iconEl = item.icon
@@ -109,33 +126,30 @@ function MenuItemRow({
         {
           size: depth > 0 ? 14 : 16,
           className: cn(
-            "shrink-0 transition-all duration-200",
+            "shrink-0 transition-colors duration-150",
             isActive
-              ? "text-indigo-600"
-              : "text-zinc-400 group-hover:text-zinc-600",
+              ? "text-primary"
+              : "text-muted-foreground/70 group-hover:text-foreground/70",
           ),
         },
       )
     : null;
 
-  /* Base row styles — the icon size override from shadcn kicks in via
-     group-data-[collapsible=icon]:size-8! on SidebarMenuButton */
   const rowBase = cn(
     "group relative flex items-center w-full transition-all duration-150 cursor-pointer select-none",
-    depth === 0 ? "h-9 px-3 rounded-xl gap-2.5" : "h-8 px-2.5 rounded-lg gap-2",
+    depth === 0 ? "h-8 px-2.5 rounded-lg gap-2.5" : "h-7 px-2 rounded-md gap-2",
     isActive
-      ? "bg-indigo-50 shadow-[inset_0_0_0_1px_oklch(0.55_0.24_264/0.12)]"
-      : "hover:bg-zinc-50",
+      ? "bg-sidebar-accent text-sidebar-accent-foreground"
+      : "hover:bg-sidebar-accent/50",
   );
 
-  /* Active left bar — hidden when collapsed (icon-only) */
+  /* Active indicator */
   const activeBar = isActive && depth === 0 && (
-    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-full bg-indigo-500 pointer-events-none group-data-[collapsible=icon]:hidden" />
+    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[2.5px] h-4 rounded-full bg-primary pointer-events-none group-data-[collapsible=icon]:hidden" />
   );
 
   /* ── Children (expandable group) ── */
   if (hasChildren) {
-    // In collapsed mode: show first child's icon if no parent icon, else parent icon
     return (
       <SidebarMenuItem>
         <SidebarMenuButton
@@ -144,33 +158,33 @@ function MenuItemRow({
           tooltip={tooltipLabel}
           className={cn(
             rowBase,
-            "justify-between h-auto! py-0 group-data-[collapsible=icon]:size-9! group-data-[collapsible=icon]:p-0! group-data-[collapsible=icon]:justify-center",
+            "justify-between h-auto! py-0 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-0! group-data-[collapsible=icon]:justify-center",
           )}
           onClick={() => !isCollapsed && toggleGroup(item.key)}
         >
           <span
             className={cn(
-              "flex items-center gap-2.5 flex-1 min-w-0 h-9",
-              "group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:flex-none group-data-[collapsible=icon]:h-9 group-data-[collapsible=icon]:w-9",
+              "flex items-center gap-2.5 flex-1 min-w-0 h-8",
+              "group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:flex-none group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:w-8",
             )}
           >
             {activeBar}
             {iconEl}
-            <span className="truncate text-[13px] leading-none tracking-tight transition-colors duration-200 group-data-[collapsible=icon]:hidden font-medium text-inherit">
+            <span className="truncate text-[13px] leading-none tracking-[-0.01em] transition-colors duration-150 group-data-[collapsible=icon]:hidden font-medium text-inherit">
               {item.label}
             </span>
           </span>
           <ChevronRight
-            size={13}
+            size={12}
             className={cn(
-              "shrink-0 text-zinc-400 transition-transform duration-200 group-data-[collapsible=icon]:hidden",
-              isOpen && "rotate-90 text-indigo-500",
+              "shrink-0 text-muted-foreground/40 transition-transform duration-200 group-data-[collapsible=icon]:hidden",
+              isOpen && "rotate-90 text-primary",
             )}
           />
         </SidebarMenuButton>
 
         {isOpen && !isCollapsed && (
-          <div className="ml-4 pl-3 border-l border-zinc-100 mt-0.5 mb-0.5 space-y-0.5 group-data-[collapsible=icon]:hidden">
+          <div className="ml-4 pl-2.5 border-l border-border/50 mt-0.5 mb-0.5 space-y-0.5 group-data-[collapsible=icon]:hidden">
             {item.children!.map((child) => (
               <MenuItemRow
                 key={child.key}
@@ -199,13 +213,13 @@ function MenuItemRow({
           tooltip={tooltipLabel}
           className={cn(
             rowBase,
-            "text-red-400 hover:text-red-600 hover:bg-red-50",
-            "group-data-[collapsible=icon]:size-9! group-data-[collapsible=icon]:p-0! group-data-[collapsible=icon]:justify-center",
+            "text-destructive/60 hover:text-destructive hover:bg-destructive/5",
+            "group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-0! group-data-[collapsible=icon]:justify-center",
           )}
           onClick={() => setLogoutOpen(true)}
         >
           {iconEl}
-          <span className="text-[13px] leading-none tracking-tight font-medium truncate group-data-[collapsible=icon]:hidden">
+          <span className="text-[13px] leading-none tracking-[-0.01em] font-medium truncate group-data-[collapsible=icon]:hidden">
             {item.label}
           </span>
         </SidebarMenuButton>
@@ -222,7 +236,7 @@ function MenuItemRow({
         tooltip={tooltipLabel}
         className={cn(
           rowBase,
-          "group-data-[collapsible=icon]:size-9! group-data-[collapsible=icon]:p-0! group-data-[collapsible=icon]:justify-center",
+          "group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-0! group-data-[collapsible=icon]:justify-center",
         )}
       >
         <Link
@@ -233,10 +247,10 @@ function MenuItemRow({
           {iconEl}
           <span
             className={cn(
-              "text-[13px] leading-none tracking-tight transition-colors duration-200 truncate group-data-[collapsible=icon]:hidden",
+              "text-[13px] leading-none tracking-[-0.01em] transition-colors duration-150 truncate group-data-[collapsible=icon]:hidden",
               isActive
-                ? "text-zinc-900 font-semibold"
-                : "text-zinc-500 group-hover:text-zinc-800 font-medium",
+                ? "text-foreground font-semibold"
+                : "text-muted-foreground group-hover:text-foreground font-medium",
             )}
           >
             {item.label}
@@ -244,7 +258,7 @@ function MenuItemRow({
           {item.badge && (
             <Badge
               variant="outline"
-              className="ml-auto text-[9px] h-4 px-1.5 bg-indigo-50/60 text-indigo-500 border-indigo-100 rounded-full font-semibold shrink-0 group-data-[collapsible=icon]:hidden"
+              className="ml-auto text-[9px] h-4 px-1.5 bg-primary/5 text-primary border-primary/10 rounded-full font-medium shrink-0 group-data-[collapsible=icon]:hidden"
             >
               {item.badge}
             </Badge>
@@ -255,17 +269,36 @@ function MenuItemRow({
   );
 }
 
-/* ─── Inner Layout (needs useSidebar) ───────────────────────────────────── */
+/* ─── Inner Layout ─────────────────────────────────────────────── */
 function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
   const pathName = usePathname();
+  const router = useRouter();
   const [openGroup, setOpenGroup] = useState<string | null>(null);
   const [logoutOpen, setLogoutOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
 
-  const { extendedItems: subscriptionFilteredItems, gamificationItems } =
-    useFilteredExtendedItems();
+  // ⌘K keyboard shortcut
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setSearchOpen((prev) => !prev);
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  const {
+    homeItems,
+    communityIntelligence,
+    contentModeration,
+    gamificationEngine,
+    modules: modulesItems,
+  } = useFilteredExtendedItems();
   const { managementItems: managementFolders } = useFilteredManagementItems();
 
   const toggleGroup = (key: string) => {
@@ -291,7 +324,7 @@ function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
             return {
               ...item,
               children: labelMatch ? item.children : filteredChildren,
-            };
+            } as MenuItem;
           }
           return null;
         })
@@ -300,29 +333,79 @@ function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
     [],
   );
 
-  const filteredMain = useMemo(
-    () => filterList(main, searchQuery),
-    [searchQuery, filterList],
+  const filteredHome = useMemo(
+    () => filterList(homeItems as MenuItem[], searchQuery),
+    [searchQuery, homeItems, filterList],
   );
-  const filteredExtendedItems = useMemo(
-    () => filterList(subscriptionFilteredItems, searchQuery),
-    [searchQuery, subscriptionFilteredItems, filterList],
+  const filteredCommunity = useMemo(
+    () => filterList(communityIntelligence as MenuItem[], searchQuery),
+    [searchQuery, communityIntelligence, filterList],
   );
-  const filteredSettings = useMemo(
-    () => filterList(managementFolders, searchQuery),
-    [searchQuery, managementFolders, filterList],
+  const filteredModeration = useMemo(
+    () => filterList(contentModeration as MenuItem[], searchQuery),
+    [searchQuery, contentModeration, filterList],
   );
   const filteredGamification = useMemo(
-    () => filterList(gamificationItems, searchQuery),
-    [searchQuery, gamificationItems, filterList],
+    () => filterList(gamificationEngine as MenuItem[], searchQuery),
+    [searchQuery, gamificationEngine, filterList],
   );
-  const filteredProfile = useMemo(
-    () => filterList(profile, searchQuery),
-    [searchQuery, filterList],
+  const filteredModules = useMemo(
+    () => filterList(modulesItems as MenuItem[], searchQuery),
+    [searchQuery, modulesItems, filterList],
+  );
+  const filteredSettings = useMemo(
+    () => filterList(managementFolders as MenuItem[], searchQuery),
+    [searchQuery, managementFolders, filterList],
   );
 
+  const { data: userData } = useGetUser();
+  const nameOfUser = userData?.getUser
+    ? `${userData.getUser.firstName} ${userData.getUser.lastName}`
+    : "Deepak Rai";
+
+  const profileItems = useMemo(
+    () => profile(nameOfUser) as MenuItem[],
+    [nameOfUser],
+  );
+  const filteredProfile = useMemo(
+    () => filterList(profileItems, searchQuery),
+    [searchQuery, profileItems, filterList],
+  );
+
+  // Flatten items for ⌘K search
+  const flattenItems = useCallback((items: MenuItem[], section: string, parentIcon?: React.ReactNode): any[] => {
+    return items.reduce((acc: any[], item) => {
+      const icon = item.icon || parentIcon;
+      if (item.children && item.children.length > 0) {
+        return [...acc, ...flattenItems(item.children, section, icon)];
+      }
+      if (item.path) {
+        acc.push({
+          key: item.key,
+          label: item.label,
+          path: item.path,
+          icon: icon,
+          section: section
+        });
+      }
+      return acc;
+    }, []);
+  }, []);
+
+  const allSearchItems = useMemo(() => {
+    return [
+      ...flattenItems(homeItems as MenuItem[], "Home"),
+      ...flattenItems(communityIntelligence as MenuItem[], "Community"),
+      ...flattenItems(contentModeration as MenuItem[], "Moderation"),
+      ...flattenItems(gamificationEngine as MenuItem[], "Gamification"),
+      ...flattenItems(modulesItems as MenuItem[], "Modules"),
+      ...flattenItems(managementFolders as MenuItem[], "Settings"),
+      ...flattenItems(profileItems, "Account"),
+    ];
+  }, [homeItems, communityIntelligence, contentModeration, gamificationEngine, modulesItems, managementFolders, profileItems, flattenItems]);
+
   const renderItems = (items: MenuItem[]) => (
-    <SidebarMenu className="gap-0.5">
+    <SidebarMenu className="gap-px">
       {items.map((item) => (
         <MenuItemRow
           key={item.key}
@@ -342,11 +425,11 @@ function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
       {/* ── SIDEBAR ── */}
       <Sidebar
         collapsible="icon"
-        className="border-r border-zinc-100 bg-white"
-        style={{ "--sidebar-width": "232px" } as React.CSSProperties}
+        className="border-r border-border bg-sidebar"
+        style={{ "--sidebar-width": "240px" } as React.CSSProperties}
       >
         {/* HEADER */}
-        <SidebarHeader className="h-14 flex flex-row items-center justify-between px-3 border-b border-zinc-50 overflow-hidden">
+        <SidebarHeader className="h-14 flex flex-row items-center justify-between px-3 border-b border-border overflow-hidden">
           {!isCollapsed && (
             <Link
               href="/"
@@ -355,26 +438,26 @@ function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
               <Logo />
             </Link>
           )}
-          <SidebarTrigger className="h-7 w-7 rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-all duration-150 flex items-center justify-center shrink-0" />
+          <SidebarTrigger className="h-7 w-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-sidebar-accent transition-all duration-150 flex items-center justify-center shrink-0" />
         </SidebarHeader>
 
         {/* CONTENT */}
-        <SidebarContent className="py-3 px-2 overflow-x-hidden">
-          {/* SEARCH — global search */}
+        <SidebarContent className="py-2 px-1.5 overflow-x-hidden">
+          {/* SEARCH */}
           {!isCollapsed && (
-            <div className="px-2 mb-4 mt-1 group-data-[collapsible=icon]:hidden">
+            <div className="px-1.5 mb-3 mt-1 group-data-[collapsible=icon]:hidden">
               <div className="relative">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-zinc-400 pointer-events-none" />
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50 pointer-events-none" />
                 <Input
-                  placeholder="Search sidebar…"
+                  placeholder="Search…"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="h-8 bg-zinc-50 border-zinc-100 pl-7 pr-7 text-xs rounded-xl focus-visible:ring-1 focus-visible:ring-indigo-300 placeholder:text-zinc-400 text-zinc-700"
+                  className="h-8 bg-sidebar-accent/50 border-border pl-8 pr-7 text-xs rounded-lg focus-visible:ring-1 focus-visible:ring-ring/30 placeholder:text-muted-foreground/40 text-foreground"
                 />
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery("")}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 transition-colors"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-foreground transition-colors"
                   >
                     <X className="h-3 w-3" />
                   </button>
@@ -383,124 +466,104 @@ function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
             </div>
           )}
 
-          {/* MAIN */}
-          {filteredMain.length > 0 && (
-            <SidebarGroup className="mb-1 p-0">
-              <SectionLabel>Playground</SectionLabel>
+          {/* HOME */}
+          {filteredHome.length > 0 && (
+            <SidebarGroup className="mb-3 p-0">
+              <SectionLabel>Home</SectionLabel>
               <SidebarGroupContent>
-                {renderItems(filteredMain)}
+                {renderItems(filteredHome)}
               </SidebarGroupContent>
             </SidebarGroup>
           )}
 
-          {/* PRODUCTS / EXTENDED MODULES */}
-          {filteredExtendedItems.length > 0 && (
-            <SidebarGroup className="mb-1 p-0">
-              {/* Section header — hidden when collapsed */}
-              <div className="flex items-center gap-2 px-3 mb-1.5 mt-1 group-data-[collapsible=icon]:hidden">
-                <span
-                  style={{
-                    fontSize: "9px",
-                    letterSpacing: "0.12em",
-                    fontWeight: 700,
-                    textTransform: "uppercase",
-                    color: "oklch(0.556 0 0 / 45%)",
-                  }}
-                >
-                  Products
-                </span>
-                <span
-                  className="inline-flex items-center justify-center rounded-full text-[9px] font-bold px-1.5 h-4"
-                  style={{
-                    background: "oklch(0.55 0.24 264 / 0.08)",
-                    color: "oklch(0.45 0.24 264)",
-                  }}
-                >
-                  {filteredExtendedItems.length}
-                </span>
-              </div>
+          {/* COMMUNITY INTELLIGENCE */}
+          {filteredCommunity.length > 0 && (
+            <SidebarGroup className="mb-3 p-0">
+              <SectionLabel>Community</SectionLabel>
               <SidebarGroupContent>
-                {renderItems(filteredExtendedItems)}
+                {renderItems(filteredCommunity)}
               </SidebarGroupContent>
             </SidebarGroup>
           )}
 
-          {/* GAMIFICATION */}
+          {/* CONTENT MODERATION */}
+          {filteredModeration.length > 0 && (
+            <SidebarGroup className="mb-3 p-0">
+              <SectionLabel>Moderation</SectionLabel>
+              <SidebarGroupContent>
+                {renderItems(filteredModeration)}
+              </SidebarGroupContent>
+            </SidebarGroup>
+          )}
+
+          {/* GAMIFICATION ENGINE */}
           {filteredGamification.length > 0 && (
-            <SidebarGroup className="mb-1 p-0">
-              <div className="flex items-center gap-2 px-3 mb-1.5 mt-1 group-data-[collapsible=icon]:hidden">
-                <span
-                  style={{
-                    fontSize: "9px",
-                    letterSpacing: "0.12em",
-                    fontWeight: 700,
-                    textTransform: "uppercase",
-                    color: "oklch(0.556 0 0 / 45%)",
-                  }}
-                >
-                  Gamification
-                </span>
-                <span
-                  className="inline-flex items-center justify-center rounded-full text-[9px] font-bold px-1.5 h-4"
-                  style={{
-                    background: "oklch(0.55 0.24 264 / 0.08)",
-                    color: "oklch(0.45 0.24 264)",
-                  }}
-                >
-                  {filteredGamification.length}
-                </span>
-              </div>
+            <SidebarGroup className="mb-3 p-0">
+              <SectionLabel>Gamification</SectionLabel>
               <SidebarGroupContent>
                 {renderItems(filteredGamification)}
               </SidebarGroupContent>
             </SidebarGroup>
           )}
 
-          {/* MANAGEMENT */}
+          {/* MODULES */}
+          {filteredModules.length > 0 && (
+            <SidebarGroup className="mb-3 p-0">
+              <SectionLabel>Modules</SectionLabel>
+              <SidebarGroupContent>
+                {renderItems(filteredModules)}
+              </SidebarGroupContent>
+            </SidebarGroup>
+          )}
+
+          {/* ADMIN SETTINGS */}
           {filteredSettings.length > 0 && (
             <SidebarGroup className="p-0">
-              <SectionLabel>Management</SectionLabel>
+              <SectionLabel>Settings</SectionLabel>
               <SidebarGroupContent>
                 {renderItems(filteredSettings)}
               </SidebarGroupContent>
             </SidebarGroup>
           )}
 
-          {/* NO RESULTS FALLBACK */}
+          {/* NO RESULTS */}
           {searchQuery.trim() &&
-            filteredMain.length === 0 &&
-            filteredExtendedItems.length === 0 &&
+            filteredHome.length === 0 &&
+            filteredModeration.length === 0 &&
             filteredGamification.length === 0 &&
+            filteredModules.length === 0 &&
             filteredSettings.length === 0 &&
             filteredProfile.length === 0 && (
-              <div className="px-3 py-5 text-center group-data-[collapsible=icon]:hidden">
-                <p className="text-[11px] text-zinc-400">No matching items</p>
+              <div className="px-3 py-6 text-center group-data-[collapsible=icon]:hidden">
+                <p className="text-[11px] text-muted-foreground/60">
+                  No matching items
+                </p>
               </div>
             )}
-
         </SidebarContent>
 
         {/* FOOTER */}
         {filteredProfile.length > 0 && (
-          <SidebarFooter className="border-t border-zinc-50 p-2 pt-3 pb-3">
+          <SidebarFooter className="border-t border-border p-1.5 pt-2 pb-2">
             <SidebarGroup className="p-0">
-              <SectionLabel>Support</SectionLabel>
-              {renderItems(filteredProfile)}
+              <SidebarGroupContent>
+                {renderItems(filteredProfile)}
+              </SidebarGroupContent>
             </SidebarGroup>
           </SidebarFooter>
         )}
       </Sidebar>
 
       {/* ── MAIN CONTENT ── */}
-      <SidebarInset className="bg-[#FAFBFC]">
-        <header className="flex h-16 items-center justify-between gap-4 border-b border-zinc-100/80 bg-white/70 backdrop-blur-xl px-6 sticky top-0 z-40 shadow-[0_1px_2px_0_rgba(0,0,0,0.02)]">
-          <div className="flex items-center gap-4">
-            <SidebarTrigger className="-ml-2 h-8 w-8 rounded-xl text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-all duration-200" />
+      <SidebarInset className="bg-background">
+        <header className="flex h-14 items-center justify-between gap-4 border-b border-border bg-background/80 backdrop-blur-lg px-5 sticky top-0 z-40">
+          <div className="flex items-center gap-3">
+            <SidebarTrigger className="-ml-1 h-7 w-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-150" />
 
-            <div className="h-4 w-px bg-zinc-200/60 hidden sm:block" />
+            <div className="h-4 w-px bg-border hidden sm:block" />
 
-            <div className="hidden sm:flex items-center gap-2 text-[13px]">
-              <span className="font-semibold text-zinc-800 capitalize tracking-tight">
+            <div className="hidden sm:flex items-center gap-1.5 text-[13px]">
+              <span className="font-medium text-foreground/80 capitalize tracking-[-0.01em]">
                 {pathName === "/"
                   ? "Dashboard"
                   : pathName
@@ -512,35 +575,106 @@ function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <VisitSite />
-            <div className="h-4 w-px bg-zinc-200/60 mx-1" />
+            <div className="h-4 w-px bg-border mx-0.5" />
 
-            <button className="relative flex h-9 w-9 items-center justify-center rounded-xl text-zinc-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200 group">
-              <Search
-                size={16}
-                className="group-hover:scale-110 transition-transform"
-              />
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="relative flex h-8 items-center gap-1.5 px-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-150"
+            >
+              <Search size={15} />
+              <kbd className="hidden sm:inline-flex h-5 items-center gap-0.5 rounded border border-border bg-muted px-1.5 text-[10px] font-medium text-muted-foreground/70">
+                ⌘K
+              </kbd>
             </button>
 
-            <button className="relative flex h-9 w-9 items-center justify-center rounded-xl text-zinc-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200 group">
-              <span className="absolute top-2 right-2 h-1.5 w-1.5 rounded-full bg-rose-500 shadow-[0_0_0_2px_white]" />
-              <BellDotIcon
-                size={16}
-                className="group-hover:scale-110 transition-transform"
-              />
+            <button className="relative flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-150">
+              <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-destructive ring-2 ring-background" />
+              <BellDotIcon size={15} />
             </button>
 
-            <div className="h-4 w-px bg-zinc-200/60 mx-1" />
+            <div className="h-4 w-px bg-border mx-0.5" />
 
-            <button className="flex items-center gap-2 h-9 pl-1.5 pr-4 rounded-xl bg-zinc-50 border border-zinc-100 hover:bg-zinc-100 hover:border-zinc-200 transition-all duration-200">
-              <div className="h-6 w-6">
-                <UserAvatar />
-              </div>
-              <span className="text-[12px] font-bold text-zinc-700 leading-none truncate max-w-[120px]">
-                <UserName />
-              </span>
-            </button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-2 h-8 pl-1 pr-2.5 rounded-lg bg-sidebar-accent/50 border border-border hover:bg-sidebar-accent transition-all duration-150 outline-none">
+                  <div className="h-6 w-6">
+                    <UserAvatar />
+                  </div>
+                  <span className="text-[12px] font-medium text-foreground leading-none truncate max-w-[100px]">
+                    <UserName />
+                  </span>
+                  <ChevronDown className="h-3 w-3 text-muted-foreground/50" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" sideOffset={8} className="w-56 rounded-xl p-1.5">
+                {/* User info header */}
+                <DropdownMenuLabel className="px-2.5 py-2">
+                  <div className="flex items-center gap-2.5">
+                    <div className="h-8 w-8 shrink-0">
+                      <UserAvatar />
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-[13px] font-semibold text-foreground truncate">
+                        <UserName />
+                      </span>
+                      <span className="text-[11px] text-muted-foreground font-normal">Manage account</span>
+                    </div>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+
+                {/* Account group */}
+                <DropdownMenuGroup>
+                  <DropdownMenuItem asChild className="rounded-lg px-2.5 py-2 cursor-pointer">
+                    <Link href="/settings/profile" className="flex items-center gap-2.5">
+                      <User2 className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-[13px]">Profile</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="rounded-lg px-2.5 py-2 cursor-pointer">
+                    <Link href="/settings/appearance" className="flex items-center gap-2.5">
+                      <PaintBucket className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-[13px]">Appearance</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="rounded-lg px-2.5 py-2 cursor-pointer">
+                    <Link href="/notifications" className="flex items-center gap-2.5">
+                      <Bell className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-[13px]">Notifications</span>
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator />
+
+                {/* Billing group */}
+                <DropdownMenuGroup>
+                  <DropdownMenuItem asChild className="rounded-lg px-2.5 py-2 cursor-pointer">
+                    <Link href="/settings/billing" className="flex items-center gap-2.5">
+                      <CreditCard className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-[13px]">Billing</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="rounded-lg px-2.5 py-2 cursor-pointer">
+                    <Link href="/settings" className="flex items-center gap-2.5">
+                      <Settings className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-[13px]">Settings</span>
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator />
+
+                {/* Logout */}
+                <DropdownMenuItem
+                  className="rounded-lg px-2.5 py-2 cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/5"
+                  onClick={() => setLogoutOpen(true)}
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span className="text-[13px]">Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </header>
 
@@ -548,22 +682,54 @@ function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
       </SidebarInset>
 
       <LogoutModal open={logoutOpen} onOpenChange={setLogoutOpen} />
+
+      {/* ⌘K Global Search Palette */}
+      <CommandDialog open={searchOpen} onOpenChange={setSearchOpen}>
+        <CommandInput placeholder="Search for a page..." />
+        <CommandList className="max-h-[80vh] sm:max-h-[450px]">
+          <CommandEmpty>No results found.</CommandEmpty>
+          
+          {/* Grouped results */}
+          {["Home", "Community", "Moderation", "Gamification", "Modules", "Settings", "Account"].map((section) => {
+            const sectionItems = allSearchItems.filter(i => i.section === section);
+            if (sectionItems.length === 0) return null;
+            
+            return (
+              <CommandGroup key={section} heading={section}>
+                {sectionItems.map((item) => (
+                  <CommandItem
+                    key={item.key}
+                    value={typeof item.label === 'string' ? item.label : item.key}
+                    onSelect={() => {
+                      setSearchOpen(false);
+                      router.push(item.path);
+                    }}
+                    className="flex items-center gap-3 p-3 cursor-pointer rounded-lg hover:bg-accent transition-colors"
+                  >
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted text-muted-foreground shrink-0 border border-border/50">
+                      {item.icon ? React.cloneElement(item.icon as React.ReactElement<{ size?: number }>, { size: 16 }) : <ChevronRight size={16} />}
+                    </div>
+                    <span className="text-[13.5px] font-medium">{item.label}</span>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            );
+          })}
+        </CommandList>
+      </CommandDialog>
     </>
   );
 }
 
-/* ─── Root Export ────────────────────────────────────────────────────────── */
+/* ─── Root Export ────────────────────────────────────────────────── */
 export default function SidebarLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <>
-      <DotPatternLinearGradient />
-      <SidebarProvider defaultOpen={true}>
-        <SidebarLayoutInner>{children}</SidebarLayoutInner>
-      </SidebarProvider>
-    </>
+    <SidebarProvider defaultOpen={true}>
+      <SidebarLayoutInner>{children}</SidebarLayoutInner>
+    </SidebarProvider>
   );
 }

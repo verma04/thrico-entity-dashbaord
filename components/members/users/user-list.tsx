@@ -1,16 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { type ColumnDef } from "@tanstack/react-table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import UserActions from "./user-actions";
-import { DataTable } from "@/components/ui/data-table";
+import { AppDataTable } from "@/components/ui/app-data-table";
 import { format } from "date-fns";
 import { Mail, MapPin } from "lucide-react";
 import { UserDetail, useBulkChangeUserStatus } from "@/graphql/actions";
 import { cn } from "@/lib/utils";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 
 const getStatusColor = (status: string) => {
@@ -31,7 +30,10 @@ const getStatusColor = (status: string) => {
 };
 
 export function UserList({ users }: { users: UserDetail[] }) {
-  const [rowSelection, setRowSelection] = useState({});
+  const [rowSelection, setRowSelection] = React.useState<
+    Record<string, boolean>
+  >({});
+
   const [bulkChangeStatus, { loading: bulkLoading }] = useBulkChangeUserStatus({
     onCompleted: () => {
       setRowSelection({});
@@ -39,7 +41,7 @@ export function UserList({ users }: { users: UserDetail[] }) {
   });
 
   const selectedRowsIds = Object.keys(rowSelection)
-    .filter((key) => (rowSelection as any)[key])
+    .filter((key) => rowSelection[key])
     .map((key) => users[Number(key)]?.id)
     .filter(Boolean);
 
@@ -61,27 +63,6 @@ export function UserList({ users }: { users: UserDetail[] }) {
   };
 
   const columns: ColumnDef<UserDetail>[] = [
-    {
-      id: "select",
-      header: ({ table }) => (
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected()}
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-          className="translate-y-[2px]"
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-          className="translate-y-[2px]"
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    },
     {
       accessorKey: "user.firstName",
       header: "Member",
@@ -194,7 +175,8 @@ export function UserList({ users }: { users: UserDetail[] }) {
 
   return (
     <div className="space-y-4">
-      {Object.keys(rowSelection).length > 0 && (
+      {/* Bulk action bar */}
+      {selectedRowsIds.length > 0 && (
         <div className="flex items-center gap-2 bg-indigo-50/50 p-2.5 border border-indigo-100 rounded-xl shadow-sm animate-in fade-in slide-in-from-top-2">
           <span className="text-xs font-bold text-indigo-700 px-3 py-1 bg-indigo-100 rounded-lg">
             {selectedRowsIds.length} selected
@@ -209,7 +191,6 @@ export function UserList({ users }: { users: UserDetail[] }) {
           >
             Approve Selected
           </Button>
-
           <Button
             size="sm"
             variant="outline"
@@ -230,12 +211,46 @@ export function UserList({ users }: { users: UserDetail[] }) {
           </Button>
         </div>
       )}
-      <DataTable
+
+      {/* react-table-craft DataTable */}
+      <AppDataTable<UserDetail, unknown>
         columns={columns}
         data={users || []}
-        rowSelection={rowSelection}
-        onRowSelectionChange={setRowSelection}
-        rowClassName="hover:bg-muted/30 transition-colors"
+        searchableColumns={[
+          { id: "user.email" as any, title: "Email" },
+          { id: "user.firstName" as any, title: "Name" },
+        ]}
+        filterableColumns={[
+          {
+            id: "status" as any,
+            title: "Status",
+            options: [
+              { label: "Approved", value: "APPROVED" },
+              { label: "Pending", value: "PENDING" },
+              { label: "Blocked", value: "BLOCKED" },
+              { label: "Rejected", value: "REJECTED" },
+              { label: "Disabled", value: "DISABLED" },
+            ],
+          },
+        ]}
+        showFilter
+        showPagination
+        floatingBar={false}
+        isShowExportButtons={{ isShow: true, fileName: "members" }}
+        config={{
+          features: {
+            rowSelection: true,
+            columnVisibility: true,
+            search: true,
+            filter: true,
+            pagination: true,
+            csvExport: true,
+            viewToggle: false,
+            floatingBar: false,
+            advancedFilter: false,
+            sorting: true,
+          },
+        }}
       />
     </div>
   );

@@ -340,3 +340,5 @@ export * from "./currency/currency-queries";
 export * from "./rewards/rewards-queries";
 export * from "./reports";
 export * from "./audit";
+export * from "./email";
+export * from "./contacts";

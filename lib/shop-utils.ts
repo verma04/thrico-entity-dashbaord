@@ -4,16 +4,11 @@
  */
 
 export const CATEGORY_DEFAULT_IMAGES: Record<string, string> = {
-  clothing:
-    "https://cdn.thrico.network/shop_product_clothing.png",
-  electronics:
-    "https://cdn.thrico.network/shop_product_electronics.png",
-  digital:
-    "https://cdn.thrico.network/shop_product_digital_goods.png",
-  services:
-    "https://cdn.thrico.network/shop_product_services.png",
-  merch:
-    "https://cdn.thrico.network/shop_product_merchandise.png",
+  clothing: "https://cdn.thrico.network/shop_product_clothing.png",
+  electronics: "https://cdn.thrico.network/shop_product_electronics.png",
+  digital: "https://cdn.thrico.network/shop_product_digital_goods.png",
+  services: "https://cdn.thrico.network/shop_product_services.png",
+  merch: "https://cdn.thrico.network/shop_product_merchandise.png",
 };
 
 /**

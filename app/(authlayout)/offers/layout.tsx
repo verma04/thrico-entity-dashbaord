@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Tag, Settings, List, FolderTree } from "lucide-react";
+import { Tag, Settings, List, FolderTree, Plus } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
 
 function OffersLayout({ children }: { children: React.ReactNode }) {
@@ -15,6 +15,11 @@ function OffersLayout({ children }: { children: React.ReactNode }) {
       key: "categories",
       label: "Categories",
       icon: <FolderTree className="h-4 w-4" />,
+    },
+    {
+      key: "create",
+      label: "Create Offer",
+      icon: <Plus className="h-4 w-4" />,
     },
   ];
 

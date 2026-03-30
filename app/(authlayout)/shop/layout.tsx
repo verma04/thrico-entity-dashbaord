@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ShoppingBag, Settings, List, Images } from "lucide-react";
+import { ShoppingBag, Settings, List, Images, Plus } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
 import { Card } from "@/components/ui/card";
 
@@ -11,6 +11,11 @@ function ShopLayout({ children }: { children: React.ReactNode }) {
       key: "all",
       label: "All Products",
       icon: <List className="h-4 w-4" />,
+    },
+    {
+      key: "create",
+      label: "Create Product",
+      icon: <Plus className="h-4 w-4" />,
     },
     {
       key: "banners",
