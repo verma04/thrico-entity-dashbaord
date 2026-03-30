@@ -85,7 +85,7 @@ const CommunityKPICard = ({
       {/* Main Value & Change */}
       <div className="mb-5">
         <h3 className="text-2xl font-semibold text-foreground tracking-tight mb-1.5 tabular-nums">
-          {value}
+          {typeof value === 'number' ? Math.round(value) : value}
         </h3>
         <div className="flex items-center gap-2">
           <div className={cn(
@@ -95,7 +95,7 @@ const CommunityKPICard = ({
               : "bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400"
           )}>
             {isPositive ? <TrendingUp className="h-2.5 w-2.5" /> : <TrendingDown className="h-2.5 w-2.5" />}
-            {isPositive ? "+" : ""}{change}%
+            {isPositive ? "+" : ""}{typeof change === 'number' ? Math.round(change) : change}%
           </div>
           <span className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-wider">
             {subtext}
@@ -328,7 +328,7 @@ export default function Dashboard() {
                   <div key={i} className="space-y-1.5">
                     <div className="flex items-center justify-between text-[11px]">
                       <span className="text-muted-foreground font-medium">{item.type}</span>
-                      <span className="text-foreground font-semibold tabular-nums">{item.percentage}%</span>
+                      <span className="text-foreground font-semibold tabular-nums">{Math.round(item.percentage)}%</span>
                     </div>
                     <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
                       <div 

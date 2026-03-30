@@ -334,7 +334,7 @@ export default function EmailDashboard() {
             <QuickStat
               icon={Zap}
               label="Usage"
-              value={`${usagePercent}%`}
+              value={`${Math.round(usagePercent)}%`}
               color="text-slate-600"
               bg="bg-slate-50"
               delay={3}

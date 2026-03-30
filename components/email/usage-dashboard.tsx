@@ -163,7 +163,7 @@ function TopUpModal({
                 Add Credits
               </h3>
               <p className="text-sm text-slate-500 mt-1">
-                Current usage is at {usage.usagePercent}%
+                Current usage is at {Math.round(usage.usagePercent)}%
               </p>
             </div>
             <button
@@ -519,7 +519,7 @@ export default function UsageDashboard() {
               </div>
               <div className="text-right">
                 <span className="text-3xl font-bold text-slate-900 tracking-tight">
-                  {usagePercent}%
+                  {Math.round(usagePercent)}%
                 </span>
                 <p className="text-xs text-slate-500 mt-1 font-medium">
                   {usage.emailsSent.toLocaleString()} of{" "}

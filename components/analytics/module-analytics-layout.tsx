@@ -95,7 +95,7 @@ export const ModuleAnalyticsLayout: React.FC<ModuleAnalyticsLayoutProps> = ({
                       className={`flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full ${trendBg} ${trendColor}`}
                     >
                       <TrendIcon className="h-3 w-3" />
-                      {Math.abs(stat.change)}%
+                      {Math.round(Math.abs(stat.change))}%
                     </div>
                   )}
                 </div>

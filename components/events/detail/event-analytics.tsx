@@ -69,7 +69,7 @@ export default function EventAnalytics({ eventId }: { eventId: string }) {
     },
     {
       title: "Check-in Rate",
-      value: `${stats?.checkInRate || 0}%`,
+      value: `${Math.round(stats?.checkInRate || 0)}%`,
       description: "Current attendance conversion",
       icon: CheckCircle,
       color: "text-orange-600",
