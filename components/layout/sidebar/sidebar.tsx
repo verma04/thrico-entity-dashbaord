@@ -547,25 +547,12 @@ function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
             )}
         </SidebarContent>
 
-        {/* FOOTER */}
-        {filteredProfile.length > 0 && (
-          <SidebarFooter className="border-t border-border p-1.5 pt-2 pb-2">
-            <SidebarGroup className="p-0">
-              <SidebarGroupContent>
-                {renderItems(filteredProfile)}
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </SidebarFooter>
-        )}
       </Sidebar>
 
       {/* ── MAIN CONTENT ── */}
       <SidebarInset className="bg-background transition-all duration-300">
         <header className="flex h-16 items-center justify-between gap-4 border-b border-border/40 bg-background/80 backdrop-blur-2xl px-5 sticky top-0 z-40 shadow-[0_4px_24px_-12px_rgba(0,0,0,0.05)]">
           <div className="flex items-center gap-3">
-            <SidebarTrigger className="-ml-1 h-8 w-8 rounded-xl text-muted-foreground hover:text-primary hover:bg-accent/80 transition-all duration-300" />
-
-            <div className="h-4 w-px bg-border hidden sm:block" />
 
             <div className="hidden sm:flex items-center gap-1.5 text-[13px]">
               <span className="font-medium text-foreground/80 capitalize tracking-[-0.01em]">

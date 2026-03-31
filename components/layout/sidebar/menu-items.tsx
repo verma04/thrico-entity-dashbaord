@@ -193,11 +193,6 @@ export const gamificationEngine = [
         label: "Activity Log",
         path: "/gamification/activity-log",
       },
-      {
-        key: "eng-history",
-        label: "Full History",
-        path: "/gamification/history",
-      },
     ],
   },
   {

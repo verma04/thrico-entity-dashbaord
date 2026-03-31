@@ -43,11 +43,6 @@ function GamificationLayout({ children }: { children: React.ReactNode }) {
       label: "Activity Log",
       icon: <History className="h-4 w-4" />,
     },
-    {
-      key: "user-history",
-      label: "Full History",
-      icon: <History className="h-4 w-4" />,
-    },
   ];
 
   return (
