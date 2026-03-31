@@ -168,7 +168,9 @@ function TopUpModal({
     }
   };
 
-  const packs = topupData?.getEmailTopups || [];
+  const packs = [...(topupData?.getEmailTopups || [])].sort(
+    (a, b) => a.numberOfEmails - b.numberOfEmails
+  );
   const selectedPackDetails = packs.find(p => p.topupId === selectedPack);
 
   return (
