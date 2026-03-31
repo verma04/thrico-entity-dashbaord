@@ -49,7 +49,7 @@ const allMenuItems: MenuItem[] = [
   { key: "/settings", icon: Home, label: "General" },
   { key: "/settings/appearance", icon: PaintBucket, label: "Appearance" },
   { key: "/settings/domains", icon: Earth, label: "Domains" },
-  { key: "/settings/moderation", icon: ShieldCheck, label: "Moderation" },
+
   { key: "/settings/subscription", icon: ArrowUpRight, label: "Subscription" },
   { key: "/settings/modules", icon: ListTodo, label: "Modules" },
   { key: "/settings/billing", icon: Receipt, label: "Billing" },
@@ -70,7 +70,7 @@ const buildSections = (items: MenuItem[]): MenuSection[] => {
 
   // Account
   const accountItems = [find("/settings/profile"), find("/settings")].filter(
-    Boolean
+    Boolean,
   ) as MenuItem[];
   if (accountItems.length)
     sections.push({ title: "Account", items: accountItems });
@@ -105,15 +105,12 @@ const buildSections = (items: MenuItem[]): MenuSection[] => {
     sections.push({ title: "Legal & Privacy", items: legalItems });
 
   // Team
-  const teamItems = [find("/settings/users")].filter(
-    Boolean
-  ) as MenuItem[];
-  if (teamItems.length)
-    sections.push({ title: "Team", items: teamItems });
+  const teamItems = [find("/settings/users")].filter(Boolean) as MenuItem[];
+  if (teamItems.length) sections.push({ title: "Team", items: teamItems });
 
   // Support
   const supportItems = [find("/settings/contact")].filter(
-    Boolean
+    Boolean,
   ) as MenuItem[];
   if (supportItems.length)
     sections.push({ title: "Support", items: supportItems });
@@ -152,7 +149,7 @@ function SectionGroup({
         <ChevronDown
           className={cn(
             "w-3.5 h-3.5 opacity-50 transition-transform duration-300",
-            open && "rotate-180"
+            open && "rotate-180",
           )}
         />
       </button>
@@ -160,7 +157,7 @@ function SectionGroup({
       <div
         className={cn(
           "overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.2,0,0,1)]",
-          open ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"
+          open ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0",
         )}
       >
         <ul className="list-none m-0 py-0.5 pb-1.5 flex flex-col gap-px">
@@ -175,32 +172,40 @@ function SectionGroup({
                     "group relative w-full flex items-center gap-3 py-1.5 px-3 rounded-xl border-none bg-transparent cursor-pointer text-[13px] transition-all duration-200 font-medium tracking-tight",
                     isActive
                       ? "text-primary"
-                      : "text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50"
+                      : "text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50",
                   )}
                 >
                   {isActive && (
                     <motion.span
                       layoutId="settings-pill"
                       className="absolute inset-0 rounded-xl bg-primary/5 border border-primary/10"
-                      transition={{ type: "spring", bounce: 0.15, duration: 0.4 }}
+                      transition={{
+                        type: "spring",
+                        bounce: 0.15,
+                        duration: 0.4,
+                      }}
                     />
                   )}
-                  
-                  <div className={cn(
-                    "relative z-10 flex items-center justify-center w-7 h-7 rounded-lg transition-all duration-200",
-                    isActive ? "bg-primary text-primary-foreground shadow-sm scale-105" : "bg-sidebar-accent/20 text-muted-foreground/50 group-hover:bg-sidebar-accent group-hover:text-foreground"
-                  )}>
+
+                  <div
+                    className={cn(
+                      "relative z-10 flex items-center justify-center w-7 h-7 rounded-lg transition-all duration-200",
+                      isActive
+                        ? "bg-primary text-primary-foreground shadow-sm scale-105"
+                        : "bg-sidebar-accent/20 text-muted-foreground/50 group-hover:bg-sidebar-accent group-hover:text-foreground",
+                    )}
+                  >
                     <Icon className="w-[15px] h-[15px]" />
                   </div>
-                  
+
                   <span className="relative z-10 flex-1 text-left whitespace-nowrap overflow-hidden text-ellipsis leading-none pt-0.5">
                     {item.label}
                   </span>
-                  
+
                   {isActive && (
-                    <motion.span 
+                    <motion.span
                       layoutId="settings-dot"
-                      className="w-1 h-1 rounded-full bg-primary shrink-0 relative z-10" 
+                      className="w-1 h-1 rounded-full bg-primary shrink-0 relative z-10"
                     />
                   )}
                 </button>

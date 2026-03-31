@@ -165,7 +165,7 @@ export const contentModeration = [
       {
         key: "mod-ai-settings",
         label: "Settings",
-        path: "/settings/moderation/ai",
+        path: "/settings/moderation",
       },
     ],
   },
