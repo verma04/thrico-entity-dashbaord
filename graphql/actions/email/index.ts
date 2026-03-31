@@ -19,6 +19,7 @@ import {
   GET_EMAIL_TOPUPS,
   BUY_EMAIL_TOPUP,
   VERIFY_EMAIL_TOPUP_PAYMENT,
+  GET_EMAIL_DELIVERY_PERFORMANCE,
 } from "../../quries/email";
 
 // --- Types ---
@@ -138,6 +139,12 @@ export interface VerifyEmailTopupPaymentResponse {
   messageId: string;
 }
 
+export interface EmailDeliveryPerformance {
+  day: string;
+  sent: number;
+  delivered: number;
+}
+
 // --- Hooks ---
 
 export const useGetEmailDomain = () =>
@@ -235,3 +242,8 @@ export const useVerifyEmailTopupPayment = (options?: any) =>
     ...options,
     refetchQueries: [{ query: GET_EMAIL_OVERVIEW }],
   });
+
+export const useGetEmailDeliveryPerformance = () =>
+  useQuery<{ getEmailDeliveryPerformance: EmailDeliveryPerformance[] }>(
+    GET_EMAIL_DELIVERY_PERFORMANCE,
+  );

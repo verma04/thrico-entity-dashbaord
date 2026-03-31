@@ -60,10 +60,12 @@ import {
   useVerifyEmailTopupPayment,
   useGetEmailLogs,
   useGetEmailTopupHistory,
+  useGetEmailDeliveryPerformance,
   type EmailOverview,
   type EmailTopupProduct,
   type EmailLog,
   type EmailTopupHistory,
+  type EmailDeliveryPerformance,
   type BuyTopupResponse,
 } from "@/graphql/actions/email";
 
@@ -558,10 +560,11 @@ function HistorySection() {
 // ---------------------------------------------------------------------------
 export default function UsageDashboard() {
   const { data, loading } = useGetEmailOverview();
+  const { data: performanceData, loading: perfLoading } = useGetEmailDeliveryPerformance();
   const [topOpen, setTopOpen] = useState(false);
   const { setShowBuyPlanDialog } = useSubscriptionStore();
 
-  if (loading || !data) {
+  if (loading || perfLoading || !data) {
     return (
       <div className="h-96 flex items-center justify-center">
         <RefreshCw className="h-5 w-5 text-slate-300 animate-spin" />
@@ -575,14 +578,14 @@ export default function UsageDashboard() {
     ? Math.ceil((new Date(usage.periodEnd).getTime() - Date.now()) / 86400000)
     : 0;
 
-  const chartData = [
-    { name: "Mon", sent: 120, delivered: 118 },
-    { name: "Tue", sent: 450, delivered: 442 },
-    { name: "Wed", sent: 380, delivered: 375 },
-    { name: "Thu", sent: 890, delivered: 882 },
-    { name: "Fri", sent: 620, delivered: 615 },
-    { name: "Sat", sent: 210, delivered: 208 },
-    { name: "Sun", sent: 150, delivered: 148 },
+  const chartData = performanceData?.getEmailDeliveryPerformance || [
+    { day: "Mon", sent: 0, delivered: 0 },
+    { day: "Tue", sent: 0, delivered: 0 },
+    { day: "Wed", sent: 0, delivered: 0 },
+    { day: "Thu", sent: 0, delivered: 0 },
+    { day: "Fri", sent: 0, delivered: 0 },
+    { day: "Sat", sent: 0, delivered: 0 },
+    { day: "Sun", sent: 0, delivered: 0 },
   ];
 
   const stats = [
@@ -743,7 +746,7 @@ export default function UsageDashboard() {
                     stroke="#f8fafc"
                   />
                   <XAxis
-                    dataKey="name"
+                    dataKey="day"
                     axisLine={false}
                     tickLine={false}
                     tick={{ fontSize: 11, fill: "#94a3b8" }}

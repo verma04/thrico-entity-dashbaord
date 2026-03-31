@@ -626,7 +626,7 @@ export const adminSettings = [
       {
         key: "sup-manager",
         label: "Dedicated Account Manager",
-        path: "/support/manager",
+        path: "/settings/contact",
       },
     ],
   },

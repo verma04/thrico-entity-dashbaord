@@ -255,3 +255,13 @@ export const VERIFY_EMAIL_TOPUP_PAYMENT = gql`
     }
   }
 `;
+// 8. Performance Analytics
+export const GET_EMAIL_DELIVERY_PERFORMANCE = gql`
+  query GetEmailDeliveryPerformance {
+    getEmailDeliveryPerformance {
+      day
+      sent
+      delivered
+    }
+  }
+`;
