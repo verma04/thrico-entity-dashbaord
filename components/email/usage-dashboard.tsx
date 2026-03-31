@@ -3,31 +3,51 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  BarChart3,
-  Mail,
-  CheckCircle2,
-  Clock,
-  Zap,
-  X,
-  ArrowUpRight,
-  Shield,
-  CreditCard,
-  RefreshCw,
-  Trophy,
-  Activity,
-  Layers,
-  ArrowRight,
-  Target,
-} from "lucide-react";
-import {
   ResponsiveContainer,
   AreaChart,
   Area,
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip,
+  Tooltip as RechartsTooltip,
 } from "recharts";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Plus,
+  HelpCircle,
+  Calculator,
+  Loader2,
+  CheckCircle2,
+  Zap,
+  ArrowRight,
+  ArrowLeft,
+  CreditCard,
+  Mail,
+  RefreshCw,
+  Clock,
+  Activity,
+  Layers,
+  X,
+  Target,
+  ArrowUpRight,
+  Shield,
+  Trophy,
+} from "lucide-react";
 import { useEmailStore } from "@/store/useEmailStore";
 import { useSubscriptionStore } from "@/store/subscriptionStore";
 import { cn } from "@/lib/utils";
@@ -44,6 +64,7 @@ import {
   type EmailTopupProduct,
   type EmailLog,
   type EmailTopupHistory,
+  type BuyTopupResponse,
 } from "@/graphql/actions/email";
 
 // ---------------------------------------------------------------------------
@@ -60,7 +81,7 @@ const loadRazorpay = () => {
 };
 
 // ---------------------------------------------------------------------------
-// Top-up Modal
+// Top-up Modal (Redesigned to match addon-purchase-modal.tsx)
 // ---------------------------------------------------------------------------
 function TopUpModal({
   onClose,
@@ -71,23 +92,36 @@ function TopUpModal({
 }) {
   const { data: topupData, loading: packsLoading } = useGetEmailTopups();
   const [selectedPack, setSelectedPack] = useState<string | null>(null);
-  const [buyTopup, { loading: isBuying }] = useBuyEmailTopup();
+  const [step, setStep] = useState<"selection" | "checkout">("selection");
+  const [orderData, setOrderData] = useState<BuyTopupResponse | null>(null);
+  const [buyTopup, { loading: isInitiating }] = useBuyEmailTopup();
   const [verifyPayment] = useVerifyEmailTopupPayment();
 
-  const handleBuy = async () => {
+  const handleAction = async () => {
     if (!selectedPack) {
       toast.error("Please select a top-up pack");
       return;
     }
 
+    if (step === "selection") {
+      try {
+        const { data } = await buyTopup({
+          variables: { input: { topupId: selectedPack } },
+        });
+
+        if (data?.buyEmailTopup) {
+          setOrderData(data.buyEmailTopup);
+          setStep("checkout");
+        }
+      } catch (error: any) {
+        toast.error(error.message || "Failed to initiate purchase");
+      }
+      return;
+    }
+
+    if (!orderData) return;
+
     try {
-      const { data } = await buyTopup({
-        variables: { input: { topupId: selectedPack } },
-      });
-
-      const order = data?.buyEmailTopup;
-      if (!order) return;
-
       const scriptLoaded = await loadRazorpay();
       if (!scriptLoaded) {
         toast.error("Failed to load payment gateway");
@@ -96,11 +130,11 @@ function TopUpModal({
 
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY || "rzp_test_AVIthfNy85rAR2",
-        amount: order.amount,
-        currency: order.currency,
+        amount: orderData.totalAmount,
+        currency: orderData.currency,
         name: "Thrico",
-        description: `Email Top-up: ${selectedPack}`,
-        order_id: order.razorpayOrderId,
+        description: `Credits Top-up: ${selectedPack}`,
+        order_id: orderData.razorpayOrderId,
         handler: async function (response: any) {
           try {
             const { data: verifyData } = await verifyPayment({
@@ -115,137 +149,243 @@ function TopUpModal({
             });
 
             if (verifyData?.verifyEmailTopupPayment.success) {
-              toast.success("Payment verified and credits added!");
+              toast.success("Credits added successfully!");
               onClose();
             } else {
-              toast.error(
-                verifyData?.verifyEmailTopupPayment.message ||
-                  "Verification failed",
-              );
+              toast.error(verifyData?.verifyEmailTopupPayment.message || "Verification failed");
             }
           } catch (err: any) {
             toast.error(err.message || "Payment verification failed");
           }
         },
-        theme: {
-          color: "#0f172a",
-        },
+        theme: { color: "#6C47FF" },
       };
 
       const rzp = new (window as any).Razorpay(options);
       rzp.open();
     } catch (error: any) {
-      toast.error(error.message || "Failed to initiate purchase");
+      toast.error(error.message || "Failed to initiate payment");
     }
   };
 
   const packs = topupData?.getEmailTopups || [];
+  const selectedPackDetails = packs.find(p => p.topupId === selectedPack);
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-100 flex items-center justify-center bg-slate-950/20 backdrop-blur-sm p-6"
-      onClick={onClose}
-    >
-      <motion.div
-        initial={{ scale: 0.98, opacity: 0, y: 10 }}
-        animate={{ scale: 1, opacity: 1, y: 0 }}
-        exit={{ scale: 0.98, opacity: 0, y: 10 }}
-        className="bg-white rounded-3xl shadow-xl max-w-lg w-full overflow-hidden border border-slate-200/60"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="p-8">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h3 className="text-lg font-semibold text-slate-900 tracking-tight">
-                Add Credits
-              </h3>
-              <p className="text-sm text-slate-500 mt-1">
-                Current usage is at {Math.round(usage.usagePercent)}%
-              </p>
-            </div>
-            <button
-              onClick={onClose}
-              className="h-10 w-10 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-900 hover:bg-slate-50 transition-colors"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          </div>
-
-          <div className="space-y-3">
-            {packsLoading ? (
-              <div className="py-12 flex items-center justify-center">
-                <RefreshCw className="h-5 w-5 text-slate-300 animate-spin" />
+    <Dialog open onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl bg-card border-border z-50 p-0 overflow-hidden">
+        {/* Header */}
+        <div className="relative px-6 pt-6 pb-4 border-b border-border">
+          <div className="absolute inset-0 bg-linear-to-r from-primary/5 to-transparent" />
+          <DialogHeader className="relative">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+                <Plus className="h-5 w-5 text-primary" />
               </div>
-            ) : (
-              packs.map((pack) => (
-                <button
-                  key={pack.topupId}
-                  onClick={() => setSelectedPack(pack.topupId)}
-                  className={cn(
-                    "w-full flex items-center justify-between p-4 rounded-2xl border transition-all text-left",
-                    selectedPack === pack.topupId
-                      ? "border-slate-900 bg-slate-50"
-                      : "border-slate-100 bg-white hover:border-slate-200",
-                  )}
-                >
-                  <div className="flex items-center gap-4">
-                    <div
+              <div>
+                <DialogTitle className="text-xl font-semibold">
+                  {step === "selection" ? "Add Email Credits" : "Confirm Purchase"}
+                </DialogTitle>
+                <DialogDescription className="text-sm text-muted-foreground">
+                  {step === "selection" 
+                    ? "Choose a credit pack to boost your monthly quota." 
+                    : "Review your order summary and taxes before payment."}
+                </DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+        </div>
+
+        {/* Processing State Banner */}
+        {isInitiating && (
+          <div className="flex items-center justify-center py-4 bg-secondary/10 border-b border-border/50">
+            <Loader2 className="animate-spin h-5 w-5 text-primary" />
+            <span className="ml-2 text-sm text-muted-foreground font-medium">Preparing your summary...</span>
+          </div>
+        )}
+
+        {/* Info Banner */}
+        <div className="mx-6 mt-4 rounded-xl bg-primary/5 border border-primary/20 p-4">
+          <div className="flex items-start gap-3">
+            <CheckCircle2 className="h-5 w-5 text-primary mt-0.5" />
+            <p className="text-sm text-foreground leading-relaxed">
+              {step === "selection"
+                ? `Your current usage is at ${Math.round(usage.usagePercent)}%. Adding credits will take effect immediately.`
+                : "Credits are non-refundable and will be added to your current balance immediately after purchase."}
+            </p>
+          </div>
+        </div>
+
+        <div className="p-6">
+          {step === "selection" ? (
+            <div className="space-y-4">
+              <h4 className="text-sm font-medium">Available Packs</h4>
+              <div className="grid gap-3">
+                {packsLoading ? (
+                  <div className="h-40 flex items-center justify-center">
+                    <Loader2 className="h-6 w-6 animate-spin text-primary/30" />
+                  </div>
+                ) : (
+                  packs.map((pack: EmailTopupProduct) => (
+                    <button
+                      key={pack.topupId}
+                      onClick={() => setSelectedPack(pack.topupId)}
                       className={cn(
-                        "h-10 w-10 rounded-xl flex items-center justify-center border",
+                        "w-full flex items-center justify-between p-4 rounded-2xl border transition-all text-left group",
                         selectedPack === pack.topupId
-                          ? "bg-white border-slate-200"
-                          : "bg-slate-50 border-transparent",
+                          ? "border-primary bg-primary/5 ring-1 ring-primary/20"
+                          : "border-border bg-background hover:border-primary/50"
                       )}
                     >
-                      <Mail className="h-4 w-4 text-slate-600" />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-semibold text-slate-900">
-                        {pack.name}
-                      </h4>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <p className="text-xs text-slate-500">
-                          {pack.numberOfEmails.toLocaleString()} units
-                        </p>
-                        <span className="h-1 w-1 rounded-full bg-slate-300" />
-                        <p className="text-xs font-medium text-emerald-600">
-                          ₹{(pack.price / pack.numberOfEmails).toFixed(2)} /
-                          email
-                        </p>
+                      <div className="flex items-center gap-4">
+                        <div className={cn(
+                          "h-10 w-10 rounded-xl flex items-center justify-center border transition-colors",
+                          selectedPack === pack.topupId ? "bg-white border-primary/20 shadow-sm" : "bg-secondary/50 border-transparent group-hover:bg-background"
+                        )}>
+                          <Mail className={cn("h-4 w-4", selectedPack === pack.topupId ? "text-primary" : "text-muted-foreground")} />
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-semibold text-foreground">{pack.name}</h4>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className="text-xs text-muted-foreground">{pack.numberOfEmails.toLocaleString()} units</span>
+                            <span className="h-0.5 w-0.5 rounded-full bg-border" />
+                            <span className="text-xs font-medium text-emerald-600">₹{(pack.price / pack.numberOfEmails).toFixed(2)} / email</span>
+                          </div>
+                        </div>
                       </div>
+                      <div className="text-right">
+                        <span className="text-sm font-bold text-foreground">₹{pack.price}</span>
+                        {selectedPack === pack.topupId && (
+                          <div className="text-[10px] text-primary font-bold mt-1 uppercase tracking-wider">Selected</div>
+                        )}
+                      </div>
+                    </button>
+                  ))
+                )}
+              </div>
+            </div>
+          ) : orderData && (
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium">Purchase Details</h4>
+                  <div className="p-4 rounded-2xl bg-secondary/30 border border-border/50">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="h-8 w-8 rounded-lg bg-white flex items-center justify-center text-primary shadow-sm">
+                        <Mail className="h-4 w-4" />
+                      </div>
+                      <span className="text-sm font-bold">{selectedPackDetails?.name}</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      Instant top-up of {selectedPackDetails?.numberOfEmails.toLocaleString()} email transmission units. No expiration date.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 p-3 rounded-2xl bg-blue-50/50 border border-blue-100/30">
+                  <Shield className="h-4 w-4 text-blue-600 shrink-0 mt-0.5" />
+                  <p className="text-[10px] text-blue-700 font-medium leading-tight">
+                    Transactions are secured by 256-bit SSL encryption. We do not store your card details.
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h4 className="text-sm font-medium text-foreground/80">Payment Summary</h4>
+                <div className="rounded-2xl border bg-secondary/20 p-4 space-y-4">
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-muted-foreground flex items-center gap-1.5">
+                      Subtotal
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <HelpCircle className="w-3.5 h-3.5 text-muted-foreground/40 cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-72 p-4 bg-popover border shadow-xl">
+                            <div className="space-y-2">
+                              <p className="font-bold text-sm flex items-center gap-1.5 text-foreground">
+                                <Calculator className="w-4 h-4 text-primary" />
+                                Price Breakdown
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                All top-ups inclusive of local taxation based on your billing region.
+                              </p>
+                            </div>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </span>
+                    <span className="font-bold">₹{(orderData.amount / 100).toFixed(2)}</span>
+                  </div>
+
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-muted-foreground">
+                      {orderData.taxName} ({orderData.taxPercentage}%)
+                    </span>
+                    <span className="font-bold text-primary">₹{(orderData.taxAmount / 100).toFixed(2)}</span>
+                  </div>
+
+                  <div className="h-px bg-border/50 border-dashed" />
+
+                  <div className="space-y-1">
+                    <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest leading-none">Total amount due</p>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-2xl font-black text-foreground">₹{(orderData.totalAmount / 100).toFixed(2)}</span>
+                      <span className="text-xs font-bold text-muted-foreground uppercase">{orderData.currency}</span>
                     </div>
                   </div>
-                  <span className="text-sm font-bold text-slate-900 py-1 px-3 bg-slate-100 rounded-lg">
-                    ₹{pack.price}
-                  </span>
-                </button>
-              ))
-            )}
+                  
+                  <Badge variant="secondary" className="w-full justify-center bg-primary/10 text-primary border-none font-bold">
+                    PREPAID TOP-UP
+                  </Badge>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <DialogFooter className="flex flex-row justify-between items-center px-6 py-4 bg-secondary/20 border-t border-border/50 sm:justify-between">
+          <div className="flex items-center gap-2 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+            <Zap className="h-3.5 w-3.5 text-primary" />
+            Instant Activation
           </div>
 
-          <button
-            onClick={handleBuy}
-            disabled={!selectedPack || isBuying}
-            className={cn(
-              "w-full mt-8 h-12 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all",
-              selectedPack && !isBuying
-                ? "bg-slate-900 text-white hover:bg-black shadow-sm"
-                : "bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200",
-            )}
-          >
-            {isBuying ? (
-              <RefreshCw className="h-4 w-4 animate-spin" />
-            ) : (
-              <CreditCard className="h-4 w-4" />
-            )}
-            {isBuying ? "Processing..." : "Purchase Credits"}
-          </button>
-        </div>
-      </motion.div>
-    </motion.div>
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              className="text-xs font-bold hover:bg-white"
+              onClick={step === "selection" ? onClose : () => setStep("selection")}
+              disabled={isInitiating}
+            >
+              {step === "selection" ? "Cancel" : "Change Pack"}
+            </Button>
+            <Button
+              className="font-bold shadow-lg shadow-primary/20 px-6 py-2 h-auto text-xs"
+              onClick={handleAction}
+              disabled={!selectedPack || isInitiating}
+            >
+              {isInitiating ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  One moment...
+                </span>
+              ) : step === "selection" ? (
+                <>
+                  Review Order
+                  <ArrowRight className="h-3.5 w-3.5 ml-2" />
+                </>
+              ) : (
+                <>
+                  <CreditCard className="h-3.5 w-3.5 mr-2" />
+                  Pay ₹{(orderData!.totalAmount / 100).toFixed(2)}
+                </>
+              )}
+            </Button>
+          </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -320,7 +460,7 @@ function LogsSection() {
             No recent activity found.
           </div>
         ) : (
-          logs.map((log) => (
+          logs.map((log: EmailLog) => (
             <div
               key={log.id}
               className="p-5 flex items-center justify-between hover:bg-slate-50/50 transition-colors group"
@@ -389,7 +529,7 @@ function HistorySection() {
             No purchases yet.
           </p>
         ) : (
-          history.slice(0, 3).map((item) => (
+          history.slice(0, 3).map((item: EmailTopupHistory) => (
             <div
               key={item.id}
               className="flex items-center justify-between pb-4 border-b border-slate-50 last:border-0 last:pb-0"

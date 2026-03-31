@@ -232,10 +232,16 @@ export const GET_EMAIL_TOPUPS = gql`
 export const BUY_EMAIL_TOPUP = gql`
   mutation BuyEmailTopup($input: BuyEmailTopupInput!) {
     buyEmailTopup(input: $input) {
+      success
+      message
       billingId
       razorpayOrderId
       amount
+      taxAmount
+      totalAmount
       currency
+      taxName
+      taxPercentage
     }
   }
 `;

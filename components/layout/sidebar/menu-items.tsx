@@ -490,7 +490,7 @@ export const adminSettings = [
     label: "Configuration",
     icon: <Settings size={18} />,
     children: [
-      { key: "conf-gen", label: "General", path: "/settings/general" },
+      { key: "conf-gen", label: "General", path: "/settings" },
       { key: "conf-app", label: "Appearance", path: "/settings/appearance" },
       { key: "conf-dom", label: "Domain", path: "/settings/domains" },
       { key: "conf-web", label: "Manage Websites", path: "/app-layout/pages" },

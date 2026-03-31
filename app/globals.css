@@ -39,7 +39,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-plus-jakarta-sans), var(--font-geist-sans), sans-serif;
   --font-mono: var(--font-geist-mono);
   --font-avant-garde: var(--font-avant-garde), sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
@@ -177,10 +177,11 @@
 }
 
 div {
-  font-family: var(--font-avant-garde);
+  font-family: var(--font-plus-jakarta-sans), var(--font-avant-garde), sans-serif;
 }
 body {
-  font-family: var(--font-avant-garde);
+  font-family: var(--font-plus-jakarta-sans), var(--font-avant-garde), sans-serif;
+  letter-spacing: -0.02em;
 }
 @layer base {
   * {
@@ -188,8 +189,14 @@ body {
   }
   body {
     @apply bg-background text-foreground;
+    /* Morphed 2026 SaaS Aesthetic Defaults */
+    background-image: radial-gradient(at 0% 0%, color-mix(in oklab, var(--primary) 5%, transparent) 0px, transparent 50%),
+                      radial-gradient(at 100% 0%, color-mix(in oklab, var(--secondary) 5%, transparent) 0px, transparent 50%);
+    background-attachment: fixed;
+    background-size: cover;
   }
 }
+
 
 /* Ensure Razorpay popup appears above all other elements */
 .razorpay-container,

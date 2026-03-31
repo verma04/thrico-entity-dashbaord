@@ -80,8 +80,8 @@ interface MenuItem {
 /* ─── Section Label ──────────────────────────────────────────────── */
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <div className="px-3 mb-1 mt-0.5 group-data-[collapsible=icon]:hidden">
-      <span className="text-[10px] font-medium uppercase tracking-[0.08em] text-muted-foreground/50">
+    <div className="px-4 mb-2 mt-5 group-data-[collapsible=icon]:hidden first:mt-2">
+      <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/40 select-none">
         {children}
       </span>
     </div>
@@ -124,28 +124,28 @@ function MenuItemRow({
           className?: string;
         }>,
         {
-          size: depth > 0 ? 14 : 16,
+          size: depth > 0 ? 15 : 18,
           className: cn(
-            "shrink-0 transition-colors duration-150",
+            "shrink-0 transition-all duration-300",
             isActive
-              ? "text-primary"
-              : "text-muted-foreground/70 group-hover:text-foreground/70",
+              ? "text-primary scale-110 drop-shadow-sm"
+              : "text-muted-foreground/50 group-hover:text-foreground/80 group-hover:scale-110",
           ),
         },
       )
     : null;
 
   const rowBase = cn(
-    "group relative flex items-center w-full transition-all duration-150 cursor-pointer select-none",
-    depth === 0 ? "h-8 px-2.5 rounded-lg gap-2.5" : "h-7 px-2 rounded-md gap-2",
+    "group relative flex items-center w-full transition-all duration-300 ease-out cursor-pointer select-none overflow-hidden",
+    depth === 0 ? "h-10 px-3 rounded-xl gap-3 my-0.5" : "h-8 px-3 rounded-[10px] gap-2.5 my-0.5",
     isActive
-      ? "bg-sidebar-accent text-sidebar-accent-foreground"
-      : "hover:bg-sidebar-accent/50",
+      ? "bg-primary/10 text-primary dark:bg-primary/20 shadow-[inset_0px_1px_0px_rgba(255,255,255,0.04)]"
+      : "hover:bg-sidebar-accent/60 text-muted-foreground hover:text-foreground hover:translate-x-1",
   );
 
   /* Active indicator */
   const activeBar = isActive && depth === 0 && (
-    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[2.5px] h-4 rounded-full bg-primary pointer-events-none group-data-[collapsible=icon]:hidden" />
+    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[4px] h-5 rounded-r-full bg-primary pointer-events-none group-data-[collapsible=icon]:hidden shadow-[0_0_12px_rgba(var(--primary),0.6)] transition-all duration-300" />
   );
 
   /* ── Children (expandable group) ── */
@@ -164,13 +164,18 @@ function MenuItemRow({
         >
           <span
             className={cn(
-              "flex items-center gap-2.5 flex-1 min-w-0 h-8",
-              "group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:flex-none group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:w-8",
+              "flex items-center gap-3 flex-1 min-w-0 h-10",
+              "group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:flex-none group-data-[collapsible=icon]:h-10 group-data-[collapsible=icon]:w-10",
             )}
           >
             {activeBar}
             {iconEl}
-            <span className="truncate text-[13px] leading-none tracking-[-0.01em] transition-colors duration-150 group-data-[collapsible=icon]:hidden font-medium text-inherit">
+            <span
+              className={cn(
+                "truncate text-[13.5px] leading-none tracking-normal transition-colors duration-300 group-data-[collapsible=icon]:hidden",
+                isActive ? "font-semibold text-primary" : "font-medium text-inherit"
+              )}
+            >
               {item.label}
             </span>
           </span>
@@ -213,8 +218,8 @@ function MenuItemRow({
           tooltip={tooltipLabel}
           className={cn(
             rowBase,
-            "text-destructive/60 hover:text-destructive hover:bg-destructive/5",
-            "group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-0! group-data-[collapsible=icon]:justify-center",
+            "text-destructive/70 hover:text-destructive hover:bg-destructive/10 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] dark:hover:bg-destructive/20",
+            "group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center",
           )}
           onClick={() => setLogoutOpen(true)}
         >
@@ -236,21 +241,21 @@ function MenuItemRow({
         tooltip={tooltipLabel}
         className={cn(
           rowBase,
-          "group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-0! group-data-[collapsible=icon]:justify-center",
+          "group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center",
         )}
       >
         <Link
           href={item.path || "#"}
-          className="flex items-center gap-2.5 flex-1 min-w-0 group-data-[collapsible=icon]:justify-center"
+          className="flex items-center gap-3 flex-1 min-w-0 group-data-[collapsible=icon]:justify-center"
         >
           {activeBar}
           {iconEl}
           <span
             className={cn(
-              "text-[13px] leading-none tracking-[-0.01em] transition-colors duration-150 truncate group-data-[collapsible=icon]:hidden",
+              "text-[13.5px] leading-none tracking-normal transition-colors duration-300 truncate group-data-[collapsible=icon]:hidden",
               isActive
-                ? "text-foreground font-semibold"
-                : "text-muted-foreground group-hover:text-foreground font-medium",
+                ? "text-primary font-semibold"
+                : "text-inherit font-medium shadow-none",
             )}
           >
             {item.label}
@@ -258,7 +263,7 @@ function MenuItemRow({
           {item.badge && (
             <Badge
               variant="outline"
-              className="ml-auto text-[9px] h-4 px-1.5 bg-primary/5 text-primary border-primary/10 rounded-full font-medium shrink-0 group-data-[collapsible=icon]:hidden"
+              className="ml-auto text-[9px] h-[18px] px-2 bg-primary/10 text-primary border-transparent rounded-full font-bold uppercase tracking-wider shrink-0 shadow-sm group-data-[collapsible=icon]:hidden"
             >
               {item.badge}
             </Badge>
@@ -425,11 +430,11 @@ function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
       {/* ── SIDEBAR ── */}
       <Sidebar
         collapsible="icon"
-        className="border-r border-border bg-sidebar"
-        style={{ "--sidebar-width": "240px" } as React.CSSProperties}
+        className="border-r border-border/40 bg-sidebar/95 backdrop-blur-2xl shadow-[4px_0_24px_-12px_rgba(0,0,0,0.1)] transition-all duration-300"
+        style={{ "--sidebar-width": "260px" } as React.CSSProperties}
       >
         {/* HEADER */}
-        <SidebarHeader className="h-14 flex flex-row items-center justify-between px-3 border-b border-border overflow-hidden">
+        <SidebarHeader className="h-16 flex flex-row items-center justify-between px-4 border-b border-border/40 overflow-hidden bg-sidebar/50 backdrop-blur-sm">
           {!isCollapsed && (
             <Link
               href="/"
@@ -445,14 +450,14 @@ function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
         <SidebarContent className="py-2 px-1.5 overflow-x-hidden">
           {/* SEARCH */}
           {!isCollapsed && (
-            <div className="px-1.5 mb-3 mt-1 group-data-[collapsible=icon]:hidden">
-              <div className="relative">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50 pointer-events-none" />
+            <div className="px-3 mb-4 mt-2 group-data-[collapsible=icon]:hidden">
+              <div className="relative group">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/40 group-focus-within:text-primary transition-colors pointer-events-none" />
                 <Input
-                  placeholder="Search…"
+                  placeholder="Search pages or settings…"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="h-8 bg-sidebar-accent/50 border-border pl-8 pr-7 text-xs rounded-lg focus-visible:ring-1 focus-visible:ring-ring/30 placeholder:text-muted-foreground/40 text-foreground"
+                  className="h-10 bg-background/50 border-border/40 shadow-sm pl-9 pr-8 text-[13px] rounded-xl focus-visible:ring-2 focus-visible:ring-primary/20 placeholder:text-muted-foreground/40 text-foreground transition-all duration-300 hover:bg-background/80"
                 />
                 {searchQuery && (
                   <button
@@ -555,10 +560,10 @@ function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
       </Sidebar>
 
       {/* ── MAIN CONTENT ── */}
-      <SidebarInset className="bg-background">
-        <header className="flex h-14 items-center justify-between gap-4 border-b border-border bg-background/80 backdrop-blur-lg px-5 sticky top-0 z-40">
+      <SidebarInset className="bg-background transition-all duration-300">
+        <header className="flex h-16 items-center justify-between gap-4 border-b border-border/40 bg-background/80 backdrop-blur-2xl px-5 sticky top-0 z-40 shadow-[0_4px_24px_-12px_rgba(0,0,0,0.05)]">
           <div className="flex items-center gap-3">
-            <SidebarTrigger className="-ml-1 h-7 w-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-150" />
+            <SidebarTrigger className="-ml-1 h-8 w-8 rounded-xl text-muted-foreground hover:text-primary hover:bg-accent/80 transition-all duration-300" />
 
             <div className="h-4 w-px bg-border hidden sm:block" />
 
@@ -581,31 +586,31 @@ function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
 
             <button
               onClick={() => setSearchOpen(true)}
-              className="relative flex h-8 items-center gap-1.5 px-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-150"
+              className="relative flex h-9 items-center gap-2 px-3 rounded-xl bg-accent/40 text-muted-foreground hover:text-foreground hover:bg-accent/80 transition-all duration-300 border border-transparent hover:border-border/60 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)]"
             >
-              <Search size={15} />
-              <kbd className="hidden sm:inline-flex h-5 items-center gap-0.5 rounded border border-border bg-muted px-1.5 text-[10px] font-medium text-muted-foreground/70">
+              <Search size={15} className="group-hover:text-primary transition-colors" />
+              <kbd className="hidden sm:inline-flex h-5 items-center gap-0.5 rounded-md border border-border/50 bg-background/50 px-1.5 text-[10px] font-bold text-muted-foreground/70 shadow-sm">
                 ⌘K
               </kbd>
             </button>
 
-            <button className="relative flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-150">
-              <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-destructive ring-2 ring-background" />
-              <BellDotIcon size={15} />
+            <button className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-accent/40 text-muted-foreground hover:text-primary hover:bg-accent/80 transition-all duration-300 border border-transparent hover:border-border/60 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)]">
+              <span className="absolute top-2 right-2.5 h-1.5 w-1.5 rounded-full bg-destructive ring-2 ring-background shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
+              <BellDotIcon size={16} />
             </button>
 
-            <div className="h-4 w-px bg-border mx-0.5" />
+            <div className="h-4 w-px bg-border/50 mx-1" />
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-2 h-8 pl-1 pr-2.5 rounded-lg bg-sidebar-accent/50 border border-border hover:bg-sidebar-accent transition-all duration-150 outline-none">
-                  <div className="h-6 w-6">
+                <button className="group flex items-center gap-2 h-9 pl-1 pr-3 rounded-xl bg-accent/40 border border-transparent hover:border-border/60 hover:bg-accent/80 transition-all duration-300 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] outline-none">
+                  <div className="h-7 w-7 rounded-lg overflow-hidden ring-1 ring-border/50 group-hover:ring-primary/30 transition-all">
                     <UserAvatar />
                   </div>
-                  <span className="text-[12px] font-medium text-foreground leading-none truncate max-w-[100px]">
+                  <span className="text-[13px] font-semibold text-foreground leading-none truncate max-w-[120px] group-hover:text-primary transition-colors">
                     <UserName />
                   </span>
-                  <ChevronDown className="h-3 w-3 text-muted-foreground/50" />
+                  <ChevronDown className="h-3.5 w-3.5 text-muted-foreground/50 group-hover:text-primary/70 transition-colors" />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" sideOffset={8} className="w-56 rounded-xl p-1.5">

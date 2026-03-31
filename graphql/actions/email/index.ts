@@ -113,10 +113,16 @@ export interface EmailTopupProduct {
 }
 
 export interface BuyTopupResponse {
+  success: boolean;
+  message: string;
   billingId: string;
   razorpayOrderId: string;
   amount: number;
+  taxAmount: number;
+  totalAmount: number;
   currency: string;
+  taxName: string;
+  taxPercentage: number;
 }
 
 export interface VerifyEmailTopupPaymentInput {
