@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
-import FeedbackAnalytics from "@/components/feedback/dashboard/analytics";
+import FeedbackDashboard from "@/components/feedback/dashboard/redesign";
 
 export default function FeedbackPage() {
-  return <FeedbackAnalytics />;
+  return <FeedbackDashboard />;
 }
