@@ -50,7 +50,8 @@ export const GET_SPIN_WHEEL_PLAYS = gql`
       playedAt
       user {
         id
-        fullName
+        firstName
+        lastName
       }
       prize {
         id

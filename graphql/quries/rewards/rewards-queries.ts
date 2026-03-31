@@ -456,8 +456,8 @@ export const GET_MATCH_WIN_PLAYS = gql`
       playedAt
       user {
         id
-        fullName
-        profileImage
+        lastName
+        firstName
       }
       prize {
         id
