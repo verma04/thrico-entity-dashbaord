@@ -92,7 +92,7 @@ export const homeItems = [
   },
 ];
 
-// --- 2. COMMUNITY INTELLIGENCE ---
+// --- 2. COMMUNITY ---
 export const communityIntelligence = [
   {
     key: "members",
@@ -108,7 +108,7 @@ export const communityIntelligence = [
   },
 ];
 
-// --- 2. CONTENT MODERATION ---
+// --- 2. MODERATION ---
 export const contentModeration = [
   {
     key: "mod-dashboard",
@@ -142,7 +142,7 @@ export const contentModeration = [
   },
   {
     key: "mod-manual",
-    label: "Manual Setup",
+    label: "Moderation Settings",
     icon: <Settings size={18} />,
     children: [
       {
@@ -171,11 +171,11 @@ export const contentModeration = [
   },
 ];
 
-// --- 3. GAMIFICATION ENGINE ---
+// --- 3. REWARDS & GAMES ---
 export const gamificationEngine = [
   {
     key: "engagement-activities",
-    label: "Engagement Activities",
+    label: "Points & Badges",
     path: "/gamification",
     icon: <Target size={18} />,
     children: [
@@ -197,7 +197,7 @@ export const gamificationEngine = [
   },
   {
     key: "engagement-games",
-    label: "Engagement Games",
+    label: "Member Games",
     path: "/rewards/engagement/spin-wheel",
     icon: <Gamepad2 size={18} />,
     children: [
@@ -229,7 +229,7 @@ export const gamificationEngine = [
       { key: "cur-abuse", label: "Anti-Abuse", path: "/currency/anti-abuse" },
       {
         key: "cur-redemption",
-        label: "Redemption Logic",
+        label: "Redeem Rules",
         path: "/currency/redemption",
       },
       { key: "cur-trace", label: "Quick Trace", path: "/currency/trace" },
@@ -267,12 +267,12 @@ export const gamificationEngine = [
       },
       {
         key: "rew-inventory",
-        label: "Inventory Audit",
+        label: "Item Stock",
         path: "/rewards/vouchers/inventory",
       },
       {
         key: "rew-ledger",
-        label: "Redemption Ledger",
+        label: "Claim History",
         path: "/rewards/vouchers/redemptions",
       },
       {
@@ -482,7 +482,7 @@ export const modules = [
 export const adminSettings = [
   {
     key: "configuration",
-    label: "Configuration",
+    label: "General Settings",
     icon: <Settings size={18} />,
     children: [
       { key: "conf-gen", label: "General", path: "/settings" },
@@ -501,7 +501,7 @@ export const adminSettings = [
 
   {
     key: "branded-email",
-    label: "Email Broadcast",
+    label: "Email",
     path: "/email/usage",
     icon: <Mail size={18} />,
     children: [
@@ -512,15 +512,20 @@ export const adminSettings = [
         path: "/email/templates",
       },
       {
+        key: "email-campaigns",
+        label: "Automation Campaigns",
+        path: "/email/automation",
+      },
+      {
         key: "email-settings",
-        label: "Outbound Settings",
+        label: "Email Settings",
         path: "/email/settings",
       },
     ],
   },
   {
     key: "customisation",
-    label: "Customisation",
+    label: "Design & Style",
     icon: <PaintBucketIcon size={18} />,
     children: [
       {
@@ -530,7 +535,7 @@ export const adminSettings = [
       },
       {
         key: "cust-brand",
-        label: "Setup Branding",
+        label: "Brand Look",
         path: "/settings/appearance#branding",
       },
       {
@@ -540,7 +545,7 @@ export const adminSettings = [
       },
       {
         key: "cust-web",
-        label: "Setup Website",
+        label: "Website Layout",
         path: "/app-layout/pages#setup",
       },
       {
@@ -608,7 +613,7 @@ export const adminSettings = [
   },
   {
     key: "learnings",
-    label: "Learnings",
+    label: "Help Guides",
     path: "/learnings",
     icon: <BookOpen size={18} />,
   },

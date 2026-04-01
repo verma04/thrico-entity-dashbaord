@@ -63,9 +63,9 @@ export default function Reports({
   return (
     <EcosystemWrapper anonymized-1="reports-intelligence">
       <EcosystemHeader
-        title="Moderation Intelligence"
-        badgeText="Security Registry"
-        description="Monitor anomaly detection velocity, report instantiation protocols, and architectural resolution expansion across the global registry."
+        title="Reports Overview"
+        badgeText="Moderation Stats"
+        description="Monitor and manage community reports, content violations, and moderation actions."
         icon={ShieldAlert}
       />
 
@@ -74,12 +74,12 @@ export default function Reports({
           <div className="flex items-center gap-6">
             <EcosystemStatusIndicator
               status="active"
-              label="Reality Core: Operational"
+              label="System Status: Online"
             />
             <div className="h-4 w-px bg-slate-200" />
             <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
               <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
-              <span>Verified Network Integrity</span>
+              <span>Verified System</span>
             </div>
           </div>
 
@@ -98,7 +98,7 @@ export default function Reports({
                     value="ALL"
                     className="font-bold uppercase text-[10px]"
                   >
-                    All Registry Tiers
+                    All Categories
                   </SelectItem>
                   {availableModules.map((mod) => (
                     <SelectItem
@@ -106,7 +106,7 @@ export default function Reports({
                       value={mod}
                       className="font-bold uppercase text-[10px]"
                     >
-                      {mod} Protocol
+                      {mod}
                     </SelectItem>
                   ))}
                 </SelectContent>

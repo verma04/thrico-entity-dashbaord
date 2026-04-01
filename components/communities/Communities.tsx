@@ -82,8 +82,8 @@ export default function Communities({ status: initialStatus }: CommunitiesProps)
     <EcosystemWrapper>
       <EcosystemHeader 
         title="Communities"
-        badgeText="Ecosystem Registry"
-        description={loading ? "Synchronizing community registry..." : `Manage and monitor ${communities.length} connected network spaces.`}
+        badgeText="Community List"
+        description={loading ? "Loading communities..." : `Manage and view all ${communities.length} your communities.`}
         icon={Users}
         actions={
           <div className="flex items-center gap-3">
@@ -123,7 +123,7 @@ export default function Communities({ status: initialStatus }: CommunitiesProps)
         }
       />
 
-      <EcosystemActionBar showLiveIndicator={false}>
+      <EcosystemActionBar>
           <div className="relative w-full md:w-96 group">
             <div className="absolute left-4 top-1/2 -translate-y-1/2">
               <Search className="h-5 w-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
@@ -161,7 +161,7 @@ export default function Communities({ status: initialStatus }: CommunitiesProps)
               </SelectTrigger>
               <SelectContent className="rounded-2xl border-slate-100 shadow-2xl p-1">
                 <SelectItem value="ALL" className="font-bold rounded-lg py-2.5">
-                  All Ecosystem
+                  All Communities
                 </SelectItem>
                 <div className="h-px bg-slate-50 my-1" />
                 <SelectItem
@@ -206,7 +206,7 @@ export default function Communities({ status: initialStatus }: CommunitiesProps)
           <div className="flex items-center gap-2 relative z-10 ml-auto mr-4">
             <div className="flex items-center gap-2.5 px-5 py-2.5 bg-slate-900 rounded-2xl shadow-lg shadow-slate-900/10 text-xs font-black text-white uppercase tracking-wider">
               <span className="h-1.5 w-1.5 rounded-full bg-indigo-400 animate-pulse" />
-              {filteredCommunities.length} Active Spaces
+              {filteredCommunities.length} Active Communities
             </div>
           </div>
       </EcosystemActionBar>

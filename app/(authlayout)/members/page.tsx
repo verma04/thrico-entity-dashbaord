@@ -56,7 +56,7 @@ export default function MembersPage() {
 
   const kpis = [
     {
-      title: "Aggregate Population",
+      title: "Total Members",
       value: loading
         ? "..."
         : (data?.getMembersStats?.totalMembers?.toLocaleString() ?? "0"),
@@ -66,7 +66,7 @@ export default function MembersPage() {
       bg: "bg-indigo-500/10",
     },
     {
-      title: "Verified Nodes",
+      title: "Active Users",
       value: loading
         ? "..."
         : (data?.getMembersStats?.activeMembers?.toLocaleString() ?? "0"),
@@ -76,7 +76,7 @@ export default function MembersPage() {
       bg: "bg-emerald-500/10",
     },
     {
-      title: "Instantiation Velocity",
+      title: "New Joins",
       value: loading
         ? "..."
         : (data?.getMembersStats?.newMembersThisMonth?.toLocaleString() ?? "0"),
@@ -86,7 +86,7 @@ export default function MembersPage() {
       bg: "bg-violet-500/10",
     },
     {
-      title: "Engagement Ratio",
+      title: "Active Rate",
       value: "94.2%",
       trend: 2, // Placeholder
       icon: Activity,
@@ -114,9 +114,9 @@ export default function MembersPage() {
   return (
     <EcosystemWrapper anonymized-1="members-registry">
       <EcosystemHeader
-        title="Network Population"
-        badgeText="Identity Registry"
-        description="Monitor community growth velocity, node verification protocols, and architectural identity expansion across the global registry."
+        title="Member List"
+        badgeText="Directory"
+        description="View and manage all members in your community, track growth, and see activity levels."
         icon={Users}
       />
 
@@ -125,14 +125,14 @@ export default function MembersPage() {
           <EcosystemActionBar.Item>
             <EcosystemStatusIndicator
               status="active"
-              label="Identity Stream: Operational"
+              label="System: Active"
             />
           </EcosystemActionBar.Item>
           <EcosystemActionBar.Separator />
           <EcosystemActionBar.Item>
             <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
               <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
-              <span>Verified Node Registry</span>
+              <span>Verified Users</span>
             </div>
           </EcosystemActionBar.Item>
         </EcosystemActionBar.Group>
@@ -144,7 +144,7 @@ export default function MembersPage() {
               className="h-10 px-4 rounded-xl border-slate-200 font-bold hover:bg-slate-50 transition-all gap-2"
             >
               <Activity className="h-4 w-4 text-emerald-500" />
-              Live telemetry
+              Live stats
             </Button>
           </EcosystemActionBar.Item>
         </EcosystemActionBar.Group>
@@ -161,8 +161,8 @@ export default function MembersPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           <div className="lg:col-span-8">
             <EcosystemCard
-              title="Population Growth"
-              description="Temporal identity instantiation cycles"
+              title="Growth Over Time"
+              description="New members joining the community"
               icon={TrendingUp}
               decorationIcon={Zap}
             >
@@ -235,8 +235,8 @@ export default function MembersPage() {
 
           <div className="lg:col-span-4">
             <EcosystemCard
-              title="Archetype Matrix"
-              description="Registry role distribution"
+              title="By Department"
+              description="How members are distributed"
               icon={Sparkles}
               decorationIcon={LayoutGrid}
               className="min-h-fit"

@@ -57,7 +57,7 @@ export default function CommunitiesAnalytics() {
 
   const kpis = [
     {
-      title: "Aggregate Communities",
+      title: "Total Communities",
       value: loading
         ? "..."
         : (stats?.totalCommunities?.toLocaleString() ?? "0"),
@@ -67,7 +67,7 @@ export default function CommunitiesAnalytics() {
       bg: "bg-indigo-500/10",
     },
     {
-      title: "Active Protocol Nodes",
+      title: "Active Communities",
       value: loading
         ? "..."
         : (stats?.activeCommunities?.toLocaleString() ?? "0"),
@@ -77,7 +77,7 @@ export default function CommunitiesAnalytics() {
       bg: "bg-emerald-500/10",
     },
     {
-      title: "Enrollment Yield",
+      title: "New Members",
       value: loading
         ? "..."
         : (stats?.totalEnrollments?.toLocaleString() ?? "0"),
@@ -87,7 +87,7 @@ export default function CommunitiesAnalytics() {
       bg: "bg-violet-500/10",
     },
     {
-      title: "Propagation Count",
+      title: "Total Views",
       value: loading ? "..." : (stats?.totalViews?.toLocaleString() ?? "0"),
       trend: stats?.viewsChange ?? 0,
       icon: Globe,
@@ -109,9 +109,9 @@ export default function CommunitiesAnalytics() {
   return (
     <EcosystemWrapper anonymized-1="communities-analytics">
       <EcosystemHeader
-        title="Network Intelligence"
-        badgeText="Community Registry"
-        description="Monitor community instantiation velocity, enrollment protocols, and architectural network expansion across the global registry node."
+        title="Community Overview"
+        badgeText="Registry"
+        description="Track how your communities are growing and how many people are joining."
         icon={LayoutGrid}
       />
 
@@ -120,12 +120,12 @@ export default function CommunitiesAnalytics() {
           <div className="flex items-center gap-6">
             <EcosystemStatusIndicator
               status="active"
-              label="Network Stream: Operational"
+              label="System: Active"
             />
             <div className="h-4 w-px bg-slate-200" />
             <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
               <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
-              <span>Verified Community Node</span>
+              <span>Verified Communities</span>
             </div>
           </div>
 
@@ -143,25 +143,25 @@ export default function CommunitiesAnalytics() {
                   value={TimeRange.LAST_24_HOURS}
                   className="font-bold uppercase text-[10px]"
                 >
-                  Real-time Cycle
+                  Today
                 </SelectItem>
                 <SelectItem
                   value={TimeRange.LAST_7_DAYS}
                   className="font-bold uppercase text-[10px]"
                 >
-                  Last 7 Cycles
+                  Last 7 Days
                 </SelectItem>
                 <SelectItem
                   value={TimeRange.LAST_30_DAYS}
                   className="font-bold uppercase text-[10px]"
                 >
-                  Last 30 Cycles
+                  Last 30 Days
                 </SelectItem>
                 <SelectItem
                   value={TimeRange.LAST_90_DAYS}
                   className="font-bold uppercase text-[10px]"
                 >
-                  Last 90 Cycles
+                  Last 90 Days
                 </SelectItem>
               </SelectContent>
             </Select>
@@ -182,15 +182,15 @@ export default function CommunitiesAnalytics() {
         {/* KPI Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {kpis.map((kpi, i) => (
-            <EcosystemKPI key={i} {...kpi} trendLabel="Protocol Yield" />
+            <EcosystemKPI key={i} {...kpi} trendLabel="Growth" />
           ))}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           <div className="lg:col-span-8">
             <EcosystemCard
-              title="Enrollment Velocity"
-              description="Temporal membership instantiation cycles"
+              title="Member Growth"
+              description="How members are joining over time"
               icon={TrendingUp}
               decorationIcon={Zap}
             >
@@ -266,8 +266,8 @@ export default function CommunitiesAnalytics() {
 
           <div className="lg:col-span-4">
             <EcosystemCard
-              title="Community Matrix"
-              description="Registry tier allocation"
+              title="Community Types"
+              description="How communities are categorized"
               icon={Sparkles}
               decorationIcon={LayoutGrid}
               className="min-h-fit"
@@ -275,17 +275,17 @@ export default function CommunitiesAnalytics() {
               <div className="space-y-6">
                 {[
                   {
-                    label: "Elite Foundations",
+                    label: "Featured",
                     value: 35,
                     color: "bg-indigo-500",
                   },
                   {
-                    label: "Specialized Nodes",
+                    label: "Specialized",
                     value: 40,
                     color: "bg-purple-500",
                   },
                   {
-                    label: "Public Protocols",
+                    label: "Public",
                     value: 25,
                     color: "bg-emerald-500",
                   },
@@ -326,7 +326,7 @@ export default function CommunitiesAnalytics() {
                     variant="outline"
                     className="h-11 px-6 rounded-xl border-slate-200 font-black text-[10px] uppercase tracking-widest text-slate-600 gap-3 hover:bg-slate-50 transition-all shadow-sm"
                   >
-                    Catalog
+                    View All
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>

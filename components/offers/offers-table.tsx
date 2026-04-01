@@ -48,7 +48,7 @@ export function OffersTable({
             <div className="h-12 w-12 rounded-lg bg-primary/5 border border-primary/10 flex items-center justify-center shrink-0 overflow-hidden">
               {offer.image ? (
                 <img
-                  src={offer.image}
+                  src={`https://cdn.thrico.network/${offer.image}`}
                   alt={offer.title}
                   className="h-full w-full object-cover"
                 />

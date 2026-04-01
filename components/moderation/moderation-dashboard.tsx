@@ -28,8 +28,8 @@ export function ModerationDashboard() {
     <EcosystemWrapper>
       <EcosystemHeader
         title="Content Moderation"
-        description="Monitor, review, and manage community content safety across your platform."
-        breadcrumb="Trust & Safety"
+        description="Manage and review reported content from your community."
+        breadcrumb="Moderation"
         icon={ShieldCheck}
         badgeText="Safety Center"
         showLiveIndicator={false}
@@ -138,7 +138,7 @@ export function ModerationDashboard() {
                     </div>
                   </div>
                   <p className="text-[11px] font-medium text-emerald-700/80">
-                    Neural filters and spam detection actively screening content.
+                    Automated filters and spam detection are checking content.
                   </p>
                 </div>
               </div>
@@ -167,7 +167,7 @@ export function ModerationDashboard() {
                       <div className="h-7 w-7 rounded bg-slate-100 text-slate-600 flex items-center justify-center group-hover:bg-slate-900 group-hover:text-white transition-colors">
                         <ShieldCheck className="h-3.5 w-3.5" />
                       </div>
-                      <span className="text-[12px] font-semibold text-slate-700 group-hover:text-slate-900">Safety Thresholds</span>
+                      <span className="text-[12px] font-semibold text-slate-700 group-hover:text-slate-900">Safety Settings</span>
                     </div>
                   </Link>
                 </div>

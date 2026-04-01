@@ -73,22 +73,22 @@ export default function AuditLogsPage() {
 
   const kpis = [
     {
-      title: "Recent Actions",
+      title: "Total Logs",
       value: meta.totalItems ?? "0",
       icon: Terminal,
       color: "text-indigo-600",
       bg: "bg-indigo-500/10",
     },
     {
-      title: "Active Protocols",
+      title: "Active Modules",
       value: modules.length ?? "0",
       icon: History,
       color: "text-emerald-600",
       bg: "bg-emerald-500/10",
     },
     {
-      title: "Persistence",
-      value: "Enabled",
+      title: "Status",
+      value: "Online",
       icon: ShieldCheck,
       color: "text-violet-600",
       bg: "bg-violet-500/10",
@@ -141,9 +141,9 @@ export default function AuditLogsPage() {
   return (
     <EcosystemWrapper>
       <EcosystemHeader
-        title="Audit logs"
-        badgeText="Immutable Trace"
-        description="Review system-level administrative actions, security modifications, and protocol executions across the network nodes."
+        title="Audit Logs"
+        badgeText="System Logs"
+        description="Track all system activity, administrative changes, and security updates."
         icon={History}
       />
 
@@ -152,12 +152,12 @@ export default function AuditLogsPage() {
           <div className="flex items-center gap-6">
             <EcosystemStatusIndicator
               status="active"
-              label="Log Stream: Active"
+              label="System Status: Online"
             />
             <div className="h-4 w-px bg-slate-200" />
             <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
               <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
-              <span>Verified Audit Stream</span>
+              <span>Verified System</span>
             </div>
           </div>
 
@@ -178,7 +178,7 @@ export default function AuditLogsPage() {
                   value="ALL"
                   className="font-bold uppercase text-[10px]"
                 >
-                  All System Modules
+                  All Modules
                 </SelectItem>
                 {modules.map((mod) => (
                   <SelectItem
@@ -186,7 +186,7 @@ export default function AuditLogsPage() {
                     value={mod}
                     className="font-bold uppercase text-[10px]"
                   >
-                    {mod} Trace
+                    {mod}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -214,8 +214,8 @@ export default function AuditLogsPage() {
         </div>
 
         <EcosystemCard
-          title="Sequence Manifest"
-          description="Chronological record of administrative protocols"
+          title="Log History"
+          description="A chronological record of system actions"
           icon={Terminal}
           decorationIcon={Zap}
         >
@@ -223,7 +223,7 @@ export default function AuditLogsPage() {
             <div className="flex flex-col items-center justify-center py-20 gap-4">
               <div className="h-12 w-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                Hydrating manifest nodes...
+                Loading logs...
               </p>
             </div>
           ) : logs.length === 0 ? (
@@ -232,10 +232,10 @@ export default function AuditLogsPage() {
                 <Search className="h-8 w-8" />
               </div>
               <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">
-                Empty Flux
+                No Logs Found
               </h3>
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2 px-10">
-                No audit records detected within this module parameter.
+                No logs were detected for this module.
               </p>
             </div>
           ) : (
@@ -345,10 +345,10 @@ export default function AuditLogsPage() {
             </div>
             <div className="space-y-0.5">
               <DialogTitle className="text-xl font-bold text-slate-900">
-                Audit Manifest Detail
+                Log Details
               </DialogTitle>
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-                System Level Sequence Details
+                Detailed information for this log entry
               </p>
             </div>
           </DialogHeader>
@@ -357,17 +357,17 @@ export default function AuditLogsPage() {
             {logDetailsLoading ? (
               <div className="flex flex-col items-center justify-center py-12 gap-4">
                 <div className="h-8 w-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Decrypting payload...</p>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Loading details...</p>
               </div>
             ) : logDetailsData?.auditLogById ? (
               <div className="space-y-6">
                 <div className="grid grid-cols-2 lg:grid-cols-3 gap-6">
                   <div className="space-y-1.5">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Action Type</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Action</span>
                     <p className="text-sm font-semibold text-slate-900 border border-slate-100 bg-slate-50 p-2 rounded-lg">{logDetailsData.auditLogById.action}</p>
                   </div>
                   <div className="space-y-1.5">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Target Module</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Module</span>
                     <p className="text-sm font-semibold text-slate-900 border border-slate-100 bg-slate-50 p-2 rounded-lg">{logDetailsData.auditLogById.module || "SYSTEM"}</p>
                   </div>
                   <div className="space-y-1.5">
@@ -378,13 +378,13 @@ export default function AuditLogsPage() {
                     </p>
                   </div>
                   <div className="space-y-1.5 col-span-2 lg:col-span-1 border border-slate-100 bg-slate-50 p-2 rounded-lg">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Target Resource</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Applied To</span>
                     <p className="font-semibold text-slate-900 font-mono text-xs truncate" title={logDetailsData.auditLogById.resourceId || logDetailsData.auditLogById.targetUserId || "N/A"}>
                       {logDetailsData.auditLogById.resourceId || logDetailsData.auditLogById.targetUserId || "N/A"}
                     </p>
                   </div>
                   <div className="space-y-1.5 col-span-2 lg:col-span-1 border border-slate-100 bg-slate-50 p-2 rounded-lg">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Authorizing Entity</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Performed By</span>
                     <p className="text-sm font-semibold text-slate-900 flex items-center gap-2 truncate">
                       <User className="h-3.5 w-3.5 text-slate-400 shrink-0" />
                       {logDetailsData.auditLogById.admin?.firstName ? `${logDetailsData.auditLogById.admin.firstName} ${logDetailsData.auditLogById.admin?.lastName || ""}` : logDetailsData.auditLogById.adminId || "System"}
@@ -400,7 +400,7 @@ export default function AuditLogsPage() {
 
                 {logDetailsData.auditLogById.reason && (
                   <div className="pt-4 border-t border-slate-100">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 border border-slate-100 bg-slate-50 px-2.5 py-1 rounded-lg">Protocol Reason / Origin</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 border border-slate-100 bg-slate-50 px-2.5 py-1 rounded-lg">Reason / Origin</span>
                     <p className="mt-3 text-sm text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100 font-mono whitespace-pre-wrap max-h-32 overflow-auto">
                       {logDetailsData.auditLogById.reason}
                     </p>

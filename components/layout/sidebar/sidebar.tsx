@@ -81,7 +81,7 @@ interface MenuItem {
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <div className="px-4 mb-2 mt-5 group-data-[collapsible=icon]:hidden first:mt-2">
-      <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/40 select-none">
+      <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/40 select-none leading-none">
         {children}
       </span>
     </div>
@@ -137,15 +137,15 @@ function MenuItemRow({
 
   const rowBase = cn(
     "group relative flex items-center w-full transition-all duration-300 ease-out cursor-pointer select-none overflow-hidden",
-    depth === 0 ? "h-10 px-3 rounded-xl gap-3 my-0.5" : "h-8 px-3 rounded-[10px] gap-2.5 my-0.5",
+    depth === 0 ? "h-11 px-3.5 rounded-xl gap-3 my-1" : "h-9 px-3.5 rounded-[10px] gap-2.5 my-0.5",
     isActive
-      ? "bg-primary/10 text-primary dark:bg-primary/20 shadow-[inset_0px_1px_0px_rgba(255,255,255,0.04)]"
-      : "hover:bg-sidebar-accent/60 text-muted-foreground hover:text-foreground hover:translate-x-1",
+      ? "bg-primary/10 text-primary dark:bg-primary/20 shadow-[inset_0px_1px_0px_rgba(255,255,255,0.04)] ring-1 ring-primary/20"
+      : "hover:bg-sidebar-accent/60 text-muted-foreground hover:text-foreground hover:translate-x-1.5",
   );
 
   /* Active indicator */
   const activeBar = isActive && depth === 0 && (
-    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[4px] h-5 rounded-r-full bg-primary pointer-events-none group-data-[collapsible=icon]:hidden shadow-[0_0_12px_rgba(var(--primary),0.6)] transition-all duration-300" />
+    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-r-full bg-primary pointer-events-none group-data-[collapsible=icon]:hidden shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all duration-300 animate-pulse" />
   );
 
   /* ── Children (expandable group) ── */

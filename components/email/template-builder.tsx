@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   useCreateEmailTemplate,
   useUpdateEmailTemplate,
 } from "@/graphql/actions/email";
+import { useGetEntity } from "@/graphql/actions";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft,
@@ -37,6 +38,8 @@ import {
   X,
   Space,
   Mail,
+  Building2,
+  RefreshCw,
 } from "lucide-react";
 import { useEmailStore, type EmailTemplate } from "@/store/useEmailStore";
 import { cn } from "@/lib/utils";
@@ -240,9 +243,14 @@ function BlockCanvas({
       onClick={onSelect}
       className={cn(
         "group relative rounded-xl border-2 transition-all duration-150 cursor-pointer",
-        isSelected
-          ? "border-indigo-400 shadow-lg shadow-indigo-100/60 bg-white"
-          : "border-transparent hover:border-slate-200 bg-white hover:shadow-sm",
+        // Spacer & divider should feel lightweight — no white card background when not selected
+        block.type === "spacer" || block.type === "divider"
+          ? isSelected
+            ? "border-indigo-300 bg-slate-50/60"
+            : "border-transparent hover:border-slate-200 bg-transparent"
+          : isSelected
+            ? "border-indigo-400 shadow-lg shadow-indigo-100/60 bg-white"
+            : "border-transparent hover:border-slate-200 bg-white hover:shadow-sm",
       )}
     >
       {/* Selection ring glow */}
@@ -299,159 +307,171 @@ function BlockCanvas({
         </div>
       </div>
 
-      {/* Content */}
-      <div className="p-4">
-        {(block.type === "text" || block.type === "heading") && (
-          <div className="w-full" style={{ textAlign: block.align }}>
-            <textarea
-              value={block.content}
-              onChange={(e) => onUpdate(block.id, { content: e.target.value })}
-              onClick={(e) => e.stopPropagation()}
-              className="w-full bg-transparent border-none outline-none resize-none text-slate-800 leading-relaxed placeholder:text-slate-300"
-              style={{
-                fontSize: block.fontSize,
-                fontWeight: block.bold ? 700 : 400,
-                fontStyle: block.italic ? "italic" : "normal",
-                textDecoration: block.underline ? "underline" : "none",
-                color: block.color === "transparent" ? "#1e293b" : block.color,
-                textAlign: block.align,
-                minHeight: block.type === "heading" ? "48px" : "80px",
+      {/* ── Content (padding applied per-block-type) ── */}
+
+      {/* Text / Heading — standard padding */}
+      {(block.type === "text" || block.type === "heading") && (
+        <div className="p-4 w-full" style={{ textAlign: block.align }}>
+          <textarea
+            value={block.content}
+            onChange={(e) => onUpdate(block.id, { content: e.target.value })}
+            onClick={(e) => e.stopPropagation()}
+            className="w-full bg-transparent border-none outline-none resize-none text-slate-800 leading-relaxed placeholder:text-slate-300"
+            style={{
+              fontSize: block.fontSize,
+              fontWeight: block.bold ? 700 : 400,
+              fontStyle: block.italic ? "italic" : "normal",
+              textDecoration: block.underline ? "underline" : "none",
+              color: block.color === "transparent" ? "#1e293b" : block.color,
+              textAlign: block.align,
+              minHeight: block.type === "heading" ? "48px" : "80px",
+            }}
+            placeholder={
+              block.type === "heading" ? "Enter heading…" : "Enter text…"
+            }
+          />
+        </div>
+      )}
+
+      {/* Image — standard padding */}
+      {block.type === "image" && (
+        <div className="p-4">
+          {block.content ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={block.content}
+              alt={block.imageAlt || "Email image"}
+              className="w-full rounded-lg object-cover max-h-64"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src =
+                  "https://placehold.co/600x200/f8fafc/94a3b8?text=Invalid+URL";
               }}
-              placeholder={
-                block.type === "heading" ? "Enter heading…" : "Enter text…"
-              }
             />
-          </div>
-        )}
-
-        {block.type === "image" && (
-          <div>
-            {block.content ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={block.content}
-                alt={block.imageAlt || "Email image"}
-                className="w-full rounded-lg object-cover max-h-64"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src =
-                    "https://placehold.co/600x200/f8fafc/94a3b8?text=Invalid+URL";
-                }}
-              />
-            ) : (
-              <div className="h-32 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 flex flex-col items-center justify-center gap-2 text-slate-400">
-                <ImageIcon className="h-6 w-6 opacity-40" />
-                <span className="text-[11px] font-medium">
-                  Enter image URL in the properties panel →
-                </span>
-              </div>
-            )}
-          </div>
-        )}
-
-        {block.type === "button" && (
-          <div style={{ textAlign: block.align }}>
-            <span
-              className="inline-block px-6 py-3 rounded-lg text-[14px] cursor-default select-none"
-              style={{
-                backgroundColor:
-                  block.bgColor === "transparent" ? brandColor : block.bgColor,
-                color: block.color,
-                fontWeight: block.bold ? 700 : 600,
-              }}
-            >
-              {block.content || "Button Label"}
-            </span>
-          </div>
-        )}
-
-        {block.type === "header" && (
-          <div
-            className="flex flex-col items-center gap-2 py-4"
-            style={{ textAlign: block.align }}
-          >
-            {block.logoUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={block.logoUrl}
-                alt="Logo"
-                className="h-10 object-contain"
-              />
-            ) : (
-              <div className="h-10 w-24 bg-slate-100 rounded flex items-center justify-center text-[10px] text-slate-400">
-                Logo
-              </div>
-            )}
-            {block.secondaryContent && (
-              <p className="text-[12px] text-slate-500 font-medium">
-                {block.secondaryContent}
-              </p>
-            )}
-          </div>
-        )}
-
-        {block.type === "navbar" && (
-          <div
-            className="flex flex-wrap items-center justify-center gap-6 py-4"
-            style={{ textAlign: block.align }}
-          >
-            {(() => {
-              try {
-                const links = JSON.parse(block.content);
-                return links.map((link: any, i: number) => (
-                  <span
-                    key={i}
-                    className="text-[13px] font-semibold text-slate-600 hover:text-slate-900 transition-colors"
-                  >
-                    {link.label}
-                  </span>
-                ));
-              } catch (e) {
-                return (
-                  <span className="text-[12px] text-red-400">
-                    Invalid Navbar Links Data
-                  </span>
-                );
-              }
-            })()}
-          </div>
-        )}
-
-        {block.type === "footer" && (
-          <div
-            className="py-8 px-4 flex flex-col items-center gap-4 border-t border-slate-100"
-            style={{ textAlign: block.align }}
-          >
-            <p className="text-[11px] text-slate-400 leading-relaxed max-w-[400px]">
-              {block.content}
-            </p>
-            <div className="flex items-center gap-4">
-              <span className="text-[10px] font-bold text-indigo-500 uppercase tracking-widest border-b border-indigo-200">
-                Unsubscribe
-              </span>
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                Manage Preferences
+          ) : (
+            <div className="h-32 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 flex flex-col items-center justify-center gap-2 text-slate-400">
+              <ImageIcon className="h-6 w-6 opacity-40" />
+              <span className="text-[11px] font-medium">
+                Enter image URL in the properties panel →
               </span>
             </div>
-          </div>
-        )}
+          )}
+        </div>
+      )}
 
-        {block.type === "divider" && (
-          <div className="py-2">
-            <div className="h-px bg-slate-200 w-full" />
-          </div>
-        )}
-
-        {block.type === "spacer" && (
-          <div
-            className="w-full rounded-lg border border-dashed border-slate-200 bg-slate-50/70 flex items-center justify-center"
-            style={{ height: SPACER_MAP[block.spacerSize] }}
+      {/* Button — standard padding */}
+      {block.type === "button" && (
+        <div className="p-4" style={{ textAlign: block.align }}>
+          <span
+            className="inline-block px-6 py-3 rounded-lg text-[14px] cursor-default select-none"
+            style={{
+              backgroundColor:
+                block.bgColor === "transparent" ? brandColor : block.bgColor,
+              color: block.color,
+              fontWeight: block.bold ? 700 : 600,
+            }}
           >
-            <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">
-              {SPACER_MAP[block.spacerSize]}px spacer
+            {block.content || "Button Label"}
+          </span>
+        </div>
+      )}
+
+      {/* Header — standard padding */}
+      {block.type === "header" && (
+        <div
+          className="p-4 flex flex-col items-center gap-2"
+          style={{ textAlign: block.align }}
+        >
+          {block.logoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={block.logoUrl}
+              alt="Logo"
+              className="h-10 object-contain"
+            />
+          ) : (
+            <div className="h-10 w-24 bg-slate-100 rounded flex items-center justify-center text-[10px] text-slate-400">
+              Logo
+            </div>
+          )}
+          {block.secondaryContent && (
+            <p className="text-[12px] text-slate-500 font-medium">
+              {block.secondaryContent}
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Navbar — standard padding */}
+      {block.type === "navbar" && (
+        <div
+          className="px-4 py-3 flex flex-wrap items-center justify-center gap-6"
+          style={{ textAlign: block.align }}
+        >
+          {(() => {
+            try {
+              const links = JSON.parse(block.content);
+              return links.map((link: any, i: number) => (
+                <span
+                  key={i}
+                  className="text-[13px] font-semibold text-slate-600 hover:text-slate-900 transition-colors"
+                >
+                  {link.label}
+                </span>
+              ));
+            } catch (e) {
+              return (
+                <span className="text-[12px] text-red-400">
+                  Invalid Navbar Links Data
+                </span>
+              );
+            }
+          })()}
+        </div>
+      )}
+
+      {/* Footer — standard padding */}
+      {block.type === "footer" && (
+        <div
+          className="py-6 px-4 flex flex-col items-center gap-4 border-t border-slate-100"
+          style={{ textAlign: block.align }}
+        >
+          <p className="text-[11px] text-slate-400 leading-relaxed max-w-[400px]">
+            {block.content}
+          </p>
+          <div className="flex items-center gap-4">
+            <span className="text-[10px] font-bold text-indigo-500 uppercase tracking-widest border-b border-indigo-200">
+              Unsubscribe
+            </span>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+              Manage Preferences
             </span>
           </div>
-        )}
-      </div>
+        </div>
+      )}
+
+      {/* Divider — NO padding so the line sits flush */}
+      {block.type === "divider" && (
+        <div className="px-2 py-1">
+          <div className="h-px bg-slate-200 w-full" />
+        </div>
+      )}
+
+      {/* Spacer — NO extra padding; height is exactly as configured */}
+      {block.type === "spacer" && (
+        <div
+          className="w-full flex items-center justify-center relative"
+          style={{ height: SPACER_MAP[block.spacerSize] }}
+        >
+          {/* Only show label when selected */}
+          {isSelected && (
+            <span className="text-[9px] font-bold text-slate-300 uppercase tracking-widest">
+              {SPACER_MAP[block.spacerSize]}px spacer
+            </span>
+          )}
+          {/* Subtle dashed indicator */}
+          <div className="absolute inset-x-0 top-1/2 border-t border-dashed border-slate-200" />
+        </div>
+      )}
     </div>
   );
 }
@@ -463,10 +483,12 @@ function PropertiesPanel({
   block,
   onUpdate,
   brandColor,
+  entityLogoUrl,
 }: {
   block: BuilderBlock;
   onUpdate: (id: string, patch: Partial<BuilderBlock>) => void;
   brandColor: string;
+  entityLogoUrl?: string;
 }) {
   const def = blockDefs.find((d) => d.type === block.type)!;
 
@@ -760,18 +782,87 @@ function PropertiesPanel({
       {/* Header properties */}
       {block.type === "header" && (
         <div className="space-y-4">
+          {/* Logo section */}
           <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
-              Logo URL
-            </label>
-            <input
-              type="text"
-              value={block.logoUrl}
-              onChange={(e) => update({ logoUrl: e.target.value })}
-              className="w-full h-9 px-3 rounded-lg border border-slate-200 bg-slate-50 text-[12px] text-slate-800 outline-none focus:ring-1 focus:ring-indigo-300 transition-all font-mono"
-              placeholder="https://..."
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">
+                Logo
+              </label>
+              {entityLogoUrl && block.logoUrl !== entityLogoUrl && (
+                <button
+                  onClick={() => update({ logoUrl: entityLogoUrl })}
+                  className="flex items-center gap-1 text-[9px] font-bold text-[#5B6CFF] hover:text-[#4a5ce8] transition-colors px-1.5 py-0.5 rounded-md bg-indigo-50 border border-indigo-100"
+                >
+                  <RefreshCw size={8} /> Reset to entity logo
+                </button>
+              )}
+            </div>
+
+            {/* Current logo preview */}
+            {block.logoUrl ? (
+              <div className="relative mb-3 rounded-xl border border-slate-100 bg-slate-50 p-3 flex items-center justify-center">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={block.logoUrl}
+                  alt="Logo preview"
+                  className="h-10 max-w-full object-contain"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = "none";
+                  }}
+                />
+                {entityLogoUrl && (
+                  <div className="absolute top-2 right-2">
+                    {block.logoUrl === entityLogoUrl ? (
+                      <span className="flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600">
+                        <Building2 size={8} /> Entity logo
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-600">
+                        Custom
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="mb-3 h-16 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 flex flex-col items-center justify-center gap-1 text-slate-300">
+                <ImageIcon size={16} />
+                <span className="text-[10px] font-medium">No logo set</span>
+              </div>
+            )}
+
+            {/* Upload new logo */}
+            <ImageUploadWithCrop
+              currentImage={block.logoUrl || ""}
+              onImageUpdate={(url) => update({ logoUrl: url })}
+              label=""
+              recommendedWidth={400}
+              recommendedHeight={120}
+              aspectRatio={undefined}
+              showAspectRatioPresets={false}
+              showQualitySlider={false}
+              showFormatSelector={false}
+              className="mt-1"
+              dropzoneClassName="py-6 border-slate-100 bg-slate-50/50 hover:bg-white hover:border-indigo-200 transition-all rounded-xl"
+              previewClassName="hidden"
             />
+
+            {/* Manual URL input */}
+            <div className="mt-2">
+              <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1 leading-none">
+                Or paste URL
+              </label>
+              <input
+                type="text"
+                value={block.logoUrl || ""}
+                onChange={(e) => update({ logoUrl: e.target.value })}
+                className="w-full h-8 px-2.5 rounded-lg border border-slate-200 bg-slate-50 text-[11px] text-slate-700 outline-none focus:ring-1 focus:ring-indigo-300 transition-all font-mono"
+                placeholder="https://cdn.example.com/logo.png"
+              />
+            </div>
           </div>
+
+          {/* Tagline */}
           <div>
             <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
               Tagline / Subtext
@@ -923,6 +1014,24 @@ export default function TemplateBuilder({
   const [name, setName] = useState(initialData?.name || "");
   const [subject, setSubject] = useState(initialData?.subject || "");
   const [brandColor, setBrandColor] = useState("#0f172a");
+
+  // ── Fetch entity logo and auto-populate header blocks ─────────────────────
+  const { data: entityData } = useGetEntity();
+  const entityLogoUrl = entityData?.getEntity?.logo
+    ? `https://cdn.thrico.network/${entityData.getEntity.logo}`
+    : undefined;
+
+  useEffect(() => {
+    if (!entityLogoUrl) return;
+    setBlocks((prev) =>
+      prev.map((b) =>
+        b.type === "header" && (!b.logoUrl || b.logoUrl === "https://cdn.thrico.network/thrico.png")
+          ? { ...b, logoUrl: entityLogoUrl }
+          : b
+      )
+    );
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [entityLogoUrl]);
 
   const getInitialBlocks = useCallback((): BuilderBlock[] => {
     if (!initialData?.json) {
@@ -1589,6 +1698,7 @@ export default function TemplateBuilder({
                   block={selectedBlock}
                   onUpdate={updateBlock}
                   brandColor={brandColor}
+                  entityLogoUrl={entityLogoUrl}
                 />
               </div>
             ) : (

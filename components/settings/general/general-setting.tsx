@@ -50,9 +50,9 @@ export default function GeneralSettings() {
     return (
       <EcosystemWrapper anonymized-1="settings-loading">
         <EcosystemHeader
-          title="Institutional Control"
-          badgeText="System Foundation"
-          description="Synchronizing core identity parameters with the global registry node."
+          title="General Settings"
+          badgeText="Profile Stats"
+          description="Loading your profile settings and branding."
           icon={Store}
         />
         <EcosystemActionBar shadow="none">
@@ -76,9 +76,9 @@ export default function GeneralSettings() {
   return (
     <EcosystemWrapper anonymized-1="general-settings">
       <EcosystemHeader
-        title="Institutional Control"
-        badgeText="Foundation Identity"
-        description="Manage your community identity, branding assets, and institutional details for global identification across the network."
+        title="General Settings"
+        badgeText="Profile Identity"
+        description="Manage your logo, branding, and billing details."
         icon={Store}
       />
 
@@ -93,13 +93,13 @@ export default function GeneralSettings() {
               </div>
               <div className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-500">
                  <ShieldCheck className="h-3.5 w-3.5 text-slate-400" />
-                 <span>Registry Verified Node</span>
+                 <span>Verified Profile</span>
               </div>
            </div>
 
            <Button variant="outline" className="h-9 px-4 rounded-lg border-slate-200 font-semibold text-slate-700 text-[12px] shadow-sm bg-white hover:bg-slate-50 gap-2 transition-all" onClick={() => refetch()}>
              <RotateCcw className="h-3.5 w-3.5 text-slate-400" />
-             Sync Protocol
+             Refresh
            </Button>
         </div>
       </EcosystemActionBar>
@@ -117,8 +117,8 @@ export default function GeneralSettings() {
                           <Store className="h-4 w-4" />
                        </div>
                        <div>
-                          <h3 className="text-[14px] font-semibold text-slate-900 tracking-tight">Foundational Identity</h3>
-                          <p className="text-[11px] text-slate-500 mt-0.5">Core Institutional Parameters</p>
+                          <h3 className="text-[14px] font-semibold text-slate-900 tracking-tight">Profile Details</h3>
+                          <p className="text-[11px] text-slate-500 mt-0.5">Basic Information</p>
                        </div>
                     </div>
                  </div>
@@ -127,7 +127,7 @@ export default function GeneralSettings() {
                     <section className="space-y-4">
                       <div className="flex items-center gap-2">
                          <div className="h-1.5 w-1.5 rounded-full bg-slate-300" />
-                         <h4 className="text-[12px] font-semibold text-slate-900 tracking-tight">Profile Overview Registry</h4>
+                         <h4 className="text-[12px] font-semibold text-slate-900 tracking-tight">Identity</h4>
                       </div>
                       <div className="p-5 rounded-lg border border-slate-200 bg-white shadow-sm">
                          <EntityProfileCard
@@ -143,7 +143,7 @@ export default function GeneralSettings() {
                     <section className="space-y-4">
                       <div className="flex items-center gap-2">
                          <div className="h-1.5 w-1.5 rounded-full bg-slate-300" />
-                         <h4 className="text-[12px] font-semibold text-slate-900 tracking-tight">Visual Asset Manifest</h4>
+                         <h4 className="text-[12px] font-semibold text-slate-900 tracking-tight">Branding</h4>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div className="p-5 rounded-lg border border-slate-200 bg-slate-50/50 hover:bg-white transition-colors duration-300 group">
@@ -183,8 +183,8 @@ export default function GeneralSettings() {
                           <CreditCard className="h-4 w-4" />
                        </div>
                        <div>
-                          <h3 className="text-[14px] font-semibold text-slate-900 tracking-tight">Institutional Billing</h3>
-                          <p className="text-[11px] text-slate-500 mt-0.5">Legal Registry & Invoicing Protocols</p>
+                          <h3 className="text-[14px] font-semibold text-slate-900 tracking-tight">Billing Information</h3>
+                          <p className="text-[11px] text-slate-500 mt-0.5">Billing address and details</p>
                        </div>
                     </div>
                  </div>
@@ -212,7 +212,7 @@ export default function GeneralSettings() {
                     </div>
                     
                     <p className="text-[12px] text-slate-300 leading-relaxed font-medium">
-                       Ensure your primary logo utilizes a transparent background. High-resolution PNG or SVG is strictly required. Non-transparent background imagery will result in visual clipping across ecosystem endpoints.
+                       Use a high-quality logo with a transparent background (PNG or SVG). This ensures your brand looks great everywhere.
                     </p>
                     
                     <div className="pt-2">
@@ -227,7 +227,7 @@ export default function GeneralSettings() {
               <div className="rounded-xl border border-slate-200/80 bg-white shadow-sm overflow-hidden">
                  <div className="px-5 py-3.5 border-b border-slate-100 bg-slate-50/50 flex items-center gap-2.5">
                     <Activity className="h-3.5 w-3.5 text-slate-400" />
-                    <h4 className="text-[12px] font-semibold text-slate-900 tracking-tight">System Propagation</h4>
+                    <h4 className="text-[12px] font-semibold text-slate-900 tracking-tight">Platform Sync</h4>
                  </div>
                  <div className="p-5 space-y-5">
                     <div className="space-y-1.5">
@@ -239,7 +239,7 @@ export default function GeneralSettings() {
                          <span className="text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded text-[9px]">ACTIVE</span>
                        </h5>
                        <p className="text-[11px] text-slate-500 font-medium leading-relaxed">
-                          Changes to your institutional profile are broadcasted instantly across all synchronized edge node endpoints.
+                          Your profile changes are updated across the platform immediately.
                        </p>
                     </div>
 
@@ -253,7 +253,7 @@ export default function GeneralSettings() {
                          </span>
                        </h5>
                        <p className="text-[11px] text-slate-500 font-medium leading-relaxed">
-                          Your entity configuration governs how peer nodes perceive your brand across the global registry index.
+                          These settings control how your brand looks to everyone.
                        </p>
                     </div>
                  </div>

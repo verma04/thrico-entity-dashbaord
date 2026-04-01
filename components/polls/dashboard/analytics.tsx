@@ -33,7 +33,7 @@ export default function PollsAnalytics() {
 
   const kpis = [
     {
-      title: "Aggregate Polls",
+      title: "Total Polls",
       value: loading ? "..." : (stats?.totalPolls?.toLocaleString() ?? "0"),
       trend: stats?.totalPollsChange ?? 0,
       icon: Vote,
@@ -41,7 +41,7 @@ export default function PollsAnalytics() {
       bg: "bg-indigo-500/10",
     },
     {
-      title: "Active Protocols",
+      title: "Active Polls",
       value: loading ? "..." : (stats?.activePolls?.toLocaleString() ?? "0"),
       trend: stats?.activePollsChange ?? 0,
       icon: Activity,
@@ -49,7 +49,7 @@ export default function PollsAnalytics() {
       bg: "bg-emerald-500/10",
     },
     {
-      title: "Consensus Yield",
+      title: "Total Votes",
       value: loading ? "..." : (stats?.votes?.toLocaleString() ?? "0"),
       trend: stats?.votesChange ?? 0,
       icon: CheckCircle,
@@ -57,7 +57,7 @@ export default function PollsAnalytics() {
       bg: "bg-purple-500/10",
     },
     {
-      title: "Engagement Velocity",
+      title: "Participation",
       value: loading ? "..." : stats ? `${stats.engagementRate}%` : "0%",
       trend: stats?.engagementRateChange ?? 0,
       icon: Users,
@@ -79,34 +79,41 @@ export default function PollsAnalytics() {
   return (
     <EcosystemWrapper anonymized-1="polls-analytics">
       <EcosystemHeader
-        title="Consensus Intelligence"
-        badgeText="Decision Registry"
-        description="Monitor community consensus velocity, voting protocols, and architectural engagement yield across the global registry node."
+        title="Polls Overview"
+        badgeText="Poll Stats"
+        description="Track votes, participation, and results from your community polls."
         icon={Vote}
       />
 
       <EcosystemActionBar shadow="none">
         <div className="flex items-center justify-between w-full">
-           <div className="flex items-center gap-6">
-              <EcosystemStatusIndicator status="active" label="Consensus Stream: Operational" />
-              <div className="h-4 w-px bg-slate-200" />
-              <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
-                 <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
-                 <span>Verified Decision Node</span>
-              </div>
-           </div>
+            <div className="flex items-center gap-6">
+               <EcosystemStatusIndicator status="active" label="System Status: Online" />
+               <div className="h-4 w-px bg-slate-200" />
+               <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
+                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
+                  <span>Verified System</span>
+               </div>
+            </div>
 
-           <div className="flex items-center gap-3">
-              <Select value={timeRange} onValueChange={(val) => setTimeRange(val as TimeRange)}>
+            <div className="flex items-center gap-3">
+               <Link href="/polls/create">
+                  <Button className="h-10 px-6 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white font-black text-[10px] uppercase tracking-widest gap-3 transition-all shadow-lg shadow-zinc-900/20">
+                     Create Poll
+                     <Sparkles className="h-4 w-4" />
+                  </Button>
+               </Link>
+               <div className="h-4 w-px bg-slate-200 mx-1" />
+               <Select value={timeRange} onValueChange={(val) => setTimeRange(val as TimeRange)}>
                 <SelectTrigger className="h-10 w-[200px] rounded-xl border-slate-200 font-bold text-slate-600 bg-white shadow-sm">
                   <Timer className="h-4 w-4 mr-2 text-indigo-500" />
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="rounded-2xl border-slate-100 shadow-2xl">
-                  <SelectItem value={TimeRange.LAST_24_HOURS} className="font-bold uppercase text-[10px]">Real-time Cycle</SelectItem>
-                  <SelectItem value={TimeRange.LAST_7_DAYS} className="font-bold uppercase text-[10px]">Last 7 Cycles</SelectItem>
-                  <SelectItem value={TimeRange.LAST_30_DAYS} className="font-bold uppercase text-[10px]">Last 30 Cycles</SelectItem>
-                  <SelectItem value={TimeRange.LAST_90_DAYS} className="font-bold uppercase text-[10px]">Last 90 Cycles</SelectItem>
+                   <SelectItem value={TimeRange.LAST_24_HOURS} className="font-bold uppercase text-[10px]">Today</SelectItem>
+                   <SelectItem value={TimeRange.LAST_7_DAYS} className="font-bold uppercase text-[10px]">Last 7 Days</SelectItem>
+                   <SelectItem value={TimeRange.LAST_30_DAYS} className="font-bold uppercase text-[10px]">Last 30 Days</SelectItem>
+                   <SelectItem value={TimeRange.LAST_90_DAYS} className="font-bold uppercase text-[10px]">Last 90 Days</SelectItem>
                 </SelectContent>
               </Select>
               <div className="h-4 w-px bg-slate-200 mx-1" />
@@ -120,16 +127,16 @@ export default function PollsAnalytics() {
       <EcosystemContainer className="space-y-12 p-8 lg:p-12">
         {/* KPI Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-           {kpis.map((kpi, i) => (
-             <EcosystemKPI key={i} {...kpi} trendLabel="Protocol" />
-           ))}
+            {kpis.map((kpi, i) => (
+              <EcosystemKPI key={i} {...kpi} trendLabel="v. last period" />
+            ))}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
            <div className="lg:col-span-8">
-              <EcosystemCard 
-                title="Consensus Velocity" 
-                description="Temporal voting instantiation cycles" 
+               <EcosystemCard 
+                 title="Voting Activity" 
+                 description="How people are voting over time" 
                 icon={TrendingUp}
                 decorationIcon={Zap}
               >
@@ -163,19 +170,19 @@ export default function PollsAnalytics() {
            </div>
 
            <div className="lg:col-span-4">
-              <EcosystemCard 
-                title="Consensus Matrix" 
-                description="Registry decision distribution" 
-                icon={Sparkles}
-                decorationIcon={Globe}
-                className="min-h-fit"
-              >
-                 <div className="space-y-4">
-                    {[
-                      { label: "High Yield Decisions", value: 70, color: "bg-indigo-500" },
-                      { label: "Active Consensus", value: 20, color: "bg-purple-500" },
-                      { label: "Pending Validation", value: 10, color: "bg-emerald-500" }
-                    ].map((item, i) => (
+               <EcosystemCard 
+                 title="Poll Status" 
+                 description="How your polls are performing" 
+                 icon={Sparkles}
+                 decorationIcon={Globe}
+                 className="min-h-fit"
+               >
+                  <div className="space-y-4">
+                     {[
+                       { label: "Closed Polls", value: 70, color: "bg-indigo-500" },
+                       { label: "Active Polls", value: 20, color: "bg-purple-500" },
+                       { label: "Drafts", value: 10, color: "bg-emerald-500" }
+                     ].map((item, i) => (
                       <div key={i} className="group/item">
                          <div className="flex items-center justify-between mb-2 px-1">
                             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{item.label}</span>
@@ -187,18 +194,17 @@ export default function PollsAnalytics() {
                       </div>
                     ))}
                  </div>
-                 
-                 <div className="mt-auto pt-8 border-t border-slate-50 flex items-center justify-between">
-                    <div>
-                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Global Consensus</p>
-                       <p className="text-2xl font-black text-slate-900 tracking-tighter">84.2%</p>
-                    </div>
-                    <Link href="/polls/admin">
-                       <Button variant="outline" className="h-11 px-6 rounded-xl border-slate-200 font-black text-[10px] uppercase tracking-widest text-slate-600 gap-3 hover:bg-slate-50 transition-all shadow-sm">
-                          Registry
-                          <ArrowRight className="h-4 w-4" />
-                       </Button>
-                    </Link>
+                                  <div className="mt-auto pt-8 border-t border-slate-50 flex items-center justify-between">
+                     <div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Enrollment Rate</p>
+                        <p className="text-2xl font-black text-slate-900 tracking-tighter">84.2%</p>
+                     </div>
+                     <Link href="/polls/admin">
+                        <Button variant="outline" className="h-11 px-6 rounded-xl border-slate-200 font-black text-[10px] uppercase tracking-widest text-slate-600 gap-3 hover:bg-slate-50 transition-all shadow-sm">
+                           All Polls
+                           <ArrowRight className="h-4 w-4" />
+                        </Button>
+                     </Link>
                  </div>
               </EcosystemCard>
            </div>

@@ -91,10 +91,10 @@ function SetupStep({
             </span>
           )}
         </div>
-        <p className="text-[14px] font-semibold text-slate-900 mt-0.5">
+        <p className="text-[14px] font-semibold text-slate-900 mt-0.5 truncate leading-none">
           {title}
         </p>
-        <p className="text-[12px] text-slate-500 mt-0.5 truncate">
+        <p className="text-[12px] text-slate-500 mt-0.5 truncate leading-none">
           {description}
         </p>
       </div>
@@ -142,7 +142,7 @@ function QuickStat({
           <Icon className={cn("h-4 w-4", color)} />
         </div>
       </div>
-      <span className="text-2xl font-bold text-slate-900 tracking-tight tabular-nums">
+      <span className="text-2xl font-bold text-slate-900 tracking-tight tabular-nums leading-none">
         {value}
       </span>
     </motion.div>
@@ -192,7 +192,7 @@ function NotificationBanner({
       )}
     >
       {c.icon}
-      <span className={cn("text-[13px] font-medium flex-1", c.text)}>
+      <span className={cn("text-[13px] font-medium flex-1 leading-none", c.text)}>
         {message}
       </span>
       {action && onAction && (
@@ -252,22 +252,22 @@ export default function EmailDashboard() {
     },
     {
       step: 3,
-      title: "Campaign Management",
-      description: "Compose and send emails to your targeted lists",
+      title: "Send Emails",
+      description: "Write and send emails to your members",
       route: "/email/send",
       status: "pending",
     },
     {
       step: 4,
-      title: "Analytics & Tracking",
-      description: "Monitor email delivery, engagement and performance",
+      title: "Email Stats",
+      description: "See how many emails were sent and opened",
       route: "/email/usage",
       status: usage.emailsSent > 0 ? "current" : "pending",
     },
   ];
 
   return (
-    <div className="space-y-10 py-6 max-w-6xl mx-auto">
+    <div className="space-y-10 py-6 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto overflow-hidden">
       {/* Notifications */}
       {usagePercent >= 90 && (
         <NotificationBanner
@@ -285,11 +285,11 @@ export default function EmailDashboard() {
             <Mail className="h-6 w-6" />
           </div>
           <div>
-            <h1 className="text-[20px] font-semibold tracking-tight text-slate-900">
-              Email Communications
+            <h1 className="text-[20px] font-semibold tracking-tight text-slate-900 leading-none">
+              Email Campaigns
             </h1>
-            <p className="text-[13px] text-slate-500 mt-1 font-medium">
-              Manage your email infrastructure, templates, and delivery performance.
+            <p className="text-[13px] text-slate-500 mt-1 font-medium leading-none">
+              Manage your emails, templates, and track how they perform.
             </p>
           </div>
         </div>
@@ -350,15 +350,15 @@ export default function EmailDashboard() {
               {[
                 {
                   icon: PaintBucket,
-                  title: "Template Studio",
-                  desc: "Manage and edit templates",
+                  title: "Email Templates",
+                  desc: "Create and edit designs",
                   route: "/email/templates",
                   color: "bg-indigo-50 text-indigo-600 border-indigo-100",
                 },
                 {
                   icon: Globe,
-                  title: "Infrastructure Setup",
-                  desc: "DNS & Deliverability settings",
+                  title: "Domain Settings",
+                  desc: "Set up domain for sending",
                   route: "/settings/domains",
                   color: "bg-slate-50 text-slate-600 border-slate-200",
                 },
@@ -383,7 +383,7 @@ export default function EmailDashboard() {
 
         {/* Sidebar / Progress Column */}
         <div className="space-y-6">
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm overflow-hidden">
             <div className="flex items-center gap-3 mb-6">
               <div className="h-9 w-9 rounded-lg bg-slate-50 flex items-center justify-center text-slate-900 border border-slate-200">
                 <Shield className="h-4.5 w-4.5" />
@@ -398,7 +398,7 @@ export default function EmailDashboard() {
               </div>
             </div>
 
-            <div className="grid gap-3">
+            <div className="flex flex-col gap-3">
               {setupSteps.map((s, i) => (
                 <SetupStep
                   key={s.step}
@@ -419,7 +419,7 @@ export default function EmailDashboard() {
                 <Info className="h-4 w-4" />
               </div>
               <p className="text-[12px] text-slate-500 leading-relaxed">
-                All emails are automatically secured with SSL, DKIM, and SPF protection for maximum deliverability rates.
+                All emails are secured and protected to ensure they land in the inbox.
               </p>
             </div>
           </div>

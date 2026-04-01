@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
-import { PaintBucket, Send, BarChart3 } from "lucide-react";
+import { PaintBucket, Send, BarChart3, GitBranch } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { EmailDomainGate } from "@/components/email/domain-gate";
 
@@ -31,11 +31,19 @@ function EmailLayout({ children }: { children: React.ReactNode }) {
       section: "General",
       href: "/email/usage",
     },
+    {
+      key: "automation",
+      label: "Campaigns",
+      icon: <GitBranch className="h-4 w-4" />,
+      section: "General",
+      href: "/email/automation",
+    },
   ];
 
   const isTakeoverPage =
     pathname.includes("/email/send") ||
-    pathname.includes("/email/templates/create");
+    pathname.includes("/email/templates/create") ||
+    pathname.includes("/email/automation");
 
   return (
     <MenuItemsLayout

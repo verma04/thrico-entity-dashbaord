@@ -61,14 +61,14 @@ export default function MentorshipAnalytics() {
 
   const kpis = [
     {
-      title: "Aggregate Mentors",
+      title: "Total Mentors",
       value: loading ? "..." : (stats?.totalMentors?.toLocaleString() ?? "0"),
       icon: Users,
       color: "text-indigo-500",
       bg: "bg-indigo-500/10",
     },
     {
-      title: "Verified Guides",
+      title: "Active Mentors",
       value: loading
         ? "..."
         : (stats?.approvedMentors?.toLocaleString() ?? "0"),
@@ -77,14 +77,14 @@ export default function MentorshipAnalytics() {
       bg: "bg-emerald-500/10",
     },
     {
-      title: "Pending Protocols",
+      title: "Pending Review",
       value: loading ? "..." : (stats?.pendingMentors?.toLocaleString() ?? "0"),
       icon: Clock,
       color: "text-purple-500",
       bg: "bg-purple-500/10",
     },
     {
-      title: "Taxonomy Nodes",
+      title: "Categories",
       value: loading
         ? "..."
         : (stats?.totalCategories?.toLocaleString() ?? "0"),
@@ -103,9 +103,9 @@ export default function MentorshipAnalytics() {
   return (
     <EcosystemWrapper anonymized-1="mentorship-analytics">
       <EcosystemHeader
-        title="Knowledge Intelligence"
-        badgeText="Mentorship Registry"
-        description="Monitor expert instantiation velocity, guidance protocols, and architectural knowledge expansion across the global registry node."
+        title="Mentorship Overview"
+        badgeText="Mentor Stats"
+        description="Track mentor applications, approvals, and expertise across your community."
         icon={GraduationCap}
       />
 
@@ -114,12 +114,12 @@ export default function MentorshipAnalytics() {
           <div className="flex items-center gap-6">
             <EcosystemStatusIndicator
               status="active"
-              label="Expert Stream: Synchronized"
+              label="System Status: Online"
             />
             <div className="h-4 w-px bg-slate-200" />
             <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
               <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
-              <span>Verified Mentorship Node</span>
+              <span>Verified System</span>
             </div>
           </div>
 
@@ -137,25 +137,25 @@ export default function MentorshipAnalytics() {
                   value={TimeRange.LAST_24_HOURS}
                   className="font-bold uppercase text-[10px]"
                 >
-                  Real-time Cycle
+                  Today
                 </SelectItem>
                 <SelectItem
                   value={TimeRange.LAST_7_DAYS}
                   className="font-bold uppercase text-[10px]"
                 >
-                  Last 7 Cycles
+                  Last 7 Days
                 </SelectItem>
                 <SelectItem
                   value={TimeRange.LAST_30_DAYS}
                   className="font-bold uppercase text-[10px]"
                 >
-                  Last 30 Cycles
+                  Last 30 Days
                 </SelectItem>
                 <SelectItem
                   value={TimeRange.LAST_90_DAYS}
                   className="font-bold uppercase text-[10px]"
                 >
-                  Last 90 Cycles
+                  Last 90 Days
                 </SelectItem>
               </SelectContent>
             </Select>
@@ -176,15 +176,15 @@ export default function MentorshipAnalytics() {
         {/* KPI Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {kpis.map((kpi, i) => (
-            <EcosystemKPI key={i} {...kpi} trendLabel="Protocol" />
+            <EcosystemKPI key={i} {...kpi} trendLabel="Status" />
           ))}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           <div className="lg:col-span-8">
             <EcosystemCard
-              title="Application Distribution"
-              description="Registry status instantiation matrix"
+              title="Mentor Status"
+              description="Review of mentor applications"
               icon={TrendingUp}
               decorationIcon={Zap}
             >
@@ -255,8 +255,8 @@ export default function MentorshipAnalytics() {
 
           <div className="lg:col-span-4">
             <EcosystemCard
-              title="Expert Matrix"
-              description="Registry knowledge allocation"
+              title="Expertise"
+              description="How mentors are categorized"
               icon={Sparkles}
               decorationIcon={Globe}
               className="min-h-fit"
@@ -286,7 +286,7 @@ export default function MentorshipAnalytics() {
                     variant="outline"
                     className="w-full h-12 rounded-xl border-slate-200 font-black text-[10px] uppercase tracking-widest text-slate-600 gap-3 hover:bg-slate-50 hover:text-indigo-600 transition-all shadow-sm"
                   >
-                    Verify Experts
+                    Review All
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>

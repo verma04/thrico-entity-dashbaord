@@ -159,9 +159,9 @@ export default function DiscussionForum() {
   return (
     <EcosystemWrapper anonymized-1="discussion-forums">
       <EcosystemHeader
-        title="Dialogue Protocol"
+        title="Forum Overview"
         badgeText="Community Hub"
-        description="Orchestrate and monitor high-frequency community discussions. Track sentiment, engagement velocity, and architectural discourse."
+        description="Manage and view all discussions and engagement across your forums."
         icon={MessageCircle}
       />
 
@@ -171,13 +171,13 @@ export default function DiscussionForum() {
               <div className="flex items-center gap-3">
                  <div className="h-3 w-3 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                    Discussion Engine: Energized
+                    Forums: Active
                  </span>
               </div>
               <div className="h-4 w-px bg-slate-200" />
               <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
                  <Globe className="h-3.5 w-3.5 text-indigo-500" />
-                 <span>Global Propagation Stable</span>
+                 <span>System: Online</span>
               </div>
            </div>
 
@@ -189,13 +189,13 @@ export default function DiscussionForum() {
                 </SelectTrigger>
                 <SelectContent className="rounded-2xl border-slate-100 shadow-2xl">
                   <SelectItem value="today" className="font-bold uppercase text-[10px]">Today</SelectItem>
-                  <SelectItem value="7days" className="font-bold uppercase text-[10px]">Last 7 Cycles</SelectItem>
-                  <SelectItem value="30days" className="font-bold uppercase text-[10px]">Last 30 Cycles</SelectItem>
+                  <SelectItem value="7days" className="font-bold uppercase text-[10px]">Last 7 Days</SelectItem>
+                  <SelectItem value="30days" className="font-bold uppercase text-[10px]">Last 30 Days</SelectItem>
                 </SelectContent>
               </Select>
               <Button variant="outline" className="h-10 px-4 rounded-xl border-slate-200 font-bold text-slate-600 gap-2 hover:bg-slate-50 transition-all">
                 <Download className="h-4 w-4 text-emerald-500" />
-                Export Manifest
+                Export Data
               </Button>
            </div>
         </div>
@@ -205,10 +205,10 @@ export default function DiscussionForum() {
         {/* Metric Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
            {[
-             { label: "Aggregate Forums", value: "128", trend: "+3 new", icon: LayoutGrid, color: "text-emerald-500", bg: "bg-emerald-500/10" },
-             { label: "Active Threads", value: "542", trend: "18% velocity", icon: Hash, color: "text-amber-500", bg: "bg-amber-500/10" },
-             { label: "Temporal Posts", value: "3,200", trend: "+24% delta", icon: MessageSquare, color: "text-blue-500", bg: "bg-blue-500/10" },
-             { label: "Engaged Entities", value: "1,240", trend: "High stability", icon: Users, color: "text-indigo-500", bg: "bg-indigo-500/10" }
+             { label: "Total Forums", value: "128", trend: "+3 new", icon: LayoutGrid, color: "text-emerald-500", bg: "bg-emerald-500/10" },
+             { label: "Total Threads", value: "542", trend: "18% up", icon: Hash, color: "text-amber-500", bg: "bg-amber-500/10" },
+             { label: "Total Posts", value: "3,200", trend: "+24% up", icon: MessageSquare, color: "text-blue-500", bg: "bg-blue-500/10" },
+             { label: "Active Members", value: "1,240", trend: "Steady", icon: Users, color: "text-indigo-500", bg: "bg-indigo-500/10" }
            ].map((stat, i) => (
              <div key={i} className="p-8 rounded-[2.5rem] bg-white border border-slate-100 shadow-xl shadow-slate-200/50 group hover:shadow-2xl hover:translate-y-[-4px] transition-all duration-500 relative overflow-hidden">
                 <div className={cn("inline-flex p-4 rounded-2xl mb-6 transition-all duration-500 group-hover:scale-110", stat.bg)}>
@@ -233,8 +233,8 @@ export default function DiscussionForum() {
                     <Activity className="h-5 w-5" />
                  </div>
                  <div>
-                    <h3 className="text-xl font-black text-slate-900 tracking-tight italic uppercase">Emission Velocity</h3>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] leading-none mt-1">Foundational thread instantiation cycles</p>
+                    <h3 className="text-xl font-black text-slate-900 tracking-tight italic uppercase">Posting Activity</h3>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] leading-none mt-1">New threads and posts over time</p>
                  </div>
               </div>
               <div className="p-10 rounded-[3rem] bg-white border border-slate-100 shadow-xl shadow-slate-200/50">
@@ -292,8 +292,8 @@ export default function DiscussionForum() {
                     <BarChart3 className="h-5 w-5" />
                  </div>
                  <div>
-                    <h3 className="text-xl font-black text-slate-900 tracking-tight italic uppercase">Taxonomy Distribution</h3>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] leading-none mt-1">Domain-specific engagement</p>
+                    <h3 className="text-xl font-black text-slate-900 tracking-tight italic uppercase">Popular Topics</h3>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] leading-none mt-1">Engagement by category</p>
                  </div>
               </div>
               <div className="p-10 rounded-[3rem] bg-white border border-slate-100 shadow-xl shadow-slate-200/50 flex items-center justify-center">
@@ -343,12 +343,12 @@ export default function DiscussionForum() {
                     <Zap className="h-6 w-6" />
                  </div>
                  <div>
-                    <h3 className="text-2xl font-black text-slate-900 tracking-tight italic uppercase">Forum Performance Manifest</h3>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] leading-none mt-1">High-tier forum engagement metrics</p>
+                    <h3 className="text-2xl font-black text-slate-900 tracking-tight italic uppercase">Forum Performance</h3>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] leading-none mt-1">Key metrics for each forum</p>
                  </div>
               </div>
               <Button variant="outline" className="h-12 px-8 rounded-2xl border-slate-200 font-black text-slate-600 gap-3 hover:bg-slate-50 transition-all uppercase text-[10px] tracking-widest">
-                 View Archival Logs
+                 View All
                  <ArrowRight className="h-4 w-4" />
               </Button>
            </div>
@@ -379,12 +379,12 @@ export default function DiscussionForum() {
                        <p className="text-xl font-black text-slate-900">
                          {forum.members.toLocaleString()}
                        </p>
-                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Population</p>
+                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Members</p>
                      </div>
 
                      <div className="w-48 space-y-3">
                        <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Activity Velocity</span>
+                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Activity</span>
                           <span className="text-[10px] font-black text-slate-900 leading-none">{forum.activePercentage}%</span>
                        </div>
                        <div className="h-2 bg-slate-100 rounded-full overflow-hidden p-0.5">
@@ -400,7 +400,7 @@ export default function DiscussionForum() {
                      </div>
 
                      <div className="text-right w-32 space-y-1">
-                       <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest italic leading-none">Last Emission</p>
+                       <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest italic leading-none">Last Post</p>
                        <p className="text-sm font-bold text-slate-400">
                          {forum.lastActivity}
                        </p>

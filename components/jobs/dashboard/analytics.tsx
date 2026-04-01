@@ -34,7 +34,7 @@ export default function JobsAnalytics() {
 
   const kpis = [
     {
-      title: "Aggregate Roles",
+      title: "Total Jobs",
       value: loading ? "..." : (stats?.totalJobs?.toLocaleString() ?? "0"),
       trend: stats?.totalJobsChange ?? 0,
       icon: Briefcase,
@@ -42,7 +42,7 @@ export default function JobsAnalytics() {
       bg: "bg-indigo-500/10",
     },
     {
-      title: "Active Mandates",
+      title: "Active Jobs",
       value: loading ? "..." : (stats?.activeJobs?.toLocaleString() ?? "0"),
       trend: stats?.activeJobsChange ?? 0,
       icon: FileText,
@@ -50,7 +50,7 @@ export default function JobsAnalytics() {
       bg: "bg-emerald-500/10",
     },
     {
-      title: "Applicant Yield",
+      title: "Total Applications",
       value: loading ? "..." : (stats?.totalApplications?.toLocaleString() ?? "0"),
       trend: stats?.applicationsChange ?? 0,
       icon: Users,
@@ -58,7 +58,7 @@ export default function JobsAnalytics() {
       bg: "bg-violet-500/10",
     },
     {
-      title: "Propagation Count",
+      title: "Total Views",
       value: loading ? "..." : (stats?.totalViews?.toLocaleString() ?? "0"),
       trend: stats?.viewsChange ?? 0,
       icon: Eye,
@@ -80,20 +80,20 @@ export default function JobsAnalytics() {
   return (
     <EcosystemWrapper anonymized-1="jobs-analytics">
       <EcosystemHeader
-        title="Talent Intelligence"
-        badgeText="Workforce Telemetry"
-        description="Monitor role instantiation velocity, applicant engagement protocols, and architectural workforce expansion across the registry."
+        title="Jobs Overview"
+        badgeText="Job Stats"
+        description="Track job postings, applications, and growth across your platform."
         icon={Briefcase}
       />
 
       <EcosystemActionBar shadow="none">
         <div className="flex items-center justify-between w-full">
            <div className="flex items-center gap-6">
-              <EcosystemStatusIndicator status="active" label="Talent Stream: Synchronized" />
+              <EcosystemStatusIndicator status="active" label="System: Active" />
               <div className="h-4 w-px bg-slate-200" />
               <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
-                 <span>Verified Listings Only</span>
+                 <span>Verified Jobs</span>
               </div>
            </div>
 
@@ -104,10 +104,10 @@ export default function JobsAnalytics() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="rounded-2xl border-slate-100 shadow-2xl">
-                  <SelectItem value={TimeRange.LAST_24_HOURS} className="font-bold uppercase text-[10px]">Real-time Cycle</SelectItem>
-                  <SelectItem value={TimeRange.LAST_7_DAYS} className="font-bold uppercase text-[10px]">Last 7 Cycles</SelectItem>
-                  <SelectItem value={TimeRange.LAST_30_DAYS} className="font-bold uppercase text-[10px]">Last 30 Cycles</SelectItem>
-                  <SelectItem value={TimeRange.LAST_90_DAYS} className="font-bold uppercase text-[10px]">Last 90 Cycles</SelectItem>
+                  <SelectItem value={TimeRange.LAST_24_HOURS} className="font-bold uppercase text-[10px]">Today</SelectItem>
+                  <SelectItem value={TimeRange.LAST_7_DAYS} className="font-bold uppercase text-[10px]">Last 7 Days</SelectItem>
+                  <SelectItem value={TimeRange.LAST_30_DAYS} className="font-bold uppercase text-[10px]">Last 30 Days</SelectItem>
+                  <SelectItem value={TimeRange.LAST_90_DAYS} className="font-bold uppercase text-[10px]">Last 90 Days</SelectItem>
                 </SelectContent>
               </Select>
               <div className="h-4 w-px bg-slate-200 mx-1" />
@@ -122,15 +122,15 @@ export default function JobsAnalytics() {
         {/* KPI Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
            {kpis.map((kpi, i) => (
-             <EcosystemKPI key={i} {...kpi} trendLabel="Protocol Yield" />
+             <EcosystemKPI key={i} {...kpi} trendLabel="Growth" />
            ))}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
            <div className="lg:col-span-8">
               <EcosystemCard 
-                title="Application Yield" 
-                description="Temporal talent acquisition cycles" 
+                title="Applications" 
+                description="How people are applying over time" 
                 icon={TrendingUp}
                 decorationIcon={Zap}
               >
@@ -165,18 +165,18 @@ export default function JobsAnalytics() {
 
            <div className="lg:col-span-4 space-y-8">
               <EcosystemCard 
-                title="Role Distribution" 
-                description="Registry tier allocation" 
+                title="By Department" 
+                description="How jobs are categorized" 
                 icon={Sparkles}
                 decorationIcon={LayoutGrid}
                 className="min-h-fit"
               >
                  <div className="space-y-6">
                     {[
-                      { label: "Engineering Protocols", value: 45, color: "bg-indigo-500" },
-                      { label: "Design Systems", value: 30, color: "bg-purple-500" },
-                      { label: "Product Strategy", value: 15, color: "bg-emerald-500" },
-                      { label: "Marketing Streams", value: 10, color: "bg-amber-500" }
+                      { label: "Engineering", value: 45, color: "bg-indigo-500" },
+                      { label: "Design", value: 30, color: "bg-purple-500" },
+                      { label: "Product", value: 15, color: "bg-emerald-500" },
+                      { label: "Marketing", value: 10, color: "bg-amber-500" }
                     ].map((item, i) => (
                       <div key={i} className="group/item">
                          <div className="flex items-center justify-between mb-2 px-1">
@@ -192,12 +192,12 @@ export default function JobsAnalytics() {
                  
                  <div className="mt-auto pt-8 border-t border-slate-50 flex items-center justify-between">
                     <div>
-                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Seekers</p>
+                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Candidates</p>
                        <p className="text-2xl font-black text-slate-900 tracking-tighter">2.4k</p>
                     </div>
                     <Link href="/jobs/all">
                        <Button variant="outline" className="h-11 px-6 rounded-xl border-slate-200 font-black text-[10px] uppercase tracking-widest text-slate-600 gap-3 hover:bg-slate-50 transition-all shadow-sm">
-                          Post Role
+                          Add Job
                           <ArrowRight className="h-4 w-4" />
                        </Button>
                     </Link>

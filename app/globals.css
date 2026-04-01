@@ -190,10 +190,25 @@ body {
   body {
     @apply bg-background text-foreground;
     /* Morphed 2026 SaaS Aesthetic Defaults */
-    background-image: radial-gradient(at 0% 0%, color-mix(in oklab, var(--primary) 5%, transparent) 0px, transparent 50%),
-                      radial-gradient(at 100% 0%, color-mix(in oklab, var(--secondary) 5%, transparent) 0px, transparent 50%);
+    background-image: 
+      radial-gradient(at 0% 0%, color-mix(in oklab, var(--primary) 10%, transparent) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, color-mix(in oklab, var(--secondary) 10%, transparent) 0px, transparent 50%),
+      radial-gradient(at 50% 100%, color-mix(in oklab, var(--accent) 5%, transparent) 0px, transparent 50%);
     background-attachment: fixed;
     background-size: cover;
+  }
+
+  /* Glassmorphism Utilities */
+  .glass {
+    @apply bg-white/40 dark:bg-black/40 backdrop-blur-md border border-white/20 dark:border-white/10;
+  }
+  
+  .glass-card {
+    @apply bg-white/60 dark:bg-zinc-900/60 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-xl;
+  }
+
+  .premium-shadow {
+    box-shadow: 0 0 50px -12px color-mix(in oklab, var(--primary) 20%, transparent);
   }
 }
 

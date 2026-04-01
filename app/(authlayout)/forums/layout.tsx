@@ -21,9 +21,7 @@ function ForumsLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <MenuItemsLayout active="forums" items={items}>
-      <Card className="border-0 shadow-sm">
-        <div className="p-6">{children}</div>
-      </Card>
+      {children}
     </MenuItemsLayout>
   );
 }

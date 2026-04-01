@@ -24,12 +24,12 @@ export function ApolloWrapper({ children }: Props) {
     const errorControl = onError(({ graphQLErrors, networkError }) => {
       if (graphQLErrors) {
         graphQLErrors.forEach(({ message, extensions }) => {
-          toast.error("Error", {
-            description:
-              extensions?.code === "INTERNAL_SERVER_ERROR"
-                ? "Something went wrong"
-                : message,
-          });
+          // toast.error("Error", {
+          //   description:
+          //     extensions?.code === "INTERNAL_SERVER_ERROR"
+          //       ? "Something went wrong"
+          //       : message,
+          // });
         });
       }
       if (networkError) {

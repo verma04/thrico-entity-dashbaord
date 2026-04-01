@@ -139,7 +139,7 @@ export default function EventsAnalytics() {
     <EcosystemWrapper anonymized-1="events-analytics">
       <EcosystemHeader
         title="Events Overview"
-        badgeText="Live Status"
+        badgeText="Events Status"
         description="Track your community events, attendee growth, and engagement in real-time."
         icon={Calendar}
       />
@@ -149,7 +149,7 @@ export default function EventsAnalytics() {
           <div className="flex items-center gap-6">
             <EcosystemStatusIndicator
               status="active"
-              label="Ready to go"
+              label="System: Online"
             />
             <div className="h-4 w-px bg-border" />
             <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest italic">
@@ -172,25 +172,25 @@ export default function EventsAnalytics() {
                   value={TimeRange.LAST_24_HOURS}
                   className="font-bold uppercase text-[10px]"
                 >
-                  Real-time Cycle
+                  Today
                 </SelectItem>
                 <SelectItem
                   value={TimeRange.LAST_7_DAYS}
                   className="font-bold uppercase text-[10px]"
                 >
-                  Last 7 Cycles
+                  Last 7 Days
                 </SelectItem>
                 <SelectItem
                   value={TimeRange.LAST_30_DAYS}
                   className="font-bold uppercase text-[10px]"
                 >
-                  Last 30 Cycles
+                  Last 30 Days
                 </SelectItem>
                 <SelectItem
                   value={TimeRange.LAST_90_DAYS}
                   className="font-bold uppercase text-[10px]"
                 >
-                  Last 90 Cycles
+                  Last 90 Days
                 </SelectItem>
               </SelectContent>
             </Select>
@@ -210,7 +210,7 @@ export default function EventsAnalytics() {
         {/* KPI Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {kpis.map((kpi, i) => (
-            <EcosystemKPI key={i} {...kpi} trendLabel="vs last period" />
+            <EcosystemKPI key={i} {...kpi} trendLabel="v. last period" />
           ))}
         </div>
 
@@ -425,15 +425,15 @@ export default function EventsAnalytics() {
                     74.2%
                   </p>
                 </div>
-                <Link href="/events/all">
-                  <Button
-                    variant="outline"
-                    className="h-11 px-6 rounded-xl border-slate-200 font-black text-[10px] uppercase tracking-widest text-slate-600 gap-3 hover:bg-slate-50 transition-all shadow-sm"
-                  >
-                    Registry
-                    <ArrowRight className="h-4 w-4" />
-                  </Button>
-                </Link>
+                  <Link href="/events/all">
+                    <Button
+                      variant="outline"
+                      className="h-11 px-6 rounded-xl border-slate-200 font-black text-[10px] uppercase tracking-widest text-slate-600 gap-3 hover:bg-slate-50 transition-all shadow-sm"
+                    >
+                      All Events
+                      <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </Link>
               </div>
             </EcosystemCard>
 
@@ -445,18 +445,17 @@ export default function EventsAnalytics() {
                     <LayoutGrid className="h-5 w-5" />
                   </div>
                   <h4 className="text-sm font-black text-white uppercase tracking-widest">
-                    Registry Sync
+                    System Status
                   </h4>
                 </div>
                 <p className="text-xs font-bold text-slate-400 leading-relaxed uppercase tracking-wider">
-                  All temporal event nodes are broadcasted across the global
-                  registry with 99.9% propagation velocity.
+                  All your events are being synced across the platform in real-time.
                 </p>
                 <Button
                   variant="link"
                   className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] p-0 group-hover:translate-x-2 transition-transform"
                 >
-                  View Registry Logs <ArrowRight className="h-3 w-3 ml-2" />
+                  View System Logs <ArrowRight className="h-3 w-3 ml-2" />
                 </Button>
               </div>
             </div>

@@ -54,7 +54,7 @@ const pollSchema = Yup.object().shape({
     .max(10, "Maximum 10 options allowed"),
 });
 
-const STEP_LABELS = ["Compose", "Settings", "Preview"];
+const STEP_LABELS = ["Build", "Rules", "Review"];
 
 export default function NewPoll({
   standalone = true,
@@ -111,18 +111,18 @@ export default function NewPoll({
   const visibilityOptions = [
     {
       value: "ALWAYS",
-      label: "Always Public",
-      desc: "Results visible at all times",
+      label: "Everyone",
+      desc: "Results are always public",
     },
     {
       value: "AFTER_VOTE",
-      label: "After Voting",
-      desc: "Results shown after user votes",
+      label: "After voting",
+      desc: "People see results after they vote",
     },
     {
       value: "ADMIN",
-      label: "Admin Only",
-      desc: "Only admins can see results",
+      label: "Only Admin",
+      desc: "Only you can see the results",
     },
   ];
 
@@ -184,7 +184,7 @@ export default function NewPoll({
         <Input
           name="title"
           className="h-14 rounded-2xl border-zinc-200 bg-zinc-50/50 text-[16px] font-bold text-zinc-900 placeholder:text-zinc-300 focus:bg-white focus:border-zinc-300 focus:ring-2 focus:ring-zinc-900/5 transition-all"
-          placeholder="Give your poll a catchy title..."
+          placeholder="Name your poll..."
           value={formik.values.title}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
@@ -208,7 +208,7 @@ export default function NewPoll({
           name="question"
           rows={3}
           className="rounded-2xl border-zinc-200 bg-zinc-50/50 text-[15px] font-medium text-zinc-900 placeholder:text-zinc-300 focus:bg-white focus:border-zinc-300 focus:ring-2 focus:ring-zinc-900/5 transition-all resize-none"
-          placeholder="What would you like to ask your community?"
+          placeholder="What is your question?"
           value={formik.values.question}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
@@ -324,10 +324,10 @@ export default function NewPoll({
           </div>
           <div>
             <h3 className="text-[14px] font-black text-zinc-900 tracking-tight">
-              Results Visibility
+              Who sees the results?
             </h3>
             <p className="text-[11px] font-medium text-zinc-400">
-              Control when voters can see poll results
+              Choose when voters can see the poll outcomes
             </p>
           </div>
         </div>
@@ -578,7 +578,7 @@ export default function NewPoll({
     <>
       <Button
         onClick={() => setOpen(true)}
-        className="h-11 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-white font-black text-[12px] uppercase tracking-[0.1em] px-5 shadow-lg shadow-zinc-900/15 transition-all active:scale-95"
+        className="h-11 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-white font-black text-[12px] uppercase tracking-widest px-5 shadow-lg shadow-zinc-900/15 transition-all active:scale-95"
       >
         <Plus className="h-4 w-4 mr-2" />
         Create Poll
@@ -593,10 +593,10 @@ export default function NewPoll({
               </div>
               <div>
                 <SheetTitle className="text-[18px] font-black text-zinc-900 tracking-tight">
-                  New Poll
+                  Create Poll
                 </SheetTitle>
                 <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-[0.12em]">
-                  Community Engagement
+                  Get feedback
                 </p>
               </div>
             </div>

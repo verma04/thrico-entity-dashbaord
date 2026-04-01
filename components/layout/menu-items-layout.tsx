@@ -51,7 +51,9 @@ function TabButton({
       <span
         className={cn(
           "relative z-10 shrink-0 transition-transform duration-200",
-          isActive ? "text-primary scale-110" : "text-muted-foreground/60 group-hover/tab:text-foreground/70",
+          isActive
+            ? "text-primary scale-110"
+            : "text-muted-foreground/60 group-hover/tab:text-foreground/70",
         )}
       >
         {React.isValidElement(item.icon)
@@ -71,9 +73,9 @@ function TabButton({
 
       {/* Active Dot indicator */}
       {isActive && (
-        <motion.span 
+        <motion.span
           layoutId="active-dot"
-          className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary" 
+          className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary"
         />
       )}
     </button>
@@ -157,21 +159,31 @@ const MenuItemsLayout = ({
   };
 
   return (
-    <div className={cn(
-      "bg-background text-foreground flex flex-col",
-      fixed ? "fixed inset-0 z-100 bg-background h-screen w-screen overflow-hidden" : (fullHeight ? "h-screen overflow-hidden" : "min-h-screen")
-    )}>
+    <div
+      className={cn(
+        "bg-background text-foreground flex flex-col",
+        fixed
+          ? "fixed inset-0 z-100 bg-background h-screen w-screen overflow-hidden"
+          : fullHeight
+            ? "h-screen overflow-hidden"
+            : "min-h-screen",
+      )}
+    >
       {/* ── Top Nav Bar ─────────────────────────────────────────────────── */}
       <nav className="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b border-border">
-        <div className={cn("px-6", fullWidth ? "w-full" : "max-w-[1400px] mx-auto")}>
+        <div
+          className={cn(
+            "px-6",
+            fullWidth ? "w-full" : "max-w-[1400px] mx-auto",
+          )}
+        >
           <div className="flex h-12 items-center gap-1 overflow-x-auto scrollbar-hide relative no-scrollbar">
             {menuitems.map((item) => (
               <TabButton
                 key={item.key}
                 item={item}
                 isActive={
-                  activeTab === item.key ||
-                  fullKey.startsWith(item.key + "/")
+                  activeTab === item.key || fullKey.startsWith(item.key + "/")
                 }
                 onClick={() => onChange(item.key)}
               />
@@ -182,7 +194,7 @@ const MenuItemsLayout = ({
         {/* Close Button for Fixed Mode */}
         {fixed && (
           <button
-            onClick={() => router.push("/")}
+            onClick={() => router.back()}
             className="absolute right-4 top-1/2 -translate-y-1/2 h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-all z-50"
           >
             <X className="h-4 w-4" />
@@ -191,20 +203,19 @@ const MenuItemsLayout = ({
       </nav>
 
       {/* ── Content ─────────────────────────────────────────────────────── */}
-      <main className={cn(
-        "flex-1 min-w-0 min-h-0 transition-opacity duration-300 flex flex-col",
-        fullWidth ? "w-full" : "max-w-[1400px] mx-auto px-6",
-        !fullHeight && "py-4 lg:py-6"
-      )}>
+      <main
+        className={cn(
+          "flex-1 min-w-0 min-h-0 transition-opacity duration-300 flex flex-col",
+          fullWidth ? "w-full" : "max-w-[1400px] mx-auto px-6",
+          !fullHeight && "py-4 lg:py-6",
+        )}
+      >
         <motion.div
           key={activeTab}
           initial={{ opacity: 0, y: 4 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2, ease: "easeOut" }}
-          className={cn(
-            "flex-1",
-            fullHeight && "h-full overflow-y-auto"
-          )}
+          className={cn("flex-1", fullHeight && "h-full overflow-y-auto")}
         >
           {children}
         </motion.div>

@@ -200,10 +200,10 @@ const Dashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold tracking-tight">
-                Marketplace Dashboard
+                Marketplace Overview
               </h1>
               <p className="text-muted-foreground mt-1">
-                Manage and monitor your marketplace listings
+                Manage and view all your listings.
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -253,7 +253,7 @@ const Dashboard = () => {
         <Card className="hover:shadow-lg transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Pending Approvals
+              Waiting for Review
             </CardTitle>
             <div className="rounded-full p-2 bg-amber-50 dark:bg-amber-950">
               <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400" />

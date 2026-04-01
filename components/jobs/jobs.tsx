@@ -44,11 +44,11 @@ export default function Jobs({ data }: { data: Job[] | undefined }) {
         <Table>
           <TableHeader className="bg-muted/30">
             <TableRow className="hover:bg-transparent border-b-border h-12">
-              <TableHead className="px-6 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">Position & Location</TableHead>
+              <TableHead className="px-6 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">Job & Location</TableHead>
               <TableHead className="px-6 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">Company</TableHead>
               <TableHead className="px-6 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60 text-center">Status</TableHead>
               <TableHead className="px-6 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60 text-center">Applicants</TableHead>
-              <TableHead className="px-6 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">Posted Date</TableHead>
+              <TableHead className="px-6 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">Posted</TableHead>
               <TableHead className="px-6 text-right w-[60px]"></TableHead>
             </TableRow>
           </TableHeader>
@@ -136,7 +136,7 @@ export default function Jobs({ data }: { data: Job[] | undefined }) {
                         <Briefcase className="h-10 w-10" />
                       </div>
                       <div className="space-y-1">
-                        <p className="text-[14px] font-semibold text-foreground">No opportunities found</p>
+                        <p className="text-[14px] font-semibold text-foreground">No jobs found</p>
                         <p className="text-[12px] text-muted-foreground">Try adjusting your filters or search terms.</p>
                       </div>
                     </div>
@@ -152,7 +152,7 @@ export default function Jobs({ data }: { data: Job[] | undefined }) {
       {data && data.length > pageSize && (
         <div className="flex items-center justify-between px-2 pt-2">
           <p className="text-[11.5px] font-medium text-muted-foreground pl-2">
-            Showing <span className="font-bold text-foreground">{(currentPage - 1) * pageSize + 1}</span> to <span className="font-bold text-foreground">{Math.min(currentPage * pageSize, data.length)}</span> of <span className="font-bold text-foreground">{data.length}</span> opportunities
+            Showing <span className="font-bold text-foreground">{(currentPage - 1) * pageSize + 1}</span> to <span className="font-bold text-foreground">{Math.min(currentPage * pageSize, data.length)}</span> of <span className="font-bold text-foreground">{data.length}</span> jobs
           </p>
 
           <div className="flex items-center gap-1.5">

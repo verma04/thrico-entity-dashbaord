@@ -56,7 +56,7 @@ export default function SurveyAnalytics() {
 
   const kpis = [
     {
-      title: "Aggregate Surveys",
+      title: "Total Surveys",
       value: loading ? "..." : (stats?.totalSurveys?.toLocaleString() ?? "0"),
       trend: stats?.totalSurveysChange ?? 0,
       icon: ClipboardList,
@@ -64,7 +64,7 @@ export default function SurveyAnalytics() {
       bg: "bg-indigo-500/10",
     },
     {
-      title: "Active Protocols",
+      title: "Active Surveys",
       value: loading ? "..." : (stats?.activeSurveys?.toLocaleString() ?? "0"),
       trend: stats?.activeSurveysChange ?? 0,
       icon: Activity,
@@ -72,7 +72,7 @@ export default function SurveyAnalytics() {
       bg: "bg-emerald-500/10",
     },
     {
-      title: "Response Yield",
+      title: "Total Responses",
       value: loading ? "..." : (stats?.totalResponses?.toLocaleString() ?? "0"),
       trend: stats?.totalResponsesChange ?? 0,
       icon: Users,
@@ -80,7 +80,7 @@ export default function SurveyAnalytics() {
       bg: "bg-violet-500/10",
     },
     {
-      title: "Completion Velocity",
+      title: "Completion Rate",
       value: loading ? "..." : `${stats?.completionRate?.toFixed(1) ?? "0"}%`,
       trend: stats?.completionRateChange ?? 0,
       icon: Zap,
@@ -112,29 +112,29 @@ export default function SurveyAnalytics() {
   return (
     <EcosystemWrapper anonymized-1="surveys-analytics">
       <EcosystemHeader
-        title="Insight Intelligence"
-        badgeText="Sentiment Registry"
-        description="Monitor community sentiment instantiation velocity, response protocols, and architectural feedback expansion across the global registry node."
+        title="Surveys Overview"
+        badgeText="Survey Stats"
+        description="Track survey responses, completion rates, and community feedback."
         icon={BarChart3}
       />
 
       <EcosystemActionBar shadow="none">
         <div className="flex items-center justify-between w-full">
-           <div className="flex items-center gap-6">
-              <EcosystemStatusIndicator status="active" label="Insight Stream: Operational" />
-              <div className="h-4 w-px bg-slate-200" />
-              <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
-                 <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
-                 <span>Verified Analytical Registry</span>
-              </div>
-           </div>
+            <div className="flex items-center gap-6">
+               <EcosystemStatusIndicator status="active" label="System Status: Online" />
+               <div className="h-4 w-px bg-slate-200" />
+               <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
+                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
+                  <span>Verified System</span>
+               </div>
+            </div>
 
            <div className="flex items-center gap-3">
               <Link href="/surveys/all">
                  <Button variant="outline" className="h-10 px-6 rounded-xl border-slate-200 font-black text-[10px] uppercase tracking-widest text-slate-600 gap-3 hover:bg-slate-50 transition-all shadow-sm">
-                    Registry
-                    <ArrowRight className="h-4 w-4" />
-                 </Button>
+                     All Surveys
+                     <ArrowRight className="h-4 w-4" />
+                  </Button>
               </Link>
               <div className="h-4 w-px bg-slate-200 mx-1" />
               <Button variant="outline" size="icon" className="h-10 w-10 text-slate-400 hover:text-indigo-600 rounded-xl transition-all shadow-sm bg-white" onClick={() => refetch()}>
@@ -147,17 +147,17 @@ export default function SurveyAnalytics() {
       <EcosystemContainer className="space-y-12 p-8 lg:p-12">
         {/* KPI Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-           {kpis.map((kpi, i) => (
-             <EcosystemKPI key={i} {...kpi} trendLabel="Registry" />
-           ))}
+            {kpis.map((kpi, i) => (
+              <EcosystemKPI key={i} {...kpi} trendLabel="v. last period" />
+            ))}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
            {/* Chart Section */}
            <div className="lg:col-span-8">
-              <EcosystemCard 
-                title="Yield Velocity" 
-                description="Temporal response instantiation cycles" 
+               <EcosystemCard 
+                 title="Response Activity" 
+                 description="How people are responding over time" 
                 icon={TrendingUp}
                 decorationIcon={Zap}
               >
@@ -195,13 +195,13 @@ export default function SurveyAnalytics() {
 
            {/* Distribution Section */}
            <div className="lg:col-span-4">
-              <EcosystemCard 
-                title="Status Matrix" 
-                description="Registry tier allocation" 
-                icon={Sparkles}
-                decorationIcon={LayoutGrid}
-                className="min-h-fit"
-              >
+               <EcosystemCard 
+                 title="Survey Status" 
+                 description="How surveys are categorized" 
+                 icon={Sparkles}
+                 decorationIcon={LayoutGrid}
+                 className="min-h-fit"
+               >
                  <div className="h-[250px] w-full mb-8 relative flex items-center justify-center">
                     <ResponsiveContainer width="100%" height="100%">
                        <PieChart>

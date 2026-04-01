@@ -75,11 +75,11 @@ const User = ({ status: initialStatus }: any) => {
             ? "Members"
             : `${status.charAt(0) + status.slice(1).toLowerCase()} Members`
         }
-        badgeText="Network Registry"
+        badgeText="Member List"
         description={
           loading
-            ? "Synchronizing directory records..."
-            : `Manage and monitor ${data?.getAllUser?.length || 0} community participants.`
+            ? "Loading members..."
+            : `Manage and view all ${data?.getAllUser?.length || 0} your members.`
         }
         icon={Users}
         actions={
