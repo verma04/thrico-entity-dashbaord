@@ -113,7 +113,7 @@ export const contentModeration = [
   {
     key: "mod-dashboard",
     label: "Dashboard",
-    path: "/settings/moderation",
+    path: "/moderation",
     icon: <LayoutDashboard size={18} />,
   },
   {
@@ -148,12 +148,12 @@ export const contentModeration = [
       {
         key: "mod-banned",
         label: "Banned words",
-        path: "/settings/moderation/banned-words",
+        path: "/moderation/banned-words",
       },
       {
         key: "mod-links",
         label: "Blocked Links",
-        path: "/settings/moderation/blocked-links",
+        path: "/moderation/blocked-links",
       },
     ],
   },
@@ -165,7 +165,7 @@ export const contentModeration = [
       {
         key: "mod-ai-settings",
         label: "Settings",
-        path: "/settings/moderation",
+        path: "/moderation",
       },
     ],
   },
