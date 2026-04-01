@@ -12,14 +12,14 @@ export const formatPrice = (
 };
 
 import * as Icons from "lucide-react";
-export const renderModuleIcon = (icon: string) => {
+export const renderModuleIcon = (icon: string, className?: string) => {
   if (icon) {
     const IconComponent = (
       Icons as unknown as Record<string, React.ComponentType<any>>
     )[icon];
     if (IconComponent) {
-      return <IconComponent className="w-4 h-4" />;
+      return <IconComponent className={className || "w-4 h-4"} />;
     }
   }
-  return <Icons.Settings className="w-4 h-4" />;
+  return <Icons.Settings className={className || "w-4 h-4"} />;
 };

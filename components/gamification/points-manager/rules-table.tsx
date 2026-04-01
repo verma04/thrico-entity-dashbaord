@@ -99,7 +99,7 @@ export function RulesTable({
       header: () => <div className="text-center">Points</div>,
       cell: ({ row }) => (
         <div className="text-center font-bold text-primary font-mono">
-          +{row.original.points}
+          +{row.original.points.toLocaleString()}
         </div>
       ),
     },

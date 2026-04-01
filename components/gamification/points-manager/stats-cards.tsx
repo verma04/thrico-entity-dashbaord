@@ -17,7 +17,7 @@ export function StatsCards({ pointRules, stats }: StatsCardsProps) {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Total Users</p>
-              <p className="text-2xl font-bold">{stats?.totalUsers ?? 0}</p>
+              <p className="text-2xl font-bold">{stats?.totalUsers?.toLocaleString() ?? 0}</p>
             </div>
             <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
               <div className="h-4 w-4 rounded-full bg-blue-500" />
@@ -44,7 +44,7 @@ export function StatsCards({ pointRules, stats }: StatsCardsProps) {
             <div>
               <p className="text-sm text-muted-foreground">Badges Earned</p>
               <p className="text-2xl font-bold">
-                {stats?.totalBadgesEarned ?? 0}
+                {stats?.totalBadgesEarned?.toLocaleString() ?? 0}
               </p>
             </div>
             <Badge variant="secondary">Earned</Badge>
@@ -57,8 +57,8 @@ export function StatsCards({ pointRules, stats }: StatsCardsProps) {
             <div>
               <p className="text-sm text-muted-foreground">Active Rules</p>
               <p className="text-2xl font-bold">
-                {stats?.activePointRules ??
-                  pointRules.filter((r) => r.isActive).length}
+                {(stats?.activePointRules ??
+                  pointRules.filter((r) => r.isActive).length).toLocaleString()}
               </p>
             </div>
             <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
