@@ -106,8 +106,9 @@ export default function AddUserDialog({
     email: Yup.string()
       .email("Invalid email address")
       .required("Email is required"),
-    role: user ? Yup.string() : Yup.string().required("Assigned role is required"),
-    password: user ? Yup.string() : Yup.string().min(8, "Minimum 8 characters").required("Password is required"),
+    role: user
+      ? Yup.string()
+      : Yup.string().required("Assigned role is required"),
   });
 
   const formik = useFormik({
@@ -116,7 +117,6 @@ export default function AddUserDialog({
       lastName: user?.lastName || "",
       email: user?.email || "",
       role: user?.role?.id || "",
-      password: "",
     },
     enableReinitialize: true,
     validationSchema,
@@ -140,7 +140,6 @@ export default function AddUserDialog({
               lastName: values.lastName,
               email: values.email,
               roleId: values.role,
-              password: values.password,
             },
           },
         });
@@ -276,38 +275,6 @@ export default function AddUserDialog({
                       </p>
                     )}
                   </div>
-
-                  {!user && (
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="password"
-                        className="text-[11px] font-medium text-muted-foreground/80 ml-0.5"
-                      >
-                        Initial Password
-                      </Label>
-                      <div className="relative">
-                        <Input
-                          id="password"
-                          name="password"
-                          type="password"
-                          value={formik.values.password}
-                          onChange={formik.handleChange}
-                          onBlur={formik.handleBlur}
-                          placeholder="••••••••"
-                          className="bg-muted/10 border-border/60 shadow-none h-10 px-4 font-medium focus-visible:ring-primary/20 rounded-xl"
-                        />
-                      </div>
-                      {formik.touched.password && formik.errors.password ? (
-                        <p className="text-destructive text-[10px] font-medium mt-1 ml-0.5">
-                          {formik.errors.password}
-                        </p>
-                      ) : (
-                        <p className="text-[10px] text-muted-foreground font-medium px-0.5 opacity-60 italic">
-                          Security policy requires minimum 8 characters.
-                        </p>
-                      )}
-                    </div>
-                  )}
                 </div>
 
                 <Separator className="opacity-30" />
@@ -329,7 +296,8 @@ export default function AddUserDialog({
                         <div className="flex gap-3">
                           <Info className="h-4 w-4 text-indigo-400 shrink-0 mt-0.5" />
                           <p className="text-[11px] text-indigo-700/80 font-medium leading-relaxed">
-                            Select a role to define initial access. Roles can be adjusted later from the management panel.
+                            Select a role to define initial access. Roles can be
+                            adjusted later from the management panel.
                           </p>
                         </div>
                       </div>
@@ -391,7 +359,8 @@ export default function AddUserDialog({
                           Role assignment is managed separately
                         </p>
                         <p className="text-[11px] text-amber-600/70 font-medium leading-snug">
-                          Use the "Edit Role & Access" action to change this user's platform permissions.
+                          Use the "Edit Role & Access" action to change this
+                          user's platform permissions.
                         </p>
                       </div>
                     </div>

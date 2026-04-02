@@ -113,7 +113,6 @@ export interface AdminRegisterInput {
   firstName: string;
   lastName: string;
   roleId: string;
-  password: string;
 }
 
 export interface CreateAdminResponse {
