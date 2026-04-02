@@ -172,6 +172,38 @@ export default function AddRoleDialog({
     }));
   };
 
+  const toggleAllAdminAccess = (checked: boolean) => {
+    const newAdminAccess = { ...adminAccess };
+    Object.keys(newAdminAccess).forEach(key => {
+      newAdminAccess[key] = checked;
+    });
+    setAdminAccess(newAdminAccess);
+  };
+
+  const toggleAllModulePermissions = (moduleId: string, checked: boolean) => {
+    setPermissions(prev => ({
+      ...prev,
+      [moduleId]: {
+        Read: checked,
+        Create: checked,
+        Edit: checked,
+        Delete: checked,
+      }
+    }));
+  };
+
+  const togglePermissionTypeForAllModules = (type: string, checked: boolean) => {
+    const availableModules = modulesData?.getAvailableModules || [];
+    setPermissions(prev => {
+      const next = { ...prev };
+      availableModules.forEach((mod: string) => {
+        const current = next[mod] || { Read: false, Create: false, Edit: false, Delete: false };
+        next[mod] = { ...current, [type]: checked };
+      });
+      return next;
+    });
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -275,11 +307,22 @@ export default function AddRoleDialog({
 
               {/* SECTION: ELEVATED PRIVILEGES */}
               <div className="space-y-5">
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 bg-amber-500/5 rounded-lg border border-amber-500/10">
-                    <ShieldAlert className="h-3.5 w-3.5 text-amber-600" />
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 bg-amber-500/5 rounded-lg border border-amber-500/10">
+                      <ShieldAlert className="h-3.5 w-3.5 text-amber-600" />
+                    </div>
+                    <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground/70">Elevated Admin Access</h3>
                   </div>
-                  <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground/70">Elevated Admin Access</h3>
+                  <div className="flex items-center gap-2">
+                    <Checkbox 
+                      id="select-all-admin"
+                      checked={Object.values(adminAccess).every(v => v)}
+                      onCheckedChange={(checked) => toggleAllAdminAccess(!!checked)}
+                      className="h-4 w-4 border-border/60 data-[state=checked]:bg-amber-500 data-[state=checked]:border-amber-500 rounded"
+                    />
+                    <Label htmlFor="select-all-admin" className="text-[10px] font-bold text-amber-600 uppercase tracking-tighter cursor-pointer">Select All Scopes</Label>
+                  </div>
                 </div>
 
                 <div className="p-3.5 bg-amber-50/50 border border-amber-100/50 rounded-xl flex gap-3">
@@ -326,7 +369,17 @@ export default function AddRoleDialog({
                       <TableRow className="hover:bg-transparent">
                         <TableHead className="w-[300px] font-semibold text-[11px] uppercase tracking-wider px-6 text-foreground/70">Resource Name</TableHead>
                         {permissionTypes.map((type) => (
-                          <TableHead key={type} className="text-center font-semibold text-[11px] uppercase tracking-wider text-foreground/70">{type}</TableHead>
+                          <TableHead key={type} className="text-center font-semibold text-[11px] uppercase tracking-wider text-foreground/70">
+                            <div className="flex flex-col items-center gap-1.5">
+                              <span>{type}</span>
+                              <Checkbox 
+                                id={`select-all-${type}`}
+                                checked={(modulesData?.getAvailableModules || []).every((mod: string) => !!permissions[mod]?.[type])}
+                                onCheckedChange={(checked) => togglePermissionTypeForAllModules(type, !!checked)}
+                                className="h-4 w-4 border-border/60 data-[state=checked]:bg-primary data-[state=checked]:border-primary rounded"
+                              />
+                            </div>
+                          </TableHead>
                         ))}
                       </TableRow>
                     </TableHeader>
@@ -345,7 +398,13 @@ export default function AddRoleDialog({
                             return (
                               <TableRow key={moduleName} className="hover:bg-muted/10 border-b border-border/40 last:border-0 group transition-colors">
                                 <TableCell className="px-6 py-4 flex items-center gap-3">
-                                  <div className="h-9 w-9 rounded-xl bg-muted/50 flex items-center justify-center text-muted-foreground group-hover:bg-primary/5 group-hover:text-primary transition-all">
+                                  <Checkbox 
+                                    id={`select-row-${moduleName}`}
+                                    checked={permissionTypes.every(type => !!permissions[moduleName]?.[type])}
+                                    onCheckedChange={(checked) => toggleAllModulePermissions(moduleName, !!checked)}
+                                    className="h-4.5 w-4.5 border-border/60 data-[state=checked]:bg-primary data-[state=checked]:border-primary rounded-md"
+                                  />
+                                  <div className="h-9 w-9 rounded-xl bg-muted/50 flex items-center justify-center text-muted-foreground group-hover:bg-primary/5 group-hover:text-primary transition-all ml-1">
                                     <ModuleIcon name={moduleName} fallback={subModule?.icon} className="w-4.5 h-4.5 opacity-70" />
                                   </div>
                                   <span className="capitalize font-semibold text-sm text-foreground/90">{moduleName}</span>
