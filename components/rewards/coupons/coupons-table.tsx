@@ -2,7 +2,7 @@
 
 import React from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import { DataTable } from "@/components/ui/data-table";
+import { AppDataTable } from "@/components/ui/app-data-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,7 +30,6 @@ export interface Coupon {
   status: string;
   isActive: boolean;
   totalUsageLimit?: number;
-  // We'll calculate these or use from API if added
   redeemedCount?: number;
   inventoryCount?: number;
 }
@@ -184,5 +183,14 @@ export function CouponsTable({ coupons, isLoading }: CouponsTableProps) {
     },
   ];
 
-  return <DataTable columns={columns} data={coupons} isLoading={isLoading} />;
+  return (
+    <AppDataTable
+      columns={columns}
+      data={coupons}
+      isLoading={isLoading}
+      searchableColumns={[{ id: "title", placeholder: "Search rewards..." }]}
+      isShowExportButtons={true}
+      addItemPagePath="/rewards/vouchers/coupons/create"
+    />
+  );
 }

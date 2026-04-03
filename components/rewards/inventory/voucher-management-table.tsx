@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import { DataTable } from "@/components/ui/data-table";
+import { AppDataTable } from "@/components/ui/app-data-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,7 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreVertical, Copy, Eye, Trash2, CheckCircle2 } from "lucide-react";
+import { MoreVertical, Copy, Eye, Trash2, CheckCircle2, Ticket } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 
@@ -68,21 +68,21 @@ export function VoucherManagementTable({
     return daysUntilExpiry <= 7 && daysUntilExpiry > 0;
   };
 
-  const columns: ColumnDef<Voucher>[] = [
+  const columns = useMemo<ColumnDef<Voucher>[]>(() => [
     {
       accessorKey: "code",
       header: "Voucher Code",
       cell: ({ row }) => {
         const voucher = row.original;
         return (
-          <div className="flex items-center gap-2">
-            <code className="px-2 py-1 rounded bg-muted font-mono text-sm font-bold">
+          <div className="flex items-center gap-2 group">
+            <code className="px-2 py-1 rounded bg-slate-50 border border-slate-100 font-mono text-sm font-bold text-slate-900 group-hover:bg-white transition-colors shadow-sm">
               {voucher.code}
             </code>
             <Button
               variant="ghost"
               size="icon"
-              className="h-6 w-6"
+              className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
               onClick={() => copyToClipboard(voucher.code)}
             >
               <Copy className="h-3 w-3" />
@@ -95,9 +95,12 @@ export function VoucherManagementTable({
       accessorKey: "rewardTitle",
       header: "Reward",
       cell: ({ row }) => (
-        <span className="font-medium text-foreground">
-          {row.original.rewardTitle || "Unknown"}
-        </span>
+        <div className="flex items-center gap-2">
+           <Ticket className="h-3.5 w-3.5 text-slate-400" />
+           <span className="font-semibold text-slate-900 leading-tight">
+             {row.original.rewardTitle || "Unknown"}
+           </span>
+        </div>
       ),
     },
     {
@@ -109,7 +112,7 @@ export function VoucherManagementTable({
           <Badge
             variant="outline"
             className={cn(
-              "text-xs uppercase font-bold px-2 py-0 h-5",
+              "text-[10px] uppercase font-bold px-2 py-0 h-5 tracking-tight",
               getStatusColor(isUsed),
             )}
           >
@@ -124,10 +127,10 @@ export function VoucherManagementTable({
       cell: ({ row }) => {
         const assignedTo = row.original.assignedTo;
         return assignedTo ? (
-          <span className="text-sm text-muted-foreground">{assignedTo}</span>
+          <span className="text-xs font-medium text-slate-600">{assignedTo}</span>
         ) : (
-          <span className="text-xs text-muted-foreground italic">
-            Not assigned
+          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+            Unassigned
           </span>
         );
       },
@@ -143,24 +146,24 @@ export function VoucherManagementTable({
           <div className="flex items-center gap-2">
             <span
               className={cn(
-                "text-sm",
-                expiringSoon && "text-amber-600 font-medium",
+                "text-xs font-medium",
+                expiringSoon ? "text-amber-600 font-bold" : "text-slate-500",
               )}
             >
-              {new Date(expiryDate).toLocaleDateString()}
+              {new Date(expiryDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
             </span>
             {expiringSoon && (
               <Badge
                 variant="outline"
-                className="text-xs bg-amber-50 text-amber-600 border-amber-200"
+                className="text-[9px] bg-amber-50 text-amber-600 border-amber-200 px-1 py-0 h-4 uppercase font-black"
               >
                 Soon
               </Badge>
             )}
           </div>
         ) : (
-          <span className="text-xs text-muted-foreground italic">
-            No expiry
+          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+            Never
           </span>
         );
       },
@@ -174,36 +177,36 @@ export function VoucherManagementTable({
           <div className="flex justify-end">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-slate-50 rounded-xl transition-all">
                   <MoreVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent align="end" className="w-48 p-1.5 rounded-2xl border-slate-200 shadow-xl">
                 <DropdownMenuItem
-                  className="gap-2"
+                  className="gap-2.5 px-3 py-2 text-sm font-semibold rounded-xl cursor-pointer"
                   onClick={() => onViewDetails(voucher)}
                 >
-                  <Eye className="h-4 w-4" /> View Details
+                  <Eye className="h-4 w-4 opacity-70" /> View Details
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  className="gap-2"
+                  className="gap-2.5 px-3 py-2 text-sm font-semibold rounded-xl cursor-pointer"
                   onClick={() => copyToClipboard(voucher.code)}
                 >
-                  <Copy className="h-4 w-4" /> Copy Code
+                  <Copy className="h-4 w-4 opacity-70" /> Copy Code
                 </DropdownMenuItem>
                 {!voucher.isUsed && (
                   <DropdownMenuItem
-                    className="gap-2 text-emerald-600"
+                    className="gap-2.5 px-3 py-2 text-sm font-semibold rounded-xl cursor-pointer text-emerald-600 focus:text-emerald-700"
                     onClick={() => onMarkAsUsed(voucher.id)}
                   >
-                    <CheckCircle2 className="h-4 w-4" /> Mark as Used
+                    <CheckCircle2 className="h-4 w-4 opacity-70" /> Mark as Used
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuItem
-                  className="gap-2 text-destructive"
+                  className="gap-2.5 px-3 py-2 text-sm font-semibold rounded-xl cursor-pointer text-rose-600 focus:text-rose-700"
                   onClick={() => onDelete(voucher.id)}
                 >
-                  <Trash2 className="h-4 w-4" /> Delete
+                  <Trash2 className="h-4 w-4 opacity-70" /> Delete
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -211,7 +214,15 @@ export function VoucherManagementTable({
         );
       },
     },
-  ];
+  ], [onViewDetails, onMarkAsUsed, onDelete]);
 
-  return <DataTable columns={columns} data={vouchers} isLoading={isLoading} />;
+  return (
+    <AppDataTable 
+      columns={columns} 
+      data={vouchers} 
+      isLoading={isLoading} 
+      isShowExportButtons={true}
+      searchableColumns={[{ id: "code", placeholder: "Search vouchers..." }]}
+    />
+  );
 }

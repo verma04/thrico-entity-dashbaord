@@ -99,9 +99,9 @@ export default function FraudPage() {
   return (
     <EcosystemWrapper anonymized-1="fraud-control">
       <EcosystemHeader
-        title="Fraud Control Panel"
-        badgeText="Security System"
-        description="Configure global security protocols and redemption constraints to maintain economy integrity."
+        title="Security Settings"
+        badgeText="Fraud Prevention"
+        description="Manage global security limits and fraud prevention settings for rewards."
         icon={ShieldCheck}
       />
 
@@ -110,26 +110,26 @@ export default function FraudPage() {
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2 text-sm font-bold text-slate-500">
               <Activity className="h-4 w-4 text-emerald-500" />
-              <span>Real-time Shield Active</span>
+              <span>Security Shield Active</span>
             </div>
             <div className="h-4 w-px bg-slate-200" />
             <div className="flex items-center gap-2 text-sm font-bold text-slate-500">
                <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />
-               <span>Settings apply globally across all reward modules.</span>
+               <span>These settings apply to all reward programs.</span>
             </div>
           </div>
           
           <Button
             onClick={handleSave}
             disabled={loading || updating}
-            className="h-10 px-8 rounded-xl bg-slate-900 hover:bg-black text-white font-black text-[11px] uppercase tracking-wider gap-3 shadow-xl shadow-slate-200 transition-all active:scale-95 group"
+            className="h-10 px-8 rounded-xl bg-slate-900 hover:bg-black text-white font-bold text-[11px] uppercase tracking-wider gap-3 shadow-xl shadow-slate-200 transition-all active:scale-95 group"
           >
             {updating ? (
               <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             ) : (
               <Save className="h-4 w-4 transition-transform group-hover:-translate-y-0.5" />
             )}
-            {updating ? "Committing..." : "Save Configuration"}
+            {updating ? "Saving..." : "Save Settings"}
           </Button>
         </div>
       </EcosystemActionBar>
@@ -143,23 +143,23 @@ export default function FraudPage() {
                    <ShieldAlert className="h-5 w-5 text-rose-600" />
                 </div>
                 <div>
-                   <h3 className="text-xl font-black text-slate-900 tracking-tight italic">Global Thresholds</h3>
-                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-1">Economy-wide redemption caps</p>
+                   <h3 className="text-xl font-semibold text-slate-900 tracking-tight">Global Limits</h3>
+                   <p className="text-[10px] font-medium text-slate-400 uppercase tracking-widest leading-none mt-1">Limits for the entire platform</p>
                 </div>
              </div>
 
              <div className="grid grid-cols-1 gap-6">
-                <div className="p-8 rounded-[2rem] bg-white border border-slate-100 shadow-sm space-y-8">
+                <div className="p-8 rounded-4xl bg-white border border-slate-100 shadow-sm space-y-8">
                    <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                         <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Daily Redemption Limit</Label>
+                         <Label className="text-[10px] font-semibold uppercase text-slate-400 tracking-widest ml-1">Daily Redemption Limit</Label>
                          <TooltipProvider>
                             <Tooltip>
                               <TooltipTrigger>
                                 <Info className="h-3.5 w-3.5 text-slate-300 hover:text-indigo-500 transition-colors" />
                               </TooltipTrigger>
-                              <TooltipContent className="rounded-xl border-slate-100 shadow-2xl p-4 max-w-xs font-bold text-xs bg-slate-900 text-white">
-                                Maximum cumulative redemptions permitted across the entire platform in a 24-hour window.
+                              <TooltipContent className="rounded-xl border-slate-100 shadow-2xl p-4 max-w-xs font-medium text-xs bg-slate-900 text-white">
+                                The maximum total redemptions allowed across the platform in 24 hours.
                               </TooltipContent>
                             </Tooltip>
                          </TooltipProvider>
@@ -169,7 +169,7 @@ export default function FraudPage() {
                          <Input
                             type="number"
                             value={localSettings.dailyRedemptionLimit}
-                            className="pl-12 h-14 rounded-2xl border-slate-200 font-black text-slate-900 text-lg focus:ring-indigo-500/10 transition-all"
+                            className="pl-12 h-14 rounded-2xl border-slate-200 font-semibold text-slate-900 text-lg focus:ring-indigo-500/10 transition-all"
                             onChange={(e) =>
                               setLocalSettings({
                                 ...localSettings,
@@ -181,13 +181,13 @@ export default function FraudPage() {
                    </div>
 
                    <div className="space-y-3">
-                      <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Minimum Account Age (Days)</Label>
+                      <Label className="text-[10px] font-semibold uppercase text-slate-400 tracking-widest ml-1">Minimum Account Age (Days)</Label>
                       <div className="relative group">
                          <Activity className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 group-focus-within:text-emerald-500 transition-colors" />
                          <Input
                             type="number"
                             defaultValue={30}
-                            className="pl-12 h-14 rounded-2xl border-slate-200 font-black text-slate-900 text-lg focus:ring-emerald-500/10 transition-all"
+                            className="pl-12 h-14 rounded-2xl border-slate-200 font-semibold text-slate-900 text-lg focus:ring-emerald-500/10 transition-all"
                          />
                       </div>
                    </div>
@@ -202,21 +202,21 @@ export default function FraudPage() {
                    <UserCheck className="h-5 w-5 text-indigo-600" />
                 </div>
                 <div>
-                   <h3 className="text-xl font-black text-slate-900 tracking-tight italic">Protocol Controls</h3>
-                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-1">Anti-sybil and verification</p>
+                   <h3 className="text-xl font-semibold text-slate-900 tracking-tight">Identity & Device</h3>
+                   <p className="text-[10px] font-medium text-slate-400 uppercase tracking-widest leading-none mt-1">Verification and bot defense</p>
                 </div>
              </div>
 
              <div className="grid grid-cols-1 gap-6">
-                <div className="p-8 rounded-[2rem] bg-white border border-slate-100 shadow-sm space-y-6">
+                <div className="p-8 rounded-4xl bg-white border border-slate-100 shadow-sm space-y-6">
                    <div className="flex items-start justify-between p-6 rounded-3xl bg-slate-50/50 border border-slate-100 hover:bg-white hover:shadow-lg transition-all group">
                      <div className="space-y-1">
                         <div className="flex items-center gap-3 mb-1">
-                          <Label className="text-sm font-black text-slate-900 tracking-tight italic">Identity Verification (KYC)</Label>
+                          <Label className="text-sm font-semibold text-slate-900 tracking-tight">Identity Verification (KYC)</Label>
                           <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                         </div>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight leading-relaxed max-w-[200px]">
-                          RESTRICT PREMIUM REWARDS TO VERIFIED IDENTITY HOLDERS ONLY.
+                        <p className="text-[10px] font-medium text-slate-400 uppercase tracking-tight leading-relaxed max-w-[200px]">
+                          Restrict rewards to verified users.
                         </p>
                      </div>
                      <Switch
@@ -234,11 +234,11 @@ export default function FraudPage() {
                    <div className="flex items-start justify-between p-6 rounded-3xl bg-slate-50/50 border border-slate-100 hover:bg-white hover:shadow-lg transition-all group">
                      <div className="space-y-1">
                         <div className="flex items-center gap-3 mb-1">
-                          <Label className="text-sm font-black text-slate-900 tracking-tight italic">Hardware Invariant Lock</Label>
+                          <Label className="text-sm font-semibold text-slate-900 tracking-tight">Device Lock</Label>
                           <Smartphone className="h-3.5 w-3.5 text-slate-400 group-hover:text-indigo-500 transition-colors" />
                         </div>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight leading-relaxed max-w-[200px]">
-                          BIND ACCOUNTS TO PHYSICAL HARDWARE TO PREVENT MULTI-ACCING.
+                        <p className="text-[10px] font-medium text-slate-400 uppercase tracking-tight leading-relaxed max-w-[200px]">
+                          Bind accounts to specific devices.
                         </p>
                      </div>
                      <Switch
@@ -264,12 +264,12 @@ export default function FraudPage() {
                  <Trophy className="h-5 w-5 text-amber-600" />
               </div>
               <div>
-                 <h3 className="text-xl font-black text-slate-900 tracking-tight italic">Elite Access constraints</h3>
-                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-1">Leaderboard and network constraints</p>
+                 <h3 className="text-xl font-semibold text-slate-900 tracking-tight">Access Restrictions</h3>
+                 <p className="text-[10px] font-medium text-slate-400 uppercase tracking-widest leading-none mt-1">Rank and network limits</p>
               </div>
            </div>
 
-           <div className="p-8 rounded-[2rem] bg-white border border-slate-100 shadow-sm space-y-6 overflow-hidden relative">
+           <div className="p-8 rounded-4xl bg-white border border-slate-100 shadow-sm space-y-6 overflow-hidden relative">
               <div className="absolute top-0 right-0 p-8 opacity-[0.03] rotate-12 scale-150">
                 <ShieldCheck className="h-40 w-40" />
               </div>
@@ -278,7 +278,7 @@ export default function FraudPage() {
                  <div className="space-y-4">
                     <div className="flex items-center justify-between">
                        <div className="space-y-1">
-                          <Label className="text-sm font-black text-slate-900 tracking-tight">Leaderboard Exclusivity</Label>
+                          <Label className="text-sm font-bold text-slate-900 tracking-tight">Leaderboard Priority</Label>
                           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Only top 100 global participants can access reward flow.</p>
                        </div>
                        <Switch defaultChecked={false} className="data-[state=checked]:bg-amber-500" />
@@ -286,8 +286,8 @@ export default function FraudPage() {
                     <Separator className="bg-slate-50" />
                     <div className="flex items-center justify-between">
                        <div className="space-y-1">
-                          <Label className="text-sm font-black text-slate-900 tracking-tight">Anti-Automation (IP Velocity)</Label>
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight italic">Detect and nullify bot-driven burst activity.</p>
+                          <Label className="text-sm font-bold text-slate-900 tracking-tight">Bot Prevention (IP Velocity)</Label>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Detect and nullify bot-driven burst activity.</p>
                        </div>
                        <Switch
                         checked={localSettings.maxIpVelocity > 0}
@@ -305,9 +305,9 @@ export default function FraudPage() {
                  <div className="p-6 rounded-3xl bg-amber-50 border border-amber-100/50 flex items-start gap-4">
                     <AlertTriangle className="h-6 w-6 text-amber-600 shrink-0 mt-1 animate-pulse" />
                     <div className="space-y-2">
-                       <h4 className="text-sm font-black text-amber-900 uppercase tracking-tight">Operational Warning</h4>
+                       <h4 className="text-sm font-bold text-amber-900 uppercase tracking-tight">Security Warning</h4>
                        <p className="text-[11px] font-bold text-amber-700/80 uppercase leading-relaxed tracking-tight">
-                         Enabling high-protocol security may increase friction for legitimate power users. Monitor redemption velocity closely after deployment.
+                         Stricter security rules may affect some users. Monitor redemptions closely after saving.
                        </p>
                     </div>
                  </div>

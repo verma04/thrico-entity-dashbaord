@@ -3,43 +3,36 @@
 import React, { useState } from "react";
 import { useGetCommunitiesStats } from "@/graphql/actions/communities";
 import { TimeRange } from "@/graphql/actions";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   Users,
   LayoutGrid,
   Activity,
-  Zap,
-  ShieldCheck,
   RotateCcw,
-  TrendingUp,
   BarChart3,
   Globe,
-  ArrowRight,
   Timer,
   Sparkles,
+  Eye,
+  Crown,
+  TrendingUp,
+  Search
 } from "lucide-react";
 import {
   ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
   Tooltip,
-  Legend,
   Cell,
+  PieChart,
+  Pie,
 } from "recharts";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
-import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
-import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
-import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
-import {
+import { PlatformHeader } from "@/components/ui/platform/header";
+import { PlatformGrid, PlatformContainer } from "@/components/ui/platform/container";
+import { PlatformCard } from "@/components/ui/platform/card";
+import { PlatformButton } from "@/components/ui/platform/button";
+import { 
   EcosystemKPI,
-  EcosystemCard,
-  EcosystemStatusIndicator,
 } from "@/components/layout/ecosystem/ecosystem-analytics";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -47,14 +40,41 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import Link from "next/link";
+
+const STATUS_COLORS = ["#18181b", "#71717a", "#a1a1aa", "#d4d4d8", "#f4f4f5"];
+
+// ─── Shared helpers ─────────────────────────────────────────────────────────
+
+const ChartSkeleton = () => (
+  <div className="h-full w-full flex items-center justify-center bg-zinc-50/50 rounded-[20px] border border-dashed border-zinc-200">
+    <div className="flex flex-col items-center gap-4 text-center px-6">
+      <div className="h-8 w-8 border-2 border-zinc-200 border-t-zinc-900 rounded-full animate-spin" />
+      <p className="text-[11px] font-medium text-zinc-400">
+        Loading intelligence...
+      </p>
+    </div>
+  </div>
+);
+
+const EmptyChart = ({ message }: { message: string }) => (
+  <div className="h-full w-full flex items-center justify-center bg-zinc-50/50 rounded-[20px] border border-dashed border-zinc-200">
+    <div className="flex flex-col items-center gap-2">
+      <Search size={24} className="text-zinc-200" />
+      <p className="text-[11px] font-medium text-zinc-400 text-center px-6">
+        {message}
+      </p>
+    </div>
+  </div>
+);
+
+// ─── Main Component ──────────────────────────────────────────────────────────
 
 export default function CommunitiesAnalytics() {
   const [timeRange, setTimeRange] = useState<TimeRange>(TimeRange.LAST_7_DAYS);
   const { data, loading, refetch } = useGetCommunitiesStats(timeRange);
-
   const stats = data?.getCommunitiesStats;
 
+  // KPI cards
   const kpis = [
     {
       title: "Total Communities",
@@ -63,8 +83,8 @@ export default function CommunitiesAnalytics() {
         : (stats?.totalCommunities?.toLocaleString() ?? "0"),
       trend: stats?.totalCommunitiesChange ?? 0,
       icon: LayoutGrid,
-      color: "text-indigo-500",
-      bg: "bg-indigo-500/10",
+      color: "text-zinc-900",
+      bg: "bg-zinc-50",
     },
     {
       title: "Active Communities",
@@ -73,8 +93,8 @@ export default function CommunitiesAnalytics() {
         : (stats?.activeCommunities?.toLocaleString() ?? "0"),
       trend: stats?.activeCommunitiesChange ?? 0,
       icon: Activity,
-      color: "text-emerald-500",
-      bg: "bg-emerald-500/10",
+      color: "text-zinc-900",
+      bg: "bg-zinc-50",
     },
     {
       title: "New Members",
@@ -83,258 +103,260 @@ export default function CommunitiesAnalytics() {
         : (stats?.totalEnrollments?.toLocaleString() ?? "0"),
       trend: stats?.enrollmentsChange ?? 0,
       icon: Users,
-      color: "text-violet-500",
-      bg: "bg-violet-500/10",
+      color: "text-zinc-900",
+      bg: "bg-zinc-50",
     },
     {
       title: "Total Views",
       value: loading ? "..." : (stats?.totalViews?.toLocaleString() ?? "0"),
       trend: stats?.viewsChange ?? 0,
       icon: Globe,
-      color: "text-amber-500",
-      bg: "bg-amber-500/10",
+      color: "text-zinc-900",
+      bg: "bg-zinc-50",
     },
   ];
 
-  const enrollmentTrendData = [
-    { name: "MON", enrollments: 120 },
-    { name: "TUE", enrollments: 150 },
-    { name: "WED", enrollments: 100 },
-    { name: "THU", enrollments: 200 },
-    { name: "FRI", enrollments: 180 },
-    { name: "SAT", enrollments: 90 },
-    { name: "SUN", enrollments: 110 },
-  ];
+  // Derived chart data
+  const statusDistribution = stats?.statusDistribution ?? [];
+  const totalStatusCount = statusDistribution.reduce((s, i) => s + i.value, 0);
+
+  const topCommunities = stats?.topCommunities ?? [];
+  const topCreators = stats?.topCreators ?? [];
 
   return (
     <EcosystemWrapper anonymized-1="communities-analytics">
-      <EcosystemHeader
-        title="Community Overview"
-        badgeText="Registry"
-        description="Track how your communities are growing and how many people are joining."
-        icon={LayoutGrid}
-      />
-
-      <EcosystemActionBar shadow="none">
-        <div className="flex items-center justify-between w-full">
-          <div className="flex items-center gap-6">
-            <EcosystemStatusIndicator
-              status="active"
-              label="System: Active"
-            />
-            <div className="h-4 w-px bg-slate-200" />
-            <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
-              <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
-              <span>Verified Communities</span>
+      <PlatformContainer>
+        <PlatformHeader
+          title="Community Overview"
+          description="Analyze the growth and engagement metrics across your community ecosystem."
+          icon={LayoutGrid}
+          actions={
+            <div className="flex items-center gap-3">
+              <Select
+                value={timeRange}
+                onValueChange={(v) => setTimeRange(v as TimeRange)}
+              >
+                <SelectTrigger className="h-9 w-[160px] rounded-[10px] border-zinc-200 bg-white text-[13px] font-medium transition-all hover:bg-zinc-50">
+                  <Timer size={14} className="mr-2 text-zinc-400" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="rounded-[12px] border-zinc-100 shadow-xl">
+                  <SelectItem value={TimeRange.LAST_24_HOURS} className="text-[13px] font-medium">Today</SelectItem>
+                  <SelectItem value={TimeRange.LAST_7_DAYS} className="text-[13px] font-medium">Last 7 Days</SelectItem>
+                  <SelectItem value={TimeRange.LAST_30_DAYS} className="text-[13px] font-medium">Last 30 Days</SelectItem>
+                  <SelectItem value={TimeRange.LAST_90_DAYS} className="text-[13px] font-medium">Last 90 Days</SelectItem>
+                </SelectContent>
+              </Select>
+              <PlatformButton
+                variant="ghost"
+                size="icon"
+                onClick={() => refetch()}
+                icon={RotateCcw}
+                className={cn("h-9 w-9 text-zinc-400", loading && "animate-spin")}
+              />
             </div>
-          </div>
+          }
+        />
 
-          <div className="flex items-center gap-3">
-            <Select
-              value={timeRange}
-              onValueChange={(val) => setTimeRange(val as TimeRange)}
-            >
-              <SelectTrigger className="h-10 w-[200px] rounded-xl border-slate-200 font-bold text-slate-600 bg-white shadow-sm">
-                <Timer className="h-4 w-4 mr-2 text-indigo-500" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="rounded-2xl border-slate-100 shadow-2xl">
-                <SelectItem
-                  value={TimeRange.LAST_24_HOURS}
-                  className="font-bold uppercase text-[10px]"
-                >
-                  Today
-                </SelectItem>
-                <SelectItem
-                  value={TimeRange.LAST_7_DAYS}
-                  className="font-bold uppercase text-[10px]"
-                >
-                  Last 7 Days
-                </SelectItem>
-                <SelectItem
-                  value={TimeRange.LAST_30_DAYS}
-                  className="font-bold uppercase text-[10px]"
-                >
-                  Last 30 Days
-                </SelectItem>
-                <SelectItem
-                  value={TimeRange.LAST_90_DAYS}
-                  className="font-bold uppercase text-[10px]"
-                >
-                  Last 90 Days
-                </SelectItem>
-              </SelectContent>
-            </Select>
-            <div className="h-4 w-px bg-slate-200 mx-1" />
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-10 w-10 text-slate-400 hover:text-indigo-600 rounded-xl transition-all shadow-sm bg-white"
-              onClick={() => refetch()}
-            >
-              <RotateCcw className={cn("h-4 w-4", loading && "animate-spin")} />
-            </Button>
-          </div>
-        </div>
-      </EcosystemActionBar>
-
-      <EcosystemContainer className="space-y-12 p-8 lg:p-12">
-        {/* KPI Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        {/* ── KPI Grid ── */}
+        <PlatformGrid cols={4} gap="md">
           {kpis.map((kpi, i) => (
-            <EcosystemKPI key={i} {...kpi} trendLabel="Growth" />
+            <EcosystemKPI key={i} {...kpi} trendLabel="Period growth" />
           ))}
-        </div>
+        </PlatformGrid>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          <div className="lg:col-span-8">
-            <EcosystemCard
-              title="Member Growth"
-              description="How members are joining over time"
-              icon={TrendingUp}
-              decorationIcon={Zap}
+        <PlatformGrid cols={12} gap="lg">
+          {/* Main Content Area */}
+          <div className="lg:col-span-8 space-y-8">
+            <PlatformCard
+              title="Top Performing Communities"
+              description="Ranked by member acquisition and engagement views."
+              icon={BarChart3}
             >
-              <div className="h-[350px] w-full">
-                {loading ? (
-                  <div className="h-full w-full flex items-center justify-center bg-slate-50/50 rounded-3xl border-2 border-dashed border-slate-100 transition-all">
-                    <div className="h-10 w-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-                  </div>
-                ) : (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={enrollmentTrendData} barGap={8}>
-                      <CartesianGrid
-                        strokeDasharray="3 3"
-                        vertical={false}
-                        stroke="#f1f5f9"
-                      />
-                      <XAxis
-                        dataKey="name"
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{
-                          fontSize: 10,
-                          fontWeight: 900,
-                          fill: "#94a3b8",
-                        }}
-                        dy={15}
-                      />
-                      <YAxis
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{
-                          fontSize: 10,
-                          fontWeight: 900,
-                          fill: "#94a3b8",
-                        }}
-                      />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: "#0f172a",
-                          border: "none",
-                          borderRadius: "16px",
-                          boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)",
-                        }}
-                        itemStyle={{
-                          color: "#fff",
-                          fontWeight: 900,
-                          textTransform: "uppercase",
-                          fontSize: "10px",
-                        }}
-                        labelStyle={{ display: "none" }}
-                        cursor={{ fill: "#f8fafc" }}
-                      />
-                      <Bar
-                        dataKey="enrollments"
-                        fill="#6366f1"
-                        radius={[8, 8, 0, 0]}
-                        barSize={40}
-                        animationDuration={1500}
-                      >
-                        {enrollmentTrendData.map((entry, index) => (
-                          <Cell
-                            key={`cell-${index}`}
-                            fill={index % 2 === 0 ? "#6366f1" : "#10b981"}
-                          />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                )}
-              </div>
-            </EcosystemCard>
-          </div>
+              {loading ? (
+                <div className="h-64"><ChartSkeleton /></div>
+              ) : topCommunities.length === 0 ? (
+                <div className="h-64"><EmptyChart message="No active communities found for this period." /></div>
+              ) : (
+                <div className="space-y-1">
+                  {topCommunities.slice(0, 6).map((community, idx) => {
+                    const maxMembers = topCommunities[0]?.members || 1;
+                    const barWidth = Math.round((community.members / maxMembers) * 100);
 
-          <div className="lg:col-span-4">
-            <EcosystemCard
-              title="Community Types"
-              description="How communities are categorized"
-              icon={Sparkles}
-              decorationIcon={LayoutGrid}
-              className="min-h-fit"
-            >
-              <div className="space-y-6">
-                {[
-                  {
-                    label: "Featured",
-                    value: 35,
-                    color: "bg-indigo-500",
-                  },
-                  {
-                    label: "Specialized",
-                    value: 40,
-                    color: "bg-purple-500",
-                  },
-                  {
-                    label: "Public",
-                    value: 25,
-                    color: "bg-emerald-500",
-                  },
-                ].map((item, i) => (
-                  <div key={i} className="group/item">
-                    <div className="flex items-center justify-between mb-2 px-1">
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                        {item.label}
-                      </span>
-                      <span className="text-xs font-black text-slate-900">
-                        {item.value}%
-                      </span>
-                    </div>
-                    <div className="h-2.5 w-full bg-slate-50 rounded-full overflow-hidden border border-slate-100 shadow-inner">
+                    return (
                       <div
-                        className={cn(
-                          "h-full rounded-full transition-all duration-1000 group-hover/item:scale-x-105 origin-left",
-                          item.color,
-                        )}
-                        style={{ width: `${item.value}%` }}
-                      />
+                        key={community.name}
+                        className="flex items-center gap-4 p-4 rounded-[14px] hover:bg-zinc-50/80 transition-colors group"
+                      >
+                        <div className="w-8 h-8 rounded-[8px] bg-zinc-50 border border-zinc-100 flex items-center justify-center text-[12px] font-bold text-zinc-400 group-hover:text-zinc-900 transition-colors">
+                          {idx + 1}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-[14px] font-semibold text-zinc-900 truncate">
+                              {community.name}
+                            </span>
+                            <div className="flex items-center gap-4 text-zinc-500">
+                              <span className="flex items-center gap-1 text-[12px] font-medium tabular-nums">
+                                <Users size={12} className="text-zinc-300" />
+                                {community.members.toLocaleString()}
+                              </span>
+                              <span className="flex items-center gap-1 text-[12px] font-medium tabular-nums px-2 py-0.5 rounded-full bg-zinc-100/50 uppercase tracking-wider text-zinc-400">
+                                <Eye size={10} />
+                                {community.views.toLocaleString()}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="h-1 w-full rounded-full bg-zinc-100 overflow-hidden">
+                            <div
+                              className="h-full bg-zinc-900 rounded-full transition-all duration-1000"
+                              style={{ width: `${barWidth}%` }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </PlatformCard>
+
+            {/* Creators Section */}
+            <PlatformCard
+               title="Top Ecosystem Creators"
+               description="The most influential community architects."
+               icon={Crown}
+            >
+              <PlatformGrid cols={2} gap="md">
+                {topCreators.slice(0, 6).map((creator, idx) => (
+                  <div
+                    key={creator.name}
+                    className="flex items-center gap-3 p-3 rounded-[12px] border border-zinc-100 bg-white hover:border-zinc-200 hover:shadow-sm transition-all"
+                  >
+                    <div className="h-10 w-10 rounded-[10px] bg-zinc-50 border border-zinc-100 flex items-center justify-center text-[12px] font-bold text-zinc-500 overflow-hidden">
+                      {creator.avatar ? (
+                        <img src={creator.avatar} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        creator.name.charAt(0)
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] font-semibold text-zinc-900 truncate">{creator.name}</p>
+                      <p className="text-[11px] font-medium text-zinc-400">
+                        {creator.communitiesCreated} active communities
+                      </p>
+                    </div>
+                    <div className="h-6 w-6 rounded-full bg-zinc-50 flex items-center justify-center text-[10px] font-bold text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                      {idx + 1}
                     </div>
                   </div>
                 ))}
-              </div>
-
-              <div className="mt-auto pt-8 border-t border-slate-50 flex items-center justify-between">
-                <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    Global Reach
-                  </p>
-                  <p className="text-2xl font-black text-slate-900 tracking-tighter">
-                    12.4k
-                  </p>
-                </div>
-                <Link href="/communities/all">
-                  <Button
-                    variant="outline"
-                    className="h-11 px-6 rounded-xl border-slate-200 font-black text-[10px] uppercase tracking-widest text-slate-600 gap-3 hover:bg-slate-50 transition-all shadow-sm"
-                  >
-                    View All
-                    <ArrowRight className="h-4 w-4" />
-                  </Button>
-                </Link>
-              </div>
-            </EcosystemCard>
+              </PlatformGrid>
+            </PlatformCard>
           </div>
-        </div>
-      </EcosystemContainer>
+
+          {/* Sidebar Area */}
+          <div className="lg:col-span-4 space-y-8">
+            <PlatformCard
+              title="Status Distribution"
+              description="Breakdown by lifecycle status"
+              icon={Sparkles}
+            >
+              <div className="flex flex-col items-center gap-8 py-4">
+                <div className="relative h-[180px] w-full flex items-center justify-center">
+                  {loading ? (
+                    <ChartSkeleton />
+                  ) : (
+                    <>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={statusDistribution}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={50}
+                            outerRadius={75}
+                            paddingAngle={4}
+                            dataKey="value"
+                            stroke="none"
+                            animationDuration={1000}
+                          >
+                            {statusDistribution.map((_, i) => (
+                              <Cell
+                                key={i}
+                                fill={STATUS_COLORS[i % STATUS_COLORS.length]}
+                              />
+                            ))}
+                          </Pie>
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: "#fff",
+                              border: "1px solid #f4f4f5",
+                              borderRadius: "12px",
+                              boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)",
+                              fontSize: "12px",
+                              fontWeight: 500,
+                            }}
+                          />
+                        </PieChart>
+                      </ResponsiveContainer>
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <div className="text-center">
+                          <span className="text-2xl font-semibold text-zinc-900 tracking-tight block leading-none">
+                            {totalStatusCount}
+                          </span>
+                          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mt-1">
+                            TOTAL
+                          </p>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                <div className="w-full space-y-2">
+                  {statusDistribution.map((item, i) => (
+                    <div
+                      key={item.name}
+                      className="flex items-center justify-between p-2 rounded-[10px] bg-zinc-50 border border-zinc-100/50"
+                    >
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="h-2 w-2 rounded-full"
+                          style={{ backgroundColor: STATUS_COLORS[i % STATUS_COLORS.length] }}
+                        />
+                        <span className="text-[12px] font-medium text-zinc-500">
+                          {item.name}
+                        </span>
+                      </div>
+                      <span className="text-[12px] font-semibold text-zinc-900 tabular-nums">
+                        {item.value}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </PlatformCard>
+
+            {/* Quick Actions / Link */}
+            <div className="bg-zinc-900 rounded-[24px] p-8 text-white space-y-4 shadow-xl">
+               <div className="flex flex-col gap-1">
+                 <h4 className="text-[16px] font-semibold tracking-tight">Expand Connectivity</h4>
+                 <p className="text-[12px] text-zinc-400 leading-relaxed font-medium">
+                   Deployment of new community nodes increases network utility by approximately 14% on average.
+                 </p>
+               </div>
+               <PlatformButton 
+                  variant="default" 
+                  className="w-full justify-between bg-white text-zinc-900 hover:bg-zinc-100"
+                  icon={TrendingUp}
+               >
+                  New Deployment
+               </PlatformButton>
+            </div>
+          </div>
+        </PlatformGrid>
+      </PlatformContainer>
     </EcosystemWrapper>
   );
 }

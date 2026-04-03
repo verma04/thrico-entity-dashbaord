@@ -21,6 +21,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MOCK_CAMPAIGNS, MODULE_COLORS } from "./types";
+import { useGetEmailCampaigns } from "@/graphql/actions/email";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface CampaignsListProps {
   onCreate?: () => void;
@@ -103,6 +105,13 @@ const FLOW_STEPS = [
 export function CampaignsList({ onCreate }: CampaignsListProps) {
   const router = useRouter();
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  
+  const { data, loading } = useGetEmailCampaigns();
+  const campaigns = data?.getEmailCampaigns || [];
+
+  // Merge mock with real for demonstration if requested, but usually we just want real
+  // Let's use real ones if they exist, otherwise show mock to not look empty during dev
+  const displayCampaigns = campaigns.length > 0 ? campaigns : MOCK_CAMPAIGNS;
 
   const handleNew = () => router.push("/email/automation/add");
   const handleEdit = (id: string) => router.push(`/email/automation/edit/${id}`);
@@ -110,7 +119,7 @@ export function CampaignsList({ onCreate }: CampaignsListProps) {
   const stats = [
     {
       label: "Active Campaigns",
-      value: MOCK_CAMPAIGNS.filter(
+      value: displayCampaigns.filter(
         (c) => c.status === "released",
       ).length.toString(),
       trend: "+2 this month",
@@ -122,8 +131,8 @@ export function CampaignsList({ onCreate }: CampaignsListProps) {
     },
     {
       label: "Total Audience",
-      value: MOCK_CAMPAIGNS.reduce(
-        (s, c) => s + c.audience,
+      value: displayCampaigns.reduce(
+        (s, c) => s + (("audience" in c) ? (c as any).audience : 0),
         0,
       ).toLocaleString(),
       trend: "+12.4%",
@@ -274,11 +283,35 @@ export function CampaignsList({ onCreate }: CampaignsListProps) {
         {/* ── Campaigns ── */}
         <div className="space-y-3">
           <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-1">
-            Your Campaigns ({MOCK_CAMPAIGNS.length})
+            Your Campaigns ({loading ? "..." : displayCampaigns.length})
           </p>
-          {MOCK_CAMPAIGNS.map((c, i) => {
-            const st = STATUS_STYLE[c.status];
-            const modColor = MODULE_COLORS[c.module] || "#6366F1";
+          
+          {loading ? (
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-24 w-full bg-white rounded-2xl border border-slate-200 animate-pulse" />
+              ))}
+            </div>
+          ) : displayCampaigns.map((c, i) => {
+            const st = STATUS_STYLE[c.status] || STATUS_STYLE.draft;
+            const modColor = (MODULE_COLORS as any)[c.module] || "#6366F1";
+            
+            // Handle real fields vs mock fields
+            let nodeCount = 0;
+            if (c.canvasNodes) {
+              try { nodeCount = JSON.parse(c.canvasNodes).length; } catch(e) {}
+            } else if ("nodes" in c) {
+              nodeCount = (c as any).nodes;
+            }
+
+            const triggerLabel = ("trigger" in c) ? (c as any).trigger : 
+                                 (nodeCount > 0 && c.canvasNodes ? "Workflow Set" : "Trigger not set");
+            const audienceCount = ("audience" in c) ? (c as any).audience : 0;
+            const lastEditedLabel = c.updatedAt ? new Date(parseInt(c.updatedAt)).toLocaleDateString() : 
+                                    (("lastEdited" in c) ? (c as any).lastEdited : "Recently");
+            const cronLabel = ("cronLabel" in c) ? (c as any).cronLabel : 
+                              (c.frequency === "recurring" ? (c.cronType || "Recurring") : null);
+
             return (
               <motion.div
                 key={c.id}
@@ -344,7 +377,7 @@ export function CampaignsList({ onCreate }: CampaignsListProps) {
                   <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                     <p className="text-[11px] text-slate-400">
                       <span className="font-medium text-slate-600">Trigger:</span>{" "}
-                      {c.trigger}
+                      {triggerLabel}
                     </p>
                     <span className="text-slate-200">·</span>
                     {/* Frequency badge */}
@@ -356,7 +389,7 @@ export function CampaignsList({ onCreate }: CampaignsListProps) {
                     )}>
                       {c.frequency === "recurring" ? <Repeat size={9} /> : <Play size={9} />}
                       {c.frequency === "recurring"
-                        ? c.cronLabel ?? "Recurring"
+                        ? (cronLabel ?? "Recurring")
                         : "One Time"}
                     </span>
                     {/* Channel badge */}
@@ -365,10 +398,10 @@ export function CampaignsList({ onCreate }: CampaignsListProps) {
                     </span>
                     <span className="text-slate-200">·</span>
                     <p className="text-[11px] text-slate-400">
-                      {c.nodes} nodes · {c.audience.toLocaleString()} users
+                      {nodeCount} nodes · {audienceCount.toLocaleString()} users
                     </p>
                     <span className="text-slate-200">·</span>
-                    <p className="text-[11px] text-slate-400">Edited {c.lastEdited}</p>
+                    <p className="text-[11px] text-slate-400">Edited {lastEditedLabel}</p>
                   </div>
                 </div>
 

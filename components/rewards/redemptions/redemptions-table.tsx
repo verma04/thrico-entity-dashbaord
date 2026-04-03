@@ -2,7 +2,7 @@
 
 import React from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import { DataTable } from "@/components/ui/data-table";
+import { AppDataTable } from "@/components/ui/app-data-table";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Copy, CheckCircle2, Clock, AlertCircle } from "lucide-react";
@@ -65,7 +65,8 @@ export function RedemptionsTable({
 
   const columns: ColumnDef<Redemption>[] = [
     {
-      accessorKey: "user",
+      id: "user",
+      accessorFn: (row) => `${row.user.firstName} ${row.user.lastName} ${row.user.email}`,
       header: "User",
       cell: ({ row }) => {
         const user = row.original.user;
@@ -172,6 +173,12 @@ export function RedemptionsTable({
   ];
 
   return (
-    <DataTable columns={columns} data={redemptions} isLoading={isLoading} />
+    <AppDataTable
+      columns={columns}
+      data={redemptions}
+      isLoading={isLoading}
+      searchableColumns={[{ id: "user", placeholder: "Search users..." }]}
+      isShowExportButtons={true}
+    />
   );
 }

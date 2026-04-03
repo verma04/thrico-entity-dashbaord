@@ -25,7 +25,7 @@ export function AppDataTable<TData, TValue>({
   showFilter = true,
   showPagination = true,
   isLoading = false,
-  isShowExportButtons,
+  isShowExportButtons = true,
   customButtons,
   addItemPagePath,
   deleteRowsAction,

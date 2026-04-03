@@ -15,6 +15,7 @@ import {
   PaintBucket,
   LogOut,
   ChevronDown,
+  Trophy,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -62,6 +63,7 @@ import {
   UserAvatar,
   UserName,
 } from "./menu-items";
+
 import { useUserStore } from "@/store/store";
 import Logo from "./logo";
 import VisitSite from "./visit";
@@ -137,7 +139,9 @@ function MenuItemRow({
 
   const rowBase = cn(
     "group relative flex items-center w-full transition-all duration-300 ease-out cursor-pointer select-none overflow-hidden",
-    depth === 0 ? "h-11 px-3.5 rounded-xl gap-3 my-1" : "h-9 px-3.5 rounded-[10px] gap-2.5 my-0.5",
+    depth === 0
+      ? "h-11 px-3.5 rounded-xl gap-3 my-1"
+      : "h-9 px-3.5 rounded-[10px] gap-2.5 my-0.5",
     isActive
       ? "bg-primary/10 text-primary dark:bg-primary/20 shadow-[inset_0px_1px_0px_rgba(255,255,255,0.04)] ring-1 ring-primary/20"
       : "hover:bg-sidebar-accent/60 text-muted-foreground hover:text-foreground hover:translate-x-1.5",
@@ -173,7 +177,9 @@ function MenuItemRow({
             <span
               className={cn(
                 "truncate text-[13.5px] leading-none tracking-normal transition-colors duration-300 group-data-[collapsible=icon]:hidden",
-                isActive ? "font-semibold text-primary" : "font-medium text-inherit"
+                isActive
+                  ? "font-semibold text-primary"
+                  : "font-medium text-inherit",
               )}
             >
               {item.label}
@@ -378,24 +384,31 @@ function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
   );
 
   // Flatten items for ⌘K search
-  const flattenItems = useCallback((items: MenuItem[], section: string, parentIcon?: React.ReactNode): any[] => {
-    return items.reduce((acc: any[], item) => {
-      const icon = item.icon || parentIcon;
-      if (item.children && item.children.length > 0) {
-        return [...acc, ...flattenItems(item.children, section, icon)];
-      }
-      if (item.path) {
-        acc.push({
-          key: item.key,
-          label: item.label,
-          path: item.path,
-          icon: icon,
-          section: section
-        });
-      }
-      return acc;
-    }, []);
-  }, []);
+  const flattenItems = useCallback(
+    (
+      items: MenuItem[],
+      section: string,
+      parentIcon?: React.ReactNode,
+    ): any[] => {
+      return items.reduce((acc: any[], item) => {
+        const icon = item.icon || parentIcon;
+        if (item.children && item.children.length > 0) {
+          return [...acc, ...flattenItems(item.children, section, icon)];
+        }
+        if (item.path) {
+          acc.push({
+            key: item.key,
+            label: item.label,
+            path: item.path,
+            icon: icon,
+            section: section,
+          });
+        }
+        return acc;
+      }, []);
+    },
+    [],
+  );
 
   const allSearchItems = useMemo(() => {
     return [
@@ -407,7 +420,16 @@ function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
       ...flattenItems(managementFolders as MenuItem[], "Settings"),
       ...flattenItems(profileItems, "Account"),
     ];
-  }, [homeItems, communityIntelligence, contentModeration, gamificationEngine, modulesItems, managementFolders, profileItems, flattenItems]);
+  }, [
+    homeItems,
+    communityIntelligence,
+    contentModeration,
+    gamificationEngine,
+    modulesItems,
+    managementFolders,
+    profileItems,
+    flattenItems,
+  ]);
 
   const renderItems = (items: MenuItem[]) => (
     <SidebarMenu className="gap-px">
@@ -443,7 +465,8 @@ function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
               <Logo />
             </Link>
           )}
-          <SidebarTrigger className="h-7 w-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-sidebar-accent transition-all duration-150 flex items-center justify-center shrink-0" />
+
+          <SidebarTrigger className="h-7 w-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-sidebar-accent transition-all duration-150 flex items-center justify-center shrink-0 ml-auto" />
         </SidebarHeader>
 
         {/* CONTENT */}
@@ -546,14 +569,12 @@ function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
               </div>
             )}
         </SidebarContent>
-
       </Sidebar>
 
       {/* ── MAIN CONTENT ── */}
       <SidebarInset className="bg-background transition-all duration-300">
         <header className="flex h-16 items-center justify-between gap-4 border-b border-border/40 bg-background/80 backdrop-blur-2xl px-5 sticky top-0 z-40 shadow-[0_4px_24px_-12px_rgba(0,0,0,0.05)]">
           <div className="flex items-center gap-3">
-
             <div className="hidden sm:flex items-center gap-1.5 text-[13px]">
               <span className="font-medium text-foreground/80 capitalize tracking-[-0.01em]">
                 {pathName === "/"
@@ -575,7 +596,10 @@ function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
               onClick={() => setSearchOpen(true)}
               className="relative flex h-9 items-center gap-2 px-3 rounded-xl bg-accent/40 text-muted-foreground hover:text-foreground hover:bg-accent/80 transition-all duration-300 border border-transparent hover:border-border/60 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)]"
             >
-              <Search size={15} className="group-hover:text-primary transition-colors" />
+              <Search
+                size={15}
+                className="group-hover:text-primary transition-colors"
+              />
               <kbd className="hidden sm:inline-flex h-5 items-center gap-0.5 rounded-md border border-border/50 bg-background/50 px-1.5 text-[10px] font-bold text-muted-foreground/70 shadow-sm">
                 ⌘K
               </kbd>
@@ -594,13 +618,19 @@ function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
                   <div className="h-7 w-7 rounded-lg overflow-hidden ring-1 ring-border/50 group-hover:ring-primary/30 transition-all">
                     <UserAvatar />
                   </div>
-                  <span className="text-[13px] font-semibold text-foreground leading-none truncate max-w-[120px] group-hover:text-primary transition-colors">
+                  <span className="text-[13px] font-semibold text-foreground leading-none truncate max-w-[120px]">
                     <UserName />
                   </span>
+                  <span className="hidden sm:inline-block h-6 w-px bg-border/40 mx-1" />
+
                   <ChevronDown className="h-3.5 w-3.5 text-muted-foreground/50 group-hover:text-primary/70 transition-colors" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" sideOffset={8} className="w-56 rounded-xl p-1.5">
+              <DropdownMenuContent
+                align="end"
+                sideOffset={8}
+                className="w-56 rounded-xl p-1.5"
+              >
                 {/* User info header */}
                 <DropdownMenuLabel className="px-2.5 py-2">
                   <div className="flex items-center gap-2.5">
@@ -611,7 +641,9 @@ function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
                       <span className="text-[13px] font-semibold text-foreground truncate">
                         <UserName />
                       </span>
-                      <span className="text-[11px] text-muted-foreground font-normal">Manage account</span>
+                      <span className="text-[11px] text-muted-foreground font-normal">
+                        Manage account
+                      </span>
                     </div>
                   </div>
                 </DropdownMenuLabel>
@@ -619,20 +651,38 @@ function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
 
                 {/* Account group */}
                 <DropdownMenuGroup>
-                  <DropdownMenuItem asChild className="rounded-lg px-2.5 py-2 cursor-pointer">
-                    <Link href="/settings/profile" className="flex items-center gap-2.5">
+                  <DropdownMenuItem
+                    asChild
+                    className="rounded-lg px-2.5 py-2 cursor-pointer"
+                  >
+                    <Link
+                      href="/settings/profile"
+                      className="flex items-center gap-2.5"
+                    >
                       <User2 className="h-4 w-4 text-muted-foreground" />
                       <span className="text-[13px]">Profile</span>
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild className="rounded-lg px-2.5 py-2 cursor-pointer">
-                    <Link href="/settings/appearance" className="flex items-center gap-2.5">
+                  <DropdownMenuItem
+                    asChild
+                    className="rounded-lg px-2.5 py-2 cursor-pointer"
+                  >
+                    <Link
+                      href="/settings/appearance"
+                      className="flex items-center gap-2.5"
+                    >
                       <PaintBucket className="h-4 w-4 text-muted-foreground" />
                       <span className="text-[13px]">Appearance</span>
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild className="rounded-lg px-2.5 py-2 cursor-pointer">
-                    <Link href="/notifications" className="flex items-center gap-2.5">
+                  <DropdownMenuItem
+                    asChild
+                    className="rounded-lg px-2.5 py-2 cursor-pointer"
+                  >
+                    <Link
+                      href="/notifications"
+                      className="flex items-center gap-2.5"
+                    >
                       <Bell className="h-4 w-4 text-muted-foreground" />
                       <span className="text-[13px]">Notifications</span>
                     </Link>
@@ -642,14 +692,26 @@ function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
 
                 {/* Billing group */}
                 <DropdownMenuGroup>
-                  <DropdownMenuItem asChild className="rounded-lg px-2.5 py-2 cursor-pointer">
-                    <Link href="/settings/billing" className="flex items-center gap-2.5">
+                  <DropdownMenuItem
+                    asChild
+                    className="rounded-lg px-2.5 py-2 cursor-pointer"
+                  >
+                    <Link
+                      href="/settings/billing"
+                      className="flex items-center gap-2.5"
+                    >
                       <CreditCard className="h-4 w-4 text-muted-foreground" />
                       <span className="text-[13px]">Billing</span>
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild className="rounded-lg px-2.5 py-2 cursor-pointer">
-                    <Link href="/settings" className="flex items-center gap-2.5">
+                  <DropdownMenuItem
+                    asChild
+                    className="rounded-lg px-2.5 py-2 cursor-pointer"
+                  >
+                    <Link
+                      href="/settings"
+                      className="flex items-center gap-2.5"
+                    >
                       <Settings className="h-4 w-4 text-muted-foreground" />
                       <span className="text-[13px]">Settings</span>
                     </Link>
@@ -680,18 +742,30 @@ function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
         <CommandInput placeholder="Search for a page..." />
         <CommandList className="max-h-[80vh] sm:max-h-[450px]">
           <CommandEmpty>No results found.</CommandEmpty>
-          
+
           {/* Grouped results */}
-          {["Home", "Community", "Moderation", "Gamification", "Modules", "Settings", "Account"].map((section) => {
-            const sectionItems = allSearchItems.filter(i => i.section === section);
+          {[
+            "Home",
+            "Community",
+            "Moderation",
+            "Gamification",
+            "Modules",
+            "Settings",
+            "Account",
+          ].map((section) => {
+            const sectionItems = allSearchItems.filter(
+              (i) => i.section === section,
+            );
             if (sectionItems.length === 0) return null;
-            
+
             return (
               <CommandGroup key={section} heading={section}>
                 {sectionItems.map((item) => (
                   <CommandItem
                     key={item.key}
-                    value={typeof item.label === 'string' ? item.label : item.key}
+                    value={
+                      typeof item.label === "string" ? item.label : item.key
+                    }
                     onSelect={() => {
                       setSearchOpen(false);
                       router.push(item.path);
@@ -699,9 +773,18 @@ function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
                     className="flex items-center gap-3 p-3 cursor-pointer rounded-lg hover:bg-accent transition-colors"
                   >
                     <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted text-muted-foreground shrink-0 border border-border/50">
-                      {item.icon ? React.cloneElement(item.icon as React.ReactElement<{ size?: number }>, { size: 16 }) : <ChevronRight size={16} />}
+                      {item.icon ? (
+                        React.cloneElement(
+                          item.icon as React.ReactElement<{ size?: number }>,
+                          { size: 16 },
+                        )
+                      ) : (
+                        <ChevronRight size={16} />
+                      )}
                     </div>
-                    <span className="text-[13.5px] font-medium">{item.label}</span>
+                    <span className="text-[13.5px] font-medium">
+                      {item.label}
+                    </span>
                   </CommandItem>
                 ))}
               </CommandGroup>

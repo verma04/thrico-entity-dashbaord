@@ -372,13 +372,13 @@ export const MODULE_CONDITION_FIELDS: Record<string, { value: string; label: str
 export const OPERATORS = ["equals", "not equals", "contains", "not contains", "greater than", "less than"];
 
 // ─── Campaign Modules options ─────────────────────────────────────────────────
-export const CAMPAIGN_MODULES: { value: CampaignModule; label: string; color: string; icon: React.ReactNode }[] = [
-  { value: "Communities", label: "Communities", color: "#3B82F6", icon: <Users size={16} /> },
+export const CAMPAIGN_MODULES: { value: CampaignModule; label: string; color: string; icon: React.ReactNode; isMobileOnly?: boolean }[] = [
+  { value: "Communities", label: "Communities", color: "#3B82F6", icon: <Users size={16} />, isMobileOnly: true },
   { value: "Events",      label: "Events",      color: "#8B5CF6", icon: <Calendar size={16} /> },
   { value: "Shop",        label: "Shop",        color: "#10B981", icon: <Store size={16} /> },
-  { value: "Jobs",        label: "Jobs",        color: "#F59E0B", icon: <Briefcase size={16} /> },
-  { value: "Listings",    label: "Listings",    color: "#EF4444", icon: <ShoppingBag size={16} /> },
-  { value: "Users",       label: "Users",       color: "#EC4899", icon: <UserPlus size={16} /> },
+  { value: "Jobs",        label: "Jobs",        color: "#F59E0B", icon: <Briefcase size={16} />, isMobileOnly: true },
+  { value: "Listings",    label: "Listings",    color: "#EF4444", icon: <ShoppingBag size={16} />, isMobileOnly: true },
+  { value: "Users",       label: "Users",       color: "#EC4899", icon: <UserPlus size={16} />, isMobileOnly: true },
 ];
 
 // ─── Mock Campaigns ───────────────────────────────────────────────────────────
@@ -388,12 +388,15 @@ export const MOCK_CAMPAIGNS: {
   status: CampaignStatus;
   frequency: CampaignFrequency;
   cronLabel?: string;
+  cronType?: string;
   module: CampaignModule;
   channelType: ChannelType;
   trigger: string;
   nodes: number;
   audience: number;
   lastEdited: string;
+  canvasNodes?: string;
+  updatedAt?: string;
 }[] = [
   {
     id: "c1",
@@ -406,6 +409,7 @@ export const MOCK_CAMPAIGNS: {
     nodes: 4,
     audience: 2340,
     lastEdited: "2 days ago",
+    canvasNodes: JSON.stringify([{}, {}, {}, {}]),
   },
   {
     id: "c2",
@@ -413,12 +417,14 @@ export const MOCK_CAMPAIGNS: {
     status: "draft",
     frequency: "recurring",
     cronLabel: "Every Monday",
+    cronType: "weekly",
     module: "Events",
     channelType: "email",
     trigger: "Event Registered",
     nodes: 3,
     audience: 890,
     lastEdited: "5 days ago",
+    canvasNodes: JSON.stringify([{}, {}, {}]),
   },
   {
     id: "c3",
@@ -431,6 +437,7 @@ export const MOCK_CAMPAIGNS: {
     nodes: 5,
     audience: 445,
     lastEdited: "12 days ago",
+    canvasNodes: JSON.stringify([{}, {}, {}, {}, {}]),
   },
   {
     id: "c4",
@@ -438,11 +445,13 @@ export const MOCK_CAMPAIGNS: {
     status: "released",
     frequency: "recurring",
     cronLabel: "Every Day",
+    cronType: "daily",
     module: "Users",
     channelType: "email",
     trigger: "Member Birthday",
     nodes: 3,
     audience: 120,
     lastEdited: "Just now",
+    canvasNodes: JSON.stringify([{}, {}, {}]),
   },
 ];

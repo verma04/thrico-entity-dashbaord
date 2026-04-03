@@ -2,23 +2,22 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CardContent } from "@/components/ui/card";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { 
   ShieldCheck, 
-  AlertCircle
+  AlertCircle,
+  Save,
+  RotateCcw
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 import {
   useGetTermsAndConditionsByModule,
   useUpdateTermsAndConditionsByModule,
 } from "@/graphql/actions/faq";
-import { 
-  ModuleCard, 
-  ModuleHeader, 
-  ModuleStatusBar, 
-  ModuleSectionLabel 
-} from "./module-ui-kit";
+import { PlatformCard, PlatformSection } from "@/components/ui/platform/card";
+import { PlatformHeader } from "@/components/ui/platform/header";
+import { PlatformButton } from "@/components/ui/platform/button";
+import { PlatformSectionLabel } from "@/components/ui/platform/settings";
+import { toast } from "sonner";
 
 interface ModuleTermsManagerProps {
   moduleName: string;
@@ -30,10 +29,9 @@ interface ModuleTermsManagerProps {
 export function ModuleTermsManager({
   moduleName,
   title = "Terms & Conditions",
-  description = "Manage terms and conditions for this module",
+  description = "Define the legal parameters and user agreements for this module.",
   placeholder = "Enter terms and conditions here...",
 }: ModuleTermsManagerProps) {
-  const { toast } = useToast();
   const [termsContent, setTermsContent] = useState<string>("");
   const [hasChanged, setHasChanged] = useState(false);
 
@@ -52,7 +50,7 @@ export function ModuleTermsManager({
   const [updateTerms, { loading: updating }] = useUpdateTermsAndConditionsByModule({
     module: moduleName,
     onCompleted: () => {
-      toast({ title: "Terms Updated", description: "Legal content has been successfully published." });
+      toast.success("Legal content published.");
       setHasChanged(false);
     },
   });
@@ -77,61 +75,88 @@ export function ModuleTermsManager({
     }
   };
 
-  if (loading) return null;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="w-8 h-8 border-2 border-zinc-200 border-t-zinc-900 rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
-    <div className="animate-in fade-in duration-500">
-      <ModuleCard>
-        <ModuleHeader
-          title={title}
-          description={description}
-          icon={<ShieldCheck size={24} strokeWidth={1.5} />}
-          iconClassName="bg-indigo-600"
-          hasChanged={hasChanged}
-          onSave={handleSave}
-          onReset={handleReset}
-          isLoading={updating}
-          saveLabel="PUBLISH TERMS"
-          resetLabel="DISCARD"
-        />
-        
-        <CardContent className="p-8">
-          <div className="space-y-6">
-            <ModuleSectionLabel>Legal Content Canvas</ModuleSectionLabel>
+    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-700">
+      <PlatformHeader
+        title={title}
+        description={description}
+        icon={ShieldCheck}
+        actions={
+          <AnimatePresence>
+            {hasChanged && (
+              <motion.div
+                initial={{ opacity: 0, x: 20, filter: "blur(8px)" }}
+                animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+                exit={{ opacity: 0, x: 10, filter: "blur(8px)" }}
+                className="flex items-center gap-3"
+              >
+                <PlatformButton
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleReset}
+                  disabled={updating}
+                  icon={RotateCcw}
+                >
+                  Discard
+                </PlatformButton>
+                <PlatformButton
+                  variant="default"
+                  size="sm"
+                  onClick={handleSave}
+                  isLoading={updating}
+                  icon={Save}
+                >
+                  Publish
+                </PlatformButton>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        }
+      />
+      
+      <PlatformSection title="Legal Framework">
+        <div className="space-y-6">
+          <PlatformSectionLabel>LEGAL CONTENT CANVAS</PlatformSectionLabel>
 
-            <div className="rounded-[24px] border border-zinc-100 overflow-hidden shadow-sm bg-zinc-50/20 ring-1 ring-zinc-50 focus-within:ring-4 focus-within:ring-indigo-50 transition-all">
-              <RichTextEditor
-                value={termsContent}
-                onChange={handleContentChange}
-                placeholder={placeholder}
-                minHeight="500px"
-              />
-            </div>
-
-            <div className="flex items-center justify-between px-2 pt-2">
-              <div className="flex items-center gap-3 py-2 px-4 rounded-xl bg-zinc-50/80 border border-zinc-100 text-[11px] font-bold text-zinc-400">
-                <AlertCircle size={14} className="text-zinc-300" />
-                Auto-syncing to blockchain node clusters
-              </div>
-              
-              <AnimatePresence>
-                {hasChanged && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="px-4 py-2 rounded-xl bg-amber-50 border border-amber-100 text-amber-600 text-[11px] font-black tracking-tight flex items-center gap-2"
-                  >
-                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shadow-[0_0_8px_oklch(0.76_0.18_70/0.4)]" />
-                    UNPUBLISHED DRAFT
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+          <div className="rounded-[20px] border border-zinc-100 overflow-hidden shadow-sm bg-zinc-50/20 focus-within:border-zinc-200 focus-within:shadow-md transition-all">
+            <RichTextEditor
+              value={termsContent}
+              onChange={handleContentChange}
+              placeholder={placeholder}
+              minHeight="500px"
+            />
           </div>
-        </CardContent>
 
-        <ModuleStatusBar label="Module Compliance Verified" />
-      </ModuleCard>
+          <div className="flex items-center justify-between px-2 pt-2">
+            <div className="text-[11px] font-medium text-zinc-400 flex items-center gap-2">
+              <AlertCircle size={14} className="text-zinc-300" />
+              Content is synchronized to blockchain node clusters.
+            </div>
+            
+            <AnimatePresence>
+              {hasChanged && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="px-3 py-1 rounded-full bg-zinc-100 border border-zinc-200/50 text-zinc-500 text-[10px] font-bold tracking-tight flex items-center gap-2"
+                >
+                  <span className="w-1 h-1 rounded-full bg-zinc-400 animate-pulse" />
+                  UNPUBLISHED DRAFT
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+      </PlatformSection>
     </div>
   );
 }
+

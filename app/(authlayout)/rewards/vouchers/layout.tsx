@@ -33,7 +33,13 @@ function VouchersLayout({ children }: { children: React.ReactNode }) {
   ];
 
   return (
-    <MenuItemsLayout active="rewards/vouchers" items={items} hideDefaultTabs={true}>
+    <MenuItemsLayout
+      className="p-0"
+      active="rewards/vouchers"
+      items={items}
+      hideDefaultTabs={true}
+      fullWidth={true}
+    >
       {children}
     </MenuItemsLayout>
   );

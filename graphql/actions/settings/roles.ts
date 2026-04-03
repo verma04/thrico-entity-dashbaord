@@ -122,7 +122,6 @@ export interface CreateAdminResponse {
 export interface AdminUpdateInput {
   firstName?: string;
   lastName?: string;
-  email?: string;
   phone?: string;
   status?: string;
 }

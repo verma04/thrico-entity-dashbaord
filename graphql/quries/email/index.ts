@@ -265,3 +265,74 @@ export const GET_EMAIL_DELIVERY_PERFORMANCE = gql`
     }
   }
 `;
+// 9. Automation Campaigns
+export const CREATE_EMAIL_CAMPAIGN = gql`
+  mutation CreateEmailCampaign($input: CreateEmailCampaignInput!) {
+    createEmailCampaign(input: $input) {
+      id
+      name
+      status
+      frequency
+      module
+      channelType
+      targetUsers
+      description
+      createdAt
+    }
+  }
+`;
+
+export const GET_EMAIL_CAMPAIGNS = gql`
+  query GetEmailCampaigns {
+    getEmailCampaigns {
+      id
+      name
+      status
+      frequency
+      module
+      channelType
+      targetUsers
+      description
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const GET_EMAIL_CAMPAIGN = gql`
+  query GetEmailCampaign($id: ID!) {
+    getEmailCampaign(id: $id) {
+      id
+      name
+      status
+      frequency
+      module
+      channelType
+      targetUsers
+      description
+      canvasNodes
+      canvasEdges
+      cronType
+      cronDay
+      cronDate
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const UPDATE_EMAIL_CAMPAIGN = gql`
+  mutation UpdateEmailCampaign($id: ID!, $input: UpdateEmailCampaignInput!) {
+    updateEmailCampaign(id: $id, input: $input) {
+      id
+      name
+      status
+      canvasNodes
+      canvasEdges
+      cronType
+      cronDay
+      cronDate
+      updatedAt
+    }
+  }
+`;

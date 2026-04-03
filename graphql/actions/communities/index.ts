@@ -4,6 +4,29 @@ import { GET_COMMUNITIES_STATS } from "@/graphql/quries/communities";
 
 // --- TypeScript Types ---
 
+export type EnrollmentTrendPoint = {
+  label: string;
+  count: number;
+};
+
+export type StatusDistributionPoint = {
+  name: string;
+  value: number;
+};
+
+export type TopCommunity = {
+  name: string;
+  members: number;
+  posts: number;
+  views: number;
+};
+
+export type TopCreator = {
+  name: string;
+  avatar: string;
+  communitiesCreated: number;
+};
+
 export type CommunitiesStats = {
   totalCommunities: number;
   activeCommunities: number;
@@ -13,6 +36,10 @@ export type CommunitiesStats = {
   activeCommunitiesChange: number;
   enrollmentsChange: number;
   viewsChange: number;
+  enrollmentTrend: EnrollmentTrendPoint[];
+  statusDistribution: StatusDistributionPoint[];
+  topCommunities: TopCommunity[];
+  topCreators: TopCreator[];
 };
 
 export type GetCommunitiesStatsResponse = {

@@ -2,9 +2,9 @@
 
 import React from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import { DataTable } from "@/components/ui/data-table";
+import { AppDataTable } from "@/components/ui/app-data-table";
 import { Badge } from "@/components/ui/badge";
-import { Ticket, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { Ticket, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface InventoryItem {
@@ -13,7 +13,6 @@ export interface InventoryItem {
   totalVouchers: number;
   redeemedCount: number;
   remainingVouchers: number;
-  // still needed for UI
   expiringSoon?: number;
 }
 
@@ -97,5 +96,13 @@ export function InventoryTable({ items, isLoading }: InventoryTableProps) {
     },
   ];
 
-  return <DataTable columns={columns} data={items} isLoading={isLoading} />;
+  return (
+    <AppDataTable
+      columns={columns}
+      data={items}
+      isLoading={isLoading}
+      searchableColumns={[{ id: "title", placeholder: "Search inventory..." }]}
+      isShowExportButtons={true}
+    />
+  );
 }

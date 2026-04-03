@@ -128,7 +128,6 @@ export default function AddUserDialog({
             input: {
               firstName: values.firstName,
               lastName: values.lastName,
-              email: values.email,
             },
           },
         });
@@ -263,6 +262,7 @@ export default function AddUserDialog({
                       onChange={formik.handleChange}
                       onBlur={formik.handleBlur}
                       placeholder="name@company.com"
+                      disabled={!!user}
                       className="bg-muted/10 border-border/60 shadow-none h-10 px-4 font-medium focus-visible:ring-primary/20 rounded-xl"
                     />
                     {formik.touched.email && formik.errors.email ? (

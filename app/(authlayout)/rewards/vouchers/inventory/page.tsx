@@ -13,9 +13,7 @@ import {
   Plus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  InventoryTable,
-} from "@/components/rewards/inventory/inventory-table";
+import { InventoryTable } from "@/components/rewards/inventory/inventory-table";
 import {
   Dialog,
   DialogContent,
@@ -229,26 +227,26 @@ export default function InventoryPage() {
   return (
     <EcosystemWrapper anonymized-1="voucher-inventory">
       <EcosystemHeader
-        title="Fulfillment Inventory"
-        badgeText="Operational"
-        description="Monitor vault health and upload new voucher code pools for external reward fulfillment."
+        title="Reward Inventory"
+        badgeText="Inventory"
+        description="Track stock levels and upload new voucher codes for rewards."
         icon={Package}
       >
         <div className="flex gap-4">
           <Button
             variant="outline"
-            className="h-10 px-6 rounded-xl border-white/20 bg-white/5 text-white font-black text-[11px] uppercase tracking-wider gap-3 hover:bg-white/10 transition-all shadow-xl shadow-white/10"
+            className="h-10 px-6 rounded-xl border-white/20 bg-white/5 text-white font-bold text-[11px] uppercase tracking-wider gap-3 hover:bg-white/10 transition-all shadow-xl shadow-white/10"
             onClick={downloadTemplate}
           >
-            <FileDown className="h-4 w-4" /> 
-            Get Template
+            <FileDown className="h-4 w-4" />
+            Download Template
           </Button>
           <Button
             onClick={() => setIsUploadOpen(true)}
-            className="h-10 px-6 rounded-xl bg-white text-slate-900 font-black text-[11px] uppercase tracking-wider gap-3 hover:bg-slate-100 transition-all shadow-xl shadow-white/10 group active:scale-95"
+            className="h-10 px-6 rounded-xl bg-white text-slate-900 font-bold text-[11px] uppercase tracking-wider gap-3 hover:bg-slate-100 transition-all shadow-xl shadow-white/10 group active:scale-95"
           >
             <Upload className="h-4 w-4 transition-transform group-hover:-translate-y-1 duration-300" />
-            Provision Codes
+            Upload Codes
           </Button>
         </div>
       </EcosystemHeader>
@@ -264,9 +262,7 @@ export default function InventoryPage() {
         </div>
       </EcosystemActionBar>
 
-      <EcosystemContainer className="p-0 overflow-hidden border-none shadow-xl shadow-slate-200/50 rounded-4xl bg-white ring-1 ring-slate-100">
-        <InventoryTable items={inventoryItems} isLoading={loading} />
-      </EcosystemContainer>
+      <InventoryTable items={inventoryItems} isLoading={loading} />
 
       <Dialog
         open={isUploadOpen}
@@ -281,8 +277,10 @@ export default function InventoryPage() {
               <Upload className="h-24 w-24" />
             </div>
             <DialogHeader className="relative z-10">
-              <DialogTitle className="text-2xl font-black italic tracking-tight">Provision Vouchers</DialogTitle>
-              <DialogDescription className="text-slate-400 font-bold uppercase text-[10px] tracking-[.15em] mt-1">
+              <DialogTitle className="text-2xl font-bold tracking-tight">
+                Upload Voucher Codes
+              </DialogTitle>
+              <DialogDescription className="text-slate-400 font-bold uppercase text-[10px] tracking-widest mt-1">
                 Upload a CSV file with columns: voucherCode, amount, expiryDate.
               </DialogDescription>
             </DialogHeader>
@@ -290,7 +288,7 @@ export default function InventoryPage() {
 
           <div className="p-8 space-y-6">
             <div className="space-y-2">
-              <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">
+              <Label className="text-[10px] font-bold uppercase text-slate-400 tracking-widest ml-1">
                 Target Reward
               </Label>
               <UISelect
@@ -302,7 +300,11 @@ export default function InventoryPage() {
                 </UISelectTrigger>
                 <UISelectContent className="rounded-2xl border-slate-100 shadow-2xl">
                   {inventoryItems.map((item: any) => (
-                    <UISelectItem key={item.id} value={item.id} className="font-bold text-slate-600">
+                    <UISelectItem
+                      key={item.id}
+                      value={item.id}
+                      className="font-bold text-slate-600"
+                    >
                       {item.title}
                     </UISelectItem>
                   ))}
@@ -337,10 +339,10 @@ export default function InventoryPage() {
                     <Upload className="h-8 w-8" />
                   </div>
                   <div className="text-center">
-                    <p className="text-sm font-black text-slate-900 leading-tight">
+                    <p className="text-sm font-bold text-slate-900 leading-tight">
                       {isDragging
-                        ? "RELEASE TO INGEST"
-                        : "Click to provision or drag CSV"}
+                        ? "RELEASE TO UPLOAD"
+                        : "Click or drag CSV to upload codes"}
                     </p>
                     <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-wider">
                       Batch Processing Limit: 10,000 codes
@@ -353,8 +355,8 @@ export default function InventoryPage() {
             {uploadStep === "validating" && (
               <div className="flex flex-col items-center justify-center py-12 gap-5">
                 <div className="h-12 w-12 border-4 border-indigo-500/10 border-t-indigo-500 rounded-full animate-spin" />
-                <p className="text-xs font-black text-slate-400 uppercase tracking-widest animate-pulse">
-                  Validating ingestion set...
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest animate-pulse">
+                  Validating file...
                 </p>
               </div>
             )}
@@ -364,7 +366,7 @@ export default function InventoryPage() {
                 {uploadedFile && (
                   <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex items-center gap-4 shadow-sm">
                     <div className="h-10 w-10 rounded-xl bg-slate-900 flex items-center justify-center text-white">
-                       <FileText className="h-5 w-5" />
+                      <FileText className="h-5 w-5" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-black text-slate-900 truncate tracking-tight">
@@ -434,18 +436,21 @@ export default function InventoryPage() {
           </div>
 
           <div className="p-8 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-3">
-            <Button variant="ghost" onClick={resetUpload} disabled={uploading} className="rounded-xl font-bold h-11 px-6 hover:bg-white text-slate-500">
-              Abort
+            <Button
+              variant="ghost"
+              onClick={resetUpload}
+              disabled={uploading}
+              className="rounded-xl font-bold h-11 px-6 hover:bg-white text-slate-500"
+            >
+              Cancel
             </Button>
             {uploadStep === "summary" && validCount > 0 && (
-              <Button 
-                onClick={confirmUpload} 
+              <Button
+                onClick={confirmUpload}
                 disabled={uploading}
-                className="rounded-xl font-black h-11 px-8 bg-slate-900 hover:bg-black text-white shadow-xl shadow-slate-200 transition-all active:scale-95"
+                className="rounded-xl font-bold h-11 px-8 bg-slate-900 hover:bg-black text-white shadow-xl shadow-slate-200 transition-all active:scale-95"
               >
-                {uploading
-                  ? "PROVISIONING..."
-                  : `COMMIT ${validCount} CODES`}
+                {uploading ? "UPLOADING..." : `ADD ${validCount} CODES`}
               </Button>
             )}
           </div>

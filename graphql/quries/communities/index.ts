@@ -11,6 +11,29 @@ export const GET_COMMUNITIES_STATS = gql`
       activeCommunitiesChange
       enrollmentsChange
       viewsChange
+
+      enrollmentTrend {
+        label
+        count
+      }
+
+      statusDistribution {
+        name
+        value
+      }
+
+      topCommunities {
+        name
+        members
+        posts
+        views
+      }
+
+      topCreators {
+        name
+        avatar
+        communitiesCreated
+      }
     }
   }
 `;

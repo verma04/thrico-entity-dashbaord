@@ -1,16 +1,9 @@
 "use client";
 
-import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import React, { useMemo } from "react";
+import { AppDataTable } from "@/components/ui/app-data-table";
 import { Badge } from "@/components/ui/badge";
+import { ColumnDef } from "@tanstack/react-table";
 import moment from "moment";
 
 interface MatchWinActivityLogProps {
@@ -20,45 +13,63 @@ interface MatchWinActivityLogProps {
 export const MatchWinActivityLog = ({
   playsData,
 }: MatchWinActivityLogProps) => {
+  const data = playsData?.getMatchWinPlays || [];
+
+  const columns = useMemo<ColumnDef<any>[]>(() => [
+    {
+      id: "user",
+      accessorFn: (row) => `${row.user?.firstName} ${row.user?.lastName}`,
+      header: "User",
+      cell: ({ row }) => (
+        <span className="font-semibold text-slate-900 leading-tight">
+          {row.original.user?.firstName} {row.original.user?.lastName}
+        </span>
+      ),
+    },
+    {
+      accessorKey: "prizeType",
+      header: "Outcome",
+      cell: ({ row }) => (
+        <Badge
+          className="text-[10px] font-bold uppercase tracking-tight"
+          variant={row.original.prizeType === "NOTHING" ? "secondary" : "default"}
+        >
+          {row.original.prizeType}
+        </Badge>
+      ),
+    },
+    {
+      accessorKey: "prizeValue",
+      header: "Result",
+      cell: ({ row }) => (
+        <div className="flex items-center gap-1.5 font-bold text-slate-900">
+          <div className="h-4 w-4 rounded-full bg-amber-400 flex items-center justify-center text-[8px] text-amber-900 border border-amber-500/20">
+            TC
+          </div>
+          {row.original.prizeValue}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "playedAt",
+      header: "Time",
+      cell: ({ row }) => (
+        <span className="text-xs text-slate-500 font-medium">
+          {moment(row.original.playedAt).fromNow()}
+        </span>
+      ),
+    },
+  ], []);
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Recent Activity</CardTitle>
-      </CardHeader>
-      <CardContent className="p-0">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="pl-6">User</TableHead>
-              <TableHead>Outcome</TableHead>
-              <TableHead>Result</TableHead>
-              <TableHead className="text-right pr-6">Time</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {playsData?.getMatchWinPlays?.map((p: any) => (
-              <TableRow key={p.id}>
-                <TableCell className="pl-6 font-medium">
-                  {p.user?.firstName} {p.user?.lastName}
-                </TableCell>
-                <TableCell>
-                  <Badge
-                    variant={
-                      p.prizeType === "NOTHING" ? "secondary" : "default"
-                    }
-                  >
-                    {p.prizeType}
-                  </Badge>
-                </TableCell>
-                <TableCell className="font-bold">{p.prizeValue} TC</TableCell>
-                <TableCell className="text-right pr-6 text-xs text-slate-500">
-                  {moment(p.playedAt).fromNow()}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
+    <div className="p-1 rounded-[2.5rem] bg-slate-50 border border-slate-100 shadow-inner">
+      <AppDataTable
+        columns={columns}
+        data={data}
+        isLoading={!playsData}
+        searchableColumns={[{ id: "user", placeholder: "Search activity..." }]}
+        isShowExportButtons={true}
+      />
+    </div>
   );
 };

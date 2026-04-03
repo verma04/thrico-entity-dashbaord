@@ -20,6 +20,10 @@ import {
   BUY_EMAIL_TOPUP,
   VERIFY_EMAIL_TOPUP_PAYMENT,
   GET_EMAIL_DELIVERY_PERFORMANCE,
+  CREATE_EMAIL_CAMPAIGN,
+  GET_EMAIL_CAMPAIGNS,
+  GET_EMAIL_CAMPAIGN,
+  UPDATE_EMAIL_CAMPAIGN,
 } from "../../quries/email";
 
 // --- Types ---
@@ -145,6 +149,24 @@ export interface EmailDeliveryPerformance {
   delivered: number;
 }
 
+export interface EmailCampaign {
+  id: string;
+  name: string;
+  status: string;
+  frequency: string;
+  module: string;
+  channelType: string;
+  targetUsers: string;
+  description?: string;
+  canvasNodes?: string;
+  canvasEdges?: string;
+  cronType?: string;
+  cronDay?: string;
+  cronDate?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // --- Hooks ---
 
 export const useGetEmailDomain = () =>
@@ -247,3 +269,24 @@ export const useGetEmailDeliveryPerformance = () =>
   useQuery<{ getEmailDeliveryPerformance: EmailDeliveryPerformance[] }>(
     GET_EMAIL_DELIVERY_PERFORMANCE,
   );
+
+export const useCreateEmailCampaign = (options?: any) =>
+  useMutation(CREATE_EMAIL_CAMPAIGN, {
+    ...options,
+    refetchQueries: [{ query: GET_EMAIL_CAMPAIGNS }],
+  });
+
+export const useGetEmailCampaigns = () =>
+  useQuery<{ getEmailCampaigns: EmailCampaign[] }>(GET_EMAIL_CAMPAIGNS);
+
+export const useGetEmailCampaign = (id: string) =>
+  useQuery<{ getEmailCampaign: EmailCampaign }>(GET_EMAIL_CAMPAIGN, {
+    variables: { id },
+    skip: !id,
+  });
+
+export const useUpdateEmailCampaign = (options?: any) =>
+  useMutation(UPDATE_EMAIL_CAMPAIGN, {
+    ...options,
+    refetchQueries: [{ query: GET_EMAIL_CAMPAIGNS }],
+  });

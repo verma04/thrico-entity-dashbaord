@@ -27,9 +27,9 @@ export default function CouponsPage() {
   return (
     <EcosystemWrapper anonymized-1="coupons-management">
       <EcosystemHeader
-        title="Redemption Registry"
-        badgeText="Reward Catalog"
-        description="Monitor high-value coupon instantiation velocity, external voucher protocols, and architectural redemption yield across the global registry node."
+        title="Reward Catalog"
+        badgeText="Rewards"
+        description="Manage and monitor your rewards program's active coupons and vouchers."
         icon={Ticket}
       />
 
@@ -38,19 +38,19 @@ export default function CouponsPage() {
           <div className="flex items-center gap-6">
             <EcosystemStatusIndicator
               status="active"
-              label="Inventory Stream: Operational"
+              label="Program Status: Online"
             />
             <div className="h-4 w-px bg-slate-200" />
-            <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
+            <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
               <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
               <span>Verified Reward Node</span>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="h-10 px-4 flex items-center bg-slate-100 border border-slate-200 rounded-xl text-[10px] font-black text-slate-600 uppercase tracking-widest whitespace-nowrap">
+            <div className="h-10 px-4 flex items-center bg-slate-100 border border-slate-200 rounded-xl text-[10px] font-bold text-slate-600 uppercase tracking-widest whitespace-nowrap">
               <Zap className="h-3 w-3 text-indigo-500 fill-current animate-pulse mr-2" />
-              {coupons.length} Rewards Synchronized
+              {coupons.length} Rewards Active
             </div>
             <div className="h-4 w-px bg-slate-200 mx-1" />
             <Button
@@ -62,9 +62,9 @@ export default function CouponsPage() {
               <RotateCcw className={cn("h-4 w-4", loading && "animate-spin")} />
             </Button>
             <Link href="/rewards/vouchers/coupons/create">
-              <Button className="h-10 px-6 rounded-xl bg-slate-900 border-slate-800 font-black text-[11px] uppercase tracking-widest gap-2 shadow-xl hover:bg-black transition-all active:scale-95 group">
+              <Button className="h-10 px-6 rounded-xl bg-slate-900 border-slate-800 font-bold text-[11px] uppercase tracking-widest gap-2 shadow-xl hover:bg-black transition-all active:scale-95 group">
                 <Plus className="h-4 w-4 transition-transform group-hover:rotate-90 duration-500" />
-                Provision Coupon
+                Add Reward
               </Button>
             </Link>
           </div>
@@ -76,21 +76,21 @@ export default function CouponsPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
             {
-              label: "Active Coupons",
+              label: "Active Rewards",
               value: coupons.length,
               icon: Ticket,
               color: "text-indigo-500",
               bg: "bg-indigo-500/10",
             },
             {
-              label: "Redemption Velocity",
+              label: "Redemption Rate",
               value: "84%",
               icon: Activity,
               color: "text-emerald-500",
               bg: "bg-emerald-500/10",
             },
             {
-              label: "Registry Health",
+              label: "Program Health",
               value: "Optimal",
               icon: ShieldCheck,
               color: "text-amber-500",
@@ -99,13 +99,13 @@ export default function CouponsPage() {
           ].map((stat, i) => (
             <div
               key={i}
-              className="p-6 rounded-[2rem] bg-white border border-slate-100 shadow-xl shadow-slate-200/50 flex items-center justify-between group hover:shadow-2xl hover:translate-y-[-4px] transition-all duration-500"
+              className="p-6 rounded-4xl bg-white border border-slate-100 shadow-xl shadow-slate-200/50 flex items-center justify-between group hover:shadow-2xl hover:translate-y-[-4px] transition-all duration-500"
             >
               <div className="flex flex-col">
-                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">
                   {stat.label}
                 </span>
-                <span className="text-2xl font-black text-slate-900 tracking-tighter">
+                <span className="text-2xl font-bold text-slate-900 tracking-tight">
                   {stat.value}
                 </span>
               </div>
@@ -128,11 +128,11 @@ export default function CouponsPage() {
               <Ticket className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-xl font-black text-slate-900 tracking-tight italic uppercase">
-                Foundational Manifest
+              <h3 className="text-xl font-bold text-slate-900 tracking-tight uppercase">
+                Reward Inventory
               </h3>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] leading-none mt-1">
-                Reward inventory & distribution registry
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-1">
+                List of all active and inactive rewards
               </p>
             </div>
           </div>

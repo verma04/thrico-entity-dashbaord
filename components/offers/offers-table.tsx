@@ -1,13 +1,12 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import { DataTable } from "@/components/ui/data-table";
+import { AppDataTable } from "@/components/ui/app-data-table";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { Offer } from "@/graphql/actions/offers";
-import { Edit2, Trash2, Eye, Calendar, Tag, ExternalLink } from "lucide-react";
+import { Calendar, Tag, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { OfferActions } from "./offer-actions";
 
@@ -37,7 +36,7 @@ export function OffersTable({
     }
   };
 
-  const columns: ColumnDef<Offer>[] = [
+  const columns = useMemo<ColumnDef<Offer>[]>(() => [
     {
       accessorKey: "title",
       header: "Offer",
@@ -80,7 +79,7 @@ export function OffersTable({
       },
     },
     {
-      accessorKey: "category",
+      accessorKey: "category.name",
       header: "Category",
       cell: ({ row }) => {
         const category = row.original.category;
@@ -91,9 +90,9 @@ export function OffersTable({
           >
             <div
               className="h-2 w-2 rounded-full"
-              style={{ backgroundColor: category.color }}
+              style={{ backgroundColor: category?.color }}
             />
-            {category.name}
+            {category?.name}
           </Badge>
         );
       },
@@ -154,25 +153,6 @@ export function OffersTable({
       },
     },
     {
-      accessorKey: "website",
-      header: "Link",
-      cell: ({ row }) => {
-        const website = row.original.website;
-        return website ? (
-          <a
-            href={website}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-500 hover:text-blue-700 transition-colors"
-          >
-            <ExternalLink className="h-4 w-4" />
-          </a>
-        ) : (
-          <span className="text-muted-foreground text-xs">-</span>
-        );
-      },
-    },
-    {
       id: "actions",
       header: () => <div className="text-right">Actions</div>,
       cell: ({ row }) => (
@@ -185,7 +165,15 @@ export function OffersTable({
         </div>
       ),
     },
-  ];
+  ], [onEdit, refetch]);
 
-  return <DataTable columns={columns} data={offers} isLoading={isLoading} />;
+  return (
+    <AppDataTable
+      columns={columns}
+      data={offers}
+      isLoading={isLoading}
+      searchableColumns={[{ id: "title", placeholder: "Search offers..." }]}
+      isShowExportButtons={true}
+    />
+  );
 }

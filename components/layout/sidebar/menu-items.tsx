@@ -98,6 +98,7 @@ export const communityIntelligence = [
     key: "members",
     label: "Members",
     path: "/members",
+    isMobileOnly: true,
     icon: <Users size={18} />,
     children: [
       { key: "members-dash", label: "Dashboard", path: "/members" },
@@ -127,9 +128,19 @@ export const contentModeration = [
       { key: "feed-overall", label: "Overall Posts", path: "/feed/all" },
       { key: "feed-pinned", label: "Pinned Post", path: "/feed/pinned" },
       { key: "feed-admin", label: "Admin Posts", path: "/feed/admin" },
-      { key: "feed-moments", label: "Moments (Videos)", path: "/moments" },
-      { key: "feed-jobs", label: "Jobs", path: "/jobs" },
-      { key: "feed-listings", label: "Listings", path: "/listing" },
+      {
+        key: "feed-moments",
+        label: "Moments (Videos)",
+        path: "/moments",
+        isMobileOnly: true,
+      },
+      { key: "feed-jobs", label: "Jobs", path: "/jobs", isMobileOnly: true },
+      {
+        key: "feed-listings",
+        label: "Listings",
+        path: "/listing",
+        isMobileOnly: true,
+      },
       { key: "feed-reported", label: "Reported", path: "/feed/reported" },
       { key: "feed-settings", label: "Settings", path: "/feed/settings" },
     ],
@@ -177,6 +188,7 @@ export const gamificationEngine = [
     key: "engagement-activities",
     label: "Points & Badges",
     path: "/gamification",
+    isMobileOnly: true,
     icon: <Target size={18} />,
     children: [
       { key: "eng-dash", label: "Dashboard", path: "/gamification" },
@@ -199,6 +211,7 @@ export const gamificationEngine = [
     key: "engagement-games",
     label: "Member Games",
     path: "/rewards/engagement/spin-wheel",
+    isMobileOnly: true,
     icon: <Gamepad2 size={18} />,
     children: [
       {
@@ -222,6 +235,7 @@ export const gamificationEngine = [
     key: "currency",
     label: "Currency",
     path: "/currency",
+    isMobileOnly: true,
     icon: <Coins size={18} />,
     children: [
       { key: "cur-dash", label: "Dashboard", path: "/currency" },
@@ -240,6 +254,7 @@ export const gamificationEngine = [
     key: "rewards",
     label: "Rewards",
     path: "/rewards",
+    isMobileOnly: true,
     icon: <Gift size={18} />,
     children: [
       { key: "rew-dash", label: "Dashboard", path: "/rewards" },
@@ -291,6 +306,7 @@ export const modules = [
     key: "communities",
     label: "Communities",
     path: "/communities",
+    isMobileOnly: true,
     icon: <Users size={18} />,
     children: [
       { key: "com-dash", label: "Dashboard", path: "/communities" },
@@ -334,6 +350,7 @@ export const modules = [
     key: "jobs",
     label: "Jobs",
     path: "/jobs",
+    isMobileOnly: true,
     icon: <Briefcase size={18} />,
     children: [
       { key: "job-dash", label: "Dashboard", path: "/jobs" },
@@ -347,6 +364,7 @@ export const modules = [
     key: "listing",
     label: "Marketplace",
     path: "/listing",
+    isMobileOnly: true,
     icon: <ShoppingBag size={18} />,
     children: [
       { key: "market-dash", label: "Dashboard", path: "/listing" },
@@ -463,6 +481,7 @@ export const modules = [
     key: "offers",
     label: "Offers",
     path: "/offers",
+    isMobileOnly: true,
     icon: <Tag size={18} />,
     children: [
       { key: "off-dash", label: "Dashboard", path: "/offers" },
@@ -480,49 +499,6 @@ export const modules = [
 
 // --- 5. ADMIN SETTINGS ---
 export const adminSettings = [
-  {
-    key: "configuration",
-    label: "General Settings",
-    icon: <Settings size={18} />,
-    children: [
-      { key: "conf-gen", label: "General", path: "/settings" },
-      { key: "conf-app", label: "Appearance", path: "/settings/appearance" },
-      { key: "conf-dom", label: "Domain", path: "/settings/domains" },
-      { key: "conf-web", label: "Manage Websites", path: "/app-layout/pages" },
-      { key: "conf-mod", label: "Module", path: "/settings/modules" },
-      { key: "conf-lang", label: "Languages", path: "/settings/languages" },
-      {
-        key: "conf-int",
-        label: "Integrations",
-        path: "/settings/integrations",
-      },
-    ],
-  },
-
-  {
-    key: "branded-email",
-    label: "Email",
-    path: "/email/usage",
-    icon: <Mail size={18} />,
-    children: [
-      { key: "email-dash", label: "Usage Dashboard", path: "/email/usage" },
-      {
-        key: "email-templates",
-        label: "Manage Templates",
-        path: "/email/templates",
-      },
-      {
-        key: "email-campaigns",
-        label: "Automation Campaigns",
-        path: "/email/automation",
-      },
-      {
-        key: "email-settings",
-        label: "Email Settings",
-        path: "/email/settings",
-      },
-    ],
-  },
   {
     key: "customisation",
     label: "Design & Style",
@@ -565,6 +541,32 @@ export const adminSettings = [
       },
     ],
   },
+
+  {
+    key: "branded-email",
+    label: "Email",
+    path: "/email/usage",
+    icon: <Mail size={18} />,
+    children: [
+      { key: "email-dash", label: "Usage Dashboard", path: "/email/usage" },
+      {
+        key: "email-templates",
+        label: "Manage Templates",
+        path: "/email/templates",
+      },
+      {
+        key: "email-campaigns",
+        label: "Automation Campaigns",
+        path: "/email/automation",
+      },
+      {
+        key: "email-settings",
+        label: "Email Settings",
+        path: "/email/settings",
+      },
+    ],
+  },
+
   {
     key: "team",
     label: "Team",

@@ -16,6 +16,8 @@ import {
   CampaignModule, CAMPAIGN_MODULES, MODULE_COLORS,
 } from "@/components/email/automation/types";
 import { BorderBeam } from "@/components/ui/border-beam";
+import { useCreateEmailCampaign } from "@/graphql/actions/email";
+import { toast } from "sonner";
 
 // ─── Campaign template definitions ────────────────────────────────────────────
 interface CampaignTemplate {
@@ -33,6 +35,7 @@ interface CampaignTemplate {
   emailTemplateName?: string;
   nodes: number;                  // canvas complexity hint
   suggestedName: string;
+  isMobileOnly?: boolean;
 }
 
 const CAMPAIGN_TEMPLATES: CampaignTemplate[] = [
@@ -63,6 +66,7 @@ const CAMPAIGN_TEMPLATES: CampaignTemplate[] = [
     emailTemplateName: "Welcome — Community",
     nodes: 3,
     suggestedName: "Welcome New Community Members",
+    isMobileOnly: true,
   },
   {
     id: "event-reminder",
@@ -93,6 +97,7 @@ const CAMPAIGN_TEMPLATES: CampaignTemplate[] = [
     emailTemplateName: "Job Match Alert",
     nodes: 4,
     suggestedName: "New Job Application Confirmation",
+    isMobileOnly: true,
   },
   {
     id: "newsletter-monthly",
@@ -109,6 +114,7 @@ const CAMPAIGN_TEMPLATES: CampaignTemplate[] = [
     emailTemplateName: "Monthly Newsletter",
     nodes: 2,
     suggestedName: "Monthly Platform Digest",
+    isMobileOnly: true,
   },
   {
     id: "re-engagement",
@@ -123,6 +129,7 @@ const CAMPAIGN_TEMPLATES: CampaignTemplate[] = [
     emailTemplateName: "Re-engagement Campaign",
     nodes: 5,
     suggestedName: "Inactive Member Re-engagement",
+    isMobileOnly: true,
   },
   {
     id: "shop-abandoned",
@@ -151,6 +158,7 @@ const CAMPAIGN_TEMPLATES: CampaignTemplate[] = [
     emailTemplateName: "Survey Follow-up",
     nodes: 3,
     suggestedName: "Post-Survey Thank You",
+    isMobileOnly: true,
   },
   {
     id: "low-rating-alert",
@@ -163,6 +171,7 @@ const CAMPAIGN_TEMPLATES: CampaignTemplate[] = [
     icon: <Star size={22} className="text-white" />,
     nodes: 4,
     suggestedName: "Low Rating Follow-up",
+    isMobileOnly: true,
   },
   {
     id: "listing-expiry",
@@ -175,6 +184,7 @@ const CAMPAIGN_TEMPLATES: CampaignTemplate[] = [
     icon: <CalendarDays size={22} className="text-white" />,
     nodes: 3,
     suggestedName: "Listing Expiry Alert",
+    isMobileOnly: true,
   },
   // ── New templates ──────────────────────────────────────────────────
   {
@@ -192,6 +202,7 @@ const CAMPAIGN_TEMPLATES: CampaignTemplate[] = [
     emailTemplateName: "Welcome — Community",
     nodes: 3,
     suggestedName: "Happy Birthday 🎂",
+    isMobileOnly: true,
   },
   {
     id: "new-member-onboard",
@@ -208,6 +219,7 @@ const CAMPAIGN_TEMPLATES: CampaignTemplate[] = [
     emailTemplateName: "Welcome — Platform",
     nodes: 5,
     suggestedName: "New Member Welcome Series",
+    isMobileOnly: true,
   },
   {
     id: "gamification-milestone",
@@ -220,6 +232,7 @@ const CAMPAIGN_TEMPLATES: CampaignTemplate[] = [
     icon: <Trophy size={22} className="text-white" />,
     nodes: 4,
     suggestedName: "Gamification Milestone Reward",
+    isMobileOnly: true,
   },
   {
     id: "inactive-member",
@@ -234,6 +247,7 @@ const CAMPAIGN_TEMPLATES: CampaignTemplate[] = [
     emailTemplateName: "Re-engagement Campaign",
     nodes: 4,
     suggestedName: "Inactive Member Win-back",
+    isMobileOnly: true,
   },
 ];
 
@@ -338,7 +352,12 @@ function TemplateCard({ t, selected, onClick }: {
 
       {/* Info */}
       <div className="px-0.5">
-        <p className="text-[12px] font-bold text-slate-800 leading-tight">{t.label}</p>
+        <p className="text-[12px] font-bold text-slate-800 leading-tight flex items-center gap-2">
+          {t.label}
+          {t.isMobileOnly && (
+             <span className="inline-flex h-4 px-1.5 rounded bg-amber-500/10 text-amber-600 border border-amber-500/20 text-[8px] font-bold uppercase tracking-wider items-center">Mobile</span>
+          )}
+        </p>
         <p className="text-[10px] text-slate-400 mt-0.5 leading-tight line-clamp-2">{t.description}</p>
         <div className="flex items-center gap-2 mt-2 flex-wrap">
           {t.module && (
@@ -410,7 +429,42 @@ export default function NewCampaignPage() {
     else router.push("/email/automation");
   };
 
-  const handleLaunch = () => router.push("/email/automation/add/canvas");
+  const [createCampaign, { loading: isSaving }] = useCreateEmailCampaign({
+    onCompleted: (data: any) => {
+      const campaignId = data?.createEmailCampaign?.id;
+      toast.success("Campaign created successfully!");
+      if (campaignId) {
+        router.push(`/email/automation/add/canvas?id=${campaignId}`);
+      } else {
+        router.push("/email/automation/add/canvas");
+      }
+    },
+    onError: (err: any) => {
+      toast.error(err.message || "Failed to create campaign");
+      console.error("Save Error:", err);
+    }
+  });
+
+  const handleLaunch = async () => {
+    // Prepare data for database
+    const input = {
+      name:        form.name,
+      status:      form.status,
+      frequency:   form.frequency,
+      module:      form.module,
+      channelType: form.channelType,
+      targetUsers: form.targetUsers,
+      description: form.description,
+      // Add cron config if recurring
+      ...(form.frequency === "recurring" && {
+        cronType: form.cronType,
+        cronDay:  form.cronDay,
+        cronDate: form.cronDate,
+      })
+    };
+
+    await createCampaign({ variables: { input } });
+  };
 
   const selectedTemplate = CAMPAIGN_TEMPLATES.find((t) => t.id === selectedTemplateId) ?? null;
   const filteredTemplates = CAMPAIGN_TEMPLATES.filter((t) =>
@@ -625,9 +679,14 @@ export default function NewCampaignPage() {
                     <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
                       {CAMPAIGN_MODULES.map((mod) => (
                         <button key={mod.value} type="button" onClick={() => update("module", mod.value)}
-                          className={cn("flex flex-col items-center gap-2 pt-3 pb-2.5 px-2 rounded-xl border text-center transition-all",
+                          className={cn("flex flex-col items-center gap-2 pt-3 pb-2.5 px-2 rounded-xl border text-center transition-all relative overflow-hidden",
                             form.module === mod.value ? "shadow-sm" : "bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50")}
                           style={form.module === mod.value ? { backgroundColor: `${mod.color}0e`, borderColor: mod.color } : {}}>
+                          {mod.isMobileOnly && (
+                            <div className="absolute top-0 right-0 p-1">
+                              <Zap size={8} className="text-amber-500 fill-amber-500" />
+                            </div>
+                          )}
                           <div className="h-9 w-9 rounded-xl flex items-center justify-center"
                             style={{ backgroundColor: `${mod.color}18`, color: mod.color }}>
                             {mod.icon}
@@ -848,9 +907,14 @@ export default function NewCampaignPage() {
                     className="flex-1 h-11 bg-white border border-slate-200 hover:border-slate-300 text-slate-600 text-[13px] font-semibold rounded-xl transition-all flex items-center justify-center gap-2">
                     <ChevronLeft size={14} /> Back
                   </button>
-                  <button onClick={handleLaunch}
-                    className="flex-1 h-11 bg-[#5B6CFF] hover:bg-[#4a5ce8] text-white text-[13px] font-bold rounded-xl transition-all shadow-md shadow-[#5B6CFF]/20 flex items-center justify-center gap-2">
-                    <Zap size={14} /> Open Canvas Builder
+                  <button onClick={handleLaunch} disabled={isSaving}
+                    className="flex-1 h-11 bg-[#5B6CFF] hover:bg-[#4a5ce8] text-white text-[13px] font-bold rounded-xl transition-all shadow-md shadow-[#5B6CFF]/20 flex items-center justify-center gap-2 disabled:opacity-50">
+                    {isSaving ? (
+                      <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      <Zap size={14} />
+                    )}
+                    {isSaving ? "Saving..." : "Open Canvas Builder"}
                   </button>
                 </div>
               </div>

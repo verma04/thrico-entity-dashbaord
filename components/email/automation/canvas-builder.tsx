@@ -10,13 +10,16 @@ import {
 import { cn } from "@/lib/utils";
 import {
   WorkflowNode, WorkflowEdge, DragBlock, uid,
-  MOCK_CAMPAIGNS, CampaignModule, CampaignStatus,
+  CampaignModule, CampaignStatus,
   CampaignFrequency, CAMPAIGN_MODULES, MODULE_COLORS, CronType,
 } from "./types";
 import { BlockLibrary } from "./block-library";
 import { CanvasNode } from "./canvas-node";
 import { EdgeLine, PreviewEdge } from "./edge-line";
 import { ConfigPanel } from "./config-panel";
+import { useGetEmailCampaign, useUpdateEmailCampaign } from "@/graphql/actions/email";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 const NODE_W = 280;
 const NODE_H = 88;
@@ -44,25 +47,68 @@ interface CanvasBuilderProps {
 }
 
 export function CanvasBuilder({ campaignId, onBack }: CanvasBuilderProps) {
-  const existing = campaignId ? MOCK_CAMPAIGNS.find((c) => c.id === campaignId) ?? null : null;
-  const isEditMode = !!existing;
+  const { data, loading } = useGetEmailCampaign(campaignId || "");
+  const [updateCampaign, { loading: isSaving }] = useUpdateEmailCampaign();
+
+  const existing = data?.getEmailCampaign;
+  const isEditMode = !!campaignId;
 
   // ── Core canvas state ─────────────────────────────────────────────────────
-  const [nodes, setNodes] = useState<WorkflowNode[]>(DEFAULT_NODES);
-  const [edges, setEdges] = useState<WorkflowEdge[]>(DEFAULT_EDGES);
+  const [nodes, setNodes] = useState<WorkflowNode[]>([]);
+  const [edges, setEdges] = useState<WorkflowEdge[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [campaignName, setCampaignName] = useState(existing?.name ?? "Untitled Campaign");
+  const [campaignName, setCampaignName] = useState("Untitled Campaign");
   const [isEditingName, setIsEditingName] = useState(false);
   const [canvasOffset, setCanvasOffset] = useState({ x: 0, y: 0 });
 
   // ── Campaign settings (lives IN the builder) ──────────────────────────────
   const [showSettings, setShowSettings] = useState(false);
-  const [status, setStatus]       = useState<CampaignStatus>((existing?.status as CampaignStatus) ?? "draft");
-  const [frequency, setFrequency] = useState<CampaignFrequency>(existing?.frequency ?? "one-time");
+  const [status, setStatus]       = useState<CampaignStatus>("draft");
+  const [frequency, setFrequency] = useState<CampaignFrequency>("one-time");
   const [cronType, setCronType]   = useState<CronType>("weekly");
   const [cronDay, setCronDay]     = useState("MON");
   const [cronDate, setCronDate]   = useState(1);
-  const [module, setModule]       = useState<CampaignModule | "">(existing?.module ?? "");
+  const [module, setModule]       = useState<CampaignModule | "">("");
+
+  // Sync state when data loads
+  useEffect(() => {
+    if (existing) {
+      setCampaignName(existing.name);
+      setStatus(existing.status as CampaignStatus);
+      setFrequency(existing.frequency as CampaignFrequency);
+      setModule(existing.module as CampaignModule);
+      if (existing.cronType) setCronType(existing.cronType as CronType);
+      if (existing.cronDay) setCronDay(existing.cronDay);
+      if (existing.cronDate) setCronDate(existing.cronDate);
+
+      // Load nodes & edges if plural JSON strings exist
+      if (existing.canvasNodes) {
+        try {
+          setNodes(JSON.parse(existing.canvasNodes));
+        } catch (e) {
+          console.error("Failed to parse canvasNodes", e);
+          setNodes(DEFAULT_NODES);
+        }
+      } else {
+        setNodes(DEFAULT_NODES);
+      }
+
+      if (existing.canvasEdges) {
+        try {
+          setEdges(JSON.parse(existing.canvasEdges));
+        } catch (e) {
+          console.error("Failed to parse canvasEdges", e);
+          setEdges(DEFAULT_EDGES);
+        }
+      } else {
+        setEdges(DEFAULT_EDGES);
+      }
+    } else if (!loading && !campaignId) {
+      // New campaign fallback (if somehow reached without ID, though wizard creates it)
+      setNodes(DEFAULT_NODES);
+      setEdges(DEFAULT_EDGES);
+    }
+  }, [existing, loading, campaignId]);
 
   // ── Connection wire state ─────────────────────────────────────────────────
   const [connectingFrom, setConnectingFrom] = useState<string | null>(null);
@@ -198,7 +244,37 @@ export function CanvasBuilder({ campaignId, onBack }: CanvasBuilderProps) {
   const svgW = Math.max(2000, ...nodes.map((n) => n.x + NODE_W + 100));
   const svgH = Math.max(1500, ...nodes.map((n) => n.y + NODE_H + 200));
 
-  // ── Status meta ───────────────────────────────────────────────────────────
+  const handleSave = async (newStatus?: CampaignStatus) => {
+    if (!campaignId) return;
+    try {
+      const input = {
+        name: campaignName,
+        status: newStatus || status,
+        frequency,
+        module,
+        cronType,
+        cronDay,
+        cronDate,
+        canvasNodes: JSON.stringify(nodes),
+        canvasEdges: JSON.stringify(edges),
+      };
+      await updateCampaign({ variables: { id: campaignId, input } });
+      toast.success(newStatus === "released" ? "Campaign Activated!" : "Draft Saved!");
+      if (newStatus) setStatus(newStatus);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to save campaign");
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center bg-slate-50 gap-3">
+        <Loader2 className="h-8 w-8 text-[#5B6CFF] animate-spin" />
+        <p className="text-sm text-slate-500 font-medium">Loading campaign flow...</p>
+      </div>
+    );
+  }
+
   const statusMeta: Record<CampaignStatus, { label: string; color: string; bg: string; border: string }> = {
     draft:    { label: "Draft",    color: "text-slate-600",  bg: "bg-slate-50",  border: "border-slate-200" },
     released: { label: "Released", color: "text-emerald-700", bg: "bg-emerald-50", border: "border-emerald-200" },
@@ -301,25 +377,19 @@ export function CanvasBuilder({ campaignId, onBack }: CanvasBuilderProps) {
           <Settings2 size={13} /> Settings
         </button>
 
-        <button onClick={() => console.log("SAVE_DRAFT", { nodes, edges, campaignName, module, frequency })}
-          className="flex items-center gap-2 h-8 px-3 bg-white border border-slate-200 hover:border-slate-300 text-slate-600 text-[12px] font-semibold rounded-xl transition-all">
+        <button 
+          onClick={() => handleSave()}
+          disabled={isSaving}
+          className="flex items-center gap-2 h-8 px-3 bg-white border border-slate-200 hover:border-slate-300 disabled:opacity-50 text-slate-600 text-[12px] font-semibold rounded-xl transition-all">
+          {isSaving ? <Loader2 size={12} className="animate-spin" /> : null}
           Save Draft
         </button>
-        <button onClick={() => {
-          console.log("ACTIVATE_CAMPAIGN", {
-            id: campaignId || "new",
-            name: campaignName,
-            module,
-            frequency,
-            nodeCount: nodes.length,
-            edgeCount: edges.length,
-            nodes,
-            edges
-          });
-          alert("Campaign Activated Successfully!");
-        }}
-          className="flex items-center gap-2 h-8 px-4 bg-[#5B6CFF] hover:bg-[#4a5ce8] text-white text-[12px] font-bold rounded-xl transition-all shadow-sm shadow-[#5B6CFF]/20">
-          <Play size={12} /> Activate
+        <button 
+          onClick={() => handleSave("released")}
+          disabled={isSaving}
+          className="flex items-center gap-2 h-8 px-4 bg-[#5B6CFF] hover:bg-[#4a5ce8] disabled:opacity-50 text-white text-[12px] font-bold rounded-xl transition-all shadow-sm shadow-[#5B6CFF]/20">
+          {isSaving ? <Loader2 size={12} className="animate-spin" /> : <Play size={12} />} 
+          Activate
         </button>
       </div>
 

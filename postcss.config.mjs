@@ -7,6 +7,7 @@ const config = {
         "./app/**/*.{ts,tsx}",
         "./components/**/*.{ts,tsx}",
         "./node_modules/react-table-craft/dist/**/*.{js,mjs}",
+
       ],
     },
   },

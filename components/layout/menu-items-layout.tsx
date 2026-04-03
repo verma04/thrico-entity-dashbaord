@@ -18,10 +18,12 @@ function TabButton({
   item,
   isActive,
   onClick,
+  className,
 }: {
   item: MenuItem;
   isActive: boolean;
   onClick: () => void;
+  className?: string;
 }) {
   return (
     <button
@@ -31,6 +33,7 @@ function TabButton({
         isActive
           ? "text-primary"
           : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
+        className,
       )}
     >
       {/* Animated pill background */}
@@ -53,7 +56,7 @@ function TabButton({
           "relative z-10 shrink-0 transition-transform duration-200",
           isActive
             ? "text-primary scale-110"
-            : "text-muted-foreground/60 group-hover/tab:text-foreground/70",
+            : "text-muted-foreground/60 group/tab-hover:text-foreground/70",
         )}
       >
         {React.isValidElement(item.icon)
@@ -92,6 +95,7 @@ const MenuItemsLayout = ({
   fullWidth = false,
   fullHeight = false,
   fixed = false,
+  className,
 }: {
   children: React.ReactNode;
   items: MenuItem[];
@@ -101,11 +105,15 @@ const MenuItemsLayout = ({
   fullWidth?: boolean;
   fullHeight?: boolean;
   fixed?: boolean;
+  className?: string;
 }) => {
   const router = useRouter();
   const pathname = usePathname();
   const pathParts = pathname.split("/").filter(Boolean);
-  const activeIndex = pathParts.indexOf(active);
+  const activeSegments = active.split("/").filter(Boolean);
+  const activeIndex = pathname.startsWith(`/${active}`)
+    ? activeSegments.length - 1
+    : pathParts.indexOf(active);
   const fullKey = pathParts.slice(activeIndex + 1).join("/");
 
   const activeTab = React.useMemo(() => {
@@ -137,7 +145,7 @@ const MenuItemsLayout = ({
           ? [
               {
                 key: "reports",
-                label: "Reports",
+                label: "Reports Items",
                 icon: <AlertTriangle />,
                 section: "Admin",
               },
@@ -161,33 +169,36 @@ const MenuItemsLayout = ({
   return (
     <div
       className={cn(
-        "bg-background text-foreground flex flex-col",
+        "bg-background text-foreground flex flex-col w-full",
         fixed
           ? "fixed inset-0 z-100 bg-background h-screen w-screen overflow-hidden"
           : fullHeight
             ? "h-screen overflow-hidden"
             : "min-h-screen",
+        className,
       )}
     >
       {/* ── Top Nav Bar ─────────────────────────────────────────────────── */}
-      <nav className="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b border-border">
+      <nav className="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b border-border w-full">
         <div
-          className={cn(
-            "px-6",
-            fullWidth ? "w-full" : "max-w-[1400px] mx-auto",
-          )}
+          className={cn("px-6 w-full", !fullWidth && "max-w-[1400px] mx-auto")}
         >
-          <div className="flex h-12 items-center gap-1 overflow-x-auto scrollbar-hide relative no-scrollbar">
-            {menuitems.map((item) => (
-              <TabButton
-                key={item.key}
-                item={item}
-                isActive={
-                  activeTab === item.key || fullKey.startsWith(item.key + "/")
-                }
-                onClick={() => onChange(item.key)}
-              />
-            ))}
+          <div className="flex h-12 items-center gap-1 overflow-x-auto scrollbar-hide relative no-scrollbar w-full">
+            <AnimatePresence>
+              {menuitems.map((item) => (
+                <div key={item.key} className={cn(fullWidth ? "flex-1" : "")}>
+                  <TabButton
+                    item={item}
+                    isActive={
+                      activeTab === item.key ||
+                      fullKey.startsWith(item.key + "/")
+                    }
+                    onClick={() => onChange(item.key)}
+                    className={cn(fullWidth ? "w-full justify-center" : "")}
+                  />
+                </div>
+              ))}
+            </AnimatePresence>
           </div>
         </div>
 
@@ -205,8 +216,8 @@ const MenuItemsLayout = ({
       {/* ── Content ─────────────────────────────────────────────────────── */}
       <main
         className={cn(
-          "flex-1 min-w-0 min-h-0 transition-opacity duration-300 flex flex-col",
-          fullWidth ? "w-full" : "max-w-[1400px] mx-auto px-6",
+          "flex-1 min-w-0 min-h-0 transition-opacity duration-300 flex flex-col w-full",
+          !fullWidth && "max-w-[1400px] mx-auto px-6",
           !fullHeight && "py-4 lg:py-6",
         )}
       >
@@ -215,7 +226,10 @@ const MenuItemsLayout = ({
           initial={{ opacity: 0, y: 4 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2, ease: "easeOut" }}
-          className={cn("flex-1", fullHeight && "h-full overflow-y-auto")}
+          className={cn(
+            "flex-1 w-full",
+            fullHeight && "h-full overflow-y-auto",
+          )}
         >
           {children}
         </motion.div>
