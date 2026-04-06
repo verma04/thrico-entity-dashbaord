@@ -1,9 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-
 import { TimeRange } from "@/graphql/actions";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   Calendar,
   Users,
@@ -15,12 +13,10 @@ import {
   TrendingUp,
   BarChart3,
   Globe,
-  ArrowRight,
   Timer,
   Sparkles,
   LayoutGrid,
 } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -31,21 +27,17 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   PieChart as ReChartsPieChart,
   Pie,
   Cell,
 } from "recharts";
-import { PieChart } from "lucide-react";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import {
   EcosystemKPI,
-  EcosystemSectionHeader,
   EcosystemCard,
-  EcosystemStatusIndicator,
 } from "@/components/layout/ecosystem/ecosystem-analytics";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -56,21 +48,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import Link from "next/link";
 
 export default function EventsAnalytics() {
   const [timeRange, setTimeRange] = useState<TimeRange>(TimeRange.LAST_7_DAYS);
   let loading = false;
   const data = {
     getEventsStats: {
-      totalEvents: 0,
-      activeEvents: 0,
-      totalAttendees: 0,
-      totalViews: 0,
-      totalEventsChange: 0,
-      activeEventsChange: 0,
-      attendeesChange: 0,
-      viewsChange: 0,
+      totalEvents: 124,
+      activeEvents: 42,
+      totalAttendees: 15400,
+      totalViews: 89000,
+      totalEventsChange: 12,
+      activeEventsChange: 5,
+      attendeesChange: 24,
+      viewsChange: 8,
     },
   };
 
@@ -82,36 +73,35 @@ export default function EventsAnalytics() {
       value: loading ? "..." : (stats?.totalEvents?.toLocaleString() ?? "0"),
       trend: stats?.totalEventsChange ?? 0,
       icon: Calendar,
-      color: "text-indigo-500",
-      bg: "bg-indigo-500/10",
+      color: "text-indigo-600",
+      bg: "bg-indigo-50",
     },
     {
-      title: "Active Events",
+      title: "Active Now",
       value: loading ? "..." : (stats?.activeEvents?.toLocaleString() ?? "0"),
       trend: stats?.activeEventsChange ?? 0,
       icon: Activity,
-      color: "text-emerald-500",
-      bg: "bg-emerald-500/10",
+      color: "text-emerald-600",
+      bg: "bg-emerald-50",
     },
     {
-      title: "Total Attendees",
+      title: "Attendance",
       value: loading ? "..." : (stats?.totalAttendees?.toLocaleString() ?? "0"),
       trend: stats?.attendeesChange ?? 0,
       icon: Users,
-      color: "text-violet-500",
-      bg: "bg-violet-500/10",
+      color: "text-blue-600",
+      bg: "bg-blue-50",
     },
     {
-      title: "Event Views",
+      title: "Engagement",
       value: loading ? "..." : (stats?.totalViews?.toLocaleString() ?? "0"),
       trend: stats?.viewsChange ?? 0,
       icon: Eye,
-      color: "text-amber-500",
-      bg: "bg-amber-500/10",
+      color: "text-amber-600",
+      bg: "bg-amber-50",
     },
   ];
 
-  // Placeholder data for charts
   const registrationTrend = [
     { name: "MON", registrations: 400 },
     { name: "TUE", registrations: 300 },
@@ -123,9 +113,9 @@ export default function EventsAnalytics() {
   ];
 
   const eventTypeDistribution = [
-    { name: "IN_PERSON", value: 40, color: "#6366f1" },
-    { name: "ONLINE", value: 30, color: "#10b981" },
-    { name: "HYBRID", value: 30, color: "#f59e0b" },
+    { name: "IN_PERSON", value: 40, color: "#18181b" },
+    { name: "ONLINE", value: 30, color: "#71717a" },
+    { name: "HYBRID", value: 30, color: "#a1a1aa" },
   ];
 
   const topPerformingEvents = [
@@ -138,24 +128,19 @@ export default function EventsAnalytics() {
   return (
     <EcosystemWrapper anonymized-1="events-analytics">
       <EcosystemHeader
-        title="Events Overview"
-        badgeText="Events Status"
-        description="Track your community events, attendee growth, and engagement in real-time."
+        title="Events Dashboard"
+        description="Monitor community gathering metrics, registration velocity, and attendance trends."
+        badgeText="Overview"
         icon={Calendar}
       />
 
       <EcosystemActionBar shadow="none">
         <div className="flex items-center justify-between w-full">
-          <div className="flex items-center gap-6">
-            <EcosystemStatusIndicator
-              status="active"
-              label="System: Online"
-            />
-            <div className="h-4 w-px bg-border" />
-            <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest italic">
-              <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
-              <span>Verified System</span>
-            </div>
+          <div className="flex items-center gap-2 px-1">
+            <ShieldCheck className="h-4 w-4 text-emerald-500" />
+            <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground italic">
+              Verified Event Stream
+            </span>
           </div>
 
           <div className="flex items-center gap-3">
@@ -163,196 +148,116 @@ export default function EventsAnalytics() {
               value={timeRange}
               onValueChange={(val) => setTimeRange(val as TimeRange)}
             >
-              <SelectTrigger className="h-10 w-[200px] rounded-xl border-slate-200 font-bold text-slate-600 bg-white shadow-sm transition-all focus:ring-indigo-500/20">
-                <Timer className="h-4 w-4 mr-2 text-indigo-500" />
+              <SelectTrigger className="h-9 w-[180px] rounded-lg border-zinc-200 bg-white text-xs font-semibold shadow-sm">
+                <Timer className="h-3.5 w-3.5 mr-2 text-indigo-500" />
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="rounded-2xl border-slate-100 shadow-2xl">
-                <SelectItem
-                  value={TimeRange.LAST_24_HOURS}
-                  className="font-bold uppercase text-[10px]"
-                >
-                  Today
-                </SelectItem>
-                <SelectItem
-                  value={TimeRange.LAST_7_DAYS}
-                  className="font-bold uppercase text-[10px]"
-                >
-                  Last 7 Days
-                </SelectItem>
-                <SelectItem
-                  value={TimeRange.LAST_30_DAYS}
-                  className="font-bold uppercase text-[10px]"
-                >
-                  Last 30 Days
-                </SelectItem>
-                <SelectItem
-                  value={TimeRange.LAST_90_DAYS}
-                  className="font-bold uppercase text-[10px]"
-                >
-                  Last 90 Days
-                </SelectItem>
+              <SelectContent>
+                <SelectItem value={TimeRange.LAST_24_HOURS} className="text-xs">Last 24 Hours</SelectItem>
+                <SelectItem value={TimeRange.LAST_7_DAYS} className="text-xs">Last 7 Days</SelectItem>
+                <SelectItem value={TimeRange.LAST_30_DAYS} className="text-xs">Last 30 Days</SelectItem>
+                <SelectItem value={TimeRange.LAST_90_DAYS} className="text-xs">Last 90 Days</SelectItem>
               </SelectContent>
             </Select>
-            <div className="h-4 w-px bg-slate-200 mx-1" />
+            <div className="h-4 w-px bg-zinc-200 mx-1" />
             <Button
               variant="outline"
               size="icon"
-              className="h-10 w-10 text-slate-400 hover:text-indigo-600 rounded-xl transition-all shadow-sm bg-white"
+              className="h-9 w-9 text-zinc-400 hover:text-indigo-600 rounded-lg transition-all"
             >
-              <RotateCcw className={cn("h-4 w-4", loading && "animate-spin")} />
+              <RotateCcw size={14} className={cn(loading && "animate-spin")} />
             </Button>
           </div>
         </div>
       </EcosystemActionBar>
 
-      <EcosystemContainer className="space-y-12 p-8 lg:p-12">
-        {/* KPI Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <EcosystemContainer className="p-6 lg:p-8 space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {kpis.map((kpi, i) => (
             <EcosystemKPI key={i} {...kpi} trendLabel="v. last period" />
           ))}
         </div>
 
-        {/* Charts Matrix */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          <div className="lg:col-span-8 space-y-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-8 space-y-6">
             <EcosystemCard
-              title="Registration Trend"
-              description="Daily sign-ups over time"
+              title="Registration Velocity"
+              description="Daily enrollment trajectory"
               icon={TrendingUp}
-              decorationIcon={Zap}
             >
-              <div className="h-[350px] w-full">
-                {loading ? (
-                  <div className="h-full w-full flex items-center justify-center bg-slate-50/50 rounded-3xl border-2 border-dashed border-slate-100 transition-all">
-                    <div className="h-10 w-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-                  </div>
-                ) : (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={registrationTrend}>
-                      <defs>
-                        <linearGradient
-                          id="colorReg"
-                          x1="0"
-                          y1="0"
-                          x2="0"
-                          y2="1"
-                        >
-                          <stop
-                            offset="5%"
-                            stopColor="#6366f1"
-                            stopOpacity={0.1}
-                          />
-                          <stop
-                            offset="95%"
-                            stopColor="#6366f1"
-                            stopOpacity={0}
-                          />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid
-                        strokeDasharray="3 3"
-                        vertical={false}
-                        stroke="#f1f5f9"
-                      />
-                      <XAxis
-                        dataKey="name"
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{
-                          fontSize: 10,
-                          fontWeight: 900,
-                          fill: "#94a3b8",
-                        }}
-                        dy={15}
-                      />
-                      <YAxis
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{
-                          fontSize: 10,
-                          fontWeight: 900,
-                          fill: "#94a3b8",
-                        }}
-                      />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: "#0f172a",
-                          border: "none",
-                          borderRadius: "16px",
-                          boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)",
-                        }}
-                        itemStyle={{
-                          color: "#fff",
-                          fontWeight: 900,
-                          textTransform: "uppercase",
-                          fontSize: "10px",
-                        }}
-                        labelStyle={{ display: "none" }}
-                      />
-                      <Area
-                        type="monotone"
-                        dataKey="registrations"
-                        stroke="#6366f1"
-                        strokeWidth={4}
-                        fillOpacity={1}
-                        fill="url(#colorReg)"
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                )}
+              <div className="h-[320px] w-full mt-4">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={registrationTrend}>
+                    <defs>
+                      <linearGradient id="colorReg" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#6366f1" stopOpacity={0.08} />
+                        <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <XAxis 
+                      dataKey="name" 
+                      axisLine={false} 
+                      tickLine={false} 
+                      tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} 
+                      dy={10} 
+                    />
+                    <YAxis 
+                      axisLine={false} 
+                      tickLine={false} 
+                      tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} 
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "#18181b",
+                        border: "none",
+                        borderRadius: "12px",
+                        boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
+                      }}
+                      itemStyle={{ color: "#fff", fontWeight: 700, fontSize: '11px' }}
+                      labelStyle={{ display: "none" }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="registrations"
+                      stroke="#6366f1"
+                      strokeWidth={3}
+                      fillOpacity={1}
+                      fill="url(#colorReg)"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
               </div>
             </EcosystemCard>
 
             <EcosystemCard
-              title="Top Performing Events"
-              description="Events with the highest attendance"
+              title="Event Performance"
+              description="Highest attendance per assembly"
               icon={BarChart3}
-              decorationIcon={Sparkles}
             >
-              <div className="h-[350px] w-full">
+              <div className="h-[300px] w-full mt-4">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={topPerformingEvents} layout="vertical">
-                    <CartesianGrid
-                      strokeDasharray="3 3"
-                      horizontal={false}
-                      stroke="#f1f5f9"
-                    />
+                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
                     <XAxis type="number" hide />
                     <YAxis
                       dataKey="name"
                       type="category"
                       axisLine={false}
                       tickLine={false}
-                      width={150}
-                      tick={{ fontSize: 9, fontWeight: 900, fill: "#64748b" }}
+                      width={120}
+                      tick={{ fontSize: 10, fontWeight: 600, fill: '#64748b' }}
                     />
                     <Tooltip
-                      contentStyle={{
-                        backgroundColor: "#0f172a",
-                        border: "none",
-                        borderRadius: "16px",
-                      }}
-                      itemStyle={{
-                        color: "#fff",
-                        fontWeight: 900,
-                        textTransform: "uppercase",
-                        fontSize: "10px",
-                      }}
-                      labelStyle={{
-                        color: "#94a3b8",
-                        fontSize: "10px",
-                        marginBottom: "4px",
-                      }}
-                      cursor={{ fill: "#f8fafc" }}
+                      contentStyle={{ backgroundColor: "#18181b", border: "none", borderRadius: "12px" }}
+                      itemStyle={{ color: "#fff", fontWeight: 700, fontSize: '11px' }}
+                      cursor={{ fill: '#f8fafc' }}
                     />
                     <Bar
                       dataKey="attendees"
                       fill="#4f46e5"
                       radius={[0, 4, 4, 0]}
-                      barSize={20}
-                      animationDuration={1500}
+                      barSize={16}
                     />
                   </BarChart>
                 </ResponsiveContainer>
@@ -360,14 +265,13 @@ export default function EventsAnalytics() {
             </EcosystemCard>
           </div>
 
-          <div className="lg:col-span-4 space-y-10">
+          <div className="lg:col-span-4 space-y-6">
             <EcosystemCard
-              title="Event Types"
-              description="Distribution of event formats"
-              icon={PieChart}
-              decorationIcon={Globe}
+              title="Assembly Formats"
+              description="Distribution by medium"
+              icon={Globe}
             >
-              <div className="h-[300px] w-full">
+              <div className="h-56 w-full mt-2">
                 <ResponsiveContainer width="100%" height="100%">
                   <ReChartsPieChart>
                     <Pie
@@ -375,87 +279,56 @@ export default function EventsAnalytics() {
                       cx="50%"
                       cy="50%"
                       innerRadius={60}
-                      outerRadius={100}
-                      paddingAngle={8}
+                      outerRadius={85}
+                      paddingAngle={4}
                       dataKey="value"
-                      animationDuration={1500}
                     >
                       {eventTypeDistribution.map((entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={entry.color}
-                          stroke="none"
-                        />
+                        <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
                       ))}
                     </Pie>
                     <Tooltip />
                   </ReChartsPieChart>
                 </ResponsiveContainer>
               </div>
-              <div className="space-y-4">
+              <div className="space-y-4 px-2">
                 {eventTypeDistribution.map((item, i) => (
-                  <div key={i} className="group/item">
-                    <div className="flex items-center justify-between mb-2 px-1">
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                  <div key={i}>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
                         {item.name.replace("_", " ")}
                       </span>
-                      <span className="text-xs font-black text-slate-900">
+                      <span className="text-xs font-bold text-zinc-900">
                         {item.value}%
                       </span>
                     </div>
-                    <div className="h-2.5 w-full bg-slate-50 rounded-full overflow-hidden border border-slate-100 shadow-inner">
+                    <div className="h-1.5 w-full bg-zinc-50 rounded-full overflow-hidden border border-zinc-100">
                       <div
-                        className="h-full rounded-full transition-all duration-1000 group-hover/item:scale-x-105 origin-left"
-                        style={{
-                          width: `${item.value}%`,
-                          backgroundColor: item.color,
-                        }}
+                        className="h-full rounded-full transition-all duration-1000"
+                        style={{ width: `${item.value}%`, backgroundColor: item.color }}
                       />
                     </div>
                   </div>
                 ))}
               </div>
-
-              <div className="mt-auto pt-8 border-t border-slate-50 flex items-center justify-between">
-                <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    Global engagement
-                  </p>
-                  <p className="text-2xl font-black text-slate-900 tracking-tighter">
-                    74.2%
-                  </p>
-                </div>
-                  <Link href="/events/all">
-                    <Button
-                      variant="outline"
-                      className="h-11 px-6 rounded-xl border-slate-200 font-black text-[10px] uppercase tracking-widest text-slate-600 gap-3 hover:bg-slate-50 transition-all shadow-sm"
-                    >
-                      All Events
-                      <ArrowRight className="h-4 w-4" />
-                    </Button>
-                  </Link>
-              </div>
             </EcosystemCard>
 
-            <div className="p-10 rounded-[3rem] bg-slate-900 border border-slate-800 shadow-2xl relative overflow-hidden group">
-              <div className="absolute -top-10 -right-10 h-40 w-40 bg-indigo-500/20 rounded-full blur-3xl group-hover:bg-indigo-500/30 transition-all duration-1000" />
-              <div className="relative z-10 space-y-6">
+            <div className="p-8 rounded-2xl bg-zinc-900 text-white shadow-xl relative overflow-hidden group">
+              <div className="relative z-10 space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center text-indigo-400 border border-white/10 group-hover:scale-110 transition-transform">
-                    <LayoutGrid className="h-5 w-5" />
+                  <div className="h-9 w-9 rounded-lg bg-white/10 backdrop-blur-md flex items-center justify-center text-indigo-400 border border-white/10">
+                    <LayoutGrid size={18} />
                   </div>
-                  <h4 className="text-sm font-black text-white uppercase tracking-widest">
-                    System Status
-                  </h4>
+                  <h4 className="text-sm font-bold uppercase tracking-wider">Engagement Peak</h4>
                 </div>
-                <p className="text-xs font-bold text-slate-400 leading-relaxed uppercase tracking-wider">
-                  All your events are being synced across the platform in real-time.
+                <p className="text-xs font-medium text-zinc-400 leading-relaxed">
+                  Interactive assemblies showing 74.2% higher retention than passive streams.
                 </p>
                 <Button
                   variant="link"
-                  className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] p-0 group-hover:translate-x-2 transition-transform"
+                  className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest p-0 group-hover:translate-x-1 transition-transform"
                 >
-                  View System Logs <ArrowRight className="h-3 w-3 ml-2" />
+                  Analyze Retention <RotateCcw size={10} className="ml-2" />
                 </Button>
               </div>
             </div>

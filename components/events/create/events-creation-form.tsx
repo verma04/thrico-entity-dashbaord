@@ -112,7 +112,7 @@ export function EventsCreationForm({
   return (
     <div className="flex flex-col h-full bg-background overflow-hidden rounded-t-[inherit]">
       {/* Header section - Sticky */}
-      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b px-6 py-4">
+      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 border-b px-6 py-4">
         <div className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-3 mb-1">
@@ -173,7 +173,6 @@ export function EventsCreationForm({
                 className="space-y-8"
               >
                 {/* Cover Image Card */}
-                {console.log(formik.errors)}
                 <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden">
                   <CardHeader className="bg-muted/30 pb-4">
                     <CardTitle className="text-xl">Event Cover Image</CardTitle>

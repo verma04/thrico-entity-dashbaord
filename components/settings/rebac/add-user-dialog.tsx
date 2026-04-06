@@ -4,10 +4,9 @@ import { useEffect } from "react";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,28 +25,12 @@ import {
   useUpdateAdminUser,
   AdminUser,
 } from "@/graphql/actions";
-import {
-  Loader2,
-  ShieldCheck,
-  Trash2,
-  Lock,
-  Globe,
-  Settings,
-  Eye,
-  EyeOff,
-  Check,
-  Circle,
-  X,
-  Info,
-  User,
-  Database,
-  ShieldAlert,
-  UserPlus,
-} from "lucide-react";
+import { Loader2, ShieldAlert, UserPlus, UserCog, Info, Plus, Camera } from "lucide-react";
+import { ImageUploadWithCrop } from "@/components/ui/image-upload-with-crop";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ApolloError } from "@apollo/client";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 
@@ -57,58 +40,36 @@ interface AddUserDialogProps {
   user?: AdminUser | null;
 }
 
-export default function AddUserDialog({
-  open,
-  onOpenChange,
-  user,
-}: AddUserDialogProps) {
+export default function AddUserDialog({ open, onOpenChange, user }: AddUserDialogProps) {
   const { toast } = useToast();
   const { data: rolesData, loading: rolesLoading } = useGetRoles();
 
   const [createAdmin, { loading: creating }] = useCreateAdmin({
     onCompleted: () => {
-      toast({
-        title: "Success",
-        description: "Admin user created successfully",
-      });
+      toast({ title: "Member added", description: "The new admin has been invited." });
       onOpenChange(false);
-      resetForm();
+      formik.resetForm();
     },
     onError: (err: ApolloError) => {
-      toast({
-        title: "Error",
-        description: err.message,
-        variant: "destructive",
-      });
+      toast({ title: "Failed to add member", description: err.message, variant: "destructive" });
     },
   });
 
   const [updateAdmin, { loading: updating }] = useUpdateAdminUser({
     onCompleted: () => {
-      toast({
-        title: "Success",
-        description: "Admin user updated successfully",
-      });
+      toast({ title: "Member updated" });
       onOpenChange(false);
     },
     onError: (err: ApolloError) => {
-      toast({
-        title: "Error",
-        description: err.message,
-        variant: "destructive",
-      });
+      toast({ title: "Update failed", description: err.message, variant: "destructive" });
     },
   });
 
   const validationSchema = Yup.object().shape({
     firstName: Yup.string().required("First name is required"),
     lastName: Yup.string().required("Last name is required"),
-    email: Yup.string()
-      .email("Invalid email address")
-      .required("Email is required"),
-    role: user
-      ? Yup.string()
-      : Yup.string().required("Assigned role is required"),
+    email: Yup.string().email("Invalid email").required("Email is required"),
+    role: user ? Yup.string() : Yup.string().required("Role is required"),
   });
 
   const formik = useFormik({
@@ -117,6 +78,7 @@ export default function AddUserDialog({
       lastName: user?.lastName || "",
       email: user?.email || "",
       role: user?.role?.id || "",
+      avatar: user?.avatar || "",
     },
     enableReinitialize: true,
     validationSchema,
@@ -125,9 +87,10 @@ export default function AddUserDialog({
         updateAdmin({
           variables: {
             adminId: user.id,
-            input: {
-              firstName: values.firstName,
+            input: { 
+              firstName: values.firstName, 
               lastName: values.lastName,
+              avatar: values.avatar,
             },
           },
         });
@@ -139,6 +102,7 @@ export default function AddUserDialog({
               lastName: values.lastName,
               email: values.email,
               roleId: values.role,
+              avatar: values.avatar,
             },
           },
         });
@@ -146,274 +110,228 @@ export default function AddUserDialog({
     },
   });
 
-  const resetForm = () => {
-    formik.resetForm();
-  };
-
   useEffect(() => {
-    if (!open) {
-      resetForm();
-    }
+    if (!open) formik.resetForm();
   }, [open]);
 
   const roles = rolesData?.getRoles || [];
+  const isLoading = creating || updating;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[620px] p-0 overflow-hidden border-border/40 shadow-2xl bg-background rounded-2xl">
-        <div className="flex flex-col h-full max-h-[90vh]">
-          {/* Refined Header */}
-          <div className="bg-muted/20 px-8 py-6 border-b border-border/40">
-            <div className="flex items-center gap-4">
-              <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
-                {user ? (
-                  <Settings className="h-5 w-5" />
-                ) : (
-                  <UserPlus className="h-5 w-5" />
-                )}
-              </div>
-              <div>
-                <DialogTitle className="text-xl font-semibold tracking-tight text-foreground">
-                  {user ? "Update Team Member" : "Add New Team Member"}
-                </DialogTitle>
-                <DialogDescription className="text-xs font-medium text-muted-foreground mt-1 opacity-80">
-                  {user
-                    ? "Modify account details and platform access permissions."
-                    : "Invite a new administrator to your workspace."}
-                </DialogDescription>
-              </div>
+      <DialogContent className="sm:max-w-[520px] p-0 overflow-hidden rounded-xl border-border/50">
+        {/* Header */}
+        <DialogHeader className="px-6 pt-6 pb-5 border-b border-border/40">
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded-lg bg-muted border border-border/60 flex items-center justify-center text-muted-foreground shrink-0">
+              {user ? <UserCog className="h-4.5 w-4.5" /> : <UserPlus className="h-4.5 w-4.5" />}
+            </div>
+            <div>
+              <DialogTitle className="text-base font-semibold text-foreground">
+                {user ? "Edit member" : "Add team member"}
+              </DialogTitle>
+              <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+                {user
+                  ? "Update this member's profile details."
+                  : "Invite a new administrator to your workspace."}
+              </DialogDescription>
             </div>
           </div>
+        </DialogHeader>
 
-          <form
-            onSubmit={formik.handleSubmit}
-            className="flex-1 overflow-hidden flex flex-col"
-          >
-            <ScrollArea className="flex-1 px-8 py-6">
-              <div className="space-y-8 pb-4">
-                {/* SECTION 1: IDENTITY */}
-                <div className="space-y-5">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 bg-primary/5 rounded-lg border border-primary/10">
-                      <User className="h-3.5 w-3.5 text-primary" />
-                    </div>
-                    <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground/70">
-                      Identity Details
-                    </h3>
+        <form onSubmit={formik.handleSubmit}>
+          <ScrollArea className="max-h-[calc(90vh-180px)]">
+            <div className="px-6 py-5 space-y-5">
+              {/* Avatar Upload */}
+              <div className="flex flex-col items-center justify-center pb-2">
+                <div className="relative group cursor-pointer">
+                  <Avatar className="h-20 w-20 rounded-2xl border-2 border-slate-100 shadow-sm overflow-hidden">
+                    <AvatarImage src={formik.values.avatar as any} className="object-cover" />
+                    <AvatarFallback className="rounded-2xl bg-slate-50 text-slate-400 text-xl font-black">
+                      {formik.values.firstName?.[0]}
+                      {formik.values.lastName?.[0]}
+                    </AvatarFallback>
+                  </Avatar>
+                  
+                  <div className="absolute inset-0 bg-black/40 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                    <Camera className="h-5 w-5 text-white" />
                   </div>
-                  <div className="grid grid-cols-2 gap-5">
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="firstName"
-                        className="text-[11px] font-medium text-muted-foreground/80 ml-0.5"
-                      >
-                        First Name
-                      </Label>
-                      <Input
-                        id="firstName"
-                        name="firstName"
-                        value={formik.values.firstName}
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
-                        placeholder="e.g. Satoshi"
-                        className="bg-muted/10 border-border/60 shadow-none focus-visible:ring-primary/20 h-10 px-4 font-medium rounded-xl"
-                      />
-                      {formik.touched.firstName && formik.errors.firstName && (
-                        <p className="text-destructive text-[10px] font-medium mt-1 ml-0.5">
-                          {formik.errors.firstName}
-                        </p>
-                      )}
-                    </div>
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="lastName"
-                        className="text-[11px] font-medium text-muted-foreground/80 ml-0.5"
-                      >
-                        Last Name
-                      </Label>
-                      <Input
-                        id="lastName"
-                        name="lastName"
-                        value={formik.values.lastName}
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
-                        placeholder="e.g. Nakamoto"
-                        className="bg-muted/10 border-border/60 shadow-none focus-visible:ring-primary/20 h-10 px-4 font-medium rounded-xl"
-                      />
-                      {formik.touched.lastName && formik.errors.lastName && (
-                        <p className="text-destructive text-[10px] font-medium mt-1 ml-0.5">
-                          {formik.errors.lastName}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="email"
-                      className="text-[11px] font-medium text-muted-foreground/80 ml-0.5"
+
+                  <div className="absolute -bottom-1 -right-1">
+                    <ImageUploadWithCrop
+                      currentImage={formik.values.avatar as any || ""}
+                      onImageUpdate={(url) => formik.setFieldValue("avatar", url)}
+                      label=""
+                      aspectRatio={1}
+                      circularCrop={true}
+                      className="p-0"
+                      dropzoneClassName="h-7 w-7 rounded-full bg-white shadow-md border-slate-200 flex items-center justify-center p-0"
+                      previewClassName="hidden"
                     >
-                      Email Address
-                    </Label>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      value={formik.values.email}
-                      onChange={formik.handleChange}
-                      onBlur={formik.handleBlur}
-                      placeholder="name@company.com"
-                      disabled={!!user}
-                      className="bg-muted/10 border-border/60 shadow-none h-10 px-4 font-medium focus-visible:ring-primary/20 rounded-xl"
-                    />
-                    {formik.touched.email && formik.errors.email ? (
-                      <p className="text-destructive text-[10px] font-medium mt-1 ml-0.5">
-                        {formik.errors.email}
-                      </p>
-                    ) : (
-                      <p className="text-[10px] text-muted-foreground font-medium px-0.5 opacity-60 italic">
-                        The user will use this email to log in to the dashboard.
-                      </p>
-                    )}
+                      <div className="h-7 w-7 rounded-full bg-indigo-600 text-white flex items-center justify-center shadow-lg border-2 border-white">
+                        <Plus className="h-3.5 w-3.5" />
+                      </div>
+                    </ImageUploadWithCrop>
                   </div>
                 </div>
-
-                <Separator className="opacity-30" />
-
-                {/* SECTION 2: ACCESS CONTROL */}
-                <div className="space-y-5">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 bg-indigo-500/5 rounded-lg border border-indigo-500/10">
-                      <ShieldAlert className="h-3.5 w-3.5 text-indigo-500" />
-                    </div>
-                    <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground/70">
-                      Access Permissions
-                    </h3>
-                  </div>
-
-                  {!user && (
-                    <div className="space-y-4">
-                      <div className="p-3.5 bg-indigo-50/30 border border-indigo-100/50 rounded-xl">
-                        <div className="flex gap-3">
-                          <Info className="h-4 w-4 text-indigo-400 shrink-0 mt-0.5" />
-                          <p className="text-[11px] text-indigo-700/80 font-medium leading-relaxed">
-                            Select a role to define initial access. Roles can be
-                            adjusted later from the management panel.
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label className="text-[11px] font-medium text-muted-foreground/80 ml-0.5">
-                          Assigned Role
-                        </Label>
-                        <Select
-                          value={formik.values.role}
-                          onValueChange={(value) =>
-                            formik.setFieldValue("role", value)
-                          }
-                          disabled={user ? true : false}
-                        >
-                          <SelectTrigger className="h-11 font-medium bg-muted/10 border-border/60 shadow-none focus:ring-primary/20 rounded-xl transition-all">
-                            <SelectValue placeholder="Search available roles..." />
-                          </SelectTrigger>
-                          <SelectContent className="max-h-[250px] rounded-xl border-border/60 shadow-xl">
-                            {rolesLoading ? (
-                              <div className="p-6 flex items-center justify-center">
-                                <Loader2 className="h-5 w-5 animate-spin text-primary opacity-50" />
-                              </div>
-                            ) : (
-                              roles.map((role) => (
-                                <SelectItem
-                                  key={role.id}
-                                  value={role.id}
-                                  className="font-medium py-2.5 rounded-lg focus:bg-primary/5 focus:text-primary"
-                                >
-                                  <div className="flex flex-col gap-0.5">
-                                    <span className="text-sm">{role.name}</span>
-                                    <span className="text-[10px] text-muted-foreground/70 font-medium line-clamp-1">
-                                      {role.description ||
-                                        "No description provided."}
-                                    </span>
-                                  </div>
-                                </SelectItem>
-                              ))
-                            )}
-                          </SelectContent>
-                        </Select>
-                        {formik.touched.role && formik.errors.role && (
-                          <p className="text-destructive text-[10px] font-medium mt-1 ml-0.5">
-                            {formik.errors.role}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {user && (
-                    <div className="p-4 bg-amber-50/50 border border-amber-100/50 rounded-xl flex items-center gap-4">
-                      <div className="h-10 w-10 rounded-xl bg-amber-100/40 flex items-center justify-center text-amber-600">
-                        <ShieldAlert className="h-5 w-5" />
-                      </div>
-                      <div>
-                        <p className="text-xs font-semibold text-amber-700 mb-0.5">
-                          Role assignment is managed separately
-                        </p>
-                        <p className="text-[11px] text-amber-600/70 font-medium leading-snug">
-                          Use the "Edit Role & Access" action to change this
-                          user's platform permissions.
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </ScrollArea>
-
-            {/* Clean Footer */}
-            <div className="px-8 py-6 bg-muted/20 border-t border-border/40 flex items-center justify-between">
-              <div className="hidden sm:block">
-                <p className="text-[10px] font-semibold text-muted-foreground/40 uppercase tracking-widest mb-0.5">
-                  IAM Service
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-3">
+                  Profile Picture
                 </p>
-                <div className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground/80">
-                  <Globe className="h-3 w-3 opacity-50" />
-                  Management Console
+              </div>
+
+              {/* Name */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="firstName" className="text-xs font-medium text-muted-foreground">
+                    First name
+                  </Label>
+                  <Input
+                    id="firstName"
+                    name="firstName"
+                    value={formik.values.firstName}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    placeholder="First"
+                    className={cn(
+                      "h-9 text-sm",
+                      formik.touched.firstName && formik.errors.firstName && "border-destructive"
+                    )}
+                  />
+                  {formik.touched.firstName && formik.errors.firstName && (
+                    <p className="text-[11px] text-destructive">{formik.errors.firstName}</p>
+                  )}
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="lastName" className="text-xs font-medium text-muted-foreground">
+                    Last name
+                  </Label>
+                  <Input
+                    id="lastName"
+                    name="lastName"
+                    value={formik.values.lastName}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    placeholder="Last"
+                    className={cn(
+                      "h-9 text-sm",
+                      formik.touched.lastName && formik.errors.lastName && "border-destructive"
+                    )}
+                  />
+                  {formik.touched.lastName && formik.errors.lastName && (
+                    <p className="text-[11px] text-destructive">{formik.errors.lastName}</p>
+                  )}
                 </div>
               </div>
-              <div className="flex gap-3">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={() => onOpenChange(false)}
-                  className="font-medium text-xs px-5 h-10 rounded-xl"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={creating || updating || !formik.isValid}
+
+              {/* Email */}
+              <div className="space-y-1.5">
+                <Label htmlFor="email" className="text-xs font-medium text-muted-foreground">
+                  Email address
+                </Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={formik.values.email}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  placeholder="name@company.com"
+                  disabled={!!user}
                   className={cn(
-                    "font-medium text-xs px-8 h-10 rounded-xl shadow-sm transition-all active:scale-[0.98]",
-                    !creating && !updating && formik.isValid
-                      ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                      : "opacity-40",
+                    "h-9 text-sm",
+                    formik.touched.email && formik.errors.email && "border-destructive"
                   )}
-                >
-                  {creating || updating ? (
-                    <>
-                      <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" />
-                      {user ? "Updating..." : "Creating..."}
-                    </>
-                  ) : user ? (
-                    "Update User"
-                  ) : (
-                    "Initialize User"
-                  )}
-                </Button>
+                />
+                {formik.touched.email && formik.errors.email ? (
+                  <p className="text-[11px] text-destructive">{formik.errors.email}</p>
+                ) : (
+                  <p className="text-[11px] text-muted-foreground">
+                    Used to log in to the dashboard.
+                  </p>
+                )}
               </div>
+
+              {/* Role — only shown when creating */}
+              {!user && (
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-muted-foreground">
+                    Assigned role
+                  </Label>
+                  <Select
+                    value={formik.values.role}
+                    onValueChange={(v) => formik.setFieldValue("role", v)}
+                  >
+                    <SelectTrigger
+                      className={cn(
+                        "h-9 text-sm",
+                        formik.touched.role && formik.errors.role && "border-destructive"
+                      )}
+                    >
+                      <SelectValue placeholder="Select a role..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {rolesLoading ? (
+                        <div className="flex items-center justify-center py-4">
+                          <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                        </div>
+                      ) : (
+                        roles.map((role) => (
+                          <SelectItem key={role.id} value={role.id}>
+                            <div className="flex flex-col gap-0.5 py-0.5">
+                              <span className="text-sm font-medium">{role.name}</span>
+                              {role.description && (
+                                <span className="text-[11px] text-muted-foreground">
+                                  {role.description}
+                                </span>
+                              )}
+                            </div>
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                  {formik.touched.role && formik.errors.role && (
+                    <p className="text-[11px] text-destructive">{formik.errors.role}</p>
+                  )}
+                </div>
+              )}
+
+              {/* Edit-mode: role notice */}
+              {user && (
+                <div className="flex gap-3 p-3.5 bg-muted/40 border border-border/50 rounded-lg">
+                  <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    To change this member's role, use the{" "}
+                    <strong className="font-medium text-foreground">Edit role & access</strong>{" "}
+                    option from the member actions menu.
+                  </p>
+                </div>
+              )}
             </div>
-          </form>
-        </div>
+          </ScrollArea>
+
+          {/* Footer */}
+          <div className="px-6 py-4 border-t border-border/40 flex items-center justify-end gap-2">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => onOpenChange(false)}
+              className="h-9 px-4 font-medium"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              size="sm"
+              disabled={isLoading || !formik.isValid}
+              className="h-9 px-5 font-medium gap-2"
+            >
+              {isLoading && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+              {user ? "Save changes" : "Add member"}
+            </Button>
+          </div>
+        </form>
       </DialogContent>
     </Dialog>
   );

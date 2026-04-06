@@ -90,14 +90,18 @@ export const CREATE_EMAIL_TEMPLATE = gql`
 `;
 
 export const GET_EMAIL_TEMPLATES = gql`
-  query GetTemplates {
+  query GetEmailTemplates {
     getEmailTemplates {
       id
+      entity
       name
+      slug
       subject
       html
       json
       isActive
+      isDeletable
+      createdAt
       updatedAt
     }
   }

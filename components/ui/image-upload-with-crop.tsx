@@ -89,6 +89,7 @@ interface ImageUploadWithCropProps {
   disablePreview?: boolean;
   customUploadHandler?: (file: File) => Promise<string>;
   returnKeyOnly?: boolean;
+  children?: React.ReactNode;
 }
 
 function centerAspectCrop(
@@ -159,6 +160,7 @@ export const ImageUploadWithCrop = ({
   disablePreview = false,
   customUploadHandler,
   returnKeyOnly = false,
+  children,
 }: ImageUploadWithCropProps) => {
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [imgSrc, setImgSrc] = useState("");
@@ -436,7 +438,11 @@ export const ImageUploadWithCrop = ({
       <div className={cn("space-y-2", className)}>
         {label && <Label>{label}</Label>}
 
-        {currentImage && !disablePreview ? (
+        {children ? (
+          <div onClick={() => !uploading && fileInputRef.current?.click()} className="cursor-pointer">
+            {children}
+          </div>
+        ) : currentImage && !disablePreview ? (
           <div className="space-y-3">
             <div
               className={cn(

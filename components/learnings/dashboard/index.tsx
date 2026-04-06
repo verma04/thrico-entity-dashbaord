@@ -1,8 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { PlayCircle, Clock, BookOpen, ExternalLink } from "lucide-react";
+import { PlayCircle, Clock, BookOpen, ExternalLink, ArrowRight, Play, ShieldCheck, Timer } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { Button } from "@/components/ui/button";
 
 // ---------------------------------------------------------------------------
 // Static Content
@@ -73,9 +78,9 @@ function VideoCard({ video }: { video: (typeof VIDEOS)[0] }) {
   const [playing, setPlaying] = useState(false);
 
   return (
-    <article className="group bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 hover:-translate-y-0.5">
+    <article className="group bg-white rounded-lg border border-zinc-200 overflow-hidden hover:border-indigo-200 transition-all duration-300">
       {/* Thumbnail / Player */}
-      <div className="relative aspect-video bg-slate-100 overflow-hidden">
+      <div className="relative aspect-video bg-zinc-50 overflow-hidden border-b border-zinc-100">
         {playing ? (
           <iframe
             className="absolute inset-0 w-full h-full"
@@ -89,52 +94,58 @@ function VideoCard({ video }: { video: (typeof VIDEOS)[0] }) {
             <img
               src={`https://img.youtube.com/vi/${video.id}/hqdefault.jpg`}
               alt={video.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
             />
             {/* Overlay */}
-            <div className="absolute inset-0 bg-slate-900/30 group-hover:bg-slate-900/20 transition-colors" />
+            <div className="absolute inset-0 bg-zinc-950/20 group-hover:bg-zinc-950/10 transition-colors" />
+            
             {/* Play button */}
             <button
               onClick={() => setPlaying(true)}
               className="absolute inset-0 flex items-center justify-center"
               aria-label={`Play ${video.title}`}
             >
-              <div className="h-14 w-14 rounded-full bg-white/95 shadow-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-                <PlayCircle className="h-8 w-8 text-slate-900 fill-slate-900" />
+              <div className="h-12 w-12 rounded-full bg-white/95 shadow-md flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <Play className="h-5 w-5 text-zinc-900 fill-zinc-900 ml-1" />
               </div>
             </button>
+            
             {/* Duration badge */}
-            <div className="absolute bottom-3 right-3 bg-slate-900/80 text-white text-[10px] font-bold px-2 py-0.5 rounded-md backdrop-blur-sm flex items-center gap-1">
-              <Clock className="h-2.5 w-2.5" />
+            <div className="absolute bottom-2.5 right-2.5 bg-zinc-900/90 text-[10px] font-bold text-white px-2 py-0.5 rounded uppercase tracking-widest backdrop-blur-sm flex items-center gap-1.5">
+              <Clock size={10} />
               {video.duration}
-            </div>
-            {/* Category badge */}
-            <div className="absolute top-3 left-3 bg-white/90 text-slate-700 text-[10px] font-black px-2 py-0.5 rounded-md backdrop-blur-sm uppercase tracking-wider">
-              {video.category}
             </div>
           </>
         )}
       </div>
 
       {/* Content */}
-      <div className="p-5 space-y-2">
-        <h2 className="text-sm font-bold text-slate-900 leading-snug line-clamp-2 group-hover:text-blue-600 transition-colors">
+      <div className="p-5 space-y-3">
+        <div className="flex items-center justify-between">
+           <span className="text-[9px] font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded uppercase tracking-widest">
+              {video.category}
+           </span>
+           <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest italic">
+              {video.author}
+           </span>
+        </div>
+        <h2 className="text-sm font-bold text-zinc-900 leading-tight line-clamp-1 group-hover:text-indigo-600 transition-colors uppercase tracking-tight">
           {video.title}
         </h2>
-        <p className="text-xs text-slate-500 leading-relaxed line-clamp-3">
+        <p className="text-[11px] font-medium text-zinc-500 leading-relaxed line-clamp-2 uppercase tracking-tighter">
           {video.description}
         </p>
-        <div className="flex items-center justify-between pt-2">
-          <span className="text-[10px] font-semibold text-slate-400">{video.author}</span>
+        <div className="pt-3 border-t border-zinc-50 flex items-center justify-between">
+          <Button variant="ghost" className="h-7 px-0 text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-zinc-900 gap-2" onClick={() => setPlaying(true)}>
+             Initialize Stream <ArrowRight size={12} />
+          </Button>
           <a
             href={`https://www.youtube.com/watch?v=${video.id}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[10px] font-bold text-slate-400 hover:text-blue-600 flex items-center gap-1 transition-colors"
-            onClick={(e) => e.stopPropagation()}
+            className="text-[10px] font-bold text-zinc-300 hover:text-zinc-600 transition-colors"
           >
-            YouTube
-            <ExternalLink className="h-2.5 w-2.5" />
+            <ExternalLink size={12} />
           </a>
         </div>
       </div>
@@ -154,51 +165,64 @@ export default function LearningsDashboard() {
       : VIDEOS.filter((v) => v.category === activeCategory);
 
   return (
-    <div className="max-w-6xl mx-auto py-10 px-6 space-y-10 animate-in fade-in duration-700">
-      {/* Header */}
-      <div>
-        <div className="flex items-center gap-2 mb-2">
-          <BookOpen className="h-4 w-4 text-slate-400" />
-          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-            Knowledge Library
-          </span>
+    <EcosystemWrapper anonymized-1="learnings-hub">
+      <EcosystemHeader
+        title="Knowledge Registry"
+        description="Curated technical and community intelligence resources focused on exponential scale."
+        badgeText="Learnings"
+        icon={BookOpen}
+      />
+
+      <EcosystemActionBar shadow="none">
+        <div className="flex items-center justify-between w-full overflow-hidden">
+          <div className="flex items-center gap-2 px-1 shrink-0">
+            <ShieldCheck className="h-4 w-4 text-emerald-500" />
+            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest italic">
+              Verified Knowledge Node
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+             <div className="h-4 w-px bg-zinc-200 mx-2 shrink-0" />
+             {CATEGORIES.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setActiveCategory(cat)}
+                className={cn(
+                  "h-8 px-3 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap",
+                  activeCategory === cat
+                    ? "bg-zinc-900 text-white shadow-sm"
+                    : "bg-zinc-50 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 border border-zinc-100"
+                )}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
         </div>
-        <h1 className="text-3xl font-black tracking-tight text-slate-900">Learnings</h1>
-        <p className="text-sm text-slate-500 mt-1 font-medium max-w-xl">
-          Curated video resources to help you grow and manage your community more effectively.
-        </p>
-      </div>
+      </EcosystemActionBar>
 
-      {/* Category filter */}
-      <div className="flex gap-2 flex-wrap">
-        {CATEGORIES.map((cat) => (
-          <button
-            key={cat}
-            onClick={() => setActiveCategory(cat)}
-            className={cn(
-              "h-8 px-3 rounded-lg text-xs font-bold transition-all border",
-              activeCategory === cat
-                ? "bg-slate-900 text-white border-slate-900"
-                : "bg-white text-slate-500 border-slate-200 hover:border-slate-400 hover:text-slate-700"
-            )}
-          >
-            {cat}
-          </button>
-        ))}
-      </div>
-
-      {/* Video grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filtered.map((video) => (
-          <VideoCard key={video.id} video={video} />
-        ))}
-      </div>
-
-      {filtered.length === 0 && (
-        <div className="py-20 text-center">
-          <p className="text-sm font-semibold text-slate-400">No videos in this category yet.</p>
+      <EcosystemContainer className="p-6 lg:p-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filtered.map((video) => (
+            <VideoCard key={video.id} video={video} />
+          ))}
         </div>
-      )}
-    </div>
+
+        {filtered.length === 0 && (
+          <div className="py-32 text-center space-y-4">
+             <div className="h-12 w-12 rounded-xl bg-zinc-50 border border-zinc-100 flex items-center justify-center mx-auto opacity-50">
+                <Timer size={24} className="text-zinc-300" />
+             </div>
+            <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em]">No registry entries available in this segment.</p>
+          </div>
+        )}
+      </EcosystemContainer>
+
+      <style jsx global>{`
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      `}</style>
+    </EcosystemWrapper>
   );
 }

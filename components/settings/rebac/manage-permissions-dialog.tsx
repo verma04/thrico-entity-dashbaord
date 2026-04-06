@@ -4,38 +4,30 @@ import { useState } from "react";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-
 import { 
   useGetRoles, 
   useUpdateAdminUserRole, 
-  AdminUser, 
-  Role 
+  AdminUser 
 } from "@/graphql/actions";
 import { 
-  ShieldCheck, 
-  Info, 
-  ShieldAlert, 
-  Database, 
+  Shield, 
   Search, 
   CheckCircle2, 
   Loader2,
   Lock,
   Globe,
-  Settings,
-  Shield,
   Briefcase,
-  ChevronRight,
+  ShieldAlert,
+  Info,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -47,7 +39,6 @@ interface ManagePermissionsDialogProps {
   user: AdminUser;
 }
 
-
 export default function ManagePermissionsDialog({
   open,
   onOpenChange,
@@ -56,18 +47,19 @@ export default function ManagePermissionsDialog({
   const { toast } = useToast();
   const { data: rolesData, loading: rolesLoading } = useGetRoles();
   const [selectedRoleId, setSelectedRoleId] = useState<string>(user?.role?.id || "");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const [updateRole, { loading: saving }] = useUpdateAdminUserRole({
     onCompleted: () => {
       toast({
-        title: "Policy Assigned",
-        description: `Successfully updated ${user.firstName}'s access permissions.`,
+        title: "Permissions updated",
+        description: `Access for ${user.firstName} has been updated.`,
       });
       onOpenChange(false);
     },
     onError: (err: any) => {
       toast({
-        title: "IAM Update Failed",
+        title: "Update failed",
         description: err.message,
         variant: "destructive",
       });
@@ -75,6 +67,9 @@ export default function ManagePermissionsDialog({
   });
 
   const roles = rolesData?.getRoles || [];
+  const filteredRoles = roles.filter(role => 
+    role.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
   const selectedRole = roles.find((r) => r.id === selectedRoleId);
 
   const handleSave = () => {
@@ -89,205 +84,202 @@ export default function ManagePermissionsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[780px] p-0 overflow-hidden border-border/40 shadow-2xl bg-background rounded-2xl">
-        <div className="flex flex-col h-full max-h-[90vh]">
-          {/* Refined Header */}
-          <div className="bg-muted/20 px-8 py-6 border-b border-border/40">
-            <div className="flex items-center gap-4">
-              <div className="h-10 w-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-600 border border-indigo-500/20">
-                <Shield className="h-5 w-5" />
+      <DialogContent className="sm:max-w-[840px] p-0 overflow-hidden rounded-xl border-border/50">
+        <div className="flex flex-col h-[600px] max-h-[85vh]">
+          {/* Header */}
+          <DialogHeader className="px-6 py-5 border-b border-border/40 shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="h-9 w-9 rounded-lg bg-muted border border-border/60 flex items-center justify-center text-muted-foreground shrink-0">
+                <Shield className="h-4.5 w-4.5" />
               </div>
               <div>
-                <DialogTitle className="text-xl font-semibold tracking-tight text-foreground">
-                  Modify IAM Policy
+                <DialogTitle className="text-base font-semibold text-foreground">
+                  Manage member access
                 </DialogTitle>
-                <DialogDescription className="text-xs font-medium text-muted-foreground mt-1 opacity-80">
-                  Manage access permissions for <span className="text-primary font-semibold">{user?.firstName} {user?.lastName}</span>
+                <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+                  Update permissions for <span className="text-foreground font-medium">{user?.firstName} {user?.lastName}</span>
                 </DialogDescription>
               </div>
             </div>
-          </div>
+          </DialogHeader>
 
           <div className="flex-1 flex overflow-hidden">
-            {/* Left Sidebar: Role Selection */}
-            <div className="w-[300px] border-r border-border/40 bg-muted/5 flex flex-col">
-              <div className="p-4 border-b border-border/40">
+            {/* Left: Role Selection */}
+            <div className="w-[300px] border-r border-border/40 bg-muted/20 flex flex-col shrink-0">
+              <div className="p-4 border-b border-border/40 bg-background/50">
                 <div className="relative">
-                  <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-muted-foreground/50" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
                   <input
-                    placeholder="Search policies..."
-                    className="w-full bg-background border border-border/60 text-xs font-medium p-2.5 pl-9 rounded-xl shadow-none focus:ring-1 focus:ring-primary/20 outline-none transition-all"
+                    placeholder="Find a role..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full bg-background border border-border/60 text-xs py-1.5 pl-9 pr-3 rounded-lg outline-none focus:ring-1 focus:ring-primary/20 placeholder:text-muted-foreground/50 transition-all font-medium"
                   />
                 </div>
               </div>
               <ScrollArea className="flex-1">
-                <div className="p-3 space-y-1.5">
+                <div className="p-3 space-y-1">
                   {rolesLoading ? (
-                    <div className="p-10 flex flex-col items-center justify-center gap-4">
-                      <Loader2 className="h-6 w-6 animate-spin text-primary opacity-40" />
-                      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/50">Fetching Policies</p>
+                    <div className="p-8 flex flex-col items-center justify-center gap-2">
+                      <Loader2 className="h-5 w-5 animate-spin text-muted-foreground/40" />
+                      <span className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-wider">Loading roles</span>
                     </div>
+                  ) : filteredRoles.length === 0 ? (
+                    <div className="p-8 text-center text-xs text-muted-foreground italic">No roles found</div>
                   ) : (
-                    roles.map((role) => (
-                      <div
+                    filteredRoles.map((role) => (
+                      <button
                         key={role.id}
                         onClick={() => setSelectedRoleId(role.id)}
                         className={cn(
-                          "group p-3.5 rounded-xl cursor-pointer transition-all border border-transparent",
+                          "w-full text-left p-3 rounded-lg transition-all border border-transparent flex flex-col gap-0.5 group",
                           selectedRoleId === role.id 
-                            ? "bg-primary text-primary-foreground shadow-md shadow-primary/10" 
-                            : "hover:bg-primary/5 hover:border-primary/10"
+                            ? "bg-foreground text-background" 
+                            : "hover:bg-muted/60"
                         )}
                       >
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-xs font-semibold">{role.name}</span>
-                          {selectedRoleId === role.id && <CheckCircle2 className="h-3.5 w-3.5" />}
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-semibold truncate leading-none">{role.name}</span>
+                          {selectedRoleId === role.id && <CheckCircle2 className="h-3 w-3" />}
                         </div>
                         <p className={cn(
-                          "text-[10px] line-clamp-1 font-medium opacity-70",
-                          selectedRoleId === role.id ? "text-primary-foreground" : "text-muted-foreground"
+                          "text-[10px] line-clamp-1 leading-none font-medium mt-0.5",
+                          selectedRoleId === role.id ? "text-background/70" : "text-muted-foreground"
                         )}>
-                          {role.description || "No policy description provided."}
+                          {role.description || "No description"}
                         </p>
-                      </div>
+                      </button>
                     ))
                   )}
                 </div>
               </ScrollArea>
             </div>
 
-            {/* Right Pane: Policy Preview */}
-            <div className="flex-1 flex flex-col bg-background">
-              <ScrollArea className="flex-1 px-8 py-6">
-                {!selectedRole ? (
-                  <div className="h-full flex flex-col items-center justify-center text-center space-y-5 opacity-40">
-                    <div className="p-4 bg-muted/30 rounded-full">
-                      <ShieldAlert className="h-10 w-10 text-muted-foreground/50" />
+            {/* Right: Role Details */}
+            <div className="flex-1 overflow-hidden flex flex-col bg-background">
+              <ScrollArea className="flex-1">
+                <div className="p-6">
+                  {!selectedRole ? (
+                    <div className="h-[400px] flex flex-col items-center justify-center text-center px-8">
+                      <div className="h-12 w-12 rounded-full bg-muted border border-border/40 flex items-center justify-center mb-4">
+                        <ShieldAlert className="h-6 w-6 text-muted-foreground/40" />
+                      </div>
+                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Select a role</p>
+                      <p className="text-[11px] text-muted-foreground leading-relaxed max-w-[200px]">
+                        Choose a role from the sidebar to see its associated permissions.
+                      </p>
                     </div>
-                    <div className="space-y-1.5 px-6">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">No Policy Selected</p>
-                      <p className="text-[11px] text-muted-foreground/80 font-medium">Select a role from the sidebar to review its attached entity permissions and access scopes.</p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-10">
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2">
-                        <div className="p-1.5 bg-primary/5 rounded-lg border border-primary/10">
-                          <Briefcase className="h-3.5 w-3.5 text-primary" />
+                  ) : (
+                    <div className="space-y-8 animate-in fade-in duration-200">
+                      {/* Section: Overview */}
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <Briefcase className="h-3.5 w-3.5 text-muted-foreground" />
+                          <h4 className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">Role Summary</h4>
                         </div>
-                        <h4 className="text-xs font-semibold uppercase tracking-wider text-foreground/70">Attached Policy Details</h4>
-                      </div>
-                      <div className="p-5 rounded-2xl bg-muted/10 border border-border/40">
-                        <p className="text-xs font-semibold text-foreground mb-1.5">{selectedRole.name}</p>
-                        <p className="text-[11px] text-muted-foreground font-medium leading-relaxed italic opacity-80">{selectedRole.description || "Comprehensive policy for administrative actions."}</p>
-                      </div>
-                    </div>
-
-                    <Separator className="opacity-30" />
-
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2">
-                        <div className="p-1.5 bg-amber-500/5 rounded-lg border border-amber-500/10">
-                          <Lock className="h-3.5 w-3.5 text-amber-500" />
+                        <div className="p-4 rounded-xl border border-border/50 bg-muted/10">
+                          <p className="text-sm font-semibold text-foreground">{selectedRole.name}</p>
+                          <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                            {selectedRole.description || "No description provided for this role."}
+                          </p>
                         </div>
-                        <h4 className="text-xs font-semibold uppercase tracking-wider text-foreground/70">Admin Panel Privileges</h4>
                       </div>
-                      <div className="flex flex-wrap gap-2">
-                        {Object.entries(selectedRole.adminAccess || {})
-                          .filter(([_, val]) => val)
-                          .map(([key]) => (
-                            <Badge key={key} variant="outline" className="bg-amber-50/50 text-amber-700 border-amber-200/50 text-[10px] font-semibold px-2.5 py-0.5 rounded-lg">
-                              {key.replace(/([A-Z])/g, " $1")}
-                            </Badge>
-                          ))}
-                        {!Object.values(selectedRole.adminAccess || {}).some(Boolean) && (
-                          <p className="text-[11px] text-muted-foreground font-medium italic opacity-60">No elevated panel access defined in this policy.</p>
-                        )}
-                      </div>
-                    </div>
 
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2">
-                        <div className="p-1.5 bg-indigo-500/5 rounded-lg border border-indigo-500/10">
-                          <Globe className="h-3.5 w-3.5 text-indigo-500" />
+                      {/* Section: Admin Panes */}
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <Lock className="h-3.5 w-3.5 text-muted-foreground" />
+                          <h4 className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">Admin Privileges</h4>
                         </div>
-                        <h4 className="text-xs font-semibold uppercase tracking-wider text-foreground/70">Resource Permissions</h4>
+                        <div className="flex flex-wrap gap-1.5">
+                          {Object.entries(selectedRole.adminAccess || {})
+                            .filter(([_, val]) => val)
+                            .map(([key]) => (
+                              <Badge 
+                                key={key} 
+                                variant="outline" 
+                                className="bg-amber-50 border-amber-200/60 text-amber-700 text-[10px] font-medium px-2 py-0 rounded-md"
+                              >
+                                {key.replace(/([A-Z])/g, " $1")}
+                              </Badge>
+                            ))}
+                          {!Object.values(selectedRole.adminAccess || {}).some(Boolean) && (
+                            <p className="text-xs text-muted-foreground italic">No system-wide admin privileges.</p>
+                          )}
+                        </div>
                       </div>
-                      <div className="space-y-2.5">
-                        {selectedRole.modulePermissions?.map((perm: any) => (
-                          <div key={perm.id} className="flex items-center justify-between p-3.5 rounded-xl bg-muted/5 border border-border/40 hover:bg-muted/10 transition-all border-dashed">
-                            <div className="flex items-center gap-3">
-                              <div className="p-1.5 bg-background rounded-lg border border-border/60 shadow-sm">
-                                <ModuleIcon name={perm.module} className="h-4 w-4 text-primary opacity-80" />
+
+                      {/* Section: Module Permissions */}
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <Globe className="h-3.5 w-3.5 text-muted-foreground" />
+                          <h4 className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">Resource Permissions</h4>
+                        </div>
+                        <div className="grid gap-2">
+                          {selectedRole.modulePermissions?.map((perm: any) => (
+                            <div 
+                              key={perm.id} 
+                              className="flex items-center justify-between p-3 rounded-lg border border-border/40 bg-muted/5 group hover:bg-muted/10 transition-colors"
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className="h-7 w-7 rounded-md bg-background border border-border/60 flex items-center justify-center shrink-0">
+                                  <ModuleIcon name={perm.module} className="h-3.5 w-3.5 text-muted-foreground" />
+                                </div>
+                                <span className="text-xs font-semibold capitalize text-foreground/80">{perm.module}</span>
                               </div>
-                              <span className="text-xs font-semibold text-foreground/90 capitalize">{perm.module}</span>
+                              <div className="flex items-center gap-1">
+                                {perm.canRead && <Badge className="text-[10px] h-5 bg-background text-foreground border border-border/60 font-medium px-1.5 py-0 shadow-none">Read</Badge>}
+                                {perm.canCreate && <Badge className="text-[10px] h-5 bg-background text-foreground border border-border/60 font-medium px-1.5 py-0 shadow-none">Create</Badge>}
+                                {perm.canEdit && <Badge className="text-[10px] h-5 bg-background text-foreground border border-border/60 font-medium px-1.5 py-0 shadow-none">Edit</Badge>}
+                                {perm.canDelete && <Badge className="text-[10px] h-5 bg-background text-foreground border border-border/60 font-medium px-1.5 py-0 shadow-none">Delete</Badge>}
+                              </div>
                             </div>
-                            <div className="flex items-center gap-1.5">
-                              {perm.canRead && <Badge className="text-[9px] h-5 font-semibold bg-emerald-50 text-emerald-700 border-emerald-200/50 uppercase rounded-md shadow-none">Read</Badge>}
-                              {perm.canCreate && <Badge className="text-[9px] h-5 font-semibold bg-blue-50 text-blue-700 border-blue-200/50 uppercase rounded-md shadow-none">Create</Badge>}
-                              {perm.canEdit && <Badge className="text-[9px] h-5 font-semibold bg-amber-50 text-amber-700 border-amber-200/50 uppercase rounded-md shadow-none">Edit</Badge>}
-                              {perm.canDelete && <Badge className="text-[9px] h-5 font-semibold bg-rose-50 text-rose-700 border-rose-200/50 uppercase rounded-md shadow-none">Delete</Badge>}
+                          ))}
+                          {(!selectedRole.modulePermissions?.length) && (
+                            <div className="p-6 border border-dashed border-border/50 rounded-xl flex flex-col items-center justify-center text-center gap-2 opacity-50">
+                              <Info className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-[11px] font-medium text-muted-foreground">No resource permissions.</span>
                             </div>
-                          </div>
-                        ))}
-                        {(!selectedRole.modulePermissions || selectedRole.modulePermissions.length === 0) && (
-                          <div className="p-10 border border-dashed rounded-2xl flex flex-col items-center justify-center text-center space-y-2 opacity-50 bg-muted/5">
-                            <Info className="h-6 w-6 text-muted-foreground" />
-                            <p className="text-[11px] font-medium text-muted-foreground italic">No resource-level permissions attached to this policy.</p>
-                          </div>
-                        )}
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </ScrollArea>
             </div>
           </div>
 
-          {/* Clean Footer */}
-          <div className="px-8 py-6 bg-muted/20 border-t border-border/40 flex items-center justify-between">
-            <div className="hidden sm:block">
-              <p className="text-[10px] font-semibold text-muted-foreground/40 uppercase tracking-widest mb-0.5">IAM Service</p>
-              <div className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground/80">
-                <ShieldCheck className="h-3 w-3 opacity-50" />
-                Access Management Console
-              </div>
+          {/* Footer */}
+          <div className="px-6 py-4 border-t border-border/40 flex items-center justify-between shrink-0 bg-muted/10">
+            <div className="text-[10px] text-muted-foreground/60 font-medium uppercase tracking-widest flex items-center gap-1.5">
+              <Shield className="h-3 w-3" />
+              IAM Control
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               <Button
                 type="button"
                 variant="ghost"
+                size="sm"
                 onClick={() => onOpenChange(false)}
-                className="font-medium text-xs px-5 h-10 rounded-xl"
+                className="h-9 px-4 font-medium"
               >
                 Cancel
               </Button>
               <Button
                 type="button"
+                size="sm"
                 onClick={handleSave}
                 disabled={saving || !selectedRoleId || selectedRoleId === user?.role?.id}
-                className={cn(
-                  "font-medium text-xs px-8 h-10 rounded-xl shadow-sm transition-all active:scale-[0.98]",
-                  saving || !selectedRoleId || selectedRoleId === user?.role?.id
-                    ? "opacity-40"
-                    : "bg-primary text-primary-foreground hover:bg-primary/90"
-                )}
+                className="h-9 px-6 font-medium gap-2"
               >
-                {saving ? (
-                  <>
-                    <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" />
-                    Updating Policy...
-                  </>
-                ) : (
-                  "Apply IAM Policy"
-                )}
+                {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                Apply policy
               </Button>
             </div>
           </div>
         </div>
       </DialogContent>
     </Dialog>
-
   );
 }

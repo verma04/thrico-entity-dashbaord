@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Settings, MessageCircleQuestion, MessageSquare, ScrollText } from "lucide-react";
+import { Settings, MessageCircleQuestion, MessageSquare } from "lucide-react";
 import { PlatformSettingsLayout } from "@/components/ui/platform/layout";
 
 const TABS = [
@@ -10,12 +10,6 @@ const TABS = [
     label: "General Settings",
     icon: Settings,
     href: "/forums/settings",
-  },
-  {
-    id: "terms",
-    label: "Terms & Conditions",
-    icon: ScrollText,
-    href: "/forums/settings/term_and_conditions",
   },
   {
     id: "faq",
@@ -46,4 +40,3 @@ function ForumsSettingsLayout({ children }: { children: React.ReactNode }) {
 }
 
 export default ForumsSettingsLayout;
-

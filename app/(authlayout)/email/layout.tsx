@@ -48,7 +48,6 @@ function EmailLayout({ children }: { children: React.ReactNode }) {
   return (
     <MenuItemsLayout
       fixed={isTakeoverPage}
-      fullWidth={isTakeoverPage}
       fullHeight={isTakeoverPage}
       showAdminTabs={false}
       active={"email"}

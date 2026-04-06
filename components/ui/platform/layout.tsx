@@ -40,28 +40,6 @@ export function PlatformSettingsLayout({
 
   return (
     <div className="flex flex-col h-full space-y-8 animate-in fade-in duration-500">
-      {/* Breadcrumb */}
-      {breadcrumb && (
-        <div className="flex items-center gap-2 text-[11px] font-semibold text-zinc-400">
-          {breadcrumb.map((item, i) => (
-            <React.Fragment key={i}>
-              <span 
-                className={cn(
-                  "transition-colors",
-                  item.href ? "hover:text-zinc-600 cursor-pointer" : ""
-                )}
-                onClick={() => item.href && router.push(item.href)}
-              >
-                {item.label}
-              </span>
-              {i < breadcrumb.length - 1 && (
-                <ChevronRight size={10} className="text-zinc-300" strokeWidth={3} />
-              )}
-            </React.Fragment>
-          ))}
-        </div>
-      )}
-
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 py-2">
         <div className="flex items-center gap-5">
@@ -95,7 +73,9 @@ export function PlatformSettingsLayout({
                 onClick={() => router.push(tab.href)}
                 className={cn(
                   "relative flex items-center gap-2 px-4 py-2 rounded-[10px] text-[13px] font-semibold transition-all group",
-                  isActive ? "text-zinc-900" : "text-zinc-500 hover:text-zinc-700"
+                  isActive
+                    ? "text-zinc-900"
+                    : "text-zinc-500 hover:text-zinc-700",
                 )}
               >
                 {isActive && (
@@ -110,12 +90,12 @@ export function PlatformSettingsLayout({
                   strokeWidth={2}
                   className={cn(
                     "relative z-10 transition-colors",
-                    isActive ? "text-indigo-600" : "text-zinc-400 group-hover:text-zinc-500"
+                    isActive
+                      ? "text-indigo-600"
+                      : "text-zinc-400 group-hover:text-zinc-500",
                   )}
                 />
-                <span className="relative z-10">
-                  {tab.label}
-                </span>
+                <span className="relative z-10">{tab.label}</span>
               </button>
             );
           })}

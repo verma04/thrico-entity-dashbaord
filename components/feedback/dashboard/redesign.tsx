@@ -17,7 +17,10 @@ import {
   Frown,
   BarChart3,
   ArrowUpRight,
-  RefreshCw,
+  RotateCcw,
+  ShieldCheck,
+  Timer,
+  ArrowRight,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -39,6 +42,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import {
+  EcosystemKPI,
+  EcosystemCard,
+} from "@/components/layout/ecosystem/ecosystem-analytics";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 // ---------------------------------------------------------------------------
 // Mock recent feedback entries
@@ -84,16 +97,6 @@ const RECENT_FEEDBACK = [
     time: "1d ago",
     category: "Mentorship",
   },
-  {
-    id: "5",
-    member: "Karan J.",
-    avatar: "KJ",
-    sentiment: "neutral" as const,
-    message: "Forum search could be better. Hard to find older posts by topic.",
-    rating: 3,
-    time: "2d ago",
-    category: "Forums",
-  },
 ];
 
 const TREND_DATA = [
@@ -107,92 +110,11 @@ const TREND_DATA = [
 ];
 
 const SENTIMENT_CONFIG = {
-  positive: { icon: Smile, color: "text-emerald-600", bg: "bg-emerald-50 border-emerald-100", label: "Positive" },
-  neutral: { icon: Meh, color: "text-amber-600", bg: "bg-amber-50 border-amber-100", label: "Neutral" },
-  negative: { icon: Frown, color: "text-rose-600", bg: "bg-rose-50 border-rose-100", label: "Negative" },
+  positive: { icon: Smile, color: "text-emerald-600", bg: "bg-emerald-50", label: "Positive" },
+  neutral: { icon: Meh, color: "text-amber-600", bg: "bg-amber-50", label: "Neutral" },
+  negative: { icon: Frown, color: "text-rose-600", bg: "bg-rose-50", label: "Negative" },
 };
 
-// ---------------------------------------------------------------------------
-// KPI card
-// ---------------------------------------------------------------------------
-function KPICard({
-  label,
-  value,
-  icon: Icon,
-  color,
-  trend,
-}: {
-  label: string;
-  value: string;
-  icon: any;
-  color: string;
-  trend?: string;
-}) {
-  return (
-    <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm p-5 flex flex-col gap-3">
-      <div className="flex items-center justify-between">
-        <div className={cn("h-9 w-9 rounded-xl border flex items-center justify-center", color)}>
-          <Icon className="h-4 w-4" />
-        </div>
-        {trend && (
-          <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
-            <TrendingUp className="h-2.5 w-2.5" />
-            {trend}
-          </span>
-        )}
-      </div>
-      <div>
-        <p className="text-2xl font-black text-slate-900 tabular-nums">{value}</p>
-        <p className="text-[11px] font-medium text-slate-500 mt-0.5">{label}</p>
-      </div>
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Feedback Row
-// ---------------------------------------------------------------------------
-function FeedbackRow({ item }: { item: (typeof RECENT_FEEDBACK)[0] }) {
-  const conf = SENTIMENT_CONFIG[item.sentiment];
-  const SentimentIcon = conf.icon;
-
-  return (
-    <div className="group px-6 py-4 flex items-start gap-4 hover:bg-slate-50/50 transition-colors border-b border-slate-50 last:border-0 cursor-pointer">
-      <div className="h-9 w-9 rounded-full bg-linear-to-br from-slate-100 to-slate-200 flex items-center justify-center text-[10px] font-black text-slate-600 shrink-0 mt-0.5">
-        {item.avatar}
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-1">
-          <span className="text-xs font-bold text-slate-800">{item.member}</span>
-          <span className="text-[10px] font-bold text-slate-300">·</span>
-          <span className="text-[10px] font-semibold text-slate-400">{item.category}</span>
-          <span className="text-[10px] font-bold text-slate-300">·</span>
-          <span className="text-[10px] text-slate-400">{item.time}</span>
-        </div>
-        <p className="text-xs text-slate-600 leading-relaxed line-clamp-2">{item.message}</p>
-        <div className="flex items-center gap-1 mt-2">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Star
-              key={i}
-              className={cn(
-                "h-2.5 w-2.5",
-                i < item.rating ? "fill-amber-400 text-amber-400" : "text-slate-200"
-              )}
-            />
-          ))}
-        </div>
-      </div>
-      <div className={cn("flex items-center gap-1 px-2 py-1 rounded-lg border text-[10px] font-bold shrink-0", conf.bg, conf.color)}>
-        <SentimentIcon className="h-2.5 w-2.5" />
-        {conf.label}
-      </div>
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Main Page
-// ---------------------------------------------------------------------------
 export default function FeedbackDashboard() {
   const [timeRange, setTimeRange] = useState<TimeRange>(TimeRange.LAST_7_DAYS);
   const [search, setSearch] = useState("");
@@ -205,213 +127,269 @@ export default function FeedbackDashboard() {
       f.member.toLowerCase().includes(search.toLowerCase())
   );
 
+  const kpis = [
+    {
+      title: "Total Feedback",
+      value: loading ? "—" : (stats?.totalFeedback?.toLocaleString() ?? "0"),
+      icon: MessageSquare,
+      color: "text-zinc-900",
+      bg: "bg-zinc-100",
+    },
+    {
+      title: "Active Resolving",
+      value: loading ? "—" : (stats?.pendingFeedback?.toLocaleString() ?? "0"),
+      icon: Clock,
+      color: "text-amber-600",
+      bg: "bg-amber-50",
+    },
+    {
+      title: "Registry Resolved",
+      value: loading ? "—" : (stats?.resolvedFeedback?.toLocaleString() ?? "0"),
+      icon: CheckCircle2,
+      color: "text-emerald-600",
+      bg: "bg-emerald-50",
+    },
+    {
+      title: "Registry Score",
+      value: loading ? "—" : stats ? `${stats.satisfactionScore}/5` : "0/5",
+      icon: Star,
+      color: "text-indigo-600",
+      bg: "bg-indigo-50",
+    },
+  ];
+
   return (
-    <div className="max-w-7xl mx-auto py-10 px-6 space-y-8 animate-in fade-in duration-700">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <div className="h-2 w-2 rounded-full bg-indigo-500" />
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-              Sentiment Hub
+    <EcosystemWrapper anonymized-1="feedback-intelligence">
+      <EcosystemHeader
+        title="Sentiment Intelligence"
+        description="Monitor member feedback velocity, sentiment distribution, and resolution performance."
+        badgeText="Sentiment Hub"
+        icon={Smile}
+      />
+
+      <EcosystemActionBar shadow="none">
+        <div className="flex items-center justify-between w-full">
+          <div className="flex items-center gap-2 px-1">
+            <ShieldCheck className="h-4 w-4 text-emerald-500" />
+            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest italic">
+              Verified Sentiment Stream
             </span>
           </div>
-          <h1 className="text-3xl font-black tracking-tight text-slate-900">Feedback</h1>
-          <p className="text-sm text-slate-500 mt-1 font-medium">
-            Monitor member sentiment, resolve feedback, and track satisfaction trends.
-          </p>
-        </div>
-        <div className="flex items-center gap-3 self-start md:self-auto">
-          <Select value={timeRange} onValueChange={(v) => setTimeRange(v as TimeRange)}>
-            <SelectTrigger className="h-10 w-44 rounded-xl border-slate-200 text-xs font-bold text-slate-600 bg-white shadow-sm">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="rounded-2xl border-slate-100 shadow-xl">
-              <SelectItem value={TimeRange.LAST_24_HOURS} className="text-xs font-bold">Last 24 hours</SelectItem>
-              <SelectItem value={TimeRange.LAST_7_DAYS} className="text-xs font-bold">Last 7 days</SelectItem>
-              <SelectItem value={TimeRange.LAST_30_DAYS} className="text-xs font-bold">Last 30 days</SelectItem>
-              <SelectItem value={TimeRange.LAST_90_DAYS} className="text-xs font-bold">Last 90 days</SelectItem>
-            </SelectContent>
-          </Select>
-          <button
-            onClick={() => refetch()}
-            className="h-10 w-10 border border-slate-200 bg-white rounded-xl flex items-center justify-center text-slate-400 hover:text-indigo-600 transition-colors shadow-sm"
-          >
-            <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
-          </button>
-        </div>
-      </div>
 
-      {/* KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <KPICard
-          label="Total Feedback"
-          value={loading ? "—" : (stats?.totalFeedback?.toLocaleString() ?? "0")}
-          icon={MessageSquare}
-          color="bg-indigo-50 border-indigo-100 text-indigo-600"
-          trend="+8%"
-        />
-        <KPICard
-          label="Pending"
-          value={loading ? "—" : (stats?.pendingFeedback?.toLocaleString() ?? "0")}
-          icon={Clock}
-          color="bg-amber-50 border-amber-100 text-amber-600"
-        />
-        <KPICard
-          label="Resolved"
-          value={loading ? "—" : (stats?.resolvedFeedback?.toLocaleString() ?? "0")}
-          icon={CheckCircle2}
-          color="bg-emerald-50 border-emerald-100 text-emerald-600"
-          trend="+12%"
-        />
-        <KPICard
-          label="Satisfaction Score"
-          value={loading ? "—" : stats ? `${stats.satisfactionScore}/5` : "0/5"}
-          icon={Star}
-          color="bg-amber-50 border-amber-100 text-amber-500"
-        />
-      </div>
+          <div className="flex items-center gap-3">
+            <Select value={timeRange} onValueChange={(v) => setTimeRange(v as TimeRange)}>
+              <SelectTrigger className="h-9 w-[180px] rounded-lg border-zinc-200 bg-white text-xs font-semibold shadow-sm text-zinc-600">
+                <Timer className="h-3.5 w-3.5 mr-2 text-indigo-500" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={TimeRange.LAST_24_HOURS} className="text-xs">Last 24 hours</SelectItem>
+                <SelectItem value={TimeRange.LAST_7_DAYS} className="text-xs">Last 7 days</SelectItem>
+                <SelectItem value={TimeRange.LAST_30_DAYS} className="text-xs">Last 30 days</SelectItem>
+              </SelectContent>
+            </Select>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Trend Chart + Feed */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Chart */}
-          <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h3 className="text-sm font-bold text-slate-900">Feedback Trend</h3>
-                <p className="text-xs text-slate-400 font-medium mt-0.5">Sentiment breakdown over time</p>
+            <div className="h-4 w-px bg-zinc-200 mx-1" />
+
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-9 w-9 text-zinc-400 hover:text-indigo-600 rounded-lg transition-all"
+              onClick={() => refetch()}
+            >
+              <RotateCcw size={14} className={cn(loading && "animate-spin")} />
+            </Button>
+          </div>
+        </div>
+      </EcosystemActionBar>
+
+      <EcosystemContainer className="p-6 lg:p-8 space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {kpis.map((kpi, i) => (
+            <EcosystemKPI key={i} {...kpi} trendLabel="Metric Rate" />
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            <EcosystemCard
+              title="Sentiment Trajectory"
+              description="Daily feedback breakdown"
+              icon={TrendingUp}
+            >
+              <div className="h-64 w-full mt-6">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={TREND_DATA} barGap={4}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <XAxis
+                      dataKey="day"
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 10, fontWeight: 600, fill: "#94a3b8" }}
+                    />
+                    <YAxis
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 10, fontWeight: 600, fill: "#94a3b8" }}
+                    />
+                    <Tooltip
+                      contentStyle={{ backgroundColor: "#18181b", border: "none", borderRadius: "12px" }}
+                      itemStyle={{ color: "#fff", fontWeight: 700, fontSize: "11px" }}
+                      labelStyle={{ display: "none" }}
+                      cursor={{ fill: "#f8fafc" }}
+                    />
+                    <Bar dataKey="positive" fill="#18181b" radius={[2, 2, 0, 0]} barSize={12} />
+                    <Bar dataKey="neutral" fill="#71717a" radius={[2, 2, 0, 0]} barSize={12} />
+                    <Bar dataKey="negative" fill="#d4d4d8" radius={[2, 2, 0, 0]} barSize={12} />
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-6 mt-4 px-1">
                 {[
-                  { label: "Positive", color: "bg-emerald-500" },
-                  { label: "Neutral", color: "bg-amber-400" },
-                  { label: "Negative", color: "bg-rose-400" },
+                  { label: "Positive", color: "bg-zinc-900" },
+                  { label: "Neutral", color: "bg-zinc-500" },
+                  { label: "Negative", color: "bg-zinc-300" },
                 ].map((l) => (
-                  <div key={l.label} className="flex items-center gap-1.5">
+                  <div key={l.label} className="flex items-center gap-2">
                     <div className={cn("h-1.5 w-1.5 rounded-full", l.color)} />
-                    <span className="text-[10px] font-semibold text-slate-500">{l.label}</span>
+                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{l.label}</span>
                   </div>
                 ))}
               </div>
-            </div>
-            <div className="h-56">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={TREND_DATA} barGap={3}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f8fafc" />
-                  <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "#94a3b8", fontWeight: 700 }} />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "#94a3b8", fontWeight: 700 }} />
-                  <Tooltip
-                    contentStyle={{ backgroundColor: "#0f172a", border: "none", borderRadius: "12px", padding: "8px 12px" }}
-                    itemStyle={{ color: "#fff", fontWeight: 700, fontSize: "11px" }}
-                    labelStyle={{ color: "#94a3b8", fontSize: "10px", fontWeight: 900, textTransform: "uppercase" }}
-                    cursor={{ fill: "#f8fafc" }}
-                  />
-                  <Bar dataKey="positive" fill="#10b981" radius={[4, 4, 0, 0]} barSize={14} />
-                  <Bar dataKey="neutral" fill="#fbbf24" radius={[4, 4, 0, 0]} barSize={14} />
-                  <Bar dataKey="negative" fill="#f87171" radius={[4, 4, 0, 0]} barSize={14} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            </EcosystemCard>
+
+            <EcosystemCard
+              title="Recent Registry"
+              description="Live interaction feed"
+              icon={MessageSquare}
+              noPadding
+            >
+              <div className="divide-y divide-zinc-100">
+                {filtered.map((item) => {
+                  const conf = SENTIMENT_CONFIG[item.sentiment];
+                  const SentimentIcon = conf.icon;
+                  return (
+                    <div key={item.id} className="p-5 flex items-start gap-4 hover:bg-zinc-50/50 transition-all group">
+                      <Avatar className="h-9 w-9 border border-zinc-200 shadow-sm rounded-lg">
+                        <AvatarFallback className="bg-zinc-100 text-[10px] font-bold text-zinc-500 uppercase">
+                          {item.avatar}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-xs font-bold text-zinc-900">{item.member}</span>
+                          <span className="text-[10px] font-bold text-zinc-300">·</span>
+                          <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-tight">{item.category}</span>
+                          <span className="text-[10px] font-bold text-zinc-300">·</span>
+                          <span className="text-[10px] font-medium text-zinc-400 uppercase tracking-tighter">{item.time}</span>
+                        </div>
+                        <p className="text-xs text-zinc-500 leading-relaxed line-clamp-1">{item.message}</p>
+                        <div className="flex items-center gap-0.5 mt-2">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <Star
+                              key={i}
+                              size={10}
+                              className={cn(
+                                i < item.rating ? "fill-amber-400 text-amber-400" : "text-zinc-200"
+                              )}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      <div className={cn("px-2 py-1 rounded border text-[9px] font-bold tracking-tighter uppercase shrink-0 flex items-center gap-1", conf.bg, conf.color, "border-transparent")}>
+                        <SentimentIcon size={10} />
+                        {conf.label}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="p-4 border-t border-zinc-100 bg-zinc-50/30">
+                 <Button variant="ghost" className="w-full h-8 text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-zinc-900 gap-2">
+                    View Full Feed <ArrowRight size={12} />
+                 </Button>
+              </div>
+            </EcosystemCard>
           </div>
 
-          {/* Recent Feedback */}
-          <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-              <h3 className="text-sm font-bold text-slate-900">Recent Feedback</h3>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-indigo-400 transition-all text-slate-900 placeholder:text-slate-400"
-                />
+          <div className="space-y-6">
+            <EcosystemCard
+              title="Metric Distribution"
+              description="Aggregate sentiment breakdown"
+              icon={BarChart3}
+            >
+              <div className="space-y-5 mt-4">
+                {[
+                  { label: "Positive", pct: 63, color: "bg-zinc-900" },
+                  { label: "Neutral", pct: 27, color: "bg-zinc-500" },
+                  { label: "Negative", pct: 10, color: "bg-zinc-300" },
+                ].map((s) => (
+                  <div key={s.label} className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest leading-none">{s.label}</span>
+                      <span className="text-xs font-bold text-zinc-900 leading-none">{s.pct}%</span>
+                    </div>
+                    <div className="h-1.5 w-full bg-zinc-50 rounded-full overflow-hidden border border-zinc-100">
+                      <div
+                        className={cn("h-full rounded-full transition-all duration-700", s.color)}
+                        style={{ width: `${s.pct}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
-            <div>
-              {filtered.map((item) => (
-                <FeedbackRow key={item.id} item={item} />
-              ))}
-              {filtered.length === 0 && (
-                <div className="py-12 text-center text-sm text-slate-400">No feedback found.</div>
-              )}
+              
+              <div className="mt-10 flex flex-col items-center py-4 bg-zinc-50/50 rounded-xl border border-dashed border-zinc-200">
+                <div className="relative h-24 w-24 mb-4">
+                  <svg className="w-full h-full -rotate-90">
+                    <circle cx="48" cy="48" r="42" fill="transparent" stroke="#e4e4e7" strokeWidth="6" />
+                    <circle
+                      cx="48"
+                      cy="48"
+                      r="42"
+                      fill="transparent"
+                      stroke="#6366f1"
+                      strokeWidth="6"
+                      strokeDasharray="263.89"
+                      strokeDashoffset={263.89 * (1 - ((stats?.satisfactionScore ?? 4.2) / 5))}
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="text-xl font-bold text-zinc-900">
+                      {loading ? "—" : (stats?.satisfactionScore ?? 4.2)}
+                    </span>
+                    <span className="text-[7px] font-bold text-zinc-400 uppercase tracking-widest">Score</span>
+                  </div>
+                </div>
+                <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">
+                  Platform Satisfaction Rank
+                </p>
+              </div>
+            </EcosystemCard>
+
+            <div className="p-8 rounded-2xl bg-zinc-900 text-white shadow-xl relative overflow-hidden group">
+              <div className="relative z-10 space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-lg bg-indigo-500/20 flex items-center justify-center text-indigo-400 border border-indigo-400/20">
+                    <Zap size={18} />
+                  </div>
+                  <h4 className="text-sm font-bold uppercase tracking-wider">Insight Alert</h4>
+                </div>
+                <p className="text-xs font-medium text-zinc-400 leading-relaxed">
+                  Export behavioral reports and sentiment history across all interaction nodes.
+                </p>
+                <Button
+                  variant="link"
+                  className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest p-0 group-hover:translate-x-1 transition-transform"
+                >
+                  Generate Report <ArrowUpRight size={10} className="ml-2" />
+                </Button>
+              </div>
             </div>
           </div>
         </div>
-
-        {/* Sidebar */}
-        <div className="space-y-5">
-          {/* Sentiment breakdown */}
-          <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm p-5 space-y-5">
-            <h4 className="text-sm font-bold text-slate-900">Sentiment Breakdown</h4>
-            {[
-              { label: "Positive", pct: 63, color: "bg-emerald-500" },
-              { label: "Neutral", pct: 27, color: "bg-amber-400" },
-              { label: "Negative", pct: 10, color: "bg-rose-400" },
-            ].map((s) => (
-              <div key={s.label} className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-slate-600 font-medium">{s.label}</span>
-                  <span className="text-xs font-black text-slate-800">{s.pct}%</span>
-                </div>
-                <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                  <div
-                    className={cn("h-full rounded-full transition-all duration-700", s.color)}
-                    style={{ width: `${s.pct}%` }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* CSAT Ring */}
-          <div className="bg-white rounded-2xl border border-slate-200/60 shadow-sm p-5 space-y-4">
-            <h4 className="text-sm font-bold text-slate-900">Satisfaction Score</h4>
-            <div className="flex flex-col items-center py-2">
-              <div className="relative h-28 w-28">
-                <svg className="w-full h-full -rotate-90">
-                  <circle cx="56" cy="56" r="48" fill="transparent" stroke="#f1f5f9" strokeWidth="10" />
-                  <circle
-                    cx="56"
-                    cy="56"
-                    r="48"
-                    fill="transparent"
-                    stroke="#6366f1"
-                    strokeWidth="10"
-                    strokeDasharray="301.6"
-                    strokeDashoffset={301.6 * (1 - ((stats?.satisfactionScore ?? 4.2) / 5))}
-                    strokeLinecap="round"
-                    className="transition-all duration-1000"
-                  />
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-3xl font-black text-slate-900">
-                    {loading ? "—" : (stats?.satisfactionScore ?? 4.2)}
-                  </span>
-                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider">out of 5</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Cta */}
-          <div className="bg-slate-950 rounded-2xl p-5 text-white space-y-4">
-            <BarChart3 className="h-5 w-5 text-indigo-400" />
-            <div>
-              <p className="text-sm font-bold">Deep Dive Analytics</p>
-              <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-                Export full feedback reports and view member-level sentiment history.
-              </p>
-            </div>
-            <button className="w-full h-9 bg-white text-slate-950 rounded-xl text-xs font-bold flex items-center justify-center gap-2 hover:bg-slate-100 transition-colors">
-              View Reports
-              <ArrowUpRight className="h-3.5 w-3.5" />
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+      </EcosystemContainer>
+    </EcosystemWrapper>
   );
 }

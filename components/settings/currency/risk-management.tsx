@@ -1,16 +1,8 @@
 "use client";
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { ShieldAlert, Loader2, Info } from "lucide-react";
 import {
   useGetEntityCurrencyConfig,
@@ -21,8 +13,7 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
 export function RiskManagement() {
-  const { data: configData, loading: loadingConfig } =
-    useGetEntityCurrencyConfig();
+  const { data: configData, loading: loadingConfig } = useGetEntityCurrencyConfig();
   const { data: convData, loading: loadingConv } = useGetTCConversionCap();
 
   const [tcCaps, setTcCaps] = useState({
@@ -31,8 +22,7 @@ export function RiskManagement() {
     maxTcPerEntity: 0,
   });
 
-  const currencyName =
-    configData?.getEntityCurrencyConfig?.currencyName || "TC";
+  const currencyName = configData?.getEntityCurrencyConfig?.currencyName || "TC";
 
   useEffect(() => {
     if (convData?.getTCConversionCap) {
@@ -51,121 +41,85 @@ export function RiskManagement() {
 
   if (loadingConfig || loadingConv) {
     return (
-      <div className="flex items-center justify-center p-8">
-        <Loader2 className="h-6 w-6 animate-spin" />
+      <div className="flex items-center justify-center py-16">
+        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
       </div>
     );
   }
 
+  const capFields = [
+    {
+      key: "maxTcPerDay" as const,
+      label: `Max ${currencyName} per Day`,
+      description: "Resets every 24 hours",
+    },
+    {
+      key: "maxTcPerMonth" as const,
+      label: `Max ${currencyName} per Month`,
+      description: "Resets on the 1st of each month",
+    },
+    {
+      key: "maxTcPerEntity" as const,
+      label: `Global Limit (Entity Total)`,
+      description: "Hard ceiling — no more generation once reached",
+    },
+  ];
+
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
-      {/* Risk Logic Advisory */}
-      <div className="rounded-xl border border-orange-500/20 bg-orange-500/5 p-4 flex gap-4 items-start">
-        <div className="h-10 w-10 rounded-lg bg-orange-500/10 flex items-center justify-center shrink-0">
-          <Info className="h-5 w-5 text-orange-600" />
-        </div>
+    <div className="max-w-2xl space-y-6">
+      {/* Info Banner */}
+      <div className="flex items-start gap-3 p-4 rounded-lg bg-amber-50/60 border border-amber-100">
+        <Info className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
         <div className="space-y-1">
-          <h4 className="text-sm font-bold text-orange-900 dark:text-orange-100">
-            How Risk Logic Works
-          </h4>
-          <p className="text-xs text-orange-800/80 dark:text-orange-200/80 leading-relaxed text-pretty">
-            These guardrails control the <strong>Liquidity Velocity</strong> of
-            your {currencyName}. They prevent sudden depletion of your entity's
-            treasury by setting hard ceilings on how much {currencyName} can be
-            minted through TC conversions daily and monthly.
-            <span className="block mt-2 font-medium italic">
-              A Global Limit (Entity) is your ultimate emergency brake—once hit,
-              no more {currencyName} can be generated until the limit is raised.
-              If you need help setting these safely, please contact the Thrico
-              team.
-            </span>
+          <p className="text-xs font-semibold text-amber-900">How risk controls work</p>
+          <p className="text-xs text-amber-800/80 leading-relaxed">
+            These caps control how much {currencyName} can be minted through TC conversions. Setting a <strong>Global Limit</strong> acts as an emergency brake — once hit, no more {currencyName} can be generated until it is raised.
           </p>
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ShieldAlert className="h-5 w-5 text-red-500" />
-            Financial Guardrails
-          </CardTitle>
-          <CardDescription>
-            {currencyName} generation and movement caps
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <Label>Max {currencyName} Per Day</Label>
-                <span className="text-muted-foreground font-mono">
-                  {tcCaps.maxTcPerDay}
-                </span>
-              </div>
-              <Input
-                type="number"
-                value={tcCaps.maxTcPerDay}
-                onChange={(e) =>
-                  setTcCaps({
-                    ...tcCaps,
-                    maxTcPerDay: parseInt(e.target.value),
-                  })
-                }
-              />
-              <Progress value={45} className="h-1" />
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <Label>Max {currencyName} Per Month</Label>
-                <span className="text-muted-foreground font-mono">
-                  {tcCaps.maxTcPerMonth}
-                </span>
-              </div>
-              <Input
-                type="number"
-                value={tcCaps.maxTcPerMonth}
-                onChange={(e) =>
-                  setTcCaps({
-                    ...tcCaps,
-                    maxTcPerMonth: parseInt(e.target.value),
-                  })
-                }
-              />
-              <Progress value={60} className="h-1" />
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <Label>Max {currencyName} Global Limit (Entity)</Label>
-                <span className="text-muted-foreground font-mono">
-                  {tcCaps.maxTcPerEntity}
-                </span>
-              </div>
-              <Input
-                type="number"
-                value={tcCaps.maxTcPerEntity}
-                onChange={(e) =>
-                  setTcCaps({
-                    ...tcCaps,
-                    maxTcPerEntity: parseInt(e.target.value),
-                  })
-                }
-              />
-              <Progress value={20} className="h-1" />
-            </div>
+      {/* Guardrails Card */}
+      <div className="rounded-xl border border-border bg-card p-5 space-y-5">
+        <div className="flex items-center gap-2">
+          <div className="h-8 w-8 rounded-lg bg-rose-50 flex items-center justify-center">
+            <ShieldAlert className="h-4 w-4 text-rose-600" />
           </div>
+          <div>
+            <p className="text-sm font-semibold text-foreground">Generation Caps</p>
+            <p className="text-xs text-muted-foreground">{currencyName} minting limits via TC conversions</p>
+          </div>
+        </div>
 
+        <div className="space-y-4">
+          {capFields.map((field) => (
+            <div key={field.key} className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <Label className="text-xs font-semibold text-foreground">{field.label}</Label>
+                <span className="text-[10px] text-muted-foreground">{field.description}</span>
+              </div>
+              <Input
+                type="number"
+                className="font-mono"
+                value={tcCaps[field.key]}
+                onChange={(e) =>
+                  setTcCaps({ ...tcCaps, [field.key]: parseInt(e.target.value) })
+                }
+              />
+            </div>
+          ))}
+        </div>
+
+        <div className="pt-4 border-t border-border flex justify-end">
           <Button
-            className="w-full bg-red-600 hover:bg-red-700"
             onClick={() => updateTcCap({ variables: { input: tcCaps } })}
             disabled={updating}
+            className="min-w-[160px] gap-2"
           >
-            {updating && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-            Update Guardrails
+            {updating && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+            Save Guardrails
           </Button>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

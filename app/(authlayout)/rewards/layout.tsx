@@ -2,48 +2,75 @@
 
 import * as React from "react";
 import {
-  LayoutDashboard,
   Ticket,
   Package,
   History,
-  BarChart3,
+  LayoutDashboard,
   ShieldAlert,
-  Dices,
-  RectangleHorizontal,
-  RefreshCw,
+  Plus,
+  Coins,
+  Network,
 } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
 
 function RewardsLayout({ children }: { children: React.ReactNode }) {
   const items = [
     {
+      key: "",
+      label: "Overview",
+      icon: <LayoutDashboard className="h-4 w-4" />,
+    },
+    {
       key: "vouchers",
-      label: "Vouchers",
+      label: "Inventory",
+      icon: <Package className="h-4 w-4" />,
+      section: "Modules",
+    },
+    {
+      key: "coupons",
+      label: "Catalog",
       icon: <Ticket className="h-4 w-4" />,
       section: "Modules",
     },
     {
-      key: "engagement/spin-wheel",
-      label: "Engagement",
-      icon: <Dices className="h-4 w-4" />,
+      key: "inventory",
+      label: "Restock",
+      icon: <Coins className="h-4 w-4" />,
       section: "Modules",
     },
     {
-      key: "analytics",
-      label: "Analytics",
-      icon: <BarChart3 className="h-4 w-4" />,
-      section: "Management",
+      key: "redemptions",
+      label: "Audit Trail",
+      icon: <History className="h-4 w-4" />,
+      section: "Registry",
     },
     {
       key: "fraud",
-      label: "Fraud",
+      label: "Governance",
       icon: <ShieldAlert className="h-4 w-4" />,
-      section: "Management",
+      section: "Registry",
+    },
+    {
+      key: "settings",
+      label: "Partner Network",
+      icon: <Network className="h-4 w-4" />,
+      section: "Collaboration",
+    },
+    {
+      key: "coupons/create",
+      label: "Add Reward",
+      icon: <Plus className="h-4 w-4" />,
+      section: "Actions",
     },
   ];
 
   return (
-    <MenuItemsLayout active="rewards" items={items} showAdminTabs={false}>
+    <MenuItemsLayout
+      className="p-0"
+      active="rewards"
+      items={items}
+      hideDefaultTabs={true}
+    >
       {children}
     </MenuItemsLayout>
   );

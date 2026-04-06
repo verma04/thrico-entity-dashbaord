@@ -111,7 +111,7 @@ export default function CreateOfferPage() {
   return (
     <div className="flex flex-col h-full bg-background overflow-hidden rounded-t-[inherit]">
       {/* Header section - Sticky */}
-      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b px-6 py-4">
+      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 border-b px-6 py-4">
         <div className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-3 mb-1">

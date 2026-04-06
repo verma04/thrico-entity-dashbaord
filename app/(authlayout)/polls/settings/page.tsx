@@ -1,51 +1,57 @@
 "use client";
 
-import { ModuleSettingsForm } from "@/components/common/module-settings-form";
+import React from "react";
 import { useEntitySettings, useUpdateEntitySettings } from "@/graphql/actions";
-import { Loader2 } from "lucide-react";
+import { BarChart2, ShieldCheck, Zap } from "lucide-react";
+import { PlatformSettingsPage, SettingsField } from "@/components/ui/platform/settings-page";
+import { toast } from "sonner";
+
+const FIELDS: SettingsField[] = [
+  {
+    key: "allowPolls",
+    label: "Allow Poll Creation",
+    description: "Enable or disable the ability for members to create new polling modules.",
+    icon: ShieldCheck,
+    section: "Engagement Controls",
+  },
+  {
+    key: "autoApprovePolls",
+    label: "Auto Approve Polls",
+    description: "Automatically validate and publish new polls without review.",
+    icon: Zap,
+    section: "Automation Protocols",
+  },
+];
 
 const PollsSettings = () => {
   const { data, loading } = useEntitySettings();
   const [update, { loading: loadingBtn }] = useUpdateEntitySettings({});
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
-  const fields = [
-    {
-      key: "allowPolls",
-      label: "Allow Poll Creation",
-      description: "Enable or disable the ability to create new polls",
-    },
-    {
-      key: "autoApprovePolls",
-      label: "Auto Approve Polls",
-      description: "Automatically approve new poll creation requests",
-    },
-  ];
+  const handleSave = async (settings: any) => {
+    try {
+      await update({
+        variables: {
+          input: settings,
+        },
+      });
+      toast.success("Polls settings updated successfully");
+    } catch (error) {
+      toast.error("Failed to update polls configuration");
+      throw error;
+    }
+  };
 
   return (
-    <ModuleSettingsForm
-      title="Polls Settings"
-      description="Configure polls module settings"
-      fields={fields}
-      onSave={(settings) => {
-        update({
-          variables: {
-            input: settings,
-          },
-        });
-      }}
-      isLoading={loadingBtn}
-      data={{
-        allowPolls: data?.getEntitySettings?.allowPolls ?? true,
-        autoApprovePolls: data?.getEntitySettings?.autoApprovePolls ?? false,
-      }}
+    <PlatformSettingsPage
+      title="Opinion Framework"
+      description="Configure public sentiment gathering and automated polling workflows."
+      headerIcon={BarChart2}
+      badge="Sentiment"
+      fields={FIELDS}
+      data={data?.getEntitySettings}
+      loading={loading}
+      onSave={handleSave}
+      isSaving={loadingBtn}
     />
   );
 };

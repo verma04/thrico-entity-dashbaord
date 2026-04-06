@@ -7,7 +7,15 @@ import {
   PopoverTrigger,
   PopoverContent,
 } from "@/components/ui/popover";
-import { Globe2, ExternalLink, Copy, Link2, BadgeCheck, Check, ArrowRight } from "lucide-react";
+import {
+  Globe2,
+  ExternalLink,
+  Copy,
+  Link2,
+  BadgeCheck,
+  Check,
+  ArrowRight,
+} from "lucide-react";
 import {
   getCustomDomain,
   getThricoDomain,
@@ -24,11 +32,14 @@ const Visit = () => {
     ? process.env.NEXT_PUBLIC_SITE_URL
     : "thrico.community";
 
-  const thricoDomainUrl = data?.getThricoDomain?.domain 
-    ? `https://${data.getThricoDomain.domain}.${NEXT_PUBLIC_SITE_URL}`
-    : `https://demo.${NEXT_PUBLIC_SITE_URL}`;
+  const hasThricoDomain = !!data?.getThricoDomain?.domain;
+  const hasCustomDomain = !!custom?.getCustomDomain?.domain;
 
-  const customDomainUrl = custom?.getCustomDomain?.domain
+  if (!hasThricoDomain && !hasCustomDomain) return null;
+
+  const thricoDomainUrl = `https://${data?.getThricoDomain?.domain}.${NEXT_PUBLIC_SITE_URL}`;
+
+  const customDomainUrl = hasCustomDomain
     ? `https://${custom.getCustomDomain.domain}`
     : null;
 
@@ -43,14 +54,32 @@ const Visit = () => {
     }
   };
 
-  const DomainCard = ({ title, url, icon: Icon, colorClass, bgClass, isCustom }: any) => (
+  const DomainCard = ({
+    title,
+    url,
+    icon: Icon,
+    colorClass,
+    bgClass,
+    isCustom,
+  }: any) => (
     <div className="group relative flex flex-col gap-2 rounded-xl p-3 hover:bg-zinc-50 border border-transparent hover:border-zinc-100 transition-all duration-300">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className={cn("flex size-7 items-center justify-center rounded-lg shadow-sm border", bgClass, colorClass)}>
-            <Icon size={14} className={isCustom ? "text-emerald-600" : "text-indigo-600"} />
+          <div
+            className={cn(
+              "flex size-7 items-center justify-center rounded-lg shadow-sm border",
+              bgClass,
+              colorClass,
+            )}
+          >
+            <Icon
+              size={14}
+              className={isCustom ? "text-emerald-600" : "text-indigo-600"}
+            />
           </div>
-          <span className="text-[13px] font-bold text-zinc-800 tracking-tight">{title}</span>
+          <span className="text-[13px] font-bold text-zinc-800 tracking-tight">
+            {title}
+          </span>
           {isCustom && (
             <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-emerald-600 border border-emerald-100/50">
               Verified
@@ -63,7 +92,11 @@ const Visit = () => {
             className="flex size-7 items-center justify-center rounded-md text-zinc-400 hover:text-indigo-600 hover:bg-white border border-transparent hover:border-zinc-200 shadow-sm transition-all"
             title="Copy URL"
           >
-            {copied === url ? <Check size={13} className="text-emerald-500" /> : <Copy size={13} />}
+            {copied === url ? (
+              <Check size={13} className="text-emerald-500" />
+            ) : (
+              <Copy size={13} />
+            )}
           </button>
           <a
             href={url}
@@ -83,7 +116,7 @@ const Visit = () => {
           rel="noopener noreferrer"
           className="text-[12.5px] font-medium text-zinc-500 group-hover:text-indigo-600 truncate block transition-colors group-hover:underline decoration-indigo-200 underline-offset-4"
         >
-          {url.replace(/^https?:\/\//, '')}
+          {url.replace(/^https?:\/\//, "")}
         </a>
       </div>
     </div>
@@ -97,10 +130,10 @@ const Visit = () => {
           <span>Visit Site</span>
         </button>
       </PopoverTrigger>
-      
-      <PopoverContent 
-        className="w-[340px] p-0 rounded-2xl border border-zinc-200/80 shadow-[0_12px_24px_-8px_rgba(0,0,0,0.15)] overflow-hidden outline-none" 
-        align="end" 
+
+      <PopoverContent
+        className="w-[340px] p-0 rounded-2xl border border-zinc-200/80 shadow-[0_12px_24px_-8px_rgba(0,0,0,0.15)] overflow-hidden outline-none"
+        align="end"
         sideOffset={14}
       >
         <div className="bg-linear-to-b from-zinc-50/80 to-white px-5 py-4 border-b border-zinc-100/80">
@@ -108,44 +141,62 @@ const Visit = () => {
             Active Deployments
           </h3>
           <p className="text-[12px] text-zinc-500 max-w-[260px] mt-1 leading-relaxed">
-            Manage and securely navigate to your publicly accessible community networks.
+            Manage and securely navigate to your publicly accessible community
+            networks.
           </p>
         </div>
-        
+
         <div className="p-2 space-y-0.5 bg-white">
-          <DomainCard 
-            title="Thrico Network" 
-            url={thricoDomainUrl} 
-            icon={Globe2}
-            bgClass="bg-indigo-50"
-            colorClass="border-indigo-100/50"
-          />
-          
-          {customDomainUrl ? (
-            <DomainCard 
-              title="Custom Domain" 
-              url={customDomainUrl} 
+          {hasThricoDomain && (
+            <DomainCard
+              title="Thrico Network"
+              url={thricoDomainUrl}
+              icon={Globe2}
+              bgClass="bg-indigo-50"
+              colorClass="border-indigo-100/50"
+            />
+          )}
+
+          {hasCustomDomain ? (
+            <DomainCard
+              title="Custom Domain"
+              url={customDomainUrl}
               icon={BadgeCheck}
               bgClass="bg-emerald-50"
               colorClass="border-emerald-100/50"
               isCustom={true}
             />
           ) : (
-            <Link href="/settings" className="block px-3 py-3 mx-1 mt-1 rounded-xl bg-zinc-50/50 border border-dashed border-zinc-200 flex flex-col items-center justify-center text-center gap-2 group hover:bg-zinc-50 hover:border-zinc-300 transition-colors cursor-pointer outline-none">
-               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white shadow-sm border border-zinc-100 text-zinc-400 group-hover:text-indigo-600 transition-colors">
-                 <Globe2 size={14} />
-               </div>
-               <div>
-                 <span className="block text-[12px] font-bold text-zinc-700 group-hover:text-indigo-600 transition-colors">Connect Custom Domain</span>
-                 <span className="block text-[11px] text-zinc-500 mt-0.5 px-2">Mask the Thrico subdomain with your own brand.</span>
-               </div>
+            <Link
+              href="/settings"
+              className="block px-3 py-3 mx-1 mt-1 rounded-xl bg-zinc-50/50 border border-dashed border-zinc-200 flex flex-col items-center justify-center text-center gap-2 group hover:bg-zinc-50 hover:border-zinc-300 transition-colors cursor-pointer outline-none"
+            >
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white shadow-sm border border-zinc-100 text-zinc-400 group-hover:text-indigo-600 transition-colors">
+                <Globe2 size={14} />
+              </div>
+              <div>
+                <span className="block text-[12px] font-bold text-zinc-700 group-hover:text-indigo-600 transition-colors">
+                  Connect Custom Domain
+                </span>
+                <span className="block text-[11px] text-zinc-500 mt-0.5 px-2">
+                  Mask the Thrico subdomain with your own brand.
+                </span>
+              </div>
             </Link>
           )}
         </div>
-        
-        <Link href="/settings" className="block bg-zinc-50/80 border-t border-zinc-100 p-3 hover:bg-zinc-100/80 transition-colors outline-none group flex items-center justify-between">
-           <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest group-hover:text-indigo-600 transition-colors pl-2">Domain Settings</span>
-           <ArrowRight size={14} className="text-zinc-400 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all" />
+
+        <Link
+          href="/settings"
+          className="block bg-zinc-50/80 border-t border-zinc-100 p-3 hover:bg-zinc-100/80 transition-colors outline-none group flex items-center justify-between"
+        >
+          <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest group-hover:text-indigo-600 transition-colors pl-2">
+            Domain Settings
+          </span>
+          <ArrowRight
+            size={14}
+            className="text-zinc-400 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all"
+          />
         </Link>
       </PopoverContent>
     </Popover>

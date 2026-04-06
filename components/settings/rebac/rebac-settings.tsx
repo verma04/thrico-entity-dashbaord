@@ -1,78 +1,103 @@
 "use client";
 
 import { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Users, ShieldCheck, ShieldAlert } from "lucide-react";
+import { motion } from "framer-motion";
 import UsersTab from "./users-tab";
 import RolesTab from "./roles-tab";
-
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { cn } from "@/lib/utils";
 
+const TABS = [
+  { id: "users", label: "Team Members", icon: Users },
+  { id: "roles", label: "Roles & Permissions", icon: ShieldAlert },
+] as const;
+
+type TabId = (typeof TABS)[number]["id"];
+
 export default function RebacSettings() {
-  const [activeTab, setActiveTab] = useState("users");
+  const [activeTab, setActiveTab] = useState<TabId>("users");
 
   return (
     <EcosystemWrapper>
-      <EcosystemHeader
-        title="Access Control"
-        description="Manage administrative identities, resource policies, and platform security scopes."
-        breadcrumb="IAM & Governance"
-        icon={ShieldCheck}
-        badgeText="Security Center"
-        showLiveIndicator={false}
-      />
-
-      {/* Header & Tabs */}
-      <div className="px-6 py-4 border-b border-border/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-background/50 backdrop-blur-sm">
-        <div className="flex items-center gap-1 bg-muted/30 p-1 rounded-xl border border-border/40 w-fit">
-          <button
-            onClick={() => setActiveTab("users")}
-            className={cn(
-              "flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-medium transition-all duration-200",
-              activeTab === "users"
-                ? "bg-background text-foreground shadow-sm ring-1 ring-border/50"
-                : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
-            )}
-          >
-            <Users className="h-3.5 w-3.5" />
-            Identity Directory
-          </button>
-          <button
-            onClick={() => setActiveTab("roles")}
-            className={cn(
-              "flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-medium transition-all duration-200",
-              activeTab === "roles"
-                ? "bg-background text-foreground shadow-sm ring-1 ring-border/50"
-                : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
-            )}
-          >
-            <ShieldAlert className="h-3.5 w-3.5" />
-            IAM Policies
-          </button>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/5 border border-emerald-500/10 text-[10px] font-medium text-emerald-600 uppercase tracking-wider">
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            ReBAC Active
-          </div>
-        </div>
+      {/* Page Header */}
+      <div className="px-6 pt-6">
+        <EcosystemHeader
+          title="Users & Access"
+          description="Manage team members, roles, and permission scopes for your workspace."
+          breadcrumb="Settings"
+          icon={ShieldCheck}
+          badgeText="IAM"
+          showLiveIndicator={false}
+        />
       </div>
 
-      <div className="p-6">
+      {/* Tab Bar - Styled like MenuItemsLayout */}
+      <div className="px-6 border-b border-zinc-100/80 bg-white/50 backdrop-blur-sm sticky top-0 z-10">
+        <nav className="flex items-center h-12 gap-0.5 overflow-x-auto no-scrollbar" role="tablist">
+          {TABS.map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                role="tab"
+                aria-selected={isActive}
+                onClick={() => setActiveTab(tab.id)}
+                className={cn(
+                  "group/tab relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12.5px] font-medium transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/50 whitespace-nowrap overflow-hidden",
+                  isActive
+                    ? "text-indigo-700 font-semibold"
+                    : "text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100/70"
+                )}
+              >
+                {/* Animated pill background */}
+                {isActive && (
+                  <motion.span
+                    layoutId="rebac-tab-pill"
+                    className="absolute inset-0 rounded-lg bg-indigo-50 border border-indigo-100/80 shadow-[0_1px_3px_0_oklch(0.55_0.24_264/0.08)]"
+                    transition={{ type: "spring", bounce: 0.18, duration: 0.38 }}
+                  />
+                )}
+
+                {/* Icon */}
+                <Icon
+                  className={cn(
+                    "relative z-10 h-3.5 w-3.5 shrink-0 transition-all duration-200",
+                    isActive
+                      ? "text-indigo-600"
+                      : "text-zinc-400 group-hover/tab:text-zinc-600"
+                  )}
+                  strokeWidth={2}
+                />
+
+                {/* Label */}
+                <span className="relative z-10 leading-none">{tab.label}</span>
+              </button>
+            );
+          })}
+        </nav>
+      </div>
+
+      {/* Tab Content */}
+      <div className="px-6 pb-6">
         {activeTab === "users" && (
-          <div className="animate-in fade-in slide-in-from-bottom-1 duration-400">
+          <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 ease-out">
             <UsersTab />
           </div>
         )}
         {activeTab === "roles" && (
-          <div className="animate-in fade-in slide-in-from-bottom-1 duration-400">
+          <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 ease-out">
             <RolesTab />
           </div>
         )}
       </div>
+
+      <style jsx>{`
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      `}</style>
     </EcosystemWrapper>
   );
 }

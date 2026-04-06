@@ -1,61 +1,73 @@
 "use client";
 
 import React from "react";
-import { Trophy, Timer, Sparkles } from "lucide-react";
+import { Trophy, Timer, Swords, Users, Star, Calendar } from "lucide-react";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { Badge } from "@/components/ui/badge";
+
+const upcomingFeatures = [
+  { icon: Timer, label: "Timed Sprints", description: "Short-burst point challenges with live countdowns" },
+  { icon: Users, label: "Team Battles", description: "Group vs group competitions across communities" },
+  { icon: Star, label: "Badge Quests", description: "Guided progression with exclusive unlocks" },
+  { icon: Calendar, label: "Seasonal Events", description: "Platform-wide recurring campaigns" },
+];
 
 const CompetitionsPage = () => {
   return (
-    <EcosystemWrapper anonymized-1="competitions-overview">
+    <EcosystemWrapper>
       <EcosystemHeader
-        title="Community Competitions"
-        badgeText="Beta"
-        description="Launch time-bound challenges and seasonal events to drive high-intensity community participation."
-        icon={Trophy}
+        title="Competitions"
+        badgeText="Coming Soon"
+        description="Time-bound challenges and events to drive high-intensity community engagement."
+        icon={Swords}
       />
 
-      <EcosystemActionBar>
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2 text-sm font-bold text-indigo-500 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100 italic animate-pulse">
-            <Sparkles className="h-3.5 w-3.5" />
-            <span>Module in Development</span>
-          </div>
-        </div>
+      <EcosystemActionBar shadow="none">
+        <EcosystemActionBar.Group>
+          <Badge variant="secondary" className="text-[11px] font-medium gap-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-amber-500 inline-block" />
+            Feature in development
+          </Badge>
+        </EcosystemActionBar.Group>
       </EcosystemActionBar>
 
-      <EcosystemContainer className="py-24 border-none bg-transparent shadow-none ring-0">
-        <div className="max-w-xl mx-auto text-center space-y-8">
-          <div className="relative inline-block group">
-            <div className="absolute -inset-4 bg-linear-to-r from-indigo-500 to-purple-500 rounded-full blur-xl opacity-10 group-hover:opacity-20 transition-opacity" />
-            <div className="relative h-32 w-32 bg-white rounded-3xl border border-slate-100 shadow-2xl flex items-center justify-center mx-auto ring-1 ring-slate-200/50 group-hover:scale-105 transition-transform duration-500">
-               <Timer className="h-16 w-16 text-indigo-600 animate-in fade-in zoom-in spin-in-12 duration-1000" />
+      <EcosystemContainer className="p-12">
+        <div className="max-w-lg mx-auto text-center space-y-8">
+          {/* Icon */}
+          <div className="relative inline-flex items-center justify-center">
+            <div className="h-20 w-20 rounded-2xl bg-muted border border-border flex items-center justify-center">
+              <Trophy className="h-9 w-9 text-muted-foreground/50" />
             </div>
-            <div className="absolute -bottom-2 -right-2 h-10 w-10 bg-amber-400 rounded-xl border-4 border-white shadow-lg flex items-center justify-center text-xl">
+            <div className="absolute -bottom-2 -right-2 h-8 w-8 bg-amber-100 border border-amber-200 rounded-lg flex items-center justify-center text-base">
               🚧
             </div>
           </div>
 
-          <div className="space-y-3">
-            <h2 className="text-3xl font-black text-slate-900 tracking-tight">Competitions are Coming</h2>
-            <p className="text-slate-500 font-medium leading-relaxed">
-              We're building a powerful engine for cross-community challenges, 
-              seasonal leaderboards, and exclusive reward tracks.
+          {/* Text */}
+          <div className="space-y-2">
+            <h2 className="text-xl font-semibold text-foreground tracking-tight">
+              Competitions are coming
+            </h2>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              We're building a powerful engine for cross-community challenges, seasonal leaderboards, and exclusive reward tracks.
             </p>
           </div>
 
-          <div className="pt-6 grid grid-cols-2 gap-4 text-left">
-            {[
-              { label: "Timed Sprints", desc: "Short duration peaks" },
-              { label: "Team Battles", desc: "Group vs Group play" },
-              { label: "Badge Quest", desc: "Progressive unlocks" },
-              { label: "Global Events", desc: "Site-wide seasons" },
-            ].map((feature) => (
-              <div key={feature.label} className="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm transition-all hover:border-indigo-100 hover:shadow-md group/item">
-                <p className="text-xs font-black text-indigo-600 uppercase tracking-[0.15em] mb-1 group-hover/item:text-indigo-500">{feature.label}</p>
-                <p className="text-xs font-bold text-slate-400">{feature.desc}</p>
+          {/* Upcoming Features */}
+          <div className="grid grid-cols-2 gap-3 text-left pt-2">
+            {upcomingFeatures.map((feature) => (
+              <div
+                key={feature.label}
+                className="p-4 rounded-xl border border-border bg-card hover:bg-muted/30 transition-colors"
+              >
+                <div className="h-8 w-8 rounded-lg bg-muted flex items-center justify-center mb-3">
+                  <feature.icon className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <p className="text-sm font-semibold text-foreground">{feature.label}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{feature.description}</p>
               </div>
             ))}
           </div>

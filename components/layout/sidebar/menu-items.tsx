@@ -103,6 +103,7 @@ export const communityIntelligence = [
     children: [
       { key: "members-dash", label: "Dashboard", path: "/members" },
       { key: "members-manage", label: "Manage Members", path: "/members/all" },
+      { key: "members-create", label: "Add New Member", path: "/members/create" },
       { key: "members-reported", label: "Reported", path: "/members/reports" },
       { key: "members-settings", label: "Settings", path: "/members/settings" },
     ],
@@ -210,24 +211,24 @@ export const gamificationEngine = [
   {
     key: "engagement-games",
     label: "Member Games",
-    path: "/rewards/engagement/spin-wheel",
+    path: "/engagement-games",
     isMobileOnly: true,
     icon: <Gamepad2 size={18} />,
     children: [
       {
         key: "game-spin",
         label: "Spin Wheel",
-        path: "/rewards/engagement/spin-wheel",
+        path: "/engagement-games/spin-wheel",
       },
       {
         key: "game-scratch",
         label: "Scratch Card",
-        path: "/rewards/engagement/scratch-card",
+        path: "/engagement-games/scratch-card",
       },
       {
         key: "game-match",
         label: "Match & Win",
-        path: "/rewards/engagement/match-win",
+        path: "/engagement-games/match-win",
       },
     ],
   },

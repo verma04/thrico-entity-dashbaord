@@ -42,6 +42,17 @@ import {
 import { CheckSsl } from "./check-ssl";
 import { DNSProviderGuide } from "./dns-provider-guide";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+
+// ---------------------------------------------------------------------------
+// Design Tokens
+// ---------------------------------------------------------------------------
+const STYLES = {
+  card: "rounded-lg border border-slate-200/60 bg-white",
+  heading: "text-[16px] font-semibold tracking-tight text-slate-900 leading-none",
+  label: "text-[11px] font-bold uppercase tracking-widest text-slate-400",
+  mono: "font-mono text-[12px] text-slate-600",
+};
 
 interface DomainDetailProps {
   id: string;
@@ -57,22 +68,28 @@ export const DomainDetail = ({ id }: DomainDetailProps) => {
 
   const [del, { loading: deleting }] = deleteDomain({
     onCompleted: () => {
+      toast.success("Domain detached successfully");
       router.push("/settings/domains");
     },
   });
-  console.log();
 
-  const [check, { loading: checking }] = checkUpdatedDnsRecord({});
+  const [check, { loading: checking }] = checkUpdatedDnsRecord({
+    onCompleted: (data: any) => {
+      if (data?.checkUpdatedDnsRecord?.success) {
+        toast.success("DNS records updated");
+      }
+    }
+  });
 
   if (error) {
     return (
-      <div className="flex items-start gap-3 px-4 py-3.5 rounded-xl border bg-red-50 border-red-200">
-        <AlertCircle className="h-4 w-4 text-red-600 mt-0.5 shrink-0" />
+      <div className="flex items-start gap-4 p-5 rounded-lg border border-red-200/50 bg-red-50/30">
+        <AlertCircle className="h-4.5 w-4.5 text-red-500 shrink-0 mt-0.5" />
         <div>
-          <p className="text-[13px] font-semibold text-red-800">
-            Domain not found
+          <p className="text-[13px] font-bold text-red-900 uppercase tracking-wide">
+            Endpoint error
           </p>
-          <p className="text-[12px] text-red-600 mt-0.5">{error.message}</p>
+          <p className="text-[12px] text-red-600 mt-1 font-medium">{error.message}</p>
         </div>
       </div>
     );
@@ -80,9 +97,11 @@ export const DomainDetail = ({ id }: DomainDetailProps) => {
 
   if (loading) {
     return (
-      <div className="space-y-6 animate-pulse">
-        <div className="h-20 bg-slate-100 rounded-xl" />
-        <div className="h-64 bg-slate-50 rounded-xl" />
+      <div className="max-w-5xl mx-auto py-8 px-6 space-y-8 animate-pulse">
+        <div className="h-12 w-full bg-slate-50 border border-slate-100 rounded-lg" />
+        <div className="grid grid-cols-1 gap-6">
+          <div className="h-64 w-full bg-slate-50 border border-slate-100 rounded-lg" />
+        </div>
       </div>
     );
   }
@@ -107,51 +126,52 @@ export const DomainDetail = ({ id }: DomainDetailProps) => {
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
+    toast.success("Copied to clipboard");
   };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto py-2 pb-16">
-      {/* Action Bar / Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
-        <div className="flex items-center gap-3">
+    <div className="max-w-5xl mx-auto py-8 px-6 space-y-8 pb-20">
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 pb-6 border-b border-slate-100">
+        <div className="flex items-start gap-4">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => router.back()}
-            className="h-8 w-8 text-slate-500 hover:text-slate-900 shrink-0"
+            className="h-9 w-9 rounded-md text-slate-400 hover:text-slate-900 hover:bg-slate-50 border border-transparent hover:border-slate-200 transition-all"
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <div>
-            <div className="flex items-center gap-2.5">
-              <h1 className="text-[18px] font-semibold tracking-tight text-slate-900 leading-none">
+          <div className="pt-0.5">
+            <div className="flex items-center gap-3">
+              <h1 className={STYLES.heading}>
                 {domainDetails.domain}
               </h1>
               {domainDetails.isVerified ? (
-                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-emerald-50 border border-emerald-100 text-[10px] font-semibold text-emerald-700 uppercase tracking-widest">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                  Verified
+                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-emerald-50 border border-emerald-100 text-[10px] font-bold text-emerald-700 uppercase tracking-widest">
+                  <span className="h-1 w-1 rounded-full bg-emerald-500" />
+                  Active
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-amber-50 border border-amber-200 text-[10px] font-semibold text-amber-700 uppercase tracking-widest">
-                  <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
-                  Pending
+                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-amber-50 border border-amber-200 text-[10px] font-bold text-amber-700 uppercase tracking-widest">
+                  <span className="h-1 w-1 rounded-full bg-amber-500 animate-pulse" />
+                  Propagation
                 </span>
               )}
             </div>
-            <p className="text-[12px] text-slate-400 mt-1.5">
-              DNS configuration and active status
+            <p className="text-[13px] text-slate-500 mt-2 font-medium leading-none">
+              Manage infrastructure settings for your custom domain.
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-3">
           {domainDetails?.isVerified && (
             <>
               {domainDetails?.ssl ? (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-100 text-[11px] font-semibold text-emerald-700 mr-2">
-                  <CheckCircle2 className="h-3.5 w-3.5" />
-                  TLS Encrypted
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white border border-slate-200 text-[11px] font-bold text-slate-600 uppercase tracking-wider">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                  Mutual TLS Managed
                 </span>
               ) : (
                 <CheckSsl ssl={domainDetails.ssl} />
@@ -163,148 +183,131 @@ export const DomainDetail = ({ id }: DomainDetailProps) => {
             variant="ghost"
             onClick={() => setShowDeleteConfirm(true)}
             disabled={deleting}
-            className="h-9 px-4 text-[12px] font-semibold text-red-600 hover:text-red-700 hover:bg-red-50 gap-2 border border-slate-200 shadow-sm transition-colors"
+            className="h-9 px-4 text-[11px] font-bold uppercase tracking-wider text-rose-500 hover:text-rose-600 hover:bg-rose-50 border border-slate-200/60 shadow-none transition-all"
           >
             <Trash2 className="h-3.5 w-3.5" />
-            Detach
+            Detach Entity
           </Button>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="rounded-xl border border-slate-200/80 bg-white shadow-sm overflow-hidden">
+      {/* Main Configuration Card */}
+      <div className={STYLES.card}>
         {domainDetails.isVerified ? (
-          // Verified State
+          // Verified Infrastructure State
           <>
-            <div className="px-5 py-4 border-b border-emerald-100 bg-emerald-50 flex items-center gap-3">
-              <div className="h-8 w-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
-                <CheckCircle2 className="h-4 w-4" />
+            <div className="p-8 border-b border-slate-100 flex items-start gap-5">
+              <div className="h-10 w-10 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center shrink-0">
+                <CheckCircle2 className="h-5 w-5" />
               </div>
               <div>
-                <h3 className="text-[13px] font-semibold text-emerald-900 tracking-tight">
-                  Domain configuration complete
+                <h3 className="text-[15px] font-semibold text-slate-900 tracking-tight">
+                  Public Traffic Route Active
                 </h3>
-                <p className="text-[11px] text-emerald-700 mt-0.5 max-w-md">
-                  DNS records are actively routing successfully to our edge
-                  infrastructure.
+                <p className="text-[13px] text-slate-500 mt-1 max-w-md font-medium leading-relaxed">
+                  Traffic is served via our global edge network. All requests are automatically upgraded to HTTPS.
                 </p>
               </div>
             </div>
-            <div className="p-5">
-              <div className="flex items-center gap-3 p-4 bg-slate-50 border border-slate-200 rounded-lg group hover:border-slate-300 transition-colors">
-                <Globe className="h-5 w-5 text-slate-400 shrink-0" />
-                <a
-                  href={`https://www.${domainDetails.domain}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[13px] font-semibold text-slate-700 group-hover:text-slate-900 group-hover:underline flex-1 truncate font-mono"
-                >
-                  https://www.{domainDetails.domain}
-                </a>
-                <ExternalLink className="h-4 w-4 text-slate-400 group-hover:text-slate-600 transition-colors shrink-0" />
+            <div className="p-8">
+              <div className="flex items-center gap-4 p-4 bg-slate-50 border border-slate-200 rounded-lg group transition-all">
+                <div className="h-8 w-8 rounded bg-white border border-slate-100 flex items-center justify-center shrink-0">
+                  <Globe className="h-4 w-4 text-slate-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">External Resource</p>
+                  <a
+                    href={`https://${domainDetails.domain}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[13px] font-bold text-slate-900 group-hover:text-black group-hover:underline truncate font-mono"
+                  >
+                    https://{domainDetails.domain}
+                  </a>
+                </div>
+                <ExternalLink className="h-4 w-4 text-slate-300 group-hover:text-slate-900 transition-colors shrink-0" />
               </div>
             </div>
           </>
         ) : (
-          // Setup Needed State
+          // Pending DNS Propagation State
           <>
-            <div className="px-5 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50">
-              <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center border border-slate-200 shrink-0">
-                  <Globe className="h-4 w-4" />
+            <div className="px-6 py-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/40">
+              <div className="flex items-center gap-4">
+                <div className="h-9 w-9 rounded-md bg-slate-100 text-slate-400 flex items-center justify-center border border-slate-200 shrink-0">
+                  <Globe className="h-4.5 w-4.5" />
                 </div>
                 <div>
-                  <h3 className="text-[13px] font-semibold text-slate-900 tracking-tight">
-                    DNS Configuration
+                  <h3 className="text-[14px] font-semibold text-slate-900 tracking-tight">
+                    Authoritative DNS Records
                   </h3>
-                  <p className="text-[11px] text-slate-500 mt-0.5 max-w-md">
-                    Apply these records at your registrar to route traffic.
+                  <p className="text-[11px] text-slate-500 mt-0.5 font-medium">
+                    Provision these entries at your registrar.
                   </p>
                 </div>
               </div>
               <DNSProviderGuide domainName={domainDetails.domain} />
             </div>
 
-            <div className="p-5 space-y-5">
-              {/* Alert instructions */}
-              <div className="flex items-start gap-3 p-3.5 bg-slate-50 border border-slate-100 rounded-lg">
-                <AlertCircle className="h-4 w-4 text-slate-400 mt-0.5 shrink-0" />
-                <div className="space-y-2 text-[12px] text-slate-600">
-                  <p className="font-semibold text-slate-800">
-                    Setup Instructions
-                  </p>
-                  <ol className="list-decimal pl-4 space-y-1 text-slate-500">
-                    <li>
-                      Log in to your registrar and open DNS management for{" "}
-                      <strong className="text-slate-700">
-                        {domainDetails.domain}
-                      </strong>
-                    </li>
-                    <li>Add the records listed below EXACTLY as they appear</li>
-                  </ol>
-                  <div className="text-[11px] text-slate-400 pt-1 border-t border-slate-200/50 mt-2 flex items-center gap-1">
-                    <Info className="h-3 w-3 inline" /> Propagation across
-                    global networks can take up to 48h.
-                  </div>
+            <div className="p-8 space-y-8">
+              <div className="flex items-start gap-4 p-4 bg-slate-50/50 border border-slate-100 rounded-lg">
+                <Info className="h-4 w-4 text-slate-400 shrink-0 mt-0.5" />
+                <div className="text-[12px] text-slate-600 font-medium leading-relaxed">
+                  <p className="text-slate-900 font-bold mb-1.5 uppercase tracking-wide text-[11px]">Verification Logic</p>
+                  <p className="text-slate-500">Propagation can take up to 48 hours depending on your registrar’s TTL settings. Please ensure values match exactly.</p>
                 </div>
               </div>
 
-              {/* Records table */}
-              <div className="rounded-lg border border-slate-200 overflow-hidden">
+              {/* Records Table */}
+              <div className="rounded-lg border border-slate-200/60 overflow-hidden bg-white">
                 <Table>
-                  <TableHeader className="bg-slate-50 border-b border-slate-200">
-                    <TableRow className="hover:bg-transparent">
-                      <TableHead className="font-semibold text-slate-600 text-[11px] tracking-widest uppercase h-9">
-                        Type
-                      </TableHead>
-                      <TableHead className="font-semibold text-slate-600 text-[11px] tracking-widest uppercase h-9">
-                        Name
-                      </TableHead>
-                      <TableHead className="font-semibold text-slate-600 text-[11px] tracking-widest uppercase h-9">
-                        Value
-                      </TableHead>
-                      <TableHead className="text-right font-semibold text-slate-600 text-[11px] tracking-widest uppercase h-9">
-                        Status
-                      </TableHead>
+                  <TableHeader className="bg-slate-50/50">
+                    <TableRow className="hover:bg-transparent border-b border-slate-200/60">
+                      <TableHead className={cn(STYLES.label, "h-10 pl-6")}>Type</TableHead>
+                      <TableHead className={cn(STYLES.label, "h-10")}>Identity / Name</TableHead>
+                      <TableHead className={cn(STYLES.label, "h-10")}>Target Value</TableHead>
+                      <TableHead className={cn(STYLES.label, "h-10 text-right pr-6")}>Status</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {dnsRecords.map((record) => (
                       <TableRow
                         key={record.key}
-                        className="hover:bg-slate-50/50 transition-colors group"
+                        className="hover:bg-slate-50/30 transition-colors group border-b border-slate-100 last:border-0"
                       >
-                        <TableCell className="font-mono text-[12px] font-semibold text-slate-700">
-                          {record.type}
+                        <TableCell className="pl-6">
+                           <span className="inline-flex px-2 py-0.5 rounded bg-slate-100 text-[10px] font-bold text-slate-600 font-mono">
+                            {record.type}
+                          </span>
                         </TableCell>
-                        <TableCell className="font-mono text-[11px] text-slate-600">
+                        <TableCell className="font-mono text-[11px] text-slate-500 font-medium">
                           {record.name}
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-2 group-hover:gap-3 transition-all">
-                            <span className="font-mono text-[11px] text-slate-600 bg-slate-100 border border-slate-200 px-2 py-1 rounded truncate max-w-[200px] sm:max-w-xs block">
+                          <div className="flex items-center gap-2">
+                            <code className="text-[11px] text-slate-900 bg-slate-50 border border-slate-200 px-2 py-1 rounded truncate max-w-[200px] sm:max-w-xs font-mono">
                               {record.value}
-                            </span>
+                            </code>
                             <Button
                               variant="ghost"
                               size="icon"
                               onClick={() => copyToClipboard(record.value)}
-                              className="h-6 w-6 text-slate-400 hover:text-slate-900 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                              className="h-7 w-7 rounded-md text-slate-300 hover:text-slate-900 hover:bg-white border border-transparent hover:border-slate-100 opacity-0 group-hover:opacity-100 transition-all shrink-0"
                             >
                               <Copy className="h-3 w-3" />
                             </Button>
                           </div>
                         </TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="text-right pr-6">
                           {record.verified ? (
-                            <span className="inline-flex items-center justify-end gap-1.5 text-[11px] font-semibold text-emerald-600">
-                              <CheckCircle2 className="h-3.5 w-3.5" />
-                              <span className="hidden sm:inline">Verified</span>
+                            <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-600 uppercase tracking-widest">
+                              <CheckCircle2 className="h-3 w-3" />
+                              Active
                             </span>
                           ) : (
-                            <span className="inline-flex items-center justify-end gap-1.5 text-[11px] font-semibold text-amber-600">
-                              <Clock className="h-3.5 w-3.5" />
-                              <span className="hidden sm:inline">Pending</span>
+                            <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-amber-500 uppercase tracking-widest">
+                              <Clock className="h-3 w-3" />
+                              Waiting
                             </span>
                           )}
                         </TableCell>
@@ -314,23 +317,20 @@ export const DomainDetail = ({ id }: DomainDetailProps) => {
                 </Table>
               </div>
 
-              {/* Action */}
-              <div className="flex items-center justify-end gap-3 pt-3">
-                <p className="text-[11px] text-slate-400 select-none">
-                  Waiting for propagation...
-                </p>
+              {/* Action Area */}
+              <div className="flex items-center justify-between pt-2">
+                 <div className="flex items-center gap-2">
+                    <RefreshCw className={cn("h-3 w-3 text-slate-300", checking && "animate-spin")} />
+                    <p className="text-[11px] text-slate-400 font-medium uppercase tracking-wider">
+                      Network scanning available every 60s
+                    </p>
+                 </div>
                 <Button
                   onClick={() => check({ variables: { input: { id } } })}
-                  loading={checking}
                   disabled={checking}
-                  className="h-10 px-5 text-[12px] font-semibold bg-slate-900 hover:bg-black text-white shadow-sm gap-2 transition-all"
+                  className="h-9 px-6 text-[11px] font-bold uppercase tracking-wider bg-slate-900 hover:bg-black text-white rounded-md shadow-none gap-2 transition-all active:scale-[0.98]"
                 >
-                  {checking ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <RefreshCw className="h-3.5 w-3.5" />
-                  )}
-                  {checking ? "Scanning network..." : "Re-Verify DNS"}
+                  {checking ? "Scanning network..." : "Re-Verify DNS Namespace"}
                 </Button>
               </div>
             </div>
@@ -340,35 +340,31 @@ export const DomainDetail = ({ id }: DomainDetailProps) => {
 
       {/* Detach Dialog */}
       <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <AlertDialogContent className="sm:max-w-md p-0 overflow-hidden border-slate-200 shadow-xl rounded-xl">
-          <div className="p-6">
-            <AlertDialogHeader className="mb-6 text-left">
-              <AlertDialogTitle className="text-[16px] font-semibold text-slate-900 tracking-tight flex items-center gap-2">
-                <AlertCircle className="h-5 w-5 text-red-500" />
-                Detach Custom Domain
+        <AlertDialogContent className="sm:max-w-md p-0 overflow-hidden border-slate-200/60 rounded-lg shadow-none">
+          <div className="px-6 py-5 border-b border-slate-100 bg-rose-50/20">
+            <AlertDialogHeader className="text-left">
+              <AlertDialogTitle className="text-[15px] font-semibold text-slate-900 tracking-tight flex items-center gap-2">
+                <AlertCircle className="h-4 w-4 text-rose-500" />
+                Detach Custom Resource
               </AlertDialogTitle>
-              <AlertDialogDescription className="text-[13px] text-slate-500 mt-2 leading-relaxed">
-                You are about to permanently detach{" "}
-                <strong className="text-slate-700 font-mono">
-                  {domainDetails.domain}
-                </strong>{" "}
-                from this environment. This action prevents further routing and
-                terminates TLS automation.
+              <AlertDialogDescription className="text-[12px] text-slate-500 mt-2 font-medium leading-relaxed">
+                You are about to remove <code className="text-slate-900 bg-slate-100 px-1 rounded">{domainDetails.domain}</code>. Public traffic routing will cease immediately.
               </AlertDialogDescription>
             </AlertDialogHeader>
-            <AlertDialogFooter className="sm:justify-end gap-2 border-t border-slate-100 pt-4 mt-6">
+          </div>
+          <div className="p-6">
+            <AlertDialogFooter className="sm:justify-end gap-2">
               <AlertDialogCancel
                 disabled={deleting}
-                className="h-9 px-4 text-[12px] font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 border-none m-0"
+                className="h-9 px-4 text-[11px] font-bold uppercase tracking-wider text-slate-500 hover:text-slate-900 hover:bg-slate-50 border-none m-0 shadow-none"
               >
                 Cancel
               </AlertDialogCancel>
               <AlertDialogAction
                 onClick={handleDelete}
                 disabled={deleting}
-                className="h-9 px-6 text-[12px] font-semibold bg-red-600 hover:bg-red-700 text-white shadow-sm gap-2 m-0"
+                className="h-9 px-6 text-[11px] font-bold uppercase tracking-wider bg-rose-600 hover:bg-rose-700 text-white rounded-md m-0 shadow-none"
               >
-                {deleting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                 {deleting ? "Detaching..." : "Confirm Detach"}
               </AlertDialogAction>
             </AlertDialogFooter>

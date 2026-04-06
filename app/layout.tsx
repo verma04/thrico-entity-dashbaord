@@ -24,6 +24,7 @@ import {
   Cinzel,
   Pacifico,
   Plus_Jakarta_Sans,
+  Mona_Sans,
 } from "next/font/google";
 import "./globals.css";
 import { ApolloWrapper } from "@/graphql/hoc/ApolloWrapper";
@@ -240,6 +241,11 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-plus-jakarta-sans",
 });
 
+const monaSans = Mona_Sans({
+  subsets: ["latin"],
+  variable: "--font-mona-sans",
+});
+
 export const metadata: Metadata = {
   title: {
     default: "Thrico Entity Dashboard",
@@ -306,7 +312,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${plusJakartaSans.variable} ${roobert.variable} ${avantGarde.variable} ${spaceGrotesk.className} ${inter.variable} ${playfair.variable} ${outfit.variable} ${firaCode.variable} ${roboto.variable} ${openSans.variable} ${montserrat.variable} ${lato.variable} ${poppins.variable} ${nunito.variable} ${sourceSans3.variable} ${workSans.variable} ${ubuntu.variable} ${merriweather.variable} ${lora.variable} ${cormorantGaramond.variable} ${bitter.variable} ${oswald.variable} ${raleway.variable} ${bebasNeue.variable} ${cinzel.variable} ${pacifico.variable} font-sans antialiased`}
+        className={`${monaSans.variable} ${plusJakartaSans.variable} ${roobert.variable} ${avantGarde.variable} ${monaSans.className} ${inter.variable} ${playfair.variable} ${outfit.variable} ${firaCode.variable} ${roboto.variable} ${openSans.variable} ${montserrat.variable} ${lato.variable} ${poppins.variable} ${nunito.variable} ${sourceSans3.variable} ${workSans.variable} ${ubuntu.variable} ${merriweather.variable} ${lora.variable} ${cormorantGaramond.variable} ${bitter.variable} ${oswald.variable} ${raleway.variable} ${bebasNeue.variable} ${cinzel.variable} ${pacifico.variable} antialiased`}
       >
         <Toaster position="top-right" />
         <ApolloWrapper>{children}</ApolloWrapper>

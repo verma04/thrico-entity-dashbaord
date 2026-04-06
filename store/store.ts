@@ -104,3 +104,15 @@ export const useUserStore = create<UserState>()(
     ),
   ),
 );
+
+interface WorkspaceState {
+  isSwitching: boolean;
+  targetName: string;
+  setIsSwitching: (isSwitching: boolean, targetName?: string) => void;
+}
+
+export const useWorkspaceStore = create<WorkspaceState>()((set) => ({
+  isSwitching: false,
+  targetName: "",
+  setIsSwitching: (isSwitching, targetName = "") => set({ isSwitching, targetName }),
+}));

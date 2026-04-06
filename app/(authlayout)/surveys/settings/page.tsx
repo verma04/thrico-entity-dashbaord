@@ -1,52 +1,57 @@
 "use client";
 
-import { ModuleSettingsForm } from "@/components/common/module-settings-form";
+import React from "react";
 import { useEntitySettings, useUpdateEntitySettings } from "@/graphql/actions";
-import { Loader2 } from "lucide-react";
+import { FileText, ShieldCheck, Zap } from "lucide-react";
+import { PlatformSettingsPage, SettingsField } from "@/components/ui/platform/settings-page";
+import { toast } from "sonner";
+
+const FIELDS: SettingsField[] = [
+  {
+    key: "allowSurveys",
+    label: "Allow Surveys",
+    description: "Enable or disable the module for comprehensive data gathering.",
+    icon: ShieldCheck,
+    section: "Research Governance",
+  },
+  {
+    key: "autoApproveSurveys",
+    label: "Auto Approve Surveys",
+    description: "Automatically validate and publish research modules without review.",
+    icon: Zap,
+    section: "Automation Protocols",
+  },
+];
 
 const SurveysSettings = () => {
   const { data, loading } = useEntitySettings();
   const [update, { loading: loadingBtn }] = useUpdateEntitySettings({});
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
-  const fields = [
-    {
-      key: "allowSurveys",
-      label: "Allow Surveys",
-      description: "Enable or disable the surveys module",
-    },
-    {
-      key: "autoApproveSurveys",
-      label: "Auto Approve Surveys",
-      description: "Automatically approve new surveys",
-    },
-  ];
+  const handleSave = async (settings: any) => {
+    try {
+      await update({
+        variables: {
+          input: settings,
+        },
+      });
+      toast.success("Surveys settings updated successfully");
+    } catch (error) {
+      toast.error("Failed to update survey configuration");
+      throw error;
+    }
+  };
 
   return (
-    <ModuleSettingsForm
-      title="Surveys Settings"
-      description="Configure surveys module settings"
-      fields={fields}
-      onSave={(settings) => {
-        update({
-          variables: {
-            input: settings,
-          },
-        });
-      }}
-      isLoading={loadingBtn}
-      data={{
-        allowSurveys: data?.getEntitySettings?.allowSurveys ?? true,
-        autoApproveSurveys:
-          data?.getEntitySettings?.autoApproveSurveys ?? false,
-      }}
+    <PlatformSettingsPage
+      title="Data Protocols"
+      description="Moderate research-grade surveys and configure automated validation workflows."
+      headerIcon={FileText}
+      badge="Research"
+      fields={FIELDS}
+      data={data?.getEntitySettings}
+      loading={loading}
+      onSave={handleSave}
+      isSaving={loadingBtn}
     />
   );
 };

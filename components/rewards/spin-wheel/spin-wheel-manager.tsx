@@ -1,19 +1,10 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -35,9 +26,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import {
-  Settings,
   Dices,
   Plus,
   Trash2,
@@ -45,21 +36,15 @@ import {
   Shield,
   TrendingUp,
   AlertTriangle,
-  CircleDollarSign,
   Clock,
   Save,
-  Eye,
-  RotateCcw,
   Coins,
   Crown,
   Ticket,
   XCircle,
   Users,
-  Zap,
   Loader2,
-  Trophy,
-  Activity,
-  ChartBar,
+  Info,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -73,15 +58,10 @@ import {
   useGetSpinActivity,
   useGetRewards,
 } from "@/graphql/actions/rewards";
-
 import moment from "moment";
-import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
-import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
-import { DialogDescription } from "@radix-ui/react-dialog";
 
-// ─── Types ───────────────────────────────────────────
 type RewardType = "TC" | "VOUCHER" | "PREMIUM" | "NOTHING";
 
 interface WheelSegment {
@@ -94,14 +74,9 @@ interface WheelSegment {
   isActive: boolean;
   sortOrder: number;
   rewardId?: string;
-  reward?: {
-    id: string;
-    title: string;
-    image?: string;
-  };
+  reward?: { id: string; title: string; image?: string };
 }
 
-// ─── Constants ───────────────────────────────────────
 const SEGMENT_COLORS = [
   "#7c3aed",
   "#2563eb",
@@ -117,44 +92,26 @@ const SEGMENT_COLORS = [
   "#7c2d12",
 ];
 
-// ─── Reward type helpers ─────────────────────────────
-const rewardTypeLabel = (t: RewardType) => {
-  switch (t) {
-    case "TC":
-      return "TC Coins";
-    case "VOUCHER":
-      return "Voucher";
-    case "PREMIUM":
-      return "Premium";
-    case "NOTHING":
-      return "No Reward";
-  }
+const REWARD_LABELS: Record<RewardType, string> = {
+  TC: "TC Coins",
+  VOUCHER: "Voucher",
+  PREMIUM: "Premium",
+  NOTHING: "No Reward",
+};
+const REWARD_BADGE: Record<RewardType, string> = {
+  TC: "bg-amber-50 text-amber-700 border border-amber-100",
+  VOUCHER: "bg-blue-50 text-blue-700 border border-blue-100",
+  PREMIUM: "bg-violet-50 text-violet-700 border border-violet-100",
+  NOTHING: "bg-muted text-muted-foreground border border-border",
+};
+const REWARD_ICON: Record<RewardType, React.ReactNode> = {
+  TC: <Coins className="h-3 w-3" />,
+  VOUCHER: <Ticket className="h-3 w-3" />,
+  PREMIUM: <Crown className="h-3 w-3" />,
+  NOTHING: <XCircle className="h-3 w-3" />,
 };
 
-const rewardTypeIcon = (t: RewardType) => {
-  switch (t) {
-    case "TC":
-      return <Coins className="h-3.5 w-3.5" />;
-    case "VOUCHER":
-      return <Ticket className="h-3.5 w-3.5" />;
-    case "PREMIUM":
-      return <Crown className="h-3.5 w-3.5" />;
-    case "NOTHING":
-      return <XCircle className="h-3.5 w-3.5" />;
-  }
-};
-
-const rewardTypeBadge = (t: RewardType) => {
-  const styles: Record<RewardType, string> = {
-    TC: "text-amber-700 bg-amber-50 border-amber-200",
-    VOUCHER: "text-blue-700 bg-blue-50 border-blue-200",
-    PREMIUM: "text-purple-700 bg-purple-50 border-purple-200",
-    NOTHING: "text-gray-600 bg-gray-50 border-gray-200",
-  };
-  return styles[t];
-};
-
-// ─── Mini Wheel Preview ─────────────────────────────
+// Wheel Canvas Preview
 function WheelPreview({ segments }: { segments: WheelSegment[] }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -170,35 +127,23 @@ function WheelPreview({ segments }: { segments: WheelSegment[] }) {
 
     ctx.clearRect(0, 0, size, size);
 
-    if (segments.length === 0) {
+    const active = segments.filter((s) => s.isActive);
+    const totalProb = active.reduce((s, seg) => s + seg.probability, 0);
+
+    if (active.length === 0) {
       ctx.beginPath();
       ctx.arc(center, center, radius, 0, Math.PI * 2);
       ctx.fillStyle = "#e5e7eb";
       ctx.fill();
-      ctx.font = "12px sans-serif";
+      ctx.font = "11px sans-serif";
       ctx.fillStyle = "#9ca3af";
       ctx.textAlign = "center";
       ctx.fillText("No segments", center, center);
       return;
     }
 
-    const activeSegments = segments.filter((s) => s.isActive);
-    const totalProb = activeSegments.reduce((s, seg) => s + seg.probability, 0);
     let startAngle = -Math.PI / 2;
-
-    if (activeSegments.length === 0) {
-      ctx.beginPath();
-      ctx.arc(center, center, radius, 0, Math.PI * 2);
-      ctx.fillStyle = "#e5e7eb";
-      ctx.fill();
-      ctx.font = "12px sans-serif";
-      ctx.fillStyle = "#9ca3af";
-      ctx.textAlign = "center";
-      ctx.fillText("No active segments", center, center);
-      return;
-    }
-
-    activeSegments.forEach((seg) => {
+    active.forEach((seg) => {
       const sliceAngle = (seg.probability / totalProb) * Math.PI * 2;
       ctx.beginPath();
       ctx.moveTo(center, center);
@@ -206,52 +151,47 @@ function WheelPreview({ segments }: { segments: WheelSegment[] }) {
       ctx.closePath();
       ctx.fillStyle = seg.color;
       ctx.fill();
-      ctx.strokeStyle = "rgba(255,255,255,0.3)";
-      ctx.lineWidth = 1;
+      ctx.strokeStyle = "rgba(255,255,255,0.4)";
+      ctx.lineWidth = 1.5;
       ctx.stroke();
 
       const midAngle = startAngle + sliceAngle / 2;
       const labelR = radius * 0.65;
       const x = center + Math.cos(midAngle) * labelR;
       const y = center + Math.sin(midAngle) * labelR;
-
       ctx.save();
       ctx.translate(x, y);
       ctx.rotate(midAngle + Math.PI / 2);
-      ctx.font = "bold 9px sans-serif";
+      ctx.font = "bold 8px sans-serif";
       ctx.fillStyle = "#fff";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      const maxLen = 10;
-      const txt =
-        seg.label.length > maxLen
-          ? seg.label.slice(0, maxLen) + "…"
-          : seg.label;
-      ctx.fillText(txt, 0, 0);
+      ctx.fillText(
+        seg.label.length > 9 ? seg.label.slice(0, 9) + "…" : seg.label,
+        0,
+        0,
+      );
       ctx.restore();
-
       startAngle += sliceAngle;
     });
 
-    // Center circle
     ctx.beginPath();
-    ctx.arc(center, center, 18, 0, Math.PI * 2);
+    ctx.arc(center, center, 16, 0, Math.PI * 2);
     ctx.fillStyle = "#1f2937";
     ctx.fill();
     ctx.strokeStyle = "rgba(255,255,255,0.2)";
     ctx.lineWidth = 2;
     ctx.stroke();
-    ctx.font = "bold 8px sans-serif";
+    ctx.font = "bold 7px sans-serif";
     ctx.fillStyle = "#fff";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText("SPIN", center, center);
 
-    // Pointer
     ctx.beginPath();
-    ctx.moveTo(center - 8, 2);
-    ctx.lineTo(center + 8, 2);
-    ctx.lineTo(center, 14);
+    ctx.moveTo(center - 7, 2);
+    ctx.lineTo(center + 7, 2);
+    ctx.lineTo(center, 13);
     ctx.closePath();
     ctx.fillStyle = "#fbbf24";
     ctx.fill();
@@ -262,30 +202,56 @@ function WheelPreview({ segments }: { segments: WheelSegment[] }) {
   }, [drawWheel]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      width={200}
-      height={200}
-      className="mx-auto"
-      style={{ imageRendering: "auto" }}
-    />
+    <canvas ref={canvasRef} width={180} height={180} className="mx-auto" />
   );
 }
 
-// ─── Main Component ─────────────────────────────────
+const SectionCard = ({
+  title,
+  description,
+  icon: Icon,
+  iconBg,
+  iconColor,
+  children,
+  action,
+}: {
+  title: string;
+  description?: string;
+  icon: any;
+  iconBg: string;
+  iconColor: string;
+  children: React.ReactNode;
+  action?: React.ReactNode;
+}) => (
+  <div className="rounded-xl border border-border bg-card overflow-hidden">
+    <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-muted/20">
+      <div className="flex items-center gap-3">
+        <div
+          className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 ${iconBg}`}
+        >
+          <Icon className={`h-4 w-4 ${iconColor}`} />
+        </div>
+        <div>
+          <p className="text-sm font-semibold text-foreground">{title}</p>
+          {description && (
+            <p className="text-xs text-muted-foreground">{description}</p>
+          )}
+        </div>
+      </div>
+      {action}
+    </div>
+    <div className="p-5">{children}</div>
+  </div>
+);
+
 export function SpinWheelManager() {
-  // ── GraphQL hooks ──
   const {
     data: configData,
     loading: configLoading,
     refetch: refetchConfig,
   } = useGetSpinWheelConfig();
-  const {
-    data: prizesData,
-    loading: prizesLoading,
-    refetch: refetchPrizes,
-  } = useGetSpinWheelPrizes();
-  const { data: activityData, loading: activityLoading } = useGetSpinActivity({
+  const { data: prizesData, refetch: refetchPrizes } = useGetSpinWheelPrizes();
+  const { data: activityData } = useGetSpinActivity({
     pagination: { page: 1, limit: 10 },
   });
   const { data: rewardsData } = useGetRewards({
@@ -293,17 +259,14 @@ export function SpinWheelManager() {
     pagination: { page: 1, limit: 100 },
   });
   const [updateConfig, { loading: savingConfig }] = useUpdateSpinWheelConfig();
-
   const [createPrize, { loading: creatingSegment }] = useCreateSpinWheelPrize();
   const [updatePrize, { loading: updatingSegment }] = useUpdateSpinWheelPrize();
   const [deletePrize, { loading: deletingSegment }] = useDeleteSpinWheelPrize();
 
-  // ── Local state (initialized from API or defaults) ──
   const config = configData?.getSpinWheelConfig;
   const [isActive, setIsActive] = useState(false);
   const [costPerSpin, setCostPerSpin] = useState(0);
   const [maxSpinsPerDay, setMaxSpinsPerDay] = useState(0);
-
   const [campaignStartDate, setCampaignStartDate] = useState<string | null>(
     null,
   );
@@ -315,7 +278,6 @@ export function SpinWheelManager() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [initialized, setInitialized] = useState(false);
 
-  // Sync from API data when it loads
   useEffect(() => {
     if (config && !initialized) {
       setIsActive(config.isActive ?? true);
@@ -329,31 +291,31 @@ export function SpinWheelManager() {
 
   useEffect(() => {
     if (prizesData?.getSpinWheelPrizes) {
-      const mappedPrizes = prizesData.getSpinWheelPrizes.map((p: any) => ({
-        ...p,
-        rewardType: p.type,
-        rewardValue: p.value,
-      }));
-      setSegments(mappedPrizes);
+      setSegments(
+        prizesData.getSpinWheelPrizes.map((p: any) => ({
+          ...p,
+          rewardType: p.type,
+          rewardValue: p.value,
+        })),
+      );
     }
   }, [prizesData]);
 
   const activities = activityData?.getSpinWheelPlays || [];
-
-  // ── Economy calculations ──
   const totalProbability = segments.reduce((s, seg) => s + seg.probability, 0);
-  const avgPayout = segments.reduce((sum, seg) => {
-    if (seg.rewardType === "TC") {
-      return sum + (seg.rewardValue * seg.probability) / totalProbability;
-    }
-    return sum;
-  }, 0);
-
+  const avgPayout = segments.reduce(
+    (sum, seg) =>
+      seg.rewardType === "TC"
+        ? sum + (seg.rewardValue * seg.probability) / totalProbability
+        : sum,
+    0,
+  );
   const profitMargin =
     costPerSpin > 0 ? ((costPerSpin - avgPayout) / costPerSpin) * 100 : 0;
   const isHealthy = profitMargin >= 20 && profitMargin <= 40;
+  const isMutating =
+    savingConfig || creatingSegment || updatingSegment || deletingSegment;
 
-  // ── Save config ──
   const handleSaveConfig = async () => {
     try {
       await updateConfig({
@@ -367,20 +329,17 @@ export function SpinWheelManager() {
           },
         },
       });
-
-      toast.success("Spin wheel configuration saved!");
+      toast.success("Spin wheel configuration saved");
     } catch (err: any) {
-      toast.error(err?.message || "Failed to save configuration");
+      toast.error(err?.message || "Failed to save");
     }
   };
 
-  // ── Segment CRUD ──
   const handleAddSegment = () => {
     const nextSortOrder =
       segments.length > 0
         ? Math.max(...segments.map((s) => s.sortOrder)) + 1
         : 0;
-
     setEditingSegment({
       id: "",
       label: "",
@@ -395,41 +354,34 @@ export function SpinWheelManager() {
     setIsDialogOpen(true);
   };
 
-  const handleEditSegment = (seg: WheelSegment) => {
-    setEditingSegment({ ...seg });
-    setIsDialogOpen(true);
-  };
-
   const handleSaveSegment = async () => {
     if (!editingSegment) return;
     const input = {
       label: editingSegment.label,
-      type: editingSegment.rewardType, // Backend expects 'type'
-      value: editingSegment.rewardValue, // Backend expects 'value'
+      type: editingSegment.rewardType,
+      value: editingSegment.rewardValue,
       probability: editingSegment.probability,
       rewardId: editingSegment.rewardId || null,
       color: editingSegment.color,
       isActive: editingSegment.isActive,
       sortOrder: editingSegment.sortOrder,
     };
-
     try {
       if (editingSegment.id) {
         await updatePrize({ variables: { id: editingSegment.id, input } });
         setSegments((prev) =>
           prev.map((s) => (s.id === editingSegment.id ? editingSegment : s)),
         );
-        toast.success("Segment updated!");
+        toast.success("Segment updated");
       } else {
         const { data } = await createPrize({ variables: { input } });
         const newSeg = data?.createSpinWheelPrize;
-        if (newSeg) {
+        if (newSeg)
           setSegments((prev) => [
             ...prev,
             { ...newSeg, rewardType: newSeg.type, rewardValue: newSeg.value },
           ]);
-        }
-        toast.success("Segment added!");
+        toast.success("Segment added");
       }
       setIsDialogOpen(false);
       setEditingSegment(null);
@@ -443,145 +395,122 @@ export function SpinWheelManager() {
     try {
       await deletePrize({ variables: { id } });
       setSegments((prev) => prev.filter((s) => s.id !== id));
-      toast.success("Segment deleted!");
+      toast.success("Segment deleted");
     } catch (err: any) {
       toast.error(err?.message || "Failed to delete segment");
     }
   };
 
-  const isMutating =
-    savingConfig || creatingSegment || updatingSegment || deletingSegment;
-
   return (
-    <EcosystemWrapper anonymized-1="spin-wheel-config">
-      <EcosystemHeader
-        title="Wheel of Fortune"
-        badgeText="Engagement System"
-        description="Configure spin rewards, token costs, and winning probabilities to drive community participation."
-        icon={Dices}
-      />
-
+    <>
       <EcosystemActionBar shadow="none">
-        <div className="flex items-center justify-between w-full">
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-3">
-              <div
-                className={cn(
-                  "h-3 w-3 rounded-full animate-pulse",
-                  isActive ? "bg-emerald-500" : "bg-amber-500",
-                )}
-              />
-              <span className="text-sm font-bold text-slate-500">
-                System {isActive ? "Live" : "Paused"}
-              </span>
-            </div>
-            <div className="h-4 w-px bg-slate-200" />
-            <div className="flex items-center gap-2 text-sm font-bold text-slate-500">
-              <Users className="h-4 w-4 text-indigo-500" />
-              <span>{activities.length}+ Recent Spins Processed</span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              onClick={() => {
-                refetchConfig();
-                refetchPrizes();
-              }}
-              className="h-10 px-4 rounded-xl border-slate-200 font-bold text-slate-600 gap-2 hover:bg-slate-50 transition-all"
-            >
-              <RotateCcw
-                className={cn("h-4 w-4", configLoading && "animate-spin")}
-              />
-              Refresh
-            </Button>
-            <Button
-              onClick={handleSaveConfig}
-              disabled={isMutating}
-              className="h-10 px-8 rounded-xl bg-slate-900 hover:bg-black text-white font-black text-[11px] uppercase tracking-wider gap-3 shadow-xl shadow-slate-200 transition-all active:scale-95 group"
-            >
-              {savingConfig ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Save className="h-4 w-4 transition-transform group-hover:-translate-y-0.5" />
-              )}
-              Save Configuration
-            </Button>
-          </div>
-        </div>
+        <EcosystemActionBar.Group>
+          <div
+            className={cn(
+              "h-2 w-2 rounded-full animate-pulse",
+              isActive ? "bg-emerald-500" : "bg-amber-500",
+            )}
+          />
+          <span className="text-xs font-medium text-muted-foreground">
+            {isActive ? "Live" : "Paused"}
+          </span>
+          <EcosystemActionBar.Separator />
+          <Users className="h-3.5 w-3.5 text-muted-foreground" />
+          <span className="text-xs text-muted-foreground">
+            {activities.length} recent spins
+          </span>
+        </EcosystemActionBar.Group>
+        <EcosystemActionBar.Group align="right">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              refetchConfig();
+              refetchPrizes();
+            }}
+          >
+            Refresh
+          </Button>
+          <Button
+            size="sm"
+            onClick={handleSaveConfig}
+            disabled={isMutating}
+            className="gap-2 min-w-[140px]"
+          >
+            {savingConfig ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Save className="h-3.5 w-3.5" />
+            )}
+            Save Configuration
+          </Button>
+        </EcosystemActionBar.Group>
       </EcosystemActionBar>
 
-      <EcosystemContainer className="space-y-10 p-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          {/* Left Column: Config */}
-          <div className="lg:col-span-8 space-y-10">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Master Toggle Card */}
-              <div className="p-8 rounded-[2.5rem] bg-indigo-50/50 border border-indigo-100 flex items-center justify-between group hover:bg-white hover:shadow-xl hover:shadow-indigo-500/10 transition-all duration-500">
-                <div className="space-y-1">
-                  <h3 className="text-xl font-black text-slate-900 tracking-tight italic">
-                    Status
-                  </h3>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                    {isActive ? "Spin flow is active" : "Flow is restricted"}
-                  </p>
-                </div>
-                <Switch
-                  checked={isActive}
-                  onCheckedChange={setIsActive}
-                  className="data-[state=checked]:bg-indigo-600 scale-125"
-                />
-              </div>
-
-              {/* Cost Card */}
-              <div className="p-8 rounded-[2.5rem] bg-white border border-slate-100 shadow-sm space-y-4">
-                <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">
-                  Spin Value (TC)
-                </Label>
-                <div className="relative">
-                  <Coins className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-amber-500" />
-                  <Input
-                    type="number"
-                    value={costPerSpin}
-                    onChange={(e) => setCostPerSpin(Number(e.target.value))}
-                    className="pl-12 h-14 rounded-2xl border-slate-200 font-extrabold text-slate-900 text-xl focus:ring-amber-500/10 transition-all"
+      <EcosystemContainer className="p-6 space-y-5">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          {/* Left col: 2/3 */}
+          <div className="lg:col-span-2 space-y-5">
+            <div className="grid grid-cols-2 gap-4">
+              <SectionCard
+                icon={Dices}
+                iconBg="bg-indigo-50"
+                iconColor="text-indigo-600"
+                title="System Status"
+              >
+                <div className="flex items-center justify-between py-1">
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">
+                      {isActive ? "Active" : "Paused"}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Spin wheel availability
+                    </p>
+                  </div>
+                  <Switch
+                    checked={isActive}
+                    onCheckedChange={setIsActive}
+                    className="data-[state=checked]:bg-emerald-500"
                   />
                 </div>
-              </div>
+              </SectionCard>
+
+              <SectionCard
+                icon={Coins}
+                iconBg="bg-amber-50"
+                iconColor="text-amber-600"
+                title="Cost per Spin (TC)"
+              >
+                <Input
+                  type="number"
+                  value={costPerSpin}
+                  onChange={(e) => setCostPerSpin(Number(e.target.value))}
+                  className="font-mono h-9"
+                />
+              </SectionCard>
             </div>
 
-            {/* Limits & Timing */}
-            <div className="p-10 rounded-[2.5rem] bg-white border border-slate-100 shadow-sm space-y-8">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-slate-900 flex items-center justify-center text-white">
-                  <Clock className="h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-black text-slate-900 tracking-tight italic">
-                    Temporal Constraints
-                  </h3>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-1">
-                    Daily limits & windows
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div className="space-y-4">
-                  <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">
-                    Daily Cap / User
+            <SectionCard
+              icon={Clock}
+              iconBg="bg-blue-50"
+              iconColor="text-blue-600"
+              title="Campaign Schedule"
+              description="Daily limits and campaign window"
+            >
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-muted-foreground">
+                    Daily Cap
                   </Label>
                   <Input
                     type="number"
                     value={maxSpinsPerDay}
                     onChange={(e) => setMaxSpinsPerDay(Number(e.target.value))}
-                    className="h-12 rounded-xl border-slate-200 font-bold text-slate-900"
                   />
                 </div>
-                <div className="space-y-4">
-                  <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">
-                    Activation Date
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-muted-foreground">
+                    Start Date
                   </Label>
                   <Input
                     type="date"
@@ -591,12 +520,11 @@ export function SpinWheelManager() {
                         : ""
                     }
                     onChange={(e) => setCampaignStartDate(e.target.value)}
-                    className="h-12 rounded-xl border-slate-200 font-bold text-slate-900"
                   />
                 </div>
-                <div className="space-y-4">
-                  <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">
-                    Termination Date
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-muted-foreground">
+                    End Date
                   </Label>
                   <Input
                     type="date"
@@ -606,245 +534,270 @@ export function SpinWheelManager() {
                         : ""
                     }
                     onChange={(e) => setCampaignEndDate(e.target.value)}
-                    className="h-12 rounded-xl border-slate-200 font-bold text-slate-900"
                   />
                 </div>
               </div>
-            </div>
+            </SectionCard>
 
-            {/* Segments Table */}
-            <div className="space-y-6">
-              <div className="flex items-center justify-between px-1">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-xl bg-indigo-500/10 flex items-center justify-center">
-                    <Trophy className="h-5 w-5 text-indigo-600" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-black text-slate-900 tracking-tight italic">
-                      Wheel Invariants
-                    </h3>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-1">
-                      {segments.length} segments configured
-                    </p>
-                  </div>
-                </div>
+            <SectionCard
+              icon={Dices}
+              iconBg="bg-violet-50"
+              iconColor="text-violet-600"
+              title="Wheel Segments"
+              description={`${segments.length} segments configured`}
+              action={
                 <Button
+                  size="sm"
                   onClick={handleAddSegment}
                   disabled={segments.length >= 12}
-                  className="rounded-xl h-10 px-6 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-[11px] uppercase tracking-wider gap-2 shadow-lg shadow-indigo-200"
+                  className="gap-1.5 h-7 text-xs"
                 >
-                  <Plus className="h-4 w-4" />
-                  Append Segment
+                  <Plus className="h-3 w-3" /> Add Segment
                 </Button>
-              </div>
-
-              <div className="rounded-[2rem] bg-white border border-slate-100 shadow-sm overflow-hidden">
+              }
+            >
+              <div className="rounded-lg border border-border overflow-hidden">
                 <Table>
                   <TableHeader>
-                    <TableRow className="border-b border-slate-50 bg-slate-50/50">
-                      <TableHead className="text-[10px] font-black uppercase text-slate-400 tracking-widest h-14 pl-8">
-                        ID
+                    <TableRow className="bg-muted/30 hover:bg-muted/30">
+                      <TableHead className="h-10 text-xs font-semibold w-[40px]">
+                        #
                       </TableHead>
-                      <TableHead className="text-[10px] font-black uppercase text-slate-400 tracking-widest h-14">
-                        Reward
+                      <TableHead className="h-10 text-xs font-semibold">
+                        Label
                       </TableHead>
-                      <TableHead className="text-[10px] font-black uppercase text-slate-400 tracking-widest h-14">
+                      <TableHead className="h-10 text-xs font-semibold">
                         Type
                       </TableHead>
-                      <TableHead className="text-[10px] font-black uppercase text-slate-400 tracking-widest h-14">
-                        Yield
+                      <TableHead className="h-10 text-xs font-semibold">
+                        Value
                       </TableHead>
-                      <TableHead className="text-[10px] font-black uppercase text-slate-400 tracking-widest h-14">
+                      <TableHead className="h-10 text-xs font-semibold">
                         Probability
                       </TableHead>
-                      <TableHead className="text-[10px] font-black uppercase text-slate-400 tracking-widest h-14 text-center">
+                      <TableHead className="h-10 text-xs font-semibold text-center">
                         Active
                       </TableHead>
-                      <TableHead className="text-[10px] font-black uppercase text-slate-400 tracking-widest h-14 text-right pr-8">
+                      <TableHead className="h-10 text-xs font-semibold text-right">
                         Actions
                       </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {segments.map((seg, i) => (
-                      <TableRow
-                        key={seg.id}
-                        className="group hover:bg-slate-50/80 transition-colors border-b border-slate-50"
-                      >
-                        <TableCell className="font-mono text-xs text-slate-300 pl-8">
-                          {i + 1}
-                        </TableCell>
-                        <TableCell className="font-bold text-slate-900">
-                          {seg.label}
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant="outline"
-                            className={cn(
-                              "rounded-lg font-black text-[10px] uppercase tracking-tighter gap-1.5",
-                              rewardTypeBadge(seg.rewardType),
-                            )}
-                          >
-                            {rewardTypeIcon(seg.rewardType)}
-                            {rewardTypeLabel(seg.rewardType)}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="font-black text-slate-900">
-                          {seg.rewardType === "TC" && `${seg.rewardValue} TC`}
-                          {seg.rewardType === "VOUCHER" &&
-                            `₹${seg.rewardValue}`}
-                          {seg.rewardType === "PREMIUM" &&
-                            `${seg.rewardValue} Days`}
-                          {seg.rewardType === "NOTHING" && "—"}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden max-w-[60px]">
-                              <div
-                                className="h-full bg-indigo-500 rounded-full"
-                                style={{
-                                  width: `${(seg.probability / totalProbability) * 100}%`,
-                                }}
-                              />
-                            </div>
-                            <span className="text-[10px] font-black text-slate-400">
-                              {(
-                                (seg.probability / totalProbability) *
-                                100
-                              ).toFixed(1)}
-                              %
-                            </span>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <Switch
-                            checked={seg.isActive}
-                            onCheckedChange={async (v) => {
-                              try {
-                                await updatePrize({
-                                  variables: {
-                                    id: seg.id,
-                                    input: { isActive: v },
-                                  },
-                                });
-                                toast.success("Status updated");
-                                refetchPrizes();
-                              } catch (e) {
-                                toast.error("Update failed");
-                              }
-                            }}
-                            className="scale-75"
-                          />
-                        </TableCell>
-                        <TableCell className="text-right pr-8">
-                          <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleEditSegment(seg)}
-                              className="h-8 w-8 rounded-lg hover:bg-white hover:shadow-md transition-all text-slate-400 hover:text-indigo-600"
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleDeleteSegment(seg.id)}
-                              className="h-8 w-8 rounded-lg hover:bg-white hover:shadow-md transition-all text-slate-400 hover:text-rose-600"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
+                    {segments.length === 0 ? (
+                      <TableRow>
+                        <TableCell
+                          colSpan={7}
+                          className="h-20 text-center text-sm text-muted-foreground"
+                        >
+                          No segments yet. Add one to get started.
                         </TableCell>
                       </TableRow>
-                    ))}
+                    ) : (
+                      segments.map((seg, i) => (
+                        <TableRow key={seg.id} className="group h-12">
+                          <TableCell className="font-mono text-xs text-muted-foreground">
+                            {i + 1}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <span
+                                className="h-2.5 w-2.5 rounded-sm shrink-0"
+                                style={{ background: seg.color }}
+                              />
+                              <span className="text-sm font-medium text-foreground">
+                                {seg.label}
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <span
+                              className={cn(
+                                "text-[11px] font-medium px-2 py-0.5 rounded-md flex items-center gap-1 w-fit",
+                                REWARD_BADGE[seg.rewardType],
+                              )}
+                            >
+                              {REWARD_ICON[seg.rewardType]}
+                              {REWARD_LABELS[seg.rewardType]}
+                            </span>
+                          </TableCell>
+                          <TableCell className="font-mono text-sm font-medium text-foreground">
+                            {seg.rewardType === "TC" && `${seg.rewardValue} TC`}
+                            {seg.rewardType === "VOUCHER" &&
+                              `₹${seg.rewardValue}`}
+                            {seg.rewardType === "PREMIUM" &&
+                              `${seg.rewardValue} Days`}
+                            {seg.rewardType === "NOTHING" && "—"}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <div className="w-16 h-1.5 bg-muted rounded-full overflow-hidden">
+                                <div
+                                  className="h-full bg-indigo-500 rounded-full"
+                                  style={{
+                                    width: `${(seg.probability / totalProbability) * 100}%`,
+                                  }}
+                                />
+                              </div>
+                              <span className="text-xs text-muted-foreground font-mono">
+                                {(
+                                  (seg.probability / totalProbability) *
+                                  100
+                                ).toFixed(1)}
+                                %
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Switch
+                              checked={seg.isActive}
+                              onCheckedChange={async (v) => {
+                                try {
+                                  await updatePrize({
+                                    variables: {
+                                      id: seg.id,
+                                      input: { isActive: v },
+                                    },
+                                  });
+                                  toast.success("Updated");
+                                  refetchPrizes();
+                                } catch {
+                                  toast.error("Update failed");
+                                }
+                              }}
+                              className="scale-75"
+                            />
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 rounded-lg"
+                                onClick={() => {
+                                  setEditingSegment({ ...seg });
+                                  setIsDialogOpen(true);
+                                }}
+                              >
+                                <Edit className="h-3.5 w-3.5" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 rounded-lg hover:text-rose-600"
+                                onClick={() => handleDeleteSegment(seg.id)}
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
                   </TableBody>
                 </Table>
               </div>
-            </div>
+            </SectionCard>
           </div>
 
-          {/* Right Column: Preview & Stats */}
-          <div className="lg:col-span-4 space-y-10">
-            <div className="sticky top-10 space-y-10">
-              {/* Visual Preview */}
-              <div className="p-10 rounded-[3rem] bg-slate-900 shadow-2xl shadow-indigo-900/20 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-10 opacity-[0.05] group-hover:scale-125 transition-transform duration-1000">
-                  <Zap className="h-32 w-32 text-indigo-500" />
+          {/* Right col: Preview + Economy */}
+          <div className="space-y-5">
+            {/* Wheel Preview */}
+            <div className="rounded-xl border border-border bg-card overflow-hidden sticky top-6">
+              <div className="flex items-center gap-3 px-5 py-4 border-b border-border bg-muted/20">
+                <div className="h-8 w-8 rounded-lg bg-indigo-50 flex items-center justify-center">
+                  <Dices className="h-4 w-4 text-indigo-600" />
                 </div>
-                <div className="relative z-10 space-y-8">
-                  <div className="text-center">
-                    <h4 className="text-white font-black italic tracking-tight text-xl">
-                      Visual Invariants
-                    </h4>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-                      Simulated frontend render
-                    </p>
-                  </div>
-                  <WheelPreview segments={segments} />
-                  <p className="text-[10px] font-bold text-slate-500 text-center uppercase tracking-tighter italic">
-                    * Preview reflects active segments only
+                <div>
+                  <p className="text-sm font-semibold text-foreground">
+                    Wheel Preview
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Active segments only
                   </p>
                 </div>
               </div>
+              <div className="p-5 flex flex-col items-center gap-4">
+                <WheelPreview segments={segments} />
+                <p className="text-xs text-muted-foreground text-center">
+                  Preview reflects active segments and probability weights
+                </p>
+              </div>
 
-              {/* Economy Protection */}
-              <div className="p-10 rounded-[3rem] bg-white border border-slate-100 shadow-xl shadow-slate-200/50 space-y-8">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-xl bg-orange-500/10 flex items-center justify-center">
-                    <Shield className="h-5 w-5 text-orange-600" />
+              <div className="border-t border-border">
+                <div className="flex items-center gap-3 px-5 py-4 border-b border-border bg-muted/20">
+                  <div className="h-8 w-8 rounded-lg bg-orange-50 flex items-center justify-center">
+                    <Shield className="h-4 w-4 text-orange-600" />
                   </div>
-                  <h3 className="text-xl font-black text-slate-900 tracking-tight italic">
-                    Vault Health
-                  </h3>
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">
+                      Economy Monitor
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Payout health check
+                    </p>
+                  </div>
                 </div>
-
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                      Payout Factor
+                <div className="p-5 space-y-3">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
+                    <span className="text-xs text-muted-foreground">
+                      Avg. Payout
                     </span>
-                    <span className="font-black text-slate-900">
+                    <span className="text-sm font-bold font-mono text-foreground">
                       {avgPayout.toFixed(1)} TC
                     </span>
                   </div>
                   <div
                     className={cn(
-                      "flex items-center justify-between p-6 rounded-[2rem] border transition-all duration-500",
+                      "p-4 rounded-xl border",
                       isHealthy
-                        ? "bg-emerald-50 border-emerald-100"
-                        : "bg-rose-50 border-rose-100",
+                        ? "bg-emerald-50 border-emerald-200"
+                        : "bg-rose-50 border-rose-200",
                     )}
                   >
-                    <div>
-                      <p className="text-[10px] font-black uppercase tracking-widest opacity-60">
-                        Profit Margin
-                      </p>
-                      <h4
+                    <div className="flex items-center justify-between">
+                      <p
                         className={cn(
-                          "text-3xl font-black tracking-tighter",
-                          isHealthy ? "text-emerald-600" : "text-rose-600",
+                          "text-xs font-semibold",
+                          isHealthy ? "text-emerald-700" : "text-rose-700",
                         )}
                       >
-                        {profitMargin.toFixed(1)}%
-                      </h4>
+                        Profit Margin
+                      </p>
+                      {isHealthy ? (
+                        <TrendingUp className="h-4 w-4 text-emerald-500" />
+                      ) : (
+                        <AlertTriangle className="h-4 w-4 text-rose-500" />
+                      )}
                     </div>
-                    {isHealthy ? (
-                      <TrendingUp className="h-8 w-8 text-emerald-500 opacity-20" />
-                    ) : (
-                      <AlertTriangle className="h-8 w-8 text-rose-500 opacity-20" />
-                    )}
+                    <p
+                      className={cn(
+                        "text-2xl font-bold font-mono mt-1",
+                        isHealthy ? "text-emerald-700" : "text-rose-700",
+                      )}
+                    >
+                      {profitMargin.toFixed(1)}%
+                    </p>
+                    <p
+                      className={cn(
+                        "text-xs mt-0.5",
+                        isHealthy ? "text-emerald-600/70" : "text-rose-600/70",
+                      )}
+                    >
+                      Target: 20–40%
+                    </p>
                   </div>
+                  {!isHealthy && (
+                    <div className="flex items-start gap-2 p-3 rounded-lg bg-rose-50 border border-rose-100">
+                      <Info className="h-3.5 w-3.5 text-rose-500 shrink-0 mt-0.5" />
+                      <p className="text-xs text-rose-700 leading-relaxed">
+                        {profitMargin < 20
+                          ? "Margin too low. Increase spin cost or reduce payouts."
+                          : "Margin too high. Add higher-value rewards."}
+                      </p>
+                    </div>
+                  )}
                 </div>
-
-                {!isHealthy && (
-                  <div className="p-5 rounded-2xl bg-rose-50 border border-rose-100/50 text-[11px] font-bold text-rose-600 leading-relaxed uppercase tracking-tight">
-                    Critical: Economy is imbalanced.{" "}
-                    {profitMargin < 20
-                      ? "Increase cost or lower rewards."
-                      : "Add higher rewards to boost engagement."}
-                  </div>
-                )}
               </div>
             </div>
           </div>
@@ -853,132 +806,107 @@ export function SpinWheelManager() {
 
       {/* Segment Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-xl rounded-[2.5rem] p-0 overflow-hidden border-none shadow-2xl">
-          <div className="bg-slate-900 p-8 text-white relative">
-            <div className="absolute top-0 right-0 p-8 opacity-10">
-              <Trophy className="h-20 w-20" />
-            </div>
-            <DialogHeader>
-              <DialogTitle className="text-2xl font-black italic tracking-tight uppercase">
-                Configuring Segment
-              </DialogTitle>
-              <DialogDescription className="text-slate-400 font-bold uppercase text-[10px] tracking-widest mt-1">
-                Definition of a single wheel invariant
-              </DialogDescription>
-            </DialogHeader>
-          </div>
-
-          <div className="p-10 space-y-8">
-            <div className="grid grid-cols-2 gap-8">
-              <div className="space-y-3">
-                <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">
-                  Internal Label
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {editingSegment?.id ? "Edit Segment" : "Add Segment"}
+            </DialogTitle>
+            <DialogDescription>
+              Configure label, reward type, value, and probability weight.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-muted-foreground">
+                  Label
                 </Label>
                 <Input
-                  value={editingSegment?.label}
+                  placeholder="e.g. 50 TC"
+                  value={editingSegment?.label || ""}
                   onChange={(e) =>
-                    setEditingSegment((prev) =>
-                      prev ? { ...prev, label: e.target.value } : null,
+                    setEditingSegment((p) =>
+                      p ? { ...p, label: e.target.value } : null,
                     )
                   }
-                  className="h-12 rounded-xl border-slate-200 font-bold"
                 />
               </div>
-              <div className="space-y-3">
-                <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">
-                  Yield Type
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-muted-foreground">
+                  Reward Type
                 </Label>
                 <Select
                   value={editingSegment?.rewardType}
                   onValueChange={(v) =>
-                    setEditingSegment((prev) =>
-                      prev ? { ...prev, rewardType: v as RewardType } : null,
+                    setEditingSegment((p) =>
+                      p ? { ...p, rewardType: v as RewardType } : null,
                     )
                   }
                 >
-                  <SelectTrigger className="h-12 rounded-xl border-slate-200 font-bold">
+                  <SelectTrigger>
                     <SelectValue placeholder="Select type..." />
                   </SelectTrigger>
-                  <SelectContent className="rounded-2xl border-slate-100 shadow-2xl">
-                    <SelectItem value="TC" className="font-bold">
-                      TC COINS
-                    </SelectItem>
-                    <SelectItem value="VOUCHER" className="font-bold">
-                      EXTERNAL VOUCHER
-                    </SelectItem>
-                    <SelectItem value="PREMIUM" className="font-bold">
-                      PREMIUM ACCESS
-                    </SelectItem>
-                    <SelectItem value="NOTHING" className="font-bold">
-                      EMPTY SLOT
-                    </SelectItem>
+                  <SelectContent>
+                    <SelectItem value="TC">TC Coins</SelectItem>
+                    <SelectItem value="VOUCHER">Voucher</SelectItem>
+                    <SelectItem value="PREMIUM">Premium</SelectItem>
+                    <SelectItem value="NOTHING">No Reward</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
-
-            <div className="grid grid-cols-2 gap-8">
-              <div className="space-y-3">
-                <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">
-                  Asset Value
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-muted-foreground">
+                  Reward Value
                 </Label>
                 <Input
                   type="number"
-                  value={editingSegment?.rewardValue}
+                  value={editingSegment?.rewardValue || 0}
                   onChange={(e) =>
-                    setEditingSegment((prev) =>
-                      prev
-                        ? {
-                            ...prev,
-                            rewardValue: parseInt(e.target.value) || 0,
-                          }
+                    setEditingSegment((p) =>
+                      p
+                        ? { ...p, rewardValue: parseInt(e.target.value) || 0 }
                         : null,
                     )
                   }
-                  className="h-12 rounded-xl border-slate-200 font-bold"
                 />
               </div>
-              <div className="space-y-3">
-                <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-muted-foreground">
                   Probability Weight
                 </Label>
                 <Input
                   type="number"
-                  value={editingSegment?.probability}
+                  value={editingSegment?.probability || 0}
                   onChange={(e) =>
-                    setEditingSegment((prev) =>
-                      prev
-                        ? {
-                            ...prev,
-                            probability: parseInt(e.target.value) || 0,
-                          }
+                    setEditingSegment((p) =>
+                      p
+                        ? { ...p, probability: parseInt(e.target.value) || 0 }
                         : null,
                     )
                   }
-                  className="h-12 rounded-xl border-slate-200 font-bold text-indigo-600"
                 />
               </div>
             </div>
           </div>
-
-          <div className="p-8 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-3">
-            <Button
-              variant="ghost"
-              onClick={() => setIsDialogOpen(false)}
-              className="rounded-xl font-bold h-11 px-6"
-            >
-              Discard
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+              Cancel
             </Button>
             <Button
               onClick={handleSaveSegment}
               disabled={creatingSegment || updatingSegment}
-              className="rounded-xl font-black h-11 px-8 bg-slate-900 hover:bg-black text-white shadow-xl shadow-slate-200 transition-all active:scale-95"
+              className="gap-2"
             >
-              Commit Segment
+              {(creatingSegment || updatingSegment) && (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              )}
+              {editingSegment?.id ? "Save Changes" : "Add Segment"}
             </Button>
-          </div>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
-    </EcosystemWrapper>
+    </>
   );
 }

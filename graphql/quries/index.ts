@@ -335,6 +335,26 @@ export interface GetAllEntityInvoiceResponse {
   getAllEntityInvoice: EntityInvoice[];
 }
 
+export const GET_MY_OTHER_ACCOUNTS = gql`
+  query GetMyOtherAccounts {
+    getMyOtherAccounts {
+      id
+      entityId
+      name
+      logo
+      role
+    }
+  }
+`;
+
+export const SWITCH_TO_OTHER_ACCOUNT = gql`
+  mutation SwitchToOtherAccount($entityId: ID!) {
+    switchToOtherAccount(entityId: $entityId) {
+      token
+    }
+  }
+`;
+
 export * from "./dashboard";
 export * from "./currency/currency-queries";
 export * from "./rewards/rewards-queries";

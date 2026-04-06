@@ -14,6 +14,8 @@ import {
   UPLOAD_ENTITY_LOGO,
   UPDATE_ENTITY_PROFILE,
   UPDATE_USER_PROFILE,
+  GET_MY_OTHER_ACCOUNTS,
+  SWITCH_TO_OTHER_ACCOUNT,
 } from "../quries";
 import { GET_MEMBERS_TERMS_AND_CONDITIONS } from "../quries/user";
 export * from "./membership/membership-queries";
@@ -245,6 +247,33 @@ export const useUpdateUserProfile = (options: any) =>
     refetchQueries: [{ query: GET_USER }],
     awaitRefetchQueries: true,
   });
+
+export interface OtherAccount {
+  id: string;
+  entityId: string;
+  name: string;
+  logo: string;
+  role: string | null;
+}
+
+export interface GetMyOtherAccountsResponse {
+  getMyOtherAccounts: OtherAccount[];
+}
+
+export const useGetMyOtherAccounts = () =>
+  useQuery<GetMyOtherAccountsResponse>(GET_MY_OTHER_ACCOUNTS);
+
+export interface SwitchToOtherAccountResponse {
+  switchToOtherAccount: {
+    token: string;
+  };
+}
+
+export const useSwitchToOtherAccount = (options?: any) =>
+  useMutation<SwitchToOtherAccountResponse, { entityId: string }>(
+    SWITCH_TO_OTHER_ACCOUNT,
+    options,
+  );
 
 export * from "./website";
 export * from "./dashbaord/dashboard-quries";

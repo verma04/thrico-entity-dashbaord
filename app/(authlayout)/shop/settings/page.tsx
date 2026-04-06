@@ -1,51 +1,57 @@
 "use client";
 
-import { ModuleSettingsForm } from "@/components/common/module-settings-form";
+import React from "react";
 import { useEntitySettings, useUpdateEntitySettings } from "@/graphql/actions";
-import { Loader2 } from "lucide-react";
+import { ShoppingBag, ShieldCheck, Zap } from "lucide-react";
+import { PlatformSettingsPage, SettingsField } from "@/components/ui/platform/settings-page";
+import { toast } from "sonner";
+
+const FIELDS: SettingsField[] = [
+  {
+    key: "allowShop",
+    label: "Allow Product Listings",
+    description: "Enable or disable the module for listing and selling products.",
+    icon: ShieldCheck,
+    section: "Marketplace Governance",
+  },
+  {
+    key: "autoApproveShop",
+    label: "Auto Approve Products",
+    description: "New product listings will be live instantly without manual review.",
+    icon: Zap,
+    section: "Automation Protocols",
+  },
+];
 
 const ShopSettings = () => {
   const { data, loading } = useEntitySettings();
   const [update, { loading: loadingBtn }] = useUpdateEntitySettings({});
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
-  const fields = [
-    {
-      key: "allowShop",
-      label: "Allow Shop",
-      description: "Enable or disable the shop module",
-    },
-    {
-      key: "autoApproveShop",
-      label: "Auto Approve Products",
-      description: "Automatically approve new product listings",
-    },
-  ];
+  const handleSave = async (settings: any) => {
+    try {
+      await update({
+        variables: {
+          input: settings,
+        },
+      });
+      toast.success("Shop settings updated successfully");
+    } catch (error) {
+      toast.error("Failed to update shop configuration");
+      throw error;
+    }
+  };
 
   return (
-    <ModuleSettingsForm
-      title="Shop Settings"
-      description="Configure shop module settings"
-      fields={fields}
-      onSave={(settings) => {
-        update({
-          variables: {
-            input: settings,
-          },
-        });
-      }}
-      isLoading={loadingBtn}
-      data={{
-        allowShop: data?.getEntitySettings?.allowShop ?? true,
-        autoApproveShop: data?.getEntitySettings?.autoApproveShop ?? false,
-      }}
+    <PlatformSettingsPage
+      title="Commerce Engine"
+      description="Moderate digital storefronts and configure automated product validation."
+      headerIcon={ShoppingBag}
+      badge="Commerce"
+      fields={FIELDS}
+      data={data?.getEntitySettings}
+      loading={loading}
+      onSave={handleSave}
+      isSaving={loadingBtn}
     />
   );
 };

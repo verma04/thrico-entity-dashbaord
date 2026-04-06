@@ -57,11 +57,15 @@ export interface EmailDomain {
 
 export interface EmailTemplate {
   id: string;
+  entity?: string;
   name: string;
+  slug?: string;
   subject: string;
   html: string;
   json: string;
   isActive: boolean;
+  isDeletable?: boolean;
+  createdAt?: string;
   updatedAt: string;
 }
 

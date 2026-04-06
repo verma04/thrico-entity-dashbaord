@@ -21,9 +21,7 @@ function SurveysLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <MenuItemsLayout active="surveys" items={items}>
-      <Card className="border-none shadow-sm ring-1 ring-border/50">
-        {children}
-      </Card>
+      {children}
     </MenuItemsLayout>
   );
 }

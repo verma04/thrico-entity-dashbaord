@@ -4,33 +4,26 @@ import React, { useState } from "react";
 import { useGetUserGamificationActivityLog } from "@/graphql/actions/gamification/gamification-quiries";
 import { UserActivityLogTable } from "./user-activity-log-table";
 import { Button } from "@/components/ui/button";
-import { ScrollText, ChevronLeft, ChevronRight, LayoutGrid } from "lucide-react";
+import { ScrollText, ChevronLeft, ChevronRight } from "lucide-react";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
-import { Card, CardContent } from "@/components/ui/card";
 
 export function UserActivityLogManager() {
   const [offset, setOffset] = useState(0);
   const limit = 20;
 
   const { data, loading, error } = useGetUserGamificationActivityLog({
-    variables: {
-      input: {
-        limit,
-        offset,
-      },
-    },
+    variables: { input: { limit, offset } },
     fetchPolicy: "network-only",
   });
 
   const logs = data?.getUserGamificationActivityLog || [];
+  const currentPage = Math.floor(offset / limit) + 1;
 
   const handleNext = () => {
-    if (logs.length === limit) {
-      setOffset((prev) => prev + limit);
-    }
+    if (logs.length === limit) setOffset((prev) => prev + limit);
   };
 
   const handlePrev = () => {
@@ -39,62 +32,55 @@ export function UserActivityLogManager() {
 
   if (error) {
     return (
-      <Card className="border-destructive/20 bg-destructive/5">
-        <CardContent className="py-10 text-center">
-          <p className="text-destructive font-medium">
-            Error loading user activity logs
-          </p>
-          <p className="text-xs text-muted-foreground mt-1">{error.message}</p>
-        </CardContent>
-      </Card>
+      <div className="p-6 rounded-xl border border-destructive/20 bg-destructive/5 text-center">
+        <p className="text-sm font-medium text-destructive">Error loading activity logs</p>
+        <p className="text-xs text-muted-foreground mt-1">{error.message}</p>
+      </div>
     );
   }
 
   return (
     <EcosystemWrapper>
       <EcosystemHeader
-        title="Gamification History"
+        title="Member Activity History"
         badgeText="Gamification"
-        description="Detailed view of user actions, points earned, and badges achieved unlocks across the ecosystem."
+        description="Detailed log of member actions, points earned, and badges achieved."
         icon={ScrollText}
       />
 
       <EcosystemActionBar>
-        <div className="flex items-center justify-between w-full pr-4">
-          <div className="flex items-center gap-1 min-w-12 font-medium text-slate-500">
-            <LayoutGrid className="h-4 w-4 text-slate-400" />
-            Showing Page {Math.floor(offset / limit) + 1}
-          </div>
-          <div className="flex items-center gap-2">
+        <EcosystemActionBar.Group>
+          <span className="text-xs text-muted-foreground">Page {currentPage}</span>
+        </EcosystemActionBar.Group>
+        <EcosystemActionBar.Group align="right">
+          <div className="flex items-center gap-1 border border-border rounded-lg overflow-hidden bg-card">
             <Button
-              variant="outline"
+              variant="ghost"
               size="icon"
-              className="h-9 w-9 border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+              className="h-8 w-8 rounded-none border-r border-border"
               onClick={handlePrev}
               disabled={offset === 0 || loading}
             >
-              <ChevronLeft className="h-4 w-4 text-slate-600" />
+              <ChevronLeft className="h-4 w-4" />
             </Button>
-            <div className="h-9 min-w-12 flex items-center justify-center font-bold text-slate-700 bg-slate-50 border border-slate-200 rounded-lg text-xs leading-none">
-              {Math.floor(offset / limit) + 1}
-            </div>
+            <span className="px-3 text-xs font-semibold text-foreground min-w-[28px] text-center">
+              {currentPage}
+            </span>
             <Button
-              variant="outline"
+              variant="ghost"
               size="icon"
-              className="h-9 w-9 border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+              className="h-8 w-8 rounded-none border-l border-border"
               onClick={handleNext}
               disabled={logs.length < limit || loading}
             >
-              <ChevronRight className="h-4 w-4 text-slate-600" />
+              <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
-        </div>
+        </EcosystemActionBar.Group>
       </EcosystemActionBar>
 
-      <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">
-        <div className="rounded-2xl border border-slate-200/60 bg-white shadow-xl shadow-slate-200/20 overflow-hidden">
-          <UserActivityLogTable logs={logs} isLoading={loading} />
-        </div>
+      <EcosystemContainer className="p-0 overflow-hidden">
+        <UserActivityLogTable logs={logs} isLoading={loading} />
       </EcosystemContainer>
     </EcosystemWrapper>
   );

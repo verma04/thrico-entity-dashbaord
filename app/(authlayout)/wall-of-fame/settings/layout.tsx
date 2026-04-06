@@ -1,16 +1,10 @@
 "use client";
 
 import React from "react";
-import { MessageCircleQuestion, Trophy, ScrollText } from "lucide-react";
+import { MessageCircleQuestion, Trophy } from "lucide-react";
 import { PlatformSettingsLayout } from "@/components/ui/platform/layout";
 
 const TABS = [
-  {
-    id: "terms",
-    label: "Induction Criteria",
-    icon: ScrollText,
-    href: "/wall-of-fame/settings/term_and_conditions",
-  },
   {
     id: "faq",
     label: "Success FAQ",
@@ -40,4 +34,3 @@ function WallOfFameSettingsLayout({ children }: { children: React.ReactNode }) {
 }
 
 export default WallOfFameSettingsLayout;
-

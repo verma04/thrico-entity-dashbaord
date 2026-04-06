@@ -5,6 +5,7 @@ import {
   GET_ALL_USER,
   UPDATE_MEMBERS_TERMS_AND_CONDITIONS,
   BULK_CHANGE_USER_STATUS,
+  ADD_NEW_MEMBER,
 } from "../../quries/user";
 
 // ---------------------------------------------------------
@@ -50,6 +51,15 @@ export const useBulkChangeUserStatus = (options: any) =>
       { query: GET_ALL_USER, variables: { input: { status: "REJECTED" } } },
       { query: GET_ALL_USER, variables: { input: { status: "FLAGGED" } } },
       { query: GET_ALL_USER, variables: { input: { status: "DISABLED" } } },
+    ],
+    awaitRefetchQueries: true,
+  });
+
+export const useAddNewMember = (options?: any) =>
+  useMutation(ADD_NEW_MEMBER, {
+    ...options,
+    refetchQueries: [
+      { query: GET_ALL_USER, variables: { input: { status: "ALL" } } },
     ],
     awaitRefetchQueries: true,
   });

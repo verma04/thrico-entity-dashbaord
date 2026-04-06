@@ -1,7 +1,5 @@
 import React from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Trophy } from "lucide-react";
+import { Trophy, CheckCircle2, Layers } from "lucide-react";
 import { Rank } from "@/graphql/actions";
 
 interface StatsCardsProps {
@@ -9,59 +7,49 @@ interface StatsCardsProps {
 }
 
 export function StatsCards({ ranks }: StatsCardsProps) {
-  const pointsBased = ranks.filter(
-    (r) => !r.icon || r.minPoints !== undefined || r.maxPoints !== undefined
-  ).length;
-  // Note: The original logic used rank.type which doesn't exist in the GraphQL Rank interface yet.
-  // I will adjust this based on the GraphQL fields or keep it simple.
-
-  // Actually, the GraphQL Rank has color, icon, minPoints, maxPoints.
-  // Let's use total, active, and maybe a split by points?
-
   const totalRanks = ranks.length;
   const activeRanks = ranks.filter((r) => r.isActive).length;
 
+  const items = [
+    {
+      label: "Total Ranks",
+      value: totalRanks,
+      icon: Layers,
+      accent: "text-orange-600",
+      bg: "bg-orange-50",
+    },
+    {
+      label: "Active Ranks",
+      value: activeRanks,
+      icon: CheckCircle2,
+      accent: "text-emerald-600",
+      bg: "bg-emerald-50",
+    },
+    {
+      label: "Status",
+      value: totalRanks > 0 ? "Configured" : "Not Set Up",
+      icon: Trophy,
+      accent: "text-amber-600",
+      bg: "bg-amber-50",
+    },
+  ];
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Total Ranks</p>
-              <p className="text-2xl font-bold">{totalRanks}</p>
-            </div>
-            <Trophy className="h-8 w-8 text-yellow-500" />
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+      {items.map((item) => (
+        <div
+          key={item.label}
+          className="flex items-center gap-3 p-4 rounded-lg border border-border bg-card"
+        >
+          <div className={`h-9 w-9 rounded-lg flex items-center justify-center shrink-0 ${item.bg}`}>
+            <item.icon className={`h-4 w-4 ${item.accent}`} />
           </div>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Active Ranks</p>
-              <p className="text-2xl font-bold">{activeRanks}</p>
-            </div>
-            <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
-              <div className="h-3 w-3 rounded-full bg-green-500" />
-            </div>
+          <div>
+            <p className="text-xs font-medium text-muted-foreground">{item.label}</p>
+            <p className="text-lg font-bold text-foreground tracking-tight">{item.value}</p>
           </div>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Status</p>
-              <p className="text-2xl font-bold">
-                {totalRanks > 0 ? "Configured" : "Empty"}
-              </p>
-            </div>
-            <Badge variant={totalRanks > 0 ? "default" : "secondary"}>
-              {totalRanks > 0 ? "Live" : "Setup"}
-            </Badge>
-          </div>
-        </CardContent>
-      </Card>
+        </div>
+      ))}
     </div>
   );
 }

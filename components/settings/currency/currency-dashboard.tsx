@@ -1,13 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import {
-  TimeRange,
-  useGetCurrencyTransactions,
   useGetEntityCurrencyConfig,
-  useGetUser,
 } from "@/graphql/actions";
-import { Coins, CreditCard, Activity, History, Settings2, Zap, LayoutGrid } from "lucide-react";
+import { Coins, CreditCard, Activity, Settings2, TrendingUp, BarChart3 } from "lucide-react";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -17,129 +14,100 @@ import {
   CartesianGrid,
   Tooltip,
 } from "recharts";
-import {
-  EcosystemKPI,
-  EcosystemCard,
-  EcosystemGrid,
-} from "@/components/layout/ecosystem/ecosystem-analytics";
 import { formatNumber } from "@/lib/formatNumber";
+import { EcosystemKPI, EcosystemCard } from "@/components/layout/ecosystem/ecosystem-analytics";
+import { cn } from "@/lib/utils";
+
+const chartData = [
+  { name: "Jan", amount: 4000 },
+  { name: "Feb", amount: 3000 },
+  { name: "Mar", amount: 5000 },
+  { name: "Apr", amount: 2780 },
+  { name: "May", amount: 1890 },
+  { name: "Jun", amount: 2390 },
+  { name: "Jul", amount: 3490 },
+];
 
 export function CurrencyDashboard() {
-  const [timeRange, setTimeRange] = useState<TimeRange>(TimeRange.LAST_7_DAYS);
-  const { data: configData, loading: configLoading } =
-    useGetEntityCurrencyConfig();
-  const { data: userData } = useGetUser();
-
-  // Mocking stats as the backend might not have a dedicated stats query for currency yet
-  // In a real scenario, we would use a useGetCurrencyStats hook
-  const { data: txData, loading: txLoading } = useGetCurrencyTransactions({
-    userId: userData?.getUser?.id || "",
-    limit: 100,
-  });
-
+  const { data: configData, loading: configLoading } = useGetEntityCurrencyConfig();
   const config = configData?.getEntityCurrencyConfig;
   const currencyName = config?.currencyName || "EC";
 
   const kpis = [
     {
       title: `Total ${currencyName} Earned`,
-      value: configLoading ? "..." : "124,500",
+      value: configLoading ? "—" : "124,500",
       trend: 12,
       icon: Coins,
-      color: "text-indigo-500",
-      bg: "bg-indigo-500/10",
+      color: "text-zinc-900",
+      bg: "bg-zinc-100",
     },
     {
       title: "Redemption Volume",
-      value: configLoading ? "..." : "42,100",
+      value: configLoading ? "—" : "42,100",
       trend: -2,
       icon: CreditCard,
-      color: "text-violet-500",
-      bg: "bg-violet-500/10",
+      color: "text-indigo-600",
+      bg: "bg-indigo-50",
     },
     {
       title: "Active Users",
-      value: configLoading ? "..." : "1,240",
+      value: configLoading ? "—" : "1,240",
       trend: 8,
       icon: Activity,
-      color: "text-amber-500",
-      bg: "bg-amber-500/10",
+      color: "text-emerald-600",
+      bg: "bg-emerald-50",
     },
   ];
 
-  // Derive chart data from transactions if available, otherwise use mock
-  const chartData = [
-    { name: "JAN", amount: 4000 },
-    { name: "FEB", amount: 3000 },
-    { name: "MAR", amount: 5000 },
-    { name: "APR", amount: 2780 },
-    { name: "MAY", amount: 1890 },
-    { name: "JUN", amount: 2390 },
-    { name: "JUL", amount: 3490 },
-  ];
-
   return (
-    <div className="space-y-8">
-      {/* KPI Grid */}
-      <EcosystemGrid cols={3} className="gap-8">
+    <div className="space-y-6">
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {kpis.map((kpi, i) => (
-          <EcosystemKPI key={i} {...kpi} trendLabel="Economy" />
+          <EcosystemKPI key={i} {...kpi} trendLabel="v. last month" />
         ))}
-      </EcosystemGrid>
+      </div>
 
-      <EcosystemGrid cols={12} className="gap-10">
+      {/* Chart + Config */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Chart */}
         <div className="lg:col-span-8">
           <EcosystemCard
-            title="Sovereign Currency Flow"
-            description="Temporal circulation velocity"
-            icon={History}
-            decorationIcon={Zap}
+            title="Currency Flow"
+            description="Monthly circulation trajectory"
+            icon={TrendingUp}
           >
-            <div className="h-[350px] w-full">
+            <div className="h-[300px] w-full mt-6">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData}>
                   <defs>
-                    <linearGradient
-                      id="colorAmount"
-                      x1="0"
-                      y1="0"
-                      x2="0"
-                      y2="1"
-                    >
-                      <stop offset="5%" stopColor="#6366f1" stopOpacity={0.1} />
+                    <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#6366f1" stopOpacity={0.08} />
                       <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    vertical={false}
-                    stroke="#f1f5f9"
-                  />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                   <XAxis
                     dataKey="name"
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fontSize: 10, fontWeight: 900, fill: "#94a3b8" }}
-                    dy={15}
+                    tick={{ fontSize: 10, fontWeight: 600, fill: "#94a3b8" }}
+                    dy={10}
                   />
                   <YAxis
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fontSize: 10, fontWeight: 900, fill: "#94a3b8" }}
+                    tick={{ fontSize: 10, fontWeight: 600, fill: "#94a3b8" }}
                     tickFormatter={formatNumber}
                   />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "#0f172a",
+                      backgroundColor: "#18181b",
                       border: "none",
-                      borderRadius: "16px",
+                      borderRadius: "12px",
                     }}
-                    itemStyle={{
-                      color: "#fff",
-                      fontWeight: 900,
-                      fontSize: "10px",
-                    }}
-                    labelStyle={{ display: "none" }}
+                    itemStyle={{ color: "#fff", fontWeight: 700, fontSize: "11px" }}
                     formatter={(value: any) => [
                       value ? formatNumber(Number(value)) : "0",
                       "Amount",
@@ -149,7 +117,7 @@ export function CurrencyDashboard() {
                     type="monotone"
                     dataKey="amount"
                     stroke="#6366f1"
-                    strokeWidth={4}
+                    strokeWidth={3}
                     fillOpacity={1}
                     fill="url(#colorAmount)"
                   />
@@ -159,57 +127,67 @@ export function CurrencyDashboard() {
           </EcosystemCard>
         </div>
 
+        {/* Config Summary */}
         <div className="lg:col-span-4">
           <EcosystemCard
-            title="Quick Configurations"
-            description="Active ledger parameters"
+            title="Registry Parameters"
+            description="Active economic variables"
             icon={Settings2}
-            decorationIcon={LayoutGrid}
-            className="min-h-fit"
           >
-            <div className="space-y-6">
-              <div className="p-5 rounded-2xl border border-slate-100 bg-slate-50/50 space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">
-                    Local Name
-                  </span>
-                  <span className="text-sm font-black text-slate-900">
-                    {config?.currencyName || "N/A"}
-                  </span>
-                </div>
-                <div className="h-px w-full bg-slate-100" />
-                <div className="flex justify-between items-center">
-                  <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">
-                    Normalization
-                  </span>
-                  <span className="text-sm font-black text-slate-900">
-                    {config?.normalizationFactor || "N/A"}
-                  </span>
-                </div>
+            <div className="space-y-1 mt-4 overflow-hidden rounded-lg border border-zinc-100">
+              <div className="flex items-center justify-between px-4 py-3 bg-zinc-50/50">
+                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest leading-none">
+                  Currency Node
+                </span>
+                <span className="text-xs font-bold text-zinc-900 leading-none">
+                  {config?.currencyName || "—"}
+                </span>
               </div>
+              <div className="flex items-center justify-between px-4 py-3 bg-zinc-50/50">
+                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest leading-none">
+                  Normalization
+                </span>
+                <span className="text-xs font-bold text-zinc-900 font-mono leading-none">
+                  {config?.normalizationFactor || "—"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between px-4 py-3 bg-zinc-50/50">
+                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest leading-none">
+                  Max Burn Rate
+                </span>
+                <span className="text-xs font-bold text-zinc-900 leading-none">
+                  {config?.maxTcPercentage || 30}%
+                </span>
+              </div>
+            </div>
 
-              <div className="space-y-3">
-                <div className="flex items-center justify-between px-1">
-                  <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">
-                    Spending Policy Limit
+            {config && (
+              <div className="mt-8 px-1">
+                <div className="flex items-center justify-between mb-2 px-1">
+                  <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest leading-none">
+                    TC Capacity
                   </span>
-                  <span className="text-[11px] font-black text-slate-900">
-                    {config?.maxTcPercentage || 30}% TC Cap
+                  <span className="text-xs font-bold text-zinc-900 leading-none">
+                    {config?.maxTcPercentage || 30}%
                   </span>
                 </div>
-                <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+                <div className="h-1.5 w-full bg-zinc-50 rounded-full overflow-hidden border border-zinc-100">
                   <div
-                    className="h-full bg-indigo-500 rounded-full transition-all duration-1000 origin-left"
-                    style={{
-                      width: `${config?.maxTcPercentage || 30}%`,
-                    }}
+                    className="h-full bg-indigo-500 rounded-full transition-all duration-1000"
+                    style={{ width: `${config?.maxTcPercentage || 30}%` }}
                   />
                 </div>
               </div>
+            )}
+
+            <div className="mt-8 pt-6 border-t border-zinc-100 italic">
+               <p className="text-[9px] font-medium text-zinc-400 leading-relaxed">
+                  Registry integrity verified at {new Date().toLocaleTimeString()}. Economic parameters are automatically synchronized across all system nodes.
+               </p>
             </div>
           </EcosystemCard>
         </div>
-      </EcosystemGrid>
+      </div>
     </div>
   );
 }

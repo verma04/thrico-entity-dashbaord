@@ -256,3 +256,23 @@ export const GET_USER_STATS = gql`
     }
   }
 `;
+
+export const ADD_NEW_MEMBER = gql`
+  mutation AddNewMember($input: AddNewMemberInput!) {
+    addNewMember(input: $input) {
+      id
+      isApproved
+      isRequested
+      status
+      lastActive
+      isOnline
+      user {
+        id
+        firstName
+        lastName
+        email
+        avatar
+      }
+    }
+  }
+`;

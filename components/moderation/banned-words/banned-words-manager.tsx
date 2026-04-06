@@ -7,13 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -28,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Trash2, Edit2, Search, AlertTriangle } from "lucide-react";
+import { Plus, Trash2, Edit2, Search, AlertTriangle, Ban, Filter, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 import {
@@ -39,11 +32,14 @@ import {
 } from "@/graphql/moderation/hooks";
 import { BannedWord, Severity } from "@/graphql/moderation/types";
 import { toast } from "sonner";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 
-const SEVERITY_COLORS: Record<string, string> = {
-  LOW: "text-yellow-600 bg-yellow-50 border-yellow-200",
-  MEDIUM: "text-orange-600 bg-orange-50 border-orange-200",
-  HIGH: "text-red-600 bg-red-50 border-red-200",
+const SEVERITY_BADGE: Record<string, string> = {
+  LOW: "bg-blue-50 text-blue-700 border-blue-100",
+  MEDIUM: "bg-amber-50 text-amber-700 border-amber-100",
+  HIGH: "bg-rose-50 text-rose-700 border-rose-100",
 };
 
 const CATEGORIES = ["spam", "offensive", "explicit", "harassment", "other"];
@@ -53,12 +49,12 @@ export function BannedWordsManager() {
   const [pageSize, setPageSize] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { data, loading, error } = useGetBannedWords({
+  const { data, loading, error, refetch } = useGetBannedWords({
     limit: pageSize,
     offset: pageIndex * pageSize,
   });
-  const [addWord] = useAddBannedWord();
-  const [updateWord] = useUpdateBannedWord();
+  const [addWord, { loading: adding }] = useAddBannedWord();
+  const [updateWord, { loading: updating }] = useUpdateBannedWord();
   const [deleteWord] = useDeleteBannedWord();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -73,7 +69,6 @@ export function BannedWordsManager() {
   const totalCount = data?.getBannedWords.totalCount || 0;
   const pageCount = Math.ceil(totalCount / pageSize);
 
-  // Note: Searching server-side would be better, but let's keep it consistent
   const filteredWords = words.filter((w) =>
     w.word.toLowerCase().includes(searchQuery.toLowerCase()),
   );
@@ -112,6 +107,7 @@ export function BannedWordsManager() {
         toast.success("Banned word added");
       }
       setIsDialogOpen(false);
+      refetch();
     } catch (err) {
       toast.error("Failed to save banned word");
     }
@@ -122,6 +118,7 @@ export function BannedWordsManager() {
       try {
         await deleteWord({ variables: { id } });
         toast.success("Banned word deleted");
+        refetch();
       } catch (err) {
         toast.error("Failed to delete banned word");
       }
@@ -133,7 +130,7 @@ export function BannedWordsManager() {
       accessorKey: "word",
       header: "Word/Phrase",
       cell: ({ row }) => (
-        <span className="font-medium">{row.original.word}</span>
+        <span className="font-semibold text-foreground">{row.original.word}</span>
       ),
     },
     {
@@ -143,8 +140,8 @@ export function BannedWordsManager() {
         <Badge
           variant="outline"
           className={cn(
-            "text-[10px] uppercase font-bold px-1.5 py-0 h-5",
-            SEVERITY_COLORS[row.original.severity],
+            "text-[10px] uppercase font-bold px-1.5 h-4",
+            SEVERITY_BADGE[row.original.severity],
           )}
         >
           {row.original.severity}
@@ -155,16 +152,16 @@ export function BannedWordsManager() {
       accessorKey: "category",
       header: "Category",
       cell: ({ row }) => (
-        <span className="capitalize text-muted-foreground">
+        <span className="capitalize text-xs text-muted-foreground font-medium">
           {row.original.category}
         </span>
       ),
     },
     {
       accessorKey: "createdAt",
-      header: "Added",
+      header: "Added Date",
       cell: ({ row }) => (
-        <span className="text-muted-foreground text-sm">
+        <span className="text-muted-foreground text-xs font-medium">
           {new Date(parseInt(row.original.createdAt)).toLocaleDateString()}
         </span>
       ),
@@ -173,138 +170,128 @@ export function BannedWordsManager() {
       id: "actions",
       header: () => <div className="text-right">Actions</div>,
       cell: ({ row }) => (
-        <div className="flex justify-end gap-2">
+        <div className="flex justify-end gap-1">
           <Button
             variant="ghost"
             size="icon"
+            className="h-7 w-7"
             onClick={() => handleOpenDialog(row.original)}
           >
-            <Edit2 className="h-4 w-4" />
+            <Edit2 className="h-3 w-3.5" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
+            className="h-7 w-7 hover:text-rose-600"
             onClick={() => handleDelete(row.original.id)}
           >
-            <Trash2 className="h-4 w-4 text-destructive" />
+            <Trash2 className="h-3.5 w-3.5" />
           </Button>
         </div>
       ),
     },
   ];
 
-  if (error) return <div>Error loading banned words.</div>;
-
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-orange-500" />
-                Banned Words
-              </CardTitle>
-              <CardDescription>
-                Manage words and phrases that are automatically filtered from
-                user content
-              </CardDescription>
-            </div>
-            <Button onClick={() => handleOpenDialog()}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Word
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {/* Search */}
-          <div className="mb-4">
-            <div className="relative max-w-sm">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+    <div className="min-h-screen flex flex-col">
+       <EcosystemHeader
+        title="Banned Words"
+        description="Configure automated text filters to detect and block inappropriate content in real-time."
+        badgeText="Auto-Mod"
+        icon={Ban}
+      />
+
+      <EcosystemActionBar shadow="none">
+        <EcosystemActionBar.Group>
+           <div className="relative">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
               <Input
-                placeholder="Search banned words..."
+                placeholder="Search filters..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9"
+                className="pl-8 h-8 w-[200px] text-xs"
               />
             </div>
+            <EcosystemActionBar.Separator />
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
+               <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />
+               {totalCount} active filters
+            </div>
+        </EcosystemActionBar.Group>
+        <EcosystemActionBar.Group align="right">
+          <Button variant="outline" size="sm" onClick={() => refetch()} className="h-8 gap-1.5">
+             <RotateCcw className="h-3.5 w-3.5" />
+             Refresh
+          </Button>
+          <Button size="sm" onClick={() => handleOpenDialog()} className="h-8 gap-1.5">
+            <Plus className="h-3.5 w-3.5" />
+            Add Word
+          </Button>
+        </EcosystemActionBar.Group>
+      </EcosystemActionBar>
+
+      <EcosystemContainer className="p-6">
+        <div className="rounded-xl border border-border bg-card overflow-hidden">
+          <div className="px-5 py-4 border-b border-border bg-muted/20 flex items-center justify-between">
+             <div className="flex items-center gap-3">
+                <div className="h-8 w-8 rounded-lg bg-indigo-50 flex items-center justify-center shrink-0">
+                   <Ban className="h-4 w-4 text-indigo-600" />
+                </div>
+                <div>
+                   <p className="text-sm font-semibold text-foreground">Filter Matrix</p>
+                   <p className="text-xs text-muted-foreground">Automated keyword detection across all posts and comments</p>
+                </div>
+             </div>
           </div>
-
-          {/* Stats (Simplified to current page for now or using totalCount) */}
-          <div className="grid grid-cols-4 gap-4 mb-6">
-            <div className="p-4 bg-muted/50 rounded-lg">
-              <div className="text-2xl font-bold">{totalCount}</div>
-              <div className="text-sm text-muted-foreground">Total Words</div>
-            </div>
-            {/* The individual severity counts would ideally come from the stats summary or a specialized count query */}
-            <div className="p-4 bg-red-50 rounded-lg">
-              <div className="text-2xl font-bold text-red-600">
-                {words.filter((w) => w.severity === "HIGH").length}+
-              </div>
-              <div className="text-sm text-red-600">High (this page)</div>
-            </div>
-            <div className="p-4 bg-orange-50 rounded-lg">
-              <div className="text-2xl font-bold text-orange-600">
-                {words.filter((w) => w.severity === "MEDIUM").length}+
-              </div>
-              <div className="text-sm text-orange-600">Medium (this page)</div>
-            </div>
-            <div className="p-4 bg-yellow-50 rounded-lg">
-              <div className="text-2xl font-bold text-yellow-600">
-                {words.filter((w) => w.severity === "LOW").length}+
-              </div>
-              <div className="text-sm text-yellow-600">Low (this page)</div>
-            </div>
+          <div className="p-1">
+            <DataTable
+              columns={columns}
+              data={words}
+              isLoading={loading}
+              manualPagination
+              totalRows={totalCount}
+              pageCount={pageCount}
+              pageIndex={pageIndex}
+              onPageChange={setPageIndex}
+              pageSize={pageSize}
+              onPageSizeChange={(size) => {
+                setPageSize(size);
+                setPageIndex(0);
+              }}
+            />
           </div>
+        </div>
+      </EcosystemContainer>
 
-          {/* TanStack Table */}
-          <DataTable
-            columns={columns}
-            data={filteredWords}
-            isLoading={loading}
-            manualPagination
-            totalRows={totalCount}
-            pageCount={pageCount}
-            pageIndex={pageIndex}
-            onPageChange={setPageIndex}
-            pageSize={pageSize}
-            onPageSizeChange={(size) => {
-              setPageSize(size);
-              setPageIndex(0);
-            }}
-          />
-        </CardContent>
-      </Card>
-
-      {/* Add/Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>
-              {editingWord ? "Edit Banned Word" : "Add Banned Word"}
+            <DialogTitle className="text-xl font-bold flex items-center gap-2">
+               {editingWord ? "Edit Filter" : "Add Filter"}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label>Word or Phrase</Label>
+              <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Word or Phrase</Label>
               <Input
-                placeholder="Enter word or phrase..."
+                placeholder="Enter regex or literal string..."
                 value={formData.word}
                 onChange={(e) =>
                   setFormData({ ...formData, word: e.target.value })
                 }
+                className="h-10"
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Severity</Label>
+                <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Severity</Label>
                 <Select
                   value={formData.severity}
                   onValueChange={(v) =>
                     setFormData({ ...formData, severity: v as Severity })
                   }
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="h-10">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -315,19 +302,19 @@ export function BannedWordsManager() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Category</Label>
+                <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Category</Label>
                 <Select
                   value={formData.category}
                   onValueChange={(v) =>
                     setFormData({ ...formData, category: v })
                   }
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="h-10">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     {CATEGORIES.map((cat) => (
-                      <SelectItem key={cat} value={cat} className="capitalize">
+                      <SelectItem key={cat} value={cat} className="capitalize font-medium">
                         {cat}
                       </SelectItem>
                     ))}
@@ -336,12 +323,12 @@ export function BannedWordsManager() {
               </div>
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="ghost" onClick={() => setIsDialogOpen(false)} className="font-semibold">
               Cancel
             </Button>
-            <Button onClick={handleSave}>
-              {editingWord ? "Save Changes" : "Add Word"}
+            <Button onClick={handleSave} disabled={adding || updating} className="font-bold min-w-[100px]">
+              {adding || updating ? "Saving..." : (editingWord ? "Save Changes" : "Add Filter")}
             </Button>
           </DialogFooter>
         </DialogContent>

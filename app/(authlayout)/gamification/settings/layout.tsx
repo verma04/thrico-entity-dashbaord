@@ -1,6 +1,6 @@
 "use client";
 
-import { Gamepad2, Settings2, ScrollText, MessageCircleQuestion } from "lucide-react";
+import { Gamepad2, Settings2, MessageCircleQuestion } from "lucide-react";
 import { PlatformSettingsLayout } from "@/components/ui/platform/layout";
 
 export default function GamificationSettingsLayout({
@@ -14,12 +14,6 @@ export default function GamificationSettingsLayout({
       label: "General Configuration",
       icon: Settings2,
       href: "/gamification/settings/general",
-    },
-    {
-      id: "terms",
-      label: "Rules & Terms",
-      icon: ScrollText,
-      href: "/gamification/settings/term_and_conditions",
     },
     {
       id: "faq",
@@ -46,4 +40,3 @@ export default function GamificationSettingsLayout({
     </PlatformSettingsLayout>
   );
 }
-

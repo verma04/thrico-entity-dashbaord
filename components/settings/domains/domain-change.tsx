@@ -90,88 +90,103 @@ export default function DomainChange() {
 
   return (
     <>
-      <Button variant="outline" size="sm" onClick={() => setIsOpen(true)}>
+      <Button 
+        variant="outline" 
+        size="sm" 
+        onClick={() => setIsOpen(true)}
+        className="h-8 px-3 text-[11px] font-bold uppercase tracking-wider text-slate-500 hover:text-slate-900 border-slate-200 hover:bg-slate-50 shadow-none transition-all"
+      >
         Change Domain
       </Button>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Change to a new domain</DialogTitle>
-            <DialogDescription>
-              You can only change this domain name once. Your original
-              thrico.community domain will still be visible in your admin.
-            </DialogDescription>
-          </DialogHeader>
-
-          <Alert>
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              There is no cost to make this change.
-            </AlertDescription>
-          </Alert>
-
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <div className="text-sm font-medium text-muted-foreground">
-                https://
-              </div>
-              <Input
-                placeholder="mydomain"
-                value={domain}
-                onChange={(e) => handleDomainChange(e.target.value)}
-                className="flex-1"
-              />
-              <div className="text-sm font-medium text-muted-foreground">
-                .thrico.community
-              </div>
-            </div>
-
-            {/* Availability Status */}
-            <div>
-              {checkLoading && domain && (
-                <div className="flex items-center gap-2 p-2 text-sm text-muted-foreground">
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                  Checking availability...
-                </div>
-              )}
-
-              {isDomainAvailable && (
-                <div className="flex items-center gap-2 p-3 rounded-lg bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 text-sm">
-                  <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-500" />
-                  <span className="text-green-700 dark:text-green-400">
-                    {fullDomain} is available!
-                  </span>
-                </div>
-              )}
-
-              {isDomainTaken && (
-                <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-sm">
-                  <AlertTriangle className="h-4 w-4 text-destructive" />
-                  <span className="text-destructive">
-                    {fullDomain} is already taken
-                  </span>
-                </div>
-              )}
-            </div>
+        <DialogContent className="sm:max-w-md p-0 overflow-hidden border-slate-200/60 rounded-lg shadow-none">
+          <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/30">
+            <DialogHeader>
+              <DialogTitle className="text-[15px] font-semibold text-slate-900 tracking-tight">
+                Update subdomain
+              </DialogTitle>
+              <DialogDescription className="text-[12px] text-slate-400 mt-1 font-medium">
+                You can change your default system domain once. This will update your public URL.
+              </DialogDescription>
+            </DialogHeader>
           </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsOpen(false)}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleSubmit}
-              disabled={
-                !domain || !isDomainAvailable || checkLoading || changeLoading
-              }
-            >
-              {changeLoading && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              )}
-              Update Domain
-            </Button>
-          </DialogFooter>
+          <div className="p-6 space-y-6">
+            <div className="flex items-center gap-3 p-3 rounded-md bg-slate-50 border border-slate-100">
+              <AlertCircle className="h-4 w-4 text-slate-400 shrink-0" />
+              <p className="text-[11px] font-semibold text-slate-500">
+                There is no overhead cost for this migration.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <div className="text-[12px] font-mono text-slate-300 select-none">
+                  https://
+                </div>
+                <Input
+                  placeholder="mydomain"
+                  value={domain}
+                  onChange={(e) => handleDomainChange(e.target.value)}
+                  className="flex-1 h-10 border-slate-200 focus:border-slate-400 focus:ring-0 rounded-md text-[13px] font-mono shadow-none transition-all"
+                />
+                <div className="text-[12px] font-mono text-slate-300 select-none">
+                  .thrico.community
+                </div>
+              </div>
+
+              {/* Availability Status */}
+              <div className="min-h-[40px]">
+                {checkLoading && domain && (
+                  <div className="flex items-center gap-2 px-1 text-[11px] font-bold text-slate-400 uppercase tracking-widest animate-pulse">
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    Checking...
+                  </div>
+                )}
+
+                {isDomainAvailable && (
+                  <div className="flex items-center gap-2.5 p-3 rounded-md bg-emerald-50/50 border border-emerald-100/50">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
+                    <span className="text-[11px] font-bold text-emerald-700 uppercase tracking-wider">
+                      Available: <span className="lowercase font-mono ml-1">{fullDomain}</span>
+                    </span>
+                  </div>
+                )}
+
+                {isDomainTaken && (
+                  <div className="flex items-center gap-2.5 p-3 rounded-md bg-rose-50/50 border border-rose-100/50">
+                    <AlertTriangle className="h-4 w-4 text-rose-500 shrink-0" />
+                    <span className="text-[11px] font-bold text-rose-700 uppercase tracking-wider">
+                      Taken: <span className="lowercase font-mono ml-1">{domain}</span>
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <DialogFooter className="gap-2 sm:gap-2 pt-4 border-t border-slate-100">
+              <Button 
+                variant="ghost" 
+                onClick={() => setIsOpen(false)}
+                className="h-9 px-4 text-[11px] font-bold uppercase tracking-wider text-slate-500 hover:text-slate-900 hover:bg-slate-50"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSubmit}
+                disabled={
+                  !domain || !isDomainAvailable || checkLoading || changeLoading
+                }
+                className="h-9 px-6 text-[11px] font-bold uppercase tracking-wider bg-slate-900 hover:bg-black text-white gap-2 rounded-md transition-all active:scale-[0.98]"
+              >
+                {changeLoading && (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                )}
+                Update Domain
+              </Button>
+            </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
     </>

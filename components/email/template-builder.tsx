@@ -243,14 +243,13 @@ function BlockCanvas({
       onClick={onSelect}
       className={cn(
         "group relative rounded-xl border-2 transition-all duration-150 cursor-pointer",
-        // Spacer & divider should feel lightweight — no white card background when not selected
         block.type === "spacer" || block.type === "divider"
           ? isSelected
-            ? "border-indigo-300 bg-slate-50/60"
-            : "border-transparent hover:border-slate-200 bg-transparent"
+            ? "border-indigo-400 bg-slate-50/50"
+            : "border-transparent hover:border-slate-100 bg-transparent"
           : isSelected
-            ? "border-indigo-400 shadow-lg shadow-indigo-100/60 bg-white"
-            : "border-transparent hover:border-slate-200 bg-white hover:shadow-sm",
+            ? "border-indigo-600 bg-white ring-1 ring-indigo-50"
+            : "border-transparent hover:border-slate-200 bg-white shadow-xs hover:shadow-sm",
       )}
     >
       {/* Selection ring glow */}
@@ -497,45 +496,44 @@ function PropertiesPanel({
   return (
     <div className="space-y-5">
       {/* Block type header */}
-      <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100">
+      <div className="flex items-center gap-2.5 pb-4 border-b border-slate-200">
         <div
           className={cn(
-            "h-7 w-7 rounded-lg flex items-center justify-center text-white shadow-sm",
+            "h-8 w-8 rounded-xl flex items-center justify-center text-white shadow-sm",
             def.accent,
           )}
         >
-          <def.icon className="h-3.5 w-3.5" />
+          <def.icon className="h-4 w-4" />
         </div>
         <div>
-          <p className="text-[12px] font-bold text-slate-800">
-            {def.label} Block
+          <p className="text-[14px] font-black text-slate-900 leading-none">
+            {def.label}
           </p>
-          <p className="text-[10px] text-slate-400">{def.description}</p>
+          <p className="text-[10px] font-medium text-slate-400 mt-1">{def.description}</p>
         </div>
       </div>
 
-      {/* Text content / Button label */}
       {(block.type === "text" ||
         block.type === "heading" ||
         block.type === "button") && (
         <div>
-          <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
-            {block.type === "button" ? "Button Label" : "Content"}
+          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 leading-none">
+            {block.type === "button" ? "Display Label" : "Content Body"}
           </label>
           <textarea
             value={block.content}
             onChange={(e) => update({ content: e.target.value })}
-            className="w-full h-20 px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-[12px] text-slate-800 outline-none focus:ring-1 focus:ring-indigo-300 focus:border-indigo-300 resize-none transition-all"
+            className="w-full h-24 px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-[12px] font-medium text-slate-900 outline-none focus:ring-1 focus:ring-indigo-600 focus:border-indigo-600 resize-none transition-all placeholder:text-slate-300"
+            placeholder="Type content here..."
           />
         </div>
       )}
 
-      {/* Asset Upload */}
       {block.type === "image" && (
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">
-              Asset Deployment
+        <div className="space-y-6">
+          <div className="space-y-3">
+            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">
+              Asset Source
             </label>
             <ImageUploadWithCrop
               currentImage={block.content}
@@ -548,47 +546,46 @@ function PropertiesPanel({
               showQualitySlider={true}
               showFormatSelector={true}
               className="mt-2"
-              dropzoneClassName="py-10 border-slate-100 bg-slate-50/50 hover:bg-white hover:border-slate-200 transition-all rounded-xl"
-              previewClassName="bg-slate-50 border-slate-100 p-2 rounded-xl"
+              dropzoneClassName="py-10 border-slate-200 bg-slate-50/50 hover:bg-white hover:border-indigo-200 transition-all rounded-xl"
+              previewClassName="bg-slate-50 border-slate-200 p-2 rounded-xl"
             />
           </div>
 
           <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 leading-none">
-              Image Reference URL (Manual)
+            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 leading-none">
+              Direct Access URL
             </label>
             <input
               type="text"
               value={block.content}
               onChange={(e) => update({ content: e.target.value })}
               placeholder="https://example.com/image.jpg"
-              className="w-full h-9 px-3 rounded-lg border border-slate-200 bg-slate-50 text-[12px] text-slate-800 outline-none focus:ring-1 focus:ring-indigo-300 focus:border-indigo-300 transition-all"
+              className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white text-[12px] font-medium text-slate-900 outline-none focus:ring-1 focus:ring-indigo-600 focus:border-indigo-600 transition-all"
             />
           </div>
 
           <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 leading-none">
-              Accessible Alt Text
+            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 leading-none">
+              Accessibility (Alt)
             </label>
             <input
               type="text"
               value={block.imageAlt || ""}
               onChange={(e) => update({ imageAlt: e.target.value })}
-              placeholder="Describe the image context…"
-              className="w-full h-9 px-3 rounded-lg border border-slate-200 bg-slate-50 text-[12px] text-slate-800 outline-none focus:ring-1 focus:ring-indigo-300 focus:border-indigo-300 transition-all"
+              placeholder="Brief description for screen readers"
+              className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white text-[12px] font-medium text-slate-900 outline-none focus:ring-1 focus:ring-indigo-600 focus:border-indigo-600 transition-all"
             />
           </div>
         </div>
       )}
 
-      {/* Global Hyperlink Property (Anchor) */}
       {(block.type === "text" ||
         block.type === "heading" ||
         block.type === "button" ||
         block.type === "image") && (
-        <div className="pt-4 border-t border-slate-50">
-          <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 leading-none">
-            Hyperlink Payload (Optional)
+        <div className="pt-6 border-t border-slate-200">
+          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 leading-none">
+            Target Destination 
           </label>
           <div className="relative group">
             <Link className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-300 group-focus-within:text-slate-900 transition-colors" />
@@ -597,12 +594,9 @@ function PropertiesPanel({
               value={block.href || ""}
               onChange={(e) => update({ href: e.target.value })}
               placeholder="https://example.com/target"
-              className="w-full h-9 pl-9 pr-3 rounded-lg border border-slate-200 bg-slate-50 text-[12px] text-slate-800 outline-none focus:ring-1 focus:ring-indigo-300 focus:border-indigo-300 transition-all font-mono"
+              className="w-full h-10 pl-10 pr-3 rounded-xl border border-slate-200 bg-white text-[12px] font-bold text-slate-900 outline-none focus:ring-1 focus:ring-indigo-600 focus:border-indigo-600 transition-all font-mono"
             />
           </div>
-          <p className="text-[9px] text-slate-400 mt-1.5 px-1 italic">
-            Makes this entire section clickable as an anchor.
-          </p>
         </div>
       )}
 
@@ -610,42 +604,31 @@ function PropertiesPanel({
       {(block.type === "text" || block.type === "heading") && (
         <>
           <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
-              Formatting
+            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2.5">
+              Typography
             </label>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center bg-slate-200/50 p-1 rounded-xl w-fit">
               <button
                 onClick={() => update({ bold: !block.bold })}
                 className={cn(
-                  "h-8 w-8 rounded-md flex items-center justify-center text-[13px] font-extrabold border transition-all",
+                  "h-8 px-3 rounded-lg flex items-center justify-center text-[12px] font-black transition-all",
                   block.bold
-                    ? "bg-slate-900 text-white border-slate-900"
-                    : "bg-white text-slate-500 border-slate-200 hover:border-slate-300",
+                    ? "bg-white text-slate-900 shadow-xs ring-1 ring-slate-200"
+                    : "text-slate-400 hover:text-slate-600",
                 )}
               >
-                B
+                Bold
               </button>
               <button
                 onClick={() => update({ italic: !block.italic })}
                 className={cn(
-                  "h-8 w-8 rounded-md flex items-center justify-center italic text-[13px] font-bold border transition-all",
+                  "h-8 px-3 rounded-lg flex items-center justify-center italic text-[12px] font-black transition-all",
                   block.italic
-                    ? "bg-slate-900 text-white border-slate-900"
-                    : "bg-white text-slate-500 border-slate-200 hover:border-slate-300",
+                    ? "bg-white text-slate-900 shadow-xs ring-1 ring-slate-200"
+                    : "text-slate-400 hover:text-slate-600",
                 )}
               >
-                I
-              </button>
-              <button
-                onClick={() => update({ underline: !block.underline })}
-                className={cn(
-                  "h-8 w-8 rounded-md flex items-center justify-center underline text-[13px] font-bold border transition-all",
-                  block.underline
-                    ? "bg-slate-900 text-white border-slate-900"
-                    : "bg-white text-slate-500 border-slate-200 hover:border-slate-300",
-                )}
-              >
-                U
+                Italic
               </button>
             </div>
           </div>
@@ -1307,13 +1290,13 @@ export default function TemplateBuilder({
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="flex items-center bg-slate-100/80 rounded-xl p-1 border border-slate-200 shadow-sm">
+          <div className="flex items-center bg-slate-50 rounded-xl p-1 border border-slate-200">
             <button
               onClick={() => setPreviewMode("desktop")}
               className={cn(
-                "h-7 px-4 rounded-lg flex items-center gap-1.5 text-[11px] font-bold transition-all",
+                "h-7 px-4 rounded-lg flex items-center gap-1.5 text-[11px] font-black transition-all",
                 previewMode === "desktop"
-                  ? "bg-white text-slate-900 shadow-sm"
+                  ? "bg-white text-slate-900 border border-slate-200 shadow-xs"
                   : "text-slate-500 hover:text-slate-700",
               )}
             >
@@ -1323,9 +1306,9 @@ export default function TemplateBuilder({
             <button
               onClick={() => setPreviewMode("mobile")}
               className={cn(
-                "h-7 px-4 rounded-lg flex items-center gap-1.5 text-[11px] font-bold transition-all",
+                "h-7 px-4 rounded-lg flex items-center gap-1.5 text-[11px] font-black transition-all",
                 previewMode === "mobile"
-                  ? "bg-white text-slate-900 shadow-sm"
+                  ? "bg-white text-slate-900 border border-slate-200 shadow-xs"
                   : "text-slate-500 hover:text-slate-700",
               )}
             >
@@ -1339,9 +1322,9 @@ export default function TemplateBuilder({
           <button
             onClick={handleSave}
             disabled={isSaving}
-            className="h-9 px-5 bg-slate-900 hover:bg-black text-white text-[12px] font-bold rounded-xl flex items-center gap-2 transition-all shadow-[0_4px_12px_-2px_rgba(0,0,0,0.15)] disabled:opacity-60 disabled:cursor-not-allowed group active:scale-95"
+            className="h-9 px-5 bg-indigo-600 hover:bg-indigo-700 text-white text-[12px] font-black rounded-xl flex items-center gap-2 transition-all disabled:opacity-60 disabled:cursor-not-allowed group active:scale-95"
           >
-            <Save className="h-3.5 w-3.5 group-hover:animate-pulse" />
+            <Save className="h-3.5 w-3.5" />
             {isSaving ? "Saving..." : "Save Template"}
           </button>
         </div>
@@ -1352,12 +1335,12 @@ export default function TemplateBuilder({
         {/* ── Left Panel: Blocks & Settings ─────────────────────────────── */}
         <div className="w-[240px] shrink-0 bg-white border-r border-slate-100 flex flex-col">
           {/* Tabs */}
-          <div className="p-2 border-b border-slate-100 bg-slate-50/50">
-            <div className="relative flex p-1 bg-slate-200/50 rounded-xl">
+          <div className="p-2 border-b border-slate-100 bg-white">
+            <div className="relative flex p-1 bg-slate-50 rounded-xl border border-slate-200">
               <AnimatePresence mode="wait">
                 <motion.div
                   layoutId="sidebar-tab-pill"
-                  className="absolute inset-y-1 bg-white rounded-lg shadow-sm border border-slate-100"
+                  className="absolute inset-y-1 bg-white rounded-lg shadow-xs border border-slate-200"
                   style={{
                     width: "calc(33.33% - 4px)",
                     left:
@@ -1367,7 +1350,7 @@ export default function TemplateBuilder({
                           ? "33.33%"
                           : "66.66%",
                   }}
-                  transition={{ type: "spring", bounce: 0.1, duration: 0.4 }}
+                  transition={{ type: "spring", bounce: 0, duration: 0.3 }}
                 />
               </AnimatePresence>
               {(["blocks", "templates", "settings"] as const).map((tab) => (
@@ -1375,15 +1358,15 @@ export default function TemplateBuilder({
                   key={tab}
                   onClick={() => setActiveTab(tab)}
                   className={cn(
-                    "relative z-10 flex-1 h-9 text-[10px] font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-1.5",
+                    "relative z-10 flex-1 h-8 text-[10px] font-black uppercase tracking-widest transition-colors flex items-center justify-center gap-1.5",
                     activeTab === tab
                       ? "text-slate-900"
                       : "text-slate-400 hover:text-slate-600",
                   )}
                 >
-                  {tab === "blocks" && <Layout className="h-3 w-3" />}
-                  {tab === "templates" && <Sparkles className="h-3 w-3" />}
-                  {tab === "settings" && <Settings2 className="h-3 w-3" />}
+                  {tab === "blocks" && <Layout className="h-3 w-3 text-indigo-600" />}
+                  {tab === "templates" && <Sparkles className="h-3 w-3 text-indigo-600" />}
+                  {tab === "settings" && <Settings2 className="h-3 w-3 text-indigo-600" />}
                   <span className="hidden min-[1100px]:inline">{tab}</span>
                 </button>
               ))}
@@ -1393,31 +1376,32 @@ export default function TemplateBuilder({
           <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
             {activeTab === "blocks" && (
               <div className="space-y-1.5">
-                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest px-1 pb-1">
-                  Add a block to canvas
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-1 pb-2">
+                  Library
                 </p>
                 {blockDefs.map((def) => (
                   <button
                     key={def.type}
                     onClick={() => addBlock(def.type)}
-                    className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg border border-transparent hover:border-slate-200 hover:bg-slate-50 transition-all group text-left"
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border border-transparent hover:border-slate-200 bg-white hover:bg-slate-50 transition-all group text-left mb-1.5"
                   >
                     <div
                       className={cn(
-                        "h-7 w-7 rounded-md flex items-center justify-center text-white shrink-0 group-hover:scale-105 transition-transform shadow-sm",
+                        "h-8 w-8 rounded-lg flex items-center justify-center text-white shrink-0 transition-transform shadow-xs",
                         def.accent,
                       )}
                     >
-                      <def.icon className="h-3.5 w-3.5" />
+                      <def.icon className="h-4 w-4" />
                     </div>
-                    <div>
-                      <p className="text-[12px] font-semibold text-slate-800 group-hover:text-slate-900">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[12px] font-black text-slate-900">
                         {def.label}
                       </p>
-                      <p className="text-[10px] text-slate-400">
+                      <p className="text-[10px] font-medium text-slate-500 truncate">
                         {def.description}
                       </p>
                     </div>
+                    <Plus className="h-3 w-3 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" />
                   </button>
                 ))}
               </div>
@@ -1426,96 +1410,59 @@ export default function TemplateBuilder({
             {activeTab === "templates" && (
               <div className="space-y-4 pt-1">
                 <div className="px-1">
-                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest pb-1.5 flex items-center justify-between">
-                    Blueprint Presets
-                    <Sparkles className="h-2 w-2 text-indigo-400" />
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest pb-2 flex items-center justify-between">
+                    Blueprints
+                    <Sparkles className="h-2.5 w-2.5 text-indigo-500" />
                   </p>
                   <div className="grid gap-3">
-                    <button
-                      onClick={() => {
-                        setBlocks(STARTER_TEMPLATES.NEWSLETTER.blocks as any);
-                        setSelectedId("h1");
-                        toast.success("Newsletter layout applied");
-                      }}
-                      className="w-full text-left p-4 rounded-2xl border border-slate-100 bg-white hover:border-indigo-200 hover:bg-indigo-50/30 hover:shadow-xl hover:shadow-indigo-500/5 transition-all group relative overflow-hidden"
-                    >
-                      <div className="absolute top-0 left-0 w-1 h-full bg-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-                      <p className="text-[13px] font-bold text-slate-800">
-                        Newsletter
-                      </p>
-                      <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
-                        Clean, information-dense layout with hero sections
-                      </p>
-                    </button>
-                    <button
-                      onClick={() => {
-                        setBlocks(STARTER_TEMPLATES.WELCOME.blocks as any);
-                        setSelectedId("he1");
-                        toast.success("Welcome layout applied");
-                      }}
-                      className="w-full text-left p-4 rounded-2xl border border-slate-100 bg-white hover:border-emerald-200 hover:bg-emerald-50/30 hover:shadow-xl hover:shadow-emerald-500/5 transition-all group relative overflow-hidden"
-                    >
-                      <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-                      <p className="text-[13px] font-bold text-slate-800">
-                        Welcome Series
-                      </p>
-                      <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
-                        Engagement-focused greeting for onboarding
-                      </p>
-                    </button>
-                    <button
-                      onClick={() => {
-                        setBlocks(STARTER_TEMPLATES.EVENT.blocks as any);
-                        setSelectedId("he1");
-                        toast.success("Event layout applied");
-                      }}
-                      className="w-full text-left p-4 rounded-2xl border border-slate-100 bg-white hover:border-amber-200 hover:bg-amber-50/30 hover:shadow-xl hover:shadow-amber-500/5 transition-all group relative overflow-hidden"
-                    >
-                      <div className="absolute top-0 left-0 w-1 h-full bg-amber-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-                      <p className="text-[13px] font-bold text-slate-800">
-                        Event Invite
-                      </p>
-                      <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
-                        Bold invitation with date and venue details
-                      </p>
-                    </button>
-                    <button
-                      onClick={() => {
-                        setBlocks(STARTER_TEMPLATES.ANNOUNCEMENT.blocks as any);
-                        setSelectedId("he1");
-                        toast.success("Announcement layout applied");
-                      }}
-                      className="w-full text-left p-4 rounded-2xl border border-slate-100 bg-white hover:border-rose-200 hover:bg-rose-50/30 hover:shadow-xl hover:shadow-rose-500/5 transition-all group relative overflow-hidden"
-                    >
-                      <div className="absolute top-0 left-0 w-1 h-full bg-rose-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-                      <p className="text-[13px] font-bold text-slate-800">
-                        Announcement
-                      </p>
-                      <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
-                        High-impact layout for sharing big news
-                      </p>
-                    </button>
+                    {[
+                      { key: "NEWSLETTER", label: "Newsletter", color: "indigo" },
+                      { key: "WELCOME", label: "Welcome Series", color: "emerald" },
+                      { key: "EVENT", label: "Event Invite", color: "amber" },
+                      { key: "ANNOUNCEMENT", label: "Announcement", color: "rose" },
+                    ].map((t) => (
+                      <button
+                        key={t.key}
+                        onClick={() => {
+                          setBlocks((STARTER_TEMPLATES as any)[t.key].blocks);
+                          setSelectedId("h1");
+                          toast.success(`${t.label} layout applied`);
+                        }}
+                        className={cn(
+                          "w-full text-left p-4 rounded-xl border border-slate-200 bg-white transition-all group relative overflow-hidden active:scale-[0.98]",
+                          `hover:border-${t.color}-200 hover:bg-${t.color}-50/30`,
+                        )}
+                      >
+                        <div className={cn("absolute top-0 left-0 w-1 h-full opacity-0 group-hover:opacity-100 transition-opacity", `bg-${t.color}-500`)} />
+                        <p className="text-[13px] font-black text-slate-900">
+                          {t.label}
+                        </p>
+                        <p className="text-[11px] font-medium text-slate-500 mt-1 leading-tight">
+                          Apply {t.label.toLowerCase()} framework
+                        </p>
+                      </button>
+                    ))}
                   </div>
                 </div>
               </div>
             )}
 
             {activeTab === "settings" && (
-              <div className="space-y-5 pt-1">
+              <div className="space-y-6 pt-1">
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
-                    Template Name *
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 leading-none">
+                    Template Name
                   </label>
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="e.g. Welcome Email"
-                    className="w-full h-9 px-3 rounded-lg border border-slate-200 bg-slate-50 text-[12px] font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-300 focus:border-indigo-300 transition-all"
+                    className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white text-[12px] font-bold text-slate-900 placeholder:text-slate-300 focus:ring-1 focus:ring-indigo-600 focus:border-indigo-600 transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 leading-none">
                     Subject Line
                   </label>
                   <input
@@ -1523,11 +1470,11 @@ export default function TemplateBuilder({
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
                     placeholder="e.g. Welcome to Thrico!"
-                    className="w-full h-9 px-3 rounded-lg border border-slate-200 bg-slate-50 text-[12px] font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-300 focus:border-indigo-300 transition-all"
+                    className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white text-[12px] font-bold text-slate-900 placeholder:text-slate-300 focus:ring-1 focus:ring-indigo-600 focus:border-indigo-600 transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 leading-none">
                     Brand Color
                   </label>
                   <div className="flex items-center gap-2">
@@ -1535,25 +1482,25 @@ export default function TemplateBuilder({
                       type="color"
                       value={brandColor}
                       onChange={(e) => setBrandColor(e.target.value)}
-                      className="h-9 w-9 rounded-lg cursor-pointer border border-slate-200 p-0.5 overflow-hidden"
+                      className="h-9 w-9 rounded-lg cursor-pointer border border-slate-200 p-0.5 overflow-hidden shadow-xs"
                     />
                     <input
                       type="text"
                       value={brandColor}
                       onChange={(e) => setBrandColor(e.target.value)}
-                      className="flex-1 h-9 px-3 rounded-lg border border-slate-200 bg-slate-50 font-mono text-[12px] text-slate-600 outline-none focus:ring-1 focus:ring-indigo-300"
+                      className="flex-1 h-9 px-3 rounded-xl border border-slate-200 bg-white font-mono text-[11px] font-bold text-slate-600 outline-none focus:ring-1 focus:ring-indigo-600"
                     />
                   </div>
                 </div>
 
-                <div className="rounded-2xl bg-indigo-50/50 border border-indigo-100 p-4 flex gap-3 shadow-sm shadow-indigo-100/20">
-                  <Sparkles className="h-4 w-4 text-indigo-500 shrink-0 mt-0.5" />
-                  <p className="text-[12px] text-indigo-800 font-medium leading-relaxed">
+                <div className="rounded-2xl bg-indigo-50 border border-indigo-100 p-4 flex gap-3">
+                  <Sparkles className="h-4 w-4 text-indigo-600 shrink-0 mt-0.5" />
+                  <p className="text-[12px] text-indigo-900 font-bold leading-relaxed">
                     Pro-tip: Use{" "}
-                    <code className="bg-indigo-100/50 px-1.5 py-0.5 rounded-md font-mono text-[10px] text-indigo-600 border border-indigo-200/50">
+                    <code className="bg-white/60 px-1 py-0.5 rounded border border-indigo-200/50 font-mono text-[10px] text-indigo-700">
                       {"{{variable}}"}
                     </code>{" "}
-                    to inject dynamic recipient data during dispatch.
+                    to inject dynamic recipient data.
                   </p>
                 </div>
               </div>

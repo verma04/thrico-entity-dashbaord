@@ -102,6 +102,7 @@ export interface AdminUser {
   lastName: string;
   role: Role;
   isSuperAdmin: boolean;
+  avatar?: string;
 }
 
 export interface GetAdminUsersResponse {
@@ -113,6 +114,7 @@ export interface AdminRegisterInput {
   firstName: string;
   lastName: string;
   roleId: string;
+  avatar?: string;
 }
 
 export interface CreateAdminResponse {
@@ -124,6 +126,7 @@ export interface AdminUpdateInput {
   lastName?: string;
   phone?: string;
   status?: string;
+  avatar?: string;
 }
 
 export interface UpdateAdminUserResponse {

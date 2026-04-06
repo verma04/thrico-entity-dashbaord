@@ -1,5 +1,5 @@
 import React from "react";
-import { Award, Pencil, Trash2 } from "lucide-react";
+import { Award, Pencil } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -8,15 +8,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge as UIBadge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { renderModuleIcon } from "@/components/subscription/utils";
 import { Badge, useToggleBadge } from "@/graphql/actions";
-import { ConfirmDialog } from "@/components/pages/confirm-dialog";
-import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 
 interface BadgeListProps {
   badges: Badge[];
@@ -34,16 +31,12 @@ export function BadgeList({
   refetchBadges,
 }: BadgeListProps) {
   const [toggleBadge, { loading: toggling }] = useToggleBadge({
-    onCompleted: () => {
-      refetchBadges();
-    },
+    onCompleted: () => refetchBadges(),
   });
 
   const handleToggleActive = async (id: string) => {
     try {
-      await toggleBadge({
-        variables: { id },
-      });
+      await toggleBadge({ variables: { id } });
     } catch (error) {
       console.error("Error toggling badge status:", error);
     }
@@ -56,202 +49,138 @@ export function BadgeList({
 
   if (isLoading) {
     return (
-      <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">
-        <div className="rounded-xl border border-border/50 bg-white shadow-sm overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-slate-50/50 hover:bg-slate-50/50">
-                <TableHead className="font-bold text-slate-700 h-14">
-                  Badge
-                </TableHead>
-                <TableHead className="font-bold text-slate-700 h-14">
-                  Module
-                </TableHead>
-                <TableHead className="font-bold text-slate-700 h-14">
-                  Type
-                </TableHead>
-                <TableHead className="font-bold text-slate-700 h-14">
-                  Criteria
-                </TableHead>
-                <TableHead className="font-bold text-slate-700 h-14">
-                  Status
-                </TableHead>
-                <TableHead className="text-right font-bold text-slate-700 h-14">
-                  Actions
-                </TableHead>
+      <div className="rounded-lg border border-border overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-muted/30 hover:bg-muted/30">
+              <TableHead className="h-11 text-xs font-semibold">Badge</TableHead>
+              <TableHead className="h-11 text-xs font-semibold">Module</TableHead>
+              <TableHead className="h-11 text-xs font-semibold">Type</TableHead>
+              <TableHead className="h-11 text-xs font-semibold">Criteria</TableHead>
+              <TableHead className="h-11 text-xs font-semibold">Status</TableHead>
+              <TableHead className="h-11 text-xs font-semibold text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {[...Array(5)].map((_, i) => (
+              <TableRow key={i} className="h-16">
+                <TableCell><div className="flex items-center gap-3"><Skeleton className="h-9 w-9 rounded-lg" /><Skeleton className="h-4 w-28" /></div></TableCell>
+                <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                <TableCell><Skeleton className="h-5 w-14 rounded-md" /></TableCell>
+                <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                <TableCell><Skeleton className="h-5 w-10 rounded-full" /></TableCell>
+                <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto rounded-lg" /></TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {[...Array(5)].map((_, i) => (
-                <TableRow key={i} className="h-20">
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <Skeleton className="h-10 w-10 rounded-xl" />
-                      <div className="space-y-2">
-                        <Skeleton className="h-4 w-24" />
-                        <Skeleton className="h-3 w-32" />
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-4 w-20" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-4 w-16" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-4 w-24" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-6 w-12 rounded-full" />
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Skeleton className="h-8 w-8 ml-auto" />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      </EcosystemContainer>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     );
   }
 
   if (badges.length === 0) {
     return (
-      <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">
-        <div className="rounded-xl border border-border/50 bg-white shadow-sm p-12 text-center">
-          <Award className="h-12 w-12 mx-auto text-muted-foreground mb-4 opacity-20" />
-          <p className="text-slate-500 font-medium">
-            No badges found. Create your first badge!
-          </p>
-        </div>
-      </EcosystemContainer>
+      <div className="flex flex-col items-center justify-center py-16 rounded-xl border border-dashed border-border bg-muted/30">
+        <Award className="h-8 w-8 text-muted-foreground/30 mb-3" />
+        <p className="text-sm font-medium text-muted-foreground">No badges yet</p>
+        <p className="text-xs text-muted-foreground/70 mt-1">Create your first badge to reward members</p>
+      </div>
     );
   }
 
   return (
-    <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">
-      <div className="rounded-xl border border-border/50 bg-white shadow-sm overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-slate-50/50 hover:bg-slate-50/50">
-              <TableHead className="font-bold text-slate-700 h-14">
-                Badge
-              </TableHead>
-              <TableHead className="font-bold text-slate-700 h-14">
-                Module
-              </TableHead>
-              <TableHead className="font-bold text-slate-700 h-14">
-                Type
-              </TableHead>
-              <TableHead className="font-bold text-slate-700 h-14">
-                Criteria
-              </TableHead>
-              <TableHead className="font-bold text-slate-700 h-14">
-                Status
-              </TableHead>
-              <TableHead className="text-right font-bold text-slate-700 h-14">
-                Actions
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {badges.map((badge) => {
-              const moduleInfo = getModuleInfo(badge.module);
-              return (
-                <TableRow key={badge.id} className="h-20 hover:bg-slate-50/30">
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <div className="h-12 w-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-2xl shadow-sm">
-                        {badge.icon}
-                      </div>
-                      <div>
-                        <div className="font-bold text-slate-900">
-                          {badge.name}
-                        </div>
-                        <div className="text-xs text-slate-500 line-clamp-1 max-w-[200px]">
-                          {badge.description}
-                        </div>
-                      </div>
+    <div className="rounded-lg border border-border overflow-hidden">
+      <Table>
+        <TableHeader>
+          <TableRow className="bg-muted/30 hover:bg-muted/30">
+            <TableHead className="h-11 text-xs font-semibold">Badge</TableHead>
+            <TableHead className="h-11 text-xs font-semibold">Module</TableHead>
+            <TableHead className="h-11 text-xs font-semibold">Type</TableHead>
+            <TableHead className="h-11 text-xs font-semibold">Criteria</TableHead>
+            <TableHead className="h-11 text-xs font-semibold">Status</TableHead>
+            <TableHead className="h-11 text-xs font-semibold text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {badges.map((badge) => {
+            const moduleInfo = getModuleInfo(badge.module);
+            return (
+              <TableRow key={badge.id} className="group h-16">
+                {/* Badge */}
+                <TableCell>
+                  <div className="flex items-center gap-3">
+                    <div className="h-9 w-9 rounded-lg bg-muted border border-border flex items-center justify-center text-lg shrink-0">
+                      {badge.icon}
                     </div>
-                  </TableCell>
-                  <TableCell>
-                    {moduleInfo ? (
-                      <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-100 border border-slate-200 rounded-lg w-fit">
-                        {renderModuleIcon(moduleInfo.icon || "Settings")}
-                        <span className="text-xs font-bold text-slate-700">
-                          {moduleInfo.name}
-                        </span>
-                      </div>
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">{badge.name}</p>
+                      <p className="text-xs text-muted-foreground line-clamp-1 max-w-[180px]">{badge.description}</p>
+                    </div>
+                  </div>
+                </TableCell>
+
+                {/* Module */}
+                <TableCell>
+                  {moduleInfo ? (
+                    <div className="flex items-center gap-1.5 px-2 py-1 bg-muted border border-border rounded-md w-fit text-xs font-medium text-foreground">
+                      {renderModuleIcon(moduleInfo.icon || "Settings")}
+                      {moduleInfo.name}
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1.5 px-2 py-1 bg-blue-50 border border-blue-100 rounded-md w-fit text-xs font-medium text-blue-700">
+                      Global
+                    </div>
+                  )}
+                </TableCell>
+
+                {/* Type */}
+                <TableCell>
+                  <UIBadge variant="outline" className="text-[10px] font-medium capitalize">
+                    {badge.type === "ACTION" ? "Action" : "Points"}
+                  </UIBadge>
+                </TableCell>
+
+                {/* Criteria */}
+                <TableCell>
+                  <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-md border border-border">
+                    {badge.type === "ACTION" ? (
+                      <>
+                        {(badge.condition?.action || badge.action || "").replace(/_/g, " ")}
+                        {" × "}
+                        {badge.condition?.count || badge.targetValue}
+                      </>
                     ) : (
-                      <div className="flex items-center gap-2 px-3 py-1.5 bg-indigo-50 border border-indigo-100 rounded-lg w-fit">
-                        <span className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
-                        <span className="text-xs font-bold text-indigo-700">
-                          Global
-                        </span>
-                      </div>
+                      <>{(badge.condition?.pointsRequired || badge.targetValue)?.toLocaleString()} pts</>
                     )}
-                  </TableCell>
-                  <TableCell>
-                    <UIBadge
-                      variant="outline"
-                      className="rounded-lg font-bold text-[10px] uppercase tracking-wider py-1 border-slate-200"
-                    >
-                      {badge.type}
-                    </UIBadge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-sm font-medium text-slate-600 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100 w-fit">
-                      {badge.type === "ACTION" ? (
-                        <div className="flex items-center gap-1.5">
-                          <span className="capitalize">
-                            {badge.condition?.action ||
-                              badge.action?.replace(/_/g, " ")}
-                          </span>
-                          <span className="text-[10px] px-1.5 py-0.5 bg-white border border-slate-200 rounded text-slate-400 font-bold">
-                            {badge.condition?.count || badge.targetValue}
-                          </span>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-1.5">
-                          <span className="font-bold text-indigo-600">
-                            {badge.condition?.pointsRequired ||
-                              badge.targetValue}
-                          </span>
-                          <span className="text-[10px] items-center text-slate-400 uppercase tracking-widest font-bold">
-                            pts
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Switch
-                      checked={badge.isActive}
-                      onCheckedChange={() => handleToggleActive(badge.id)}
-                      disabled={toggling}
-                      className="data-[state=checked]:bg-emerald-500"
-                    />
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-9 w-9 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl"
-                        onClick={() => onEdit(badge)}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </div>
-    </EcosystemContainer>
+                  </span>
+                </TableCell>
+
+                {/* Status */}
+                <TableCell>
+                  <Switch
+                    checked={badge.isActive}
+                    onCheckedChange={() => handleToggleActive(badge.id)}
+                    disabled={toggling}
+                    className="data-[state=checked]:bg-emerald-500"
+                  />
+                </TableCell>
+
+                {/* Actions */}
+                <TableCell className="text-right">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => onEdit(badge)}
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+    </div>
   );
 }

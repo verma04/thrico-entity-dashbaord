@@ -134,13 +134,13 @@ function TemplateThumbnail({ starter, selected }: { starter: StarterEntry; selec
   const isBlank = starter.key === "blank";
   return (
     <div className={cn(
-      "relative w-full aspect-3/2 rounded-xl overflow-hidden transition-all",
-      selected ? "ring-2 ring-[#5B6CFF] ring-offset-2" : "",
+      "relative w-full aspect-3/2 rounded-xl overflow-hidden transition-all duration-200",
+      selected ? "ring-2 ring-indigo-600 ring-offset-2" : "ring-1 ring-slate-200 hover:ring-indigo-300",
     )}>
       {isBlank ? (
         <div className="absolute inset-0 bg-slate-50 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center gap-2">
           <Plus size={20} className="text-slate-300" />
-          <span className="text-[10px] font-semibold text-slate-300">Blank Canvas</span>
+          <span className="text-[10px] font-bold text-slate-400">Blank Canvas</span>
         </div>
       ) : (
         <>
@@ -149,13 +149,13 @@ function TemplateThumbnail({ starter, selected }: { starter: StarterEntry; selec
             <div className="opacity-80">{starter.icon}</div>
           </div>
           {/* Body lines */}
-          <div className="absolute inset-x-0 bottom-0 bg-white p-2 flex flex-col gap-1" style={{ height: "65%" }}>
-            <div className="h-2 bg-slate-200 rounded-full w-2/3" />
+          <div className="absolute inset-x-0 bottom-0 bg-white p-2 flex flex-col gap-1.5 border-t border-slate-100" style={{ height: "65%" }}>
+            <div className="h-1.5 bg-slate-200 rounded-full w-2/3 mt-1" />
             <div className="h-1.5 bg-slate-100 rounded-full w-full" />
             <div className="h-1.5 bg-slate-100 rounded-full w-5/6" />
             <div className="h-1.5 bg-slate-100 rounded-full w-3/4" />
             <div className="mt-auto flex justify-center">
-              <div className="h-4 w-20 bg-slate-200 rounded-full" />
+              <div className="h-3 w-16 bg-slate-200 rounded-full mb-1" />
             </div>
           </div>
         </>
@@ -163,15 +163,15 @@ function TemplateThumbnail({ starter, selected }: { starter: StarterEntry; selec
 
       {/* Badge */}
       {starter.badge && (
-        <div className={cn("absolute top-2 right-2 text-[9px] font-bold text-white px-1.5 py-0.5 rounded-full", starter.badgeColor)}>
+        <div className={cn("absolute top-2 right-2 text-[9px] font-bold text-white px-1.5 py-0.5 rounded-md", starter.badgeColor)}>
           {starter.badge}
         </div>
       )}
 
       {/* Selected tick */}
       {selected && (
-        <div className="absolute top-2 left-2 h-5 w-5 rounded-full bg-[#5B6CFF] flex items-center justify-center">
-          <Check size={10} className="text-white" />
+        <div className="absolute top-2 left-2 h-5 w-5 rounded-md bg-indigo-600 flex items-center justify-center shadow-xs">
+          <Check size={12} className="text-white" strokeWidth={3} />
         </div>
       )}
     </div>
@@ -188,19 +188,19 @@ function TemplateChooser({ onSelect }: { onSelect: (key: string) => void }) {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="h-full bg-slate-50 flex flex-col overflow-hidden">
       {/* Top bar */}
-      <div className="flex items-center gap-4 px-8 py-4 bg-white border-b border-slate-200 shrink-0">
+      <div className="flex items-center gap-4 px-8 py-4 bg-white border-b border-slate-200 shrink-0 z-10 sticky top-0">
         <button
           onClick={() => window.history.back()}
-          className="flex items-center gap-1.5 text-[12px] text-slate-500 hover:text-[#5B6CFF] transition-colors"
+          className="flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-indigo-600 transition-colors"
         >
-          <ArrowLeft size={13} /> Back
+          <ArrowLeft size={14} /> Back
         </button>
         <div className="w-px h-4 bg-slate-200" />
         <div className="flex items-center gap-2">
-          <LayoutTemplate size={14} className="text-[#5B6CFF]" />
-          <span className="text-[13px] font-bold text-slate-800">Create Email Template</span>
+          <LayoutTemplate size={16} className="text-indigo-600" />
+          <span className="text-sm font-black text-slate-900 tracking-tight">Create Template</span>
         </div>
         <div className="flex-1" />
         <button
@@ -210,91 +210,90 @@ function TemplateChooser({ onSelect }: { onSelect: (key: string) => void }) {
           }}
           disabled={false}
           className={cn(
-            "flex items-center gap-2 h-9 px-5 rounded-xl text-[13px] font-bold transition-all",
+            "flex items-center gap-2 h-9 px-5 rounded-xl text-xs font-bold transition-all",
             selected
-              ? "bg-[#5B6CFF] hover:bg-[#4a5ce8] text-white shadow-md shadow-[#5B6CFF]/20"
+              ? "bg-indigo-600 hover:bg-indigo-700 text-white"
               : "bg-slate-900 hover:bg-slate-800 text-white",
           )}
         >
           {selected ? (
             <>Use This Template <ChevronRight size={14} /></>
           ) : (
-            <>Start from Scratch <Plus size={13} /></>
+            <>Start from Scratch <Plus size={14} /></>
           )}
         </button>
       </div>
 
-      {/* Hero */}
-      <div className="px-8 pt-10 pb-6 max-w-5xl mx-auto w-full">
-        <div className="flex items-start gap-3 mb-2">
-          <div className="h-9 w-9 rounded-xl bg-[#5B6CFF]/10 flex items-center justify-center shrink-0">
-            <Sparkles size={17} className="text-[#5B6CFF]" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight leading-none">Start with a template</h1>
-            <p className="text-sm text-slate-500 mt-1">Choose a pre-built design to get started faster, or build from scratch.</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Category pills */}
-      <div className="px-8 pb-4 max-w-5xl mx-auto w-full">
-        <div className="flex gap-2 flex-wrap">
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setCategory(cat)}
-              className={cn(
-                "text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-all",
-                category === cat
-                  ? "bg-slate-900 border-slate-900 text-white"
-                  : "bg-white border-slate-200 text-slate-500 hover:border-slate-300 hover:text-slate-700",
-              )}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Grid */}
-      <div className="flex-1 px-8 pb-12 max-w-5xl mx-auto w-full">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-          {filtered.map((starter) => (
-            <button
-              key={starter.key}
-              onClick={() => setSelected(starter.key === selected ? null : starter.key)}
-              className={cn(
-                "text-left rounded-2xl border-2 p-3 transition-all hover:shadow-md",
-                selected === starter.key
-                  ? "border-[#5B6CFF] bg-indigo-50/50 shadow-md shadow-[#5B6CFF]/10"
-                  : "border-slate-200 bg-white hover:border-slate-300",
-              )}
-            >
-              <TemplateThumbnail starter={starter} selected={selected === starter.key} />
-              <div className="mt-3 px-0.5">
-                <div className="flex items-center gap-2">
-                  <p className="text-[12px] font-bold text-slate-800 flex-1 leading-tight">{starter.label}</p>
-                </div>
-                <p className="text-[10px] text-slate-400 mt-0.5 leading-tight">{starter.description}</p>
-                <span className="inline-block mt-2 text-[9px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-500">
-                  {starter.category}
-                </span>
+      <div className="flex-1 overflow-y-auto w-full">
+        <div className="max-w-5xl mx-auto w-full">
+          {/* Hero */}
+          <div className="px-8 pt-10 pb-6">
+            <div className="flex items-start gap-3 mb-2">
+              <div className="h-10 w-10 rounded-xl bg-indigo-50 flex items-center justify-center shrink-0 ring-1 ring-indigo-100">
+                <Sparkles size={18} className="text-indigo-600" />
               </div>
-            </button>
-          ))}
-        </div>
-
-        {/* Empty category state */}
-        {filtered.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <LayoutTemplate size={32} className="text-slate-200 mb-3" />
-            <p className="text-slate-500 font-medium">No templates in this category yet</p>
-            <button onClick={() => setCategory("All")} className="mt-3 text-[#5B6CFF] text-sm font-semibold hover:underline">
-              View all templates
-            </button>
+              <div>
+                <h1 className="text-2xl font-black text-slate-900 tracking-tight leading-none">Choose a Template</h1>
+                <p className="text-sm font-medium text-slate-500 mt-1.5">Start with a pre-built design to move faster, or create from scratch.</p>
+              </div>
+            </div>
           </div>
-        )}
+
+          {/* Category pills */}
+          <div className="px-8 pb-6">
+            <div className="flex gap-2 flex-wrap">
+              {CATEGORIES.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setCategory(cat)}
+                  className={cn(
+                    "text-xs font-bold px-3 py-1.5 rounded-lg border transition-all",
+                    category === cat
+                      ? "bg-slate-900 border-slate-900 text-white shadow-xs"
+                      : "bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50",
+                  )}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Grid */}
+          <div className="px-8 pb-16">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
+              {filtered.map((starter) => (
+                <button
+                  key={starter.key}
+                  onClick={() => setSelected(starter.key === selected ? null : starter.key)}
+                  className={cn(
+                    "text-left rounded-2xl p-3 transition-all outline-none border-none",
+                    selected === starter.key
+                      ? "bg-indigo-50/50 ring-1 ring-indigo-200"
+                      : "bg-white ring-1 ring-slate-200 hover:bg-slate-50",
+                  )}
+                >
+                  <TemplateThumbnail starter={starter} selected={selected === starter.key} />
+                  <div className="mt-3 px-1">
+                    <p className="text-xs font-black text-slate-900 flex-1 leading-tight mb-1">{starter.label}</p>
+                    <p className="text-[11px] font-medium text-slate-500 leading-snug">{starter.description}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            {/* Empty category state */}
+            {filtered.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-20 text-center rounded-2xl border border-dashed border-slate-200 mt-4 bg-white">
+                <LayoutTemplate size={32} className="text-slate-300 mb-3" />
+                <p className="text-slate-500 font-bold text-sm">No templates in this category</p>
+                <button onClick={() => setCategory("All")} className="mt-2 text-indigo-600 text-xs font-bold hover:text-indigo-700 transition-colors flex items-center gap-1">
+                  <ArrowLeft size={12} /> View all templates
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

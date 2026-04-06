@@ -1,52 +1,57 @@
 "use client";
 
-import { ModuleSettingsForm } from "@/components/common/module-settings-form";
+import React from "react";
 import { useEntitySettings, useUpdateEntitySettings } from "@/graphql/actions";
-import { Loader2 } from "lucide-react";
+import { ClipboardList, ShieldCheck, Zap } from "lucide-react";
+import { PlatformSettingsPage, SettingsField } from "@/components/ui/platform/settings-page";
+import { toast } from "sonner";
+
+const FIELDS: SettingsField[] = [
+  {
+    key: "allowListing",
+    label: "Allow Listings",
+    description: "Enable or disable the ability for members to create new directory listings.",
+    icon: ShieldCheck,
+    section: "Directory Protocols",
+  },
+  {
+    key: "autoApproveListing",
+    label: "Auto Approve Listings",
+    description: "Automatically validate and publish new listings without manual review.",
+    icon: Zap,
+    section: "Automation Protocols",
+  },
+];
 
 const ListingSettings = () => {
   const { data, loading } = useEntitySettings();
   const [update, { loading: loadingBtn }] = useUpdateEntitySettings({});
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
-  const fields = [
-    {
-      key: "allowListing",
-      label: "Allow Listings",
-      description: "Enable or disable the ability to create new listings",
-    },
-    {
-      key: "autoApproveListing",
-      label: "Auto Approve Listings",
-      description: "Automatically approve new listings",
-    },
-  ];
+  const handleSave = async (settings: any) => {
+    try {
+      await update({
+        variables: {
+          input: settings,
+        },
+      });
+      toast.success("Listing settings updated successfully");
+    } catch (error) {
+      toast.error("Failed to update listing configuration");
+      throw error;
+    }
+  };
 
   return (
-    <ModuleSettingsForm
-      title="Listing Settings"
-      description="Configure listing module settings"
-      fields={fields}
-      onSave={(settings) => {
-        update({
-          variables: {
-            input: settings,
-          },
-        });
-      }}
-      isLoading={loadingBtn}
-      data={{
-        allowListing: data?.getEntitySettings?.allowListing ?? true,
-        autoApproveListing:
-          data?.getEntitySettings?.autoApproveListing ?? false,
-      }}
+    <PlatformSettingsPage
+      title="Directory Management"
+      description="Moderate directory infrastructure and configure automated validation workflows."
+      headerIcon={ClipboardList}
+      badge="Directory"
+      fields={FIELDS}
+      data={data?.getEntitySettings}
+      loading={loading}
+      onSave={handleSave}
+      isSaving={loadingBtn}
     />
   );
 };

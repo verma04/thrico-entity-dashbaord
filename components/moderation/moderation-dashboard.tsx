@@ -4,7 +4,20 @@ import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { ShieldCheck, AlertTriangle, Flag, Link2, Clock, Inbox, ChevronRight, Activity } from "lucide-react";
+import {
+  ShieldCheck,
+  AlertTriangle,
+  Flag,
+  Link2,
+  Clock,
+  Inbox,
+  ChevronRight,
+  Activity,
+  Ban,
+  ShieldAlert,
+  ArrowRight,
+  Zap,
+} from "lucide-react";
 import Link from "next/link";
 import {
   useGetModerationStats,
@@ -14,6 +27,44 @@ import { AiModerationDashboardWidget } from "./ai-moderation-dashboard-widget";
 import { ModerationSummaryWidget } from "./moderation-summary-widget";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
+
+const SectionCard = ({
+  title,
+  description,
+  icon: Icon,
+  children,
+  action,
+}: {
+  title: string;
+  description?: string;
+  icon: any;
+  children: React.ReactNode;
+  action?: React.ReactNode;
+}) => (
+  <div className="rounded-lg border border-zinc-200 bg-white overflow-hidden h-full flex flex-col shadow-sm">
+    <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100 bg-zinc-50/30">
+      <div className="flex items-center gap-3">
+        <div className="h-8 w-8 rounded-lg bg-zinc-100 flex items-center justify-center shrink-0 border border-zinc-200">
+          <Icon className="h-4 w-4 text-zinc-600" />
+        </div>
+        <div>
+          <p className="text-xs font-bold text-zinc-900 uppercase tracking-tight">
+            {title}
+          </p>
+          {description && (
+            <p className="text-[10px] font-medium text-zinc-500 uppercase tracking-widest mt-0.5">
+              {description}
+            </p>
+          )}
+        </div>
+      </div>
+      {action}
+    </div>
+    <div className="p-5 flex-1">{children}</div>
+  </div>
+);
 
 export function ModerationDashboard() {
   const { data: statsData, loading: statsLoading } = useGetModerationStats();
@@ -25,17 +76,38 @@ export function ModerationDashboard() {
   const recentReports = reportsData?.getContentReports.items || [];
 
   return (
-    <EcosystemWrapper>
+    <EcosystemWrapper anonymized-1="moderation-intelligence">
       <EcosystemHeader
-        title="Content Moderation"
-        description="Manage and review reported content from your community."
-        breadcrumb="Moderation"
+        title="Safety Intelligence"
+        description="Monitor automated filtering velocity, pending review queues, and architectural safety protocols."
+        badgeText="Moderation Hub"
         icon={ShieldCheck}
-        badgeText="Safety Center"
-        showLiveIndicator={false}
       />
-      
-      <div className="space-y-6">
+
+      <EcosystemActionBar shadow="none">
+        <div className="flex items-center justify-between w-full">
+          <div className="flex items-center gap-2 px-1">
+            <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]" />
+            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest italic">
+              Automated Guardrails Active
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Link href="/moderation/reported-content">
+              <Button
+                variant="outline"
+                className="h-9 px-4 rounded-lg border-zinc-200 font-bold text-[10px] uppercase tracking-widest text-zinc-600 gap-2 hover:bg-zinc-50 transition-all shadow-sm"
+              >
+                <Flag className="h-3.5 w-3.5 text-indigo-500" />
+                Review Queue
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </EcosystemActionBar>
+
+      <EcosystemContainer className="p-6 lg:p-8 space-y-6">
         {/* Overview Widgets */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <ModerationSummaryWidget />
@@ -44,59 +116,66 @@ export function ModerationDashboard() {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Recent Pending Reports */}
-          <div className="lg:col-span-8 rounded-xl border border-slate-200/80 bg-white shadow-sm overflow-hidden flex flex-col">
-            <div className="px-5 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="h-8 w-8 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center border border-orange-200 shrink-0">
-                  <Clock className="h-4 w-4" />
-                </div>
-                <div>
-                   <h3 className="text-[14px] font-semibold text-slate-900 tracking-tight">Pending Reports</h3>
-                   <p className="text-[11px] text-slate-500 mt-0.5">Content awaiting manual review</p>
-                </div>
-              </div>
-              <Link href="/settings/moderation/reports">
-                <Button variant="outline" size="sm" className="h-8 text-[11px] font-semibold border-slate-200">
-                  View All Queue
-                </Button>
-              </Link>
-            </div>
-            
-            <div className="p-0">
+          <div className="lg:col-span-8">
+            <SectionCard
+              title="Awaiting Review"
+              description="High-priority manual intervention"
+              icon={Clock}
+              action={
+                <Link href="/moderation/reported-content">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 text-[10px] font-bold text-zinc-400 uppercase tracking-widest hover:text-indigo-600 gap-1.5"
+                  >
+                    View All <ArrowRight className="h-3 w-3" />
+                  </Button>
+                </Link>
+              }
+            >
               {reportsLoading ? (
-                <div className="h-48 flex flex-col items-center justify-center text-slate-400 space-y-3">
-                  <div className="h-6 w-6 rounded-full border-2 border-slate-200 border-t-slate-400 animate-spin" />
-                  <span className="text-[12px] font-medium">Fetching reports...</span>
+                <div className="h-48 flex flex-col items-center justify-center text-zinc-400 space-y-3">
+                  <div className="h-6 w-6 rounded-full border-2 border-zinc-100 border-t-zinc-900 animate-spin" />
+                  <span className="text-[10px] font-bold uppercase tracking-widest">
+                    Syncing Queue...
+                  </span>
                 </div>
               ) : recentReports.length > 0 ? (
-                <div className="divide-y divide-slate-100">
+                <div className="divide-y divide-zinc-100 -mx-5 -my-5">
                   {recentReports.map((report) => (
                     <div
                       key={report.id}
-                      className="flex items-center justify-between p-5 hover:bg-slate-50/50 transition-colors group"
+                      className="flex items-center justify-between p-5 hover:bg-zinc-50/50 transition-colors group"
                     >
                       <div className="flex items-start gap-4">
-                        <Avatar className="h-9 w-9 border border-slate-200 shadow-sm mt-0.5">
-                          <AvatarFallback className="bg-slate-100 text-[12px] font-bold text-slate-600">
+                        <Avatar className="h-8 w-8 border border-zinc-200 shadow-sm rounded-lg">
+                          <AvatarFallback className="bg-zinc-100 text-[10px] font-bold text-zinc-500 uppercase">
                             {report.reportedBy.firstName[0]}
                           </AvatarFallback>
                         </Avatar>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-[13px] font-semibold text-slate-900 capitalize leading-none pt-1">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-semibold text-zinc-900 capitalize">
                               {report.contentType.toLowerCase()}
                             </span>
-                            <Badge variant="outline" className="text-[9px] uppercase tracking-widest font-bold border-red-200 text-red-600 bg-red-50 px-1.5 py-0">
+                            <Badge
+                              variant="outline"
+                              className="text-[9px] uppercase font-bold border-rose-100 text-rose-600 bg-rose-50 px-1.5 h-4 tracking-tighter"
+                            >
                               {report.reason}
                             </Badge>
                           </div>
-                          <p className="text-[12px] text-slate-500 truncate max-w-sm md:max-w-md">
+                          <p className="text-xs text-zinc-500 truncate max-w-xs md:max-w-md">
                             {report.contentPreview || "No preview available..."}
                           </p>
                         </div>
                       </div>
-                      <Link href="/settings/moderation/reports">
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-900 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Link href={`/moderation/reported-content?id=${report.id}`}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-zinc-300 hover:text-zinc-600 transition-colors"
+                        >
                           <ChevronRight className="h-4 w-4" />
                         </Button>
                       </Link>
@@ -104,78 +183,91 @@ export function ModerationDashboard() {
                   ))}
                 </div>
               ) : (
-                <div className="h-48 flex flex-col items-center justify-center">
-                  <div className="h-12 w-12 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center mb-3">
-                     <ShieldCheck className="h-6 w-6 text-slate-300" />
+                <div className="h-48 flex flex-col items-center justify-center text-center space-y-4">
+                  <div className="h-10 w-10 rounded-xl bg-zinc-50 border border-zinc-100 flex items-center justify-center">
+                    <ShieldCheck className="h-5 w-5 text-zinc-300" />
                   </div>
-                  <p className="text-[13px] font-semibold text-slate-900">Queue is empty</p>
-                  <p className="text-[12px] text-slate-500 mt-0.5">No pending reports require your attention.</p>
+                  <div>
+                    <p className="text-sm font-bold text-zinc-900 leading-none">
+                      Queue Sanitized
+                    </p>
+                    <p className="text-[10px] font-medium text-zinc-400 uppercase tracking-widest mt-2">
+                      All content reports have been resolved.
+                    </p>
+                  </div>
                 </div>
               )}
-            </div>
+            </SectionCard>
           </div>
-  
+
           {/* Action Center / Quick Settings */}
-          <div className="lg:col-span-4 rounded-xl border border-slate-200/80 bg-slate-50/30 shadow-sm flex flex-col h-fit">
-            <div className="px-5 py-4 border-b border-slate-100 bg-white rounded-t-xl">
-               <h3 className="text-[13px] font-semibold text-slate-900 tracking-tight">System Health</h3>
-               <p className="text-[11px] text-slate-500 mt-0.5">Automated filters & tools</p>
-            </div>
-            
-            <div className="p-5 space-y-6">
-              <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-100 shadow-sm relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-4 opacity-5">
-                   <Activity className="h-24 w-24 text-emerald-500" />
-                </div>
-                <div className="relative z-10">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[12px] font-bold text-emerald-800 uppercase tracking-widest">
-                      Auto-Mod
-                    </span>
-                    <div className="flex items-center gap-1.5 bg-emerald-500 text-white text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full shadow-sm">
-                      <div className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
-                      Online
+          <div className="lg:col-span-4">
+            <SectionCard
+              title="System Hygiene"
+              description="Hygiene protocols & filters"
+              icon={Activity}
+            >
+              <div className="space-y-4">
+                <div className="p-4 rounded-lg bg-emerald-50/30 border border-emerald-100/50 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
+                      <Zap className="h-4 w-4 text-emerald-600" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider">
+                        Auto-Mod Active
+                      </p>
+                      <p className="text-[9px] font-medium text-emerald-700/60 uppercase tracking-tighter">
+                        Sanitizing interaction nodes
+                      </p>
                     </div>
                   </div>
-                  <p className="text-[11px] font-medium text-emerald-700/80">
-                    Automated filters and spam detection are checking content.
+                  <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.4)]" />
+                </div>
+
+                <div className="space-y-2">
+                  <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] mb-3 px-1 mt-6">
+                    Registry Tools
                   </p>
+                  {[
+                    {
+                      label: "Banned Words",
+                      icon: Ban,
+                      href: "/moderation/banned-words",
+                    },
+                    {
+                      label: "Blocked Links",
+                      icon: Link2,
+                      href: "/moderation/blocked-links",
+                    },
+                    {
+                      label: "Safety Settings",
+                      icon: ShieldAlert,
+                      href: "/moderation/settings",
+                    },
+                  ].map((item) => (
+                    <Link
+                      key={item.label}
+                      href={item.href}
+                      className="flex items-center justify-between p-3.5 rounded-lg border border-zinc-100 bg-white hover:bg-zinc-50 hover:border-indigo-200 hover:shadow-sm transition-all group"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="h-7 w-7 rounded bg-zinc-50 border border-zinc-100 text-zinc-400 flex items-center justify-center shrink-0 group-hover:bg-indigo-50 group-hover:text-indigo-600 group-hover:border-indigo-100 transition-colors">
+                          <item.icon className="h-3.5 w-3.5" />
+                        </div>
+                        <span className="text-[11px] font-bold text-zinc-600 uppercase tracking-widest group-hover:text-zinc-900 transition-colors">
+                          {item.label}
+                        </span>
+                      </div>
+                      <ChevronRight className="h-3.5 w-3.5 text-zinc-300 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all" />
+                    </Link>
+                  ))}
                 </div>
               </div>
-  
-              <div className="space-y-2.5">
-                <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-3">Quick Actions</h4>
-                <div className="grid grid-cols-1 gap-2">
-                  <Link href="/settings/moderation/words" className="group">
-                    <div className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 bg-white hover:border-slate-300 transition-colors shadow-sm cursor-pointer">
-                      <div className="h-7 w-7 rounded bg-slate-100 text-slate-600 flex items-center justify-center group-hover:bg-slate-900 group-hover:text-white transition-colors">
-                        <AlertTriangle className="h-3.5 w-3.5" />
-                      </div>
-                      <span className="text-[12px] font-semibold text-slate-700 group-hover:text-slate-900">Manage Banned Words</span>
-                    </div>
-                  </Link>
-                  <Link href="/settings/moderation/links" className="group">
-                    <div className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 bg-white hover:border-slate-300 transition-colors shadow-sm cursor-pointer">
-                      <div className="h-7 w-7 rounded bg-slate-100 text-slate-600 flex items-center justify-center group-hover:bg-slate-900 group-hover:text-white transition-colors">
-                        <Link2 className="h-3.5 w-3.5" />
-                      </div>
-                      <span className="text-[12px] font-semibold text-slate-700 group-hover:text-slate-900">Manage Blocked Links</span>
-                    </div>
-                  </Link>
-                  <Link href="/settings/moderation/settings" className="group">
-                    <div className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 bg-white hover:border-slate-300 transition-colors shadow-sm cursor-pointer">
-                      <div className="h-7 w-7 rounded bg-slate-100 text-slate-600 flex items-center justify-center group-hover:bg-slate-900 group-hover:text-white transition-colors">
-                        <ShieldCheck className="h-3.5 w-3.5" />
-                      </div>
-                      <span className="text-[12px] font-semibold text-slate-700 group-hover:text-slate-900">Safety Settings</span>
-                    </div>
-                  </Link>
-                </div>
-              </div>
-            </div>
+            </SectionCard>
           </div>
         </div>
-      </div>
+      </EcosystemContainer>
     </EcosystemWrapper>
   );
 }

@@ -16,6 +16,8 @@ import {
   LogOut,
   ChevronDown,
   Trophy,
+  Users,
+  PanelLeft,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -54,7 +56,9 @@ import {
 } from "@/components/ui/command";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { useGetUser } from "@/graphql/actions";
+import { useGetUser, useGetMyOtherAccounts } from "@/graphql/actions";
+import { SwitchingLoader } from "./switching-loader";
+import { useWorkspaceSwitch } from "@/hooks/use-workspace-switch";
 
 import {
   useFilteredExtendedItems,
@@ -66,6 +70,7 @@ import {
 
 import { useUserStore } from "@/store/store";
 import Logo from "./logo";
+import { WorkspaceSwitcher } from "./switcher";
 import VisitSite from "./visit";
 import LogoutModal from "./logout";
 
@@ -82,10 +87,15 @@ interface MenuItem {
 /* ─── Section Label ──────────────────────────────────────────────── */
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <div className="px-4 mb-2 mt-5 group-data-[collapsible=icon]:hidden first:mt-2">
-      <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/40 select-none leading-none">
+    <div className="mb-1 mt-4 first:mt-1">
+      {/* Expanded: text label */}
+      <span className="px-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/35 select-none leading-none group-data-[collapsible=icon]:hidden block">
         {children}
       </span>
+      {/* Collapsed: thin divider line */}
+      <div className="hidden group-data-[collapsible=icon]:flex items-center justify-center px-2 py-1">
+        <div className="w-full h-px bg-border/50" />
+      </div>
     </div>
   );
 }
@@ -126,30 +136,30 @@ function MenuItemRow({
           className?: string;
         }>,
         {
-          size: depth > 0 ? 15 : 18,
+          size: depth > 0 ? 14 : 16,
           className: cn(
-            "shrink-0 transition-all duration-300",
+            "shrink-0 transition-colors duration-150",
             isActive
-              ? "text-primary scale-110 drop-shadow-sm"
-              : "text-muted-foreground/50 group-hover:text-foreground/80 group-hover:scale-110",
+              ? "text-primary"
+              : "text-muted-foreground/50 group-hover:text-muted-foreground",
           ),
         },
       )
     : null;
 
   const rowBase = cn(
-    "group relative flex items-center w-full transition-all duration-300 ease-out cursor-pointer select-none overflow-hidden",
+    "group relative flex items-center w-full transition-colors duration-150 cursor-pointer select-none",
     depth === 0
-      ? "h-11 px-3.5 rounded-xl gap-3 my-1"
-      : "h-9 px-3.5 rounded-[10px] gap-2.5 my-0.5",
+      ? "h-9 px-3 rounded-lg gap-2.5 my-px"
+      : "h-8 px-3 rounded-md gap-2 my-px",
     isActive
-      ? "bg-primary/10 text-primary dark:bg-primary/20 shadow-[inset_0px_1px_0px_rgba(255,255,255,0.04)] ring-1 ring-primary/20"
-      : "hover:bg-sidebar-accent/60 text-muted-foreground hover:text-foreground hover:translate-x-1.5",
+      ? "bg-accent text-foreground"
+      : "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
   );
 
-  /* Active indicator */
+  /* Active indicator — clean 2px bar, no glow */
   const activeBar = isActive && depth === 0 && (
-    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-r-full bg-primary pointer-events-none group-data-[collapsible=icon]:hidden shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all duration-300 animate-pulse" />
+    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-r bg-primary pointer-events-none group-data-[collapsible=icon]:hidden" />
   );
 
   /* ── Children (expandable group) ── */
@@ -168,34 +178,34 @@ function MenuItemRow({
         >
           <span
             className={cn(
-              "flex items-center gap-3 flex-1 min-w-0 h-10",
-              "group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:flex-none group-data-[collapsible=icon]:h-10 group-data-[collapsible=icon]:w-10",
+              "flex items-center gap-2.5 flex-1 min-w-0 h-9",
+              "group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:flex-none group-data-[collapsible=icon]:h-9 group-data-[collapsible=icon]:w-9",
             )}
           >
             {activeBar}
             {iconEl}
             <span
               className={cn(
-                "truncate text-[13.5px] leading-none tracking-normal transition-colors duration-300 group-data-[collapsible=icon]:hidden",
+                "truncate text-[13px] leading-none tracking-[-0.01em] transition-colors duration-150 group-data-[collapsible=icon]:hidden",
                 isActive
-                  ? "font-semibold text-primary"
-                  : "font-medium text-inherit",
+                  ? "font-medium text-foreground"
+                  : "font-normal text-inherit",
               )}
             >
               {item.label}
             </span>
           </span>
           <ChevronRight
-            size={12}
+            size={11}
             className={cn(
-              "shrink-0 text-muted-foreground/40 transition-transform duration-200 group-data-[collapsible=icon]:hidden",
-              isOpen && "rotate-90 text-primary",
+              "shrink-0 text-muted-foreground/30 transition-transform duration-150 group-data-[collapsible=icon]:hidden",
+              isOpen && "rotate-90 text-muted-foreground",
             )}
           />
         </SidebarMenuButton>
 
         {isOpen && !isCollapsed && (
-          <div className="ml-4 pl-2.5 border-l border-border/50 mt-0.5 mb-0.5 space-y-0.5 group-data-[collapsible=icon]:hidden">
+          <div className="ml-3.5 pl-3 border-l border-border/40 mt-px mb-px group-data-[collapsible=icon]:hidden">
             {item.children!.map((child) => (
               <MenuItemRow
                 key={child.key}
@@ -224,13 +234,13 @@ function MenuItemRow({
           tooltip={tooltipLabel}
           className={cn(
             rowBase,
-            "text-destructive/70 hover:text-destructive hover:bg-destructive/10 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] dark:hover:bg-destructive/20",
-            "group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center",
+            "text-muted-foreground/60 hover:text-destructive hover:bg-destructive/5",
+            "group-data-[collapsible=icon]:size-9 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center",
           )}
           onClick={() => setLogoutOpen(true)}
         >
           {iconEl}
-          <span className="text-[13px] leading-none tracking-[-0.01em] font-medium truncate group-data-[collapsible=icon]:hidden">
+          <span className="text-[13px] leading-none tracking-[-0.01em] font-normal truncate group-data-[collapsible=icon]:hidden">
             {item.label}
           </span>
         </SidebarMenuButton>
@@ -247,21 +257,21 @@ function MenuItemRow({
         tooltip={tooltipLabel}
         className={cn(
           rowBase,
-          "group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center",
+          "group-data-[collapsible=icon]:size-9 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center",
         )}
       >
         <Link
           href={item.path || "#"}
-          className="flex items-center gap-3 flex-1 min-w-0 group-data-[collapsible=icon]:justify-center"
+          className="flex items-center gap-2.5 flex-1 min-w-0 group-data-[collapsible=icon]:justify-center"
         >
           {activeBar}
           {iconEl}
           <span
             className={cn(
-              "text-[13.5px] leading-none tracking-normal transition-colors duration-300 truncate group-data-[collapsible=icon]:hidden",
+              "text-[13px] leading-none tracking-[-0.01em] transition-colors duration-150 truncate group-data-[collapsible=icon]:hidden",
               isActive
-                ? "text-primary font-semibold"
-                : "text-inherit font-medium shadow-none",
+                ? "text-foreground font-medium"
+                : "text-inherit font-normal",
             )}
           >
             {item.label}
@@ -269,7 +279,7 @@ function MenuItemRow({
           {item.badge && (
             <Badge
               variant="outline"
-              className="ml-auto text-[9px] h-[18px] px-2 bg-primary/10 text-primary border-transparent rounded-full font-bold uppercase tracking-wider shrink-0 shadow-sm group-data-[collapsible=icon]:hidden"
+              className="ml-auto text-[9px] h-[17px] px-1.5 bg-primary/8 text-primary border-primary/20 rounded font-semibold uppercase tracking-wider shrink-0 group-data-[collapsible=icon]:hidden"
             >
               {item.badge}
             </Badge>
@@ -288,7 +298,7 @@ function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
   const [logoutOpen, setLogoutOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
-  const { state } = useSidebar();
+  const { state, toggleSidebar } = useSidebar();
   const isCollapsed = state === "collapsed";
 
   // ⌘K keyboard shortcut
@@ -370,6 +380,9 @@ function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
   );
 
   const { data: userData } = useGetUser();
+  const { data: otherAccountsData } = useGetMyOtherAccounts();
+  const { isSwitching, targetName, handleSwitch } = useWorkspaceSwitch();
+
   const nameOfUser = userData?.getUser
     ? `${userData.getUser.firstName} ${userData.getUser.lastName}`
     : "Deepak Rai";
@@ -432,7 +445,7 @@ function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
   ]);
 
   const renderItems = (items: MenuItem[]) => (
-    <SidebarMenu className="gap-px">
+    <SidebarMenu className="gap-0">
       {items.map((item) => (
         <MenuItemRow
           key={item.key}
@@ -449,43 +462,45 @@ function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
 
   return (
     <>
+      <SwitchingLoader
+        isVisible={isSwitching}
+        targetWorkspaceName={targetName}
+      />
       {/* ── SIDEBAR ── */}
       <Sidebar
         collapsible="icon"
-        className="border-r border-border/40 bg-sidebar/95 backdrop-blur-2xl shadow-[4px_0_24px_-12px_rgba(0,0,0,0.1)] transition-all duration-300"
-        style={{ "--sidebar-width": "260px" } as React.CSSProperties}
+        className="border-r border-border/50 bg-sidebar transition-[width] duration-150 ease-in-out"
+        style={{ "--sidebar-width": "248px" } as React.CSSProperties}
       >
         {/* HEADER */}
-        <SidebarHeader className="h-16 flex flex-row items-center justify-between px-4 border-b border-border/40 overflow-hidden bg-sidebar/50 backdrop-blur-sm">
-          {!isCollapsed && (
-            <Link
-              href="/"
-              className="flex items-center gap-2.5 flex-1 min-w-0 overflow-hidden"
-            >
-              <Logo />
-            </Link>
-          )}
-
-          <SidebarTrigger className="h-7 w-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-sidebar-accent transition-all duration-150 flex items-center justify-center shrink-0 ml-auto" />
+        <SidebarHeader className="h-14 flex items-center border-b border-border/50 px-2 group-data-[collapsible=icon]:px-1 group-data-[collapsible=icon]:justify-center">
+          <div className="flex-1 min-w-0 flex items-center group-data-[collapsible=icon]:hidden">
+            <WorkspaceSwitcher />
+          </div>
+          {/* Collapsed: just show mini logo icon */}
+          <div className="hidden group-data-[collapsible=icon]:flex items-center justify-center w-full">
+            <WorkspaceSwitcher />
+          </div>
+          {/* Collapse toggle — only shown when expanded */}
         </SidebarHeader>
 
         {/* CONTENT */}
-        <SidebarContent className="py-2 px-1.5 overflow-x-hidden">
+        <SidebarContent className="py-2 px-2 overflow-x-hidden group-data-[collapsible=icon]:px-1">
           {/* SEARCH */}
           {!isCollapsed && (
-            <div className="px-3 mb-4 mt-2 group-data-[collapsible=icon]:hidden">
-              <div className="relative group">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/40 group-focus-within:text-primary transition-colors pointer-events-none" />
+            <div className="mb-3 mt-1 group-data-[collapsible=icon]:hidden">
+              <div className="relative">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/40 pointer-events-none" />
                 <Input
-                  placeholder="Search pages or settings…"
+                  placeholder="Search…"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="h-10 bg-background/50 border-border/40 shadow-sm pl-9 pr-8 text-[13px] rounded-xl focus-visible:ring-2 focus-visible:ring-primary/20 placeholder:text-muted-foreground/40 text-foreground transition-all duration-300 hover:bg-background/80"
+                  className="h-8 bg-accent/50 border-border/50 pl-8 pr-7 text-[12.5px] rounded-md focus-visible:ring-1 focus-visible:ring-primary/30 placeholder:text-muted-foreground/40 text-foreground"
                 />
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery("")}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-foreground transition-colors"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-foreground transition-colors"
                   >
                     <X className="h-3 w-3" />
                   </button>
@@ -496,7 +511,7 @@ function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
 
           {/* HOME */}
           {filteredHome.length > 0 && (
-            <SidebarGroup className="mb-3 p-0">
+            <SidebarGroup className="mb-1 p-0">
               <SectionLabel>Home</SectionLabel>
               <SidebarGroupContent>
                 {renderItems(filteredHome)}
@@ -506,7 +521,7 @@ function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
 
           {/* COMMUNITY INTELLIGENCE */}
           {filteredCommunity.length > 0 && (
-            <SidebarGroup className="mb-3 p-0">
+            <SidebarGroup className="mb-1 p-0">
               <SectionLabel>Community</SectionLabel>
               <SidebarGroupContent>
                 {renderItems(filteredCommunity)}
@@ -516,7 +531,7 @@ function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
 
           {/* CONTENT MODERATION */}
           {filteredModeration.length > 0 && (
-            <SidebarGroup className="mb-3 p-0">
+            <SidebarGroup className="mb-1 p-0">
               <SectionLabel>Moderation</SectionLabel>
               <SidebarGroupContent>
                 {renderItems(filteredModeration)}
@@ -526,7 +541,7 @@ function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
 
           {/* GAMIFICATION ENGINE */}
           {filteredGamification.length > 0 && (
-            <SidebarGroup className="mb-3 p-0">
+            <SidebarGroup className="mb-1 p-0">
               <SectionLabel>Gamification</SectionLabel>
               <SidebarGroupContent>
                 {renderItems(filteredGamification)}
@@ -536,7 +551,7 @@ function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
 
           {/* MODULES */}
           {filteredModules.length > 0 && (
-            <SidebarGroup className="mb-3 p-0">
+            <SidebarGroup className="mb-1 p-0">
               <SectionLabel>Modules</SectionLabel>
               <SidebarGroupContent>
                 {renderItems(filteredModules)}
@@ -562,9 +577,9 @@ function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
             filteredModules.length === 0 &&
             filteredSettings.length === 0 &&
             filteredProfile.length === 0 && (
-              <div className="px-3 py-6 text-center group-data-[collapsible=icon]:hidden">
-                <p className="text-[11px] text-muted-foreground/60">
-                  No matching items
+              <div className="py-8 text-center group-data-[collapsible=icon]:hidden">
+                <p className="text-[11.5px] text-muted-foreground/50">
+                  No results found
                 </p>
               </div>
             )}
@@ -572,76 +587,91 @@ function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
       </Sidebar>
 
       {/* ── MAIN CONTENT ── */}
-      <SidebarInset className="bg-background transition-all duration-300">
-        <header className="flex h-16 items-center justify-between gap-4 border-b border-border/40 bg-background/80 backdrop-blur-2xl px-5 sticky top-0 z-40 shadow-[0_4px_24px_-12px_rgba(0,0,0,0.05)]">
-          <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-1.5 text-[13px]">
-              <span className="font-medium text-foreground/80 capitalize tracking-[-0.01em]">
-                {pathName === "/"
-                  ? "Dashboard"
-                  : pathName
-                      .split("/")
-                      .filter(Boolean)
-                      .join(" / ")
-                      .replace(/-/g, " ")}
-              </span>
-            </div>
+      <SidebarInset className="bg-background">
+        {/* ── NAVBAR ── */}
+        <header className="flex h-14 items-center justify-between gap-3 border-b border-border/50 bg-background px-4 sticky top-0 z-40">
+          {/* Left: sidebar toggle + breadcrumb */}
+          <div className="flex items-center gap-2 min-w-0">
+            {/* Always-visible toggle in navbar */}
+            <button
+              onClick={toggleSidebar}
+              className="h-7 w-7 rounded-md text-muted-foreground/40 hover:text-foreground hover:bg-accent transition-colors duration-150 flex items-center justify-center shrink-0"
+              title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            >
+              <PanelLeft
+                size={15}
+                className={cn(
+                  "transition-transform duration-200",
+                  isCollapsed && "rotate-180",
+                )}
+              />
+            </button>
+            <div className="h-4 w-px bg-border/40" />
+            <span className="text-[13px] font-medium text-muted-foreground/60 capitalize tracking-[-0.01em] truncate">
+              {pathName === "/"
+                ? "Dashboard"
+                : pathName
+                    .split("/")
+                    .filter(Boolean)
+                    .map((s) => s.replace(/-/g, " "))
+                    .join(" / ")}
+            </span>
           </div>
 
-          <div className="flex items-center gap-2">
+          {/* Right: actions */}
+          <div className="flex items-center gap-1.5">
             <VisitSite />
-            <div className="h-4 w-px bg-border mx-0.5" />
 
+            <div className="h-4 w-px bg-border/50 mx-0.5" />
+
+            {/* Search */}
             <button
               onClick={() => setSearchOpen(true)}
-              className="relative flex h-9 items-center gap-2 px-3 rounded-xl bg-accent/40 text-muted-foreground hover:text-foreground hover:bg-accent/80 transition-all duration-300 border border-transparent hover:border-border/60 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)]"
+              className="flex h-8 items-center gap-2 px-2.5 rounded-md text-muted-foreground/60 hover:text-foreground hover:bg-accent transition-colors duration-150"
             >
-              <Search
-                size={15}
-                className="group-hover:text-primary transition-colors"
-              />
-              <kbd className="hidden sm:inline-flex h-5 items-center gap-0.5 rounded-md border border-border/50 bg-background/50 px-1.5 text-[10px] font-bold text-muted-foreground/70 shadow-sm">
+              <Search size={14} />
+              <kbd className="hidden sm:inline-flex h-4 items-center gap-px rounded border border-border/60 bg-muted/60 px-1.5 text-[10px] font-medium text-muted-foreground/50">
                 ⌘K
               </kbd>
             </button>
 
-            <button className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-accent/40 text-muted-foreground hover:text-primary hover:bg-accent/80 transition-all duration-300 border border-transparent hover:border-border/60 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)]">
-              <span className="absolute top-2 right-2.5 h-1.5 w-1.5 rounded-full bg-destructive ring-2 ring-background shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
-              <BellDotIcon size={16} />
+            {/* Bell */}
+            <button className="relative flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground/60 hover:text-foreground hover:bg-accent transition-colors duration-150">
+              <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-destructive" />
+              <BellDotIcon size={15} />
             </button>
 
-            <div className="h-4 w-px bg-border/50 mx-1" />
+            <div className="h-4 w-px bg-border/50 mx-0.5" />
 
+            {/* User menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="group flex items-center gap-2 h-9 pl-1 pr-3 rounded-xl bg-accent/40 border border-transparent hover:border-border/60 hover:bg-accent/80 transition-all duration-300 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] outline-none">
-                  <div className="h-7 w-7 rounded-lg overflow-hidden ring-1 ring-border/50 group-hover:ring-primary/30 transition-all">
+                <button className="group flex items-center gap-2 h-8 pl-1 pr-2.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors duration-150 outline-none">
+                  <div className="h-6 w-6 rounded-md overflow-hidden ring-1 ring-border/60">
                     <UserAvatar />
                   </div>
-                  <span className="text-[13px] font-semibold text-foreground leading-none truncate max-w-[120px]">
+                  <span className="text-[12.5px] font-medium text-foreground leading-none truncate max-w-[100px] hidden sm:block">
                     <UserName />
                   </span>
-                  <span className="hidden sm:inline-block h-6 w-px bg-border/40 mx-1" />
-
-                  <ChevronDown className="h-3.5 w-3.5 text-muted-foreground/50 group-hover:text-primary/70 transition-colors" />
+                  <ChevronDown className="h-3 w-3 text-muted-foreground/40" />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="end"
-                sideOffset={8}
-                className="w-56 rounded-xl p-1.5"
+                sideOffset={6}
+                className="w-52 rounded-lg p-1"
               >
                 {/* User info header */}
-                <DropdownMenuLabel className="px-2.5 py-2">
-                  <div className="flex items-center gap-2.5">
-                    <div className="h-8 w-8 shrink-0">
+                <DropdownMenuLabel className="px-2 py-1.5">
+                  <div className="flex items-center gap-2">
+                    <div className="h-7 w-7 shrink-0 rounded-md overflow-hidden ring-1 ring-border/50">
                       <UserAvatar />
                     </div>
                     <div className="flex flex-col min-w-0">
-                      <span className="text-[13px] font-semibold text-foreground truncate">
+                      <span className="text-[12.5px] font-semibold text-foreground truncate">
                         <UserName />
                       </span>
-                      <span className="text-[11px] text-muted-foreground font-normal">
+                      <span className="text-[11px] text-muted-foreground/60 font-normal">
                         Manage account
                       </span>
                     </div>
@@ -649,42 +679,88 @@ function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
 
+                {/* Switch Workspace group */}
+                {otherAccountsData?.getMyOtherAccounts &&
+                  otherAccountsData.getMyOtherAccounts.length > 0 && (
+                    <>
+                      <DropdownMenuGroup>
+                        <DropdownMenuLabel className="px-2 py-1 font-semibold text-muted-foreground/40 text-[10px] uppercase tracking-[0.08em]">
+                          Switch Workspace
+                        </DropdownMenuLabel>
+                        {otherAccountsData.getMyOtherAccounts.map((account) => (
+                          <DropdownMenuItem
+                            key={account.id}
+                            disabled={isSwitching}
+                            className="rounded-md px-2 py-1.5 cursor-pointer gap-2.5 group/item"
+                            onClick={() =>
+                              handleSwitch(account.entityId, account.name)
+                            }
+                          >
+                            <div className="h-6 w-6 rounded-md overflow-hidden bg-muted flex items-center justify-center border border-border/40">
+                              {account.logo ? (
+                                <img
+                                  src={account.logo}
+                                  alt={account.name}
+                                  className="h-full w-full object-cover"
+                                />
+                              ) : (
+                                <Users
+                                  size={12}
+                                  className="text-muted-foreground/50"
+                                />
+                              )}
+                            </div>
+                            <div className="flex flex-col min-w-0">
+                              <span className="text-[12.5px] font-medium truncate">
+                                {account.name}
+                              </span>
+                              <span className="text-[10px] text-muted-foreground/60 truncate capitalize">
+                                {account.role || "Admin"}
+                              </span>
+                            </div>
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuGroup>
+                      <DropdownMenuSeparator />
+                    </>
+                  )}
+
                 {/* Account group */}
                 <DropdownMenuGroup>
                   <DropdownMenuItem
                     asChild
-                    className="rounded-lg px-2.5 py-2 cursor-pointer"
+                    className="rounded-md px-2 py-1.5 cursor-pointer"
                   >
                     <Link
                       href="/settings/profile"
-                      className="flex items-center gap-2.5"
+                      className="flex items-center gap-2"
                     >
-                      <User2 className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-[13px]">Profile</span>
+                      <User2 className="h-3.5 w-3.5 text-muted-foreground/60" />
+                      <span className="text-[12.5px]">Profile</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     asChild
-                    className="rounded-lg px-2.5 py-2 cursor-pointer"
+                    className="rounded-md px-2 py-1.5 cursor-pointer"
                   >
                     <Link
                       href="/settings/appearance"
-                      className="flex items-center gap-2.5"
+                      className="flex items-center gap-2"
                     >
-                      <PaintBucket className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-[13px]">Appearance</span>
+                      <PaintBucket className="h-3.5 w-3.5 text-muted-foreground/60" />
+                      <span className="text-[12.5px]">Appearance</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     asChild
-                    className="rounded-lg px-2.5 py-2 cursor-pointer"
+                    className="rounded-md px-2 py-1.5 cursor-pointer"
                   >
                     <Link
                       href="/notifications"
-                      className="flex items-center gap-2.5"
+                      className="flex items-center gap-2"
                     >
-                      <Bell className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-[13px]">Notifications</span>
+                      <Bell className="h-3.5 w-3.5 text-muted-foreground/60" />
+                      <span className="text-[12.5px]">Notifications</span>
                     </Link>
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
@@ -694,26 +770,23 @@ function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
                 <DropdownMenuGroup>
                   <DropdownMenuItem
                     asChild
-                    className="rounded-lg px-2.5 py-2 cursor-pointer"
+                    className="rounded-md px-2 py-1.5 cursor-pointer"
                   >
                     <Link
                       href="/settings/billing"
-                      className="flex items-center gap-2.5"
+                      className="flex items-center gap-2"
                     >
-                      <CreditCard className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-[13px]">Billing</span>
+                      <CreditCard className="h-3.5 w-3.5 text-muted-foreground/60" />
+                      <span className="text-[12.5px]">Billing</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     asChild
-                    className="rounded-lg px-2.5 py-2 cursor-pointer"
+                    className="rounded-md px-2 py-1.5 cursor-pointer"
                   >
-                    <Link
-                      href="/settings"
-                      className="flex items-center gap-2.5"
-                    >
-                      <Settings className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-[13px]">Settings</span>
+                    <Link href="/settings" className="flex items-center gap-2">
+                      <Settings className="h-3.5 w-3.5 text-muted-foreground/60" />
+                      <span className="text-[12.5px]">Settings</span>
                     </Link>
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
@@ -721,11 +794,11 @@ function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
 
                 {/* Logout */}
                 <DropdownMenuItem
-                  className="rounded-lg px-2.5 py-2 cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/5"
+                  className="rounded-md px-2 py-1.5 cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/5"
                   onClick={() => setLogoutOpen(true)}
                 >
-                  <LogOut className="h-4 w-4" />
-                  <span className="text-[13px]">Log out</span>
+                  <LogOut className="h-3.5 w-3.5" />
+                  <span className="text-[12.5px]">Log out</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

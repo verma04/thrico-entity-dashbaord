@@ -4,10 +4,9 @@ import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,27 +15,16 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { useQuery, useMutation, ApolloError } from "@apollo/client";
+import { useQuery, ApolloError } from "@apollo/client";
 import { CHECK_ENTITY_SUBSCRIPTIONS } from "@/graphql/quries";
 import { Skeleton } from "@/components/ui/skeleton";
-import { 
-  useGetAvailableModules, 
-  useCreateRole, 
+import {
+  useGetAvailableModules,
+  useCreateRole,
   useUpdateRole,
-  AdminAccess
+  AdminAccess,
 } from "@/graphql/actions";
-import { 
-  Loader2,
-  ShieldCheck,
-  Lock,
-  Globe,
-  Settings,
-  Info,
-  ShieldAlert,
-  Database,
-  Search,
-  CheckCircle2,
-} from "lucide-react";
+import { Loader2, ShieldCheck, ShieldAlert, Info } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -47,6 +35,7 @@ import {
 } from "@/components/ui/table";
 import { extendedItems } from "@/components/layout/sidebar/menu-items";
 import { ModuleIcon } from "./module-icon";
+import { cn } from "@/lib/utils";
 
 interface AddRoleDialogProps {
   open: boolean;
@@ -56,41 +45,46 @@ interface AddRoleDialogProps {
 
 const permissionTypes = ["Read", "Create", "Edit", "Delete"] as const;
 
-export default function AddRoleDialog({
-  open,
-  onOpenChange,
-  role,
-}: AddRoleDialogProps) {
+const adminAccessLabels: Record<string, string> = {
+  website: "Website",
+  moderation: "Moderation",
+  reports: "Reports",
+  settings: "Settings",
+  subscription: "Subscription",
+  platformFeatures: "Platform Features",
+  appearance: "Appearance",
+  auditLogs: "Audit Logs",
+  domain: "Domain",
+  permissions: "Permissions",
+  adminUsers: "Admin Users",
+};
+
+export default function AddRoleDialog({ open, onOpenChange, role }: AddRoleDialogProps) {
   const { toast } = useToast();
   const { data: subsData, loading: subsLoading } = useQuery(CHECK_ENTITY_SUBSCRIPTIONS);
   const { data: modulesData, loading: modulesLoading } = useGetAvailableModules();
 
   const [createRole, { loading: creating }] = useCreateRole({
     onCompleted: () => {
-      toast({ title: "Success", description: "Role created successfully" });
+      toast({ title: "Role created" });
       onOpenChange(false);
     },
     onError: (err: ApolloError) => {
       toast({ title: "Error", description: err.message, variant: "destructive" });
-    }
+    },
   });
 
   const [updateRole, { loading: updating }] = useUpdateRole({
     onCompleted: () => {
-      toast({ title: "Success", description: "Role updated successfully" });
+      toast({ title: "Role updated" });
       onOpenChange(false);
     },
     onError: (err: ApolloError) => {
       toast({ title: "Error", description: err.message, variant: "destructive" });
-    }
+    },
   });
 
-  const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-  });
-
-  const [adminAccess, setAdminAccess] = useState<Record<string, boolean>>({
+  const defaultAdminAccess = {
     website: false,
     moderation: false,
     reports: false,
@@ -102,27 +96,25 @@ export default function AddRoleDialog({
     domain: false,
     permissions: false,
     adminUsers: false,
-  });
+  };
 
+  const [formData, setFormData] = useState({ name: "", description: "" });
+  const [adminAccess, setAdminAccess] = useState<Record<string, boolean>>(defaultAdminAccess);
   const [permissions, setPermissions] = useState<Record<string, Record<string, boolean>>>({});
 
   useEffect(() => {
     if (role && open) {
-      setFormData({
-        name: role.name,
-        description: role.description,
-      });
-      
-      const newAdminAccess = { ...adminAccess };
+      setFormData({ name: role.name, description: role.description || "" });
+      const newAdminAccess = { ...defaultAdminAccess };
       if (role.adminAccess) {
-        Object.keys(newAdminAccess).forEach(key => {
-          if (role.adminAccess[key] !== undefined) {
-            newAdminAccess[key] = !!role.adminAccess[key];
+        Object.keys(newAdminAccess).forEach((key) => {
+          const typedKey = key as keyof typeof newAdminAccess;
+          if (role.adminAccess[typedKey] !== undefined) {
+            newAdminAccess[typedKey] = !!role.adminAccess[typedKey];
           }
         });
       }
       setAdminAccess(newAdminAccess);
-
       const newPerms: Record<string, Record<string, boolean>> = {};
       role.modulePermissions?.forEach((p: any) => {
         newPerms[p.module] = {
@@ -135,70 +127,45 @@ export default function AddRoleDialog({
       setPermissions(newPerms);
     } else if (!role && open) {
       setFormData({ name: "", description: "" });
-      setAdminAccess({
-        website: false,
-        moderation: false,
-        reports: false,
-        settings: false,
-        subscription: false,
-        platformFeatures: false,
-        appearance: false,
-        auditLogs: false,
-        domain: false,
-        permissions: false,
-        adminUsers: false,
-      });
+      setAdminAccess(defaultAdminAccess);
       setPermissions({});
     }
   }, [role, open]);
 
   const togglePermission = (moduleId: string, type: string) => {
-    setPermissions((prev) => {
-      const modulePerms = prev[moduleId] || { Read: false, Create: false, Edit: false, Delete: false };
-      return {
-        ...prev,
-        [moduleId]: {
-          ...modulePerms,
-          [type]: !modulePerms[type],
-        },
-      };
-    });
-  };
-
-  const toggleAdminAccess = (key: string) => {
-    setAdminAccess(prev => ({
+    setPermissions((prev) => ({
       ...prev,
-      [key]: !prev[key]
+      [moduleId]: {
+        ...(prev[moduleId] || { Read: false, Create: false, Edit: false, Delete: false }),
+        [type]: !prev[moduleId]?.[type],
+      },
     }));
   };
 
+  const toggleAdminAccess = (key: string) => {
+    setAdminAccess((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
   const toggleAllAdminAccess = (checked: boolean) => {
-    const newAdminAccess = { ...adminAccess };
-    Object.keys(newAdminAccess).forEach(key => {
-      newAdminAccess[key] = checked;
-    });
-    setAdminAccess(newAdminAccess);
+    setAdminAccess(Object.fromEntries(Object.keys(adminAccess).map((k) => [k, checked])));
   };
 
   const toggleAllModulePermissions = (moduleId: string, checked: boolean) => {
-    setPermissions(prev => ({
+    setPermissions((prev) => ({
       ...prev,
-      [moduleId]: {
-        Read: checked,
-        Create: checked,
-        Edit: checked,
-        Delete: checked,
-      }
+      [moduleId]: { Read: checked, Create: checked, Edit: checked, Delete: checked },
     }));
   };
 
   const togglePermissionTypeForAllModules = (type: string, checked: boolean) => {
     const availableModules = modulesData?.getAvailableModules || [];
-    setPermissions(prev => {
+    setPermissions((prev) => {
       const next = { ...prev };
       availableModules.forEach((mod: string) => {
-        const current = next[mod] || { Read: false, Create: false, Edit: false, Delete: false };
-        next[mod] = { ...current, [type]: checked };
+        next[mod] = {
+          ...(next[mod] || { Read: false, Create: false, Edit: false, Delete: false }),
+          [type]: checked,
+        };
       });
       return next;
     });
@@ -206,9 +173,13 @@ export default function AddRoleDialog({
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.name.trim()) {
+      toast({ title: "Role name is required", variant: "destructive" });
+      return;
+    }
 
     const modulePermissions = Object.entries(permissions)
-      .filter(([_, perms]) => Object.values(perms).some(v => v === true))
+      .filter(([_, perms]) => Object.values(perms).some((v) => v === true))
       .map(([moduleName, perms]) => ({
         module: moduleName,
         canRead: !!perms.Read,
@@ -226,8 +197,8 @@ export default function AddRoleDialog({
             description: formData.description,
             adminAccess: adminAccess as Partial<AdminAccess>,
             modulePermissions,
-          }
-        }
+          },
+        },
       });
     } else {
       createRole({
@@ -237,146 +208,167 @@ export default function AddRoleDialog({
             description: formData.description,
             adminAccess: adminAccess as Partial<AdminAccess>,
             modulePermissions,
-          }
-        }
+          },
+        },
       });
     }
   };
 
+  const isLoading = creating || updating;
+  const availableModules = modulesData?.getAvailableModules || [];
+  const allAdminSelected = Object.values(adminAccess).every((v) => v);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[850px] h-[90vh] flex flex-col p-0 overflow-hidden border-border/40 shadow-2xl bg-background rounded-2xl">
-        {/* Refined Header */}
-        <div className="bg-muted/20 px-8 py-6 border-b border-border/40">
-          <div className="flex items-center gap-4">
-            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
-              <ShieldCheck className="h-5 w-5" />
+      <DialogContent className="sm:max-w-[780px] h-[90vh] flex flex-col p-0 overflow-hidden rounded-xl border-border/50">
+        {/* Header */}
+        <DialogHeader className="px-6 pt-6 pb-5 border-b border-border/40 shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded-lg bg-muted border border-border/60 flex items-center justify-center text-muted-foreground shrink-0">
+              <ShieldCheck className="h-4.5 w-4.5" />
             </div>
             <div>
-              <DialogTitle className="text-xl font-semibold tracking-tight text-foreground">
-                {role ? "Update RBAC Role" : "Create IAM Role"}
+              <DialogTitle className="text-base font-semibold text-foreground">
+                {role ? "Edit role" : "Create role"}
               </DialogTitle>
-              <DialogDescription className="text-xs font-medium text-muted-foreground mt-1 opacity-80">
-                {role ? "Modify existing permission set and access scopes." : "Define a new set of permissions for platform resources."}
+              <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+                {role
+                  ? "Update this role's name, permission scopes, and module access."
+                  : "Define a new permission set for your workspace administrators."}
               </DialogDescription>
             </div>
           </div>
-        </div>
+        </DialogHeader>
 
-        <form
-          onSubmit={handleSave}
-          className="flex-1 flex flex-col overflow-hidden"
-        >
-          <ScrollArea className="flex-1 px-8 py-6">
-            <div className="space-y-10 py-2">
-              {/* SECTION: GENERAL SETTINGS */}
-              <div className="space-y-5">
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 bg-primary/5 rounded-lg border border-primary/10">
-                    <Database className="h-3.5 w-3.5 text-primary" />
-                  </div>
-                  <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground/70">General Configurations</h3>
-                </div>
-                <div className="grid gap-5 p-6 bg-muted/10 rounded-2xl border border-border/60">
-                  <div className="space-y-2">
-                    <Label htmlFor="name" className="text-[11px] font-medium text-muted-foreground/80 ml-0.5">Role Name</Label>
+        <form onSubmit={handleSave} className="flex-1 flex flex-col overflow-hidden">
+          <ScrollArea className="flex-1">
+            <div className="px-6 py-6 space-y-8">
+              {/* SECTION 1: Basic Info */}
+              <div className="space-y-4">
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Basic Information
+                </h3>
+                <div className="grid gap-4">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="name" className="text-xs font-medium text-muted-foreground">
+                      Role name
+                    </Label>
                     <Input
                       id="name"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      placeholder="e.g. Content-Manager-Lead"
+                      placeholder="e.g. Content Manager"
                       required
-                      className="bg-background border-border/60 shadow-none h-11 px-4 font-medium rounded-xl focus-visible:ring-primary/20"
+                      className="h-9 text-sm"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="description" className="text-[11px] font-medium text-muted-foreground/80 ml-0.5">Description (Optional)</Label>
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="description"
+                      className="text-xs font-medium text-muted-foreground"
+                    >
+                      Description{" "}
+                      <span className="text-muted-foreground/50 font-normal">(optional)</span>
+                    </Label>
                     <Input
                       id="description"
                       value={formData.description}
                       onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                       placeholder="Describe the purpose of this role..."
-                      className="bg-background border-border/60 shadow-none h-11 px-4 font-medium rounded-xl focus-visible:ring-primary/20"
+                      className="h-9 text-sm"
                     />
                   </div>
                 </div>
               </div>
 
-              <Separator className="opacity-30" />
+              <Separator className="opacity-40" />
 
-              {/* SECTION: ELEVATED PRIVILEGES */}
-              <div className="space-y-5">
+              {/* SECTION 2: Admin Access */}
+              <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 bg-amber-500/5 rounded-lg border border-amber-500/10">
-                      <ShieldAlert className="h-3.5 w-3.5 text-amber-600" />
-                    </div>
-                    <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground/70">Elevated Admin Access</h3>
+                  <div>
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      Admin access scopes
+                    </h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Grants elevated access to platform administration areas.
+                    </p>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Checkbox 
-                      id="select-all-admin"
-                      checked={Object.values(adminAccess).every(v => v)}
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <Checkbox
+                      checked={allAdminSelected}
                       onCheckedChange={(checked) => toggleAllAdminAccess(!!checked)}
-                      className="h-4 w-4 border-border/60 data-[state=checked]:bg-amber-500 data-[state=checked]:border-amber-500 rounded"
+                      className="h-4 w-4 rounded border-border/60 data-[state=checked]:bg-foreground data-[state=checked]:border-foreground"
                     />
-                    <Label htmlFor="select-all-admin" className="text-[10px] font-bold text-amber-600 uppercase tracking-tighter cursor-pointer">Select All Scopes</Label>
+                    <span className="text-xs font-medium text-muted-foreground">Select all</span>
+                  </label>
+                </div>
+
+                {Object.keys(adminAccess).some((k) => adminAccess[k]) && (
+                  <div className="flex items-center gap-2 p-3 bg-amber-50/80 border border-amber-200/60 rounded-lg">
+                    <ShieldAlert className="h-4 w-4 text-amber-600 shrink-0" />
+                    <p className="text-xs text-amber-700">
+                      Some admin scopes grant broad access. Assign carefully.
+                    </p>
                   </div>
-                </div>
+                )}
 
-                <div className="p-3.5 bg-amber-50/50 border border-amber-100/50 rounded-xl flex gap-3">
-                  <Info className="h-4 w-4 text-amber-500 shrink-0 mt-0.5 opacity-70" />
-                  <p className="text-[11px] text-amber-700/80 font-medium leading-relaxed">
-                    Elevated permissions grant wide-reaching access across the administrative interface. Exercise caution when assigning "Settings" or "Permissions" scopes.
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 p-5 rounded-2xl bg-muted/10 border border-border/50">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 p-4 bg-muted/30 rounded-lg border border-border/50">
                   {Object.keys(adminAccess).map((key) => (
-                    <div key={key} className="flex items-center space-x-3 group cursor-pointer p-2 rounded-lg hover:bg-background transition-all">
+                    <label
+                      key={key}
+                      className="flex items-center gap-2.5 p-2 rounded-md hover:bg-background cursor-pointer transition-colors group"
+                    >
                       <Checkbox
                         id={`admin-${key}`}
                         checked={adminAccess[key]}
                         onCheckedChange={() => toggleAdminAccess(key)}
-                        className="h-5 w-5 border-border/60 data-[state=checked]:bg-amber-500 data-[state=checked]:border-amber-500 rounded-md"
+                        className="h-4 w-4 rounded border-border/60 data-[state=checked]:bg-foreground data-[state=checked]:border-foreground shrink-0"
                       />
-                      <Label
-                        htmlFor={`admin-${key}`}
-                        className="text-[11px] font-medium text-muted-foreground group-hover:text-foreground cursor-pointer transition-colors"
-                      >
-                        {key.replace(/([A-Z])/g, " $1")}
-                      </Label>
-                    </div>
+                      <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+                        {adminAccessLabels[key] ?? key}
+                      </span>
+                    </label>
                   ))}
                 </div>
               </div>
 
-              <Separator className="opacity-30" />
+              <Separator className="opacity-40" />
 
-              {/* SECTION: RESOURCE PERMISSIONS */}
-              <div className="space-y-5">
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 bg-primary/5 rounded-lg border border-primary/10">
-                    <Globe className="h-3.5 w-3.5 text-primary" />
-                  </div>
-                  <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground/70">Entity Resource Permissions</h3>
+              {/* SECTION 3: Module Permissions */}
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    Module permissions
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Control read and write access for each platform module.
+                  </p>
                 </div>
 
-                <div className="rounded-2xl border border-border/50 bg-background overflow-hidden shadow-sm">
+                <div className="rounded-lg border border-border/50 overflow-hidden bg-background">
                   <Table>
-                    <TableHeader className="bg-muted/30 border-b border-border/50">
-                      <TableRow className="hover:bg-transparent">
-                        <TableHead className="w-[300px] font-semibold text-[11px] uppercase tracking-wider px-6 text-foreground/70">Resource Name</TableHead>
+                    <TableHeader className="bg-muted/40">
+                      <TableRow className="hover:bg-transparent border-border/40">
+                        <TableHead className="w-[240px] py-3 px-4 text-xs font-semibold text-muted-foreground">
+                          Module
+                        </TableHead>
                         {permissionTypes.map((type) => (
-                          <TableHead key={type} className="text-center font-semibold text-[11px] uppercase tracking-wider text-foreground/70">
+                          <TableHead
+                            key={type}
+                            className="text-center py-3 text-xs font-semibold text-muted-foreground"
+                          >
                             <div className="flex flex-col items-center gap-1.5">
                               <span>{type}</span>
-                              <Checkbox 
-                                id={`select-all-${type}`}
-                                checked={(modulesData?.getAvailableModules || []).every((mod: string) => !!permissions[mod]?.[type])}
-                                onCheckedChange={(checked) => togglePermissionTypeForAllModules(type, !!checked)}
-                                className="h-4 w-4 border-border/60 data-[state=checked]:bg-primary data-[state=checked]:border-primary rounded"
+                              <Checkbox
+                                checked={
+                                  availableModules.length > 0 &&
+                                  availableModules.every((mod: string) => !!permissions[mod]?.[type])
+                                }
+                                onCheckedChange={(checked) =>
+                                  togglePermissionTypeForAllModules(type, !!checked)
+                                }
+                                className="h-3.5 w-3.5 rounded border-border/60 data-[state=checked]:bg-foreground data-[state=checked]:border-foreground"
                               />
                             </div>
                           </TableHead>
@@ -386,38 +378,50 @@ export default function AddRoleDialog({
                     <TableBody>
                       {modulesLoading || subsLoading
                         ? Array.from({ length: 5 }).map((_, i) => (
-                            <TableRow key={i}>
-                              <TableCell className="px-6 py-4"><Skeleton className="h-5 w-40 rounded-md" /></TableCell>
+                            <TableRow key={i} className="border-border/30">
+                              <TableCell className="px-4 py-3">
+                                <Skeleton className="h-4 w-32" />
+                              </TableCell>
                               {permissionTypes.map((t) => (
-                                <TableCell key={t} className="text-center"><Skeleton className="h-6 w-6 mx-auto rounded-md" /></TableCell>
+                                <TableCell key={t} className="text-center">
+                                  <Skeleton className="h-4 w-4 mx-auto rounded" />
+                                </TableCell>
                               ))}
                             </TableRow>
                           ))
-                        : (modulesData?.getAvailableModules || []).map((moduleName: string) => {
-                            const subModule = subsData?.checkEntitySubscription?.modules?.find((m: any) => m.name.toLowerCase() === moduleName.toLowerCase());
+                        : availableModules.map((moduleName: string) => {
+                            const allChecked = permissionTypes.every(
+                              (type) => !!permissions[moduleName]?.[type]
+                            );
                             return (
-                              <TableRow key={moduleName} className="hover:bg-muted/10 border-b border-border/40 last:border-0 group transition-colors">
-                                <TableCell className="px-6 py-4 flex items-center gap-3">
-                                  <Checkbox 
-                                    id={`select-row-${moduleName}`}
-                                    checked={permissionTypes.every(type => !!permissions[moduleName]?.[type])}
-                                    onCheckedChange={(checked) => toggleAllModulePermissions(moduleName, !!checked)}
-                                    className="h-4.5 w-4.5 border-border/60 data-[state=checked]:bg-primary data-[state=checked]:border-primary rounded-md"
-                                  />
-                                  <div className="h-9 w-9 rounded-xl bg-muted/50 flex items-center justify-center text-muted-foreground group-hover:bg-primary/5 group-hover:text-primary transition-all ml-1">
-                                    <ModuleIcon name={moduleName} fallback={subModule?.icon} className="w-4.5 h-4.5 opacity-70" />
-                                  </div>
-                                  <span className="capitalize font-semibold text-sm text-foreground/90">{moduleName}</span>
+                              <TableRow
+                                key={moduleName}
+                                className="hover:bg-muted/20 border-border/30 last:border-0 transition-colors"
+                              >
+                                <TableCell className="px-4 py-3">
+                                  <label className="flex items-center gap-2.5 cursor-pointer">
+                                    <Checkbox
+                                      checked={allChecked}
+                                      onCheckedChange={(checked) =>
+                                        toggleAllModulePermissions(moduleName, !!checked)
+                                      }
+                                      className="h-4 w-4 rounded border-border/60 data-[state=checked]:bg-foreground data-[state=checked]:border-foreground shrink-0"
+                                    />
+                                    <div className="h-7 w-7 rounded-md bg-muted flex items-center justify-center text-muted-foreground shrink-0">
+                                      <ModuleIcon name={moduleName} className="w-3.5 h-3.5" />
+                                    </div>
+                                    <span className="text-sm font-medium capitalize text-foreground">
+                                      {moduleName}
+                                    </span>
+                                  </label>
                                 </TableCell>
                                 {permissionTypes.map((type) => (
                                   <TableCell key={type} className="text-center">
-                                    <div className="flex items-center justify-center">
-                                      <Checkbox
-                                        checked={!!permissions[moduleName]?.[type]}
-                                        onCheckedChange={() => togglePermission(moduleName, type)}
-                                        className="h-5.5 w-5.5 border-border/60 data-[state=checked]:bg-primary data-[state=checked]:border-primary transition-all rounded-md"
-                                      />
-                                    </div>
+                                    <Checkbox
+                                      checked={!!permissions[moduleName]?.[type]}
+                                      onCheckedChange={() => togglePermission(moduleName, type)}
+                                      className="h-4 w-4 rounded border-border/60 data-[state=checked]:bg-foreground data-[state=checked]:border-foreground mx-auto"
+                                    />
                                   </TableCell>
                                 ))}
                               </TableRow>
@@ -430,39 +434,26 @@ export default function AddRoleDialog({
             </div>
           </ScrollArea>
 
-          {/* Clean Footer */}
-          <div className="px-8 py-6 bg-muted/20 border-t border-border/40 flex items-center justify-between">
-            <div className="hidden sm:block">
-              <p className="text-[10px] font-semibold text-muted-foreground/40 uppercase tracking-widest mb-0.5">IAM Policy</p>
-              <div className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground/80">
-                <ShieldCheck className="h-3 w-3 opacity-50" />
-                Access Management Console
-              </div>
-            </div>
-            <div className="flex gap-3">
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => onOpenChange(false)}
-                className="font-medium text-xs px-5 h-10 rounded-xl"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={creating || updating}
-                className="bg-primary text-primary-foreground font-medium text-xs px-8 h-10 rounded-xl shadow-sm hover:bg-primary/90 transition-all active:scale-[0.98]"
-              >
-                {creating || updating ? (
-                   <>
-                    <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  role ? "Apply policy updates" : "Initialize IAM policy"
-                )}
-              </Button>
-            </div>
+          {/* Footer */}
+          <div className="px-6 py-4 border-t border-border/40 flex items-center justify-end gap-2 shrink-0">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => onOpenChange(false)}
+              className="h-9 px-4 font-medium"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              size="sm"
+              disabled={isLoading || !formData.name.trim()}
+              className="h-9 px-5 font-medium gap-2"
+            >
+              {isLoading && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+              {role ? "Save changes" : "Create role"}
+            </Button>
           </div>
         </form>
       </DialogContent>

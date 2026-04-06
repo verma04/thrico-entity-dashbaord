@@ -1,14 +1,14 @@
 "use client";
 
 import * as React from "react";
-import { Coins, ShieldAlert, ScrollText, List, LayoutDashboard, History } from "lucide-react";
+import { Coins, ShieldAlert, ScrollText, Activity, LayoutDashboard, History } from "lucide-react";
 import GamificationMenuLayout from "@/components/gamification/gamification-menu-layout";
 
 function CurrencyLayout({ children }: { children: React.ReactNode }) {
   const items = [
     {
       key: "dashboard",
-      label: "Dashboard",
+      label: "Overview",
       icon: <LayoutDashboard className="h-4 w-4" />,
     },
     {
@@ -23,13 +23,13 @@ function CurrencyLayout({ children }: { children: React.ReactNode }) {
     },
     {
       key: "redemption",
-      label: "Redemption Logic",
+      label: "Redemption",
       icon: <ScrollText className="h-4 w-4" />,
     },
     {
       key: "trace",
       label: "Quick Trace",
-      icon: <List className="h-4 w-4" />,
+      icon: <Activity className="h-4 w-4" />,
     },
     {
       key: "audit-log",
@@ -37,13 +37,6 @@ function CurrencyLayout({ children }: { children: React.ReactNode }) {
       icon: <History className="h-4 w-4" />,
     },
   ];
-
-  // Note: MenuItemsLayout already includes Dashboard and Audit Log by default
-  // But we need to make sure the "active" prop and key mapping align.
-  // MenuItemsLayout active="settings/currency" means:
-  // dashboard -> /settings/currency
-  // audit-log -> /settings/currency/audit-log
-  // economics -> /settings/currency/economics
 
   return (
     <GamificationMenuLayout basePath="/currency" items={items}>

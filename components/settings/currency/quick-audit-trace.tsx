@@ -1,95 +1,82 @@
 "use client";
 
 import React from "react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ReceiptText, ShieldCheck } from "lucide-react";
+import { ReceiptText, ArrowRight, ShieldCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
+
+const recentTransactions = [
+  { id: "1", user: "John Doe", type: "TC_DEBIT", amount: 50, timestamp: "2 mins ago" },
+  { id: "2", user: "Jane Smith", type: "POINTS_TO_EC", amount: 120, timestamp: "1 hour ago" },
+  { id: "3", user: "Bob Wilson", type: "TC_DEBIT", amount: 30, timestamp: "3 hours ago" },
+];
+
+const typeLabels: Record<string, string> = {
+  TC_DEBIT: "TC Debit",
+  POINTS_TO_EC: "Points → EC",
+  EC_TO_TC: "EC → TC",
+  EC_DEBIT: "EC Debit",
+};
 
 export function QuickAuditTrace() {
   const router = useRouter();
 
-  const transactions = [
-    {
-      id: "1",
-      user: "John Doe",
-      type: "TC_DEBIT",
-      amount: 50,
-      timestamp: "2 mins ago",
-      status: "Verified",
-    },
-    {
-      id: "2",
-      user: "Jane Smith",
-      type: "POINTS_TO_EC",
-      amount: 120,
-      timestamp: "1 hour ago",
-      status: "Verified",
-    },
-    {
-      id: "3",
-      user: "Bob Wilson",
-      type: "TC_DEBIT",
-      amount: 30,
-      timestamp: "3 hours ago",
-      status: "Verified",
-    },
-  ];
-
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <ReceiptText className="h-5 w-5 text-blue-500" />
-          Quick Audit Trace
-        </CardTitle>
-        <CardDescription>Real-time spending verification</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-3">
-          {transactions.map((tx) => (
+    <div className="rounded-xl border border-border bg-card overflow-hidden">
+      {/* Header */}
+      <div className="flex items-center justify-between p-5 border-b border-border">
+        <div className="flex items-center gap-2">
+          <div className="h-8 w-8 rounded-lg bg-blue-50 flex items-center justify-center">
+            <ReceiptText className="h-4 w-4 text-blue-600" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-foreground">Quick Audit Trace</p>
+            <p className="text-xs text-muted-foreground">Recent currency movements</p>
+          </div>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="gap-1.5 text-xs text-muted-foreground"
+          onClick={() => router.push("/currency/audit-log")}
+        >
+          View all
+          <ArrowRight className="h-3.5 w-3.5" />
+        </Button>
+      </div>
+
+      {/* Transactions */}
+      <div className="divide-y divide-border">
+        {recentTransactions.map((tx) => {
+          const isDebit = tx.type.includes("DEBIT");
+          return (
             <div
               key={tx.id}
-              className="flex items-center justify-between text-sm py-2 border-b last:border-0 border-dashed"
+              className="flex items-center justify-between px-5 py-3.5 hover:bg-muted/30 transition-colors"
             >
-              <div>
-                <div className="font-medium flex items-center gap-1">
-                  {tx.user}
-                  <ShieldCheck className="h-3 w-3 text-emerald-500" />
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1.5">
+                  <ShieldCheck className="h-3 w-3 text-emerald-500 shrink-0" />
+                  <span className="text-sm font-medium text-foreground">{tx.user}</span>
                 </div>
-                <div className="text-[10px] text-muted-foreground font-mono">
-                  {tx.type}
-                </div>
+                <span className="text-[11px] text-muted-foreground bg-muted px-2 py-0.5 rounded-md font-medium">
+                  {typeLabels[tx.type] || tx.type}
+                </span>
               </div>
               <div className="text-right">
-                <div
-                  className={`font-mono font-bold ${tx.type.includes("DEBIT") ? "text-red-600" : "text-emerald-600"}`}
-                >
-                  {tx.type.includes("DEBIT") ? "-" : "+"}
-                  {tx.amount}
-                </div>
-                <div className="text-[10px] text-muted-foreground">
-                  {tx.timestamp}
-                </div>
+                <p className={cn(
+                  "text-sm font-bold font-mono",
+                  isDebit ? "text-rose-600" : "text-emerald-600"
+                )}>
+                  {isDebit ? "-" : "+"}{tx.amount}
+                </p>
+                <p className="text-[10px] text-muted-foreground">{tx.timestamp}</p>
               </div>
             </div>
-          ))}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="w-full text-xs text-muted-foreground hover:text-primary mt-2"
-            onClick={() => router.push("/settings/currency/audit-log")}
-          >
-            View Comprehensive Audit Logs
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+          );
+        })}
+      </div>
+    </div>
   );
 }
