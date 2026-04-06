@@ -110,17 +110,17 @@
 :root {
   --radius: 0.625rem;
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --card-foreground: oklch(0 0 0);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
+  --popover-foreground: oklch(0 0 0);
   --primary: oklch(0.205 0 0);
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
+  --secondary-foreground: oklch(0 0 0);
   --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
+  --muted-foreground: oklch(0.3 0 0);
   --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --accent-foreground: oklch(0 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
@@ -130,20 +130,20 @@
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar: oklch(1 0 0);
+  --sidebar-foreground: oklch(0 0 0);
+  --sidebar-primary: oklch(0 0 0);
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-accent-foreground: oklch(0 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  --background: oklch(0.985 0 0);
+  --foreground: oklch(0 0 0);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
+  --background: oklch(0.205 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
   --card-foreground: oklch(0.985 0 0);
@@ -166,7 +166,7 @@
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
+  --sidebar: oklch(0.145 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
   --sidebar-primary-foreground: oklch(0.985 0 0);
@@ -190,10 +190,22 @@ body {
   body {
     @apply bg-background text-foreground;
     /* Morphed 2026 SaaS Aesthetic Defaults */
-    background-image: 
-      radial-gradient(at 0% 0%, color-mix(in oklab, var(--primary) 10%, transparent) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, color-mix(in oklab, var(--secondary) 10%, transparent) 0px, transparent 50%),
-      radial-gradient(at 50% 100%, color-mix(in oklab, var(--accent) 5%, transparent) 0px, transparent 50%);
+    background-image:
+      radial-gradient(
+        at 0% 0%,
+        color-mix(in oklab, var(--primary) 10%, transparent) 0px,
+        transparent 50%
+      ),
+      radial-gradient(
+        at 100% 0%,
+        color-mix(in oklab, var(--secondary) 10%, transparent) 0px,
+        transparent 50%
+      ),
+      radial-gradient(
+        at 50% 100%,
+        color-mix(in oklab, var(--accent) 5%, transparent) 0px,
+        transparent 50%
+      );
     background-attachment: fixed;
     background-size: cover;
   }
@@ -202,16 +214,16 @@ body {
   .glass {
     @apply bg-white/40 dark:bg-black/40 backdrop-blur-md border border-white/20 dark:border-white/10;
   }
-  
+
   .glass-card {
     @apply bg-white/60 dark:bg-zinc-900/60 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-xl;
   }
 
   .premium-shadow {
-    box-shadow: 0 0 50px -12px color-mix(in oklab, var(--primary) 20%, transparent);
+    box-shadow: 0 0 50px -12px
+      color-mix(in oklab, var(--primary) 20%, transparent);
   }
 }
-
 
 /* Ensure Razorpay popup appears above all other elements */
 .razorpay-container,
@@ -238,19 +250,19 @@ div[class*="razorpay"] {
 /* react-table-craft CSS custom properties */
 :root {
   --tc-background: 0 0% 100%;
-  --tc-foreground: 222.2 84% 4.9%;
+  --tc-foreground: 0 0% 0%;
   --tc-card: 0 0% 100%;
-  --tc-card-foreground: 222.2 84% 4.9%;
+  --tc-card-foreground: 0 0% 0%;
   --tc-popover: 0 0% 100%;
-  --tc-popover-foreground: 222.2 84% 4.9%;
+  --tc-popover-foreground: 0 0% 0%;
   --tc-primary: 221.2 83.2% 53.3%;
   --tc-primary-foreground: 210 40% 98%;
   --tc-secondary: 210 40% 96.1%;
-  --tc-secondary-foreground: 222.2 47.4% 11.2%;
+  --tc-secondary-foreground: 0 0% 0%;
   --tc-muted: 210 40% 96.1%;
-  --tc-muted-foreground: 215.4 16.3% 46.9%;
+  --tc-muted-foreground: 215.4 16.3% 30%;
   --tc-accent: 210 40% 96.1%;
-  --tc-accent-foreground: 222.2 47.4% 11.2%;
+  --tc-accent-foreground: 0 0% 0%;
   --tc-destructive: 0 84.2% 60.2%;
   --tc-destructive-foreground: 210 40% 98%;
   --tc-border: 214.3 31.8% 91.4%;

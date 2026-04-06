@@ -171,6 +171,20 @@ export default function AddRoleDialog({ open, onOpenChange, role }: AddRoleDialo
     });
   };
 
+  const toggleAllPermissions = (checked: boolean) => {
+    const availableModules = modulesData?.getAvailableModules || [];
+    const allPerms: Record<string, Record<string, boolean>> = {};
+    availableModules.forEach((mod: string) => {
+      allPerms[mod] = {
+        Read: checked,
+        Create: checked,
+        Edit: checked,
+        Delete: checked,
+      };
+    });
+    setPermissions(allPerms);
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name.trim()) {
@@ -351,7 +365,19 @@ export default function AddRoleDialog({ open, onOpenChange, role }: AddRoleDialo
                     <TableHeader className="bg-muted/40">
                       <TableRow className="hover:bg-transparent border-border/40">
                         <TableHead className="w-[240px] py-3 px-4 text-xs font-semibold text-muted-foreground">
-                          Module
+                          <div className="flex items-center gap-2.5">
+                            <Checkbox
+                              checked={
+                                availableModules.length > 0 &&
+                                availableModules.every((mod: string) =>
+                                  permissionTypes.every((type) => !!permissions[mod]?.[type])
+                                )
+                              }
+                              onCheckedChange={(checked) => toggleAllPermissions(!!checked)}
+                              className="h-4 w-4 rounded border-border/60 data-[state=checked]:bg-foreground data-[state=checked]:border-foreground"
+                            />
+                            <span>Module</span>
+                          </div>
                         </TableHead>
                         {permissionTypes.map((type) => (
                           <TableHead

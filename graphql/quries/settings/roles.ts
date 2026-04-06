@@ -147,7 +147,6 @@ export const CREATE_ADMIN = gql`
       isSuperAdmin
       lastName
       role {
-        name
         modulePermissions {
           id
           module
@@ -157,7 +156,7 @@ export const CREATE_ADMIN = gql`
           canDelete
         }
         isSystem
-        id
+
         description
         adminAccess {
           website
