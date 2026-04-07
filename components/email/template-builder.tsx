@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   useCreateEmailTemplate,
@@ -59,7 +59,8 @@ type BlockType =
   | "spacer"
   | "header"
   | "navbar"
-  | "footer";
+  | "footer"
+  | "app_links";
 type TextAlign = "left" | "center" | "right";
 type SpacerSize = "sm" | "md" | "lg" | "xl";
 
@@ -79,6 +80,8 @@ interface BuilderBlock {
   imageAlt: string;
   logoUrl?: string;
   secondaryContent?: string;
+  iosUrl?: string;
+  androidUrl?: string;
 }
 
 const SPACER_MAP: Record<SpacerSize, number> = {
@@ -108,7 +111,7 @@ const defaultBlock = (type: BlockType, id: string): BuilderBlock => ({
               ? "© 2026 Thrico. All rights reserved. 123 Innovation Way, San Francisco, CA"
               : "",
   align:
-    type === "header" || type === "navbar" || type === "footer"
+    type === "header" || type === "navbar" || type === "footer" || type === "app_links"
       ? "center"
       : "left",
   bold: type === "heading" || type === "button",
@@ -123,6 +126,8 @@ const defaultBlock = (type: BlockType, id: string): BuilderBlock => ({
   imageAlt: "",
   logoUrl: type === "header" ? "https://cdn.thrico.network/thrico.png" : "",
   secondaryContent: type === "header" ? "Premium Ecosystem Dashboard" : "",
+  iosUrl: type === "app_links" ? "" : undefined,
+  androidUrl: type === "app_links" ? "" : undefined,
 });
 
 // ---------------------------------------------------------------------------
@@ -207,6 +212,14 @@ const blockDefs: {
     description: "Legal & social footer",
     accent: "bg-zinc-800 shadow-zinc-100",
     pill: "bg-zinc-50 text-zinc-700 border-zinc-100",
+  },
+  {
+    type: "app_links",
+    label: "App Download",
+    icon: Smartphone,
+    description: "iOS & Android badges",
+    accent: "bg-sky-500 shadow-sky-100",
+    pill: "bg-sky-50 text-sky-700 border-sky-100",
   },
 ];
 
@@ -324,6 +337,7 @@ function BlockCanvas({
               color: block.color === "transparent" ? "#1e293b" : block.color,
               textAlign: block.align,
               minHeight: block.type === "heading" ? "48px" : "80px",
+              whiteSpace: "pre-wrap",
             }}
             placeholder={
               block.type === "heading" ? "Enter heading…" : "Enter text…"
@@ -461,17 +475,77 @@ function BlockCanvas({
           className="w-full flex items-center justify-center relative"
           style={{ height: SPACER_MAP[block.spacerSize] }}
         >
-          {/* Only show label when selected */}
           {isSelected && (
             <span className="text-[9px] font-bold text-slate-300 uppercase tracking-widest">
               {SPACER_MAP[block.spacerSize]}px spacer
             </span>
           )}
-          {/* Subtle dashed indicator */}
           <div className="absolute inset-x-0 top-1/2 border-t border-dashed border-slate-200" />
         </div>
       )}
+
+      {/* App Download Links */}
+      {block.type === "app_links" && (
+        <div className="p-5 flex flex-col items-center gap-3">
+          <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Get the App</p>
+          <div className="flex items-center gap-3 flex-wrap justify-center">
+            {/* App Store badge */}
+            <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 text-white min-w-[130px]">
+              <svg viewBox="0 0 24 24" className="h-5 w-5 shrink-0 fill-white" aria-hidden><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98l-.09.06c-.22.14-2.19 1.28-2.17 3.83.03 3.02 2.65 4.03 2.68 4.04l-.06.25zM13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+              <div>
+                <p className="text-[8px] text-slate-400 leading-none">Download on the</p>
+                <p className="text-[13px] font-bold leading-tight">App Store</p>
+              </div>
+            </div>
+            {/* Play Store badge */}
+            <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 text-white min-w-[130px]">
+              <svg viewBox="0 0 24 24" className="h-5 w-5 shrink-0 fill-white" aria-hidden><path d="M3 20.5v-17c0-.83.94-1.3 1.6-.8l14 8.5c.6.37.6 1.23 0 1.6l-14 8.5c-.66.5-1.6.03-1.6-.8z"/></svg>
+              <div>
+                <p className="text-[8px] text-slate-400 leading-none">Get it on</p>
+                <p className="text-[13px] font-bold leading-tight">Google Play</p>
+              </div>
+            </div>
+          </div>
+          {(!block.iosUrl && !block.androidUrl) && (
+            <p className="text-[10px] text-slate-400 mt-1">Set iOS & Android URLs in the properties panel →</p>
+          )}
+        </div>
+      )}
     </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Auto-Resize Textarea
+// ---------------------------------------------------------------------------
+function AutoResizeTextarea({
+  value,
+  onChange,
+  placeholder,
+}: {
+  value: string;
+  onChange: (val: string) => void;
+  placeholder?: string;
+}) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  }, [value]);
+
+  return (
+    <textarea
+      ref={ref}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      rows={3}
+      className="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-[12px] font-medium text-slate-900 outline-none focus:ring-1 focus:ring-indigo-600 focus:border-indigo-600 resize-none transition-all placeholder:text-slate-300 overflow-hidden"
+      style={{ minHeight: "72px" }}
+    />
   );
 }
 
@@ -520,10 +594,9 @@ function PropertiesPanel({
           <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 leading-none">
             {block.type === "button" ? "Display Label" : "Content Body"}
           </label>
-          <textarea
+          <AutoResizeTextarea
             value={block.content}
-            onChange={(e) => update({ content: e.target.value })}
-            className="w-full h-24 px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-[12px] font-medium text-slate-900 outline-none focus:ring-1 focus:ring-indigo-600 focus:border-indigo-600 resize-none transition-all placeholder:text-slate-300"
+            onChange={(val) => update({ content: val })}
             placeholder="Type content here..."
           />
         </div>
@@ -946,6 +1019,38 @@ function PropertiesPanel({
         </div>
       )}
 
+      {/* App Download Links properties */}
+      {block.type === "app_links" && (
+        <div className="space-y-4">
+          <div>
+            <label className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 leading-none">
+              <svg viewBox="0 0 24 24" className="h-3 w-3 fill-slate-400" aria-hidden><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98l-.09.06c-.22.14-2.19 1.28-2.17 3.83.03 3.02 2.65 4.03 2.68 4.04l-.06.25zM13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+              iOS App Store URL
+            </label>
+            <input
+              type="url"
+              value={block.iosUrl || ""}
+              onChange={(e) => update({ iosUrl: e.target.value })}
+              placeholder="https://apps.apple.com/app/your-app"
+              className="w-full h-9 px-3 rounded-lg border border-slate-200 bg-slate-50 text-[12px] text-slate-800 outline-none focus:ring-1 focus:ring-indigo-300 transition-all font-mono"
+            />
+          </div>
+          <div>
+            <label className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 leading-none">
+              <svg viewBox="0 0 24 24" className="h-3 w-3 fill-slate-400" aria-hidden><path d="M3 20.5v-17c0-.83.94-1.3 1.6-.8l14 8.5c.6.37.6 1.23 0 1.6l-14 8.5c-.66.5-1.6.03-1.6-.8z"/></svg>
+              Android Play Store URL
+            </label>
+            <input
+              type="url"
+              value={block.androidUrl || ""}
+              onChange={(e) => update({ androidUrl: e.target.value })}
+              placeholder="https://play.google.com/store/apps/details?id=your.app"
+              className="w-full h-9 px-3 rounded-lg border border-slate-200 bg-slate-50 text-[12px] text-slate-800 outline-none focus:ring-1 focus:ring-indigo-300 transition-all font-mono"
+            />
+          </div>
+        </div>
+      )}
+
       {/* Spacer size */}
       {block.type === "spacer" && (
         <div>
@@ -1138,12 +1243,20 @@ export default function TemplateBuilder({
               </div>
             </div>`;
             break;
-          case "heading":
-            blockHtml = `<h1 style="${alignStyle};font-size:${b.fontSize}px;font-weight:${b.bold ? 700 : 400};font-style:${b.italic ? "italic" : "normal"};text-decoration:${b.underline ? "underline" : "none"};color:${b.color};margin:0 0 16px;font-family:ui-sans-serif,system-ui,sans-serif;line-height:1.2">${b.content}</h1>`;
+          case "heading": {
+            const headingText = b.content
+              .replace(/ {2,}/g, (s: string) => "&nbsp;".repeat(s.length))
+              .replace(/\n/g, "<br />");
+            blockHtml = `<h1 style="${alignStyle};font-size:${b.fontSize}px;font-weight:${b.bold ? 700 : 400};font-style:${b.italic ? "italic" : "normal"};text-decoration:${b.underline ? "underline" : "none"};color:${b.color};margin:0 0 16px;font-family:ui-sans-serif,system-ui,sans-serif;line-height:1.2">${headingText}</h1>`;
             break;
-          case "text":
-            blockHtml = `<p style="${alignStyle};font-size:${b.fontSize}px;font-weight:${b.bold ? 700 : 400};font-style:${b.italic ? "italic" : "normal"};text-decoration:${b.underline ? "underline" : "none"};color:${b.color};margin:0 0 16px;font-family:ui-sans-serif,system-ui,sans-serif;line-height:1.6">${b.content}</p>`;
+          }
+          case "text": {
+            const textContent = b.content
+              .replace(/ {2,}/g, (s: string) => "&nbsp;".repeat(s.length))
+              .replace(/\n/g, "<br />");
+            blockHtml = `<p style="${alignStyle};font-size:${b.fontSize}px;font-weight:${b.bold ? 700 : 400};font-style:${b.italic ? "italic" : "normal"};text-decoration:${b.underline ? "underline" : "none"};color:${b.color};margin:0 0 16px;font-family:ui-sans-serif,system-ui,sans-serif;line-height:1.6">${textContent}</p>`;
             break;
+          }
           case "image":
             blockHtml = `<img src="${b.content || "https://placehold.co/600x200/f8fafc/cbd5e1?text=Image"}" alt="${b.imageAlt}" style="width:100%;border-radius:8px;margin:0 0 16px;display:block" />`;
             break;
@@ -1153,6 +1266,24 @@ export default function TemplateBuilder({
             return `<hr style="border:none;border-top:1px solid #e2e8f0;margin:0 0 16px" />`;
           case "spacer":
             return `<div style="height:${SPACER_MAP[b.spacerSize]}px"></div>`;
+          case "app_links": {
+            const iosBtn = b.iosUrl
+              ? `<a href="${b.iosUrl}" style="display:inline-flex;align-items:center;gap:8px;background:#000000;color:#ffffff;text-decoration:none;padding:10px 20px;border-radius:10px;margin:0 6px 8px;font-family:ui-sans-serif,system-ui,sans-serif">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="white"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98l-.09.06c-.22.14-2.19 1.28-2.17 3.83.03 3.02 2.65 4.03 2.68 4.04l-.06.25zM13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+                  <span><span style="display:block;font-size:9px;color:#999">Download on the</span><span style="display:block;font-size:14px;font-weight:700">App Store</span></span>
+                </a>`
+              : "";
+            const androidBtn = b.androidUrl
+              ? `<a href="${b.androidUrl}" style="display:inline-flex;align-items:center;gap:8px;background:#1a1a2e;color:#ffffff;text-decoration:none;padding:10px 20px;border-radius:10px;margin:0 6px 8px;font-family:ui-sans-serif,system-ui,sans-serif">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="white"><path d="M3 20.5v-17c0-.83.94-1.3 1.6-.8l14 8.5c.6.37.6 1.23 0 1.6l-14 8.5c-.66.5-1.6.03-1.6-.8z"/></svg>
+                  <span><span style="display:block;font-size:9px;color:#999">Get it on</span><span style="display:block;font-size:14px;font-weight:700">Google Play</span></span>
+                </a>`
+              : "";
+            return `<div style="text-align:center;padding:24px 0">
+              <p style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin:0 0 14px;font-family:ui-sans-serif,system-ui,sans-serif">Get the App</p>
+              ${iosBtn}${androidBtn}
+            </div>`;
+          }
           default:
             return "";
         }
@@ -1195,7 +1326,7 @@ export default function TemplateBuilder({
           variables: { id, name, subject, html, json },
         });
 
-        if (data?.updateEmailTemplate?.success) {
+        if (data?.updateEmailTemplate?.id) {
           updateLocalTemplate(id, { name, subject, html, json });
           toast.success("Template updated ✓");
           router.push("/email/templates");

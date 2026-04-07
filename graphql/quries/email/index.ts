@@ -123,9 +123,11 @@ export const GET_EMAIL_TEMPLATE = gql`
 
 export const UPDATE_EMAIL_TEMPLATE = gql`
   mutation UpdateTemplate($id: ID!, $name: String!, $subject: String!, $html: String!, $json: String) {
-    updateEmailTemplate(id: $id, input: { name: $name, subject: $subject, html: $html, json: $json }) {
-      success
-      message
+    updateEmailTemplate(input: { id: $id, name: $name, subject: $subject, html: $html, json: $json }) {
+      id
+      name
+      subject
+      updatedAt
     }
   }
 `;

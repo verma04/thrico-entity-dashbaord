@@ -37,18 +37,43 @@ export function ContentRefinement({ subject, setSubject, selectedTemplate }: Con
           <div className="space-y-3 pt-4 border-t border-slate-50">
             <label className="text-xs font-medium text-slate-500">Template preview</label>
             <div className="border border-slate-200 rounded-2xl overflow-hidden">
-              <div className="bg-slate-50 px-4 py-3 border-b border-slate-200 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Mail className="h-4 w-4 text-slate-400" />
-                  <span className="text-sm font-medium text-slate-700">{selectedTemplate.name}</span>
+              {/* Realistic email-client header — updates live as subject changes */}
+              <div className="bg-white px-4 pt-4 pb-3 border-b border-slate-100">
+                <div className="flex items-start gap-3">
+                  <div className="h-9 w-9 rounded-full bg-indigo-100 flex items-center justify-center shrink-0 mt-0.5">
+                    <Mail className="h-4 w-4 text-indigo-600" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-baseline justify-between gap-2">
+                      <span className="text-[13px] font-semibold text-slate-900 truncate">
+                        {subject || <span className="text-slate-400 font-normal italic">No subject yet…</span>}
+                      </span>
+                      <span className="text-[11px] text-slate-400 shrink-0">
+                        {new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                      From: <span className="font-medium text-slate-700">noreply · via Thrico</span>
+                    </p>
+                    <p className="text-[11px] text-slate-400 mt-0.5">
+                      To: <span className="text-slate-500">recipient@example.com</span>
+                    </p>
+                  </div>
                 </div>
-                <span className="text-xs text-emerald-600 font-medium bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
-                  Selected
-                </span>
               </div>
+
+              {/* HTML preview — subject injected live into srcDoc */}
               <div className="bg-white w-full overflow-hidden" style={{ height: "420px" }}>
                 <iframe
-                  srcDoc={selectedTemplate.html}
+                  srcDoc={
+                    selectedTemplate.html
+                      ? selectedTemplate.html
+                          // Replace <title> with current subject
+                          .replace(/<title>[^<]*<\/title>/i, `<title>${subject || selectedTemplate.name}</title>`)
+                          // Replace {{subject}} merge tag
+                          .replace(/\{\{subject\}\}/gi, subject || selectedTemplate.subject || "")
+                      : "<div style='padding:40px;color:#94a3b8;font-family:sans-serif;text-align:center'>No HTML content</div>"
+                  }
                   title="Template Preview"
                   className="w-full h-full border-none"
                   sandbox="allow-popups allow-popups-to-escape-sandbox"
