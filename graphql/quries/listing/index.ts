@@ -21,7 +21,12 @@ const list = `
     numberOfViews
     interests
     categories
-    location
+    location {
+      name
+      latitude
+      longitude
+      address
+    }
     verification {
       id
       isVerified

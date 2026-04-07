@@ -36,7 +36,7 @@ export type MarketPlaceListing = {
   updatedAt: string;
   currency: string;
   slug: string;
-  location: string;
+  location: LocationObject;
   description?: string;
   media: { id: string; url: string }[];
   verification?: {

@@ -34,6 +34,12 @@ const CreateListingPage = () => {
           ...values,
           price: values.price.toString(),
           media: values.media.map((m: any) => ({ url: m.url || m.name })),
+          location: {
+            name: values.location,
+            address: values.location,
+            latitude: 0,
+            longitude: 0,
+          },
         },
       },
     });
