@@ -72,6 +72,9 @@ export type PostJobInput = {
   skills: string[];
   isFeatured?: boolean;
   entity: string;
+  company: {
+    id: string;
+  };
 };
 
 // --- Apollo Client Hook ---

@@ -3,6 +3,7 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { useAddJob } from "@/graphql/actions/jobs";
+import { useGetEntity } from "@/graphql/actions";
 import { JobCreationForm } from "@/components/jobs/create/job-creation-form";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -27,18 +28,27 @@ const CreateJobPage = () => {
     },
   });
 
+  const { data: entityData } = useGetEntity();
+
   const onFinish = (values: any) => {
-    // According to PostJobInput in graphql/actions/jobs/index.ts
-    // entity is needed, but the form doesn't seem to have it. 
-    // Usually it's handled by the backend or current active entity.
-    // However, the company is an object in the form, but should be ID or name in mutation.
-    
+    if (!entityData?.getEntity?.id) {
+      toast({
+        title: "Error",
+        description: "Entity identification failed. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     add({
       variables: {
         input: {
           ...values,
-          company: values.company?.id || values.company?.name || values.company,
-          applicationDeadline: new Date().toISOString(), // Default or from values if exists
+          entity: entityData.getEntity.id,
+          company: {
+            id: values.company?.id || values.company,
+          },
+          applicationDeadline: new Date().toISOString(),
         },
       },
     });

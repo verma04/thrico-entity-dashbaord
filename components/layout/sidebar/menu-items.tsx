@@ -103,7 +103,11 @@ export const communityIntelligence = [
     children: [
       { key: "members-dash", label: "Dashboard", path: "/members" },
       { key: "members-manage", label: "Manage Members", path: "/members/all" },
-      { key: "members-create", label: "Add New Member", path: "/members/create" },
+      {
+        key: "members-create",
+        label: "Add New Member",
+        path: "/members/create",
+      },
       { key: "members-reported", label: "Reported", path: "/members/reports" },
       { key: "members-settings", label: "Settings", path: "/members/settings" },
     ],
@@ -215,6 +219,11 @@ export const gamificationEngine = [
     isMobileOnly: true,
     icon: <Gamepad2 size={18} />,
     children: [
+      {
+        key: "game-dash",
+        label: "Dashboard",
+        path: "/engagement-games",
+      },
       {
         key: "game-spin",
         label: "Spin Wheel",
