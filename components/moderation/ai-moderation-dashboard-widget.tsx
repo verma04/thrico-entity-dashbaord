@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useGetAiModerationDashboard } from "@/graphql/moderation/hooks";
-import { Bot, FileText, CheckCircle, XCircle, AlertCircle, History, ExternalLink } from "lucide-react";
+import { Bot, FileText, CheckCircle, XCircle, AlertCircle, History, ExternalLink, Zap } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -33,6 +33,7 @@ export function AiModerationDashboardWidget({ timeRange, dateRange }: AiModerati
   const flagged = aiStats?.flaggedContent || 0;
   const pending = aiStats?.pendingModeration || 0;
   const rejected = aiStats?.rejectedPosts || 0;
+  const totalTokens = aiStats?.totalTokens || 0;
   const autoApproved = totalPosts - flagged - pending - rejected;
 
   const getPercentage = (value: number) => {
@@ -63,8 +64,9 @@ export function AiModerationDashboardWidget({ timeRange, dateRange }: AiModerati
             { label: "Flagged", value: flagged, icon: AlertCircle, color: "text-amber-600", bg: "bg-amber-50" },
             { label: "Rejected", value: rejected, icon: XCircle, color: "text-rose-600", bg: "bg-rose-50" },
             { label: "Pending", value: pending, icon: Bot, color: "text-blue-600", bg: "bg-blue-50" },
-          ].map((stat) => (
-            <div key={stat.label} className="p-3 rounded-lg bg-muted/30 border border-border/50">
+            { label: "Tokens Used", value: totalTokens, icon: Zap, color: "text-emerald-600", bg: "bg-emerald-50" },
+          ].map((stat, i) => (
+            <div key={stat.label} className={cn("p-3 rounded-lg bg-muted/30 border border-border/50", i === 4 ? "col-span-2 md:col-span-4" : "")}>
               <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5">
                 <stat.icon className={cn("h-3 w-3", stat.color)} />
                 {stat.label}

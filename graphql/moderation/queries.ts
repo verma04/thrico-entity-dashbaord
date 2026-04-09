@@ -105,6 +105,7 @@ export const GET_AI_MODERATION_DASHBOARD = gql`
       pendingModeration
       flaggedContent
       rejectedPosts
+      totalTokens
     }
   }
 `;

@@ -1,6 +1,7 @@
 export type Severity = "LOW" | "MEDIUM" | "HIGH";
 export type LinkType = "DOMAIN" | "URL" | "PATTERN";
 export type ReportStatus = "PENDING" | "RESOLVED" | "DISMISSED";
+export type AiClassification = "safe" | "spam" | "offensive" | "harassment";
 
 export interface BannedWord {
   __typename?: "BannedWord";
@@ -87,13 +88,14 @@ export interface AiModerationDashboard {
   pendingModeration: number;
   flaggedContent: number;
   rejectedPosts: number;
+  totalTokens: number;
 }
 
 export interface AiModerationLog {
   id: string;
   contentId: string;
   entityId: string;
-  classification?: string;
+  classification?: AiClassification;
   confidence?: number;
   model?: string;
   createdAt: string;
@@ -102,7 +104,7 @@ export interface AiModerationLog {
 export interface ModerationLog {
   id: string;
   contentType: string;
-  aiLabel: string;
+  aiLabel: AiClassification;
   decision: string;
   actionTaken: string;
   createdAt: string;
