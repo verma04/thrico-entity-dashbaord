@@ -19,13 +19,10 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
+import { DateRangePicker } from "@/components/ui/date-range-picker";
+import { subDays } from "date-fns";
+import { DateRange } from "react-day-picker";
 import {
   Area,
   AreaChart,
@@ -97,7 +94,24 @@ const forumPerformanceData = [
 ];
 
 export default function DiscussionForum() {
-  const [timeRange, setTimeRange] = useState("7d");
+  const [timeRangeStr, setTimeRangeStr] = useState("LAST_7_DAYS");
+  const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
+    from: subDays(new Date(), 7),
+    to: new Date(),
+  });
+
+  const handleDateChange = (range: DateRange | undefined) => {
+    setDateRange(range);
+    if (!range?.from || !range?.to) return;
+    const diffDays = Math.round(
+      (range.to.getTime() - range.from.getTime()) / (1000 * 60 * 60 * 24),
+    );
+    if (diffDays <= 1) setTimeRangeStr("LAST_24_HOURS");
+    else if (diffDays <= 7) setTimeRangeStr("LAST_7_DAYS");
+    else if (diffDays <= 30) setTimeRangeStr("LAST_30_DAYS");
+    else if (diffDays <= 90) setTimeRangeStr("LAST_90_DAYS");
+  };
+
   const loading = false;
 
   const kpis = [
@@ -154,23 +168,11 @@ export default function DiscussionForum() {
           </div>
 
           <div className="flex items-center gap-3">
-            <Select value={timeRange} onValueChange={setTimeRange}>
-              <SelectTrigger className="h-9 w-[180px] rounded-lg border-zinc-200 bg-white text-xs font-semibold shadow-sm">
-                <Timer className="h-3.5 w-3.5 mr-2 text-indigo-500" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="24h" className="text-xs">
-                  Last 24 Hours
-                </SelectItem>
-                <SelectItem value="7d" className="text-xs">
-                  Last 7 Days
-                </SelectItem>
-                <SelectItem value="30d" className="text-xs">
-                  Last 30 Days
-                </SelectItem>
-              </SelectContent>
-            </Select>
+            <DateRangePicker 
+              date={dateRange}
+              onDateChange={handleDateChange}
+              defaultValue="LAST_7_DAYS"
+            />
             <div className="h-4 w-px bg-zinc-200 mx-1" />
             <Button
               variant="outline"

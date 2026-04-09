@@ -79,8 +79,8 @@ export const GET_REDEMPTIONS = gql`
 `;
 
 export const GET_REWARD_STATS = gql`
-  query GetRewardStats {
-    getRewardStats {
+  query GetRewardStats($timeRange: TimeRange, $dateRange: DateRangeInput) {
+    getRewardStats(timeRange: $timeRange, dateRange: $dateRange) {
       totalRedemptions
       totalTcBurned
       activeCoupons
@@ -537,8 +537,8 @@ export const PLAY_MATCH_WIN = gql`
 `;
 
 export const GET_SPIN_SCRATCH_STATS = gql`
-  query GetSpinScratchStats {
-    getSpinScratchStats {
+  query GetSpinScratchStats($timeRange: TimeRange, $dateRange: DateRangeInput) {
+    getSpinScratchStats(timeRange: $timeRange, dateRange: $dateRange) {
       totalSpins
       totalScratches
       totalMatchWins

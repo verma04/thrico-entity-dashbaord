@@ -12,6 +12,11 @@ export enum TimeRange {
   LAST_90_DAYS = "LAST_90_DAYS",
 }
 
+export interface DateRangeInput {
+  startDate: string | null;
+  endDate: string | null;
+}
+
 export interface DashboardStats {
   totalUsers: number;
   activeUsers: number;
@@ -28,7 +33,7 @@ export interface GetDashboardStatsResponse {
 }
 
 export interface GetDashboardStatsVariables {
-  timeRange: TimeRange;
+  dateRange?: DateRangeInput;
 }
 
 export interface ModuleActivity {
@@ -40,20 +45,20 @@ export interface GetModuleActivityResponse {
   getModuleActivity: ModuleActivity[];
 }
 
-export const useGetDashboardStats = (timeRange: TimeRange, options?: any) =>
+export const useGetDashboardStats = (dateRange?: DateRangeInput, options?: any) =>
   useQuery<GetDashboardStatsResponse, GetDashboardStatsVariables>(
     GET_DASHBOARD_STATS,
     {
-      variables: { timeRange },
+      variables: { dateRange },
       ...options,
     }
   );
 
-export const useGetModuleActivity = (timeRange: TimeRange, options?: any) =>
-  useQuery<GetModuleActivityResponse, { timeRange: TimeRange }>(
+export const useGetModuleActivity = (timeRange?: TimeRange, dateRange?: DateRangeInput, options?: any) =>
+  useQuery<GetModuleActivityResponse, { timeRange?: TimeRange; dateRange?: DateRangeInput }>(
     GET_MODULE_ACTIVITY,
     {
-      variables: { timeRange },
+      variables: { timeRange, dateRange },
       ...options,
     }
   );
@@ -107,11 +112,12 @@ export interface GetCommunityKPIsResponse {
   getCommunityKPIs: CommunityKPIs;
 }
 
-export const useGetCommunityKPIs = (timeRange: TimeRange, options?: any) =>
-  useQuery<GetCommunityKPIsResponse, { timeRange: TimeRange }>(
+export const useGetCommunityKPIs = (timeRange?: TimeRange, dateRange?: DateRangeInput, options?: any) =>
+  useQuery<GetCommunityKPIsResponse, { timeRange?: TimeRange; dateRange?: DateRangeInput }>(
     GET_COMMUNITY_KPIS,
     {
-      variables: { timeRange },
+      variables: { timeRange, dateRange },
       ...options,
     }
   );
+

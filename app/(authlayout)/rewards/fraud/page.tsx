@@ -5,21 +5,15 @@ import {
   ShieldAlert,
   UserCheck,
   Smartphone,
-  Trophy,
   AlertTriangle,
   Save,
   Info,
   ShieldCheck,
   Activity,
   Zap,
+  CheckCircle2,
+  XCircle,
 } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -30,25 +24,66 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-
 import {
   useGetRewardSecuritySettings,
   useUpdateRewardSecuritySettings,
 } from "@/graphql/actions/rewards";
-import { Skeleton } from "@/components/ui/skeleton";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { EcosystemCard } from "@/components/layout/ecosystem/ecosystem-analytics";
 import { cn } from "@/lib/utils";
+
+interface ToggleRowProps {
+  label: string;
+  desc: string;
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  icon?: React.ReactNode;
+  badge?: "enabled" | "disabled";
+}
+
+function ToggleRow({ label, desc, checked, onChange, icon, badge }: ToggleRowProps) {
+  return (
+    <div className="flex items-center justify-between p-4 rounded-xl border border-border bg-card hover:bg-muted/30 transition-colors group">
+      <div className="flex items-center gap-3 pr-4 flex-1 min-w-0">
+        {icon && (
+          <div className={cn(
+            "h-8 w-8 rounded-lg border flex items-center justify-center shrink-0 transition-colors",
+            checked ? "bg-emerald-50 border-emerald-100 text-emerald-600" : "bg-muted border-border text-muted-foreground"
+          )}>
+            {icon}
+          </div>
+        )}
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <Label className="text-sm font-semibold text-foreground cursor-pointer">{label}</Label>
+            {badge && (
+              <span className={cn(
+                "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide border",
+                checked
+                  ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+                  : "bg-muted text-muted-foreground border-border"
+              )}>
+                {checked ? <CheckCircle2 className="h-2.5 w-2.5" /> : <XCircle className="h-2.5 w-2.5" />}
+                {checked ? "Active" : "Off"}
+              </span>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{desc}</p>
+        </div>
+      </div>
+      <Switch checked={checked} onCheckedChange={onChange} />
+    </div>
+  );
+}
 
 export default function FraudPage() {
   const { toast } = useToast();
   const { data, loading } = useGetRewardSecuritySettings();
-  const [updateSettings, { loading: updating }] =
-    useUpdateRewardSecuritySettings();
+  const [updateSettings, { loading: updating }] = useUpdateRewardSecuritySettings();
 
   const settings = data?.getRewardSecuritySettings;
 
@@ -70,6 +105,8 @@ export default function FraudPage() {
     }
   }, [settings]);
 
+  const set = (key: string, val: any) => setLocalSettings((s: any) => ({ ...s, [key]: val }));
+
   const handleSave = async () => {
     try {
       await updateSettings({
@@ -82,238 +119,205 @@ export default function FraudPage() {
           },
         },
       });
-      toast({
-        title: "Security Settings Updated",
-        description:
-          "Fraud prevention parameters have been successfully applied.",
-      });
-    } catch (err) {
-      toast({
-        title: "Update Failed",
-        description: "Could not save security settings.",
-        variant: "destructive",
-      });
+      toast({ title: "Settings saved", description: "Security configuration updated successfully." });
+    } catch {
+      toast({ title: "Update failed", description: "Could not save settings. Please try again.", variant: "destructive" });
     }
   };
 
+  // Compute a rough "security score"
+  const score = [
+    localSettings.requireKyc,
+    localSettings.lockToDeviceId,
+    localSettings.maxIpVelocity > 0,
+    localSettings.dailyRedemptionLimit > 0,
+  ].filter(Boolean).length;
+
+  const scoreLabel = score === 4 ? "Strong" : score >= 2 ? "Moderate" : "Weak";
+  const scoreColor = score === 4 ? "text-emerald-600" : score >= 2 ? "text-amber-600" : "text-rose-600";
+  const scoreBg = score === 4 ? "bg-emerald-500" : score >= 2 ? "bg-amber-500" : "bg-rose-500";
+
   return (
-    <EcosystemWrapper anonymized-1="fraud-control">
+    <EcosystemWrapper data-section="fraud-control">
       <EcosystemHeader
         title="Security Settings"
         badgeText="Fraud Prevention"
-        description="Manage global security limits and fraud prevention settings for rewards."
+        description="Set limits and verification rules to protect your rewards from misuse."
         icon={ShieldCheck}
       />
 
       <EcosystemActionBar shadow="none">
-        <div className="flex items-center justify-between w-full">
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2 text-sm font-bold text-slate-500">
-              <Activity className="h-4 w-4 text-emerald-500" />
-              <span>Security Shield Active</span>
-            </div>
-            <div className="h-4 w-px bg-slate-200" />
-            <div className="flex items-center gap-2 text-sm font-bold text-slate-500">
-               <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />
-               <span>These settings apply to all reward programs.</span>
-            </div>
+        <div className="flex items-center gap-3">
+          <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="text-xs font-medium text-muted-foreground">Protection active</span>
+
+          <div className="h-4 w-px bg-border" />
+
+          <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+            <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />
+            Changes apply immediately after saving
           </div>
-          
+        </div>
+
+        <div className="sm:ml-auto">
           <Button
             onClick={handleSave}
             disabled={loading || updating}
-            className="h-10 px-8 rounded-xl bg-slate-900 hover:bg-black text-white font-bold text-[11px] uppercase tracking-wider gap-3 shadow-xl shadow-slate-200 transition-all active:scale-95 group"
+            size="sm"
+            className="gap-2"
           >
             {updating ? (
-              <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <div className="h-3.5 w-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             ) : (
-              <Save className="h-4 w-4 transition-transform group-hover:-translate-y-0.5" />
+              <Save className="h-3.5 w-3.5" />
             )}
             {updating ? "Saving..." : "Save Settings"}
           </Button>
         </div>
       </EcosystemActionBar>
 
-      <EcosystemContainer className="space-y-10 p-8 max-w-5xl">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-          {/* Global Thresholds */}
-          <div className="space-y-6">
-             <div className="flex items-center gap-3 px-1">
-                <div className="h-10 w-10 rounded-xl bg-rose-500/10 flex items-center justify-center">
-                   <ShieldAlert className="h-5 w-5 text-rose-600" />
-                </div>
-                <div>
-                   <h3 className="text-xl font-semibold text-slate-900 tracking-tight">Global Limits</h3>
-                   <p className="text-[10px] font-medium text-slate-400 uppercase tracking-widest leading-none mt-1">Limits for the entire platform</p>
-                </div>
-             </div>
+      <EcosystemContainer className="space-y-6 p-6 lg:p-8 max-w-4xl">
 
-             <div className="grid grid-cols-1 gap-6">
-                <div className="p-8 rounded-4xl bg-white border border-slate-100 shadow-sm space-y-8">
-                   <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                         <Label className="text-[10px] font-semibold uppercase text-slate-400 tracking-widest ml-1">Daily Redemption Limit</Label>
-                         <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger>
-                                <Info className="h-3.5 w-3.5 text-slate-300 hover:text-indigo-500 transition-colors" />
-                              </TooltipTrigger>
-                              <TooltipContent className="rounded-xl border-slate-100 shadow-2xl p-4 max-w-xs font-medium text-xs bg-slate-900 text-white">
-                                The maximum total redemptions allowed across the platform in 24 hours.
-                              </TooltipContent>
-                            </Tooltip>
-                         </TooltipProvider>
-                      </div>
-                      <div className="relative group">
-                         <Zap className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 group-focus-within:text-indigo-500 transition-colors" />
-                         <Input
-                            type="number"
-                            value={localSettings.dailyRedemptionLimit}
-                            className="pl-12 h-14 rounded-2xl border-slate-200 font-semibold text-slate-900 text-lg focus:ring-indigo-500/10 transition-all"
-                            onChange={(e) =>
-                              setLocalSettings({
-                                ...localSettings,
-                                dailyRedemptionLimit: parseInt(e.target.value) || 0,
-                              })
-                            }
-                         />
-                      </div>
-                   </div>
-
-                   <div className="space-y-3">
-                      <Label className="text-[10px] font-semibold uppercase text-slate-400 tracking-widest ml-1">Minimum Account Age (Days)</Label>
-                      <div className="relative group">
-                         <Activity className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 group-focus-within:text-emerald-500 transition-colors" />
-                         <Input
-                            type="number"
-                            defaultValue={30}
-                            className="pl-12 h-14 rounded-2xl border-slate-200 font-semibold text-slate-900 text-lg focus:ring-emerald-500/10 transition-all"
-                         />
-                      </div>
-                   </div>
-                </div>
-             </div>
+        {/* Security score overview */}
+        <div className="flex items-center gap-5 p-5 rounded-2xl border border-border bg-card">
+          <div className="relative h-16 w-16 shrink-0">
+            <svg viewBox="0 0 36 36" className="h-full w-full -rotate-90">
+              <circle cx="18" cy="18" r="14" fill="none" stroke="hsl(var(--muted))" strokeWidth="3" />
+              <circle
+                cx="18" cy="18" r="14" fill="none"
+                stroke={score === 4 ? "#10b981" : score >= 2 ? "#f59e0b" : "#f43f5e"}
+                strokeWidth="3"
+                strokeDasharray={`${(score / 4) * 87.96} 87.96`}
+                strokeLinecap="round"
+                className="transition-all duration-700"
+              />
+            </svg>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-sm font-black text-foreground">{score}/4</span>
+            </div>
           </div>
-
-          {/* Verification Protocol */}
-          <div className="space-y-6">
-             <div className="flex items-center gap-3 px-1">
-                <div className="h-10 w-10 rounded-xl bg-indigo-500/10 flex items-center justify-center">
-                   <UserCheck className="h-5 w-5 text-indigo-600" />
-                </div>
-                <div>
-                   <h3 className="text-xl font-semibold text-slate-900 tracking-tight">Identity & Device</h3>
-                   <p className="text-[10px] font-medium text-slate-400 uppercase tracking-widest leading-none mt-1">Verification and bot defense</p>
-                </div>
-             </div>
-
-             <div className="grid grid-cols-1 gap-6">
-                <div className="p-8 rounded-4xl bg-white border border-slate-100 shadow-sm space-y-6">
-                   <div className="flex items-start justify-between p-6 rounded-3xl bg-slate-50/50 border border-slate-100 hover:bg-white hover:shadow-lg transition-all group">
-                     <div className="space-y-1">
-                        <div className="flex items-center gap-3 mb-1">
-                          <Label className="text-sm font-semibold text-slate-900 tracking-tight">Identity Verification (KYC)</Label>
-                          <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                        </div>
-                        <p className="text-[10px] font-medium text-slate-400 uppercase tracking-tight leading-relaxed max-w-[200px]">
-                          Restrict rewards to verified users.
-                        </p>
-                     </div>
-                     <Switch
-                        checked={localSettings.requireKyc}
-                        onCheckedChange={(checked) =>
-                          setLocalSettings({
-                            ...localSettings,
-                            requireKyc: checked,
-                          })
-                        }
-                        className="data-[state=checked]:bg-indigo-600"
-                      />
-                   </div>
-
-                   <div className="flex items-start justify-between p-6 rounded-3xl bg-slate-50/50 border border-slate-100 hover:bg-white hover:shadow-lg transition-all group">
-                     <div className="space-y-1">
-                        <div className="flex items-center gap-3 mb-1">
-                          <Label className="text-sm font-semibold text-slate-900 tracking-tight">Device Lock</Label>
-                          <Smartphone className="h-3.5 w-3.5 text-slate-400 group-hover:text-indigo-500 transition-colors" />
-                        </div>
-                        <p className="text-[10px] font-medium text-slate-400 uppercase tracking-tight leading-relaxed max-w-[200px]">
-                          Bind accounts to specific devices.
-                        </p>
-                     </div>
-                     <Switch
-                        checked={localSettings.lockToDeviceId}
-                        onCheckedChange={(checked) =>
-                          setLocalSettings({
-                            ...localSettings,
-                            lockToDeviceId: checked,
-                          })
-                        }
-                        className="data-[state=checked]:bg-indigo-600"
-                      />
-                   </div>
-                </div>
-             </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <h3 className="text-base font-bold text-foreground">Security Score</h3>
+              <span className={cn("text-sm font-bold", scoreColor)}>{scoreLabel}</span>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+              {score < 4
+                ? `Enable ${4 - score} more protection rule${4 - score > 1 ? "s" : ""} to maximize reward security.`
+                : "All protection rules are active. Your rewards are well secured."}
+            </p>
+            <div className="flex items-center gap-1 mt-3">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className={cn("h-1.5 flex-1 rounded-full transition-all duration-500", i < score ? scoreBg : "bg-muted")} />
+              ))}
+            </div>
           </div>
         </div>
+
+        {/* Redemption Limits */}
+        <EcosystemCard
+          title="Redemption Limits"
+          description="Cap how many rewards can be claimed per day to prevent abuse"
+          icon={ShieldAlert}
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-2">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label className="text-xs font-semibold text-muted-foreground">Daily Redemption Limit</Label>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Info className="h-3.5 w-3.5 text-muted-foreground/50 hover:text-foreground transition-colors" />
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs text-xs">
+                      The maximum total redemptions allowed across the platform in 24 hours. Set to 0 for unlimited.
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+              <div className="relative">
+                <Zap className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/40" />
+                <Input
+                  type="number"
+                  value={localSettings.dailyRedemptionLimit}
+                  className="pl-10 h-10"
+                  onChange={(e) => set("dailyRedemptionLimit", parseInt(e.target.value) || 0)}
+                />
+              </div>
+              <p className="text-[11px] text-muted-foreground/60">Set to 0 for unlimited</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-xs font-semibold text-muted-foreground">Minimum Account Age (Days)</Label>
+              <div className="relative">
+                <Activity className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/40" />
+                <Input type="number" defaultValue={30} className="pl-10 h-10" />
+              </div>
+              <p className="text-[11px] text-muted-foreground/60">Members must be this old before redeeming</p>
+            </div>
+          </div>
+        </EcosystemCard>
+
+        {/* Identity & Device */}
+        <EcosystemCard
+          title="Identity & Device"
+          description="Control who can claim rewards and how they authenticate"
+          icon={UserCheck}
+        >
+          <div className="space-y-2 mt-2">
+            <ToggleRow
+              label="Identity Verification (KYC)"
+              desc="Only verified users can redeem rewards"
+              checked={localSettings.requireKyc}
+              onChange={(v) => set("requireKyc", v)}
+              icon={<UserCheck className="h-4 w-4" />}
+              badge="enabled"
+            />
+            <ToggleRow
+              label="Device Lock"
+              desc="Bind each account to a specific device to prevent code sharing"
+              checked={localSettings.lockToDeviceId}
+              onChange={(v) => set("lockToDeviceId", v)}
+              icon={<Smartphone className="h-4 w-4" />}
+              badge="enabled"
+            />
+          </div>
+        </EcosystemCard>
 
         {/* Access Restrictions */}
-        <div className="space-y-6">
-           <div className="flex items-center gap-3 px-1">
-              <div className="h-10 w-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
-                 <Trophy className="h-5 w-5 text-amber-600" />
-              </div>
-              <div>
-                 <h3 className="text-xl font-semibold text-slate-900 tracking-tight">Access Restrictions</h3>
-                 <p className="text-[10px] font-medium text-slate-400 uppercase tracking-widest leading-none mt-1">Rank and network limits</p>
-              </div>
-           </div>
+        <EcosystemCard
+          title="Access Restrictions"
+          description="Rank and network-level controls for redemption eligibility"
+          icon={ShieldCheck}
+        >
+          <div className="space-y-2 mt-2">
+            <ToggleRow
+              label="Leaderboard Priority"
+              desc="Only top 100 participants can redeem rewards"
+              checked={false}
+              onChange={() => {}}
+              icon={<Activity className="h-4 w-4" />}
+            />
+            <ToggleRow
+              label="Bot Prevention"
+              desc="Detect and block automated redemption attempts via IP rate limiting"
+              checked={localSettings.maxIpVelocity > 0}
+              onChange={(v) => set("maxIpVelocity", v ? 5 : 0)}
+              icon={<ShieldAlert className="h-4 w-4" />}
+              badge="enabled"
+            />
+          </div>
 
-           <div className="p-8 rounded-4xl bg-white border border-slate-100 shadow-sm space-y-6 overflow-hidden relative">
-              <div className="absolute top-0 right-0 p-8 opacity-[0.03] rotate-12 scale-150">
-                <ShieldCheck className="h-40 w-40" />
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-10 relative z-10">
-                 <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                       <div className="space-y-1">
-                          <Label className="text-sm font-bold text-slate-900 tracking-tight">Leaderboard Priority</Label>
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Only top 100 global participants can access reward flow.</p>
-                       </div>
-                       <Switch defaultChecked={false} className="data-[state=checked]:bg-amber-500" />
-                    </div>
-                    <Separator className="bg-slate-50" />
-                    <div className="flex items-center justify-between">
-                       <div className="space-y-1">
-                          <Label className="text-sm font-bold text-slate-900 tracking-tight">Bot Prevention (IP Velocity)</Label>
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Detect and nullify bot-driven burst activity.</p>
-                       </div>
-                       <Switch
-                        checked={localSettings.maxIpVelocity > 0}
-                        onCheckedChange={(checked) =>
-                          setLocalSettings({
-                            ...localSettings,
-                            maxIpVelocity: checked ? 5 : 0,
-                          })
-                        }
-                        className="data-[state=checked]:bg-amber-500"
-                      />
-                    </div>
-                 </div>
-
-                 <div className="p-6 rounded-3xl bg-amber-50 border border-amber-100/50 flex items-start gap-4">
-                    <AlertTriangle className="h-6 w-6 text-amber-600 shrink-0 mt-1 animate-pulse" />
-                    <div className="space-y-2">
-                       <h4 className="text-sm font-bold text-amber-900 uppercase tracking-tight">Security Warning</h4>
-                       <p className="text-[11px] font-bold text-amber-700/80 uppercase leading-relaxed tracking-tight">
-                         Stricter security rules may affect some users. Monitor redemptions closely after saving.
-                       </p>
-                    </div>
-                 </div>
-              </div>
-           </div>
-        </div>
+          <div className="mt-4 flex items-start gap-3 p-4 rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-500/10 dark:border-amber-500/20">
+            <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+            <div className="space-y-0.5">
+              <h4 className="text-sm font-semibold text-amber-900 dark:text-amber-300">Fair warning</h4>
+              <p className="text-xs text-amber-700 dark:text-amber-400/80 leading-relaxed">
+                Stricter rules may block some legitimate users. Monitor redemption activity closely after changes.
+              </p>
+            </div>
+          </div>
+        </EcosystemCard>
       </EcosystemContainer>
     </EcosystemWrapper>
   );

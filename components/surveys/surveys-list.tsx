@@ -11,6 +11,9 @@ import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-cont
 import { ClipboardList, Sparkles, Filter, Search, PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
+import { subDays } from "date-fns";
+import { DateRange } from "react-day-picker";
 import Link from "next/link";
 import NewForm from "../feedback-form/new-feed-back-form";
 import {
@@ -32,6 +35,11 @@ export function SurveysList({
   const [surveyToDelete, setSurveyToDelete] = useState<string | null>(null);
   const [editingDetailsSurvey, setEditingDetailsSurvey] =
     useState<Survey | null>(null);
+
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: subDays(new Date(), 30),
+    to: new Date(),
+  });
 
   // Details form state
   const [details, setDetails] = useState({
@@ -178,6 +186,11 @@ export function SurveysList({
         </div>
 
         <div className="flex items-center gap-3 ml-auto">
+          <DateRangePicker 
+            date={dateRange}
+            onDateChange={setDateRange}
+          />
+          <div className="h-4 w-px bg-zinc-200 mx-1 hidden md:block" />
           <Button variant="outline" size="icon" className="h-10 w-10 shrink-0 rounded-lg border border-zinc-200 text-zinc-400 hover:text-indigo-600 hover:bg-zinc-50 shadow-sm md:hidden">
             <Filter className="h-4 w-4" />
           </Button>

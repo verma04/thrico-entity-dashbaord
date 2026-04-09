@@ -1,8 +1,8 @@
 import { gql } from "@apollo/client";
 
 export const GET_COMMUNITIES_STATS = gql`
-  query GetCommunitiesStats($timeRange: TimeRange!) {
-    getCommunitiesStats(timeRange: $timeRange) {
+  query GetCommunitiesStats($timeRange: TimeRange, $dateRange: DateRangeInput) {
+    getCommunitiesStats(timeRange: $timeRange, dateRange: $dateRange) {
       totalCommunities
       activeCommunities
       totalEnrollments
@@ -37,3 +37,4 @@ export const GET_COMMUNITIES_STATS = gql`
     }
   }
 `;
+

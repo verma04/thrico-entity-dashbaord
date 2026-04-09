@@ -1,8 +1,8 @@
 import { gql } from "@apollo/client";
 
 export const GET_DASHBOARD_STATS = gql`
-  query GetDashboardStats($timeRange: TimeRange!) {
-    getDashboardStats(timeRange: $timeRange) {
+  query GetDashboardStats($dateRange: DateRangeInput) {
+    getDashboardStats(dateRange: $dateRange) {
       totalUsers
       activeUsers
       pageViews
@@ -16,8 +16,8 @@ export const GET_DASHBOARD_STATS = gql`
 `;
 
 export const GET_MODULE_ACTIVITY = gql`
-  query GetModuleActivity($timeRange: TimeRange!) {
-    getModuleActivity(timeRange: $timeRange) {
+  query GetModuleActivity($timeRange: TimeRange, $dateRange: DateRangeInput) {
+    getModuleActivity(timeRange: $timeRange, dateRange: $dateRange) {
       name
       userCount
     }
@@ -25,8 +25,8 @@ export const GET_MODULE_ACTIVITY = gql`
 `;
 
 export const GET_COMMUNITY_KPIS = gql`
-  query GetCommunityKPIs($timeRange: TimeRange!) {
-    getCommunityKPIs(timeRange: $timeRange) {
+  query GetCommunityKPIs($timeRange: TimeRange, $dateRange: DateRangeInput) {
+    getCommunityKPIs(timeRange: $timeRange, dateRange: $dateRange) {
       # 1. Core Community Vitals
       dailyActiveUsers {
         value
@@ -129,3 +129,4 @@ export const GET_COMMUNITY_KPIS = gql`
     }
   }
 `;
+

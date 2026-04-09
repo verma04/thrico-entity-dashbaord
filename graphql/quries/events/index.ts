@@ -68,8 +68,8 @@ export const CHANGE_EVENT_VERIFICATION = gql`
 `;
 
 export const GET_EVENT_STATS = gql`
-  query GetEventStats {
-    getEventStats {
+  query GetEventStats($timeRange: TimeRange, $dateRange: DateRangeInput) {
+    getEventStats(timeRange: $timeRange, dateRange: $dateRange) {
       totalEvents
       activeEvents
       totalAttendees
@@ -704,8 +704,8 @@ export const GET_EVENT_DETAIL_STATS = gql`
 `;
 
 export const GET_EVENT_REGISTRATION_TREND = gql`
-  query GetEventRegistrationTrend($timeRange: TimeRange) {
-    getEventRegistrationTrend(timeRange: $timeRange) {
+  query GetEventRegistrationTrend($timeRange: TimeRange, $dateRange: DateRangeInput) {
+    getEventRegistrationTrend(timeRange: $timeRange, dateRange: $dateRange) {
       name
       registrations
       views
@@ -714,8 +714,8 @@ export const GET_EVENT_REGISTRATION_TREND = gql`
 `;
 
 export const GET_EVENT_TYPE_DISTRIBUTION = gql`
-  query GetEventTypeDistribution {
-    getEventTypeDistribution {
+  query GetEventTypeDistribution($timeRange: TimeRange, $dateRange: DateRangeInput) {
+    getEventTypeDistribution(timeRange: $timeRange, dateRange: $dateRange) {
       name
       value
       color
@@ -724,8 +724,8 @@ export const GET_EVENT_TYPE_DISTRIBUTION = gql`
 `;
 
 export const GET_EVENT_ATTENDEE_ACTIVITY = gql`
-  query GetEventAttendeeActivity {
-    getEventAttendeeActivity {
+  query GetEventAttendeeActivity($timeRange: TimeRange, $dateRange: DateRangeInput) {
+    getEventAttendeeActivity(timeRange: $timeRange, dateRange: $dateRange) {
       name
       registered
       checkedIn
@@ -734,8 +734,8 @@ export const GET_EVENT_ATTENDEE_ACTIVITY = gql`
 `;
 
 export const GET_TOP_PERFORMING_EVENTS = gql`
-  query GetTopPerformingEvents($limit: Int) {
-    getTopPerformingEvents(limit: $limit) {
+  query GetTopPerformingEvents($limit: Int, $timeRange: TimeRange, $dateRange: DateRangeInput) {
+    getTopPerformingEvents(limit: $limit, timeRange: $timeRange, dateRange: $dateRange) {
       id
       title
       type

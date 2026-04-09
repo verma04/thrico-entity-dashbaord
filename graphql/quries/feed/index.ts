@@ -586,8 +586,8 @@ export const DELETE_FEED = gql`
 // ==========================================
 
 export const GET_FEED_INTELLIGENCE_KPI = gql`
-  query GetFeedIntelligenceKPI {
-    getFeedIntelligenceKPI {
+  query GetFeedIntelligenceKPI($timeRange: TimeRange, $dateRange: DateRangeInput) {
+    getFeedIntelligenceKPI(timeRange: $timeRange, dateRange: $dateRange) {
       aggregateReach
       activeDialogue
       networkVelocity
@@ -601,8 +601,8 @@ export const GET_FEED_INTELLIGENCE_KPI = gql`
 `;
 
 export const GET_FEED_YIELD_VELOCITY = gql`
-  query GetFeedYieldVelocity {
-    getFeedYieldVelocity {
+  query GetFeedYieldVelocity($timeRange: TimeRange, $dateRange: DateRangeInput) {
+    getFeedYieldVelocity(timeRange: $timeRange, dateRange: $dateRange) {
       day
       signups
     }
@@ -610,8 +610,8 @@ export const GET_FEED_YIELD_VELOCITY = gql`
 `;
 
 export const GET_FEED_INTEREST_MATRIX = gql`
-  query GetFeedInterestMatrix {
-    getFeedInterestMatrix {
+  query GetFeedInterestMatrix($timeRange: TimeRange, $dateRange: DateRangeInput) {
+    getFeedInterestMatrix(timeRange: $timeRange, dateRange: $dateRange) {
       name
       value
       color

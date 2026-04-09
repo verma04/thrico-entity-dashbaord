@@ -1,4 +1,7 @@
 import { gql, QueryHookOptions, useQuery } from "@apollo/client";
+import { DateRangeInput, TimeRange } from "../dashbaord/dashboard-quries";
+export { TimeRange };
+export type { DateRangeInput };
 import {
   GET_GAMIFICATION_SUMMARY,
   GET_USER_ACTIVITY_LOG,
@@ -256,8 +259,8 @@ export interface GetGamificationStatsData {
 }
 
 const GET_GAMIFICATION_STATS = gql`
-  query GetGamificationStats {
-    getGamificationStats {
+  query GetGamificationStats($timeRange: TimeRange, $dateRange: DateRangeInput) {
+    getGamificationStats(timeRange: $timeRange, dateRange: $dateRange) {
       totalUsers
       totalPointsAwarded
       totalBadgesEarned
@@ -277,10 +280,16 @@ const GET_GAMIFICATION_STATS = gql`
 `;
 
 export function useGetGamificationStats(
-  options?: QueryHookOptions<GetGamificationStatsData>,
+  timeRange?: TimeRange,
+  dateRange?: DateRangeInput,
+  options?: QueryHookOptions<GetGamificationStatsData, { timeRange?: TimeRange; dateRange?: DateRangeInput }>,
 ) {
-  return useQuery<GetGamificationStatsData>(GET_GAMIFICATION_STATS, options);
+  return useQuery<GetGamificationStatsData, { timeRange?: TimeRange; dateRange?: DateRangeInput }>(GET_GAMIFICATION_STATS, {
+    variables: { timeRange, dateRange },
+    ...options
+  });
 }
+
 // ---------------------------------------------------------
 // LEADERBOARD
 // ---------------------------------------------------------

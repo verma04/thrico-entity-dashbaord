@@ -1,8 +1,8 @@
 import { gql } from "@apollo/client";
 
 export const GET_OFFER_STATS = gql`
-  query GetOfferStats($timeRange: TimeRange!) {
-    getOfferStats(timeRange: $timeRange) {
+  query GetOfferStats($timeRange: TimeRange, $dateRange: DateRangeInput) {
+    getOfferStats(timeRange: $timeRange, dateRange: $dateRange) {
       totalOffers
       activeOffers
       claims

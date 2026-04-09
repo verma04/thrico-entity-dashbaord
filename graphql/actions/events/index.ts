@@ -68,6 +68,9 @@ import {
   GET_EVENT_ATTENDEE_ACTIVITY,
   GET_TOP_PERFORMING_EVENTS,
 } from "../../quries/events";
+import { DateRangeInput, TimeRange } from "../dashbaord/dashboard-quries";
+export { TimeRange };
+export type { DateRangeInput };
 
 // --- TypeScript Types ---
 
@@ -525,9 +528,20 @@ export type EventStats = {
 // --- Apollo Client Hook ---
 
 export function useEventStats(
-  options?: QueryHookOptions<{ getEventStats: EventStats }>,
-): QueryResult<{ getEventStats: EventStats }> {
-  return useQuery(GET_EVENT_STATS, options);
+  timeRange?: TimeRange,
+  dateRange?: DateRangeInput,
+  options?: QueryHookOptions<
+    { getEventStats: EventStats },
+    { timeRange?: TimeRange; dateRange?: DateRangeInput }
+  >,
+): QueryResult<
+  { getEventStats: EventStats },
+  { timeRange?: TimeRange; dateRange?: DateRangeInput }
+> {
+  return useQuery(GET_EVENT_STATS, {
+    variables: { timeRange, dateRange },
+    ...options,
+  });
 }
 
 export function useChangeEventStatus(options?: MutationHookOptions<any, any>) {
@@ -1105,39 +1119,59 @@ export function useEventDetailStats(eventId: string) {
   );
 }
 
-export function useEventRegistrationTrend(timeRange?: string) {
-  return useQuery<{ getEventRegistrationTrend: RegistrationTrend[] }>(
-    GET_EVENT_REGISTRATION_TREND,
-    {
-      variables: { timeRange },
-      fetchPolicy: "network-only",
-    },
-  );
+export function useEventRegistrationTrend(
+  timeRange?: TimeRange,
+  dateRange?: DateRangeInput,
+  options?: QueryHookOptions<
+    { getEventRegistrationTrend: RegistrationTrend[] },
+    { timeRange?: TimeRange; dateRange?: DateRangeInput }
+  >,
+) {
+  return useQuery<
+    { getEventRegistrationTrend: RegistrationTrend[] },
+    { timeRange?: TimeRange; dateRange?: DateRangeInput }
+  >(GET_EVENT_REGISTRATION_TREND, {
+    variables: { timeRange, dateRange },
+    fetchPolicy: "network-only",
+    ...options,
+  });
 }
 
-export function useEventTypeDistribution() {
+export function useEventTypeDistribution(
+  timeRange?: TimeRange,
+  dateRange?: DateRangeInput,
+) {
   return useQuery<{ getEventTypeDistribution: EventTypeDistribution[] }>(
     GET_EVENT_TYPE_DISTRIBUTION,
     {
+      variables: { timeRange, dateRange },
       fetchPolicy: "network-only",
     },
   );
 }
 
-export function useEventAttendeeActivity() {
+export function useEventAttendeeActivity(
+  timeRange?: TimeRange,
+  dateRange?: DateRangeInput,
+) {
   return useQuery<{ getEventAttendeeActivity: AttendeeActivity[] }>(
     GET_EVENT_ATTENDEE_ACTIVITY,
     {
+      variables: { timeRange, dateRange },
       fetchPolicy: "network-only",
     },
   );
 }
 
-export function useTopPerformingEvents(limit: number = 5) {
+export function useTopPerformingEvents(
+  limit: number = 5,
+  timeRange?: TimeRange,
+  dateRange?: DateRangeInput,
+) {
   return useQuery<{ getTopPerformingEvents: TopPerformingEvent[] }>(
     GET_TOP_PERFORMING_EVENTS,
     {
-      variables: { limit },
+      variables: { limit, timeRange, dateRange },
       fetchPolicy: "network-only",
     },
   );

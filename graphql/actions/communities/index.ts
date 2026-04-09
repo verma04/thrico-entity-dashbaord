@@ -1,6 +1,7 @@
 import { useQuery, QueryHookOptions, QueryResult } from "@apollo/client";
 import { TimeRange } from "..";
 import { GET_COMMUNITIES_STATS } from "@/graphql/quries/communities";
+import { DateRangeInput } from "../dashbaord/dashboard-quries";
 
 // --- TypeScript Types ---
 
@@ -49,14 +50,20 @@ export type GetCommunitiesStatsResponse = {
 // --- Apollo Client Hook ---
 
 export function useGetCommunitiesStats(
-  timeRange: TimeRange,
+  timeRange?: TimeRange,
+  dateRange?: DateRangeInput,
   options?: QueryHookOptions<
     GetCommunitiesStatsResponse,
-    { timeRange: TimeRange }
+    { timeRange?: TimeRange; dateRange?: DateRangeInput }
   >,
-): QueryResult<GetCommunitiesStatsResponse, { timeRange: TimeRange }> {
+): QueryResult<
+  GetCommunitiesStatsResponse,
+  { timeRange?: TimeRange; dateRange?: DateRangeInput }
+> {
   return useQuery(GET_COMMUNITIES_STATS, {
-    variables: { timeRange },
+    variables: { timeRange, dateRange },
     ...options,
   });
 }
+
+

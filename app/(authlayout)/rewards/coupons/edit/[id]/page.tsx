@@ -1,8 +1,9 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import { useParams, useRouter } from "next/navigation";
 import {
   ChevronLeft,
   Ticket,
@@ -21,7 +22,7 @@ import {
   Dices,
   RotateCw,
   Gamepad2,
-  Icon,
+  Trash2,
 } from "lucide-react";
 import { ImageUploadWithCrop } from "@/components/ui/image-upload-with-crop";
 import { Button } from "@/components/ui/button";
@@ -37,16 +38,15 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import { useCreateReward } from "@/graphql/actions/rewards";
+import { useGetRewards, useUpdateReward } from "@/graphql/actions/rewards";
 import { cn } from "@/lib/utils";
 
 const couponSchema = Yup.object().shape({
   title: Yup.string().required("Give your reward a catchy title"),
   description: Yup.string().required("Tell users what they're getting"),
-  category: Yup.string().required("Select a category"),
   tcCost: Yup.number().required("Set a cost in points").min(0),
   discountType: Yup.string().required("Select how the reward works"),
   discountValue: Yup.string().required("Enter the value"),
@@ -88,7 +88,7 @@ const CreatorSection = ({
         <div
           className={cn(
             "h-10 w-10 rounded-xl flex items-center justify-center shrink-0 border",
-            accents[accent],
+            accents[accent]
           )}
         >
           <Icon className="h-5 w-5" />
@@ -108,10 +108,33 @@ const CreatorSection = ({
   );
 };
 
-export default function CreateCouponPage() {
+export default function EditRewardPage() {
   const { toast } = useToast();
   const router = useRouter();
-  const [createReward, { loading }] = useCreateReward();
+  const params = useParams();
+  const rewardId = params?.id as string;
+
+  const { data, loading: fetchLoading } = useGetRewards({
+    pagination: { page: 1, limit: 100 },
+  });
+  const [updateReward, { loading }] = useUpdateReward();
+
+  const reward = data?.getRewards?.find((r: any) => r.id === rewardId);
+
+  const getCategoryName = (category: any): string => {
+    if (!category) return "Internal";
+    const idToName: Record<string, string> = {
+      "cat-001": "Amazon",
+      "cat-002": "Internal",
+      "cat-003": "Event",
+      "cat-004": "Brand",
+      "cat-005": "Scratch Card",
+      "cat-006": "Spin Wheel",
+      "cat-007": "Match & Win",
+    };
+    if (typeof category === "string") return idToName[category] || category;
+    return idToName[category.id] || category.name || "Internal";
+  };
 
   const formik = useFormik({
     initialValues: {
@@ -129,9 +152,10 @@ export default function CreateCouponPage() {
       cooldownPeriod: 0,
       inventoryRequired: false,
       image: "",
-      categories: ["Internal"],
+      categories: ["Internal"] as string[],
     },
     validationSchema: couponSchema,
+    enableReinitialize: true,
     onSubmit: async (values) => {
       try {
         const categoryIdMap: Record<string, string> = {
@@ -143,12 +167,14 @@ export default function CreateCouponPage() {
           "Spin Wheel": "cat-006",
           "Match & Win": "cat-007",
         };
-        await createReward({
+        await updateReward({
           variables: {
+            id: rewardId,
             input: {
               title: values.title,
               description: values.description,
-              categoryId: categoryIdMap[values.categories[0]] || "cat-002",
+              categoryId:
+                categoryIdMap[values.categories[0]] || "cat-002",
               tcCost: values.tcCost,
               inventoryRequired: values.inventoryRequired,
               perUserLimit: values.perUserLimit,
@@ -162,19 +188,43 @@ export default function CreateCouponPage() {
           },
         });
         toast({
-          title: "Boom! Reward is live",
-          description: `${values.title} has been added to the hub.`,
+          title: "Reward updated",
+          description: `${values.title} has been saved.`,
         });
         router.push("/rewards/coupons");
       } catch (err: any) {
         toast({
-          title: "Whoops!",
+          title: "Update failed",
           description: err.message,
           variant: "destructive",
         });
       }
     },
   });
+
+  // Populate form when reward data loads
+  useEffect(() => {
+    if (reward) {
+      formik.setValues({
+        title: reward.title || "",
+        description: reward.description || "",
+        tcCost: reward.tcCost || 0,
+        discountType: reward.discountType || "Flat",
+        discountValue: reward.discountValue || "",
+        validityDays: reward.validityDays || 30,
+        totalUsageLimit: reward.totalUsageLimit || 0,
+        perUserLimit: reward.perUserLimit || 1,
+        minAccountAge: reward.minAccountAge || 0,
+        minActivityRequired: reward.minActivityRequired || 0,
+        blockWarnedUsers: reward.blockWarnedUsers || false,
+        cooldownPeriod: reward.cooldownPeriod || 0,
+        inventoryRequired: reward.inventoryRequired || false,
+        image: reward.image || "",
+        categories: [getCategoryName(reward.category)],
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reward]);
 
   const err = (field: keyof typeof formik.errors) =>
     formik.touched[field] && formik.errors[field] ? (
@@ -183,9 +233,76 @@ export default function CreateCouponPage() {
       </p>
     ) : null;
 
+  if (fetchLoading) {
+    return (
+      <div className="min-h-screen bg-[#fafafa] dark:bg-black/5">
+        <div className="sticky top-0 z-20 bg-white/80 dark:bg-black/80 backdrop-blur-xl border-b border-border/50">
+          <div className="max-w-[1400px] mx-auto px-6 h-16 flex items-center gap-4">
+            <Skeleton className="h-8 w-8 rounded-lg" />
+            <div className="h-4 w-px bg-border/50" />
+            <div className="space-y-1">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-3 w-20" />
+            </div>
+          </div>
+        </div>
+        <div className="max-w-[1400px] mx-auto px-6 py-10">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-12">
+            <div className="space-y-12">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="space-y-6">
+                  <div className="flex items-start gap-4">
+                    <Skeleton className="h-10 w-10 rounded-xl" />
+                    <div className="space-y-2 flex-1">
+                      <Skeleton className="h-4 w-40" />
+                      <Skeleton className="h-3 w-64" />
+                    </div>
+                  </div>
+                  <div className="pl-14 space-y-4">
+                    <Skeleton className="h-10 w-full rounded-lg" />
+                    <Skeleton className="h-20 w-full rounded-lg" />
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div>
+              <Skeleton className="aspect-[3/4] w-full rounded-[32px]" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!reward) {
+    return (
+      <div className="min-h-screen bg-[#fafafa] dark:bg-black/5 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="h-16 w-16 rounded-2xl bg-muted flex items-center justify-center mx-auto border border-border">
+            <Ticket className="h-7 w-7 text-muted-foreground/30" />
+          </div>
+          <div className="space-y-1">
+            <h2 className="text-lg font-bold text-foreground">
+              Reward not found
+            </h2>
+            <p className="text-sm text-muted-foreground max-w-xs">
+              This reward may have been deleted or the link is invalid.
+            </p>
+          </div>
+          <Link href="/rewards/coupons">
+            <Button variant="outline" className="rounded-full px-6 gap-2">
+              <ChevronLeft className="h-3.5 w-3.5" />
+              Back to rewards
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#fafafa] dark:bg-black/5 pb-20">
-      {/* Editorial Header */}
+      {/* Header */}
       <div className="sticky top-0 z-20 bg-white/80 dark:bg-black/80 backdrop-blur-xl border-b border-border/50">
         <div className="max-w-[1400px] mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -201,25 +318,27 @@ export default function CreateCouponPage() {
             <div className="h-4 w-px bg-border/50" />
             <div>
               <div className="flex items-center gap-2">
-                <Sparkles className="h-3.5 w-3.5 text-indigo-500 animate-pulse" />
+                <Sparkles className="h-3.5 w-3.5 text-amber-500" />
                 <h1 className="text-sm font-bold tracking-tight">
-                  Reward Studio
+                  Edit Reward
                 </h1>
               </div>
               <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">
-                Designing new incentive
+                Editing · {reward.title}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-9 px-4 text-xs font-semibold rounded-full border-border/60"
-            >
-              Discard
-            </Button>
+            <Link href="/rewards/coupons">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-9 px-4 text-xs font-semibold rounded-full border-border/60"
+              >
+                Cancel
+              </Button>
+            </Link>
             <Button
               size="sm"
               onClick={() => formik.handleSubmit()}
@@ -229,9 +348,9 @@ export default function CreateCouponPage() {
               {loading ? (
                 <Loader2 className="h-3 w-3 animate-spin mr-2" />
               ) : (
-                <Zap className="h-3 w-3 mr-2 fill-current" />
+                <Save className="h-3 w-3 mr-2" />
               )}
-              Publish Reward
+              Save Changes
             </Button>
           </div>
         </div>
@@ -239,13 +358,13 @@ export default function CreateCouponPage() {
 
       <main className="max-w-[1400px] mx-auto px-6 py-10">
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-12">
-          {/* Form Side */}
+          {/* Form */}
           <div className="space-y-12">
             {/* 1. Identity */}
             <CreatorSection
               icon={Ticket}
               title="Identity & Presentation"
-              subtitle="Give your reward a personality. This is what members see first in the app."
+              subtitle="Update what members see when browsing rewards."
               accent="indigo"
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-2">
@@ -276,7 +395,7 @@ export default function CreateCouponPage() {
                     <Textarea
                       id="description"
                       rows={4}
-                      placeholder="Describe the value and instructions for the member..."
+                      placeholder="Describe the value and instructions..."
                       className="bg-white dark:bg-muted/10 border-border/40 resize-none"
                       {...formik.getFieldProps("description")}
                     />
@@ -292,7 +411,6 @@ export default function CreateCouponPage() {
                     <div className="flex flex-wrap gap-2">
                       {[
                         { id: "All", label: "All", icon: Dices },
-
                         {
                           id: "Spin Wheel",
                           label: "Spin Wheel",
@@ -309,7 +427,7 @@ export default function CreateCouponPage() {
                           icon: Gamepad2,
                         },
                       ].map((cat) => {
-                        const Icon = cat.icon;
+                        const CatIcon = cat.icon;
                         return (
                           <button
                             key={cat.id}
@@ -320,7 +438,7 @@ export default function CreateCouponPage() {
                                 if (current.length > 1) {
                                   formik.setFieldValue(
                                     "categories",
-                                    current.filter((c) => c !== cat.id),
+                                    current.filter((c) => c !== cat.id)
                                   );
                                 }
                               } else {
@@ -334,18 +452,17 @@ export default function CreateCouponPage() {
                               "flex items-center gap-1.5 px-4 py-2 rounded-full text-[10px] font-bold transition-all border",
                               formik.values.categories.includes(cat.id)
                                 ? "bg-indigo-600 border-indigo-600 text-white shadow-md shadow-indigo-500/20 scale-[1.05]"
-                                : "bg-white dark:bg-muted/10 border-border/40 text-muted-foreground hover:border-border",
+                                : "bg-white dark:bg-muted/10 border-border/40 text-muted-foreground hover:border-border"
                             )}
                           >
-                            {Icon && (
-                              <Icon
-                                className={cn(
-                                  "h-3 w-3",
-                                  formik.values.categories.includes(cat.id) &&
-                                    "animate-pulse",
-                                )}
-                              />
-                            )}
+                            <CatIcon
+                              className={cn(
+                                "h-3 w-3",
+                                formik.values.categories.includes(
+                                  cat.id
+                                ) && "animate-pulse"
+                              )}
+                            />
                             {cat.label}
                           </button>
                         );
@@ -357,7 +474,7 @@ export default function CreateCouponPage() {
                     <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
                       Cover Image
                     </Label>
-                    <div className="rounded-xl border border-dashed bordßer-border/60 p-1 bg-white dark:bg-black/5 overflow-hidden">
+                    <div className="rounded-xl border border-dashed border-border/60 p-1 bg-white dark:bg-black/5 overflow-hidden">
                       <ImageUploadWithCrop
                         currentImage={formik.values.image}
                         onImageUpdate={(url) =>
@@ -366,7 +483,7 @@ export default function CreateCouponPage() {
                         aspectRatio={16 / 9}
                         recommendedWidth={1200}
                         recommendedHeight={675}
-                        uploadButtonText="Upload Banner"
+                        uploadButtonText="Change Banner"
                       />
                     </div>
                   </div>
@@ -378,7 +495,7 @@ export default function CreateCouponPage() {
             <CreatorSection
               icon={Settings}
               title="Reward Economics"
-              subtitle="Define the value, cost, and validity. Be clear about what it's worth."
+              subtitle="Adjust the value, cost, and validity period."
               accent="amber"
             >
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -418,8 +535,12 @@ export default function CreateCouponPage() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="Flat">Flat Discount</SelectItem>
-                      <SelectItem value="Percentage">Percentage %</SelectItem>
-                      <SelectItem value="Access">Exclusive Access</SelectItem>
+                      <SelectItem value="Percentage">
+                        Percentage %
+                      </SelectItem>
+                      <SelectItem value="Access">
+                        Exclusive Access
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -458,11 +579,11 @@ export default function CreateCouponPage() {
               </div>
             </CreatorSection>
 
-            {/* 3. Availability & Delivery */}
+            {/* 3. Delivery */}
             <CreatorSection
               icon={PackageCheck}
               title="Delivery & Supply"
-              subtitle="How do members get their reward? Manage stock and automated vouchers."
+              subtitle="Manage stock tracking and redemption limits."
               accent="emerald"
             >
               <div className="bg-white dark:bg-muted/5 rounded-2xl border border-border/40 p-6 space-y-8 shadow-sm">
@@ -472,8 +593,7 @@ export default function CreateCouponPage() {
                       Supply Chain Type
                     </h3>
                     <p className="text-[11px] text-muted-foreground">
-                      Toggle this on if you're providing unique codes from a CSV
-                      file (e.g. Amazon, Starbucks).
+                      Toggle on if you provide unique voucher codes via CSV.
                     </p>
                   </div>
                   <div className="flex items-center gap-3 bg-muted/20 px-4 py-2 rounded-full border border-border/30">
@@ -482,7 +602,7 @@ export default function CreateCouponPage() {
                         "text-[10px] font-bold uppercase tracking-widest",
                         !formik.values.inventoryRequired
                           ? "text-indigo-600 dark:text-indigo-400"
-                          : "text-muted-foreground",
+                          : "text-muted-foreground"
                       )}
                     >
                       Manual
@@ -499,7 +619,7 @@ export default function CreateCouponPage() {
                         "text-[10px] font-bold uppercase tracking-widest",
                         formik.values.inventoryRequired
                           ? "text-emerald-600 dark:text-emerald-400"
-                          : "text-muted-foreground",
+                          : "text-muted-foreground"
                       )}
                     >
                       Inventory
@@ -511,51 +631,47 @@ export default function CreateCouponPage() {
                   <div className="flex items-start gap-3 p-4 rounded-xl bg-indigo-50/50 border border-indigo-100 dark:bg-indigo-500/10 dark:border-indigo-500/20">
                     <Info className="h-4 w-4 text-indigo-500 mt-0.5" />
                     <p className="text-[11px] text-indigo-700 dark:text-indigo-300 leading-relaxed font-medium">
-                      You'll be prompted to upload your CSV file containing the
-                      voucher codes immediately after you publish this reward.
+                      Upload voucher codes from the Inventory tab in Rewards
+                      & Codes after saving.
                     </p>
                   </div>
                 )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="totalUsageLimit"
-                        className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground"
-                      >
-                        Total Supply
-                      </Label>
-                      <Input
-                        id="totalUsageLimit"
-                        type="number"
-                        placeholder="0 = Unlimited"
-                        className="bg-white dark:bg-muted/10 border-border/40"
-                        {...formik.getFieldProps("totalUsageLimit")}
-                      />
-                      <p className="text-[9px] text-muted-foreground">
-                        Maximum times this reward can be redeemed globally.
-                      </p>
-                    </div>
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="totalUsageLimit"
+                      className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground"
+                    >
+                      Total Supply
+                    </Label>
+                    <Input
+                      id="totalUsageLimit"
+                      type="number"
+                      placeholder="0 = Unlimited"
+                      className="bg-white dark:bg-muted/10 border-border/40"
+                      {...formik.getFieldProps("totalUsageLimit")}
+                    />
+                    <p className="text-[9px] text-muted-foreground">
+                      Maximum redemptions globally. 0 = unlimited.
+                    </p>
                   </div>
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="perUserLimit"
-                        className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground"
-                      >
-                        Limit Per Member
-                      </Label>
-                      <Input
-                        id="perUserLimit"
-                        type="number"
-                        className="bg-white dark:bg-muted/10 border-border/40"
-                        {...formik.getFieldProps("perUserLimit")}
-                      />
-                      <p className="text-[9px] text-muted-foreground">
-                        How many times a single user can claim this.
-                      </p>
-                    </div>
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="perUserLimit"
+                      className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground"
+                    >
+                      Limit Per Member
+                    </Label>
+                    <Input
+                      id="perUserLimit"
+                      type="number"
+                      className="bg-white dark:bg-muted/10 border-border/40"
+                      {...formik.getFieldProps("perUserLimit")}
+                    />
+                    <p className="text-[9px] text-muted-foreground">
+                      Times a single user can claim this.
+                    </p>
                   </div>
                 </div>
               </div>
@@ -565,7 +681,7 @@ export default function CreateCouponPage() {
             <CreatorSection
               icon={ShieldCheck}
               title="Eligibility & Guardrails"
-              subtitle="Ensure your rewards reach the right members and prevent abuse."
+              subtitle="Control who can redeem and prevent abuse."
               accent="rose"
             >
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -621,7 +737,7 @@ export default function CreateCouponPage() {
                       Block Suspects
                     </Label>
                     <p className="text-[9px] text-muted-foreground">
-                      Require user to have no active community strikes.
+                      Require no active community strikes.
                     </p>
                   </div>
                   <div className="flex items-center justify-end mt-4">
@@ -638,26 +754,24 @@ export default function CreateCouponPage() {
             </CreatorSection>
           </div>
 
-          {/* Sticky Preview Side */}
+          {/* Sticky Preview */}
           <div className="relative">
             <div className="sticky top-28 space-y-6">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <div className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
                   <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                    Vibe Check: Live Preview
+                    Live Preview
                   </span>
                 </div>
                 <Eye className="h-3.5 w-3.5 text-muted-foreground opacity-20" />
               </div>
 
-              {/* The "Phone" Card Mockup */}
-              <div className="relative aspect-3/4 w-full max-w-[340px] mx-auto group">
-                {/* Background Shadow Glow */}
-                <div className="absolute inset-0 bg-indigo-500/10 blur-[60px] rounded-full group-hover:bg-indigo-500/20 transition-all duration-700" />
+              {/* Phone-style preview */}
+              <div className="relative aspect-[3/4] w-full max-w-[340px] mx-auto group">
+                <div className="absolute inset-0 bg-amber-500/10 blur-[60px] rounded-full group-hover:bg-amber-500/20 transition-all duration-700" />
 
                 <div className="relative h-full w-full bg-white dark:bg-zinc-900 rounded-[32px] shadow-2xl border border-white/40 dark:border-white/5 overflow-hidden flex flex-col p-2">
-                  {/* Inside Frame */}
                   <div className="flex-1 rounded-[24px] bg-[#f8f9ff] dark:bg-black/40 overflow-hidden flex flex-col">
                     {/* Header Image */}
                     <div className="h-[200px] w-full bg-muted relative">
@@ -668,16 +782,14 @@ export default function CreateCouponPage() {
                           className="h-full w-full object-cover"
                         />
                       ) : (
-                        <div className="h-full w-full flex flex-col items-center justify-center bg-linear-to-br from-indigo-50 to-indigo-100 dark:from-indigo-950/20 dark:to-indigo-900/10">
+                        <div className="h-full w-full flex flex-col items-center justify-center bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-950/20 dark:to-indigo-900/10">
                           <Ticket className="h-8 w-8 text-indigo-400 opacity-20" />
                           <p className="text-[10px] text-indigo-400 font-bold uppercase tracking-widest mt-2">
                             No Image
                           </p>
                         </div>
                       )}
-
-                      {/* Price Badge */}
-                      <div className="absolute bottom-4 left-4 cursor-default">
+                      <div className="absolute bottom-4 left-4">
                         <div className="bg-black/80 dark:bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-2 border border-white/20">
                           <Zap className="h-3 w-3 text-amber-400 fill-amber-400" />
                           <span className="text-[12px] font-bold text-white dark:text-black leading-none">
@@ -701,7 +813,7 @@ export default function CreateCouponPage() {
                                 "Scratch Card",
                                 "Spin Wheel",
                                 "Match & Win",
-                              ].includes(c),
+                              ].includes(c)
                             ) && (
                               <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/30 text-[8px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-tighter">
                                 <Sparkle className="h-2 w-2 fill-current" />
@@ -716,7 +828,7 @@ export default function CreateCouponPage() {
 
                         <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-3">
                           {formik.values.description ||
-                            "Describe your reward. Good descriptions increase redemption rates by 40%."}
+                            "Description will appear here."}
                         </p>
 
                         <div className="flex items-center gap-4 py-2">
@@ -740,7 +852,6 @@ export default function CreateCouponPage() {
                         </div>
                       </div>
 
-                      {/* CTA */}
                       <div className="mt-auto">
                         <Button className="w-full h-11 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs gap-2 group/btn shadow-lg shadow-indigo-500/20">
                           Redeem Now
@@ -752,37 +863,59 @@ export default function CreateCouponPage() {
                 </div>
               </div>
 
-              {/* Status Card */}
-              <div className="bg-white dark:bg-muted/5 rounded-2xl border border-border/40 p-5">
-                <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-4">
-                  Readiness Checklist
+              {/* Meta info */}
+              <div className="bg-white dark:bg-muted/5 rounded-2xl border border-border/40 p-5 space-y-3">
+                <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                  Reward Info
                 </h4>
-                <div className="space-y-3">
-                  {[
-                    {
-                      label: "Basic Info",
-                      state: formik.values.title && formik.values.description,
-                    },
-                    { label: "Price set", state: formik.values.tcCost > 0 },
-                    { label: "Delivery Logic", state: true },
-                    { label: "Security", state: true },
-                  ].map((item, i) => (
-                    <div key={i} className="flex items-center justify-between">
-                      <span className="text-[11px] font-medium text-muted-foreground">
-                        {item.label}
-                      </span>
-                      <div
+                <div className="space-y-2 text-[11px]">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Created</span>
+                    <span className="font-medium text-foreground">
+                      {reward.createdAt
+                        ? new Date(reward.createdAt).toLocaleDateString()
+                        : "—"}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">
+                      Last updated
+                    </span>
+                    <span className="font-medium text-foreground">
+                      {reward.updatedAt
+                        ? new Date(reward.updatedAt).toLocaleDateString()
+                        : "—"}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Status</span>
+                    <span
+                      className={cn(
+                        "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase border",
+                        reward.isActive
+                          ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+                          : "bg-muted text-muted-foreground border-border"
+                      )}
+                    >
+                      <span
                         className={cn(
-                          "h-4 w-4 rounded-full flex items-center justify-center border",
-                          item.state
-                            ? "bg-emerald-50 border-emerald-100 text-emerald-500 dark:bg-emerald-500/10 dark:border-emerald-500/20"
-                            : "bg-muted border-border/40",
+                          "h-1.5 w-1.5 rounded-full",
+                          reward.isActive
+                            ? "bg-emerald-500"
+                            : "bg-muted-foreground"
                         )}
-                      >
-                        {item.state && <Zap className="h-2 w-2 fill-current" />}
-                      </div>
-                    </div>
-                  ))}
+                      />
+                      {reward.isActive ? "Active" : "Inactive"}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">
+                      Inventory tracking
+                    </span>
+                    <span className="font-medium text-foreground">
+                      {formik.values.inventoryRequired ? "On" : "Off"}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>

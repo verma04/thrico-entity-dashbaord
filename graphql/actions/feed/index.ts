@@ -1,4 +1,7 @@
-import { useMutation, useQuery } from "@apollo/client";
+import { useMutation, useQuery, QueryHookOptions } from "@apollo/client";
+import { DateRangeInput, TimeRange } from "../dashbaord/dashboard-quries";
+export { TimeRange };
+export type { DateRangeInput };
 import {
   ADD_COMMENT,
   ADD_FEED,
@@ -193,14 +196,35 @@ export interface GetPromotedNodeEventsData {
   getPromotedNodeEvents: FeedPromotedEvent[];
 }
 
-export const useGetFeedIntelligenceKPI = (options?: any) =>
-  useQuery<GetFeedIntelligenceKPIData>(GET_FEED_INTELLIGENCE_KPI, options);
+export const useGetFeedIntelligenceKPI = (
+  timeRange?: TimeRange,
+  dateRange?: DateRangeInput,
+  options?: QueryHookOptions<GetFeedIntelligenceKPIData, { timeRange?: TimeRange; dateRange?: DateRangeInput }>
+) =>
+  useQuery<GetFeedIntelligenceKPIData, { timeRange?: TimeRange; dateRange?: DateRangeInput }>(GET_FEED_INTELLIGENCE_KPI, {
+    variables: { timeRange, dateRange },
+    ...options,
+  });
 
-export const useGetFeedYieldVelocity = (options?: any) =>
-  useQuery<GetFeedYieldVelocityData>(GET_FEED_YIELD_VELOCITY, options);
+export const useGetFeedYieldVelocity = (
+  timeRange?: TimeRange,
+  dateRange?: DateRangeInput,
+  options?: QueryHookOptions<GetFeedYieldVelocityData, { timeRange?: TimeRange; dateRange?: DateRangeInput }>
+) =>
+  useQuery<GetFeedYieldVelocityData, { timeRange?: TimeRange; dateRange?: DateRangeInput }>(GET_FEED_YIELD_VELOCITY, {
+    variables: { timeRange, dateRange },
+    ...options,
+  });
 
-export const useGetFeedInterestMatrix = (options?: any) =>
-  useQuery<GetFeedInterestMatrixData>(GET_FEED_INTEREST_MATRIX, options);
+export const useGetFeedInterestMatrix = (
+  timeRange?: TimeRange,
+  dateRange?: DateRangeInput,
+  options?: QueryHookOptions<GetFeedInterestMatrixData, { timeRange?: TimeRange; dateRange?: DateRangeInput }>
+) =>
+  useQuery<GetFeedInterestMatrixData, { timeRange?: TimeRange; dateRange?: DateRangeInput }>(GET_FEED_INTEREST_MATRIX, {
+    variables: { timeRange, dateRange },
+    ...options,
+  });
 
 export const useGetPromotedNodeEvents = (options?: any) =>
   useQuery<GetPromotedNodeEventsData>(GET_PROMOTED_NODE_EVENTS, options);

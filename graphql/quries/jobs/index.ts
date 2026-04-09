@@ -64,8 +64,8 @@ mutation ChangeJobVerification($input: ChangeJobStatusInput!) {
 }`;
 
 export const GET_JOB_STATS = gql`
-  query GetJobStats($timeRange: TimeRange!) {
-    getJobStats(timeRange: $timeRange) {
+  query GetJobStats($timeRange: TimeRange, $dateRange: DateRangeInput) {
+    getJobStats(timeRange: $timeRange, dateRange: $dateRange) {
       totalJobs
       activeJobs
       totalApplications

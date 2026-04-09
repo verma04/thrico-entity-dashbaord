@@ -15,7 +15,11 @@ import {
   REORDER_SHOP_BANNERS,
   UPDATE_SHOP_PRODUCT_MEDIA,
   UPDATE_SHOP_PRODUCT_OPTIONS,
+  GET_SHOP_STATS,
 } from "./shop-queries";
+import { TimeRange, DateRangeInput } from "../dashbaord/dashboard-quries";
+export { TimeRange };
+export type { DateRangeInput };
 
 // ============================================================================
 // Query Hooks
@@ -42,6 +46,12 @@ export const useShopProduct = (id: string) => {
 
 export const useShopBanners = () => {
   return useQuery(GET_SHOP_BANNERS);
+};
+
+export const useGetShopStats = (timeRange?: TimeRange, dateRange?: DateRangeInput) => {
+  return useQuery(GET_SHOP_STATS, {
+    variables: { timeRange, dateRange },
+  });
 };
 
 // ============================================================================

@@ -7,12 +7,43 @@ import {
   GET_ALL_USER,
   GET_USER_DETIALS,
   GET_USER_STATS,
+  GET_MEMBERS_STATS,
+  GET_GROWTH_STATS,
 } from "../../quries/user";
-import { TimeRange } from "../dashbaord/dashboard-quries";
+import { TimeRange, DateRangeInput } from "../dashbaord/dashboard-quries";
 
 // ---------------------------------------------------------
 // TYPES & INTERFACES
 // ---------------------------------------------------------
+
+export interface GrowthStats {
+  totalNewMembers: number;
+  growthRate: number;
+  data: {
+    date: string;
+    count: number;
+  }[];
+}
+
+export interface GetGrowthStatsResponse {
+  getGrowthStats: GrowthStats;
+}
+
+export interface MembersStats {
+
+  totalMembers: number;
+  activeMembers: number;
+  newMembersThisMonth: number;
+  activeRate: number;
+  totalMembersChange: number;
+  activeMembersChange: number;
+  newMembersChange: number;
+  activeRateChange: number;
+}
+
+export interface GetMembersStatsResponse {
+  getMembersStats: MembersStats;
+}
 
 export interface UserAnalytics {
   totalMembers: number;
@@ -134,3 +165,25 @@ export const useGetUserStats = (userId: string, options?: any) =>
     skip: !userId,
     ...options,
   });
+
+export const useGetMembersStats = (
+  timeRange?: TimeRange,
+  dateRange?: DateRangeInput,
+  options?: any,
+) =>
+  useQuery<GetMembersStatsResponse>(GET_MEMBERS_STATS, {
+    variables: { timeRange, dateRange },
+    ...options,
+  });
+
+export const useGetGrowthStats = (
+  timeRange?: TimeRange,
+  dateRange?: DateRangeInput,
+  options?: any,
+) =>
+  useQuery<GetGrowthStatsResponse>(GET_GROWTH_STATS, {
+    variables: { timeRange, dateRange },
+    ...options,
+  });
+
+

@@ -276,3 +276,33 @@ export const ADD_NEW_MEMBER = gql`
     }
   }
 `;
+
+export const GET_MEMBERS_STATS = gql`
+  query GetMembersStats($timeRange: TimeRange, $dateRange: DateRangeInput) {
+    getMembersStats(timeRange: $timeRange, dateRange: $dateRange) {
+      totalMembers
+      activeMembers
+      newMembersThisMonth
+      activeRate
+      totalMembersChange
+      activeMembersChange
+      newMembersChange
+      activeRateChange
+    }
+  }
+`;
+
+export const GET_GROWTH_STATS = gql`
+  query GetGrowthStats($timeRange: TimeRange, $dateRange: DateRangeInput) {
+    getGrowthStats(timeRange: $timeRange, dateRange: $dateRange) {
+      totalNewMembers
+      growthRate
+      data {
+        date
+        count
+      }
+    }
+  }
+`;
+
+

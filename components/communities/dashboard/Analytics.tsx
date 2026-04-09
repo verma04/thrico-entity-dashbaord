@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { useGetCommunitiesStats } from "@/graphql/actions/communities";
-import { TimeRange } from "@/graphql/actions";
+import { useGetCommunitiesStats, TopCommunity, TopCreator, StatusDistributionPoint } from "@/graphql/actions/communities";
+import { TimeRange } from "@/graphql/actions/dashboard";
 import {
   Users,
   LayoutGrid,
@@ -34,14 +34,11 @@ import {
   EcosystemCard
 } from "@/components/layout/ecosystem/ecosystem-analytics";
 import { cn } from "@/lib/utils";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { subDays } from "date-fns";
+import { DateRange } from "react-day-picker";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
+import moment from "moment";
 
 const STATUS_COLORS = ["#18181b", "#3f3f46", "#71717a", "#a1a1aa", "#e4e4e7"];
 
@@ -69,7 +66,32 @@ const EmptyChart = ({ message }: { message: string }) => (
 
 export default function CommunitiesAnalytics() {
   const [timeRange, setTimeRange] = useState<TimeRange>(TimeRange.LAST_7_DAYS);
-  const { data, loading, refetch } = useGetCommunitiesStats(timeRange);
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: subDays(new Date(), 7),
+    to: new Date(),
+  });
+
+  const handleDateChange = (range: DateRange | undefined) => {
+    setDateRange(range);
+    if (!range?.from || !range?.to) return;
+    const diffDays = Math.round(
+      (range.to.getTime() - range.from.getTime()) / (1000 * 60 * 60 * 24),
+    );
+    if (diffDays <= 1) setTimeRange(TimeRange.LAST_24_HOURS);
+    else if (diffDays <= 7) setTimeRange(TimeRange.LAST_7_DAYS);
+    else if (diffDays <= 30) setTimeRange(TimeRange.LAST_30_DAYS);
+    else if (diffDays <= 90) setTimeRange(TimeRange.LAST_90_DAYS);
+  };
+
+  const { data, loading, refetch } = useGetCommunitiesStats(
+    timeRange,
+    dateRange?.from && dateRange?.to
+      ? {
+          startDate: dateRange.from.toISOString(),
+          endDate: dateRange.to.toISOString(),
+        }
+      : undefined
+  );
   const stats = data?.getCommunitiesStats;
 
   const kpis = [
@@ -108,7 +130,7 @@ export default function CommunitiesAnalytics() {
   ];
 
   const statusDistribution = stats?.statusDistribution ?? [];
-  const totalStatusCount = statusDistribution.reduce((s, i) => s + i.value, 0);
+  const totalStatusCount = statusDistribution.reduce((acc: number, item: StatusDistributionPoint) => acc + item.value, 0);
   const topCommunities = stats?.topCommunities ?? [];
   const topCreators = stats?.topCreators ?? [];
 
@@ -125,35 +147,25 @@ export default function CommunitiesAnalytics() {
         <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-2 px-1">
                <Activity className="h-4 w-4 text-emerald-500" />
-               <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+               <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground italic">
                   Network Status: Operational
                </span>
             </div>
 
             <div className="flex items-center gap-3">
-              <Select
-                value={timeRange}
-                onValueChange={(v) => setTimeRange(v as TimeRange)}
-              >
-                <SelectTrigger className="h-9 w-[160px] rounded-lg border-zinc-200 bg-white text-xs font-medium">
-                  <Timer size={14} className="mr-2 text-zinc-400" />
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={TimeRange.LAST_24_HOURS} className="text-xs">Last 24 Hours</SelectItem>
-                  <SelectItem value={TimeRange.LAST_7_DAYS} className="text-xs">Last 7 Days</SelectItem>
-                  <SelectItem value={TimeRange.LAST_30_DAYS} className="text-xs">Last 30 Days</SelectItem>
-                  <SelectItem value={TimeRange.LAST_90_DAYS} className="text-xs">Last 90 Days</SelectItem>
-                </SelectContent>
-              </Select>
-              <div className="h-4 w-px bg-border" />
+              <DateRangePicker 
+                date={dateRange}
+                onDateChange={handleDateChange}
+                defaultValue="LAST_7_DAYS"
+              />
+              <div className="h-4 w-px bg-border mx-1" />
               <Button
                 variant="outline"
-                size="icon"
+                className="h-9 px-4 rounded-xl border-slate-200 font-bold hover:bg-slate-50 transition-all gap-2"
                 onClick={() => refetch()}
-                className={cn("h-9 w-9 text-zinc-400", loading && "animate-spin")}
               >
-                <RotateCcw size={14} />
+                <RotateCcw className={cn("h-3.5 w-3.5 text-emerald-500", loading && "animate-spin")} />
+                Refresh
               </Button>
             </div>
         </div>
@@ -179,7 +191,7 @@ export default function CommunitiesAnalytics() {
                   <div className="h-72"><EmptyChart message="No community data available for this period." /></div>
                   ) : (
                   <div className="space-y-1">
-                     {topCommunities.slice(0, 6).map((community, idx) => {
+                     {topCommunities.slice(0, 6).map((community: TopCommunity, idx: number) => {
                         const maxMembers = topCommunities[0]?.members || 1;
                         const barWidth = Math.round((community.members / maxMembers) * 100);
 
@@ -227,7 +239,7 @@ export default function CommunitiesAnalytics() {
                   icon={Crown}
                >
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {topCreators.slice(0, 6).map((creator, idx) => (
+                  {topCreators.slice(0, 6).map((creator: TopCreator, idx: number) => (
                      <div
                         key={creator.name}
                         className="flex items-center justify-between p-3 rounded-xl border border-zinc-100 bg-white hover:border-zinc-200 hover:shadow-sm transition-all group"
@@ -281,7 +293,7 @@ export default function CommunitiesAnalytics() {
                               stroke="none"
                               animationDuration={1000}
                               >
-                              {statusDistribution.map((_, i) => (
+                              {statusDistribution.map((_: any, i: number) => (
                                  <Cell
                                     key={i}
                                     fill={STATUS_COLORS[i % STATUS_COLORS.length]}
@@ -302,12 +314,12 @@ export default function CommunitiesAnalytics() {
                         </ResponsiveContainer>
                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                            <div className="text-center translate-y-1">
-                              <span className="text-2xl font-bold text-zinc-900 block leading-none">
-                              {totalStatusCount}
-                              </span>
-                              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mt-1">
-                              TOTAL
-                              </p>
+                               <span className="text-2xl font-bold text-zinc-900 block leading-none">
+                               {totalStatusCount}
+                               </span>
+                               <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mt-1">
+                               TOTAL
+                               </p>
                            </div>
                         </div>
                         </>
@@ -315,7 +327,7 @@ export default function CommunitiesAnalytics() {
                   </div>
 
                   <div className="w-full space-y-2">
-                     {statusDistribution.map((item, i) => (
+                     {statusDistribution.map((item: StatusDistributionPoint, i: number) => (
                         <div
                         key={item.name}
                         className="flex items-center justify-between p-2.5 rounded-lg bg-zinc-50/50 border border-zinc-100"
@@ -359,3 +371,4 @@ export default function CommunitiesAnalytics() {
     </EcosystemWrapper>
   );
 }
+

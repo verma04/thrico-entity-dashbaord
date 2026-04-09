@@ -1,6 +1,6 @@
 export const GET_POLL_STATS = gql`
-  query GetPollStats($timeRange: TimeRange!) {
-    getPollStats(timeRange: $timeRange) {
+  query GetPollStats($timeRange: TimeRange, $dateRange: DateRangeInput) {
+    getPollStats(timeRange: $timeRange, dateRange: $dateRange) {
       totalPolls
       activePolls
       votes

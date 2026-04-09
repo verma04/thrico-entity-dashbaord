@@ -128,6 +128,22 @@ export const GET_SHOP_BANNERS = gql`
   }
 `;
 
+export const GET_SHOP_STATS = gql`
+  query GetShopStats($timeRange: TimeRange, $dateRange: DateRangeInput) {
+    getShopStats(timeRange: $timeRange, dateRange: $dateRange) {
+      totalViews
+      activeProducts
+      activeBanners
+      totalCategories
+      lowStockItems
+      viewsChange
+      productsChange
+      bannersChange
+      categoriesChange
+    }
+  }
+`;
+
 // ============================================================================
 // MUTATIONS
 // ============================================================================

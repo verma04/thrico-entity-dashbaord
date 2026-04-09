@@ -105,6 +105,11 @@ export function useGetModuleActivity(
 // PLATFORM MODULE ACTIVITY
 // ---------------------------------------------------------
 
+export interface DateRangeInput {
+  startDate: string | null;
+  endDate: string | null;
+}
+
 export interface PlatformModuleItem {
   name: string;
   itemCount: number;
@@ -122,12 +127,13 @@ export interface GetPlatformModuleActivityData {
 }
 
 export interface GetPlatformModuleActivityVariables {
-  timeRange: TimeRange;
+  timeRange?: TimeRange;
+  dateRange?: DateRangeInput;
 }
 
 const GET_PLATFORM_MODULE_ACTIVITY = gql`
-  query GetPlatformModuleActivity($timeRange: TimeRange!) {
-    getPlatformModuleActivity(timeRange: $timeRange) {
+  query GetPlatformModuleActivity($timeRange: TimeRange, $dateRange: DateRangeInput) {
+    getPlatformModuleActivity(timeRange: $timeRange, dateRange: $dateRange) {
       total
       active
       inactive
@@ -140,7 +146,8 @@ const GET_PLATFORM_MODULE_ACTIVITY = gql`
 `;
 
 export function useGetPlatformModuleActivity(
-  timeRange: TimeRange,
+  timeRange?: TimeRange,
+  dateRange?: DateRangeInput,
   options?: QueryHookOptions<
     GetPlatformModuleActivityData,
     GetPlatformModuleActivityVariables
@@ -150,7 +157,8 @@ export function useGetPlatformModuleActivity(
     GetPlatformModuleActivityData,
     GetPlatformModuleActivityVariables
   >(GET_PLATFORM_MODULE_ACTIVITY, {
-    variables: { timeRange },
+    variables: { timeRange, dateRange },
     ...options,
   });
 }
+

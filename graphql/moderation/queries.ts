@@ -86,8 +86,8 @@ export const GET_MODERATION_SETTINGS = gql`
 `;
 
 export const GET_MODERATION_STATS = gql`
-  query GetModerationStats {
-    getModerationStats {
+  query GetModerationStats($timeRange: TimeRange, $dateRange: DateRangeInput) {
+    getModerationStats(timeRange: $timeRange, dateRange: $dateRange) {
       totalReports
       pendingReports
       resolvedReports
@@ -99,8 +99,8 @@ export const GET_MODERATION_STATS = gql`
 `;
 
 export const GET_AI_MODERATION_DASHBOARD = gql`
-  query GetAiModerationDashboard {
-    getAiModerationDashboard {
+  query GetAiModerationDashboard($timeRange: TimeRange, $dateRange: DateRangeInput) {
+    getAiModerationDashboard(timeRange: $timeRange, dateRange: $dateRange) {
       totalPosts
       pendingModeration
       flaggedContent
@@ -117,6 +117,36 @@ export const GET_AI_MODERATION_LOGS = gql`
         contentId
         classification
         confidence
+        model
+        createdAt
+      }
+      totalCount
+    }
+  }
+`;
+
+export const GET_HISTORY = gql`
+  query GetHistory($limit: Int, $offset: Int) {
+    getModerationLogs(limit: $limit, offset: $offset) {
+      items {
+        id
+        contentType
+        aiLabel
+        decision
+        actionTaken
+        createdAt
+        user {
+          firstName
+          lastName
+        }
+      }
+      totalCount
+    }
+
+    getAiTokenUsage(limit: $limit, offset: $offset) {
+      items {
+        module
+        tokens
         model
         createdAt
       }

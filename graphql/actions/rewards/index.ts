@@ -14,6 +14,9 @@ import {
   DELETE_VOUCHER,
 } from "../../quries/rewards/rewards-queries";
 import { GET_SPIN_SCRATCH_STATS } from "../../quries/rewards/stats";
+import { TimeRange, DateRangeInput } from "../dashbaord/dashboard-quries";
+export { TimeRange };
+export type { DateRangeInput };
 
 // Central exports for sub-modules
 export * from "./spin-wheel";
@@ -43,7 +46,9 @@ export const useGetRedemptions = (variables?: {
   pagination?: { page: number; limit: number };
 }) => useQuery(GET_REDEMPTIONS, { variables });
 
-export const useGetRewardStats = () => useQuery(GET_REWARD_STATS);
+export const useGetRewardStats = (timeRange?: TimeRange, dateRange?: DateRangeInput) => 
+  useQuery(GET_REWARD_STATS, { variables: { timeRange, dateRange } });
+
 
 export const useGetRewardSecuritySettings = () =>
   useQuery(GET_REWARD_SECURITY_SETTINGS);
@@ -84,4 +89,5 @@ export const useDeleteVoucher = (options?: any) =>
     refetchQueries: [{ query: GET_ALL_VOUCHERS }, { query: GET_REWARD_STATS }],
   });
 
-export const useGetSpinScratchStats = () => useQuery(GET_SPIN_SCRATCH_STATS);
+export const useGetSpinScratchStats = (timeRange?: TimeRange, dateRange?: DateRangeInput) => 
+  useQuery(GET_SPIN_SCRATCH_STATS, { variables: { timeRange, dateRange } });

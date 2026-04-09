@@ -1,5 +1,7 @@
 import { gql, QueryHookOptions, useQuery } from "@apollo/client";
-import { TimeRange } from "../actions";
+import { DateRangeInput, TimeRange } from "../actions/dashbaord/dashboard-quries";
+export { TimeRange };
+export type { DateRangeInput };
 
 // ---------------------------------------------------------
 // TYPES
@@ -255,8 +257,8 @@ export function useGetSurveys(
 }
 
 export const GET_SURVEY_STATS = gql`
-  query GetSurveyStats($timeRange: TimeRange!) {
-    getSurveyStats(timeRange: $timeRange) {
+  query GetSurveyStats($timeRange: TimeRange, $dateRange: DateRangeInput) {
+    getSurveyStats(timeRange: $timeRange, dateRange: $dateRange) {
       totalSurveys
       activeSurveys
       totalResponses
@@ -301,11 +303,18 @@ export interface GetSurveyStatsResponse {
 }
 
 export const useGetSurveyStats = (
-  timeRange: TimeRange,
-  options?: QueryHookOptions<GetSurveyStatsResponse, { timeRange: TimeRange }>,
+  timeRange?: TimeRange,
+  dateRange?: DateRangeInput,
+  options?: QueryHookOptions<
+    GetSurveyStatsResponse,
+    { timeRange?: TimeRange; dateRange?: DateRangeInput }
+  >,
 ) =>
-  useQuery<GetSurveyStatsResponse, { timeRange: TimeRange }>(GET_SURVEY_STATS, {
-    variables: { timeRange },
+  useQuery<
+    GetSurveyStatsResponse,
+    { timeRange?: TimeRange; dateRange?: DateRangeInput }
+  >(GET_SURVEY_STATS, {
+    variables: { timeRange, dateRange },
     ...options,
   });
 

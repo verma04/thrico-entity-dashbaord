@@ -9,8 +9,15 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-export function AiModerationDashboardWidget() {
-  const { data, loading, error } = useGetAiModerationDashboard();
+import { TimeRange, DateRangeInput } from "@/graphql/moderation/hooks";
+
+interface AiModerationWidgetProps {
+  timeRange?: TimeRange;
+  dateRange?: DateRangeInput;
+}
+
+export function AiModerationDashboardWidget({ timeRange, dateRange }: AiModerationWidgetProps) {
+  const { data, loading, error } = useGetAiModerationDashboard(timeRange, dateRange);
 
   if (error) {
     return (

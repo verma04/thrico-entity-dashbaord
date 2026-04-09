@@ -4,22 +4,21 @@ import React, { useState } from "react";
 import Link from "next/link";
 import {
   ShoppingBag,
-  TrendingUp,
   Package,
   Plus,
-  ArrowRight,
   Eye,
   Image as ImageIcon,
   Layers,
-  AlertCircle,
-  Zap,
   ShieldCheck,
-  Activity,
   RotateCcw,
   Timer,
   LayoutGrid,
 } from "lucide-react";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
+import { subDays } from "date-fns";
+import { DateRange } from "react-day-picker";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
@@ -28,51 +27,72 @@ import {
   EcosystemCard,
 } from "@/components/layout/ecosystem/ecosystem-analytics";
 import { Button } from "@/components/ui/button";
+import { useGetShopStats, TimeRange } from "@/graphql/actions/shop/shop-hooks";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 export default function ShopDashboardPage() {
-  const loading = false;
+  const [timeRange, setTimeRange] = useState<TimeRange>(TimeRange.LAST_7_DAYS);
+  const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
+    from: subDays(new Date(), 7),
+    to: new Date(),
+  });
+
+  const handleDateChange = (range: DateRange | undefined) => {
+    setDateRange(range);
+    if (!range?.from || !range?.to) return;
+    const diffDays = Math.round(
+      (range.to.getTime() - range.from.getTime()) / (1000 * 60 * 60 * 24),
+    );
+    if (diffDays <= 1) setTimeRange(TimeRange.LAST_24_HOURS);
+    else if (diffDays <= 7) setTimeRange(TimeRange.LAST_7_DAYS);
+    else if (diffDays <= 30) setTimeRange(TimeRange.LAST_30_DAYS);
+    else if (diffDays <= 90) setTimeRange(TimeRange.LAST_90_DAYS);
+  };
+
+  const formattedDateRange = dateRange?.from && dateRange?.to
+    ? {
+        startDate: dateRange.from.toISOString(),
+        endDate: dateRange.to.toISOString(),
+      }
+    : undefined;
+
+  const { data, loading } = useGetShopStats(timeRange, formattedDateRange);
+  const stats = data?.getShopStats;
+
   const kpis = [
     {
       title: "Total Views",
-      value: "1,234",
-      trend: 12,
+      value: loading ? "—" : (stats?.totalViews?.toLocaleString() ?? "0"),
+      trend: stats?.viewsChange,
       icon: Eye,
       color: "text-indigo-600",
       bg: "bg-indigo-50",
     },
     {
       title: "Active Products",
-      value: "156",
-      trend: -2,
+      value: loading ? "—" : (stats?.activeProducts?.toLocaleString() ?? "0"),
+      trend: stats?.productsChange,
       icon: Package,
       color: "text-emerald-600",
       bg: "bg-emerald-50",
     },
     {
       title: "Active Banners",
-      value: "5",
-      trend: 0,
+      value: loading ? "—" : (stats?.activeBanners?.toLocaleString() ?? "0"),
+      trend: stats?.bannersChange,
       icon: ImageIcon,
       color: "text-blue-600",
       bg: "bg-blue-50",
     },
     {
       title: "Categories",
-      value: "8",
-      trend: 0,
+      value: loading ? "—" : (stats?.totalCategories?.toLocaleString() ?? "0"),
+      trend: stats?.categoriesChange,
       icon: Layers,
       color: "text-amber-600",
       bg: "bg-amber-50",
     },
-  ];
-
-  const quickActions = [
-    { label: "Manage Banners", href: "/shop/banners" },
-    { label: "Manage Categories", href: "#" },
-    { label: "Product Tags", href: "#" },
-    { label: "Collections", href: "#" },
-    { label: "SEO Settings", href: "#" },
   ];
 
   return (
@@ -94,8 +114,15 @@ export default function ShopDashboardPage() {
           </div>
 
           <div className="flex items-center gap-3">
+            <DateRangePicker 
+              date={dateRange}
+              onDateChange={handleDateChange}
+              defaultValue="LAST_7_DAYS"
+            />
+            <div className="h-4 w-px bg-zinc-200 mx-1" />
             <Link href="/shop/all">
               <Button
+
                 variant="outline"
                 className="h-9 px-4 rounded-lg border-zinc-200 font-bold text-[10px] uppercase tracking-widest text-zinc-600 gap-2 hover:bg-zinc-50 transition-all shadow-sm"
               >
@@ -119,71 +146,6 @@ export default function ShopDashboardPage() {
           {kpis.map((kpi, i) => (
             <EcosystemKPI key={i} {...kpi} trendLabel="Period stats" />
           ))}
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <div className="lg:col-span-8">
-            <EcosystemCard
-              title="Shop Activity"
-              description="Real-time visibility metrics"
-              icon={TrendingUp}
-            >
-              <div className="flex flex-col items-center justify-center p-12 text-center min-h-[350px]">
-                <div className="w-16 h-16 rounded-2xl bg-zinc-50 border border-zinc-100 flex items-center justify-center text-zinc-300 mb-6">
-                  <Activity className="h-8 w-8 animate-pulse" />
-                </div>
-                <h3 className="text-sm font-bold text-zinc-900 uppercase tracking-tight mb-2">
-                  Intelligence Sync Pending
-                </h3>
-                <p className="text-[10px] font-medium text-zinc-400 uppercase tracking-widest leading-relaxed max-w-sm">
-                  We are aggregating storefront performance data. Visual insights
-                  will automatically populate once the synchronization is
-                  complete.
-                </p>
-              </div>
-            </EcosystemCard>
-          </div>
-
-          <div className="lg:col-span-4 space-y-6">
-            <EcosystemCard
-              title="Stock Alerts"
-              description="Inventory exceptions"
-              icon={AlertCircle}
-            >
-              <div className="p-5 rounded-xl border border-rose-100 bg-rose-50/20 mb-4">
-                <p className="text-xs font-bold text-zinc-800 uppercase tracking-tight mb-4">
-                  12 items require restocking attention.
-                </p>
-                <Link href="/shop/all?filter=low-stock">
-                  <Button
-                    variant="outline"
-                    className="w-full h-9 rounded-lg border-rose-200 font-bold text-[9px] uppercase tracking-widest text-rose-600 hover:bg-rose-600 hover:text-white transition-all shadow-sm"
-                  >
-                    View Low Stock
-                  </Button>
-                </Link>
-              </div>
-            </EcosystemCard>
-
-            <EcosystemCard
-              title="Operational Tools"
-              description="Common workflows"
-              icon={Zap}
-            >
-              <div className="grid grid-cols-1 gap-2">
-                {quickActions.map((action, i) => (
-                  <Link key={i} href={action.href}>
-                    <div className="group/btn flex items-center justify-between p-3.5 rounded-lg border border-zinc-100 hover:bg-zinc-50 hover:border-indigo-200 transition-all">
-                      <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest group-hover:text-indigo-600">
-                        {action.label}
-                      </span>
-                      <ArrowRight className="h-3.5 w-3.5 text-zinc-300 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all" />
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </EcosystemCard>
-          </div>
         </div>
       </EcosystemContainer>
     </EcosystemWrapper>

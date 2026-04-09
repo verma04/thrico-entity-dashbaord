@@ -1,24 +1,19 @@
 "use client";
 
 import React from "react";
-import { useGetModerationStats } from "@/graphql/moderation/hooks";
 import { ShieldAlert, AlertTriangle, Link2, Flag, CheckCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-export function ModerationSummaryWidget() {
-  const { data, loading, error } = useGetModerationStats();
+interface ModerationSummaryProps {
+  statsData?: any;
+  loading?: boolean;
+}
 
-  if (error) {
-    return (
-      <div className="p-6 rounded-xl border border-rose-200 bg-rose-50 text-rose-600">
-        <p className="text-sm font-medium">Failed to load moderation metrics.</p>
-      </div>
-    );
-  }
+export function ModerationSummaryWidget({ statsData, loading }: ModerationSummaryProps) {
+  const stats = statsData?.getModerationStats;
 
-  const stats = data?.getModerationStats;
 
   const items = [
     {

@@ -40,11 +40,7 @@ interface PlanOverview {
   };
 }
 
-const YearlyUpgrade = ({
-  planOverview,
-}: {
-  planOverview: PlanOverview;
-}) => {
+const YearlyUpgrade = ({ planOverview }: { planOverview: PlanOverview }) => {
   const [showModal, setShowModal] = useState(false);
 
   const { refetch, loading: statusLoader } = useCheckEntitySubscription();
@@ -202,8 +198,7 @@ const YearlyUpgrade = ({
                           New Plan
                         </p>
                         <p className="font-semibold text-foreground">
-                          {summary?.planName ||
-                            planOverview.package?.packageId}{" "}
+                          {summary?.planName || planOverview.package?.packageId}{" "}
                           (Yearly)
                         </p>
                         <p className="text-sm text-muted-foreground">
@@ -352,7 +347,7 @@ const YearlyUpgrade = ({
       {/* Inline CTA Button (used from PlanOverview) */}
       <Button
         variant="outline"
-        className="border-primary/30 text-primary hover:bg-primary/10 bg-transparent"
+        className="border-primary/30 text-primary hover:bg-primary/10 "
         onClick={() => setShowModal(true)}
       >
         Upgrade

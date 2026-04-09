@@ -42,13 +42,44 @@ import {
   useGetFeedYieldVelocity,
   useGetFeedInterestMatrix,
   useGetPromotedNodeEvents,
+  TimeRange,
 } from "@/graphql/actions/feed";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
+import { subDays } from "date-fns";
+import { DateRange } from "react-day-picker";
 
 export default function FeedPage() {
-  const { data: kpiData } = useGetFeedIntelligenceKPI();
-  const { data: yieldData } = useGetFeedYieldVelocity();
-  const { data: interestData } = useGetFeedInterestMatrix();
-  const { data: eventsData } = useGetPromotedNodeEvents();
+  const [timeRange, setTimeRange] = React.useState<TimeRange>(TimeRange.LAST_7_DAYS);
+  const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
+    from: subDays(new Date(), 7),
+    to: new Date(),
+  });
+
+  const handleDateChange = (range: DateRange | undefined) => {
+    setDateRange(range);
+    if (!range?.from || !range?.to) return;
+    const diffDays = Math.round(
+      (range.to.getTime() - range.from.getTime()) / (1000 * 60 * 60 * 24),
+    );
+    if (diffDays <= 1) setTimeRange(TimeRange.LAST_24_HOURS);
+    else if (diffDays <= 7) setTimeRange(TimeRange.LAST_7_DAYS);
+    else if (diffDays <= 30) setTimeRange(TimeRange.LAST_30_DAYS);
+    else if (diffDays <= 90) setTimeRange(TimeRange.LAST_90_DAYS);
+  };
+
+  const formattedDateRange = dateRange?.from && dateRange?.to
+    ? {
+        startDate: dateRange.from.toISOString(),
+        endDate: dateRange.to.toISOString(),
+      }
+    : undefined;
+
+  const { data: kpiData } = useGetFeedIntelligenceKPI(timeRange, formattedDateRange);
+  const { data: yieldData } = useGetFeedYieldVelocity(timeRange, formattedDateRange);
+  const { data: interestData } = useGetFeedInterestMatrix(timeRange, formattedDateRange);
+  const { data: eventsData } = useGetPromotedNodeEvents({
+    variables: { timeRange, dateRange: formattedDateRange }
+  });
 
   const kpis = kpiData?.getFeedIntelligenceKPI;
 
@@ -80,13 +111,11 @@ export default function FeedPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              className="h-10 px-4 rounded-xl border-slate-200 font-black text-[10px] uppercase tracking-widest text-slate-600 gap-3 hover:bg-slate-50 transition-all shadow-sm"
-            >
-              <Activity className="h-4 w-4 text-emerald-500" />
-              Live telemetry
-            </Button>
+            <DateRangePicker 
+              date={dateRange}
+              onDateChange={handleDateChange}
+              defaultValue="LAST_7_DAYS"
+            />
             <div className="h-4 w-px bg-slate-200 mx-1" />
             <Link href="/feed/settings">
               <Button className="h-10 px-6 rounded-xl bg-slate-900 border-slate-800 font-black text-[10px] uppercase tracking-widest gap-2 shadow-xl hover:bg-black transition-all active:scale-95 group">
@@ -216,7 +245,7 @@ export default function FeedPage() {
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
-                      data={matrixData}
+                      data={matrixData as any[]}
                       cx="50%"
                       cy="50%"
                       innerRadius={70}

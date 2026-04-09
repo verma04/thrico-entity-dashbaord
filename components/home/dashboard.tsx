@@ -34,14 +34,10 @@ import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-acti
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { useGetCommunityKPIs, TimeRange } from "@/graphql/actions/dashboard";
+import { subDays } from "date-fns";
+import { DateRange } from "react-day-picker";
 
 // ---------------------------------------------------------------------------
 // KPI Card
@@ -168,7 +164,36 @@ const ModulePerformanceCard = ({
 // ---------------------------------------------------------------------------
 export default function Dashboard() {
   const [timeRange, setTimeRange] = useState<TimeRange>(TimeRange.LAST_7_DAYS);
-  const { data, loading, refetch } = useGetCommunityKPIs(timeRange);
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: subDays(new Date(), 7),
+    to: new Date(),
+  });
+
+  const handleDateChange = (range: DateRange | undefined) => {
+    setDateRange(range);
+    
+    // Simple mapping logic: if the range matches a preset, set the enum
+    if (!range?.from || !range?.to) return;
+    
+    const diffDays = Math.round((range.to.getTime() - range.from.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (diffDays <= 1) setTimeRange(TimeRange.LAST_24_HOURS);
+    else if (diffDays <= 7) setTimeRange(TimeRange.LAST_7_DAYS);
+    else if (diffDays <= 30) setTimeRange(TimeRange.LAST_30_DAYS);
+    else if (diffDays <= 90) setTimeRange(TimeRange.LAST_90_DAYS);
+    // If custom, we currently still use the closest enum until backend supports custom
+  };
+
+  const { data, loading, refetch } = useGetCommunityKPIs(
+    timeRange,
+    dateRange?.from && dateRange?.to
+      ? {
+          startDate: dateRange.from.toISOString(),
+          endDate: dateRange.to.toISOString(),
+        }
+      : undefined
+  );
+
 
   const kpis = data?.getCommunityKPIs;
 
@@ -232,20 +257,11 @@ export default function Dashboard() {
           </EcosystemActionBar.Item>
           <EcosystemActionBar.Separator />
           <EcosystemActionBar.Item>
-            <Select 
-              value={timeRange} 
-              onValueChange={(val: any) => setTimeRange(val)}
-            >
-              <SelectTrigger className="w-[170px] h-9 rounded-lg bg-card border-border text-foreground text-xs font-medium">
-                <SelectValue placeholder="Select Range" />
-              </SelectTrigger>
-              <SelectContent className="bg-popover border-border rounded-lg">
-                <SelectItem value={TimeRange.LAST_24_HOURS}>Last 24 Hours</SelectItem>
-                <SelectItem value={TimeRange.LAST_7_DAYS}>Last 7 Days</SelectItem>
-                <SelectItem value={TimeRange.LAST_30_DAYS}>Last 30 Days</SelectItem>
-                <SelectItem value={TimeRange.LAST_90_DAYS}>Last 90 Days</SelectItem>
-              </SelectContent>
-            </Select>
+            <DateRangePicker 
+              date={dateRange}
+              onDateChange={handleDateChange}
+              defaultValue="LAST_7_DAYS"
+            />
           </EcosystemActionBar.Item>
         </EcosystemActionBar.Group>
 

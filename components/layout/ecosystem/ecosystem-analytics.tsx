@@ -60,8 +60,10 @@ export function EcosystemKPI({
             <div
               className={cn(
                 "inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-md",
-                isPositive && "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400",
-                isNegative && "bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400",
+                isPositive &&
+                  "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400",
+                isNegative &&
+                  "bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400",
               )}
             >
               {isPositive ? (
@@ -76,9 +78,7 @@ export function EcosystemKPI({
 
         {/* Bottom label */}
         {trendLabel && (
-          <p className="text-[11px] text-muted-foreground/70">
-            {trendLabel}
-          </p>
+          <p className="text-[11px] text-muted-foreground/70">{trendLabel}</p>
         )}
       </div>
     </div>
@@ -235,9 +235,11 @@ export function EcosystemStatusIndicator({
     pending: "text-amber-700 dark:text-amber-400",
   };
   const bgColors = {
-    active: "bg-emerald-50 border-emerald-100 dark:bg-emerald-500/10 dark:border-emerald-500/20",
+    active:
+      "bg-emerald-50 border-emerald-100 dark:bg-emerald-500/10 dark:border-emerald-500/20",
     inactive: "bg-muted border-border",
-    pending: "bg-amber-50 border-amber-100 dark:bg-amber-500/10 dark:border-amber-500/20",
+    pending:
+      "bg-amber-50 border-amber-100 dark:bg-amber-500/10 dark:border-amber-500/20",
   };
 
   return (

@@ -14,7 +14,9 @@ import {
   QueryResult,
   useQuery,
 } from "@apollo/client";
-import { TimeRange } from "..";
+import { DateRangeInput, TimeRange } from "../dashbaord/dashboard-quries";
+export { TimeRange };
+export type { DateRangeInput };
 
 // --- GraphQL Mutation Document ---
 
@@ -179,11 +181,18 @@ export type GetJobStatsResponse = {
 // --- Apollo Client Hook ---
 
 export function useJobStats(
-  timeRange: TimeRange,
-  options?: QueryHookOptions<GetJobStatsResponse, { timeRange: TimeRange }>,
-): QueryResult<GetJobStatsResponse, { timeRange: TimeRange }> {
+  timeRange?: TimeRange,
+  dateRange?: DateRangeInput,
+  options?: QueryHookOptions<
+    GetJobStatsResponse,
+    { timeRange?: TimeRange; dateRange?: DateRangeInput }
+  >,
+): QueryResult<
+  GetJobStatsResponse,
+  { timeRange?: TimeRange; dateRange?: DateRangeInput }
+> {
   return useQuery(GET_JOB_STATS, {
-    variables: { timeRange },
+    variables: { timeRange, dateRange },
     ...options,
   });
 }

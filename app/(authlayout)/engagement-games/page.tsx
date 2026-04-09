@@ -4,7 +4,11 @@ import {
   Dices, RectangleHorizontal, Trophy, Coins, TrendingDown, TrendingUp,
   Flame, LayoutDashboard, ArrowRight,
 } from "lucide-react";
-import { useGetSpinScratchStats } from "@/graphql/actions/rewards";
+import { useGetSpinScratchStats, TimeRange } from "@/graphql/actions/rewards";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
+import { subDays } from "date-fns";
+import { DateRange } from "react-day-picker";
+import React, { useState } from "react";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
@@ -106,7 +110,32 @@ function TodayCard({
 }
 
 export default function EngagementDashboardPage() {
-  const { data, loading } = useGetSpinScratchStats();
+  const [timeRange, setTimeRange] = React.useState<TimeRange>(TimeRange.LAST_7_DAYS);
+  const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
+    from: subDays(new Date(), 7),
+    to: new Date(),
+  });
+
+  const handleDateChange = (range: DateRange | undefined) => {
+    setDateRange(range);
+    if (!range?.from || !range?.to) return;
+    const diffDays = Math.round(
+      (range.to.getTime() - range.from.getTime()) / (1000 * 60 * 60 * 24),
+    );
+    if (diffDays <= 1) setTimeRange(TimeRange.LAST_24_HOURS);
+    else if (diffDays <= 7) setTimeRange(TimeRange.LAST_7_DAYS);
+    else if (diffDays <= 30) setTimeRange(TimeRange.LAST_30_DAYS);
+    else if (diffDays <= 90) setTimeRange(TimeRange.LAST_90_DAYS);
+  };
+
+  const formattedDateRange = dateRange?.from && dateRange?.to
+    ? {
+        startDate: dateRange.from.toISOString(),
+        endDate: dateRange.to.toISOString(),
+      }
+    : undefined;
+
+  const { data, loading } = useGetSpinScratchStats(timeRange, formattedDateRange);
   const stats = data?.getSpinScratchStats;
 
   const kpis = [
@@ -159,9 +188,17 @@ export default function EngagementDashboardPage() {
 
       <EcosystemActionBar shadow="none">
         <EcosystemActionBar.Group>
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-xs font-medium text-muted-foreground">Live stats</span>
+          <div className="flex items-center gap-4">
+            <DateRangePicker 
+              date={dateRange}
+              onDateChange={handleDateChange}
+              defaultValue="LAST_7_DAYS"
+            />
+            <div className="h-4 w-px bg-zinc-200 mx-1" />
+            <div className="flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-xs font-medium text-muted-foreground">Live stats</span>
+            </div>
           </div>
         </EcosystemActionBar.Group>
       </EcosystemActionBar>

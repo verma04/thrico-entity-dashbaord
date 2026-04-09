@@ -1,5 +1,7 @@
 import { GET_POLL_STATS } from "@/graphql/quries/polls";
-import { TimeRange } from "..";
+import { DateRangeInput, TimeRange } from "../dashbaord/dashboard-quries";
+export { TimeRange };
+export type { DateRangeInput };
 
 export interface PollStats {
   totalPolls: number;
@@ -16,9 +18,16 @@ export interface GetPollStatsResponse {
   getPollStats: PollStats;
 }
 
-export const useGetPollStats = (timeRange: TimeRange, options?: any) =>
-  useQuery<GetPollStatsResponse, { timeRange: TimeRange }>(GET_POLL_STATS, {
-    variables: { timeRange },
+export const useGetPollStats = (
+  timeRange?: TimeRange,
+  dateRange?: DateRangeInput,
+  options?: any,
+) =>
+  useQuery<
+    GetPollStatsResponse,
+    { timeRange?: TimeRange; dateRange?: DateRangeInput }
+  >(GET_POLL_STATS, {
+    variables: { timeRange, dateRange },
     ...options,
   });
 

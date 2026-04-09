@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { useGetOfferStats } from "@/graphql/actions/offers";
-import { TimeRange } from "@/graphql/actions";
+import { useGetOfferStats, TimeRange } from "@/graphql/actions/offers";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
+import { subDays } from "date-fns";
+import { DateRange } from "react-day-picker";
 import {
   Tag,
   Check,
@@ -50,7 +52,32 @@ import Link from "next/link";
 
 export default function OffersAnalytics() {
   const [timeRange, setTimeRange] = useState<TimeRange>(TimeRange.LAST_7_DAYS);
-  const { data, loading, refetch } = useGetOfferStats(timeRange);
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: subDays(new Date(), 7),
+    to: new Date(),
+  });
+
+  const handleDateChange = (range: DateRange | undefined) => {
+    setDateRange(range);
+    if (!range?.from || !range?.to) return;
+    const diffDays = Math.round(
+      (range.to.getTime() - range.from.getTime()) / (1000 * 60 * 60 * 24),
+    );
+    if (diffDays <= 1) setTimeRange(TimeRange.LAST_24_HOURS);
+    else if (diffDays <= 7) setTimeRange(TimeRange.LAST_7_DAYS);
+    else if (diffDays <= 30) setTimeRange(TimeRange.LAST_30_DAYS);
+    else if (diffDays <= 90) setTimeRange(TimeRange.LAST_90_DAYS);
+  };
+
+  const { data, loading, refetch } = useGetOfferStats(
+    timeRange,
+    dateRange?.from && dateRange?.to
+      ? {
+          startDate: dateRange.from.toISOString(),
+          endDate: dateRange.to.toISOString(),
+        }
+      : undefined
+  );
 
   const stats = data?.getOfferStats;
 
@@ -73,7 +100,7 @@ export default function OffersAnalytics() {
     },
     {
       title: "Claim Yield",
-      value: loading ? "..." : (stats?.totalClaims?.toLocaleString() ?? "0"),
+      value: loading ? "..." : (stats?.claims?.toLocaleString() ?? "0"),
       trend: stats?.claimsChange ?? 0,
       icon: Check,
       color: "text-emerald-600",
@@ -81,7 +108,7 @@ export default function OffersAnalytics() {
     },
     {
       title: "Total Views",
-      value: loading ? "..." : (stats?.totalViews?.toLocaleString() ?? "0"),
+      value: loading ? "..." : (stats?.views?.toLocaleString() ?? "0"),
       trend: stats?.viewsChange ?? 0,
       icon: Eye,
       color: "text-amber-600",
@@ -118,26 +145,11 @@ export default function OffersAnalytics() {
           </div>
 
           <div className="flex items-center gap-3">
-            <Select
-              value={timeRange}
-              onValueChange={(val) => setTimeRange(val as TimeRange)}
-            >
-              <SelectTrigger className="h-9 w-[180px] rounded-lg border-zinc-200 bg-white text-xs font-semibold shadow-sm text-zinc-600">
-                <Timer className="h-3.5 w-3.5 mr-2 text-indigo-500" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={TimeRange.LAST_24_HOURS} className="text-xs">
-                  Real-time Cycle
-                </SelectItem>
-                <SelectItem value={TimeRange.LAST_7_DAYS} className="text-xs">
-                  Last 7 Days
-                </SelectItem>
-                <SelectItem value={TimeRange.LAST_30_DAYS} className="text-xs">
-                  Last 30 Days
-                </SelectItem>
-              </SelectContent>
-            </Select>
+            <DateRangePicker 
+              date={dateRange}
+              onDateChange={handleDateChange}
+              defaultValue="LAST_7_DAYS"
+            />
 
             <div className="h-4 w-px bg-zinc-200 mx-1" />
 

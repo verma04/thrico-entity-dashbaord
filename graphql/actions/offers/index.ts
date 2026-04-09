@@ -16,7 +16,9 @@ import {
 } from "@/graphql/quries/offers";
 export * from "./offer-quiries";
 export * from "./offers-mutation";
-import { TimeRange } from "..";
+import { DateRangeInput, TimeRange } from "../dashbaord/dashboard-quries";
+export { TimeRange };
+export type { DateRangeInput };
 import { OfferCategory } from "./offer-quiries";
 
 export interface Offer {
@@ -110,9 +112,16 @@ export interface GetOfferStatsResponse {
   getOfferStats: OfferStats;
 }
 
-export const useGetOfferStats = (timeRange: TimeRange, options?: any) =>
-  useQuery<GetOfferStatsResponse, { timeRange: TimeRange }>(GET_OFFER_STATS, {
-    variables: { timeRange },
+export const useGetOfferStats = (
+  timeRange?: TimeRange,
+  dateRange?: DateRangeInput,
+  options?: any,
+) =>
+  useQuery<
+    GetOfferStatsResponse,
+    { timeRange?: TimeRange; dateRange?: DateRangeInput }
+  >(GET_OFFER_STATS, {
+    variables: { timeRange, dateRange },
     ...options,
   });
 

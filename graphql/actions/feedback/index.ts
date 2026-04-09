@@ -1,6 +1,6 @@
 import { useQuery } from "@apollo/client";
 import { GET_FEEDBACK_STATS } from "@/graphql/quries/feedback";
-import { TimeRange } from "..";
+import { TimeRange, DateRangeInput } from "../dashbaord/dashboard-quries";
 
 export interface FeedbackStats {
   totalFeedback: number;
@@ -17,11 +17,11 @@ export interface GetFeedbackStatsResponse {
   getFeedbackStats: FeedbackStats;
 }
 
-export const useGetFeedbackStats = (timeRange: TimeRange, options?: any) =>
-  useQuery<GetFeedbackStatsResponse, { timeRange: TimeRange }>(
+export const useGetFeedbackStats = (timeRange?: TimeRange, dateRange?: DateRangeInput, options?: any) =>
+  useQuery<GetFeedbackStatsResponse, { timeRange?: TimeRange, dateRange?: DateRangeInput }>(
     GET_FEEDBACK_STATS,
     {
-      variables: { timeRange },
+      variables: { timeRange, dateRange },
       ...options,
     }
   );

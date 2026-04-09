@@ -22,9 +22,15 @@ import Link from "next/link";
 import {
   useGetModerationStats,
   useGetContentReports,
+  TimeRange,
+  DateRangeInput
 } from "@/graphql/moderation/hooks";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
+import { subDays } from "date-fns";
+import { DateRange } from "react-day-picker";
 import { AiModerationDashboardWidget } from "./ai-moderation-dashboard-widget";
 import { ModerationSummaryWidget } from "./moderation-summary-widget";
+import { HistorySection } from "./history-section";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
@@ -67,11 +73,37 @@ const SectionCard = ({
 );
 
 export function ModerationDashboard() {
-  const { data: statsData, loading: statsLoading } = useGetModerationStats();
+  const [timeRangeStr, setTimeRangeStr] = React.useState<TimeRange>(TimeRange.LAST_7_DAYS);
+  const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
+    from: subDays(new Date(), 7),
+    to: new Date(),
+  });
+
+  const handleDateChange = (range: DateRange | undefined) => {
+    setDateRange(range);
+    if (!range?.from || !range?.to) return;
+    const diffDays = Math.round(
+      (range.to.getTime() - range.from.getTime()) / (1000 * 60 * 60 * 24),
+    );
+    if (diffDays <= 1) setTimeRangeStr(TimeRange.LAST_24_HOURS);
+    else if (diffDays <= 7) setTimeRangeStr(TimeRange.LAST_7_DAYS);
+    else if (diffDays <= 30) setTimeRangeStr(TimeRange.LAST_30_DAYS);
+    else if (diffDays <= 90) setTimeRangeStr(TimeRange.LAST_90_DAYS);
+  };
+
+  const formattedDateRange = dateRange?.from && dateRange?.to
+    ? {
+        startDate: dateRange.from.toISOString(),
+        endDate: dateRange.to.toISOString(),
+      }
+    : undefined;
+
+  const { data: statsData, loading: statsLoading } = useGetModerationStats(timeRangeStr, formattedDateRange);
   const { data: reportsData, loading: reportsLoading } = useGetContentReports({
     status: "PENDING",
     limit: 5,
   });
+
 
   const recentReports = reportsData?.getContentReports.items || [];
 
@@ -94,6 +126,12 @@ export function ModerationDashboard() {
           </div>
 
           <div className="flex items-center gap-3">
+            <DateRangePicker 
+              date={dateRange}
+              onDateChange={handleDateChange}
+              defaultValue="LAST_7_DAYS"
+            />
+            <div className="h-4 w-px bg-zinc-200 mx-1" />
             <Link href="/moderation/reported-content">
               <Button
                 variant="outline"
@@ -110,9 +148,16 @@ export function ModerationDashboard() {
       <EcosystemContainer className="p-6 lg:p-8 space-y-6">
         {/* Overview Widgets */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <ModerationSummaryWidget />
-          <AiModerationDashboardWidget />
+          <ModerationSummaryWidget 
+            statsData={statsData} 
+            loading={statsLoading} 
+          />
+          <AiModerationDashboardWidget 
+            timeRange={timeRangeStr} 
+            dateRange={formattedDateRange} 
+          />
         </div>
+
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Recent Pending Reports */}
@@ -267,6 +312,10 @@ export function ModerationDashboard() {
             </SectionCard>
           </div>
         </div>
+
+        {/* Audit Trail Section */}
+        <HistorySection />
+
       </EcosystemContainer>
     </EcosystemWrapper>
   );

@@ -99,7 +99,32 @@ export interface AiModerationLog {
   createdAt: string;
 }
 
-export interface PaginatedAiModerationLogResponse {
-  items: AiModerationLog[];
+export interface ModerationLog {
+  id: string;
+  contentType: string;
+  aiLabel: string;
+  decision: string;
+  actionTaken: string;
+  createdAt: string;
+  user: {
+    firstName: string;
+    lastName: string;
+  };
+}
+
+export interface AiTokenUsage {
+  module: string;
+  tokens: number;
+  model: string;
+  createdAt: string;
+}
+
+export interface PaginatedModerationLogResponse {
+  items: ModerationLog[];
+  totalCount: number;
+}
+
+export interface PaginatedAiTokenUsageResponse {
+  items: AiTokenUsage[];
   totalCount: number;
 }
