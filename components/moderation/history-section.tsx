@@ -59,19 +59,27 @@ export function HistorySection() {
 
   const getLabelBadge = (label: string) => {
     const l = label.toLowerCase();
-    if (l.includes("safe") || l.includes("clean")) {
+    if (l === "safe") {
       return (
         <Badge className="bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-emerald-100 transition-colors gap-1.5 px-2 font-bold text-[10px] uppercase tracking-tighter">
           <ShieldCheck className="w-3 h-3" />
-          {label}
+          CLEAN
         </Badge>
       );
     }
-    if (l.includes("unsafe") || l.includes("flagged") || l.includes("toxic")) {
+    if (l === "spam") {
+      return (
+        <Badge className="bg-amber-50 text-amber-600 border-amber-100 hover:bg-amber-100 transition-colors gap-1.5 px-2 font-bold text-[10px] uppercase tracking-tighter">
+          <AlertCircle className="w-3 h-3" />
+          SPAM
+        </Badge>
+      );
+    }
+    if (l === "offensive" || l === "harassment") {
       return (
         <Badge className="bg-rose-50 text-rose-600 border-rose-100 hover:bg-rose-100 transition-colors gap-1.5 px-2 font-bold text-[10px] uppercase tracking-tighter">
           <AlertCircle className="w-3 h-3" />
-          {label}
+          {l}
         </Badge>
       );
     }
