@@ -173,18 +173,6 @@ export const contentModeration = [
       },
     ],
   },
-  {
-    key: "mod-ai",
-    label: "AI Moderation",
-    icon: <Cpu size={18} />,
-    children: [
-      {
-        key: "mod-ai-settings",
-        label: "Settings",
-        path: "/moderation",
-      },
-    ],
-  },
 ];
 
 // --- 3. REWARDS & GAMES ---

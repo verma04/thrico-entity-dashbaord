@@ -94,7 +94,7 @@ export function DateRangePicker({
     setFromValue(e.target.value);
     const parsedDate = parse(e.target.value, "MMM d, yyyy", new Date());
     if (isValid(parsedDate)) {
-      setTempDate((prev) => ({ ...prev, from: parsedDate }));
+      setTempDate((prev) => ({ from: parsedDate, to: prev?.to }));
       setSelectedPreset("CUSTOM");
     }
   };
@@ -103,7 +103,7 @@ export function DateRangePicker({
     setIsFromFocused(false);
     const parsedDate = parse(fromValue, "MMM d, yyyy", new Date());
     if (isValid(parsedDate)) {
-      setTempDate((prev) => ({ ...prev, from: parsedDate }));
+      setTempDate((prev) => ({ from: parsedDate, to: prev?.to }));
       setFromValue(format(parsedDate, "MMM d, yyyy"));
     } else if (tempDate?.from) {
       setFromValue(format(tempDate.from, "MMM d, yyyy"));
@@ -116,7 +116,7 @@ export function DateRangePicker({
     setToValue(e.target.value);
     const parsedDate = parse(e.target.value, "MMM d, yyyy", new Date());
     if (isValid(parsedDate)) {
-      setTempDate((prev) => ({ from: prev?.from, to: parsedDate } as DateRange));
+      setTempDate((prev) => ({ from: prev?.from, to: parsedDate }));
       setSelectedPreset("CUSTOM");
     }
   };
@@ -125,7 +125,7 @@ export function DateRangePicker({
     setIsToFocused(false);
     const parsedDate = parse(toValue, "MMM d, yyyy", new Date());
     if (isValid(parsedDate)) {
-      setTempDate((prev) => ({ from: prev?.from, to: parsedDate } as DateRange));
+      setTempDate((prev) => ({ from: prev?.from, to: parsedDate }));
       setToValue(format(parsedDate, "MMM d, yyyy"));
     } else if (tempDate?.to) {
       setToValue(format(tempDate.to, "MMM d, yyyy"));
@@ -152,6 +152,8 @@ export function DateRangePicker({
       return;
     }
     setTempDate(newRange);
+    onDateChange?.(newRange);
+    setIsOpen(false);
   };
 
   const handleApply = () => {
@@ -275,27 +277,27 @@ export function DateRangePicker({
               </div>
 
               {/* Calendar Wrapper */}
-              <div className="p-4 flex-1 flex items-center justify-center">
+              <div className="p-4 flex-1 flex items-start justify-center overflow-x-auto min-w-[600px]">
                 <Calendar
                   initialFocus
                   mode="range"
-                  defaultMonth={tempDate?.from}
+                  defaultMonth={tempDate?.from || new Date()}
                   selected={tempDate}
                   onSelect={(range) => {
                     setTempDate(range);
                     setSelectedPreset("CUSTOM");
                   }}
                   numberOfMonths={2}
-                  className="p-3 bg-transparent"
                   classNames={{
-                    month: "space-y-4 px-2",
+                    months: "flex flex-row gap-8",
+                    month: "space-y-4",
                     caption_label: "text-sm font-semibold text-foreground",
-                    day_selected:
-                      "bg-primary text-primary-foreground hover:bg-primary-foreground hover:text-primary rounded-md shadow-sm font-bold",
-                    day_range_middle:
-                      "bg-primary/10 text-primary-foreground hover:text-primary",
-                    day_today:
-                      "bg-muted text-foreground ring-1 ring-border relative after:content-[''] after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-1 after:h-1 after:bg-primary after:rounded-full",
+                    selected: "bg-primary text-primary-foreground font-bold hover:bg-primary hover:text-primary-foreground",
+                    range_start: "bg-primary text-primary-foreground rounded-l-lg",
+                    range_end: "bg-primary text-primary-foreground rounded-r-lg",
+                    range_middle: "bg-primary/10 text-primary hover:bg-primary/20",
+                    day: "h-9 w-9 p-0 font-medium aria-selected:opacity-100 flex items-center justify-center transition-all duration-200",
+                    today: "bg-muted text-foreground ring-1 ring-border relative font-bold",
                   }}
                 />
               </div>
