@@ -21,6 +21,7 @@ import {
   Fingerprint,
   Layers,
   Zap,
+  BarChart3,
 } from "lucide-react";
 import { format } from "date-fns";
 import { formatDistanceToNow } from "date-fns";
@@ -60,6 +61,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+import { Label } from "recharts";
 
 const LIMIT = 10;
 
@@ -581,47 +583,20 @@ export function HistorySection() {
         open={!!selectedLog}
         onOpenChange={(open) => !open && setSelectedLog(null)}
       >
-        <SheetContent className="sm:max-w-xl border-l border-zinc-200/50 shadow-2xl p-0 overflow-hidden flex flex-col bg-[#FDFDFD]">
-          <div className="absolute top-0 right-0 p-8 pointer-events-none opacity-[0.03] select-none">
-             <Fingerprint className="h-48 w-48 text-zinc-900" />
-          </div>
-
-          <SheetHeader className="p-8 pb-6 border-b border-zinc-100 bg-white/50 backdrop-blur-md sticky top-0 z-10">
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-2xl bg-zinc-900 flex items-center justify-center shadow-lg shadow-zinc-200">
-                  <BrainCircuit className="h-5 w-5 text-white" />
-                </div>
-                <div>
-                  <SheetTitle className="text-lg font-bold text-zinc-900 tracking-tight leading-none">
-                    System Report
-                  </SheetTitle>
-                  <p className="text-[10px] font-bold text-indigo-600 uppercase tracking-[0.2em] mt-1.5 flex items-center gap-1.5">
-                    <span className="h-1 w-1 bg-indigo-600 rounded-full animate-pulse" />
-                    Protocol Log Analysis
-                  </p>
-                </div>
+        <SheetContent className="sm:max-w-xl border-l p-0 overflow-hidden flex flex-col bg-background">
+          <SheetHeader className="p-6 border-b bg-muted/30">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <BarChart3 className="h-5 w-5 text-primary" />
               </div>
-
-              <div className="flex items-center justify-between bg-zinc-50 border border-zinc-100/50 p-2.5 rounded-xl">
-                 <div className="px-3 flex flex-col">
-                    <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">Entry ID</span>
-                    <span className="text-[11px] font-mono font-bold text-zinc-600">#{selectedLog?.id.slice(0, 8)}...</span>
-                 </div>
-                 <Separator orientation="vertical" className="h-6 bg-zinc-200" />
-                 <div className="px-3 flex flex-col">
-                    <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">Type</span>
-                    <Badge variant="outline" className="text-[10px] font-bold uppercase tracking-tighter h-5 border-zinc-200 bg-white inline-flex w-fit">
-                      {selectedLog?.contentType}
-                    </Badge>
-                 </div>
-                 <Separator orientation="vertical" className="h-6 bg-zinc-200" />
-                 <div className="px-3 flex flex-col text-right">
-                    <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">Time</span>
-                    <span className="text-[11px] font-bold text-zinc-900">
-                      {selectedLog?.createdAt && format(new Date(selectedLog.createdAt), "HH:mm:ss")}
-                    </span>
-                 </div>
+              <div>
+                <SheetTitle className="text-lg font-semibold">
+                  Report Summary
+                </SheetTitle>
+                <SheetDescription className="text-xs">
+                  Detailed breakdown of the moderation event #
+                  {selectedLog?.id.slice(0, 8)}
+                </SheetDescription>
               </div>
             </div>
           </SheetHeader>
@@ -629,7 +604,7 @@ export function HistorySection() {
           <div className="flex-1 overflow-y-auto custom-scrollbar">
             <AnimatePresence mode="wait">
               {selectedLog && (
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
@@ -637,162 +612,168 @@ export function HistorySection() {
                   className="p-8 space-y-10 pb-16"
                 >
                   {/* Content Preview Section */}
-                  <section className="space-y-4">
-                    <div className="flex items-center gap-2">
-                       <FileText className="h-4 w-4 text-zinc-400" />
-                       <h4 className="text-[11px] font-bold text-zinc-400 uppercase tracking-[0.15em]">Captured Content</h4>
-                    </div>
-                    
-                    <div className="relative group">
-                       <div className="absolute -inset-1 bg-gradient-to-r from-indigo-50 to-emerald-50 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-1000"></div>
-                       <div className="relative p-5 rounded-2xl border border-zinc-100 bg-white shadow-sm overflow-hidden min-h-[100px] flex flex-col">
-                          <div className="absolute top-0 right-0 p-2">
-                             <Layers className="h-12 w-12 text-zinc-50 opacity-50" />
-                          </div>
-                          {selectedLog.contentPreview ? (
-                            <p className="text-sm text-zinc-700 leading-relaxed font-medium relative z-10 italic">
-                              "{selectedLog.contentPreview}"
-                            </p>
-                          ) : (
-                            <div className="flex flex-col items-center justify-center p-4 text-zinc-300 italic text-xs">
-                               <p>Non-textual biological material or metadata</p>
-                            </div>
-                          )}
-                          <div className="mt-auto pt-4 flex items-center justify-between border-t border-zinc-50">
-                             <span className="text-[9px] font-bold text-zinc-300 uppercase tracking-widest">Digest 256-bit hash confirmed</span>
-                             <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]" />
-                          </div>
-                       </div>
+                  <section className="space-y-3">
+                    <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      Flagged Content
+                    </Label>
+
+                    <div className="p-4 rounded-lg border bg-muted/30">
+                      {selectedLog.contentPreview ? (
+                        <p className="text-sm leading-relaxed text-foreground">
+                          {selectedLog.contentPreview}
+                        </p>
+                      ) : (
+                        <p className="text-sm text-muted-foreground italic">
+                          No text preview available for this item.
+                        </p>
+                      )}
                     </div>
                   </section>
 
                   {/* Metrics Section */}
                   <section className="space-y-4">
-                    <div className="flex items-center gap-2">
-                       <Zap className="h-4 w-4 text-amber-500" />
-                       <h4 className="text-[11px] font-bold text-zinc-400 uppercase tracking-[0.15em]">Heuristic Assessment</h4>
+                    <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      AI Assessment
+                    </Label>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="p-4 rounded-lg border bg-background flex flex-col gap-1">
+                        <span className="text-xs text-muted-foreground font-medium">
+                          Flag Score
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={cn(
+                              "text-2xl font-bold",
+                              (selectedLog.aiScore || 0) > 0.8
+                                ? "text-destructive"
+                                : "text-emerald-600",
+                            )}
+                          >
+                            {selectedLog.aiScore
+                              ? (selectedLog.aiScore * 100).toFixed(0)
+                              : "0"}
+                            %
+                          </span>
+                          <Badge
+                            variant="outline"
+                            className="text-[10px] uppercase font-bold"
+                          >
+                            Confidence
+                          </Badge>
+                        </div>
+                      </div>
+
+                      <div className="p-4 rounded-lg border bg-background flex flex-col gap-1">
+                        <span className="text-xs text-muted-foreground font-medium">
+                          Classification
+                        </span>
+                        <div className="flex items-center gap-2">
+                          {getLabelBadge(selectedLog.aiLabel)}
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-4">
-                       <div className="p-6 rounded-2xl border border-zinc-100 bg-zinc-50/50 flex items-center justify-between">
-                          <div className="space-y-1">
-                             <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Confidence Index</p>
-                             <div className="flex items-baseline gap-1">
-                                <span className={cn(
-                                   "text-3xl font-bold tracking-tighter",
-                                   (selectedLog.aiScore || 0) > 0.8 ? "text-rose-600" : "text-emerald-600"
-                                )}>
-                                   {selectedLog.aiScore ? (selectedLog.aiScore * 100).toFixed(1) : "0.0"}
-                                </span>
-                                <span className="text-xs font-bold text-zinc-400">%</span>
-                             </div>
-                          </div>
-                          <div className="h-16 w-16 relative">
-                             {/* Circular Progress Placeholder - simple SVG */}
-                             <svg className="h-full w-full transform -rotate-90">
-                                <circle cx="32" cy="32" r="28" stroke="currentColor" strokeWidth="6" fill="transparent" className="text-zinc-200" />
-                                <circle cx="32" cy="32" r="28" stroke="currentColor" strokeWidth="6" fill="transparent" 
-                                   className={cn(
-                                      (selectedLog.aiScore || 0) > 0.8 ? "text-rose-500" : "text-emerald-500"
-                                   )}
-                                   strokeDasharray={176}
-                                   strokeDashoffset={176 - (176 * (selectedLog.aiScore || 0))}
-                                   strokeLinecap="round"
-                                />
-                             </svg>
-                          </div>
-                       </div>
-
-                       {selectedLog.aiCategories && (
-                          <div className="grid grid-cols-2 gap-3">
-                             {Object.entries(selectedLog.aiCategories).map(([cat, score]: [string, any], idx) => (
-                                <motion.div 
-                                  key={cat}
-                                  initial={{ opacity: 0, scale: 0.95 }}
-                                  animate={{ opacity: 1, scale: 1 }}
-                                  transition={{ delay: 0.1 + idx * 0.05 }}
-                                  className="p-3.5 rounded-xl bg-white border border-zinc-100 shadow-[0_2px_4px_rgba(0,0,0,0.01)] space-y-2"
-                                >
-                                   <div className="flex justify-between items-center text-[9px] font-bold text-zinc-500 uppercase tracking-tighter">
-                                      <span className="truncate max-w-[100px]">{cat.replace(/_/g, " ")}</span>
-                                      <span className={cn((score as number) > 0.5 ? "text-rose-500" : "text-zinc-400")}>
-                                         {Math.round((score as number) * 100)}%
-                                      </span>
-                                   </div>
-                                   <div className="h-1 w-full bg-zinc-50 rounded-full overflow-hidden">
-                                      <motion.div 
-                                         className={cn(
-                                            "h-full rounded-full",
-                                            (score as number) > 0.5 ? "bg-rose-500" : "bg-zinc-200"
-                                         )}
-                                         initial={{ width: 0 }}
-                                         animate={{ width: `${(score as number) * 100}%` }}
-                                         transition={{ duration: 1, delay: 0.5 }}
-                                      />
-                                   </div>
-                                </motion.div>
-                             ))}
-                          </div>
-                       )}
-                    </div>
+                    {selectedLog.aiCategories && (
+                      <div className="p-4 rounded-lg border bg-muted/30 space-y-4">
+                        <span className="text-xs font-semibold text-zinc-500 uppercase">
+                          Detection Probabilities
+                        </span>
+                        <div className="grid grid-cols-1 gap-3">
+                          {Object.entries(selectedLog.aiCategories).map(
+                            ([cat, score]: [string, any]) => (
+                              <div key={cat} className="space-y-1.5">
+                                <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-tight">
+                                  <span className="text-zinc-600">
+                                    {cat.replace(/_/g, " ")}
+                                  </span>
+                                  <span
+                                    className={cn(
+                                      (score as number) > 0.5
+                                        ? "text-destructive"
+                                        : "text-muted-foreground",
+                                    )}
+                                  >
+                                    {Math.round((score as number) * 100)}%
+                                  </span>
+                                </div>
+                                <div className="h-1.5 w-full bg-border rounded-full overflow-hidden">
+                                  <div
+                                    className={cn(
+                                      "h-full rounded-full transition-all",
+                                      (score as number) > 0.5
+                                        ? "bg-destructive"
+                                        : "bg-primary",
+                                    )}
+                                    style={{
+                                      width: `${(score as number) * 100}%`,
+                                    }}
+                                  />
+                                </div>
+                              </div>
+                            ),
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </section>
 
                   {/* Decision & Action */}
                   <section className="space-y-4">
                     <div className="flex items-center gap-2">
-                       <UserCheck className="h-4 w-4 text-indigo-500" />
-                       <h4 className="text-[11px] font-bold text-zinc-400 uppercase tracking-[0.15em]">Protocol Execution</h4>
+                      <UserCheck className="h-4 w-4 text-indigo-500" />
+                      <h4 className="text-[11px] font-bold text-zinc-400 uppercase tracking-[0.15em]">
+                        Protocol Execution
+                      </h4>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-4">
-                       <div className="p-4 rounded-2xl border border-zinc-100 bg-white shadow-sm flex flex-col gap-2">
-                          <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">Decision</span>
-                          <div className="flex items-center gap-2">
-                             {getDecisionBadge(selectedLog.decision)}
-                          </div>
-                       </div>
-                       <div className="p-4 rounded-2xl border border-zinc-100 bg-white shadow-sm flex flex-col gap-2">
-                          <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">Action Applied</span>
-                          <span className="text-xs font-bold text-zinc-900 border-l-2 border-indigo-500 pl-2 uppercase italic">
-                             {selectedLog.actionTaken}
-                          </span>
-                       </div>
+                      <div className="p-4 rounded-2xl border border-zinc-100 bg-white shadow-sm flex flex-col gap-2">
+                        <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">
+                          Decision
+                        </span>
+                        <div className="flex items-center gap-2">
+                          {getDecisionBadge(selectedLog.decision)}
+                        </div>
+                      </div>
+                      <div className="p-4 rounded-2xl border border-zinc-100 bg-white shadow-sm flex flex-col gap-2">
+                        <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">
+                          Action Applied
+                        </span>
+                        <span className="text-xs font-bold text-zinc-900 border-l-2 border-indigo-500 pl-2 uppercase italic">
+                          {selectedLog.actionTaken}
+                        </span>
+                      </div>
                     </div>
                   </section>
 
                   {/* Subject Details */}
                   <section className="space-y-4">
-                    <div className="flex items-center gap-2">
-                       <Activity className="h-4 w-4 text-emerald-500" />
-                       <h4 className="text-[11px] font-bold text-zinc-400 uppercase tracking-[0.15em]">Subject Identity</h4>
-                    </div>
+                    <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      Author Details
+                    </Label>
 
-                    <div className="p-5 rounded-2xl border border-zinc-100 bg-white group hover:border-indigo-200 hover:shadow-xl hover:shadow-indigo-50/50 transition-all duration-300">
-                       <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4">
-                             <div className="relative">
-                                <Avatar className="h-12 w-12 border-2 border-white shadow-lg shadow-zinc-200 group-hover:scale-105 transition-transform duration-500">
-                                   <AvatarFallback className="bg-zinc-100 text-sm font-bold text-zinc-500 uppercase">
-                                      {selectedLog.user.firstName[0]}{selectedLog.user.lastName[0]}
-                                   </AvatarFallback>
-                                </Avatar>
-                                <div className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-emerald-100 border-2 border-white flex items-center justify-center">
-                                   <div className="h-2 w-2 rounded-full bg-emerald-500" />
-                                </div>
-                             </div>
-                             <div>
-                                <h5 className="text-base font-bold text-zinc-900 leading-none">
-                                   {selectedLog.user.firstName} {selectedLog.user.lastName}
-                                </h5>
-                                <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mt-1.5">
-                                   Verified Neural Link Node
-                                </p>
-                             </div>
-                          </div>
-                          <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-indigo-50 group-hover:text-indigo-600 transition-all">
-                             <ExternalLink className="h-4 w-4" />
-                          </Button>
-                       </div>
+                    <div className="p-4 rounded-lg border bg-background flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarFallback>
+                            {selectedLog.user.firstName[0]}
+                            {selectedLog.user.lastName[0]}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="text-sm font-bold">
+                            {selectedLog.user.firstName}{" "}
+                            {selectedLog.user.lastName}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            User Account #{selectedLog?.user?.id?.slice(0, 6)}
+                          </p>
+                        </div>
+                      </div>
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <ExternalLink className="h-4 w-4" />
+                      </Button>
                     </div>
                   </section>
                 </motion.div>
@@ -800,18 +781,14 @@ export function HistorySection() {
             </AnimatePresence>
           </div>
 
-          <div className="p-8 py-5 border-t border-zinc-100 bg-zinc-50/50 flex items-center justify-between">
-            <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-[0.2em] flex items-center gap-2">
-               <Clock className="h-3 w-3" />
-               Generated Sept-04-202X
-            </span>
-            <Button 
-               variant="outline" 
-               size="sm" 
-               onClick={() => setSelectedLog(null)}
-               className="h-8 rounded-lg text-[10px] font-bold uppercase tracking-widest border-zinc-200 hover:bg-zinc-900 hover:text-white hover:border-zinc-900 transition-all"
-            >
-              Acknowledge Entry
+          <div className="p-6 border-t bg-muted/30 flex items-center justify-between">
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
+              <Clock className="h-3 w-3" />
+              Log timestamp:{" "}
+              {selectedLog && format(new Date(selectedLog.createdAt), "PPP p")}
+            </p>
+            <Button size="sm" onClick={() => setSelectedLog(null)}>
+              Close Report
             </Button>
           </div>
         </SheetContent>

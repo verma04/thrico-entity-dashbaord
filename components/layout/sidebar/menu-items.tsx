@@ -129,25 +129,28 @@ export const contentModeration = [
     icon: <Rss size={18} />,
     children: [
       { key: "feed-dash", label: "Dashboard", path: "/feed" },
-      { key: "feed-manage", label: "Manage Posts", path: "/feed/manage" },
       { key: "feed-overall", label: "Overall Posts", path: "/feed/all" },
       { key: "feed-pinned", label: "Pinned Post", path: "/feed/pinned" },
       { key: "feed-admin", label: "Admin Posts", path: "/feed/admin" },
       {
         key: "feed-moments",
         label: "Moments (Videos)",
-        path: "/moments",
+        path: "/feed/moments",
         isMobileOnly: true,
       },
-      { key: "feed-jobs", label: "Jobs", path: "/jobs", isMobileOnly: true },
+      {
+        key: "feed-jobs",
+        label: "Jobs",
+        path: "/feed/jobs",
+        isMobileOnly: true,
+      },
       {
         key: "feed-listings",
         label: "Listings",
-        path: "/listing",
+        path: "/feed/listing",
         isMobileOnly: true,
       },
       { key: "feed-reported", label: "Reported", path: "/feed/reported" },
-      { key: "feed-settings", label: "Settings", path: "/feed/settings" },
     ],
   },
   {

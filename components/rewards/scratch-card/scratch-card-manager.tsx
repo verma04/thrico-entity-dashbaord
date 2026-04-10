@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import {
   RectangleHorizontal, Plus, Trash2, Edit, Shield, TrendingUp, AlertTriangle,
-  Clock, Save, Coins, Crown, Ticket, XCircle, Loader2, Info,
+  Clock, Save, Coins, Crown, Ticket, XCircle, Loader2, Info, Sparkles
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -343,49 +343,106 @@ export function ScratchCardManager() {
             </SectionCard>
           </div>
 
-          {/* Right: 1/3 Economy Monitor */}
+          {/* Right: 1/3 Preview + Economy Monitor */}
           <div className="space-y-5">
-            <div className="rounded-xl border border-border bg-card overflow-hidden sticky top-6">
-              <div className="flex items-center gap-3 px-5 py-4 border-b border-border bg-muted/20">
-                <div className="h-8 w-8 rounded-lg bg-orange-50 flex items-center justify-center">
-                  <Shield className="h-4 w-4 text-orange-600" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-foreground">Economy Monitor</p>
-                  <p className="text-xs text-muted-foreground">Payout health check</p>
+            <div className="sticky top-6 space-y-6">
+              {/* Scratch Card Preview (Mobile Mockup) */}
+              <div className="relative group mx-auto max-w-[340px]">
+                {/* Glowing ambient background shadow */}
+                <div className="absolute -inset-0.5 bg-gradient-to-b from-indigo-500/20 to-purple-500/20 rounded-[36px] blur-xl opacity-50 group-hover:opacity-100 transition-opacity duration-500" />
+                
+                {/* Mock Phone Frame */}
+                <div className="relative flex flex-col w-full bg-white dark:bg-zinc-900 rounded-[32px] shadow-2xl border border-zinc-200/50 dark:border-white/5 overflow-hidden text-zinc-900 dark:text-zinc-100 p-2">
+                  <div className="flex-1 rounded-[24px] bg-indigo-950 overflow-hidden flex flex-col relative border border-indigo-900/50 shadow-inner">
+                    
+                    {/* Game Header */}
+                    <div className="p-5 text-center relative z-10 space-y-1 bg-gradient-to-b from-indigo-900 to-transparent">
+                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/10 mb-2">
+                        <Sparkles className="h-3 w-3 text-amber-400" />
+                        <span className="text-[9px] font-bold uppercase tracking-widest text-indigo-200">Daily Scratch</span>
+                      </div>
+                      <h3 className="text-xl font-bold text-white tracking-tight">Scratch & Win</h3>
+                      <p className="text-[10px] text-indigo-300">Reveal hidden symbols for a chance to win.</p>
+                    </div>
+
+                    {/* Canvas / Scratch Area */}
+                    <div className="flex-1 flex flex-col items-center justify-center p-6 relative z-10 min-h-[220px]">
+                      {/* Subtle backglow */}
+                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-indigo-500/30 rounded-full blur-2xl" />
+                      
+                      {/* The Card */}
+                      <div className="relative w-full aspect-[4/3] rounded-xl bg-zinc-300 dark:bg-zinc-800 border-2 border-dashed border-zinc-400 dark:border-zinc-600 flex items-center justify-center overflow-hidden group/card cursor-crosshair">
+                        {/* Silver foil texture simulation */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-zinc-200 via-zinc-400 to-zinc-300 dark:from-zinc-700 dark:via-zinc-600 dark:to-zinc-800 opacity-90" />
+                        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/brushed-alum.png')] opacity-30 mix-blend-overlay" />
+                        
+                        <div className="relative flex flex-col items-center gap-2">
+                          <Sparkles className="h-8 w-8 text-zinc-500 dark:text-zinc-400 group-hover/card:animate-pulse" />
+                          <span className="text-xs font-black text-zinc-600 dark:text-zinc-300 tracking-widest uppercase">Scratch Here</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Game Bottom Bar */}
+                    <div className="p-6 relative z-10 mt-auto bg-gradient-to-t from-black/80 to-transparent">
+                      <div className="flex items-center justify-center gap-2 mb-4">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-200">Live Preview</span>
+                      </div>
+                      <Button disabled className="w-full h-12 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-sm shadow-[0_0_20px_rgba(245,158,11,0.4)] border-none">
+                        Buy Card For {scratchCost} TC
+                      </Button>
+                      <p className="text-center text-[9px] text-indigo-400/70 mt-3 font-medium">
+                        {maxCardsPerDay} Cards Remaining Today
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div className="p-5 space-y-4">
-                <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
-                  <span className="text-xs text-muted-foreground">Avg. Payout</span>
-                  <span className="text-sm font-bold font-mono text-foreground">{avgPayout.toFixed(1)} TC</span>
-                </div>
-                <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
-                  <span className="text-xs text-muted-foreground">Scratch Cost</span>
-                  <span className="text-sm font-bold font-mono text-foreground">{scratchCost} TC</span>
-                </div>
 
-                <div className={cn("p-4 rounded-xl border", isHealthy ? "bg-emerald-50 border-emerald-200" : "bg-rose-50 border-rose-200")}>
-                  <div className="flex items-center justify-between">
-                    <p className={cn("text-xs font-semibold", isHealthy ? "text-emerald-700" : "text-rose-700")}>Margin</p>
-                    {isHealthy ? <TrendingUp className="h-4 w-4 text-emerald-500" /> : <AlertTriangle className="h-4 w-4 text-rose-500" />}
+              {/* Economy Monitor */}
+              <div className="rounded-[24px] border border-border bg-card p-5 max-w-[340px] mx-auto shadow-sm">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="h-8 w-8 rounded-xl bg-orange-500/10 flex items-center justify-center border border-orange-500/20">
+                    <Shield className="h-4 w-4 text-orange-600" />
                   </div>
-                  <p className={cn("text-2xl font-bold font-mono mt-1", isHealthy ? "text-emerald-700" : "text-rose-700")}>
-                    {profitMargin.toFixed(1)}%
-                  </p>
-                  <p className={cn("text-xs mt-1", isHealthy ? "text-emerald-600/70" : "text-rose-600/70")}>
-                    Target: 20%–40%
-                  </p>
+                  <div>
+                    <h4 className="text-sm font-bold text-foreground leading-none">Economy Monitor</h4>
+                    <p className="text-[10px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">Health Check</p>
+                  </div>
                 </div>
-
-                {!isHealthy && (
-                  <div className="flex items-start gap-2 p-3 rounded-lg bg-rose-50 border border-rose-100">
-                    <Info className="h-3.5 w-3.5 text-rose-500 shrink-0 mt-0.5" />
-                    <p className="text-xs text-rose-700 leading-relaxed">
-                      Margin is outside the healthy range. Adjust scratch cost or tier probabilities.
-                    </p>
+                
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-muted/40 border border-border/50">
+                    <span className="text-xs font-semibold text-muted-foreground">Avg. Payout</span>
+                    <span className="text-sm font-bold font-mono text-foreground">{avgPayout.toFixed(1)} <span className="text-[10px]">TC</span></span>
                   </div>
-                )}
+                  
+                  <div className={cn(
+                    "p-4 rounded-2xl border transition-colors",
+                    isHealthy ? "bg-emerald-50/50 border-emerald-200" : "bg-rose-50/50 border-rose-200"
+                  )}>
+                    <div className="flex items-center justify-between mb-1">
+                      <p className={cn("text-xs font-bold uppercase tracking-wider", isHealthy ? "text-emerald-600" : "text-rose-600")}>Profit Margin</p>
+                      {isHealthy ? <TrendingUp className="h-4 w-4 text-emerald-500" /> : <AlertTriangle className="h-4 w-4 text-rose-500" />}
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <p className={cn("text-3xl font-black font-mono tracking-tighter", isHealthy ? "text-emerald-700" : "text-rose-700")}>
+                        {profitMargin.toFixed(1)}%
+                      </p>
+                    </div>
+                    <p className={cn("text-[10px] font-bold mt-1 uppercase tracking-wider", isHealthy ? "text-emerald-600/70" : "text-rose-600/70")}>Target: 20–40%</p>
+                  </div>
+
+                  {!isHealthy && (
+                    <div className="flex gap-2.5 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 items-start">
+                      <Info className="h-4 w-4 text-rose-500 shrink-0 mt-0.5" />
+                      <p className="text-[11px] font-medium text-rose-700 leading-relaxed">
+                        {profitMargin < 20 ? "Margin too low. Increase card cost or adjust probabilities to lower overall value." : "Margin too high. Game may feel unrewarding; consider better payouts."}
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>

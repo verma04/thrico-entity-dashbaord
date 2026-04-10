@@ -19,7 +19,7 @@ export default function MatchWinPage() {
         icon={Trophy}
       />
 
-      <Tabs defaultValue="manage" className="w-full">
+      <Tabs defaultValue="manage" className="w-full flex-col gap-4 flex">
         <EcosystemActionBar shadow="none">
           <EcosystemActionBar.Group>
             <TabsList className="h-8 bg-muted/40 border border-border rounded-lg p-0.5 gap-0.5">

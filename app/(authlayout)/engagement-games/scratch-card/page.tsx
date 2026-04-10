@@ -8,14 +8,14 @@ import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-cont
 
 export default function ScratchCardPage() {
   return (
-    <EcosystemWrapper>
+    <EcosystemWrapper className="flex-col gap-4 flex">
       <EcosystemHeader
         title="Scratch Card"
         badgeText="Engagement"
         description="Configure scratch card reward tiers, probability weights, and campaign windows."
         icon={RectangleHorizontal}
       />
-      <EcosystemContainer className="p-2">
+      <EcosystemContainer className="p-2 flex-col gap-4 flex">
         <ScratchCardManager />
       </EcosystemContainer>
     </EcosystemWrapper>
