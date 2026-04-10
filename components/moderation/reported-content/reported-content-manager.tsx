@@ -26,7 +26,7 @@ import {
   useDismissReport,
 } from "@/graphql/moderation/hooks";
 import { useChangeUserStatus } from "@/graphql/actions";
-import { ContentReport, ReportStatus } from "@/graphql/moderation/types";
+import { ContentReport, ReportStatus, ModerationContentType } from "@/graphql/moderation/types";
 import { toast } from "sonner";
 import { Lock, Unlock } from "lucide-react";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
@@ -38,7 +38,7 @@ export function ReportedContentManager() {
   const [statusFilter, setStatusFilter] = useState<ReportStatus | "ALL">(
     "PENDING",
   );
-  const [typeFilter, setTypeFilter] = useState<string>("ALL");
+  const [typeFilter, setTypeFilter] = useState<ModerationContentType | "ALL">("ALL");
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
@@ -269,10 +269,14 @@ export function ReportedContentManager() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="ALL">All Types</SelectItem>
-                  <SelectItem value="POST">Posts</SelectItem>
-                  <SelectItem value="COMMENT">Comments</SelectItem>
-                  <SelectItem value="USER">User Profiles</SelectItem>
-                  <SelectItem value="IMAGE">Images</SelectItem>
+                  {[
+                    "POST", "COMMENT", "MARKETPLACE", "COMMUNITY", "EVENT", 
+                    "SHOP", "OFFER", "JOB", "DISCUSSION_FORUM", "DISCUSSION_FORUM_COMMENT", "MESSAGE"
+                  ].map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type.replace(/_/g, " ")}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

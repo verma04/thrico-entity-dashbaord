@@ -15,8 +15,13 @@ import {
   ReportStatus,
   PaginatedModerationLogResponse,
   PaginatedAiTokenUsageResponse,
+  ModerationContentType,
+  AiClassification,
 } from "./types";
-import { TimeRange, DateRangeInput } from "../actions/dashbaord/dashboard-quries";
+import {
+  TimeRange,
+  DateRangeInput,
+} from "../actions/dashbaord/dashboard-quries";
 export { TimeRange };
 export type { DateRangeInput };
 
@@ -29,6 +34,7 @@ import {
   GET_AI_MODERATION_DASHBOARD,
   GET_AI_MODERATION_LOGS,
   GET_HISTORY,
+  GET_MODERATION_LOGS,
 } from "./queries";
 import {
   ADD_BANNED_WORD,
@@ -66,7 +72,7 @@ export function useGetBlockedLinks(
 export function useGetContentReports(
   variables?: {
     status?: ReportStatus;
-    contentType?: string;
+    contentType?: ModerationContentType;
     limit?: number;
     offset?: number;
   },
@@ -74,7 +80,7 @@ export function useGetContentReports(
     { getContentReports: PaginatedContentReportResponse },
     {
       status?: ReportStatus;
-      contentType?: string;
+      contentType?: ModerationContentType;
       limit?: number;
       offset?: number;
     }
@@ -84,7 +90,7 @@ export function useGetContentReports(
     { getContentReports: PaginatedContentReportResponse },
     {
       status?: ReportStatus;
-      contentType?: string;
+      contentType?: ModerationContentType;
       limit?: number;
       offset?: number;
     }
@@ -111,11 +117,12 @@ export function useGetModerationStats(
   );
 }
 
-
 export function useGetAiModerationDashboard(
   timeRange?: TimeRange,
   dateRange?: DateRangeInput,
-  options?: QueryHookOptions<{ getAiModerationDashboard: AiModerationDashboard }>,
+  options?: QueryHookOptions<{
+    getAiModerationDashboard: AiModerationDashboard;
+  }>,
 ) {
   return useQuery<{ getAiModerationDashboard: AiModerationDashboard }>(
     GET_AI_MODERATION_DASHBOARD,
@@ -123,10 +130,11 @@ export function useGetAiModerationDashboard(
   );
 }
 
-
 export function useGetAiModerationLogs(
   variables?: { limit?: number; offset?: number },
-  options?: QueryHookOptions<{ getAiModerationLogs: PaginatedAiModerationLogResponse }>,
+  options?: QueryHookOptions<{
+    getAiModerationLogs: PaginatedAiModerationLogResponse;
+  }>,
 ) {
   return useQuery<{ getAiModerationLogs: PaginatedAiModerationLogResponse }>(
     GET_AI_MODERATION_LOGS,
@@ -135,7 +143,13 @@ export function useGetAiModerationLogs(
 }
 
 export function useGetHistory(
-  variables?: { limit?: number; offset?: number },
+  variables?: {
+    limit?: number;
+    offset?: number;
+    contentType?: ModerationContentType;
+    userId?: string;
+    aiLabel?: AiClassification;
+  },
   options?: QueryHookOptions<{
     getModerationLogs: PaginatedModerationLogResponse;
     getAiTokenUsage: PaginatedAiTokenUsageResponse;
@@ -145,6 +159,24 @@ export function useGetHistory(
     getModerationLogs: PaginatedModerationLogResponse;
     getAiTokenUsage: PaginatedAiTokenUsageResponse;
   }>(GET_HISTORY, { variables, ...options });
+}
+
+export function useGetModerationLogs(
+  variables?: {
+    limit?: number;
+    offset?: number;
+    contentType?: ModerationContentType;
+    userId?: string;
+    aiLabel?: AiClassification;
+  },
+  options?: QueryHookOptions<{
+    getModerationLogs: PaginatedModerationLogResponse;
+  }>,
+) {
+  return useQuery<{ getModerationLogs: PaginatedModerationLogResponse }>(
+    GET_MODERATION_LOGS,
+    { variables, ...options },
+  );
 }
 
 // Mutations

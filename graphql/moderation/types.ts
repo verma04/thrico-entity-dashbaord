@@ -2,6 +2,18 @@ export type Severity = "LOW" | "MEDIUM" | "HIGH";
 export type LinkType = "DOMAIN" | "URL" | "PATTERN";
 export type ReportStatus = "PENDING" | "RESOLVED" | "DISMISSED";
 export type AiClassification = "safe" | "spam" | "offensive" | "harassment";
+export type ModerationContentType =
+  | "POST"
+  | "COMMENT"
+  | "MARKETPLACE"
+  | "COMMUNITY"
+  | "EVENT"
+  | "SHOP"
+  | "OFFER"
+  | "JOB"
+  | "DISCUSSION_FORUM"
+  | "DISCUSSION_FORUM_COMMENT"
+  | "MESSAGE";
 
 export interface BannedWord {
   __typename?: "BannedWord";
@@ -26,7 +38,7 @@ export interface BlockedLink {
 export interface ContentReport {
   __typename?: "ContentReport";
   id: string;
-  contentType: string;
+  contentType: ModerationContentType;
   contentId: string;
   contentPreview?: string;
   reason: string;
@@ -103,11 +115,15 @@ export interface AiModerationLog {
 
 export interface ModerationLog {
   id: string;
-  contentType: string;
+  contentType: ModerationContentType;
   aiLabel: AiClassification;
+  aiScore?: number;
+  aiCategories?: any;
   decision: string;
   actionTaken: string;
   createdAt: string;
+  contentId?: string;
+  contentPreview?: string;
   user: {
     firstName: string;
     lastName: string;

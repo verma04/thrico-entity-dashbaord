@@ -35,7 +35,7 @@ export const GET_BLOCKED_LINKS = gql`
 export const GET_CONTENT_REPORTS = gql`
   query GetContentReports(
     $status: ReportStatus
-    $contentType: String
+    $contentType: ModerationContentType
     $limit: Int
     $offset: Int
   ) {
@@ -127,15 +127,31 @@ export const GET_AI_MODERATION_LOGS = gql`
 `;
 
 export const GET_HISTORY = gql`
-  query GetHistory($limit: Int, $offset: Int) {
-    getModerationLogs(limit: $limit, offset: $offset) {
+  query GetHistory(
+    $limit: Int
+    $offset: Int
+    $contentType: ModerationContentType
+    $userId: ID
+    $aiLabel: AiClassification
+  ) {
+    getModerationLogs(
+      limit: $limit
+      offset: $offset
+      contentType: $contentType
+      userId: $userId
+      aiLabel: $aiLabel
+    ) {
       items {
         id
         contentType
         aiLabel
+        aiScore
+        aiCategories
         decision
         actionTaken
         createdAt
+        contentId
+        contentPreview
         user {
           firstName
           lastName
@@ -150,6 +166,38 @@ export const GET_HISTORY = gql`
         tokens
         model
         createdAt
+      }
+      totalCount
+    }
+  }
+`;
+
+export const GET_MODERATION_LOGS = gql`
+  query GetModerationLogs(
+    $limit: Int
+    $offset: Int
+    $contentType: ModerationContentType
+    $userId: ID
+    $aiLabel: AiClassification
+  ) {
+    getModerationLogs(
+      limit: $limit
+      offset: $offset
+      contentType: $contentType
+      userId: $userId
+      aiLabel: $aiLabel
+    ) {
+      items {
+        id
+        contentType
+        aiLabel
+        decision
+        actionTaken
+        createdAt
+        user {
+          firstName
+          lastName
+        }
       }
       totalCount
     }
