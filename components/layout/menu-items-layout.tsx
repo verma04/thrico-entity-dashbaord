@@ -128,7 +128,7 @@ const MenuItemsLayout = ({
           ? [
               {
                 key: "reports",
-                label: "Reports Items",
+                label: "Reported Items",
                 icon: <AlertTriangle />,
                 section: "Admin",
               },
@@ -155,7 +155,15 @@ const MenuItemsLayout = ({
     {} as Record<string, MenuItem[]>,
   );
 
-  const sectionOrder = ["System", "Vouchers", "General", "Engagement", "Modules", "Management", "Admin"];
+  const sectionOrder = [
+    "System",
+    "Vouchers",
+    "General",
+    "Engagement",
+    "Modules",
+    "Management",
+    "Admin",
+  ];
   const sortedSectionNames = Object.keys(sections).sort((a, b) => {
     const ia = sectionOrder.indexOf(a);
     const ib = sectionOrder.indexOf(b);
@@ -199,7 +207,12 @@ const MenuItemsLayout = ({
                 )}
 
                 {/* Tab buttons for this section */}
-                <div className={cn("flex items-center gap-0.5", fullWidth && "flex-1")}>
+                <div
+                  className={cn(
+                    "flex items-center gap-0.5",
+                    fullWidth && "flex-1",
+                  )}
+                >
                   {sections[sectionName].map((item) => (
                     <TabButton
                       key={item.key}
