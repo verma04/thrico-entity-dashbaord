@@ -80,7 +80,7 @@ export default function FeedbackAnalytics() {
   return (
     <EcosystemWrapper anonymized-1="feedback-analytics">
       <EcosystemHeader
-        title="Dialogue Intelligence"
+        title="Dialogue Analytics"
         badgeText="Sentiment Registry"
         description="Monitor user feedback velocity, resolution protocols, and architectural satisfaction yield across the global registry."
         icon={MessageCircle}

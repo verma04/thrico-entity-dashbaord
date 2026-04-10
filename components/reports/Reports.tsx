@@ -46,7 +46,7 @@ export default function Reports({
   const availableModules = Object.values(ReportModule) as ReportModule[];
 
   return (
-    <EcosystemWrapper anonymized-1="reports-intelligence">
+    <EcosystemWrapper anonymized-1="reports-analytics">
       <EcosystemHeader
         title="Safety Reports"
         badgeText="Critical Events"

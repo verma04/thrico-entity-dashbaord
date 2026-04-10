@@ -19,14 +19,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Flag, ExternalLink, MoreVertical, Filter, RotateCcw, ShieldAlert, CheckCircle, Clock } from "lucide-react";
+import {
+  Flag,
+  ExternalLink,
+  MoreVertical,
+  Filter,
+  RotateCcw,
+  ShieldAlert,
+  CheckCircle,
+  Clock,
+} from "lucide-react";
 import {
   useGetContentReports,
   useResolveReport,
   useDismissReport,
 } from "@/graphql/moderation/hooks";
 import { useChangeUserStatus } from "@/graphql/actions";
-import { ContentReport, ReportStatus, ModerationContentType } from "@/graphql/moderation/types";
+import {
+  ContentReport,
+  ReportStatus,
+  ModerationContentType,
+} from "@/graphql/moderation/types";
 import { toast } from "sonner";
 import { Lock, Unlock } from "lucide-react";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
@@ -38,7 +51,9 @@ export function ReportedContentManager() {
   const [statusFilter, setStatusFilter] = useState<ReportStatus | "ALL">(
     "PENDING",
   );
-  const [typeFilter, setTypeFilter] = useState<ModerationContentType | "ALL">("ALL");
+  const [typeFilter, setTypeFilter] = useState<ModerationContentType | "ALL">(
+    "ALL",
+  );
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
@@ -107,7 +122,10 @@ export function ReportedContentManager() {
       accessorKey: "contentType",
       header: "Type",
       cell: ({ row }) => (
-        <Badge variant="outline" className="capitalize text-[10px] h-4 font-bold border-muted-foreground/20">
+        <Badge
+          variant="outline"
+          className="capitalize text-[10px] h-4 font-bold border-muted-foreground/20"
+        >
           {row.original.contentType.toLowerCase()}
         </Badge>
       ),
@@ -125,8 +143,11 @@ export function ReportedContentManager() {
       accessorKey: "reason",
       header: "Reason",
       cell: ({ row }) => (
-        <Badge variant="outline" className="text-rose-600 bg-rose-50 border-rose-100 text-[9px] font-bold uppercase h-4 px-1.5">
-           {row.original.reason}
+        <Badge
+          variant="outline"
+          className="text-rose-600 bg-rose-50 border-rose-100 text-[9px] font-bold uppercase h-4 px-1.5"
+        >
+          {row.original.reason}
         </Badge>
       ),
     },
@@ -141,7 +162,8 @@ export function ReportedContentManager() {
             </AvatarFallback>
           </Avatar>
           <span className="text-xs font-medium text-foreground">
-            {row.original.reportedBy.firstName} {row.original.reportedBy.lastName}
+            {row.original.reportedBy.firstName}{" "}
+            {row.original.reportedBy.lastName}
           </span>
         </div>
       ),
@@ -159,23 +181,35 @@ export function ReportedContentManager() {
       accessorKey: "status",
       header: "Status",
       cell: ({ row }) => {
-         const isPending = row.original.status === "PENDING";
-         const isResolved = row.original.status === "RESOLVED";
-         return (
-            <div className="flex items-center gap-1.5">
-               <div className={cn("h-1.5 w-1.5 rounded-full", 
-                  isPending ? "bg-amber-500 animate-pulse" : 
-                  isResolved ? "bg-emerald-500" : "bg-muted-foreground"
-               )} />
-               <span className={cn("text-[10px] font-bold uppercase tracking-wider",
-                  isPending ? "text-amber-700" : 
-                  isResolved ? "text-emerald-700" : "text-muted-foreground"
-               )}>
-                  {row.original.status}
-               </span>
-            </div>
-         );
-      }
+        const isPending = row.original.status === "PENDING";
+        const isResolved = row.original.status === "RESOLVED";
+        return (
+          <div className="flex items-center gap-1.5">
+            <div
+              className={cn(
+                "h-1.5 w-1.5 rounded-full",
+                isPending
+                  ? "bg-amber-500 animate-pulse"
+                  : isResolved
+                    ? "bg-emerald-500"
+                    : "bg-muted-foreground",
+              )}
+            />
+            <span
+              className={cn(
+                "text-[10px] font-bold uppercase tracking-wider",
+                isPending
+                  ? "text-amber-700"
+                  : isResolved
+                    ? "text-emerald-700"
+                    : "text-muted-foreground",
+              )}
+            >
+              {row.original.status}
+            </span>
+          </div>
+        );
+      },
     },
     {
       id: "actions",
@@ -186,38 +220,63 @@ export function ReportedContentManager() {
             <>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="h-7 px-2 text-[11px] font-bold gap-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 px-2 text-[11px] font-bold gap-1"
+                  >
                     Take Action
                     <MoreVertical className="h-3 w-3" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem onClick={() => handleResolve(row.original.id, "DELETE")}>
+                  <DropdownMenuItem
+                    onClick={() => handleResolve(row.original.id, "DELETE")}
+                  >
                     Delete Content
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleResolve(row.original.id, "WARN")}>
+                  <DropdownMenuItem
+                    onClick={() => handleResolve(row.original.id, "WARN")}
+                  >
                     Warn User
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleResolve(row.original.id, "HIDE")}>
+                  <DropdownMenuItem
+                    onClick={() => handleResolve(row.original.id, "HIDE")}
+                  >
                     Hide Activity
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     className="text-destructive focus:text-destructive"
-                    onClick={() => handleUserStatusChange(row.original.reportedUser.id, "BLOCK", row.original.id)}
+                    onClick={() =>
+                      handleUserStatusChange(
+                        row.original.reportedUser.id,
+                        "BLOCK",
+                        row.original.id,
+                      )
+                    }
                   >
                     <Lock className="h-4 w-4 mr-2" />
                     Block User
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              <Button variant="ghost" size="sm" className="h-7 text-[11px] font-semibold" onClick={() => handleDismiss(row.original.id)}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 text-[11px] font-semibold"
+                onClick={() => handleDismiss(row.original.id)}
+              >
                 Dismiss
               </Button>
             </>
           ) : (
-             <Button variant="ghost" size="sm" className="h-7 text-[11px] font-semibold text-muted-foreground cursor-default">
-                Processed
-             </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 text-[11px] font-semibold text-muted-foreground cursor-default"
+            >
+              Processed
+            </Button>
           )}
           <Button variant="ghost" size="icon" className="h-7 w-7">
             <ExternalLink className="h-3.5 w-3.5" />
@@ -228,8 +287,8 @@ export function ReportedContentManager() {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col">
-       <EcosystemHeader
+    <div className="min-h-screen flex flex-col gap-4">
+      <EcosystemHeader
         title="Report Queue"
         description="Manual review center for posts, comments, and users flagged for policy violations."
         badgeText="Moderation"
@@ -238,74 +297,95 @@ export function ReportedContentManager() {
 
       <EcosystemActionBar shadow="none">
         <EcosystemActionBar.Group>
-            <div className="flex items-center gap-2">
-               <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest px-1">Filters</span>
-               <Select
-                value={statusFilter}
-                onValueChange={(v) => {
-                  setStatusFilter(v as any);
-                  setPageIndex(0);
-                }}
-              >
-                <SelectTrigger className="h-8 w-[130px] text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ALL">All Status</SelectItem>
-                  <SelectItem value="PENDING">Pending</SelectItem>
-                  <SelectItem value="RESOLVED">Resolved</SelectItem>
-                  <SelectItem value="DISMISSED">Dismissed</SelectItem>
-                </SelectContent>
-              </Select>
-               <Select
-                value={typeFilter}
-                onValueChange={(v) => {
-                  setTypeFilter(v);
-                  setPageIndex(0);
-                }}
-              >
-                <SelectTrigger className="h-8 w-[130px] text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ALL">All Types</SelectItem>
-                  {[
-                    "POST", "COMMENT", "MARKETPLACE", "COMMUNITY", "EVENT", 
-                    "SHOP", "OFFER", "JOB", "DISCUSSION_FORUM", "DISCUSSION_FORUM_COMMENT", "MESSAGE"
-                  ].map((type) => (
-                    <SelectItem key={type} value={type}>
-                      {type.replace(/_/g, " ")}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <EcosystemActionBar.Separator />
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
-               <Clock className="h-3.5 w-3.5 text-amber-500" />
-               {totalCount} total reports
-            </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest px-1">
+              Filters
+            </span>
+            <Select
+              value={statusFilter}
+              onValueChange={(v) => {
+                setStatusFilter(v as any);
+                setPageIndex(0);
+              }}
+            >
+              <SelectTrigger className="h-8 w-[130px] text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">All Status</SelectItem>
+                <SelectItem value="PENDING">Pending</SelectItem>
+                <SelectItem value="RESOLVED">Resolved</SelectItem>
+                <SelectItem value="DISMISSED">Dismissed</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select
+              value={typeFilter}
+              onValueChange={(v) => {
+                setTypeFilter(v);
+                setPageIndex(0);
+              }}
+            >
+              <SelectTrigger className="h-8 w-[130px] text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">All Types</SelectItem>
+                {[
+                  "POST",
+                  "COMMENT",
+                  "MARKETPLACE",
+                  "COMMUNITY",
+                  "EVENT",
+                  "SHOP",
+                  "OFFER",
+                  "JOB",
+                  "DISCUSSION_FORUM",
+                  "DISCUSSION_FORUM_COMMENT",
+                  "MESSAGE",
+                ].map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {type.replace(/_/g, " ")}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <EcosystemActionBar.Separator />
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
+            <Clock className="h-3.5 w-3.5 text-amber-500" />
+            {totalCount} total reports
+          </div>
         </EcosystemActionBar.Group>
         <EcosystemActionBar.Group align="right">
-          <Button variant="outline" size="sm" onClick={() => refetch()} className="h-8 gap-1.5">
-             <RotateCcw className="h-3.5 w-3.5" />
-             Refresh
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => refetch()}
+            className="h-8 gap-1.5"
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            Refresh
           </Button>
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
 
       <EcosystemContainer className="p-6">
-         <div className="rounded-xl border border-border bg-card overflow-hidden">
+        <div className="rounded-xl border border-border bg-card overflow-hidden">
           <div className="px-5 py-4 border-b border-border bg-muted/20 flex items-center justify-between">
-             <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-lg bg-orange-50 flex items-center justify-center shrink-0">
-                   <ShieldAlert className="h-4 w-4 text-orange-600" />
-                </div>
-                <div>
-                   <p className="text-sm font-semibold text-foreground">Pending Investigations</p>
-                   <p className="text-xs text-muted-foreground">Action content flagged by community members or AI</p>
-                </div>
-             </div>
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-lg bg-orange-50 flex items-center justify-center shrink-0">
+                <ShieldAlert className="h-4 w-4 text-orange-600" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-foreground">
+                  Pending Investigations
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Action content flagged by community members or automated
+                  systems
+                </p>
+              </div>
+            </div>
           </div>
           <div className="p-1">
             <DataTable

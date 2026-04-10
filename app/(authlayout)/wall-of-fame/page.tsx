@@ -55,7 +55,7 @@ export default function WallOfFamePage() {
   return (
     <EcosystemWrapper anonymized-1="wall-of-fame">
       <EcosystemHeader
-        title="Legacy Intelligence"
+        title="Legacy Analytics"
         badgeText="Distinction Registry"
         description="Monitor high-performance instantiation velocity, achievement protocols, and architectural legacy expansion across the global registry node."
         icon={Award}

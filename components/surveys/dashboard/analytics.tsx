@@ -141,7 +141,7 @@ export default function SurveyAnalytics() {
   return (
     <EcosystemWrapper anonymized-1="surveys-analytics">
       <EcosystemHeader
-        title="Feedback Intelligence"
+        title="Feedback Analytics"
         description="Monitor response rates, survey status distribution, and engagement trends."
         badgeText="Overview"
         icon={BarChart3}

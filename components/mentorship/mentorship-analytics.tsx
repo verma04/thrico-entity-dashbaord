@@ -102,7 +102,7 @@ export default function MentorshipAnalytics() {
   return (
     <EcosystemWrapper anonymized-1="mentorship-analytics">
       <EcosystemHeader
-        title="Mentorship Intelligence"
+        title="Mentorship Analytics"
         description="Monitor expert application velocity, approval trajectories, and ecosystem expertise distribution."
         badgeText="Mentorship Hub"
         icon={GraduationCap}

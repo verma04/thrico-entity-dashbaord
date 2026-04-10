@@ -168,7 +168,7 @@ export default function LearningsDashboard() {
     <EcosystemWrapper anonymized-1="learnings-hub">
       <EcosystemHeader
         title="Knowledge Registry"
-        description="Curated technical and community intelligence resources focused on exponential scale."
+        description="Curated technical and community analytics resources focused on exponential scale."
         badgeText="Learnings"
         icon={BookOpen}
       />

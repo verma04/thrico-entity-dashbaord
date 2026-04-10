@@ -129,7 +129,7 @@ export default function OffersAnalytics() {
   return (
     <EcosystemWrapper anonymized-1="offers-analytics">
       <EcosystemHeader
-        title="Commerce Intelligence"
+        title="Commerce Analytics"
         description="Monitor offer velocity, claim trends, and customer conversion cycles."
         badgeText="Overview"
         icon={ShoppingBag}

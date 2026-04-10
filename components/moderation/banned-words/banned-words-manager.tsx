@@ -21,7 +21,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Trash2, Edit2, Search, AlertTriangle, Ban, Filter, RotateCcw } from "lucide-react";
+import {
+  Plus,
+  Trash2,
+  Edit2,
+  Search,
+  AlertTriangle,
+  Ban,
+  Filter,
+  RotateCcw,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 import {
@@ -130,7 +139,9 @@ export function BannedWordsManager() {
       accessorKey: "word",
       header: "Word/Phrase",
       cell: ({ row }) => (
-        <span className="font-semibold text-foreground">{row.original.word}</span>
+        <span className="font-semibold text-foreground">
+          {row.original.word}
+        </span>
       ),
     },
     {
@@ -193,8 +204,8 @@ export function BannedWordsManager() {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col">
-       <EcosystemHeader
+    <div className="min-h-screen flex flex-col gap-4">
+      <EcosystemHeader
         title="Banned Words"
         description="Configure automated text filters to detect and block inappropriate content in real-time."
         badgeText="Auto-Mod"
@@ -203,27 +214,36 @@ export function BannedWordsManager() {
 
       <EcosystemActionBar shadow="none">
         <EcosystemActionBar.Group>
-           <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-              <Input
-                placeholder="Search filters..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-8 h-8 w-[200px] text-xs"
-              />
-            </div>
-            <EcosystemActionBar.Separator />
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
-               <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />
-               {totalCount} active filters
-            </div>
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+            <Input
+              placeholder="Search filters..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-8 h-8 w-[200px] text-xs"
+            />
+          </div>
+          <EcosystemActionBar.Separator />
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
+            <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />
+            {totalCount} active filters
+          </div>
         </EcosystemActionBar.Group>
         <EcosystemActionBar.Group align="right">
-          <Button variant="outline" size="sm" onClick={() => refetch()} className="h-8 gap-1.5">
-             <RotateCcw className="h-3.5 w-3.5" />
-             Refresh
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => refetch()}
+            className="h-8 gap-1.5"
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            Refresh
           </Button>
-          <Button size="sm" onClick={() => handleOpenDialog()} className="h-8 gap-1.5">
+          <Button
+            size="sm"
+            onClick={() => handleOpenDialog()}
+            className="h-8 gap-1.5"
+          >
             <Plus className="h-3.5 w-3.5" />
             Add Word
           </Button>
@@ -233,15 +253,19 @@ export function BannedWordsManager() {
       <EcosystemContainer className="p-6">
         <div className="rounded-xl border border-border bg-card overflow-hidden">
           <div className="px-5 py-4 border-b border-border bg-muted/20 flex items-center justify-between">
-             <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-lg bg-indigo-50 flex items-center justify-center shrink-0">
-                   <Ban className="h-4 w-4 text-indigo-600" />
-                </div>
-                <div>
-                   <p className="text-sm font-semibold text-foreground">Filter Matrix</p>
-                   <p className="text-xs text-muted-foreground">Automated keyword detection across all posts and comments</p>
-                </div>
-             </div>
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-lg bg-indigo-50 flex items-center justify-center shrink-0">
+                <Ban className="h-4 w-4 text-indigo-600" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-foreground">
+                  Filter Matrix
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Automated keyword detection across all posts and comments
+                </p>
+              </div>
+            </div>
           </div>
           <div className="p-1">
             <DataTable
@@ -267,12 +291,14 @@ export function BannedWordsManager() {
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold flex items-center gap-2">
-               {editingWord ? "Edit Filter" : "Add Filter"}
+              {editingWord ? "Edit Filter" : "Add Filter"}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Word or Phrase</Label>
+              <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">
+                Word or Phrase
+              </Label>
               <Input
                 placeholder="Enter regex or literal string..."
                 value={formData.word}
@@ -284,7 +310,9 @@ export function BannedWordsManager() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Severity</Label>
+                <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">
+                  Severity
+                </Label>
                 <Select
                   value={formData.severity}
                   onValueChange={(v) =>
@@ -302,7 +330,9 @@ export function BannedWordsManager() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Category</Label>
+                <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">
+                  Category
+                </Label>
                 <Select
                   value={formData.category}
                   onValueChange={(v) =>
@@ -314,7 +344,11 @@ export function BannedWordsManager() {
                   </SelectTrigger>
                   <SelectContent>
                     {CATEGORIES.map((cat) => (
-                      <SelectItem key={cat} value={cat} className="capitalize font-medium">
+                      <SelectItem
+                        key={cat}
+                        value={cat}
+                        className="capitalize font-medium"
+                      >
                         {cat}
                       </SelectItem>
                     ))}
@@ -324,11 +358,23 @@ export function BannedWordsManager() {
             </div>
           </div>
           <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="ghost" onClick={() => setIsDialogOpen(false)} className="font-semibold">
+            <Button
+              variant="ghost"
+              onClick={() => setIsDialogOpen(false)}
+              className="font-semibold"
+            >
               Cancel
             </Button>
-            <Button onClick={handleSave} disabled={adding || updating} className="font-bold min-w-[100px]">
-              {adding || updating ? "Saving..." : (editingWord ? "Save Changes" : "Add Filter")}
+            <Button
+              onClick={handleSave}
+              disabled={adding || updating}
+              className="font-bold min-w-[100px]"
+            >
+              {adding || updating
+                ? "Saving..."
+                : editingWord
+                  ? "Save Changes"
+                  : "Add Filter"}
             </Button>
           </DialogFooter>
         </DialogContent>

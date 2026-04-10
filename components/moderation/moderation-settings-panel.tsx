@@ -98,7 +98,7 @@ export function ModerationSettingsPanel() {
     <div className="min-h-screen flex flex-col gap-4">
       <EcosystemHeader
         title="Moderation Engine"
-        description="Global parameters for AI filtering, community reporting thresholds, and automated safety protocols."
+        description="Global parameters for content filtering, community reporting thresholds, and automated safety protocols."
         badgeText="Core Settings"
         icon={Settings}
       />
@@ -246,7 +246,7 @@ export function ModerationSettingsPanel() {
                 <div className="flex items-center gap-3">
                   <Cpu className="h-4 w-4 text-emerald-600" />
                   <p className="text-sm font-bold text-foreground">
-                    AI Intelligence
+                    Automated Protection
                   </p>
                 </div>
                 <Switch
@@ -281,7 +281,7 @@ export function ModerationSettingsPanel() {
                   </div>
                 </div>
                 <p className="text-[10px] leading-relaxed text-muted-foreground italic bg-muted/30 p-2.5 rounded-lg border border-border/50">
-                  AI analyzes linguistic patterns and metadata to predict spam.
+                  System analyzes linguistic patterns and metadata to predict spam.
                   Higher sensitivity targets borderline behavior.
                 </p>
               </div>
@@ -305,42 +305,56 @@ export function ModerationSettingsPanel() {
               </Badge>
             </div>
             <div className="p-6">
-              <p className="text-xs text-muted-foreground mb-6">
-                Define the criteria and behavioral expectations for each AI
-                classification label used across the entity.
-              </p>
+              <div className="mb-8 p-4 bg-muted/30 border border-border/50 rounded-lg">
+                <p className="text-sm text-foreground/80 leading-relaxed">
+                  Define the criteria and behavioral expectations for each automated filter
+                  classification label used across the entity. <strong className="text-foreground">The more detailed text and examples you provide, the better the system becomes at accurately classifying content.</strong>
+                </p>
+              </div>
 
-              <div className="space-y-6">
+              <div className="space-y-8">
                 {[
-                  { key: "safe", label: "Safe", icon: "✅", color: "emerald" },
-                  { key: "spam", label: "Spam", icon: "🚫", color: "amber" },
-                  { key: "offensive", label: "Offensive", icon: "⚠️", color: "orange" },
-                  { key: "harassment", label: "Harassment", icon: "🚨", color: "rose" },
+                  { key: "safe", label: "Safe", icon: "✅", color: "emerald", desc: "Baseline for acceptable community interactions." },
+                  { key: "spam", label: "Spam", icon: "🚫", color: "amber", desc: "Unwanted promotional or repetitive content." },
+                  { key: "offensive", label: "Offensive", icon: "⚠️", color: "orange", desc: "Profanity, disturbing imagery, or rude behavior." },
+                  { key: "harassment", label: "Harassment", icon: "🚨", color: "rose", desc: "Targeted attacks, hate speech, or bullying." },
                 ].map((item) => (
-                  <div key={item.key} className="space-y-3">
-                    <div className="flex items-center gap-3 px-1">
-                      <div
-                        className={cn(
-                          "h-8 w-8 rounded-lg flex items-center justify-center text-lg shadow-sm border border-transparent",
-                          `bg-${item.color}-50 text-${item.color}-600`,
-                        )}
-                      >
-                        {item.icon}
+                  <div key={item.key} className="space-y-4 p-5 rounded-xl border border-border/60 bg-muted/10">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-4">
+                        <div
+                          className={cn(
+                            "h-12 w-12 rounded-xl flex items-center justify-center text-2xl shadow-sm border border-transparent",
+                            `bg-${item.color}-100 text-${item.color}-700`,
+                          )}
+                        >
+                          {item.icon}
+                        </div>
+                        <div>
+                          <Label className="text-base font-bold text-foreground block">
+                            {item.label} Definition
+                          </Label>
+                          <span className="text-xs text-muted-foreground font-medium">
+                            {item.desc}
+                          </span>
+                        </div>
                       </div>
-                      <Label className="text-sm font-bold text-foreground">
-                        {item.label} Definition
-                      </Label>
+                      <Badge variant="outline" className={cn("text-[10px] font-mono", (classificationDefinitions[item.key as keyof typeof classificationDefinitions]?.length || 0) > 0 ? "text-indigo-600 bg-indigo-50 border-indigo-200" : "text-muted-foreground")}>
+                        {classificationDefinitions[item.key as keyof typeof classificationDefinitions]?.length || 0} chars
+                      </Badge>
                     </div>
 
-                    <Textarea 
-                       value={classificationDefinitions[item.key as keyof typeof classificationDefinitions]}
-                       onChange={(e) => setClassificationDefinitions({
-                          ...classificationDefinitions,
-                          [item.key]: e.target.value
-                       })}
-                       className="min-h-[100px] text-[13px] leading-relaxed resize-none focus:ring-indigo-500/20 bg-white"
-                       placeholder={`Enter the specific criteria used to identify ${item.label.toLowerCase()} content...`}
-                    />
+                    <div className="pt-2">
+                      <Textarea 
+                         value={classificationDefinitions[item.key as keyof typeof classificationDefinitions] || ""}
+                         onChange={(e) => setClassificationDefinitions({
+                            ...classificationDefinitions,
+                            [item.key]: e.target.value
+                         })}
+                         className="min-h-[140px] text-[14px] leading-relaxed resize-y focus:ring-indigo-500/20 bg-background shadow-sm border-border/80"
+                         placeholder={`Enter the specific criteria used to identify ${item.label.toLowerCase()} content. Feel free to add as much text as needed—include detailed guidelines, specific examples, and critical edge cases...`}
+                      />
+                    </div>
                   </div>
                 ))}
               </div>
@@ -348,7 +362,7 @@ export function ModerationSettingsPanel() {
               <div className="mt-6 p-4 rounded-xl bg-indigo-50/50 border border-indigo-100 flex items-center gap-3">
                 <Cpu className="h-5 w-5 text-indigo-600 shrink-0" />
                 <p className="text-[11px] text-indigo-900 leading-normal">
-                  <strong>AI Training Signal:</strong> Definitions set here are
+                  <strong>System Training Signal:</strong> Definitions set here are
                   used to fine-tune the heuristic assessment thresholds and
                   provide context for manual moderation reviews.
                 </p>

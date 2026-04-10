@@ -152,7 +152,7 @@ export default function DiscussionForum() {
   return (
     <EcosystemWrapper anonymized-1="discussion-forums">
       <EcosystemHeader
-        title="Forum Intelligence"
+        title="Forum Analytics"
         description="Monitor community participation, thread velocity, and topic distribution."
         badgeText="Overview"
         icon={MessageSquare}

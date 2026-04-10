@@ -108,9 +108,9 @@ export function ModerationDashboard() {
   const recentReports = reportsData?.getContentReports.items || [];
 
   return (
-    <EcosystemWrapper anonymized-1="moderation-intelligence">
+    <EcosystemWrapper anonymized-1="moderation-analytics">
       <EcosystemHeader
-        title="Safety Intelligence"
+        title="Safety Dashboard"
         description="Monitor automated filtering velocity, pending review queues, and architectural safety protocols."
         badgeText="Moderation Hub"
         icon={ShieldCheck}
@@ -121,7 +121,7 @@ export function ModerationDashboard() {
           <div className="flex items-center gap-2 px-1">
             <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]" />
             <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest italic">
-              Automated Guardrails Active
+              Automated Protection Active
             </span>
           </div>
 

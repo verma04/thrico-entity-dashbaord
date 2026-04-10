@@ -49,7 +49,9 @@ import { subDays } from "date-fns";
 import { DateRange } from "react-day-picker";
 
 export default function FeedPage() {
-  const [timeRange, setTimeRange] = React.useState<TimeRange>(TimeRange.LAST_7_DAYS);
+  const [timeRange, setTimeRange] = React.useState<TimeRange>(
+    TimeRange.LAST_7_DAYS,
+  );
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
     from: subDays(new Date(), 7),
     to: new Date(),
@@ -67,18 +69,28 @@ export default function FeedPage() {
     else if (diffDays <= 90) setTimeRange(TimeRange.LAST_90_DAYS);
   };
 
-  const formattedDateRange = dateRange?.from && dateRange?.to
-    ? {
-        startDate: dateRange.from.toISOString(),
-        endDate: dateRange.to.toISOString(),
-      }
-    : undefined;
+  const formattedDateRange =
+    dateRange?.from && dateRange?.to
+      ? {
+          startDate: dateRange.from.toISOString(),
+          endDate: dateRange.to.toISOString(),
+        }
+      : undefined;
 
-  const { data: kpiData } = useGetFeedIntelligenceKPI(timeRange, formattedDateRange);
-  const { data: yieldData } = useGetFeedYieldVelocity(timeRange, formattedDateRange);
-  const { data: interestData } = useGetFeedInterestMatrix(timeRange, formattedDateRange);
+  const { data: kpiData } = useGetFeedIntelligenceKPI(
+    timeRange,
+    formattedDateRange,
+  );
+  const { data: yieldData } = useGetFeedYieldVelocity(
+    timeRange,
+    formattedDateRange,
+  );
+  const { data: interestData } = useGetFeedInterestMatrix(
+    timeRange,
+    formattedDateRange,
+  );
   const { data: eventsData } = useGetPromotedNodeEvents({
-    variables: { timeRange, dateRange: formattedDateRange }
+    variables: { timeRange, dateRange: formattedDateRange },
   });
 
   const kpis = kpiData?.getFeedIntelligenceKPI;
@@ -88,11 +100,11 @@ export default function FeedPage() {
   const promotedEvents = eventsData?.getPromotedNodeEvents;
 
   return (
-    <EcosystemWrapper anonymized-1="feed-intelligence">
+    <EcosystemWrapper anonymized-1="feed">
       <EcosystemHeader
-        title="Dialogue Intelligence"
-        badgeText="Feed Registry"
-        description="Monitor community engagement velocity, content protocols, and architectural network expansion across the global feed registry."
+        title="Feed Analytics"
+        badgeText="Overview"
+        description="Monitor feed engagement, content trends, and user activity."
         icon={Share2}
       />
 
@@ -101,17 +113,17 @@ export default function FeedPage() {
           <div className="flex items-center gap-6">
             <EcosystemStatusIndicator
               status="active"
-              label="Dialogue Stream: Operational"
+              label="Feed Status: Active"
             />
             <div className="h-4 w-px bg-slate-200" />
             <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
               <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
-              <span>Verified Content Registry</span>
+              <span>Verified System</span>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
-            <DateRangePicker 
+            <DateRangePicker
               date={dateRange}
               onDateChange={handleDateChange}
               defaultValue="LAST_7_DAYS"
@@ -119,7 +131,7 @@ export default function FeedPage() {
             <div className="h-4 w-px bg-slate-200 mx-1" />
             <Link href="/feed/settings">
               <Button className="h-10 px-6 rounded-xl bg-slate-900 border-slate-800 font-black text-[10px] uppercase tracking-widest gap-2 shadow-xl hover:bg-black transition-all active:scale-95 group">
-                Feed Protocol
+                Feed Settings
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Button>
             </Link>
@@ -132,7 +144,7 @@ export default function FeedPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {[
             {
-              title: "Aggregate Reach",
+              title: "Total Reach",
               value: kpis?.aggregateReach,
               trend: kpis?.reachTrend,
               icon: LayoutGrid,
@@ -140,7 +152,7 @@ export default function FeedPage() {
               bg: "bg-indigo-500/10",
             },
             {
-              title: "Active Dialogue",
+              title: "Active Posts",
               value: kpis?.activeDialogue,
               trend: kpis?.dialogueTrend,
               icon: Activity,
@@ -148,7 +160,7 @@ export default function FeedPage() {
               bg: "bg-emerald-500/10",
             },
             {
-              title: "Network Velocity",
+              title: "Engagement Rate",
               value: kpis?.networkVelocity,
               trend: kpis?.velocityTrend,
               icon: TrendingUp,
@@ -156,7 +168,7 @@ export default function FeedPage() {
               bg: "bg-violet-500/10",
             },
             {
-              title: "Engagement Yield",
+              title: "Total Interactions",
               value: kpis?.engagementYield,
               trend: kpis?.yieldTrend,
               icon: Zap,
@@ -164,7 +176,7 @@ export default function FeedPage() {
               bg: "bg-amber-500/10",
             },
           ].map((kpi, i) => (
-            <EcosystemKPI key={i} {...kpi} trendLabel="Yield" />
+            <EcosystemKPI key={i} {...kpi} trendLabel="Change" />
           ))}
         </div>
 
@@ -172,8 +184,8 @@ export default function FeedPage() {
           {/* Chart Section */}
           <div className="lg:col-span-8">
             <EcosystemCard
-              title="Yield Velocity"
-              description="Temporal signup instantiation cycles"
+              title="Engagement Timeline"
+              description="Daily engagement and activity"
               icon={TrendingUp}
               decorationIcon={Zap}
             >
@@ -235,8 +247,8 @@ export default function FeedPage() {
           {/* Interest Matrix Section */}
           <div className="lg:col-span-4">
             <EcosystemCard
-              title="Interest Matrix"
-              description="Registry tier allocation"
+              title="Content Types"
+              description="Distribution of post categories"
               icon={Sparkles}
               decorationIcon={LayoutGrid}
               className="min-h-fit"
@@ -269,7 +281,7 @@ export default function FeedPage() {
                     100%
                   </span>
                   <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none">
-                    Matrix
+                    Total
                   </span>
                 </div>
               </div>
@@ -286,7 +298,7 @@ export default function FeedPage() {
                         style={{ backgroundColor: item.color }}
                       />
                       <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                        {item.name} Protocol
+                        {item.name}
                       </span>
                     </div>
                     <span className="text-sm font-black text-slate-900">
@@ -296,68 +308,6 @@ export default function FeedPage() {
                 ))}
               </div>
             </EcosystemCard>
-          </div>
-        </div>
-
-        {/* Promoted Events Registry */}
-        <div className="space-y-8">
-          <div className="flex items-center gap-3 px-1">
-            <div className="h-10 w-10 rounded-xl bg-slate-900 flex items-center justify-center text-white">
-              <Calendar className="h-5 w-5" />
-            </div>
-            <div>
-              <h2 className="text-xl font-black text-slate-900 tracking-tight italic uppercase">
-                Promoted Node Events
-              </h2>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] leading-none mt-1">
-                Registry level event propagation
-              </p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {promotedEvents?.map((event: any, i: number) => (
-              <div
-                key={i}
-                className="p-8 rounded-[3rem] bg-white border border-slate-100 shadow-xl shadow-slate-200/50 group hover:shadow-2xl hover:translate-y-[-8px] transition-all duration-500 relative overflow-hidden"
-              >
-                <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:scale-110 transition-transform duration-1000">
-                  <Calendar className="h-24 w-24" />
-                </div>
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="h-10 px-4 flex items-center bg-indigo-50 border border-indigo-100 rounded-xl text-[9px] font-black text-indigo-600 uppercase tracking-widest">
-                    <Calendar className="h-3.5 w-3.5 mr-2" />
-                    {event.date
-                      ? new Date(event.date).toLocaleDateString()
-                      : "N/A"}
-                  </div>
-                </div>
-                <h3 className="text-xl font-black text-slate-900 tracking-tight italic uppercase mb-2 group-hover:text-indigo-600 transition-colors">
-                  {event.title}
-                </h3>
-                <p className="text-sm font-semibold text-slate-500 leading-relaxed uppercase tracking-tight mb-8">
-                  {event.description}
-                </p>
-                <div className="space-y-3 pt-6 border-t border-slate-50">
-                  <div className="flex items-center gap-3 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    <Clock className="w-4 h-4 text-emerald-500" />
-                    {event.time}
-                  </div>
-                  <div className="flex items-center gap-3 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    <MapPin className="w-4 h-4 text-indigo-500" />
-                    {event.location}
-                  </div>
-                </div>
-                <div className="mt-8">
-                  <Button
-                    variant="outline"
-                    className="w-full h-11 rounded-xl border-slate-200 font-black text-[10px] uppercase tracking-widest text-slate-600 group-hover:bg-slate-900 group-hover:text-white group-hover:border-slate-900 transition-all shadow-sm"
-                  >
-                    View Details
-                  </Button>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       </EcosystemContainer>

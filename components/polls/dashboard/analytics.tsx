@@ -128,7 +128,7 @@ export default function PollsAnalytics() {
   return (
     <EcosystemWrapper anonymized-1="polls-analytics">
       <EcosystemHeader
-        title="Polls Intelligence"
+        title="Polls Analytics"
         description="Monitor community sentiment, voting velocity, and engagement metrics across the platform."
         badgeText="Sentiment Hub"
         icon={Vote}

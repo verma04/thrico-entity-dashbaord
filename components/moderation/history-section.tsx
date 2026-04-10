@@ -181,7 +181,7 @@ export function HistorySection() {
               value="moderation"
               className="text-[10px] font-bold uppercase tracking-wider px-4 data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm transition-all"
             >
-              Intelligence logs
+              System logs
             </TabsTrigger>
             <TabsTrigger
               value="tokens"
@@ -352,7 +352,7 @@ export function HistorySection() {
                       Content Type
                     </TableHead>
                     <TableHead className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest px-6 h-10">
-                      AI Label
+                      System Label
                     </TableHead>
                     <TableHead className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest px-6 h-10">
                       Decision
@@ -594,7 +594,7 @@ export function HistorySection() {
                 </div>
                 <div>
                   <SheetTitle className="text-lg font-bold text-zinc-900 tracking-tight leading-none">
-                    Intelligence Report
+                    System Report
                   </SheetTitle>
                   <p className="text-[10px] font-bold text-indigo-600 uppercase tracking-[0.2em] mt-1.5 flex items-center gap-1.5">
                     <span className="h-1 w-1 bg-indigo-600 rounded-full animate-pulse" />
@@ -666,7 +666,7 @@ export function HistorySection() {
                     </div>
                   </section>
 
-                  {/* AI & Metrics Section */}
+                  {/* Metrics Section */}
                   <section className="space-y-4">
                     <div className="flex items-center gap-2">
                        <Zap className="h-4 w-4 text-amber-500" />

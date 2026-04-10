@@ -181,9 +181,9 @@ export default function FeedbackDashboard() {
   ];
 
   return (
-    <EcosystemWrapper anonymized-1="feedback-intelligence">
+    <EcosystemWrapper anonymized-1="feedback-analytics">
       <EcosystemHeader
-        title="Sentiment Intelligence"
+        title="Sentiment Analysis"
         description="Monitor member feedback velocity, sentiment distribution, and resolution performance."
         badgeText="Sentiment Hub"
         icon={Smile}

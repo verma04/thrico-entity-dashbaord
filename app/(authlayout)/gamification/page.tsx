@@ -153,9 +153,9 @@ export default function GamificationOverview() {
   ];
 
   return (
-    <EcosystemWrapper anonymized-1="gamification-intelligence">
+    <EcosystemWrapper anonymized-1="gamification-analytics">
       <EcosystemHeader
-        title="Incentive Intelligence"
+        title="Incentive Management"
         description="Monitor system issuance, reward distribution, and engagement trajectory across the entity."
         badgeText="Gamification Hub"
         icon={Trophy}
@@ -174,7 +174,7 @@ export default function GamificationOverview() {
             />
             <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest italic">
               {settings.isEnabled
-                ? "Incentive Protocol Online"
+                ? "Incentive System Active"
                 : "System Paused"}
             </span>
           </div>
@@ -202,7 +202,7 @@ export default function GamificationOverview() {
       <EcosystemContainer className="p-6 lg:p-8 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {kpis.map((kpi, i) => (
-            <EcosystemKPI key={i} {...kpi} trendLabel="Registry Stats" />
+            <EcosystemKPI key={i} {...kpi} trendLabel="Analytics Stats" />
           ))}
         </div>
 
@@ -233,7 +233,7 @@ export default function GamificationOverview() {
                     </p>
                     <div className="flex items-center justify-between pt-4 border-t border-zinc-50">
                       <span className="text-[9px] font-bold text-zinc-300 uppercase tracking-widest group-hover:text-amber-600 transition-colors">
-                        Manage registry
+                        Manage rewards
                       </span>
                       <ArrowRight className="h-3.5 w-3.5 text-zinc-300 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all" />
                     </div>
@@ -245,7 +245,7 @@ export default function GamificationOverview() {
 
           <div className="lg:col-span-4 space-y-6">
             <EcosystemCard
-              title="Registry Parameters"
+              title="System Parameters"
               description="Active engine configuration"
               icon={Activity}
             >

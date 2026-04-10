@@ -22,7 +22,7 @@ export function AiModerationDashboardWidget({ timeRange, dateRange }: AiModerati
   if (error) {
     return (
       <div className="p-6 rounded-xl border border-rose-200 bg-rose-50 text-rose-600">
-        <p className="text-sm font-medium">Failed to load AI metrics.</p>
+        <p className="text-sm font-medium">Failed to load metrics.</p>
       </div>
     );
   }
@@ -48,8 +48,8 @@ export function AiModerationDashboardWidget({ timeRange, dateRange }: AiModerati
             <Bot className="h-4 w-4 text-indigo-600" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-foreground">AI Content Gateway</p>
-            <p className="text-xs text-muted-foreground font-medium">Autonomous pipeline status</p>
+            <p className="text-sm font-semibold text-foreground">Content Filtering</p>
+            <p className="text-xs text-muted-foreground font-medium">Automated safety checks</p>
           </div>
         </div>
         <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-100 font-bold h-5 px-2">
@@ -64,7 +64,7 @@ export function AiModerationDashboardWidget({ timeRange, dateRange }: AiModerati
             { label: "Flagged", value: flagged, icon: AlertCircle, color: "text-amber-600", bg: "bg-amber-50" },
             { label: "Rejected", value: rejected, icon: XCircle, color: "text-rose-600", bg: "bg-rose-50" },
             { label: "Pending", value: pending, icon: Bot, color: "text-blue-600", bg: "bg-blue-50" },
-            { label: "Tokens Used", value: totalTokens, icon: Zap, color: "text-emerald-600", bg: "bg-emerald-50" },
+            { label: "Scans Run", value: totalTokens, icon: Zap, color: "text-emerald-600", bg: "bg-emerald-50" },
           ].map((stat, i) => (
             <div key={stat.label} className={cn("p-3 rounded-lg bg-muted/30 border border-border/50", i === 4 ? "col-span-2 md:col-span-4" : "")}>
               <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5">
