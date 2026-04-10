@@ -11,12 +11,7 @@ function ModerationLayout({ children }: { children: React.ReactNode }) {
       icon: <LayoutDashboard className="h-4 w-4" />,
       section: "System",
     },
-    {
-      key: "reported-content",
-      label: "Reports",
-      icon: <Flag className="h-4 w-4" />,
-      section: "Management",
-    },
+
     {
       key: "banned-words",
       label: "Banned Words",
