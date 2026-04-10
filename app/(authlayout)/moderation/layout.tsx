@@ -26,7 +26,7 @@ function ModerationLayout({ children }: { children: React.ReactNode }) {
     },
     {
       key: "settings",
-      label: "Preferences",
+      label: "Ai Moderation Engine",
       icon: <Settings className="h-4 w-4" />,
       section: "Management",
     },
