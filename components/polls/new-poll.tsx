@@ -5,13 +5,14 @@ import {
   Trash2,
   Plus,
   Eye,
-  Settings2,
   BarChart3,
-  Sparkles,
-  GripVertical,
   ArrowUp,
   ArrowDown,
   Loader2,
+  Sparkles,
+  ChevronRight,
+  Info,
+  Save,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,11 +23,16 @@ import {
 } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { useFormik, FieldArray, FormikProvider } from "formik";
 import * as Yup from "yup";
@@ -54,34 +60,48 @@ const pollSchema = Yup.object().shape({
     .max(10, "Maximum 10 options allowed"),
 });
 
-const STEP_LABELS = ["Build", "Rules", "Review"];
+const visibilityOptions = [
+  {
+    value: "ALWAYS",
+    label: "Everyone",
+    desc: "Results are always public",
+  },
+  {
+    value: "AFTER_VOTE",
+    label: "After voting",
+    desc: "People see results after they vote",
+  },
+  {
+    value: "ADMIN",
+    label: "Only Admin",
+    desc: "Only you can see the results",
+  },
+];
 
 export default function NewPoll({
   standalone = true,
+  fullPage = false,
   onCompletedAction,
   onCancel,
 }: {
   standalone?: boolean;
+  fullPage?: boolean;
   onCompletedAction?: (pollId: string | number) => void;
   onCancel?: () => void;
 }) {
   const [open, setOpen] = useState(false);
-  const [step, setStep] = useState(0);
   const [resultVisibility, setResultVisibility] = useState("ALWAYS");
 
   const onCompleted = (data: any) => {
     formik.resetForm();
     setResultVisibility("ALWAYS");
-    setStep(0);
     setOpen(false);
     if (onCompletedAction && data?.addPoll?.id) {
       onCompletedAction(data.addPoll.id);
     }
   };
 
-  const [add, { loading }] = addPoll({
-    onCompleted,
-  });
+  const [add, { loading }] = addPoll({ onCompleted });
 
   const formik = useFormik({
     initialValues: {
@@ -106,130 +126,68 @@ export default function NewPoll({
     formik.setFieldValue("options", options);
   };
 
+  const handleSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    formik.handleSubmit();
+  };
+
   const canSubmit = formik.isValid && formik.dirty && !loading;
 
-  const visibilityOptions = [
-    {
-      value: "ALWAYS",
-      label: "Everyone",
-      desc: "Results are always public",
-    },
-    {
-      value: "AFTER_VOTE",
-      label: "After voting",
-      desc: "People see results after they vote",
-    },
-    {
-      value: "ADMIN",
-      label: "Only Admin",
-      desc: "Only you can see the results",
-    },
-  ];
-
-  /* ── Step Indicator ──────────────────────────────────────────────────── */
-  const StepIndicator = () => (
-    <div className="flex items-center gap-1 px-6 pt-5 pb-3">
-      {STEP_LABELS.map((label, i) => (
-        <button
-          key={label}
-          type="button"
-          onClick={() => setStep(i)}
-          className="flex items-center gap-2 group"
-        >
-          <div
-            className={cn(
-              "flex items-center gap-2 px-3 py-1.5 rounded-xl text-[11px] font-black uppercase tracking-[0.12em] transition-all duration-300",
-              step === i
-                ? "bg-zinc-900 text-white shadow-lg shadow-zinc-900/20"
-                : step > i
-                  ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
-                  : "bg-zinc-50 text-zinc-400 border border-zinc-100 hover:text-zinc-600 hover:border-zinc-200",
-            )}
-          >
-            <span
-              className={cn(
-                "h-5 w-5 rounded-full flex items-center justify-center text-[10px] font-black",
-                step === i
-                  ? "bg-white/20 text-white"
-                  : step > i
-                    ? "bg-emerald-100 text-emerald-600"
-                    : "bg-zinc-100 text-zinc-400",
-              )}
-            >
-              {step > i ? "✓" : i + 1}
-            </span>
-            {label}
-          </div>
-          {i < STEP_LABELS.length - 1 && (
-            <div
-              className={cn(
-                "w-6 h-px mx-1 transition-colors duration-300",
-                step > i ? "bg-emerald-200" : "bg-zinc-200",
-              )}
-            />
-          )}
-        </button>
-      ))}
-    </div>
-  );
-
-  /* ── Step 0: Compose ─────────────────────────────────────────────────── */
-  const ComposeStep = () => (
-    <div className="space-y-6 px-6 py-5">
+  const renderFormFields = () => (
+    <>
       {/* Title */}
       <div className="space-y-2">
-        <label className="text-[11px] font-black uppercase tracking-[0.14em] text-zinc-400">
-          Poll Title
-        </label>
+        <Label htmlFor="poll-title" className="text-sm font-medium">
+          Poll Title <span className="text-destructive">*</span>
+        </Label>
         <Input
+          id="poll-title"
           name="title"
-          className="h-14 rounded-2xl border-zinc-200 bg-zinc-50/50 text-[16px] font-bold text-zinc-900 placeholder:text-zinc-300 focus:bg-white focus:border-zinc-300 focus:ring-2 focus:ring-zinc-900/5 transition-all"
-          placeholder="Name your poll..."
+          placeholder="Enter poll title"
+          maxLength={100}
           value={formik.values.title}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
         />
         {formik.touched.title && formik.errors.title && (
-          <p className="text-[12px] font-bold text-red-500 pl-1">
-            {formik.errors.title}
-          </p>
+          <p className="text-xs text-destructive">{formik.errors.title}</p>
         )}
-        <p className="text-[10px] font-bold text-zinc-300 pl-1 tracking-wide">
-          {formik.values.title.length}/100
+        <p className="text-xs text-muted-foreground">
+          {formik.values.title.length}/100 characters
         </p>
       </div>
 
       {/* Question */}
       <div className="space-y-2">
-        <label className="text-[11px] font-black uppercase tracking-[0.14em] text-zinc-400">
-          Question
-        </label>
+        <Label htmlFor="poll-question" className="text-sm font-medium">
+          Question <span className="text-destructive">*</span>
+        </Label>
         <Textarea
+          id="poll-question"
           name="question"
-          rows={3}
-          className="rounded-2xl border-zinc-200 bg-zinc-50/50 text-[15px] font-medium text-zinc-900 placeholder:text-zinc-300 focus:bg-white focus:border-zinc-300 focus:ring-2 focus:ring-zinc-900/5 transition-all resize-none"
-          placeholder="What is your question?"
+          rows={4}
+          className="resize-none"
+          placeholder="Describe what your poll is asking"
+          maxLength={200}
           value={formik.values.question}
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
         />
         {formik.touched.question && formik.errors.question && (
-          <p className="text-[12px] font-bold text-red-500 pl-1">
-            {formik.errors.question}
-          </p>
+          <p className="text-xs text-destructive">{formik.errors.question}</p>
         )}
+        <p className="text-xs text-muted-foreground">
+          {formik.values.question.length}/200 characters
+        </p>
       </div>
 
-      {/* Options */}
+      {/* Answer Choices */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <label className="text-[11px] font-black uppercase tracking-[0.14em] text-zinc-400">
-            Answer Choices
-          </label>
-          <Badge
-            variant="secondary"
-            className="bg-zinc-100 text-zinc-500 font-black text-[10px] rounded-lg px-2 py-0.5"
-          >
+          <Label className="text-sm font-medium">
+            Answer Choices <span className="text-destructive">*</span>
+          </Label>
+          <Badge variant="outline" className="text-xs text-muted-foreground">
             {formik.values.options.length}/10
           </Badge>
         </div>
@@ -241,32 +199,29 @@ export default function NewPoll({
               {formik.values.options.map((option, index) => (
                 <div
                   key={index}
-                  className="group flex items-center gap-2 p-3 rounded-2xl border border-zinc-100 bg-white hover:border-zinc-200 hover:shadow-sm transition-all duration-200"
+                  className="group flex items-center gap-2 p-3 rounded-lg border hover:bg-muted/50 transition-colors"
                 >
-                  {/* Index badge */}
-                  <div className="h-8 w-8 rounded-xl bg-zinc-100 flex items-center justify-center shrink-0">
-                    <span className="text-[11px] font-black text-zinc-400">
+                  <div className="h-7 w-7 rounded-md bg-muted border border-border flex items-center justify-center shrink-0">
+                    <span className="text-xs font-semibold text-muted-foreground">
                       {String.fromCharCode(65 + index)}
                     </span>
                   </div>
 
-                  {/* Input */}
                   <Input
                     name={`options.${index}.option`}
                     placeholder={`Choice ${index + 1}`}
                     value={option.option}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    className="flex-1 border-0 bg-transparent text-[14px] font-medium shadow-none focus-visible:ring-0 placeholder:text-zinc-300"
+                    className="flex-1 border-0 bg-transparent shadow-none focus-visible:ring-0 text-sm"
                   />
 
-                  {/* Reorder & delete */}
                   <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                     <Button
                       type="button"
                       variant="ghost"
                       size="icon"
-                      className="h-7 w-7 rounded-lg text-zinc-300 hover:text-zinc-600"
+                      className="h-7 w-7 rounded-md text-muted-foreground hover:text-foreground"
                       onClick={() => moveOption(index, index - 1)}
                       disabled={index === 0}
                     >
@@ -276,7 +231,7 @@ export default function NewPoll({
                       type="button"
                       variant="ghost"
                       size="icon"
-                      className="h-7 w-7 rounded-lg text-zinc-300 hover:text-zinc-600"
+                      className="h-7 w-7 rounded-md text-muted-foreground hover:text-foreground"
                       onClick={() => moveOption(index, index + 1)}
                       disabled={index === formik.values.options.length - 1}
                     >
@@ -286,7 +241,7 @@ export default function NewPoll({
                       type="button"
                       variant="ghost"
                       size="icon"
-                      className="h-7 w-7 rounded-lg text-red-300 hover:text-red-500 hover:bg-red-50"
+                      className="h-7 w-7 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                       onClick={() => arrayHelpers.remove(index)}
                       disabled={formik.values.options.length <= 2}
                     >
@@ -296,12 +251,11 @@ export default function NewPoll({
                 </div>
               ))}
 
-              {/* Add choice */}
               <Button
                 type="button"
-                variant="ghost"
+                variant="outline"
                 onClick={() => arrayHelpers.push({ option: "" })}
-                className="w-full h-12 rounded-2xl border-2 border-dashed border-zinc-200 text-zinc-400 hover:text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50/50 font-bold text-[13px] transition-all"
+                className="w-full border-dashed text-muted-foreground hover:text-foreground"
                 disabled={formik.values.options.length >= 10}
               >
                 <Plus className="h-4 w-4 mr-2" />
@@ -311,261 +265,261 @@ export default function NewPoll({
           )}
         />
       </div>
-    </div>
-  );
 
-  /* ── Step 1: Settings ────────────────────────────────────────────────── */
-  const SettingsStep = () => (
-    <div className="space-y-6 px-6 py-5">
-      <div className="rounded-3xl border border-zinc-100 bg-white p-6 space-y-5">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="h-10 w-10 rounded-2xl bg-indigo-50 flex items-center justify-center">
-            <BarChart3 className="h-5 w-5 text-indigo-500" />
+      <Separator />
+
+      {/* Result Visibility */}
+      <div className="space-y-4">
+        <div className="flex items-start space-x-3">
+          <div className="p-1.5 rounded-md bg-primary/10">
+            <BarChart3 className="h-4 w-4 text-primary" />
           </div>
           <div>
-            <h3 className="text-[14px] font-black text-zinc-900 tracking-tight">
-              Who sees the results?
-            </h3>
-            <p className="text-[11px] font-medium text-zinc-400">
-              Choose when voters can see the poll outcomes
-            </p>
+            <Label className="text-base font-semibold">Result Visibility</Label>
+            <p className="text-sm text-muted-foreground">Choose when voters can see the poll outcomes</p>
           </div>
         </div>
-
-        <div className="space-y-2">
+        <RadioGroup
+          value={resultVisibility}
+          onValueChange={setResultVisibility}
+          className="space-y-3"
+        >
           {visibilityOptions.map((opt) => (
-            <button
+            <div
               key={opt.value}
-              type="button"
-              onClick={() => setResultVisibility(opt.value)}
-              className={cn(
-                "w-full flex items-center gap-4 p-4 rounded-2xl border-2 transition-all duration-200 text-left",
-                resultVisibility === opt.value
-                  ? "border-indigo-200 bg-indigo-50/50 shadow-sm shadow-indigo-500/5"
-                  : "border-zinc-100 bg-zinc-50/30 hover:border-zinc-200 hover:bg-white",
-              )}
+              className="flex items-start space-x-3 space-y-0 p-4 rounded-lg border hover:bg-muted/50 transition-colors"
             >
-              <div
-                className={cn(
-                  "h-5 w-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all",
-                  resultVisibility === opt.value
-                    ? "border-indigo-500 bg-indigo-500"
-                    : "border-zinc-300",
-                )}
-              >
-                {resultVisibility === opt.value && (
-                  <div className="h-2 w-2 rounded-full bg-white" />
-                )}
-              </div>
-              <div>
-                <p
-                  className={cn(
-                    "text-[13px] font-bold transition-colors",
-                    resultVisibility === opt.value
-                      ? "text-indigo-700"
-                      : "text-zinc-700",
-                  )}
-                >
-                  {opt.label}
-                </p>
-                <p className="text-[11px] font-medium text-zinc-400">
-                  {opt.desc}
-                </p>
-              </div>
-            </button>
+              <RadioGroupItem value={opt.value} id={`vis-${opt.value}`} />
+              <Label htmlFor={`vis-${opt.value}`} className="font-normal cursor-pointer flex-1">
+                <div className="font-medium mb-0.5">{opt.label}</div>
+                <p className="text-sm text-muted-foreground">{opt.desc}</p>
+              </Label>
+            </div>
           ))}
-        </div>
+        </RadioGroup>
       </div>
-    </div>
+    </>
   );
 
-  /* ── Step 2: Preview ─────────────────────────────────────────────────── */
-  const PreviewStep = () => (
-    <div className="space-y-5 px-6 py-5">
-      <div className="rounded-[32px] border border-zinc-100 bg-white overflow-hidden shadow-sm">
-        {/* Preview header */}
-        <div className="px-6 pt-6 pb-4">
-          <div className="flex items-center gap-2 mb-4">
-            <Badge className="bg-emerald-50 text-emerald-600 border border-emerald-100 font-black text-[9px] uppercase tracking-[0.15em] px-2.5 py-1 rounded-lg hover:bg-emerald-50">
-              <Sparkles className="h-3 w-3 mr-1" />
-              Live Preview
-            </Badge>
-          </div>
-          <h3 className="text-[22px] font-black text-zinc-900 tracking-tight leading-tight mb-2">
+  const renderPreview = () => (
+    <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden">
+      <CardHeader className="bg-muted/30 pb-4">
+        <CardTitle className="text-sm font-bold flex items-center gap-2">
+          <Eye className="h-4 w-4 text-primary" />
+          Live Preview
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="pt-6 space-y-4">
+        <div>
+          <h3 className="text-lg font-bold tracking-tight text-zinc-900 leading-tight mb-1">
             {formik.values.title || "Untitled Poll"}
           </h3>
-          <p className="text-[15px] font-medium text-zinc-500 leading-relaxed">
-            {formik.values.question || "Your question appears here..."}
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            {formik.values.question || "Your question will appear here..."}
           </p>
         </div>
 
-        <Separator className="bg-zinc-100" />
+        <Separator />
 
-        {/* Preview options */}
-        <div className="p-6 space-y-3">
-          <RadioGroup>
-            {formik.values.options.map((opt, i) => (
-              <div
-                key={i}
-                className="flex items-center gap-4 p-4 rounded-2xl border border-zinc-100 bg-zinc-50/30 hover:bg-zinc-50 hover:border-zinc-200 transition-all cursor-pointer group"
-              >
-                <RadioGroupItem
-                  value={opt.option || `option-${i}`}
-                  id={`preview-${i}`}
-                  className="border-zinc-300 text-zinc-900"
-                />
-                <Label
-                  htmlFor={`preview-${i}`}
-                  className="flex-1 cursor-pointer text-[14px] font-bold text-zinc-700 group-hover:text-zinc-900 transition-colors"
-                >
-                  {opt.option || `Choice ${i + 1}`}
-                </Label>
-                <div className="h-7 w-7 rounded-lg bg-zinc-100 flex items-center justify-center">
-                  <span className="text-[10px] font-black text-zinc-400">
-                    {String.fromCharCode(65 + i)}
-                  </span>
-                </div>
+        <div className="space-y-2">
+          {formik.values.options.map((opt, i) => (
+            <div
+              key={i}
+              className="flex items-center gap-3 p-3 rounded-lg border bg-zinc-50/50"
+            >
+              <div className="h-6 w-6 rounded bg-white border border-border flex items-center justify-center shrink-0">
+                <span className="text-[10px] font-bold text-zinc-400">
+                  {String.fromCharCode(65 + i)}
+                </span>
               </div>
-            ))}
-          </RadioGroup>
-
-          {/* Dummy vote button */}
-          <div className="pt-2">
-            <div className="w-full h-12 rounded-2xl bg-zinc-900 flex items-center justify-center text-white font-black text-[12px] uppercase tracking-[0.15em] opacity-50">
-              Submit Vote
+              <span className="text-sm font-medium text-zinc-700">
+                {opt.option || `Choice ${i + 1}`}
+              </span>
             </div>
-          </div>
+          ))}
         </div>
 
-        {/* Visibility info */}
-        <div className="px-6 pb-5">
-          <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-indigo-50/50 border border-indigo-100/50">
+        <div className="pt-2">
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-indigo-50/50 border border-indigo-100/50">
             <BarChart3 className="h-3.5 w-3.5 text-indigo-400 shrink-0" />
-            <p className="text-[11px] font-bold text-indigo-500">
-              Results:{" "}
-              {
-                visibilityOptions.find((v) => v.value === resultVisibility)
-                  ?.label
-              }
+            <p className="text-[10px] font-bold text-indigo-500 uppercase tracking-wider">
+              Results: {visibilityOptions.find(v => v.value === resultVisibility)?.label}
             </p>
           </div>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 
-  /* ── Form Content ────────────────────────────────────────────────────── */
+  const renderSubmitButton = (size: "sm" | "default" = "sm") => (
+    <Button
+      onClick={() => handleSubmit()}
+      size={size}
+      disabled={!canSubmit}
+      className="shadow-sm border-primary/20"
+    >
+      {loading ? (
+        <div className="flex items-center gap-2">
+          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          {fullPage ? "Creating..." : "Creating..."}
+        </div>
+      ) : (
+        <div className="flex items-center gap-2">
+          {fullPage ? <Save className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />}
+          {fullPage ? "Create Poll" : standalone ? "Create Poll" : "Create and Attach Poll"}
+        </div>
+      )}
+    </Button>
+  );
+
+  if (fullPage) {
+    return (
+      <FormikProvider value={formik}>
+        <div className="flex flex-col h-full bg-background overflow-hidden rounded-t-[inherit]">
+          {/* Header section - Sticky */}
+          <div className="sticky top-0 z-30 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 border-b px-6 py-4">
+            <div className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-3 mb-1">
+                  <div className="p-2.5 rounded-xl bg-primary/10 ring-1 ring-primary/20">
+                    <BarChart3 className="h-5 w-5 text-primary" />
+                  </div>
+                  <h1 className="text-2xl font-bold tracking-tight">
+                    Create Poll
+                  </h1>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground ml-1">
+                  <span>Polls</span>
+                  <ChevronRight className="h-3 w-3" />
+                  <span>Create New Poll</span>
+                </div>
+              </div>
+              <div className="hidden sm:flex gap-3">
+                <Button
+                  variant="outline"
+                  type="button"
+                  size="sm"
+                  onClick={() => (onCancel ? onCancel() : window.history.back())}
+                >
+                  Cancel
+                </Button>
+                {renderSubmitButton("sm")}
+              </div>
+            </div>
+          </div>
+
+          {/* Main Content Area - Scrollable */}
+          <div className="flex-1 overflow-y-auto">
+            <div className="max-w-7xl mx-auto px-6 py-8">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <div className="lg:col-span-8 space-y-8">
+                  <form onSubmit={handleSubmit} className="space-y-8">
+                    <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden">
+                      <CardHeader className="bg-muted/30 pb-4">
+                        <CardTitle className="text-xl">
+                          Poll Details
+                        </CardTitle>
+                        <p className="text-sm text-muted-foreground">
+                          Core details about your poll
+                        </p>
+                      </CardHeader>
+                      <CardContent className="pt-6 space-y-6">
+                        {renderFormFields()}
+                      </CardContent>
+                    </Card>
+                  </form>
+                </div>
+
+                {/* Sidebar */}
+                <div className="lg:col-span-4">
+                  <div className="sticky top-6 space-y-6">
+                    {renderPreview()}
+
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-bold">Quick Guide</h3>
+                      <Badge
+                        variant="outline"
+                        className="bg-indigo-500/5 text-indigo-600 border-indigo-500/20"
+                      >
+                        Poll Tips
+                      </Badge>
+                    </div>
+
+                    <Card className="border-none shadow-sm ring-1 ring-border/50">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-base">
+                          <Info className="h-5 w-5" />
+                          Tips for Success
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <ul className="space-y-3 text-sm">
+                          <li className="flex gap-2">
+                            <span className="text-primary font-bold">•</span>
+                            <span>Keep your question short and unambiguous.</span>
+                          </li>
+                          <li className="flex gap-2">
+                            <span className="text-primary font-bold">•</span>
+                            <span>Provide 3-5 balanced answer choices.</span>
+                          </li>
+                          <li className="flex gap-2">
+                            <span className="text-primary font-bold">•</span>
+                            <span>Use "After Voting" visibility to avoid bias.</span>
+                          </li>
+                        </ul>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Mobile Action Buttons */}
+          <div className="sm:hidden sticky bottom-0 z-30 bg-background border-t px-6 py-4">
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                type="button"
+                className="flex-1"
+                onClick={() => (onCancel ? onCancel() : window.history.back())}
+              >
+                Cancel
+              </Button>
+              {renderSubmitButton("default")}
+            </div>
+          </div>
+        </div>
+      </FormikProvider>
+    );
+  }
+
   const renderForm = () => (
     <FormikProvider value={formik}>
       <form
-        onSubmit={formik.handleSubmit}
-        className={
-          standalone
-            ? "flex flex-col h-[calc(100vh-90px)]"
-            : "space-y-6 flex flex-col"
-        }
+        onSubmit={handleSubmit}
+        className={standalone ? "flex flex-col h-[calc(100vh-90px)]" : "flex flex-col"}
       >
-        {/* Step indicator */}
-        <StepIndicator />
-
-        {/* Scrollable content */}
-        <div className="flex-1 overflow-y-auto">
-          {step === 0 && <ComposeStep />}
-          {step === 1 && <SettingsStep />}
-          {step === 2 && <PreviewStep />}
+        <div className={cn("space-y-6", standalone ? "flex-1 overflow-y-auto px-6 py-5" : "px-6 py-5")}>
+          {renderFormFields()}
         </div>
 
-        {/* Footer */}
-        {standalone ? (
-          <div className="px-6 py-4 border-t border-zinc-100 bg-zinc-50/50">
-            <div className="flex items-center justify-between">
-              <Button
-                type="button"
-                variant="ghost"
-                className="h-12 rounded-2xl font-bold text-[13px] text-zinc-400 hover:text-zinc-600 px-5"
-                onClick={() => {
-                  if (step === 0) {
-                    setOpen(false);
-                  } else {
-                    setStep(step - 1);
-                  }
-                }}
-              >
-                {step === 0 ? "Cancel" : "Back"}
-              </Button>
-
-              {step < 2 ? (
-                <Button
-                  type="button"
-                  className="h-12 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-white font-black text-[12px] uppercase tracking-[0.12em] px-8 shadow-lg shadow-zinc-900/20 transition-all active:scale-95"
-                  onClick={() => setStep(step + 1)}
-                >
-                  Continue
-                </Button>
-              ) : (
-                <Button
-                  type="submit"
-                  disabled={!canSubmit}
-                  className="h-12 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-[12px] uppercase tracking-[0.12em] px-8 shadow-lg shadow-emerald-600/20 transition-all active:scale-95 disabled:opacity-40"
-                >
-                  {loading ? (
-                    <span className="flex items-center gap-2">
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Creating...
-                    </span>
-                  ) : (
-                    <span className="flex items-center gap-2">
-                      <Sparkles className="h-4 w-4" />
-                      Create Poll
-                    </span>
-                  )}
-                </Button>
-              )}
-            </div>
+        <div className={cn("border-t px-6 py-4", standalone ? "bg-muted/30" : "")}>
+          <div className="flex items-center gap-3">
+            {renderSubmitButton("sm")}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                if (standalone) setOpen(false);
+                else if (onCancel) onCancel();
+              }}
+            >
+              Cancel
+            </Button>
           </div>
-        ) : (
-          <div className="flex items-center gap-3 pt-4 border-t px-0">
-            {step < 2 ? (
-              <>
-                <Button
-                  type="button"
-                  className="flex-1 bg-zinc-900 hover:bg-zinc-800 text-white rounded-2xl h-12 font-black text-[12px] uppercase tracking-[0.12em]"
-                  onClick={() => setStep(step + 1)}
-                >
-                  Continue
-                </Button>
-                {step > 0 && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    className="rounded-2xl h-12 font-bold text-[13px]"
-                    onClick={() => setStep(step - 1)}
-                  >
-                    Back
-                  </Button>
-                )}
-              </>
-            ) : (
-              <>
-                <Button
-                  type="submit"
-                  className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl h-12 font-black text-[12px] uppercase tracking-[0.12em] shadow-lg shadow-emerald-600/20"
-                  disabled={!canSubmit}
-                >
-                  {loading ? "Creating..." : "Create and Attach Poll"}
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  className="rounded-2xl h-12 font-bold text-[13px]"
-                  onClick={onCancel}
-                >
-                  Remove
-                </Button>
-              </>
-            )}
-          </div>
-        )}
+        </div>
       </form>
     </FormikProvider>
   );
@@ -578,25 +532,26 @@ export default function NewPoll({
     <>
       <Button
         onClick={() => setOpen(true)}
-        className="h-11 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-white font-black text-[12px] uppercase tracking-widest px-5 shadow-lg shadow-zinc-900/15 transition-all active:scale-95"
+        size="sm"
+        className="shadow-sm"
       >
         <Plus className="h-4 w-4 mr-2" />
         Create Poll
       </Button>
 
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent className="w-full z-100 sm:max-w-[560px] overflow-hidden p-0 border-l border-zinc-100 bg-[#FAFBFC]">
-          <SheetHeader className="px-6 pt-6 pb-4 border-b border-zinc-100 bg-white">
+        <SheetContent className="w-full z-100 sm:max-w-[560px] overflow-hidden p-0 border-l border-border bg-background">
+          <SheetHeader className="px-6 pt-6 pb-4 border-b bg-muted/30">
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-2xl bg-emerald-50 flex items-center justify-center">
-                <BarChart3 className="h-5 w-5 text-emerald-600" />
+              <div className="p-2 rounded-xl bg-primary/10 ring-1 ring-primary/20">
+                <BarChart3 className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <SheetTitle className="text-[18px] font-black text-zinc-900 tracking-tight">
+                <SheetTitle className="text-lg font-semibold tracking-tight">
                   Create Poll
                 </SheetTitle>
-                <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-[0.12em]">
-                  Get feedback
+                <p className="text-xs text-muted-foreground">
+                  Get feedback from your community
                 </p>
               </div>
             </div>
