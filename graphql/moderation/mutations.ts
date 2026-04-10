@@ -127,6 +127,7 @@ export const UPDATE_MODERATION_SETTINGS = gql`
       spamThreshold
       autoFlagThreshold
       autoHideThreshold
+      aiClassificationDefinitions
     }
   }
 `;

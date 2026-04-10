@@ -76,25 +76,12 @@ export function useGetContentReports(
     limit?: number;
     offset?: number;
   },
-  options?: QueryHookOptions<
-    { getContentReports: PaginatedContentReportResponse },
-    {
-      status?: ReportStatus;
-      contentType?: ModerationContentType;
-      limit?: number;
-      offset?: number;
-    }
-  >,
+  options?: QueryHookOptions<{ getContentReports: PaginatedContentReportResponse }>,
 ) {
-  return useQuery<
-    { getContentReports: PaginatedContentReportResponse },
-    {
-      status?: ReportStatus;
-      contentType?: ModerationContentType;
-      limit?: number;
-      offset?: number;
-    }
-  >(GET_CONTENT_REPORTS, { variables, ...options });
+  return useQuery<{ getContentReports: PaginatedContentReportResponse }>(
+    GET_CONTENT_REPORTS,
+    { variables, ...options },
+  );
 }
 
 export function useGetModerationSettings(

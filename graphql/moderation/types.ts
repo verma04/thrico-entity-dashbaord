@@ -67,6 +67,7 @@ export interface ModerationSettings {
   spamThreshold: number;
   autoFlagThreshold: number;
   autoHideThreshold: number;
+  aiClassificationDefinitions?: any;
 }
 
 export interface PaginatedBannedWordResponse {
