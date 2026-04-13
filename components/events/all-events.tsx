@@ -1,55 +1,133 @@
 "use client";
 
-import { useState } from "react";
-import Image from "next/image";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Calendar, MapPin, Users, Loader2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Loader2,
-  Calendar,
-  MapPin,
-  Users,
-  LayoutGrid,
-  List,
-  Eye,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
 import moment from "moment";
 import { Event } from "@/graphql/actions/events";
 import EventCard from "./event-card";
+import {
+  AdminTable,
+  AdminStatusBadge,
+  AdminVerifiedBadge,
+  AdminTableColumn,
+} from "@/components/shared/admin-table/admin-table";
 
-function getTypeStyles(type: string) {
-  switch (type) {
-    case "ONLINE":
-      return "bg-cyan-500/10 text-cyan-600 border-cyan-500/20";
-    case "HYBRID":
-      return "bg-amber-500/10 text-amber-600 border-amber-500/20";
-    default:
-      return "bg-violet-500/10 text-violet-600 border-violet-500/20";
-  }
+// ─────────────────────────────────────────────────────────────────────────────
+// Type Badge
+// ─────────────────────────────────────────────────────────────────────────────
+
+const TYPE_COLORS: Record<string, string> = {
+  ONLINE: "bg-cyan-50 text-cyan-700 border-cyan-200",
+  OFFLINE: "bg-violet-50 text-violet-700 border-violet-200",
+  HYBRID: "bg-amber-50 text-amber-700 border-amber-200",
+};
+
+function EventTypeBadge({ type }: { type: string }) {
+  const color = TYPE_COLORS[type] ?? "bg-muted text-muted-foreground border-border";
+  return (
+    <span
+      className={`inline-flex items-center px-2 py-0.5 rounded-md border text-[10px] font-semibold uppercase tracking-wide ${color}`}
+    >
+      {type?.replace("_", " ")}
+    </span>
+  );
 }
 
-function getStatusStyles(status: string) {
-  switch (status) {
-    case "APPROVED":
-      return "bg-emerald-500/10 text-emerald-600 border-emerald-500/20";
-    case "PENDING":
-      return "bg-amber-500/10 text-amber-600 border-amber-500/20";
-    case "REJECTED":
-      return "bg-red-500/10 text-red-600 border-red-500/20";
-    default:
-      return "bg-gray-500/10 text-gray-600 border-gray-500/20";
-  }
-}
+// ─────────────────────────────────────────────────────────────────────────────
+// Column definitions
+// ─────────────────────────────────────────────────────────────────────────────
+
+const columns: AdminTableColumn<Event>[] = [
+  {
+    key: "event",
+    header: "Event",
+    cell: (row) => (
+      <div className="flex items-center gap-3">
+        <Avatar className="h-9 w-9 rounded-lg border border-border/60 shrink-0">
+          <AvatarImage
+            src={
+              row.cover
+                ? `https://cdn.thrico.network/${row.cover}`
+                : "https://cdn.thrico.network/defaultEventCover.png"
+            }
+            alt={row.title}
+            className="object-cover"
+          />
+          <AvatarFallback className="rounded-lg bg-muted text-muted-foreground text-xs font-semibold">
+            <Calendar className="h-4 w-4" />
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex flex-col min-w-0">
+          <p className="text-[13px] font-semibold text-foreground leading-tight truncate max-w-[200px]">
+            {row.title}
+          </p>
+          <p className="text-[11px] text-muted-foreground mt-0.5 capitalize">
+            {row.type?.toLowerCase()} ·{" "}
+            {row.startDate ? moment(row.startDate).format("MMM DD, YYYY") : "—"}
+          </p>
+        </div>
+      </div>
+    ),
+  },
+  {
+    key: "location",
+    header: "Location",
+    cell: (row) => (
+      <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
+        <MapPin className="h-3 w-3 shrink-0" />
+        <span className="truncate max-w-[140px]">{row.location?.name || "—"}</span>
+      </div>
+    ),
+  },
+  {
+    key: "date",
+    header: "Date",
+    cell: (row) => (
+      <div className="flex flex-col text-[12px]">
+        <span className="font-medium text-foreground/80 whitespace-nowrap">
+          {row.startDate ? moment(row.startDate).format("MMM DD, YYYY") : "—"}
+        </span>
+        {row.startTime && (
+          <span className="text-muted-foreground">{row.startTime}</span>
+        )}
+      </div>
+    ),
+  },
+  {
+    key: "type",
+    header: "Type",
+    cell: (row) => <EventTypeBadge type={row.type} />,
+  },
+  {
+    key: "status",
+    header: "Status",
+    cell: (row) => <AdminStatusBadge status={row.status} />,
+  },
+  {
+    key: "verification",
+    header: "Verified",
+    cell: (row) => <AdminVerifiedBadge verified={!!row.verification?.isVerified} />,
+  },
+  {
+    key: "attendees",
+    header: "Attendees",
+    headerClassName: "text-right",
+    className: "text-right",
+    cell: (row) => (
+      <div className="flex items-center justify-end gap-1.5 text-[12px] text-muted-foreground">
+        <Users className="h-3 w-3 shrink-0" />
+        <span className="font-semibold text-foreground/80">
+          {row.numberOfAttendees || 0}
+        </span>
+      </div>
+    ),
+  },
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Component
+// ─────────────────────────────────────────────────────────────────────────────
 
 export default function AllEvents({
   data,
@@ -62,35 +140,33 @@ export default function AllEvents({
 }) {
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <div className="flex flex-col items-center gap-3">
-          <Loader2 className="h-8 w-8 animate-spin text-violet-500" />
-          <p className="text-sm text-muted-foreground">Loading events...</p>
+      <div className="flex items-center justify-center min-h-[40vh]">
+        <div className="flex flex-col items-center gap-2">
+          <Loader2 className="h-7 w-7 animate-spin text-muted-foreground/40" />
+          <p className="text-sm text-muted-foreground">Loading events…</p>
         </div>
       </div>
     );
   }
 
-  if (!data || data.length === 0) {
-    return (
-      <Card className="border-none shadow-sm ring-1 ring-border/50">
-        <CardContent className="flex flex-col items-center justify-center py-16">
-          <div className="h-20 w-20 rounded-2xl bg-violet-500/10 flex items-center justify-center mb-4">
-            <Calendar className="h-10 w-10 text-violet-500" />
-          </div>
-          <h3 className="text-lg font-semibold mb-1">No events found</h3>
-          <p className="text-muted-foreground text-sm text-center max-w-md">
-            No events match your current filters. Try adjusting your search or
-            create a new event.
-          </p>
-        </CardContent>
-      </Card>
-    );
-  }
-
   if (viewMode === "grid") {
+    if (!data || data.length === 0) {
+      return (
+        <Card className="border-none shadow-sm ring-1 ring-border/50">
+          <CardContent className="flex flex-col items-center justify-center py-16">
+            <div className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center mb-4 text-muted-foreground/40">
+              <Calendar className="h-6 w-6" />
+            </div>
+            <p className="text-sm font-semibold text-foreground">No events found</p>
+            <p className="text-xs text-muted-foreground mt-1 text-center max-w-sm">
+              No events match your current filters. Try adjusting your search or create a new event.
+            </p>
+          </CardContent>
+        </Card>
+      );
+    }
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {data.map((event) => (
           <EventCard key={event.id} event={event} />
         ))}
@@ -98,120 +174,15 @@ export default function AllEvents({
     );
   }
 
-  // List/Table view
+  // List / Table view
   return (
-    <Card className="border-none shadow-sm ring-1 ring-border/50">
-      <CardContent className="p-0">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-muted/30">
-                <TableHead className="w-[300px]">Event Details</TableHead>
-                <TableHead className="w-[200px]">Location</TableHead>
-                <TableHead className="w-[150px]">Event Date</TableHead>
-                <TableHead className="w-[100px]">Type</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Verification</TableHead>
-                <TableHead className="w-[100px] text-right">
-                  Attendees
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data.map((event) => (
-                <TableRow
-                  key={event.id}
-                  className="hover:bg-muted/50 cursor-pointer"
-                >
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-14 w-14 rounded-md">
-                        <AvatarImage
-                          src={
-                            event.cover
-                              ? `https://cdn.thrico.network/${event.cover}`
-                              : "https://cdn.thrico.network/defaultEventCover.png"
-                          }
-                          alt={event.title}
-                          className="object-cover"
-                        />
-                        <AvatarFallback className="rounded-md">
-                          <Calendar className="h-6 w-6" />
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-medium leading-tight">
-                          {event.title}
-                        </p>
-                        <p className="text-xs text-muted-foreground capitalize mt-1">
-                          {event.type?.toLowerCase()} •{" "}
-                          {moment(event.startDate).format("MMM DD, YYYY")}
-                        </p>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">
-                        {event.location?.name || "N/A"}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div>
-                      <div className="text-sm font-medium">
-                        {moment(event.startDate).format("MMM DD, YYYY")}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {event.startTime}
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant="outline"
-                      className={getTypeStyles(event.type)}
-                    >
-                      {event.type?.replace("_", " ")}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant="outline"
-                      className={getStatusStyles(event.status)}
-                    >
-                      {event.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant="outline"
-                      className={
-                        event.verification?.isVerified
-                          ? "bg-blue-500/5 text-blue-600 border-blue-500/20"
-                          : "bg-gray-500/5 text-gray-600 border-gray-500/20"
-                      }
-                    >
-                      {event.verification?.isVerified
-                        ? "Verified"
-                        : "Unverified"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-1">
-                      <Users className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm font-medium">
-                        {event.numberOfAttendees || 0}
-                      </span>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      </CardContent>
-    </Card>
+    <AdminTable<Event>
+      columns={columns}
+      data={data}
+      keyExtractor={(e) => e.id}
+      emptyIcon={Calendar}
+      emptyTitle="No events found"
+      emptyDescription="Try adjusting your search or filter criteria."
+    />
   );
 }

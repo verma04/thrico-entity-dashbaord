@@ -31,8 +31,8 @@ function TabButton({
       className={cn(
         "group/tab relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12.5px] font-medium transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/50 whitespace-nowrap",
         isActive
-          ? "text-indigo-700"
-          : "text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100/70",
+          ? "text-foreground font-semibold"
+          : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
         fullWidth && "w-full justify-center",
       )}
     >
@@ -40,8 +40,8 @@ function TabButton({
       {isActive && (
         <motion.span
           layoutId="menu-tab-pill"
-          className="absolute inset-0 rounded-lg bg-indigo-50 border border-indigo-100/80 shadow-[0_1px_3px_0_oklch(0.55_0.24_264/0.08)]"
-          transition={{ type: "spring", bounce: 0.18, duration: 0.38 }}
+          className="absolute inset-0 rounded-lg bg-muted border border-border/50"
+          transition={{ type: "spring", bounce: 0, duration: 0.3 }}
         />
       )}
 
@@ -50,8 +50,8 @@ function TabButton({
         className={cn(
           "relative z-10 shrink-0 transition-all duration-200",
           isActive
-            ? "text-indigo-600"
-            : "text-zinc-400 group-hover/tab:text-zinc-600",
+            ? "text-foreground"
+            : "text-muted-foreground group-hover/tab:text-foreground",
         )}
       >
         {React.isValidElement(item.icon)
@@ -181,7 +181,7 @@ const MenuItemsLayout = ({
   return (
     <div
       className={cn(
-        "bg-[#FAFBFC] text-foreground flex flex-col w-full",
+        "bg-background text-foreground flex flex-col w-full",
         fixed
           ? "fixed inset-0 z-100 bg-background h-screen w-screen overflow-hidden"
           : fullHeight
@@ -191,7 +191,7 @@ const MenuItemsLayout = ({
       )}
     >
       {/* ── Top Nav Bar ─────────────────────────────────────────────────── */}
-      <nav className="sticky top-0 z-40 bg-white/80 backdrop-blur-xl border-b border-zinc-100">
+      <nav className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border">
         <div
           className={cn(
             "px-6 relative w-full",
@@ -203,7 +203,7 @@ const MenuItemsLayout = ({
               <React.Fragment key={sectionName}>
                 {/* Separator between sections */}
                 {sIdx > 0 && (
-                  <div className="mx-3 h-4 w-px bg-zinc-200/70 shrink-0" />
+                  <div className="mx-3 h-4 w-px bg-border/70 shrink-0" />
                 )}
 
                 {/* Tab buttons for this section */}
@@ -230,7 +230,7 @@ const MenuItemsLayout = ({
             ))}
 
             {/* Right fade mask */}
-            <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-16 bg-linear-to-l from-white/90 to-transparent z-10" />
+            <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-16 bg-linear-to-l from-background to-transparent z-10" />
           </div>
 
           {/* Close Button for Fixed Mode */}
@@ -245,7 +245,7 @@ const MenuItemsLayout = ({
         </div>
 
         {/* Bottom border line */}
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-zinc-100" />
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-border" />
       </nav>
 
       {/* ── Content ─────────────────────────────────────────────────────── */}
@@ -257,9 +257,8 @@ const MenuItemsLayout = ({
         )}
       >
         <div
-          key={activeTab}
           className={cn(
-            "flex-1 w-full animate-in fade-in slide-in-from-bottom-2 duration-300 ease-out",
+            "flex-1 w-full",
             fullHeight && "h-full overflow-y-auto",
           )}
         >

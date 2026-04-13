@@ -14,7 +14,7 @@ export const GET_NETWORK = gql`
 `;
 
 export const SEND_CONNECTION = gql`
-  mutation ConnectAsConnection($input: inputId) {
+  mutation ConnectAsConnection($input: InputId) {
     connectAsConnection(input: $input) {
       id
       status
@@ -23,7 +23,7 @@ export const SEND_CONNECTION = gql`
 `;
 
 export const ACCEPT_CONNECTION = gql`
-  mutation AcceptConnection($input: inputId) {
+  mutation AcceptConnection($input: InputId) {
     acceptConnection(input: $input) {
       id
       status
@@ -32,7 +32,7 @@ export const ACCEPT_CONNECTION = gql`
 `;
 
 export const GET_USER_DETAILS = gql`
-  query GetUserDetails($input: inputId) {
+  query GetUserDetails($input: InputId) {
     getUserDetails(input: $input) {
       id
       firstName

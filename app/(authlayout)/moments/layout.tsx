@@ -12,6 +12,11 @@ function MomentsLayout({ children }: { children: React.ReactNode }) {
       label: "All Moments",
       icon: <List className="h-4 w-4" />,
     },
+    {
+      key: "create",
+      label: "Create Moment",
+      icon: <PlayCircle className="h-4 w-4" />,
+    },
   ];
 
   return (

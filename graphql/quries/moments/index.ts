@@ -45,7 +45,8 @@ export const GET_MOMENT_DETAILS = gql`
       }
     }
   }
-`;export const GET_MOMENT_DASHBOARD_KPIs = gql`
+`;
+export const GET_MOMENT_DASHBOARD_KPIs = gql`
   query GetMomentDashboardKPIs($timeRange: TimeRange!) {
     getMomentAnalytics(timeRange: $timeRange) {
       totalMoments
@@ -70,3 +71,30 @@ export const ADMIN_DELETE_MOMENT = gql`
     adminDeleteMoment(id: $adminDeleteMomentId)
   }
 `;
+
+export const ADMIN_GENERATE_MOMENT_UPLOAD_URL = gql`
+  mutation AdminGenerateMomentUploadUrl($input: AdminGenerateMomentUploadInput!) {
+    adminGenerateMomentUploadUrl(input: $input) {
+      momentId
+      videoUploadUrl
+      videoFileUrl
+      thumbnailUploadUrl
+      thumbnailFileUrl
+      expiresIn
+    }
+  }
+`;
+
+export const ADMIN_CONFIRM_MOMENT_UPLOAD = gql`
+  mutation AdminConfirmMomentUpload($input: AdminConfirmMomentUploadInput!) {
+    adminConfirmMomentUpload(input: $input) {
+      id
+      caption
+      videoUrl
+      thumbnailUrl
+      status
+      createdAt
+    }
+  }
+`;
+

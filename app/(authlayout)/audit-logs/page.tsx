@@ -11,6 +11,13 @@ import {
   Clock,
   User,
   Terminal,
+  Globe,
+  Activity,
+  UserCog,
+  Eye,
+  ArrowRight,
+  Fingerprint,
+  ShieldX
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,13 +42,8 @@ import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrappe
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
-import {
-  EcosystemKPI,
-  EcosystemStatusIndicator,
-  EcosystemCard,
-} from "@/components/layout/ecosystem/ecosystem-analytics";
+import { AdminTable, AdminStatusBadge } from "@/components/shared/admin-table/admin-table";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
 import moment from "moment";
 
 export default function AuditLogsPage() {
@@ -71,64 +73,120 @@ export default function AuditLogsPage() {
   const logs = logData?.auditLogs?.data || [];
   const meta = logData?.auditLogs?.meta || { totalItems: 0, totalPages: 0 };
 
-  const kpis = [
+  const columns = [
     {
-      title: "Total Logs",
-      value: meta.totalItems ?? "0",
-      icon: Terminal,
-      color: "text-indigo-600",
-      bg: "bg-indigo-500/10",
+      key: "createdAt",
+      header: "Date & Time",
+      cell: (log: any) => (
+        <div className="flex flex-col">
+          <div className="flex items-center gap-2">
+            <Clock className="h-3.5 w-3.5 text-zinc-400" />
+            <span className="text-sm text-foreground">
+              {moment(log.createdAt).format("MMM D, YYYY")}
+            </span>
+          </div>
+          <span className="text-[10px] text-zinc-400 ml-5.5 tabular-nums">
+            {moment(log.createdAt).format("HH:mm:ss")}
+          </span>
+        </div>
+      ),
     },
     {
-      title: "Active Modules",
-      value: modules.length ?? "0",
-      icon: History,
-      color: "text-emerald-600",
-      bg: "bg-emerald-500/10",
+      key: "action",
+      header: "Action",
+      cell: (log: any) => (
+        <div className="flex items-center gap-3">
+          <div className="h-8 w-8 rounded-lg bg-zinc-100 border border-zinc-200 flex items-center justify-center shrink-0">
+             <Terminal className="h-4 w-4 text-zinc-400" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-sm font-medium text-foreground">
+              {log.action}
+            </span>
+            <div className="flex items-center gap-2 mt-0.5">
+               <span className="inline-flex h-4 items-center px-1.5 rounded-md text-[8px] font-medium uppercase tracking-widest bg-zinc-100 text-zinc-500 border border-zinc-200/50">
+                  {log.module || "SYSTEM"}
+               </span>
+            </div>
+          </div>
+        </div>
+      ),
     },
     {
-      title: "Status",
-      value: "Online",
-      icon: ShieldCheck,
-      color: "text-violet-600",
-      bg: "bg-violet-500/10",
+      key: "admin",
+      header: "Performed By",
+      cell: (log: any) => (
+        <div className="flex items-center gap-3">
+          <div className="h-8 w-8 rounded-full bg-zinc-50 border border-zinc-200 flex items-center justify-center shrink-0">
+             <User className="h-4 w-4 text-zinc-400" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-xs font-medium text-foreground leading-none">
+              {log?.admin?.firstName ? `${log.admin.firstName} ${log.admin?.lastName || ""}` : "System"}
+            </span>
+            <span className="text-[9px] text-zinc-400 mt-1 uppercase tracking-tighter">
+              {log?.ipAddress || "Internal"}
+            </span>
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "target",
+      header: "Target ID",
+      cell: (log: any) => (
+        <div className="flex items-center gap-2">
+           <span className="font-mono text-[11px] text-zinc-500 truncate max-w-[140px] bg-zinc-50 px-2 py-1 rounded-lg border border-zinc-200/50">
+              {log.resourceId || log.targetUserId || "System"}
+           </span>
+        </div>
+      ),
+    },
+    {
+      key: "actions",
+      header: "",
+      headerClassName: "w-[50px]",
+      cell: (log: any) => (
+        <div className="flex justify-end pr-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setSelectedLogId(log.id)}
+            className="h-8 w-8 text-zinc-400 hover:text-foreground hover:bg-zinc-100 rounded-lg transition-all"
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
+        </div>
+      ),
     },
   ];
 
   const renderStateFields = (statePayload: any, isRed: boolean) => {
     let parsedState = statePayload;
-    if (!parsedState) return <span className="text-xs text-slate-500 italic block mt-2">No state data</span>;
+    if (!parsedState) return <span className="text-xs text-zinc-400 italic block mt-2">No data</span>;
 
     if (typeof parsedState === "string") {
-      try {
-        parsedState = JSON.parse(parsedState);
-      } catch {
-        return <span className="text-xs text-slate-700 break-all block mt-2 p-3 bg-slate-50 border border-slate-100 rounded-xl">{parsedState}</span>;
-      }
+      try { parsedState = JSON.parse(parsedState); } 
+      catch { return <span className="text-[11px] font-mono text-zinc-700 break-all block mt-2 p-3 bg-zinc-50 border border-zinc-100 rounded-xl">{parsedState}</span>; }
     }
 
     if (typeof parsedState !== "object" || parsedState === null) {
-      return <span className="text-xs text-slate-700 break-all block mt-2 p-3 bg-slate-50 border border-slate-100 rounded-xl">{String(parsedState)}</span>;
+      return <span className="text-[11px] font-mono text-zinc-700 break-all block mt-2 p-3 bg-zinc-50 border border-zinc-100 rounded-xl">{String(parsedState)}</span>;
     }
 
     return (
-      <div className="grid grid-cols-1 gap-2 mt-3 w-full pr-1 overflow-x-hidden">
+      <div className="grid grid-cols-1 gap-2 mt-3 w-full pr-1">
         {Object.entries(parsedState).map(([key, value]) => {
           const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
           let displayVal = value;
-          
-          if (typeof value === "boolean") {
-            displayVal = value ? "True" : "False";
-          } else if (typeof value === "object" && value !== null) {
-            displayVal = JSON.stringify(value);
-          } else if (value === null || value === undefined || value === "") {
-            displayVal = "—";
-          }
+          if (typeof value === "boolean") displayVal = value ? "True" : "False";
+          else if (typeof value === "object" && value !== null) displayVal = JSON.stringify(value);
+          else if (value === null || value === undefined || value === "") displayVal = "—";
 
           return (
             <div key={key} className={cn("flex flex-col gap-1 p-2.5 rounded-xl border", isRed ? "bg-red-50/50 border-red-100" : "bg-emerald-50/50 border-emerald-100")}>
-              <span className={cn("text-[9px] font-bold uppercase tracking-widest", isRed ? "text-red-400" : "text-emerald-500")}>{label}</span>
-              <span className={cn("text-xs font-semibold truncate", isRed ? "text-red-900" : "text-emerald-900", displayVal === "—" && "opacity-50")} title={String(displayVal)}>
+              <span className={cn("text-[9px] font-medium uppercase tracking-widest", isRed ? "text-red-400" : "text-emerald-500")}>{label}</span>
+              <span className={cn("text-xs font-medium truncate", isRed ? "text-red-900" : "text-emerald-900", displayVal === "—" && "opacity-50")} title={String(displayVal)}>
                 {String(displayVal)}
               </span>
             </div>
@@ -142,285 +200,140 @@ export default function AuditLogsPage() {
     <EcosystemWrapper>
       <EcosystemHeader
         title="Audit Logs"
-        badgeText="System Logs"
-        description="Track all system activity, administrative changes, and security updates."
+        badgeText="History"
+        description="Track all system activity and administrative changes."
         icon={History}
       />
 
       <EcosystemActionBar shadow="none">
-        <div className="flex items-center justify-between w-full">
-          <div className="flex items-center gap-6">
-            <EcosystemStatusIndicator
-              status="active"
-              label="System Status: Online"
-            />
-            <div className="h-4 w-px bg-slate-200" />
-            <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
-              <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
-              <span>Verified System</span>
-            </div>
-          </div>
+        <EcosystemActionBar.Group grow>
+           <div className="flex items-center gap-2.5">
+              <div className="flex flex-col">
+                 <span className="text-[11px] font-semibold text-foreground uppercase tracking-tight leading-none">System Active</span>
+                 <span className="text-[9px] text-zinc-400 mt-1 uppercase tracking-widest">v3.2 Secure</span>
+              </div>
+           </div>
+        </EcosystemActionBar.Group>
 
-          <div className="flex items-center gap-3">
-            <Select
-              value={selectedModule}
-              onValueChange={(val) => {
-                setSelectedModule(val);
-                setPage(1);
-              }}
-            >
-              <SelectTrigger className="h-10 w-[220px] rounded-xl border-slate-200 font-bold text-slate-600 bg-white shadow-sm">
-                <Filter className="h-4 w-4 mr-2 text-indigo-500" />
-                <SelectValue placeholder="Select Module" />
-              </SelectTrigger>
-              <SelectContent className="rounded-2xl border-slate-100 shadow-2xl">
-                <SelectItem
-                  value="ALL"
-                  className="font-bold uppercase text-[10px]"
-                >
-                  All Modules
-                </SelectItem>
-                {modules.map((mod) => (
-                  <SelectItem
-                    key={mod}
-                    value={mod}
-                    className="font-bold uppercase text-[10px]"
-                  >
-                    {mod}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <div className="h-4 w-px bg-slate-200 mx-1" />
+        <EcosystemActionBar.Group align="right">
+          <EcosystemActionBar.Item>
+             <Select
+                value={selectedModule}
+                onValueChange={(val) => { setSelectedModule(val); setPage(1); }}
+             >
+                <SelectTrigger className="h-9 w-[200px] rounded-xl border-zinc-200 text-xs bg-white">
+                  <div className="flex items-center gap-2">
+                     <Filter className="h-3.5 w-3.5 text-zinc-400" />
+                     <SelectValue placeholder="All Modules" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent className="rounded-xl border-zinc-100 shadow-2xl p-1">
+                  <SelectItem value="ALL" className="rounded-lg text-xs py-2">All Modules</SelectItem>
+                  {modules.map((mod) => (
+                    <SelectItem key={mod} value={mod} className="rounded-lg text-xs py-2">{mod}</SelectItem>
+                  ))}
+                </SelectContent>
+             </Select>
+          </EcosystemActionBar.Item>
+          
+          <EcosystemActionBar.Item>
             <Button
               variant="outline"
               size="icon"
-              className="h-10 w-10 text-slate-400 hover:text-indigo-600 rounded-xl transition-all bg-white border-slate-200"
+              className="h-9 w-9 text-zinc-400 hover:text-foreground rounded-xl transition-all bg-white border-zinc-200"
               onClick={() => refetch()}
             >
-              <RotateCcw
-                className={cn("h-4 w-4", logLoading && "animate-spin")}
-              />
+              <RotateCcw className={cn("h-4 w-4", logLoading && "animate-spin")} />
             </Button>
-          </div>
-        </div>
+          </EcosystemActionBar.Item>
+
+          <EcosystemActionBar.Status active={logs.length > 0}>
+             {meta.totalItems} Records
+          </EcosystemActionBar.Status>
+        </EcosystemActionBar.Group>
       </EcosystemActionBar>
 
-      <EcosystemContainer className="space-y-10 p-8 lg:p-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {kpis.map((kpi, i) => (
-            <EcosystemKPI key={i} {...kpi} trendLabel="Integrity" />
-          ))}
-        </div>
-
-        <EcosystemCard
-          title="Log History"
-          description="A chronological record of system actions"
-          icon={Terminal}
-          decorationIcon={Zap}
-        >
-          {logLoading ? (
-            <div className="flex flex-col items-center justify-center py-20 gap-4">
-              <div className="h-12 w-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                Loading logs...
-              </p>
-            </div>
-          ) : logs.length === 0 ? (
-            <div className="py-20 text-center">
-              <div className="inline-flex p-4 rounded-3xl bg-slate-50 border border-slate-100 mb-4 text-slate-300">
-                <Search className="h-8 w-8" />
-              </div>
-              <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">
-                No Logs Found
-              </h3>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2 px-10">
-                No logs were detected for this module.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {logs.map((log) => (
-                <div
-                  key={log?.id}
-                  onClick={() => setSelectedLogId(log?.id)}
-                  className="cursor-pointer group relative flex flex-col gap-3 rounded-2xl border border-slate-200/60 bg-white p-5 shadow-sm transition-all duration-300 hover:shadow-md hover:border-indigo-100"
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-50 border border-slate-100 text-slate-500 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
-                        <Terminal className="h-4 w-4" />
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-bold text-slate-900 group-hover:text-indigo-900 transition-colors">
-                          {log?.action}
-                        </h4>
-                        <div className="mt-1 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-                          <span>{log?.module || "SYSTEM"}</span>
-                          <span className="h-1 w-1 rounded-full bg-slate-300"></span>
-                          <span className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            {moment(log.createdAt).format(
-                              "MMM dd, yyyy · HH:mm:ss",
-                            )}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center gap-1.5 rounded-lg border border-slate-100 bg-slate-50 px-2.5 py-1 text-[10px] font-black uppercase text-slate-600">
-                        <User className="h-3 w-3 text-slate-400" />
-                        {log?.admin?.firstName || log?.adminId || "System"}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-2 grid grid-cols-2 gap-4 rounded-xl bg-slate-50 p-4 border border-slate-100/50">
-                    <div className="flex flex-col gap-1">
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                        Target Resource
-                      </span>
-                      <span className="text-xs font-medium text-slate-700 font-mono truncate">
-                        {log?.resourceId || log?.targetUserId || "N/A"}
-                      </span>
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                        Network Info
-                      </span>
-                      <span className="text-xs font-medium text-slate-700 font-mono truncate">
-                        {log?.ipAddress || "Unknown IP"}
-                      </span>
-                    </div>
-                    {(log?.reason || log?.userAgent) && (
-                      <div className="col-span-2 flex flex-col gap-1 border-t border-slate-200 mt-2 pt-3">
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                          {log?.reason ? "Protocol Reason" : "User Agent"}
-                        </span>
-                        <span className="text-xs text-slate-600 leading-relaxed">
-                          {log?.reason || log?.userAgent}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-
-              {meta.totalPages > 1 && (
-                <div className="pt-8 flex items-center justify-center gap-4">
-                  <Button
-                    variant="outline"
-                    className="px-6 rounded-xl border-slate-200 font-bold text-[10px] uppercase tracking-widest text-slate-600 hover:bg-slate-50"
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    disabled={page === 1}
-                  >
-                    Previous
-                  </Button>
-                  <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest py-2 px-4 bg-slate-50 rounded-lg border border-slate-100 italic">
-                    Node {page} <span className="mx-1 text-slate-300">/</span>{" "}
-                    {meta.totalPages}
-                  </div>
-                  <Button
-                    variant="outline"
-                    className="px-6 rounded-xl border-slate-200 font-bold text-[10px] uppercase tracking-widest text-slate-600 hover:bg-slate-50"
-                    onClick={() =>
-                      setPage((p) => Math.min(meta.totalPages, p + 1))
-                    }
-                    disabled={page === meta.totalPages}
-                  >
-                    Next
-                  </Button>
-                </div>
-              )}
-            </div>
-          )}
-        </EcosystemCard>
+      <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">
+         <div className="px-6 py-4">
+            <AdminTable
+              columns={columns}
+              data={logs}
+              loading={logLoading}
+              keyExtractor={(log) => log.id}
+              emptyTitle="No logs found"
+              emptyDescription="No activity has been recorded yet."
+              pagination={{
+                 pageIndex: page - 1,
+                 pageSize: 12,
+                 pageCount: meta.totalPages,
+                 onPageChange: (i) => setPage(i + 1),
+              }}
+            />
+         </div>
       </EcosystemContainer>
 
       <Dialog open={!!selectedLogId} onOpenChange={(open) => !open && setSelectedLogId(null)}>
-        <DialogContent className="sm:max-w-[700px] rounded-2xl p-0 overflow-hidden border-slate-100">
-          <DialogHeader className="bg-slate-50 border-b border-slate-100 p-6 flex flex-row items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white border border-slate-200 text-indigo-600 shadow-sm">
-              <Terminal className="h-4 w-4" />
+        <DialogContent className="sm:max-w-[700px] rounded-2xl p-0 overflow-hidden border-border shadow-2xl">
+          <DialogHeader className="bg-zinc-50 border-b border-border/50 p-6 flex flex-row items-center gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white border border-border text-zinc-900 shadow-sm">
+              <Terminal className="h-5 w-5" />
             </div>
             <div className="space-y-0.5">
-              <DialogTitle className="text-xl font-bold text-slate-900">
-                Log Details
-              </DialogTitle>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-                Detailed information for this log entry
-              </p>
+              <DialogTitle className="text-lg font-semibold text-foreground">Log Details</DialogTitle>
+              <p className="text-[10px] text-zinc-400 uppercase tracking-widest">ID: {selectedLogId}</p>
             </div>
           </DialogHeader>
 
-          <div className="p-6 overflow-y-auto max-h-[75vh] scrollbar-thin scrollbar-thumb-slate-200">
+          <div className="p-6 overflow-y-auto max-h-[70vh] scrollbar-hide">
             {logDetailsLoading ? (
               <div className="flex flex-col items-center justify-center py-12 gap-4">
-                <div className="h-8 w-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Loading details...</p>
+                <RotateCcw className="h-6 w-6 animate-spin text-zinc-300" />
+                <p className="text-[10px] text-zinc-400 uppercase tracking-widest">Loading...</p>
               </div>
             ) : logDetailsData?.auditLogById ? (
               <div className="space-y-6">
                 <div className="grid grid-cols-2 lg:grid-cols-3 gap-6">
-                  <div className="space-y-1.5">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Action</span>
-                    <p className="text-sm font-semibold text-slate-900 border border-slate-100 bg-slate-50 p-2 rounded-lg">{logDetailsData.auditLogById.action}</p>
-                  </div>
-                  <div className="space-y-1.5">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Module</span>
-                    <p className="text-sm font-semibold text-slate-900 border border-slate-100 bg-slate-50 p-2 rounded-lg">{logDetailsData.auditLogById.module || "SYSTEM"}</p>
-                  </div>
-                  <div className="space-y-1.5">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Timestamp</span>
-                    <p className="text-sm font-semibold text-slate-900 flex items-center gap-2 border border-slate-100 bg-slate-50 p-2 rounded-lg">
-                      <Clock className="w-3.5 h-3.5 text-slate-400" />
-                      {moment(logDetailsData.auditLogById.createdAt).format("MMM DD, YYYY · HH:mm:ss")}
-                    </p>
-                  </div>
-                  <div className="space-y-1.5 col-span-2 lg:col-span-1 border border-slate-100 bg-slate-50 p-2 rounded-lg">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Applied To</span>
-                    <p className="font-semibold text-slate-900 font-mono text-xs truncate" title={logDetailsData.auditLogById.resourceId || logDetailsData.auditLogById.targetUserId || "N/A"}>
-                      {logDetailsData.auditLogById.resourceId || logDetailsData.auditLogById.targetUserId || "N/A"}
-                    </p>
-                  </div>
-                  <div className="space-y-1.5 col-span-2 lg:col-span-1 border border-slate-100 bg-slate-50 p-2 rounded-lg">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Performed By</span>
-                    <p className="text-sm font-semibold text-slate-900 flex items-center gap-2 truncate">
-                      <User className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-                      {logDetailsData.auditLogById.admin?.firstName ? `${logDetailsData.auditLogById.admin.firstName} ${logDetailsData.auditLogById.admin?.lastName || ""}` : logDetailsData.auditLogById.adminId || "System"}
-                    </p>
-                  </div>
-                  <div className="space-y-1.5 col-span-2 lg:col-span-1 border border-slate-100 bg-slate-50 p-2 rounded-lg">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Network Info</span>
-                    <p className="font-semibold text-slate-900 font-mono text-xs truncate">
-                      {logDetailsData.auditLogById.ipAddress || logDetailsData.auditLogById.userAgent || "Unknown"}
-                    </p>
-                  </div>
+                  {[
+                    { label: "Action", val: logDetailsData.auditLogById.action, icon: Terminal },
+                    { label: "Module", val: logDetailsData.auditLogById.module || "System", icon: Globe },
+                    { label: "Time", val: moment(logDetailsData.auditLogById.createdAt).format("MMM D, YYYY · HH:mm:ss"), icon: Clock },
+                    { label: "Target", val: logDetailsData.auditLogById.resourceId || logDetailsData.auditLogById.targetUserId || "System", icon: Fingerprint, mono: true },
+                    { label: "Performed By", val: logDetailsData.auditLogById.admin?.firstName ? `${logDetailsData.auditLogById.admin.firstName} ${logDetailsData.auditLogById.admin?.lastName || ""}` : logDetailsData.auditLogById.adminId || "System", icon: User },
+                    { label: "IP Address", val: logDetailsData.auditLogById.ipAddress || "Internal", icon: Activity, mono: true },
+                  ].map((s, i) => (
+                    <div key={i} className="space-y-1.5">
+                      <span className="text-[10px] uppercase tracking-widest text-zinc-400 ml-0.5">{s.label}</span>
+                      <div className="flex items-center gap-2.5 px-3 py-2 bg-zinc-50 rounded-lg border border-zinc-200/50">
+                        <s.icon className="h-3.5 w-3.5 text-zinc-400" />
+                        <span className={cn("text-xs font-medium text-foreground truncate", s.mono && "font-mono")}>{s.val}</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
 
                 {logDetailsData.auditLogById.reason && (
-                  <div className="pt-4 border-t border-slate-100">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 border border-slate-100 bg-slate-50 px-2.5 py-1 rounded-lg">Reason / Origin</span>
-                    <p className="mt-3 text-sm text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100 font-mono whitespace-pre-wrap max-h-32 overflow-auto">
+                  <div className="space-y-2">
+                    <span className="text-[10px] uppercase tracking-widest text-zinc-400 ml-0.5">Reason</span>
+                    <div className="p-4 rounded-xl bg-zinc-50 border border-zinc-200/50 text-sm font-normal text-zinc-600 leading-relaxed italic">
                       {logDetailsData.auditLogById.reason}
-                    </p>
+                    </div>
                   </div>
                 )}
 
                 {(logDetailsData.auditLogById.previousState || logDetailsData.auditLogById.newState) && (
-                  <div className="pt-4 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="pt-6 border-t border-border/60 grid grid-cols-1 md:grid-cols-2 gap-6">
                     {logDetailsData.auditLogById.previousState && (
                       <div className="space-y-3">
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-red-600 flex items-center gap-2 bg-red-50 border border-red-100 px-2.5 py-1 w-fit rounded-lg">
-                          <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" /> Previous State
+                        <span className="text-[10px] font-medium uppercase tracking-widest text-red-600 flex items-center gap-2 bg-red-50 border border-red-100/50 px-2.5 py-1 w-fit rounded-lg">
+                          <ShieldX className="h-3 w-3" /> Previous State
                         </span>
                         {renderStateFields(logDetailsData.auditLogById.previousState, true)}
                       </div>
                     )}
                     {logDetailsData.auditLogById.newState && (
                       <div className="space-y-3">
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 flex items-center gap-2 bg-emerald-50 border border-emerald-100 px-2.5 py-1 w-fit rounded-lg">
-                          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> New State
+                        <span className="text-[10px] font-medium uppercase tracking-widest text-emerald-600 flex items-center gap-2 bg-emerald-50 border border-emerald-100/50 px-2.5 py-1 w-fit rounded-lg">
+                          <ShieldCheck className="h-3 w-3" /> New State
                         </span>
                         {renderStateFields(logDetailsData.auditLogById.newState, false)}
                       </div>
@@ -428,14 +341,19 @@ export default function AuditLogsPage() {
                   </div>
                 )}
               </div>
-            ) : (
-              <div className="py-12 text-center text-slate-500 uppercase tracking-widest text-[10px] font-bold">
-                Failed to decrypt payload
-              </div>
-            )}
+            ) : null}
+          </div>
+          
+          <div className="bg-zinc-50 p-6 flex items-center justify-end border-t border-border/50">
+             <Button variant="ghost" className="rounded-xl text-xs uppercase tracking-widest px-8" onClick={() => setSelectedLogId(null)}>Close</Button>
           </div>
         </DialogContent>
       </Dialog>
+
+      <style jsx global>{`
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+      `}</style>
     </EcosystemWrapper>
   );
 }

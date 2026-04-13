@@ -125,18 +125,17 @@ export default function Feed({ feed }: { feed: FeedProps }) {
 
   return (
     <div className="w-full animate-in fade-in slide-in-from-bottom-3 duration-500">
-      <Card className="w-full rounded-[32px] bg-white border border-zinc-100 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.06)] overflow-hidden transition-all hover:shadow-[0_8px_40px_-4px_rgba(0,0,0,0.08)] ring-1 ring-zinc-100/50">
+      <Card className="w-full rounded-[32px] bg-card border border-border shadow-sm overflow-hidden transition-all hover:shadow-md ring-1 ring-border/50">
         <div className="p-6">
           {feed.isPinned && (
-            <div className="flex items-center gap-2 mb-4 px-1.5 py-1 bg-amber-50/50 w-fit rounded-full border border-amber-100/50 animate-in fade-in slide-in-from-left-2 duration-500">
-              <div className="h-6 w-6 rounded-full bg-amber-100 flex items-center justify-center">
-                <Pin className="h-3 w-3 text-amber-600 fill-amber-600" />
-              </div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-amber-700 pr-2">
+            <div className="flex items-center gap-2 mb-4 px-2 py-1 bg-amber-500/10 w-fit rounded-lg border border-amber-500/20 animate-in fade-in slide-in-from-left-2 duration-500">
+              <Pin className="h-3 w-3 text-amber-600 fill-amber-600" />
+              <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-amber-700">
                 Pinned Insight
               </span>
             </div>
           )}
+          
           <div className="flex justify-between items-start mb-6">
             <FeedUserDetails {...feed} />
             <AlertDialog
@@ -148,21 +147,21 @@ export default function Feed({ feed }: { feed: FeedProps }) {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-10 w-10 rounded-2xl text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50 transition-all"
+                    className="h-10 w-10 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
                   >
-                    <MoreVertical className="h-5 w-5" />
+                    <MoreVertical className="h-4.5 w-4.5" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="end"
-                  className="w-[220px] rounded-[24px] border-zinc-100 shadow-2xl p-2 bg-white/80 backdrop-blur-xl"
+                  className="w-[200px] rounded-2xl border-border shadow-xl p-1.5 bg-card/95 backdrop-blur-xl"
                 >
                   {feed.isOwner ? (
                     <>
                       <DropdownMenuItem
                         onClick={handlePin}
                         disabled={isPinning}
-                        className="text-amber-600 focus:bg-amber-50 focus:text-amber-700 rounded-xl px-4 py-3 font-bold text-[13px] transition-all cursor-pointer"
+                        className="text-amber-600 focus:bg-amber-50 focus:text-amber-700 rounded-xl px-4 py-3 font-bold text-[12px] transition-all cursor-pointer"
                       >
                         <div className="flex items-center gap-3">
                           {isPinning ? (
@@ -175,51 +174,52 @@ export default function Feed({ feed }: { feed: FeedProps }) {
                               )}
                             />
                           )}
-                          {feed.isPinned ? "Unpin Post" : "Pin Post"}
+                          {feed.isPinned ? "Unpin Insight" : "Pin to Top"}
                         </div>
                       </DropdownMenuItem>
+                      
+                      <Separator className="my-1.5 opacity-50" />
 
                       <AlertDialogTrigger asChild>
-                        <DropdownMenuItem className="text-red-500 focus:bg-red-50 focus:text-red-600 rounded-xl px-4 py-3 font-bold text-[13px] transition-all cursor-pointer">
+                        <DropdownMenuItem className="text-destructive focus:bg-destructive/10 focus:text-destructive rounded-xl px-4 py-3 font-bold text-[12px] transition-all cursor-pointer">
                           <div className="flex items-center gap-3">
                             <Trash2 className="h-4 w-4" />
-                            Delete Post
+                            Purge Content
                           </div>
                         </DropdownMenuItem>
                       </AlertDialogTrigger>
                     </>
                   ) : (
-                    <DropdownMenuItem className="text-zinc-600 focus:bg-zinc-50 rounded-xl px-4 py-3 font-bold text-[13px] transition-all cursor-pointer">
-                      No actions available
+                    <DropdownMenuItem className="text-muted-foreground focus:bg-muted rounded-xl px-4 py-3 font-bold text-[12px] transition-all cursor-pointer">
+                      <ShieldCheck className="h-4 w-4 mr-3" />
+                      View Policy
                     </DropdownMenuItem>
                   )}
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              <AlertDialogContent className="rounded-[32px] border-zinc-100 shadow-2xl p-8 max-w-md">
+              <AlertDialogContent className="rounded-[32px] border-border shadow-2xl p-8 max-w-md">
                 <AlertDialogHeader>
-                  <div className="h-16 w-16 rounded-3xl bg-red-50 flex items-center justify-center mb-6">
-                    <Trash2 className="h-8 w-8 text-red-500" />
+                  <div className="h-14 w-14 rounded-2xl bg-destructive/10 flex items-center justify-center mb-6">
+                    <Trash2 className="h-7 w-7 text-destructive" />
                   </div>
-                  <AlertDialogTitle className="text-2xl font-black text-zinc-900 tracking-tight leading-none mb-2">
-                    Delete this post?
+                  <AlertDialogTitle className="text-xl font-bold text-foreground tracking-tight mb-2">
+                    Purge this content?
                   </AlertDialogTitle>
-                  <AlertDialogDescription className="text-[15px] font-medium text-zinc-500 leading-relaxed uppercase tracking-tight">
-                    This action is permanent and cannot be undone. All data
-                    associated with this post will be erased from our ecosystem
-                    registry.
+                  <AlertDialogDescription className="text-sm font-medium text-muted-foreground leading-relaxed">
+                    This will permanently clear the metadata and media associated with this post from the global registry.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter className="mt-8 gap-3">
-                  <AlertDialogCancel className="h-14 rounded-2xl border-zinc-100 font-black text-[12px] uppercase tracking-widest text-zinc-400 hover:bg-zinc-50 hover:text-zinc-900 transition-all flex-1">
-                    Cancel Operation
+                  <AlertDialogCancel className="h-12 rounded-xl border-border font-bold text-xs uppercase tracking-widest text-muted-foreground hover:bg-muted transition-all flex-1">
+                    Abort
                   </AlertDialogCancel>
                   <AlertDialogAction
                     onClick={handleDelete}
                     disabled={isDeleting}
-                    className="h-14 rounded-2xl bg-red-500 hover:bg-red-600 border-none font-black text-[12px] uppercase tracking-widest text-white shadow-xl shadow-red-500/20 transition-all flex-1 active:scale-95 disabled:opacity-50"
+                    className="h-12 rounded-xl bg-destructive hover:bg-destructive/90 border-none font-bold text-xs uppercase tracking-widest text-white shadow-lg shadow-destructive/20 transition-all flex-1 active:scale-95 disabled:opacity-50"
                   >
-                    {isDeleting ? "Deleting..." : "Confirm Deletion"}
+                    {isDeleting ? "Purging..." : "Confirm Purge"}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
@@ -228,8 +228,8 @@ export default function Feed({ feed }: { feed: FeedProps }) {
 
           <div className="space-y-6">
             {feed?.description && (
-              <div className="px-1">
-                <p className="text-[17px] leading-relaxed text-zinc-800 font-medium tracking-tight whitespace-pre-wrap">
+              <div className="px-0.5">
+                <p className="text-[17px] leading-relaxed text-foreground font-medium tracking-tight whitespace-pre-wrap">
                   {feed?.description}
                 </p>
               </div>
@@ -240,178 +240,157 @@ export default function Feed({ feed }: { feed: FeedProps }) {
             )}
 
             {feed?.moment && (
-              <div className="group relative mt-4 rounded-3xl overflow-hidden shadow-2xl shadow-indigo-500/10 border border-zinc-100 bg-black aspect-9/16 max-h-[600px] mx-auto cursor-pointer">
+              <div className="group relative mt-4 rounded-2xl overflow-hidden shadow-xl shadow-indigo-500/10 border border-border bg-black aspect-9/16 max-h-[580px] mx-auto cursor-pointer">
                 <img
                   src={getPreferredMediaUrl(feed.moment.thumbnailUrl)}
-                  className="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-1000"
+                  className="w-full h-full object-cover opacity-85 group-hover:scale-110 transition-transform duration-1000"
                   alt="Moment Thumbnail"
                 />
-                <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-8">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="h-14 w-14 rounded-full bg-white/20 backdrop-blur-xl border border-white/30 flex items-center justify-center text-white ring-8 ring-white/5 animate-pulse">
-                      <Play className="h-6 w-6 fill-white" />
+                <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-8">
+                  <div className="flex items-center gap-4 mb-2">
+                    <div className="h-12 w-12 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white shadow-2xl transition-transform group-hover:scale-110">
+                      <Play className="h-5 w-5 fill-white" />
                     </div>
                     <div>
-                      <p className="text-white font-black text-xl tracking-tight">
+                      <p className="text-white font-bold text-lg tracking-tight leading-none mb-1">
                         Watch Moment
                       </p>
-                      <p className="text-white/60 text-xs font-bold uppercase tracking-widest">
-                        {feed.moment.totalReactions} Views
+                      <p className="text-white/40 text-[10px] font-bold uppercase tracking-[0.2em]">
+                        {feed.moment.totalReactions} Ecosystem Views
                       </p>
                     </div>
                   </div>
                 </div>
                 <div className="absolute top-6 left-6">
-                  <Badge className="bg-white/20 backdrop-blur-md border-white/30 text-white font-black text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-xl">
-                    <Film className="h-3 w-3 mr-1.5" />
-                    Flash Moment
+                  <Badge className="bg-primary/20 backdrop-blur-lg border-white/20 text-white font-bold text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-lg">
+                    <Zap className="h-3 w-3 mr-1.5 fill-current" />
+                    Instant Flash
                   </Badge>
                 </div>
               </div>
             )}
 
             {feed?.poll && (
-              <div className="mt-2 rounded-[32px] overflow-hidden border border-emerald-100 bg-emerald-50/5 p-1">
+              <div className="mt-2 rounded-[28px] overflow-hidden border border-emerald-500/10 bg-emerald-500/5 p-1">
                 <PollVote data={feed.poll as any} />
               </div>
             )}
 
             {isJob && feed.job && (
-              <div className="bg-indigo-50/30 p-8 rounded-[40px] border border-indigo-100/50 flex flex-col gap-6 group cursor-pointer hover:bg-white hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-500 relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:scale-110 transition-transform duration-1000 rotate-12">
-                  <Briefcase className="h-32 w-32" />
+              <div className="bg-primary/5 p-8 rounded-[32px] border border-primary/10 flex flex-col gap-6 group cursor-pointer hover:bg-card hover:shadow-xl hover:shadow-primary/5 transition-all duration-500 relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition-transform duration-1000 rotate-12">
+                  <Briefcase className="h-24 w-24" />
                 </div>
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-4">
-                    <div className="h-14 w-14 rounded-2xl bg-white shadow-xl flex items-center justify-center border border-indigo-50 transition-transform group-hover:scale-110 duration-500">
-                      <Briefcase className="h-7 w-7 text-indigo-500" />
+                    <div className="h-12 w-12 rounded-xl bg-card shadow-sm flex items-center justify-center border border-border transition-transform group-hover:scale-110 duration-500">
+                      <Briefcase className="h-6 w-6 text-primary" />
                     </div>
                     <div>
-                      <h4 className="font-black text-zinc-900 tracking-tight text-xl mb-1">
+                      <h4 className="font-bold text-foreground tracking-tight text-lg mb-0.5">
                         {feed.job.title}
                       </h4>
-                      <p className="text-[12px] font-bold text-zinc-400 uppercase tracking-widest italic">
-                        Employment Opportunity
+                      <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
+                        Opportunity Registry
                       </p>
                     </div>
                   </div>
                   <Badge
-                    variant="secondary"
-                    className="bg-indigo-100 text-indigo-700 font-black text-[10px] uppercase tracking-wider rounded-xl px-4 py-1.5"
+                    variant="outline"
+                    className="bg-primary/10 text-primary font-bold text-[10px] uppercase tracking-wider rounded-lg border-primary/20"
                   >
                     {feed.job.jobType}
                   </Badge>
                 </div>
 
-                <div className="flex flex-wrap gap-6 mt-2">
-                  <div className="flex items-center gap-2.5">
-                    <div className="h-8 w-8 rounded-xl bg-white flex items-center justify-center shadow-sm border border-zinc-100">
+                <div className="flex flex-wrap gap-5 mt-1 text-sm font-medium text-muted-foreground">
+                   <div className="flex items-center gap-1.5">
                       <MapPin className="h-4 w-4 text-emerald-500" />
-                    </div>
-                    <span className="text-[14px] font-bold text-zinc-600">
-                      {feed.job.location}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2.5">
-                    <div className="h-8 w-8 rounded-xl bg-white flex items-center justify-center shadow-sm border border-zinc-100">
-                      <DollarSign className="h-4 w-4 text-indigo-500" />
-                    </div>
-                    <span className="text-[14px] font-bold text-zinc-900">
-                      {feed.job.salary}
-                    </span>
-                  </div>
+                      <span>{feed.job.location}</span>
+                   </div>
+                   <div className="flex items-center gap-1.5">
+                      <DollarSign className="h-4 w-4 text-primary" />
+                      <span className="text-foreground font-bold">{feed.job.salary}</span>
+                   </div>
                 </div>
 
-                <Button className="w-full h-14 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-[13px] uppercase tracking-widest mt-2 shadow-xl shadow-indigo-500/20 group/btn">
-                  View Job Details
-                  <ChevronRight className="h-4 w-4 ml-2 transition-transform group-hover/btn:translate-x-1" />
+                <Button className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-bold text-xs uppercase tracking-widest mt-2 shadow-lg shadow-primary/20 group/btn transition-all">
+                  Open Career Registry
+                  <ChevronRight className="h-3.5 w-3.5 ml-2 transition-transform group-hover/btn:translate-x-1" />
                 </Button>
               </div>
             )}
 
             {isMarketplace && feed.marketPlace && (
-              <div className="bg-amber-50/30 p-8 rounded-[40px] border border-amber-100/50 flex flex-col gap-6 group cursor-pointer hover:bg-white hover:shadow-2xl hover:shadow-amber-500/10 transition-all duration-500 relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:scale-110 transition-transform duration-1000 -rotate-12">
-                  <ShoppingBag className="h-32 w-32" />
+              <div className="bg-amber-500/5 p-8 rounded-[32px] border border-amber-500/10 flex flex-col gap-6 group cursor-pointer hover:bg-card hover:shadow-xl hover:shadow-amber-500/5 transition-all duration-500 relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition-transform duration-1000 -rotate-12 text-amber-500">
+                  <ShoppingBag className="h-24 w-24" />
                 </div>
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-4">
-                    <div className="h-14 w-14 rounded-2xl bg-white shadow-xl flex items-center justify-center border border-amber-50 transition-transform group-hover:scale-110 duration-500">
-                      <ShoppingBag className="h-7 w-7 text-amber-500" />
+                    <div className="h-12 w-12 rounded-xl bg-card shadow-sm flex items-center justify-center border border-border transition-transform group-hover:scale-110 duration-500">
+                      <ShoppingBag className="h-6 w-6 text-amber-600" />
                     </div>
                     <div>
-                      <h4 className="font-black text-zinc-900 tracking-tight text-xl mb-1">
+                      <h4 className="font-bold text-foreground tracking-tight text-lg mb-0.5">
                         {feed.marketPlace.title}
                       </h4>
-                      <p className="text-[12px] font-bold text-zinc-400 uppercase tracking-widest italic">
-                        Community Market Listing
+                      <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
+                        Marketplace Node
                       </p>
                     </div>
                   </div>
-                  <div className="bg-emerald-500 text-white font-black text-[14px] rounded-2xl px-5 py-2.5 shadow-xl shadow-emerald-500/20">
+                  <div className="bg-emerald-500 text-white font-bold text-[14px] rounded-xl px-4 py-2 shadow-lg shadow-emerald-500/20">
                     ${feed.marketPlace.price}
                   </div>
                 </div>
 
-                <div className="flex items-center gap-6 mt-2">
-                  <div className="flex items-center gap-2.5">
-                    <div className="h-8 w-8 rounded-xl bg-white flex items-center justify-center shadow-sm border border-zinc-100">
+                <div className="flex items-center gap-5 mt-1 text-sm font-medium text-muted-foreground">
+                   <div className="flex items-center gap-1.5">
                       <MapPin className="h-4 w-4 text-emerald-500" />
-                    </div>
-                    <span className="text-[14px] font-bold text-zinc-600">
-                      {feed.marketPlace.location.name}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2.5">
-                    <div className="h-8 w-8 rounded-xl bg-white flex items-center justify-center shadow-sm border border-zinc-100">
-                      <LayoutGrid className="h-4 w-4 text-amber-500" />
-                    </div>
-                    <span className="text-[11px] font-bold text-zinc-600 uppercase tracking-widest">
-                      {feed.marketPlace.category || "Listing"}
-                    </span>
-                  </div>
+                      <span>{feed.marketPlace.location.name}</span>
+                   </div>
+                   <div className="flex items-center gap-1.5">
+                      <LayoutGrid className="h-4 w-4 text-amber-600" />
+                      <span className="uppercase text-[10px] font-bold tracking-widest">{feed.marketPlace.category || "General"}</span>
+                   </div>
                 </div>
 
-                <Button className="w-full h-14 bg-zinc-900 hover:bg-black text-white rounded-2xl font-black text-[13px] uppercase tracking-widest mt-2 shadow-xl shadow-zinc-900/20 group/btn">
-                  Explore Offering
-                  <ShoppingBag className="h-4 w-4 ml-2 transition-transform group-hover/btn:translate-y-[-2px]" />
+                <Button className="w-full h-12 bg-foreground text-background hover:bg-foreground/90 rounded-xl font-bold text-xs uppercase tracking-widest mt-2 shadow-lg transition-all group/btn">
+                  Interrogate Offering
+                  <ShoppingBag className="h-3.5 w-3.5 ml-2 transition-transform group-hover/btn:-translate-y-0.5" />
                 </Button>
               </div>
             )}
           </div>
 
-          <div className="flex items-center justify-between mt-8 mb-6 px-1">
-            <div className="flex items-center gap-5 text-[11px] font-black text-zinc-400 uppercase tracking-[0.15em]">
-              <div className="flex items-center gap-2 hover:text-zinc-900 cursor-default transition-colors">
-                <span className="text-zinc-900 bg-zinc-100 px-2 py-0.5 rounded-full">
-                  {feed?.totalReactions || 0}
-                </span>
-                <span>Interactions</span>
-              </div>
-              <div className="flex items-center gap-2 hover:text-zinc-900 cursor-default transition-colors">
-                <span className="text-zinc-900 bg-zinc-100 px-2 py-0.5 rounded-full">
-                  {feed?.totalComment || 0}
-                </span>
-                <span>Discussion</span>
-              </div>
+          <div className="flex items-center justify-between mt-8 mb-5 px-0.5">
+            <div className="flex items-center gap-4">
+               <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-muted text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                  <TrendingUp className="h-3 w-3 text-emerald-500" />
+                  {feed?.totalReactions || 0} Growth
+               </div>
+               <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-muted text-[10px] font-bold uppercase tracking-widest text-muted-foreground border border-border/50">
+                  {feed?.totalComment || 0} Dialogue
+               </div>
             </div>
             <Analytics />
           </div>
 
-          <div className="h-px w-full bg-linear-to-r from-transparent via-zinc-100 to-transparent mb-5" />
+          <Separator className="mb-5 opacity-40" />
 
           <div className="flex items-center justify-between gap-3 px-0.5">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <Like item={feed as any} />
               <Comments id={feed.id} />
             </div>
             <Button
               variant="ghost"
               size="sm"
-              className="rounded-full h-11 px-6 text-zinc-500 font-bold text-[14px] hover:bg-zinc-50 hover:text-zinc-900 transition-all flex items-center gap-2.5"
+              className="rounded-xl h-10 px-4 text-muted-foreground font-bold text-[13px] hover:bg-muted hover:text-foreground transition-all flex items-center gap-2"
             >
-              <Repeat2 className="h-4.5 w-4.5" strokeWidth={3} />
-              Share
+              <Repeat2 className="h-4 w-4" strokeWidth={2.5} />
+              Redistribute
             </Button>
           </div>
         </div>
@@ -419,3 +398,5 @@ export default function Feed({ feed }: { feed: FeedProps }) {
     </div>
   );
 }
+
+import { ShieldCheck } from "lucide-react";

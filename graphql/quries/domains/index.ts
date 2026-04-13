@@ -37,7 +37,7 @@ export const ADD_CUSTOM_DOMAIN = gql`
 `;
 
 export const GET_DOMAIN_DETAILS = gql`
-  query GetCustomDomainDetails($input: inputId!) {
+  query GetCustomDomainDetails($input: InputId!) {
     getCustomDomainDetails(input: $input) {
       ${details}
     }
@@ -45,7 +45,7 @@ export const GET_DOMAIN_DETAILS = gql`
 `;
 
 export const CHECK_DNS_STATUS = gql`
-  mutation CheckUpdatedDnsRecord($input: inputId!) {
+  mutation CheckUpdatedDnsRecord($input: InputId!) {
     checkUpdatedDnsRecord(input: $input) {
       ${details}
     }
@@ -69,7 +69,7 @@ export const GET_THRICO_DOMAIN = gql`
 `;
 
 export const DELETE_DOMAIN = gql`
-  mutation DeleteDomain($input: inputId!) {
+  mutation DeleteDomain($input: InputId!) {
     deleteDomain(input: $input) {
       success
     }

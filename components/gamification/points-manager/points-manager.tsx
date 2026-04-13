@@ -27,9 +27,11 @@ import { StatsCards } from "./stats-cards";
 import { PointRuleDialog } from "./point-rule-dialog";
 import { RulesTable } from "./rules-table";
 import { cn } from "@/lib/utils";
+import { renderModuleIcon } from "@/components/subscription/utils";
 
 export function PointsManager() {
   const { selectedModule, setSelectedModule } = useGamificationStore();
+  const [search, setSearch] = useState("");
 
   const { data: gamificationModulesData } = useGetEntityGamificationModules({});
 
@@ -86,9 +88,18 @@ export function PointsManager() {
   const [editingRule, setEditingRule] = useState<PointRule | null>(null);
 
   const filteredRules = useMemo(() => {
-    if (selectedModule === "ALL") return pointRules;
-    return pointRules.filter((rule) => rule.module === selectedModule);
-  }, [selectedModule, pointRules]);
+    let list = pointRules;
+    if (selectedModule !== "ALL") {
+      list = list.filter((rule) => rule.module === selectedModule);
+    }
+    if (search) {
+      list = list.filter(r => 
+        r.action.toLowerCase().includes(search.toLowerCase()) ||
+        r.description?.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+    return list;
+  }, [selectedModule, pointRules, search]);
 
   const handleOpenDialog = (rule?: PointRule) => {
     if (rule) {
@@ -171,74 +182,93 @@ export function PointsManager() {
 
       <EcosystemActionBar shadow="none">
         <EcosystemActionBar.Group>
-          <Select
-            value={selectedModule}
-            onValueChange={(val) => setSelectedModule(val as any)}
-          >
-            <SelectTrigger className="w-[180px] h-8 text-sm">
-              <div className="flex items-center gap-2">
-                <LayoutGrid className="h-3.5 w-3.5 text-muted-foreground" />
-                <SelectValue placeholder="All Modules" />
-              </div>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">All Modules</SelectItem>
-              {subscriptionModules.map((mod) => (
-                <SelectItem key={mod.id} value={mod.id}>
-                  {mod.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <EcosystemActionBar.Item grow className="max-w-xs">
+             <EcosystemActionBar.Search 
+               value={search}
+               onChange={setSearch}
+               placeholder="Search rules..."
+             />
+          </EcosystemActionBar.Item>
         </EcosystemActionBar.Group>
 
         <EcosystemActionBar.Group align="right">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => { refetchRules(); refetchStats(); }}
-            className="gap-2"
-          >
-            <RotateCcw className={cn("h-3.5 w-3.5", rulesLoading && "animate-spin")} />
-            Refresh
-          </Button>
-          <Button
-            size="sm"
-            onClick={() => handleOpenDialog()}
-            className="gap-2"
-          >
-            <Plus className="h-3.5 w-3.5" />
-            Add Rule
-          </Button>
+          <EcosystemActionBar.Item>
+            <Select
+              value={selectedModule}
+              onValueChange={(val) => setSelectedModule(val as any)}
+            >
+              <SelectTrigger className="w-[180px] h-9 text-sm rounded-xl border-border bg-card">
+                <div className="flex items-center gap-2">
+                  <LayoutGrid className="h-3.5 w-3.5 text-muted-foreground" />
+                  <SelectValue placeholder="All Modules" />
+                </div>
+              </SelectTrigger>
+              <SelectContent className="rounded-xl p-1 shadow-lg border-border">
+                <SelectItem value="ALL" className="rounded-lg py-2">All Modules</SelectItem>
+                {subscriptionModules.map((mod) => (
+                  <SelectItem key={mod.id} value={mod.id} className="rounded-lg py-2">
+                    <div className="flex items-center gap-2">
+                       {renderModuleIcon(mod.icon, "h-3.5 w-3.5")}
+                       {mod.name}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </EcosystemActionBar.Item>
+
+          <EcosystemActionBar.Item>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => { refetchRules(); refetchStats(); }}
+              className="h-9 w-9 rounded-xl border-border text-muted-foreground hover:text-foreground hover:bg-muted"
+            >
+              <RotateCcw size={14} className={cn(rulesLoading && "animate-spin")} />
+            </Button>
+          </EcosystemActionBar.Item>
+
+          <EcosystemActionBar.Item>
+            <Button
+              size="sm"
+              onClick={() => handleOpenDialog()}
+              className="h-9 px-4 rounded-xl gap-2 shadow-sm font-semibold"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Add Rule
+            </Button>
+          </EcosystemActionBar.Item>
+
+          <EcosystemActionBar.Status active={filteredRules.length > 0}>
+             {filteredRules.length} Rules Active
+          </EcosystemActionBar.Status>
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
 
-      <EcosystemContainer className="p-6 space-y-6">
-        {/* Info Banner */}
-        <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50 border border-border">
-          <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-          <p className="text-[12px] text-muted-foreground leading-relaxed">
-            Point rules cannot be deleted to maintain consistency. Use the status toggle to disable a rule instead.
-          </p>
+      <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0 space-y-6">
+        <div className="px-6 py-4">
+           <StatsCards pointRules={pointRules} stats={gamificationStats} />
         </div>
 
-        {/* Stats */}
-        <StatsCards pointRules={pointRules} stats={gamificationStats} />
-
-        {/* Table Section */}
-        <div className="space-y-3">
-          <h2 className="text-sm font-semibold text-foreground">Rules</h2>
-          <div className="rounded-lg border border-border overflow-hidden">
-            <RulesTable
-              rules={filteredRules}
-              selectedModule={selectedModule}
-              modules={subscriptionModules}
-              refetchRules={refetchRules}
-              refetchStats={refetchStats}
-              onEdit={handleOpenDialog}
-              isLoading={rulesLoading}
-            />
+        <div className="px-6">
+          <div className="flex items-start gap-4 p-4 rounded-2xl bg-indigo-50/30 border border-indigo-100/50 mb-6">
+            <div className="h-8 w-8 rounded-full bg-white flex items-center justify-center shadow-sm shrink-0 border border-indigo-100">
+               <Info className="h-4 w-4 text-indigo-500" />
+            </div>
+            <p className="text-[13px] text-indigo-700/80 leading-relaxed font-medium">
+              Point rules cannot be deleted to maintain historical consistency. Use the status toggle to disable a rule and immediately cease point distribution for that event.
+            </p>
           </div>
+
+          <RulesTable
+            rules={filteredRules}
+            selectedModule={selectedModule}
+            modules={subscriptionModules}
+            refetchRules={refetchRules}
+            refetchStats={refetchStats}
+            onEdit={handleOpenDialog}
+            isLoading={rulesLoading}
+          />
         </div>
       </EcosystemContainer>
 

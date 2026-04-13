@@ -1,5 +1,5 @@
 import { useQuery, useMutation } from "@apollo/client";
-import { GET_ALL_MOMENTS, GET_MOMENT_DETAILS, GET_MOMENT_DASHBOARD_KPIs, ADMIN_DELETE_MOMENT } from "../../quries/moments";
+import { GET_ALL_MOMENTS, GET_MOMENT_DETAILS, GET_MOMENT_DASHBOARD_KPIs, ADMIN_DELETE_MOMENT, ADMIN_GENERATE_MOMENT_UPLOAD_URL, ADMIN_CONFIRM_MOMENT_UPLOAD } from "../../quries/moments";
 import { TimeRange } from "../dashboard";
 
 export interface Moment {
@@ -85,4 +85,17 @@ export const useAdminDeleteMoment = () => {
     refetchQueries: [{ query: GET_ALL_MOMENTS }],
   });
   return { deleteMoment, loading };
+};
+
+export const useAdminGenerateMomentUploadUrl = () => {
+  const [generateUploadUrl, { loading }] = useMutation(ADMIN_GENERATE_MOMENT_UPLOAD_URL);
+  return [generateUploadUrl, { loading }] as const;
+};
+
+export const useAdminConfirmMomentUpload = (options?: any) => {
+  const [confirmUpload, { loading }] = useMutation(ADMIN_CONFIRM_MOMENT_UPLOAD, {
+    refetchQueries: [{ query: GET_ALL_MOMENTS }],
+    ...options,
+  });
+  return [confirmUpload, { loading }] as const;
 };

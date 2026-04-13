@@ -17,9 +17,13 @@ import { BlockLibrary } from "./block-library";
 import { CanvasNode } from "./canvas-node";
 import { EdgeLine, PreviewEdge } from "./edge-line";
 import { ConfigPanel } from "./config-panel";
-import { useGetEmailCampaign, useUpdateEmailCampaign } from "@/graphql/actions/email";
+import { useQuery, useMutation } from "@apollo/client";
+import { GET_AUTOMATION_CAMPAIGNS } from "@/graphql/automation/queries";
+import { CREATE_AUTOMATION_CAMPAIGN, UPDATE_AUTOMATION_CAMPAIGN } from "@/graphql/automation/mutations";
+import { useGetEntity } from "@/graphql/actions";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const NODE_W = 280;
 const NODE_H = 88;
@@ -47,10 +51,22 @@ interface CanvasBuilderProps {
 }
 
 export function CanvasBuilder({ campaignId, onBack }: CanvasBuilderProps) {
-  const { data, loading } = useGetEmailCampaign(campaignId || "");
-  const [updateCampaign, { loading: isSaving }] = useUpdateEmailCampaign();
+  const router = useRouter();
+  const { data: entityData } = useGetEntity();
+  const entityId = entityData?.getEntity?.id;
 
-  const existing = data?.getEmailCampaign;
+  const { data, loading } = useQuery(GET_AUTOMATION_CAMPAIGNS, {
+    variables: { entityId },
+    skip: !campaignId || !entityId,
+  });
+
+  const [createCampaign, { loading: isCreating }] = useMutation(CREATE_AUTOMATION_CAMPAIGN, {
+    refetchQueries: [{ query: GET_AUTOMATION_CAMPAIGNS, variables: { entityId } }]
+  });
+  const [updateCampaign, { loading: isUpdating }] = useMutation(UPDATE_AUTOMATION_CAMPAIGN);
+  const isSaving = isCreating || isUpdating;
+
+  const existing = data?.getAutomationCampaigns?.find((c: any) => c.id === campaignId);
   const isEditMode = !!campaignId;
 
   // ── Core canvas state ─────────────────────────────────────────────────────
@@ -81,10 +97,10 @@ export function CanvasBuilder({ campaignId, onBack }: CanvasBuilderProps) {
       if (existing.cronDay) setCronDay(existing.cronDay);
       if (existing.cronDate) setCronDate(existing.cronDate);
 
-      // Load nodes & edges if plural JSON strings exist
-      if (existing.canvasNodes) {
+      // Load nodes & edges from our triggerConfig packaging
+      if (existing.triggerConfig && existing.triggerConfig.canvasNodes) {
         try {
-          setNodes(JSON.parse(existing.canvasNodes));
+          setNodes(existing.triggerConfig.canvasNodes);
         } catch (e) {
           console.error("Failed to parse canvasNodes", e);
           setNodes(DEFAULT_NODES);
@@ -93,9 +109,9 @@ export function CanvasBuilder({ campaignId, onBack }: CanvasBuilderProps) {
         setNodes(DEFAULT_NODES);
       }
 
-      if (existing.canvasEdges) {
+      if (existing.triggerConfig && existing.triggerConfig.canvasEdges) {
         try {
-          setEdges(JSON.parse(existing.canvasEdges));
+          setEdges(existing.triggerConfig.canvasEdges);
         } catch (e) {
           console.error("Failed to parse canvasEdges", e);
           setEdges(DEFAULT_EDGES);
@@ -104,7 +120,17 @@ export function CanvasBuilder({ campaignId, onBack }: CanvasBuilderProps) {
         setEdges(DEFAULT_EDGES);
       }
     } else if (!loading && !campaignId) {
-      // New campaign fallback (if somehow reached without ID, though wizard creates it)
+      // Check session storage for draft provided by Add page
+      const draft = sessionStorage.getItem("campaign_draft");
+      if (draft) {
+        try {
+          const parsed = JSON.parse(draft);
+          if (parsed.name) setCampaignName(parsed.name);
+          if (parsed.status) setStatus(parsed.status as CampaignStatus);
+          if (parsed.module) setModule(parsed.module as CampaignModule);
+          // you could also parse frequency, cron etc. here.
+        } catch (e) {}
+      }
       setNodes(DEFAULT_NODES);
       setEdges(DEFAULT_EDGES);
     }
@@ -245,22 +271,50 @@ export function CanvasBuilder({ campaignId, onBack }: CanvasBuilderProps) {
   const svgH = Math.max(1500, ...nodes.map((n) => n.y + NODE_H + 200));
 
   const handleSave = async (newStatus?: CampaignStatus) => {
-    if (!campaignId) return;
+    if (!entityId) {
+      toast.error("Entity context not found");
+      return;
+    }
+    const triggerNode = nodes.find(n => n.type === "trigger");
+    const triggerType = triggerNode?.blockKey || "generic";
+
     try {
-      const input = {
-        name: campaignName,
-        status: newStatus || status,
-        frequency,
-        module,
-        cronType,
-        cronDay,
-        cronDate,
-        canvasNodes: JSON.stringify(nodes),
-        canvasEdges: JSON.stringify(edges),
-      };
-      await updateCampaign({ variables: { id: campaignId, input } });
-      toast.success(newStatus === "released" ? "Campaign Activated!" : "Draft Saved!");
-      if (newStatus) setStatus(newStatus);
+      if (!isEditMode) {
+        // Create full campaign
+        const res = await createCampaign({
+          variables: {
+            name: campaignName,
+            entityId,
+            triggerType,
+            triggerConfig: { ...triggerNode?.config, canvasNodes: nodes, canvasEdges: edges },
+            actionConfig: { nodes: nodes.filter(n => n.type === 'action') },
+            segmentationConfig: { nodes: nodes.filter(n => n.type === 'condition') },
+            description: "Campaign built from canvas"
+          }
+        });
+        const newId = res.data?.createAutomationCampaign?.id;
+        toast.success("Campaign Created & Canvas Saved!");
+        if (newId) {
+           // We can update the URL without reload via Next.js router, or just redirect
+           router.replace(`/email/automation/add/canvas?id=${newId}`);
+           sessionStorage.removeItem("campaign_draft");
+        }
+        if (newStatus) setStatus(newStatus);
+        
+        if (newStatus && newId) {
+           await updateCampaign({ variables: { id: newId, status: newStatus } });
+        }
+      } else {
+        // Just update status as supported by the schema for now
+        await updateCampaign({ 
+          variables: { 
+             id: campaignId, 
+             status: newStatus || status 
+          } 
+        });
+        toast.success(newStatus === "active" ? "Campaign Activated!" : "Draft Status Saved!");
+        if (newStatus) setStatus(newStatus);
+      }
     } catch (err: any) {
       toast.error(err.message || "Failed to save campaign");
     }
@@ -277,8 +331,8 @@ export function CanvasBuilder({ campaignId, onBack }: CanvasBuilderProps) {
 
   const statusMeta: Record<CampaignStatus, { label: string; color: string; bg: string; border: string }> = {
     draft:    { label: "Draft",    color: "text-slate-600",  bg: "bg-slate-50",  border: "border-slate-200" },
-    released: { label: "Released", color: "text-emerald-700", bg: "bg-emerald-50", border: "border-emerald-200" },
-    finished: { label: "Finished", color: "text-blue-700",   bg: "bg-blue-50",   border: "border-blue-200" },
+    active:   { label: "Active",   color: "text-emerald-700", bg: "bg-emerald-50", border: "border-emerald-200" },
+    inactive: { label: "Inactive", color: "text-blue-700",   bg: "bg-blue-50",   border: "border-blue-200" },
   };
   const sm = statusMeta[status];
   const moduleColor = module ? MODULE_COLORS[module] : "#5B6CFF";
@@ -323,7 +377,7 @@ export function CanvasBuilder({ campaignId, onBack }: CanvasBuilderProps) {
         {/* Status pill */}
         <div className={cn("flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-semibold", sm.color, sm.bg, sm.border)}>
           <span className={cn("h-1.5 w-1.5 rounded-full",
-            status === "released" ? "bg-emerald-500" : status === "finished" ? "bg-blue-400" : "bg-slate-400")} />
+            status === "active" ? "bg-emerald-500" : status === "inactive" ? "bg-blue-400" : "bg-slate-400")} />
           {sm.label}
         </div>
 
@@ -385,7 +439,7 @@ export function CanvasBuilder({ campaignId, onBack }: CanvasBuilderProps) {
           Save Draft
         </button>
         <button 
-          onClick={() => handleSave("released")}
+          onClick={() => handleSave("active")}
           disabled={isSaving}
           className="flex items-center gap-2 h-8 px-4 bg-[#5B6CFF] hover:bg-[#4a5ce8] disabled:opacity-50 text-white text-[12px] font-bold rounded-xl transition-all shadow-sm shadow-[#5B6CFF]/20">
           {isSaving ? <Loader2 size={12} className="animate-spin" /> : <Play size={12} />} 
@@ -505,13 +559,13 @@ export function CanvasBuilder({ campaignId, onBack }: CanvasBuilderProps) {
                 <div>
                   <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Status</label>
                   <div className="grid grid-cols-3 gap-1.5">
-                    {(["draft", "released", "finished"] as CampaignStatus[]).map((s) => {
+                    {(["draft", "active", "inactive"] as CampaignStatus[]).map((s) => {
                       const m = statusMeta[s];
                       return (
                         <button key={s} onClick={() => setStatus(s)}
                           className={cn("flex flex-col items-center gap-1 py-2.5 px-2 rounded-xl border text-center transition-all text-[11px] font-semibold",
                             status === s ? `${m.color} ${m.bg} ${m.border} ring-1 ring-offset-1 ring-[#5B6CFF]/20` : "bg-white border-slate-200 text-slate-500 hover:border-slate-300")}>
-                          {s === "draft" ? <Hash size={13} /> : s === "released" ? <Play size={13} /> : <CheckCircle size={13} />}
+                          {s === "draft" ? <Hash size={13} /> : s === "active" ? <Play size={13} /> : <CheckCircle size={13} />}
                           {m.label}
                         </button>
                       );

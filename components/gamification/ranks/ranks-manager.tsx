@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import {
   useGetRanks,
   useCreateRank,
@@ -20,7 +20,7 @@ import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-cont
 import { cn } from "@/lib/utils";
 
 export function RanksManager() {
-  const { data: ranksData, refetch, loading } = useGetRanks();
+  const { data: ranksData, refetch, loading: ranksLoading } = useGetRanks();
   const ranks = ranksData?.getRanks || [];
 
   const [createRank, { loading: creating }] = useCreateRank({
@@ -78,64 +78,70 @@ export function RanksManager() {
     <EcosystemWrapper>
       <EcosystemHeader
         title="Ranks"
-        badgeText="Gamification"
-        description="Define the progression hierarchy for your community. Set point thresholds for each rank level."
+        badgeText="Hierarchy"
+        description="Define the progression hierarchy. Set point thresholds for each rank level to visualize member status."
         icon={Crown}
       />
 
       <EcosystemActionBar shadow="none">
         <EcosystemActionBar.Group>
-          <div className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-xs font-medium text-muted-foreground">
-              {ranks.length} rank{ranks.length !== 1 ? "s" : ""} configured
-            </span>
+          <div className="flex items-center gap-3 px-1">
+             <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+             <span className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]"> System Logic Node Active</span>
           </div>
         </EcosystemActionBar.Group>
 
         <EcosystemActionBar.Group align="right">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => refetch()}
-            className="gap-2"
-          >
-            <RotateCcw className={cn("h-3.5 w-3.5", loading && "animate-spin")} />
-            Refresh
-          </Button>
-          <Button
-            size="sm"
-            onClick={() => handleOpenDialog()}
-            className="gap-2"
-          >
-            <Plus className="h-3.5 w-3.5" />
-            Add Rank
-          </Button>
+          <EcosystemActionBar.Item>
+             <Button
+                variant="outline"
+                size="icon"
+                className="h-9 w-9 border-border rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted"
+                onClick={() => refetch()}
+              >
+                <RotateCcw className={cn(ranksLoading && "animate-spin")} size={14} />
+              </Button>
+          </EcosystemActionBar.Item>
+
+          <EcosystemActionBar.Item>
+             <Button
+                size="sm"
+                onClick={() => handleOpenDialog()}
+                className="h-9 px-4 rounded-xl gap-2 shadow-sm font-semibold"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                Add Rank
+              </Button>
+          </EcosystemActionBar.Item>
+
+          <EcosystemActionBar.Status active={ranks.length > 0}>
+             {ranks.length} Defined Tiers
+          </EcosystemActionBar.Status>
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
 
-      <EcosystemContainer className="p-6 space-y-6">
-        {/* Info Banner */}
-        <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50 border border-border">
-          <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-          <p className="text-[12px] text-muted-foreground leading-relaxed">
-            Reordering ranks affects all existing member positions. Changes are applied immediately across the platform.
-          </p>
+      <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0 space-y-6">
+        <div className="px-6 py-4">
+           <StatsCards ranks={ranks} />
         </div>
 
-        {/* Stats */}
-        <StatsCards ranks={ranks} />
+        <div className="px-6">
+          <div className="flex items-start gap-4 p-4 rounded-2xl bg-indigo-50/30 border border-indigo-100/50 mb-6 font-medium">
+            <div className="h-8 w-8 rounded-full bg-white flex items-center justify-center shadow-sm shrink-0 border border-indigo-100">
+              <Info className="h-4 w-4 text-indigo-500" />
+            </div>
+            <p className="text-[13px] text-indigo-700/80 leading-relaxed">
+              Reordering ranks will automatically adjust the order property of each level. Member eligibility is calculated in real-time based on these thresholds.
+            </p>
+          </div>
 
-        {/* Rank List */}
-        <div className="space-y-3">
-          <h2 className="text-sm font-semibold text-foreground">Rank Levels</h2>
           <RankList
             ranks={ranks}
             onMoveUp={(index) => handleMoveRank(index, "up")}
             onMoveDown={(index) => handleMoveRank(index, "down")}
             onEdit={handleOpenDialog}
             refetch={refetch}
-            isLoading={loading}
+            isLoading={ranksLoading}
           />
         </div>
       </EcosystemContainer>

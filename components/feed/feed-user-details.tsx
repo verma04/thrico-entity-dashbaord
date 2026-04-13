@@ -21,50 +21,55 @@ const FeedUserDetails: React.FC<FeedProps> = ({
 }) => {
   const { data } = useGetEntity();
 
+  const isEntity = addedBy === "ENTITY";
+  const displayName = isEntity ? data?.getEntity?.name : `${user?.firstName} ${user?.lastName}`;
+  const displayAvatar = isEntity ? data?.getEntity?.logo : user?.avatar;
+  const displayRole = isEntity ? "Community Management" : (user?.about?.currentPosition || "Community Member");
+
   return (
-    <div className="flex items-center gap-3 w-full">
+    <div className="flex items-center gap-3.5 w-full">
       <div className="relative shrink-0">
         <UserAvatar
-          size={44}
-          src={addedBy === "USER" ? user?.avatar : data?.getEntity?.logo}
-          className="rounded-xl border border-zinc-100 shadow-sm"
+          size={42}
+          src={displayAvatar}
+          className="rounded-xl border border-border shadow-sm bg-card"
         />
-        {addedBy === "ENTITY" && (
-          <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-blue-500 border-2 border-white" />
+        {isEntity && (
+          <span className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full bg-primary border-2 border-background flex items-center justify-center">
+             <div className="h-1.5 w-1.5 rounded-full bg-primary-foreground animate-pulse" />
+          </span>
         )}
       </div>
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-1.5">
-          <span className="font-bold text-[15px] text-zinc-900 tracking-tight leading-none truncate">
-            {addedBy === "USER" ? (
-              `${user?.firstName} ${user?.lastName}`
-            ) : (
-              data?.getEntity?.name
-            )}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-x-2 gap-y-0.5">
+          <span className="font-bold text-[15px] text-foreground tracking-tight leading-none truncate">
+            {displayName}
           </span>
-          <span className="text-zinc-300 select-none">•</span>
-          <span className="text-[12px] font-medium text-zinc-400">
-            {moment(createdAt).fromNow(true)}
-          </span>
+          <div className="flex items-center gap-1.5">
+            <span className="hidden sm:inline text-muted-foreground/30 font-light select-none text-xs">•</span>
+            <span className="text-[12px] font-bold text-muted-foreground/60 uppercase tracking-widest leading-none">
+              {moment(createdAt).fromNow(true)} ago
+            </span>
+          </div>
         </div>
-        <div className="flex items-center gap-2 mt-0.5">
-          <p className="text-[13px] text-zinc-500 font-medium truncate max-w-[200px]">
-            {user?.about?.currentPosition || "Community Member"}
+        <div className="flex items-center gap-2 mt-1">
+          <p className="text-[13px] text-muted-foreground font-medium truncate max-w-[180px]">
+            {displayRole}
           </p>
-          <span className="w-1 h-1 rounded-full bg-zinc-300" />
+          <div className="h-1 w-1 rounded-full bg-muted-foreground/30 shrink-0" />
           <TooltipProvider delayDuration={0}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="cursor-help">
+                <div className="cursor-help flex items-center">
                   {privacy === "PUBLIC" ? (
-                    <Globe className="h-3 w-3 text-zinc-400" />
+                    <Globe className="h-3 w-3 text-muted-foreground/50 transition-colors hover:text-primary" />
                   ) : (
-                    <Lock className="h-3 w-3 text-zinc-400" />
+                    <Lock className="h-3 w-3 text-muted-foreground/50 transition-colors hover:text-amber-500" />
                   )}
                 </div>
               </TooltipTrigger>
-              <TooltipContent side="right" className="text-[10px] px-2 py-1 bg-zinc-900 border-zinc-800 text-white">
-                {privacy === "PUBLIC" ? "Public Post" : "Shared with Connections"}
+              <TooltipContent side="top" className="text-[10px] bg-zinc-900 border-none font-bold text-white uppercase tracking-widest px-2.5 py-1.5">
+                {privacy === "PUBLIC" ? "Public Ecosystem Insight" : "Restricted Connection Data"}
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>

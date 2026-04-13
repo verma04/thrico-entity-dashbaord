@@ -155,6 +155,12 @@ export const GET_ENTITY_SETTINGS = gql`
       autoApprovePolls
       allowStories
       autoApproveStories
+
+      allowCommunityInFeed
+      allowDiscussionForumInFeed
+      allowPollsInFeed
+      allowAdminFeedInFeed
+      allowMomentsInFeed
     }
   }
 `;

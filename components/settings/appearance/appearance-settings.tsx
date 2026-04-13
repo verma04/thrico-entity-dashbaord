@@ -1,17 +1,31 @@
 "use client"
 
 import type React from "react"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
+import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import type { EntityTheme } from "@/store/ts-types"
-import { editEntityTheme } from "@/graphql/actions/theme"
+import { useEditEntityTheme } from "@/graphql/actions"
 import { useThemeStore } from "@/store/themeStore"
 import ThemePreview from "./theme-preview"
-import { Loader2, Save, Palette, Layers, Type, Sparkles } from "lucide-react"
+import { 
+  Loader2, 
+  Save, 
+  Palette, 
+  Layers, 
+  Type, 
+  Sparkles, 
+  Eye, 
+  ChevronRight,
+  Monitor,
+  Moon,
+  Sun,
+  Layout
+} from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface AppearanceSettingsProps {
@@ -48,6 +62,7 @@ const AppearanceSettings: React.FC<AppearanceSettingsProps> = ({ theme }) => {
   })
 
   const [activeTab, setActiveTab] = useState<"colors" | "layout" | "typography">("colors")
+  const [previewMode, setPreviewMode] = useState<"desktop" | "mobile">("desktop")
 
   useEffect(() => {
     if (theme) {
@@ -65,7 +80,7 @@ const AppearanceSettings: React.FC<AppearanceSettingsProps> = ({ theme }) => {
   }, [theme])
 
   const setTheme = useThemeStore((state) => state.setTheme)
-  const [update, { loading }] = editEntityTheme({
+  const [update, { loading }] = useEditEntityTheme({
     onCompleted: () => {
       setTheme({
         ...formSettings,
@@ -98,30 +113,30 @@ const AppearanceSettings: React.FC<AppearanceSettingsProps> = ({ theme }) => {
 
   const quickThemes = [
     {
-      name: "Modern SaaS",
+      name: "Midnight",
       colors: {
-        primaryColor: "#0f172a",
-        secondaryColor: "#334155",
-        backgroundColor: "#ffffff",
-        textColor: "#020617",
+        primaryColor: "#0ea5e9",
+        secondaryColor: "#6366f1",
+        backgroundColor: "#020617",
+        textColor: "#f8fafc",
       },
     },
     {
-      name: "Mint Enterprise",
+      name: "Editorial",
+      colors: {
+        primaryColor: "#000000",
+        secondaryColor: "#4b5563",
+        backgroundColor: "#ffffff",
+        textColor: "#111827",
+      },
+    },
+    {
+      name: "Oceanic",
       colors: {
         primaryColor: "#059669",
-        secondaryColor: "#34d399",
-        backgroundColor: "#f0fdf4",
+        secondaryColor: "#10b981",
+        backgroundColor: "#f0fdfa",
         textColor: "#064e3b",
-      },
-    },
-    {
-      name: "Ocean Tech",
-      colors: {
-        primaryColor: "#2563eb",
-        secondaryColor: "#60a5fa",
-        backgroundColor: "#eff6ff",
-        textColor: "#1e3a8a",
       },
     },
   ]
@@ -134,389 +149,459 @@ const AppearanceSettings: React.FC<AppearanceSettingsProps> = ({ theme }) => {
     })
   }
 
-  const isChanged = JSON.stringify(formSettings) !== JSON.stringify(theme)
+  const isChanged = useMemo(() => {
+    if (!theme) return true
+    const { __typename: t1, Button: b1, ...s1 } = formSettings as any
+    const { __typename: t2, Button: b2, ...s2 } = theme as any
+    return JSON.stringify(s1) !== JSON.stringify(s2) || JSON.stringify(b1) !== JSON.stringify(b2)
+  }, [formSettings, theme])
+
+  const tabs = [
+    { id: "colors", label: "Branding", icon: Palette },
+    { id: "layout", label: "Geometry", icon: Layout },
+    { id: "typography", label: "Text Styles", icon: Type },
+  ] as const
 
   return (
-    <div className="flex flex-col xl:flex-row gap-6 items-start">
+    <div className="flex flex-col xl:flex-row gap-8 items-start relative max-w-[1600px] mx-auto w-full">
       {/* Settings Panel */}
-      <div className="w-full xl:w-1/2 flex flex-col gap-6">
-        <div className="rounded-xl border border-slate-200/80 bg-white shadow-sm overflow-hidden flex flex-col">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full xl:w-[450px] flex flex-col gap-6 shrink-0"
+      >
+        <div className="rounded-2xl border border-border bg-card/50 backdrop-blur-sm shadow-xl overflow-hidden flex flex-col">
           {/* Header & Tabs */}
-          <div className="px-5 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50">
-            <div className="flex items-center gap-1 bg-slate-100/80 p-0.5 rounded-lg border border-slate-200/50">
-              <button
-                onClick={() => setActiveTab("colors")}
-                className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-semibold transition-all duration-150",
-                  activeTab === "colors"
-                    ? "bg-white text-slate-900 shadow-sm border border-slate-200"
-                    : "text-slate-500 hover:text-slate-700"
-                )}
-              >
-                <Palette className="h-3.5 w-3.5" />
-                Colors
-              </button>
-              <button
-                onClick={() => setActiveTab("layout")}
-                className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-semibold transition-all duration-150",
-                  activeTab === "layout"
-                    ? "bg-white text-slate-900 shadow-sm border border-slate-200"
-                    : "text-slate-500 hover:text-slate-700"
-                )}
-              >
-                <Layers className="h-3.5 w-3.5" />
-                Layout
-              </button>
-              <button
-                onClick={() => setActiveTab("typography")}
-                className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-semibold transition-all duration-150",
-                  activeTab === "typography"
-                    ? "bg-white text-slate-900 shadow-sm border border-slate-200"
-                    : "text-slate-500 hover:text-slate-700"
-                )}
-              >
-                <Type className="h-3.5 w-3.5" />
-                Typography
-              </button>
+          <div className="p-1 border-b border-border/60 bg-muted/30">
+            <div className="flex items-center gap-1 p-1">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={cn(
+                    "flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-[12px] font-semibold transition-all duration-200 relative",
+                    activeTab === tab.id
+                      ? "text-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  )}
+                >
+                  {activeTab === tab.id && (
+                    <motion.div
+                      layoutId="activeTab"
+                      className="absolute inset-0 bg-background border border-border shadow-sm rounded-xl"
+                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                    />
+                  )}
+                  <tab.icon className={cn("h-3.5 w-3.5 relative z-10", activeTab === tab.id ? "text-primary" : "")} />
+                  <span className="relative z-10">{tab.label}</span>
+                </button>
+              ))}
             </div>
-
-            <Button
-              onClick={handleSave}
-              disabled={!isChanged || loading}
-              className="h-8 px-4 text-[12px] font-semibold bg-slate-900 hover:bg-black text-white gap-2 shadow-sm shrink-0 transition-opacity"
-            >
-              {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
-              {loading ? "Saving..." : isChanged ? "Save Changes" : "Saved"}
-            </Button>
           </div>
 
-          <div className="p-6">
-            {activeTab === "colors" && (
-              <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                {/* Presets */}
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="h-4 w-4 text-slate-400" />
-                    <h3 className="text-[13px] font-semibold text-slate-900 tracking-tight">Theme Presets</h3>
-                  </div>
-                  <div className="grid grid-cols-3 gap-3">
-                    {quickThemes.map((preset) => (
-                      <button
-                        key={preset.name}
-                        onClick={() => {
-                          updateFormSetting("primaryColor", preset.colors.primaryColor)
-                          updateFormSetting("secondaryColor", preset.colors.secondaryColor)
-                          updateFormSetting("backgroundColor", preset.colors.backgroundColor)
-                          updateFormSetting("textColor", preset.colors.textColor)
-                        }}
-                        className="group flex flex-col items-center justify-center p-3 rounded-xl border border-slate-200 bg-slate-50 hover:border-slate-300 hover:bg-white transition-all duration-200 relative overflow-hidden"
-                      >
-                        <div
-                          className="h-8 w-full rounded-md shadow-inner mb-2 border border-black/5"
-                          style={{
-                            background: `linear-gradient(135deg, ${preset.colors.primaryColor} 0%, ${preset.colors.secondaryColor} 100%)`,
+          <div className="p-6 space-y-8 min-h-[500px]">
+            <AnimatePresence mode="wait">
+              {activeTab === "colors" && (
+                <motion.div
+                  key="colors"
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 10 }}
+                  className="space-y-8"
+                >
+                  {/* Presets */}
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Sparkles className="h-4 w-4" />
+                      <h3 className="text-[13px] font-semibold uppercase tracking-wider">Presets</h3>
+                    </div>
+                    <div className="grid grid-cols-3 gap-3">
+                      {quickThemes.map((preset) => (
+                        <button
+                          key={preset.name}
+                          onClick={() => {
+                            updateFormSetting("primaryColor", preset.colors.primaryColor)
+                            updateFormSetting("secondaryColor", preset.colors.secondaryColor)
+                            updateFormSetting("backgroundColor", preset.colors.backgroundColor)
+                            updateFormSetting("textColor", preset.colors.textColor)
                           }}
-                        />
-                        <span className="text-[11px] font-semibold text-slate-700">{preset.name}</span>
-                        {/* Selector ring */}
-                        <div className={cn(
-                          "absolute inset-0 border-2 rounded-xl transition-opacity pointer-events-none",
-                          formSettings.primaryColor === preset.colors.primaryColor ? "border-slate-900 opacity-100" : "border-transparent opacity-0"
-                        )} />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="h-px bg-slate-100 w-full" />
-
-                <div className="space-y-5">
-                  <h3 className="text-[13px] font-semibold text-slate-900 tracking-tight">Global Tokens</h3>
-                  
-                  <div className="grid grid-cols-2 gap-x-6 gap-y-5">
-                    <div className="space-y-2">
-                      <Label className="text-[12px] font-semibold text-slate-700">Primary Color</Label>
-                      <div className="flex items-center gap-2">
-                        <Input
-                          type="color"
-                          value={formSettings.primaryColor}
-                          onChange={(e) => updateFormSetting("primaryColor", e.target.value)}
-                          className="w-10 h-10 p-1 border-slate-200 rounded-lg cursor-pointer"
-                        />
-                        <Input 
-                          type="text" 
-                          value={formSettings.primaryColor} 
-                          onChange={(e) => updateFormSetting("primaryColor", e.target.value)}
-                          className="h-10 text-[12px] font-mono border-slate-200"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label className="text-[12px] font-semibold text-slate-700">Secondary Color</Label>
-                      <div className="flex items-center gap-2">
-                        <Input
-                          type="color"
-                          value={formSettings.secondaryColor}
-                          onChange={(e) => updateFormSetting("secondaryColor", e.target.value)}
-                          className="w-10 h-10 p-1 border-slate-200 rounded-lg cursor-pointer"
-                        />
-                        <Input 
-                          type="text" 
-                          value={formSettings.secondaryColor} 
-                          onChange={(e) => updateFormSetting("secondaryColor", e.target.value)}
-                          className="h-10 text-[12px] font-mono border-slate-200"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label className="text-[12px] font-semibold text-slate-700">Canvas Background</Label>
-                      <div className="flex items-center gap-2">
-                        <Input
-                          type="color"
-                          value={formSettings.backgroundColor}
-                          onChange={(e) => updateFormSetting("backgroundColor", e.target.value)}
-                          className="w-10 h-10 p-1 border-slate-200 rounded-lg cursor-pointer"
-                        />
-                        <Input 
-                          type="text" 
-                          value={formSettings.backgroundColor} 
-                          onChange={(e) => updateFormSetting("backgroundColor", e.target.value)}
-                          className="h-10 text-[12px] font-mono border-slate-200"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label className="text-[12px] font-semibold text-slate-700">Primary Text</Label>
-                      <div className="flex items-center gap-2">
-                        <Input
-                          type="color"
-                          value={formSettings.textColor}
-                          onChange={(e) => updateFormSetting("textColor", e.target.value)}
-                          className="w-10 h-10 p-1 border-slate-200 rounded-lg cursor-pointer"
-                        />
-                        <Input 
-                          type="text" 
-                          value={formSettings.textColor} 
-                          onChange={(e) => updateFormSetting("textColor", e.target.value)}
-                          className="h-10 text-[12px] font-mono border-slate-200"
-                        />
-                      </div>
+                          className={cn(
+                            "group flex flex-col items-center p-3 rounded-2xl border transition-all duration-300 relative overflow-hidden",
+                            formSettings.primaryColor === preset.colors.primaryColor 
+                              ? "border-primary bg-primary/5 shadow-inner" 
+                              : "border-border bg-muted/20 hover:border-muted-foreground/30"
+                          )}
+                        >
+                          <div
+                            className="h-10 w-full rounded-xl shadow-lg mb-2 border border-black/10"
+                            style={{
+                              background: `linear-gradient(135deg, ${preset.colors.primaryColor} 0%, ${preset.colors.secondaryColor} 100%)`,
+                            }}
+                          />
+                          <span className={cn(
+                            "text-[10px] font-bold tracking-tight uppercase",
+                            formSettings.primaryColor === preset.colors.primaryColor ? "text-primary" : "text-muted-foreground"
+                          )}>
+                            {preset.name}
+                          </span>
+                        </button>
+                      ))}
                     </div>
                   </div>
-                </div>
 
-                <div className="h-px bg-slate-100 w-full" />
-
-                <div className="space-y-5">
-                  <h3 className="text-[13px] font-semibold text-slate-900 tracking-tight">Form & Inputs</h3>
-
-                  <div className="grid grid-cols-2 gap-x-6 gap-y-5">
-                    <div className="space-y-2">
-                      <Label className="text-[12px] font-semibold text-slate-700">Input Background</Label>
-                      <div className="flex items-center gap-2">
-                        <Input
-                          type="color"
-                          value={formSettings.inputBackground}
-                          onChange={(e) => updateFormSetting("inputBackground", e.target.value)}
-                          className="w-10 h-10 p-1 border-slate-200 rounded-lg cursor-pointer"
-                        />
-                        <Input 
-                          type="text" 
-                          value={formSettings.inputBackground} 
-                          onChange={(e) => updateFormSetting("inputBackground", e.target.value)}
-                          className="h-10 text-[12px] font-mono border-slate-200"
-                        />
-                      </div>
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-2 text-muted-foreground pt-4 border-t border-border/60">
+                      <Palette className="h-4 w-4" />
+                      <h3 className="text-[13px] font-semibold uppercase tracking-wider">Brand Palette</h3>
                     </div>
+                    
+                    <div className="grid gap-6">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2.5">
+                          <Label className="text-[11px] font-bold text-muted-foreground uppercase">Primary</Label>
+                          <div className="flex gap-2">
+                            <div className="relative group shrink-0">
+                                <Input
+                                  type="color"
+                                  value={formSettings.primaryColor}
+                                  onChange={(e) => updateFormSetting("primaryColor", e.target.value)}
+                                  className="w-11 h-11 p-1 rounded-xl cursor-pointer border-border ring-offset-background transition-transform group-hover:scale-105"
+                                />
+                            </div>
+                            <Input 
+                              type="text" 
+                              value={formSettings.primaryColor} 
+                              onChange={(e) => updateFormSetting("primaryColor", e.target.value)}
+                              className="h-11 text-[12px] font-mono bg-muted/30 border-border rounded-xl"
+                            />
+                          </div>
+                        </div>
 
-                    <div className="space-y-2">
-                      <Label className="text-[12px] font-semibold text-slate-700">Border Color (Default)</Label>
-                      <div className="flex items-center gap-2">
-                        <Input
-                          type="color"
-                          value={formSettings.borderColor}
-                          onChange={(e) => updateFormSetting("borderColor", e.target.value)}
-                          className="w-10 h-10 p-1 border-slate-200 rounded-lg cursor-pointer"
-                        />
-                        <Input 
-                          type="text" 
-                          value={formSettings.borderColor} 
-                          onChange={(e) => updateFormSetting("borderColor", e.target.value)}
-                          className="h-10 text-[12px] font-mono border-slate-200"
-                        />
+                        <div className="space-y-2.5">
+                          <Label className="text-[11px] font-bold text-muted-foreground uppercase">Secondary</Label>
+                          <div className="flex gap-2">
+                            <div className="relative group shrink-0">
+                                <Input
+                                  type="color"
+                                  value={formSettings.secondaryColor}
+                                  onChange={(e) => updateFormSetting("secondaryColor", e.target.value)}
+                                  className="w-11 h-11 p-1 rounded-xl cursor-pointer border-border transition-transform group-hover:scale-105"
+                                />
+                            </div>
+                            <Input 
+                              type="text" 
+                              value={formSettings.secondaryColor} 
+                              onChange={(e) => updateFormSetting("secondaryColor", e.target.value)}
+                              className="h-11 text-[12px] font-mono bg-muted/30 border-border rounded-xl"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2.5">
+                          <Label className="text-[11px] font-bold text-muted-foreground uppercase">Canvas</Label>
+                          <div className="flex gap-2">
+                            <Input
+                              type="color"
+                              value={formSettings.backgroundColor}
+                              onChange={(e) => updateFormSetting("backgroundColor", e.target.value)}
+                              className="w-11 h-11 p-1 rounded-xl cursor-pointer border-border"
+                            />
+                            <Input 
+                              type="text" 
+                              value={formSettings.backgroundColor} 
+                              onChange={(e) => updateFormSetting("backgroundColor", e.target.value)}
+                              className="h-11 text-[12px] font-mono bg-muted/30 border-border rounded-xl"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-2.5">
+                          <Label className="text-[11px] font-bold text-muted-foreground uppercase">Text</Label>
+                          <div className="flex gap-2">
+                            <Input
+                              type="color"
+                              value={formSettings.textColor}
+                              onChange={(e) => updateFormSetting("textColor", e.target.value)}
+                              className="w-11 h-11 p-1 rounded-xl cursor-pointer border-border"
+                            />
+                            <Input 
+                              type="text" 
+                              value={formSettings.textColor} 
+                              onChange={(e) => updateFormSetting("textColor", e.target.value)}
+                              className="h-11 text-[12px] font-mono bg-muted/30 border-border rounded-xl"
+                            />
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                </motion.div>
+              )}
+
+              {activeTab === "layout" && (
+                <motion.div
+                  key="layout"
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 10 }}
+                  className="space-y-8"
+                >
+                  <div className="space-y-8">
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Corner Radius</Label>
+                        <span className="text-[11px] font-mono font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">{formSettings.borderRadius}px</span>
+                      </div>
+                      <Slider
+                        min={0}
+                        max={32}
+                        step={2}
+                        value={[Number(formSettings.borderRadius)]}
+                        onValueChange={(value) => updateFormSetting("borderRadius", value[0])}
+                        className="py-2"
+                      />
+                      <div className="flex justify-between text-[10px] font-bold text-muted-foreground/50 uppercase">
+                        <span>Sharp</span>
+                        <span>Balanced</span>
+                        <span>Organic</span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Stroke Weight</Label>
+                        <span className="text-[11px] font-mono font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">{formSettings.borderWidth}px</span>
+                      </div>
+                      <Slider
+                        min={0}
+                        max={4}
+                        step={1}
+                        value={[Number(formSettings.borderWidth)]}
+                        onValueChange={(value) => updateFormSetting("borderWidth", value[0])}
+                        className="py-2"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-6 pt-4 border-t border-border/60">
+                      <div className="space-y-2.5">
+                        <Label className="text-[11px] font-bold text-muted-foreground uppercase">Border Style</Label>
+                        <Select
+                          value={formSettings.borderStyle}
+                          onValueChange={(value) => updateFormSetting("borderStyle", value)}
+                        >
+                          <SelectTrigger className="h-11 text-[12px] rounded-xl border-border bg-muted/30">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="rounded-xl">
+                            <SelectItem value="solid" className="text-[12px]">Solid</SelectItem>
+                            <SelectItem value="dashed" className="text-[12px]">Dashed</SelectItem>
+                            <SelectItem value="dotted" className="text-[12px]">Dotted</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2.5">
+                        <Label className="text-[11px] font-bold text-muted-foreground uppercase">Elevation</Label>
+                        <Select
+                          value={formSettings.boxShadow || "none"}
+                          onValueChange={(value) => updateFormSetting("boxShadow", value)}
+                        >
+                          <SelectTrigger className="h-11 text-[12px] rounded-xl border-border bg-muted/30">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="rounded-xl">
+                            <SelectItem value="none" className="text-[12px]">Flat</SelectItem>
+                            <SelectItem value="0 1px 2px 0 rgba(0, 0, 0, 0.05)" className="text-[12px]">Subtle</SelectItem>
+                            <SelectItem value="0 4px 12px -2px rgba(0, 0, 0, 0.12)" className="text-[12px]">Floating</SelectItem>
+                            <SelectItem value="0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)" className="text-[12px]">High Impact</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {activeTab === "typography" && (
+                <motion.div
+                  key="typography"
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 10 }}
+                  className="space-y-8"
+                >
+                  <div className="space-y-8">
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Base Font Size</Label>
+                        <span className="text-[11px] font-mono font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">{formSettings.fontSize}px</span>
+                      </div>
+                      <Slider
+                        min={12}
+                        max={20}
+                        step={1}
+                        value={[Number(formSettings.fontSize)]}
+                        onValueChange={(value) => updateFormSetting("fontSize", value[0])}
+                        className="py-2"
+                      />
+                      <div className="flex justify-between text-[10px] font-bold text-muted-foreground/50 uppercase">
+                        <span>Compact</span>
+                        <span>Comfortable</span>
+                        <span>Large</span>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-6 pt-4 border-t border-border/60">
+                      <div className="space-y-2.5">
+                        <Label className="text-[11px] font-bold text-muted-foreground uppercase">Weight</Label>
+                        <Select
+                          value={String(formSettings.fontWeight)}
+                          onValueChange={(value) => updateFormSetting("fontWeight", value)}
+                        >
+                          <SelectTrigger className="h-11 text-[12px] rounded-xl border-border bg-muted/30">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="rounded-xl">
+                            <SelectItem value="300" className="text-[12px]">Light (300)</SelectItem>
+                            <SelectItem value="400" className="text-[12px]">Regular (400)</SelectItem>
+                            <SelectItem value="500" className="text-[12px]">Medium (500)</SelectItem>
+                            <SelectItem value="600" className="text-[12px]">Semibold (600)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2.5">
+                        <Label className="text-[11px] font-bold text-muted-foreground uppercase">Hover Animation</Label>
+                        <Select
+                          value={formSettings.hoverEffect || "none"}
+                          onValueChange={(value) => updateFormSetting("hoverEffect", value)}
+                        >
+                          <SelectTrigger className="h-11 text-[12px] rounded-xl border-border bg-muted/30">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="rounded-xl">
+                            <SelectItem value="none" className="text-[12px]">Static</SelectItem>
+                            <SelectItem value="lift" className="text-[12px]">Subtle Lift</SelectItem>
+                            <SelectItem value="scale" className="text-[12px]">Eased Scale</SelectItem>
+                            <SelectItem value="glow" className="text-[12px]">Outer Glow</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* Footer Save Button */}
+          <div className="p-4 bg-muted/50 border-t border-border/60 flex items-center justify-between gap-4">
+              <div className="flex-1">
+                {isChanged && (
+                  <motion.p 
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="text-[10px] font-bold text-orange-500 uppercase tracking-widest flex items-center gap-1.5"
+                  >
+                    <div className="h-1.5 w-1.5 rounded-full bg-orange-500 animate-pulse" />
+                    Unsaved Progress
+                  </motion.p>
+                )}
               </div>
-            )}
-
-            {activeTab === "layout" && (
-              <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                <div className="space-y-6">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <Label className="text-[12px] font-semibold text-slate-700">Border Radius (Buttons & Cards)</Label>
-                      <span className="text-[11px] font-mono font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded">{formSettings.borderRadius}px</span>
-                    </div>
-                    <Slider
-                      min={0}
-                      max={24}
-                      step={2}
-                      value={[Number(formSettings.borderRadius)]}
-                      onValueChange={(value) => updateFormSetting("borderRadius", value[0])}
-                      className="py-2"
-                    />
-                    <div className="flex justify-between text-[10px] uppercase font-semibold text-slate-400">
-                      <span>Sharp</span>
-                      <span>Rounded</span>
-                      <span>Pill</span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <Label className="text-[12px] font-semibold text-slate-700">Border Width</Label>
-                      <span className="text-[11px] font-mono font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded">{formSettings.borderWidth}px</span>
-                    </div>
-                    <Slider
-                      min={0}
-                      max={4}
-                      step={1}
-                      value={[Number(formSettings.borderWidth)]}
-                      onValueChange={(value) => updateFormSetting("borderWidth", value[0])}
-                      className="py-2"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-6 pt-4 border-t border-slate-100">
-                    <div className="space-y-2">
-                      <Label className="text-[12px] font-semibold text-slate-700">Border Style</Label>
-                      <Select
-                        value={formSettings.borderStyle}
-                        onValueChange={(value) => updateFormSetting("borderStyle", value)}
-                      >
-                        <SelectTrigger className="h-10 text-[12px] border-slate-200">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="solid" className="text-[12px]">Solid</SelectItem>
-                          <SelectItem value="dashed" className="text-[12px]">Dashed</SelectItem>
-                          <SelectItem value="dotted" className="text-[12px]">Dotted</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label className="text-[12px] font-semibold text-slate-700">Global Box Shadow</Label>
-                      <Select
-                        value={formSettings.boxShadow || "none"}
-                        onValueChange={(value) => updateFormSetting("boxShadow", value)}
-                      >
-                        <SelectTrigger className="h-10 text-[12px] border-slate-200">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="none" className="text-[12px]">Flat (None)</SelectItem>
-                          <SelectItem value="0 1px 2px 0 rgba(0, 0, 0, 0.05)" className="text-[12px]">Subtle</SelectItem>
-                          <SelectItem value="0 4px 6px -1px rgba(0, 0, 0, 0.1)" className="text-[12px]">Medium Drop</SelectItem>
-                          <SelectItem value="0 10px 15px -3px rgba(0, 0, 0, 0.1)" className="text-[12px]">Elevated</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeTab === "typography" && (
-              <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                <div className="space-y-6">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <Label className="text-[12px] font-semibold text-slate-700">Base Font Size</Label>
-                      <span className="text-[11px] font-mono font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded">{formSettings.fontSize}px</span>
-                    </div>
-                    <Slider
-                      min={12}
-                      max={18}
-                      step={1}
-                      value={[Number(formSettings.fontSize)]}
-                      onValueChange={(value) => updateFormSetting("fontSize", value[0])}
-                      className="py-2"
-                    />
-                    <div className="flex justify-between text-[10px] uppercase font-semibold text-slate-400 mt-1">
-                      <span>Small</span>
-                      <span>Default</span>
-                      <span>Large</span>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-6 pt-4 border-t border-slate-100">
-                    <div className="space-y-2">
-                      <Label className="text-[12px] font-semibold text-slate-700">Base Font Weight</Label>
-                      <Select
-                        value={String(formSettings.fontWeight)}
-                        onValueChange={(value) => updateFormSetting("fontWeight", value)}
-                      >
-                        <SelectTrigger className="h-10 text-[12px] border-slate-200">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="400" className="text-[12px]">Regular (400)</SelectItem>
-                          <SelectItem value="500" className="text-[12px]">Medium (500)</SelectItem>
-                          <SelectItem value="600" className="text-[12px]">Semibold (600)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label className="text-[12px] font-semibold text-slate-700">Interaction Effect</Label>
-                      <Select
-                        value={formSettings.hoverEffect || "none"}
-                        onValueChange={(value) => updateFormSetting("hoverEffect", value)}
-                      >
-                        <SelectTrigger className="h-10 text-[12px] border-slate-200">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="none" className="text-[12px]">Static (None)</SelectItem>
-                          <SelectItem value="lift" className="text-[12px]">Lift (Translate Y)</SelectItem>
-                          <SelectItem value="scale" className="text-[12px]">Scale Focus</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
+              <Button
+                onClick={handleSave}
+                disabled={!isChanged || loading}
+                className={cn(
+                  "h-11 px-8 rounded-2xl text-[13px] font-bold transition-all duration-300 shadow-lg active:scale-95 flex items-center gap-2",
+                  isChanged 
+                    ? "bg-primary text-primary-foreground hover:shadow-primary/20" 
+                    : "bg-muted text-muted-foreground"
+                )}
+              >
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                {loading ? "Synchronizing..." : "Commit Changes"}
+              </Button>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Preview Panel Widget */}
-      <div className="w-full xl:w-1/2 sticky top-6">
-        <div className="rounded-xl border border-slate-200/80 bg-slate-50 shadow-sm overflow-hidden flex flex-col h-full min-h-[500px]">
-           <div className="px-5 py-4 border-b border-slate-100 bg-white">
-             <h3 className="text-[13px] font-semibold text-slate-900 tracking-tight">Live Component Preview</h3>
-             <p className="text-[11px] text-slate-500 mt-0.5">Test real interactions based on your current tokens.</p>
+      <div className="flex-1 w-full sticky top-8">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="rounded-[2.5rem] border-8 border-border bg-muted/30 shadow-2xl overflow-hidden flex flex-col h-full min-h-[650px] relative group"
+        >
+           {/* Device Frame Browser Controls */}
+           <div className="px-8 py-5 border-b border-border/60 bg-background/80 backdrop-blur-md flex items-center justify-between relative z-20">
+             <div className="flex items-center gap-4">
+                <div className="flex gap-1.5">
+                  <div className="h-3 w-3 rounded-full bg-red-400/20 border border-red-400/40" />
+                  <div className="h-3 w-3 rounded-full bg-yellow-400/20 border border-yellow-400/40" />
+                  <div className="h-3 w-3 rounded-full bg-green-400/20 border border-green-400/40" />
+                </div>
+                <div className="h-6 w-px bg-border/60" />
+                <div className="flex flex-col">
+                  <h3 className="text-[13px] font-bold text-foreground tracking-tight">Stage Environment</h3>
+                  <div className="flex items-center gap-1.5">
+                    <Eye className="h-3 w-3 text-primary" />
+                    <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">Real-time Rendering</span>
+                  </div>
+                </div>
+             </div>
+
+             <div className="flex items-center gap-2 bg-muted/50 p-1 rounded-2xl border border-border">
+                <button 
+                  onClick={() => setPreviewMode("desktop")}
+                  className={cn(
+                    "p-2 rounded-xl transition-all",
+                    previewMode === "desktop" ? "bg-background shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <Monitor className="h-4 w-4" />
+                </button>
+                <button 
+                  onClick={() => setPreviewMode("mobile")}
+                  className={cn(
+                    "p-2 rounded-xl transition-all",
+                    previewMode === "mobile" ? "bg-background shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <Layout className="h-4 w-4" />
+                </button>
+             </div>
            </div>
-           {/* Preview Container inner wrapper to isolate styling cleanly */}
-           <div className="p-6 flex-1 flex flex-col relative w-full overflow-hidden">
-               <div className="absolute inset-0 bg-slate-100/40 pattern-grid-slate-200/50 [mask-image:linear-gradient(to_bottom,white,transparent)] z-0" />
-               <div className="relative z-10 w-full h-full">
-                  <ThemePreview theme={formSettings} />
+
+           {/* Preview Container */}
+           <div className="flex-1 flex flex-col items-center justify-center p-8 relative overflow-hidden bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-background to-muted/20">
+               {/* Grid Pattern Overlay */}
+               <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.07] pointer-events-none select-none"
+                    style={{ backgroundImage: `radial-gradient(circle at 2px 2px, currentColor 1px, transparent 0)`, backgroundSize: '24px 24px' }} />
+               
+               <motion.div 
+                 layout
+                 className={cn(
+                   "relative z-10 transition-all duration-500 ease-in-out",
+                   previewMode === "desktop" ? "w-full max-w-4xl" : "w-[375px]"
+                 )}
+               >
+                  <div className="premium-shadow">
+                    <ThemePreview theme={formSettings} />
+                  </div>
+               </motion.div>
+
+               {/* Hint */}
+               <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 text-muted-foreground/40 font-semibold text-[10px] uppercase tracking-[0.2em] pointer-events-none">
+                  Interact with the preview above <ChevronRight className="h-2 w-2" />
                </div>
            </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   )
 }
 
 export default AppearanceSettings
+

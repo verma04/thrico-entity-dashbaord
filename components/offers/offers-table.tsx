@@ -36,136 +36,139 @@ export function OffersTable({
     }
   };
 
-  const columns = useMemo<ColumnDef<Offer>[]>(() => [
-    {
-      accessorKey: "title",
-      header: "Offer",
-      cell: ({ row }) => {
-        const offer = row.original;
-        return (
-          <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-lg bg-primary/5 border border-primary/10 flex items-center justify-center shrink-0 overflow-hidden">
-              {offer.image ? (
-                <img
-                  src={`https://cdn.thrico.network/${offer.image}`}
-                  alt={offer.title}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <Tag className="h-6 w-6 text-primary/40" />
-              )}
-            </div>
-            <div className="flex flex-col gap-0.5">
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-foreground leading-tight">
-                  {offer.title}
-                </span>
-                <Badge
-                  variant="outline"
-                  className={cn(
-                    "text-[10px] uppercase font-bold px-1.5 py-0 h-4",
-                    getStatusColor(offer.status),
-                  )}
-                >
-                  {offer.status}
-                </Badge>
+  const columns = useMemo<ColumnDef<Offer>[]>(
+    () => [
+      {
+        accessorKey: "title",
+        header: "Offer",
+        cell: ({ row }) => {
+          const offer = row.original;
+          return (
+            <div className="flex items-center gap-4">
+              <div className="h-12 w-12 rounded-lg bg-primary/5 border border-primary/10 flex items-center justify-center shrink-0 overflow-hidden">
+                {offer.image ? (
+                  <img
+                    src={`https://cdn.thrico.network/${offer.image}`}
+                    alt={offer.title}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <Tag className="h-6 w-6 text-primary/40" />
+                )}
               </div>
-              <span className="text-xs text-muted-foreground line-clamp-1 max-w-[200px]">
-                {offer.description}
-              </span>
+              <div className="flex flex-col gap-0.5">
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-foreground leading-tight">
+                    {offer.title}
+                  </span>
+                  <Badge
+                    variant="outline"
+                    className={cn(
+                      "text-[10px] uppercase font-bold px-1.5 py-0 h-4",
+                      getStatusColor(offer.status),
+                    )}
+                  >
+                    {offer.status}
+                  </Badge>
+                </div>
+                <span className="text-xs text-muted-foreground line-clamp-1 max-w-[200px]">
+                  {offer.description}
+                </span>
+              </div>
             </div>
-          </div>
-        );
+          );
+        },
       },
-    },
-    {
-      accessorKey: "category.name",
-      header: "Category",
-      cell: ({ row }) => {
-        const category = row.original.category;
-        return (
-          <Badge
-            variant="outline"
-            className="gap-1.5 font-medium border-transparent bg-muted/50 text-foreground"
-          >
-            <div
-              className="h-2 w-2 rounded-full"
-              style={{ backgroundColor: category?.color }}
-            />
-            {category?.name}
+      {
+        accessorKey: "category.name",
+        header: "Category",
+        cell: ({ row }) => {
+          const category = row.original.category;
+          return (
+            <Badge
+              variant="outline"
+              className="gap-1.5 font-medium border-transparent bg-muted/50 text-foreground"
+            >
+              <div
+                className="h-2 w-2 rounded-full"
+                style={{ backgroundColor: category?.color }}
+              />
+              {category?.name}
+            </Badge>
+          );
+        },
+      },
+      {
+        accessorKey: "discount",
+        header: "Discount",
+        cell: ({ row }) => (
+          <Badge variant="secondary" className="font-bold">
+            {row.original.discount}
           </Badge>
-        );
+        ),
       },
-    },
-    {
-      accessorKey: "discount",
-      header: "Discount",
-      cell: ({ row }) => (
-        <Badge variant="secondary" className="font-bold">
-          {row.original.discount}
-        </Badge>
-      ),
-    },
-    {
-      id: "validity",
-      header: "Validity",
-      cell: ({ row }) => {
-        const offer = row.original;
-        return (
-          <div className="flex flex-col gap-1 text-xs text-muted-foreground">
-            <div className="flex items-center gap-1.5">
-              <Calendar className="h-3 w-3" />
-              {format(new Date(offer.validityStart), "MMM d, yyyy")}
+      {
+        id: "validity",
+        header: "Validity",
+        cell: ({ row }) => {
+          const offer = row.original;
+          return (
+            <div className="flex flex-col gap-1 text-xs text-muted-foreground">
+              <div className="flex items-center gap-1.5">
+                <Calendar className="h-3 w-3" />
+                {format(new Date(offer.validityStart), "MMM d, yyyy")}
+              </div>
+              <div className="flex items-center gap-1.5 text-[10px] opacity-70">
+                <span>to</span>
+                {format(new Date(offer.validityEnd), "MMM d, yyyy")}
+              </div>
             </div>
-            <div className="flex items-center gap-1.5 text-[10px] opacity-70">
-              <span>to</span>
-              {format(new Date(offer.validityEnd), "MMM d, yyyy")}
+          );
+        },
+      },
+      {
+        id: "stats",
+        header: "Stats",
+        cell: ({ row }) => {
+          const offer = row.original;
+          return (
+            <div className="flex items-center gap-4">
+              <div className="flex flex-col">
+                <span className="font-mono font-bold text-sm text-foreground">
+                  {offer.claimsCount}
+                </span>
+                <span className="text-[10px] text-muted-foreground uppercase font-medium">
+                  Claims
+                </span>
+              </div>
+              <div className="flex flex-col opacity-60">
+                <span className="font-mono font-bold text-sm text-foreground">
+                  {offer.viewsCount}
+                </span>
+                <span className="text-[10px] text-muted-foreground uppercase font-medium">
+                  Views
+                </span>
+              </div>
             </div>
+          );
+        },
+      },
+      {
+        id: "actions",
+        header: () => <div className="text-right">Actions</div>,
+        cell: ({ row }) => (
+          <div className="flex justify-end">
+            <OfferActions
+              offer={row.original}
+              onEdit={onEdit}
+              refetch={refetch}
+            />
           </div>
-        );
+        ),
       },
-    },
-    {
-      id: "stats",
-      header: "Stats",
-      cell: ({ row }) => {
-        const offer = row.original;
-        return (
-          <div className="flex items-center gap-4">
-            <div className="flex flex-col">
-              <span className="font-mono font-bold text-sm text-foreground">
-                {offer.claimsCount}
-              </span>
-              <span className="text-[10px] text-muted-foreground uppercase font-medium">
-                Claims
-              </span>
-            </div>
-            <div className="flex flex-col opacity-60">
-              <span className="font-mono font-bold text-sm text-foreground">
-                {offer.viewsCount}
-              </span>
-              <span className="text-[10px] text-muted-foreground uppercase font-medium">
-                Views
-              </span>
-            </div>
-          </div>
-        );
-      },
-    },
-    {
-      id: "actions",
-      header: () => <div className="text-right">Actions</div>,
-      cell: ({ row }) => (
-        <div className="flex justify-end">
-          <OfferActions
-            offer={row.original}
-            onEdit={onEdit}
-            refetch={refetch}
-          />
-        </div>
-      ),
-    },
-  ], [onEdit, refetch]);
+    ],
+    [onEdit, refetch],
+  );
 
   return (
     <AppDataTable

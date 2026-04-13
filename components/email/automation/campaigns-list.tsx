@@ -21,8 +21,12 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MOCK_CAMPAIGNS, MODULE_COLORS } from "./types";
-import { useGetEmailCampaigns } from "@/graphql/actions/email";
+import { useQuery } from "@apollo/client";
 import { Skeleton } from "@/components/ui/skeleton";
+import { GET_AUTOMATION_CAMPAIGNS, GET_AUTOMATION_JOB_LOGS } from "@/graphql/automation/queries";
+import { useGetEntity } from "@/graphql/actions";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface CampaignsListProps {
   onCreate?: () => void;
@@ -38,10 +42,10 @@ const STATUS_STYLE: Record<
     cardBorder: string;
   }
 > = {
-  released: {
+  active: {
     pill: "bg-emerald-50 text-emerald-700 border border-emerald-200",
     dot: "bg-emerald-500",
-    label: "Released",
+    label: "Active",
     accent: "bg-emerald-500",
     cardBorder: "border-emerald-200 hover:border-emerald-300",
   },
@@ -52,10 +56,10 @@ const STATUS_STYLE: Record<
     accent: "bg-slate-300",
     cardBorder: "border-slate-200 hover:border-slate-300",
   },
-  finished: {
+  inactive: {
     pill: "bg-blue-50 text-blue-600 border border-blue-200",
     dot: "bg-blue-400",
-    label: "Finished",
+    label: "Inactive",
     accent: "bg-blue-300",
     cardBorder: "border-blue-200 hover:border-blue-300",
   },
@@ -106,8 +110,21 @@ export function CampaignsList({ onCreate }: CampaignsListProps) {
   const router = useRouter();
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   
-  const { data, loading } = useGetEmailCampaigns();
-  const campaigns = data?.getEmailCampaigns || [];
+  const { data: entityData } = useGetEntity();
+  const entityId = entityData?.getEntity?.id;
+
+  const { data, loading } = useQuery(GET_AUTOMATION_CAMPAIGNS, {
+    variables: { entityId },
+    skip: !entityId,
+  });
+  const campaigns = data?.getAutomationCampaigns || [];
+
+  const [logsOpenFor, setLogsOpenFor] = useState<string | null>(null);
+  
+  const { data: logsData, loading: logsLoading } = useQuery(GET_AUTOMATION_JOB_LOGS, {
+    variables: { jobId: logsOpenFor },
+    skip: !logsOpenFor
+  });
 
   // Merge mock with real for demonstration if requested, but usually we just want real
   // Let's use real ones if they exist, otherwise show mock to not look empty during dev
@@ -120,7 +137,7 @@ export function CampaignsList({ onCreate }: CampaignsListProps) {
     {
       label: "Active Campaigns",
       value: displayCampaigns.filter(
-        (c) => c.status === "released",
+        (c) => c.status === "active",
       ).length.toString(),
       trend: "+2 this month",
       trendColor: "text-emerald-600",
@@ -294,20 +311,22 @@ export function CampaignsList({ onCreate }: CampaignsListProps) {
             </div>
           ) : displayCampaigns.map((c, i) => {
             const st = STATUS_STYLE[c.status] || STATUS_STYLE.draft;
-            const modColor = (MODULE_COLORS as any)[c.module] || "#6366F1";
+            const modColor = (MODULE_COLORS as any)[c.module || "Unknown"] || "#6366F1";
             
             // Handle real fields vs mock fields
             let nodeCount = 0;
-            if (c.canvasNodes) {
+            if (c.actionConfig) {
+              try { nodeCount = Object.keys(c.actionConfig).length; } catch(e) {}
+            } else if (c.canvasNodes) {
               try { nodeCount = JSON.parse(c.canvasNodes).length; } catch(e) {}
             } else if ("nodes" in c) {
               nodeCount = (c as any).nodes;
             }
 
-            const triggerLabel = ("trigger" in c) ? (c as any).trigger : 
-                                 (nodeCount > 0 && c.canvasNodes ? "Workflow Set" : "Trigger not set");
+            const triggerLabel = c.triggerType || ("trigger" in c ? (c as any).trigger : 
+                                 (nodeCount > 0 && c.canvasNodes ? "Workflow Set" : "Trigger not set"));
             const audienceCount = ("audience" in c) ? (c as any).audience : 0;
-            const lastEditedLabel = c.updatedAt ? new Date(parseInt(c.updatedAt)).toLocaleDateString() : 
+            const lastEditedLabel = c.createdAt ? new Date(parseInt(c.createdAt) || c.createdAt).toLocaleDateString() : 
                                     (("lastEdited" in c) ? (c as any).lastEdited : "Recently");
             const cronLabel = ("cronLabel" in c) ? (c as any).cronLabel : 
                               (c.frequency === "recurring" ? (c.cronType || "Recurring") : null);
@@ -371,7 +390,7 @@ export function CampaignsList({ onCreate }: CampaignsListProps) {
                         backgroundColor: `${modColor}14`,
                       }}
                     >
-                      {c.module}
+                      {c.module || c.triggerType || "Automation"}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 mt-1.5 flex-wrap">
@@ -407,6 +426,12 @@ export function CampaignsList({ onCreate }: CampaignsListProps) {
 
                 {/* Actions */}
                 <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setLogsOpenFor(c.id); }}
+                    className="h-8 px-3 text-[11px] font-semibold text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg transition-all flex items-center gap-1.5"
+                  >
+                    <Zap size={12} /> Logs
+                  </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); handleEdit(c.id); }}
                     className="h-8 px-3 text-[11px] font-semibold text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg transition-all flex items-center gap-1.5"
@@ -452,6 +477,52 @@ export function CampaignsList({ onCreate }: CampaignsListProps) {
           </button>
         </motion.div>
       </div>
+
+      <Dialog open={!!logsOpenFor} onOpenChange={(open) => !open && setLogsOpenFor(null)}>
+        <DialogContent className="max-w-2xl bg-white border-none shadow-xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-slate-900 flex items-center gap-2">
+              <Zap size={20} className="text-[#5B6CFF]" /> Execution Logs
+            </DialogTitle>
+          </DialogHeader>
+          <ScrollArea className="h-[400px] mt-4 pr-4">
+            {logsLoading ? (
+              <div className="space-y-3">
+                 <div className="h-16 bg-slate-50 animate-pulse rounded-xl border border-slate-100"/>
+                 <div className="h-16 bg-slate-50 animate-pulse rounded-xl border border-slate-100"/>
+              </div>
+            ) : logsData?.getAutomationExecutionLogs?.length ? (
+              <div className="space-y-3">
+                {logsData.getAutomationExecutionLogs.map((log: any) => (
+                  <div key={log.id} className="p-4 rounded-xl border border-slate-200 bg-slate-50/50">
+                    <div className="flex justify-between items-start mb-2">
+                      <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full",
+                         log.status === "SUCCESS" ? "bg-emerald-100 text-emerald-700" :
+                         log.status === "FAILED" ? "bg-red-100 text-red-700" : "bg-slate-200 text-slate-700"
+                      )}>
+                        {log.status || "UNKNOWN"}
+                      </span>
+                      <span className="text-[11px] text-slate-400">
+                        {new Date(parseInt(log.executedAt) || log.executedAt).toLocaleString()}
+                      </span>
+                    </div>
+                    <p className="text-[13px] font-semibold text-slate-800">{log.actionType}</p>
+                    {log.errorMessage ? (
+                      <p className="text-[12px] text-red-500 mt-1">{log.errorMessage}</p>
+                    ) : (
+                      <p className="text-[12px] text-slate-500 mt-1">{log.result || "Executed successfully"}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-10 text-center">
+                <p className="text-slate-500 text-sm">No execution logs found for this campaign.</p>
+              </div>
+            )}
+          </ScrollArea>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

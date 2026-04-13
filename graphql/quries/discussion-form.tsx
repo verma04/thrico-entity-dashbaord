@@ -82,7 +82,7 @@ export const GET_DISCUSSION_FORUM = gql`
 `;
 
 export const GET_DISCUSSION_FORUM_COMMENTS = gql`
-  query GetDiscussionForumComments($input: inputId) {
+  query GetDiscussionForumComments($input: InputId) {
     getDiscussionForumComments(input: $input) {
       id
 

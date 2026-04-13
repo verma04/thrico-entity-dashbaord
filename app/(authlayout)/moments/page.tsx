@@ -53,10 +53,12 @@ export default function MomentsDashboardPage() {
                 <RotateCcw className={cn("h-4 w-4", statsLoading && "animate-spin")} />
               </Button>
               <div className="h-4 w-px bg-slate-200 mx-1" />
-              <Button className="h-10 px-6 rounded-lg bg-slate-900 border-none font-bold text-xs uppercase tracking-wide gap-2 shadow-sm hover:bg-black transition-all active:scale-95 group">
-                 <Plus className="h-4 w-4" />
-                 Create Moment
-              </Button>
+              <Link href="/moments/create">
+                <Button className="h-10 px-6 rounded-lg bg-slate-900 border-none font-bold text-xs uppercase tracking-wide gap-2 shadow-sm hover:bg-black transition-all active:scale-95 group">
+                   <Plus className="h-4 w-4" />
+                   Create Moment
+                </Button>
+              </Link>
             </div>
         </div>
       </EcosystemActionBar>

@@ -141,16 +141,16 @@ export function WorkspaceSwitcher() {
                 <CommandGroup heading="All Workspaces">
                   {otherTeams.map((team) => (
                     <CommandItem
-                      key={team.id}
-                      onSelect={() => onSwitch(team.entityId, team.name)}
+                      key={team?.id}
+                      onSelect={() => onSwitch(team?.entityId, team?.name)}
                       className="flex items-center justify-between p-2.5 rounded-lg cursor-pointer hover:bg-accent/60 transition-colors mb-px group"
                     >
                       <div className="flex items-center gap-2.5">
                         <div className="size-7 rounded-md bg-muted border border-border/50 flex items-center justify-center p-1">
-                          {team.logo ? (
+                          {team?.logo ? (
                             <img
-                              src={`https://cdn.thrico.network/${team.logo}`}
-                              alt={team.name}
+                              src={`https://cdn.thrico.network/${team?.logo}`}
+                              alt={team?.name}
                               className="size-full object-contain"
                             />
                           ) : (
@@ -159,10 +159,10 @@ export function WorkspaceSwitcher() {
                         </div>
                         <div className="flex flex-col">
                           <span className="text-[13px] font-medium text-foreground">
-                            {team.name}
+                            {team?.name}
                           </span>
                           <span className="text-[10.5px] text-muted-foreground/60 uppercase font-medium tracking-tight">
-                            {team.role || "Admin"}
+                            {team?.role || "Admin"}
                           </span>
                         </div>
                       </div>

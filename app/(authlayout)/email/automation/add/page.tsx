@@ -16,7 +16,6 @@ import {
   CampaignModule, CAMPAIGN_MODULES, MODULE_COLORS,
 } from "@/components/email/automation/types";
 import { BorderBeam } from "@/components/ui/border-beam";
-import { useCreateEmailCampaign } from "@/graphql/actions/email";
 import { toast } from "sonner";
 
 // ─── Campaign template definitions ────────────────────────────────────────────
@@ -429,21 +428,7 @@ export default function NewCampaignPage() {
     else router.push("/email/automation");
   };
 
-  const [createCampaign, { loading: isSaving }] = useCreateEmailCampaign({
-    onCompleted: (data: any) => {
-      const campaignId = data?.createEmailCampaign?.id;
-      toast.success("Campaign created successfully!");
-      if (campaignId) {
-        router.push(`/email/automation/add/canvas?id=${campaignId}`);
-      } else {
-        router.push("/email/automation/add/canvas");
-      }
-    },
-    onError: (err: any) => {
-      toast.error(err.message || "Failed to create campaign");
-      console.error("Save Error:", err);
-    }
-  });
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleLaunch = async () => {
     // Prepare data for database
@@ -463,7 +448,13 @@ export default function NewCampaignPage() {
       })
     };
 
-    await createCampaign({ variables: { input } });
+    setIsSaving(true);
+    try {
+      sessionStorage.setItem("campaign_draft", JSON.stringify(input));
+      router.push("/email/automation/add/canvas");
+    } finally {
+      setTimeout(() => setIsSaving(false), 500);
+    }
   };
 
   const selectedTemplate = CAMPAIGN_TEMPLATES.find((t) => t.id === selectedTemplateId) ?? null;
@@ -660,8 +651,8 @@ export default function NewCampaignPage() {
                     <div className="flex gap-2 flex-wrap">
                       {([
                         { value: "draft",    label: "Draft",    color: "#94a3b8", icon: <Hash size={12} /> },
-                        { value: "released", label: "Released", color: "#10B981", icon: <Play size={12} /> },
-                        { value: "finished", label: "Finished", color: "#3B82F6", icon: <CheckCircle size={12} /> },
+                        { value: "active", label: "Active", color: "#10B981", icon: <Play size={12} /> },
+                        { value: "inactive", label: "Inactive", color: "#3B82F6", icon: <CheckCircle size={12} /> },
                       ] as { value: CampaignStatus; label: string; color: string; icon: React.ReactNode }[]).map((s) => (
                         <button key={s.value} type="button" onClick={() => update("status", s.value)}
                           className={cn("flex items-center gap-2 px-4 py-2.5 rounded-xl border text-[12px] font-semibold transition-all",

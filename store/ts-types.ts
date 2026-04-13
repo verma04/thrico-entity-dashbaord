@@ -36,7 +36,18 @@ export interface Question {
   text?: string;
 }
 
-export interface FormSettings {
+export interface ButtonTheme {
+  colorPrimary: string;
+  colorText: string;
+  colorBorder: string;
+  borderRadius: number;
+  defaultBg: string;
+  defaultColor: string;
+  defaultBorderColor: string;
+  fontSize: number;
+}
+
+export interface EntityTheme {
   primaryColor: string;
   secondaryColor: string;
   backgroundColor: string;
@@ -52,7 +63,10 @@ export interface FormSettings {
   fontWeight: string;
   boxShadow: string;
   hoverEffect: string;
+  Button?: ButtonTheme;
 }
+
+export interface FormSettings extends EntityTheme {}
 
 export type DuplicateQuestionFn = (id: string | number) => void;
 export type RemoveQuestionFn = (id: string | number) => void;

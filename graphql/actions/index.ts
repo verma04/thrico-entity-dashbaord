@@ -288,3 +288,4 @@ export * from "./audit";
 export * from "./communities";
 export * from "./email";
 export * from "./contacts";
+export * from "./theme";

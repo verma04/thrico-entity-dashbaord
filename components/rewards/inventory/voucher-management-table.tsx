@@ -1,9 +1,7 @@
 "use client";
 
-import React, { useMemo } from "react";
-import { ColumnDef } from "@tanstack/react-table";
-import { AppDataTable } from "@/components/ui/app-data-table";
-import { Badge } from "@/components/ui/badge";
+import React from "react";
+import { AdminTable, AdminStatusBadge } from "@/components/shared/admin-table/admin-table";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -11,9 +9,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreVertical, Copy, Eye, Trash2, CheckCircle2, Ticket } from "lucide-react";
+import { MoreVertical, Copy, Eye, Trash2, CheckCircle2, Ticket, Calendar, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import moment from "moment";
 
 export interface Voucher {
   id: string;
@@ -52,177 +51,155 @@ export function VoucherManagementTable({
     });
   };
 
-  const getStatusColor = (isUsed: boolean) => {
-    return isUsed
-      ? "text-muted-foreground bg-muted border-transparent"
-      : "text-emerald-600 bg-emerald-50 border-emerald-200";
-  };
-
   const isExpiringSoon = (expiryDate?: string) => {
     if (!expiryDate) return false;
-    const expiry = new Date(expiryDate);
-    const now = new Date();
-    const daysUntilExpiry = Math.ceil(
-      (expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
-    );
+    const daysUntilExpiry = moment(expiryDate).diff(moment(), 'days');
     return daysUntilExpiry <= 7 && daysUntilExpiry > 0;
   };
 
-  const columns = useMemo<ColumnDef<Voucher>[]>(() => [
+  const columns = [
     {
-      accessorKey: "code",
-      header: "Voucher Code",
-      cell: ({ row }) => {
-        const voucher = row.original;
-        return (
-          <div className="flex items-center gap-2 group">
-            <code className="px-2 py-1 rounded bg-slate-50 border border-slate-100 font-mono text-sm font-bold text-slate-900 group-hover:bg-white transition-colors shadow-sm">
-              {voucher.code}
-            </code>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-              onClick={() => copyToClipboard(voucher.code)}
-            >
-              <Copy className="h-3 w-3" />
-            </Button>
+      key: "code",
+      header: "Credential Code",
+      cell: (voucher: Voucher) => (
+        <div className="flex items-center gap-3 group">
+          <div className="h-8 w-8 rounded-lg bg-zinc-100 border border-zinc-200 flex items-center justify-center shrink-0">
+             <Ticket className="h-4 w-4 text-zinc-500" />
           </div>
-        );
-      },
+          <div className="flex flex-col min-w-0">
+            <div className="flex items-center gap-2">
+               <code className="text-sm font-black text-foreground tracking-tight py-0.5">
+                 {voucher.code}
+               </code>
+               <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={() => copyToClipboard(voucher.code)}
+                >
+                  <Copy className="h-2.5 w-2.5" />
+                </Button>
+            </div>
+            <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest leading-none">
+               Digital Voucher
+            </span>
+          </div>
+        </div>
+      ),
     },
     {
-      accessorKey: "rewardTitle",
-      header: "Reward",
-      cell: ({ row }) => (
-        <div className="flex items-center gap-2">
-           <Ticket className="h-3.5 w-3.5 text-slate-400" />
-           <span className="font-semibold text-slate-900 leading-tight">
-             {row.original.rewardTitle || "Unknown"}
+      key: "reward",
+      header: "Associated Reward",
+      cell: (voucher: Voucher) => (
+        <div className="flex flex-col">
+           <span className="text-sm font-bold text-foreground leading-tight">
+             {voucher.rewardTitle || "System Reward"}
+           </span>
+           <span className="text-[10px] text-muted-foreground mt-0.5 font-medium">
+             ID: {voucher.offerId.substring(0, 8).toUpperCase()}
            </span>
         </div>
       ),
     },
     {
-      accessorKey: "isUsed",
+      key: "status",
       header: "Status",
-      cell: ({ row }) => {
-        const isUsed = row.original.isUsed;
-        return (
-          <Badge
-            variant="outline"
-            className={cn(
-              "text-[10px] uppercase font-bold px-2 py-0 h-5 tracking-tight",
-              getStatusColor(isUsed),
-            )}
-          >
-            {isUsed ? "Used" : "Available"}
-          </Badge>
-        );
-      },
+      cell: (voucher: Voucher) => (
+        <AdminStatusBadge status={voucher.isUsed ? "PENDING" : "APPROVED"}>
+           {voucher.isUsed ? "Redeemed" : "Available"}
+        </AdminStatusBadge>
+      ),
     },
     {
-      accessorKey: "assignedTo",
-      header: "Assigned To",
-      cell: ({ row }) => {
-        const assignedTo = row.original.assignedTo;
-        return assignedTo ? (
-          <span className="text-xs font-medium text-slate-600">{assignedTo}</span>
-        ) : (
-          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-            Unassigned
+      key: "assigned",
+      header: "Attribution",
+      cell: (voucher: Voucher) => (
+        <div className="flex items-center gap-2">
+          <div className="h-5 w-5 rounded-full bg-slate-100 flex items-center justify-center">
+             <User className="h-3 w-3 text-slate-500" />
+          </div>
+          <span className="text-[11px] font-bold text-foreground">
+            {voucher.assignedTo || "Unassigned"}
           </span>
-        );
-      },
+        </div>
+      ),
     },
     {
-      accessorKey: "expiryDate",
+      key: "timeline",
       header: "Expiry Date",
-      cell: ({ row }) => {
-        const expiryDate = row.original.expiryDate;
-        const expiringSoon = isExpiringSoon(expiryDate);
-
-        return expiryDate ? (
-          <div className="flex items-center gap-2">
-            <span
-              className={cn(
-                "text-xs font-medium",
-                expiringSoon ? "text-amber-600 font-bold" : "text-slate-500",
-              )}
-            >
-              {new Date(expiryDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+      cell: (voucher: Voucher) => {
+        const expiringSoon = isExpiringSoon(voucher.expiryDate);
+        return (
+          <div className="flex flex-col">
+            <span className={cn(
+              "text-[11px] font-black uppercase tracking-tight",
+              expiringSoon ? "text-amber-600" : "text-muted-foreground"
+            )}>
+              {voucher.expiryDate ? moment(voucher.expiryDate).format("MMM D, YYYY") : "No Limit"}
             </span>
             {expiringSoon && (
-              <Badge
-                variant="outline"
-                className="text-[9px] bg-amber-50 text-amber-600 border-amber-200 px-1 py-0 h-4 uppercase font-black"
-              >
-                Soon
-              </Badge>
+               <span className="text-[9px] text-amber-500 font-bold uppercase animate-pulse">
+                 Critical: Expiring Soon
+               </span>
             )}
           </div>
-        ) : (
-          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-            Never
-          </span>
         );
       },
     },
     {
-      id: "actions",
-      header: () => <div className="text-right">Actions</div>,
-      cell: ({ row }) => {
-        const voucher = row.original;
-        return (
-          <div className="flex justify-end">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-slate-50 rounded-xl transition-all">
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48 p-1.5 rounded-2xl border-slate-200 shadow-xl">
+      key: "actions",
+      header: "",
+      headerClassName: "w-[50px]",
+      cell: (voucher: Voucher) => (
+        <div className="flex justify-end pr-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-muted rounded-lg transition-all">
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48 p-1 rounded-xl border-border shadow-lg">
+              <DropdownMenuItem
+                className="gap-2 px-3 py-2 text-sm font-medium rounded-lg cursor-pointer"
+                onClick={() => onViewDetails(voucher)}
+              >
+                <Eye className="h-4 w-4 opacity-70" /> View Details
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="gap-2 px-3 py-2 text-sm font-medium rounded-lg cursor-pointer"
+                onClick={() => copyToClipboard(voucher.code)}
+              >
+                <Copy className="h-4 w-4 opacity-70" /> Copy Code
+              </DropdownMenuItem>
+              {!voucher.isUsed && (
                 <DropdownMenuItem
-                  className="gap-2.5 px-3 py-2 text-sm font-semibold rounded-xl cursor-pointer"
-                  onClick={() => onViewDetails(voucher)}
+                  className="gap-2 px-3 py-2 text-sm font-medium rounded-lg cursor-pointer text-emerald-600 focus:text-emerald-700"
+                  onClick={() => onMarkAsUsed(voucher.id)}
                 >
-                  <Eye className="h-4 w-4 opacity-70" /> View Details
+                  <CheckCircle2 className="h-4 w-4 opacity-70" /> Mark as Used
                 </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="gap-2.5 px-3 py-2 text-sm font-semibold rounded-xl cursor-pointer"
-                  onClick={() => copyToClipboard(voucher.code)}
-                >
-                  <Copy className="h-4 w-4 opacity-70" /> Copy Code
-                </DropdownMenuItem>
-                {!voucher.isUsed && (
-                  <DropdownMenuItem
-                    className="gap-2.5 px-3 py-2 text-sm font-semibold rounded-xl cursor-pointer text-emerald-600 focus:text-emerald-700"
-                    onClick={() => onMarkAsUsed(voucher.id)}
-                  >
-                    <CheckCircle2 className="h-4 w-4 opacity-70" /> Mark as Used
-                  </DropdownMenuItem>
-                )}
-                <DropdownMenuItem
-                  className="gap-2.5 px-3 py-2 text-sm font-semibold rounded-xl cursor-pointer text-rose-600 focus:text-rose-700"
-                  onClick={() => onDelete(voucher.id)}
-                >
-                  <Trash2 className="h-4 w-4 opacity-70" /> Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        );
-      },
+              )}
+              <DropdownMenuItem
+                className="gap-2 px-3 py-2 text-sm font-medium rounded-lg cursor-pointer text-rose-600 focus:text-rose-700"
+                onClick={() => onDelete(voucher.id)}
+              >
+                <Trash2 className="h-4 w-4 opacity-70" /> Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      ),
     },
-  ], [onViewDetails, onMarkAsUsed, onDelete]);
+  ];
 
   return (
-    <AppDataTable 
-      columns={columns} 
-      data={vouchers} 
-      isLoading={isLoading} 
-      isShowExportButtons={true}
-      searchableColumns={[{ id: "code", placeholder: "Search vouchers..." }]}
+    <AdminTable
+      columns={columns}
+      data={vouchers}
+      loading={isLoading}
+      keyExtractor={(v) => v.id}
+      emptyTitle="No vouchers detected"
+      emptyDescription="Upload a CSV of codes to start distributing unique rewards to your members."
     />
   );
 }

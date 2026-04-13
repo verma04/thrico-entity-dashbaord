@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useMemo } from "react";
 import {
   Search,
   Plus,
@@ -160,10 +160,10 @@ export default function CouponsPage() {
   const { toast } = useToast();
 
   // ── Data ──
-  const { data: rewardsData, loading: rewardsLoading } = useGetRewards({
+  const { data: rewardsData, loading: rewardsLoading, refetch: refetchRewards } = useGetRewards({
     pagination: { page: 1, limit: 100 },
   });
-  const { data: vouchersData, loading: vouchersLoading } = useGetAllVouchers({
+  const { data: vouchersData, loading: vouchersLoading, refetch: refetchVouchers } = useGetAllVouchers({
     status: statusFilter === "all" ? undefined : statusFilter,
     rewardId: rewardFilter === "all" ? undefined : rewardFilter,
   });
@@ -175,39 +175,46 @@ export default function CouponsPage() {
   const allVouchers = vouchersData?.getAllVouchers || [];
 
   // ── Rewards computed ──
-  const filteredRewards = rewards.filter((r: any) => {
-    const matchesSearch = r.title
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
-    if (!matchesSearch) return false;
-    if (activeFilter === "All") return true;
-    return getInteractionType(r.category) === activeFilter;
-  });
+  const filteredRewards = useMemo(() => {
+    return rewards.filter((r: any) => {
+      const matchesSearch = r.title.toLowerCase().includes(searchQuery.toLowerCase());
+      if (!matchesSearch) return false;
+      if (activeFilter === "All") return true;
+      return getInteractionType(r.category) === activeFilter;
+    });
+  }, [rewards, searchQuery, activeFilter]);
 
-  const categoryCounts: Record<string, number> = { All: rewards.length };
-  rewards.forEach((r: any) => {
-    const t = getInteractionType(r.category);
-    categoryCounts[t] = (categoryCounts[t] || 0) + 1;
-  });
+  const categoryCounts: Record<string, number> = useMemo(() => {
+    const counts: Record<string, number> = { All: rewards.length };
+    rewards.forEach((r: any) => {
+      const t = getInteractionType(r.category);
+      counts[t] = (counts[t] || 0) + 1;
+    });
+    return counts;
+  }, [rewards]);
 
   // ── Vouchers computed ──
-  const filteredVouchers = allVouchers.filter(
-    (v: any) =>
-      v.code.toLowerCase().includes(codeSearch.toLowerCase()) ||
-      v.reward?.title?.toLowerCase().includes(codeSearch.toLowerCase()),
-  );
+  const filteredVouchers = useMemo(() => {
+    return allVouchers.filter(
+      (v: any) =>
+        v.code.toLowerCase().includes(codeSearch.toLowerCase()) ||
+        v.reward?.title?.toLowerCase().includes(codeSearch.toLowerCase()),
+    );
+  }, [allVouchers, codeSearch]);
 
-  const mappedVouchers: Voucher[] = filteredVouchers.map((v: any) => ({
-    id: v.id,
-    code: v.code,
-    offerId: v.offerId,
-    rewardTitle: v.reward?.title,
-    isUsed: v.isUsed,
-    assignedTo: v.assignedTo,
-    assignedAt: v.assignedAt,
-    expiryDate: v.expiryDate,
-    createdAt: v.createdAt,
-  }));
+  const mappedVouchers: Voucher[] = useMemo(() => {
+    return filteredVouchers.map((v: any) => ({
+      id: v.id,
+      code: v.code,
+      offerId: v.offerId,
+      rewardTitle: v.reward?.title,
+      isUsed: v.isUsed,
+      assignedTo: v.assignedTo,
+      assignedAt: v.assignedAt,
+      expiryDate: v.expiryDate,
+      createdAt: v.createdAt,
+    }));
+  }, [filteredVouchers]);
 
   const totalVouchers = allVouchers.length;
   const usedVouchers = allVouchers.filter((v: any) => v.isUsed).length;
@@ -223,11 +230,15 @@ export default function CouponsPage() {
     totalVouchers > 0 ? Math.round((usedVouchers / totalVouchers) * 100) : 0;
 
   // ── Inventory computed ──
-  const inventoryItems = rewards.filter((r: any) => r.inventoryRequired) || [];
+  const inventoryItems = useMemo(() => {
+    return rewards.filter((r: any) => r.inventoryRequired) || [];
+  }, [rewards]);
   const totalTracked = inventoryItems.length;
-  const lowStockCount = inventoryItems.filter(
-    (r: any) => r.remainingStock !== undefined && r.remainingStock <= 10,
-  ).length;
+  const lowStockCount = useMemo(() => {
+    return inventoryItems.filter(
+      (r: any) => r.remainingStock !== undefined && r.remainingStock <= 10,
+    ).length;
+  }, [inventoryItems]);
   const healthyCount = totalTracked - lowStockCount;
 
   // ── Voucher handlers ──
@@ -396,905 +407,631 @@ export default function CouponsPage() {
 
   // ── Tab definitions ──
   const tabs = [
-    { key: "rewards" as const, label: "Rewards", count: rewards.length },
+    { key: "rewards" as const, label: "Rewards Gallery", count: rewards.length },
     {
       key: "codes" as const,
-      label: "Voucher Codes",
+      label: "Credential Codes",
       count: totalVouchers,
     },
     {
       key: "inventory" as const,
-      label: "Inventory",
+      label: "Stock Controller",
       count: totalTracked,
     },
   ];
 
   // ── Render ──
   return (
-    <EcosystemWrapper className="min-h-screen">
+    <EcosystemWrapper>
       <EcosystemHeader
-        title="Rewards & Codes"
-        description="Manage reward offers, voucher codes, and stock levels — all in one place."
-        badgeText="Reward Collection"
+        title="Rewards & Vouchers"
+        description="Monitor reward distribution lifecycle, manage voucher credentials and inventory stock levels from a unified interface."
+        badgeText="Economic Hub"
         icon={Ticket}
       />
 
-      {/* ── Tab bar ────────────────────────────────────────────────── */}
-      <div className="flex items-center gap-1 bg-muted/50 rounded-lg p-1 border border-border/50 w-fit">
-        {tabs.map((tab) => (
-          <button
-            key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
-            className={cn(
-              "inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all",
-              activeTab === tab.key
-                ? "bg-card text-foreground shadow-sm border border-border/50"
-                : "text-muted-foreground hover:text-foreground",
-            )}
-          >
-            {tab.label}
-            <span
-              className={cn(
-                "inline-flex h-5 min-w-5 px-1.5 items-center justify-center rounded-full text-[10px] font-bold tabular-nums",
-                activeTab === tab.key
-                  ? "bg-foreground text-background"
-                  : "bg-muted text-muted-foreground",
-              )}
-            >
-              {tab.count}
-            </span>
-          </button>
-        ))}
-      </div>
-
-      {/* ══════════════════════════════════════════════════════════════
-          REWARDS TAB
-         ══════════════════════════════════════════════════════════════ */}
-      {activeTab === "rewards" && (
-        <>
-          <EcosystemActionBar
-            shadow="none"
-            className="bg-transparent border-none p-0"
-          >
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 w-full">
-              <div className="relative flex-1 max-w-sm">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search rewards..."
-                  className="pl-10 h-9 bg-card border-border/60 rounded-lg"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
+      <EcosystemActionBar shadow="none">
+         <EcosystemActionBar.Group>
+            <EcosystemActionBar.Item grow className="max-w-md">
+               <div className="flex items-center gap-1 bg-zinc-100/50 p-1 rounded-xl border border-zinc-200/50">
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.key}
+                    onClick={() => setActiveTab(tab.key)}
+                    className={cn(
+                      "inline-flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-bold transition-all duration-200",
+                      activeTab === tab.key
+                        ? "bg-white text-zinc-900 shadow-sm border border-zinc-200/50"
+                        : "text-zinc-500 hover:text-zinc-800 hover:bg-white/50"
+                    )}
+                  >
+                    {tab.label}
+                    <span
+                      className={cn(
+                        "inline-flex h-4 min-w-[16px] px-1 items-center justify-center rounded-md text-[9px] font-black tabular-nums transition-colors",
+                        activeTab === tab.key
+                          ? "bg-zinc-900 text-white"
+                          : "bg-zinc-200 text-zinc-600"
+                      )}
+                    >
+                      {tab.count}
+                    </span>
+                  </button>
+                ))}
               </div>
-              <div className="flex items-center gap-2">
-                <div className="flex items-center bg-muted rounded-lg p-0.5 border border-border/50">
+            </EcosystemActionBar.Item>
+         </EcosystemActionBar.Group>
+
+         <EcosystemActionBar.Group align="right">
+            {activeTab === "rewards" ? (
+               <EcosystemActionBar.Item>
+                  <Link href="/rewards/coupons/create">
+                    <Button size="sm" className="h-9 px-4 rounded-xl gap-2 font-black uppercase tracking-tighter shadow-md ring-1 ring-black/5">
+                      <Plus className="h-4 w-4" />
+                      Create Master Reward
+                    </Button>
+                  </Link>
+               </EcosystemActionBar.Item>
+            ) : activeTab === "inventory" ? (
+               <>
+                 <EcosystemActionBar.Item>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={downloadTemplate}
+                      className="h-9 rounded-xl gap-2 text-xs font-bold border-border bg-card"
+                    >
+                      <FileDown className="h-3.5 w-3.5" />
+                      Template
+                    </Button>
+                 </EcosystemActionBar.Item>
+                 <EcosystemActionBar.Item>
+                    <Button
+                      size="sm"
+                      onClick={() => setIsUploadOpen(true)}
+                      className="h-9 rounded-xl gap-2 text-xs font-bold shadow-sm"
+                    >
+                      <Upload className="h-3.5 w-3.5" />
+                      Batch Upload
+                    </Button>
+                 </EcosystemActionBar.Item>
+               </>
+            ) : (
+                <EcosystemActionBar.Item>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleExport}
+                    className="h-9 rounded-xl gap-2 text-xs font-bold border-border bg-card shadow-sm"
+                  >
+                    <Download className="h-3.5 w-3.5" />
+                    Data Export
+                  </Button>
+                </EcosystemActionBar.Item>
+            )}
+
+            <EcosystemActionBar.Item>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => { refetchRewards(); refetchVouchers(); }}
+                className="h-9 w-9 rounded-xl border-border bg-card text-muted-foreground hover:text-foreground"
+              >
+                <RotateCw size={14} className={cn(rewardsLoading || vouchersLoading ? "animate-spin" : "")} />
+              </Button>
+            </EcosystemActionBar.Item>
+         </EcosystemActionBar.Group>
+      </EcosystemActionBar>
+
+      {/* ── Sub-ActionBar for search/filters per tab ──────────────── */}
+      <EcosystemActionBar shadow="none" className="bg-transparent border-none py-0 -mt-2">
+         {activeTab === "rewards" && (
+            <div className="flex flex-col gap-2 w-full">
+              <div className="flex items-center justify-between w-full">
+                <div className="relative flex-1 max-w-sm">
+                   <EcosystemActionBar.Search 
+                     value={searchQuery}
+                     onChange={setSearchQuery}
+                     placeholder="Filter master rewards..."
+                   />
+                </div>
+                <div className="flex items-center bg-muted/40 p-1 rounded-xl border border-border/40 gap-1 ml-4 shadow-inner">
                   <button
                     onClick={() => setViewMode("grid")}
                     className={cn(
-                      "h-7 w-7 rounded-md flex items-center justify-center transition-all",
+                      "h-8 px-2.5 rounded-lg flex items-center justify-center transition-all duration-300",
                       viewMode === "grid"
-                        ? "bg-card shadow-sm text-foreground"
-                        : "text-muted-foreground hover:text-foreground",
+                        ? "bg-white shadow-sm ring-1 ring-black/[0.05] text-indigo-600"
+                        : "text-muted-foreground hover:text-foreground hover:bg-white/50",
                     )}
                   >
-                    <LayoutGrid className="h-3.5 w-3.5" />
+                    <LayoutGrid className="h-4 w-4" />
                   </button>
                   <button
                     onClick={() => setViewMode("list")}
                     className={cn(
-                      "h-7 w-7 rounded-md flex items-center justify-center transition-all",
+                      "h-8 px-2.5 rounded-lg flex items-center justify-center transition-all duration-300",
                       viewMode === "list"
-                        ? "bg-card shadow-sm text-foreground"
-                        : "text-muted-foreground hover:text-foreground",
+                        ? "bg-white shadow-sm ring-1 ring-black/[0.05] text-indigo-600"
+                        : "text-muted-foreground hover:text-foreground hover:bg-white/50",
                     )}
                   >
-                    <LayoutList className="h-3.5 w-3.5" />
+                    <LayoutList className="h-4 w-4" />
                   </button>
                 </div>
-                <Link href="/rewards/coupons/create">
-                  <Button size="sm" className="h-9 px-4 gap-2 font-semibold">
-                    <Plus className="h-3.5 w-3.5" />
-                    New Reward
-                  </Button>
-                </Link>
               </div>
-            </div>
-            {/* Filter chips */}
-            <div className="flex items-center gap-2 mt-1 overflow-x-auto pb-0.5 flex-wrap">
-              {FILTER_OPTIONS.map((f) => (
-                <button
-                  key={f}
-                  onClick={() => setActiveFilter(f)}
-                  className={cn(
-                    "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all whitespace-nowrap",
-                    activeFilter === f
-                      ? "bg-foreground text-background border-foreground shadow-sm"
-                      : "bg-card text-muted-foreground border-border hover:border-foreground/30 hover:text-foreground",
-                  )}
-                >
-                  {f}
-                  <span
+
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
+                {FILTER_OPTIONS.map((f) => (
+                  <button
+                    key={f}
+                    onClick={() => setActiveFilter(f)}
                     className={cn(
-                      "inline-flex h-4 min-w-4 px-1 rounded-full text-[10px] font-bold items-center justify-center",
-                      activeFilter === f ? "bg-white/20" : "bg-muted",
+                      "inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[11px] font-black uppercase tracking-tight border transition-all duration-200",
+                      activeFilter === f
+                        ? "bg-zinc-900 text-white border-zinc-900 shadow-sm"
+                        : "bg-white text-zinc-500 border-zinc-200 hover:border-zinc-400 hover:text-zinc-800",
                     )}
                   >
-                    {categoryCounts[f] || 0}
-                  </span>
-                </button>
-              ))}
+                    {f}
+                    <span className={cn(
+                      "inline-flex h-4 min-w-[16px] px-1 rounded-md text-[9px] font-black items-center justify-center transition-colors",
+                      activeFilter === f ? "bg-white/20" : "bg-muted"
+                    )}>
+                      {categoryCounts[f] || 0}
+                    </span>
+                  </button>
+                ))}
+              </div>
             </div>
-          </EcosystemActionBar>
+         )}
 
-          <EcosystemContainer className="p-5 mt-6 pb-20">
-            {rewardsLoading ? (
-              viewMode === "grid" ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                  {[...Array(8)].map((_, i) => (
-                    <div
-                      key={i}
-                      className="bg-card rounded-2xl p-4 border border-border animate-pulse"
-                    >
-                      <div className="aspect-[4/3] bg-muted rounded-xl mb-4" />
-                      <div className="space-y-2.5">
-                        <Skeleton className="h-3 w-2/3" />
-                        <Skeleton className="h-4 w-full" />
-                        <Skeleton className="h-3 w-1/3" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {[...Array(6)].map((_, i) => (
-                    <div
-                      key={i}
-                      className="flex gap-4 p-4 bg-card rounded-xl border border-border animate-pulse"
-                    >
-                      <Skeleton className="h-14 w-14 rounded-lg shrink-0" />
-                      <div className="flex-1 space-y-2">
-                        <Skeleton className="h-3 w-1/4" />
-                        <Skeleton className="h-4 w-1/2" />
-                        <Skeleton className="h-3 w-1/3" />
-                      </div>
-                      <Skeleton className="h-8 w-20 rounded-lg" />
-                    </div>
-                  ))}
-                </div>
-              )
-            ) : filteredRewards.length > 0 ? (
-              viewMode === "grid" ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                  {filteredRewards.map((reward: any) => {
-                    const type = getInteractionType(reward.category);
-                    const badge = getInteractiveBadge(type);
-                    const BadgeIcon = badge.icon;
-                    return (
-                      <div
-                        key={reward.id}
-                        className="group relative bg-card rounded-2xl border border-border/60 hover:border-indigo-300/60 hover:shadow-lg hover:shadow-indigo-500/5 transition-all duration-300 hover:-translate-y-0.5 overflow-hidden"
-                      >
-                        <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 dark:from-zinc-800 dark:to-zinc-900">
-                          {reward.image ? (
-                            <img
-                              src={reward.image}
-                              alt={reward.title}
-                              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                            />
-                          ) : (
-                            <div className="h-full w-full flex flex-col items-center justify-center opacity-20">
-                              <Ticket className="h-10 w-10 mb-1.5" />
-                              <span className="text-[9px] font-bold uppercase tracking-widest">
-                                No Image
-                              </span>
-                            </div>
-                          )}
-                          <div className="absolute top-3 left-3">
-                            <div
-                              className={cn(
-                                "flex items-center gap-1 px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider shadow-sm",
-                                badge.color,
-                              )}
-                            >
-                              <BadgeIcon className="h-2.5 w-2.5" />
-                              {badge.label}
-                            </div>
-                          </div>
-                          <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-black/50 backdrop-blur-sm text-white text-[9px] font-bold uppercase tracking-wide">
-                            {reward.inventory ?? "∞"} left
-                          </div>
-                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center gap-2 backdrop-blur-[1px]">
-                            <Button
-                              size="icon"
-                              variant="secondary"
-                              className="h-9 w-9 rounded-full scale-90 group-hover:scale-100 transition-transform shadow-lg"
-                            >
-                              <ExternalLink className="h-3.5 w-3.5" />
-                            </Button>
-                            <Link href={`/rewards/coupons/edit/${reward.id}`}>
-                              <Button
-                                size="icon"
-                                variant="secondary"
-                                className="h-9 w-9 rounded-full scale-90 group-hover:scale-100 transition-transform delay-75 shadow-lg"
-                              >
-                                <Pencil className="h-3.5 w-3.5" />
-                              </Button>
-                            </Link>
-                            {reward.inventoryRequired && (
-                              <Button
-                                size="icon"
-                                variant="secondary"
-                                className="h-9 w-9 rounded-full scale-90 group-hover:scale-100 transition-transform delay-100 shadow-lg"
-                                onClick={() => openUploadForReward(reward.id)}
-                              >
-                                <Upload className="h-3.5 w-3.5" />
-                              </Button>
-                            )}
+         {activeTab === "codes" && (
+            <div className="flex flex-col gap-3 w-full">
+               <div className="flex items-center gap-3 w-full">
+                  <div className="relative flex-1 max-w-sm">
+                     <EcosystemActionBar.Search 
+                       value={codeSearch}
+                       onChange={setCodeSearch}
+                       placeholder="Find specific code..."
+                     />
+                  </div>
+                  <div className="flex flex-1 items-center gap-2">
+                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                      <SelectTrigger className="w-[140px] h-9 rounded-xl border-border bg-card text-xs font-bold">
+                        <div className="flex items-center gap-2">
+                          <Activity className="h-3.5 w-3.5 text-muted-foreground" />
+                          <SelectValue placeholder="All Status" />
+                        </div>
+                      </SelectTrigger>
+                      <SelectContent className="rounded-xl p-1 shadow-xl border-border">
+                        <SelectItem value="all" className="rounded-lg text-xs font-semibold py-2">All Status</SelectItem>
+                        <SelectItem value="available" className="rounded-lg text-xs font-semibold py-2">Available</SelectItem>
+                        <SelectItem value="used" className="rounded-lg text-xs font-semibold py-2">Redeemed</SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    <Select value={rewardFilter} onValueChange={setRewardFilter}>
+                      <SelectTrigger className="w-[180px] h-9 rounded-xl border-border bg-card text-xs font-bold">
+                        <div className="flex items-center gap-2">
+                           <Ticket className="h-3.5 w-3.5 text-muted-foreground" />
+                           <SelectValue placeholder="All Rewards" />
+                        </div>
+                      </SelectTrigger>
+                      <SelectContent className="rounded-xl p-1 shadow-xl border-border">
+                        <SelectItem value="all" className="rounded-lg text-xs font-semibold py-2">All Master Rewards</SelectItem>
+                        {rewards.map((reward: any) => (
+                          <SelectItem key={reward.id} value={reward.id} className="rounded-lg text-xs font-semibold py-2">
+                            {reward.title}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+               </div>
+            </div>
+         )}
+
+         {activeTab === "inventory" && (
+            <div className="flex items-center gap-4 px-1 py-1 bg-indigo-50/50 border border-indigo-100/50 rounded-xl w-full">
+               <div className="h-8 w-8 rounded-full bg-white flex items-center justify-center shadow-sm shrink-0 border border-indigo-100">
+                  <Package className="h-4 w-4 text-indigo-500" />
+               </div>
+               <div className="flex items-center gap-4">
+                  <span className="text-[11px] font-bold text-indigo-700 tracking-tighter uppercase whitespace-nowrap">Inventory Status Nexus:</span>
+                  <div className="flex items-center gap-3">
+                     <div className="flex items-center gap-1.5">
+                        <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                        <span className="text-[10px] font-black text-indigo-600/70">{healthyCount} Healthy</span>
+                     </div>
+                     <div className="flex items-center gap-1.5">
+                        <div className="h-1.5 w-1.5 rounded-full bg-rose-500 animate-pulse" />
+                        <span className="text-[10px] font-black text-indigo-600/70">{lowStockCount} Critical</span>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         )}
+      </EcosystemActionBar>
+
+      <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0 pb-20">
+         {activeTab === "rewards" && (
+            <div className="px-6 py-4">
+               {rewardsLoading ? (
+                  viewMode === "grid" ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                      {[...Array(8)].map((_, i) => (
+                        <div key={i} className="bg-card rounded-2xl p-4 border border-border animate-pulse">
+                          <div className="aspect-[4/3] bg-muted rounded-xl mb-4" />
+                          <div className="space-y-2.5">
+                            <Skeleton className="h-3 w-2/3" />
+                            <Skeleton className="h-4 w-full" />
+                            <Skeleton className="h-3 w-1/3" />
                           </div>
                         </div>
-                        <div className="p-4 space-y-3">
-                          <div>
-                            <h3 className="text-sm font-semibold text-foreground line-clamp-1 group-hover:text-indigo-600 transition-colors">
-                              {reward.title}
-                            </h3>
-                            {reward.description && (
-                              <p className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5">
-                                {reward.description}
-                              </p>
-                            )}
-                          </div>
-                          <div className="flex items-center justify-between pt-1 border-t border-border/50">
-                            <div className="flex items-center gap-1.5">
-                              <div className="h-5 w-5 rounded-full bg-orange-100 flex items-center justify-center">
-                                <Zap className="h-3 w-3 text-orange-600 fill-current" />
-                              </div>
-                              <span className="text-xs font-black text-foreground tabular-nums">
-                                {reward.tcRequired || 0} pts
-                              </span>
-                            </div>
-                            {reward.expiryDays && (
-                              <div className="flex items-center gap-1 text-[10px] text-muted-foreground/70 font-medium">
-                                <Clock className="h-3 w-3" />
-                                {reward.expiryDays}d
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {filteredRewards.map((reward: any) => {
-                    const type = getInteractionType(reward.category);
-                    const badge = getInteractiveBadge(type);
-                    const BadgeIcon = badge.icon;
-                    return (
-                      <div
-                        key={reward.id}
-                        className="group flex items-center gap-4 p-4 bg-card rounded-xl border border-border/60 hover:border-indigo-300/50 hover:shadow-sm transition-all duration-200"
-                      >
-                        <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 dark:from-zinc-800 dark:to-zinc-900 border border-border/50 overflow-hidden shrink-0">
-                          {reward.image ? (
-                            <img
-                              src={reward.image}
-                              alt={reward.title}
-                              className="h-full w-full object-cover"
-                            />
-                          ) : (
-                            <div className="h-full w-full flex items-center justify-center opacity-20">
-                              <Ticket className="h-5 w-5" />
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-0.5">
-                            <h3 className="text-sm font-semibold text-foreground truncate group-hover:text-indigo-600 transition-colors">
-                              {reward.title}
-                            </h3>
-                            <span
-                              className={cn(
-                                "inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[9px] font-bold uppercase tracking-wide shrink-0",
-                                badge.chip,
-                              )}
-                            >
-                              <BadgeIcon className="h-2.5 w-2.5" />
-                              {badge.label}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
-                            <span className="flex items-center gap-1">
-                              <Zap className="h-3 w-3 text-orange-500" />
-                              {reward.tcRequired || 0} points
-                            </span>
-                            {reward.expiryDays && (
-                              <span className="flex items-center gap-1">
-                                <Clock className="h-3 w-3" />
-                                {reward.expiryDays} days
-                              </span>
-                            )}
-                            <span>
-                              {reward.inventory ?? "Unlimited"} remaining
-                            </span>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                          {reward.inventoryRequired && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-8 px-3 gap-1.5 text-xs rounded-lg"
-                              onClick={() => openUploadForReward(reward.id)}
-                            >
-                              <Upload className="h-3 w-3" />
-                              Upload
-                            </Button>
-                          )}
-                          <Link href={`/rewards/coupons/edit/${reward.id}`}>
-                            <Button
-                              size="sm"
-                              className="h-8 px-3 gap-1.5 text-xs rounded-lg"
-                            >
-                              <Pencil className="h-3 w-3" />
-                              Edit
-                            </Button>
-                          </Link>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )
-            ) : (
-              <div className="py-32 flex flex-col items-center justify-center text-center space-y-5">
-                <div className="h-20 w-20 rounded-3xl bg-muted flex items-center justify-center border border-border">
-                  <Search className="h-8 w-8 text-muted-foreground/30" />
-                </div>
-                <div className="space-y-1.5">
-                  <h3 className="text-lg font-bold text-foreground">
-                    {searchQuery ? "No results found" : "No rewards yet"}
-                  </h3>
-                  <p className="text-sm text-muted-foreground max-w-xs leading-relaxed">
-                    {searchQuery
-                      ? `No rewards match "${searchQuery}". Try a different search.`
-                      : "Create your first reward to start engaging your community."}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  {searchQuery && (
-                    <Button
-                      onClick={() => setSearchQuery("")}
-                      variant="outline"
-                      className="rounded-xl px-5 h-9 text-sm"
-                    >
-                      Clear search
-                    </Button>
-                  )}
-                  <Link href="/rewards/coupons/create">
-                    <Button className="rounded-xl px-5 h-9 text-sm gap-2">
-                      <Plus className="h-3.5 w-3.5" />
-                      Create reward
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-            )}
-          </EcosystemContainer>
-        </>
-      )}
-
-      {/* ══════════════════════════════════════════════════════════════
-          VOUCHER CODES TAB
-         ══════════════════════════════════════════════════════════════ */}
-      {activeTab === "codes" && (
-        <>
-          <EcosystemActionBar shadow="none">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full">
-              <div className="relative flex-1 max-w-xs">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-                <input
-                  type="text"
-                  placeholder="Search code or reward..."
-                  value={codeSearch}
-                  onChange={(e) => setCodeSearch(e.target.value)}
-                  className="w-full pl-9 pr-3 h-9 rounded-lg border border-border bg-background text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-ring/30 transition-all"
-                />
-              </div>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[130px] h-9 text-sm">
-                  <div className="flex items-center gap-2">
-                    <Activity className="h-3.5 w-3.5 text-muted-foreground" />
-                    <SelectValue placeholder="Status" />
-                  </div>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="available">Available</SelectItem>
-                  <SelectItem value="used">Used</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={rewardFilter} onValueChange={setRewardFilter}>
-                <SelectTrigger className="w-[160px] h-9 text-sm">
-                  <SelectValue placeholder="All Rewards" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Rewards</SelectItem>
-                  {rewards.map((reward: any) => (
-                    <SelectItem key={reward.id} value={reward.id}>
-                      {reward.title}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <div className="sm:ml-auto">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleExport}
-                  className="gap-2 h-9"
-                >
-                  <Download className="h-3.5 w-3.5" />
-                  Export CSV
-                </Button>
-              </div>
-            </div>
-          </EcosystemActionBar>
-
-          <EcosystemContainer className="p-6 space-y-6 pb-20">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              {[
-                {
-                  label: "Total Codes",
-                  value: totalVouchers,
-                  icon: Ticket,
-                  color: "text-indigo-600",
-                  bg: "bg-indigo-50",
-                  desc: "All voucher codes",
-                },
-                {
-                  label: "Available",
-                  value: availableVouchers,
-                  icon: CheckCircle2,
-                  color: "text-emerald-600",
-                  bg: "bg-emerald-50",
-                  desc: "Ready to be claimed",
-                },
-                {
-                  label: "Redeemed",
-                  value: usedVouchers,
-                  icon: History,
-                  color: "text-slate-600",
-                  bg: "bg-slate-100",
-                  desc: `${utilRate}% utilization`,
-                },
-                {
-                  label: "Expiring Soon",
-                  value: expiringSoon,
-                  icon: expiringSoon > 0 ? AlertTriangle : Clock,
-                  color:
-                    expiringSoon > 0 ? "text-rose-600" : "text-emerald-600",
-                  bg: expiringSoon > 0 ? "bg-rose-50" : "bg-emerald-50",
-                  desc: expiringSoon > 0 ? "Within 7 days" : "None expiring",
-                },
-              ].map((s, i) => (
-                <div
-                  key={i}
-                  className="flex items-center gap-3 p-4 rounded-xl border border-border bg-card"
-                >
-                  <div
-                    className={cn(
-                      "h-9 w-9 rounded-lg flex items-center justify-center border border-border/50 shrink-0",
-                      s.bg,
-                    )}
-                  >
-                    <s.icon className={cn("h-4 w-4", s.color)} />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider truncate">
-                      {s.label}
-                    </p>
-                    <p className="text-xl font-bold text-foreground tabular-nums">
-                      {s.value}
-                    </p>
-                    <p className="text-[10px] text-muted-foreground/60 truncate">
-                      {s.desc}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {totalVouchers > 0 && (
-              <div className="p-4 rounded-xl border border-border bg-card space-y-2">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-semibold text-foreground">
-                    Voucher Utilization
-                  </span>
-                  <span className="text-muted-foreground">
-                    {usedVouchers} / {totalVouchers} used ({utilRate}%)
-                  </span>
-                </div>
-                <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
-                  <div
-                    className={cn(
-                      "h-full rounded-full transition-all duration-700",
-                      utilRate >= 80
-                        ? "bg-rose-500"
-                        : utilRate >= 50
-                          ? "bg-amber-500"
-                          : "bg-indigo-500",
-                    )}
-                    style={{ width: `${utilRate}%` }}
-                  />
-                </div>
-              </div>
-            )}
-
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <h2 className="text-sm font-semibold text-foreground">
-                  Voucher Inventory
-                </h2>
-                {!vouchersLoading && (
-                  <span className="text-xs text-muted-foreground px-2 py-0.5 bg-muted border border-border rounded-full">
-                    {filteredVouchers.length} codes
-                  </span>
-                )}
-              </div>
-              <VoucherManagementTable
-                vouchers={mappedVouchers}
-                isLoading={vouchersLoading}
-                onViewDetails={(v) => {
-                  setSelectedVoucher(v);
-                  setIsDetailsOpen(true);
-                }}
-                onMarkAsUsed={handleMarkAsUsed}
-                onDelete={handleDelete}
-              />
-            </div>
-          </EcosystemContainer>
-
-          <VoucherDetailsDialog
-            voucher={selectedVoucher}
-            open={isDetailsOpen}
-            onOpenChange={setIsDetailsOpen}
-            onMarkAsUsed={handleMarkAsUsed}
-            onDelete={handleDelete}
-          />
-        </>
-      )}
-
-      {/* ══════════════════════════════════════════════════════════════
-          INVENTORY TAB
-         ══════════════════════════════════════════════════════════════ */}
-      {activeTab === "inventory" && (
-        <>
-          <EcosystemActionBar shadow="none">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Activity className="h-3.5 w-3.5" />
-              <span>{totalTracked} rewards tracked</span>
-            </div>
-            <div className="flex items-center gap-2 sm:ml-auto">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={downloadTemplate}
-                className="gap-2"
-              >
-                <FileDown className="h-3.5 w-3.5" />
-                Download Template
-              </Button>
-              <Button
-                size="sm"
-                onClick={() => setIsUploadOpen(true)}
-                className="gap-2"
-              >
-                <Upload className="h-3.5 w-3.5" />
-                Upload Codes
-              </Button>
-            </div>
-          </EcosystemActionBar>
-
-          <EcosystemContainer className="p-6 space-y-6 pb-20">
-            {/* Stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {[
-                {
-                  label: "Tracked Rewards",
-                  value: rewardsLoading ? "—" : totalTracked,
-                  desc: "Have inventory control",
-                  icon: Package,
-                  color: "text-indigo-600",
-                  bg: "bg-indigo-50",
-                },
-                {
-                  label: "Healthy Stock",
-                  value: rewardsLoading ? "—" : healthyCount,
-                  desc: "Above minimum threshold",
-                  icon: CheckCircle2,
-                  color: "text-emerald-600",
-                  bg: "bg-emerald-50",
-                },
-                {
-                  label: "Low Stock",
-                  value: rewardsLoading ? "—" : lowStockCount,
-                  desc:
-                    lowStockCount > 0 ? "Need restocking" : "All well stocked",
-                  icon: AlertTriangle,
-                  color: lowStockCount > 0 ? "text-rose-600" : "text-slate-500",
-                  bg: lowStockCount > 0 ? "bg-rose-50" : "bg-slate-100",
-                },
-              ].map((stat, i) => (
-                <div
-                  key={i}
-                  className="flex items-center gap-4 p-5 rounded-xl border border-border bg-card"
-                >
-                  <div
-                    className={cn(
-                      "h-10 w-10 rounded-xl flex items-center justify-center shrink-0 border border-border/50",
-                      stat.bg,
-                    )}
-                  >
-                    <stat.icon className={cn("h-5 w-5", stat.color)} />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
-                      {stat.label}
-                    </p>
-                    <p className="text-2xl font-bold text-foreground tabular-nums leading-tight">
-                      {stat.value}
-                    </p>
-                    <p className="text-[11px] text-muted-foreground/70">
-                      {stat.desc}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Inventory table */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between px-1">
-                <h2 className="text-sm font-semibold text-foreground">
-                  Inventory Items
-                </h2>
-                <span className="text-xs text-muted-foreground">
-                  {rewards.length} total rewards
-                </span>
-              </div>
-              <InventoryTable
-                items={inventoryItems}
-                isLoading={rewardsLoading}
-              />
-            </div>
-          </EcosystemContainer>
-        </>
-      )}
-
-      {/* ══════════════════════════════════════════════════════════════
-          UPLOAD DIALOG (shared across tabs)
-         ══════════════════════════════════════════════════════════════ */}
-      <Dialog
-        open={isUploadOpen}
-        onOpenChange={(o) => {
-          if (!o) resetUpload();
-          else setIsUploadOpen(true);
-        }}
-      >
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center">
-                <Upload className="h-4 w-4 text-indigo-600" />
-              </div>
-              Upload Voucher Codes
-            </DialogTitle>
-            <DialogDescription>
-              Select a reward and upload a CSV. Columns:{" "}
-              <code className="text-[11px] bg-muted px-1 py-0.5 rounded font-mono">
-                voucherCode, amount, expiryDate
-              </code>
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 py-2">
-            {/* Reward Select */}
-            <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-muted-foreground">
-                Assign to Reward
-              </Label>
-              <Select value={uploadRewardId} onValueChange={setUploadRewardId}>
-                <SelectTrigger className="h-10">
-                  <SelectValue placeholder="Choose a reward..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {inventoryItems.length === 0 ? (
-                    <div className="py-3 px-3 text-xs text-muted-foreground text-center">
-                      No rewards with inventory tracking enabled
+                      ))}
                     </div>
                   ) : (
-                    inventoryItems.map((item: any) => (
-                      <SelectItem key={item.id} value={item.id}>
-                        {item.title}
-                      </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Drop Zone */}
-            {uploadStep === "idle" && (
-              <>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".csv"
-                  className="hidden"
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    if (f) handleFileSelect(f);
-                  }}
-                />
-                <div
-                  className={cn(
-                    "border-2 border-dashed rounded-xl p-8 flex flex-col items-center gap-3 cursor-pointer transition-all",
-                    isDragging
-                      ? "border-indigo-400 bg-indigo-50/50"
-                      : "border-border hover:border-indigo-300 hover:bg-muted/20",
-                  )}
-                  onClick={() => fileInputRef.current?.click()}
-                  onDragOver={(e) => {
-                    e.preventDefault();
-                    setIsDragging(true);
-                  }}
-                  onDragLeave={() => setIsDragging(false)}
-                  onDrop={(e) => {
-                    e.preventDefault();
-                    setIsDragging(false);
-                    const f = e.dataTransfer.files[0];
-                    if (f) handleFileSelect(f);
-                  }}
-                >
-                  <div className="h-12 w-12 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center">
-                    <Upload className="h-5 w-5 text-indigo-500" />
-                  </div>
-                  <div className="text-center">
-                    <p className="text-sm font-semibold text-foreground">
-                      {isDragging ? "Drop file here" : "Click or drag CSV here"}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Max 10MB · up to 10,000 codes
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-2 p-3 rounded-lg bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20">
-                  <Info className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
-                  <p className="text-[11px] text-blue-700 dark:text-blue-400 leading-relaxed">
-                    Download the template to ensure your CSV is correctly
-                    formatted before uploading.
-                  </p>
-                </div>
-              </>
-            )}
-
-            {/* Validating */}
-            {uploadStep === "validating" && (
-              <div className="flex flex-col items-center justify-center py-10 gap-3">
-                <div className="h-12 w-12 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center">
-                  <Loader2 className="h-5 w-5 animate-spin text-indigo-500" />
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Validating your file...
-                </p>
-              </div>
-            )}
-
-            {/* Summary */}
-            {uploadStep === "summary" && (
-              <div className="space-y-3">
-                {uploadedFile && (
-                  <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 border border-border">
-                    <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">
-                        {uploadedFile.name}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {(uploadedFile.size / 1024).toFixed(1)} KB
+                    <div className="space-y-3">
+                      {[...Array(6)].map((_, i) => (
+                        <div key={i} className="flex gap-4 p-4 bg-card rounded-2xl border border-border animate-pulse">
+                          <Skeleton className="h-14 w-14 rounded-xl shrink-0" />
+                          <div className="flex-1 space-y-2">
+                            <Skeleton className="h-3 w-1/4" />
+                            <Skeleton className="h-4 w-1/2" />
+                            <Skeleton className="h-3 w-1/3" />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )
+                ) : filteredRewards.length > 0 ? (
+                  viewMode === "grid" ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                      {filteredRewards.map((reward: any) => {
+                        const type = getInteractionType(reward.category);
+                        const badge = getInteractiveBadge(type);
+                        const BadgeIcon = badge.icon;
+                        return (
+                          <div key={reward.id} className="group relative bg-card rounded-2xl border border-border hover:border-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/[0.03] transition-all duration-500 overflow-hidden">
+                            <div className="relative aspect-[4/3] overflow-hidden bg-zinc-50 border-b border-border/50">
+                              {reward.image ? (
+                                <img
+                                  src={reward.image}
+                                  alt={reward.title}
+                                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                />
+                              ) : (
+                                <div className="h-full w-full flex flex-col items-center justify-center opacity-10">
+                                  <Ticket className="h-12 w-12 mb-2" />
+                                </div>
+                              )}
+                              <div className="absolute top-2.5 left-2.5">
+                                <div className={cn("flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest shadow-md ring-1 ring-black/5", badge.color)}>
+                                  <BadgeIcon className="h-2.5 w-2.5" />
+                                  {badge.label}
+                                </div>
+                              </div>
+                              <div className="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest border border-white/10 shadow-lg">
+                                {reward.inventory ?? "∞"} Unit
+                              </div>
+                              <div className="absolute inset-0 bg-indigo-900/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center gap-3 backdrop-blur-[2px]">
+                                <Link href={`/rewards/coupons/edit/${reward.id}`}>
+                                   <Button size="icon" variant="secondary" className="h-10 w-10 rounded-xl shadow-2xl ring-1 ring-black/10 hover:scale-110 transition-transform">
+                                      <Pencil className="h-4 w-4" />
+                                   </Button>
+                                </Link>
+                                {reward.inventoryRequired && (
+                                  <Button onClick={() => openUploadForReward(reward.id)} size="icon" variant="secondary" className="h-10 w-10 rounded-xl shadow-2xl ring-1 ring-black/10 hover:scale-110 transition-transform">
+                                     <Upload className="h-4 w-4" />
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                            <div className="p-4 space-y-3">
+                              <div className="min-h-[40px]">
+                                <h3 className="text-[13px] font-black text-foreground line-clamp-1 group-hover:text-indigo-600 transition-colors uppercase tracking-tight">
+                                  {reward.title}
+                                </h3>
+                                <p className="text-[11px] text-muted-foreground line-clamp-2 mt-1 leading-tight font-medium opacity-70">
+                                  {reward.description || "No categorical description defined for this reward nexus."}
+                                </p>
+                              </div>
+                              <div className="flex items-center justify-between pt-3 border-t border-border/40">
+                                <div className="flex items-center gap-1.5">
+                                  <div className="h-5 w-5 rounded-full bg-amber-50 border border-amber-100 flex items-center justify-center">
+                                    <Zap className="h-2.5 w-2.5 text-amber-500 fill-current" />
+                                  </div>
+                                  <span className="text-[11px] font-black text-foreground tabular-nums">
+                                    {reward.tcRequired || 0} PTS
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                   <div className="h-4 w-px bg-border/50" />
+                                   <Link href={`/rewards/coupons/edit/${reward.id}`} className="text-[9px] font-black text-indigo-600 uppercase tracking-widest hover:underline underline-offset-4"> Manage Node </Link>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {filteredRewards.map((reward: any) => {
+                        const type = getInteractionType(reward.category);
+                        const badge = getInteractiveBadge(type);
+                        const BadgeIcon = badge.icon;
+                        return (
+                          <div key={reward.id} className="group flex items-center gap-4 p-4 bg-card rounded-2xl border border-border hover:border-indigo-500/20 hover:shadow-lg hover:shadow-indigo-500/[0.02] transition-all duration-300">
+                            <div className="h-14 w-14 rounded-xl bg-zinc-50 border border-border/60 overflow-hidden shrink-0 shadow-sm ring-1 ring-black/[0.03]">
+                              {reward.image ? (
+                                <img src={reward.image} alt={reward.title} className="h-full w-full object-cover" />
+                              ) : (
+                                <div className="h-full w-full flex items-center justify-center opacity-10">
+                                  <Ticket className="h-6 w-6" />
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <h3 className="text-sm font-black text-foreground truncate group-hover:text-indigo-600 transition-colors uppercase tracking-tight">
+                                  {reward.title}
+                                </h3>
+                                <span className={cn("inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg border text-[8px] font-black uppercase tracking-widest shrink-0", badge.chip)}>
+                                  <BadgeIcon className="h-2.5 w-2.5" />
+                                  {badge.label}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-4 text-[10px] font-bold text-muted-foreground/70 uppercase tracking-tighter">
+                                <span className="flex items-center gap-1.5 px-2 py-0.5 bg-muted rounded">
+                                  <Zap className="h-2.5 w-2.5 text-amber-500" />
+                                  {reward.tcRequired || 0} Points Required
+                                </span>
+                                <span className="flex items-center gap-1.5">
+                                  <Clock className="h-2.5 w-2.5 text-indigo-400" />
+                                  {reward.expiryDays || "No"} Expiry Cycle
+                                </span>
+                                <span className="bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded text-[8px] font-black">
+                                  STOCK: {reward.inventory ?? "∞"}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                              {reward.inventoryRequired && (
+                                <Button onClick={() => openUploadForReward(reward.id)} variant="outline" size="sm" className="h-8 px-4 gap-2 text-[10px] font-black uppercase tracking-widest rounded-xl border-border bg-card">
+                                  <Upload className="h-3.5 w-3.5" /> Upload Batch
+                                </Button>
+                              )}
+                              <Link href={`/rewards/coupons/edit/${reward.id}`}>
+                                <Button size="sm" className="h-8 px-4 gap-2 text-[10px] font-black uppercase tracking-widest rounded-xl shadow-md">
+                                  <Pencil className="h-3.5 w-3.5" /> Edit Offer
+                                </Button>
+                              </Link>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )
+                ) : (
+                  <div className="py-32 flex flex-col items-center justify-center text-center">
+                    <div className="h-24 w-24 rounded-[2rem] bg-indigo-50 border-4 border-white shadow-2xl flex items-center justify-center mb-8 rotate-3">
+                      <Ticket className="h-10 w-10 text-indigo-300" />
+                    </div>
+                    <div className="space-y-2 max-w-sm">
+                      <h3 className="text-xl font-black text-foreground uppercase tracking-tight">
+                        Offer Nexus Offline
+                      </h3>
+                      <p className="text-[13px] text-muted-foreground leading-relaxed font-medium">
+                        {searchQuery ? `The filter query "${searchQuery}" yielded zero results across your reward collection.` : "Your economic engine is currently idle. Define your first master reward offer to begin the exchange lifecycle."}
                       </p>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7 shrink-0 rounded-lg"
-                      onClick={resetUpload}
-                    >
-                      <X className="h-3.5 w-3.5" />
-                    </Button>
+                    <div className="mt-8">
+                       <Link href="/rewards/coupons/create">
+                          <Button className="h-11 px-8 rounded-2xl gap-3 font-black uppercase tracking-widest shadow-xl ring-1 ring-black/10">
+                             <Plus className="h-5 w-5" /> Initialize Reward
+                          </Button>
+                       </Link>
+                    </div>
                   </div>
                 )}
+            </div>
+         )}
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="flex items-center gap-3 p-4 rounded-xl border border-emerald-200 bg-emerald-50 dark:bg-emerald-500/10 dark:border-emerald-500/20">
-                    <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
-                    <div>
-                      <p className="text-xl font-bold text-emerald-900 dark:text-emerald-300 tabular-nums">
-                        {validCount}
-                      </p>
-                      <p className="text-[11px] text-emerald-700/80 dark:text-emerald-400/80">
-                        ready to upload
-                      </p>
-                    </div>
-                  </div>
-                  {invalidCount > 0 && (
-                    <div className="flex items-center gap-3 p-4 rounded-xl border border-rose-200 bg-rose-50 dark:bg-rose-500/10 dark:border-rose-500/20">
-                      <AlertCircle className="h-5 w-5 text-rose-600 shrink-0" />
-                      <div>
-                        <p className="text-xl font-bold text-rose-900 dark:text-rose-300 tabular-nums">
-                          {invalidCount}
-                        </p>
-                        <p className="text-[11px] text-rose-700/80 dark:text-rose-400/80">
-                          with errors (skipped)
-                        </p>
+         {activeTab === "codes" && (
+            <div className="px-6 space-y-6">
+               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+                  {[
+                    { label: "Total Capacity", value: totalVouchers, icon: Ticket, color: "text-indigo-600", bg: "bg-indigo-50", desc: "Digital Assets Logged" },
+                    { label: "Market Ready", value: availableVouchers, icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-50", desc: "Available for Emission" },
+                    { label: "Redemption Flow", value: usedVouchers, icon: History, color: "text-slate-600", bg: "bg-slate-50", desc: `${utilRate}% Consumption` },
+                    { label: "Critical Expiry", value: expiringSoon, icon: AlertTriangle, color: expiringSoon > 0 ? "text-rose-600" : "text-zinc-400", bg: expiringSoon > 0 ? "bg-rose-50" : "bg-zinc-50", desc: expiringSoon > 0 ? "T-Minus 7 Days" : "No Impending Expiry" },
+                  ].map((s, i) => (
+                    <div key={i} className="flex items-center gap-4 p-5 rounded-2xl border border-border bg-card shadow-sm ring-1 ring-black/[0.02]">
+                      <div className={cn("h-11 w-11 rounded-xl flex items-center justify-center border border-border/40 shrink-0 shadow-inner", s.bg)}>
+                        <s.icon className={cn("h-5 w-5", s.color)} />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest truncate">{s.label}</p>
+                        <p className="text-2xl font-black text-foreground tabular-nums leading-none mt-1">{s.value}</p>
+                        <p className="text-[10px] font-bold text-muted-foreground/60 truncate mt-1">{s.desc}</p>
                       </div>
                     </div>
-                  )}
-                </div>
+                  ))}
+               </div>
 
-                {invalidCount > 0 && (
-                  <div className="p-3 rounded-lg bg-muted/50 border border-border space-y-1.5 max-h-28 overflow-y-auto">
-                    <p className="text-[10px] font-bold text-foreground uppercase tracking-wide">
-                      Error details
+               {totalVouchers > 0 && (
+                  <div className="p-5 rounded-2xl border border-border bg-card shadow-sm space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                         <span className="text-[11px] font-black text-foreground uppercase tracking-widest">Inventory Saturation</span>
+                         <div className="h-2 w-2 rounded-full bg-indigo-500 animate-pulse" />
+                      </div>
+                      <span className="text-[11px] font-bold text-muted-foreground tabular-nums">
+                        {usedVouchers} OF {totalVouchers} CONSUMED ({utilRate}%)
+                      </span>
+                    </div>
+                    <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                      <div className={cn("h-full rounded-full transition-all duration-1000", utilRate >= 85 ? "bg-rose-500" : utilRate >= 60 ? "bg-amber-500" : "bg-indigo-600")} style={{ width: `${utilRate}%` }} />
+                    </div>
+                  </div>
+               )}
+
+               <div className="space-y-3">
+                  <VoucherManagementTable
+                    vouchers={mappedVouchers}
+                    isLoading={vouchersLoading}
+                    onViewDetails={(v) => { setSelectedVoucher(v); setIsDetailsOpen(true); }}
+                    onMarkAsUsed={handleMarkAsUsed}
+                    onDelete={handleDelete}
+                  />
+               </div>
+            </div>
+         )}
+
+         {activeTab === "inventory" && (
+            <div className="px-6 space-y-6 mt-4">
+               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {[
+                    { label: "Active Tracking", value: totalTracked, desc: "Rewards with inventory logic", icon: Package, color: "text-indigo-600", bg: "bg-indigo-50" },
+                    { label: "Optimal Logic", value: healthyCount, desc: "Stock above safety margin", icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-50" },
+                    { label: "Critical Stock", value: lowStockCount, desc: lowStockCount > 0 ? "Immediate restock required" : "All nodes fully saturated", icon: AlertTriangle, color: lowStockCount > 0 ? "text-rose-600" : "text-zinc-400", bg: lowStockCount > 0 ? "bg-rose-50" : "bg-zinc-50" },
+                  ].map((stat, i) => (
+                    <div key={i} className="flex items-center gap-4 p-5 rounded-2xl border border-border bg-card shadow-sm ring-1 ring-black/[0.02]">
+                      <div className={cn("h-12 w-12 rounded-2xl flex items-center justify-center shrink-0 border border-border/40 shadow-inner", stat.bg)}>
+                        <stat.icon className={cn("h-6 w-6", stat.color)} />
+                      </div>
+                      <div>
+                        <p className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.1em]">{stat.label}</p>
+                        <p className="text-2xl font-black text-foreground tabular-nums leading-tight mt-1">{stat.value}</p>
+                        <p className="text-[10px] font-bold text-muted-foreground/70">{stat.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+               </div>
+
+               <div className="space-y-3">
+                  <InventoryTable items={inventoryItems} isLoading={rewardsLoading} />
+               </div>
+            </div>
+         )}
+      </EcosystemContainer>
+
+      {/* ── Auxiliary Components ──────── */}
+      <VoucherDetailsDialog
+        voucher={selectedVoucher}
+        open={isDetailsOpen}
+        onOpenChange={setIsDetailsOpen}
+        onMarkAsUsed={handleMarkAsUsed}
+        onDelete={handleDelete}
+      />
+
+      <Dialog open={isUploadOpen} onOpenChange={(o) => { if (!o) resetUpload(); else setIsUploadOpen(true); }}>
+        <DialogContent className="sm:max-w-lg rounded-[2rem] border-border shadow-2xl p-0 overflow-hidden">
+          <div className="p-8 space-y-6">
+            <DialogHeader className="text-left">
+               <div className="flex items-center gap-4">
+                  <div className="h-14 w-14 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center shadow-sm">
+                    <Upload className="h-6 w-6 text-indigo-600" />
+                  </div>
+                  <div>
+                    <DialogTitle className="text-xl font-black uppercase tracking-tight">Mass Ingestion</DialogTitle>
+                    <DialogDescription className="text-xs font-medium text-muted-foreground mt-1">
+                       Feed unique voucher credentials into your economic engine via CSV protocol.
+                    </DialogDescription>
+                  </div>
+               </div>
+            </DialogHeader>
+
+            <div className="space-y-5">
+              <div className="space-y-2">
+                <Label className="text-[11px] font-black text-muted-foreground uppercase tracking-widest px-1">Source Destination Reward</Label>
+                <Select value={uploadRewardId} onValueChange={setUploadRewardId}>
+                  <SelectTrigger className="h-12 rounded-2xl border-border bg-zinc-50 font-bold focus:ring-2 focus:ring-indigo-500/20">
+                    <SelectValue placeholder="Targeting Reward Node..." />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-2xl p-1 shadow-2xl border-border">
+                    {inventoryItems.map((item: any) => (
+                      <SelectItem key={item.id} value={item.id} className="rounded-xl py-2.5 font-bold text-sm">
+                        {item.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {uploadStep === "idle" && (
+                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                  <input ref={fileInputRef} type="file" accept=".csv" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFileSelect(f); }} />
+                  <div className={cn("border-2 border-dashed rounded-3xl p-10 flex flex-col items-center gap-4 cursor-pointer transition-all duration-500 group", isDragging ? "border-indigo-400 bg-indigo-50/50 scale-[1.02]" : "border-border hover:border-indigo-300 hover:bg-zinc-50")} onClick={() => fileInputRef.current?.click()} onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }} onDragLeave={() => setIsDragging(false)} onDrop={(e) => { e.preventDefault(); setIsDragging(false); const f = e.dataTransfer.files[0]; if (f) handleFileSelect(f); }}>
+                    <div className="h-14 w-14 rounded-2xl bg-white flex items-center justify-center shadow-lg border border-border group-hover:scale-110 transition-transform">
+                      <FileDown className="h-6 w-6 text-indigo-500" />
+                    </div>
+                    <div className="text-center">
+                      <p className="text-[13px] font-black text-foreground uppercase tracking-tight">{isDragging ? "Protocol Accepted: Drop Now" : "Establish Link: Click or Drop CSV"}</p>
+                      <p className="text-[10px] font-bold text-muted-foreground/60 mt-1 uppercase tracking-widest">Supports up to 50,000 Unique Entries</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 p-4 rounded-2xl bg-indigo-50/30 border border-indigo-100/50">
+                    <Info className="h-4 w-4 text-indigo-500 shrink-0 mt-0.5" />
+                    <p className="text-[11px] text-indigo-700 font-medium leading-relaxed">
+                       Download our <span onClick={downloadTemplate} className="text-indigo-600 font-black cursor-pointer hover:underline">Voucher Schema Template</span> to ensure seamless ingestion and prevent allocation errors during the upload cycle.
                     </p>
-                    {parsedVouchers
-                      .filter((v) => !v.isValid)
-                      .slice(0, 5)
-                      .map((v, i) => (
-                        <p
-                          key={i}
-                          className="text-xs text-rose-600 flex items-center gap-1.5"
-                        >
-                          <span className="h-1 w-1 rounded-full bg-rose-400 shrink-0" />
-                          <span className="font-mono text-[10px]">
-                            {v.code}
-                          </span>
-                          : {v.error}
-                        </p>
-                      ))}
-                    {invalidCount > 5 && (
-                      <p className="text-xs text-muted-foreground">
-                        ...and {invalidCount - 5} more
-                      </p>
+                  </div>
+                </div>
+              )}
+
+              {uploadStep === "validating" && (
+                <div className="flex flex-col items-center justify-center py-12 gap-5 animate-pulse">
+                  <div className="h-16 w-16 rounded-3xl bg-indigo-50 border border-indigo-100 flex items-center justify-center shadow-inner">
+                    <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+                  </div>
+                  <p className="text-sm font-black text-muted-foreground uppercase tracking-widest">Validating Integrity...</p>
+                </div>
+              )}
+
+              {uploadStep === "summary" && (
+                <div className="space-y-4 animate-in zoom-in-95 duration-500">
+                  <div className="flex items-center gap-4 p-4 rounded-2xl bg-zinc-50 border border-zinc-200 shadow-inner">
+                    <div className="h-10 w-10 rounded-xl bg-white border border-border flex items-center justify-center shadow-sm">
+                       <FileText className="h-5 w-5 text-indigo-500" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] font-black text-foreground truncate uppercase tracking-tight">{uploadedFile?.name}</p>
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Checksum Passed · {(uploadedFile!.size / 1024).toFixed(1)} KB</p>
+                    </div>
+                    <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:bg-rose-50 hover:text-rose-600 transition-colors" onClick={resetUpload}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-emerald-50 border border-emerald-100 p-5 rounded-2xl shadow-sm">
+                       <span className="text-2xl font-black text-emerald-600 tabular-nums">{validCount}</span>
+                       <p className="text-[9px] font-black text-emerald-700/70 uppercase tracking-widest mt-1 leading-none">Accepted Records</p>
+                    </div>
+                    {invalidCount > 0 && (
+                      <div className="bg-rose-50 border border-rose-100 p-5 rounded-2xl shadow-sm">
+                         <span className="text-2xl font-black text-rose-600 tabular-nums">{invalidCount}</span>
+                         <p className="text-[9px] font-black text-rose-700/70 uppercase tracking-widest mt-1 leading-none">Invalid Signals</p>
+                      </div>
                     )}
                   </div>
-                )}
-              </div>
-            )}
+                </div>
+              )}
+            </div>
           </div>
 
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={resetUpload}
-              disabled={uploading}
-              className="rounded-lg"
-            >
-              Cancel
-            </Button>
+          <div className="bg-zinc-50 p-6 flex items-center justify-end gap-3 border-t border-border/50">
+            <Button variant="ghost" onClick={resetUpload} disabled={uploading} className="rounded-xl font-bold text-xs uppercase tracking-widest">Abort</Button>
             {uploadStep === "summary" && validCount > 0 && (
-              <Button
-                onClick={confirmUpload}
-                disabled={uploading}
-                className="gap-2 rounded-lg"
-              >
-                {uploading && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-                Upload {validCount} codes
+              <Button onClick={confirmUpload} disabled={uploading} className="h-11 px-8 rounded-xl gap-3 font-black uppercase tracking-widest shadow-xl">
+                {uploading ? <Loader2 className="h-5 w-5 animate-spin" /> : <CheckCircle2 className="h-5 w-5" />}
+                Ingest {validCount} Units
               </Button>
             )}
-          </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
     </EcosystemWrapper>

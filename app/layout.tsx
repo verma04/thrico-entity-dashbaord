@@ -29,6 +29,8 @@ import "./globals.css";
 import { ApolloWrapper } from "@/graphql/hoc/ApolloWrapper";
 import type { Metadata } from "next";
 import { Toaster } from "sonner";
+import { ThemeProvider } from "@/components/theme-provider";
+import { BrandStyles } from "@/components/layout/brand-styles";
 
 const roobert = localFont({
   src: [
@@ -309,7 +311,18 @@ export default function RootLayout({
         className={`${plusJakartaSans.variable} ${roobert.variable} ${avantGarde.variable} ${spaceGrotesk.className} ${inter.variable} ${playfair.variable} ${outfit.variable} ${firaCode.variable} ${roboto.variable} ${openSans.variable} ${montserrat.variable} ${lato.variable} ${poppins.variable} ${nunito.variable} ${sourceSans3.variable} ${workSans.variable} ${ubuntu.variable} ${merriweather.variable} ${lora.variable} ${cormorantGaramond.variable} ${bitter.variable} ${oswald.variable} ${raleway.variable} ${bebasNeue.variable} ${cinzel.variable} ${pacifico.variable} font-sans antialiased`}
       >
         <Toaster position="top-right" />
-        <ApolloWrapper>{children}</ApolloWrapper>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+          themes={["light", "dark", "system", "brand"]}
+        >
+          <ApolloWrapper>
+            <BrandStyles />
+            {children}
+          </ApolloWrapper>
+        </ThemeProvider>
       </body>
     </html>
   );

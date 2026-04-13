@@ -104,61 +104,55 @@ export function OffersManager() {
         }
       />
 
-      <EcosystemActionBar>
-        <div className="flex items-center gap-2 relative z-10 w-full md:max-w-[400px] group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
-          <Input
-            placeholder="Search offers..."
-            className="pl-12 h-12 bg-slate-50 border-slate-200 rounded-xl focus-visible:ring-4 focus-visible:ring-indigo-500/5 transition-all font-medium text-slate-700 placeholder:text-slate-400 border shadow-sm w-full"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={handleReset}
-            title="Reset Filters"
-            className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-lg shrink-0 border-transparent bg-transparent text-slate-400 hover:text-indigo-600 hover:bg-slate-200"
-          >
-            <RotateCcw className="h-4 w-4" />
-          </Button>
-        </div>
+      <EcosystemActionBar shadow="none">
+        <EcosystemActionBar.Group>
+          <EcosystemActionBar.Item grow className="max-w-[400px]">
+             <EcosystemActionBar.Search
+              value={search}
+              onChange={setSearch}
+              placeholder="Search offers..."
+            />
+          </EcosystemActionBar.Item>
+        </EcosystemActionBar.Group>
 
-        <div className="flex items-center gap-4 pr-4 ml-auto">
-          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger className="w-[180px] h-12 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition-colors shadow-sm font-semibold text-slate-600 focus:ring-4 focus:ring-indigo-500/5 hidden md:flex">
-              <div className="flex items-center gap-2">
-                <LayoutGrid className="h-4 w-4 text-slate-400" />
-                <SelectValue placeholder="All Categories" />
-              </div>
-            </SelectTrigger>
-            <SelectContent className="rounded-xl border-slate-200 shadow-xl p-1">
-              <SelectItem value="all" className="font-semibold rounded-lg py-2.5">All Categories</SelectItem>
-              {categories.map((cat) => (
-                <SelectItem key={cat.id} value={cat.id} className="font-semibold rounded-lg py-2.5">
-                  {cat.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <EcosystemActionBar.Group align="right">
+          <EcosystemActionBar.Item>
+            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <SelectTrigger className="w-[170px] h-9 rounded-lg border-border bg-card text-sm font-medium text-foreground shadow-none focus:ring-2 focus:ring-ring/20">
+                <div className="flex items-center gap-2">
+                  <LayoutGrid className="h-3.5 w-3.5 text-muted-foreground" />
+                  <SelectValue placeholder="All Categories" />
+                </div>
+              </SelectTrigger>
+              <SelectContent className="rounded-xl border-border shadow-lg p-1">
+                <SelectItem value="all" className="rounded-lg text-sm font-medium py-2">All Categories</SelectItem>
+                {categories.map((cat) => (
+                  <SelectItem key={cat.id} value={cat.id} className="rounded-lg text-sm font-medium py-2">
+                    {cat.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </EcosystemActionBar.Item>
 
-          <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-            <SelectTrigger className="w-[150px] h-12 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition-colors shadow-sm font-semibold text-slate-600 focus:ring-4 focus:ring-indigo-500/5 hidden md:flex">
-              <SelectValue placeholder="All Status" />
-            </SelectTrigger>
-            <SelectContent className="rounded-xl border-slate-200 shadow-xl p-1">
-              <SelectItem value="all" className="font-semibold rounded-lg py-2.5">All Status</SelectItem>
-              <SelectItem value="ACTIVE" className="font-semibold rounded-lg py-2.5 text-emerald-600">Active</SelectItem>
-              <SelectItem value="INACTIVE" className="font-semibold rounded-lg py-2.5 text-slate-500">Inactive</SelectItem>
-              <SelectItem value="EXPIRED" className="font-semibold rounded-lg py-2.5 text-rose-600">Expired</SelectItem>
-            </SelectContent>
-          </Select>
+          <EcosystemActionBar.Item>
+            <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+              <SelectTrigger className="w-[140px] h-9 rounded-lg border-border bg-card text-sm font-medium text-foreground shadow-none focus:ring-2 focus:ring-ring/20">
+                <SelectValue placeholder="All Status" />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl border-border shadow-lg p-1">
+                <SelectItem value="all" className="rounded-lg text-sm font-medium py-2">All Status</SelectItem>
+                <SelectItem value="ACTIVE" className="rounded-lg text-sm font-medium py-2 text-emerald-600">Active</SelectItem>
+                <SelectItem value="INACTIVE" className="rounded-lg text-sm font-medium py-2 text-muted-foreground">Inactive</SelectItem>
+                <SelectItem value="EXPIRED" className="rounded-lg text-sm font-medium py-2 text-rose-600">Expired</SelectItem>
+              </SelectContent>
+            </Select>
+          </EcosystemActionBar.Item>
 
-          <div className="flex items-center gap-2.5 px-4 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs font-semibold text-slate-600 uppercase tracking-wide whitespace-nowrap shadow-inner">
-            <span className="h-1.5 w-1.5 rounded-full bg-indigo-500 animate-pulse" />
-            {offers.length} Offers
-          </div>
-        </div>
+          <EcosystemActionBar.Status active={offers.length > 0}>
+             {offers.length} Offers
+          </EcosystemActionBar.Status>
+        </EcosystemActionBar.Group>
       </EcosystemActionBar>
 
       <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">

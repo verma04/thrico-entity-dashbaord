@@ -1,218 +1,108 @@
 "use client";
 
-import { useState } from "react";
+import React from "react";
 import {
-  useReactTable,
-  getCoreRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  getFilteredRowModel,
-  flexRender,
-  ColumnDef,
-  SortingState,
-  ColumnFiltersState,
-} from "@tanstack/react-table";
+  AdminTable,
+  AdminStatusBadge,
+} from "@/components/shared/admin-table/admin-table";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
-import { ChevronLeft, ChevronRight, Search } from "lucide-react";
+  BarChart3,
+  MessageSquare,
+  Clock,
+  LayoutGrid,
+  Calendar,
+} from "lucide-react";
 import moment from "moment";
-
 import { poll } from "./ts-types";
 import Actions from "./poll-actions";
-import { getStatusTag } from "./utils";
+import { cn } from "@/lib/utils";
 
-export default function List({ data }: { data: poll[] }) {
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [globalFilter, setGlobalFilter] = useState("");
-
-  const columns: ColumnDef<poll>[] = [
+export default function List({
+  data,
+  isLoading = false,
+}: {
+  data: poll[];
+  isLoading?: boolean;
+}) {
+  const columns = [
     {
-      accessorKey: "title",
-      header: "Title",
-      cell: ({ row }) => (
-        <div className="font-medium">{row.getValue("title")}</div>
+      key: "title",
+      header: "Poll",
+      cell: (poll: poll) => (
+        <div className="flex items-center gap-3">
+          <div className="h-8 w-8 rounded-lg bg-zinc-50 border border-zinc-200 flex items-center justify-center shrink-0">
+            <MessageSquare className="h-4 w-4 text-zinc-400" />
+          </div>
+          <div className="flex flex-col min-w-0">
+            <span className="text-sm font-medium text-foreground truncate max-w-[280px]">
+              {poll.title}
+            </span>
+            <span className="text-[11px] text-zinc-400 line-clamp-1 max-w-[320px] mt-0.5">
+              {poll.question}
+            </span>
+          </div>
+        </div>
       ),
     },
+
     {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }) => getStatusTag(row.original.status),
-    },
-    {
-      accessorKey: "question",
-      header: "Question",
-      cell: ({ row }) => (
-        <div className="max-w-md truncate">{row.getValue("question")}</div>
-      ),
-    },
-    {
-      id: "options",
+      key: "options",
       header: "Options",
-      cell: ({ row }) => (
-        <div className="max-w-xs truncate">
-          {row.original.options?.map((option) => option.text).join(", ")}
+      cell: (poll: poll) => (
+        <div className="flex items-center gap-1.5 flex-wrap max-w-xs">
+          {poll.options?.slice(0, 3).map((opt, i) => (
+            <div
+              key={i}
+              className="text-[10px] px-1.5 py-0.5 rounded-md bg-zinc-50 text-zinc-500 border border-zinc-200/50"
+            >
+              {opt.text}
+            </div>
+          ))}
+          {(poll.options?.length || 0) > 3 && (
+            <span className="text-[10px] text-zinc-400 ml-0.5">
+              +{(poll.options?.length || 0) - 3} more
+            </span>
+          )}
         </div>
       ),
     },
     {
-      accessorKey: "createdAt",
-      header: "Created At",
-      cell: ({ row }) => (
-        <span className="text-muted-foreground">
-          {moment(row.getValue("createdAt")).format("MMMM Do YYYY")}
-        </span>
+      key: "dates",
+      header: "Date",
+      cell: (poll: poll) => (
+        <div className="flex flex-col">
+          <div className="flex items-center gap-2">
+            <Calendar className="h-3.5 w-3.5 text-zinc-300" />
+            <span className="text-xs text-foreground">
+              {moment(poll.createdAt).format("MMM D, YYYY")}
+            </span>
+          </div>
+          <span className="text-[10px] text-zinc-400 ml-5.5 mt-0.5">
+            Updated {moment(poll.updatedAt).fromNow()}
+          </span>
+        </div>
       ),
     },
     {
-      accessorKey: "updatedAt",
-      header: "Last Update",
-      cell: ({ row }) => (
-        <span className="text-muted-foreground">
-          {moment(row.getValue("updatedAt")).fromNow()}
-        </span>
-      ),
-    },
-    {
-      id: "actions",
-      header: () => <div className="text-right">Actions</div>,
-      cell: ({ row }) => (
-        <div className="text-right">
-          <Actions {...row.original} />
+      key: "actions",
+      header: "",
+      headerClassName: "w-[50px]",
+      cell: (poll: poll) => (
+        <div className="flex justify-end pr-2">
+          <Actions {...poll} />
         </div>
       ),
     },
   ];
 
-  const table = useReactTable({
-    data: data || [],
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    onGlobalFilterChange: setGlobalFilter,
-    state: {
-      sorting,
-      columnFilters,
-      globalFilter,
-    },
-    initialState: {
-      pagination: {
-        pageSize: 10,
-      },
-    },
-  });
-
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search polls..."
-            value={globalFilter ?? ""}
-            onChange={(e) => setGlobalFilter(e.target.value)}
-            className="pl-8"
-          />
-        </div>
-      </div>
-
-      <Card>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows &&
-              table.getRowModel().rows.length > 0 ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id}>
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center text-muted-foreground"
-                  >
-                    No polls found matching your criteria
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-
-      <div className="flex items-center justify-between">
-        <div className="text-sm text-muted-foreground">
-          Showing{" "}
-          {table.getState().pagination.pageIndex *
-            table.getState().pagination.pageSize +
-            1}{" "}
-          to{" "}
-          {Math.min(
-            (table.getState().pagination.pageIndex + 1) *
-              table.getState().pagination.pageSize,
-            table.getFilteredRowModel().rows.length
-          )}{" "}
-          of {table.getFilteredRowModel().rows.length} results
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            <ChevronLeft className="h-4 w-4 mr-1" />
-            Previous
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            Next
-            <ChevronRight className="h-4 w-4 ml-1" />
-          </Button>
-        </div>
-      </div>
-    </div>
+    <AdminTable
+      columns={columns}
+      data={data || []}
+      loading={isLoading}
+      keyExtractor={(poll) => poll.id}
+      emptyTitle="No polls found"
+      emptyDescription="Create a new poll to start gathering feedback."
+    />
   );
 }

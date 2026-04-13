@@ -108,8 +108,14 @@ export const communityIntelligence = [
         label: "Add New Member",
         path: "/members/create",
       },
-      { key: "members-reported", label: "Reported", path: "/members/reports" },
+
+      {
+        key: "members-reported",
+        label: "Reported Items",
+        path: "/members/reports",
+      },
       { key: "members-settings", label: "Settings", path: "/members/settings" },
+      { key: "members-audit", label: "Audit Log", path: "/members/audit-log" },
     ],
   },
 ];
@@ -150,7 +156,7 @@ export const contentModeration = [
         path: "/feed/listing",
         isMobileOnly: true,
       },
-      { key: "feed-reported", label: "Reported", path: "/feed/reported" },
+      { key: "feed-reported", label: "Reported Items", path: "/feed/reported" },
     ],
   },
   {
@@ -164,6 +170,11 @@ export const contentModeration = [
     label: "Moderation Settings",
     icon: <Settings size={18} />,
     children: [
+      {
+        key: "mod-moderation",
+        label: "Ai Moderation",
+        path: "/moderation/settings",
+      },
       {
         key: "mod-banned",
         label: "Banned words",
@@ -248,7 +259,7 @@ export const gamificationEngine = [
         path: "/currency/redemption",
       },
       { key: "cur-trace", label: "Quick Trace", path: "/currency/trace" },
-      { key: "cur-audit", label: "Audit Log", path: "/currency/audit" },
+      { key: "cur-audit", label: "Audit Log", path: "/currency/audit-log" },
     ],
   },
   {
@@ -381,6 +392,34 @@ export const modules = [
         path: "/listing/reports",
       },
       { key: "market-settings", label: "Settings", path: "/listing/settings" },
+      { key: "market-audit", label: "Audit Log", path: "/listing/audit-logs" },
+    ],
+  },
+
+  {
+    key: "moments",
+    label: "Moments",
+    path: "/moments",
+    isMobileOnly: true,
+    icon: <Video size={18} />,
+    children: [
+      { key: "mom-dash", label: "Dashboard", path: "/moments" },
+      {
+        key: "mom-create",
+        label: "Create Moments",
+        path: "/moments/create",
+      },
+      {
+        key: "mom-manage",
+        label: "Manage Moments",
+        path: "/moments/all",
+      },
+      {
+        key: "mom-reported",
+        label: "Reported Items",
+        path: "/moments/reports",
+      },
+      { key: "mom-settings", label: "Settings", path: "/moments/settings" },
     ],
   },
   {
@@ -417,6 +456,7 @@ export const modules = [
       },
       { key: "for-reported", label: "Reported Items", path: "/forums/reports" },
       { key: "for-settings", label: "Settings", path: "/forums/settings" },
+      { key: "for-audit", label: "Audit Log", path: "/forums/audit-log" },
     ],
   },
   {
@@ -592,7 +632,7 @@ export const adminSettings = [
         path: "/settings/subscription",
       },
       { key: "acc-inv", label: "Invoices", path: "/settings/invoices" },
-      { key: "acc-audit", label: "Audit Logs", path: "/audit-logs" },
+      { key: "acc-audit", label: "Audit Log", path: "/audit-logs" },
       { key: "acc-export", label: "Export Data", path: "/settings/export" },
     ],
   },

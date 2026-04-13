@@ -503,14 +503,14 @@ export const ADD_FEED = gql`
 `;
 
 export const LIKE_FEED = gql`
-  mutation likeFeed($input: inputId) {
+  mutation likeFeed($input: InputId) {
     likeFeed(input: $input) {
       status
     }
   }
 `;
 export const ADD_COMMENT = gql`
-  mutation AddComment($input: inputComment) {
+  mutation AddComment($input: InputComment) {
     addComment(input: $input) {
       id
       content
@@ -533,7 +533,7 @@ export const ADD_COMMENT = gql`
 `;
 
 export const GET_FEED_COMMENTS = gql`
-  query GetFeedComment($input: inputId) {
+  query GetFeedComment($input: InputId) {
     getFeedComment(input: $input) {
       id
       content
@@ -574,7 +574,7 @@ export const DELETE_COMMENT_FEED = gql`
 `;
 
 export const DELETE_FEED = gql`
-  mutation DeleteFeed($input: inputId) {
+  mutation DeleteFeed($input: InputId) {
     deleteFeed(input: $input) {
       status
     }
@@ -586,7 +586,10 @@ export const DELETE_FEED = gql`
 // ==========================================
 
 export const GET_FEED_INTELLIGENCE_KPI = gql`
-  query GetFeedIntelligenceKPI($timeRange: TimeRange, $dateRange: DateRangeInput) {
+  query GetFeedIntelligenceKPI(
+    $timeRange: TimeRange
+    $dateRange: DateRangeInput
+  ) {
     getFeedIntelligenceKPI(timeRange: $timeRange, dateRange: $dateRange) {
       aggregateReach
       activeDialogue
@@ -601,7 +604,10 @@ export const GET_FEED_INTELLIGENCE_KPI = gql`
 `;
 
 export const GET_FEED_YIELD_VELOCITY = gql`
-  query GetFeedYieldVelocity($timeRange: TimeRange, $dateRange: DateRangeInput) {
+  query GetFeedYieldVelocity(
+    $timeRange: TimeRange
+    $dateRange: DateRangeInput
+  ) {
     getFeedYieldVelocity(timeRange: $timeRange, dateRange: $dateRange) {
       day
       signups
@@ -610,7 +616,10 @@ export const GET_FEED_YIELD_VELOCITY = gql`
 `;
 
 export const GET_FEED_INTEREST_MATRIX = gql`
-  query GetFeedInterestMatrix($timeRange: TimeRange, $dateRange: DateRangeInput) {
+  query GetFeedInterestMatrix(
+    $timeRange: TimeRange
+    $dateRange: DateRangeInput
+  ) {
     getFeedInterestMatrix(timeRange: $timeRange, dateRange: $dateRange) {
       name
       value

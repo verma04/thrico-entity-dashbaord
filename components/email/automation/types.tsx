@@ -10,7 +10,7 @@ import {
 // ─── Core Types ──────────────────────────────────────────────────────────────
 export type NodeType = "trigger" | "condition" | "action" | "delay";
 
-export type CampaignStatus = "draft" | "released" | "finished";
+export type CampaignStatus = "draft" | "active" | "inactive";
 export type CampaignFrequency = "one-time" | "recurring";
 export type CronType = "weekly" | "monthly" | "custom";
 export type ChannelType = "email";
@@ -401,7 +401,7 @@ export const MOCK_CAMPAIGNS: {
   {
     id: "c1",
     name: "Welcome New Members",
-    status: "released",
+    status: "active",
     frequency: "one-time",
     module: "Communities",
     channelType: "email",
@@ -429,7 +429,7 @@ export const MOCK_CAMPAIGNS: {
   {
     id: "c3",
     name: "Job Application Follow-up",
-    status: "finished",
+    status: "inactive",
     frequency: "one-time",
     module: "Jobs",
     channelType: "email",
@@ -442,7 +442,7 @@ export const MOCK_CAMPAIGNS: {
   {
     id: "c4",
     name: "Happy Birthday members",
-    status: "released",
+    status: "active",
     frequency: "recurring",
     cronLabel: "Every Day",
     cronType: "daily",

@@ -2,31 +2,29 @@
 
 import React from "react";
 import { useEntitySettings, useUpdateEntitySettings } from "@/graphql/actions";
-import { ShieldCheck, Zap, Settings2 } from "lucide-react";
-import { PlatformSettingsPage, SettingsField } from "@/components/ui/platform/settings-page";
+import { ShieldCheck, Zap, Settings2, Globe, Users2 } from "lucide-react";
+import {
+  PlatformSettingsPage,
+  SettingsField,
+} from "@/components/ui/platform/settings-page";
 import { toast } from "sonner";
 
 const FIELDS: SettingsField[] = [
   {
     key: "allowCommunity",
     label: "Allow Community Creation",
-    description: "When enabled, eligible members can initiate new community nodes.",
-    icon: ShieldCheck,
+    description:
+      "When enabled, eligible members can initiate new community nodes within the ecosystem.",
+    icon: Globe,
     section: "Creation & Governance",
   },
   {
     key: "autoApproveCommunity",
     label: "Auto Approve Communities",
-    description: "New communities will be live instantly without manual review requirements.",
+    description:
+      "New communities will be live instantly in the registry without manual validation requirements.",
     icon: Zap,
-    section: "Automation Engines",
-  },
-  {
-    key: "autoApproveGroup",
-    label: "Auto Approve Groups",
-    description: "Enable automatic validation for sub-group units.",
-    icon: Zap,
-    section: "Automation Engines",
+    section: "Automation Protocols",
   },
 ];
 
@@ -41,9 +39,9 @@ const Settings = () => {
           input: settings,
         },
       });
-      toast.success("Settings updated successfully");
+      toast.success("Community protocols synchronized successfully.");
     } catch (error) {
-      toast.error("Failed to update settings");
+      toast.error("Failed to update registry parameters.");
       throw error;
     }
   };
@@ -51,9 +49,9 @@ const Settings = () => {
   return (
     <PlatformSettingsPage
       title="Community Protocols"
-      description="Configure the governance and automation frameworks for your community network."
+      description="Configure the governance and automation frameworks for your community network and node clusters."
       headerIcon={Settings2}
-      badge="Enterprise"
+      badge="Network"
       fields={FIELDS}
       data={data?.getEntitySettings}
       loading={loading}
@@ -64,5 +62,3 @@ const Settings = () => {
 };
 
 export default Settings;
-
-

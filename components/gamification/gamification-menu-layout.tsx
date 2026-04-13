@@ -28,16 +28,16 @@ function TabButton({
       className={cn(
         "group/tab relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12.5px] font-medium transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/50 whitespace-nowrap",
         isActive
-          ? "text-indigo-700"
-          : "text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100/70"
+          ? "text-zinc-900 font-semibold"
+          : "text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100/50"
       )}
     >
       {/* Animated pill background */}
       {isActive && (
         <motion.span
           layoutId="gamification-tab-pill"
-          className="absolute inset-0 rounded-lg bg-indigo-50 border border-indigo-100/80 shadow-[0_1px_3px_0_oklch(0.55_0.24_264/0.08)]"
-          transition={{ type: "spring", bounce: 0.18, duration: 0.38 }}
+          className="absolute inset-0 rounded-lg bg-zinc-100 border border-zinc-200/50"
+          transition={{ type: "spring", bounce: 0, duration: 0.3 }}
         />
       )}
 
@@ -45,7 +45,7 @@ function TabButton({
       <span
         className={cn(
           "relative z-10 shrink-0 transition-all duration-200",
-          isActive ? "text-indigo-600" : "text-zinc-400 group-hover/tab:text-zinc-600"
+          isActive ? "text-zinc-900" : "text-zinc-400 group-hover/tab:text-zinc-600"
         )}
       >
         {React.isValidElement(item.icon)

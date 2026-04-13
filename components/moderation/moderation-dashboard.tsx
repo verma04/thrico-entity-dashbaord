@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -49,18 +50,18 @@ const SectionCard = ({
   children: React.ReactNode;
   action?: React.ReactNode;
 }) => (
-  <div className="rounded-lg border border-zinc-200 bg-white overflow-hidden h-full flex flex-col shadow-sm">
-    <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100 bg-zinc-50/30">
+  <div className="rounded-lg border border-border bg-card overflow-hidden h-full flex flex-col shadow-sm">
+    <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-muted/30">
       <div className="flex items-center gap-3">
-        <div className="h-8 w-8 rounded-lg bg-zinc-100 flex items-center justify-center shrink-0 border border-zinc-200">
-          <Icon className="h-4 w-4 text-zinc-600" />
+        <div className="h-8 w-8 rounded-lg bg-muted flex items-center justify-center shrink-0 border border-border">
+          <Icon className="h-4 w-4 text-muted-foreground" />
         </div>
         <div>
-          <p className="text-xs font-bold text-zinc-900 uppercase tracking-tight">
+          <p className="text-xs font-bold text-foreground uppercase tracking-tight">
             {title}
           </p>
           {description && (
-            <p className="text-[10px] font-medium text-zinc-500 uppercase tracking-widest mt-0.5">
+            <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest mt-0.5">
               {description}
             </p>
           )}
@@ -120,7 +121,7 @@ export function ModerationDashboard() {
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-2 px-1">
             <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]" />
-            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest italic">
+            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest italic">
               Automated Protection Active
             </span>
           </div>
@@ -131,11 +132,11 @@ export function ModerationDashboard() {
               onDateChange={handleDateChange}
               defaultValue="LAST_7_DAYS"
             />
-            <div className="h-4 w-px bg-zinc-200 mx-1" />
+            <div className="h-4 w-px bg-border mx-1" />
             <Link href="/moderation/reported-content">
               <Button
                 variant="outline"
-                className="h-9 px-4 rounded-lg border-zinc-200 font-bold text-[10px] uppercase tracking-widest text-zinc-600 gap-2 hover:bg-zinc-50 transition-all shadow-sm"
+                className="h-9 px-4 rounded-lg border-border font-bold text-[10px] uppercase tracking-widest text-muted-foreground gap-2 hover:bg-muted transition-all shadow-sm"
               >
                 <Flag className="h-3.5 w-3.5 text-indigo-500" />
                 Review Queue
@@ -171,7 +172,7 @@ export function ModerationDashboard() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-7 text-[10px] font-bold text-zinc-400 uppercase tracking-widest hover:text-indigo-600 gap-1.5"
+                    className="h-7 text-[10px] font-bold text-muted-foreground uppercase tracking-widest hover:text-indigo-600 gap-1.5"
                   >
                     View All <ArrowRight className="h-3 w-3" />
                   </Button>
@@ -179,28 +180,28 @@ export function ModerationDashboard() {
               }
             >
               {reportsLoading ? (
-                <div className="h-48 flex flex-col items-center justify-center text-zinc-400 space-y-3">
-                  <div className="h-6 w-6 rounded-full border-2 border-zinc-100 border-t-zinc-900 animate-spin" />
+                <div className="h-48 flex flex-col items-center justify-center text-muted-foreground space-y-3">
+                  <div className="h-6 w-6 rounded-full border-2 border-muted border-t-foreground animate-spin" />
                   <span className="text-[10px] font-bold uppercase tracking-widest">
                     Syncing Queue...
                   </span>
                 </div>
               ) : recentReports.length > 0 ? (
-                <div className="divide-y divide-zinc-100 -mx-5 -my-5">
+                <div className="divide-y divide-border -mx-5 -my-5">
                   {recentReports.map((report) => (
                     <div
                       key={report.id}
-                      className="flex items-center justify-between p-5 hover:bg-zinc-50/50 transition-colors group"
+                      className="flex items-center justify-between p-5 hover:bg-muted/50 transition-colors group"
                     >
                       <div className="flex items-start gap-4">
-                        <Avatar className="h-8 w-8 border border-zinc-200 shadow-sm rounded-lg">
-                          <AvatarFallback className="bg-zinc-100 text-[10px] font-bold text-zinc-500 uppercase">
+                        <Avatar className="h-8 w-8 border border-border shadow-sm rounded-lg">
+                          <AvatarFallback className="bg-muted text-[10px] font-bold text-muted-foreground uppercase">
                             {report.reportedBy.firstName[0]}
                           </AvatarFallback>
                         </Avatar>
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
-                            <span className="text-sm font-semibold text-zinc-900 capitalize">
+                            <span className="text-sm font-semibold text-foreground capitalize">
                               {report.contentType.toLowerCase()}
                             </span>
                             <Badge
@@ -210,7 +211,7 @@ export function ModerationDashboard() {
                               {report.reason}
                             </Badge>
                           </div>
-                          <p className="text-xs text-zinc-500 truncate max-w-xs md:max-w-md">
+                          <p className="text-xs text-muted-foreground truncate max-w-xs md:max-w-md">
                             {report.contentPreview || "No preview available..."}
                           </p>
                         </div>
@@ -233,10 +234,10 @@ export function ModerationDashboard() {
                     <ShieldCheck className="h-5 w-5 text-zinc-300" />
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-zinc-900 leading-none">
+                    <p className="text-sm font-bold text-foreground leading-none">
                       Queue Sanitized
                     </p>
-                    <p className="text-[10px] font-medium text-zinc-400 uppercase tracking-widest mt-2">
+                    <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest mt-2">
                       All content reports have been resolved.
                     </p>
                   </div>
@@ -271,7 +272,7 @@ export function ModerationDashboard() {
                 </div>
 
                 <div className="space-y-2">
-                  <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] mb-3 px-1 mt-6">
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-3 px-1 mt-6">
                     Registry Tools
                   </p>
                   {[
@@ -294,17 +295,17 @@ export function ModerationDashboard() {
                     <Link
                       key={item.label}
                       href={item.href}
-                      className="flex items-center justify-between p-3.5 rounded-lg border border-zinc-100 bg-white hover:bg-zinc-50 hover:border-indigo-200 hover:shadow-sm transition-all group"
+                      className="flex items-center justify-between p-3.5 rounded-lg border border-border bg-background hover:bg-muted hover:border-indigo-200 hover:shadow-sm transition-all group"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="h-7 w-7 rounded bg-zinc-50 border border-zinc-100 text-zinc-400 flex items-center justify-center shrink-0 group-hover:bg-indigo-50 group-hover:text-indigo-600 group-hover:border-indigo-100 transition-colors">
+                        <div className="h-7 w-7 rounded bg-muted border border-border text-muted-foreground flex items-center justify-center shrink-0 group-hover:bg-indigo-50 group-hover:text-indigo-600 group-hover:border-indigo-100 transition-colors">
                           <item.icon className="h-3.5 w-3.5" />
                         </div>
-                        <span className="text-[11px] font-bold text-zinc-600 uppercase tracking-widest group-hover:text-zinc-900 transition-colors">
+                        <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest group-hover:text-foreground transition-colors">
                           {item.label}
                         </span>
                       </div>
-                      <ChevronRight className="h-3.5 w-3.5 text-zinc-300 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all" />
+                      <ChevronRight className="h-3.5 w-3.5 text-muted-foreground group-hover:text-indigo-600 group-hover:translate-x-1 transition-all" />
                     </Link>
                   ))}
                 </div>

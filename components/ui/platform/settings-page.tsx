@@ -1,14 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Loader2, Save, RotateCcw, LucideIcon } from "lucide-react";
-import { PlatformHeader } from "./header";
-import { PlatformSection, PlatformCard } from "./card";
+import React, { useState, useEffect, useMemo } from "react";
+import { Loader2, Save, RotateCcw, LucideIcon, Check } from "lucide-react";
 import { PlatformContainer } from "./container";
-import { PlatformSettingRow, PlatformSectionLabel } from "./settings";
-import { PlatformButton } from "./button";
 import { AnimatePresence, motion } from "framer-motion";
-import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export interface SettingsField {
   key: string;
@@ -34,7 +33,7 @@ interface PlatformSettingsPageProps<T> {
 export function PlatformSettingsPage<T extends Record<string, any>>({
   title,
   description,
-  headerIcon,
+  headerIcon: HeaderIcon,
   badge,
   fields,
   data,
@@ -44,6 +43,7 @@ export function PlatformSettingsPage<T extends Record<string, any>>({
 }: PlatformSettingsPageProps<T>) {
   const [settings, setSettings] = useState<T | null>(null);
   const [hasChanged, setHasChanged] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     if (data) {
@@ -55,11 +55,9 @@ export function PlatformSettingsPage<T extends Record<string, any>>({
   const handleChange = (key: string, value: any) => {
     if (!settings) return;
     const next = { ...settings, [key]: value };
-    setSettings(next);
-    
-    // Simple deep compare against initial data
-    const isDirty = JSON.stringify(next) !== JSON.stringify(data);
-    setHasChanged(isDirty);
+    setSettings(next as T);
+    setSaved(false);
+    setHasChanged(JSON.stringify(next) !== JSON.stringify(data));
   };
 
   const handleSave = async () => {
@@ -67,109 +65,240 @@ export function PlatformSettingsPage<T extends Record<string, any>>({
     try {
       await onSave(settings);
       setHasChanged(false);
-    } catch (error) {
-      // toast should be handled by the caller or here
-    }
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    } catch {}
   };
 
   const handleReset = () => {
     if (data) {
       setSettings(data);
       setHasChanged(false);
+      setSaved(false);
     }
   };
 
+  const groupedFields = useMemo(() => {
+    const groups: Record<string, SettingsField[]> = {};
+    fields.forEach((f) => {
+      const sec = f.section || "General";
+      if (!groups[sec]) groups[sec] = [];
+      groups[sec].push(f);
+    });
+    return groups;
+  }, [fields]);
+
   if (loading || !settings) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="flex flex-col items-center gap-4 text-center">
-          <Loader2 className="h-10 w-10 animate-spin text-zinc-200" strokeWidth={1.5} />
-          <p className="text-zinc-400 font-medium text-xs tracking-widest uppercase">Initializing Interface</p>
+      <PlatformContainer className="py-0">
+        <div className="flex flex-col gap-8">
+          {/* skeleton header */}
+          <div className="flex items-center gap-3 pb-6 border-b border-zinc-100">
+            <div className="w-9 h-9 rounded-xl bg-zinc-100 animate-pulse" />
+            <div className="space-y-2">
+              <div className="h-4 w-40 bg-zinc-100 rounded-md animate-pulse" />
+              <div className="h-3 w-64 bg-zinc-50 rounded-md animate-pulse" />
+            </div>
+          </div>
+          {/* skeleton rows */}
+          <div className="max-w-2xl space-y-3">
+            {[1, 2].map((i) => (
+              <div
+                key={i}
+                className="h-[72px] rounded-xl border border-zinc-100 bg-zinc-50/60 animate-pulse"
+              />
+            ))}
+          </div>
         </div>
-      </div>
+      </PlatformContainer>
     );
   }
 
-  // Group fields by section
-  const groupedFields = fields.reduce((acc, field) => {
-    const section = field.section || "General Configuration";
-    if (!acc[section]) acc[section] = [];
-    acc[section].push(field);
-    return acc;
-  }, {} as Record<string, SettingsField[]>);
-
   return (
     <PlatformContainer className="py-0">
-      <PlatformHeader
-        title={title}
-        description={description}
-        icon={headerIcon}
-        badge={badge}
-        actions={
-          <AnimatePresence>
-            {hasChanged && (
-              <motion.div
-                initial={{ opacity: 0, x: 20, filter: "blur(8px)" }}
-                animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-                exit={{ opacity: 0, x: 10, filter: "blur(8px)" }}
-                className="flex items-center gap-3"
+      {/* ── Page Header ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-zinc-100">
+        <div className="flex items-center gap-3 min-w-0">
+          {HeaderIcon && (
+            <div className="w-9 h-9 rounded-xl bg-zinc-900 flex items-center justify-center text-white shrink-0">
+              <HeaderIcon size={16} strokeWidth={2} />
+            </div>
+          )}
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <h1 className="text-[15px] font-semibold text-zinc-900 tracking-tight leading-none">
+                {title}
+              </h1>
+              {badge && (
+                <span className="px-1.5 py-0.5 rounded-md bg-zinc-100 text-[10px] font-medium text-zinc-500 uppercase tracking-wide border border-zinc-200/60">
+                  {badge}
+                </span>
+              )}
+            </div>
+            <p className="mt-1 text-[12.5px] text-zinc-400 font-normal leading-snug max-w-md truncate">
+              {description}
+            </p>
+          </div>
+        </div>
+
+        {/* Save / Discard actions */}
+        <AnimatePresence mode="wait">
+          {hasChanged && (
+            <motion.div
+              key="actions"
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.15 }}
+              className="flex items-center gap-2 shrink-0"
+            >
+              <button
+                onClick={handleReset}
+                disabled={isSaving}
+                className="h-8 px-3 rounded-lg text-[12px] font-medium text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition-colors disabled:opacity-40 flex items-center gap-1.5"
               >
-                <PlatformButton
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleReset}
-                  disabled={isSaving}
-                  icon={RotateCcw}
-                >
-                  Discard
-                </PlatformButton>
-                <PlatformButton
-                  variant="default"
-                  size="sm"
-                  onClick={handleSave}
-                  isLoading={isSaving}
-                  icon={Save}
-                >
-                  Save Config
-                </PlatformButton>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        }
-      />
+                <RotateCcw size={12} />
+                Discard
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={isSaving}
+                className="h-8 px-4 rounded-lg text-[12px] font-medium bg-zinc-900 text-white hover:bg-zinc-800 transition-colors disabled:opacity-60 flex items-center gap-1.5 shadow-sm"
+              >
+                {isSaving ? (
+                  <Loader2 size={12} className="animate-spin" />
+                ) : (
+                  <Save size={12} />
+                )}
+                Save
+              </button>
+            </motion.div>
+          )}
+          {!hasChanged && saved && (
+            <motion.div
+              key="saved"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="flex items-center gap-1.5 text-[12px] font-medium text-emerald-600"
+            >
+              <Check size={13} strokeWidth={2.5} />
+              Saved
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
-      <div className="max-w-3xl space-y-10 mt-8">
-        {Object.entries(groupedFields).map(([sectionName, sectionFields]) => (
-          <PlatformSection
+      {/* ── Settings Sections ── */}
+      <div className="max-w-2xl space-y-10 mt-2">
+        {Object.entries(groupedFields).map(([sectionName, sectionFields], si) => (
+          <motion.div
             key={sectionName}
-            title={sectionName}
-            className="animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-both"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25, delay: si * 0.06 }}
+            className="space-y-3"
           >
-            <PlatformSectionLabel>{sectionName.toUpperCase()}</PlatformSectionLabel>
-            {sectionFields.map((field) => (
-              <PlatformSettingRow
-                key={field.key}
-                label={field.label}
-                description={field.description}
-                type={field.type}
-                value={settings[field.key]}
-                onChange={(v) => handleChange(field.key, v)}
-                icon={field.icon ? <field.icon size={16} /> : undefined}
-                isDirty={data ? settings[field.key] !== data[field.key] : false}
-              />
-            ))}
-          </PlatformSection>
-        ))}
+            {/* Section label */}
+            <div className="flex items-center gap-2.5">
+              <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-[0.12em] select-none">
+                {sectionName}
+              </span>
+              <div className="flex-1 h-px bg-zinc-100" />
+            </div>
 
-        <PlatformCard className="bg-zinc-50/50 border-dashed border-2 flex items-center justify-center py-12 text-zinc-400/60 group hover:bg-white hover:border-zinc-200 transition-all duration-500">
-           <div className="flex flex-col items-center gap-2 cursor-pointer grayscale group-hover:grayscale-0 transition-all">
-              <div className="w-10 h-10 rounded-full bg-zinc-100 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
-                 <Save size={16} className="text-zinc-400 group-hover:text-indigo-500 transition-colors" />
-              </div>
-              <p className="text-[11px] font-semibold tracking-wider uppercase opacity-70">Platform Ready</p>
-           </div>
-        </PlatformCard>
+            {/* Rows */}
+            <div className="rounded-xl border border-zinc-200/60 bg-white overflow-hidden divide-y divide-zinc-100">
+              {sectionFields.map((field) => (
+                <SettingRow
+                  key={field.key}
+                  field={field}
+                  value={settings[field.key]}
+                  onChange={(v) => handleChange(field.key, v)}
+                  isDirty={data ? settings[field.key] !== data[field.key] : false}
+                />
+              ))}
+            </div>
+          </motion.div>
+        ))}
       </div>
     </PlatformContainer>
+  );
+}
+
+// ── Internal Row Component ──────────────────────────────────────────────────
+
+function SettingRow({
+  field,
+  value,
+  onChange,
+  isDirty,
+}: {
+  field: SettingsField;
+  value: any;
+  onChange: (v: any) => void;
+  isDirty: boolean;
+}) {
+  const { label, description, type = "switch", icon: Icon } = field;
+  const id = `setting-${field.key}`;
+
+  return (
+    <div
+      className={cn(
+        "group flex items-center justify-between gap-6 px-5 py-4 transition-colors duration-150",
+        isDirty ? "bg-amber-50/40" : "hover:bg-zinc-50/60"
+      )}
+    >
+      {/* Left: icon + label + description */}
+      <div className="flex items-start gap-3 min-w-0">
+        {Icon && (
+          <div className="mt-0.5 w-7 h-7 rounded-lg bg-zinc-100 border border-zinc-200/60 flex items-center justify-center text-zinc-500 shrink-0 group-hover:bg-zinc-50 group-hover:text-zinc-700 transition-colors">
+            <Icon size={13} strokeWidth={2} />
+          </div>
+        )}
+        <div className="min-w-0">
+          <Label
+            htmlFor={id}
+            className={cn(
+              "text-[13.5px] font-medium leading-none cursor-pointer",
+              isDirty ? "text-amber-700" : "text-zinc-800"
+            )}
+          >
+            {label}
+            {isDirty && (
+              <span className="ml-2 inline-block w-1.5 h-1.5 rounded-full bg-amber-400 align-middle translate-y-[-1px]" />
+            )}
+          </Label>
+          <p className="mt-1 text-[12px] text-zinc-400 leading-relaxed font-normal max-w-[400px]">
+            {description}
+          </p>
+        </div>
+      </div>
+
+      {/* Right: control */}
+      <div className="shrink-0">
+        {type === "switch" && (
+          <Switch
+            id={id}
+            checked={!!value}
+            onCheckedChange={onChange}
+            className="data-[state=checked]:bg-zinc-900 data-[state=unchecked]:bg-zinc-200"
+          />
+        )}
+        {(type === "text" || type === "number") && (
+          <Input
+            id={id}
+            type={type}
+            value={value ?? ""}
+            onChange={(e) =>
+              onChange(type === "number" ? Number(e.target.value) : e.target.value)
+            }
+            className="h-8 w-40 text-[13px] rounded-lg border-zinc-200 bg-white focus-visible:ring-1 focus-visible:ring-zinc-300 focus-visible:ring-offset-0 font-medium shadow-none"
+            placeholder={`Enter value…`}
+          />
+        )}
+      </div>
+    </div>
   );
 }

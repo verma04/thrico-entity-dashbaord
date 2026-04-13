@@ -1,12 +1,12 @@
 "use client";
 import { AppearanceSettings } from "@/components/settings/appearance";
-import { getEntityTheme } from "@/graphql/actions/theme";
+import { useGetEntityTheme } from "@/graphql/actions";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { PaintBucket, Loader2, AlertCircle } from "lucide-react";
 
 export default function AppearancePage() {
-  const { data, loading, error } = getEntityTheme();
+  const { data, loading, error } = useGetEntityTheme();
 
   return (
     <EcosystemWrapper>

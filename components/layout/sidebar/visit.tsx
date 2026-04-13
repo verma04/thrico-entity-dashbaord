@@ -11,10 +11,12 @@ import {
   Globe2,
   ExternalLink,
   Copy,
-  Link2,
   BadgeCheck,
   Check,
-  ArrowRight,
+  ArrowUpRight,
+  Plus,
+  Sparkles,
+  SquareArrowOutUpRight,
 } from "lucide-react";
 import {
   getCustomDomain,
@@ -47,9 +49,9 @@ const Visit = () => {
     try {
       await navigator.clipboard.writeText(url);
       setCopied(url);
-      toast.success("URL copied to clipboard!");
+      toast.success("Copied to clipboard");
       setTimeout(() => setCopied(null), 2000);
-    } catch (err) {
+    } catch {
       toast.error("Failed to copy URL");
     }
   };
@@ -58,144 +60,192 @@ const Visit = () => {
     title,
     url,
     icon: Icon,
-    colorClass,
-    bgClass,
     isCustom,
-  }: any) => (
-    <div className="group relative flex flex-col gap-2 rounded-xl p-3 hover:bg-zinc-50 border border-transparent hover:border-zinc-100 transition-all duration-300">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div
+  }: {
+    title: string;
+    url: string;
+    icon: React.ElementType;
+    isCustom?: boolean;
+  }) => (
+    <div
+      className={cn(
+        "group relative flex items-center gap-3 rounded-lg px-3 py-2.5 transition-all duration-200 cursor-default",
+        "hover:bg-accent/60 border border-transparent hover:border-border/60",
+      )}
+    >
+      {/* Live indicator */}
+      <div className="relative shrink-0">
+        <div
+          className={cn(
+            "flex size-8 items-center justify-center rounded-lg border",
+            isCustom
+              ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400"
+              : "bg-primary/8 border-primary/15 text-primary",
+          )}
+        >
+          <Icon size={14} />
+        </div>
+        {/* Pulse dot */}
+        <span className="absolute -top-0.5 -right-0.5 flex size-2.5">
+          <span
             className={cn(
-              "flex size-7 items-center justify-center rounded-lg shadow-sm border",
-              bgClass,
-              colorClass,
+              "animate-ping absolute inline-flex h-full w-full rounded-full opacity-50",
+              isCustom ? "bg-emerald-500" : "bg-primary",
             )}
-          >
-            <Icon
-              size={14}
-              className={isCustom ? "text-emerald-600" : "text-indigo-600"}
-            />
-          </div>
-          <span className="text-[13px] font-bold text-zinc-800 tracking-tight">
+          />
+          <span
+            className={cn(
+              "relative inline-flex rounded-full size-2.5",
+              isCustom ? "bg-emerald-500" : "bg-primary",
+            )}
+          />
+        </span>
+      </div>
+
+      {/* Info */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-1.5">
+          <span className="text-[12.5px] font-semibold text-foreground leading-none">
             {title}
           </span>
           {isCustom && (
-            <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-emerald-600 border border-emerald-100/50">
-              Verified
+            <span className="inline-flex items-center gap-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-px text-[9px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+              <BadgeCheck size={8} />
+              Custom
             </span>
           )}
         </div>
-        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity translate-x-1 group-hover:translate-x-0 duration-200">
-          <button
-            onClick={() => handleCopyUrl(url)}
-            className="flex size-7 items-center justify-center rounded-md text-zinc-400 hover:text-indigo-600 hover:bg-white border border-transparent hover:border-zinc-200 shadow-sm transition-all"
-            title="Copy URL"
-          >
-            {copied === url ? (
-              <Check size={13} className="text-emerald-500" />
-            ) : (
-              <Copy size={13} />
-            )}
-          </button>
-          <a
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex size-7 items-center justify-center rounded-md text-zinc-400 hover:text-indigo-600 hover:bg-white border border-transparent hover:border-zinc-200 shadow-sm transition-all"
-            title="Open in new tab"
-          >
-            <ExternalLink size={13} />
-          </a>
-        </div>
-      </div>
-      <div className="pl-[2.3rem] pr-2">
         <a
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-[12.5px] font-medium text-zinc-500 group-hover:text-indigo-600 truncate block transition-colors group-hover:underline decoration-indigo-200 underline-offset-4"
+          className="mt-0.5 block text-[11.5px] text-muted-foreground/70 truncate hover:text-primary transition-colors leading-tight max-w-[170px]"
         >
           {url.replace(/^https?:\/\//, "")}
+        </a>
+      </div>
+
+      {/* Actions — appear on hover */}
+      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-x-1 group-hover:translate-x-0 shrink-0">
+        <button
+          onClick={() => handleCopyUrl(url)}
+          title="Copy URL"
+          className="flex size-6 items-center justify-center rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-accent border border-transparent hover:border-border/60 transition-all"
+        >
+          {copied === url ? (
+            <Check size={11} className="text-emerald-500" />
+          ) : (
+            <Copy size={11} />
+          )}
+        </button>
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Open in new tab"
+          className="flex size-6 items-center justify-center rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-accent border border-transparent hover:border-border/60 transition-all"
+        >
+          <ExternalLink size={11} />
         </a>
       </div>
     </div>
   );
 
+  const domainCount = (hasThricoDomain ? 1 : 0) + (hasCustomDomain ? 1 : 0);
+
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <button className="group relative flex h-9 items-center gap-2 rounded-xl bg-indigo-50/50 hover:bg-indigo-100/50 px-3.5 text-[13px] font-bold text-indigo-700 outline-none ring-indigo-500/20 hover:ring-2 focus-visible:ring-2 transition-all duration-200 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.8)] border border-indigo-100/60">
-          <Link2 className="size-4 shrink-0 transition-transform duration-300 group-hover:-rotate-45" />
-          <span>Visit Site</span>
+        <button className="group relative flex h-8 items-center gap-1.5 rounded-md px-2.5 text-[12.5px] font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-primary/30">
+          {/* Tiny live dot */}
+          <span className="relative flex size-1.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-60" />
+            <span className="relative inline-flex rounded-full size-1.5 bg-emerald-500" />
+          </span>
+          <span>View Site</span>
+          <SquareArrowOutUpRight
+            size={11}
+            className="opacity-50 group-hover:opacity-80 transition-opacity"
+          />
         </button>
       </PopoverTrigger>
 
       <PopoverContent
-        className="w-[340px] p-0 rounded-2xl border border-zinc-200/80 shadow-[0_12px_24px_-8px_rgba(0,0,0,0.15)] overflow-hidden outline-none"
+        className="w-[310px] p-0 rounded-xl border border-border/80 shadow-[0_8px_32px_-4px_rgba(0,0,0,0.12),0_2px_8px_-2px_rgba(0,0,0,0.06)] overflow-hidden outline-none"
         align="end"
-        sideOffset={14}
+        sideOffset={10}
       >
-        <div className="bg-linear-to-b from-zinc-50/80 to-white px-5 py-4 border-b border-zinc-100/80">
-          <h3 className="text-[14px] font-bold text-zinc-800 tracking-tight flex items-center gap-2">
-            Active Deployments
-          </h3>
-          <p className="text-[12px] text-zinc-500 max-w-[260px] mt-1 leading-relaxed">
-            Manage and securely navigate to your publicly accessible community
-            networks.
-          </p>
+        {/* Header */}
+        <div className="px-4 pt-3.5 pb-3 border-b border-border/60">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-[13px] font-semibold text-foreground tracking-tight leading-none">
+                Live Deployments
+              </h3>
+              <p className="text-[11.5px] text-muted-foreground/60 mt-1 leading-snug">
+                {domainCount} active endpoint{domainCount !== 1 ? "s" : ""} · publicly reachable
+              </p>
+            </div>
+            <div className="flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2 py-1">
+              <span className="relative flex size-1.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-60" />
+                <span className="relative inline-flex rounded-full size-1.5 bg-emerald-500" />
+              </span>
+              <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide">
+                Online
+              </span>
+            </div>
+          </div>
         </div>
 
-        <div className="p-2 space-y-0.5 bg-white">
+        {/* Domain list */}
+        <div className="p-2 space-y-0.5 bg-card/50">
           {hasThricoDomain && (
             <DomainCard
               title="Thrico Network"
               url={thricoDomainUrl}
               icon={Globe2}
-              bgClass="bg-indigo-50"
-              colorClass="border-indigo-100/50"
             />
           )}
 
           {hasCustomDomain ? (
             <DomainCard
               title="Custom Domain"
-              url={customDomainUrl}
+              url={customDomainUrl!}
               icon={BadgeCheck}
-              bgClass="bg-emerald-50"
-              colorClass="border-emerald-100/50"
-              isCustom={true}
+              isCustom
             />
           ) : (
             <Link
               href="/settings"
-              className="block px-3 py-3 mx-1 mt-1 rounded-xl bg-zinc-50/50 border border-dashed border-zinc-200 flex flex-col items-center justify-center text-center gap-2 group hover:bg-zinc-50 hover:border-zinc-300 transition-colors cursor-pointer outline-none"
+              className="group flex items-center gap-3 rounded-lg px-3 py-2.5 border border-dashed border-border/60 hover:border-primary/40 hover:bg-accent/40 transition-all duration-200 outline-none mx-0.5"
             >
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white shadow-sm border border-zinc-100 text-zinc-400 group-hover:text-indigo-600 transition-colors">
-                <Globe2 size={14} />
+              <div className="flex size-8 items-center justify-center rounded-lg bg-muted border border-border/60 text-muted-foreground/50 group-hover:text-primary group-hover:border-primary/30 group-hover:bg-primary/5 transition-all">
+                <Plus size={13} />
               </div>
               <div>
-                <span className="block text-[12px] font-bold text-zinc-700 group-hover:text-indigo-600 transition-colors">
+                <span className="block text-[12.5px] font-medium text-muted-foreground group-hover:text-foreground transition-colors leading-none">
                   Connect Custom Domain
                 </span>
-                <span className="block text-[11px] text-zinc-500 mt-0.5 px-2">
-                  Mask the Thrico subdomain with your own brand.
+                <span className="block text-[11px] text-muted-foreground/50 mt-0.5 leading-tight">
+                  Use your own brand URL
                 </span>
               </div>
             </Link>
           )}
         </div>
 
+        {/* Footer */}
         <Link
           href="/settings"
-          className="block bg-zinc-50/80 border-t border-zinc-100 p-3 hover:bg-zinc-100/80 transition-colors outline-none group flex items-center justify-between"
+          className="group flex items-center justify-between px-4 py-2.5 bg-muted/40 border-t border-border/60 hover:bg-muted/70 transition-colors outline-none"
         >
-          <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest group-hover:text-indigo-600 transition-colors pl-2">
+          <span className="text-[11px] font-semibold text-muted-foreground/50 uppercase tracking-[0.07em] group-hover:text-muted-foreground transition-colors">
             Domain Settings
           </span>
-          <ArrowRight
-            size={14}
-            className="text-zinc-400 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all"
+          <ArrowUpRight
+            size={12}
+            className="text-muted-foreground/30 group-hover:text-muted-foreground group-hover:-translate-y-px group-hover:translate-x-px transition-all duration-150"
           />
         </Link>
       </PopoverContent>

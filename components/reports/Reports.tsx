@@ -5,12 +5,12 @@ import { useGetAllReports, ReportModule } from "@/graphql/actions";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import {
   ShieldAlert,
   ShieldCheck,
   RotateCcw,
-  Filter,
-  Timer,
+  LayoutGrid,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,6 +31,7 @@ export default function Reports({
   const [selectedModule, setSelectedModule] = useState<ReportModule | "ALL">(
     preselectedModule || "ALL",
   );
+  const [search, setSearch] = useState("");
 
   const queryModule = selectedModule === "ALL" ? undefined : selectedModule;
 
@@ -44,61 +45,81 @@ export default function Reports({
   });
 
   const availableModules = Object.values(ReportModule) as ReportModule[];
+  const reports = data?.getAllReports?.reports || [];
+  
+  const filteredReports = reports.filter(r => 
+    r.reason?.toLowerCase().includes(search.toLowerCase()) ||
+    r.description?.toLowerCase().includes(search.toLowerCase()) ||
+    r.module?.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
-    <EcosystemWrapper anonymized-1="reports-analytics">
+    <EcosystemWrapper>
       <EcosystemHeader
-        title="Safety Reports"
-        badgeText="Critical Events"
-        description="Monitor and resolve user reports, content violations, and system flags across the entity."
+        title="Reports"
+        badgeText="Safety"
+        description="View and manage reported content and users."
         icon={ShieldAlert}
       />
 
       <EcosystemActionBar shadow="none">
-        <div className="flex items-center justify-between w-full">
-          <div className="flex items-center gap-2 px-1">
-            <ShieldCheck className="h-4 w-4 text-emerald-500" />
-            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest italic">
-              Verified Compliance Node Active
-            </span>
-          </div>
+        <EcosystemActionBar.Group>
+          <EcosystemActionBar.Item grow className="max-w-sm">
+            <EcosystemActionBar.Search
+              value={search}
+              onChange={setSearch}
+              placeholder="Search reports..."
+            />
+          </EcosystemActionBar.Item>
+        </EcosystemActionBar.Group>
 
-          <div className="flex items-center gap-3">
+        <EcosystemActionBar.Group align="right">
+          <EcosystemActionBar.Item>
             {!preselectedModule && (
-              <Select
+               <Select
                 value={selectedModule}
                 onValueChange={(val: any) => setSelectedModule(val)}
               >
-                <SelectTrigger className="h-9 w-[200px] rounded-lg border-zinc-200 bg-white text-xs font-semibold shadow-sm text-zinc-600">
-                  <Filter className="h-3.5 w-3.5 mr-2 text-indigo-500" />
-                  <SelectValue />
+                <SelectTrigger className="h-9 w-[180px] rounded-xl border-zinc-200 bg-white text-xs font-medium focus:ring-2 focus:ring-zinc-500/10 transition-all">
+                  <div className="flex items-center gap-2">
+                    <LayoutGrid className="h-3.5 w-3.5 text-zinc-400" />
+                    <SelectValue placeholder="All Modules" />
+                  </div>
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ALL" className="text-xs">
-                    All Categories
+                <SelectContent className="rounded-xl border-zinc-100 shadow-2xl p-1">
+                  <SelectItem value="ALL" className="rounded-lg text-xs py-2">
+                    All Modules
                   </SelectItem>
                   {availableModules.map((mod) => (
-                    <SelectItem key={mod} value={mod} className="text-xs">
+                    <SelectItem key={mod} value={mod} className="rounded-lg text-xs py-2">
                       {mod}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             )}
-            <div className="h-4 w-px bg-zinc-200 mx-1" />
+          </EcosystemActionBar.Item>
+
+          <EcosystemActionBar.Item>
             <Button
               variant="outline"
               size="icon"
-              className="h-9 w-9 text-zinc-400 hover:text-indigo-600 rounded-lg transition-all"
+              className="h-9 w-9 text-zinc-400 hover:text-foreground rounded-xl transition-all bg-white border-zinc-200"
               onClick={() => refetch()}
             >
               <RotateCcw size={14} className={cn(loading && "animate-spin")} />
             </Button>
-          </div>
-        </div>
+          </EcosystemActionBar.Item>
+
+          <EcosystemActionBar.Status active={filteredReports.length > 0}>
+             {filteredReports.length} Reports
+          </EcosystemActionBar.Status>
+        </EcosystemActionBar.Group>
       </EcosystemActionBar>
 
-      <ReportsList data={data?.getAllReports?.reports || []} />
+      <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">
+        <ReportsList data={filteredReports} loading={loading} />
+      </EcosystemContainer>
     </EcosystemWrapper>
   );
 }

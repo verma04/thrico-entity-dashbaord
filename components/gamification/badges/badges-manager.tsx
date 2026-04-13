@@ -30,6 +30,7 @@ import { cn } from "@/lib/utils";
 
 export function BadgesManager() {
   const { selectedModule, setSelectedModule } = useGamificationStore();
+  const [search, setSearch] = useState("");
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const { data: gamificationModulesData } = useGetEntityGamificationModules({});
 
@@ -49,7 +50,6 @@ export function BadgesManager() {
   });
 
   const isSaving = isCreating || isUpdating;
-
   const badges = (badgesData?.getBadges || []) as Badge[];
 
   const subscriptionModules = useMemo(() => {
@@ -68,9 +68,18 @@ export function BadgesManager() {
   const [editingBadge, setEditingBadge] = useState<Badge | null>(null);
 
   const filteredBadges = useMemo(() => {
-    if (selectedModule === "ALL") return badges;
-    return badges.filter((b) => b.module === selectedModule || !b.module);
-  }, [badges, selectedModule]);
+    let list = badges;
+    if (selectedModule !== "ALL") {
+      list = list.filter((b) => b.module === selectedModule || !b.module);
+    }
+    if (search) {
+      list = list.filter(b => 
+        b.name.toLowerCase().includes(search.toLowerCase()) ||
+        b.description?.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+    return list;
+  }, [badges, selectedModule, search]);
 
   const handleOpenDialog = (badge?: Badge) => {
     if (badge) {
@@ -110,73 +119,91 @@ export function BadgesManager() {
     <EcosystemWrapper>
       <EcosystemHeader
         title="Badges"
-        badgeText="Gamification"
-        description="Create and manage badges to recognize member achievements across your community."
+        badgeText="Recognition"
+        description="Create and manage badges to recognize member achievements and drive sustained community engagement."
         icon={Award}
       />
 
       <EcosystemActionBar shadow="none">
         <EcosystemActionBar.Group>
-          <Select
-            value={selectedModule}
-            onValueChange={(val) => setSelectedModule(val as any)}
-          >
-            <SelectTrigger className="w-[180px] h-8 text-sm">
-              <div className="flex items-center gap-2">
-                <LayoutGrid className="h-3.5 w-3.5 text-muted-foreground" />
-                <SelectValue placeholder="All Modules" />
-              </div>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">All Modules</SelectItem>
-              {subscriptionModules.map((mod) => (
-                <SelectItem key={mod.id} value={mod.id}>
-                  <div className="flex items-center gap-2">
-                    {renderModuleIcon(mod.icon)}
-                    {mod.name}
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <EcosystemActionBar.Item grow className="max-w-xs">
+            <EcosystemActionBar.Search
+              value={search}
+              onChange={setSearch}
+              placeholder="Search badges..."
+            />
+          </EcosystemActionBar.Item>
         </EcosystemActionBar.Group>
 
         <EcosystemActionBar.Group align="right">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => refetchBadges()}
-            className="gap-2"
-          >
-            <RotateCcw className={cn("h-3.5 w-3.5", badgesLoading && "animate-spin")} />
-            Refresh
-          </Button>
-          <Button
-            size="sm"
-            onClick={() => handleOpenDialog()}
-            className="gap-2"
-          >
-            <Plus className="h-3.5 w-3.5" />
-            Add Badge
-          </Button>
+          <EcosystemActionBar.Item>
+            <Select
+              value={selectedModule}
+              onValueChange={(val) => setSelectedModule(val as any)}
+            >
+              <SelectTrigger className="w-[180px] h-9 text-sm rounded-xl border-border bg-card">
+                <div className="flex items-center gap-2">
+                  <LayoutGrid className="h-3.5 w-3.5 text-muted-foreground" />
+                  <SelectValue placeholder="All Modules" />
+                </div>
+              </SelectTrigger>
+              <SelectContent className="rounded-xl p-1 shadow-lg border-border">
+                <SelectItem value="ALL" className="rounded-lg py-2">All Modules</SelectItem>
+                {subscriptionModules.map((mod) => (
+                  <SelectItem key={mod.id} value={mod.id} className="rounded-lg py-2">
+                    <div className="flex items-center gap-2">
+                      {renderModuleIcon(mod.icon, "h-3.5 w-3.5")}
+                      {mod.name}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </EcosystemActionBar.Item>
+
+          <EcosystemActionBar.Item>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-9 w-9 rounded-xl border-border text-muted-foreground hover:text-foreground hover:bg-muted"
+              onClick={() => refetchBadges()}
+            >
+              <RotateCcw className={cn(badgesLoading && "animate-spin")} size={14} />
+            </Button>
+          </EcosystemActionBar.Item>
+
+          <EcosystemActionBar.Item>
+            <Button
+              size="sm"
+              onClick={() => handleOpenDialog()}
+              className="h-9 px-4 rounded-xl gap-2 shadow-sm font-semibold"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Add Badge
+            </Button>
+          </EcosystemActionBar.Item>
+
+          <EcosystemActionBar.Status active={filteredBadges.length > 0}>
+             {filteredBadges.length} Credentials Available
+          </EcosystemActionBar.Status>
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
 
-      <EcosystemContainer className="p-6 space-y-6">
-        {/* Info Banner */}
-        <div className="flex items-start gap-3 p-4 rounded-lg bg-muted/50 border border-border">
-          <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-          <p className="text-[12px] text-muted-foreground leading-relaxed">
-            Badges are permanent once issued. To prevent further issuance, disable the badge rather than deleting it.
-          </p>
+      <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0 space-y-6">
+        <div className="px-6 py-4">
+          <BadgeStats badges={badges} />
         </div>
 
-        {/* Stats */}
-        <BadgeStats badges={badges} />
+        <div className="px-6">
+          <div className="flex items-start gap-4 p-4 rounded-2xl bg-indigo-50/30 border border-indigo-100/50 mb-6">
+            <div className="h-8 w-8 rounded-full bg-white flex items-center justify-center shadow-sm shrink-0 border border-indigo-100">
+              <Info className="h-4 w-4 text-indigo-500" />
+            </div>
+            <p className="text-[13px] text-indigo-700/80 leading-relaxed font-medium">
+              Badges are permanent records once issued to members. To stop issuing a badge without affecting existing recipients, safely disable it via the status toggle.
+            </p>
+          </div>
 
-        {/* Badge List */}
-        <div className="space-y-3">
-          <h2 className="text-sm font-semibold text-foreground">All Badges</h2>
           <BadgeList
             badges={filteredBadges}
             modules={subscriptionModules}

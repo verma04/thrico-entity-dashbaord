@@ -1,177 +1,371 @@
+"use client";
+
 import React, { useState, useMemo } from "react";
 import { UserList } from "./user-list";
 import { useGetAllUser } from "@/graphql/actions/membership/membership-queries";
-import TableLoading from "@/components/layout/table-loading";
 import { MembersListCards } from "../dashboard/members-listcards";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutGrid,
   List as ListIcon,
   Users,
-  Search,
-  Filter,
   RefreshCw,
+  UserCheck,
+  Clock,
+  Ban,
+  UserX,
+  CheckCircle2,
 } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import {
   Select,
-SelectContent,
+  SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 
-const User = ({ status: initialStatus }: any) => {
+// ─────────────────────────────────────────────────────────────────────────────
+// Constants
+// ─────────────────────────────────────────────────────────────────────────────
+
+const STATUS_TABS = [
+  {
+    value: "ALL",
+    label: "All",
+    icon: Users,
+    dot: "",
+    color: "text-foreground",
+  },
+  {
+    value: "APPROVED",
+    label: "Approved",
+    icon: UserCheck,
+    dot: "bg-emerald-500",
+    color: "text-emerald-600",
+  },
+  {
+    value: "PENDING",
+    label: "Pending",
+    icon: Clock,
+    dot: "bg-amber-500",
+    color: "text-amber-600",
+  },
+  {
+    value: "BLOCKED",
+    label: "Blocked",
+    icon: Ban,
+    dot: "bg-red-500",
+    color: "text-red-600",
+  },
+  {
+    value: "REJECTED",
+    label: "Rejected",
+    icon: UserX,
+    dot: "bg-slate-400",
+    color: "text-slate-500",
+  },
+  {
+    value: "DISABLED",
+    label: "Disabled",
+    icon: CheckCircle2,
+    dot: "bg-orange-500",
+    color: "text-orange-600",
+  },
+] as const;
+
+type StatusValue = (typeof STATUS_TABS)[number]["value"];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Sub-components
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** View-mode toggle: Grid / Table */
+function ViewToggle({
+  value,
+  onChange,
+}: {
+  value: "grid" | "table";
+  onChange: (v: "grid" | "table") => void;
+}) {
+  return (
+    <Tabs
+      value={value}
+      onValueChange={(v) => onChange(v as "grid" | "table")}
+      className="bg-muted p-0.5 rounded-lg border border-border"
+    >
+      <TabsList className="bg-transparent border-none h-auto p-0 gap-0.5">
+        <TabsTrigger
+          value="grid"
+          className="h-8 px-3 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground transition-all text-xs font-medium"
+        >
+          <LayoutGrid className="h-3.5 w-3.5 mr-1.5" />
+          Grid
+        </TabsTrigger>
+        <TabsTrigger
+          value="table"
+          className="h-8 px-3 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground transition-all text-xs font-medium"
+        >
+          <ListIcon className="h-3.5 w-3.5 mr-1.5" />
+          Table
+        </TabsTrigger>
+      </TabsList>
+    </Tabs>
+  );
+}
+
+/** Status section bar — appears between action bar and content */
+function SectionHeader({
+  status,
+  count,
+  loading,
+}: {
+  status: StatusValue;
+  count: number;
+  loading: boolean;
+}) {
+  const tab = STATUS_TABS.find((t) => t.value === status) ?? STATUS_TABS[0];
+  const Icon = tab.icon;
+
+  if (status === "ALL") return null; // no extra header for All
+
+  return (
+    <div className="flex items-center gap-3 pb-1">
+      <div
+        className={cn(
+          "flex items-center gap-2 text-sm font-semibold",
+          tab.color,
+        )}
+      >
+        {tab.dot && (
+          <span
+            className={cn(
+              "h-2 w-2 rounded-full shrink-0 animate-pulse",
+              tab.dot,
+            )}
+          />
+        )}
+        <Icon className="h-4 w-4" />
+        <span>{tab.label} Members</span>
+      </div>
+      <div className="h-px flex-1 bg-border" />
+      {!loading && (
+        <span className="text-[11px] font-medium text-muted-foreground">
+          {count} {count === 1 ? "record" : "records"}
+        </span>
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Content area (animated)
+// ─────────────────────────────────────────────────────────────────────────────
+
+function ContentArea({
+  view,
+  loading,
+  users,
+}: {
+  view: "grid" | "table";
+  loading: boolean;
+  users: any[];
+}) {
+  return (
+    <AnimatePresence mode="wait">
+      {loading ? (
+        <motion.div
+          key="loading"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="space-y-2"
+        >
+          {/* Inline skeleton matching table rows */}
+          <div className="overflow-hidden rounded-xl border border-border bg-card">
+            <div className="h-10 border-b border-border bg-muted/30 px-5 flex items-center gap-4">
+              {[120, 180, 100, 80, 80, 90].map((w, i) => (
+                <Skeleton
+                  key={i}
+                  className="h-2.5 rounded"
+                  style={{ width: w }}
+                />
+              ))}
+            </div>
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div
+                key={i}
+                className="flex items-center gap-4 px-5 py-3 border-b border-border/40 last:border-0"
+              >
+                <Skeleton className="h-9 w-9 rounded-lg shrink-0" />
+                <div className="space-y-1.5 flex-1">
+                  <Skeleton className="h-3 w-32 rounded" />
+                  <Skeleton className="h-2.5 w-20 rounded" />
+                </div>
+                <Skeleton className="h-3 w-40 rounded hidden sm:block" />
+                <Skeleton className="h-3 w-20 rounded hidden md:block" />
+                <Skeleton className="h-5 w-16 rounded-md" />
+                <Skeleton className="h-5 w-16 rounded-md hidden lg:block" />
+                <Skeleton className="h-3 w-20 rounded hidden lg:block" />
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      ) : (
+        <motion.div
+          key={view}
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
+        >
+          {view === "grid" ? (
+            <MembersListCards manualData={users} />
+          ) : (
+            <UserList users={users} />
+          )}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Main User component
+// ─────────────────────────────────────────────────────────────────────────────
+
+const User = ({ status: initialStatus }: { status?: string }) => {
   const [view, setView] = useState<"grid" | "table">("table");
   const [search, setSearch] = useState("");
-  const [status, setStatus] = useState(initialStatus || "ALL");
+  const [status, setStatus] = useState<StatusValue>(
+    (initialStatus as StatusValue) || "ALL",
+  );
 
   const { data, loading, refetch } = useGetAllUser({
     status: status === "ALL" ? "ALL" : status,
   });
 
+  // Client-side search filter
   const filteredUsers = useMemo(() => {
-    return (
-      data?.getAllUser?.filter(
-        (u) =>
-          `${u.user?.firstName} ${u.user?.lastName}`
-            .toLowerCase()
-            .includes(search.toLowerCase()) ||
-          u.user?.email.toLowerCase().includes(search.toLowerCase()),
-      ) || []
+    const all = data?.getAllUser || [];
+    if (!search.trim()) return all;
+    const term = search.toLowerCase();
+    return all.filter(
+      (u) =>
+        `${u.user?.firstName} ${u.user?.lastName}`
+          .toLowerCase()
+          .includes(term) || u.user?.email?.toLowerCase().includes(term),
     );
   }, [data, search]);
 
-  const containerVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.5,
-        staggerChildren: 0.1,
-      },
-    },
-  };
+  // For per-tab count badges — count from full unfiltered data
+  const counts = useMemo(() => {
+    const all = data?.getAllUser || [];
+    const result: Record<string, number> = { ALL: all.length };
+    for (const u of all) {
+      result[u.status] = (result[u.status] || 0) + 1;
+    }
+    return result;
+  }, [data]);
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 10 },
-    visible: { opacity: 1, y: 0 },
-  };
+  const pageTitle =
+    status === "ALL"
+      ? "Members"
+      : `${status.charAt(0) + status.slice(1).toLowerCase()} Members`;
 
   return (
     <EcosystemWrapper>
+      {/* ── Header ────────────────────────────────────────────────────────── */}
       <EcosystemHeader
-        title={
-          status === "ALL"
-            ? "Members"
-            : `${status.charAt(0) + status.slice(1).toLowerCase()} Members`
-        }
+        title={pageTitle}
         badgeText="Member List"
         description={
           loading
-            ? "Loading members..."
-            : `Manage and view all ${data?.getAllUser?.length || 0} your members.`
+            ? "Loading members…"
+            : `${data?.getAllUser?.length || 0} total members in your community.`
         }
         icon={Users}
         actions={
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <Button
               variant="outline"
               size="icon"
               onClick={() => refetch()}
-              className="h-11 w-11 rounded-xl border-slate-200 hover:bg-slate-50 text-slate-400 hover:text-indigo-600 transition-all shadow-sm"
+              className="h-9 w-9 rounded-lg border-border text-muted-foreground hover:text-foreground transition-all"
             >
-              <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
+              <RefreshCw
+                className={cn("h-3.5 w-3.5", loading && "animate-spin")}
+              />
             </Button>
-
-            <Tabs
-              value={view}
-              onValueChange={(val: string) => setView(val as "grid" | "table")}
-              className="bg-slate-100 p-1 rounded-xl shadow-inner border border-slate-200/50"
-            >
-              <TabsList className="bg-transparent border-none">
-                <TabsTrigger
-                  value="grid"
-                  className="h-9 px-4 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-indigo-600 transition-all font-semibold text-xs"
-                >
-                  <LayoutGrid className="h-4 w-4 mr-2" />
-                  Grid
-                </TabsTrigger>
-                <TabsTrigger
-                  value="table"
-                  className="h-9 px-4 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-indigo-600 transition-all font-semibold text-xs"
-                >
-                  <ListIcon className="h-4 w-4 mr-2" />
-                  Table
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
+            <ViewToggle value={view} onChange={setView} />
           </div>
         }
       />
 
+      {/* ── Action / Filter Bar ───────────────────────────────────────────── */}
       <EcosystemActionBar shadow="none">
         <EcosystemActionBar.Group>
-          <EcosystemActionBar.Item grow className="max-w-md">
+          <EcosystemActionBar.Item grow className="max-w-xs">
             <EcosystemActionBar.Search
               value={search}
               onChange={setSearch}
-              placeholder="Search members by name, email or ID..."
+              placeholder="Search by name or email…"
             />
           </EcosystemActionBar.Item>
         </EcosystemActionBar.Group>
 
         <EcosystemActionBar.Separator />
 
+        {/* Inline status quick-select (mirrors the tabs for mobile accessibility) */}
         <EcosystemActionBar.Group>
           <EcosystemActionBar.Item>
-            <Select value={status} onValueChange={setStatus}>
-              <SelectTrigger className="w-[180px] h-12 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition-colors shadow-sm font-semibold text-slate-600 focus:ring-4 focus:ring-indigo-500/5">
-                <div className="flex items-center gap-2.5">
-                  <div
-                    className={cn(
-                      "h-2 w-2 rounded-full",
-                      status === "APPROVED"
-                        ? "bg-emerald-500"
-                        : status === "PENDING"
-                          ? "bg-amber-500"
-                          : "bg-slate-300",
-                    )}
-                  />
-                  <SelectValue placeholder="Status Filter" />
+            <Select
+              value={status}
+              onValueChange={(v) => setStatus(v as StatusValue)}
+            >
+              <SelectTrigger className="w-[150px] h-9 rounded-lg border-border bg-card text-sm font-medium text-foreground shadow-none focus:ring-2 focus:ring-ring/20">
+                <div className="flex items-center gap-2">
+                  {STATUS_TABS.find((t) => t.value === status)?.dot && (
+                    <span
+                      className={cn(
+                        "h-1.5 w-1.5 rounded-full shrink-0",
+                        STATUS_TABS.find((t) => t.value === status)?.dot,
+                      )}
+                    />
+                  )}
+                  <SelectValue placeholder="Status" />
                 </div>
               </SelectTrigger>
-              <SelectContent className="rounded-xl border-slate-200 shadow-xl p-1">
-                <SelectItem value="ALL" className="font-semibold rounded-lg py-2.5">
-                  All Members
-                </SelectItem>
-                <SelectItem value="APPROVED" className="font-semibold rounded-lg py-2.5">
-                  Approved
-                </SelectItem>
-                <SelectItem value="PENDING" className="font-semibold rounded-lg py-2.5">
-                  Pending
-                </SelectItem>
-                <SelectItem value="BLOCKED" className="font-semibold rounded-lg py-2.5">
-                  Blocked
-                </SelectItem>
+              <SelectContent className="rounded-xl border-border shadow-lg p-1">
+                {STATUS_TABS.map((opt) => (
+                  <SelectItem
+                    key={opt.value}
+                    value={opt.value}
+                    className="rounded-lg text-sm font-medium py-2"
+                  >
+                    <div className="flex items-center gap-2">
+                      {opt.dot && (
+                        <span
+                          className={cn(
+                            "h-1.5 w-1.5 rounded-full shrink-0",
+                            opt.dot,
+                          )}
+                        />
+                      )}
+                      {opt.label}
+                    </div>
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
-          </EcosystemActionBar.Item>
-
-          <EcosystemActionBar.Item className="hidden lg:flex">
-            <div className="flex items-center gap-2 px-4 py-2 bg-slate-50 rounded-xl border border-slate-200 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
-              <Filter className="h-3 w-3" />
-              Advanced
-            </div>
           </EcosystemActionBar.Item>
         </EcosystemActionBar.Group>
 
@@ -182,48 +376,24 @@ const User = ({ status: initialStatus }: any) => {
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
 
-      <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">
-        <AnimatePresence mode="wait">
-          {loading ? (
-            <motion.div
-              key="loading"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              <TableLoading />
-            </motion.div>
-          ) : (
-            <motion.div
-              key={view}
-              initial={{ opacity: 0, scale: 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 1.02 }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
-            >
-              {view === "grid" ? (
-                <MembersListCards manualData={filteredUsers} />
-              ) : (
-                <UserList users={filteredUsers} />
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
+      {/* ── Content ───────────────────────────────────────────────────────── */}
+      <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0 space-y-3">
+        {/* Section heading (non-ALL statuses only) */}
+        <SectionHeader
+          status={status}
+          count={filteredUsers.length}
+          loading={loading}
+        />
+
+        <ContentArea view={view} loading={loading} users={filteredUsers} />
       </EcosystemContainer>
+
+      <style>{`
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      `}</style>
     </EcosystemWrapper>
   );
 };
-
-const Badge = ({ children, variant, className }: any) => (
-  <span
-    className={cn(
-      "px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider",
-      variant === "outline" ? "border" : "bg-slate-100",
-      className,
-    )}
-  >
-    {children}
-  </span>
-);
 
 export default User;

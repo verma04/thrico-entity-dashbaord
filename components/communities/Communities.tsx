@@ -8,14 +8,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutGrid,
   List as ListIcon,
-  Search,
   Users,
-  Plus,
   RefreshCw,
-  Filter,
 } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import CommunityCard from "./community-card";
 import Create from "./add/Create";
@@ -32,6 +28,19 @@ import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header"
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Status options
+// ─────────────────────────────────────────────────────────────────────────────
+
+const STATUS_OPTIONS = [
+  { value: "ALL",      label: "All",      dot: "" },
+  { value: "APPROVED", label: "Approved", dot: "bg-emerald-500" },
+  { value: "PENDING",  label: "Pending",  dot: "bg-amber-500" },
+  { value: "DISABLED", label: "Disabled", dot: "bg-orange-500" },
+  { value: "REJECTED", label: "Rejected", dot: "bg-red-500" },
+  { value: "PAUSED",   label: "Paused",   dot: "bg-slate-400" },
+];
 
 interface CommunitiesProps {
   status?: string;
@@ -57,213 +66,164 @@ export default function Communities({ status: initialStatus }: CommunitiesProps)
       (c: any) =>
         c.title.toLowerCase().includes(search.toLowerCase()) ||
         c.tagline?.toLowerCase().includes(search.toLowerCase()) ||
-        c.description?.toLowerCase().includes(search.toLowerCase())
+        c.description?.toLowerCase().includes(search.toLowerCase()),
     );
   }, [communities, search]);
 
-  const containerVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.5,
-        staggerChildren: 0.1,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 10 },
-    visible: { opacity: 1, y: 0 },
-  };
+  const currentStatus =
+    STATUS_OPTIONS.find((s) => s.value === status) || STATUS_OPTIONS[0];
 
   return (
     <EcosystemWrapper>
-      <EcosystemHeader 
+      <EcosystemHeader
         title="Communities"
         badgeText="Community List"
-        description={loading ? "Loading communities..." : `Manage and view all ${communities.length} your communities.`}
+        description={
+          loading
+            ? "Loading communities…"
+            : `Manage and view all ${communities.length} communities.`
+        }
         icon={Users}
         actions={
-          <div className="flex items-center gap-3">
-             <Button
-                variant="outline"
-                size="icon"
-                onClick={() => refetch?.()}
-                className="h-11 w-11 rounded-xl border-slate-200 hover:bg-slate-50 text-slate-400 hover:text-indigo-600 transition-all shadow-sm"
-              >
-                <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
-              </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => refetch?.()}
+              className="h-9 w-9 rounded-lg border-border text-muted-foreground hover:text-foreground transition-all"
+            >
+              <RefreshCw className={cn("h-3.5 w-3.5", loading && "animate-spin")} />
+            </Button>
 
-              <Tabs
-                value={view}
-                onValueChange={(val: string) => setView(val as "grid" | "table")}
-                className="bg-slate-100 p-1 rounded-xl shadow-inner border border-slate-200/50"
-              >
-                <TabsList className="bg-transparent border-none">
-                  <TabsTrigger
-                    value="grid"
-                    className="h-9 px-4 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-indigo-600 transition-all font-bold text-xs"
-                  >
-                    <LayoutGrid className="h-4 w-4 mr-2" />
-                    Grid
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="table"
-                    className="h-9 px-4 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-indigo-600 transition-all font-bold text-xs"
-                  >
-                    <ListIcon className="h-4 w-4 mr-2" />
-                    Table
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
-              <Create />
+            {/* View toggle */}
+            <Tabs
+              value={view}
+              onValueChange={(val: string) => setView(val as "grid" | "table")}
+              className="bg-muted p-0.5 rounded-lg border border-border"
+            >
+              <TabsList className="bg-transparent border-none h-auto p-0 gap-0.5">
+                <TabsTrigger
+                  value="grid"
+                  className="h-8 px-3 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground transition-all text-xs font-medium"
+                >
+                  <LayoutGrid className="h-3.5 w-3.5 mr-1.5" />
+                  Grid
+                </TabsTrigger>
+                <TabsTrigger
+                  value="table"
+                  className="h-8 px-3 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground transition-all text-xs font-medium"
+                >
+                  <ListIcon className="h-3.5 w-3.5 mr-1.5" />
+                  Table
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+            <Create />
           </div>
         }
       />
 
       <EcosystemActionBar>
-          <div className="relative w-full md:w-96 group">
-            <div className="absolute left-4 top-1/2 -translate-y-1/2">
-              <Search className="h-5 w-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
-            </div>
-            <Input
-              placeholder="Search by community name, tagline or ID..."
-              className="pl-12 h-12 bg-slate-50/50 border-slate-100 rounded-2xl focus-visible:ring-4 focus-visible:ring-indigo-500/10 transition-all font-semibold text-slate-700 placeholder:text-slate-400 placeholder:font-medium border-2 focus:border-indigo-500/20"
+        <EcosystemActionBar.Group>
+          <EcosystemActionBar.Item grow className="max-w-xs">
+            <EcosystemActionBar.Search
               value={search}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
+              onChange={setSearch}
+              placeholder="Search by name, tagline…"
             />
-          </div>
+          </EcosystemActionBar.Item>
+        </EcosystemActionBar.Group>
 
-          <div className="h-8 w-px bg-slate-100 hidden md:block" />
+        <EcosystemActionBar.Separator />
 
-          <div className="flex items-center gap-3">
+        <EcosystemActionBar.Group>
+          <EcosystemActionBar.Item>
             <Select value={status} onValueChange={setStatus}>
-              <SelectTrigger className="w-[200px] h-12 rounded-2xl border-2 border-slate-50 bg-white hover:bg-slate-50 transition-colors shadow-sm font-bold text-slate-600 focus:ring-4 focus:ring-indigo-500/5">
-                <div className="flex items-center gap-3">
-                  <div
-                    className={cn(
-                      "h-2.5 w-2.5 rounded-full ring-2 ring-white shadow-sm",
-                      status === "APPROVED"
-                        ? "bg-emerald-500"
-                        : status === "PENDING"
-                          ? "bg-amber-500"
-                          : status === "BLOCKED"
-                            ? "bg-rose-500"
-                            : status === "DISABLED" || status === "PAUSED"
-                              ? "bg-orange-500"
-                              : "bg-slate-300",
-                    )}
-                  />
-                  <SelectValue placeholder="Status Filter" />
+              <SelectTrigger className="w-[160px] h-9 rounded-lg border-border bg-card text-sm font-medium text-foreground shadow-none focus:ring-2 focus:ring-ring/20">
+                <div className="flex items-center gap-2">
+                  {currentStatus.dot && (
+                    <span
+                      className={cn(
+                        "h-1.5 w-1.5 rounded-full shrink-0",
+                        currentStatus.dot,
+                      )}
+                    />
+                  )}
+                  <SelectValue placeholder="Status" />
                 </div>
               </SelectTrigger>
-              <SelectContent className="rounded-2xl border-slate-100 shadow-2xl p-1">
-                <SelectItem value="ALL" className="font-bold rounded-lg py-2.5">
-                  All Communities
-                </SelectItem>
-                <div className="h-px bg-slate-50 my-1" />
-                <SelectItem
-                  value="APPROVED"
-                  className="font-bold text-emerald-600 rounded-lg py-2.5"
-                >
-                  Approved
-                </SelectItem>
-                <SelectItem
-                  value="PENDING"
-                  className="font-bold text-amber-600 rounded-lg py-2.5"
-                >
-                  Pending
-                </SelectItem>
-                <SelectItem
-                  value="DISABLED"
-                  className="font-bold text-orange-600 rounded-lg py-2.5"
-                >
-                  Disabled
-                </SelectItem>
-                <SelectItem
-                  value="REJECTED"
-                  className="font-bold text-rose-600 rounded-lg py-2.5"
-                >
-                  Rejected
-                </SelectItem>
-                <SelectItem
-                  value="PAUSED"
-                  className="font-bold text-slate-600 rounded-lg py-2.5"
-                >
-                  Paused
-                </SelectItem>
+              <SelectContent className="rounded-xl border-border shadow-lg p-1">
+                {STATUS_OPTIONS.map((opt) => (
+                  <SelectItem
+                    key={opt.value}
+                    value={opt.value}
+                    className="rounded-lg text-sm font-medium py-2"
+                  >
+                    <div className="flex items-center gap-2">
+                      {opt.dot && (
+                        <span
+                          className={cn("h-1.5 w-1.5 rounded-full shrink-0", opt.dot)}
+                        />
+                      )}
+                      {opt.label}
+                    </div>
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
+          </EcosystemActionBar.Item>
+        </EcosystemActionBar.Group>
 
-            <div className="hidden lg:flex items-center gap-2 px-4 py-2 bg-indigo-50/50 rounded-2xl border border-indigo-100/50 text-[10px] font-black text-indigo-500 uppercase tracking-widest">
-              <Filter className="h-3 w-3" />
-              Advanced
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 relative z-10 ml-auto mr-4">
-            <div className="flex items-center gap-2.5 px-5 py-2.5 bg-slate-900 rounded-2xl shadow-lg shadow-slate-900/10 text-xs font-black text-white uppercase tracking-wider">
-              <span className="h-1.5 w-1.5 rounded-full bg-indigo-400 animate-pulse" />
-              {filteredCommunities.length} Active Communities
-            </div>
-          </div>
+        <EcosystemActionBar.Group align="right">
+          <EcosystemActionBar.Status active={filteredCommunities.length > 0}>
+            {filteredCommunities.length} Communities
+          </EcosystemActionBar.Status>
+        </EcosystemActionBar.Group>
       </EcosystemActionBar>
 
       <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">
-      <AnimatePresence mode="wait">
-        {loading ? (
-          <motion.div
-            key="loading"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <TableLoading />
-          </motion.div>
-        ) : (
-          <motion.div
-            key={view}
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 1.02 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-          >
-            {view === "grid" ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredCommunities.map((community: any) => (
-                  <CommunityCard key={community.id} record={community} />
-                ))}
-                {filteredCommunities.length === 0 && (
-                  <div className="col-span-full py-20 text-center bg-slate-50/50 border-2 border-dashed border-slate-100 rounded-3xl">
-                     <div className="h-16 w-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400">
-                        <Search className="h-8 w-8" />
-                     </div>
-                     <h3 className="text-xl font-bold text-slate-700">No results found</h3>
-                     <p className="text-slate-400">Try adjusting your search query or filters.</p>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <List data={filteredCommunities} />
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
+        <AnimatePresence mode="wait">
+          {loading ? (
+            <motion.div
+              key="loading"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <TableLoading />
+            </motion.div>
+          ) : (
+            <motion.div
+              key={view}
+              initial={{ opacity: 0, scale: 0.99 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.01 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+            >
+              {view === "grid" ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {filteredCommunities.map((community: any) => (
+                    <CommunityCard key={community.id} record={community} />
+                  ))}
+                  {filteredCommunities.length === 0 && (
+                    <div className="col-span-full py-20 text-center border border-dashed border-border rounded-xl bg-muted/20">
+                      <div className="h-12 w-12 bg-muted rounded-xl flex items-center justify-center mx-auto mb-3 text-muted-foreground/40">
+                        <Users className="h-6 w-6" />
+                      </div>
+                      <p className="text-sm font-semibold text-foreground">No results found</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Try adjusting your search or filters.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <List data={filteredCommunities} />
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </EcosystemContainer>
     </EcosystemWrapper>
   );
 }
-
-const Badge = ({ children, variant, className }: any) => (
-  <span
-    className={cn(
-      "px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-widest",
-      variant === "outline" ? "border" : "bg-slate-100",
-      className,
-    )}
-  >
-    {children}
-  </span>
-);

@@ -46,7 +46,7 @@ export function EcosystemHeader({
             className={cn(
               "h-10 w-10 rounded-xl flex items-center justify-center border transition-colors",
               dark
-                ? "bg-white/10 text-white border-white/15"
+                ? "bg-foreground/10 text-foreground border-foreground/15"
                 : "bg-primary text-primary-foreground border-primary/20",
               iconClassName,
             )}
@@ -57,7 +57,7 @@ export function EcosystemHeader({
             <span
               className={cn(
                 "absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-emerald-500 border-2",
-                dark ? "border-background" : "border-background"
+                "border-background"
               )}
             >
               <span className="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-30" />
@@ -80,7 +80,7 @@ export function EcosystemHeader({
               className={cn(
                 "inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[10px] font-medium leading-none",
                 dark
-                  ? "bg-white/8 border-white/15 text-white/60"
+                  ? "bg-foreground/5 border-foreground/15 text-muted-foreground"
                   : "bg-muted border-border text-muted-foreground"
               )}
             >
@@ -90,7 +90,7 @@ export function EcosystemHeader({
           <p
             className={cn(
               "mt-1 text-[13px] leading-relaxed truncate max-w-md",
-              dark ? "text-white/50" : "text-muted-foreground"
+              dark ? "text-muted-foreground" : "text-muted-foreground"
             )}
           >
             {description}

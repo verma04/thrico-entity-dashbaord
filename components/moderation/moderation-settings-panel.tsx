@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -30,10 +29,9 @@ import {
   Save,
   RotateCcw,
   BrainCircuit,
+  Loader2,
 } from "lucide-react";
-import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
-import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
-import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { PlatformContainer } from "@/components/ui/platform/container";
 import { cn } from "@/lib/utils";
 
 export function ModerationSettingsPanel() {
@@ -95,56 +93,61 @@ export function ModerationSettingsPanel() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col gap-4">
-      <EcosystemHeader
-        title="Moderation Engine"
-        description="Global parameters for content filtering, community reporting thresholds, and automated safety protocols."
-        badgeText="Core Settings"
-        icon={Settings}
-      />
-
-      <EcosystemActionBar shadow="none">
-        <EcosystemActionBar.Group>
-          <div className="flex items-center gap-2 px-1">
-            <ShieldCheck
-              className={cn(
-                "h-4 w-4",
-                settings.autoModerationEnabled
-                  ? "text-emerald-500"
-                  : "text-muted-foreground",
-              )}
-            />
-            <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-              System Status:{" "}
-              {settings.autoModerationEnabled ? "Active" : "Disabled"}
-            </span>
+    <PlatformContainer className="py-0">
+      {/* ── Page Header ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-zinc-100">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-9 h-9 rounded-xl bg-zinc-900 flex items-center justify-center text-white shrink-0">
+            <Settings size={16} strokeWidth={2} />
           </div>
-        </EcosystemActionBar.Group>
-        <EcosystemActionBar.Group align="right">
-          <Button
-            variant="outline"
-            size="sm"
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <h1 className="text-[15px] font-semibold text-zinc-900 tracking-tight leading-none">
+                Moderation Engine
+              </h1>
+              <span className="px-1.5 py-0.5 rounded-md bg-zinc-100 text-[10px] font-medium text-zinc-500 uppercase tracking-wide border border-zinc-200/60">
+                Safety
+              </span>
+              <div className={cn(
+                "flex items-center gap-1.5 ml-1",
+                settings.autoModerationEnabled ? "text-emerald-600" : "text-zinc-400"
+              )}>
+                <div className={cn(
+                  "w-1.5 h-1.5 rounded-full",
+                  settings.autoModerationEnabled ? "bg-emerald-500" : "bg-zinc-300"
+                )} />
+                <span className="text-[11px] font-medium">
+                  {settings.autoModerationEnabled ? "Active" : "Disabled"}
+                </span>
+              </div>
+            </div>
+            <p className="mt-1 text-[12.5px] text-zinc-400 font-normal leading-snug max-w-md">
+              Global parameters for content filtering, reporting thresholds, and automated safety protocols.
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <button
             onClick={() => refetch()}
-            className="h-8 gap-1.5"
+            className="h-8 px-3 rounded-lg text-[12px] font-medium text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition-colors flex items-center gap-1.5"
           >
-            <RotateCcw className="h-3.5 w-3.5" />
+            <RotateCcw size={12} />
             Reload
-          </Button>
-          <Button
-            size="sm"
+          </button>
+          <button
             onClick={handleSave}
             disabled={updating}
-            className="h-8 gap-1.5 font-bold"
+            className="h-8 px-4 rounded-lg text-[12px] font-medium bg-zinc-900 text-white hover:bg-zinc-800 transition-colors disabled:opacity-60 flex items-center gap-1.5 shadow-sm"
           >
-            <Save className="h-3.5 w-3.5" />
-            {updating ? "Saving..." : "Save Changes"}
-          </Button>
-        </EcosystemActionBar.Group>
-      </EcosystemActionBar>
+            {updating ? <Loader2 size={12} className="animate-spin" /> : <Save size={12} />}
+            Save
+          </button>
+        </div>
+      </div>
 
-      <EcosystemContainer className="p-6 max-w-4xl mx-auto w-full">
-        <div className="grid gap-6">
+      <div className="grid gap-6 max-w-4xl mt-2">
           {/* Master Toggle */}
+
           <div className="p-5 rounded-xl border border-border bg-card flex items-center justify-between shadow-sm">
             <div className="flex items-center gap-4">
               <div
@@ -421,8 +424,7 @@ export function ModerationSettingsPanel() {
               </div>
             </div>
           </div>
-        </div>
-      </EcosystemContainer>
-    </div>
+      </div>
+    </PlatformContainer>
   );
 }

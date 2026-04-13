@@ -73,6 +73,7 @@ import Logo from "./logo";
 import { WorkspaceSwitcher } from "./switcher";
 import VisitSite from "./visit";
 import LogoutModal from "./logout";
+import { ThemeToggle } from "../theme-toggle";
 
 interface MenuItem {
   key: string;
@@ -640,6 +641,7 @@ function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
               <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-destructive" />
               <BellDotIcon size={15} />
             </button>
+            <ThemeToggle />
 
             <div className="h-4 w-px bg-border/50 mx-0.5" />
 
@@ -689,18 +691,18 @@ function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
                         </DropdownMenuLabel>
                         {otherAccountsData.getMyOtherAccounts.map((account) => (
                           <DropdownMenuItem
-                            key={account.id}
+                            key={account?.id}
                             disabled={isSwitching}
                             className="rounded-md px-2 py-1.5 cursor-pointer gap-2.5 group/item"
                             onClick={() =>
-                              handleSwitch(account.entityId, account.name)
+                              handleSwitch(account?.entityId, account?.name)
                             }
                           >
                             <div className="h-6 w-6 rounded-md overflow-hidden bg-muted flex items-center justify-center border border-border/40">
-                              {account.logo ? (
+                              {account?.logo ? (
                                 <img
-                                  src={account.logo}
-                                  alt={account.name}
+                                  src={`https://cdn.thrico.network/${account?.logo}`}
+                                  alt={account?.name}
                                   className="h-full w-full object-cover"
                                 />
                               ) : (
@@ -712,10 +714,10 @@ function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
                             </div>
                             <div className="flex flex-col min-w-0">
                               <span className="text-[12.5px] font-medium truncate">
-                                {account.name}
+                                {account?.name}
                               </span>
                               <span className="text-[10px] text-muted-foreground/60 truncate capitalize">
-                                {account.role || "Admin"}
+                                {account?.role || "Admin"}
                               </span>
                             </div>
                           </DropdownMenuItem>
