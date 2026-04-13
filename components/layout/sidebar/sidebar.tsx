@@ -19,6 +19,7 @@ import {
   Users,
   PanelLeft,
 } from "lucide-react";
+import { useSidebarSectionStore } from "@/store/useSidebarStore";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -85,15 +86,38 @@ interface MenuItem {
   badge?: string;
 }
 
-/* ─── Section Label ──────────────────────────────────────────────── */
-function SectionLabel({ children }: { children: React.ReactNode }) {
+/* ─── Section Label (collapsible) ───────────────────────────────── */
+function SectionLabel({
+  sectionKey,
+  children,
+}: {
+  sectionKey: string;
+  children: React.ReactNode;
+}) {
+  // Select the array directly — Zustand re-renders when the array reference changes
+  const collapsedSections = useSidebarSectionStore((s) => s.collapsedSections);
+  const toggleSection = useSidebarSectionStore((s) => s.toggleSection);
+  const isOpen = !collapsedSections.includes(sectionKey);
+
   return (
     <div className="mb-1 mt-4 first:mt-1">
-      {/* Expanded: text label */}
-      <span className="px-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/35 select-none leading-none group-data-[collapsible=icon]:hidden block">
-        {children}
-      </span>
-      {/* Collapsed: thin divider line */}
+      {/* Expanded: clickable label with chevron */}
+      <button
+        onClick={() => toggleSection(sectionKey)}
+        className="group-data-[collapsible=icon]:hidden flex w-full items-center justify-between px-3 py-0.5 rounded hover:bg-accent/40 transition-colors duration-150 cursor-pointer select-none"
+      >
+        <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/40 leading-none">
+          {children}
+        </span>
+        <ChevronRight
+          size={10}
+          className={cn(
+            "text-muted-foreground/25 transition-transform duration-200",
+            isOpen && "rotate-90",
+          )}
+        />
+      </button>
+      {/* Collapsed sidebar: thin divider line */}
       <div className="hidden group-data-[collapsible=icon]:flex items-center justify-center px-2 py-1">
         <div className="w-full h-px bg-border/50" />
       </div>
@@ -288,6 +312,44 @@ function MenuItemRow({
         </Link>
       </SidebarMenuButton>
     </SidebarMenuItem>
+  );
+}
+
+/* ─── Collapsible Section ───────────────────────────────────────── */
+function CollapsibleSection({
+  sectionKey,
+  label,
+  items,
+  renderItems,
+  className,
+}: {
+  sectionKey: string;
+  label: string;
+  items: MenuItem[];
+  renderItems: (items: MenuItem[]) => React.ReactNode;
+  className?: string;
+}) {
+  // Select collapsedSections array directly so Zustand re-renders on change
+  const collapsedSections = useSidebarSectionStore((s) => s.collapsedSections);
+  const isOpen = !collapsedSections.includes(sectionKey);
+
+  if (items.length === 0) return null;
+
+  return (
+    <SidebarGroup className={cn("p-0", className)}>
+      <SectionLabel sectionKey={sectionKey}>{label}</SectionLabel>
+      {/* Animate open/close with CSS — avoids layout jank */}
+      <div
+        className={cn(
+          "overflow-hidden transition-all duration-200 ease-in-out",
+          isOpen ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0 pointer-events-none",
+          /* When sidebar icon-only mode, always show (icon tooltips still work) */
+          "group-data-[collapsible=icon]:max-h-[2000px] group-data-[collapsible=icon]:opacity-100 group-data-[collapsible=icon]:pointer-events-auto",
+        )}
+      >
+        <SidebarGroupContent>{renderItems(items)}</SidebarGroupContent>
+      </div>
+    </SidebarGroup>
   );
 }
 
@@ -511,64 +573,57 @@ function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
           )}
 
           {/* HOME */}
-          {filteredHome.length > 0 && (
-            <SidebarGroup className="mb-1 p-0">
-              <SectionLabel>Home</SectionLabel>
-              <SidebarGroupContent>
-                {renderItems(filteredHome)}
-              </SidebarGroupContent>
-            </SidebarGroup>
-          )}
+          <CollapsibleSection
+            sectionKey="home"
+            label="Home"
+            items={filteredHome}
+            renderItems={renderItems}
+            className="mb-1"
+          />
 
           {/* COMMUNITY INTELLIGENCE */}
-          {filteredCommunity.length > 0 && (
-            <SidebarGroup className="mb-1 p-0">
-              <SectionLabel>Community</SectionLabel>
-              <SidebarGroupContent>
-                {renderItems(filteredCommunity)}
-              </SidebarGroupContent>
-            </SidebarGroup>
-          )}
+          <CollapsibleSection
+            sectionKey="community"
+            label="Community"
+            items={filteredCommunity}
+            renderItems={renderItems}
+            className="mb-1"
+          />
 
           {/* CONTENT MODERATION */}
-          {filteredModeration.length > 0 && (
-            <SidebarGroup className="mb-1 p-0">
-              <SectionLabel>Moderation</SectionLabel>
-              <SidebarGroupContent>
-                {renderItems(filteredModeration)}
-              </SidebarGroupContent>
-            </SidebarGroup>
-          )}
+          <CollapsibleSection
+            sectionKey="moderation"
+            label="Moderation"
+            items={filteredModeration}
+            renderItems={renderItems}
+            className="mb-1"
+          />
 
           {/* GAMIFICATION ENGINE */}
-          {filteredGamification.length > 0 && (
-            <SidebarGroup className="mb-1 p-0">
-              <SectionLabel>Gamification</SectionLabel>
-              <SidebarGroupContent>
-                {renderItems(filteredGamification)}
-              </SidebarGroupContent>
-            </SidebarGroup>
-          )}
+          <CollapsibleSection
+            sectionKey="gamification"
+            label="Gamification"
+            items={filteredGamification}
+            renderItems={renderItems}
+            className="mb-1"
+          />
 
           {/* MODULES */}
-          {filteredModules.length > 0 && (
-            <SidebarGroup className="mb-1 p-0">
-              <SectionLabel>Modules</SectionLabel>
-              <SidebarGroupContent>
-                {renderItems(filteredModules)}
-              </SidebarGroupContent>
-            </SidebarGroup>
-          )}
+          <CollapsibleSection
+            sectionKey="modules"
+            label="Modules"
+            items={filteredModules}
+            renderItems={renderItems}
+            className="mb-1"
+          />
 
           {/* ADMIN SETTINGS */}
-          {filteredSettings.length > 0 && (
-            <SidebarGroup className="p-0">
-              <SectionLabel>Settings</SectionLabel>
-              <SidebarGroupContent>
-                {renderItems(filteredSettings)}
-              </SidebarGroupContent>
-            </SidebarGroup>
-          )}
+          <CollapsibleSection
+            sectionKey="settings"
+            label="Settings"
+            items={filteredSettings}
+            renderItems={renderItems}
+          />
 
           {/* NO RESULTS */}
           {searchQuery.trim() &&
