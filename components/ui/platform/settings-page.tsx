@@ -206,7 +206,7 @@ export function PlatformSettingsPage<T extends Record<string, any>>({
             >
               <div className="flex flex-col">
                 <span className="text-[11px] font-bold text-white/90 leading-none">Unsaved Changes</span>
-                <span className="text-[10px] text-zinc-400 mt-0.5">Synchronize with protocol registry</span>
+                <span className="text-[10px] text-zinc-400 mt-0.5">You have made changes to the settings</span>
               </div>
               
               <div className="w-px h-8 bg-white/10 mx-1" />
@@ -244,7 +244,7 @@ export function PlatformSettingsPage<T extends Record<string, any>>({
                 className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] px-4 py-2 rounded-xl bg-emerald-500 text-white text-[12px] font-bold shadow-xl flex items-center gap-2"
               >
                 <Check size={14} strokeWidth={3} />
-                Protocols Updated
+                Saved
               </motion.div>
           )}
         </AnimatePresence>

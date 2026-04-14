@@ -109,14 +109,14 @@ const FeedSourceOrdering: React.FC<FeedSourceOrderingProps> = ({
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <h3 className="text-[14px] font-semibold text-zinc-900 tracking-tight">
-              Feed Prioritization
+              Feed Order
             </h3>
             <span className="px-1.5 py-0.5 rounded bg-emerald-50 text-[9px] font-bold text-emerald-600 uppercase tracking-wider border border-emerald-100">
-              Active Sequence
+              Live Order
             </span>
           </div>
           <p className="text-[12px] text-zinc-400 max-w-md">
-            Determine the hierarchy of content sources. Items at the top take precedence in the unified activity stream.
+            Drag and drop to change the order of content in your feed.
           </p>
         </div>
 
@@ -198,8 +198,7 @@ const FeedSourceOrdering: React.FC<FeedSourceOrderingProps> = ({
       <div className="flex items-start gap-2.5 p-4 rounded-xl bg-zinc-50 border border-zinc-100/80">
         <Info size={14} className="text-zinc-400 mt-0.5 shrink-0" />
         <p className="text-[11px] text-zinc-500 leading-relaxed font-medium">
-          Source weights are processed in real-time. Reordering will affect the architectural density of content distribution 
-          across all active user sessions once synchronized with the registry.
+          Changes will be applied to all users once saved.
         </p>
       </div>
 
@@ -213,8 +212,8 @@ const FeedSourceOrdering: React.FC<FeedSourceOrderingProps> = ({
             className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-4 px-5 py-3 rounded-2xl bg-zinc-900 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] backdrop-blur-md"
           >
             <div className="flex flex-col">
-              <span className="text-[11px] font-bold text-white/90 leading-none">Modified Sequence</span>
-              <span className="text-[10px] text-zinc-400 mt-0.5">Architectural Priority changes detected</span>
+              <span className="text-[11px] font-bold text-white/90 leading-none">Unsaved Changes</span>
+              <span className="text-[10px] text-zinc-400 mt-0.5">You have changed the order</span>
             </div>
             
             <div className="w-px h-8 bg-white/10 mx-1" />
@@ -252,7 +251,7 @@ const FeedSourceOrdering: React.FC<FeedSourceOrderingProps> = ({
             className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] px-4 py-2 rounded-xl bg-emerald-500 text-white text-[12px] font-bold shadow-xl flex items-center gap-2"
           >
             <Check size={14} strokeWidth={3} />
-            Sequence Synchronized
+            Sequence Saved
           </motion.div>
         )}
       </AnimatePresence>

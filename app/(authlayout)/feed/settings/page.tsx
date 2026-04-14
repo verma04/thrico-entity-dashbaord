@@ -58,10 +58,10 @@ const FeedSettingsPage = () => {
           </div>
           <div>
             <h1 className="text-[17px] font-semibold text-zinc-900 tracking-tight leading-none">
-              Feed Protocol
+              Feed Settings
             </h1>
             <p className="mt-1.5 text-[13px] text-zinc-400 font-normal">
-              Manage content source availability and priority within the unified activity stream.
+              Choose what shows up in your feed and the order they appear.
             </p>
           </div>
         </div>
@@ -76,14 +76,14 @@ const FeedSettingsPage = () => {
               className="px-0 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-zinc-900 data-[state=active]:bg-transparent text-zinc-400 data-[state=active]:text-zinc-900 text-[13px] font-medium transition-all gap-2"
             >
               <LayoutGrid size={14} />
-              Protocol Registry
+              Visibility
             </TabsTrigger>
             <TabsTrigger 
               value="prioritization" 
               className="px-0 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-zinc-900 data-[state=active]:bg-transparent text-zinc-400 data-[state=active]:text-zinc-900 text-[13px] font-medium transition-all gap-2"
             >
               <ListOrdered size={14} />
-              Architectural Priority
+              Ordering
             </TabsTrigger>
           </TabsList>
         </div>

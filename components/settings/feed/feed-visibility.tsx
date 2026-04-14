@@ -88,8 +88,8 @@ const FeedVisibility = () => {
 
   return (
     <PlatformSettingsPage
-      title="Feed Protocol"
-      description="Configure which content types surface in the activity feed and how they are moderated."
+      title="Feed Visibility"
+      description="Choose which types of content should be shown in your feed."
       headerIcon={Rss}
       badge="Content"
       fields={FEED_FIELDS}
