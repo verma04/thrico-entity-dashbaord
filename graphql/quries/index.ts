@@ -156,11 +156,11 @@ export const GET_ENTITY_SETTINGS = gql`
       allowStories
       autoApproveStories
 
-      allowCommunityInFeed
-      allowDiscussionForumInFeed
-      allowPollsInFeed
+      allowEntityCommunityInFeed
+      allowEntityDiscussionForumInFeed
+      allowEntityPollsInFeed
       allowAdminFeedInFeed
-      allowMomentsInFeed
+      allowEntityMomentsInFeed
     }
   }
 `;
