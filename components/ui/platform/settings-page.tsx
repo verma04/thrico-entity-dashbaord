@@ -28,6 +28,7 @@ interface PlatformSettingsPageProps<T> {
   loading?: boolean;
   onSave: (settings: T) => Promise<void> | void;
   isSaving?: boolean;
+  hideHeader?: boolean;
 }
 
 export function PlatformSettingsPage<T extends Record<string, any>>({
@@ -40,6 +41,7 @@ export function PlatformSettingsPage<T extends Record<string, any>>({
   loading,
   onSave,
   isSaving,
+  hideHeader,
 }: PlatformSettingsPageProps<T>) {
   const [settings, setSettings] = useState<T | null>(null);
   const [hasChanged, setHasChanged] = useState(false);
@@ -93,13 +95,15 @@ export function PlatformSettingsPage<T extends Record<string, any>>({
       <PlatformContainer className="py-0">
         <div className="flex flex-col gap-8">
           {/* skeleton header */}
-          <div className="flex items-center gap-3 pb-6 border-b border-zinc-100">
-            <div className="w-9 h-9 rounded-xl bg-zinc-100 animate-pulse" />
-            <div className="space-y-2">
-              <div className="h-4 w-40 bg-zinc-100 rounded-md animate-pulse" />
-              <div className="h-3 w-64 bg-zinc-50 rounded-md animate-pulse" />
+          {!hideHeader && (
+            <div className="flex items-center gap-3 pb-6 border-b border-zinc-100">
+              <div className="w-9 h-9 rounded-xl bg-zinc-100 animate-pulse" />
+              <div className="space-y-2">
+                <div className="h-4 w-40 bg-zinc-100 rounded-md animate-pulse" />
+                <div className="h-3 w-64 bg-zinc-50 rounded-md animate-pulse" />
+              </div>
             </div>
-          </div>
+          )}
           {/* skeleton rows */}
           <div className="max-w-2xl space-y-3">
             {[1, 2].map((i) => (
@@ -117,81 +121,83 @@ export function PlatformSettingsPage<T extends Record<string, any>>({
   return (
     <PlatformContainer className="py-0">
       {/* ── Page Header ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-zinc-100">
-        <div className="flex items-center gap-3 min-w-0">
-          {HeaderIcon && (
-            <div className="w-9 h-9 rounded-xl bg-zinc-900 flex items-center justify-center text-white shrink-0">
-              <HeaderIcon size={16} strokeWidth={2} />
-            </div>
-          )}
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <h1 className="text-[15px] font-semibold text-zinc-900 tracking-tight leading-none">
-                {title}
-              </h1>
-              {badge && (
-                <span className="px-1.5 py-0.5 rounded-md bg-zinc-100 text-[10px] font-medium text-zinc-500 uppercase tracking-wide border border-zinc-200/60">
-                  {badge}
-                </span>
-              )}
-            </div>
-            <p className="mt-1 text-[12.5px] text-zinc-400 font-normal leading-snug max-w-md truncate">
-              {description}
-            </p>
-          </div>
-        </div>
-
-        {/* Save / Discard actions */}
-        <AnimatePresence mode="wait">
-          {hasChanged && (
-            <motion.div
-              key="actions"
-              initial={{ opacity: 0, y: -6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.15 }}
-              className="flex items-center gap-2 shrink-0"
-            >
-              <button
-                onClick={handleReset}
-                disabled={isSaving}
-                className="h-8 px-3 rounded-lg text-[12px] font-medium text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition-colors disabled:opacity-40 flex items-center gap-1.5"
-              >
-                <RotateCcw size={12} />
-                Discard
-              </button>
-              <button
-                onClick={handleSave}
-                disabled={isSaving}
-                className="h-8 px-4 rounded-lg text-[12px] font-medium bg-zinc-900 text-white hover:bg-zinc-800 transition-colors disabled:opacity-60 flex items-center gap-1.5 shadow-sm"
-              >
-                {isSaving ? (
-                  <Loader2 size={12} className="animate-spin" />
-                ) : (
-                  <Save size={12} />
+      {!hideHeader && (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-zinc-100">
+          <div className="flex items-center gap-3 min-w-0">
+            {HeaderIcon && (
+              <div className="w-9 h-9 rounded-xl bg-zinc-900 flex items-center justify-center text-white shrink-0">
+                <HeaderIcon size={16} strokeWidth={2} />
+              </div>
+            )}
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <h1 className="text-[15px] font-semibold text-zinc-900 tracking-tight leading-none">
+                  {title}
+                </h1>
+                {badge && (
+                  <span className="px-1.5 py-0.5 rounded-md bg-zinc-100 text-[10px] font-medium text-zinc-500 uppercase tracking-wide border border-zinc-200/60">
+                    {badge}
+                  </span>
                 )}
-                Save
-              </button>
-            </motion.div>
-          )}
-          {!hasChanged && saved && (
-            <motion.div
-              key="saved"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="flex items-center gap-1.5 text-[12px] font-medium text-emerald-600"
-            >
-              <Check size={13} strokeWidth={2.5} />
-              Saved
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+              </div>
+              <p className="mt-1 text-[12.5px] text-zinc-400 font-normal leading-snug max-w-md truncate">
+                {description}
+              </p>
+            </div>
+          </div>
+
+          {/* Save / Discard actions */}
+          <AnimatePresence mode="wait">
+            {hasChanged && (
+              <motion.div
+                key="actions"
+                initial={{ opacity: 0, y: -6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.15 }}
+                className="flex items-center gap-2 shrink-0"
+              >
+                <button
+                  onClick={handleReset}
+                  disabled={isSaving}
+                  className="h-8 px-3 rounded-lg text-[12px] font-medium text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition-colors disabled:opacity-40 flex items-center gap-1.5"
+                >
+                  <RotateCcw size={12} />
+                  Discard
+                </button>
+                <button
+                  onClick={handleSave}
+                  disabled={isSaving}
+                  className="h-8 px-4 rounded-lg text-[12px] font-medium bg-zinc-900 text-white hover:bg-zinc-800 transition-colors disabled:opacity-60 flex items-center gap-1.5 shadow-sm"
+                >
+                  {isSaving ? (
+                    <Loader2 size={12} className="animate-spin" />
+                  ) : (
+                    <Save size={12} />
+                  )}
+                  Save
+                </button>
+              </motion.div>
+            )}
+            {!hasChanged && saved && (
+              <motion.div
+                key="saved"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="flex items-center gap-1.5 text-[12px] font-medium text-emerald-600"
+              >
+                <Check size={13} strokeWidth={2.5} />
+                Saved
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
 
       {/* ── Settings Sections ── */}
-      <div className="max-w-2xl space-y-10 mt-2">
+      <div className={cn("max-w-2xl space-y-10", !hideHeader ? "mt-2" : "mt-0")}>
         {Object.entries(groupedFields).map(([sectionName, sectionFields], si) => (
           <motion.div
             key={sectionName}

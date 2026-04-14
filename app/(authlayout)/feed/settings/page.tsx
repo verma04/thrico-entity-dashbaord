@@ -1,95 +1,126 @@
 "use client";
 
-import { useEntitySettings, useUpdateEntitySettings } from "@/graphql/actions";
-import {
-  Rss,
-  MessageSquare,
-  BarChart2,
-  Users2,
-  ShieldAlert,
-  Film,
-} from "lucide-react";
-import {
-  PlatformSettingsPage,
-  SettingsField,
-} from "@/components/ui/platform/settings-page";
-import { toast } from "sonner";
+import React, { useState } from "react";
+import { Rss, LayoutGrid, ListOrdered } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import FeedVisibility from "@/components/settings/feed/feed-visibility";
+import FeedSourceOrdering from "@/components/settings/feed/feed-source-ordering";
+import { useEntitySettings } from "@/graphql/actions";
+import { FEED_FIELDS } from "@/components/settings/feed/feed-visibility";
+import { motion, AnimatePresence } from "framer-motion";
 
-const FIELDS: SettingsField[] = [
-  {
-    key: "allowCommunityInFeed",
-    label: "Show Communities in Feed",
-    description:
-      "Surface community activity and updates in the main activity feed.",
-    icon: Users2,
-    section: "Content Sources",
-  },
-  {
-    key: "allowDiscussionForumInFeed",
-    label: "Show Forum Posts in Feed",
-    description:
-      "Allow discussion forum posts to surface in the main activity feed.",
-    icon: MessageSquare,
-    section: "Content Sources",
-  },
-  {
-    key: "allowPollsInFeed",
-    label: "Show Polls in Feed",
-    description:
-      "Allow poll modules to appear as interactive cards within the activity feed.",
-    icon: BarChart2,
-    section: "Content Sources",
-  },
-  {
-    key: "allowAdminFeedInFeed",
-    label: "Show Admin Feed",
-    description:
-      "Surface administrative announcements and pinned posts from entity admins.",
-    icon: ShieldAlert,
-    section: "Content Sources",
-  },
-  {
-    key: "allowMomentsInFeed",
-    label: "Show Moments in Feed",
-    description:
-      "Surface short-form video moments as feed cards within the activity feed.",
-    icon: Film,
-    section: "Content Sources",
-  },
-];
-
-const FeedSettings = () => {
+/**
+ * Manager component for Feed Prioritization
+ */
+const FeedOrderManager = () => {
   const { data, loading } = useEntitySettings();
-  const [update, { loading: loadingBtn }] = useUpdateEntitySettings({});
 
-  const handleSave = async (settings: any) => {
-    try {
-      // Clean up the settings object to remove fields not allowed in EntityAutoApprovalSettingsInput
-      const { __typename, id, entity, ...cleanSettings } = settings;
-      
-      await update({
-        variables: { input: cleanSettings },
-      });
-      toast.success("Feed protocols synchronized successfully.");
-    } catch (error) {
-      toast.error("Failed to update feed parameters.");
-      throw error;
-    }
-  };
+  if (loading || !data) {
+    return (
+      <div className="flex flex-col gap-3 max-w-2xl">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="h-16 w-full rounded-xl bg-zinc-50 animate-pulse" />
+        ))}
+      </div>
+    );
+  }
+
+  const sources = FEED_FIELDS.map((f) => ({
+    id: f.key,
+    label: f.label,
+    description: f.description,
+    icon: f.icon || Rss,
+    enabled: !!(data.getEntitySettings as any)[f.key],
+  }));
 
   return (
-    <PlatformSettingsPage
-      title="Feed Protocol"
-      description="Configure which content types surface in the activity feed and how they are moderated."
-      headerIcon={Rss}
-      badge="Content"
-      fields={FIELDS}
-      data={data?.getEntitySettings}
-      loading={loading}
-      onSave={handleSave}
-      isSaving={loadingBtn}
-    />
+    <div className="max-w-2xl px-4 sm:px-0">
+      <FeedSourceOrdering 
+        initialSources={sources} 
+        onOrderChange={(order) => {
+          console.log("Priority updated in registry:", order);
+        }}
+      />
+    </div>
   );
 };
 
-export default FeedSettings;
+const FeedSettingsPage = () => {
+  const [activeTab, setActiveTab] = useState("registry");
+
+  return (
+    <div className="space-y-8 pb-20">
+      {/* ── Page Header ── */}
+      <div className="flex flex-col gap-1 pb-2">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-zinc-900 flex items-center justify-center text-white shrink-0">
+            <Rss size={16} strokeWidth={2} />
+          </div>
+          <div>
+            <h1 className="text-[17px] font-semibold text-zinc-900 tracking-tight leading-none">
+              Feed Protocol
+            </h1>
+            <p className="mt-1.5 text-[13px] text-zinc-400 font-normal">
+              Manage content source availability and priority within the unified activity stream.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Navigation Tabs ── */}
+      <Tabs defaultValue="registry" className="w-full" onValueChange={setActiveTab}>
+        <div className="border-b border-zinc-100 mb-8">
+          <TabsList className="bg-transparent h-auto p-0 gap-8 justify-start">
+            <TabsTrigger 
+              value="registry" 
+              className="px-0 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-zinc-900 data-[state=active]:bg-transparent text-zinc-400 data-[state=active]:text-zinc-900 text-[13px] font-medium transition-all gap-2"
+            >
+              <LayoutGrid size={14} />
+              Protocol Registry
+            </TabsTrigger>
+            <TabsTrigger 
+              value="prioritization" 
+              className="px-0 py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-zinc-900 data-[state=active]:bg-transparent text-zinc-400 data-[state=active]:text-zinc-900 text-[13px] font-medium transition-all gap-2"
+            >
+              <ListOrdered size={14} />
+              Architectural Priority
+            </TabsTrigger>
+          </TabsList>
+        </div>
+
+        <div className="min-h-[500px]">
+          <AnimatePresence mode="wait">
+            <TabsContent value="registry" key="registry" className="mt-0 outline-none">
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+              >
+                {/* 
+                  Note: FeedVisibility already contains a PlatformSettingsPage which has its own header.
+                  To avoid double headers, we normally would refactor FeedVisibility to JUST show the rows.
+                  But for now we keep it as is for protocol safety.
+                */}
+                <FeedVisibility />
+              </motion.div>
+            </TabsContent>
+
+            <TabsContent value="prioritization" key="prioritization" className="mt-0 outline-none">
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+              >
+                <FeedOrderManager />
+              </motion.div>
+            </TabsContent>
+          </AnimatePresence>
+        </div>
+      </Tabs>
+    </div>
+  );
+};
+
+export default FeedSettingsPage;

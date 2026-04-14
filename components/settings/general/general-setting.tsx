@@ -9,10 +9,8 @@ import {
   MapPin,
   Fingerprint,
   Layers,
-  ChevronRight,
-  Loader2,
-  Check,
   RotateCcw,
+  ShieldCheck,
 } from "lucide-react";
 import BillingAddress from "./billing-address";
 import { useGetEntity } from "@/graphql/actions";
@@ -26,7 +24,12 @@ import { motion, AnimatePresence } from "framer-motion";
 
 type Tab = "identity" | "branding" | "billing";
 
-const TABS: { key: Tab; label: string; icon: React.ElementType; description: string }[] = [
+const TABS: {
+  key: Tab;
+  label: string;
+  icon: React.ElementType;
+  description: string;
+}[] = [
   {
     key: "identity",
     label: "Identity",
@@ -52,7 +55,7 @@ export default function GeneralSettings() {
   const [activeTab, setActiveTab] = useState<Tab>("identity");
 
   const [communityName, setCommunityName] = useState(
-    entityData?.getEntity?.name || "My Page"
+    entityData?.getEntity?.name || "My Page",
   );
   const [communityImage, setCommunityImage] = useState<string>("");
   const [faviconImage, setFaviconImage] = useState<string>("");
@@ -63,7 +66,7 @@ export default function GeneralSettings() {
       setCommunityImage(
         entityData.getEntity.logo
           ? `https://cdn.thrico.network/${entityData.getEntity.logo}`
-          : ""
+          : "",
       );
     }
   }, [entityData]);
@@ -87,7 +90,10 @@ export default function GeneralSettings() {
           {/* skeleton tabs */}
           <div className="flex gap-2">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-10 w-28 bg-zinc-100 rounded-lg animate-pulse" />
+              <div
+                key={i}
+                className="h-10 w-28 bg-zinc-100 rounded-lg animate-pulse"
+              />
             ))}
           </div>
           {/* skeleton content */}
@@ -115,7 +121,8 @@ export default function GeneralSettings() {
               </span>
             </div>
             <p className="mt-1 text-[12.5px] text-zinc-400 font-normal leading-snug">
-              Manage your entity's profile, visual identity, and billing information.
+              Manage your entity's profile, visual identity, and billing
+              information.
             </p>
           </div>
         </div>
@@ -141,7 +148,7 @@ export default function GeneralSettings() {
                 "relative flex items-center gap-2 px-3.5 py-2.5 rounded-t-lg text-[12.5px] font-medium transition-colors duration-150 border border-transparent",
                 isActive
                   ? "text-zinc-900 bg-white border-zinc-200 border-b-white -mb-px z-10"
-                  : "text-zinc-400 hover:text-zinc-700 hover:bg-zinc-50"
+                  : "text-zinc-400 hover:text-zinc-700 hover:bg-zinc-50",
               )}
             >
               <Icon size={13} strokeWidth={isActive ? 2.2 : 1.8} />
@@ -184,8 +191,17 @@ export default function GeneralSettings() {
               >
                 <div className="divide-y divide-zinc-100">
                   <InfoRow label="Entity Type" value="Organizational Unit" />
-                  <InfoRow label="Protocol Status" value="Active / Synchronized" valueClass="text-emerald-600" dot="emerald" />
-                  <InfoRow label="Registry ID" value={entityData?.getEntity?.id || "—"} mono />
+                  <InfoRow
+                    label="Protocol Status"
+                    value="Active / Synchronized"
+                    valueClass="text-emerald-600"
+                    dot="emerald"
+                  />
+                  <InfoRow
+                    label="Registry ID"
+                    value={entityData?.getEntity?.id || "—"}
+                    mono
+                  />
                   <InfoRow label="Workspace" value={communityName} />
                   <InfoRow label="Primary Language" value="English (Global)" />
                 </div>
@@ -228,10 +244,14 @@ export default function GeneralSettings() {
                   <div className="w-6 h-6 rounded-md bg-white/10 flex items-center justify-center">
                     <ImageIcon size={12} className="text-zinc-300" />
                   </div>
-                  <p className="text-[12px] font-semibold text-zinc-100">Asset Guidelines</p>
+                  <p className="text-[12px] font-semibold text-zinc-100">
+                    Asset Guidelines
+                  </p>
                 </div>
                 <p className="text-[12px] text-zinc-400 leading-relaxed">
-                  Use high-quality assets with transparent backgrounds. PNG or SVG are preferred formats. Minimum recommended size is 256×256px for the logo.
+                  Use high-quality assets with transparent backgrounds. PNG or
+                  SVG are preferred formats. Minimum recommended size is
+                  256×256px for the logo.
                 </p>
               </div>
             </div>
@@ -254,21 +274,28 @@ export default function GeneralSettings() {
                 description="Registry information for tax reporting and regulatory compliance."
               >
                 <div className="space-y-4">
-                   <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-1.5">
-                         <label className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">Tax Registration Number</label>
-                         <div className="h-9 px-3 rounded-lg bg-zinc-50 border border-zinc-100 flex items-center text-[13px] font-medium text-zinc-600 font-mono">
-                            TRN-942-881-229
-                         </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
+                        Tax Registration Number
+                      </label>
+                      <div className="h-9 px-3 rounded-lg bg-zinc-50 border border-zinc-100 flex items-center text-[13px] font-medium text-zinc-600 font-mono">
+                        TRN-942-881-229
                       </div>
-                      <div className="space-y-1.5">
-                         <label className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">VAT / GST ID</label>
-                         <div className="h-9 px-3 rounded-lg bg-zinc-50 border border-zinc-100 flex items-center text-[13px] font-medium text-zinc-600 font-mono">
-                            VAT-GLOBAL-102
-                         </div>
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
+                        VAT / GST ID
+                      </label>
+                      <div className="h-9 px-3 rounded-lg bg-zinc-50 border border-zinc-100 flex items-center text-[13px] font-medium text-zinc-600 font-mono">
+                        VAT-GLOBAL-102
                       </div>
-                   </div>
-                   <p className="text-[11px] text-zinc-400 italic">These details are verified and managed by the Thrico Financial Registry.</p>
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-zinc-400 italic">
+                    These details are verified and managed by the Thrico
+                    Financial Registry.
+                  </p>
                 </div>
               </SectionCard>
 
@@ -279,9 +306,17 @@ export default function GeneralSettings() {
               >
                 <div className="divide-y divide-zinc-100">
                   <InfoRow label="Platform Plan" value="Enterprise Protocol" />
-                  <InfoRow label="Billing Frequency" value="Annual / Recurring" />
+                  <InfoRow
+                    label="Billing Frequency"
+                    value="Annual / Recurring"
+                  />
                   <InfoRow label="Renewal Date" value="Jan 12, 2027" />
-                  <InfoRow label="Current Status" value="Settled" valueClass="text-emerald-600" dot="emerald" />
+                  <InfoRow
+                    label="Current Status"
+                    value="Settled"
+                    valueClass="text-emerald-600"
+                    dot="emerald"
+                  />
                   <InfoRow label="Auto-Renewal" value="Enabled" />
                 </div>
               </SectionCard>
@@ -314,8 +349,12 @@ function SectionCard({
           <Icon size={13} strokeWidth={2} />
         </div>
         <div>
-          <p className="text-[13.5px] font-semibold text-zinc-900 leading-none">{title}</p>
-          <p className="mt-1 text-[12px] text-zinc-400 leading-snug">{description}</p>
+          <p className="text-[13.5px] font-semibold text-zinc-900 leading-none">
+            {title}
+          </p>
+          <p className="mt-1 text-[12px] text-zinc-400 leading-snug">
+            {description}
+          </p>
         </div>
       </div>
       {/* Card body */}
@@ -345,7 +384,7 @@ function InfoRow({
           <div
             className={cn(
               "w-1.5 h-1.5 rounded-full",
-              dot === "emerald" ? "bg-emerald-500" : "bg-zinc-400"
+              dot === "emerald" ? "bg-emerald-500" : "bg-zinc-400",
             )}
           />
         )}
@@ -353,7 +392,7 @@ function InfoRow({
           className={cn(
             "text-[12.5px] font-medium text-zinc-700",
             mono && "font-mono text-[11px] text-zinc-500",
-            valueClass
+            valueClass,
           )}
         >
           {value}
