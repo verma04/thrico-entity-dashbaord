@@ -31,6 +31,14 @@ export interface EntitySettings {
   autoApprovePolls: boolean;
   allowStories: boolean;
   autoApproveStories: boolean;
+
+  // Feed Protocol Fields
+  allowEntityCommunityInFeed: boolean;
+  allowEntityDiscussionForumInFeed: boolean;
+  allowEntityPollsInFeed: boolean;
+  allowEntityFeedInFeed: boolean;
+  allowEntityMomentsInFeed: boolean;
+  allowAdminFeedInFeed: boolean;
 }
 
 export interface GetEntitySettingsResponse {
@@ -64,6 +72,32 @@ export interface UpdateEntitySettingsInput {
   autoApprovePolls?: boolean;
   allowStories?: boolean;
   autoApproveStories?: boolean;
+
+  // Feed Protocol Fields
+  allowEntityCommunityInFeed?: boolean;
+  allowEntityDiscussionForumInFeed?: boolean;
+  allowEntityPollsInFeed?: boolean;
+  allowEntityFeedInFeed?: boolean;
+  allowEntityMomentsInFeed?: boolean;
+  allowAdminFeedInFeed?: boolean;
+
+  // FAQ & Terms Fields
+  termAndConditionsEvents?: string | null;
+  termAndConditionsCommunities?: string | null;
+  faqWallOfFame?: string | null;
+  faqSurveys?: string | null;
+  faqStories?: string | null;
+  faqShop?: string | null;
+  faqPolls?: string | null;
+  faqOffers?: string | null;
+  faqMentorship?: string | null;
+  faqMembers?: string | null;
+  faqListing?: string | null;
+  faqJobs?: string | null;
+  faqGamification?: string | null;
+  faqForums?: string | null;
+  faqEvents?: string | null;
+  faqCommunities?: string | null;
 }
 
 export interface UpdateEntitySettingsResponse {

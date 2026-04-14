@@ -155,12 +155,12 @@ export const GET_ENTITY_SETTINGS = gql`
       autoApprovePolls
       allowStories
       autoApproveStories
-
       allowEntityCommunityInFeed
       allowEntityDiscussionForumInFeed
       allowEntityPollsInFeed
-      allowAdminFeedInFeed
+      allowEntityFeedInFeed
       allowEntityMomentsInFeed
+      allowAdminFeedInFeed
     }
   }
 `;
@@ -195,6 +195,12 @@ export const UPDATE_ENTITY_SETTINGS = gql`
       autoApprovePolls
       allowStories
       autoApproveStories
+      allowEntityCommunityInFeed
+      allowEntityDiscussionForumInFeed
+      allowEntityPollsInFeed
+      allowEntityFeedInFeed
+      allowEntityMomentsInFeed
+      allowAdminFeedInFeed
     }
   }
 `;

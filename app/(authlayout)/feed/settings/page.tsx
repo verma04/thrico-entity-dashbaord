@@ -49,7 +49,7 @@ const FeedSettingsPage = () => {
   const [activeTab, setActiveTab] = useState("registry");
 
   return (
-    <div className="space-y-8 pb-20">
+    <div className="space-y-8 pb-32">
       {/* ── Page Header ── */}
       <div className="flex flex-col gap-1 pb-2">
         <div className="flex items-center gap-3">

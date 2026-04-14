@@ -17,7 +17,11 @@ import {
   MessageSquare,
   BarChart2,
   Film,
-  LucideIcon
+  LucideIcon,
+  RotateCcw,
+  Loader2,
+  Save,
+  Check
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -42,11 +46,14 @@ const FeedSourceOrdering: React.FC<FeedSourceOrderingProps> = ({
   onOrderChange,
 }) => {
   const [sources, setSources] = useState<SourceItem[]>(initialSources);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
 
   // Sync with initialSources if they change from parent
   useEffect(() => {
     setSources(initialSources);
+    setIsDirty(false);
   }, [initialSources]);
 
   const handleDragEnd = (result: DropResult) => {
@@ -57,7 +64,12 @@ const FeedSourceOrdering: React.FC<FeedSourceOrderingProps> = ({
     items.splice(result.destination.index, 0, reorderedItem);
 
     setSources(items);
-    setIsDirty(true);
+    setSaved(false);
+    
+    // Check if order actually changed from initial
+    const currentOrder = items.map(s => s.id).join(",");
+    const initialOrder = initialSources.map(s => s.id).join(",");
+    setIsDirty(currentOrder !== initialOrder);
     
     if (onOrderChange) {
       onOrderChange(items.map(s => s.id));
@@ -65,18 +77,29 @@ const FeedSourceOrdering: React.FC<FeedSourceOrderingProps> = ({
   };
 
   const handleSaveOrder = async () => {
+    setIsSaving(true);
     try {
       // Placeholder for the "different API" the user mentioned
-      // In a real scenario, this would be a mutation like:
-      // await updateFeedOrder({ variables: { order: sources.map(s => s.id) } });
-      
       console.log("Saving new feed source sequence:", sources.map(s => s.id));
+      
+      // Simulate API latency
+      await new Promise(resolve => setTimeout(resolve, 800));
       
       toast.success("Feed prioritization sequence updated.");
       setIsDirty(false);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
     } catch (error) {
       toast.error("Failed to synchronize sequence protocols.");
+    } finally {
+      setIsSaving(false);
     }
+  };
+
+  const handleReset = () => {
+    setSources(initialSources);
+    setIsDirty(false);
+    setSaved(false);
   };
 
   return (
@@ -97,24 +120,7 @@ const FeedSourceOrdering: React.FC<FeedSourceOrderingProps> = ({
           </p>
         </div>
 
-        <AnimatePresence>
-          {isDirty && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-            >
-              <Button
-                onClick={handleSaveOrder}
-                size="sm"
-                className="h-8 px-4 bg-zinc-900 text-white hover:bg-zinc-800 text-[11px] font-medium rounded-lg shadow-sm gap-1.5"
-              >
-                <Sparkles size={12} className="text-emerald-400" />
-                Apply Sequence
-              </Button>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Floating Action Bar (logic moved to bottom of component) */}
       </div>
 
       {/* Drag & Drop List */}
@@ -196,6 +202,60 @@ const FeedSourceOrdering: React.FC<FeedSourceOrderingProps> = ({
           across all active user sessions once synchronized with the registry.
         </p>
       </div>
+
+      {/* ── Floating Action Bar ── */}
+      <AnimatePresence>
+        {isDirty && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            exit={{ opacity: 0, y: 20, filter: "blur(10px)" }}
+            className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-4 px-5 py-3 rounded-2xl bg-zinc-900 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] backdrop-blur-md"
+          >
+            <div className="flex flex-col">
+              <span className="text-[11px] font-bold text-white/90 leading-none">Modified Sequence</span>
+              <span className="text-[10px] text-zinc-400 mt-0.5">Architectural Priority changes detected</span>
+            </div>
+            
+            <div className="w-px h-8 bg-white/10 mx-1" />
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleReset}
+                disabled={isSaving}
+                className="h-9 px-4 rounded-xl text-[12px] font-medium text-zinc-400 hover:text-white hover:bg-white/5 transition-all disabled:opacity-40 flex items-center gap-2"
+              >
+                <RotateCcw size={13} />
+                Discard
+              </button>
+              <button
+                onClick={handleSaveOrder}
+                disabled={isSaving}
+                className="h-9 px-5 rounded-xl text-[12px] font-bold bg-white text-zinc-900 hover:bg-zinc-200 transition-all disabled:opacity-60 flex items-center gap-2 shadow-lg"
+              >
+                {isSaving ? (
+                  <Loader2 size={13} className="animate-spin" />
+                ) : (
+                  <Save size={13} />
+                )}
+                Save
+              </button>
+            </div>
+          </motion.div>
+        )}
+        {!isDirty && saved && (
+          <motion.div
+            key="saved-floating"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] px-4 py-2 rounded-xl bg-emerald-500 text-white text-[12px] font-bold shadow-xl flex items-center gap-2"
+          >
+            <Check size={14} strokeWidth={3} />
+            Sequence Synchronized
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

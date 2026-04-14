@@ -18,7 +18,39 @@ import { toast } from "sonner";
 
 export const FEED_FIELDS: SettingsField[] = [
   {
-    key: "allowMomentsInFeed",
+    key: "allowEntityCommunityInFeed",
+    label: "Show Communities in Feed",
+    description:
+      "Surface community activity and updates in the main activity feed.",
+    icon: Users2,
+    section: "Content Sources",
+  },
+  {
+    key: "allowEntityDiscussionForumInFeed",
+    label: "Show Forum Posts in Feed",
+    description:
+      "Allow discussion forum posts to surface in the main activity feed.",
+    icon: MessageSquare,
+    section: "Content Sources",
+  },
+  {
+    key: "allowEntityPollsInFeed",
+    label: "Show Polls in Feed",
+    description:
+      "Allow poll modules to appear as interactive cards within the activity feed.",
+    icon: BarChart2,
+    section: "Content Sources",
+  },
+  {
+    key: "allowEntityFeedInFeed",
+    label: "Show Global Feed",
+    description:
+      "Include content from the global entity feed in the unified activity stream.",
+    icon: Rss,
+    section: "Content Sources",
+  },
+  {
+    key: "allowEntityMomentsInFeed",
     label: "Show Moments in Feed",
     description:
       "Surface short-form video moments as feed cards within the activity feed.",
@@ -33,30 +65,6 @@ export const FEED_FIELDS: SettingsField[] = [
     icon: ShieldAlert,
     section: "Content Sources",
   },
-  {
-    key: "allowCommunityInFeed",
-    label: "Show Communities in Feed",
-    description:
-      "Surface community activity and updates in the main activity feed.",
-    icon: Users2,
-    section: "Content Sources",
-  },
-  {
-    key: "allowDiscussionForumInFeed",
-    label: "Show Forum Posts in Feed",
-    description:
-      "Allow discussion forum posts to surface in the main activity feed.",
-    icon: MessageSquare,
-    section: "Content Sources",
-  },
-  {
-    key: "allowPollsInFeed",
-    label: "Show Polls in Feed",
-    description:
-      "Allow poll modules to appear as interactive cards within the activity feed.",
-    icon: BarChart2,
-    section: "Content Sources",
-  },
 ];
 
 const FeedVisibility = () => {
@@ -67,7 +75,7 @@ const FeedVisibility = () => {
     try {
       // Clean up the settings object to remove fields not allowed in EntityAutoApprovalSettingsInput
       const { __typename, id, entity, ...cleanSettings } = settings;
-      
+
       await update({
         variables: { input: cleanSettings },
       });
