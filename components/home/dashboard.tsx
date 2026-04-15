@@ -22,6 +22,7 @@ import {
   LucideIcon,
   Circle,
   Users,
+  Database,
 } from "lucide-react";
 import { ResponsiveContainer, AreaChart, Area } from "recharts";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
@@ -34,6 +35,11 @@ import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { useGetCommunityKPIs, TimeRange } from "@/graphql/actions/dashboard";
 import { subDays } from "date-fns";
 import { DateRange } from "react-day-picker";
+import { StorageStats } from "@/components/subscription/storage-stats";
+import {
+  useGetStorageStats,
+  useGetStorageSummary,
+} from "@/graphql/storage/storage-hooks";
 
 // ---------------------------------------------------------------------------
 // KPI Card
@@ -48,6 +54,17 @@ interface CommunityKPICardProps {
   subtext?: string;
 }
 
+interface DashboardMetricValue {
+  value?: string | number;
+  change?: number;
+  trend?: number[];
+}
+
+const isDashboardMetricValue = (value: unknown): value is DashboardMetricValue =>
+  typeof value === "object" &&
+  value !== null &&
+  ("value" in value || "change" in value || "trend" in value);
+
 const CommunityKPICard = ({
   title,
   value,
@@ -61,31 +78,36 @@ const CommunityKPICard = ({
   const chartData = trend.map((val, i) => ({ value: val, id: i }));
 
   return (
-    <div className="h-[160px] group relative bg-card border border-border rounded-xl p-5 transition-all duration-200 hover:shadow-sm overflow-hidden flex flex-col justify-between">
+    <div className="h-[170px] group relative overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-b from-background via-background to-muted/30 p-5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 flex flex-col justify-between">
+      <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-[radial-gradient(circle_at_90%_10%,hsl(var(--primary)/0.12),transparent_45%)]" />
       {/* Top Header */}
-      <div className="flex items-start justify-between mb-3">
-        <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider leading-none">
+      <div className="relative flex items-start justify-between mb-3">
+        <span className="text-[10px] font-semibold text-muted-foreground/85 uppercase tracking-[0.18em] leading-none">
           {title}
         </span>
         {Icon ? (
-          <Icon className="h-4 w-4 text-muted-foreground/60" />
+          <div className="h-8 w-8 rounded-lg border border-border/60 bg-background/80 backdrop-blur-sm flex items-center justify-center">
+            <Icon className="h-4 w-4 text-muted-foreground/80" />
+          </div>
         ) : (
-          <div className={cn("h-2 w-2 rounded-full", statusColor)} />
+          <div className="h-8 w-8 rounded-lg border border-border/60 bg-background/80 backdrop-blur-sm flex items-center justify-center">
+            <div className={cn("h-2.5 w-2.5 rounded-full", statusColor)} />
+          </div>
         )}
       </div>
 
       {/* Main Value & Change */}
-      <div className="mb-5">
-        <h3 className="text-2xl font-semibold text-foreground tracking-tight mb-1.5 tabular-nums">
+      <div className="relative mb-5">
+        <h3 className="text-3xl font-semibold text-foreground tracking-tight mb-1.5 tabular-nums">
           {typeof value === "number" ? Math.round(value) : value}
         </h3>
         <div className="flex items-center gap-2">
           <div
             className={cn(
-              "flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[10px] font-semibold",
+              "flex items-center gap-0.5 px-2 py-1 rounded-full text-[10px] font-semibold border",
               isPositive
-                ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400"
-                : "bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400",
+                ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20 dark:text-emerald-300"
+                : "bg-rose-500/10 text-rose-600 border-rose-500/20 dark:text-rose-300",
             )}
           >
             {isPositive ? (
@@ -96,14 +118,14 @@ const CommunityKPICard = ({
             {isPositive ? "+" : ""}
             {typeof change === "number" ? Math.round(change) : change}%
           </div>
-          <span className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-wider">
+          <span className="text-[10px] font-medium text-muted-foreground/65 uppercase tracking-wider">
             {subtext}
           </span>
         </div>
       </div>
 
       {/* Sparkline */}
-      <div className="h-9 -mx-5 -mb-5 mt-1">
+      <div className="relative h-10 -mx-5 -mb-5 mt-1">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={chartData}>
             <defs>
@@ -158,13 +180,13 @@ const ModulePerformanceCard = ({
   icon: LucideIcon;
   color?: string;
 }) => (
-  <div className="bg-card border border-border rounded-xl p-4 hover:shadow-sm transition-all duration-200 group">
+  <div className="rounded-2xl border border-border/60 bg-gradient-to-b from-background to-muted/20 p-4 shadow-sm transition-all duration-300 group hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-lg">
     <div className="flex items-center gap-3.5">
-      <div className="h-9 w-9 rounded-lg bg-muted border border-border flex items-center justify-center group-hover:scale-105 transition-transform">
+      <div className="h-10 w-10 rounded-xl bg-background border border-border/70 flex items-center justify-center group-hover:scale-105 transition-transform">
         <Icon className={cn("h-4.5 w-4.5", color)} />
       </div>
       <div className="min-w-0">
-        <h4 className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider leading-none mb-1">
+        <h4 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.15em] leading-none mb-1.5">
           {title}
         </h4>
         <div className="flex items-baseline gap-1.5">
@@ -218,7 +240,12 @@ export default function Dashboard() {
       : undefined,
   );
 
+  const { data: statsData, loading: statsLoading } = useGetStorageStats();
+  const { data: summaryData, loading: summaryLoading } = useGetStorageSummary();
+
   const kpis = data?.getCommunityKPIs;
+  const storageStats = statsData?.getStorageStats;
+  const storageSummary = summaryData?.getStorageSummary;
 
   const vitals = [
     {
@@ -267,6 +294,15 @@ export default function Dashboard() {
     { title: "Moderation", icon: Shield, color: "text-red-600" },
   ];
 
+  const getMetric = (key: string): DashboardMetricValue => {
+    if (!kpis || !(key in kpis)) {
+      return {};
+    }
+
+    const metric = kpis[key as keyof typeof kpis];
+    return isDashboardMetricValue(metric) ? metric : {};
+  };
+
   return (
     <EcosystemWrapper>
       <EcosystemHeader
@@ -279,9 +315,9 @@ export default function Dashboard() {
       <EcosystemActionBar shadow="none">
         <EcosystemActionBar.Group>
           <EcosystemActionBar.Item>
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1.5">
               <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[11px] font-medium text-muted-foreground">
+              <span className="text-[11px] font-medium text-emerald-700 dark:text-emerald-300">
                 All systems running normally
               </span>
             </div>
@@ -300,7 +336,7 @@ export default function Dashboard() {
           <Button
             variant="outline"
             size="sm"
-            className="h-9 px-3.5 rounded-lg text-xs gap-2"
+            className="h-9 px-3.5 rounded-xl text-xs gap-2 border-border/70 bg-background/80 backdrop-blur-sm hover:bg-muted/60"
             onClick={() => refetch()}
           >
             <RefreshCcw
@@ -308,7 +344,10 @@ export default function Dashboard() {
             />
             Refresh
           </Button>
-          <Button size="sm" className="h-9 px-3.5 rounded-lg text-xs gap-2">
+          <Button
+            size="sm"
+            className="h-9 px-4 rounded-xl text-xs gap-2 shadow-sm shadow-primary/20"
+          >
             <Sparkles className="h-3.5 w-3.5" />
             Insights
           </Button>
@@ -319,14 +358,14 @@ export default function Dashboard() {
         {/* 1. Core Stats */}
         <section className="space-y-4">
           <div className="flex items-center gap-3">
-            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-widest">
+            <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.2em]">
               Core Community Stats
             </span>
-            <div className="h-px bg-border flex-1" />
+            <div className="h-px bg-gradient-to-r from-border to-transparent flex-1" />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
             {vitals.map((v) => {
-              const item = kpis?.[v.key as keyof typeof kpis] as any;
+              const item = getMetric(v.key);
               return (
                 <CommunityKPICard
                   key={v.key}
@@ -344,15 +383,15 @@ export default function Dashboard() {
         {/* 2. Content & Feed */}
         <section className="space-y-4">
           <div className="flex items-center gap-3">
-            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-widest">
+            <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.2em]">
               Content & Feed
             </span>
-            <div className="h-px bg-border flex-1" />
+            <div className="h-px bg-gradient-to-r from-border to-transparent flex-1" />
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
             <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
               {contentFeed.map((v) => {
-                const item = kpis?.[v.key as keyof typeof kpis] as any;
+                const item = getMetric(v.key);
                 return (
                   <CommunityKPICard
                     key={v.key}
@@ -367,24 +406,27 @@ export default function Dashboard() {
             </div>
 
             {/* Content Type Breakdown */}
-            <div className="lg:col-span-4 bg-card border border-border rounded-xl p-5">
+            <div className="lg:col-span-4 rounded-2xl border border-border/60 bg-gradient-to-b from-background to-muted/25 p-5 shadow-sm">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xs font-semibold text-foreground uppercase tracking-wider">
+                <h3 className="text-[11px] font-semibold text-foreground uppercase tracking-[0.16em]">
                   What members are posting
                 </h3>
-                {kpis?.contentTypeBreakdown && kpis.contentTypeBreakdown.length > 3 && (
-                  <Button
-                    variant="link"
-                    className="text-[10px] text-muted-foreground font-medium p-0 h-auto"
-                    onClick={() => setShowAllContentTypes(!showAllContentTypes)}
-                  >
-                    {showAllContentTypes ? "View less ←" : "View all →"}
-                  </Button>
-                )}
+                {kpis?.contentTypeBreakdown &&
+                  kpis.contentTypeBreakdown.length > 3 && (
+                    <Button
+                      variant="link"
+                      className="text-[10px] text-muted-foreground font-medium p-0 h-auto"
+                      onClick={() =>
+                        setShowAllContentTypes(!showAllContentTypes)
+                      }
+                    >
+                      {showAllContentTypes ? "View less ←" : "View all →"}
+                    </Button>
+                  )}
               </div>
               <div className="space-y-5">
-                {(showAllContentTypes 
-                  ? kpis?.contentTypeBreakdown 
+                {(showAllContentTypes
+                  ? kpis?.contentTypeBreakdown
                   : kpis?.contentTypeBreakdown?.slice(0, 3)
                 )?.map((item, i) => (
                   <div key={i} className="space-y-1.5">
@@ -398,10 +440,10 @@ export default function Dashboard() {
                         {Math?.round(item?.percentage)}%
                       </span>
                     </div>
-                    <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
+                    <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
                       <div
                         className={cn(
-                          "h-full rounded-full transition-all duration-700",
+                          "h-full rounded-full transition-all duration-700 shadow-sm",
                           i === 0
                             ? "bg-indigo-500"
                             : i === 1
@@ -442,10 +484,10 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="bg-card border border-border rounded-xl overflow-hidden">
+            <div className="rounded-2xl border border-border/60 bg-gradient-to-b from-background to-muted/20 overflow-hidden shadow-sm">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="border-b border-border bg-muted/30">
+                  <tr className="border-b border-border/70 bg-muted/40">
                     <th className="px-4 py-3 text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
                       Type
                     </th>
@@ -459,7 +501,7 @@ export default function Dashboard() {
                 </thead>
                 <tbody className="divide-y divide-border">
                   {kpis?.moderationStats?.map((stat, i) => (
-                    <tr key={i} className="hover:bg-muted/30 transition-colors">
+                    <tr key={i} className="hover:bg-muted/35 transition-colors">
                       <td className="px-4 py-3 text-[12px] text-foreground/80">
                         {stat.type}
                       </td>
@@ -502,13 +544,13 @@ export default function Dashboard() {
           {/* Module Performance Grid */}
           <section className="lg:col-span-8 space-y-4">
             <div className="flex items-center gap-3">
-              <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-widest">
+              <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.2em]">
                 How people use features
               </span>
-              <div className="h-px bg-border flex-1" />
+              <div className="h-px bg-gradient-to-r from-border to-transparent flex-1" />
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {modulePerformanceList.map((mod, i) => {
+              {modulePerformanceList.map((mod) => {
                 const dataItem = kpis?.modulePerformance?.find(
                   (m) => m.module === mod.title,
                 );
@@ -527,30 +569,54 @@ export default function Dashboard() {
           </section>
         </div>
 
-        {/* 4. Acquisition & Retention */}
-        <section className="space-y-4">
-          <div className="flex items-center gap-3">
-            <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-widest">
-              Growing & Keeping Members
-            </span>
-            <div className="h-px bg-border flex-1" />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {acquisitionRet.map((v) => {
-              const item = kpis?.[v.key as keyof typeof kpis] as any;
-              return (
-                <CommunityKPICard
-                  key={v.key}
-                  title={v.title}
-                  value={loading ? "..." : (item?.value ?? "0")}
-                  change={item?.change ?? 0}
-                  trend={item?.trend ?? [0, 0, 0, 0, 0, 0, 0]}
-                  icon={v.icon}
-                />
-              );
-            })}
-          </div>
-        </section>
+        {/* 4. Storage & Acquisition/Retention Combined Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* Storage Stats */}
+          <section className="lg:col-span-4 space-y-4">
+            <div className="flex items-center gap-2">
+              <Database className="h-4 w-4 text-slate-800" />
+              <h2 className="text-xs font-semibold text-slate-900 uppercase tracking-[0.14em]">
+                Platform Storage
+              </h2>
+            </div>
+            <div className="h-full">
+              {statsLoading || summaryLoading ? (
+                <div className="h-[280px] border border-border/70 rounded-2xl bg-gradient-to-b from-background to-muted/25 animate-pulse flex items-center justify-center">
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium">
+                    Crunching usage data...
+                  </span>
+                </div>
+              ) : (
+                <StorageStats stats={storageStats} summary={storageSummary} />
+              )}
+            </div>
+          </section>
+
+          {/* Growing & Keeping Members (Acquisition & Retention) */}
+          <section className="lg:col-span-8 space-y-4">
+            <div className="flex items-center gap-3">
+              <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.2em]">
+                Growing & Keeping Members
+              </span>
+              <div className="h-px bg-gradient-to-r from-border to-transparent flex-1" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {acquisitionRet.map((v) => {
+                const item = getMetric(v.key);
+                return (
+                  <CommunityKPICard
+                    key={v.key}
+                    title={v.title}
+                    value={loading ? "..." : (item?.value ?? "0")}
+                    change={item?.change ?? 0}
+                    trend={item?.trend ?? [0, 0, 0, 0, 0, 0, 0]}
+                    icon={v.icon}
+                  />
+                );
+              })}
+            </div>
+          </section>
+        </div>
       </EcosystemContainer>
     </EcosystemWrapper>
   );
