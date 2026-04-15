@@ -1,5 +1,9 @@
 import { useMutation, useQuery } from "@apollo/client";
-import { GET_ENTITY_SETTINGS, UPDATE_ENTITY_SETTINGS } from "../../quries";
+import {
+  GET_ENTITY_SETTINGS,
+  UPDATE_ENTITY_SETTINGS,
+  UPDATE_FEED_ORDER,
+} from "../../quries";
 
 // TypeScript types for EntitySettings
 export interface EntitySettings {
@@ -38,7 +42,8 @@ export interface EntitySettings {
   allowEntityPollsInFeed: boolean;
   allowEntityFeedInFeed: boolean;
   allowEntityMomentsInFeed: boolean;
-  allowAdminFeedInFeed: boolean;
+  allowEntityFeedInFeed: boolean;
+  feedOrder: string[];
 }
 
 export interface GetEntitySettingsResponse {
@@ -79,7 +84,7 @@ export interface UpdateEntitySettingsInput {
   allowEntityPollsInFeed?: boolean;
   allowEntityFeedInFeed?: boolean;
   allowEntityMomentsInFeed?: boolean;
-  allowAdminFeedInFeed?: boolean;
+  allowEntityFeedInFeed?: boolean;
 
   // FAQ & Terms Fields
   termAndConditionsEvents?: string | null;
@@ -114,3 +119,11 @@ export const useUpdateEntitySettings = (options?: any) =>
     UpdateEntitySettingsResponse,
     { input: UpdateEntitySettingsInput }
   >(UPDATE_ENTITY_SETTINGS, options);
+
+// Custom hook to update feed order
+export const useUpdateFeedOrder = (options?: any) =>
+  useMutation(UPDATE_FEED_ORDER, {
+    ...options,
+    refetchQueries: [{ query: GET_ENTITY_SETTINGS }],
+    awaitRefetchQueries: true,
+  });

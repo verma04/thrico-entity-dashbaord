@@ -129,7 +129,7 @@ const Details = ({
                 {job.location && (
                   <div className="flex items-center gap-1">
                     <MapPin className="h-4 w-4" />
-                    <span>{job.location}</span>
+                    <span>{typeof job.location === 'object' ? job.location?.name : job.location}</span>
                   </div>
                 )}
                 <div className="flex items-center gap-1">

@@ -355,7 +355,9 @@ export function JobCreationForm({
                                 "border-destructive"
                             )}
                             initialValue={
-                              formik.values.location
+                              typeof formik.values.location === "object"
+                                ? formik.values.location
+                                : formik.values.location
                                 ? {
                                     name: formik.values.location,
                                     address: formik.values.location,
@@ -364,12 +366,7 @@ export function JobCreationForm({
                                   }
                                 : null
                             }
-                            onChange={(loc) =>
-                              formik.setFieldValue(
-                                "location",
-                                loc.address || loc.name
-                              )
-                            }
+                            onChange={(loc) => formik.setFieldValue("location", loc)}
                           />
                         </div>
                         {formik.touched.location && formik.errors.location && (
@@ -656,7 +653,7 @@ export function JobCreationForm({
                         className="bg-primary/5 text-primary border-primary/10 hover:bg-primary/10"
                       >
                         <MapPin className="h-3 w-3 mr-1" />
-                        {formik.values.location || "Location"}
+                        {typeof formik.values.location === 'object' ? formik.values.location?.name : (formik.values.location || "Location")}
                       </Badge>
                       <Badge
                         variant="secondary"

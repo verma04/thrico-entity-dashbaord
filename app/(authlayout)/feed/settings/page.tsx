@@ -25,21 +25,29 @@ const FeedOrderManager = () => {
     );
   }
 
-  const sources = FEED_FIELDS.map((f) => ({
-    id: f.key,
-    label: f.label,
-    description: f.description,
-    icon: f.icon || Rss,
-    enabled: !!(data.getEntitySettings as any)[f.key],
-  }));
+  const feedOrder = (data.getEntitySettings as any).feedOrder || [];
+
+  const sources = [...FEED_FIELDS]
+    .sort((a, b) => {
+      const indexA = feedOrder.indexOf(a.key);
+      const indexB = feedOrder.indexOf(b.key);
+      if (indexA === -1 && indexB === -1) return 0;
+      if (indexA === -1) return 1;
+      if (indexB === -1) return -1;
+      return indexA - indexB;
+    })
+    .map((f) => ({
+      id: f.key,
+      label: f.label,
+      description: f.description,
+      icon: f.icon || Rss,
+      enabled: !!(data.getEntitySettings as any)[f.key],
+    }));
 
   return (
     <div className="max-w-2xl px-4 sm:px-0">
       <FeedSourceOrdering 
         initialSources={sources} 
-        onOrderChange={(order) => {
-          console.log("Priority updated in registry:", order);
-        }}
       />
     </div>
   );

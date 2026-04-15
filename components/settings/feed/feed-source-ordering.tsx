@@ -7,10 +7,10 @@ import {
   Draggable,
   DropResult,
 } from "@hello-pangea/dnd";
-import { 
-  GripVertical, 
-  Settings2, 
-  Info, 
+import {
+  GripVertical,
+  Settings2,
+  Info,
   Sparkles,
   ShieldCheck,
   Users2,
@@ -21,12 +21,13 @@ import {
   RotateCcw,
   Loader2,
   Save,
-  Check
+  Check,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useUpdateFeedOrder } from "@/graphql/actions";
 
 interface SourceItem {
   id: string;
@@ -50,6 +51,8 @@ const FeedSourceOrdering: React.FC<FeedSourceOrderingProps> = ({
   const [saved, setSaved] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
 
+  const [updateOrder] = useUpdateFeedOrder();
+
   // Sync with initialSources if they change from parent
   useEffect(() => {
     setSources(initialSources);
@@ -65,30 +68,38 @@ const FeedSourceOrdering: React.FC<FeedSourceOrderingProps> = ({
 
     setSources(items);
     setSaved(false);
-    
+
     // Check if order actually changed from initial
-    const currentOrder = items.map(s => s.id).join(",");
-    const initialOrder = initialSources.map(s => s.id).join(",");
+    const currentOrder = items.map((s) => s.id).join(",");
+    const initialOrder = initialSources.map((s) => s.id).join(",");
     setIsDirty(currentOrder !== initialOrder);
-    
+
     if (onOrderChange) {
-      onOrderChange(items.map(s => s.id));
+      onOrderChange(items.map((s) => s.id));
     }
   };
 
   const handleSaveOrder = async () => {
     setIsSaving(true);
     try {
-      // Placeholder for the "different API" the user mentioned
-      console.log("Saving new feed source sequence:", sources.map(s => s.id));
-      
-      // Simulate API latency
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      toast.success("Feed prioritization sequence updated.");
-      setIsDirty(false);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2500);
+      const order = sources.map((s) => s.id);
+
+      const { data } = await updateOrder({
+        variables: {
+          input: {
+            order,
+          },
+        },
+      });
+
+      if (data?.updateFeedOrder) {
+        toast.success("Feed prioritization sequence updated.");
+        setIsDirty(false);
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2500);
+      } else {
+        throw new Error("Failed to synchronize protocols.");
+      }
     } catch (error) {
       toast.error("Failed to synchronize sequence protocols.");
     } finally {
@@ -133,7 +144,11 @@ const FeedSourceOrdering: React.FC<FeedSourceOrderingProps> = ({
               className="space-y-2.5"
             >
               {sources.map((source, index) => (
-                <Draggable key={source.id} draggableId={source.id} index={index}>
+                <Draggable
+                  key={source.id}
+                  draggableId={source.id}
+                  index={index}
+                >
                   {(provided, snapshot) => (
                     <div
                       ref={provided.innerRef}
@@ -142,7 +157,7 @@ const FeedSourceOrdering: React.FC<FeedSourceOrderingProps> = ({
                         "group relative flex items-center gap-4 p-3 rounded-xl border transition-all duration-200",
                         snapshot.isDragging
                           ? "bg-white border-zinc-900 shadow-xl z-50 scale-[1.02]"
-                          : "bg-zinc-50/50 border-zinc-100 hover:border-zinc-200 hover:bg-white"
+                          : "bg-zinc-50/50 border-zinc-100 hover:border-zinc-200 hover:bg-white",
                       )}
                     >
                       {/* Drag Handle */}
@@ -165,7 +180,9 @@ const FeedSourceOrdering: React.FC<FeedSourceOrderingProps> = ({
                         </div>
                         <div className="min-w-0">
                           <h4 className="text-[13.5px] font-medium text-zinc-900 leading-none">
-                            {source.label.replace("Show ", "").replace(" in Feed", "")}
+                            {source.label
+                              .replace("Show ", "")
+                              .replace(" in Feed", "")}
                           </h4>
                           <p className="mt-1.5 text-[11.5px] text-zinc-400 leading-relaxed truncate max-w-[300px]">
                             {source.description}
@@ -212,10 +229,14 @@ const FeedSourceOrdering: React.FC<FeedSourceOrderingProps> = ({
             className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-4 px-5 py-3 rounded-2xl bg-zinc-900 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] backdrop-blur-md"
           >
             <div className="flex flex-col">
-              <span className="text-[11px] font-bold text-white/90 leading-none">Unsaved Changes</span>
-              <span className="text-[10px] text-zinc-400 mt-0.5">You have changed the order</span>
+              <span className="text-[11px] font-bold text-white/90 leading-none">
+                Unsaved Changes
+              </span>
+              <span className="text-[10px] text-zinc-400 mt-0.5">
+                You have changed the order
+              </span>
             </div>
-            
+
             <div className="w-px h-8 bg-white/10 mx-1" />
 
             <div className="flex items-center gap-2">

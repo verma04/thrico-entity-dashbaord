@@ -16,15 +16,17 @@ import {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const JOB_TYPE_COLORS: Record<string, string> = {
-  FULL_TIME:   "bg-emerald-50 text-emerald-700 border-emerald-200",
-  PART_TIME:   "bg-sky-50 text-sky-700 border-sky-200",
-  CONTRACT:    "bg-amber-50 text-amber-700 border-amber-200",
-  INTERNSHIP:  "bg-violet-50 text-violet-700 border-violet-200",
-  FREELANCE:   "bg-orange-50 text-orange-700 border-orange-200",
+  FULL_TIME: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  PART_TIME: "bg-sky-50 text-sky-700 border-sky-200",
+  CONTRACT: "bg-amber-50 text-amber-700 border-amber-200",
+  INTERNSHIP: "bg-violet-50 text-violet-700 border-violet-200",
+  FREELANCE: "bg-orange-50 text-orange-700 border-orange-200",
 };
 
 function JobTypeBadge({ type }: { type: string }) {
-  const color = JOB_TYPE_COLORS[type?.toUpperCase()] ?? "bg-muted text-muted-foreground border-border";
+  const color =
+    JOB_TYPE_COLORS[type?.toUpperCase()] ??
+    "bg-muted text-muted-foreground border-border";
   return (
     <span
       className={`inline-flex items-center px-2 py-0.5 rounded-md border text-[10px] font-semibold uppercase tracking-wide ${color}`}
@@ -41,7 +43,7 @@ function JobTypeBadge({ type }: { type: string }) {
 const columns: AdminTableColumn<Job>[] = [
   {
     key: "job",
-    header: "Job & Location",
+    header: "Job",
     cell: (row) => (
       <div className="flex items-center gap-3">
         <Avatar className="h-9 w-9 rounded-lg border border-border/60 shrink-0">
@@ -68,7 +70,7 @@ const columns: AdminTableColumn<Job>[] = [
           <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
             <MapPin className="h-2.5 w-2.5 shrink-0" />
             <span className="truncate max-w-[160px]">
-              {row.location} · {row.workplaceType}
+              {(typeof row.location === 'object' ? row.location?.name : row.location) || "—"} · {row.workplaceType}
             </span>
           </div>
         </div>
@@ -92,7 +94,7 @@ const columns: AdminTableColumn<Job>[] = [
   },
   {
     key: "applicants",
-    header: "Applicants",
+    header: "People",
     headerClassName: "text-center",
     className: "text-center",
     cell: (row) => (
@@ -104,7 +106,7 @@ const columns: AdminTableColumn<Job>[] = [
   },
   {
     key: "posted",
-    header: "Posted",
+    header: "Date",
     cell: (row) => (
       <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground whitespace-nowrap">
         <Calendar className="h-3 w-3 shrink-0" />
@@ -132,8 +134,8 @@ export default function Jobs({ data }: { data: Job[] | undefined }) {
       data={data}
       keyExtractor={(j) => j.id}
       emptyIcon={Briefcase}
-      emptyTitle="No jobs found"
-      emptyDescription="Try adjusting your filters or search terms."
+      emptyTitle="No jobs here"
+      emptyDescription="Try searching for something else."
     />
   );
 }

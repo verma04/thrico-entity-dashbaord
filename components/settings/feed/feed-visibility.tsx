@@ -41,14 +41,7 @@ export const FEED_FIELDS: SettingsField[] = [
     icon: BarChart2,
     section: "Content Sources",
   },
-  {
-    key: "allowEntityFeedInFeed",
-    label: "Show Global Feed",
-    description:
-      "Include content from the global entity feed in the unified activity stream.",
-    icon: Rss,
-    section: "Content Sources",
-  },
+
   {
     key: "allowEntityMomentsInFeed",
     label: "Show Moments in Feed",
@@ -58,7 +51,7 @@ export const FEED_FIELDS: SettingsField[] = [
     section: "Content Sources",
   },
   {
-    key: "allowAdminFeedInFeed",
+    key: "allowEntityFeedInFeed",
     label: "Show Admin Feed",
     description:
       "Surface administrative announcements and pinned posts from entity admins.",

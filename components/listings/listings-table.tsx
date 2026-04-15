@@ -26,7 +26,12 @@ interface Listing {
   id: string;
   title: string;
   price: number;
-  location: string;
+  location: {
+    name?: string;
+    address?: string;
+    latitude?: number;
+    longitude?: number;
+  } | string;
   status: string;
   verified: boolean;
   views: number;
@@ -73,7 +78,9 @@ export function ListingsTable({ listings }: { listings: Listing[] }) {
               <span className="text-[10px] text-muted-foreground">•</span>
               <div className="flex items-center gap-0.5 text-[10px] text-muted-foreground">
                 <MapPin className="h-2.5 w-2.5 opacity-50" />
-                {listing.location}
+                {typeof listing.location === "object"
+                  ? listing.location?.name || listing.location?.address || "—"
+                  : listing.location || "—"}
               </div>
             </div>
           </div>

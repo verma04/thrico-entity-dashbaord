@@ -160,7 +160,8 @@ export const GET_ENTITY_SETTINGS = gql`
       allowEntityPollsInFeed
       allowEntityFeedInFeed
       allowEntityMomentsInFeed
-      allowAdminFeedInFeed
+      allowEntityFeedInFeed
+      feedOrder
     }
   }
 `;
@@ -200,7 +201,8 @@ export const UPDATE_ENTITY_SETTINGS = gql`
       allowEntityPollsInFeed
       allowEntityFeedInFeed
       allowEntityMomentsInFeed
-      allowAdminFeedInFeed
+      allowEntityFeedInFeed
+      feedOrder
     }
   }
 `;
@@ -374,3 +376,9 @@ export * from "./reports";
 export * from "./audit";
 export * from "./email";
 export * from "./contacts";
+
+export const UPDATE_FEED_ORDER = gql`
+  mutation UpdateFeedOrder($input: UpdateFeedOrderInput!) {
+    updateFeedOrder(input: $input)
+  }
+`;

@@ -28,11 +28,18 @@ export type JobCompany = {
   logo: string;
 };
 
+export type JobLocation = {
+  name: string;
+  latitude: number;
+  longitude: number;
+  address: string;
+};
+
 export type Job = {
   id: string;
   title: string;
   description: string;
-  location: string;
+  location: JobLocation;
   jobType: string;
   salary: string;
   experienceLevel: string;
@@ -62,7 +69,7 @@ export type Job = {
 export type PostJobInput = {
   title: string;
   description: string;
-  location: string;
+  location: string | JobLocation;
   jobType: string;
   salary: string;
   experienceLevel: string;
