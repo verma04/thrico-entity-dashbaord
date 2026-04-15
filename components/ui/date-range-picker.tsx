@@ -4,15 +4,13 @@ import {
   Check,
   ChevronDown,
   LucideIcon,
-  Target,
+  AlertCircle,
 } from "lucide-react";
 import {
-  addDays,
   format,
   subDays,
   startOfDay,
   endOfDay,
-  isSameDay,
   parse,
   isValid,
 } from "date-fns";
@@ -27,7 +25,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
 
 export interface DateRangePickerProps extends React.HTMLAttributes<HTMLDivElement> {
   date?: DateRange;
@@ -66,6 +63,35 @@ export function DateRangePicker({
   const [isFromFocused, setIsFromFocused] = React.useState(false);
   const [isToFocused, setIsToFocused] = React.useState(false);
 
+  const normalizeRange = React.useCallback((range: DateRange | undefined) => {
+    if (!range?.from || !range?.to) {
+      return range;
+    }
+    if (range.from <= range.to) {
+      return range;
+    }
+    return { from: range.to, to: range.from };
+  }, []);
+
+  const hasInvalidManualRange =
+    !!tempDate?.from && !!tempDate?.to && tempDate.from > tempDate.to;
+
+  const canApply = !!tempDate?.from && !!tempDate?.to && !hasInvalidManualRange;
+
+  const dayCount =
+    tempDate?.from && tempDate?.to
+      ? Math.max(
+          1,
+          Math.round(
+            (endOfDay(tempDate.to).getTime() - startOfDay(tempDate.from).getTime()) /
+              (1000 * 60 * 60 * 24),
+          ) + 1,
+        )
+      : null;
+
+  const activePresetLabel =
+    presets.find((preset) => preset.value === selectedPreset)?.label || "Custom";
+
   React.useEffect(() => {
     setTempDate(date);
   }, [date]);
@@ -103,7 +129,9 @@ export function DateRangePicker({
     setIsFromFocused(false);
     const parsedDate = parse(fromValue, "MMM d, yyyy", new Date());
     if (isValid(parsedDate)) {
-      setTempDate((prev) => ({ from: parsedDate, to: prev?.to }));
+      setTempDate((prev) =>
+        normalizeRange({ from: parsedDate, to: prev?.to }),
+      );
       setFromValue(format(parsedDate, "MMM d, yyyy"));
     } else if (tempDate?.from) {
       setFromValue(format(tempDate.from, "MMM d, yyyy"));
@@ -125,7 +153,9 @@ export function DateRangePicker({
     setIsToFocused(false);
     const parsedDate = parse(toValue, "MMM d, yyyy", new Date());
     if (isValid(parsedDate)) {
-      setTempDate((prev) => ({ from: prev?.from, to: parsedDate }));
+      setTempDate((prev) =>
+        normalizeRange({ from: prev?.from, to: parsedDate }),
+      );
       setToValue(format(parsedDate, "MMM d, yyyy"));
     } else if (tempDate?.to) {
       setToValue(format(tempDate.to, "MMM d, yyyy"));
@@ -148,6 +178,8 @@ export function DateRangePicker({
         from: subDays(new Date(), preset.days),
         to: new Date(),
       };
+    } else if (preset.value === "CUSTOM") {
+      return;
     } else {
       return;
     }
@@ -157,7 +189,12 @@ export function DateRangePicker({
   };
 
   const handleApply = () => {
-    onDateChange?.(tempDate);
+    const normalizedRange = normalizeRange(tempDate);
+    if (!normalizedRange?.from || !normalizedRange?.to) {
+      return;
+    }
+    onDateChange?.(normalizedRange);
+    setTempDate(normalizedRange);
     setIsOpen(false);
   };
 
@@ -174,10 +211,11 @@ export function DateRangePicker({
             id="date"
             variant="outline"
             className={cn(
-              "w-fit min-w-[260px] justify-start text-left font-medium bg-card border-border h-9 rounded-lg text-xs gap-3 group",
+              "w-fit min-w-[290px] justify-start text-left font-medium bg-card border-border h-10 rounded-xl text-xs gap-3 group relative overflow-hidden",
               !date && "text-muted-foreground",
             )}
           >
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-primary/[0.06] via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
             <div className="flex items-center justify-center w-5 h-5 rounded-md bg-muted group-hover:bg-accent transition-colors">
               <CalendarIcon className="h-3 w-3 text-foreground/70" />
             </div>
@@ -195,6 +233,11 @@ export function DateRangePicker({
                 "Pick a date"
               )}
             </span>
+            {dayCount && (
+              <span className="rounded-md border border-border/70 bg-muted/60 px-2 py-0.5 text-[10px] font-semibold tracking-wide text-muted-foreground">
+                {dayCount}D
+              </span>
+            )}
             <ChevronDown
               className={cn(
                 "h-3.5 w-3.5 opacity-40 transition-transform duration-200",
@@ -214,23 +257,29 @@ export function DateRangePicker({
               <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 px-2">
                 Range Presets
               </h4>
-              {presets.map((preset) => (
-                <button
-                  key={preset.value}
-                  onClick={() => handlePresetSelect(preset)}
-                  className={cn(
-                    "flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200",
-                    selectedPreset === preset.value
-                      ? "bg-foreground text-background shadow-md transform scale-[1.02]"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                  )}
-                >
-                  {preset.label}
-                  {selectedPreset === preset.value && (
-                    <Check className="h-3 w-3" />
-                  )}
-                </button>
-              ))}
+              {presets.map((preset) => {
+                const isCustom = preset.value === "CUSTOM";
+                const isActive = selectedPreset === preset.value;
+                return (
+                  <button
+                    key={preset.value}
+                    onClick={() => handlePresetSelect(preset)}
+                    className={cn(
+                      "flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200",
+                      isActive
+                        ? "bg-foreground text-background shadow-md transform scale-[1.02]"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                      isCustom && "border border-dashed border-border/60",
+                    )}
+                  >
+                    <span className="inline-flex items-center gap-2">
+                      {preset.icon ? <preset.icon className="h-3 w-3" /> : null}
+                      {preset.label}
+                    </span>
+                    {isActive && <Check className="h-3 w-3" />}
+                  </button>
+                );
+              })}
             </div>
 
             {/* Calendar Main Section */}
@@ -284,13 +333,19 @@ export function DateRangePicker({
                   defaultMonth={tempDate?.from || new Date()}
                   selected={tempDate}
                   onSelect={(range) => {
-                    setTempDate(range);
+                    setTempDate(normalizeRange(range));
                     setSelectedPreset("CUSTOM");
                   }}
                   numberOfMonths={2}
                   classNames={{
                     months: "flex flex-row gap-8",
                     month: "space-y-4",
+                    month_caption: "relative flex h-9 items-center justify-center",
+                    nav: "absolute inset-x-0 top-1/2 -translate-y-1/2",
+                    button_previous:
+                      "absolute left-1 top-1/2 h-7 w-7 -translate-y-1/2 rounded-md border border-border bg-background/80 p-0 hover:bg-muted",
+                    button_next:
+                      "absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 rounded-md border border-border bg-background/80 p-0 hover:bg-muted",
                     caption_label: "text-sm font-semibold text-foreground",
                     selected: "bg-primary text-primary-foreground font-bold hover:bg-primary hover:text-primary-foreground",
                     range_start: "bg-primary text-primary-foreground rounded-l-lg",
@@ -304,8 +359,19 @@ export function DateRangePicker({
 
               {/* Footer Actions */}
               <div className="p-4 border-t border-border bg-muted/20 flex items-center justify-between">
-                <div className="text-[10px] text-muted-foreground font-medium px-2 italic">
-                  * All times are in UTC
+                <div className="flex flex-col gap-1 px-2">
+                  <div className="text-[10px] text-muted-foreground font-medium italic">
+                    * All times are in UTC
+                  </div>
+                  <div className="text-[10px] text-muted-foreground/80 tracking-wide uppercase">
+                    {activePresetLabel}
+                  </div>
+                  {hasInvalidManualRange && (
+                    <div className="inline-flex items-center gap-1 text-[10px] font-semibold text-rose-500">
+                      <AlertCircle className="h-3 w-3" />
+                      End date must be on or after start date
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-center gap-3">
                   <Button
@@ -318,8 +384,9 @@ export function DateRangePicker({
                   </Button>
                   <Button
                     size="sm"
-                    className="h-8 px-6 text-xs font-bold shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-300"
+                    className="h-8 px-6 text-xs font-bold shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none"
                     onClick={handleApply}
+                    disabled={!canApply}
                   >
                     Apply Range
                   </Button>

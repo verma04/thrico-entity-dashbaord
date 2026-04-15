@@ -3,6 +3,7 @@
 import React from "react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Database, HardDrive, FileText, PieChart } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -42,9 +43,11 @@ export const StorageStats = ({
   stats = [],
   summary = { totalBytes: 0, totalFileCount: 0 },
 }: StorageStatsProps) => {
+  const [showAllStorageModules, setShowAllStorageModules] = React.useState(false);
   const TOTAL_LIMIT = 5 * 1024 * 1024 * 1024; // 5 GB
   const usedBytes = summary.totalBytes || 0;
   const percent = TOTAL_LIMIT > 0 ? Math.min((usedBytes / TOTAL_LIMIT) * 100, 100) : 0;
+  const visibleStorageModules = showAllStorageModules ? stats : stats.slice(0, 9);
 
   const usageColor =
     percent > 90 ? "bg-red-500" : percent > 70 ? "bg-amber-400" : "bg-slate-800";
@@ -118,11 +121,22 @@ export const StorageStats = ({
       {/* Breakdown */}
       {stats.length > 0 && (
         <div className="border-t border-slate-100 px-5 py-4 flex-1 space-y-3">
-          <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
-            By Module
-          </p>
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
+              By Module
+            </p>
+            {stats.length > 9 && (
+              <Button
+                variant="link"
+                className="h-auto p-0 text-[10px] text-slate-500 font-medium"
+                onClick={() => setShowAllStorageModules((prev) => !prev)}
+              >
+                {showAllStorageModules ? "View less ←" : "View all →"}
+              </Button>
+            )}
+          </div>
           <div className="space-y-2">
-            {stats.map((stat) => {
+            {visibleStorageModules.map((stat) => {
               const modulePercent = usedBytes > 0 ? (stat.totalBytes / usedBytes) * 100 : 0;
               const barColor =
                 moduleBarColors[stat.module.toLowerCase()] ?? moduleBarColors.default;

@@ -60,9 +60,11 @@ const STATUS_COLORS: Record<string, string> = {
 export function AdminStatusBadge({
   status,
   className,
+  children,
 }: {
   status: string;
   className?: string;
+  children?: React.ReactNode;
 }) {
   const color =
     STATUS_COLORS[status?.toUpperCase()] ??
@@ -89,7 +91,7 @@ export function AdminStatusBadge({
                 : "bg-slate-400",
         )}
       />
-      {status}
+      {children || status}
     </span>
   );
 }

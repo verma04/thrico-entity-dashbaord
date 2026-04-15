@@ -45,6 +45,7 @@ export const GET_ORGANIZATION = gql`
       id
       name
       logo
+
       subscription {
         subscriptionId
         packageId

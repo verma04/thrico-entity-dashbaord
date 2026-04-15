@@ -36,6 +36,7 @@ import { useGetCommunityKPIs, TimeRange } from "@/graphql/actions/dashboard";
 import { subDays } from "date-fns";
 import { DateRange } from "react-day-picker";
 import { StorageStats } from "@/components/subscription/storage-stats";
+import PlanOverview from "@/components/subscription/plan-overview";
 import {
   useGetStorageStats,
   useGetStorageSummary,
@@ -60,7 +61,9 @@ interface DashboardMetricValue {
   trend?: number[];
 }
 
-const isDashboardMetricValue = (value: unknown): value is DashboardMetricValue =>
+const isDashboardMetricValue = (
+  value: unknown,
+): value is DashboardMetricValue =>
   typeof value === "object" &&
   value !== null &&
   ("value" in value || "change" in value || "trend" in value);
@@ -212,6 +215,7 @@ export default function Dashboard() {
     to: new Date(),
   });
   const [showAllContentTypes, setShowAllContentTypes] = useState(false);
+  const [showAllFeatureModules, setShowAllFeatureModules] = useState(false);
 
   const handleDateChange = (range: DateRange | undefined) => {
     setDateRange(range);
@@ -302,6 +306,10 @@ export default function Dashboard() {
     const metric = kpis[key as keyof typeof kpis];
     return isDashboardMetricValue(metric) ? metric : {};
   };
+
+  const visibleFeatureModules = showAllFeatureModules
+    ? modulePerformanceList
+    : modulePerformanceList.slice(0, 9);
 
   return (
     <EcosystemWrapper>
@@ -543,14 +551,25 @@ export default function Dashboard() {
 
           {/* Module Performance Grid */}
           <section className="lg:col-span-8 space-y-4">
-            <div className="flex items-center gap-3">
-              <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.2em]">
-                How people use features
-              </span>
-              <div className="h-px bg-gradient-to-r from-border to-transparent flex-1" />
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.2em]">
+                  How people use features
+                </span>
+                <div className="h-px bg-gradient-to-r from-border to-transparent flex-1 min-w-10" />
+              </div>
+              {modulePerformanceList.length > 9 && (
+                <Button
+                  variant="link"
+                  className="text-[10px] text-muted-foreground font-medium p-0 h-auto"
+                  onClick={() => setShowAllFeatureModules((prev) => !prev)}
+                >
+                  {showAllFeatureModules ? "View less ←" : "View all →"}
+                </Button>
+              )}
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {modulePerformanceList.map((mod) => {
+              {visibleFeatureModules.map((mod) => {
                 const dataItem = kpis?.modulePerformance?.find(
                   (m) => m.module === mod.title,
                 );
@@ -617,6 +636,17 @@ export default function Dashboard() {
             </div>
           </section>
         </div>
+
+        {/* 5. Subscription Details */}
+        <section className="space-y-4 mt-16">
+          <div className="flex items-center gap-3">
+            <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.2em]">
+              Subscription Details
+            </span>
+            <div className="h-px bg-gradient-to-r from-border to-transparent flex-1" />
+          </div>
+          <PlanOverview />
+        </section>
       </EcosystemContainer>
     </EcosystemWrapper>
   );

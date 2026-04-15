@@ -122,7 +122,7 @@ export const BULK_CHANGE_USER_STATUS = gql`
 `;
 
 export const GET_USER_DETIALS = gql`
-  query GetUserDetailsById($input: InputId) {
+  query GetUserDetailsById($input: inputId) {
     getUserDetailsById(input: $input) {
       verification {
         id

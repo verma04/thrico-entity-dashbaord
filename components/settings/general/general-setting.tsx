@@ -10,9 +10,9 @@ import {
   Fingerprint,
   Layers,
   RotateCcw,
-  ShieldCheck,
+  ExternalLink,
 } from "lucide-react";
-import BillingAddress from "./billing-address";
+import BillingDetailsForm from "./billing-details-form";
 import { useGetEntity } from "@/graphql/actions";
 import { EntityProfileCard } from "./entity-profile-card";
 import { EntityLogoUpload } from "./entity-logo-upload";
@@ -204,6 +204,17 @@ export default function GeneralSettings() {
                   />
                   <InfoRow label="Workspace" value={communityName} />
                   <InfoRow label="Primary Language" value="English (Global)" />
+                  <InfoRow
+                    label="Subdomain"
+                    value={entityData?.getEntity?.subdomain || "—"}
+                    mono
+                  />
+                  <InfoRow
+                    label="Public URL"
+                    value={`https://${entityData?.getEntity?.subdomain}.thrico.network`}
+                    isLink
+                    href={`https://${entityData?.getEntity?.subdomain}.thrico.network`}
+                  />
                 </div>
               </SectionCard>
             </div>
@@ -262,41 +273,10 @@ export default function GeneralSettings() {
             <div className="max-w-2xl space-y-6">
               <SectionCard
                 icon={MapPin}
-                title="Legal Address"
-                description="The verified physical location for this entity's legal representation and invoicing."
+                title="Billing Details"
+                description="Manage account type, tax information, card details, and billing address for invoicing."
               >
-                <BillingAddress />
-              </SectionCard>
-
-              <SectionCard
-                icon={ShieldCheck}
-                title="Institutional / Tax Details"
-                description="Registry information for tax reporting and regulatory compliance."
-              >
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
-                      <label className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
-                        Tax Registration Number
-                      </label>
-                      <div className="h-9 px-3 rounded-lg bg-zinc-50 border border-zinc-100 flex items-center text-[13px] font-medium text-zinc-600 font-mono">
-                        TRN-942-881-229
-                      </div>
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
-                        VAT / GST ID
-                      </label>
-                      <div className="h-9 px-3 rounded-lg bg-zinc-50 border border-zinc-100 flex items-center text-[13px] font-medium text-zinc-600 font-mono">
-                        VAT-GLOBAL-102
-                      </div>
-                    </div>
-                  </div>
-                  <p className="text-[11px] text-zinc-400 italic">
-                    These details are verified and managed by the Thrico
-                    Financial Registry.
-                  </p>
-                </div>
+                <BillingDetailsForm />
               </SectionCard>
 
               <SectionCard
@@ -369,12 +349,16 @@ function InfoRow({
   mono = false,
   valueClass,
   dot,
+  isLink = false,
+  href,
 }: {
   label: string;
   value: string;
   mono?: boolean;
   valueClass?: string;
   dot?: "emerald" | "zinc";
+  isLink?: boolean;
+  href?: string;
 }) {
   return (
     <div className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
@@ -388,15 +372,27 @@ function InfoRow({
             )}
           />
         )}
-        <span
-          className={cn(
-            "text-[12.5px] font-medium text-zinc-700",
-            mono && "font-mono text-[11px] text-zinc-500",
-            valueClass,
-          )}
-        >
-          {value}
-        </span>
+        {isLink ? (
+          <a
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[12.5px] font-medium text-emerald-600 hover:text-emerald-700 hover:underline flex items-center gap-1 transition-all"
+          >
+            {value}
+            <ExternalLink size={11} strokeWidth={2.5} />
+          </a>
+        ) : (
+          <span
+            className={cn(
+              "text-[12.5px] font-medium text-zinc-700",
+              mono && "font-mono text-[11px] text-zinc-500",
+              valueClass,
+            )}
+          >
+            {value}
+          </span>
+        )}
       </div>
     </div>
   );

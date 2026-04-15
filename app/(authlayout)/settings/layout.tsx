@@ -10,8 +10,10 @@ import {
   FileStack,
   HandCoins,
   Headset,
+  Fingerprint,
   Home,
   Languages,
+  Layers,
   ListTodo,
   Lock,
   PaintBucket,
@@ -46,7 +48,8 @@ interface MenuSection {
 
 const allMenuItems: MenuItem[] = [
   { key: "/settings/profile", icon: UserCheck, label: "Your Profile" },
-  { key: "/settings", icon: Home, label: "General" },
+  { key: "/settings", icon: Fingerprint, label: "Identity" },
+  { key: "/settings/branding", icon: Layers, label: "Branding" },
   { key: "/settings/appearance", icon: PaintBucket, label: "Appearance" },
   { key: "/settings/domains", icon: Earth, label: "Domains" },
 
@@ -69,9 +72,11 @@ const buildSections = (items: MenuItem[]): MenuSection[] => {
   const sections: MenuSection[] = [];
 
   // Account
-  const accountItems = [find("/settings/profile"), find("/settings")].filter(
-    Boolean,
-  ) as MenuItem[];
+  const accountItems = [
+    find("/settings/profile"),
+    find("/settings"),
+    find("/settings/branding"),
+  ].filter(Boolean) as MenuItem[];
   if (accountItems.length)
     sections.push({ title: "Account", items: accountItems });
 

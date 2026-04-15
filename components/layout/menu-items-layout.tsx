@@ -13,6 +13,18 @@ type MenuItem = {
   section?: string;
 };
 
+type MenuItemsLayoutProps = {
+  children: React.ReactNode;
+  items: MenuItem[];
+  active: string;
+  hideDefaultTabs?: boolean;
+  showAdminTabs?: boolean;
+  fullWidth?: boolean;
+  fullHeight?: boolean;
+  fixed?: boolean;
+  className?: string;
+};
+
 /* ─── Single Tab Button ─────────────────────────────────────────────────── */
 function TabButton({
   item,
@@ -31,7 +43,7 @@ function TabButton({
       className={cn(
         "group/tab relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12.5px] font-medium transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/50 whitespace-nowrap",
         isActive
-          ? "text-foreground font-semibold"
+          ? "text-primary font-semibold"
           : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
         fullWidth && "w-full justify-center",
       )}
@@ -40,7 +52,7 @@ function TabButton({
       {isActive && (
         <motion.span
           layoutId="menu-tab-pill"
-          className="absolute inset-0 rounded-lg bg-muted border border-border/50"
+          className="absolute inset-0 rounded-lg bg-primary/10 border border-primary/30"
           transition={{ type: "spring", bounce: 0, duration: 0.3 }}
         />
       )}
@@ -50,7 +62,7 @@ function TabButton({
         className={cn(
           "relative z-10 shrink-0 transition-all duration-200",
           isActive
-            ? "text-foreground"
+            ? "text-primary"
             : "text-muted-foreground group-hover/tab:text-foreground",
         )}
       >
@@ -68,6 +80,101 @@ function TabButton({
   );
 }
 
+function MenuTabs({
+  fullWidth,
+  fixed,
+  sections,
+  sortedSectionNames,
+  activeTab,
+  fullKey,
+  onChange,
+  onClose,
+}: {
+  fullWidth: boolean;
+  fixed: boolean;
+  sections: Record<string, MenuItem[]>;
+  sortedSectionNames: string[];
+  activeTab: string;
+  fullKey: string;
+  onChange: (key: string) => void;
+  onClose: () => void;
+}) {
+  return (
+    <nav className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border">
+      <div
+        className={cn(
+          "px-6 relative w-full",
+          !fullWidth && "max-w-[1400px] mx-auto",
+        )}
+      >
+        <div className="flex h-12 items-center gap-0 overflow-x-auto no-scrollbar">
+          {sortedSectionNames.map((sectionName, sIdx) => (
+            <React.Fragment key={sectionName}>
+              {sIdx > 0 && <div className="mx-3 h-4 w-px bg-border/70 shrink-0" />}
+
+              <div
+                className={cn(
+                  "flex items-center gap-0.5",
+                  fullWidth && "flex-1",
+                )}
+              >
+                {sections[sectionName].map((item) => (
+                  <TabButton
+                    key={item.key}
+                    item={item}
+                    isActive={
+                      activeTab === item.key || fullKey.startsWith(item.key + "/")
+                    }
+                    onClick={() => onChange(item.key)}
+                    fullWidth={fullWidth}
+                  />
+                ))}
+              </div>
+            </React.Fragment>
+          ))}
+
+          <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-16 bg-linear-to-l from-background to-transparent z-10" />
+        </div>
+
+        {fixed && (
+          <button
+            onClick={onClose}
+            className="absolute right-4 top-1/2 -translate-y-1/2 h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-all z-50"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
+      </div>
+
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-border" />
+    </nav>
+  );
+}
+
+function MenuPage({
+  children,
+  fullWidth,
+  fullHeight,
+}: {
+  children: React.ReactNode;
+  fullWidth: boolean;
+  fullHeight: boolean;
+}) {
+  return (
+    <main
+      className={cn(
+        "flex-1 min-w-0 min-h-0 flex flex-col w-full",
+        !fullWidth && "max-w-[1400px] mx-auto px-6",
+        !fullHeight && "py-4 lg:py-6",
+      )}
+    >
+      <div className={cn("flex-1 w-full", fullHeight && "h-full overflow-y-auto")}>
+        {children}
+      </div>
+    </main>
+  );
+}
+
 /* ─── Main Component ────────────────────────────────────────────────────── */
 const MenuItemsLayout = ({
   children,
@@ -79,17 +186,7 @@ const MenuItemsLayout = ({
   fullHeight = false,
   fixed = false,
   className,
-}: {
-  children: React.ReactNode;
-  items: MenuItem[];
-  active: string;
-  hideDefaultTabs?: boolean;
-  showAdminTabs?: boolean;
-  fullWidth?: boolean;
-  fullHeight?: boolean;
-  fixed?: boolean;
-  className?: string;
-}) => {
+}: MenuItemsLayoutProps) => {
   const router = useRouter();
   const pathname = usePathname();
   const pathParts = pathname.split("/").filter(Boolean);
@@ -190,81 +287,20 @@ const MenuItemsLayout = ({
         className,
       )}
     >
-      {/* ── Top Nav Bar ─────────────────────────────────────────────────── */}
-      <nav className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border">
-        <div
-          className={cn(
-            "px-6 relative w-full",
-            !fullWidth && "max-w-[1400px] mx-auto",
-          )}
-        >
-          <div className="flex h-12 items-center gap-0 overflow-x-auto no-scrollbar">
-            {sortedSectionNames.map((sectionName, sIdx) => (
-              <React.Fragment key={sectionName}>
-                {/* Separator between sections */}
-                {sIdx > 0 && (
-                  <div className="mx-3 h-4 w-px bg-border/70 shrink-0" />
-                )}
+      <MenuTabs
+        fullWidth={fullWidth}
+        fixed={fixed}
+        sections={sections}
+        sortedSectionNames={sortedSectionNames}
+        activeTab={activeTab}
+        fullKey={fullKey}
+        onChange={onChange}
+        onClose={() => router.back()}
+      />
 
-                {/* Tab buttons for this section */}
-                <div
-                  className={cn(
-                    "flex items-center gap-0.5",
-                    fullWidth && "flex-1",
-                  )}
-                >
-                  {sections[sectionName].map((item) => (
-                    <TabButton
-                      key={item.key}
-                      item={item}
-                      isActive={
-                        activeTab === item.key ||
-                        fullKey.startsWith(item.key + "/")
-                      }
-                      onClick={() => onChange(item.key)}
-                      fullWidth={fullWidth}
-                    />
-                  ))}
-                </div>
-              </React.Fragment>
-            ))}
-
-            {/* Right fade mask */}
-            <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-16 bg-linear-to-l from-background to-transparent z-10" />
-          </div>
-
-          {/* Close Button for Fixed Mode */}
-          {fixed && (
-            <button
-              onClick={() => router.back()}
-              className="absolute right-4 top-1/2 -translate-y-1/2 h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-all z-50"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          )}
-        </div>
-
-        {/* Bottom border line */}
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-border" />
-      </nav>
-
-      {/* ── Content ─────────────────────────────────────────────────────── */}
-      <main
-        className={cn(
-          "flex-1 min-w-0 min-h-0 flex flex-col w-full",
-          !fullWidth && "max-w-[1400px] mx-auto px-6",
-          !fullHeight && "py-4 lg:py-6",
-        )}
-      >
-        <div
-          className={cn(
-            "flex-1 w-full",
-            fullHeight && "h-full overflow-y-auto",
-          )}
-        >
-          {children}
-        </div>
-      </main>
+      <MenuPage fullWidth={fullWidth} fullHeight={fullHeight}>
+        {children}
+      </MenuPage>
 
       <style>{`
         .no-scrollbar::-webkit-scrollbar { display: none; }
