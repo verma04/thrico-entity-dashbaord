@@ -639,3 +639,30 @@ export const GET_PROMOTED_NODE_EVENTS = gql`
     }
   }
 `;
+
+export const GET_POST_ANALYTICS = gql`
+  query GetPostAnalytics($input: InputId) {
+    getPostAnalytics(input: $input) {
+      engagement {
+        name
+        value
+        color
+      }
+      demographics {
+        age {
+          group
+          percentage
+        }
+        location {
+          country
+          percentage
+        }
+      }
+      reachData {
+        total
+        organic
+        paid
+      }
+    }
+  }
+`;

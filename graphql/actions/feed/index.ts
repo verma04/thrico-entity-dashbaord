@@ -21,6 +21,7 @@ import {
   GET_PROMOTED_NODE_EVENTS,
   DELETE_FEED,
   PIN_FEED,
+  GET_POST_ANALYTICS,
 } from "../../quries/feed";
 
 export const useAllFeed = (options: any) => useQuery(GET_ALL_FEED, options);
@@ -35,9 +36,11 @@ export const useMomentsFeed = (options: any) =>
 export const useListingFeed = (options: any) =>
   useQuery(GET_LISTING_FEED, options);
 
-export const usePinnedFeed = (options: any) => useQuery(GET_PINNED_FEED, options);
+export const usePinnedFeed = (options: any) =>
+  useQuery(GET_PINNED_FEED, options);
 
-export const useDeleteFeed = (options: any) => useMutation(DELETE_FEED, options);
+export const useDeleteFeed = (options: any) =>
+  useMutation(DELETE_FEED, options);
 
 export const usePinFeed = (options: any) => useMutation(PIN_FEED, options);
 
@@ -123,7 +126,7 @@ export const useDeleteCommentFeed = (options: any) =>
         });
         if (!getFeedComment) return;
         const updatedComments = getFeedComment.filter(
-          (comment: any) => comment.id !== deleteCommentFeed.id
+          (comment: any) => comment.id !== deleteCommentFeed.id,
         );
 
         cache.writeQuery({
@@ -199,9 +202,15 @@ export interface GetPromotedNodeEventsData {
 export const useGetFeedIntelligenceKPI = (
   timeRange?: TimeRange,
   dateRange?: DateRangeInput,
-  options?: QueryHookOptions<GetFeedIntelligenceKPIData, { timeRange?: TimeRange; dateRange?: DateRangeInput }>
+  options?: QueryHookOptions<
+    GetFeedIntelligenceKPIData,
+    { timeRange?: TimeRange; dateRange?: DateRangeInput }
+  >,
 ) =>
-  useQuery<GetFeedIntelligenceKPIData, { timeRange?: TimeRange; dateRange?: DateRangeInput }>(GET_FEED_INTELLIGENCE_KPI, {
+  useQuery<
+    GetFeedIntelligenceKPIData,
+    { timeRange?: TimeRange; dateRange?: DateRangeInput }
+  >(GET_FEED_INTELLIGENCE_KPI, {
     variables: { timeRange, dateRange },
     ...options,
   });
@@ -209,9 +218,15 @@ export const useGetFeedIntelligenceKPI = (
 export const useGetFeedYieldVelocity = (
   timeRange?: TimeRange,
   dateRange?: DateRangeInput,
-  options?: QueryHookOptions<GetFeedYieldVelocityData, { timeRange?: TimeRange; dateRange?: DateRangeInput }>
+  options?: QueryHookOptions<
+    GetFeedYieldVelocityData,
+    { timeRange?: TimeRange; dateRange?: DateRangeInput }
+  >,
 ) =>
-  useQuery<GetFeedYieldVelocityData, { timeRange?: TimeRange; dateRange?: DateRangeInput }>(GET_FEED_YIELD_VELOCITY, {
+  useQuery<
+    GetFeedYieldVelocityData,
+    { timeRange?: TimeRange; dateRange?: DateRangeInput }
+  >(GET_FEED_YIELD_VELOCITY, {
     variables: { timeRange, dateRange },
     ...options,
   });
@@ -219,12 +234,59 @@ export const useGetFeedYieldVelocity = (
 export const useGetFeedInterestMatrix = (
   timeRange?: TimeRange,
   dateRange?: DateRangeInput,
-  options?: QueryHookOptions<GetFeedInterestMatrixData, { timeRange?: TimeRange; dateRange?: DateRangeInput }>
+  options?: QueryHookOptions<
+    GetFeedInterestMatrixData,
+    { timeRange?: TimeRange; dateRange?: DateRangeInput }
+  >,
 ) =>
-  useQuery<GetFeedInterestMatrixData, { timeRange?: TimeRange; dateRange?: DateRangeInput }>(GET_FEED_INTEREST_MATRIX, {
+  useQuery<
+    GetFeedInterestMatrixData,
+    { timeRange?: TimeRange; dateRange?: DateRangeInput }
+  >(GET_FEED_INTEREST_MATRIX, {
     variables: { timeRange, dateRange },
     ...options,
   });
 
 export const useGetPromotedNodeEvents = (options?: any) =>
   useQuery<GetPromotedNodeEventsData>(GET_PROMOTED_NODE_EVENTS, options);
+
+export interface PostAnalytics {
+  engagement: {
+    name: string;
+    value: number;
+    color: string;
+  }[];
+  demographics: {
+    age: {
+      group: string;
+      percentage: number;
+    }[];
+    location: {
+      country: string;
+      percentage: number;
+    }[];
+  };
+  reachData: {
+    total: number;
+    organic: number;
+    paid: number;
+  };
+}
+//localhost:2025/
+
+export interface GetPostAnalyticsData {
+  getPostAnalytics: PostAnalytics;
+}
+
+export const usePostAnalytics = (
+  postId: string,
+  options?: QueryHookOptions<GetPostAnalyticsData, { input: { id: string } }>,
+) =>
+  useQuery<GetPostAnalyticsData, { input: { id: string } }>(
+    GET_POST_ANALYTICS,
+    {
+      variables: { input: { id: postId } },
+      skip: !postId,
+      ...options,
+    },
+  );

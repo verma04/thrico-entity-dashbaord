@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { usePostAnalytics } from "@/graphql/actions/feed";
 
 const currentFeed = {
   id: 2,
@@ -139,10 +140,9 @@ const getAnalyticsData = (feedId: number) => {
   };
 };
 
-const Analytics = () => {
-  const analyticsData = currentFeed.id
-    ? getAnalyticsData(currentFeed.id)
-    : null;
+const Analytics = ({ feedId }: { feedId?: string }) => {
+  const { data, loading } = usePostAnalytics(feedId || "");
+  const analyticsData = data?.getPostAnalytics;
 
   const [analyticsVisible, setAnalyticsVisible] = useState(false);
 
@@ -158,132 +158,153 @@ const Analytics = () => {
       </Button>
       <Dialog open={analyticsVisible} onOpenChange={setAnalyticsVisible}>
         <DialogContent className="sm:max-w-[800px] max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Post Analytics</DialogTitle>
+          <DialogHeader className="pb-4 border-b border-border">
+            <DialogTitle className="text-3xl font-bold tracking-tight">Post Analytics</DialogTitle>
           </DialogHeader>
 
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-sm font-semibold mb-4">
-                Engagement Overview
-              </h3>
-              <div className="grid grid-cols-3 gap-4">
-                {analyticsData?.engagement.map((item) => (
-                  <Card key={item.name}>
-                    <CardContent className="pt-6">
-                      <div className="text-center">
-                        <p className="text-2xl font-bold">{item.value}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {item.name}
-                        </p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+          <div className="space-y-12 py-6">
+            {loading ? (
+              <div className="flex items-center justify-center py-20">
+                <p className="text-[12px] font-bold text-foreground uppercase tracking-widest animate-pulse">Analyzing engagement...</p>
               </div>
-            </div>
-
-            <Separator />
-
-            <div>
-              <h3 className="text-sm font-semibold mb-4">Reach</h3>
-              <div className="grid grid-cols-3 gap-4">
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="text-center">
-                      <p className="text-2xl font-bold">
-                        {analyticsData?.reachData.total}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Total Views
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="text-center">
-                      <p className="text-2xl font-bold">
-                        {analyticsData?.reachData.organic}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Organic Reach
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="pt-6">
-                    <div className="text-center">
-                      <p className="text-2xl font-bold">
-                        {analyticsData?.reachData.paid}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Paid Reach
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
+            ) : !analyticsData ? (
+              <div className="flex items-center justify-center py-20">
+                <p className="text-muted-foreground italic">No analytics data available for this post.</p>
               </div>
-            </div>
-
-            <Separator />
-
-            <div>
-              <h3 className="text-sm font-semibold mb-4">Demographics</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base">
-                      Age Distribution
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {analyticsData?.demographics.age.map((item) => (
-                        <div key={item.group}>
-                          <div className="flex justify-between text-sm mb-1">
-                            <span>{item.group}</span>
-                            <span>{item.percentage}%</span>
+            ) : (
+              <>
+                <section className="space-y-6">
+                  <div className="flex items-center gap-4">
+                    <h3 className="text-[11px] font-bold text-foreground uppercase tracking-[0.3em] whitespace-nowrap">
+                      Engagement Overview
+                    </h3>
+                    <div className="h-px bg-border flex-1" />
+                  </div>
+                  <div className="grid grid-cols-3 gap-4">
+                    {analyticsData?.engagement.map((item) => (
+                      <Card key={item.name} className="bg-charcoal-3 border-none shadow-none">
+                        <CardContent className="py-8">
+                          <div className="text-center">
+                            <p className="text-3xl font-bold tracking-tight text-foreground mb-1">{item.value}</p>
+                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                              {item.name}
+                            </p>
                           </div>
-                          <div className="w-full h-2 bg-muted rounded">
-                            <div
-                              className="h-full bg-blue-500 rounded"
-                              style={{ width: `${item.percentage}%` }}
-                            />
-                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </section>
+
+                <section className="space-y-6">
+                  <div className="flex items-center gap-4">
+                    <h3 className="text-[11px] font-bold text-foreground uppercase tracking-[0.3em] whitespace-nowrap">
+                      Reach & Visibility
+                    </h3>
+                    <div className="h-px bg-border flex-1" />
+                  </div>
+                  <div className="grid grid-cols-3 gap-4">
+                    <Card className="bg-charcoal-4 border-none shadow-none">
+                      <CardContent className="py-8">
+                        <div className="text-center">
+                          <p className="text-3xl font-bold tracking-tight text-foreground mb-1">
+                            {analyticsData?.reachData.total}
+                          </p>
+                          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                            Total Views
+                          </p>
                         </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base">
-                      Geographic Distribution
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {analyticsData?.demographics.location.map((item) => (
-                        <div key={item.country}>
-                          <div className="flex justify-between text-sm mb-1">
-                            <span>{item.country}</span>
-                            <span>{item.percentage}%</span>
-                          </div>
-                          <div className="w-full h-2 bg-muted rounded">
-                            <div
-                              className="h-full bg-green-500 rounded"
-                              style={{ width: `${item.percentage}%` }}
-                            />
-                          </div>
+                      </CardContent>
+                    </Card>
+                    <Card className="border border-border shadow-none">
+                      <CardContent className="py-8">
+                        <div className="text-center">
+                          <p className="text-3xl font-bold tracking-tight text-foreground mb-1">
+                            {analyticsData?.reachData.organic}
+                          </p>
+                          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                            Organic Reach
+                          </p>
                         </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
+                      </CardContent>
+                    </Card>
+                    <Card className="border border-border shadow-none">
+                      <CardContent className="py-8">
+                        <div className="text-center">
+                          <p className="text-3xl font-bold tracking-tight text-foreground mb-1">
+                            {analyticsData?.reachData.paid}
+                          </p>
+                          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                            Paid Reach
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </section>
+
+                <section className="space-y-6">
+                  <div className="flex items-center gap-4">
+                    <h3 className="text-[11px] font-bold text-foreground uppercase tracking-[0.3em] whitespace-nowrap">
+                      Audience Demographics
+                    </h3>
+                    <div className="h-px bg-border flex-1" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-6">
+                    <Card className="border border-border">
+                      <CardHeader className="pb-4">
+                        <CardTitle className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground">
+                          Age Distribution
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          {analyticsData?.demographics.age.map((item) => (
+                            <div key={item.group} className="space-y-1.5">
+                              <div className="flex justify-between text-[11px] font-semibold uppercase tracking-wide">
+                                <span className="text-muted-foreground">{item.group}</span>
+                                <span className="text-foreground">{item.percentage}%</span>
+                              </div>
+                              <div className="w-full h-1.5 bg-charcoal-4 rounded-full overflow-hidden">
+                                <div
+                                  className="h-full bg-foreground rounded-full"
+                                  style={{ width: `${item.percentage}%` }}
+                                />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <Card className="border border-border">
+                      <CardHeader className="pb-4">
+                        <CardTitle className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground">
+                          Geographic Distribution
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          {analyticsData?.demographics.location.map((item) => (
+                            <div key={item.country} className="space-y-1.5">
+                              <div className="flex justify-between text-[11px] font-semibold uppercase tracking-wide">
+                                <span className="text-muted-foreground">{item.country}</span>
+                                <span className="text-foreground">{item.percentage}%</span>
+                              </div>
+                              <div className="w-full h-1.5 bg-charcoal-4 rounded-full overflow-hidden">
+                                <div
+                                  className="h-full bg-foreground rounded-full opacity-60"
+                                  style={{ width: `${item.percentage}%` }}
+                                />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </section>
+              </>
+            )}
           </div>
         </DialogContent>
       </Dialog>

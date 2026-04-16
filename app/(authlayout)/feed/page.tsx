@@ -161,7 +161,7 @@ export default function FeedPage() {
             },
             {
               title: "Engagement Rate",
-              value: kpis?.networkVelocity,
+              value: kpis?.networkVelocity?.toFixed(2),
               trend: kpis?.velocityTrend,
               icon: TrendingUp,
               color: "text-violet-500",
@@ -169,7 +169,7 @@ export default function FeedPage() {
             },
             {
               title: "Total Interactions",
-              value: kpis?.engagementYield,
+              value: kpis?.engagementYield?.toFixed(2),
               trend: kpis?.yieldTrend,
               icon: Zap,
               color: "text-amber-500",

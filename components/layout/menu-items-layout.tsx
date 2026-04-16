@@ -43,8 +43,8 @@ function TabButton({
       className={cn(
         "group/tab relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12.5px] font-medium transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/50 whitespace-nowrap",
         isActive
-          ? "text-primary font-semibold"
-          : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
+          ? "text-indigo-700 bg-primary/5"
+          : "text-muted-foreground hover:text-foreground hover:bg-muted/30",
         fullWidth && "w-full justify-center",
       )}
     >
@@ -52,8 +52,8 @@ function TabButton({
       {isActive && (
         <motion.span
           layoutId="menu-tab-pill"
-          className="absolute inset-0 rounded-lg bg-primary/10 border border-primary/30"
-          transition={{ type: "spring", bounce: 0, duration: 0.3 }}
+          className="absolute inset-0 rounded-lg border border-primary/10 shadow-sm"
+          transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
         />
       )}
 
@@ -62,7 +62,7 @@ function TabButton({
         className={cn(
           "relative z-10 shrink-0 transition-all duration-200",
           isActive
-            ? "text-primary"
+            ? "text-indigo-700"
             : "text-muted-foreground group-hover/tab:text-foreground",
         )}
       >
@@ -75,7 +75,14 @@ function TabButton({
       </span>
 
       {/* Label */}
-      <span className="relative z-10 leading-none">{item.label}</span>
+      <span
+        className={cn(
+          "relative z-10 leading-none tracking-tight transition-all",
+          isActive ? "font-bold" : "font-medium",
+        )}
+      >
+        {item.label}
+      </span>
     </button>
   );
 }
@@ -100,17 +107,19 @@ function MenuTabs({
   onClose: () => void;
 }) {
   return (
-    <nav className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border">
+    <nav className="sticky top-0 z-40 bg-background/60 backdrop-blur-xl border-b border-border/50">
       <div
         className={cn(
           "px-6 relative w-full",
-          !fullWidth && "max-w-[1400px] mx-auto",
+          !fullWidth && "max-w-7xl mx-auto",
         )}
       >
-        <div className="flex h-12 items-center gap-0 overflow-x-auto no-scrollbar">
+        <div className="flex h-14 items-center gap-1 overflow-x-auto no-scrollbar">
           {sortedSectionNames.map((sectionName, sIdx) => (
             <React.Fragment key={sectionName}>
-              {sIdx > 0 && <div className="mx-3 h-4 w-px bg-border/70 shrink-0" />}
+              {sIdx > 0 && (
+                <div className="mx-4 h-4 w-px bg-border/50 shrink-0" />
+              )}
 
               <div
                 className={cn(
@@ -123,7 +132,8 @@ function MenuTabs({
                     key={item.key}
                     item={item}
                     isActive={
-                      activeTab === item.key || fullKey.startsWith(item.key + "/")
+                      activeTab === item.key ||
+                      fullKey.startsWith(item.key + "/")
                     }
                     onClick={() => onChange(item.key)}
                     fullWidth={fullWidth}
@@ -164,11 +174,13 @@ function MenuPage({
     <main
       className={cn(
         "flex-1 min-w-0 min-h-0 flex flex-col w-full",
-        !fullWidth && "max-w-[1400px] mx-auto px-6",
+        !fullWidth && "max-w-7xl mx-auto px-6",
         !fullHeight && "py-4 lg:py-6",
       )}
     >
-      <div className={cn("flex-1 w-full", fullHeight && "h-full overflow-y-auto")}>
+      <div
+        className={cn("flex-1 w-full", fullHeight && "h-full overflow-y-auto")}
+      >
         {children}
       </div>
     </main>

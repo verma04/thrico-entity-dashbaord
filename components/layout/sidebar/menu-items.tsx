@@ -156,7 +156,8 @@ export const contentModeration = [
         path: "/feed/listing",
         isMobileOnly: true,
       },
-      { key: "feed-reported", label: "Reported Items", path: "/feed/reported" },
+      { key: "feed-reported", label: "Reported Items", path: "/feed/reports" },
+      { key: "feed-settings", label: "Settings", path: "/feed/settings" },
     ],
   },
   {

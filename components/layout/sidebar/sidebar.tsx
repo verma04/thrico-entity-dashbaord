@@ -342,7 +342,9 @@ function CollapsibleSection({
       <div
         className={cn(
           "overflow-hidden transition-all duration-200 ease-in-out",
-          isOpen ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0 pointer-events-none",
+          isOpen
+            ? "max-h-[2000px] opacity-100"
+            : "max-h-0 opacity-0 pointer-events-none",
           /* When sidebar icon-only mode, always show (icon tooltips still work) */
           "group-data-[collapsible=icon]:max-h-[2000px] group-data-[collapsible=icon]:opacity-100 group-data-[collapsible=icon]:pointer-events-auto",
         )}
@@ -532,11 +534,11 @@ function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
       {/* ── SIDEBAR ── */}
       <Sidebar
         collapsible="icon"
-        className="border-r border-border/50 bg-sidebar transition-[width] duration-150 ease-in-out"
+        className="border-r border-border bg-sidebar transition-[width] duration-150 ease-in-out"
         style={{ "--sidebar-width": "248px" } as React.CSSProperties}
       >
         {/* HEADER */}
-        <SidebarHeader className="h-14 flex items-center border-b border-border/50 px-2 group-data-[collapsible=icon]:px-1 group-data-[collapsible=icon]:justify-center">
+        <SidebarHeader className="h-14 flex items-center border-b border-border px-4 group-data-[collapsible=icon]:px-1 group-data-[collapsible=icon]:justify-center">
           <div className="flex-1 min-w-0 flex items-center group-data-[collapsible=icon]:hidden">
             <WorkspaceSwitcher />
           </div>
@@ -645,7 +647,7 @@ function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
       {/* ── MAIN CONTENT ── */}
       <SidebarInset className="bg-background">
         {/* ── NAVBAR ── */}
-        <header className="flex h-14 items-center justify-between gap-3 border-b border-border/50 bg-background px-4 sticky top-0 z-40">
+        <header className="flex h-14 items-center justify-between gap-3 border-b border-border bg-background px-4 sticky top-0 z-40">
           {/* Left: sidebar toggle + breadcrumb */}
           <div className="flex items-center gap-2 min-w-0">
             {/* Always-visible toggle in navbar */}
