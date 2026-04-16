@@ -32,6 +32,40 @@ export const GET_REWARDS = gql`
   }
 `;
 
+export const GET_REWARD_BY_ID = gql`
+  query GetRewardById($getRewardByIdId: ID!) {
+    getRewardById(id: $getRewardByIdId) {
+      id
+      title
+      description
+      image
+      tcCost
+      inventoryRequired
+      perUserLimit
+      totalUsageLimit
+      minAccountAge
+      minActivityRequired
+      blockWarnedUsers
+      cooldownPeriod
+      status
+      category {
+        id
+        name
+      }
+      isActive
+      totalVouchers
+      remainingVouchers
+      redeemedCount
+      createdAt
+      updatedAt
+      validityDays
+      discountType
+      discountValue
+      rewardMechanism
+    }
+  }
+`;
+
 export const GET_VOUCHERS = gql`
   query GetVouchers($rewardId: ID!, $pagination: PaginationInput) {
     getVouchers(rewardId: $rewardId, pagination: $pagination) {
@@ -43,6 +77,11 @@ export const GET_VOUCHERS = gql`
       assignedAt
       expiryDate
       createdAt
+      reward {
+        id
+        title
+        image
+      }
     }
   }
 `;
@@ -68,6 +107,7 @@ export const GET_REDEMPTIONS = gql`
         firstName
         lastName
         email
+        avatar
       }
       reward {
         id
@@ -110,24 +150,43 @@ export const CREATE_REWARD = gql`
     createReward(input: $input) {
       id
       title
+      description
+      image
+      tcCost
+      inventoryRequired
+      perUserLimit
+      totalUsageLimit
+      minAccountAge
+      minActivityRequired
+      blockWarnedUsers
+      cooldownPeriod
+      status
       category {
         id
         name
-        color
-        isActive
       }
-      status
+      isActive
+      totalVouchers
+      remainingVouchers
+      redeemedCount
+      createdAt
+      updatedAt
+      validityDays
+      discountType
+      discountValue
+      rewardMechanism
     }
   }
 `;
 
 export const UPDATE_REWARD = gql`
-  mutation UpdateReward($id: ID!, $input: UpdateRewardInput!) {
-    updateReward(id: $id, input: $input) {
+  mutation UpdateReward($updateRewardId: ID!, $input: UpdateRewardInput!) {
+    updateReward(id: $updateRewardId, input: $input) {
       id
       title
       status
       isActive
+      rewardMechanism
     }
   }
 `;
@@ -171,6 +230,7 @@ export const GET_ALL_VOUCHERS = gql`
       reward {
         id
         title
+        image
       }
     }
   }

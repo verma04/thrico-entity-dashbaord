@@ -41,8 +41,9 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
-import { useGetRewards, useUpdateReward } from "@/graphql/actions/rewards";
+import { useGetRewardById, useUpdateReward } from "@/graphql/actions/rewards";
 import { cn } from "@/lib/utils";
+import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 
 const couponSchema = Yup.object().shape({
   title: Yup.string().required("Give your reward a catchy title"),
@@ -88,7 +89,7 @@ const CreatorSection = ({
         <div
           className={cn(
             "h-10 w-10 rounded-xl flex items-center justify-center shrink-0 border",
-            accents[accent]
+            accents[accent],
           )}
         >
           <Icon className="h-5 w-5" />
@@ -114,12 +115,11 @@ export default function EditRewardPage() {
   const params = useParams();
   const rewardId = params?.id as string;
 
-  const { data, loading: fetchLoading } = useGetRewards({
-    pagination: { page: 1, limit: 100 },
-  });
+  const { data, loading: fetchLoading } = useGetRewardById(rewardId);
   const [updateReward, { loading }] = useUpdateReward();
+  const [saved, setSaved] = React.useState(false);
 
-  const reward = data?.getRewards?.find((r: any) => r.id === rewardId);
+  const reward = data?.getRewardById;
 
   const getCategoryName = (category: any): string => {
     if (!category) return "Internal";
@@ -138,43 +138,34 @@ export default function EditRewardPage() {
 
   const formik = useFormik({
     initialValues: {
-      title: "",
-      description: "",
-      tcCost: 0,
-      discountType: "Flat",
-      discountValue: "",
-      validityDays: 30,
-      totalUsageLimit: 0,
-      perUserLimit: 1,
-      minAccountAge: 0,
-      minActivityRequired: 0,
-      blockWarnedUsers: false,
-      cooldownPeriod: 0,
-      inventoryRequired: false,
-      image: "",
-      categories: ["Internal"] as string[],
+      title: reward?.title || "",
+      description: reward?.description || "",
+      tcCost: reward?.tcCost || 0,
+      discountType: reward?.discountType || "Flat",
+      discountValue: reward?.discountValue || "",
+      validityDays: reward?.validityDays || 30,
+      totalUsageLimit: reward?.totalUsageLimit || 0,
+      perUserLimit: reward?.perUserLimit || 1,
+      minAccountAge: reward?.minAccountAge || 0,
+      minActivityRequired: reward?.minActivityRequired || 0,
+      blockWarnedUsers: reward?.blockWarnedUsers || false,
+      cooldownPeriod: reward?.cooldownPeriod || 0,
+      inventoryRequired: reward?.inventoryRequired || false,
+      image: reward?.image || "",
+      rewardMechanism: reward?.rewardMechanism || "COUPON",
+      status: reward?.status || "ACTIVE",
+      isActive: reward?.isActive ?? true,
     },
     validationSchema: couponSchema,
     enableReinitialize: true,
     onSubmit: async (values) => {
       try {
-        const categoryIdMap: Record<string, string> = {
-          Amazon: "cat-001",
-          Internal: "cat-002",
-          Event: "cat-003",
-          Brand: "cat-004",
-          "Scratch Card": "cat-005",
-          "Spin Wheel": "cat-006",
-          "Match & Win": "cat-007",
-        };
         await updateReward({
           variables: {
-            id: rewardId,
+            updateRewardId: rewardId,
             input: {
               title: values.title,
               description: values.description,
-              categoryId:
-                categoryIdMap[values.categories[0]] || "cat-002",
               tcCost: values.tcCost,
               inventoryRequired: values.inventoryRequired,
               perUserLimit: values.perUserLimit,
@@ -184,6 +175,9 @@ export default function EditRewardPage() {
               blockWarnedUsers: values.blockWarnedUsers,
               cooldownPeriod: values.cooldownPeriod,
               image: values.image,
+              rewardMechanism: values.rewardMechanism,
+              status: values.status,
+              isActive: values.isActive,
             },
           },
         });
@@ -191,7 +185,10 @@ export default function EditRewardPage() {
           title: "Reward updated",
           description: `${values.title} has been saved.`,
         });
-        router.push("/rewards/coupons");
+        setSaved(true);
+        setTimeout(() => {
+          router.push("/rewards/coupons");
+        }, 1500);
       } catch (err: any) {
         toast({
           title: "Update failed",
@@ -201,30 +198,6 @@ export default function EditRewardPage() {
       }
     },
   });
-
-  // Populate form when reward data loads
-  useEffect(() => {
-    if (reward) {
-      formik.setValues({
-        title: reward.title || "",
-        description: reward.description || "",
-        tcCost: reward.tcCost || 0,
-        discountType: reward.discountType || "Flat",
-        discountValue: reward.discountValue || "",
-        validityDays: reward.validityDays || 30,
-        totalUsageLimit: reward.totalUsageLimit || 0,
-        perUserLimit: reward.perUserLimit || 1,
-        minAccountAge: reward.minAccountAge || 0,
-        minActivityRequired: reward.minActivityRequired || 0,
-        blockWarnedUsers: reward.blockWarnedUsers || false,
-        cooldownPeriod: reward.cooldownPeriod || 0,
-        inventoryRequired: reward.inventoryRequired || false,
-        image: reward.image || "",
-        categories: [getCategoryName(reward.category)],
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reward]);
 
   const err = (field: keyof typeof formik.errors) =>
     formik.touched[field] && formik.errors[field] ? (
@@ -328,31 +301,6 @@ export default function EditRewardPage() {
               </p>
             </div>
           </div>
-
-          <div className="flex items-center gap-3">
-            <Link href="/rewards/coupons">
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-9 px-4 text-xs font-semibold rounded-full border-border/60"
-              >
-                Cancel
-              </Button>
-            </Link>
-            <Button
-              size="sm"
-              onClick={() => formik.handleSubmit()}
-              disabled={loading}
-              className="h-9 px-6 text-xs font-bold rounded-full bg-black text-white dark:bg-white dark:text-black hover:opacity-90 transition-all shadow-lg"
-            >
-              {loading ? (
-                <Loader2 className="h-3 w-3 animate-spin mr-2" />
-              ) : (
-                <Save className="h-3 w-3 mr-2" />
-              )}
-              Save Changes
-            </Button>
-          </div>
         </div>
       </div>
 
@@ -406,64 +354,50 @@ export default function EditRewardPage() {
                 <div className="space-y-6">
                   <div className="space-y-4">
                     <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-                      Assigned Categories
+                      Reward Mechanism
                     </Label>
                     <div className="flex flex-wrap gap-2">
                       {[
-                        { id: "All", label: "All", icon: Dices },
+                        { id: "COUPON", label: "Coupon", icon: Ticket },
                         {
-                          id: "Spin Wheel",
+                          id: "SPIN_WHEEL",
                           label: "Spin Wheel",
                           icon: RotateCw,
                         },
                         {
-                          id: "Scratch Card",
+                          id: "SCRATCH_CARD",
                           label: "Scratch Card",
                           icon: Sparkles,
                         },
                         {
-                          id: "Match & Win",
+                          id: "MATCH_AND_WIN",
                           label: "Match & Win",
                           icon: Gamepad2,
                         },
-                      ].map((cat) => {
-                        const CatIcon = cat.icon;
+                      ].map((mech) => {
+                        const MechIcon = mech.icon;
                         return (
                           <button
-                            key={cat.id}
+                            key={mech.id}
                             type="button"
-                            onClick={() => {
-                              const current = formik.values.categories;
-                              if (current.includes(cat.id)) {
-                                if (current.length > 1) {
-                                  formik.setFieldValue(
-                                    "categories",
-                                    current.filter((c) => c !== cat.id)
-                                  );
-                                }
-                              } else {
-                                formik.setFieldValue("categories", [
-                                  ...current,
-                                  cat.id,
-                                ]);
-                              }
-                            }}
+                            onClick={() =>
+                              formik.setFieldValue("rewardMechanism", mech.id)
+                            }
                             className={cn(
                               "flex items-center gap-1.5 px-4 py-2 rounded-full text-[10px] font-bold transition-all border",
-                              formik.values.categories.includes(cat.id)
+                              formik.values.rewardMechanism === mech.id
                                 ? "bg-indigo-600 border-indigo-600 text-white shadow-md shadow-indigo-500/20 scale-[1.05]"
-                                : "bg-white dark:bg-muted/10 border-border/40 text-muted-foreground hover:border-border"
+                                : "bg-white dark:bg-muted/10 border-border/40 text-muted-foreground hover:border-border",
                             )}
                           >
-                            <CatIcon
+                            <MechIcon
                               className={cn(
                                 "h-3 w-3",
-                                formik.values.categories.includes(
-                                  cat.id
-                                ) && "animate-pulse"
+                                formik.values.rewardMechanism === mech.id &&
+                                  "animate-pulse",
                               )}
                             />
-                            {cat.label}
+                            {mech.label}
                           </button>
                         );
                       })}
@@ -535,12 +469,8 @@ export default function EditRewardPage() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="Flat">Flat Discount</SelectItem>
-                      <SelectItem value="Percentage">
-                        Percentage %
-                      </SelectItem>
-                      <SelectItem value="Access">
-                        Exclusive Access
-                      </SelectItem>
+                      <SelectItem value="Percentage">Percentage %</SelectItem>
+                      <SelectItem value="Access">Exclusive Access</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -602,7 +532,7 @@ export default function EditRewardPage() {
                         "text-[10px] font-bold uppercase tracking-widest",
                         !formik.values.inventoryRequired
                           ? "text-indigo-600 dark:text-indigo-400"
-                          : "text-muted-foreground"
+                          : "text-muted-foreground",
                       )}
                     >
                       Manual
@@ -619,7 +549,7 @@ export default function EditRewardPage() {
                         "text-[10px] font-bold uppercase tracking-widest",
                         formik.values.inventoryRequired
                           ? "text-emerald-600 dark:text-emerald-400"
-                          : "text-muted-foreground"
+                          : "text-muted-foreground",
                       )}
                     >
                       Inventory
@@ -631,8 +561,8 @@ export default function EditRewardPage() {
                   <div className="flex items-start gap-3 p-4 rounded-xl bg-indigo-50/50 border border-indigo-100 dark:bg-indigo-500/10 dark:border-indigo-500/20">
                     <Info className="h-4 w-4 text-indigo-500 mt-0.5" />
                     <p className="text-[11px] text-indigo-700 dark:text-indigo-300 leading-relaxed font-medium">
-                      Upload voucher codes from the Inventory tab in Rewards
-                      & Codes after saving.
+                      Upload voucher codes from the Inventory tab in Rewards &
+                      Codes after saving.
                     </p>
                   </div>
                 )}
@@ -805,16 +735,15 @@ export default function EditRewardPage() {
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
                             <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-indigo-50">
-                              {formik.values.categories.join(" • ") ||
-                                "General"}
+                              {formik.values.rewardMechanism
+                                ? String(formik.values.rewardMechanism).replace(/_/g, " ")
+                                : "COUPON"}
                             </span>
-                            {formik.values.categories.some((c) =>
-                              [
-                                "Scratch Card",
-                                "Spin Wheel",
-                                "Match & Win",
-                              ].includes(c)
-                            ) && (
+                            {[
+                              "SCRATCH_CARD",
+                              "SPIN_WHEEL",
+                              "MATCH_AND_WIN",
+                            ].includes(String(formik.values.rewardMechanism)) && (
                               <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/30 text-[8px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-tighter">
                                 <Sparkle className="h-2 w-2 fill-current" />
                                 Interactive
@@ -878,9 +807,7 @@ export default function EditRewardPage() {
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">
-                      Last updated
-                    </span>
+                    <span className="text-muted-foreground">Last updated</span>
                     <span className="font-medium text-foreground">
                       {reward.updatedAt
                         ? new Date(reward.updatedAt).toLocaleDateString()
@@ -894,7 +821,7 @@ export default function EditRewardPage() {
                         "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase border",
                         reward.isActive
                           ? "bg-emerald-50 text-emerald-700 border-emerald-100"
-                          : "bg-muted text-muted-foreground border-border"
+                          : "bg-muted text-muted-foreground border-border",
                       )}
                     >
                       <span
@@ -902,7 +829,7 @@ export default function EditRewardPage() {
                           "h-1.5 w-1.5 rounded-full",
                           reward.isActive
                             ? "bg-emerald-500"
-                            : "bg-muted-foreground"
+                            : "bg-muted-foreground",
                         )}
                       />
                       {reward.isActive ? "Active" : "Inactive"}
@@ -922,6 +849,17 @@ export default function EditRewardPage() {
           </div>
         </div>
       </main>
+
+      <FloatingSavePanel
+        hasChanged={formik.dirty}
+        saved={saved}
+        isSaving={loading}
+        onSave={() => formik.submitForm()}
+        onReset={() => formik.resetForm()}
+        title="Unsaved Changes"
+        description="You have pending changes to this reward."
+        buttonText="Save Changes"
+      />
     </div>
   );
 }

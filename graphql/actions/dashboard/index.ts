@@ -4,6 +4,7 @@ import {
   GET_MODULE_ACTIVITY,
   GET_COMMUNITY_KPIS,
   GET_DEVICE_DISTRIBUTION,
+  GET_LOGIN_SESSIONS_REPORT,
 } from "../../quries/dashboard";
 
 export enum TimeRange {
@@ -140,6 +141,32 @@ export const useGetCommunityKPIs = (timeRange?: TimeRange, dateRange?: DateRange
     GET_COMMUNITY_KPIS,
     {
       variables: { timeRange, dateRange },
+      ...options,
+    }
+  );
+
+export enum GroupBy {
+  DAY = "DAY",
+  WEEK = "WEEK",
+  MONTH = "MONTH",
+  YEAR = "YEAR",
+}
+
+export interface LoginSessionReportItem {
+  time: string;
+  desktop: number;
+  mobile: number;
+}
+
+export interface GetLoginSessionsReportResponse {
+  getLoginSessionsReport: LoginSessionReportItem[];
+}
+
+export const useGetLoginSessionsReport = (timeRange?: TimeRange, groupBy?: GroupBy, dateRange?: DateRangeInput, options?: any) =>
+  useQuery<GetLoginSessionsReportResponse, { timeRange?: TimeRange; groupBy?: GroupBy; dateRange?: DateRangeInput }>(
+    GET_LOGIN_SESSIONS_REPORT,
+    {
+      variables: { timeRange, groupBy, dateRange },
       ...options,
     }
   );

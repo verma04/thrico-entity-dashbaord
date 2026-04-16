@@ -11,7 +11,7 @@ function RootLayout({ children }: { children: React.ReactNode }) {
   const { data, loading } = useGetWebsite();
   const website = data?.getWebsite;
   const initializeWebsiteData = useWebsiteBuilderStore(
-    (state) => state.initializeWebsiteData
+    (state) => state.initializeWebsiteData,
   );
 
   React.useEffect(() => {

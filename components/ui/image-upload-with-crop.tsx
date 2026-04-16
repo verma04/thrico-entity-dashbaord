@@ -51,7 +51,7 @@ interface AspectRatioPreset {
 
 interface ImageUploadWithCropProps {
   currentImage?: string;
-  onImageUpdate: (imageUrl: string) => void;
+  onImageUpdate: (cdnUrl: string, url: string) => void;
   label?: string;
   recommendedWidth?: number;
   recommendedHeight?: number;
@@ -186,7 +186,7 @@ export const ImageUploadWithCrop = ({
         const result = returnKeyOnly
           ? data.uploadImage
           : `https://cdn.thrico.network/${data.uploadImage}`;
-        handleUploadSuccess(result);
+        handleUploadSuccess(result, data.uploadImage);
       }
     },
     onError: (error: any) => {
@@ -196,9 +196,9 @@ export const ImageUploadWithCrop = ({
 
   const uploading = defaultUploading || isCustomUploading;
 
-  const handleUploadSuccess = (url: string) => {
-    onImageUpdate(url);
-    onUploadComplete?.(url);
+  const handleUploadSuccess = (cdnUrl: string, url: string) => {
+    onImageUpdate(cdnUrl, url);
+    onUploadComplete?.(cdnUrl, url);
     toast({
       title: "Success",
       description: `${label} uploaded successfully!`,
@@ -439,7 +439,10 @@ export const ImageUploadWithCrop = ({
         {label && <Label>{label}</Label>}
 
         {children ? (
-          <div onClick={() => !uploading && fileInputRef.current?.click()} className="cursor-pointer">
+          <div
+            onClick={() => !uploading && fileInputRef.current?.click()}
+            className="cursor-pointer"
+          >
             {children}
           </div>
         ) : currentImage && !disablePreview ? (
@@ -451,7 +454,11 @@ export const ImageUploadWithCrop = ({
               )}
             >
               <img
-                src={currentImage}
+                src={
+                  currentImage?.startsWith("https://cdn.thrico.network/")
+                    ? currentImage
+                    : `https://cdn.thrico.network/${currentImage}`
+                }
                 alt={label}
                 className={cn(
                   "max-h-32 max-w-full object-contain",

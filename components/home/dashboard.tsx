@@ -205,6 +205,7 @@ const ModulePerformanceCard = ({
   </div>
 );
 import { DashboardDistributionChart } from "./dashboard-distribution-chart";
+import { DashboardSessionRadarChart } from "./dashboard-session-radar-chart";
 
 // ---------------------------------------------------------------------------
 // Main Dashboard Component
@@ -389,9 +390,14 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {/* Device Distribution Chart */}
-        <DashboardDistributionChart />
-        {/* <DashboardLoginSessionsChart /> */}
+        <section className="grid grid-cols-1 lg:grid-cols-10 gap-4">
+          <div className="lg:col-span-7">
+            <DashboardDistributionChart />
+          </div>
+          <div className="lg:col-span-3">
+            <DashboardSessionRadarChart />
+          </div>
+        </section>
 
         {/* 2. Content & Feed */}
         <section className="space-y-4">

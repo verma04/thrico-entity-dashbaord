@@ -108,12 +108,7 @@ function MenuTabs({
 }) {
   return (
     <nav className="sticky top-0 z-40 bg-background/60 backdrop-blur-xl border-b border-border/50">
-      <div
-        className={cn(
-          "px-6 relative w-full",
-          !fullWidth && "max-w-7xl mx-auto",
-        )}
-      >
+      <div className={cn("px-6 relative", !fullWidth && "max-w-7xl mx-auto")}>
         <div className="flex h-14 items-center gap-1 overflow-x-auto no-scrollbar">
           {sortedSectionNames.map((sectionName, sIdx) => (
             <React.Fragment key={sectionName}>

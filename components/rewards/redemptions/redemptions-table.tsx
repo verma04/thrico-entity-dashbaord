@@ -9,6 +9,7 @@ import { Copy, CheckCircle2, Clock, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { AdminStatusBadge } from "@/components/shared/admin-table/admin-table";
 
 export interface Redemption {
   id: string;
@@ -24,9 +25,11 @@ export interface Redemption {
     title: string;
     image?: string;
   };
+  ecUsed: number;
   tcUsed: number;
+  totalCost: number;
   claimedAt: string;
-  status: "Success" | "Failed" | "Pending";
+  status: string;
   metadata?: {
     voucherCode?: string;
   };
@@ -51,22 +54,19 @@ export function RedemptionsTable({
     });
   };
 
-  const statusIcons = {
-    Success: <CheckCircle2 className="h-3 w-3" />,
-    Pending: <Clock className="h-3 w-3" />,
-    Failed: <AlertCircle className="h-3 w-3" />,
-  };
-
-  const statusColors = {
-    Success: "text-emerald-600 bg-emerald-50 border-emerald-200",
-    Pending: "text-amber-600 bg-amber-50 border-amber-200",
-    Failed: "text-rose-600 bg-rose-50 border-rose-200",
+  const getStatusType = (status: string) => {
+    const s = status?.toUpperCase();
+    if (s === "SUCCESS" || s === "COMPLETED" || s === "FULFILLED") return "APPROVED";
+    if (s === "PENDING") return "PENDING";
+    if (s === "FAILED" || s === "REJECTED") return "REJECTED";
+    return "DISABLED";
   };
 
   const columns: ColumnDef<Redemption>[] = [
     {
       id: "user",
-      accessorFn: (row) => `${row.user.firstName} ${row.user.lastName} ${row.user.email}`,
+      accessorFn: (row) =>
+        `${row.user.firstName} ${row.user.lastName} ${row.user.email}`,
       header: "User",
       cell: ({ row }) => {
         const user = row.original.user;
@@ -74,7 +74,7 @@ export function RedemptionsTable({
         return (
           <div className="flex items-center gap-3">
             <Avatar className="h-8 w-8 ring-1 ring-border">
-              <AvatarImage src={user.avatar} />
+              <AvatarImage src={`https://cdn.thrico.network/${user.avatar}`} />
               <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-bold">
                 {user.firstName[0]}
                 {user.lastName[0]}
@@ -105,11 +105,17 @@ export function RedemptionsTable({
       accessorKey: "tcUsed",
       header: "TC Spent",
       cell: ({ row }) => (
-        <div className="flex items-center gap-1.5 font-bold text-foreground">
-          <div className="h-4 w-4 rounded-full bg-amber-400 flex items-center justify-center text-[8px] text-amber-900 border border-amber-500/20">
-            TC
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-50 border border-amber-200 text-amber-700 text-[10px] font-black uppercase tracking-tighter">
+            <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+            {row.original.tcUsed || 0} TC
           </div>
-          {row.original.tcUsed}
+          {row.original.ecUsed > 0 && (
+            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-black uppercase tracking-tighter">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              {row.original.ecUsed} EC
+            </div>
+          )}
         </div>
       ),
     },
@@ -128,17 +134,9 @@ export function RedemptionsTable({
       accessorKey: "status",
       header: "Status",
       cell: ({ row }) => (
-        <Badge
-          variant="outline"
-          className={cn(
-            "text-[10px] uppercase font-bold px-1.5 py-0 h-5 gap-1",
-            statusColors[row.original.status] ||
-              "text-muted-foreground bg-muted",
-          )}
-        >
-          {statusIcons[row.original.status]}
-          {row.original.status}
-        </Badge>
+        <AdminStatusBadge status={getStatusType(row.original.status)}>
+          {row.original.status || "Completed"}
+        </AdminStatusBadge>
       ),
     },
     {

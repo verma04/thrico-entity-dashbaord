@@ -3,7 +3,6 @@
 import { ClipboardList, Plus, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
-import NewForm from "../feedback-form/new-feed-back-form";
 import Link from "next/link";
 
 export function SurveysHeader() {
@@ -22,7 +21,12 @@ export function SurveysHeader() {
             Browse Templates
           </Button>
         </Link>
-        <NewForm />
+        <Link href="/surveys/create">
+          <Button className="gap-2 rounded-xl">
+            <Plus className="h-4 w-4" />
+            Create New Survey
+          </Button>
+        </Link>
       </div>
     </div>
   );

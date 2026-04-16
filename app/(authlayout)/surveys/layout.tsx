@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { ClipboardList, Settings, List } from "lucide-react";
+import { ClipboardList, Settings, List, Plus } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
 import { Card } from "@/components/ui/card";
 
@@ -11,6 +11,11 @@ function SurveysLayout({ children }: { children: React.ReactNode }) {
       key: "all",
       label: "All Surveys",
       icon: <List className="h-4 w-4" />,
+    },
+    {
+      key: "create",
+      label: "Create Survey",
+      icon: <Plus className="h-4 w-4" />,
     },
     {
       key: "settings",

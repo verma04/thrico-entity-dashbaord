@@ -1,6 +1,7 @@
 import { useMutation, useQuery } from "@apollo/client";
 import {
   GET_REWARDS,
+  GET_REWARD_BY_ID,
   GET_VOUCHERS,
   GET_ALL_VOUCHERS,
   GET_REDEMPTIONS,
@@ -28,6 +29,12 @@ export const useGetRewards = (variables?: {
   search?: string;
   pagination?: { page: number; limit: number };
 }) => useQuery(GET_REWARDS, { variables });
+
+export const useGetRewardById = (id: string) =>
+  useQuery(GET_REWARD_BY_ID, {
+    variables: { getRewardByIdId: id },
+    skip: !id,
+  });
 
 export const useGetVouchers = (variables: {
   rewardId: string;
