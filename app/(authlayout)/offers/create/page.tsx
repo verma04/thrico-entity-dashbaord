@@ -41,6 +41,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Offer } from "@/types/offer-types";
 import { useRouter } from "next/navigation";
+import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 
 const offerSchema = Yup.object().shape({
   title: Yup.string()
@@ -127,27 +128,6 @@ export default function CreateOfferPage() {
               <ChevronRight className="h-3 w-3" />
               <span>Create New</span>
             </div>
-          </div>
-          <div className="hidden sm:flex gap-3">
-            <Button
-              variant="outline"
-              type="button"
-              size="sm"
-              onClick={handleCancel}
-            >
-              Cancel
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => formik.handleSubmit()}
-              disabled={!formik.isValid || formik.isSubmitting}
-              className="shadow-sm border-primary/20"
-            >
-              <div className="flex items-center gap-2">
-                <Save className="h-4 w-4" />
-                Create Offer
-              </div>
-            </Button>
           </div>
         </div>
       </div>
@@ -615,6 +595,19 @@ export default function CreateOfferPage() {
           </div>
         </div>
       </div>
+      <FloatingSavePanel
+        hasChanged={formik.dirty}
+        saved={false}
+        isSaving={formik.isSubmitting}
+        onSave={() => formik.handleSubmit()}
+        onReset={() => {
+          formik.resetForm();
+          handleCancel();
+        }}
+        title="Unsaved Offer Data"
+        description="You have unfilled form data."
+        buttonText="Create Offer"
+      />
     </div>
   );
 }

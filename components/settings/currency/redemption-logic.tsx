@@ -12,6 +12,7 @@ import {
   useUpdateEntityCurrencyConfig,
 } from "@/graphql/actions";
 import { useState, useEffect } from "react";
+import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { toast } from "sonner";
 
 export function RedemptionLogic() {
@@ -23,22 +24,30 @@ export function RedemptionLogic() {
     maxTcPercentage: 30,
     minEntityActivityRequired: true,
   });
+  
+  const [originalCaps, setOriginalCaps] = useState<any>(null);
+  const [originalSpendingRules, setOriginalSpendingRules] = useState<any>(null);
+  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     if (capData?.getRedemptionCap) {
-      setCaps({
+      const formatted = {
         maxTcPerOrder: capData.getRedemptionCap.maxTcPerOrder,
         maxTcPerMonth: capData.getRedemptionCap.maxTcPerMonth,
-      });
+      };
+      setCaps(formatted);
+      setOriginalCaps(formatted);
     }
   }, [capData]);
 
   useEffect(() => {
     if (configData?.getEntityCurrencyConfig) {
-      setSpendingRules({
+      const formatted = {
         maxTcPercentage: configData.getEntityCurrencyConfig.maxTcPercentage,
         minEntityActivityRequired: configData.getEntityCurrencyConfig.minEntityActivityRequired,
-      });
+      };
+      setSpendingRules(formatted);
+      setOriginalSpendingRules(formatted);
     }
   }, [configData]);
 
@@ -52,16 +61,33 @@ export function RedemptionLogic() {
     onError: (err: any) => toast.error(err.message),
   });
 
-  const handleSavePolicy = () => {
-    updateConfig({
-      variables: {
-        input: {
-          maxTcPercentage: parseInt(spendingRules.maxTcPercentage.toString()),
-          minEntityActivityRequired: spendingRules.minEntityActivityRequired,
+  const hasChanged = 
+    (originalCaps ? JSON.stringify(caps) !== JSON.stringify(originalCaps) : false) ||
+    (originalSpendingRules ? JSON.stringify(spendingRules) !== JSON.stringify(originalSpendingRules) : false);
+
+  const handleReset = () => {
+    if (originalCaps) setCaps(originalCaps);
+    if (originalSpendingRules) setSpendingRules(originalSpendingRules);
+  };
+
+  const handleSavePolicy = async () => {
+    try {
+      await updateConfig({
+        variables: {
+          input: {
+            maxTcPercentage: parseInt(spendingRules.maxTcPercentage.toString()),
+            minEntityActivityRequired: spendingRules.minEntityActivityRequired,
+          },
         },
-      },
-    });
-    updateCap({ variables: { input: caps } });
+      });
+      await updateCap({ variables: { input: caps } });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+      setOriginalCaps(caps);
+      setOriginalSpendingRules(spendingRules);
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   if (loadingCaps || loadingConfig) {
@@ -156,17 +182,6 @@ export function RedemptionLogic() {
           </div>
         </div>
 
-        {/* Save */}
-        <div className="flex justify-end border-t border-border pt-4">
-          <Button
-            onClick={handleSavePolicy}
-            disabled={updatingCaps || updatingConfig}
-            className="min-w-[160px] gap-2"
-          >
-            {(updatingCaps || updatingConfig) && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-            Save Rules
-          </Button>
-        </div>
       </div>
 
       {/* Sidebar: How it works */}
@@ -211,6 +226,14 @@ export function RedemptionLogic() {
           <span className="font-medium text-blue-600">Contact Thrico support.</span>
         </div>
       </div>
+
+      <FloatingSavePanel
+        hasChanged={hasChanged}
+        saved={saved}
+        isSaving={updatingCaps || updatingConfig}
+        onSave={handleSavePolicy}
+        onReset={handleReset}
+      />
     </div>
   );
 }

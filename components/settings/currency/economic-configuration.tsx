@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Loader2, Palette, Zap, Info } from "lucide-react";
 import { useState, useEffect } from "react";
+import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { useUpdateEntityCurrencyConfig } from "@/graphql/actions";
 import { toast } from "sonner";
 
@@ -19,19 +20,34 @@ export function EconomicConfiguration({ data, loading }: EconomicConfigProps) {
     normalizationFactor: 1,
     tcCoinsAllowed: true,
   });
+  const [originalConfig, setOriginalConfig] = useState<any>(null);
+  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     if (data?.getEntityCurrencyConfig) {
-      setConfig({
+      const formatted = {
         currencyName: data.getEntityCurrencyConfig.currencyName || "",
         normalizationFactor: data.getEntityCurrencyConfig.normalizationFactor || 1,
         tcCoinsAllowed: data.getEntityCurrencyConfig.tcCoinsAllowed,
-      });
+      };
+      setConfig(formatted);
+      setOriginalConfig(formatted);
     }
   }, [data]);
 
+  const hasChanged = originalConfig ? JSON.stringify(config) !== JSON.stringify(originalConfig) : false;
+
+  const handleReset = () => {
+    if (originalConfig) setConfig(originalConfig);
+  };
+
   const [updateConfig, { loading: updating }] = useUpdateEntityCurrencyConfig({
-    onCompleted: () => toast.success("Economic configuration updated"),
+    onCompleted: () => {
+      toast.success("Economic configuration updated");
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+      setOriginalConfig(config);
+    },
     onError: (err: any) => toast.error(err.message),
   });
 
@@ -123,13 +139,13 @@ export function EconomicConfiguration({ data, loading }: EconomicConfigProps) {
         </div>
       </div>
 
-      {/* Save */}
-      <div className="flex justify-end pt-2 border-t border-border">
-        <Button onClick={handleSave} disabled={updating} className="min-w-[160px] gap-2">
-          {updating && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-          Save Configuration
-        </Button>
-      </div>
+      <FloatingSavePanel
+        hasChanged={hasChanged}
+        saved={saved}
+        isSaving={updating}
+        onSave={handleSave}
+        onReset={handleReset}
+      />
     </div>
   );
 }

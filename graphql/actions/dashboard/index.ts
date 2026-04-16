@@ -3,6 +3,7 @@ import {
   GET_DASHBOARD_STATS,
   GET_MODULE_ACTIVITY,
   GET_COMMUNITY_KPIS,
+  GET_DEVICE_DISTRIBUTION,
 } from "../../quries/dashboard";
 
 export enum TimeRange {
@@ -10,7 +11,29 @@ export enum TimeRange {
   LAST_7_DAYS = "LAST_7_DAYS",
   LAST_30_DAYS = "LAST_30_DAYS",
   LAST_90_DAYS = "LAST_90_DAYS",
+  THIS_MONTH = "THIS_MONTH",
+  LAST_MONTH = "LAST_MONTH",
 }
+
+export interface DeviceDataPoint {
+  date: string;
+  android: number;
+  ios: number;
+  web: number;
+}
+
+export interface GetDeviceDistributionResponse {
+  getDeviceDistribution: DeviceDataPoint[];
+}
+
+export const useGetDeviceDistribution = (timeRange?: TimeRange, dateRange?: DateRangeInput, options?: any) =>
+  useQuery<GetDeviceDistributionResponse, { timeRange?: TimeRange; dateRange?: DateRangeInput }>(
+    GET_DEVICE_DISTRIBUTION,
+    {
+      variables: { timeRange, dateRange },
+      ...options,
+    }
+  );
 
 export interface DateRangeInput {
   startDate: string | null;

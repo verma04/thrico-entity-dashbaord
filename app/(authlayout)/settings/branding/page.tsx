@@ -5,6 +5,7 @@ import React, { useState, useEffect } from "react";
 import { useGetEntity } from "@/graphql/actions";
 import { PlatformContainer } from "@/components/ui/platform/container";
 import { Layers, RotateCcw } from "lucide-react";
+import { GeneralSettingsLayout } from "@/components/settings/general/general-settings-layout";
 
 const BrandingPage = () => {
   const { data: entityData, loading: entityLoading, refetch } = useGetEntity();
@@ -42,7 +43,8 @@ const BrandingPage = () => {
   }
 
   return (
-    <PlatformContainer className="py-0">
+    <GeneralSettingsLayout>
+      <PlatformContainer className="py-0">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-zinc-100">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-9 h-9 rounded-xl bg-zinc-900 flex items-center justify-center text-white shrink-0">
@@ -80,6 +82,7 @@ const BrandingPage = () => {
         />
       </div>
     </PlatformContainer>
+    </GeneralSettingsLayout>
   );
 };
 

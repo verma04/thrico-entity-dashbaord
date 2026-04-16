@@ -21,6 +21,7 @@ import MobileNavigation from "./mobile-navigation";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
+import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 
 import { gql, useMutation } from "@apollo/client";
 import {
@@ -77,8 +78,10 @@ export default function ModuleManagement() {
   const subscription = data?.checkEntitySubscription;
 
   const [modules, setModules] = useState<ModuleItem[]>(moduleData);
+  const [originalModules, setOriginalModules] = useState<ModuleItem[]>(moduleData);
   const [modulesInitialized, setModulesInitialized] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState<ActiveTab>("management");
   const [userRole] = useState("admin");
@@ -88,24 +91,47 @@ export default function ModuleManagement() {
     description?: string;
   } | null>(null);
 
+  const hasChanged = React.useMemo(() => {
+    if (!modulesInitialized) return false;
+    if (modules.length !== originalModules.length) return true;
+    for (const m of modules) {
+      const orig = originalModules.find((o) => o.id === m.id);
+      if (!orig) return true;
+      if (
+        m.enabled !== orig.enabled ||
+        m.showInMobileNavigation !== orig.showInMobileNavigation ||
+        m.isPopular !== orig.isPopular ||
+        m.showInMobileNavigationSortNumber !== orig.showInMobileNavigationSortNumber
+      ) {
+        return true;
+      }
+    }
+    return false;
+  }, [modules, originalModules, modulesInitialized]);
+
+  const onReset = () => {
+    setModules(originalModules);
+    setSaved(false);
+  };
+
   React.useEffect(() => {
     if (!modulesInitialized && subscription && Array.isArray(subscription.modules)) {
-      setModules(
-        subscription.modules.map((m: any) => ({
-          id: m.id,
-          name: m.name,
-          enabled: m.enabled ?? true,
-          required: m.required ?? false,
-          showInMobileNavigation: m.showInMobileNavigation ?? false,
-          showInWebNavigation: m.showInWebNavigation ?? false,
-          icon: m.icon ?? null,
-          showInMobileNavigationSortNumber:
-            typeof m.showInMobileNavigationSortNumber === "number"
-              ? m.showInMobileNavigationSortNumber
-              : undefined,
-          isPopular: m.isPopular ?? false,
-        }))
-      );
+      const parsedModules = subscription.modules.map((m: any) => ({
+        id: m.id,
+        name: m.name,
+        enabled: m.enabled ?? true,
+        required: m.required ?? false,
+        showInMobileNavigation: m.showInMobileNavigation ?? false,
+        showInWebNavigation: m.showInWebNavigation ?? false,
+        icon: m.icon ?? null,
+        showInMobileNavigationSortNumber:
+          typeof m.showInMobileNavigationSortNumber === "number"
+            ? m.showInMobileNavigationSortNumber
+            : undefined,
+        isPopular: m.isPopular ?? false,
+      }));
+      setModules(parsedModules);
+      setOriginalModules(parsedModules);
       setModulesInitialized(true);
     }
   }, [subscription, modulesInitialized]);
@@ -152,6 +178,9 @@ export default function ModuleManagement() {
     try {
       const response = await updateEntityModule({ variables: { input } });
       if (response.data?.updateEntityModule.success) {
+        setOriginalModules(modules);
+        setSaved(true);
+        setTimeout(() => setSaved(false), 3000);
         setNotification({ type: "success", message: "Changes saved successfully" });
         setTimeout(() => setNotification(null), 3000);
       } else {
@@ -314,18 +343,7 @@ export default function ModuleManagement() {
                 {navCount} / 3 in nav
               </span>
             </div>
-            <Button
-              onClick={saveChanges}
-              disabled={userRole === "directory" || saving}
-              className="h-8 px-4 text-[12px] font-semibold bg-slate-900 hover:bg-black text-white gap-2"
-            >
-              {saving ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <Save className="h-3.5 w-3.5" />
-              )}
-              {saving ? "Saving..." : "Save Changes"}
-            </Button>
+
           </div>
         </div>
 
@@ -490,6 +508,14 @@ export default function ModuleManagement() {
           </div>
         )}
       </div>
+
+      <FloatingSavePanel
+        hasChanged={hasChanged}
+        saved={saved}
+        isSaving={saving}
+        onSave={saveChanges}
+        onReset={onReset}
+      />
     </EcosystemWrapper>
   );
 }

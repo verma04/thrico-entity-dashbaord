@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { FloatingSavePanel } from "./floating-save-panel";
 
 export interface SettingsField {
   key: string;
@@ -121,7 +122,7 @@ export function PlatformSettingsPage<T extends Record<string, any>>({
   return (
     <PlatformContainer className="py-0">
       {/* ── Page Header ── */}
-      {!hideHeader ? (
+      {!hideHeader && (
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-zinc-100">
           <div className="flex items-center gap-3 min-w-0">
             {HeaderIcon && (
@@ -145,110 +146,16 @@ export function PlatformSettingsPage<T extends Record<string, any>>({
               </p>
             </div>
           </div>
-
-          {/* Save / Discard actions (Header) */}
-          <AnimatePresence mode="wait">
-            {hasChanged && (
-              <motion.div
-                key="actions"
-                initial={{ opacity: 0, y: -6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.15 }}
-                className="flex items-center gap-2 shrink-0"
-              >
-                <button
-                  onClick={handleReset}
-                  disabled={isSaving}
-                  className="h-8 px-3 rounded-lg text-[12px] font-medium text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition-colors disabled:opacity-40 flex items-center gap-1.5"
-                >
-                  <RotateCcw size={12} />
-                  Discard
-                </button>
-                <button
-                  onClick={handleSave}
-                  disabled={isSaving}
-                  className="h-8 px-4 rounded-lg text-[12px] font-medium bg-zinc-900 text-white hover:bg-zinc-800 transition-colors disabled:opacity-60 flex items-center gap-1.5 shadow-sm"
-                >
-                  {isSaving ? (
-                    <Loader2 size={12} className="animate-spin" />
-                  ) : (
-                    <Save size={12} />
-                  )}
-                  Save
-                </button>
-              </motion.div>
-            )}
-            {!hasChanged && saved && (
-              <motion.div
-                key="saved"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="flex items-center gap-1.5 text-[12px] font-medium text-emerald-600"
-              >
-                <Check size={13} strokeWidth={2.5} />
-                Saved
-              </motion.div>
-            )}
-          </AnimatePresence>
         </div>
-      ) : (
-        /* Floating Action Bar (when header is hidden) */
-        <AnimatePresence>
-          {hasChanged && (
-            <motion.div
-              initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
-              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              exit={{ opacity: 0, y: 20, filter: "blur(10px)" }}
-              className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-4 px-5 py-3 rounded-2xl bg-zinc-900 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] backdrop-blur-md"
-            >
-              <div className="flex flex-col">
-                <span className="text-[11px] font-bold text-white/90 leading-none">Unsaved Changes</span>
-                <span className="text-[10px] text-zinc-400 mt-0.5">You have made changes to the settings</span>
-              </div>
-              
-              <div className="w-px h-8 bg-white/10 mx-1" />
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={handleReset}
-                  disabled={isSaving}
-                  className="h-9 px-4 rounded-xl text-[12px] font-medium text-zinc-400 hover:text-white hover:bg-white/5 transition-all disabled:opacity-40 flex items-center gap-2"
-                >
-                  <RotateCcw size={13} />
-                  Discard
-                </button>
-                <button
-                  onClick={handleSave}
-                  disabled={isSaving}
-                  className="h-9 px-5 rounded-xl text-[12px] font-bold bg-white text-zinc-900 hover:bg-zinc-200 transition-all disabled:opacity-60 flex items-center gap-2 shadow-lg"
-                >
-                  {isSaving ? (
-                    <Loader2 size={13} className="animate-spin" />
-                  ) : (
-                    <Save size={13} />
-                  )}
-                  Apply Changes
-                </button>
-              </div>
-            </motion.div>
-          )}
-          {!hasChanged && saved && (
-            <motion.div
-                key="saved-floating"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] px-4 py-2 rounded-xl bg-emerald-500 text-white text-[12px] font-bold shadow-xl flex items-center gap-2"
-              >
-                <Check size={14} strokeWidth={3} />
-                Saved
-              </motion.div>
-          )}
-        </AnimatePresence>
       )}
+
+      <FloatingSavePanel
+        hasChanged={hasChanged}
+        saved={saved}
+        isSaving={isSaving}
+        onSave={handleSave}
+        onReset={handleReset}
+      />
 
       {/* ── Settings Sections ── */}
       <div className={cn("max-w-2xl space-y-10", !hideHeader ? "mt-2" : "mt-0")}>

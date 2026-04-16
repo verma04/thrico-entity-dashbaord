@@ -47,6 +47,7 @@ import {
 } from "lucide-react";
 import { CommunityPreview } from "./community-preview";
 import { ImageCropper } from "./image-cropper";
+import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { cn } from "@/lib/utils";
 
 export function CommunityCreationForm({
@@ -126,7 +127,8 @@ export function CommunityCreationForm({
 
   return (
     <FormikProvider value={formik}>
-      <div className="flex flex-col h-full bg-background overflow-hidden rounded-t-[inherit]">
+      <>
+        <div className="flex flex-col h-full bg-background overflow-hidden rounded-t-[inherit]">
         {/* Header section - Sticky */}
         <div className="sticky top-0 z-30 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 border-b px-6 py-4">
           <div className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -145,36 +147,8 @@ export function CommunityCreationForm({
                 <span>Create New Community</span>
               </div>
             </div>
-            <div className="hidden sm:flex gap-3">
-              <Button
-                variant="outline"
-                type="button"
-                size="sm"
-                onClick={() => (onCancel ? onCancel() : window.history.back())}
-              >
-                Cancel
-              </Button>
-              <Button
-                size="sm"
-                onClick={handleSubmit}
-                disabled={loading}
-                className="shadow-sm border-primary/20"
-              >
-                {loading ? (
-                  <div className="flex items-center gap-2">
-                    <div className="h-3.5 w-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Creating...
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <Save className="h-4 w-4" />
-                    Create Community
-                  </div>
-                )}
-              </Button>
             </div>
           </div>
-        </div>
 
         {/* Main Content Area - Scrollable */}
         <div className="flex-1 overflow-y-auto">
@@ -721,27 +695,6 @@ export function CommunityCreationForm({
           </div>
         </div>
 
-        {/* Mobile Action Buttons - Sticky at bottom */}
-        <div className="sm:hidden sticky bottom-0 z-30 bg-background border-t px-6 py-4">
-          <div className="flex gap-3">
-            <Button
-              variant="outline"
-              type="button"
-              className="flex-1"
-              onClick={() => (onCancel ? onCancel() : window.history.back())}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleSubmit}
-              disabled={loading}
-              className="flex-1"
-            >
-              {loading ? "Creating..." : "Create"}
-            </Button>
-          </div>
-        </div>
-
         {/* Image Cropper Modal */}
         {selectedImage && (
           <ImageCropper
@@ -755,6 +708,22 @@ export function CommunityCreationForm({
           />
         )}
       </div>
+
+      <FloatingSavePanel
+        hasChanged={formik.dirty}
+        saved={false}
+        isSaving={loading}
+        onSave={handleSubmit}
+        onReset={() => {
+          formik.resetForm();
+          if (onCancel) onCancel();
+          else window.history.back();
+        }}
+        title="Unsaved Community Data"
+        description="You have unfilled form data."
+        buttonText="Create Community"
+      />
+      </>
     </FormikProvider>
   );
 }

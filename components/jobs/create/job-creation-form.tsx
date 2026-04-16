@@ -40,6 +40,7 @@ import {
 } from "lucide-react";
 import { CompanyAutocompleteSelect } from "./company-auto-complete";
 import GooglePlacesInput from "@/components/layout/google-place-input";
+import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { cn } from "@/lib/utils";
 
 interface ListingCreationFormProps {
@@ -61,10 +62,10 @@ const jobSchema = Yup.object().shape({
     .required("Job description is required")
     .min(50, "Description must be at least 50 characters"),
   requirements: Yup.array().of(
-    Yup.string().required("Requirement cannot be empty")
+    Yup.string().required("Requirement cannot be empty"),
   ),
   responsibilities: Yup.array().of(
-    Yup.string().required("Responsibility cannot be empty")
+    Yup.string().required("Responsibility cannot be empty"),
   ),
   benefits: Yup.array().of(Yup.string().required("Benefit cannot be empty")),
   skills: Yup.array().of(Yup.string().required("Skill cannot be empty")),
@@ -117,7 +118,7 @@ export function JobCreationForm({
   const handleListChange = (
     fieldName: string,
     index: number,
-    value: string
+    value: string,
   ) => {
     const currentList = formik.values[
       fieldName as keyof typeof formik.values
@@ -131,7 +132,7 @@ export function JobCreationForm({
     fieldName: string,
     label: string,
     placeholder: string,
-    Icon: React.ElementType
+    Icon: React.ElementType,
   ) => (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -183,7 +184,7 @@ export function JobCreationForm({
                         fieldName as keyof typeof formik.errors
                       ] as any
                     )?.[index] &&
-                    "border-destructive"
+                    "border-destructive",
                 )}
               />
               {(
@@ -212,7 +213,7 @@ export function JobCreationForm({
                       formik.errors[
                         fieldName as keyof typeof formik.errors
                       ] as any
-                    )[index]
+                    )[index],
                   )}
                 </p>
               )}
@@ -242,34 +243,6 @@ export function JobCreationForm({
               <ChevronRight className="h-3 w-3" />
               <span>Create New Listing</span>
             </div>
-          </div>
-          <div className="hidden sm:flex gap-3">
-            <Button
-              variant="outline"
-              type="button"
-              size="sm"
-              onClick={() => (onCancel ? onCancel() : window.history.back())}
-            >
-              Cancel
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => formik.handleSubmit()}
-              disabled={loading || !formik.isValid}
-              className="shadow-sm border-primary/20"
-            >
-              {loading ? (
-                <div className="flex items-center gap-2">
-                  <div className="h-3.5 w-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Saving...
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <Save className="h-4 w-4" />
-                  Publish Job
-                </div>
-              )}
-            </Button>
           </div>
         </div>
       </div>
@@ -304,7 +277,7 @@ export function JobCreationForm({
                           className={cn(
                             formik.touched.title &&
                               formik.errors.title &&
-                              "border-destructive"
+                              "border-destructive",
                           )}
                         />
                         {formik.touched.title && formik.errors.title && (
@@ -352,21 +325,23 @@ export function JobCreationForm({
                               "pl-10",
                               formik.touched.location &&
                                 formik.errors.location &&
-                                "border-destructive"
+                                "border-destructive",
                             )}
                             initialValue={
                               typeof formik.values.location === "object"
                                 ? formik.values.location
                                 : formik.values.location
-                                ? {
-                                    name: formik.values.location,
-                                    address: formik.values.location,
-                                    latitude: 0,
-                                    longitude: 0,
-                                  }
-                                : null
+                                  ? {
+                                      name: formik.values.location,
+                                      address: formik.values.location,
+                                      latitude: 0,
+                                      longitude: 0,
+                                    }
+                                  : null
                             }
-                            onChange={(loc) => formik.setFieldValue("location", loc)}
+                            onChange={(loc) =>
+                              formik.setFieldValue("location", loc)
+                            }
                           />
                         </div>
                         {formik.touched.location && formik.errors.location && (
@@ -426,7 +401,7 @@ export function JobCreationForm({
                             className={cn(
                               formik.touched.jobType &&
                                 formik.errors.jobType &&
-                                "border-destructive"
+                                "border-destructive",
                             )}
                           >
                             <SelectValue placeholder="Select type" />
@@ -465,7 +440,7 @@ export function JobCreationForm({
                             className={cn(
                               formik.touched.workplaceType &&
                                 formik.errors.workplaceType &&
-                                "border-destructive"
+                                "border-destructive",
                             )}
                           >
                             <SelectValue placeholder="Select arrangement" />
@@ -502,7 +477,7 @@ export function JobCreationForm({
                             className={cn(
                               formik.touched.experienceLevel &&
                                 formik.errors.experienceLevel &&
-                                "border-destructive"
+                                "border-destructive",
                             )}
                           >
                             <SelectValue placeholder="Select level" />
@@ -541,7 +516,7 @@ export function JobCreationForm({
                           "min-h-[160px] resize-none",
                           formik.touched.description &&
                             formik.errors.description &&
-                            "border-destructive"
+                            "border-destructive",
                         )}
                         value={formik.values.description}
                         onChange={formik.handleChange}
@@ -576,28 +551,28 @@ export function JobCreationForm({
                         "requirements",
                         "Requirements",
                         "e.g., 5+ years of React experience",
-                        GraduationCap
+                        GraduationCap,
                       )}
                       <Separator />
                       {renderListSection(
                         "responsibilities",
                         "Key Responsibilities",
                         "e.g., Lead a team of 4 frontend engineers",
-                        CheckCircle2
+                        CheckCircle2,
                       )}
                       <Separator />
                       {renderListSection(
                         "skills",
                         "Required Skills",
                         "e.g., TypeScript, Next.js, TailwindCSS",
-                        Briefcase
+                        Briefcase,
                       )}
                       <Separator />
                       {renderListSection(
                         "benefits",
                         "Benefits & Perks",
                         "e.g., Unlimited PTO, Health Insurance",
-                        DollarSign
+                        DollarSign,
                       )}
                     </div>
                   </CardContent>
@@ -653,7 +628,9 @@ export function JobCreationForm({
                         className="bg-primary/5 text-primary border-primary/10 hover:bg-primary/10"
                       >
                         <MapPin className="h-3 w-3 mr-1" />
-                        {typeof formik.values.location === 'object' ? formik.values.location?.name : (formik.values.location || "Location")}
+                        {typeof formik.values.location === "object"
+                          ? formik.values.location?.name
+                          : formik.values.location || "Location"}
                       </Badge>
                       <Badge
                         variant="secondary"
@@ -734,26 +711,20 @@ export function JobCreationForm({
         </div>
       </div>
 
-      {/* Mobile Action Buttons - Sticky at bottom */}
-      <div className="sm:hidden sticky bottom-0 z-30 bg-background border-t px-6 py-4">
-        <div className="flex gap-3">
-          <Button
-            variant="outline"
-            type="button"
-            className="flex-1"
-            onClick={() => (onCancel ? onCancel() : window.history.back())}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={() => formik.handleSubmit()}
-            disabled={loading || !formik.isValid}
-            className="flex-1 shadow-sm"
-          >
-            {loading ? "Publishing..." : "Publish Job"}
-          </Button>
-        </div>
-      </div>
+      <FloatingSavePanel
+        hasChanged={formik.dirty}
+        saved={false}
+        isSaving={loading}
+        onSave={() => formik.handleSubmit()}
+        onReset={() => {
+          formik.resetForm();
+          if (onCancel) onCancel();
+          else window.history.back();
+        }}
+        title="Unsaved Job Posting"
+        description="You have unfilled form data."
+        buttonText="Publish Job"
+      />
     </div>
   );
 }

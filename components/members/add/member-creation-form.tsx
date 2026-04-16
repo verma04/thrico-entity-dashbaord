@@ -53,6 +53,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import Link from "next/link";
 import { ImageUploadWithCrop } from "@/components/ui/image-upload-with-crop";
+import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 
 export function MemberCreationForm({
   initialValues,
@@ -104,55 +105,28 @@ export function MemberCreationForm({
 
   return (
     <FormikProvider value={formik}>
-      <div className="flex flex-col h-full bg-slate-50/50 overflow-hidden rounded-t-[inherit]">
-        {/* Header section - Sticky */}
-        <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200 px-6 py-4">
-          <div className="max-w-5xl mx-auto w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-3 mb-1">
-                <div className="p-2.5 rounded-xl bg-indigo-600/10 ring-1 ring-indigo-600/20">
-                  <User className="h-5 w-5 text-indigo-600" />
+      <>
+        <div className="flex flex-col h-full bg-slate-50/50 overflow-hidden rounded-t-[inherit]">
+          {/* Header section - Sticky */}
+          <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200 px-6 py-4">
+            <div className="max-w-5xl mx-auto w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-3 mb-1">
+                  <div className="p-2.5 rounded-xl bg-indigo-600/10 ring-1 ring-indigo-600/20">
+                    <User className="h-5 w-5 text-indigo-600" />
+                  </div>
+                  <h1 className="text-2xl font-black tracking-tight text-slate-900">
+                    Add New Member
+                  </h1>
                 </div>
-                <h1 className="text-2xl font-black tracking-tight text-slate-900">
-                  Add New Member
-                </h1>
+                <div className="flex items-center gap-2 text-xs font-medium text-slate-500 ml-1">
+                  <span>Community</span>
+                  <ChevronRight className="h-3 w-3" />
+                  <span>Members</span>
+                  <ChevronRight className="h-3 w-3" />
+                  <span className="text-indigo-600">Add New</span>
+                </div>
               </div>
-              <div className="flex items-center gap-2 text-xs font-medium text-slate-500 ml-1">
-                <span>Community</span>
-                <ChevronRight className="h-3 w-3" />
-                <span>Members</span>
-                <ChevronRight className="h-3 w-3" />
-                <span className="text-indigo-600">Add New</span>
-              </div>
-            </div>
-            <div className="flex gap-3 w-full sm:w-auto">
-              <Button
-                variant="outline"
-                type="button"
-                size="sm"
-                className="flex-1 sm:flex-none h-10 rounded-xl border-slate-200 hover:bg-slate-50 font-semibold transition-all"
-                onClick={() => (onCancel ? onCancel() : window.history.back())}
-              >
-                Cancel
-              </Button>
-              <Button
-                size="sm"
-                onClick={handleSubmit}
-                disabled={loading}
-                className="flex-1 sm:flex-none h-10 rounded-xl bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-600/20 border-none font-semibold transition-all"
-              >
-                {loading ? (
-                  <div className="flex items-center gap-2">
-                    <div className="h-3.5 w-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Adding...
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <Save className="h-4 w-4" />
-                    Save Member
-                  </div>
-                )}
-              </Button>
             </div>
           </div>
         </div>
@@ -307,7 +281,6 @@ export function MemberCreationForm({
                           </Popover>
                         </div>
                       </div>
-
                     </CardContent>
                   </Card>
 
@@ -462,7 +435,22 @@ export function MemberCreationForm({
             </div>
           </div>
         </div>
-      </div>
+
+        <FloatingSavePanel
+          hasChanged={formik.dirty}
+          saved={false}
+          isSaving={loading}
+          onSave={handleSubmit}
+          onReset={() => {
+            formik.resetForm();
+            if (onCancel) onCancel();
+            else window.history.back();
+          }}
+          title="Unsaved Member Data"
+          description="You have unfilled form data."
+          buttonText="Save Member"
+        />
+      </>
     </FormikProvider>
   );
 }

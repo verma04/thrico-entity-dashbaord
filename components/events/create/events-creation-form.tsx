@@ -37,6 +37,7 @@ import GooglePlacesInput from "@/components/layout/google-place-input";
 
 import { useToast } from "@/components/ui/use-toast";
 import { ImageCropper } from "@/components/communities/add/image-cropper";
+import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 
 interface EventsCreationFormProps {
   initialValues?: Record<string, any>;
@@ -129,36 +130,8 @@ export function EventsCreationForm({
               <span>Create New Event</span>
             </div>
           </div>
-          <div className="hidden sm:flex gap-3">
-            <Button
-              variant="outline"
-              type="button"
-              size="sm"
-              onClick={() => (onCancel ? onCancel() : window.history.back())}
-            >
-              Cancel
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => formik.handleSubmit()}
-              disabled={loading}
-              className="shadow-sm border-primary/20"
-            >
-              {loading ? (
-                <div className="flex items-center gap-2">
-                  <div className="h-3.5 w-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Creating...
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <Save className="h-4 w-4" />
-                  Create Event
-                </div>
-              )}
-            </Button>
           </div>
         </div>
-      </div>
 
       {/* Main Content Area - Scrollable */}
       <div className="flex-1 overflow-y-auto">
@@ -546,27 +519,6 @@ export function EventsCreationForm({
         </div>
       </div>
 
-      {/* Mobile Action Buttons - Sticky at bottom */}
-      <div className="sm:hidden sticky bottom-0 z-30 bg-background border-t px-6 py-4">
-        <div className="flex gap-3">
-          <Button
-            variant="outline"
-            type="button"
-            className="flex-1"
-            onClick={() => (onCancel ? onCancel() : window.history.back())}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={() => formik.handleSubmit()}
-            disabled={loading}
-            className="flex-1"
-          >
-            {loading ? "Creating..." : "Create"}
-          </Button>
-        </div>
-      </div>
-
       {/* Image Cropper Modal */}
       {selectedImage && (
         <ImageCropper
@@ -579,6 +531,21 @@ export function EventsCreationForm({
           }}
         />
       )}
+      
+      <FloatingSavePanel
+        hasChanged={formik.dirty}
+        saved={false}
+        isSaving={loading}
+        onSave={() => formik.handleSubmit()}
+        onReset={() => {
+          formik.resetForm();
+          if (onCancel) onCancel();
+          else window.history.back();
+        }}
+        title="Unsaved Event Data"
+        description="You have unfilled form data."
+        buttonText="Create Event"
+      />
     </div>
   );
 }

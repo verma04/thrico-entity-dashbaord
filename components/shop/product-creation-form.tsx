@@ -9,6 +9,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { ShoppingBag, Info, ChevronRight, Save, Loader2 } from "lucide-react";
 import { ProductPreview } from "./product-preview";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 
 import { useShopStore } from "@/store/useShopStore";
 import { ProductFormValues } from "./product-form"; // Reuse types if possible
@@ -179,8 +180,10 @@ export function ProductCreationForm({
   }, [formik.submitCount, formik.isValid, formik.errors, toast]);
 
   return (
+   <>
     <FormikProvider value={formik}>
-      <div className="flex flex-col h-full bg-background min-h-0 rounded-t-[inherit]">
+      <>
+        <div className="flex flex-col h-full bg-background min-h-0 rounded-t-[inherit]">
         {/* Header section - Sticky */}
         <div className="sticky top-0 z-30 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 border-b px-6 py-4">
           <div className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -198,34 +201,6 @@ export function ProductCreationForm({
                 <ChevronRight className="h-3 w-3" />
                 <span>{mode === "create" ? "New" : "Edit"} Product</span>
               </div>
-            </div>
-            <div className="hidden sm:flex gap-3">
-              <Button
-                variant="outline"
-                type="button"
-                size="sm"
-                onClick={() => (onCancel ? onCancel() : window.history.back())}
-              >
-                Cancel
-              </Button>
-              <Button
-                size="sm"
-                onClick={handleSubmit}
-                disabled={loading}
-                className="shadow-sm border-primary/20"
-              >
-                {loading ? (
-                  <div className="flex items-center gap-2">
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    Saving...
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <Save className="h-4 w-4" />
-                    {getButtonLabel()}
-                  </div>
-                )}
-              </Button>
             </div>
           </div>
         </div>
@@ -335,28 +310,25 @@ export function ProductCreationForm({
             </div>
           </div>
         </div>
-
-        {/* Mobile Sticky Footer */}
-        <div className="sm:hidden sticky bottom-0 z-30 bg-background border-t px-6 py-4">
-          <div className="flex gap-3">
-            <Button
-              variant="outline"
-              type="button"
-              className="flex-1"
-              onClick={() => (onCancel ? onCancel() : window.history.back())}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleSubmit}
-              disabled={loading}
-              className="flex-1"
-            >
-              {loading ? "Saving..." : "Save Product"}
-            </Button>
-          </div>
-        </div>
       </div>
-    </FormikProvider>
+
+      <FloatingSavePanel
+        hasChanged={formik.dirty}
+        saved={false}
+        isSaving={loading}
+        onSave={handleSubmit}
+        onReset={() => {
+          formik.resetForm();
+          if (onCancel) onCancel();
+          else window.history.back();
+        }}
+        title={`Unsaved ${mode === "create" ? "Product Data" : "Changes"}`}
+        description="You have unfilled form data."
+        buttonText={getButtonLabel()}
+      />
+      </>
+ 
+   </FormikProvider>
+   </>
   );
 }

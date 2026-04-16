@@ -37,6 +37,7 @@ import { cn } from "@/lib/utils";
 import { useFormik, FieldArray, FormikProvider } from "formik";
 import * as Yup from "yup";
 import { addPoll } from "../../graphql/actions/polls";
+import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 
 const pollSchema = Yup.object().shape({
   title: Yup.string()
@@ -375,7 +376,8 @@ export default function NewPoll({
   if (fullPage) {
     return (
       <FormikProvider value={formik}>
-        <div className="flex flex-col h-full bg-background overflow-hidden rounded-t-[inherit]">
+        <>
+          <div className="flex flex-col h-full bg-background overflow-hidden rounded-t-[inherit]">
           {/* Header section - Sticky */}
           <div className="sticky top-0 z-30 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 border-b px-6 py-4">
             <div className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -393,17 +395,6 @@ export default function NewPoll({
                   <ChevronRight className="h-3 w-3" />
                   <span>Create New Poll</span>
                 </div>
-              </div>
-              <div className="hidden sm:flex gap-3">
-                <Button
-                  variant="outline"
-                  type="button"
-                  size="sm"
-                  onClick={() => (onCancel ? onCancel() : window.history.back())}
-                >
-                  Cancel
-                </Button>
-                {renderSubmitButton("sm")}
               </div>
             </div>
           </div>
@@ -474,22 +465,23 @@ export default function NewPoll({
               </div>
             </div>
           </div>
-
-          {/* Mobile Action Buttons */}
-          <div className="sm:hidden sticky bottom-0 z-30 bg-background border-t px-6 py-4">
-            <div className="flex gap-3">
-              <Button
-                variant="outline"
-                type="button"
-                className="flex-1"
-                onClick={() => (onCancel ? onCancel() : window.history.back())}
-              >
-                Cancel
-              </Button>
-              {renderSubmitButton("default")}
-            </div>
-          </div>
         </div>
+
+          <FloatingSavePanel
+            hasChanged={formik.dirty}
+            saved={false}
+            isSaving={loading}
+            onSave={handleSubmit}
+            onReset={() => {
+              formik.resetForm();
+              if (onCancel) onCancel();
+              else window.history.back();
+            }}
+            title="Unsaved Poll Data"
+            description="You have unfilled form data."
+            buttonText="Create Poll"
+          />
+        </>
       </FormikProvider>
     );
   }

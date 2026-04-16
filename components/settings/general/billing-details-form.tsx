@@ -13,7 +13,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -21,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 
 const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/;
 const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
@@ -133,6 +133,7 @@ export default function BillingDetailsForm() {
 
   const onSubmit = () => {
     setIsSaved(true);
+    form.reset(form.getValues());
     setTimeout(() => setIsSaved(false), 2500);
   };
 
@@ -328,16 +329,18 @@ export default function BillingDetailsForm() {
 
         <div className="flex items-center justify-between pt-2">
           <p className="text-[11px] text-zinc-500">
-            {isSaved ? "Billing details saved successfully." : "All fields are secured and encrypted in transit."}
+            All fields are secured and encrypted in transit.
           </p>
-          <Button
-            type="submit"
-            className="h-9 px-4 text-[12px] font-semibold bg-zinc-900 hover:bg-zinc-800 text-white"
-          >
-            Save Billing Details
-          </Button>
         </div>
       </form>
+
+      <FloatingSavePanel
+        hasChanged={form.formState.isDirty}
+        saved={isSaved}
+        isSaving={form.formState.isSubmitting}
+        onSave={form.handleSubmit(onSubmit)}
+        onReset={() => form.reset()}
+      />
     </Form>
   );
 }

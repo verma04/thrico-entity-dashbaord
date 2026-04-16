@@ -37,6 +37,7 @@ import {
 } from "lucide-react";
 import GooglePlacesInput from "@/components/layout/google-place-input";
 import { ImageUpload } from "./image-upload";
+import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { cn } from "@/lib/utils";
 
 interface ListingCreationFormProps {
@@ -126,34 +127,6 @@ export function ListingCreationForm({
               <ChevronRight className="h-3 w-3" />
               <span>Create New Listing</span>
             </div>
-          </div>
-          <div className="hidden sm:flex gap-3">
-            <Button
-              variant="outline"
-              type="button"
-              size="sm"
-              onClick={() => (onCancel ? onCancel() : window.history.back())}
-            >
-              Cancel
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => formik.handleSubmit()}
-              disabled={loading || !formik.isValid}
-              className="shadow-sm border-primary/20"
-            >
-              {loading ? (
-                <div className="flex items-center gap-2">
-                  <div className="h-3.5 w-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Publishing...
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <Save className="h-4 w-4" />
-                  Publish Listing
-                </div>
-              )}
-            </Button>
           </div>
         </div>
       </div>
@@ -554,26 +527,20 @@ export function ListingCreationForm({
         </div>
       </div>
 
-      {/* Mobile Action Buttons - Sticky at bottom */}
-      <div className="sm:hidden sticky bottom-0 z-30 bg-background border-t px-6 py-4">
-        <div className="flex gap-3">
-          <Button
-            variant="outline"
-            type="button"
-            className="flex-1"
-            onClick={() => (onCancel ? onCancel() : window.history.back())}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={() => formik.handleSubmit()}
-            disabled={loading || !formik.isValid}
-            className="flex-1 shadow-sm"
-          >
-            {loading ? "Publishing..." : "Publish Listing"}
-          </Button>
-        </div>
-      </div>
+      <FloatingSavePanel
+        hasChanged={formik.dirty}
+        saved={false}
+        isSaving={loading}
+        onSave={() => formik.handleSubmit()}
+        onReset={() => {
+          formik.resetForm();
+          if (onCancel) onCancel();
+          else window.history.back();
+        }}
+        title="Unsaved Marketplace Listing"
+        description="You have unfilled form data."
+        buttonText="Publish Listing"
+      />
     </div>
   );
 }

@@ -48,14 +48,12 @@ interface MenuSection {
 
 const allMenuItems: MenuItem[] = [
   { key: "/settings/profile", icon: UserCheck, label: "Your Profile" },
-  { key: "/settings", icon: Fingerprint, label: "Identity" },
-  { key: "/settings/branding", icon: Layers, label: "Branding" },
+  { key: "/settings", icon: Fingerprint, label: "General Workspace" },
   { key: "/settings/appearance", icon: PaintBucket, label: "Appearance" },
   { key: "/settings/domains", icon: Earth, label: "Domains" },
 
   { key: "/settings/subscription", icon: ArrowUpRight, label: "Subscription" },
   { key: "/settings/modules", icon: ListTodo, label: "Modules" },
-  { key: "/settings/billing", icon: Receipt, label: "Billing" },
   { key: "/settings/users", icon: UserCheck, label: "Users & Permissions" },
   { key: "/settings/taxes", icon: HandCoins, label: "Taxes & Duties" },
   { key: "/settings/languages", icon: Languages, label: "Languages" },
@@ -75,7 +73,6 @@ const buildSections = (items: MenuItem[]): MenuSection[] => {
   const accountItems = [
     find("/settings/profile"),
     find("/settings"),
-    find("/settings/branding"),
   ].filter(Boolean) as MenuItem[];
   if (accountItems.length)
     sections.push({ title: "Account", items: accountItems });
@@ -95,7 +92,6 @@ const buildSections = (items: MenuItem[]): MenuSection[] => {
   // Commerce
   const commerceItems = [
     find("/settings/subscription"),
-    find("/settings/billing"),
     find("/settings/taxes"),
   ].filter(Boolean) as MenuItem[];
   if (commerceItems.length)

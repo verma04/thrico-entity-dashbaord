@@ -129,4 +129,22 @@ export const GET_COMMUNITY_KPIS = gql`
     }
   }
 `;
-
+export const GET_DEVICE_DISTRIBUTION = gql`
+  query GetDeviceDistribution($timeRange: TimeRange, $dateRange: DateRangeInput) {
+    getDeviceDistribution(timeRange: $timeRange, dateRange: $dateRange) {
+      date
+      android
+      ios
+      web
+    }
+  }
+`
+export const GET_LOGIN_SESSIONS_REPORT = gql`
+  query GetLoginSessionsReport($timeRange: TimeRange, $groupBy: GroupBy, $dateRange: DateRangeInput) {
+    getLoginSessionsReport(timeRange: $timeRange, groupBy: $groupBy, dateRange: $dateRange) {
+      time
+      desktop
+      mobile
+    }
+  }
+`;

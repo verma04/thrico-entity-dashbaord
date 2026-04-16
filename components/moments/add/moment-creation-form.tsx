@@ -36,6 +36,7 @@ import {
 import { cn } from "@/lib/utils";
 import { ImageUploadWithCrop } from "@/components/ui/image-upload-with-crop";
 import { Skeleton } from "@/components/ui/skeleton";
+import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 
 export function MomentCreationForm({
   loading,
@@ -111,7 +112,8 @@ export function MomentCreationForm({
 
   return (
     <FormikProvider value={formik}>
-      <div className="flex flex-col h-full bg-slate-50/50 overflow-hidden">
+      <>
+        <div className="flex flex-col h-full bg-slate-50/50 overflow-hidden">
         {/* Sober Editorial Header */}
         <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200 px-6 py-4">
           <div className="max-w-5xl mx-auto w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -133,30 +135,6 @@ export function MomentCreationForm({
                   02 Details
                 </span>
               </div>
-            </div>
-            <div className="flex gap-3 w-full sm:w-auto">
-              <Button
-                variant="ghost"
-                type="button"
-                size="sm"
-                className="h-10 rounded-xl font-medium text-slate-500 hover:text-slate-900"
-                onClick={() => (onCancel ? onCancel() : window.history.back())}
-              >
-                Cancel
-              </Button>
-              <Button
-                size="sm"
-                onClick={() => formik.handleSubmit()}
-                disabled={loading}
-                className={cn(
-                  "h-10 px-6 rounded-xl font-bold transition-all shadow-none ring-1",
-                  step === 1 
-                    ? "bg-slate-900 text-white hover:bg-slate-800 ring-slate-900" 
-                    : "bg-indigo-600 text-white hover:bg-indigo-700 ring-indigo-600"
-                )}
-              >
-                {loading ? "Processing..." : step === 1 ? "Continue" : "Publish Moment"}
-              </Button>
             </div>
           </div>
         </div>
@@ -384,6 +362,26 @@ export function MomentCreationForm({
           </div>
         </div>
       )}
+
+      <FloatingSavePanel
+        hasChanged={formik.dirty || !!videoFile}
+        saved={false}
+        isSaving={loading}
+        onSave={() => formik.handleSubmit()}
+        onReset={() => {
+          formik.resetForm();
+          setVideoFile(null);
+          setVideoPreviewUrl(null);
+          setThumbnailFile(null);
+          setThumbnailUrl(null);
+          if (onCancel) onCancel();
+          else window.history.back();
+        }}
+        title="Unsaved Moment"
+        description="You have unfilled form data."
+        buttonText={step === 1 ? "Continue" : "Publish Moment"}
+      />
+      </>
     </FormikProvider>
   );
 }

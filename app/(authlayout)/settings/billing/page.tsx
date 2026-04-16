@@ -1,6 +1,7 @@
 import React from "react";
 import type { Metadata } from "next";
 import Billing from "@/components/settings/billing/Billing";
+import { GeneralSettingsLayout } from "@/components/settings/general/general-settings-layout";
 
 export const metadata: Metadata = {
   title: "Billing Details",
@@ -9,7 +10,11 @@ export const metadata: Metadata = {
 };
 
 const page = () => {
-  return <Billing />;
+  return (
+    <GeneralSettingsLayout>
+      <Billing />
+    </GeneralSettingsLayout>
+  );
 };
 
 export default page;

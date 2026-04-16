@@ -13,13 +13,13 @@ import {
   Mail, 
   Shield, 
   FileText, 
-  Save, 
   Loader2,
   CheckCircle2,
   AlertCircle
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 
 export default function ProfilePage() {
   const { data, loading: userLoading } = useGetUser();
@@ -27,12 +27,19 @@ export default function ProfilePage() {
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [isEditing, setIsEditing] = useState(false);
+
+  const [saved, setSaved] = useState(false);
+
+  const hasChanged = firstName !== (user?.firstName || "") || lastName !== (user?.lastName || "");
+
+  const handleReset = () => {
+    setFirstName(user?.firstName || "");
+    setLastName(user?.lastName || "");
+  };
 
   const [updateProfile, { loading: updating }] = useUpdateUserProfile({
     onCompleted: () => {
       toast.success("Profile updated successfully");
-      setIsEditing(false);
     },
     onError: (error: any) => {
       toast.error(error.message || "Failed to update profile");
@@ -46,8 +53,8 @@ export default function ProfilePage() {
     }
   }, [user]);
 
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSave = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (!firstName.trim() || !lastName.trim()) {
       toast.error("Name fields cannot be empty");
       return;
@@ -61,6 +68,8 @@ export default function ProfilePage() {
         }
       }
     });
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2500);
   };
 
   const getInitials = (f?: string, l?: string) => {
@@ -199,21 +208,6 @@ export default function ProfilePage() {
                 </div>
               </CardContent>
               <div className="p-6 pt-0 flex justify-end">
-                <Button 
-                  type="submit" 
-                  disabled={updating || (firstName === user?.firstName && lastName === user?.lastName)}
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground font-black px-8 shadow-lg shadow-primary/20"
-                >
-                  {updating ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="mr-2 h-4 w-4" /> Save Changes
-                    </>
-                  )}
-                </Button>
               </div>
             </Card>
           </form>
@@ -230,6 +224,14 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
+
+      <FloatingSavePanel
+        hasChanged={hasChanged}
+        saved={saved}
+        isSaving={updating}
+        onSave={() => handleSave()}
+        onReset={handleReset}
+      />
     </div>
   );
 }

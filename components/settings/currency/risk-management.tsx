@@ -10,10 +10,12 @@ import {
   useUpdateTCConversionCap,
 } from "@/graphql/actions";
 import { useState, useEffect } from "react";
+import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { toast } from "sonner";
 
 export function RiskManagement() {
-  const { data: configData, loading: loadingConfig } = useGetEntityCurrencyConfig();
+  const { data: configData, loading: loadingConfig } =
+    useGetEntityCurrencyConfig();
   const { data: convData, loading: loadingConv } = useGetTCConversionCap();
 
   const [tcCaps, setTcCaps] = useState({
@@ -21,21 +23,39 @@ export function RiskManagement() {
     maxTcPerMonth: 0,
     maxTcPerEntity: 0,
   });
+  const [originalTcCaps, setOriginalTcCaps] = useState<any>(null);
+  const [saved, setSaved] = useState(false);
 
-  const currencyName = configData?.getEntityCurrencyConfig?.currencyName || "TC";
+  const currencyName =
+    configData?.getEntityCurrencyConfig?.currencyName || "TC";
 
   useEffect(() => {
     if (convData?.getTCConversionCap) {
-      setTcCaps({
+      const formatted = {
         maxTcPerDay: convData.getTCConversionCap.maxTcPerDay,
         maxTcPerMonth: convData.getTCConversionCap.maxTcPerMonth,
         maxTcPerEntity: convData.getTCConversionCap.maxTcPerEntity,
-      });
+      };
+      setTcCaps(formatted);
+      setOriginalTcCaps(formatted);
     }
   }, [convData]);
 
+  const hasChanged = originalTcCaps
+    ? JSON.stringify(tcCaps) !== JSON.stringify(originalTcCaps)
+    : false;
+
+  const handleReset = () => {
+    if (originalTcCaps) setTcCaps(originalTcCaps);
+  };
+
   const [updateTcCap, { loading: updating }] = useUpdateTCConversionCap({
-    onCompleted: () => toast.success(`${currencyName} guardrails updated`),
+    onCompleted: () => {
+      toast.success(`${currencyName} guardrails updated`);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+      setOriginalTcCaps(tcCaps);
+    },
     onError: (err: any) => toast.error(err.message),
   });
 
@@ -71,9 +91,14 @@ export function RiskManagement() {
       <div className="flex items-start gap-3 p-4 rounded-lg bg-amber-50/60 border border-amber-100">
         <Info className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
         <div className="space-y-1">
-          <p className="text-xs font-semibold text-amber-900">How risk controls work</p>
+          <p className="text-xs font-semibold text-amber-900">
+            How risk controls work
+          </p>
           <p className="text-xs text-amber-800/80 leading-relaxed">
-            These caps control how much {currencyName} can be minted through TC conversions. Setting a <strong>Global Limit</strong> acts as an emergency brake — once hit, no more {currencyName} can be generated until it is raised.
+            These caps control how much {currencyName} can be minted through TC
+            conversions. Setting a <strong>Global Limit</strong> acts as an
+            emergency brake — once hit, no more {currencyName} can be generated
+            until it is raised.
           </p>
         </div>
       </div>
@@ -85,8 +110,12 @@ export function RiskManagement() {
             <ShieldAlert className="h-4 w-4 text-rose-600" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-foreground">Generation Caps</p>
-            <p className="text-xs text-muted-foreground">{currencyName} minting limits via TC conversions</p>
+            <p className="text-sm font-semibold text-foreground">
+              Generation Caps
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {currencyName} minting limits via TC conversions
+            </p>
           </div>
         </div>
 
@@ -94,32 +123,36 @@ export function RiskManagement() {
           {capFields.map((field) => (
             <div key={field.key} className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <Label className="text-xs font-semibold text-foreground">{field.label}</Label>
-                <span className="text-[10px] text-muted-foreground">{field.description}</span>
+                <Label className="text-xs font-semibold text-foreground">
+                  {field.label}
+                </Label>
+                <span className="text-[10px] text-muted-foreground">
+                  {field.description}
+                </span>
               </div>
               <Input
                 type="number"
                 className="font-mono"
                 value={tcCaps[field.key]}
                 onChange={(e) =>
-                  setTcCaps({ ...tcCaps, [field.key]: parseInt(e.target.value) })
+                  setTcCaps({
+                    ...tcCaps,
+                    [field.key]: parseInt(e.target.value),
+                  })
                 }
               />
             </div>
           ))}
         </div>
-
-        <div className="pt-4 border-t border-border flex justify-end">
-          <Button
-            onClick={() => updateTcCap({ variables: { input: tcCaps } })}
-            disabled={updating}
-            className="min-w-[160px] gap-2"
-          >
-            {updating && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-            Save Guardrails
-          </Button>
-        </div>
       </div>
+
+      <FloatingSavePanel
+        hasChanged={hasChanged}
+        saved={saved}
+        isSaving={updating}
+        onSave={() => updateTcCap({ variables: { input: tcCaps } })}
+        onReset={handleReset}
+      />
     </div>
   );
 }

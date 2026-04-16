@@ -31,6 +31,7 @@ import {
   BrainCircuit,
   Loader2,
 } from "lucide-react";
+import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { PlatformContainer } from "@/components/ui/platform/container";
 import { cn } from "@/lib/utils";
 
@@ -48,6 +49,10 @@ export function ModerationSettingsPanel() {
     autoHideThreshold: 5,
   });
 
+  const [originalSettings, setOriginalSettings] = useState<any>(null);
+  const [originalClassifications, setOriginalClassifications] = useState<any>(null);
+  const [saved, setSaved] = useState(false);
+
   const [classificationDefinitions, setClassificationDefinitions] = useState({
     safe: "Content that adheres to all community guidelines and contains no harmful signals.",
     spam: "Unsolicited, repetitive, or strictly promotional content that degrades user experience.",
@@ -59,11 +64,25 @@ export function ModerationSettingsPanel() {
     if (data?.getModerationSettings) {
       const { id, __typename, aiClassificationDefinitions, ...rest } = data.getModerationSettings;
       setSettings(rest as any);
+      setOriginalSettings(rest as any);
       if (aiClassificationDefinitions) {
         setClassificationDefinitions(aiClassificationDefinitions);
+        setOriginalClassifications(aiClassificationDefinitions);
+      } else {
+        setOriginalClassifications({});
       }
     }
   }, [data]);
+
+  const hasChanged = originalSettings 
+    ? JSON.stringify(settings) !== JSON.stringify(originalSettings) || 
+      JSON.stringify(classificationDefinitions) !== JSON.stringify(originalClassifications)
+    : false;
+
+  const handleReset = () => {
+    if (originalSettings) setSettings(originalSettings);
+    if (originalClassifications) setClassificationDefinitions(originalClassifications);
+  };
 
   const handleSave = async () => {
     try {
@@ -76,6 +95,8 @@ export function ModerationSettingsPanel() {
         },
       });
       toast.success("Moderation settings updated");
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
       refetch();
     } catch (err) {
       toast.error("Failed to update settings");
@@ -125,23 +146,6 @@ export function ModerationSettingsPanel() {
               Global parameters for content filtering, reporting thresholds, and automated safety protocols.
             </p>
           </div>
-        </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <button
-            onClick={() => refetch()}
-            className="h-8 px-3 rounded-lg text-[12px] font-medium text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition-colors flex items-center gap-1.5"
-          >
-            <RotateCcw size={12} />
-            Reload
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={updating}
-            className="h-8 px-4 rounded-lg text-[12px] font-medium bg-zinc-900 text-white hover:bg-zinc-800 transition-colors disabled:opacity-60 flex items-center gap-1.5 shadow-sm"
-          >
-            {updating ? <Loader2 size={12} className="animate-spin" /> : <Save size={12} />}
-            Save
-          </button>
         </div>
       </div>
 
@@ -425,6 +429,14 @@ export function ModerationSettingsPanel() {
             </div>
           </div>
       </div>
+
+      <FloatingSavePanel
+        hasChanged={hasChanged}
+        saved={saved}
+        isSaving={updating}
+        onSave={handleSave}
+        onReset={handleReset}
+      />
     </PlatformContainer>
   );
 }
