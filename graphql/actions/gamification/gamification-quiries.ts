@@ -89,8 +89,6 @@ const GET_BADGES = gql`
       type
       module
       action
-      count
-      points
       targetValue
       condition
       isActive

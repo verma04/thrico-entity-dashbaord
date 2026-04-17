@@ -11,8 +11,7 @@ export interface BadgeInput {
   type: string;
   module: string;
   action: string;
-  count?: number | null;
-  points?: number | null;
+  targetValue: number;
   isActive?: boolean;
 }
 
@@ -23,8 +22,7 @@ export interface BadgeUpdateInput {
   type?: string;
   module?: string;
   action?: string;
-  count?: number | null;
-  points?: number | null;
+  targetValue?: number;
   isActive?: boolean;
 }
 
@@ -36,8 +34,6 @@ const CREATE_BADGE = gql`
       type
       module
       action
-      count
-      points
       targetValue
       icon
       description
@@ -57,8 +53,6 @@ const UPDATE_BADGE = gql`
       type
       module
       action
-      count
-      points
       targetValue
       icon
       description
