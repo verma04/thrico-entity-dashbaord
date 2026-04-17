@@ -92,19 +92,20 @@ export interface CreatePointRuleInput {
   action: string;
   trigger: string;
   points: number;
-  dailyCap?: number;
-  weeklyCap?: number;
-  monthlyCap?: number;
-  description?: string;
+  dailyCap?: number | null;
+  weeklyCap?: number | null;
+  monthlyCap?: number | null;
+  description?: string | null;
 }
 
 export interface UpdatePointRuleInput {
   points?: number;
-  dailyCap?: number;
-  weeklyCap?: number;
-  monthlyCap?: number;
+  trigger?: string;
+  dailyCap?: number | null;
+  weeklyCap?: number | null;
+  monthlyCap?: number | null;
   isActive?: boolean;
-  description?: string;
+  description?: string | null;
 }
 
 const CREATE_POINT_RULE = gql`
@@ -129,6 +130,7 @@ const UPDATE_POINT_RULE = gql`
     updatePointRule(id: $id, input: $input) {
       id
       points
+      trigger
       dailyCap
       weeklyCap
       monthlyCap

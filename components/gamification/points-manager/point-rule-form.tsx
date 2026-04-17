@@ -56,11 +56,11 @@ export function PointRuleForm({
     initialValues: initialValues || {
       module: "",
       action: "",
-      trigger: "IMMEDIATE",
+      trigger: "FIRST_TIME",
       points: 10,
-      dailyCap: 0,
-      weeklyCap: 0,
-      monthlyCap: 0,
+      dailyCap: null,
+      weeklyCap: null,
+      monthlyCap: null,
       description: "",
     },
     validationSchema: pointRuleSchema,
@@ -132,6 +132,32 @@ export function PointRuleForm({
                     {formik.errors.action as string}
                   </p>
                 )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="trigger">Trigger Type</Label>
+                <Select
+                  onValueChange={(val) => formik.setFieldValue("trigger", val)}
+                  value={formik.values.trigger}
+                  disabled={isEdit}
+                >
+                  <SelectTrigger id="trigger" className="h-11 shadow-none">
+                    <SelectValue placeholder="Select trigger type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="FIRST_TIME">One-time (First Action)</SelectItem>
+                    <SelectItem value="RECURRING">Recurring (Every Action)</SelectItem>
+                  </SelectContent>
+                </Select>
+                {formik.touched.trigger && formik.errors.trigger && (
+                  <p className="text-xs text-destructive">
+                    {formik.errors.trigger as string}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2 md:col-span-1">
+                {/* Placeholder to maintain grid alignment if needed, or just let it flow */}
               </div>
 
               <div className="md:col-span-2 space-y-2">
