@@ -278,37 +278,18 @@ export const gamificationEngine = [
         label: "Manage Coupons",
         path: "/rewards/vouchers/coupons",
       },
-      {
-        key: "rew-vouchers-all",
-        label: "All Vouchers",
-        path: "/rewards/vouchers/all",
-      },
+      ,
       {
         key: "rew-coupons",
         label: "Coupons",
         path: "/rewards/vouchers/coupons-audit",
       },
-      {
-        key: "rew-vouchers",
-        label: "Vouchers",
-        path: "/rewards/vouchers/vouchers-audit",
-      },
-      {
-        key: "rew-inventory",
-        label: "Item Stock",
-        path: "/rewards/vouchers/inventory",
-      },
+
       {
         key: "rew-ledger",
         label: "Claim History",
         path: "/rewards/vouchers/redemptions",
       },
-      {
-        key: "rew-engagement",
-        label: "Engagement",
-        path: "/rewards/engagement",
-      },
-      { key: "rew-settings", label: "Settings", path: "/rewards/settings" },
     ],
   },
 ];
