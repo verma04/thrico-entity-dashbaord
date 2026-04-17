@@ -4,7 +4,10 @@ import React, { useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Zap, ChevronRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useGetPointRules } from "@/graphql/actions/gamification/gamification-quiries";
+import {
+  useGetPointRules,
+  useGetEntityGamificationModules,
+} from "@/graphql/actions/gamification/gamification-quiries";
 import { useUpdatePointRule } from "@/graphql/actions/gamification/gamification-mutation";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
@@ -17,6 +20,7 @@ export default function EditPointRulePage() {
   const ruleId = params?.id as string;
 
   const { data, loading: fetchLoading } = useGetPointRules();
+  const { data: moduleData } = useGetEntityGamificationModules();
   const [updatePointRule, { loading: isUpdating }] = useUpdatePointRule();
 
   const rule = useMemo(() => {
@@ -39,6 +43,9 @@ export default function EditPointRulePage() {
       },
     });
   };
+
+  const modules = moduleData?.getEntityGamificationModules?.modules || [];
+  const triggers = moduleData?.getEntityGamificationModules?.triggers || [];
 
   if (fetchLoading) {
     return (
@@ -86,6 +93,8 @@ export default function EditPointRulePage() {
         onSubmit={handleUpdate}
         loading={isUpdating}
         isEdit={true}
+        modules={modules}
+        triggers={triggers}
       />
     </EcosystemWrapper>
   );

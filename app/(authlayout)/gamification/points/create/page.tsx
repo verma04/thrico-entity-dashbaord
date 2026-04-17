@@ -5,6 +5,7 @@ import { Zap, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useCreatePointRule } from "@/graphql/actions/gamification/gamification-mutation";
+import { useGetEntityGamificationModules } from "@/graphql/actions/gamification/gamification-quiries";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
@@ -12,6 +13,7 @@ import { PointRuleForm } from "@/components/gamification/points-manager/point-ru
 
 export default function CreatePointRulePage() {
   const router = useRouter();
+  const { data: moduleData } = useGetEntityGamificationModules();
   const [createPointRule, { loading: isCreating }] = useCreatePointRule();
 
   const handleCreate = async (values: any) => {
@@ -30,6 +32,9 @@ export default function CreatePointRulePage() {
       },
     });
   };
+
+  const modules = moduleData?.getEntityGamificationModules?.modules || [];
+  const triggers = moduleData?.getEntityGamificationModules?.triggers || [];
 
   return (
     <EcosystemWrapper>
@@ -53,7 +58,12 @@ export default function CreatePointRulePage() {
         </Button>
       </div>
 
-      <PointRuleForm onSubmit={handleCreate} loading={isCreating} />
+      <PointRuleForm
+        onSubmit={handleCreate}
+        loading={isCreating}
+        modules={modules}
+        triggers={triggers}
+      />
     </EcosystemWrapper>
   );
 }

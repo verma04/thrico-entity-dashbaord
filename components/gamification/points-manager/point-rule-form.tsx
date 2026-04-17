@@ -21,7 +21,6 @@ import { Badge as UIBadge } from "@/components/ui/badge";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { useToast } from "@/hooks/use-toast";
 import { EcosystemCard } from "@/components/layout/ecosystem/ecosystem-analytics";
-import { MODULES } from "../ts-types";
 
 const pointRuleSchema = Yup.object().shape({
   module: Yup.string().required("Please select a module"),
@@ -41,6 +40,8 @@ interface PointRuleFormProps {
   onSubmit: (values: any) => Promise<void>;
   loading: boolean;
   isEdit?: boolean;
+  modules: any[];
+  triggers: any[];
 }
 
 export function PointRuleForm({
@@ -48,6 +49,8 @@ export function PointRuleForm({
   onSubmit,
   loading,
   isEdit,
+  modules,
+  triggers,
 }: PointRuleFormProps) {
   const router = useRouter();
   const { toast } = useToast();
@@ -59,9 +62,9 @@ export function PointRuleForm({
       action: "",
       trigger: "FIRST_TIME",
       points: 10,
-      dailyCap: null,
-      weeklyCap: null,
-      monthlyCap: null,
+      dailyCap: 0,
+      weeklyCap: 0,
+      monthlyCap: 0,
       description: "",
     },
     validationSchema: pointRuleSchema,
@@ -82,6 +85,10 @@ export function PointRuleForm({
       }
     },
   });
+
+  const filteredTriggers = triggers.filter(
+    (t) => t.moduleId === formik.values.module,
+  );
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -105,9 +112,9 @@ export function PointRuleForm({
                     <SelectValue placeholder="Select a module" />
                   </SelectTrigger>
                   <SelectContent>
-                    {MODULES.map((mod) => (
-                      <SelectItem key={mod.key} value={mod.key}>
-                        {mod.label}
+                    {modules.map((mod) => (
+                      <SelectItem key={mod.id} value={mod.id}>
+                        {mod.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -120,14 +127,29 @@ export function PointRuleForm({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="action">Action Keyword</Label>
-                <Input
-                  id="action"
-                  placeholder="e.g. create_post, attend_event"
-                  {...formik.getFieldProps("action")}
-                  className="h-11 shadow-none"
-                  disabled={isEdit}
-                />
+                <Label htmlFor="action">Triggering Action</Label>
+                <Select
+                  onValueChange={(val) => formik.setFieldValue("action", val)}
+                  value={formik.values.action}
+                  disabled={!formik.values.module || isEdit}
+                >
+                  <SelectTrigger id="action" className="h-11 shadow-none">
+                    <SelectValue
+                      placeholder={
+                        formik.values.module
+                          ? "Select trigger"
+                          : "Select module first"
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {filteredTriggers.map((t) => (
+                      <SelectItem key={t.id} value={t.id}>
+                        {t.description}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 {formik.touched.action && formik.errors.action && (
                   <p className="text-xs text-destructive">
                     {formik.errors.action as string}
@@ -140,19 +162,22 @@ export function PointRuleForm({
                 <Select
                   onValueChange={(val) => formik.setFieldValue("trigger", val)}
                   value={formik.values.trigger}
-                  disabled={isEdit}
                 >
                   <SelectTrigger id="trigger" className="h-11 shadow-none">
                     <SelectValue placeholder="Select trigger type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="FIRST_TIME">One-time (First Action)</SelectItem>
-                    <SelectItem value="RECURRING">Recurring (Every Action)</SelectItem>
+                    <SelectItem value="FIRST_TIME">
+                      One-time (First Action)
+                    </SelectItem>
+                    <SelectItem value="RECURRING">
+                      Recurring (Every Action)
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 {formik.touched.trigger && formik.errors.trigger && (
                   <p className="text-xs text-destructive">
-                    {formik.errors.trigger as string}
+                    {formik.errors.trigger as string}ß
                   </p>
                 )}
               </div>
