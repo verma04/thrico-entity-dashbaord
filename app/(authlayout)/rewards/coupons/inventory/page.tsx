@@ -1,16 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  RotateCw,
-} from "lucide-react";
+import { RotateCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  useGetRewards,
-} from "@/graphql/actions/rewards";
+import { useGetRewards } from "@/graphql/actions/rewards";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
-import { InventoryTab } from "@/components/rewards/coupons/inventory-tab";
+
 import { cn } from "@/lib/utils";
 
 export default function InventoryPage() {
@@ -62,9 +58,9 @@ export default function InventoryPage() {
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
 
-      <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0 pb-20 overflow-visible mt-6">
-        <InventoryTab rewards={filteredRewards} loading={rewardsLoading} />
-      </EcosystemContainer>
+      {/* <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0 pb-20 overflow-visible mt-6">
+        {/* <InventoryTab rewards={filteredRewards} loading={rewardsLoading} /> */}
+      </EcosystemContainer> */}
     </>
   );
 }
