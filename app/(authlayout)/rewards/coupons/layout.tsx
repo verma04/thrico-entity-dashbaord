@@ -4,11 +4,7 @@ import React from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import {
-  Ticket,
-  LayoutGrid,
-  Package,
-} from "lucide-react";
+import { Ticket, LayoutGrid, Package } from "lucide-react";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
@@ -34,12 +30,6 @@ export default function CouponsLayout({
       icon: Ticket,
       href: "/rewards/coupons/vouchers",
     },
-    {
-      key: "inventory",
-      label: "Inventory",
-      icon: Package,
-      href: "/rewards/coupons/inventory",
-    },
   ];
 
   return (
@@ -60,10 +50,14 @@ export default function CouponsLayout({
             <div className="flex h-12 items-center gap-1 overflow-x-auto no-scrollbar">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
-                const isActive = pathname === tab.href || (tab.key === "gallery" && pathname === "/rewards/coupons");
-                
+                const isActive =
+                  pathname === tab.href ||
+                  (tab.key === "gallery" && pathname === "/rewards/coupons");
+
                 // Special check for exact match on gallery to avoid active state on sub-paths
-                const isExactActive = (tab.key === "gallery" && pathname === "/rewards/coupons") || (tab.key !== "gallery" && pathname.startsWith(tab.href));
+                const isExactActive =
+                  (tab.key === "gallery" && pathname === "/rewards/coupons") ||
+                  (tab.key !== "gallery" && pathname.startsWith(tab.href));
 
                 return (
                   <Link
@@ -113,9 +107,7 @@ export default function CouponsLayout({
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
 
-      <div className="flex-1">
-        {children}
-      </div>
+      <div className="flex-1">{children}</div>
     </EcosystemWrapper>
   );
 }
