@@ -161,8 +161,8 @@ export const GET_ENTITY_SETTINGS = gql`
       allowEntityPollsInFeed
       allowEntityFeedInFeed
       allowEntityMomentsInFeed
-      allowEntityFeedInFeed
       feedOrder
+      feedEntityName
     }
   }
 `;
@@ -202,11 +202,20 @@ export const UPDATE_ENTITY_SETTINGS = gql`
       allowEntityPollsInFeed
       allowEntityFeedInFeed
       allowEntityMomentsInFeed
-      allowEntityFeedInFeed
       feedOrder
+      feedEntityName
     }
   }
 `;
+
+export const UPDATE_FEED_ENTITY_NAME = gql`
+  mutation UpdateFeedEntityName($name: String!) {
+    updateFeedEntityName(name: $name) {
+      success
+    }
+  }
+`;
+
 
 export const GET_KYC_COUNTRIES = gql`
   query GetKycCountries {

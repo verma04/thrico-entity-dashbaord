@@ -22,6 +22,7 @@ const FeedOrderingPage = () => {
   const feedOrder = (data.getEntitySettings as any).feedOrder || [];
 
   const sources = [...FEED_FIELDS]
+    .filter((f) => f.type === "switch" || !f.type)
     .sort((a, b) => {
       const indexA = feedOrder.indexOf(a.key);
       const indexB = feedOrder.indexOf(b.key);

@@ -3,6 +3,7 @@ import {
   GET_ENTITY_SETTINGS,
   UPDATE_ENTITY_SETTINGS,
   UPDATE_FEED_ORDER,
+  UPDATE_FEED_ENTITY_NAME,
 } from "../../quries";
 
 // TypeScript types for EntitySettings
@@ -41,9 +42,8 @@ export interface EntitySettings {
   allowEntityDiscussionForumInFeed: boolean;
   allowEntityPollsInFeed: boolean;
   allowEntityFeedInFeed: boolean;
-  allowEntityMomentsInFeed: boolean;
-  allowEntityFeedInFeed: boolean;
   feedOrder: string[];
+  feedEntityName: string;
 }
 
 export interface GetEntitySettingsResponse {
@@ -123,6 +123,14 @@ export const useUpdateEntitySettings = (options?: any) =>
 // Custom hook to update feed order
 export const useUpdateFeedOrder = (options?: any) =>
   useMutation(UPDATE_FEED_ORDER, {
+    ...options,
+    refetchQueries: [{ query: GET_ENTITY_SETTINGS }],
+    awaitRefetchQueries: true,
+  });
+
+// Custom hook to update feed entity name
+export const useUpdateFeedEntityName = (options?: any) =>
+  useMutation(UPDATE_FEED_ENTITY_NAME, {
     ...options,
     refetchQueries: [{ query: GET_ENTITY_SETTINGS }],
     awaitRefetchQueries: true,

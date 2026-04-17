@@ -8,12 +8,17 @@ import {
   Users2,
   ShieldAlert,
   Film,
+  Sparkles,
 } from "lucide-react";
 import {
   PlatformSettingsPage,
   SettingsField,
 } from "@/components/ui/platform/settings-page";
-import { useEntitySettings, useUpdateEntitySettings } from "@/graphql/actions";
+import {
+  useEntitySettings,
+  useUpdateEntitySettings,
+  useUpdateFeedEntityName,
+} from "@/graphql/actions";
 import { toast } from "sonner";
 
 export const FEED_FIELDS: SettingsField[] = [
@@ -24,6 +29,14 @@ export const FEED_FIELDS: SettingsField[] = [
       "Surface community activity and updates in the main activity feed.",
     icon: Users2,
     section: "Content Sources",
+  },
+  {
+    key: "feedEntityName",
+    label: "Feed Brand Name",
+    description: "Customize the display name for your entity's official publications in the feed.",
+    icon: Sparkles,
+    type: "text",
+    section: "Branding",
   },
   {
     key: "allowEntityDiscussionForumInFeed",
@@ -63,15 +76,46 @@ export const FEED_FIELDS: SettingsField[] = [
 const FeedVisibility = () => {
   const { data, loading } = useEntitySettings();
   const [update, { loading: loadingBtn }] = useUpdateEntitySettings({});
+  const [updateFeedName, { loading: loadingName }] =
+    useUpdateFeedEntityName({});
+
+  const dynamicFields = React.useMemo(() => {
+    return FEED_FIELDS.map((f) => {
+      if (f.key === "allowEntityFeedInFeed") {
+        return {
+          ...f,
+          label: `Show ${data?.getEntitySettings?.feedEntityName || "Admin"} Feed`,
+        };
+      }
+      return f;
+    });
+  }, [data?.getEntitySettings?.feedEntityName]);
 
   const handleSave = async (settings: any) => {
     try {
       // Clean up the settings object to remove fields not allowed in EntityAutoApprovalSettingsInput
-      const { __typename, id, entity, ...cleanSettings } = settings;
+      const { __typename, id, entity, feedEntityName, ...cleanSettings } =
+        settings;
 
-      await update({
-        variables: { input: cleanSettings },
-      });
+      const promises = [];
+
+      // Update visibility settings
+      promises.push(
+        update({
+          variables: { input: cleanSettings },
+        })
+      );
+
+      // Update feed brand name if changed
+      if (feedEntityName !== data?.getEntitySettings?.feedEntityName) {
+        promises.push(
+          updateFeedName({
+            variables: { name: feedEntityName },
+          })
+        );
+      }
+
+      await Promise.all(promises);
       toast.success("Feed protocols synchronized successfully.");
     } catch (error) {
       toast.error("Failed to update feed parameters.");
@@ -85,11 +129,11 @@ const FeedVisibility = () => {
       description="Choose which types of content should be shown in your feed."
       headerIcon={Rss}
       badge="Content"
-      fields={FEED_FIELDS}
+      fields={dynamicFields}
       data={data?.getEntitySettings}
       loading={loading}
       onSave={handleSave}
-      isSaving={loadingBtn}
+      isSaving={loadingBtn || loadingName}
       hideHeader
     />
   );
