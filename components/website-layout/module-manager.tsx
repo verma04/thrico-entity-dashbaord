@@ -60,50 +60,54 @@ const ModuleCard = ({
       ref={provided?.innerRef}
       {...provided?.draggableProps}
       className={cn(
-        "group relative flex items-center gap-4 p-4 rounded-2xl border bg-card transition-all duration-300",
+        "group flex items-center gap-3 p-3 rounded-xl border bg-card text-card-foreground transition-all",
         provided?.snapshot?.isDragging
-          ? "shadow-2xl scale-[1.02] border-primary ring-4 ring-primary/10 z-50 cursor-grabbing"
-          : "hover:border-primary/30 hover:shadow-lg hover:-translate-y-0.5 cursor-pointer",
-        !isDraggable && "border-dashed bg-muted/20",
-        !module.isEnabled && "opacity-50 grayscale bg-muted/30",
-        selectedModuleId === module.id && "border-primary ring-2 ring-primary/20 shadow-md bg-primary/[0.02]"
+          ? "shadow-lg scale-105 border-primary z-50"
+          : "hover:border-primary/50",
+        !isDraggable && "border-dashed bg-muted/20 opacity-90",
+        !module.isEnabled && "opacity-60 bg-muted/50 grayscale",
+        selectedModuleId === module.id && "border-primary ring-1 ring-primary",
       )}
-      onClick={() => selectModule(module.id)}
     >
       {/* Drag Handle */}
-      {isDraggable && (
-        <div
-          {...provided?.dragHandleProps}
-          className="flex items-center justify-center w-8 h-8 rounded-lg bg-muted/0 group-hover:bg-muted/50 text-muted-foreground/30 group-hover:text-muted-foreground transition-colors duration-300"
-        >
-          <GripVertical className="h-4 w-4" />
-        </div>
-      )}
+      <div
+        {...provided?.dragHandleProps}
+        className={cn(
+          "text-muted-foreground",
+          isDraggable
+            ? "cursor-move hover:text-foreground"
+            : "cursor-default opacity-20",
+        )}
+      >
+        <GripVertical className="h-5 w-5" />
+      </div>
 
       {/* Content */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-0.5">
-          <span className="font-semibold text-[13px] tracking-tight truncate">{module.name}</span>
+      <div
+        className="flex-1 cursor-pointer"
+        onClick={() => selectModule(module.id)}
+      >
+        <div className="flex items-center gap-2">
+          <span className="font-medium text-sm">{module.name}</span>
           {module.isCustomized && (
-            <div className="flex items-center h-4 px-1.5 rounded-full bg-amber-500/10 text-amber-600">
-              <span className="text-[9px] font-black uppercase tracking-tighter">Modified</span>
-            </div>
+            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+              Customized
+            </span>
           )}
           {!isDraggable && (
-            <div className="flex items-center h-4 px-1.5 rounded-full bg-slate-500/10 text-slate-500">
-              <span className="text-[9px] font-black uppercase tracking-tighter">System</span>
-            </div>
+            <span className="px-1.5 py-0.5 rounded text-[10px] uppercase font-bold bg-muted text-muted-foreground">
+              Fixed
+            </span>
           )}
         </div>
-        <div className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground/70">
+        <div className="text-xs text-muted-foreground">
+          Layout:{" "}
           <span className="capitalize">{module.layout.replace("-", " ")}</span>
-          <span className="w-1 h-1 rounded-full bg-muted-foreground/30" />
-          <span className="uppercase text-[9px] tracking-widest">{module.type}</span>
         </div>
       </div>
 
       {/* Actions */}
-      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-300">
+      <div className="flex items-center gap-1">
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -112,14 +116,18 @@ const ModuleCard = ({
             onToggle(module.id, newEnabledState);
           }}
           className={cn(
-            "p-2 rounded-xl transition-all duration-300",
+            "p-2 rounded-lg transition-colors",
             module.isEnabled
-              ? "text-muted-foreground hover:bg-primary/10 hover:text-primary"
-              : "text-muted-foreground hover:bg-muted/80 hover:text-foreground"
+              ? "text-muted-foreground hover:bg-muted hover:text-foreground"
+              : "text-muted-foreground hover:bg-muted hover:text-foreground",
           )}
-          title={module.isEnabled ? "Hide Module" : "Show Module"}
+          title={module.isEnabled ? "Disable Module" : "Enable Module"}
         >
-          {module.isEnabled ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+          {module.isEnabled ? (
+            <Eye className="h-4 w-4" />
+          ) : (
+            <EyeOff className="h-4 w-4" />
+          )}
         </button>
 
         <button
@@ -128,51 +136,47 @@ const ModuleCard = ({
             selectModule(module.id);
           }}
           className={cn(
-            "p-2 rounded-xl transition-all duration-300",
+            "p-2 rounded-lg transition-colors",
             selectedModuleId === module.id
-              ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
-              : "text-muted-foreground hover:bg-primary/10 hover:text-primary"
+              ? "bg-primary text-primary-foreground"
+              : "text-muted-foreground hover:bg-muted hover:text-foreground",
           )}
-          title="Module Settings"
+          title="Settings"
         >
-          <Settings className="h-3.5 w-3.5" />
+          <Settings className="h-4 w-4" />
         </button>
 
+        {/* Delete Button - Only show for draggable modules (not header/footer) */}
         {isDraggable && (
           <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
             <DialogTrigger asChild>
               <button
-                onClick={(e) => e.stopPropagation()}
-                className="p-2 rounded-xl text-muted-foreground/50 hover:bg-destructive/10 hover:text-destructive transition-all duration-300"
-                title="Remove"
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+                className="p-2 rounded-lg transition-colors text-muted-foreground hover:bg-destructive hover:text-destructive-foreground"
+                title="Delete Module"
               >
-                <Trash2 className="h-3.5 w-3.5" />
+                <Trash2 className="h-4 w-4" />
               </button>
             </DialogTrigger>
-            <DialogContent className="z-[2000] border-none shadow-2xl rounded-3xl p-8">
-              <DialogHeader className="gap-2">
-                <div className="w-12 h-12 rounded-2xl bg-destructive/10 text-destructive flex items-center justify-center mb-2">
-                  <Trash2 className="h-6 w-6" />
-                </div>
-                <DialogTitle className="text-xl font-bold tracking-tight">Remove Module?</DialogTitle>
-                <DialogDescription className="text-muted-foreground leading-relaxed">
-                  You are about to remove <span className="font-bold text-foreground">"{module.name}"</span>. This will delete all configuration for this module on this page.
+            <DialogContent className="z-[2000]">
+              <DialogHeader>
+                <DialogTitle>Delete Module</DialogTitle>
+                <DialogDescription>
+                  Are you sure you want to delete {module.name}? This action
+                  cannot be undone.
                 </DialogDescription>
               </DialogHeader>
-              <DialogFooter className="gap-3 mt-4">
+              <DialogFooter className="gap-2">
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   onClick={() => setIsDeleteOpen(false)}
-                  className="rounded-xl flex-1 h-12 font-semibold"
                 >
-                  Keep it
+                  Cancel
                 </Button>
-                <Button 
-                  variant="destructive" 
-                  onClick={handleDelete}
-                  className="rounded-xl flex-1 h-12 font-semibold shadow-lg shadow-destructive/20"
-                >
-                  Yes, Remove
+                <Button variant="default" onClick={handleDelete}>
+                  Delete
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -197,31 +201,40 @@ const ModuleManager = () => {
 
   if (!isMounted) return null;
 
+  // Get current page's modules
   const currentPage = pages.find((p) => p.id === currentPageId);
   const pageModules = currentPage?.modules || [];
 
+  // Split modules into Navbar, Body, and Footer, then sort by sort field
   const bodyModules = pageModules
     .filter((m) => m.type !== "navbar" && m.type !== "footer")
     .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
   const handleDeleteModule = (moduleId: string) => {
-    deleteModuleMutation({ variables: { moduleId } });
+    deleteModuleMutation({
+      variables: { moduleId },
+    });
   };
 
   const handleToggleModule = (moduleId: string, isEnabled: boolean) => {
-    toggleModuleMutation({ variables: { moduleId, isEnabled } });
+    toggleModuleMutation({
+      variables: { moduleId, isEnabled },
+    });
   };
 
   const onDragEnd = (result: any) => {
     if (!result.destination) return;
+
     const sourceIndex = result.source.index;
     const destIndex = result.destination.index;
+
     if (sourceIndex === destIndex) return;
 
     const newBodyModules = Array.from(bodyModules);
     const [moved] = newBodyModules.splice(sourceIndex, 1);
     newBodyModules.splice(destIndex, 0, moved);
 
+    // Assign sort indices to maintain explicit ordering
     const modulesWithSort = newBodyModules.map((module, index) => ({
       ...module,
       order: index,
@@ -229,7 +242,12 @@ const ModuleManager = () => {
 
     setModules(modulesWithSort);
 
+    // Call API to persist reordering
     if (currentPageId) {
+      console.log({
+        pageId: currentPageId,
+        moduleIds: modulesWithSort.map((m) => m.id),
+      });
       reorderModules({
         variables: {
           pageId: currentPageId,
@@ -240,24 +258,18 @@ const ModuleManager = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between px-1">
-        <div className="space-y-1">
-          <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
-            Module Stack
-          </h3>
-          <p className="text-[10px] text-muted-foreground/60 font-medium">Drag to reorder elements</p>
-        </div>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+          Modules
+        </h3>
 
         <AddModuleDialog open={isAddOpen} onOpenChange={setIsAddOpen} />
       </div>
 
       <div className="space-y-4">
         {/* Global Navigation */}
-        <div className="relative">
-          <div className="absolute -left-3 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary/50 to-transparent rounded-full" />
-          <NavigationManager />
-        </div>
+        <NavigationManager />
 
         <DragDropContext onDragEnd={onDragEnd}>
           <Droppable droppableId="body-modules">
@@ -265,38 +277,26 @@ const ModuleManager = () => {
               <div
                 {...provided.droppableProps}
                 ref={provided.innerRef}
-                className="space-y-3 py-1"
+                className="space-y-2 py-1"
               >
-                {bodyModules.length > 0 ? (
-                  bodyModules.map((module, index) => (
-                    <Draggable
-                      key={module.id}
-                      draggableId={module.id}
-                      index={index}
-                    >
-                      {(provided, snapshot) => (
-                        <ModuleCard
-                          module={module}
-                          isDraggable={true}
-                          index={index}
-                          provided={{ ...provided, snapshot }}
-                          onDelete={handleDeleteModule}
-                          onToggle={handleToggleModule}
-                        />
-                      )}
-                    </Draggable>
-                  ))
-                ) : (
-                  <div className="py-12 px-4 rounded-3xl border-2 border-dashed border-muted flex flex-col items-center justify-center text-center space-y-3 opacity-60">
-                    <div className="w-10 h-10 rounded-2xl bg-muted flex items-center justify-center">
-                      <Plus className="h-5 w-5 text-muted-foreground" />
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-sm font-semibold">No modules yet</p>
-                      <p className="text-xs text-muted-foreground">Add your first module to get started</p>
-                    </div>
-                  </div>
-                )}
+                {bodyModules.map((module, index) => (
+                  <Draggable
+                    key={module.id}
+                    draggableId={module.id}
+                    index={index}
+                  >
+                    {(provided, snapshot) => (
+                      <ModuleCard
+                        module={module}
+                        isDraggable={true}
+                        index={index}
+                        provided={{ ...provided, snapshot }}
+                        onDelete={handleDeleteModule}
+                        onToggle={handleToggleModule}
+                      />
+                    )}
+                  </Draggable>
+                ))}
                 {provided.placeholder}
               </div>
             )}
@@ -304,10 +304,7 @@ const ModuleManager = () => {
         </DragDropContext>
 
         {/* Global Footer */}
-        <div className="relative">
-          <div className="absolute -left-3 top-0 bottom-0 w-0.5 bg-gradient-to-t from-primary/50 to-transparent rounded-full" />
-          <FooterManager />
-        </div>
+        <FooterManager />
       </div>
     </div>
   );
