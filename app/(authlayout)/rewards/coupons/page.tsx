@@ -448,7 +448,10 @@ export default function CouponsPage() {
         icon={Ticket}
       />
 
-      <EcosystemActionBar shadow="none" className="sticky top-16 z-30 bg-background/80 backdrop-blur-xl border-b border-border/40">
+      <EcosystemActionBar
+        shadow="none"
+        className="sticky top-16 z-30 bg-background/80 backdrop-blur-xl border-b border-border/40"
+      >
         <EcosystemActionBar.Group>
           <EcosystemActionBar.Item grow className="max-w-2xl">
             <div className="flex h-12 items-center gap-1 overflow-x-auto no-scrollbar">
@@ -813,7 +816,7 @@ export default function CouponsPage() {
                             <div className="relative aspect-[4/3] overflow-hidden bg-zinc-50 border-b border-border/50">
                               {reward.image ? (
                                 <img
-                                  src={reward.image}
+                                  src={`https://cdn.thrico.network/${reward.image}`}
                                   alt={reward.title}
                                   className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                                 />
@@ -837,7 +840,9 @@ export default function CouponsPage() {
                                 {reward.inventory ?? "∞"} Unit
                               </div>
                               <div className="absolute inset-0 bg-indigo-900/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center gap-3 backdrop-blur-[2px]">
-                                <Link href={`/rewards/coupons/edit/${reward.id}`}>
+                                <Link
+                                  href={`/rewards/coupons/edit/${reward.id}`}
+                                >
                                   <Button
                                     size="icon"
                                     variant="secondary"
@@ -848,7 +853,9 @@ export default function CouponsPage() {
                                 </Link>
                                 {reward.inventoryRequired && (
                                   <Button
-                                    onClick={() => openUploadForReward(reward.id)}
+                                    onClick={() =>
+                                      openUploadForReward(reward.id)
+                                    }
                                     size="icon"
                                     variant="secondary"
                                     className="h-10 w-10 rounded-xl shadow-2xl ring-1 ring-black/10 hover:scale-110 transition-transform"
@@ -907,7 +914,7 @@ export default function CouponsPage() {
                             <div className="h-14 w-14 rounded-xl bg-zinc-50 border border-border/60 overflow-hidden shrink-0 shadow-sm ring-1 ring-black/[0.03]">
                               {reward.image ? (
                                 <img
-                                  src={reward.image}
+                                  src={`https://cdn.thrico.network/${reward?.image}`}
                                   alt={reward.title}
                                   className="h-full w-full object-cover"
                                 />
@@ -954,7 +961,8 @@ export default function CouponsPage() {
                                   size="sm"
                                   className="h-8 px-4 gap-2 text-[10px] font-black uppercase tracking-widest rounded-xl border-border bg-card"
                                 >
-                                  <Upload className="h-3.5 w-3.5" /> Upload Batch
+                                  <Upload className="h-3.5 w-3.5" /> Upload
+                                  Batch
                                 </Button>
                               )}
                               <Link href={`/rewards/coupons/edit/${reward.id}`}>
@@ -1030,10 +1038,13 @@ export default function CouponsPage() {
                       label: "Critical Expiry",
                       value: expiringSoon,
                       icon: AlertTriangle,
-                      color: expiringSoon > 0 ? "text-rose-600" : "text-zinc-400",
+                      color:
+                        expiringSoon > 0 ? "text-rose-600" : "text-zinc-400",
                       bg: expiringSoon > 0 ? "bg-rose-50" : "bg-zinc-50",
                       desc:
-                        expiringSoon > 0 ? "T-Minus 7 Days" : "No Impending Expiry",
+                        expiringSoon > 0
+                          ? "T-Minus 7 Days"
+                          : "No Impending Expiry",
                     },
                   ].map((s, i) => (
                     <div
@@ -1135,7 +1146,8 @@ export default function CouponsPage() {
                           ? "Immediate restock required"
                           : "All nodes fully saturated",
                       icon: AlertTriangle,
-                      color: lowStockCount > 0 ? "text-rose-600" : "text-zinc-400",
+                      color:
+                        lowStockCount > 0 ? "text-rose-600" : "text-zinc-400",
                       bg: lowStockCount > 0 ? "bg-rose-50" : "bg-zinc-50",
                     },
                   ].map((stat, i) => (

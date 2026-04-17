@@ -1,17 +1,18 @@
 "use client";
 
-import { Formik, Form, Field, FormikProps } from "formik";
+import React from "react";
+import { useFormik } from "formik";
 import * as Yup from "yup";
 import {
-  SaveIcon,
-  ShieldCheck,
-  Activity,
   Globe,
   Layout,
   Layers,
-  Wand2,
   Share2,
-  FileText,
+  PanelBottom,
+  ChevronRight,
+  Info,
+  Smartphone,
+  Laptop,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -37,9 +38,15 @@ import {
 import { LivePreviewFooter } from "@/components/website-layout/preview/live-preview-footer";
 import { SocialLinksEditor } from "@/components/website-layout/settings/social-links-editor";
 import { MenuEditor } from "@/components/website-layout/settings/menu-editor";
-import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
-import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { cn } from "@/lib/utils";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 // ------------------------------------------------
 // TYPES
@@ -93,18 +100,19 @@ const footerSchema = Yup.object().shape({
         id: Yup.string().required(),
         platform: Yup.string().when("url", {
           is: (url: string) => url && url.length > 0,
-          then: (schema) => schema.required("Platform is required"),
-          otherwise: (schema) => schema.notRequired(),
+          then: (schema: any) => schema.required("Platform is required"),
+          otherwise: (schema: any) => schema.notRequired(),
         }),
         url: Yup.string().when("platform", {
           is: (platform: string) => platform && platform.length > 0,
-          then: (schema) =>
+          then: (schema: any) =>
             schema.url("Must be a valid URL").required("URL is required"),
-          otherwise: (schema) => schema.url("Must be a valid URL").notRequired(),
+          otherwise: (schema: any) =>
+            schema.url("Must be a valid URL").notRequired(),
         }),
       },
-      [["platform", "url"]]
-    )
+      [["platform", "url"]],
+    ),
   ),
   copyrightText: Yup.string(),
 });
@@ -117,6 +125,8 @@ export default function FooterManager() {
   const { toast } = useToast();
   const { globalFooter, updateModuleContent, updateModuleLayout } =
     useWebsiteBuilderStore();
+  const [previewDevice, setPreviewDevice] = React.useState<"mobile" | "desktop">("desktop");
+  const [saved, setSaved] = React.useState(false);
 
   // Fetch website data
   const { data: websiteData, refetch } = useGetWebsite({});
@@ -128,6 +138,7 @@ export default function FooterManager() {
         title: "Footer Saved",
         description: "Global footer has been updated successfully.",
       });
+      setSaved(true);
       refetch();
     },
     onError: (error) => {
@@ -139,340 +150,383 @@ export default function FooterManager() {
     },
   });
 
-  // Initial values from global footer
-  const initialValues: FooterConfig = {
-    layout: globalFooter.layout,
-    logoText: globalFooter.content?.logoText || "Brand",
-    logoType: globalFooter.content?.logoType || "text",
-    logoImage: globalFooter.content?.logoImage || "",
-    description: globalFooter.content?.description || "",
-    socialLinks: globalFooter.content?.socialLinks || [],
-    menuItems: globalFooter.content?.menuItems || [],
-    copyrightText:
-      globalFooter.content?.copyrightText ||
-      `© ${new Date().getFullYear()} All rights reserved.`,
-  };
+  const formik = useFormik<FooterConfig>({
+    initialValues: {
+      layout: globalFooter.layout,
+      logoText: globalFooter.content?.logoText || "Brand",
+      logoType: globalFooter.content?.logoType || "text",
+      logoImage: globalFooter.content?.logoImage || "",
+      description: globalFooter.content?.description || "",
+      socialLinks: globalFooter.content?.socialLinks || [],
+      menuItems: globalFooter.content?.menuItems || [],
+      copyrightText:
+        globalFooter.content?.copyrightText ||
+        `© ${new Date().getFullYear()} All rights reserved.`,
+    },
+    validationSchema: footerSchema,
+    enableReinitialize: true,
+    onSubmit: async (values) => {
+      if (!websiteData?.getWebsite?.id) {
+        toast({
+          title: "Error",
+          description: "Website not found",
+          variant: "destructive",
+        });
+        return;
+      }
 
-  const handleSubmit = async (values: FooterConfig) => {
-    if (!websiteData?.getWebsite?.id) {
-      toast({
-        title: "Error",
-        description: "Website not found",
-        variant: "destructive",
-      });
-      return;
-    }
+      try {
+        const validSocialLinks = values.socialLinks.filter(
+          (link) => link.platform || link.url,
+        );
 
-    try {
-      const validSocialLinks = values.socialLinks.filter(
-        (link) => link.platform || link.url
-      );
-
-      await updateFooterMutation({
-        variables: {
-          websiteId: websiteData.getWebsite.id,
-          layout: values.layout,
-          content: {
-            logoText: values.logoText,
-            logoType: values.logoType,
-            logoImage: values.logoImage,
-            description: values.description,
-            socialLinks: validSocialLinks,
-            menuItems: values.menuItems,
-            copyrightText: values.copyrightText,
+        await updateFooterMutation({
+          variables: {
+            websiteId: websiteData.getWebsite.id,
+            layout: values.layout,
+            content: {
+              logoText: values.logoText,
+              logoType: values.logoType,
+              logoImage: values.logoImage,
+              description: values.description,
+              socialLinks: validSocialLinks,
+              menuItems: values.menuItems,
+              copyrightText: values.copyrightText,
+            },
           },
-        },
-      });
+        });
 
-      updateModuleLayout(globalFooter.id, values.layout);
-      updateModuleContent(globalFooter.id, {
-        logoText: values.logoText,
-        logoType: values.logoType,
-        logoImage: values.logoImage,
-        description: values.description,
-        socialLinks: validSocialLinks,
-        menuItems: values.menuItems,
-        copyrightText: values.copyrightText,
-      });
-    } catch (error) {
-      console.error("Footer update failed:", error);
-    }
-  };
+        updateModuleLayout(globalFooter.id, values.layout);
+        updateModuleContent(globalFooter.id, {
+          logoText: values.logoText,
+          logoType: values.logoType,
+          logoImage: values.logoImage,
+          description: values.description,
+          socialLinks: validSocialLinks,
+          menuItems: values.menuItems,
+          copyrightText: values.copyrightText,
+        });
+      } catch (error) {
+        console.error("Footer update failed:", error);
+      }
+    },
+  });
 
   return (
-    <Formik
-      initialValues={initialValues}
-      validationSchema={footerSchema}
-      onSubmit={handleSubmit}
-      enableReinitialize
-    >
-      {({
-        values,
-        setFieldValue,
-        errors,
-        touched,
-        isSubmitting,
-      }: FormikProps<FooterConfig>) => (
-        <Form className="space-y-8">
-          <EcosystemActionBar shadow="sm">
-            <div className="flex items-center justify-between w-full">
-              <div className="flex items-center gap-6">
-                <div className="flex items-center gap-3">
-                  <div className="h-3 w-3 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
-                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                    Footer Nodes: Active
-                  </span>
-                </div>
-                <div className="h-4 w-px bg-slate-200" />
-                <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
-                  <ShieldCheck className="h-3.5 w-3.5 text-indigo-500" />
-                  <span>Protocol: Valid</span>
-                </div>
+    <div className="flex flex-col h-full bg-background overflow-hidden relative">
+      {/* Sticky Header */}
+      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b px-6 py-4">
+        <div className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-3 mb-1">
+              <div className="p-2.5 rounded-xl bg-indigo-600/10 ring-1 ring-indigo-600/20">
+                <PanelBottom className="h-5 w-5 text-indigo-600" />
               </div>
-
-              <div className="flex items-center gap-3">
-                <Button
-                  type="submit"
-                  disabled={isUpdating}
-                  className="h-10 px-8 rounded-xl bg-slate-900 hover:bg-black text-white font-black text-[11px] uppercase tracking-wider gap-3 shadow-xl shadow-slate-200 transition-all active:scale-95 group"
-                >
-                  <SaveIcon className="h-4 w-4 transition-transform group-hover:scale-110" />
-                  {isUpdating ? "Synchronizing..." : "Save Footer"}
-                </Button>
-              </div>
+              <h1 className="text-2xl font-bold tracking-tight">
+                Footer Studio
+              </h1>
             </div>
-          </EcosystemActionBar>
-
-          <EcosystemContainer className="space-y-12 p-8 lg:p-12">
-            {/* Live Preview Section */}
-            <div className="space-y-6">
-              <div className="flex items-center gap-3 px-1">
-                <div className="h-10 w-10 rounded-xl bg-slate-900 flex items-center justify-center text-white font-black italic">
-                  VP
-                </div>
-                <div>
-                  <h3 className="text-xl font-black text-slate-900 tracking-tight italic uppercase leading-none">
-                    Visual Protocol
-                  </h3>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-                    Real-time architectural simulation
-                  </p>
-                </div>
-              </div>
-
-              <div className="rounded-[2.5rem] border border-slate-100 bg-white shadow-xl shadow-slate-200/50 p-6 overflow-hidden">
-                <div className="border border-slate-50 rounded-2xl overflow-hidden bg-slate-50/30">
-                  <LivePreviewFooter
-                    content={{
-                      logoText: values.logoText,
-                      logoType: values.logoType,
-                      logoImage: values.logoImage,
-                      description: values.description,
-                      socialLinks: values.socialLinks,
-                      menuItems: values.menuItems,
-                      copyrightText: values.copyrightText,
-                    }}
-                    layout={values.layout}
-                  />
-                </div>
-                <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] text-center mt-6 italic opacity-60">
-                  Synchronized Simulation Active
-                </p>
-              </div>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground ml-1">
+              <span>Website Builder</span>
+              <ChevronRight className="h-3 w-3" />
+              <span>General Settings</span>
+              <ChevronRight className="h-3 w-3" />
+              <span>Global Footer</span>
             </div>
+          </div>
+        </div>
+      </div>
 
-            {/* Layout & Branding Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 pt-4">
-              <div className="space-y-6">
-                <div className="flex items-center gap-3 px-1">
-                  <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-900">
-                    <Layout className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-black text-slate-900 tracking-tight italic uppercase leading-none">
-                      Architecture
-                    </h3>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-                      Footer & Branding definitions
-                    </p>
-                  </div>
-                </div>
-
-                <div className="space-y-8 bg-slate-50/50 p-8 rounded-[2rem] border border-slate-100">
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="layout"
-                      className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1"
-                    >
-                      Layout Variant
-                    </Label>
-                    <Select
-                      value={values.layout}
-                      onValueChange={(value) => setFieldValue("layout", value)}
-                    >
-                      <SelectTrigger
-                        id="layout"
-                        className="h-12 rounded-xl border-slate-100 bg-white font-medium"
-                      >
-                        <SelectValue placeholder="Select a layout" />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-xl border-slate-100 shadow-xl">
-                        <SelectItem value="columns">Multi-Column</SelectItem>
-                        <SelectItem value="simple">Simple</SelectItem>
-                        <SelectItem value="minimal">Minimal</SelectItem>
-                        <SelectItem value="corporate">Corporate</SelectItem>
-                        <SelectItem value="newsletter">Newsletter</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="grid gap-6 sm:grid-cols-2">
+      {/* Main Content Area */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            {/* Form Section */}
+            <div className="lg:col-span-8 space-y-8">
+              <form onSubmit={formik.handleSubmit} className="space-y-8">
+                {/* Architecture & Branding Section */}
+                <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden">
+                  <CardHeader className="bg-muted/30 pb-4">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Layout className="h-4 w-4 text-indigo-600" />
+                      <CardTitle className="text-xl">
+                        Identity & Base
+                      </CardTitle>
+                    </div>
+                    <CardDescription>
+                      Configure the foundational branding and layout of your footer.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-6 space-y-8">
                     <div className="space-y-2">
                       <Label
-                        htmlFor="logoType"
-                        className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1"
+                        htmlFor="layout"
+                        className="text-sm font-medium"
                       >
-                        Logo Type
+                        Footer Layout
                       </Label>
                       <Select
-                        value={values.logoType}
+                        value={formik.values.layout}
                         onValueChange={(value) =>
-                          setFieldValue("logoType", value)
+                          formik.setFieldValue("layout", value)
                         }
                       >
                         <SelectTrigger
-                          id="logoType"
-                          className="h-12 rounded-xl border-slate-100 bg-white font-medium"
+                          id="layout"
+                          className="bg-background"
                         >
-                          <SelectValue placeholder="Select logo type" />
+                          <SelectValue placeholder="Select a layout" />
                         </SelectTrigger>
-                        <SelectContent className="rounded-xl border-slate-100 shadow-xl">
-                          <SelectItem value="text">Text Logo</SelectItem>
-                          <SelectItem value="image">Image Logo</SelectItem>
+                        <SelectContent>
+                          <SelectItem value="columns">
+                            Multi-Column
+                          </SelectItem>
+                          <SelectItem value="simple">Simple</SelectItem>
+                          <SelectItem value="minimal">Minimal</SelectItem>
+                          <SelectItem value="corporate">Corporate</SelectItem>
+                          <SelectItem value="newsletter">
+                            Newsletter
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
 
+                    <div className="grid gap-6 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="logoType"
+                          className="text-sm font-medium"
+                        >
+                          Logo Preference
+                        </Label>
+                        <Select
+                          value={formik.values.logoType}
+                          onValueChange={(value) =>
+                            formik.setFieldValue("logoType", value)
+                          }
+                        >
+                          <SelectTrigger
+                            id="logoType"
+                            className="bg-background"
+                          >
+                            <SelectValue placeholder="Select logo type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="text">Text Logo</SelectItem>
+                            <SelectItem value="image">Image Logo</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="logoText"
+                          className="text-sm font-medium"
+                        >
+                          Brand Name
+                        </Label>
+                        <Input
+                          id="logoText"
+                          placeholder="My Brand"
+                          {...formik.getFieldProps("logoText")}
+                          disabled={formik.values.logoType === "image"}
+                        />
+                      </div>
+                    </div>
+
+                    {formik.values.logoType === "image" && (
+                      <div className="space-y-2 bg-muted/20 p-6 rounded-2xl border border-dashed">
+                        <ImageUploadWithCrop
+                          label="Logo Image Asset"
+                          currentImage={formik.values.logoImage}
+                          onImageUpdate={(imageUrl: string) =>
+                            formik.setFieldValue("logoImage", imageUrl)
+                          }
+                          recommendedWidth={150}
+                          recommendedHeight={50}
+                          aspectRatio={3}
+                          showDimensions
+                        />
+                      </div>
+                    )}
+
                     <div className="space-y-2">
                       <Label
-                        htmlFor="logoText"
-                        className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1"
+                        htmlFor="description"
+                        className="text-sm font-medium"
                       >
-                        Logo Text
+                        Brand Statement
                       </Label>
-                      <Field
-                        name="logoText"
-                        as={Input}
-                        id="logoText"
-                        placeholder="My Brand"
-                        className="h-12 rounded-xl border-slate-100 bg-white font-medium"
-                        disabled={values.logoType === "image"}
+                      <Textarea
+                        id="description"
+                        placeholder="A brief description about your company..."
+                        rows={3}
+                        className="bg-background resize-none"
+                        {...formik.getFieldProps("description")}
                       />
                     </div>
-                  </div>
 
-                  {values.logoType === "image" && (
                     <div className="space-y-2">
-                      <ImageUploadWithCrop
-                        label="Logo Image Asset"
-                        currentImage={values.logoImage}
-                        onImageUpdate={(imageUrl: string) =>
-                          setFieldValue("logoImage", imageUrl)
-                        }
-                        recommendedWidth={150}
-                        recommendedHeight={50}
-                        aspectRatio={3}
-                        showDimensions
+                       <Label
+                        htmlFor="copyrightText"
+                        className="text-sm font-medium"
+                      >
+                        Copyright Attribution
+                      </Label>
+                      <Input
+                        id="copyrightText"
+                        placeholder="© 2025 All rights reserved."
+                        {...formik.getFieldProps("copyrightText")}
                       />
                     </div>
-                  )}
+                  </CardContent>
+                </Card>
 
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="description"
-                      className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1"
-                    >
-                      Description Invariant
-                    </Label>
-                    <Field
-                      name="description"
-                      as={Textarea}
-                      id="description"
-                      placeholder="A brief description about your company..."
-                      rows={3}
-                      className="rounded-xl border-slate-100 bg-white font-medium resize-none shadow-sm focus:ring-slate-900"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="copyrightText"
-                      className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1"
-                    >
-                      Copyright Text
-                    </Label>
-                    <Field
-                      name="copyrightText"
-                      as={Input}
-                      id="copyrightText"
-                      placeholder="© 2025 All rights reserved."
-                      className="h-12 rounded-xl border-slate-100 bg-white font-medium shadow-sm focus:ring-slate-900"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-12">
-                <div className="space-y-6">
-                  <div className="flex items-center gap-3 px-1">
-                    <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-900">
-                      <Layers className="h-5 w-5" />
+                {/* Menu Structure Section */}
+                <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden">
+                  <CardHeader className="bg-muted/30 pb-4">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Layers className="h-4 w-4 text-indigo-600" />
+                      <CardTitle className="text-xl">
+                        Information Grid
+                      </CardTitle>
                     </div>
-                    <div>
-                      <h3 className="text-xl font-black text-slate-900 tracking-tight italic uppercase leading-none">
-                        Node Manifest
-                      </h3>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-                        Hierarchical link orchestration
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="bg-slate-50/50 p-6 rounded-[2rem] border border-slate-100">
+                    <CardDescription>
+                      Organize your sitemap links and hierarchical nodes.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-8">
                     <MenuEditor
-                      menuItems={values.menuItems}
-                      onChange={(items) => setFieldValue("menuItems", items)}
+                      menuItems={formik.values.menuItems}
+                      onChange={(items) => formik.setFieldValue("menuItems", items)}
                     />
-                  </div>
-                </div>
+                  </CardContent>
+                </Card>
 
-                <div className="space-y-6">
-                  <div className="flex items-center gap-3 px-1">
-                    <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-900">
-                      <Share2 className="h-5 w-5" />
+                {/* Social Bridges Section */}
+                <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden mb-12">
+                  <CardHeader className="bg-muted/30 pb-4">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Share2 className="h-4 w-4 text-indigo-600" />
+                      <CardTitle className="text-xl">
+                        Social Presence
+                      </CardTitle>
                     </div>
-                    <div>
-                      <h3 className="text-xl font-black text-slate-900 tracking-tight italic uppercase leading-none">
-                        Social Bridges
-                      </h3>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-                        External platform connections
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="bg-slate-50/50 p-6 rounded-[2rem] border border-slate-100">
+                    <CardDescription>
+                      Link your external platform profiles and digital bridges.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-8">
                     <SocialLinksEditor
-                      links={values.socialLinks}
-                      onChange={(links) => setFieldValue("socialLinks", links)}
+                      links={formik.values.socialLinks}
+                      onChange={(links) =>
+                        formik.setFieldValue("socialLinks", links)
+                      }
                     />
+                  </CardContent>
+                </Card>
+              </form>
+            </div>
+
+            {/* Sidebar / Preview Section */}
+            <div className="lg:col-span-4">
+              <div className="sticky top-6 space-y-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-bold">Live Preview</h3>
+                  <div className="flex items-center p-1 bg-muted rounded-lg border">
+                    <button
+                      onClick={() => setPreviewDevice("desktop")}
+                      className={cn(
+                        "p-1.5 rounded-md transition-all",
+                        previewDevice === "desktop" ? "bg-background shadow-sm text-indigo-600" : "text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      <Laptop className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => setPreviewDevice("mobile")}
+                      className={cn(
+                        "p-1.5 rounded-md transition-all",
+                        previewDevice === "mobile" ? "bg-background shadow-sm text-indigo-600" : "text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      <Smartphone className="h-4 w-4" />
+                    </button>
                   </div>
                 </div>
+
+                {/* Device Frame */}
+                <div className={cn(
+                  "relative mx-auto transition-all duration-500 overflow-hidden border bg-background shadow-xl rounded-2xl",
+                  previewDevice === "mobile" ? "w-[320px] h-[580px]" : "w-full aspect-video"
+                )}>
+                  <div className="absolute inset-0 overflow-y-auto">
+                    <div className="bg-slate-50 min-h-full flex flex-col">
+                      <div className="flex-1 p-8 space-y-6">
+                        <div className="h-8 w-1/3 bg-slate-200 rounded-lg animate-pulse" />
+                        <div className="h-64 bg-slate-200 rounded-3xl animate-pulse" />
+                      </div>
+                      <LivePreviewFooter
+                        content={{
+                          logoText: formik.values.logoText,
+                          logoType: formik.values.logoType,
+                          logoImage: formik.values.logoImage,
+                          description: formik.values.description,
+                          socialLinks: formik.values.socialLinks,
+                          menuItems: formik.values.menuItems,
+                          copyrightText: formik.values.copyrightText,
+                        }}
+                        layout={formik.values.layout}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <Card className="border-none shadow-sm ring-1 ring-border/50">
+                  <CardHeader className="pb-3 border-b bg-muted/20">
+                    <CardTitle className="text-sm font-bold flex items-center gap-2">
+                       <Info className="h-4 w-4 text-indigo-600" />
+                      Footer Strategy
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-4">
+                    <ul className="space-y-3 text-xs text-muted-foreground">
+                      <li className="flex gap-2">
+                        <span className="text-indigo-600 font-bold">•</span>
+                        <span>
+                          Social links increase brand trust and community engagement.
+                        </span>
+                      </li>
+                      <li className="flex gap-2">
+                        <span className="text-indigo-600 font-bold">•</span>
+                        <span>
+                          Ensure your copyright text is updated for legal compliance.
+                        </span>
+                      </li>
+                      <li className="flex gap-2">
+                        <span className="text-indigo-600 font-bold">•</span>
+                        <span>
+                          Multi-column layouts are ideal for sites with deep content hierarchy.
+                        </span>
+                      </li>
+                    </ul>
+                  </CardContent>
+                </Card>
               </div>
             </div>
-          </EcosystemContainer>
-        </Form>
-      )}
-    </Formik>
+          </div>
+        </div>
+      </div>
+
+      <FloatingSavePanel
+        onSave={() => formik.submitForm()}
+        onReset={() => formik.resetForm()}
+        isSaving={isUpdating}
+        hasChanged={formik.dirty}
+        saved={saved}
+        title="Unsaved Changes"
+        description="You have modified the footer configuration."
+      />
+    </div>
   );
 }

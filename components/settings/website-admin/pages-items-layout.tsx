@@ -30,13 +30,6 @@ interface Tab {
 
 const menuItems: Tab[] = [
   {
-    key: "pages",
-    label: "Pages",
-    icon: <FileText />,
-    href: "/app-layout/pages",
-    description: "Manage your website hierarchy and strategic routing nodes.",
-  },
-  {
     key: "navigation",
     label: "Navigation",
     icon: <Menu />,
@@ -82,11 +75,6 @@ const PagesItemsLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <EcosystemWrapper>
       {/* Breadcrumb metadata */}
-      <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] text-zinc-400/80 mb-[-12px] opacity-80 animate-in fade-in slide-in-from-left-2 duration-700">
-        <span className="hover:text-zinc-600 cursor-default">System</span>
-        <ChevronRight size={10} strokeWidth={4} />
-        <span className="text-indigo-600">Website Orchestration</span>
-      </div>
 
       <MenuItemsLayout
         fixed={isTakeoverPage}

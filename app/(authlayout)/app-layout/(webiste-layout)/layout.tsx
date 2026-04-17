@@ -1,11 +1,13 @@
 "use client";
 import * as React from "react";
 
-import PagesItemsLayout from "@/components/settings/website-admin/pages-items-layout";
+import MenuItemsLayout from "@/components/layout/menu-items-layout";
 import { PlanDrawer } from "@/components/layout/plan-drawer";
 import { useGetWebsite } from "@/graphql/actions";
 import { useWebsiteBuilderStore } from "@/store/useWebsiteBuilderStore";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CardContent } from "@/components/ui/card";
+import { Layout, Menu, PanelBottom, Globe, Settings, Plus } from "lucide-react";
 
 function RootLayout({ children }: { children: React.ReactNode }) {
   const { data, loading } = useGetWebsite();
@@ -36,6 +38,39 @@ function RootLayout({ children }: { children: React.ReactNode }) {
     }
   }, [website, loading, initializeWebsiteData]);
 
+  const items = [
+    {
+      key: "",
+      label: "Pages",
+      icon: <Layout className="h-4 w-4" />,
+    },
+    {
+      key: "create",
+      label: "Create Page",
+      icon: <Plus className="h-4 w-4" />,
+    },
+    {
+      key: "navigation",
+      label: "Navigation",
+      icon: <Menu className="h-4 w-4" />,
+    },
+    {
+      key: "footer",
+      label: "Footer",
+      icon: <PanelBottom className="h-4 w-4" />,
+    },
+    {
+      key: "seo",
+      label: "SEO",
+      icon: <Globe className="h-4 w-4" />,
+    },
+    {
+      key: "settings",
+      label: "Settings",
+      icon: <Settings className="h-4 w-4" />,
+    },
+  ];
+
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center p-8">
@@ -56,7 +91,14 @@ function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <PlanDrawer />
-      <PagesItemsLayout>{children}</PagesItemsLayout>
+      <MenuItemsLayout
+        active="app-layout"
+        items={items}
+        hideDefaultTabs={true}
+        showAdminTabs={false}
+      >
+        {children}
+      </MenuItemsLayout>
     </>
   );
 }

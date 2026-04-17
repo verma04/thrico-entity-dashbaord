@@ -17,7 +17,7 @@ const WebsiteBuilderPage = () => {
       <button
         className="rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition p-2 shadow-sm absolute top-4 right-6 z-50"
         aria-label="Close"
-        onClick={() => redirect("/app-layout/pages")}
+        onClick={() => redirect("/app-layout/")}
       >
         <span className="sr-only">Close</span>
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none">

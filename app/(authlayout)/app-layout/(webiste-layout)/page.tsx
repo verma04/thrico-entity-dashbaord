@@ -2,51 +2,37 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  CardDescription,
-} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   Plus,
-  Loader2,
   Lock,
   Sparkles,
   Layout,
   ShieldCheck,
-  Activity,
-  RotateCcw,
-  Search,
-  Filter,
   ArrowRight,
   Layers,
+  Trash2,
+  ChevronRight,
+  Globe,
+  Info,
 } from "lucide-react";
 import { useWebsiteBuilderStore } from "@/store/useWebsiteBuilderStore";
 import { useIsPremium } from "@/hooks/useIsPremium";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   useGetWebsite,
   useUpdatePage,
   useDeletePage,
 } from "@/graphql/actions/website";
 import { useToast } from "@/hooks/use-toast";
-import { PageListItem } from "@/components/pages/page-list-item";
 import { CreatePageDialog } from "@/components/pages/create-page-dialog";
 import { ConfirmDialog } from "@/components/pages/confirm-dialog";
-import { Skeleton } from "@/components/ui/skeleton";
-import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
-import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
-import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
-import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import {
+  AdminTable,
+  AdminStatusBadge,
+  AdminTableColumn,
+} from "@/components/shared/admin-table/admin-table";
 import { cn } from "@/lib/utils";
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 
 const Page = () => {
   const router = useRouter();
@@ -55,15 +41,12 @@ const Page = () => {
   const { isPremium } = useIsPremium();
   const { toast } = useToast();
 
-  // Fetch website data
   const {
     data: websiteData,
     loading: websiteLoading,
-    error: websiteError,
     refetch,
   } = useGetWebsite({});
 
-  // Update page mutation
   const [updatePageMutation, { loading: updatingPage }] = useUpdatePage({
     onCompleted: (data) => {
       toast({
@@ -83,7 +66,7 @@ const Page = () => {
       });
     },
   });
-  // Delete page mutation
+
   const [deletePageMutation, { loading: deletingPage }] = useDeletePage({
     onCompleted: () => {
       toast({
@@ -113,7 +96,6 @@ const Page = () => {
     pageId: string | null;
   }>({ open: false, pageId: null });
 
-  // Use server pages if available, otherwise fallback to local store
   const displayPages = websiteData?.getWebsite?.pages || [];
 
   const handleEditPage = (pageId: string) => {
@@ -125,11 +107,9 @@ const Page = () => {
     const page = displayPages?.find((p: any) => p.id === pageId);
     if (!page || page.slug === "home") return;
 
-    // If page is currently active (enabled), show confirmation before making it draft
     if (currentStatus) {
       setConfirmDialog({ open: true, pageId, currentStatus });
     } else {
-      // If page is draft, directly enable it without confirmation
       updatePageMutation({
         variables: {
           pageId: pageId,
@@ -162,168 +142,243 @@ const Page = () => {
           pageId: deleteConfirmDialog.pageId,
         },
       });
-      // Also update local store
       deletePage(deleteConfirmDialog.pageId);
       setDeleteConfirmDialog({ open: false, pageId: null });
     }
   };
 
-  return (
-    <div className="space-y-8">
-      <EcosystemActionBar shadow="sm">
-        <div className="flex items-center justify-between w-full">
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-3">
-              <div className="h-3 w-3 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
-              <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                Routing Engine Active
+  const columns: AdminTableColumn<any>[] = [
+    {
+      key: "designation",
+      header: "Designation",
+      cell: (row) => (
+        <div className="flex items-center gap-3">
+          <div className="h-9 w-9 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center">
+            <Layout className="h-4 w-4 text-indigo-500" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-[13px] font-bold text-foreground leading-tight">
+              {row.name}
+            </span>
+            {row.slug === "home" && (
+              <span className="text-[10px] text-indigo-500 font-bold uppercase tracking-widest mt-0.5">
+                Root Invariant
               </span>
-            </div>
-            <div className="h-4 w-px bg-slate-200" />
-            <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
-              <ShieldCheck className="h-3.5 w-3.5 text-indigo-500" />
-              <span>Namespace Safety: Valid</span>
-            </div>
+            )}
           </div>
-
-          <div className="flex items-center gap-3">
+        </div>
+      ),
+    },
+    {
+      key: "namespace",
+      header: "Namespace",
+      cell: (row) => (
+        <code className="px-2 py-0.5 rounded-md bg-muted border border-border text-[11px] font-mono text-muted-foreground">
+          /{row.slug}
+        </code>
+      ),
+    },
+    {
+      key: "protocol-status",
+      header: "Status",
+      headerClassName: "text-center",
+      className: "text-center",
+      cell: (row) => (
+        <Button
+          variant="ghost"
+          className="p-0 h-auto hover:bg-transparent"
+          onClick={() => handleToggleStatus(row.id, row.isEnabled)}
+          disabled={row.slug === "home"}
+        >
+          <AdminStatusBadge status={row.isEnabled ? "ACTIVE" : "DRAFT"}>
+            {row.isEnabled ? "Active" : "Archival Draft"}
+          </AdminStatusBadge>
+        </Button>
+      ),
+    },
+    {
+      key: "matrix-actions",
+      header: "Actions",
+      headerClassName: "text-right",
+      className: "text-right",
+      cell: (row) => (
+        <div className="flex items-center justify-end gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-8 rounded-lg font-bold text-[11px] uppercase tracking-wide gap-2 bg-background hover:bg-muted"
+            onClick={() => handleEditPage(row.id)}
+          >
+            <Layers className="h-3.5 w-3.5" />
+            Design
+          </Button>
+          {row.slug !== "home" && (
             <Button
-              variant="outline"
-              onClick={() => refetch()}
-              className="h-10 px-4 rounded-xl border-slate-200 font-bold text-slate-600 gap-2 hover:bg-slate-50 transition-all"
+              size="sm"
+              variant="ghost"
+              className="h-8 w-8 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+              onClick={() => handleDeletePage(row.id)}
             >
-              <RotateCcw
-                className={cn("h-4 w-4", websiteLoading && "animate-spin")}
-              />
-              Sync Manifest
+              <Trash2 className="h-3.5 w-3.5" />
             </Button>
-            {isPremium ? (
-              <Button
-                onClick={() => setIsCreateOpen(true)}
-                className="h-10 px-8 rounded-xl bg-slate-900 hover:bg-black text-white font-black text-[11px] uppercase tracking-wider gap-3 shadow-xl shadow-slate-200 transition-all active:scale-95 group"
-              >
-                <Plus className="h-4 w-4 transition-transform group-hover:scale-110" />
-                New Invariant Page
-              </Button>
-            ) : (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    disabled
-                    className="h-10 px-8 rounded-xl bg-slate-100 text-slate-400 font-black text-[11px] uppercase tracking-wider gap-3 cursor-not-allowed"
-                  >
-                    <Lock className="h-4 w-4" /> New Invariant Page
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent className="rounded-xl border-slate-200 bg-white font-bold text-slate-900 shadow-xl">
-                  <p className="text-xs">Upgrade for architectural expansion</p>
-                </TooltipContent>
-              </Tooltip>
-            )}
+          )}
+        </div>
+      ),
+    },
+  ];
+
+  return (
+    <div className="flex flex-col h-full bg-background overflow-hidden relative">
+      {/* Sticky Header */}
+      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b px-6 py-4">
+        <div className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-3 mb-1">
+              <div className="p-2.5 rounded-xl bg-indigo-600/10 ring-1 ring-indigo-600/20">
+                <Layout className="h-5 w-5 text-indigo-600" />
+              </div>
+              <h1 className="text-2xl font-bold tracking-tight">
+                App Hierarchy
+              </h1>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground ml-1">
+              <span>Website Builder</span>
+              <ChevronRight className="h-3 w-3" />
+              <span>Project Pages</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <Button
+              onClick={() => router.push("/app-layout/create")}
+              className="h-10 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold gap-2 shadow-sm transition-all active:scale-95"
+            >
+              <Plus className="h-4 w-4" />
+              New Page
+            </Button>
           </div>
         </div>
-      </EcosystemActionBar>
+      </div>
 
-      <EcosystemContainer className="space-y-10 p-8 lg:p-12">
-        {!isPremium && (
-          <div className="p-8 rounded-[2.5rem] bg-indigo-600 shadow-2xl shadow-indigo-200 overflow-hidden relative border-none">
-            <div className="absolute top-0 right-0 p-8 opacity-10 scale-150 rotate-12">
-              <Sparkles className="h-32 w-32 text-indigo-100" />
-            </div>
-            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
-              <div className="space-y-3">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-indigo-100 font-black text-[9px] uppercase tracking-widest border border-white/20">
-                    System Upgrade Available
-                  </div>
-                </div>
-                <h3 className="text-3xl font-black text-white tracking-tighter uppercase italic">
-                  Unlock Master Architecture
-                </h3>
-                <p className="text-[11px] font-bold text-indigo-100/80 uppercase tracking-tight max-w-xl leading-relaxed">
-                  Evolve your platform with unlimited page definitions,
-                  architectural nesting, and high-tier module access.
-                </p>
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          
+          {!isPremium && (
+            <div className="p-8 rounded-[2rem] bg-indigo-600 shadow-xl overflow-hidden relative mb-8 border-none isolate">
+              <div className="absolute top-0 right-0 p-8 opacity-10 scale-150 rotate-12 pointer-events-none">
+                <Sparkles className="h-32 w-32 text-indigo-100" />
               </div>
-              <Button
-                className="h-14 px-10 rounded-2xl bg-white hover:bg-indigo-50 text-indigo-600 font-black text-[12px] uppercase tracking-widest shadow-2xl transition-all active:scale-95 gap-3"
-                onClick={() => router.push("/settings/subscription")}
-              >
-                Elevate Protocol
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        )}
-
-        <div className="space-y-6">
-          <div className="flex items-center gap-3 px-1">
-            <div className="h-10 w-10 rounded-xl bg-slate-900 flex items-center justify-center text-white">
-              <Layers className="h-5 w-5" />
-            </div>
-            <div>
-              <h3 className="text-xl font-black text-slate-900 tracking-tight italic uppercase">
-                Hierarchy Manifest
-              </h3>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-1">
-                {displayPages.length} active route definitions
-              </p>
-            </div>
-          </div>
-
-          <div className="rounded-[2.5rem] border border-slate-100 bg-white shadow-xl shadow-slate-200/50 overflow-hidden">
-            {websiteLoading ? (
-              <div className="p-20 flex flex-col items-center justify-center space-y-4">
-                <div className="relative">
-                  <div className="h-12 w-12 rounded-full border-4 border-slate-100 border-t-indigo-600 animate-spin" />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Activity className="h-4 w-4 text-indigo-600" />
-                  </div>
-                </div>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">
-                  Synchronizing Namespace
-                </p>
-              </div>
-            ) : (
-              <div className="divide-y divide-slate-50">
-                <div className="grid grid-cols-12 bg-slate-50/50 p-6 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">
-                  <div className="col-span-4">Designation</div>
-                  <div className="col-span-3">Namespace Slug</div>
-                  <div className="col-span-2 text-center">Protocol Status</div>
-                  <div className="col-span-3 text-right pr-4">
-                    Matrix Actions
-                  </div>
-                </div>
-                {displayPages.length === 0 ? (
-                  <div className="p-24 flex flex-col items-center justify-center text-center space-y-6">
-                    <div className="h-20 w-20 rounded-[2rem] bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-300">
-                      <Layout className="h-10 w-10 opacity-20" />
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-lg font-black italic text-slate-900 uppercase">
-                        Void Detected
-                      </p>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                        No architectural pages have been instantiated
-                      </p>
+              <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-indigo-100 font-bold text-[10px] uppercase tracking-widest border border-white/20 inline-block">
+                      System Upgrade Available
                     </div>
                   </div>
-                ) : (
-                  displayPages.map((page: any) => (
-                    <PageListItem
-                      key={page.id}
-                      page={page}
-                      onEdit={handleEditPage}
-                      onDelete={handleDeletePage}
-                      onToggleStatus={handleToggleStatus}
-                    />
-                  ))
-                )}
+                  <h3 className="text-2xl font-bold text-white tracking-tight">
+                    Unlock Master Architecture
+                  </h3>
+                  <p className="text-sm font-medium text-indigo-100/90 max-w-xl leading-relaxed">
+                    Evolve your platform with unlimited page definitions, architectural nesting, and high-tier module access.
+                  </p>
+                </div>
+                <Button
+                  className="h-12 px-8 rounded-xl bg-white hover:bg-indigo-50 text-indigo-600 font-bold shadow-md transition-all active:scale-95 shrink-0 gap-2"
+                  onClick={() => router.push("/settings/subscription")}
+                >
+                  Elevate Protocol
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
               </div>
-            )}
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div className="lg:col-span-8 space-y-8">
+              <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden">
+                <CardHeader className="bg-muted/30 pb-4 border-b">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Layers className="h-4 w-4 text-indigo-600" />
+                    <CardTitle className="text-xl">
+                      Hierarchy Manifest
+                    </CardTitle>
+                  </div>
+                  <CardDescription>
+                    Manage the architectural structure of your platform and define URI segments.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <AdminTable
+                    columns={columns}
+                    data={displayPages}
+                    loading={websiteLoading}
+                    keyExtractor={(p) => p.id}
+                    emptyIcon={Layout}
+                    emptyTitle="Void Detected"
+                    emptyDescription="No architectural pages have been instantiated in this namespace."
+                    className="border-0 shadow-none border-t-0 rounded-none bg-transparent"
+                  />
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="lg:col-span-4">
+              <div className="sticky top-6 space-y-6">
+                <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden bg-muted/20">
+                   <div className="p-6">
+                      <Globe className="h-8 w-8 mb-4 text-indigo-500 opacity-80" />
+                      <h3 className="text-lg font-bold">Project Pulse</h3>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Overview of active structural nodes.
+                      </p>
+                   </div>
+                   <div className="p-4 bg-background grid grid-cols-2 gap-4 divide-x border-t">
+                      <div className="flex flex-col items-center justify-center py-2">
+                        <span className="text-2xl font-bold">{displayPages.length}</span>
+                        <span className="text-[10px] uppercase font-bold text-muted-foreground mt-1">Total Nodes</span>
+                      </div>
+                      <div className="flex flex-col items-center justify-center py-2 text-emerald-600">
+                        <span className="text-2xl font-bold">{displayPages.filter((p:any) => p.isEnabled).length}</span>
+                        <span className="text-[10px] uppercase font-bold mt-1 text-emerald-600/70">Published</span>
+                      </div>
+                   </div>
+                </Card>
+
+                <Card className="border-none shadow-sm ring-1 ring-border/50">
+                  <CardHeader className="pb-3 border-b bg-muted/20">
+                    <CardTitle className="text-sm font-bold flex items-center gap-2">
+                      <Info className="h-4 w-4 text-indigo-600" />
+                      Structural Strategy
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-4">
+                    <ul className="space-y-3 text-xs text-muted-foreground">
+                      <li className="flex gap-2">
+                        <span className="text-indigo-600 font-bold">•</span>
+                        <span>
+                          The 'home' invariant is immutable and maps to the root domain trajectory.
+                        </span>
+                      </li>
+                      <li className="flex gap-2">
+                        <span className="text-indigo-600 font-bold">•</span>
+                        <span>
+                          Unpublishing a node moves it to draft status, immediately revoking public access.
+                        </span>
+                      </li>
+                      <li className="flex gap-2">
+                        <span className="text-indigo-600 font-bold">•</span>
+                        <span>
+                          Click "Design" to enter the canvas editor for a specific structural node.
+                        </span>
+                      </li>
+                    </ul>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+
           </div>
         </div>
-      </EcosystemContainer>
+      </div>
 
       <CreatePageDialog
         open={isCreateOpen}
