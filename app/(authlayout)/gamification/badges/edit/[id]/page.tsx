@@ -24,16 +24,7 @@ export default function EditBadgePage() {
   const [updateBadge, { loading: isUpdating }] = useUpdateBadge();
 
   const badge = useMemo(() => {
-    const rawBadge = badgeData?.getBadges?.find((b) => b.id === badgeId);
-    if (!rawBadge) return null;
-
-    return {
-      ...rawBadge,
-      targetValue:
-        rawBadge.type === "ACTION"
-          ? rawBadge.count || rawBadge.targetValue
-          : rawBadge.points || rawBadge.targetValue,
-    };
+    return badgeData?.getBadges?.find((b) => b.id === badgeId);
   }, [badgeData, badgeId]);
 
   const handleUpdate = async (values: any) => {
@@ -47,8 +38,7 @@ export default function EditBadgePage() {
           type: values.type,
           module: values.type === "ACTION" ? values.module : "SYSTEM",
           action: values.type === "ACTION" ? values.action : "POINTS_THRESHOLD",
-          count: values.type === "ACTION" ? Number(values.targetValue) : null,
-          points: values.type === "POINTS" ? Number(values.targetValue) : null,
+          targetValue: Number(values.targetValue),
           isActive: values.isActive,
         },
       },
