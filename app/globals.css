@@ -223,6 +223,41 @@ body {
     box-shadow: 0 0 50px -12px
       color-mix(in oklab, var(--primary) 20%, transparent);
   }
+
+  .bg-dots-grid {
+    background-image: radial-gradient(
+      circle at center,
+      color-mix(in oklab, var(--border) 40%, transparent) 1px,
+      transparent 1px
+    );
+    background-size: 24px 24px;
+  }
+
+  /* React Crop Studio Overrides */
+  .react-crop-studio {
+    --rc-handle-size: 10px;
+    --rc-handle-color: var(--primary);
+  }
+
+  .react-crop-studio .ReactCrop__crop-selection {
+    border: 1.5px solid var(--primary);
+    box-shadow: 0 0 0 4000px rgba(0, 0, 0, 0.4);
+  }
+
+  .react-crop-studio .ReactCrop__handle {
+    background-color: var(--primary);
+    border: 2px solid white;
+    border-radius: 4px;
+    width: var(--rc-handle-size);
+    height: var(--rc-handle-size);
+  }
+
+  .react-crop-studio .ReactCrop__rule-of-thirds-vt::before,
+  .react-crop-studio .ReactCrop__rule-of-thirds-vt::after,
+  .react-crop-studio .ReactCrop__rule-of-thirds-hz::before,
+  .react-crop-studio .ReactCrop__rule-of-thirds-hz::after {
+    background-color: rgba(255, 255, 255, 0.3);
+  }
 }
 
 /* Ensure Razorpay popup appears above all other elements */
