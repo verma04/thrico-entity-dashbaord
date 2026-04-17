@@ -15,9 +15,8 @@ export default function ScratchCardPage() {
         description="Configure scratch card reward tiers, probability weights, and campaign windows."
         icon={RectangleHorizontal}
       />
-      <EcosystemContainer className="p-2 flex-col gap-4 flex">
-        <ScratchCardManager />
-      </EcosystemContainer>
+
+      <ScratchCardManager />
     </EcosystemWrapper>
   );
 }

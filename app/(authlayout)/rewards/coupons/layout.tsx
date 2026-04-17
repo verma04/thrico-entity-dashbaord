@@ -19,8 +19,8 @@ export default function CouponsLayout({
 
   const tabs = [
     {
-      key: "gallery",
-      label: "Gallery",
+      key: "Rewards",
+      label: "Rewards",
       icon: LayoutGrid,
       href: "/rewards/coupons",
     },

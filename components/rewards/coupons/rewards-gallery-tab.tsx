@@ -4,7 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Ticket, Pencil, Upload, Zap, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { getInteractionType, getInteractiveBadge } from "./utils";
+import { getMechanismBadge } from "./utils";
 
 interface RewardsGalleryTabProps {
   loading: boolean;
@@ -97,8 +97,7 @@ export function RewardsGalleryTab({
       {viewMode === "grid" ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
           {filteredRewards.map((reward: any) => {
-            const type = getInteractionType(reward.category);
-            const badge = getInteractiveBadge(type);
+            const badge = getMechanismBadge(reward.rewardMechanism || "COUPON");
             const BadgeIcon = badge.icon;
             return (
               <div
@@ -173,9 +172,10 @@ export function RewardsGalleryTab({
                         <Zap className="h-2.5 w-2.5 text-amber-500 fill-current" />
                       </div>
                       <span className="text-[11px] font-black text-foreground tabular-nums">
-                        {reward.tcRequired || 0} PTS
+                        {reward.tcCost || 0} Coins
                       </span>
                     </div>
+
                     <div className="flex items-center gap-3">
                       <div className="h-4 w-px bg-border/50" />
                       <button
@@ -183,8 +183,31 @@ export function RewardsGalleryTab({
                         className="text-[9px] font-black text-indigo-600 uppercase tracking-widest hover:underline underline-offset-4"
                       >
                         {" "}
-                        Manage Vouchers{" "}
+                        Manage
                       </button>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-3 border-t border-border/40">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[10px] font-bold text-muted-foreground">
+                        Discount:{" "}
+                      </span>
+                      <span className="text-[11px] font-black text-foreground">
+                        {reward.discountType === "Percentage"
+                          ? `${reward.discountValue}%`
+                          : reward.discountType === "Flat"
+                            ? `$${reward.discountValue}`
+                            : reward.discountType}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[10px] font-bold text-muted-foreground">
+                        Per User Limit:{" "}
+                      </span>
+                      <span className="text-[11px] font-black text-foreground">
+                        {reward.perUserLimit ?? "Unlimited"}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -195,8 +218,7 @@ export function RewardsGalleryTab({
       ) : (
         <div className="space-y-3">
           {filteredRewards.map((reward: any) => {
-            const type = getInteractionType(reward.category);
-            const badge = getInteractiveBadge(type);
+            const badge = getMechanismBadge(reward.rewardMechanism || "COUPON");
             const BadgeIcon = badge.icon;
             return (
               <div
@@ -234,14 +256,25 @@ export function RewardsGalleryTab({
                   <div className="flex items-center gap-4 text-[10px] font-bold text-muted-foreground/70 uppercase tracking-tighter">
                     <span className="flex items-center gap-1.5 px-2 py-0.5 bg-muted rounded">
                       <Zap className="h-2.5 w-2.5 text-amber-500" />
-                      {reward.tcRequired || 0} Points Required
+                      {reward.tcCost || 0} Cost
                     </span>
                     <span className="flex items-center gap-1.5">
                       <Clock className="h-2.5 w-2.5 text-indigo-400" />
-                      {reward.expiryDays || "No"} Expiry Cycle
+                      {reward.validityDays || "No"} Days Validity
                     </span>
                     <span className="bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded text-[8px] font-black">
                       STOCK: {reward.inventory ?? "∞"}
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      Discount:{" "}
+                      {reward.discountType === "Percentage"
+                        ? `${reward.discountValue}%`
+                        : reward.discountType === "Flat"
+                          ? `$${reward.discountValue}`
+                          : reward.discountType}
+                    </span>
+                    <span className="flex items-center gap-1.5 border-l border-border pl-4">
+                      Limit per User: {reward.perUserLimit ?? "Unlimited"}
                     </span>
                   </div>
                 </div>

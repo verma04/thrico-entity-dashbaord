@@ -85,55 +85,243 @@ export function RewardFormSections({ formik }: RewardFormSectionsProps) {
 
           <div className="space-y-6">
             <div className="space-y-4">
-              <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-                Reward Mechanism
-              </Label>
+              <div className="flex items-center justify-between">
+                <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                  Reward Mechanism
+                </Label>
+                {/* All toggle */}
+                {(() => {
+                  const ALL_IDS = [
+                    "COUPON",
+                    "SPIN_WHEEL",
+                    "SCRATCH_CARD",
+                    "MATCH_AND_WIN",
+                  ];
+                  const selected: string[] = Array.isArray(
+                    formik.values.rewardMechanism,
+                  )
+                    ? formik.values.rewardMechanism
+                    : formik.values.rewardMechanism
+                      ? [formik.values.rewardMechanism]
+                      : [];
+                  const allSelected = ALL_IDS.every((id) =>
+                    selected.includes(id),
+                  );
+                  return (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (allSelected) {
+                          formik.setFieldValue("rewardMechanism", ["COUPON"]);
+                        } else {
+                          formik.setFieldValue("rewardMechanism", ALL_IDS);
+                        }
+                      }}
+                      className={cn(
+                        "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold transition-all border",
+                        allSelected
+                          ? "bg-gradient-to-r from-indigo-600 via-violet-600 to-rose-500 border-transparent text-white shadow-md"
+                          : "bg-white dark:bg-muted/10 border-border/40 text-muted-foreground hover:border-indigo-300 hover:text-indigo-600",
+                      )}
+                    >
+                      <Zap className="h-2.5 w-2.5" />
+                      {allSelected ? "All Selected" : "Select All"}
+                    </button>
+                  );
+                })()}
+              </div>
+
               <div className="flex flex-wrap gap-2">
-                {[
-                  { id: "COUPON", label: "Coupon", icon: Ticket },
-                  {
-                    id: "SPIN_WHEEL",
-                    label: "Spin Wheel",
-                    icon: RotateCw,
-                  },
-                  {
-                    id: "SCRATCH_CARD",
-                    label: "Scratch Card",
-                    icon: Sparkles,
-                  },
-                  {
-                    id: "MATCH_AND_WIN",
-                    label: "Match & Win",
-                    icon: Gamepad2,
-                  },
-                ].map((mech) => {
+                {(
+                  [
+                    {
+                      id: "COUPON",
+                      label: "Coupon",
+                      icon: Ticket,
+                      activeClass: "bg-indigo-600 border-indigo-600",
+                    },
+                    {
+                      id: "SPIN_WHEEL",
+                      label: "Spin Wheel",
+                      icon: RotateCw,
+                      activeClass: "bg-violet-600 border-violet-600",
+                    },
+                    {
+                      id: "SCRATCH_CARD",
+                      label: "Scratch Card",
+                      icon: Sparkles,
+                      activeClass: "bg-amber-500 border-amber-500",
+                    },
+                    {
+                      id: "MATCH_AND_WIN",
+                      label: "Match & Win",
+                      icon: Gamepad2,
+                      activeClass: "bg-rose-600 border-rose-600",
+                    },
+                  ] as const
+                ).map((mech) => {
                   const MechIcon = mech.icon;
+                  const selected: string[] = Array.isArray(
+                    formik.values.rewardMechanism,
+                  )
+                    ? formik.values.rewardMechanism
+                    : formik.values.rewardMechanism
+                      ? [formik.values.rewardMechanism]
+                      : [];
+                  const isActive = selected.includes(mech.id);
                   return (
                     <button
                       key={mech.id}
                       type="button"
-                      onClick={() =>
-                        formik.setFieldValue("rewardMechanism", mech.id)
-                      }
+                      onClick={() => {
+                        const current: string[] = Array.isArray(
+                          formik.values.rewardMechanism,
+                        )
+                          ? formik.values.rewardMechanism
+                          : formik.values.rewardMechanism
+                            ? [formik.values.rewardMechanism]
+                            : [];
+                        if (isActive && current.length > 1) {
+                          formik.setFieldValue(
+                            "rewardMechanism",
+                            current.filter((v) => v !== mech.id),
+                          );
+                        } else if (!isActive) {
+                          formik.setFieldValue("rewardMechanism", [
+                            ...current,
+                            mech.id,
+                          ]);
+                        }
+                      }}
                       className={cn(
                         "flex items-center gap-1.5 px-4 py-2 rounded-full text-[10px] font-bold transition-all border",
-                        formik.values.rewardMechanism === mech.id
-                          ? "bg-indigo-600 border-indigo-600 text-white shadow-md shadow-indigo-500/20 scale-[1.05]"
+                        isActive
+                          ? cn(
+                              mech.activeClass,
+                              "text-white shadow-md scale-[1.05]",
+                            )
                           : "bg-white dark:bg-muted/10 border-border/40 text-muted-foreground hover:border-border",
                       )}
                     >
                       <MechIcon
-                        className={cn(
-                          "h-3 w-3",
-                          formik.values.rewardMechanism === mech.id &&
-                            "animate-pulse",
-                        )}
+                        className={cn("h-3 w-3", isActive && "animate-pulse")}
                       />
                       {mech.label}
                     </button>
                   );
                 })}
               </div>
+
+              {/* Per-mechanism description callouts */}
+              {(() => {
+                const ALL_IDS = [
+                  "COUPON",
+                  "SPIN_WHEEL",
+                  "SCRATCH_CARD",
+                  "MATCH_AND_WIN",
+                ];
+                const selected: string[] = Array.isArray(
+                  formik.values.rewardMechanism,
+                )
+                  ? formik.values.rewardMechanism
+                  : formik.values.rewardMechanism
+                    ? [formik.values.rewardMechanism]
+                    : [];
+
+                const mechanismInfo: Record<
+                  string,
+                  {
+                    icon: React.ElementType;
+                    desc: string;
+                    bg: string;
+                    border: string;
+                    iconColor: string;
+                    label: string;
+                  }
+                > = {
+                  COUPON: {
+                    label: "Standard Coupon",
+                    icon: Ticket,
+                    desc: "A redeemable coupon code members claim directly from the Rewards hub. Supports flat, percentage, and exclusive access discount types.",
+                    bg: "bg-indigo-50/60 dark:bg-indigo-500/10",
+                    border: "border-indigo-100 dark:border-indigo-500/20",
+                    iconColor: "text-indigo-600",
+                  },
+                  SPIN_WHEEL: {
+                    label: "Spin Wheel Prize",
+                    icon: RotateCw,
+                    desc: "Available as a prize tier in the Spin Wheel game. Members spend TC to spin and may win this reward. Configure in Engagement Games → Spin Wheel.",
+                    bg: "bg-violet-50/60 dark:bg-violet-500/10",
+                    border: "border-violet-100 dark:border-violet-500/20",
+                    iconColor: "text-violet-600",
+                  },
+                  SCRATCH_CARD: {
+                    label: "Scratch Card Prize",
+                    icon: Sparkles,
+                    desc: "Distributed via the Scratch Card game. Members scratch to reveal if they've won. Manage prize tiers in Engagement Games → Scratch Card.",
+                    bg: "bg-amber-50/60 dark:bg-amber-500/10",
+                    border: "border-amber-100 dark:border-amber-500/20",
+                    iconColor: "text-amber-600",
+                  },
+                  MATCH_AND_WIN: {
+                    label: "Match & Win Prize",
+                    icon: Gamepad2,
+                    desc: "Awarded through the Match & Win slot-style game. Members match symbols to win this reward. Configure in Engagement Games → Match & Win.",
+                    bg: "bg-rose-50/60 dark:bg-rose-500/10",
+                    border: "border-rose-100 dark:border-rose-500/20",
+                    iconColor: "text-rose-600",
+                  },
+                };
+
+                const visibleIds = ALL_IDS.filter((id) =>
+                  selected.includes(id),
+                );
+                if (visibleIds.length === 0) return null;
+
+                return (
+                  <div className="space-y-2">
+                    {visibleIds.map((id) => {
+                      const info = mechanismInfo[id];
+                      if (!info) return null;
+                      const MechIcon = info.icon;
+                      return (
+                        <div
+                          key={id}
+                          className={cn(
+                            "flex items-start gap-3 p-3 rounded-xl border",
+                            info.bg,
+                            info.border,
+                          )}
+                        >
+                          <div
+                            className={cn(
+                              "h-6 w-6 rounded-lg flex items-center justify-center shrink-0 bg-white/70 dark:bg-black/20 border border-white/50",
+                              info.border,
+                            )}
+                          >
+                            <MechIcon
+                              className={cn("h-3 w-3", info.iconColor)}
+                            />
+                          </div>
+                          <div className="space-y-0.5">
+                            <p
+                              className={cn(
+                                "text-[10px] font-bold uppercase tracking-wider",
+                                info.iconColor,
+                              )}
+                            >
+                              {info.label}
+                            </p>
+                            <p className="text-[11px] text-muted-foreground leading-relaxed">
+                              {info.desc}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
             </div>
 
             <div className="space-y-2">
@@ -177,11 +365,22 @@ export function RewardFormSections({ formik }: RewardFormSectionsProps) {
               <Input
                 id="tcCost"
                 type="number"
-                className="pl-9 bg-white dark:bg-muted/10 border-border/40"
+                min={1}
+                className={cn(
+                  "pl-9 bg-white dark:bg-muted/10 border-border/40",
+                  formik.touched.tcCost && formik.errors.tcCost
+                    ? "border-rose-400 focus:ring-rose-500/20"
+                    : "",
+                )}
                 {...formik.getFieldProps("tcCost")}
               />
             </div>
             {err("tcCost")}
+            {!formik.errors.tcCost && (
+              <p className="text-[9px] text-muted-foreground">
+                Min. 1 TC — cannot be free.
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">

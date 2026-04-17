@@ -15,9 +15,8 @@ export default function SpinWheelPage() {
         description="Configure spin wheel segments, token costs, and winning probabilities."
         icon={Dices}
       />
-      <EcosystemContainer className="p-2 flex-col gap-4 flex">
-        <SpinWheelManager />
-      </EcosystemContainer>
+
+      <SpinWheelManager />
     </EcosystemWrapper>
   );
 }

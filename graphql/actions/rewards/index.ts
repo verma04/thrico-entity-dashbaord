@@ -13,6 +13,7 @@ import {
   UPDATE_REWARD_SECURITY_SETTINGS,
   MARK_VOUCHER_AS_USED,
   DELETE_VOUCHER,
+  GET_VOUCHERS_BY_REWARD_MECHANISM,
 } from "../../quries/rewards/rewards-queries";
 import { GET_SPIN_SCRATCH_STATS } from "../../quries/rewards/stats";
 import { TimeRange, DateRangeInput } from "../dashbaord/dashboard-quries";
@@ -46,6 +47,11 @@ export const useGetAllVouchers = (variables?: {
   status?: string;
   rewardId?: string;
 }) => useQuery(GET_ALL_VOUCHERS, { variables });
+
+export const useGetVouchersByRewardMechanism = (variables: {
+  mechanism: string;
+  pagination?: { page: number; limit: number };
+}) => useQuery(GET_VOUCHERS_BY_REWARD_MECHANISM, { variables, skip: !variables.mechanism });
 
 export const useGetRedemptions = (variables?: {
   userId?: string;

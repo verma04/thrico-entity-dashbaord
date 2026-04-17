@@ -1,14 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Dices, Gift, RefreshCw, Trophy, Shield, TrendingUp, AlertTriangle, Settings, LayoutGrid, Activity, History, Save, Loader2, Plus } from "lucide-react";
+import { RefreshCw, Trophy, Settings, History, Loader2, Plus, Users, Activity, LayoutGrid } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   useGetRewards,
@@ -293,13 +292,42 @@ export function MatchWinManager() {
   }
 
   return (
-    <div className="space-y-0">
-      <div className="px-6 pt-6">
-        <MatchWinStats statsData={statsData} />
-      </div>
+    <>
+      <EcosystemActionBar shadow="none">
+        <EcosystemActionBar.Group>
+          <div
+            className={cn(
+              "h-2 w-2 rounded-full animate-pulse",
+              isActive ? "bg-emerald-500" : "bg-amber-500",
+            )}
+          />
+          <span className="text-xs font-medium text-muted-foreground">
+            {isActive ? "Live" : "Paused"}
+          </span>
+          <EcosystemActionBar.Separator />
+          <Users className="h-3.5 w-3.5 text-muted-foreground" />
+          <span className="text-xs text-muted-foreground">
+            {playsData?.getMatchWinPlays?.length ?? 0} recent plays
+          </span>
+        </EcosystemActionBar.Group>
+        <EcosystemActionBar.Group align="right">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => { refetchData(); refetchPlays(); refetchStats(); }}
+          >
+            Refresh Data
+          </Button>
+        </EcosystemActionBar.Group>
+      </EcosystemActionBar>
+
+      <EcosystemContainer className="p-0">
+        <div className="px-6 pt-6">
+          <MatchWinStats statsData={statsData} />
+        </div>
 
       <Tabs defaultValue="config" className="w-full">
-        <div className="flex items-center justify-between px-6 py-3 border-b border-border">
+        <div className="flex items-center px-6 py-3 border-b border-border">
           <TabsList className="h-8 bg-muted/40 border border-border rounded-lg p-0.5 gap-0.5">
             <TabsTrigger
               value="config"
@@ -316,18 +344,6 @@ export function MatchWinManager() {
               Activity Log
             </TabsTrigger>
           </TabsList>
-
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => { refetchData(); refetchPlays(); refetchStats(); }}
-              className="gap-1.5"
-            >
-              <RefreshCw className={cn("h-3.5 w-3.5", (isMutating || dataLoading || playsLoading) && "animate-spin")} />
-              Refresh Data
-            </Button>
-          </div>
         </div>
 
         <TabsContent value="config" className="m-0 focus-visible:outline-hidden">
@@ -418,6 +434,7 @@ export function MatchWinManager() {
           <MatchWinActivityLog playsData={playsData} />
         </TabsContent>
       </Tabs>
+      </EcosystemContainer>
 
       {/* Dialogs */}
       <SymbolDialog
@@ -450,6 +467,6 @@ export function MatchWinManager() {
         title="Unsaved Changes"
         description="You have modified the match win game configuration."
       />
-    </div>
+    </>
   );
 }

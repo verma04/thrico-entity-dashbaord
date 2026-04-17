@@ -21,7 +21,7 @@ export default function CreateCouponPage() {
     initialValues: {
       title: "",
       description: "",
-      tcCost: 0,
+      tcCost: 1,
       discountType: "Flat",
       discountValue: "",
       validityDays: 30,
@@ -33,7 +33,7 @@ export default function CreateCouponPage() {
       cooldownPeriod: 0,
       inventoryRequired: false,
       image: "",
-      rewardMechanism: "COUPON",
+      rewardMechanism: ["COUPON"],
     },
     validationSchema: couponSchema,
     onSubmit: async (values) => {
@@ -53,7 +53,9 @@ export default function CreateCouponPage() {
               blockWarnedUsers: values.blockWarnedUsers,
               cooldownPeriod: values.cooldownPeriod,
               image: values.image,
-              rewardMechanism: values.rewardMechanism,
+              rewardMechanism: Array.isArray(values.rewardMechanism)
+                ? values.rewardMechanism[0] || "COUPON"
+                : values.rewardMechanism || "COUPON",
             },
           },
         });

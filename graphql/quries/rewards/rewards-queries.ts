@@ -26,6 +26,7 @@ export const GET_REWARDS = gql`
       validityDays
       status
       isActive
+      rewardMechanism
       createdAt
       updatedAt
     }
@@ -249,6 +250,39 @@ export const MARK_VOUCHER_AS_USED = gql`
 export const DELETE_VOUCHER = gql`
   mutation DeleteVoucher($voucherId: ID!) {
     deleteVoucher(voucherId: $voucherId)
+  }
+`;
+
+export const GET_VOUCHERS_BY_REWARD_MECHANISM = gql`
+  query GetVouchersByRewardMechanism(
+    $mechanism: RewardMechanism!
+    $pagination: PaginationInput
+  ) {
+    getVouchersByRewardMechanism(mechanism: $mechanism, pagination: $pagination) {
+      id
+      rewardId
+      code
+      isUsed
+      assignedTo
+      assignedAt
+      expiryDate
+      createdAt
+      reward {
+        id
+        title
+        description
+        image
+        tcCost
+        inventoryRequired
+        perUserLimit
+        totalUsageLimit
+        minAccountAge
+        minActivityRequired
+        blockWarnedUsers
+        cooldownPeriod
+        status
+      }
+    }
   }
 `;
 

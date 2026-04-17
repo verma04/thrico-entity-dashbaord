@@ -35,7 +35,7 @@ export default function EditRewardPage() {
     initialValues: {
       title: reward?.title || "",
       description: reward?.description || "",
-      tcCost: reward?.tcCost || 0,
+      tcCost: reward?.tcCost || 1,
       discountType: reward?.discountType || "Flat",
       discountValue: reward?.discountValue || "",
       validityDays: reward?.validityDays || 30,

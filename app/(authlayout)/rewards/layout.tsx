@@ -27,7 +27,7 @@ function RewardsLayout({ children }: { children: React.ReactNode }) {
     },
     {
       key: "coupons",
-      label: "Rewards & Codes",
+      label: "Rewards & Vouchers",
       icon: <Ticket className="h-4 w-4" />,
       section: "Manage",
     },

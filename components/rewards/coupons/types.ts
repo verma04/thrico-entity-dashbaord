@@ -3,7 +3,7 @@ import * as Yup from "yup";
 export const couponSchema = Yup.object().shape({
   title: Yup.string().required("Give your reward a catchy title"),
   description: Yup.string().required("Tell users what they're getting"),
-  tcCost: Yup.number().required("Set a cost in points").min(0),
+  tcCost: Yup.number().required("Set a cost in points").min(1, "Price must be at least 1 TC"),
   discountType: Yup.string().required("Select how the reward works"),
   discountValue: Yup.string().required("Enter the value"),
   validityDays: Yup.number().required("Set an expiration period").min(1),
