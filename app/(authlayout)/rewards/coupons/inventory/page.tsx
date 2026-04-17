@@ -57,10 +57,6 @@ export default function InventoryPage() {
           </EcosystemActionBar.Item>
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
-
-      {/* <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0 pb-20 overflow-visible mt-6">
-        {/* <InventoryTab rewards={filteredRewards} loading={rewardsLoading} /> */}
-      </EcosystemContainer> */}
     </>
   );
 }
