@@ -4,14 +4,7 @@ import React, { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useRouter } from "next/navigation";
-import {
-  Zap,
-  ChevronRight,
-  Info,
-  Trophy,
-  Target,
-  Clock,
-} from "lucide-react";
+import { Zap, ChevronRight, Info, Trophy, Target, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,12 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge as UIBadge } from "@/components/ui/badge";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { useToast } from "@/hooks/use-toast";
@@ -38,7 +26,9 @@ const pointRuleSchema = Yup.object().shape({
   module: Yup.string().required("Please select a module"),
   action: Yup.string().required("Action name is required"),
   trigger: Yup.string().required("Trigger type is required"),
-  points: Yup.number().required("Point value is required").min(1, "Must be at least 1 point"),
+  points: Yup.number()
+    .required("Point value is required")
+    .min(1, "Must be at least 1 point"),
   dailyCap: Yup.number().nullable(),
   weeklyCap: Yup.number().nullable(),
   monthlyCap: Yup.number().nullable(),
@@ -52,7 +42,12 @@ interface PointRuleFormProps {
   isEdit?: boolean;
 }
 
-export function PointRuleForm({ initialValues, onSubmit, loading, isEdit }: PointRuleFormProps) {
+export function PointRuleForm({
+  initialValues,
+  onSubmit,
+  loading,
+  isEdit,
+}: PointRuleFormProps) {
   const router = useRouter();
   const { toast } = useToast();
   const [saved, setSaved] = useState(false);
@@ -117,7 +112,9 @@ export function PointRuleForm({ initialValues, onSubmit, loading, isEdit }: Poin
                   </SelectContent>
                 </Select>
                 {formik.touched.module && formik.errors.module && (
-                  <p className="text-xs text-destructive">{formik.errors.module as string}</p>
+                  <p className="text-xs text-destructive">
+                    {formik.errors.module as string}
+                  </p>
                 )}
               </div>
 
@@ -131,7 +128,9 @@ export function PointRuleForm({ initialValues, onSubmit, loading, isEdit }: Poin
                   disabled={isEdit}
                 />
                 {formik.touched.action && formik.errors.action && (
-                  <p className="text-xs text-destructive">{formik.errors.action as string}</p>
+                  <p className="text-xs text-destructive">
+                    {formik.errors.action as string}
+                  </p>
                 )}
               </div>
 
@@ -166,24 +165,6 @@ export function PointRuleForm({ initialValues, onSubmit, loading, isEdit }: Poin
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="trigger">Trigger Logic</Label>
-                <Select
-                  onValueChange={(val) => formik.setFieldValue("trigger", val)}
-                  value={formik.values.trigger}
-                  disabled={isEdit}
-                >
-                  <SelectTrigger id="trigger" className="h-11 shadow-none">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="IMMEDIATE">Immediate payout</SelectItem>
-                    <SelectItem value="VERIFIED">Requires verification</SelectItem>
-                    <SelectItem value="SCHEDULED">Daily batch</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
               <div className="md:col-span-2">
                 <div className="pt-4 border-t border-dashed">
                   <h4 className="text-sm font-bold mb-4 flex items-center gap-2">
@@ -192,16 +173,46 @@ export function PointRuleForm({ initialValues, onSubmit, loading, isEdit }: Poin
                   </h4>
                   <div className="grid grid-cols-3 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="dailyCap" className="text-[10px] uppercase tracking-wider text-muted-foreground">Daily Cap</Label>
-                      <Input id="dailyCap" type="number" {...formik.getFieldProps("dailyCap")} className="h-10 bg-muted/30 border-none" />
+                      <Label
+                        htmlFor="dailyCap"
+                        className="text-[10px] uppercase tracking-wider text-muted-foreground"
+                      >
+                        Daily Cap
+                      </Label>
+                      <Input
+                        id="dailyCap"
+                        type="number"
+                        {...formik.getFieldProps("dailyCap")}
+                        className="h-10 bg-muted/30 border-none"
+                      />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="weeklyCap" className="text-[10px] uppercase tracking-wider text-muted-foreground">Weekly Cap</Label>
-                      <Input id="weeklyCap" type="number" {...formik.getFieldProps("weeklyCap")} className="h-10 bg-muted/30 border-none" />
+                      <Label
+                        htmlFor="weeklyCap"
+                        className="text-[10px] uppercase tracking-wider text-muted-foreground"
+                      >
+                        Weekly Cap
+                      </Label>
+                      <Input
+                        id="weeklyCap"
+                        type="number"
+                        {...formik.getFieldProps("weeklyCap")}
+                        className="h-10 bg-muted/30 border-none"
+                      />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="monthlyCap" className="text-[10px] uppercase tracking-wider text-muted-foreground">Monthly Cap</Label>
-                      <Input id="monthlyCap" type="number" {...formik.getFieldProps("monthlyCap")} className="h-10 bg-muted/30 border-none" />
+                      <Label
+                        htmlFor="monthlyCap"
+                        className="text-[10px] uppercase tracking-wider text-muted-foreground"
+                      >
+                        Monthly Cap
+                      </Label>
+                      <Input
+                        id="monthlyCap"
+                        type="number"
+                        {...formik.getFieldProps("monthlyCap")}
+                        className="h-10 bg-muted/30 border-none"
+                      />
                     </div>
                   </div>
                 </div>
@@ -216,7 +227,10 @@ export function PointRuleForm({ initialValues, onSubmit, loading, isEdit }: Poin
         <div className="sticky top-24 space-y-6">
           <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden">
             <CardHeader className="bg-muted/30 border-b pb-4">
-              <UIBadge variant="outline" className="w-fit mb-2 bg-indigo-500/5 text-indigo-600 border-indigo-500/20">
+              <UIBadge
+                variant="outline"
+                className="w-fit mb-2 bg-indigo-500/5 text-indigo-600 border-indigo-500/20"
+              >
                 Live Preview
               </UIBadge>
               <CardTitle className="text-lg">Rule Summary</CardTitle>
@@ -234,8 +248,12 @@ export function PointRuleForm({ initialValues, onSubmit, loading, isEdit }: Poin
                     {(formik.values.action || "New Action").replace(/_/g, " ")}
                   </div>
                   <div className="flex items-end gap-1">
-                    <span className="text-3xl font-black">{formik.values.points}</span>
-                    <span className="text-sm font-bold mb-1 opacity-80">PTS</span>
+                    <span className="text-3xl font-black">
+                      {formik.values.points}
+                    </span>
+                    <span className="text-sm font-bold mb-1 opacity-80">
+                      PTS
+                    </span>
                   </div>
                 </div>
               </div>
@@ -247,7 +265,9 @@ export function PointRuleForm({ initialValues, onSubmit, loading, isEdit }: Poin
                 </div>
                 <div className="flex justify-between text-xs border-b pb-2">
                   <span className="text-muted-foreground">Daily Limit</span>
-                  <span className="font-bold">{formik.values.dailyCap || "∞"}</span>
+                  <span className="font-bold">
+                    {formik.values.dailyCap || "∞"}
+                  </span>
                 </div>
               </div>
             </CardContent>
@@ -262,7 +282,8 @@ export function PointRuleForm({ initialValues, onSubmit, loading, isEdit }: Poin
             </CardHeader>
             <CardContent>
               <p className="text-xs text-amber-800 leading-relaxed font-medium">
-                Point rules are calibrated across the entire ecosystem. Changes to payout values affect the economy immediately.
+                Point rules are calibrated across the entire ecosystem. Changes
+                to payout values affect the economy immediately.
               </p>
             </CardContent>
           </Card>
@@ -276,7 +297,11 @@ export function PointRuleForm({ initialValues, onSubmit, loading, isEdit }: Poin
         onSave={() => formik.submitForm()}
         onReset={() => formik.resetForm()}
         title={isEdit ? "Unsaved Changes" : "Unsaved Definition"}
-        description={isEdit ? "Preserve your updated rule parameters." : "Establish this point rule in the production matrix?"}
+        description={
+          isEdit
+            ? "Preserve your updated rule parameters."
+            : "Establish this point rule in the production matrix?"
+        }
         buttonText={isEdit ? "Update Rule" : "Commission Rule"}
       />
     </div>
