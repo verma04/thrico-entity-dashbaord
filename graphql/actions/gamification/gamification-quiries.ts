@@ -67,6 +67,8 @@ export interface Badge {
   module: string;
   action?: string;
   targetValue?: number;
+  count?: number;
+  points?: number;
   condition?: any;
   isActive: boolean;
   createdAt: string;
@@ -87,6 +89,8 @@ const GET_BADGES = gql`
       type
       module
       action
+      count
+      points
       targetValue
       condition
       isActive

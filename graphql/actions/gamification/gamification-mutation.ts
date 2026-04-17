@@ -4,6 +4,30 @@ import { gql, useMutation, MutationHookOptions } from "@apollo/client";
 // BADGE MUTATIONS
 // ---------------------------------------------------------
 
+export interface BadgeInput {
+  name: string;
+  description: string;
+  icon: string;
+  type: string;
+  module: string;
+  action: string;
+  count?: number | null;
+  points?: number | null;
+  isActive?: boolean;
+}
+
+export interface BadgeUpdateInput {
+  name?: string;
+  description?: string;
+  icon?: string;
+  type?: string;
+  module?: string;
+  action?: string;
+  count?: number | null;
+  points?: number | null;
+  isActive?: boolean;
+}
+
 const CREATE_BADGE = gql`
   mutation CreateBadge($input: BadgeInput!) {
     createBadge(input: $input) {
@@ -12,6 +36,8 @@ const CREATE_BADGE = gql`
       type
       module
       action
+      count
+      points
       targetValue
       icon
       description
@@ -31,6 +57,8 @@ const UPDATE_BADGE = gql`
       type
       module
       action
+      count
+      points
       targetValue
       icon
       description

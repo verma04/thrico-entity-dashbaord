@@ -24,7 +24,16 @@ export default function EditBadgePage() {
   const [updateBadge, { loading: isUpdating }] = useUpdateBadge();
 
   const badge = useMemo(() => {
-    return badgeData?.getBadges?.find((b) => b.id === badgeId);
+    const rawBadge = badgeData?.getBadges?.find((b) => b.id === badgeId);
+    if (!rawBadge) return null;
+
+    return {
+      ...rawBadge,
+      targetValue:
+        rawBadge.type === "ACTION"
+          ? rawBadge.count || rawBadge.targetValue
+          : rawBadge.points || rawBadge.targetValue,
+    };
   }, [badgeData, badgeId]);
 
   const handleUpdate = async (values: any) => {
@@ -36,9 +45,10 @@ export default function EditBadgePage() {
           description: values.description,
           icon: values.icon,
           type: values.type,
-          module: values.module || "SYSTEM",
-          action: values.action || "POINTS_THRESHOLD",
-          targetValue: Number(values.targetValue),
+          module: values.type === "ACTION" ? values.module : "SYSTEM",
+          action: values.type === "ACTION" ? values.action : "POINTS_THRESHOLD",
+          count: values.type === "ACTION" ? Number(values.targetValue) : null,
+          points: values.type === "POINTS" ? Number(values.targetValue) : null,
           isActive: values.isActive,
         },
       },

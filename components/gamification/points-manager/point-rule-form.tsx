@@ -21,6 +21,7 @@ import { Badge as UIBadge } from "@/components/ui/badge";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { useToast } from "@/hooks/use-toast";
 import { EcosystemCard } from "@/components/layout/ecosystem/ecosystem-analytics";
+import { MODULES } from "../ts-types";
 
 const pointRuleSchema = Yup.object().shape({
   module: Yup.string().required("Please select a module"),
@@ -104,11 +105,11 @@ export function PointRuleForm({
                     <SelectValue placeholder="Select a module" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="FEED">Community Feed</SelectItem>
-                    <SelectItem value="EVENTS">Events & Meetups</SelectItem>
-                    <SelectItem value="LEARNING">LMS / Training</SelectItem>
-                    <SelectItem value="JOBS">Job Portal</SelectItem>
-                    <SelectItem value="PROFILE">User Profile</SelectItem>
+                    {MODULES.map((mod) => (
+                      <SelectItem key={mod.key} value={mod.key}>
+                        {mod.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 {formik.touched.module && formik.errors.module && (
