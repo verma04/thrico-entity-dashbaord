@@ -564,7 +564,7 @@ export const adminSettings = [
       {
         key: "cust-web",
         label: "Website Layout",
-        path: "/app-layout/pages#setup",
+        path: "/app-layout",
       },
       {
         key: "cust-mod",

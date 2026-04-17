@@ -31,12 +31,7 @@ function RewardsLayout({ children }: { children: React.ReactNode }) {
       icon: <Ticket className="h-4 w-4" />,
       section: "Manage",
     },
-    {
-      key: "interactions",
-      label: "Interactions",
-      icon: <Gamepad2 className="h-4 w-4" />,
-      section: "Manage",
-    },
+
     {
       key: "redemptions",
       label: "Redemptions",

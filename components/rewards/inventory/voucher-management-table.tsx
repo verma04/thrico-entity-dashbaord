@@ -29,7 +29,7 @@ import moment from "moment";
 export interface Voucher {
   id: string;
   code: string;
-  offerId: string;
+  rewardId: string;
   rewardTitle?: string;
   isUsed: boolean;
   assignedTo?: string;
@@ -108,7 +108,7 @@ export function VoucherManagementTable({
             {voucher.rewardTitle || "System Reward"}
           </span>
           <span className="text-[10px] text-muted-foreground mt-0.5 font-medium">
-            ID: {voucher?.offerId?.substring(0, 8).toUpperCase()}
+            ID: {voucher?.rewardId?.substring(0, 8).toUpperCase()}
           </span>
         </div>
       ),

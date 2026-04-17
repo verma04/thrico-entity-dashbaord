@@ -70,7 +70,7 @@ export const GET_VOUCHERS = gql`
   query GetVouchers($rewardId: ID!, $pagination: PaginationInput) {
     getVouchers(rewardId: $rewardId, pagination: $pagination) {
       id
-      offerId
+      rewardId
       code
       isUsed
       assignedTo

@@ -30,7 +30,7 @@ import moment from "moment";
 interface Voucher {
   id: string;
   code: string;
-  offerId: string;
+  rewardId: string;
   rewardTitle?: string;
   isUsed: boolean;
   assignedTo?: string;

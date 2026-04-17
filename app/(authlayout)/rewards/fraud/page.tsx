@@ -35,6 +35,7 @@ import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-acti
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { EcosystemCard } from "@/components/layout/ecosystem/ecosystem-analytics";
 import { cn } from "@/lib/utils";
+import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 
 interface ToggleRowProps {
   label: string;
@@ -84,6 +85,7 @@ export default function FraudPage() {
   const { toast } = useToast();
   const { data, loading } = useGetRewardSecuritySettings();
   const [updateSettings, { loading: updating }] = useUpdateRewardSecuritySettings();
+  const [saved, setSaved] = React.useState(false);
 
   const settings = data?.getRewardSecuritySettings;
 
@@ -97,13 +99,34 @@ export default function FraudPage() {
   React.useEffect(() => {
     if (settings) {
       setLocalSettings({
-        dailyRedemptionLimit: settings.dailyRedemptionLimit,
-        requireKyc: settings.requireKyc,
-        lockToDeviceId: settings.lockToDeviceId,
-        maxIpVelocity: settings.maxIpVelocity,
+        dailyRedemptionLimit: settings.dailyRedemptionLimit || 0,
+        requireKyc: settings.requireKyc || false,
+        lockToDeviceId: settings.lockToDeviceId || false,
+        maxIpVelocity: settings.maxIpVelocity || 0,
       });
     }
   }, [settings]);
+
+  const hasChanged = React.useMemo(() => {
+    if (!settings) return false;
+    return (
+      localSettings.dailyRedemptionLimit !== (settings.dailyRedemptionLimit || 0) ||
+      localSettings.requireKyc !== (settings.requireKyc || false) ||
+      localSettings.lockToDeviceId !== (settings.lockToDeviceId || false) ||
+      localSettings.maxIpVelocity !== (settings.maxIpVelocity || 0)
+    );
+  }, [localSettings, settings]);
+
+  const handleReset = () => {
+    if (settings) {
+      setLocalSettings({
+        dailyRedemptionLimit: settings.dailyRedemptionLimit || 0,
+        requireKyc: settings.requireKyc || false,
+        lockToDeviceId: settings.lockToDeviceId || false,
+        maxIpVelocity: settings.maxIpVelocity || 0,
+      });
+    }
+  };
 
   const set = (key: string, val: any) => setLocalSettings((s: any) => ({ ...s, [key]: val }));
 
@@ -120,6 +143,8 @@ export default function FraudPage() {
         },
       });
       toast({ title: "Settings saved", description: "Security configuration updated successfully." });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
     } catch {
       toast({ title: "Update failed", description: "Could not save settings. Please try again.", variant: "destructive" });
     }
@@ -157,22 +182,6 @@ export default function FraudPage() {
             <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />
             Changes apply immediately after saving
           </div>
-        </div>
-
-        <div className="sm:ml-auto">
-          <Button
-            onClick={handleSave}
-            disabled={loading || updating}
-            size="sm"
-            className="gap-2"
-          >
-            {updating ? (
-              <div className="h-3.5 w-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            ) : (
-              <Save className="h-3.5 w-3.5" />
-            )}
-            {updating ? "Saving..." : "Save Settings"}
-          </Button>
         </div>
       </EcosystemActionBar>
 
@@ -319,6 +328,17 @@ export default function FraudPage() {
           </div>
         </EcosystemCard>
       </EcosystemContainer>
+
+      <FloatingSavePanel
+        hasChanged={hasChanged}
+        saved={saved}
+        isSaving={updating}
+        onSave={handleSave}
+        onReset={handleReset}
+        title="Unsaved Changes"
+        description="Security configuration has been modified."
+        buttonText="Apply Changes"
+      />
     </EcosystemWrapper>
   );
 }

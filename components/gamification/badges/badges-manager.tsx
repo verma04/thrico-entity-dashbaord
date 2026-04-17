@@ -1,19 +1,17 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { useGamificationStore } from "@/store/useGamificationStore";
 import {
   useGetEntityGamificationModules,
   useGetBadges,
-  useCreateBadge,
-  useUpdateBadge,
   Badge,
 } from "@/graphql/actions";
 import { Button } from "@/components/ui/button";
 import { renderModuleIcon } from "@/components/subscription/utils";
 import { BadgeStats } from "./badge-stats";
 import { BadgeList } from "./badge-list";
-import { BadgeDialog } from "./badge-dialog";
 import { Award, Plus, Info, LayoutGrid, RotateCcw } from "lucide-react";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
@@ -29,9 +27,9 @@ import {
 import { cn } from "@/lib/utils";
 
 export function BadgesManager() {
+  const router = useRouter();
   const { selectedModule, setSelectedModule } = useGamificationStore();
   const [search, setSearch] = useState("");
-  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const { data: gamificationModulesData } = useGetEntityGamificationModules({});
 
   const {
@@ -39,17 +37,7 @@ export function BadgesManager() {
     refetch: refetchBadges,
     loading: badgesLoading,
   } = useGetBadges();
-  const [createBadge, { loading: isCreating }] = useCreateBadge({
-    onCompleted: () => {
-      setIsDialogOpen(false);
-      refetchBadges();
-    },
-  });
-  const [updateBadge, { loading: isUpdating }] = useUpdateBadge({
-    onCompleted: () => refetchBadges(),
-  });
 
-  const isSaving = isCreating || isUpdating;
   const badges = (badgesData?.getBadges || []) as Badge[];
 
   const subscriptionModules = useMemo(() => {
@@ -61,11 +49,6 @@ export function BadgesManager() {
       icon: m.icon,
     }));
   }, [gamificationModulesData]);
-
-  const triggers =
-    gamificationModulesData?.getEntityGamificationModules?.triggers || [];
-
-  const [editingBadge, setEditingBadge] = useState<Badge | null>(null);
 
   const filteredBadges = useMemo(() => {
     let list = badges;
@@ -81,38 +64,12 @@ export function BadgesManager() {
     return list;
   }, [badges, selectedModule, search]);
 
-  const handleOpenDialog = (badge?: Badge) => {
-    if (badge) {
-      setEditingBadge(badge);
-    } else {
-      setEditingBadge(null);
-    }
-    setIsDialogOpen(true);
+  const handleCreate = () => {
+    router.push("/gamification/badges/create");
   };
 
-  const handleSave = async (formData: Partial<Badge>) => {
-    try {
-      const input = {
-        name: formData.name,
-        description: formData.description,
-        icon: formData.icon,
-        type: formData.type,
-        module: formData.module,
-        action: formData.condition?.action || null,
-        count: formData.condition?.count ? Number(formData.condition.count) : null,
-        points: formData.condition?.pointsRequired
-          ? Number(formData.condition.pointsRequired)
-          : null,
-      };
-
-      if (editingBadge) {
-        await updateBadge({ variables: { id: editingBadge.id, input } });
-      } else {
-        await createBadge({ variables: { input } });
-      }
-    } catch (error) {
-      console.error("Failed to save badge:", error);
-    }
+  const handleEdit = (badge: Badge) => {
+    router.push(`/gamification/badges/edit/${badge.id}`);
   };
 
   return (
@@ -175,7 +132,7 @@ export function BadgesManager() {
           <EcosystemActionBar.Item>
             <Button
               size="sm"
-              onClick={() => handleOpenDialog()}
+              onClick={handleCreate}
               className="h-9 px-4 rounded-xl gap-2 shadow-sm font-semibold"
             >
               <Plus className="h-3.5 w-3.5" />
@@ -195,11 +152,11 @@ export function BadgesManager() {
         </div>
 
         <div className="px-6">
-          <div className="flex items-start gap-4 p-4 rounded-2xl bg-indigo-50/30 border border-indigo-100/50 mb-6">
+          <div className="flex items-start gap-4 p-4 rounded-2xl bg-indigo-50/30 border border-indigo-100/50 mb-6 font-medium text-indigo-700/80">
             <div className="h-8 w-8 rounded-full bg-white flex items-center justify-center shadow-sm shrink-0 border border-indigo-100">
               <Info className="h-4 w-4 text-indigo-500" />
             </div>
-            <p className="text-[13px] text-indigo-700/80 leading-relaxed font-medium">
+            <p className="text-[13px] leading-relaxed">
               Badges are permanent records once issued to members. To stop issuing a badge without affecting existing recipients, safely disable it via the status toggle.
             </p>
           </div>
@@ -208,21 +165,11 @@ export function BadgesManager() {
             badges={filteredBadges}
             modules={subscriptionModules}
             refetchBadges={refetchBadges}
-            onEdit={handleOpenDialog}
+            onEdit={handleEdit}
             isLoading={badgesLoading}
           />
         </div>
       </EcosystemContainer>
-
-      <BadgeDialog
-        isOpen={isDialogOpen}
-        onOpenChange={setIsDialogOpen}
-        editingBadge={editingBadge}
-        subscriptionModules={subscriptionModules}
-        triggers={triggers}
-        isLoading={isSaving}
-        onSave={handleSave}
-      />
     </EcosystemWrapper>
   );
 }

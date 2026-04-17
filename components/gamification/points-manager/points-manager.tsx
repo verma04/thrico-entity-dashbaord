@@ -1,13 +1,12 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { useGamificationStore } from "@/store/useGamificationStore";
 import {
   useGetEntityGamificationModules,
   useGetPointRules,
   useGetGamificationStats,
-  useCreatePointRule,
-  useUpdatePointRule,
   PointRule,
 } from "@/graphql/actions";
 import { Button } from "@/components/ui/button";
@@ -24,12 +23,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { StatsCards } from "./stats-cards";
-import { PointRuleDialog } from "./point-rule-dialog";
 import { RulesTable } from "./rules-table";
 import { cn } from "@/lib/utils";
 import { renderModuleIcon } from "@/components/subscription/utils";
 
 export function PointsManager() {
+  const router = useRouter();
   const { selectedModule, setSelectedModule } = useGamificationStore();
   const [search, setSearch] = useState("");
 
@@ -51,23 +50,6 @@ export function PointsManager() {
   const pointRules = pointRulesData?.getPointRules || [];
   const gamificationStats = gamificationStatsData?.getGamificationStats;
 
-  const [createPointRule, { loading: createLoading }] = useCreatePointRule({
-    onCompleted: () => {
-      refetchRules();
-      refetchStats();
-      setIsDialogOpen(false);
-    },
-  });
-
-  const [updatePointRule, { loading: updateLoading }] = useUpdatePointRule({
-    onCompleted: () => {
-      refetchRules();
-      refetchStats();
-    },
-  });
-
-  const isSaving = createLoading || updateLoading;
-
   const subscriptionModules = useMemo(() => {
     const modules =
       gamificationModulesData?.getEntityGamificationModules?.modules || [];
@@ -77,15 +59,6 @@ export function PointsManager() {
       icon: m.icon || "Settings",
     }));
   }, [gamificationModulesData]);
-
-  const triggers = useMemo(() => {
-    return (
-      gamificationModulesData?.getEntityGamificationModules?.triggers || []
-    );
-  }, [gamificationModulesData]);
-
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingRule, setEditingRule] = useState<PointRule | null>(null);
 
   const filteredRules = useMemo(() => {
     let list = pointRules;
@@ -101,74 +74,12 @@ export function PointsManager() {
     return list;
   }, [selectedModule, pointRules, search]);
 
-  const handleOpenDialog = (rule?: PointRule) => {
-    if (rule) {
-      setEditingRule(rule);
-    } else {
-      setEditingRule(null);
-    }
-    setIsDialogOpen(true);
+  const handleCreate = () => {
+    router.push("/gamification/points/create");
   };
 
-  const handleSaveRule = async (formData: Partial<PointRule>) => {
-    try {
-      if (editingRule) {
-        await updatePointRule({
-          variables: {
-            id: editingRule.id,
-            input: {
-              points:
-                typeof formData.points === "string"
-                  ? parseInt(formData.points)
-                  : formData.points,
-              dailyCap:
-                typeof formData.dailyCap === "string"
-                  ? parseInt(formData.dailyCap)
-                  : formData.dailyCap,
-              weeklyCap:
-                typeof formData.weeklyCap === "string"
-                  ? parseInt(formData.weeklyCap)
-                  : formData.weeklyCap,
-              monthlyCap:
-                typeof formData.monthlyCap === "string"
-                  ? parseInt(formData.monthlyCap)
-                  : formData.monthlyCap,
-              isActive: formData.isActive,
-              description: formData.description,
-            },
-          },
-        });
-      } else {
-        await createPointRule({
-          variables: {
-            input: {
-              module: formData.module,
-              action: formData.action,
-              trigger: formData.trigger,
-              points:
-                typeof formData.points === "string"
-                  ? parseInt(formData.points)
-                  : formData.points,
-              dailyCap:
-                typeof formData.dailyCap === "string"
-                  ? parseInt(formData.dailyCap)
-                  : formData.dailyCap,
-              weeklyCap:
-                typeof formData.weeklyCap === "string"
-                  ? parseInt(formData.weeklyCap)
-                  : formData.weeklyCap,
-              monthlyCap:
-                typeof formData.monthlyCap === "string"
-                  ? parseInt(formData.monthlyCap)
-                  : formData.monthlyCap,
-              description: formData.description,
-            },
-          },
-        });
-      }
-    } catch (error) {
-      console.error("Error saving point rule:", error);
-    }
+  const handleEdit = (rule: PointRule) => {
+    router.push(`/gamification/points/edit/${rule.id}`);
   };
 
   return (
@@ -231,7 +142,7 @@ export function PointsManager() {
           <EcosystemActionBar.Item>
             <Button
               size="sm"
-              onClick={() => handleOpenDialog()}
+              onClick={handleCreate}
               className="h-9 px-4 rounded-xl gap-2 shadow-sm font-semibold"
             >
               <Plus className="h-3.5 w-3.5" />
@@ -266,22 +177,11 @@ export function PointsManager() {
             modules={subscriptionModules}
             refetchRules={refetchRules}
             refetchStats={refetchStats}
-            onEdit={handleOpenDialog}
+            onEdit={handleEdit}
             isLoading={rulesLoading}
           />
         </div>
       </EcosystemContainer>
-
-      <PointRuleDialog
-        isOpen={isDialogOpen}
-        onOpenChange={setIsDialogOpen}
-        editingRule={editingRule}
-        modules={subscriptionModules}
-        triggers={triggers}
-        pointRules={pointRules}
-        onSave={handleSaveRule}
-        isLoading={isSaving}
-      />
     </EcosystemWrapper>
   );
 }
