@@ -29,6 +29,7 @@ import {
 import moment from "moment";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 
 type RewardType = "tc" | "voucher" | "premium" | "none";
 
@@ -101,6 +102,18 @@ export function ScratchCardManager() {
   const [editingTier, setEditingTier] = useState<ScratchRewardTier | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  const hasChanged = React.useMemo(() => {
+    if (!config) return false;
+    return (
+      isEnabled !== (config.isActive ?? true) ||
+      scratchCost !== (config.costPerScratch ?? 15) ||
+      maxCardsPerDay !== (config.maxScratchesPerDay ?? 5) ||
+      campaignStartDate !== (config.campaignStartDate ? moment(config.campaignStartDate).format("YYYY-MM-DD") : "") ||
+      campaignEndDate !== (config.campaignEndDate ? moment(config.campaignEndDate).format("YYYY-MM-DD") : "")
+    );
+  }, [config, isEnabled, scratchCost, maxCardsPerDay, campaignStartDate, campaignEndDate]);
 
   useEffect(() => {
     if (config && !initialized) {
@@ -146,8 +159,20 @@ export function ScratchCardManager() {
         },
       });
       toast.success("Scratch card configuration saved");
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
     } catch (err: any) {
       toast.error(err?.message || "Failed to save configuration");
+    }
+  };
+
+  const handleReset = () => {
+    if (config) {
+      setIsEnabled(config.isActive ?? true);
+      setScratchCost(config.costPerScratch ?? 15);
+      setMaxCardsPerDay(config.maxScratchesPerDay ?? 5);
+      setCampaignStartDate(config.campaignStartDate ? moment(config.campaignStartDate).format("YYYY-MM-DD") : "");
+      setCampaignEndDate(config.campaignEndDate ? moment(config.campaignEndDate).format("YYYY-MM-DD") : "");
     }
   };
 
@@ -205,11 +230,7 @@ export function ScratchCardManager() {
         </EcosystemActionBar.Group>
         <EcosystemActionBar.Group align="right">
           <Button variant="outline" size="sm" onClick={() => { refetchConfig(); refetchPrizes(); }} className="gap-2">
-            Refresh
-          </Button>
-          <Button size="sm" onClick={handleSaveConfig} disabled={isMutating} className="gap-2 min-w-[140px]">
-            {savingConfig ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
-            Save Configuration
+            Refresh Data
           </Button>
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
@@ -448,6 +469,16 @@ export function ScratchCardManager() {
           </div>
         </div>
       </EcosystemContainer>
+
+      <FloatingSavePanel
+        hasChanged={hasChanged}
+        isSaving={savingConfig}
+        onSave={handleSaveConfig}
+        onReset={handleReset}
+        saved={saved}
+        title="Unsaved Changes"
+        description="You have modified the scratch card settings."
+      />
 
       {/* Tier Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

@@ -816,13 +816,10 @@ export const ImageUploadWithCrop = ({
                   </div>
                   <div>
                     <span className="font-medium">Aspect:</span>{" "}
-                    {selectedAspectRatio
-                        value={[zoom]}
-                        onValueChange={(value) => setZoom(value[0])}
-                        className="py-2"
-                      />
-                    </div>
-                  )}
+                    {selectedAspectRatio ? selectedAspectRatio.toFixed(2) : "Custom"}
+                  </div>
+                </div>
+              </div>
                 </TabsContent>
               </Tabs>
 

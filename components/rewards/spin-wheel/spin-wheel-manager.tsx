@@ -61,6 +61,7 @@ import {
 import moment from "moment";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 
 type RewardType = "TC" | "VOUCHER" | "PREMIUM" | "NOTHING";
 
@@ -277,6 +278,25 @@ export function SpinWheelManager() {
   );
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  const hasChanged = React.useMemo(() => {
+    if (!config) return false;
+    return (
+      isActive !== (config.isActive ?? true) ||
+      costPerSpin !== (config.costPerSpin ?? 20) ||
+      maxSpinsPerDay !== (config.maxSpinsPerDay ?? 3) ||
+      campaignStartDate !== (config.campaignStartDate || null) ||
+      campaignEndDate !== (config.campaignEndDate || null)
+    );
+  }, [
+    config,
+    isActive,
+    costPerSpin,
+    maxSpinsPerDay,
+    campaignStartDate,
+    campaignEndDate,
+  ]);
 
   useEffect(() => {
     if (config && !initialized) {
@@ -330,8 +350,20 @@ export function SpinWheelManager() {
         },
       });
       toast.success("Spin wheel configuration saved");
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
     } catch (err: any) {
       toast.error(err?.message || "Failed to save");
+    }
+  };
+
+  const handleReset = () => {
+    if (config) {
+      setIsActive(config.isActive ?? true);
+      setCostPerSpin(config.costPerSpin ?? 20);
+      setMaxSpinsPerDay(config.maxSpinsPerDay ?? 3);
+      setCampaignStartDate(config.campaignStartDate || null);
+      setCampaignEndDate(config.campaignEndDate || null);
     }
   };
 
@@ -429,20 +461,7 @@ export function SpinWheelManager() {
               refetchPrizes();
             }}
           >
-            Refresh
-          </Button>
-          <Button
-            size="sm"
-            onClick={handleSaveConfig}
-            disabled={isMutating}
-            className="gap-2 min-w-[140px]"
-          >
-            {savingConfig ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : (
-              <Save className="h-3.5 w-3.5" />
-            )}
-            Save Configuration
+            Refresh Data
           </Button>
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
@@ -796,6 +815,16 @@ export function SpinWheelManager() {
           </div>
         </div>
       </EcosystemContainer>
+
+      <FloatingSavePanel
+        hasChanged={hasChanged}
+        isSaving={savingConfig}
+        onSave={handleSaveConfig}
+        onReset={handleReset}
+        saved={saved}
+        title="Unsaved Configuration"
+        description="You have pending changes to the spin wheel settings."
+      />
 
       {/* Segment Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

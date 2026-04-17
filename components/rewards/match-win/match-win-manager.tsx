@@ -31,6 +31,7 @@ import { SymbolsTable, CombinationsTable } from "./config-tables";
 import { EconomySidebar } from "./economy-sidebar";
 import { SymbolDialog } from "./symbol-dialog";
 import { CombinationDialog } from "./combination-dialog";
+import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 
 export function MatchWinManager() {
   const {
@@ -80,6 +81,17 @@ export function MatchWinManager() {
   const [isSymbolDialogOpen, setIsSymbolDialogOpen] = useState(false);
   const [isCombinationDialogOpen, setIsCombinationDialogOpen] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  const hasChanged = React.useMemo(() => {
+    if (!config) return false;
+    return (
+      isActive !== (config.isActive ?? false) ||
+      costPerPlay !== (config.costPerPlay ?? 25) ||
+      maxPlaysPerDay !== (config.maxPlaysPerDay ?? 3) ||
+      festivalMode !== (config.festivalMode ?? false)
+    );
+  }, [config, isActive, costPerPlay, maxPlaysPerDay, festivalMode]);
 
   // Sync from API
   useEffect(() => {
@@ -139,8 +151,19 @@ export function MatchWinManager() {
         },
       });
       toast.success("Match & Win configuration saved!");
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
     } catch (err: any) {
       toast.error(err?.message || "Failed to save configuration");
+    }
+  };
+
+  const handleReset = () => {
+    if (config) {
+      setIsActive(config.isActive ?? false);
+      setCostPerPlay(config.costPerPlay ?? 25);
+      setMaxPlaysPerDay(config.maxPlaysPerDay ?? 3);
+      setFestivalMode(config.festivalMode ?? false);
     }
   };
 
@@ -302,16 +325,7 @@ export function MatchWinManager() {
               className="gap-1.5"
             >
               <RefreshCw className={cn("h-3.5 w-3.5", (isMutating || dataLoading || playsLoading) && "animate-spin")} />
-              Refresh
-            </Button>
-            <Button
-              size="sm"
-              onClick={handleSaveConfig}
-              disabled={isMutating}
-              className="gap-2 min-w-[130px]"
-            >
-              {savingConfig ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
-              Save Config
+              Refresh Data
             </Button>
           </div>
         </div>
@@ -425,6 +439,16 @@ export function MatchWinManager() {
         saving={upsertingCombination}
         rewardsData={rewardsData}
         symbols={dbSymbols}
+      />
+
+      <FloatingSavePanel
+        hasChanged={hasChanged}
+        isSaving={savingConfig}
+        onSave={handleSaveConfig}
+        onReset={handleReset}
+        saved={saved}
+        title="Unsaved Changes"
+        description="You have modified the match win game configuration."
       />
     </div>
   );
