@@ -23,6 +23,9 @@ import {
   ChevronDown,
   Pause,
   Play,
+  BookOpen,
+  Link,
+  ExternalLink,
 } from "lucide-react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -398,6 +401,46 @@ export default function MCPPage() {
       <EcosystemContainer className="mt-6 border-none bg-transparent shadow-none ring-0 p-0">
         {activeTab === "keys" ? (
           <div className="bg-white rounded-3xl border border-zinc-200/60 shadow-sm overflow-hidden p-6 mx-1">
+            {/* Connection Guide */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
+              <div className="lg:col-span-1 p-5 rounded-3xl bg-transparent border-2 border-dashed border-zinc-200 flex flex-col items-center justify-center text-center space-y-3 group hover:border-primary/30 transition-all">
+                <div className="h-12 w-12 rounded-2xl bg-zinc-100 text-zinc-400 flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-all">
+                  <BookOpen className="h-6 w-6" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-zinc-900">Claude Integration</h4>
+                  <p className="text-[11px] text-zinc-500 px-4">Connect your workspace tools directly to Claude Desktop.</p>
+                </div>
+              </div>
+
+              <div className="lg:col-span-2 p-1 bg-zinc-50 rounded-3xl border border-zinc-200/60 overflow-hidden flex flex-col md:flex-row">
+                <div className="flex-1 p-5 border-b md:border-b-0 md:border-r border-zinc-200/60 transition-all hover:bg-white">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="h-6 w-6 rounded-md bg-indigo-100 text-indigo-600 flex items-center justify-center text-[10px] font-bold">1</div>
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 font-mono">Endpoint URL</span>
+                  </div>
+                  <div 
+                    className="flex items-center justify-between bg-zinc-100 p-2.5 rounded-xl border border-zinc-200 group cursor-pointer hover:border-indigo-200 transition-all"
+                    onClick={() => copyToClipboard("https://mcp.thrico.app")}
+                  >
+                    <code className="text-[11px] font-mono font-bold text-zinc-600 truncate">https://mcp.thrico.app</code>
+                    <Copy className="h-3.5 w-3.5 text-zinc-400 group-hover:text-indigo-600 transition-colors" />
+                  </div>
+                </div>
+                <div className="flex-1 p-5 transition-all hover:bg-white">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="h-6 w-6 rounded-md bg-emerald-100 text-emerald-600 flex items-center justify-center text-[10px] font-bold">2</div>
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 font-mono">Authentication</span>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] text-zinc-500 leading-relaxed">
+                      In Claude Settings, use your generated <span className="font-bold text-zinc-900">API Key</span> as the <span className="text-emerald-600 font-bold underline decoration-emerald-200 underline-offset-4">Client ID</span>.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="mb-6 flex items-start gap-4 p-4 bg-blue-50/50 border border-blue-100 rounded-2xl">
               <ShieldCheck className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
               <div className="space-y-1">
@@ -625,12 +668,23 @@ export default function MCPPage() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 p-4 bg-amber-50 rounded-2xl border border-amber-100 text-amber-800">
-                <AlertCircle className="h-5 w-5 shrink-0 opacity-60" />
-                <p className="text-[11px] leading-relaxed font-medium">
-                  Please copy this key and store it in a secure location. If you
-                  lose it, you will need to generate a new one.
-                </p>
+              <div className="grid grid-cols-1 gap-2">
+                <div className="flex items-center gap-3 p-4 bg-amber-50 rounded-2xl border border-amber-100 text-amber-800">
+                  <AlertCircle className="h-5 w-5 shrink-0 opacity-60" />
+                  <p className="text-[11px] leading-relaxed font-medium">
+                    Copy this key now. It won't be shown again.
+                  </p>
+                </div>
+                
+                <div className="flex items-center gap-3 p-4 bg-indigo-50 rounded-2xl border border-indigo-100 text-indigo-800">
+                  <Link className="h-5 w-5 shrink-0 opacity-60" />
+                  <div className="text-left">
+                    <p className="text-[10px] uppercase font-bold tracking-tight opacity-70">Claude Connector Hint</p>
+                    <p className="text-[11px] leading-relaxed font-medium">
+                      Use this key as the <span className="font-bold">Client ID</span> with endpoint <span className="font-mono text-[10px] bg-indigo-100/50 px-1 rounded">https://mcp.thrico.app</span>
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
 
