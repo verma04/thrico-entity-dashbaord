@@ -68,6 +68,7 @@ import {
   GET_EVENT_ATTENDEE_ACTIVITY,
   GET_TOP_PERFORMING_EVENTS,
 } from "../../quries/events";
+import { EventType } from "@/types/event-types";
 import { DateRangeInput, TimeRange } from "../dashbaord/dashboard-quries";
 export { TimeRange };
 export type { DateRangeInput };
@@ -113,7 +114,7 @@ export type PostEventInput = {
   startDate: string;
   endDate: string;
   startTime: string;
-  type: "IN_PERSON" | "ONLINE" | "HYBRID";
+  type: EventType;
   lastDateOfRegistration: string;
   coverImage?: string;
   entity: string;

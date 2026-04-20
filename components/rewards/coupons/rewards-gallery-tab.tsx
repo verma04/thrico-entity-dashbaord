@@ -97,8 +97,6 @@ export function RewardsGalleryTab({
       {viewMode === "grid" ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
           {filteredRewards.map((reward: any) => {
-            const badge = getMechanismBadge(reward.rewardMechanism || "COUPON");
-            const BadgeIcon = badge.icon;
             return (
               <div
                 key={reward.id}
@@ -120,16 +118,27 @@ export function RewardsGalleryTab({
                       <Ticket className="h-12 w-12 mb-2" />
                     </div>
                   )}
-                  <div className="absolute top-2.5 left-2.5">
-                    <div
-                      className={cn(
-                        "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest shadow-md ring-1 ring-black/5",
-                        badge.color,
-                      )}
-                    >
-                      <BadgeIcon className="h-2.5 w-2.5" />
-                      {badge.label}
-                    </div>
+                  <div className="absolute top-2.5 left-2.5 flex flex-wrap gap-1.5 max-w-[calc(100%-100px)]">
+                    {(Array.isArray(reward.rewardMechanism)
+                      ? reward.rewardMechanism
+                      : [reward.rewardMechanism || "COUPON"]
+                    ).map((mech: string, idx: number) => {
+                      const badge = getMechanismBadge(mech);
+                      const BadgeIcon = badge.icon;
+                      return (
+                        <div
+                          key={idx}
+                          className={cn(
+                            "flex items-center gap-1 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest shadow-md ring-1 ring-black/5 animate-in fade-in slide-in-from-left-2",
+                            badge.color,
+                          )}
+                          style={{ animationDelay: `${idx * 100}ms` }}
+                        >
+                          <BadgeIcon className="h-2 w-2" />
+                          {badge.label}
+                        </div>
+                      );
+                    })}
                   </div>
                   <div className="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest border border-white/10 shadow-lg">
                     {reward.inventory ?? "∞"} Unit
@@ -218,8 +227,6 @@ export function RewardsGalleryTab({
       ) : (
         <div className="space-y-3">
           {filteredRewards.map((reward: any) => {
-            const badge = getMechanismBadge(reward.rewardMechanism || "COUPON");
-            const BadgeIcon = badge.icon;
             return (
               <div
                 key={reward.id}
@@ -239,19 +246,30 @@ export function RewardsGalleryTab({
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <h3 className="text-sm font-black text-foreground truncate group-hover:text-indigo-600 transition-colors uppercase tracking-tight">
                       {reward.title}
                     </h3>
-                    <span
-                      className={cn(
-                        "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg border text-[8px] font-black uppercase tracking-widest shrink-0",
-                        badge.chip,
-                      )}
-                    >
-                      <BadgeIcon className="h-2.5 w-2.5" />
-                      {badge.label}
-                    </span>
+                    {(Array.isArray(reward.rewardMechanism)
+                      ? reward.rewardMechanism
+                      : [reward.rewardMechanism || "COUPON"]
+                    ).map((mech: string, idx: number) => {
+                      const badge = getMechanismBadge(mech);
+                      const BadgeIcon = badge.icon;
+                      return (
+                        <span
+                          key={idx}
+                          className={cn(
+                            "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg border text-[8px] font-black uppercase tracking-widest shrink-0 animate-in zoom-in-50",
+                            badge.chip,
+                          )}
+                          style={{ animationDelay: `${idx * 100}ms` }}
+                        >
+                          <BadgeIcon className="h-2.5 w-2.5" />
+                          {badge.label}
+                        </span>
+                      );
+                    })}
                   </div>
                   <div className="flex items-center gap-4 text-[10px] font-bold text-muted-foreground/70 uppercase tracking-tighter">
                     <span className="flex items-center gap-1.5 px-2 py-0.5 bg-muted rounded">

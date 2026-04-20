@@ -42,7 +42,7 @@ export default function EventGeneralInfo() {
   const eventId = params?.id as string;
   const router = useRouter();
 
-  const [eventType, setEventType] = useState("IN_PERSON");
+  const [eventType, setEventType] = useState("in_person");
   const [registrationOpen, setRegistrationOpen] = useState(true);
 
   const { data, loading: fetchingEvent } = useEventById(eventId);
@@ -62,7 +62,7 @@ export default function EventGeneralInfo() {
       location: event?.location?.address || event?.location?.name || "",
       seats: 1500, // Not in schema yet? Add placeholder
       timezone: "pst",
-      eventType: event?.type || "IN_PERSON",
+      eventType: event?.type || "in_person",
       startDate: event?.startDate
         ? moment(event.startDate).format("YYYY-MM-DD")
         : "",
@@ -293,11 +293,11 @@ export default function EventGeneralInfo() {
                     <SelectValue placeholder="Select event type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="IN_PERSON">
+                    <SelectItem value="in_person">
                       Physical (In Person)
                     </SelectItem>
-                    <SelectItem value="ONLINE">Online</SelectItem>
-                    <SelectItem value="HYBRID">Hybrid</SelectItem>
+                    <SelectItem value="virtual">Virtual</SelectItem>
+                    <SelectItem value="hybrid">Hybrid</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

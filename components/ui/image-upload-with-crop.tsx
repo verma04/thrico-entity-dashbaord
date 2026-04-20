@@ -16,6 +16,13 @@ import {
   Circle,
   Square,
   Maximize2,
+  CheckCircle2,
+  RotateCw,
+  FlipHorizontal,
+  FlipVertical,
+  RotateCcw,
+  Sun,
+  Contrast,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -82,6 +89,9 @@ interface ImageUploadWithCropProps {
   defaultQuality?: number; // 0-100
   defaultFormat?: OutputFormat;
   hideRecommendedSize?: boolean;
+  showRotation?: boolean;
+  showFlip?: boolean;
+  showAdjustments?: boolean;
   customDescription?: string;
   onUploadStart?: () => void;
   onUploadComplete?: (url: string) => void;
@@ -154,6 +164,9 @@ export const ImageUploadWithCrop = ({
   defaultFormat = "png",
   hideRecommendedSize = false,
   customDescription,
+  showRotation = true,
+  showFlip = true,
+  showAdjustments = true,
   onUploadStart,
   onUploadComplete,
   onUploadError,
@@ -174,6 +187,11 @@ export const ImageUploadWithCrop = ({
   const [imageQuality, setImageQuality] = useState(defaultQuality);
   const [outputFormat, setOutputFormat] = useState<OutputFormat>(defaultFormat);
   const [zoom, setZoom] = useState(1);
+  const [rotation, setRotation] = useState(0);
+  const [flipHorizontal, setFlipHorizontal] = useState(false);
+  const [flipVertical, setFlipVertical] = useState(false);
+  const [brightness, setBrightness] = useState(100);
+  const [contrast, setContrast] = useState(100);
   const [isDragging, setIsDragging] = useState(false);
   const [isCustomUploading, setIsCustomUploading] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
@@ -209,6 +227,13 @@ export const ImageUploadWithCrop = ({
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
+    // Reset editor states
+    setRotation(0);
+    setFlipHorizontal(false);
+    setFlipVertical(false);
+    setBrightness(100);
+    setContrast(100);
+    setZoom(1);
   };
 
   const handleUploadError = (error: any) => {
@@ -325,18 +350,14 @@ export const ImageUploadWithCrop = ({
 
   const getCroppedImg = async (): Promise<Blob | null> => {
     const image = imgRef.current;
-    const crop = completedCrop;
-
-    if (!image || !crop) {
-      return null;
-    }
+    if (!image || !completedCrop) return null;
 
     const canvas = document.createElement("canvas");
+    const crop = completedCrop;
+
     const scaleX = image.naturalWidth / image.width;
     const scaleY = image.naturalHeight / image.height;
 
-    // Use natural pixels of the crop area for the final output dimensions
-    // This ensures no quality loss from resampling.
     const finalWidth = Math.round(crop.width * scaleX * zoom);
     const finalHeight = Math.round(crop.height * scaleY * zoom);
 
@@ -344,13 +365,19 @@ export const ImageUploadWithCrop = ({
     canvas.height = finalHeight;
     const ctx = canvas.getContext("2d");
 
-    if (!ctx) {
-      return null;
-    }
+    if (!ctx) return null;
 
-    // Enable image smoothing for better quality
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = "high";
+
+    // Apply filters
+    ctx.filter = `brightness(${brightness}%) contrast(${contrast}%)`;
+
+    // Move to the center to apply transforms
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    ctx.rotate((rotation * Math.PI) / 180);
+    ctx.scale(flipHorizontal ? -1 : 1, flipVertical ? -1 : 1);
+    ctx.translate(-canvas.width / 2, -canvas.height / 2);
 
     ctx.drawImage(
       image,
@@ -364,26 +391,30 @@ export const ImageUploadWithCrop = ({
       finalHeight,
     );
 
-    // Determine MIME type based on selected format
     const mimeType =
       outputFormat === "jpeg"
         ? "image/jpeg"
         : outputFormat === "webp"
           ? "image/webp"
           : "image/png";
-
-    // Convert quality from 0-100 to 0-1
-    const quality = imageQuality / 100;
-
     return new Promise((resolve) => {
-      canvas.toBlob(
-        (blob) => {
-          resolve(blob);
-        },
-        mimeType,
-        quality,
-      );
+      canvas.toBlob((blob) => resolve(blob), mimeType, imageQuality / 100);
     });
+  };
+
+  const handleReset = () => {
+    setRotation(0);
+    setFlipHorizontal(false);
+    setFlipVertical(false);
+    setBrightness(100);
+    setContrast(100);
+    setZoom(1);
+    if (imgRef.current) {
+      const { width, height } = imgRef.current;
+      const aspect = selectedAspectRatio || (aspectRatio ?? width / height);
+      const initialCrop = centerAspectCrop(width, height, aspect);
+      setCrop(initialCrop);
+    }
   };
 
   const handleSave = async () => {
@@ -413,7 +444,7 @@ export const ImageUploadWithCrop = ({
           setIsCustomUploading(true);
           try {
             const url = await customUploadHandler(file);
-            handleUploadSuccess(url);
+            handleUploadSuccess(url, url);
           } catch (error) {
             handleUploadError(error);
           }
@@ -439,11 +470,11 @@ export const ImageUploadWithCrop = ({
       <div className={cn("group space-y-3", className)}>
         {label && (
           <div className="flex items-center justify-between px-0.5">
-            <Label className="text-[13px] font-semibold text-foreground/90 tracking-tight">
+            <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest leading-none">
               {label}
             </Label>
             {!hideRecommendedSize && !currentImage && (
-              <span className="text-[10px] font-medium text-muted-foreground bg-muted/50 px-2 py-0.5 rounded-full border border-border/50">
+              <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">
                 {recommendedWidth} × {recommendedHeight}px
               </span>
             )}
@@ -458,10 +489,10 @@ export const ImageUploadWithCrop = ({
             {children}
           </div>
         ) : currentImage && !disablePreview ? (
-          <div className="relative group/preview overflow-hidden rounded-2xl border bg-secondary/20 transition-all duration-300 hover:border-primary/30 shadow-sm">
+          <div className="relative group/preview overflow-hidden rounded-2xl border border-border shadow-sm bg-zinc-50/50">
             <div
               className={cn(
-                "relative aspect-video flex items-center justify-center p-6 bg-dots-grid",
+                "relative aspect-video flex items-center justify-center p-6 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]",
                 previewClassName,
               )}
             >
@@ -473,18 +504,18 @@ export const ImageUploadWithCrop = ({
                 }
                 alt={label}
                 className={cn(
-                  "relative z-10 max-h-full max-w-full object-contain drop-shadow-2xl transition-transform duration-500 group-hover/preview:scale-105",
-                  circularCrop && "rounded-full shadow-2xl",
+                  "relative z-10 max-h-full max-w-full object-contain shadow-2xl transition-transform duration-500 group-hover/preview:scale-[1.02]",
+                  circularCrop && "rounded-full",
                 )}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover/preview:opacity-100 transition-opacity duration-300 z-20 flex items-end justify-between p-4 px-5">
-                <div className="flex gap-2 w-full">
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/preview:opacity-100 transition-all duration-300 z-20 backdrop-blur-[2px] flex items-center justify-center p-4">
+                <div className="flex gap-2 w-full max-w-[240px] translate-y-2 group-hover/preview:translate-y-0 transition-transform duration-300">
                   <Button
                     type="button"
                     variant="secondary"
                     size="sm"
                     onClick={() => fileInputRef.current?.click()}
-                    className="flex-1 h-9 bg-white/95 hover:bg-white text-black border-0 shadow-lg font-bold text-xs"
+                    className="flex-1 h-10 bg-white hover:bg-zinc-50 text-foreground border-none shadow-xl font-bold text-xs rounded-xl"
                     disabled={uploading}
                   >
                     <Upload className="h-3.5 w-3.5 mr-2" />
@@ -495,7 +526,7 @@ export const ImageUploadWithCrop = ({
                     variant="destructive"
                     size="sm"
                     onClick={handleRemove}
-                    className="h-9 w-9 p-0 bg-red-500/90 hover:bg-red-500 border-0 shadow-lg shrink-0"
+                    className="h-10 w-10 p-0 bg-white/10 hover:bg-rose-500 hover:text-white backdrop-blur-md border-none shadow-xl shrink-0 rounded-xl text-white transition-colors"
                     disabled={uploading}
                     aria-label={removeButtonText || "Remove image"}
                   >
@@ -504,26 +535,32 @@ export const ImageUploadWithCrop = ({
                 </div>
               </div>
             </div>
-            
+
             {/* Loading Overlay */}
             {uploading && (
-              <div className="absolute inset-0 z-30 bg-background/80 backdrop-blur-[2px] flex flex-col items-center justify-center gap-2 animate-in fade-in duration-300">
-                <Loader2 className="h-6 w-6 text-primary animate-spin" />
-                <span className="text-[11px] font-bold text-primary tracking-wider uppercase">Uploading...</span>
+              <div className="absolute inset-0 z-30 bg-white/80 backdrop-blur-md flex flex-col items-center justify-center gap-3 animate-in fade-in duration-300">
+                <div className="relative">
+                  <div className="h-12 w-12 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center">
+                    <Loader2 className="h-5 w-5 text-indigo-600 animate-spin" />
+                  </div>
+                </div>
+                <span className="text-[11px] font-bold text-indigo-600 tracking-widest uppercase">
+                  Uploading Asset...
+                </span>
               </div>
             )}
           </div>
         ) : (
           <div
             className={cn(
-              "relative flex flex-col items-center justify-center min-h-[160px] p-8 border-2 border-dashed border-border/60 rounded-2xl transition-all duration-300",
-              "group/drop flex flex-col items-center text-center",
+              "relative flex flex-col items-center justify-center min-h-[180px] p-8 border-2 border-dashed border-border rounded-2xl transition-all duration-300",
+              "group/drop bg-zinc-50/50 hover:bg-zinc-50",
               enableDragDrop && "cursor-pointer",
               !uploading &&
                 enableDragDrop &&
-                "hover:border-primary/40 hover:bg-primary/[0.02] hover:shadow-inner",
+                "hover:border-indigo-400/50 hover:shadow-lg hover:shadow-indigo-500/5",
               uploading && "opacity-60 cursor-not-allowed",
-              isDragging && "border-primary bg-primary/[0.04] scale-[1.01] shadow-xl",
+              isDragging && "border-indigo-500 bg-indigo-50/30 scale-[1.01]",
               dropzoneClassName,
             )}
             onClick={() => !uploading && fileInputRef.current?.click()}
@@ -540,49 +577,59 @@ export const ImageUploadWithCrop = ({
               }
             }}
           >
-            <div className="relative mb-4">
-              <div className={cn(
-                "h-14 w-14 rounded-2xl flex items-center justify-center border-2 border-border/50 bg-secondary/30 transition-all duration-300 group-hover/drop:scale-110 group-hover/drop:rotate-3 group-hover/drop:bg-primary/5 group-hover/drop:border-primary/20",
-                isDragging && "scale-110 rotate-3 bg-primary/10 border-primary/30 shadow-lg shadow-primary/10"
-              )}>
-                <ImageIcon
+            <div className="relative mb-5">
+              <div
+                className={cn(
+                  "h-14 w-14 rounded-2xl flex items-center justify-center border border-border bg-white shadow-sm transition-all duration-500 group-hover/drop:scale-110 group-hover/drop:rotate-3 group-hover/drop:border-indigo-200 group-hover/drop:shadow-indigo-100 group-hover/drop:shadow-xl",
+                  isDragging &&
+                    "scale-110 rotate-3 border-indigo-300 shadow-xl shadow-indigo-100 bg-indigo-50",
+                )}
+              >
+                <Upload
                   className={cn(
-                    "h-7 w-7 transition-colors duration-300",
-                    isDragging || uploading ? "text-primary" : "text-muted-foreground group-hover/drop:text-primary",
+                    "h-6 w-6 transition-colors duration-300",
+                    isDragging || uploading
+                      ? "text-indigo-600"
+                      : "text-slate-400 group-hover/drop:text-indigo-600",
                   )}
                 />
               </div>
               {uploading && (
-                <div className="absolute -bottom-1 -right-1 bg-background rounded-full p-0.5">
-                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-1 shadow-md border border-border">
+                  <Loader2 className="h-3 w-3 animate-spin text-indigo-600" />
                 </div>
               )}
             </div>
 
-            <div className="space-y-1.5 px-4">
-              <p className={cn(
-                "text-[13px] font-bold tracking-tight transition-colors duration-300",
-                isDragging ? "text-primary" : "text-foreground group-hover/drop:text-primary",
-              )}>
+            <div className="space-y-2 text-center">
+              <p
+                className={cn(
+                  "text-sm font-bold tracking-tight transition-colors duration-300",
+                  isDragging
+                    ? "text-indigo-600"
+                    : "text-slate-900 group-hover/drop:text-indigo-600",
+                )}
+              >
                 {isDragging
-                  ? `Drop to upload ${label.toLowerCase()}`
+                  ? `Drop to finish upload`
                   : uploadButtonText || `Upload ${label}`}
               </p>
-              <p className="text-[11px] text-muted-foreground/80 leading-relaxed max-w-[200px] mx-auto">
+              <p className="text-[11px] font-medium text-slate-500 leading-tight">
                 {customDescription || (
                   <>
-                    {enableDragDrop ? "Drag and drop or " : ""}
-                    <span className="text-primary/80 font-semibold group-hover/drop:text-primary underline-offset-4 decoration-primary/30">click to browse</span>
+                    Drag and drop your file or{" "}
+                    <span className="text-indigo-600 font-bold underline underline-offset-2">
+                      browse
+                    </span>
                   </>
                 )}
               </p>
             </div>
 
-            {/* Hint icons/text */}
             {!hideRecommendedSize && !customDescription && (
-              <div className="mt-6 pt-4 border-t border-border/50 w-full flex items-center justify-center gap-4">
-                <div className="flex items-center gap-1.5 text-[10px] font-medium text-muted-foreground/60 uppercase tracking-widest bg-secondary/40 px-3 py-1 rounded-full border border-border/40">
-                   {maxFileSize}MB MAX
+              <div className="mt-6 pt-6 border-t border-slate-200/60 w-full flex items-center justify-center gap-4">
+                <div className="flex items-center gap-1.5 text-[9px] font-bold text-slate-400 uppercase tracking-widest bg-white px-3 py-1.5 rounded-lg border border-border/60">
+                  MAX {maxFileSize}MB
                 </div>
               </div>
             )}
@@ -601,314 +648,373 @@ export const ImageUploadWithCrop = ({
       </div>
 
       <Dialog open={isEditorOpen} onOpenChange={setIsEditorOpen}>
-        <DialogContent className="max-w-[1000px] p-0 gap-0 overflow-hidden border-none shadow-2xl rounded-3xl bg-[#F8FAFC]">
-          <div className="flex h-[750px] max-h-[90vh]">
-            {/* Left Sidebar - Controls */}
-            <div className="w-[320px] shrink-0 border-r bg-white p-8 flex flex-col h-full overflow-y-auto">
-              <div className="mb-8">
-                <h2 className="text-xl font-black text-slate-900 tracking-tight leading-none mb-1.5 uppercase">
-                  Studio <span className="text-primary">Editor</span>
-                </h2>
-                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
-                  Fine-tune your visual asset
-                </p>
-              </div>
-
-              <Tabs defaultValue="basic" className="flex-1 flex flex-col gap-8">
-                <TabsList className="grid w-full grid-cols-2 h-10 bg-slate-100 p-1 rounded-xl">
-                  <TabsTrigger value="basic" className="rounded-lg text-[11px] font-black uppercase tracking-wider data-[state=active]:bg-white data-[state=active]:shadow-sm">Basic</TabsTrigger>
-                  <TabsTrigger value="advanced" className="rounded-lg text-[11px] font-black uppercase tracking-wider data-[state=active]:bg-white data-[state=active]:shadow-sm">Advanced</TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="basic" className="space-y-10 mt-0">
-                  {/* Aspect Ratio Presets */}
-                  {showAspectRatioPresets && (
-                    <div className="space-y-4">
-                      <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Aspect Ratio</Label>
-                      <div className="grid grid-cols-1 gap-2">
-                        {aspectRatioPresets.map((preset) => (
-                          <Button
-                            key={preset.label}
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedAspectRatio(preset.value);
-                              if (imgRef.current) {
-                                const { width, height } = imgRef.current;
-                                const aspect = preset.value || width / height;
-                                const newCrop = centerAspectCrop(
-                                  width,
-                                  height,
-                                  aspect,
-                                );
-                                setCrop(newCrop);
-                                setCompletedCrop({
-                                  unit: "px",
-                                  x: (newCrop.x / 100) * width,
-                                  y: (newCrop.y / 100) * height,
-                                  width: (newCrop.width / 100) * width,
-                                  height: (newCrop.height / 100) * height,
-                                });
-                              }
-                            }}
-                            className={cn(
-                              "relative flex items-center justify-between px-4 h-11 rounded-xl border-slate-200 text-slate-600 transition-all duration-300",
-                              selectedAspectRatio === preset.value && "border-primary bg-primary/[0.02] text-primary shadow-sm"
-                            )}
-                          >
-                            <span className="text-xs font-bold">{preset.label}</span>
-                            {preset.icon || (preset.value && <Square className="h-4 w-4 opacity-40" />)}
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Dimension Controls */}
-                  {showDimensions && (
-                    <div className="space-y-4 p-5 bg-slate-50 border border-slate-100 rounded-2xl">
-                      <Label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-2">Resolution</Label>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Input
-                            id="width"
-                            type="number"
-                            className="h-10 bg-white border-slate-200 rounded-lg font-mono text-[13px] font-bold"
-                            value={customWidth}
-                            onChange={(e) => {
-                              const value = Number(e.target.value);
-                              if (value >= minWidth && value <= maxWidth) {
-                                setCustomWidth(value);
-                              }
-                            }}
-                          />
-                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter text-center">Width</p>
-                        </div>
-                        <div className="space-y-2">
-                          <Input
-                            id="height"
-                            type="number"
-                            className="h-10 bg-white border-slate-200 rounded-lg font-mono text-[13px] font-bold"
-                            value={customHeight}
-                            onChange={(e) => {
-                              const value = Number(e.target.value);
-                              if (value >= minHeight && value <= maxHeight) {
-                                setCustomHeight(value);
-                              }
-                            }}
-                          />
-                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter text-center">Height</p>
-                        </div>
-                      </div>
-                      <div className="pt-2">
-                        <div className="flex items-center gap-1.5 p-2 bg-blue-50/50 rounded-lg border border-blue-100/50">
-                          <div className="h-2 w-2 rounded-full bg-blue-400 animate-pulse" />
-                          <p className="text-[10px] font-bold text-blue-600/80 tracking-tight">
-                            PREV: {recommendedWidth}x{recommendedHeight}px
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {circularCrop && (
-                    <div className="flex items-center gap-3 p-4 bg-emerald-50 rounded-2xl border border-emerald-100">
-                      <div className="h-8 w-8 rounded-full bg-emerald-100 flex items-center justify-center border border-emerald-200">
-                        <Circle className="h-4 w-4 text-emerald-600" />
-                      </div>
-                      <p className="text-[11px] font-bold text-emerald-700 leading-tight">
-                        Circular mask enabled. Output will be contained in a circle.
-                      </p>
-                    </div>
-                  )}
-                </TabsContent>
-
-                <TabsContent value="advanced" className="space-y-8 mt-0">
-                  {/* Quality Slider */}
-                  {showQualitySlider && (
-                    <div className="space-y-4 p-5 bg-slate-50 border border-slate-100 rounded-2xl">
-                      <div className="flex items-center justify-between mb-2">
-                        <Label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Quality</Label>
-                        <span className="text-[11px] font-black text-primary bg-primary/10 px-2 py-0.5 rounded">
-                          {imageQuality}%
-                        </span>
-                      </div>
-                      <Slider
-                        id="quality"
-                        min={1}
-                        max={100}
-                        step={1}
-                        value={[imageQuality]}
-                        onValueChange={(value) => setImageQuality(value[0])}
-                        className="py-2"
-                      />
-                      <p className="text-[10px] text-slate-400 font-medium leading-relaxed italic">
-                        Balance between fidelity and load speed.
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Format Selector */}
-                  {showFormatSelector && (
-                    <div className="space-y-4">
-                      <Label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block ml-1">Format</Label>
-                      <Select
-                        value={outputFormat}
-                        onValueChange={(value: OutputFormat) =>
-                          setOutputFormat(value)
-                        }
-                      >
-                        <SelectTrigger className="h-11 rounded-xl border-slate-200 font-bold text-xs bg-white">
-                          <SelectValue placeholder="Select format" />
-                        </SelectTrigger>
-                        <SelectContent className="rounded-xl border-slate-200">
-                          <SelectItem value="png" className="text-xs font-bold">PNG <span className="text-[10px] font-normal text-slate-400 ml-2">Lossless</span></SelectItem>
-                          <SelectItem value="jpeg" className="text-xs font-bold">JPEG <span className="text-[10px] font-normal text-slate-400 ml-2">Web Optimized</span></SelectItem>
-                          <SelectItem value="webp" className="text-xs font-bold">WebP <span className="text-[10px] font-normal text-slate-400 ml-2">Next Gen</span></SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
-
-                  {/* Zoom Slider */}
-                  {enableZoom && (
-                    <div className="space-y-4 p-5 bg-slate-50 border border-slate-100 rounded-2xl">
-                      <div className="flex items-center justify-between mb-2">
-                        <Label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Scaling</Label>
-                        <span className="text-[11px] font-black text-slate-600 bg-white shadow-sm border px-2 py-0.5 rounded">
-                          {(zoom * 100).toFixed(0)}%
-                        </span>
-                      </div>
-                      <Slider
-                        id="zoom"
-                        min={0.5}
-                        max={3}
-                        step={0.1}
-                    value={[zoom]}
-                    onValueChange={(value) => setZoom(value[0])}
-                    className="w-full"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Zoom the output image. Final size:{" "}
-                    {Math.round(customWidth * zoom)}x
-                    {Math.round(customHeight * zoom)}px
+        <DialogContent className="max-w-4xl p-0 gap-0 overflow-hidden border-none shadow-2xl rounded-[32px] bg-white">
+          <div className="flex flex-col md:flex-row h-[600px] md:h-[700px]">
+            {/* Main Preview Area */}
+            <div className="flex-1 bg-zinc-50/50 relative overflow-hidden flex flex-col">
+              <div className="p-6 border-b border-border bg-white flex items-center justify-between">
+                <div>
+                  <h3 className="text-base font-bold text-foreground">
+                    Aesthetic Studio
+                  </h3>
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                    Visual Asset Refinement
                   </p>
                 </div>
-              )}
-
-              {/* File Info */}
-              <div className="p-4 bg-muted/50 rounded-lg space-y-2">
-                <h4 className="text-sm font-medium">File Information</h4>
-                <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
-                  <div>
-                    <span className="font-medium">Format:</span>{" "}
-                    {outputFormat.toUpperCase()}
-                  </div>
-                  <div>
-                    <span className="font-medium">Quality:</span> {imageQuality}
-                    %
-                  </div>
-                  <div>
-                    <span className="font-medium">Dimensions:</span>{" "}
-                    {Math.round(customWidth * zoom)}x
-                    {Math.round(customHeight * zoom)}px
-                  </div>
-                  <div>
-                    <span className="font-medium">Aspect:</span>{" "}
-                    {selectedAspectRatio ? selectedAspectRatio.toFixed(2) : "Custom"}
+                <div className="flex items-center gap-2">
+                  <div className="px-3 py-1.5 rounded-full bg-zinc-100 border border-border flex items-center gap-2">
+                    <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-tight font-mono">
+                      {Math.round(customWidth)} × {Math.round(customHeight)} PX
+                    </span>
                   </div>
                 </div>
               </div>
-                </TabsContent>
-              </Tabs>
 
-              <div className="mt-auto pt-8 border-t flex gap-3">
+              <div className="flex-1 relative flex items-center justify-center p-8 overflow-hidden">
+                <div className="relative shadow-2xl rounded-xl overflow-hidden bg-white">
+                  <ReactCrop
+                    crop={crop}
+                    onChange={(_, percentCrop) => setCrop(percentCrop)}
+                    onComplete={(c) => setCompletedCrop(c)}
+                    aspect={selectedAspectRatio}
+                    circularCrop={circularCrop}
+                    className="max-h-[50vh]"
+                  >
+                    <img
+                      ref={imgRef}
+                      alt="Crop me"
+                      src={imgSrc}
+                      style={{
+                        transform: `scale(${zoom}) rotate(${rotation}deg) scaleX(${flipHorizontal ? -1 : 1}) scaleY(${flipVertical ? -1 : 1})`,
+                        filter: `brightness(${brightness}%) contrast(${contrast}%)`,
+                        transition:
+                          "transform 0.2s ease-out, filter 0.2s ease-out",
+                      }}
+                      onLoad={onImageLoad}
+                      className="max-w-full h-auto origin-center"
+                    />
+                  </ReactCrop>
+                </div>
+
+                {/* Visual Indicators Overlay */}
+                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 bg-white/90 backdrop-blur-md px-5 py-2.5 rounded-2xl border border-border shadow-xl z-30">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setRotation((r) => (r - 90) % 360)}
+                    className="h-8 w-8 rounded-lg hover:bg-slate-100"
+                    title="Rotate Left"
+                  >
+                    <RotateCcw className="h-4 w-4 text-slate-600" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setRotation((r) => (r + 90) % 360)}
+                    className="h-8 w-8 rounded-lg hover:bg-slate-100"
+                    title="Rotate Right"
+                  >
+                    <RotateCw className="h-4 w-4 text-slate-600" />
+                  </Button>
+                  <div className="w-px h-4 bg-slate-200 mx-1" />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setFlipHorizontal(!flipHorizontal)}
+                    className={cn(
+                      "h-8 w-8 rounded-lg",
+                      flipHorizontal
+                        ? "bg-indigo-50 text-indigo-600"
+                        : "hover:bg-slate-100 text-slate-600",
+                    )}
+                    title="Flip Horizontal"
+                  >
+                    <FlipHorizontal className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setFlipVertical(!flipVertical)}
+                    className={cn(
+                      "h-8 w-8 rounded-lg",
+                      flipVertical
+                        ? "bg-indigo-50 text-indigo-600"
+                        : "hover:bg-slate-100 text-slate-600",
+                    )}
+                    title="Flip Vertical"
+                  >
+                    <FlipVertical className="h-4 w-4" />
+                  </Button>
+                  <div className="w-px h-4 bg-slate-200 mx-1" />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleReset}
+                    className="h-8 w-8 rounded-lg text-rose-500 hover:bg-rose-50 hover:text-rose-600"
+                    title="Reset All"
+                  >
+                    <RotateCcw className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Controls Panel */}
+            <div className="w-full md:w-[340px] border-l border-border bg-white p-8 flex flex-col gap-8 overflow-y-auto">
+              <div className="space-y-6">
+                <Tabs defaultValue="dimensions" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2 h-10 bg-slate-100 p-1 rounded-xl mb-6">
+                    <TabsTrigger
+                      value="dimensions"
+                      className="rounded-lg text-[10px] font-black uppercase tracking-wider"
+                    >
+                      Layout
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="adjust"
+                      className="rounded-lg text-[10px] font-black uppercase tracking-wider"
+                    >
+                      Adjust
+                    </TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="dimensions" className="space-y-6">
+                    <div>
+                      <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-4 block">
+                        Dimensions & Presets
+                      </Label>
+
+                      {showAspectRatioPresets && (
+                        <div className="grid grid-cols-2 gap-2 mb-4">
+                          {aspectRatioPresets.map((preset) => (
+                            <Button
+                              key={preset.label}
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedAspectRatio(preset.value);
+                                if (imgRef.current) {
+                                  const { width, height } = imgRef.current;
+                                  const aspect = preset.value || width / height;
+                                  const newCrop = centerAspectCrop(
+                                    width,
+                                    height,
+                                    aspect,
+                                  );
+                                  setCrop(newCrop);
+                                  setCompletedCrop({
+                                    unit: "px",
+                                    x: (newCrop.x / 100) * width,
+                                    y: (newCrop.y / 100) * height,
+                                    width: (newCrop.width / 100) * width,
+                                    height: (newCrop.height / 100) * height,
+                                  });
+                                }
+                              }}
+                              className={cn(
+                                "h-10 rounded-xl border-border font-bold text-[11px] uppercase transition-all",
+                                selectedAspectRatio === preset.value
+                                  ? "bg-indigo-50 border-indigo-200 text-indigo-600 shadow-sm"
+                                  : "hover:bg-zinc-50",
+                              )}
+                            >
+                              {preset.label}
+                            </Button>
+                          ))}
+                        </div>
+                      )}
+
+                      {showDimensions && (
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-1.5">
+                            <Input
+                              type="number"
+                              className="h-10 rounded-xl border-border bg-zinc-50/50 font-mono text-xs font-bold focus-visible:ring-indigo-500"
+                              value={customWidth}
+                              onChange={(e) =>
+                                setCustomWidth(Number(e.target.value))
+                              }
+                            />
+                            <span className="text-[9px] font-bold text-muted-foreground uppercase text-center block">
+                              Width
+                            </span>
+                          </div>
+                          <div className="space-y-1.5">
+                            <Input
+                              type="number"
+                              className="h-10 rounded-xl border-border bg-zinc-50/50 font-mono text-xs font-bold focus-visible:ring-indigo-500"
+                              value={customHeight}
+                              onChange={(e) =>
+                                setCustomHeight(Number(e.target.value))
+                              }
+                            />
+                            <span className="text-[9px] font-bold text-muted-foreground uppercase text-center block">
+                              Height
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="h-px bg-zinc-100" />
+
+                    <div className="space-y-5">
+                      {enableZoom && (
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                              Scaling
+                            </Label>
+                            <span className="text-[10px] font-bold text-indigo-600">
+                              {(zoom * 100).toFixed(0)}%
+                            </span>
+                          </div>
+                          <Slider
+                            min={0.5}
+                            max={3}
+                            step={0.1}
+                            value={[zoom]}
+                            onValueChange={(v) => setZoom(v[0])}
+                            className="py-2"
+                          />
+                        </div>
+                      )}
+
+                      {showQualitySlider && (
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                              Quality
+                            </Label>
+                            <span className="text-[10px] font-bold text-indigo-600">
+                              {imageQuality}%
+                            </span>
+                          </div>
+                          <Slider
+                            min={1}
+                            max={100}
+                            step={1}
+                            value={[imageQuality]}
+                            onValueChange={(v) => setImageQuality(v[0])}
+                            className="py-2"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="adjust" className="space-y-8">
+                    {showAdjustments && (
+                      <div className="space-y-6">
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Sun className="h-3.5 w-3.5 text-slate-400" />
+                              <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                                Brightness
+                              </Label>
+                            </div>
+                            <span className="text-[10px] font-black text-indigo-600">
+                              {brightness}%
+                            </span>
+                          </div>
+                          <Slider
+                            min={0}
+                            max={200}
+                            step={1}
+                            value={[brightness]}
+                            onValueChange={(v) => setBrightness(v[0])}
+                            className="py-2"
+                          />
+                        </div>
+
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Contrast className="h-3.5 w-3.5 text-slate-400" />
+                              <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                                Contrast
+                              </Label>
+                            </div>
+                            <span className="text-[10px] font-black text-indigo-600">
+                              {contrast}%
+                            </span>
+                          </div>
+                          <Slider
+                            min={0}
+                            max={200}
+                            step={1}
+                            value={[contrast]}
+                            onValueChange={(v) => setContrast(v[0])}
+                            className="py-2"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {showFormatSelector && (
+                      <div className="space-y-3">
+                        <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                          Export Format
+                        </Label>
+                        <Select
+                          value={outputFormat}
+                          onValueChange={(v: OutputFormat) =>
+                            setOutputFormat(v)
+                          }
+                        >
+                          <SelectTrigger className="h-11 rounded-xl border-border bg-zinc-50/50 font-bold text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="rounded-xl p-1 shadow-2xl">
+                            <SelectItem
+                              value="png"
+                              className="rounded-lg font-bold text-xs py-2"
+                            >
+                              PNG / Lossless
+                            </SelectItem>
+                            <SelectItem
+                              value="jpeg"
+                              className="rounded-lg font-bold text-xs py-2"
+                            >
+                              JPEG / Optimized
+                            </SelectItem>
+                            <SelectItem
+                              value="webp"
+                              className="rounded-lg font-bold text-xs py-2"
+                            >
+                              WebP / Modern
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+                  </TabsContent>
+                </Tabs>
+              </div>
+
+              <div className="mt-auto pt-8 border-t border-border flex gap-3">
                 <Button
-                  variant="outline"
+                  variant="ghost"
                   onClick={() => setIsEditorOpen(false)}
-                  className="flex-1 h-12 rounded-2xl border-slate-200 text-slate-500 font-bold hover:bg-slate-50"
+                  className="flex-1 h-12 rounded-xl font-bold text-xs uppercase text-muted-foreground hover:bg-zinc-50"
                 >
                   {cancelButtonText}
                 </Button>
                 <Button
                   onClick={handleSave}
                   disabled={uploading}
-                  className="flex-[2] h-12 rounded-2xl font-black uppercase tracking-wider shadow-lg shadow-primary/20"
+                  className="flex-[1.5] h-12 rounded-xl font-bold text-xs uppercase bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-200 gap-2"
                 >
                   {uploading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Saving...
-                    </>
+                    <Loader2 className="h-4 w-4 animate-spin text-white" />
                   ) : (
-                    saveButtonText || "Apply Changes"
+                    <CheckCircle2 className="h-4 w-4" />
                   )}
+                  {saveButtonText || "Save Asset"}
                 </Button>
-              </div>
-            </div>
-
-            {/* Right Side - Canvas Area */}
-            <div className="flex-1 bg-[#F1F5F9] relative flex items-center justify-center p-12 overflow-hidden bg-dots-grid">
-              <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent pointer-events-none" />
-              
-              <div className="relative z-10 w-full h-full flex items-center justify-center">
-                {imgSrc && (
-                  <div className="relative group/canvas max-w-full max-h-full">
-                    {/* Floating Canvas Meta */}
-                    <div className="absolute -top-12 left-0 right-0 flex items-center justify-between px-2 animate-in slide-in-from-bottom-2 duration-500">
-                      <div className="flex items-center gap-2">
-                         <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full border shadow-sm">
-                           Live Preview
-                         </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                         <span className="text-[10px] font-black text-primary uppercase tracking-widest bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full border shadow-sm">
-                           {customWidth} × {customHeight} PX
-                         </span>
-                      </div>
-                    </div>
-
-                    <div className="p-4 bg-white rounded-[2rem] shadow-2xl shadow-slate-200/50 border border-white/40">
-                      <div className="relative overflow-hidden rounded-2xl">
-                        <ReactCrop
-                          crop={crop}
-                          onChange={(_, percentCrop) => setCrop(percentCrop)}
-                          onComplete={(c) => {
-                            setCompletedCrop(c);
-                            if (imgRef.current) {
-                              const scaleX =
-                                imgRef.current.naturalWidth / imgRef.current.width;
-                              const scaleY =
-                                imgRef.current.naturalHeight /
-                                imgRef.current.height;
-                              setCustomWidth(Math.round(c.width * scaleX));
-                              setCustomHeight(Math.round(c.height * scaleY));
-                            }
-                          }}
-                          aspect={selectedAspectRatio}
-                          circularCrop={circularCrop}
-                          className="react-crop-studio"
-                        >
-                          <img
-                            ref={imgRef}
-                            alt="Crop preview"
-                            src={imgSrc}
-                            onLoad={onImageLoad}
-                            className="max-w-full max-h-[500px] object-contain transition-transform duration-500 ease-out"
-                            style={{
-                              transform: `scale(${zoom})`,
-                              transformOrigin: "center",
-                            }}
-                          />
-                        </ReactCrop>
-                      </div>
-                    </div>
-                    
-                    {/* Shadow Decor */}
-                    <div className="absolute -inset-10 bg-primary/5 blur-3xl -z-10 rounded-full opacity-50 pointer-events-none" />
-                  </div>
-                )}
               </div>
             </div>
           </div>

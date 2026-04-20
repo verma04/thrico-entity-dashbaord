@@ -10,8 +10,10 @@ import moment from "moment";
 import { useRouter } from "next/navigation";
 
 function getTypeStyles(type: string) {
-  switch (type) {
+  const normalizedType = type?.toUpperCase();
+  switch (normalizedType) {
     case "ONLINE":
+    case "VIRTUAL":
       return "bg-cyan-500/10 text-cyan-600 border-cyan-500/20";
     case "HYBRID":
       return "bg-amber-500/10 text-amber-600 border-amber-500/20";

@@ -15,7 +15,12 @@ const events = `
   startTime
   type
   lastDateOfRegistration
-  location 
+  location {
+    name
+    address
+    latitude
+    longitude
+  }
   visibility
   verification {
     id

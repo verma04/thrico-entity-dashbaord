@@ -48,7 +48,7 @@ export function EventPreview({ eventData, coverImage }: EventPreviewProps) {
     startDate,
     endDate,
     startTime,
-    type = "IN_PERSON",
+    type = "in_person",
     lastDateOfRegistration,
   } = eventData;
 
@@ -63,10 +63,12 @@ export function EventPreview({ eventData, coverImage }: EventPreviewProps) {
   };
 
   const getEventTypeBadgeClass = (eventType: string) => {
-    switch (eventType) {
+    const normalizedType = eventType?.toUpperCase();
+    switch (normalizedType) {
       case "IN_PERSON":
         return "bg-blue-500/5 text-blue-600 border-blue-500/20";
       case "ONLINE":
+      case "VIRTUAL":
         return "bg-green-500/5 text-green-600 border-green-500/20";
       case "HYBRID":
         return "bg-purple-500/5 text-purple-600 border-purple-500/20";
@@ -76,11 +78,13 @@ export function EventPreview({ eventData, coverImage }: EventPreviewProps) {
   };
 
   const getEventTypeLabel = (eventType: string) => {
-    switch (eventType) {
+    const normalizedType = eventType?.toUpperCase();
+    switch (normalizedType) {
       case "IN_PERSON":
         return "In Person";
       case "ONLINE":
-        return "Online";
+      case "VIRTUAL":
+        return "Virtual";
       case "HYBRID":
         return "Hybrid";
       default:

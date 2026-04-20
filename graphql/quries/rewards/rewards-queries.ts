@@ -1,12 +1,16 @@
 import { gql } from "@apollo/client";
 
 export const GET_REWARDS = gql`
-  query GetRewards(
+  query (
     $status: String
     $search: String
     $pagination: PaginationInput
   ) {
-    getRewards(status: $status, search: $search, pagination: $pagination) {
+    getRewards(
+      status: $status
+      search: $search
+      pagination: $pagination
+    ) {
       id
       title
       description
@@ -258,7 +262,10 @@ export const GET_VOUCHERS_BY_REWARD_MECHANISM = gql`
     $mechanism: RewardMechanism!
     $pagination: PaginationInput
   ) {
-    getVouchersByRewardMechanism(mechanism: $mechanism, pagination: $pagination) {
+    getVouchersByRewardMechanism(
+      mechanism: $mechanism
+      pagination: $pagination
+    ) {
       id
       rewardId
       code

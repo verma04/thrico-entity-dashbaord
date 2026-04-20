@@ -97,6 +97,7 @@ export function SpinWheelManager() {
     useGetVouchersByRewardMechanism({
       mechanism: "SPIN_WHEEL",
       pagination: { page: 1, limit: 100 },
+      pollInterval: 1000,
     });
 
   const uniqueVoucherRewards = React.useMemo(() => {

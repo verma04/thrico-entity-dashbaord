@@ -78,7 +78,7 @@ export function EventsCreationForm({
       startDate: initialValues?.startDate || "",
       endDate: initialValues?.endDate || "",
       startTime: initialValues?.startTime || "",
-      type: initialValues?.type || "IN_PERSON",
+      type: initialValues?.type || "in_person",
       lastDateOfRegistration: initialValues?.lastDateOfRegistration || "",
     },
     validationSchema: eventSchema,
@@ -394,9 +394,9 @@ export function EventsCreationForm({
                             <SelectValue placeholder="Select event type" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="IN_PERSON">In Person</SelectItem>
-                            <SelectItem value="ONLINE">Online</SelectItem>
-                            <SelectItem value="HYBRID">Hybrid</SelectItem>
+                            <SelectItem value="in_person">In Person</SelectItem>
+                            <SelectItem value="virtual">Virtual</SelectItem>
+                            <SelectItem value="hybrid">Hybrid</SelectItem>
                           </SelectContent>
                         </Select>
                         {formik.touched.type && formik.errors.type && (

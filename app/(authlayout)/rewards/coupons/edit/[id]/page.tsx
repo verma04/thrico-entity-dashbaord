@@ -70,7 +70,9 @@ export default function EditRewardPage() {
               blockWarnedUsers: values.blockWarnedUsers,
               cooldownPeriod: values.cooldownPeriod,
               image: values.image,
-              rewardMechanism: values.rewardMechanism,
+              rewardMechanism: Array.isArray(values.rewardMechanism)
+                ? values.rewardMechanism
+                : [values.rewardMechanism || "COUPON"],
               status: values.status,
               isActive: values.isActive,
             },

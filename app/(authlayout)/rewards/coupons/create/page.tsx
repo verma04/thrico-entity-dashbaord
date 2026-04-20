@@ -54,8 +54,8 @@ export default function CreateCouponPage() {
               cooldownPeriod: values.cooldownPeriod,
               image: values.image,
               rewardMechanism: Array.isArray(values.rewardMechanism)
-                ? values.rewardMechanism[0] || "COUPON"
-                : values.rewardMechanism || "COUPON",
+                ? values.rewardMechanism
+                : [values.rewardMechanism || "COUPON"],
             },
           },
         });

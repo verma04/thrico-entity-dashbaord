@@ -21,6 +21,7 @@ import {
   Search,
   ShieldCheck,
   UserCheck,
+  Terminal,
 } from "lucide-react";
 import Link from "next/link";
 import { useUserStore } from "@/store/store";
@@ -61,6 +62,11 @@ const allMenuItems: MenuItem[] = [
   { key: "/settings/policies", icon: FileStack, label: "Policies" },
   { key: "/settings/contact", icon: Headset, label: "Contact Support" },
   { key: "/settings/integrations", icon: Blocks, label: "Integrations" },
+  {
+    key: "/settings/mcp",
+    icon: Terminal,
+    label: "Model Context Protocol (MCP)",
+  },
 ];
 
 /** Semantic section grouping */
@@ -85,6 +91,7 @@ const buildSections = (items: MenuItem[]): MenuSection[] => {
     find("/settings/modules"),
     find("/settings/languages"),
     find("/settings/integrations"),
+    find("/settings/mcp"),
   ].filter(Boolean) as MenuItem[];
   if (platformItems.length)
     sections.push({ title: "Platform", items: platformItems });
@@ -253,6 +260,7 @@ function SettingsLayout({ children }: { children: React.ReactNode }) {
       if (item.key === "/settings/policies") return permissions?.settings;
       if (item.key === "/settings/integrations")
         return permissions?.platformFeatures;
+      if (item.key === "/settings/mcp") return permissions?.platformFeatures;
       return true;
     });
   }, [user, isSuperAdmin, isSystemRole, permissions]);
