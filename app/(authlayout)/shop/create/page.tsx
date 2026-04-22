@@ -36,8 +36,7 @@ const CreateProductPage = () => {
           price: values.price,
           currency: values.currency,
           category: values.category,
-          image: values.image,
-          images: values.images,
+
           isOutOfStock: values.isOutOfStock,
           externalLink: values.externalLink,
         },
