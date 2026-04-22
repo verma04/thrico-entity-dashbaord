@@ -215,38 +215,118 @@ export function useDeleteMentorshipSkills(
 }
 
 // ---------------------------------------------------------
-// FEATURE MENTOR
+// MARK TOP MENTOR
 // ---------------------------------------------------------
 
-export interface FeatureMentorInput {
+export interface MarkTopMentorInput {
   mentorshipId: string;
-  isFeatured: boolean;
+  isTopMentor: boolean;
 }
 
-export interface FeatureMentorResponse {
-  featureMentor: {
+export interface MarkTopMentorResponse {
+  markTopMentor: {
     id: string;
-    isFeatured: boolean;
+    isTopMentor: boolean;
   };
 }
 
-export const FEATURE_MENTOR = gql`
-  mutation FeatureMentor($input: featureMentorInput) {
-    featureMentor(input: $input) {
+export const MARK_TOP_MENTOR = gql`
+  mutation MarkTopMentor($input: markTopMentorInput) {
+    markTopMentor(input: $input) {
       id
-      isFeatured
+      isTopMentor
     }
   }
 `;
 
-export function useFeatureMentor(
+export function useMarkTopMentor(
   options?: MutationHookOptions<
-    FeatureMentorResponse,
-    { input: FeatureMentorInput }
+    MarkTopMentorResponse,
+    { input: MarkTopMentorInput }
   >,
 ) {
-  return useMutation<FeatureMentorResponse, { input: FeatureMentorInput }>(
-    FEATURE_MENTOR,
+  return useMutation<MarkTopMentorResponse, { input: MarkTopMentorInput }>(
+    MARK_TOP_MENTOR,
+    options,
+  );
+}
+
+// ---------------------------------------------------------
+// REMOVE MENTOR
+// ---------------------------------------------------------
+
+export interface RemoveMentorInput {
+  mentorshipId: string;
+}
+
+export interface RemoveMentorResponse {
+  removeMentor: {
+    id: string;
+    displayName: string;
+  };
+}
+
+export const REMOVE_MENTOR = gql`
+  mutation RemoveMentor($id: ID!) {
+    removeMentor(input: { mentorshipId: $id }) {
+      id
+      displayName
+    }
+  }
+`;
+
+export function useRemoveMentor(
+  options?: MutationHookOptions<
+    RemoveMentorResponse,
+    { id: string }
+  >,
+) {
+  return useMutation<RemoveMentorResponse, { id: string }>(
+    REMOVE_MENTOR,
+    options,
+  );
+}
+
+// ---------------------------------------------------------
+// UPDATE MENTOR
+// ---------------------------------------------------------
+
+export interface UpdateMentorInput {
+  id: string;
+  displayName?: string;
+  category?: string;
+  skills?: string[];
+  intro?: string;
+  about?: string;
+  featuredArticle?: string;
+  introVideo?: string;
+  whyDoWantBecomeMentor?: string;
+  greatestAchievement?: string;
+  isFeatured?: boolean;
+  isTopMentor?: boolean;
+}
+
+export interface UpdateMentorResponse {
+  updateMentor: {
+    id: string;
+    displayName: string;
+  };
+}
+
+export const UPDATE_MENTOR = gql`
+  mutation UpdateMentor($input: UpdateMentorInput!) {
+    updateMentor(input: $input) {
+      id
+      displayName
+    }
+  }
+`;
+
+export function useUpdateMentor(
+  options?: MutationHookOptions<UpdateMentorResponse, { input: UpdateMentorInput }>,
+) {
+  return useMutation<UpdateMentorResponse, { input: UpdateMentorInput }>(
+    UPDATE_MENTOR,
     options,
   );
 }

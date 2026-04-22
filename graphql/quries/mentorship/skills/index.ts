@@ -2,7 +2,7 @@ import { gql } from "@apollo/client";
 
 export const GET_ALL_MENTOR_SKILLS = gql`
   query GET_ALL_MENTOR_SKILLS {
-    getAllMentorSkills {
+    getMentorSkills {
       id
       title
       createdAt

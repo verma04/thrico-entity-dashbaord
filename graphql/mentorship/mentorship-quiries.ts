@@ -35,17 +35,21 @@ export interface Mentor {
   displayName: string;
   slug: string;
   about: string;
+  description?: string;
   featuredArticle?: string;
   greatestAchievement?: string;
   intro?: string;
   introVideo?: string;
   whyDoWantBecomeMentor?: string;
   agreement?: boolean;
-  user: MentorUser;
+  mentorUser: MentorUser;
   category: MentorCategory;
   createdAt?: string;
   updatedAt?: string;
   isFeatured?: boolean;
+  isTopMentor?: boolean;
+  mentorSince?: string;
+  skills?: string[];
 }
 
 export interface PaginationInput {
@@ -53,40 +57,41 @@ export interface PaginationInput {
   offset?: number;
 }
 
-export interface AllStatusInput extends PaginationInput {
-  status?:
-    | "APPROVED"
-    | "BLOCKED"
-    | "PENDING"
-    | "REJECTED"
-    | "REQUESTED"
-    | "ALL";
+export interface GetAllMentorInput {
+  status?: string;
+  limit?: number;
+  offset?: number;
+  searchQuery?: string;
+  category?: string;
+  isTopMentor?: boolean;
+  isFeatured?: boolean;
 }
 
 // ---------------------------------------------------------
 // PENDING MENTORSHIPS
 // ---------------------------------------------------------
 
-export interface GetAllPendingMentorshipsData {
-  getAllPendingMentorships: Mentor[];
+export interface MentorshipRequestsData {
+  mentorshipRequests: Mentor[];
 }
 
-const GET_ALL_PENDING_MENTORSHIPS = gql`
-  query GetAllPendingMentorships($input: PaginationInput) {
-    getAllPendingMentorships(input: $input) {
+const GET_MENTORSHIP_REQUESTS = gql`
+  query MentorshipRequests($input: PaginationInput) {
+    mentorshipRequests(input: $input) {
       id
       isApproved
       isRequested
       displayName
       slug
       about
+      description
       featuredArticle
       greatestAchievement
       intro
       introVideo
       whyDoWantBecomeMentor
       agreement
-      user {
+      mentorUser {
         user {
           avatar
           firstName
@@ -97,20 +102,24 @@ const GET_ALL_PENDING_MENTORSHIPS = gql`
         id
         title
       }
+      isFeatured
+      isTopMentor
+      skills
+      mentorSince
       createdAt
       updatedAt
     }
   }
 `;
 
-export function useGetAllPendingMentorships(
+export function useMentorshipRequests(
   options?: QueryHookOptions<
-    GetAllPendingMentorshipsData,
+    MentorshipRequestsData,
     { input?: PaginationInput }
   >,
 ) {
-  return useQuery<GetAllPendingMentorshipsData, { input?: PaginationInput }>(
-    GET_ALL_PENDING_MENTORSHIPS,
+  return useQuery<MentorshipRequestsData, { input?: PaginationInput }>(
+    GET_MENTORSHIP_REQUESTS,
     options,
   );
 }
@@ -139,7 +148,7 @@ const GET_ALL_MENTORSHIPS = gql`
       isFeatured
       whyDoWantBecomeMentor
       agreement
-      user {
+      mentorUser {
         user {
           avatar
           firstName
@@ -177,7 +186,7 @@ export interface GetAllMentorData {
 }
 
 const GET_ALL_MENTOR = gql`
-  query GetAllMentor($input: allStatusInput) {
+  query GetAllMentor($input: getAllMentorInput) {
     getAllMentor(input: $input) {
       id
       isApproved
@@ -192,7 +201,7 @@ const GET_ALL_MENTOR = gql`
       isFeatured
       whyDoWantBecomeMentor
       agreement
-      user {
+      mentorUser {
         user {
           avatar
           firstName
@@ -205,14 +214,17 @@ const GET_ALL_MENTOR = gql`
       }
       createdAt
       updatedAt
+      isTopMentor
+      mentorSince
+      skills
     }
   }
 `;
 
 export function useGetAllMentor(
-  options?: QueryHookOptions<GetAllMentorData, { input?: AllStatusInput }>,
+  options?: QueryHookOptions<GetAllMentorData, { input?: GetAllMentorInput }>,
 ) {
-  return useQuery<GetAllMentorData, { input?: AllStatusInput }>(
+  return useQuery<GetAllMentorData, { input?: GetAllMentorInput }>(
     GET_ALL_MENTOR,
     options,
   );
@@ -264,7 +276,7 @@ const GET_MENTOR = gql`
       introVideo
       whyDoWantBecomeMentor
       agreement
-      user {
+      mentorUser {
         user {
           avatar
           firstName
@@ -373,7 +385,7 @@ const UPDATE_MENTORSHIP_STATUS = gql`
       introVideo
       whyDoWantBecomeMentor
       agreement
-      user {
+      mentorUser {
         user {
           avatar
           firstName
@@ -400,4 +412,119 @@ export function useUpdateMentorshipStatus(
     UpdateMentorshipStatusData,
     { input: UpdateMentorshipStatusInput }
   >(UPDATE_MENTORSHIP_STATUS, options);
+}
+
+// ---------------------------------------------------------
+// GET MENTOR BY ID
+// ---------------------------------------------------------
+
+export interface GetMentorByIdData {
+  getMentorById: Mentor;
+}
+
+const GET_MENTOR_BY_ID = gql`
+  query GetMentorById($id: ID!) {
+    getMentorById(id: $id) {
+      id
+      isApproved
+      isRequested
+      displayName
+      slug
+      about
+      description
+      featuredArticle
+      greatestAchievement
+      intro
+      introVideo
+      whyDoWantBecomeMentor
+      agreement
+      mentorUser {
+        user {
+          avatar
+          firstName
+          lastName
+        }
+      }
+      category {
+        id
+        title
+      }
+      isFeatured
+      isTopMentor
+      skills
+      mentorSince
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export function useGetMentorById(
+  options?: QueryHookOptions<GetMentorByIdData, { id: string }>,
+) {
+  return useQuery<GetMentorByIdData, { id: string }>(GET_MENTOR_BY_ID, options);
+}
+
+// ---------------------------------------------------------
+// AUDIT LOGS
+// ---------------------------------------------------------
+
+export interface MentorshipAuditLog {
+  action: string;
+  admin: {
+    firstName: string;
+    lastName: string;
+    avatar?: string;
+  };
+  targetUser: {
+    firstName: string;
+    lastName: string;
+    avatar?: string;
+  };
+  createdAt: string;
+}
+
+export interface MentorshipAuditLogsData {
+  mentorshipAuditLogs: {
+    data: MentorshipAuditLog[];
+    meta: {
+      totalItems: number;
+    };
+  };
+}
+
+export const GET_MENTORSHIP_AUDIT_LOGS = gql`
+  query MentorshipAuditLogs($pagination: PaginationInput) {
+    mentorshipAuditLogs(pagination: $pagination) {
+      data {
+        action
+        admin {
+          firstName
+          lastName
+          avatar
+        }
+        targetUser {
+          firstName
+          lastName
+          avatar
+        }
+        createdAt
+      }
+      meta {
+        totalItems
+      }
+    }
+  }
+`;
+
+export function useMentorshipAuditLogs(
+  options?: QueryHookOptions<
+    MentorshipAuditLogsData,
+    { pagination?: PaginationInput }
+  >,
+) {
+  return useQuery<MentorshipAuditLogsData, { pagination?: PaginationInput }>(
+    GET_MENTORSHIP_AUDIT_LOGS,
+    options,
+  );
 }

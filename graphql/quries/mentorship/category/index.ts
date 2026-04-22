@@ -2,7 +2,7 @@ import { gql } from "@apollo/client";
 
 export const GET_ALL_MENTOR_CATEGORY = gql`
   query GET_ALL_MENTOR_CATEGORY {
-    getAllMentorCategory {
+    getMentorCategories {
       id
       title
       createdAt

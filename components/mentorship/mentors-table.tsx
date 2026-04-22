@@ -6,8 +6,10 @@ import { DataTable } from "@/components/ui/data-table";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Mentor } from "@/types/mentor-types";
-import { Star, TrendingUp, User } from "lucide-react";
+import { Ban, CheckCircle2, Clock, Star, TrendingUp, User } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import { formatDistanceToNow } from "date-fns";
 import { MentorActions } from "./mentor-actions";
 
 interface MentorsTableProps {
@@ -23,17 +25,38 @@ export function MentorsTable({
   onEdit,
   onRefetch,
 }: MentorsTableProps) {
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "approved":
-        return "text-emerald-600 bg-emerald-50 border-emerald-200";
-      case "pending":
-        return "text-amber-600 bg-amber-50 border-amber-200";
-      case "rejected":
-        return "text-rose-600 bg-rose-50 border-rose-200";
-      default:
-        return "text-muted-foreground bg-muted border-transparent";
-    }
+  const getStatusBadge = (status: string) => {
+    const variants: Record<string, { color: string; icon: any }> = {
+      approved: {
+        color: "text-emerald-600 bg-emerald-50 border-emerald-100",
+        icon: <CheckCircle2 className="w-3 h-3" />,
+      },
+      pending: {
+        color: "text-amber-600 bg-amber-50 border-amber-100",
+        icon: <Clock className="w-3 h-3" />,
+      },
+      rejected: {
+        color: "text-rose-600 bg-rose-50 border-rose-100",
+        icon: <Ban className="w-3 h-3" />,
+      },
+    };
+
+    const config = variants[status.toLowerCase()] || {
+      color: "text-zinc-500 bg-zinc-50 border-zinc-100",
+      icon: <User className="w-3 h-3" />,
+    };
+
+    return (
+      <span
+        className={cn(
+          "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border transition-all duration-300",
+          config.color,
+        )}
+      >
+        {config.icon}
+        {status}
+      </span>
+    );
   };
 
   const columns: ColumnDef<any>[] = [
@@ -44,29 +67,27 @@ export function MentorsTable({
         const mentor = row.original;
         return (
           <div className="flex items-center gap-4">
-            <Avatar className="h-10 w-10 border border-border">
-              <AvatarImage src={mentor.image} alt={mentor.name} />
-              <AvatarFallback>
-                <User className="h-5 w-5 text-muted-foreground" />
+            <Avatar className="h-10 w-10 border border-border shadow-sm group-hover:scale-105 transition-transform">
+              <AvatarImage
+                src={`https://cdn.thrico.network/${mentor.avatar}`}
+                alt={mentor.name}
+              />
+              <AvatarFallback className="bg-indigo-50 text-indigo-200">
+                <User className="h-5 w-5" />
               </AvatarFallback>
             </Avatar>
             <div className="flex flex-col gap-0.5">
               <div className="flex items-center gap-2">
-                <span className="font-bold text-foreground leading-tight">
+                <span className="font-bold text-slate-900 leading-tight group-hover:text-indigo-600 transition-colors">
                   {mentor.name}
                 </span>
-                {(mentor.isFeatured || mentor.isTrending) && (
+                {mentor.isTopMentor && (
                   <div className="flex gap-1">
-                    {mentor.isFeatured && (
-                      <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
-                    )}
-                    {mentor.isTrending && (
-                      <TrendingUp className="h-3 w-3 text-blue-500" />
-                    )}
+                    <Star className="h-3 w-3 text-amber-400 fill-amber-400 animate-pulse" />
                   </div>
                 )}
               </div>
-              <span className="text-xs text-muted-foreground line-clamp-1">
+              <span className="text-[10px] uppercase font-black tracking-widest text-slate-400 line-clamp-1">
                 {mentor.title}
               </span>
             </div>
@@ -80,7 +101,7 @@ export function MentorsTable({
       cell: ({ row }) => (
         <Badge
           variant="outline"
-          className="font-medium bg-muted/30 border-transparent text-foreground"
+          className="font-bold bg-slate-50 border-slate-100 text-slate-600 text-[10px] uppercase tracking-tighter"
         >
           {row.original.categoryName}
         </Badge>
@@ -92,21 +113,42 @@ export function MentorsTable({
       cell: ({ row }) => {
         const expertise = row.original.expertise || [];
         return (
-          <div className="flex flex-wrap gap-1 max-w-[250px]">
+          <div className="flex flex-wrap gap-1.5 max-w-[250px]">
             {expertise.slice(0, 2).map((item: string, idx: number) => (
               <Badge
                 key={idx}
                 variant="secondary"
-                className="text-[10px] px-1.5 py-0 h-4"
+                className="text-[10px] font-bold px-2 py-0 h-4 bg-indigo-50 text-indigo-600 border-indigo-100 rounded-md"
               >
                 {item}
               </Badge>
             ))}
             {expertise.length > 2 && (
-              <span className="text-[10px] text-muted-foreground">
+              <Badge
+                variant="ghost"
+                className="text-[10px] font-bold text-slate-400 px-1"
+              >
                 +{expertise.length - 2}
-              </span>
+              </Badge>
             )}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "mentorSince",
+      header: "Mentor Since",
+      cell: ({ row }) => {
+        const date = row.original.mentorSince || row.original.createdAt;
+        if (!date) return <span className="text-slate-400">-</span>;
+        return (
+          <div className="flex flex-col">
+            <span className="text-xs font-bold text-slate-700">
+              {format(new Date(date), "MMM d, yyyy")}
+            </span>
+            <span className="text-[10px] text-slate-400 font-medium whitespace-nowrap">
+              {formatDistanceToNow(new Date(date), { addSuffix: true })}
+            </span>
           </div>
         );
       },
@@ -114,17 +156,7 @@ export function MentorsTable({
     {
       accessorKey: "status",
       header: "Status",
-      cell: ({ row }) => (
-        <Badge
-          variant="outline"
-          className={cn(
-            "text-[10px] uppercase font-bold px-1.5 py-0 h-5",
-            getStatusColor(row.original.status),
-          )}
-        >
-          {row.original.status}
-        </Badge>
-      ),
+      cell: ({ row }) => getStatusBadge(row.original.status),
     },
     {
       id: "actions",

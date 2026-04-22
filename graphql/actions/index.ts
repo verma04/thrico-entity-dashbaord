@@ -115,16 +115,33 @@ export interface GetEntitySettingsResponse {
 export const useEntitySettings = () =>
   useQuery<GetEntitySettingsResponse>(GET_ENTITY_SETTINGS);
 
-export const useUpdateEntitySettings = (options: any) =>
-  useMutation(UPDATE_ENTITY_SETTINGS, {
+export const useUpdateEntitySettings = (options: any) => {
+  const [mutate, result] = useMutation(UPDATE_ENTITY_SETTINGS, {
     ...options,
     refetchQueries: [
       {
         query: GET_ENTITY_SETTINGS,
       },
     ],
-    awaitRefetchQueries: true, // ensures mutation waits until refetch is complete
+    awaitRefetchQueries: true,
   });
+
+  const wrappedMutate = (mutationOptions: any) => {
+    if (mutationOptions?.variables?.input) {
+      const { __typename, id, entity, ...rest } = mutationOptions.variables.input;
+      return mutate({
+        ...mutationOptions,
+        variables: {
+          ...mutationOptions.variables,
+          input: rest,
+        },
+      });
+    }
+    return mutate(mutationOptions);
+  };
+
+  return [wrappedMutate, result] as any;
+};
 
 // Membership terms are exported via membership-queries
 

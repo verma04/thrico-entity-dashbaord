@@ -1,8 +1,12 @@
 "use client";
 
 import React from "react";
-import { Mentor, MentorSource } from "@/types/mentor-types";
-import { useMentorStore } from "@/store/useMentorStore";
+import { Mentor as GqlMentor } from "@/graphql/mentorship/mentorship-quiries";
+import { 
+  useGetMentorCategories, 
+  useGetMentorshipStats 
+} from "@/graphql/mentorship/mentorship-quiries";
+import { useUpdateMentor } from "@/graphql/mentorship/mentoship-muation";
 import {
   Sheet,
   SheetContent,
@@ -30,10 +34,10 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 
 interface MentorEditorProps {
-  mentor?: Mentor | null;
+  mentor?: any | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  source?: MentorSource;
+  onRefetch?: () => void;
 }
 
 const mentorSchema = Yup.object().shape({
@@ -60,60 +64,69 @@ export const MentorEditor: React.FC<MentorEditorProps> = ({
   mentor,
   open,
   onOpenChange,
-  source = "admin",
+  onRefetch,
 }) => {
-  const { addMentor, updateMentor, categories } = useMentorStore();
-  const { toast } = useToast();
+  const { data: categoriesData } = useGetMentorCategories();
+  const [updateMentorGql, { loading: updating }] = useUpdateMentor();
+  const { toast: sonnerToast } = useToast();
+
+  const categories = categoriesData?.getMentorCategories || [];
 
   const formik = useFormik({
     initialValues: {
-      name: mentor?.name || "",
-      title: mentor?.title || "",
-      bio: mentor?.bio || "",
-      image: mentor?.image || "",
-      categoryId: mentor?.categoryId || "",
-      email: mentor?.email || "",
-      linkedin: mentor?.linkedin || "",
-      website: mentor?.website || "",
-      expertise: mentor?.expertise?.join(", ") || "",
-      yearsOfExperience: mentor?.yearsOfExperience || 0,
-      availability: mentor?.availability || "Available",
+      name: mentor?.displayName || mentor?.name || "",
+      title: mentor?.intro || mentor?.title || "",
+      bio: mentor?.about || mentor?.bio || "",
+      image: mentor?.mentorUser?.user?.avatar || mentor?.image || "",
+      categoryId: mentor?.category?.id || mentor?.categoryId || "",
+      email: mentor?.mentorUser?.user?.email || mentor?.email || "",
+      expertise: (mentor?.skills ? mentor?.skills.join(", ") : (mentor?.expertise?.join(", ") || "")),
       isFeatured: mentor?.isFeatured || false,
-      isTrending: mentor?.isTrending || false,
+      isTopMentor: mentor?.isTopMentor || mentor?.isTrending || false,
     },
     validationSchema: mentorSchema,
     enableReinitialize: true,
-    onSubmit: (values) => {
-      const now = new Date().toISOString();
-
-      const mentorData: Mentor = {
-        id: mentor?.id || `mentor-${Date.now()}`,
-        ...values,
-        expertise: values.expertise.split(",").map((e) => e.trim()).filter(Boolean),
-        categoryName: categories.find((c) => c.id === values.categoryId)?.name,
-        status: mentor?.status || (source === "admin" ? "approved" : "pending"),
-        source: mentor?.source || source,
-        addedBy: mentor?.addedBy || (source === "admin" ? "admin" : "user-123"),
-        isActive: mentor?.isActive ?? true,
-        createdAt: mentor?.createdAt || now,
-        updatedAt: now,
-      };
-
-      if (mentor) {
-        updateMentor(mentor.id, mentorData);
-        toast({
-          title: "Mentor Updated",
-          description: `"${values.name}" has been updated.`,
-        });
-      } else {
-        addMentor(mentorData);
-        toast({
-          title: "Mentor Created",
-          description: `"${values.name}" has been ${source === "admin" ? "created" : "submitted for approval"}.`,
+    onSubmit: async (values) => {
+      try {
+        if (mentor) {
+          await updateMentorGql({
+            variables: {
+              input: {
+                id: mentor.id,
+                displayName: values.name,
+                category: values.categoryId,
+                skills: values.expertise.split(",").map(s => s.trim()).filter(Boolean),
+                intro: values.title,
+                about: values.bio,
+                isFeatured: values.isFeatured,
+                isTopMentor: values.isTopMentor,
+              }
+            }
+          });
+          
+          sonnerToast({
+            title: "Mentor Updated",
+            description: `"${values.name}" has been synchronized with the registry.`,
+          });
+          
+          if (onRefetch) onRefetch();
+        } else {
+          // Add logic would go here if implemented
+          sonnerToast({
+            title: "Not Implemented",
+            description: "Direct creation via dashboard is coming soon. Please use user application flow.",
+            variant: "destructive"
+          });
+        }
+        
+        handleClose();
+      } catch (error: any) {
+        sonnerToast({
+          title: "Update Failed",
+          description: error.message || "An unexpected error occurred during synchronization.",
+          variant: "destructive"
         });
       }
-
-      handleClose();
     },
   });
 
@@ -210,10 +223,9 @@ export const MentorEditor: React.FC<MentorEditorProps> = ({
               </SelectTrigger>
               <SelectContent>
                 {categories
-                  .filter((c) => c.isActive)
-                  .map((cat) => (
+                  .map((cat: any) => (
                     <SelectItem key={cat.id} value={cat.id}>
-                      {cat.name}
+                      {cat.title}
                     </SelectItem>
                   ))}
               </SelectContent>
@@ -285,64 +297,58 @@ export const MentorEditor: React.FC<MentorEditorProps> = ({
             <p className="text-xs text-muted-foreground">Separate multiple areas with commas</p>
           </div>
 
-          {/* Years of Experience & Availability */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="yearsOfExperience">Years of Experience</Label>
-              <Input
-                id="yearsOfExperience"
-                type="number"
-                {...formik.getFieldProps("yearsOfExperience")}
-                placeholder="5"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="availability">Availability</Label>
-              <Input
-                id="availability"
-                {...formik.getFieldProps("availability")}
-                placeholder="Available"
-              />
-            </div>
+          {/* Availability (Optional) */}
+          <div className="space-y-2">
+            <Label htmlFor="availability">Availability Profile</Label>
+            <Input
+              id="availability"
+              disabled
+              value="Managed by System"
+              className="bg-zinc-50"
+            />
           </div>
 
           {/* Toggles (Admin only) */}
-          {source === "admin" && (
-            <div className="space-y-3 p-4 border rounded-lg">
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="isFeatured"
-                  checked={formik.values.isFeatured}
-                  onChange={(e) => formik.setFieldValue("isFeatured", e.target.checked)}
-                />
-                <Label htmlFor="isFeatured" className="flex items-center gap-1">
-                  <Star className="h-3 w-3" />
-                  Featured Mentor
-                </Label>
-              </div>
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="isTrending"
-                  checked={formik.values.isTrending}
-                  onChange={(e) => formik.setFieldValue("isTrending", e.target.checked)}
-                />
-                <Label htmlFor="isTrending" className="flex items-center gap-1">
-                  <TrendingUp className="h-3 w-3" />
-                  Trending Mentor
-                </Label>
-              </div>
+          <div className="space-y-3 p-4 border rounded-xl bg-zinc-50/50">
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                id="isFeatured"
+                className="h-4 w-4 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-600"
+                checked={formik.values.isFeatured}
+                onChange={(e) => formik.setFieldValue("isFeatured", e.target.checked)}
+              />
+              <Label htmlFor="isFeatured" className="flex items-center gap-2 cursor-pointer font-bold text-xs uppercase tracking-wider text-zinc-600">
+                <Star className={cn("h-4 w-4", formik.values.isFeatured ? "fill-amber-400 text-amber-400" : "text-zinc-400")} />
+                Featured Node
+              </Label>
             </div>
-          )}
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                id="isTopMentor"
+                className="h-4 w-4 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-600"
+                checked={formik.values.isTopMentor}
+                onChange={(e) => formik.setFieldValue("isTopMentor", e.target.checked)}
+              />
+              <Label htmlFor="isTopMentor" className="flex items-center gap-2 cursor-pointer font-bold text-xs uppercase tracking-wider text-zinc-600">
+                <TrendingUp className={cn("h-4 w-4", formik.values.isTopMentor ? "text-emerald-500" : "text-zinc-400")} />
+                Elite Tier (Top Mentor)
+              </Label>
+            </div>
+          </div>
 
           <SheetFooter className="gap-2 flex-row justify-end px-0 py-4 border-t">
             <Button type="button" variant="outline" onClick={handleClose}>
               Cancel
             </Button>
-            <Button type="submit" disabled={!formik.isValid}>
-              <Save className="h-4 w-4 mr-2" />
-              {mentor ? "Update" : source === "admin" ? "Create" : "Submit"} Mentor
+            <Button type="submit" disabled={!formik.isValid || updating} className="bg-indigo-600 hover:bg-indigo-700">
+              {updating ? (
+                <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+              ) : (
+                <Save className="h-4 w-4 mr-2" />
+              )}
+              {mentor ? "Sync Updates" : "Onboard Mentor"}
             </Button>
           </SheetFooter>
         </form>

@@ -114,11 +114,28 @@ export const useGetEntitySettings = (options?: any) =>
   useQuery<GetEntitySettingsResponse>(GET_ENTITY_SETTINGS, options);
 
 // Custom hook to update entity settings
-export const useUpdateEntitySettings = (options?: any) =>
-  useMutation<
+export const useUpdateEntitySettings = (options?: any) => {
+  const [mutate, result] = useMutation<
     UpdateEntitySettingsResponse,
     { input: UpdateEntitySettingsInput }
   >(UPDATE_ENTITY_SETTINGS, options);
+
+  const wrappedMutate = (mutationOptions: any) => {
+    if (mutationOptions?.variables?.input) {
+      const { __typename, id, entity, ...rest } = mutationOptions.variables.input;
+      return mutate({
+        ...mutationOptions,
+        variables: {
+          ...mutationOptions.variables,
+          input: rest,
+        },
+      });
+    }
+    return mutate(mutationOptions);
+  };
+
+  return [wrappedMutate, result] as any;
+};
 
 // Custom hook to update feed order
 export const useUpdateFeedOrder = (options?: any) =>

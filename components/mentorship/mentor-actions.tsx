@@ -5,8 +5,9 @@ import {
   XCircle,
   Eye,
   MoreHorizontal,
-  Ban,
   Clock,
+  Sparkles,
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,7 +30,7 @@ import { Textarea } from "@/components/ui/textarea";
 import React, { useState } from "react";
 import { toast } from "sonner";
 import { useUpdateMentorshipStatus } from "@/graphql/mentorship/mentorship-quiries";
-import { useFeatureMentor } from "@/graphql/mentorship/mentoship-muation";
+import { useFeatureMentor, useMarkTopMentor, useRemoveMentor } from "@/graphql/mentorship/mentoship-muation";
 import { Star, StarOff } from "lucide-react";
 import { MentorDetailsDialog } from "./mentor-details-dialog";
 
@@ -38,7 +39,7 @@ interface Mentor {
   displayName: string;
   isApproved: boolean;
   isRequested: boolean;
-  isFeatured?: boolean;
+  isTopMentor?: boolean;
   [key: string]: any; // Allow for other fields like about, intro, etc.
 }
 
@@ -53,8 +54,9 @@ type ActionType =
   | "REJECT"
   | "BLOCK"
   | "VIEW_DETAILS"
-  | "FEATURE"
-  | "UNFEATURE";
+  | "MARK_TOP"
+  | "REMOVE_TOP"
+  | "REMOVE";
 
 export function MentorActions({ mentor, onView, refetch }: MentorActionsProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -75,10 +77,11 @@ export function MentorActions({ mentor, onView, refetch }: MentorActionsProps) {
     },
   });
 
-  const [featureMentor, { loading: featureLoading }] = useFeatureMentor({
+
+  const [markTopMentor, { loading: topLoading }] = useMarkTopMentor({
     onCompleted: (data) => {
       toast.success(
-        `Mentor ${data.featureMentor.isFeatured ? "featured" : "unfeatured"} successfully`,
+        `Mentor ${data.markTopMentor.isTopMentor ? "marked as top" : "removed from top"} successfully`,
       );
       refetch();
     },
@@ -87,7 +90,18 @@ export function MentorActions({ mentor, onView, refetch }: MentorActionsProps) {
     },
   });
 
-  const isLoading = statusLoading || featureLoading;
+  const [removeMentor, { loading: removeLoading }] = useRemoveMentor({
+    onCompleted: () => {
+      toast.success("Mentor removed successfully");
+      setIsModalOpen(false);
+      refetch();
+    },
+    onError: (error) => {
+      toast.error(error.message || "Removal failed");
+    },
+  });
+
+  const isLoading = statusLoading || topLoading || removeLoading;
 
   const handleAction = (action: ActionType) => {
     if (action === "VIEW_DETAILS") {
@@ -101,23 +115,32 @@ export function MentorActions({ mentor, onView, refetch }: MentorActionsProps) {
   const confirmAction = async () => {
     if (!dialogAction || dialogAction === "VIEW_DETAILS") return;
 
-    if (dialogAction === "FEATURE" || dialogAction === "UNFEATURE") {
-      await featureMentor({
+
+    if (dialogAction === "MARK_TOP" || dialogAction === "REMOVE_TOP") {
+      await markTopMentor({
         variables: {
           input: {
             mentorshipId: mentor.id,
-            isFeatured: dialogAction === "FEATURE",
+            isTopMentor: dialogAction === "MARK_TOP",
           },
         },
       });
-      setIsModalOpen(false); // No modal for feature/unfeature but good to be safe
+      setIsModalOpen(false);
+      return;
+    }
+
+    if (dialogAction === "REMOVE") {
+      await removeMentor({
+        variables: {
+          id: mentor.id,
+        },
+      });
       return;
     }
 
     const statusMap = {
       APPROVE: "APPROVED",
       REJECT: "REJECTED",
-      BLOCK: "BLOCKED",
     } as const;
 
     await updateStatus({
@@ -125,7 +148,7 @@ export function MentorActions({ mentor, onView, refetch }: MentorActionsProps) {
         input: {
           mentorshipId: mentor.id,
           status: statusMap[
-            dialogAction as "APPROVE" | "REJECT" | "BLOCK"
+            dialogAction as "APPROVE" | "REJECT"
           ] as any,
         },
       },
@@ -138,8 +161,8 @@ export function MentorActions({ mentor, onView, refetch }: MentorActionsProps) {
         return "Approve Mentor";
       case "REJECT":
         return "Reject Mentor";
-      case "BLOCK":
-        return "Block Mentor";
+      case "REMOVE":
+        return "Remove Mentor";
       default:
         return "Confirm Action";
     }
@@ -151,14 +174,14 @@ export function MentorActions({ mentor, onView, refetch }: MentorActionsProps) {
         return "Are you sure you want to approve this mentor application? They will be able to start mentoring.";
       case "REJECT":
         return "Are you sure you want to reject this mentor application? Please provide a reason.";
-      case "BLOCK":
-        return "Are you sure you want to block this mentor? This action can be reversed later.";
+      case "REMOVE":
+        return "Are you sure you want to permanently remove this mentor? This action cannot be undone.";
       default:
         return "Please confirm this action.";
     }
   };
 
-  const isReasonRequired = ["REJECT", "BLOCK"].includes(dialogAction || "");
+  const isReasonRequired = ["REJECT"].includes(dialogAction || "");
 
   return (
     <>
@@ -189,29 +212,31 @@ export function MentorActions({ mentor, onView, refetch }: MentorActionsProps) {
             </DropdownMenuItem>
           )}
 
-          <DropdownMenuItem
-            onClick={() => handleAction("REJECT")}
-            className="cursor-pointer text-rose-600"
-          >
-            <XCircle className="mr-2 h-4 w-4" />
-            Reject
-          </DropdownMenuItem>
+          {!mentor.isApproved && (
+            <DropdownMenuItem
+              onClick={() => handleAction("REJECT")}
+              className="cursor-pointer text-rose-600"
+            >
+              <XCircle className="mr-2 h-4 w-4" />
+              Reject
+            </DropdownMenuItem>
+          )}
 
           <DropdownMenuItem
             onClick={() =>
-              handleAction(mentor.isFeatured ? "UNFEATURE" : "FEATURE")
+              handleAction(mentor.isTopMentor ? "REMOVE_TOP" : "MARK_TOP")
             }
             className="cursor-pointer"
           >
-            {mentor.isFeatured ? (
+            {mentor.isTopMentor ? (
               <>
-                <StarOff className="mr-2 h-4 w-4 text-amber-500" />
-                Remove Featured
+                <Sparkles className="mr-2 h-4 w-4 text-indigo-500 fill-indigo-500" />
+                Remove Top Mentor
               </>
             ) : (
               <>
-                <Star className="mr-2 h-4 w-4 text-amber-500" />
-                Mark Featured
+                <Sparkles className="mr-2 h-4 w-4 text-indigo-500" />
+                Mark Top Mentor
               </>
             )}
           </DropdownMenuItem>
@@ -219,11 +244,11 @@ export function MentorActions({ mentor, onView, refetch }: MentorActionsProps) {
           <DropdownMenuSeparator />
 
           <DropdownMenuItem
-            onClick={() => handleAction("BLOCK")}
-            className="cursor-pointer text-amber-600"
+            onClick={() => handleAction("REMOVE")}
+            className="cursor-pointer text-rose-600 font-bold"
           >
-            <Ban className="mr-2 h-4 w-4" />
-            Block
+            <Trash2 className="mr-2 h-4 w-4" />
+            Remove Mentor
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -263,7 +288,7 @@ export function MentorActions({ mentor, onView, refetch }: MentorActionsProps) {
             </Button>
             <Button
               variant={
-                ["REJECT", "BLOCK"].includes(dialogAction || "")
+                ["REJECT", "REMOVE"].includes(dialogAction || "")
                   ? "destructive"
                   : "default"
               }

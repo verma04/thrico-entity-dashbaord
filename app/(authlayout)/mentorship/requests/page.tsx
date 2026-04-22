@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useGetAllPendingMentorships } from "@/graphql/mentorship/mentorship-quiries";
+import { useMentorshipRequests } from "@/graphql/mentorship/mentorship-quiries";
 import { MentorEditor } from "@/components/mentorship/mentor-editor";
 import { MentorActions } from "@/components/mentorship/mentor-actions";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -9,14 +9,20 @@ import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Eye, CheckCircle, XCircle } from "lucide-react";
+import { Eye, CheckCircle, XCircle, Info, Settings2 } from "lucide-react";
 import { format } from "date-fns";
+import { useEntitySettings } from "@/graphql/actions";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import Link from "next/link";
 
-export default function UserRequestsPage() {
+export default function MentorshipRequestPage() {
   const [selectedMentor, setSelectedMentor] = useState<any | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const { data: settingsData } = useEntitySettings();
 
-  const { data, loading, refetch } = useGetAllPendingMentorships({
+  const autoApprove = settingsData?.getEntitySettings?.autoApproveMentorship;
+
+  const { data, loading, refetch } = useMentorshipRequests({
     variables: {
       input: {
         limit: 100,
@@ -25,7 +31,7 @@ export default function UserRequestsPage() {
     },
   });
 
-  const mentors = data?.getAllPendingMentorships || [];
+  const mentors = data?.mentorshipRequests || [];
 
   const handleEdit = (mentor: any) => {
     setSelectedMentor(mentor);
@@ -157,12 +163,31 @@ export default function UserRequestsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold">User Requests</h2>
+        <h2 className="text-2xl font-semibold">Mentorship Request</h2>
         <p className="text-sm text-muted-foreground mt-1">
           {mentors.length} pending mentor application
           {mentors.length !== 1 ? "s" : ""}
         </p>
       </div>
+
+      {autoApprove ? (
+        <Alert className="bg-amber-50 border-amber-200 text-amber-800">
+          <Settings2 className="h-4 w-4 stroke-amber-600" />
+          <AlertTitle className="font-semibold text-amber-900">Auto-Approval Enabled</AlertTitle>
+          <AlertDescription className="text-amber-700">
+            Your system is configured to <strong>automatically approve</strong> all mentor applications. New requests will not appear in this list as they bypass the review process. 
+            To change this, visit <Link href="/mentorship/settings" className="underline font-medium hover:text-amber-900">Mentorship Settings</Link>.
+          </AlertDescription>
+        </Alert>
+      ) : (
+        <Alert className="bg-blue-50 border-blue-200 text-blue-800">
+          <Info className="h-4 w-4 stroke-blue-600" />
+          <AlertTitle className="font-semibold text-blue-900">Manual Review Required</AlertTitle>
+          <AlertDescription className="text-blue-700">
+            Auto-approval is <strong>disabled</strong>. All incoming mentor applications will appear here and remain pending until you manually review and approve them.
+          </AlertDescription>
+        </Alert>
+      )}
 
       <DataTable columns={columns} data={mentors} />
 
