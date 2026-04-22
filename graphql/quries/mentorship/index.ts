@@ -39,12 +39,6 @@ export const ADD_MENTOR = gql`
         id
         title
       }
-      user {
-        user {
-          firstName
-          lastName
-        }
-      }
     }
   }
 `;

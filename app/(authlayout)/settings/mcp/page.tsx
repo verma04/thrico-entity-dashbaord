@@ -405,7 +405,7 @@ export default function MCPPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
               <div className="lg:col-span-1 p-5 rounded-3xl bg-transparent border-2 border-dashed border-zinc-200 flex flex-col items-center justify-center text-center space-y-3 group hover:border-primary/30 transition-all">
                 <div className="h-12 w-12 rounded-2xl bg-zinc-100 text-zinc-400 flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-all">
-                  <BookOpen className="h-6 w-6" />
+                  <Terminal className="h-6 w-6" />
                 </div>
                 <div>
                   <h4 className="text-sm font-bold text-zinc-900">Claude Integration</h4>
@@ -413,30 +413,71 @@ export default function MCPPage() {
                 </div>
               </div>
 
-              <div className="lg:col-span-2 p-1 bg-zinc-50 rounded-3xl border border-zinc-200/60 overflow-hidden flex flex-col md:flex-row">
-                <div className="flex-1 p-5 border-b md:border-b-0 md:border-r border-zinc-200/60 transition-all hover:bg-white">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="h-6 w-6 rounded-md bg-indigo-100 text-indigo-600 flex items-center justify-center text-[10px] font-bold">1</div>
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 font-mono">Endpoint URL</span>
-                  </div>
-                  <div 
-                    className="flex items-center justify-between bg-zinc-100 p-2.5 rounded-xl border border-zinc-200 group cursor-pointer hover:border-indigo-200 transition-all"
-                    onClick={() => copyToClipboard("https://mcp.thrico.app")}
-                  >
-                    <code className="text-[11px] font-mono font-bold text-zinc-600 truncate">https://mcp.thrico.app</code>
-                    <Copy className="h-3.5 w-3.5 text-zinc-400 group-hover:text-indigo-600 transition-colors" />
-                  </div>
-                </div>
-                <div className="flex-1 p-5 transition-all hover:bg-white">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="h-6 w-6 rounded-md bg-emerald-100 text-emerald-600 flex items-center justify-center text-[10px] font-bold">2</div>
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 font-mono">Authentication</span>
-                  </div>
+              <div className="lg:col-span-2 p-1 bg-zinc-50 rounded-3xl border border-zinc-200/60 overflow-hidden flex flex-col">
+                <div className="p-5 border-b border-zinc-200/60 transition-all hover:bg-white flex items-center justify-between">
                   <div className="space-y-1">
-                    <p className="text-[10px] text-zinc-500 leading-relaxed">
-                      In Claude Settings, use your generated <span className="font-bold text-zinc-900">API Key</span> as the <span className="text-emerald-600 font-bold underline decoration-emerald-200 underline-offset-4">Client ID</span>.
-                    </p>
+                     <div className="flex items-center gap-2">
+                       <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 font-mono">claude_desktop_config.json</span>
+                     </div>
+                     <p className="text-[10px] text-zinc-500 leading-relaxed">
+                       Add this configuration to your Claude Desktop config file. Replace <span className="font-bold text-zinc-900">&lt;YOUR_API_KEY&gt;</span> with a key generated below.
+                     </p>
                   </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    className="h-8 text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100"
+                    onClick={() => copyToClipboard(`{
+  "mcpServers": {
+    "thrico": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/client-sse",
+        "--url",
+        "https://mcp.thrico.app/sse?token=<YOUR_API_KEY>"
+      ]
+    }
+  }
+}`)}
+                  >
+                    <Copy className="h-3.5 w-3.5 mr-2" />
+                    Copy Config
+                  </Button>
+                </div>
+                <div className="bg-zinc-900 p-4 overflow-x-auto text-left">
+                  <pre className="text-[10px] font-mono leading-relaxed text-zinc-300">
+                    <span className="text-pink-400">"mcpServers"</span>: {'{'}
+                    <br />
+                    {'  '}
+                    <span className="text-emerald-300">"thrico"</span>: {'{'}
+                    <br />
+                    {'    '}
+                    <span className="text-blue-300">"command"</span>: <span className="text-amber-300">"npx"</span>,
+                    <br />
+                    {'    '}
+                    <span className="text-blue-300">"args"</span>: [
+                    <br />
+                    {'      '}
+                    <span className="text-amber-300">"-y"</span>,
+                    <br />
+                    {'      '}
+                    <span className="text-amber-300">"@modelcontextprotocol/client-sse"</span>,
+                    <br />
+                    {'      '}
+                    <span className="text-amber-300">"--url"</span>,
+                    <br />
+                    {'      '}
+                    <span className="text-amber-300">"https://mcp.thrico.app/sse?token=&lt;YOUR_API_KEY&gt;"</span>
+                    <br />
+                    {'    '}
+                    ]
+                    <br />
+                    {'  '}
+                    {'}'}
+                    <br />
+                    {'}'}
+                  </pre>
                 </div>
               </div>
             </div>
