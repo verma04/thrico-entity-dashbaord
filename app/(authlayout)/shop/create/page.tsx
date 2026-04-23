@@ -28,6 +28,20 @@ const CreateProductPage = () => {
   });
 
   const onFinish = (values: any) => {
+    // Determine images array
+    const imageList =
+      values.images && values.images.length > 0
+        ? values.images
+        : values.image
+          ? [values.image]
+          : [];
+
+    // Construct media object for GraphQL
+    const media = imageList.map((url: string, index: number) => ({
+      url,
+      sortOrder: index,
+    }));
+
     create({
       variables: {
         input: {
@@ -36,9 +50,12 @@ const CreateProductPage = () => {
           price: values.price,
           currency: values.currency,
           category: values.category,
-
+          sku: values.variants?.[0]?.sku || "",
+          media: media,
           isOutOfStock: values.isOutOfStock,
           externalLink: values.externalLink,
+          hasVariants: values.hasVariants,
+          options: values.options,
         },
       },
     });
