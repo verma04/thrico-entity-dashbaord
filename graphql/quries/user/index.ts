@@ -91,6 +91,11 @@ const details = `
         comment
         affliction
       }
+      industries {
+        updatedAt
+        title
+        id
+      }
 `;
 export const GET_ALL_USER = gql`
   query GetAllUser($input: allStatusInput) {
@@ -187,6 +192,11 @@ export const GET_USER_DETIALS = gql`
             duration
           }
         }
+      }
+      industries {
+        updatedAt
+        title
+        id
       }
     }
   }
@@ -300,6 +310,25 @@ export const GET_GROWTH_STATS = gql`
       data {
         date
         count
+      }
+    }
+  }
+`;
+export const UPDATE_MEMBER = gql`
+  mutation UpdateMember($input: UpdateMemberInput!) {
+    updateMember(input: $input) {
+      id
+      isApproved
+      isRequested
+      status
+      lastActive
+      isOnline
+      user {
+        id
+        firstName
+        lastName
+        email
+        avatar
       }
     }
   }

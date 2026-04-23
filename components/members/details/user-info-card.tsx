@@ -263,6 +263,24 @@ export function UserInfoCard({ member }: { member: any }) {
                 {user.profile?.language || "English"}
               </span>
             </div>
+            {member.industries && member.industries.length > 0 && (
+              <div className="flex flex-col p-4 gap-2">
+                <span className="text-muted-foreground flex items-center gap-2">
+                  <Briefcase className="h-4 w-4" /> Industries
+                </span>
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {member.industries.map((industry: any) => (
+                    <Badge 
+                      key={industry.id} 
+                      variant="secondary" 
+                      className="bg-indigo-50 text-indigo-700 border-indigo-100 hover:bg-indigo-100 font-bold text-[10px] uppercase"
+                    >
+                      {industry.title}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
             {user.lastLoginAt && (
               <div className="flex justify-between items-center p-4">
                 <span className="text-muted-foreground flex items-center gap-2">

@@ -6,6 +6,7 @@ import {
   UPDATE_MEMBERS_TERMS_AND_CONDITIONS,
   BULK_CHANGE_USER_STATUS,
   ADD_NEW_MEMBER,
+  UPDATE_MEMBER,
 } from "../../quries/user";
 
 // ---------------------------------------------------------
@@ -57,6 +58,15 @@ export const useBulkChangeUserStatus = (options: any) =>
 
 export const useAddNewMember = (options?: any) =>
   useMutation(ADD_NEW_MEMBER, {
+    ...options,
+    refetchQueries: [
+      { query: GET_ALL_USER, variables: { input: { status: "ALL" } } },
+    ],
+    awaitRefetchQueries: true,
+  });
+
+export const useUpdateMember = (options?: any) =>
+  useMutation(UPDATE_MEMBER, {
     ...options,
     refetchQueries: [
       { query: GET_ALL_USER, variables: { input: { status: "ALL" } } },

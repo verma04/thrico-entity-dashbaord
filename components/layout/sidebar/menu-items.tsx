@@ -271,25 +271,25 @@ export const gamificationEngine = [
     icon: <Gift size={18} />,
     children: [
       { key: "rew-dash", label: "Dashboard", path: "/rewards" },
-      { key: "rew-analytics", label: "Analytics", path: "/rewards/analytics" },
-      { key: "rew-fraud", label: "Fraud", path: "/rewards/fraud" },
+
       {
-        key: "rew-coupons-manage",
-        label: "Manage Coupons",
-        path: "/rewards/vouchers/coupons",
+        key: "rcoupons",
+        label: "Rewards & Vouchers",
+        path: "/rewards/coupons",
       },
       ,
       {
         key: "rew-coupons",
-        label: "Coupons",
-        path: "/rewards/vouchers/coupons-audit",
+        label: "Create Reward",
+        path: "/rewards/coupons/create",
       },
 
       {
-        key: "rew-ledger",
-        label: "Claim History",
-        path: "/rewards/vouchers/redemptions",
+        key: "redemptions",
+        label: "Redemptionsy",
+        path: "/rewards/Redemptions",
       },
+      { key: "rew-fraud", label: "Fraud", path: "/rewards/fraud" },
     ],
   },
 ];

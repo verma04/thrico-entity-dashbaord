@@ -147,6 +147,25 @@ export const MembersListCards = ({
                   "No bio information provided yet."}
               </p>
 
+              {/* Industries */}
+              {member.industries && member.industries.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {member.industries.slice(0, 3).map((ind: any) => (
+                    <span 
+                      key={ind.id} 
+                      className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-tight bg-indigo-50 text-indigo-700 border border-indigo-100/50"
+                    >
+                      {ind.title}
+                    </span>
+                  ))}
+                  {member.industries.length > 3 && (
+                    <span className="text-[9px] font-bold text-muted-foreground bg-muted/50 px-1.5 py-0.5 rounded-full">
+                      +{member.industries.length - 3}
+                    </span>
+                  )}
+                </div>
+              )}
+
               {/* Stats/Details */}
               <div className="mt-6 pt-6 border-t border-border/50 grid grid-cols-2 gap-4">
                 <div className="space-y-1">

@@ -38,8 +38,9 @@ const AddMemberPage = () => {
       about: values.about,
       DOB: values.dob,
       avatar: values.avatar,
+      industryIds: values.industryIds,
     };
-    
+
     addMember({ variables: { input } });
   };
 

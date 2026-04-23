@@ -63,7 +63,32 @@ const columns: AdminTableColumn<UserDetail>[] = [
     cell: (row) => (
       <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
         <MapPin className="h-3 w-3 shrink-0" />
-        <span>{row.user?.location?.name || "—"}</span>
+        <span className="truncate max-w-[120px]">{row.user?.location?.name || "—"}</span>
+      </div>
+    ),
+  },
+  {
+    key: "industries",
+    header: "Industries",
+    cell: (row) => (
+      <div className="flex flex-wrap gap-1 max-w-[200px]">
+        {row.industries && row.industries.length > 0 ? (
+          row.industries.slice(0, 2).map((ind: any) => (
+            <span
+              key={ind.id}
+              className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-tight bg-indigo-50 text-indigo-700 border border-indigo-100/50"
+            >
+              {ind.title}
+            </span>
+          ))
+        ) : (
+          <span className="text-[11px] text-muted-foreground/50">—</span>
+        )}
+        {row.industries && row.industries.length > 2 && (
+          <span className="text-[9px] font-bold text-muted-foreground bg-muted/50 px-1 rounded">
+            +{row.industries.length - 2}
+          </span>
+        )}
       </div>
     ),
   },

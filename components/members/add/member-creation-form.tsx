@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Formik,
   Form,
@@ -54,16 +54,40 @@ import { format } from "date-fns";
 import Link from "next/link";
 import { ImageUploadWithCrop } from "@/components/ui/image-upload-with-crop";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
+import { useGetIndustries } from "@/graphql/quries/industries/industry-queries";
+import { Check, ChevronsUpDown, X } from "lucide-react";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 
 export function MemberCreationForm({
   initialValues,
   loading,
   onFinish,
   onCancel,
+  isEdit = false,
 }: any) {
   const { toast } = useToast();
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(
+    initialValues?.avatar || null,
+  );
+
+  useEffect(() => {
+    if (initialValues?.avatar) {
+      setImageUrl(initialValues.avatar);
+    }
+  }, [initialValues?.avatar]);
+
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [isIndustryPopoverOpen, setIsIndustryPopoverOpen] = useState(false);
+
+  const { data: industryData, loading: loadingIndustries } = useGetIndustries();
+  const industries = industryData?.getIndustries || [];
 
   const memberSchema = Yup.object({
     firstName: Yup.string()
@@ -76,6 +100,7 @@ export function MemberCreationForm({
     headline: Yup.string().max(100, "Max 100 characters"),
     about: Yup.string().max(500, "Max 500 characters"),
     dob: Yup.date().nullable(),
+    industryIds: Yup.array().of(Yup.string()),
   });
 
   const formik = useFormik({
@@ -87,7 +112,9 @@ export function MemberCreationForm({
       headline: "",
       about: "",
       dob: null,
+      industryIds: [],
     },
+    enableReinitialize: true,
     validationSchema: memberSchema,
     onSubmit: (values) => {
       onFinish({ ...values, avatar: imageUrl });
@@ -116,7 +143,7 @@ export function MemberCreationForm({
                     <User className="h-5 w-5 text-indigo-600" />
                   </div>
                   <h1 className="text-2xl font-black tracking-tight text-slate-900">
-                    Add New Member
+                    {isEdit ? "Edit Member Details" : "Add New Member"}
                   </h1>
                 </div>
                 <div className="flex items-center gap-2 text-xs font-medium text-slate-500 ml-1">
@@ -124,7 +151,9 @@ export function MemberCreationForm({
                   <ChevronRight className="h-3 w-3" />
                   <span>Members</span>
                   <ChevronRight className="h-3 w-3" />
-                  <span className="text-indigo-600">Add New</span>
+                  <span className="text-indigo-600 font-bold">
+                    {isEdit ? "Edit Profile" : "Add New"}
+                  </span>
                 </div>
               </div>
             </div>
@@ -147,7 +176,9 @@ export function MemberCreationForm({
                         </CardTitle>
                       </div>
                       <CardDescription className="text-slate-500 font-medium">
-                        Basic identity details of the new member
+                        {isEdit
+                          ? "Update identity details of the member"
+                          : "Basic identity details of the new member"}
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="pt-8 space-y-6">
@@ -290,14 +321,133 @@ export function MemberCreationForm({
                       <div className="flex items-center gap-2 mb-1">
                         <Layout className="h-4 w-4 text-indigo-600" />
                         <CardTitle className="text-lg font-bold text-slate-800">
-                          Professional Details
+                          Professional Information
                         </CardTitle>
                       </div>
                       <CardDescription className="text-slate-500 font-medium">
-                        Headlines and brief biography of the member
+                        Work related details and industry classification
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="pt-8 space-y-6">
+                      {/* Industries */}
+                      <div className="space-y-2">
+                        <Label className="text-sm font-bold text-slate-700">
+                          Industries
+                        </Label>
+                        <Popover
+                          open={isIndustryPopoverOpen}
+                          onOpenChange={setIsIndustryPopoverOpen}
+                        >
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              role="combobox"
+                              aria-expanded={isIndustryPopoverOpen}
+                              className="w-full justify-between h-auto min-h-[44px] rounded-xl border-slate-200 hover:bg-slate-50 transition-all px-3 py-2 text-left font-normal"
+                            >
+                              <div className="flex flex-wrap gap-1.5">
+                                {formik.values.industryIds.length > 0 ? (
+                                  formik.values.industryIds.map(
+                                    (id: string) => {
+                                      const industry = industries.find(
+                                        (i) => i.id === id,
+                                      );
+                                      return (
+                                        <Badge
+                                          key={id}
+                                          variant="secondary"
+                                          className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-100 py-0.5 px-2 rounded-lg text-[11px] font-bold flex items-center gap-1"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            const next =
+                                              formik.values.industryIds.filter(
+                                                (iid: string) => iid !== id,
+                                              );
+                                            formik.setFieldValue(
+                                              "industryIds",
+                                              next,
+                                            );
+                                          }}
+                                        >
+                                          {industry?.title}
+                                          <X className="h-3 w-3" />
+                                        </Badge>
+                                      );
+                                    },
+                                  )
+                                ) : (
+                                  <span className="text-slate-400">
+                                    Select industries...
+                                  </span>
+                                )}
+                              </div>
+                              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 rounded-2xl shadow-xl border-slate-200 overflow-hidden">
+                            <Command className="border-none">
+                              <CommandInput
+                                placeholder="Search industries..."
+                                className="h-11 border-none focus:ring-0"
+                              />
+                              <CommandList className="max-h-[300px]">
+                                <CommandEmpty>No industry found.</CommandEmpty>
+                                <CommandGroup>
+                                  {industries.map((industry) => (
+                                    <CommandItem
+                                      key={industry.id}
+                                      value={industry.title}
+                                      onSelect={() => {
+                                        const current =
+                                          formik.values.industryIds;
+                                        const next = current.includes(
+                                          industry.id,
+                                        )
+                                          ? current.filter(
+                                              (id: string) =>
+                                                id !== industry.id,
+                                            )
+                                          : [...current, industry.id];
+                                        formik.setFieldValue(
+                                          "industryIds",
+                                          next,
+                                        );
+                                      }}
+                                      className="flex items-center justify-between py-2.5 px-3 cursor-pointer hover:bg-slate-50 transition-colors"
+                                    >
+                                      <div className="flex items-center gap-2">
+                                        <div
+                                          className={cn(
+                                            "h-4 w-4 rounded border border-slate-300 flex items-center justify-center transition-all",
+                                            formik.values.industryIds.includes(
+                                              industry.id,
+                                            )
+                                              ? "bg-indigo-600 border-indigo-600"
+                                              : "bg-white",
+                                          )}
+                                        >
+                                          {formik.values.industryIds.includes(
+                                            industry.id,
+                                          ) && (
+                                            <Check className="h-3 w-3 text-white" />
+                                          )}
+                                        </div>
+                                        <span className="text-sm font-semibold text-slate-700">
+                                          {industry.title}
+                                        </span>
+                                      </div>
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                        <p className="text-[10px] uppercase tracking-wider font-bold text-slate-400">
+                          Select one or more industries the member belongs to
+                        </p>
+                      </div>
+
                       {/* Headline */}
                       <div className="space-y-2">
                         <Label
@@ -353,7 +503,7 @@ export function MemberCreationForm({
                         <div className="h-24 w-24 rounded-2xl bg-slate-100 flex items-center justify-center overflow-hidden">
                           {imageUrl ? (
                             <Image
-                              src={imageUrl}
+                              src={`https://cdn.thrico.network/${imageUrl}`}
                               alt="Avatar"
                               width={96}
                               height={96}
@@ -446,9 +596,13 @@ export function MemberCreationForm({
             if (onCancel) onCancel();
             else window.history.back();
           }}
-          title="Unsaved Member Data"
-          description="You have unfilled form data."
-          buttonText="Save Member"
+          title={isEdit ? "Unsaved Profile Changes" : "Unsaved Member Data"}
+          description={
+            isEdit
+              ? "You have unsaved changes in the profile."
+              : "You have unfilled form data."
+          }
+          buttonText={isEdit ? "Update Profile" : "Save Member"}
         />
       </>
     </FormikProvider>

@@ -38,6 +38,25 @@ export function ProfileTab({ member }: { member: any }) {
         </section>
       )}
 
+      {/* Industries Section */}
+      {member.industries && member.industries.length > 0 && (
+        <section className="space-y-3">
+          <h3 className="text-xl font-black flex items-center gap-2">
+            <Briefcase className="h-5 w-5 text-primary" /> Industries
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {member.industries.map((industry: any) => (
+              <Badge 
+                key={industry.id} 
+                className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 px-4 py-1.5 rounded-xl font-black text-xs uppercase tracking-wider"
+              >
+                {industry.title}
+              </Badge>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* Experience Section */}
       <section className="space-y-4">
         <h3 className="text-xl font-black flex items-center gap-2">

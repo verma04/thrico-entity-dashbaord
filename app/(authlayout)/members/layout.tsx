@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Users, Settings, Plus } from "lucide-react";
+import { Users, Plus, Building2 } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
 
 function MembersLayout({ children }: { children: React.ReactNode }) {
@@ -11,11 +11,19 @@ function MembersLayout({ children }: { children: React.ReactNode }) {
       key: "all",
       label: "Members",
       icon: <Users className="h-4 w-4" />,
+      href: "/members",
     },
     {
       key: "create",
       label: "Create Member",
       icon: <Plus className="h-4 w-4" />,
+      href: "/members/create",
+    },
+    {
+      key: "industries",
+      label: "Industries",
+      icon: <Building2 className="h-4 w-4" />,
+      href: "/members/industries",
     },
   ];
 

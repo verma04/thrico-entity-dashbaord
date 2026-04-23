@@ -141,6 +141,7 @@ export const useGetAllUser = (input?: {
   status?: string | null;
   limit?: number | null;
   offset?: number | null;
+  industryId?: string | null;
 }) =>
   useQuery<GetAllUserResponse>(GET_ALL_USER, {
     variables: {
@@ -148,6 +149,7 @@ export const useGetAllUser = (input?: {
         status: input?.status ?? "ALL",
         limit: input?.limit ?? null,
         offset: input?.offset,
+        industryId: input?.industryId ?? null,
       },
     },
     fetchPolicy: "network-only",

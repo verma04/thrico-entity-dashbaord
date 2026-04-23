@@ -242,15 +242,22 @@ function ContentArea({
 // Main User component
 // ─────────────────────────────────────────────────────────────────────────────
 
+import { useGetIndustries } from "@/graphql/quries/industries/industry-queries";
+
 const User = ({ status: initialStatus }: { status?: string }) => {
   const [view, setView] = useState<"grid" | "table">("table");
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<StatusValue>(
     (initialStatus as StatusValue) || "ALL",
   );
+  const [selectedIndustry, setSelectedIndustry] = useState<string>("ALL");
+
+  const { data: industryData } = useGetIndustries();
+  const industries = industryData?.getIndustries || [];
 
   const { data, loading, refetch } = useGetAllUser({
     status: status === "ALL" ? "ALL" : status,
+    industryId: selectedIndustry === "ALL" ? null : selectedIndustry,
   });
 
   // Client-side search filter
@@ -331,7 +338,7 @@ const User = ({ status: initialStatus }: { status?: string }) => {
               value={status}
               onValueChange={(v) => setStatus(v as StatusValue)}
             >
-              <SelectTrigger className="w-[150px] h-9 rounded-lg border-border bg-card text-sm font-medium text-foreground shadow-none focus:ring-2 focus:ring-ring/20">
+              <SelectTrigger className="w-[130px] h-9 rounded-lg border-border bg-card text-xs font-semibold text-foreground shadow-none focus:ring-2 focus:ring-ring/20">
                 <div className="flex items-center gap-2">
                   {STATUS_TABS.find((t) => t.value === status)?.dot && (
                     <span
@@ -349,7 +356,7 @@ const User = ({ status: initialStatus }: { status?: string }) => {
                   <SelectItem
                     key={opt.value}
                     value={opt.value}
-                    className="rounded-lg text-sm font-medium py-2"
+                    className="rounded-lg text-xs font-semibold py-2"
                   >
                     <div className="flex items-center gap-2">
                       {opt.dot && (
@@ -362,6 +369,34 @@ const User = ({ status: initialStatus }: { status?: string }) => {
                       )}
                       {opt.label}
                     </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </EcosystemActionBar.Item>
+
+          <EcosystemActionBar.Item>
+            <Select
+              value={selectedIndustry}
+              onValueChange={(v) => setSelectedIndustry(v)}
+            >
+              <SelectTrigger className="w-[160px] h-9 rounded-lg border-border bg-card text-xs font-semibold text-foreground shadow-none focus:ring-2 focus:ring-ring/20">
+                <SelectValue placeholder="Industry" />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl border-border shadow-lg p-1">
+                <SelectItem
+                  value="ALL"
+                  className="rounded-lg text-xs font-semibold py-2"
+                >
+                  All Industries
+                </SelectItem>
+                {industries.map((ind) => (
+                  <SelectItem
+                    key={ind.id}
+                    value={ind.id}
+                    className="rounded-lg text-xs font-semibold py-2"
+                  >
+                    {ind.title}
                   </SelectItem>
                 ))}
               </SelectContent>
