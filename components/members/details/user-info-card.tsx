@@ -1,18 +1,19 @@
 "use client";
 
 import React from "react";
-import { 
-  Mail, 
-  MapPin, 
-  Calendar, 
-  Clock, 
-  User as UserIcon, 
-  Globe, 
+import {
+  Mail,
+  MapPin,
+  Calendar,
+  Clock,
+  User as UserIcon,
+  Globe,
   MapIcon,
   Twitter,
   Linkedin,
   Github,
-  Link as LinkIcon
+  Link as LinkIcon,
+  Briefcase,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -56,9 +57,10 @@ const getSocialIcon = (platform: string) => {
 
 export function UserInfoCard({ member }: { member: any }) {
   const user = member?.user;
-  const { data: gamificationData, loading: gamificationLoading } = useGetGamificationSummary(user?.id, {
-    skip: !user?.id,
-  });
+  const { data: gamificationData, loading: gamificationLoading } =
+    useGetGamificationSummary(user?.id, {
+      skip: !user?.id,
+    });
   const summary = gamificationData?.getUserGamificationSummary;
 
   if (!user) return null;
@@ -123,7 +125,10 @@ export function UserInfoCard({ member }: { member: any }) {
                   user.about?.headline ||
                   "Community Member"}
               </p>
-              <Badge variant="outline" className={cn("font-black px-4", getStatusColor(member.status))}>
+              <Badge
+                variant="outline"
+                className={cn("font-black px-4", getStatusColor(member.status))}
+              >
                 {member.status}
               </Badge>
             </div>
@@ -179,20 +184,27 @@ export function UserInfoCard({ member }: { member: any }) {
             {gamificationLoading ? (
               <Skeleton className="h-4 w-12" />
             ) : (
-              <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 font-black text-[9px] uppercase">
+              <Badge
+                variant="outline"
+                className="bg-primary/10 text-primary border-primary/20 font-black text-[9px] uppercase"
+              >
                 Rank #{summary?.rankPosition || "N/A"}
               </Badge>
             )}
           </div>
-          
+
           <div className="flex items-end gap-3">
             <div className="text-3xl font-black text-primary leading-none">
-              {gamificationLoading ? <Skeleton className="h-8 w-16" /> : (summary?.totalPointsEarned || 0)}
+              {gamificationLoading ? (
+                <Skeleton className="h-8 w-16" />
+              ) : (
+                summary?.totalPointsEarned || 0
+              )}
               <span className="text-[10px] font-bold text-muted-foreground ml-1 uppercase tracking-normal">
                 XP
               </span>
             </div>
-            
+
             {!gamificationLoading && summary?.currentStreak > 0 && (
               <div className="flex items-center gap-1 text-orange-500 font-black text-[10px] bg-orange-500/10 px-2 py-0.5 rounded-full mb-0.5">
                 <Flame className="h-3 w-3 fill-current" />
@@ -270,9 +282,9 @@ export function UserInfoCard({ member }: { member: any }) {
                 </span>
                 <div className="flex flex-wrap gap-2 pt-1">
                   {member.industries.map((industry: any) => (
-                    <Badge 
-                      key={industry.id} 
-                      variant="secondary" 
+                    <Badge
+                      key={industry.id}
+                      variant="secondary"
                       className="bg-indigo-50 text-indigo-700 border-indigo-100 hover:bg-indigo-100 font-bold text-[10px] uppercase"
                     >
                       {industry.title}
@@ -307,7 +319,10 @@ export function UserInfoCard({ member }: { member: any }) {
           </CardHeader>
           <CardContent className="flex flex-wrap gap-2">
             {user.profile.skills.map((skill: any, idx: number) => {
-              const skillName = typeof skill === 'object' ? (skill.name || "Unnamed Skill") : String(skill);
+              const skillName =
+                typeof skill === "object"
+                  ? skill.name || "Unnamed Skill"
+                  : String(skill);
               return (
                 <Badge
                   key={idx}
