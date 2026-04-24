@@ -26,6 +26,8 @@ import {
   BookOpen,
   Link,
   ExternalLink,
+  Monitor,
+  Globe,
 } from "lucide-react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -62,6 +64,12 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import moment from "moment";
 import { cn } from "@/lib/utils";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 
 export default function MCPPage() {
   const [activeTab, setActiveTab] = useState<"keys" | "logs">("keys");
@@ -141,7 +149,13 @@ export default function MCPPage() {
     formik.setFieldTouched("permissions", true);
   };
 
-  const suggestedPermissions = ["create_feed", "create_poll"];
+  const suggestedPermissions = [
+    "create_feed",
+    "create_poll",
+    "create_community",
+    "create_listing",
+    "create_offer",
+  ];
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -414,20 +428,35 @@ export default function MCPPage() {
               </div>
 
               <div className="lg:col-span-2 p-1 bg-zinc-50 rounded-3xl border border-zinc-200/60 overflow-hidden flex flex-col">
-                <div className="p-5 border-b border-zinc-200/60 transition-all hover:bg-white flex items-center justify-between">
-                  <div className="space-y-1">
-                     <div className="flex items-center gap-2">
-                       <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 font-mono">claude_desktop_config.json</span>
-                     </div>
-                     <p className="text-[10px] text-zinc-500 leading-relaxed">
-                       Add this configuration to your Claude Desktop config file. Replace <span className="font-bold text-zinc-900">&lt;YOUR_API_KEY&gt;</span> with a key generated below.
-                     </p>
+                <Tabs defaultValue="desktop" className="w-full">
+                  <div className="px-5 pt-4 pb-2 border-b border-zinc-200/60 flex items-center justify-between">
+                    <TabsList className="bg-zinc-200/50 p-1 rounded-xl h-9">
+                      <TabsTrigger value="desktop" className="rounded-lg text-[10px] font-bold uppercase tracking-tight data-[state=active]:bg-white">
+                        <Monitor className="h-3 w-3 mr-1.5" />
+                        Claude Desktop
+                      </TabsTrigger>
+                      <TabsTrigger value="web" className="rounded-lg text-[10px] font-bold uppercase tracking-tight data-[state=active]:bg-white">
+                        <Globe className="h-3 w-3 mr-1.5" />
+                        Claude.ai Web
+                      </TabsTrigger>
+                    </TabsList>
                   </div>
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    className="h-8 text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100"
-                    onClick={() => copyToClipboard(`{
+
+                  <TabsContent value="desktop" className="mt-0">
+                    <div className="p-5 border-b border-zinc-200/60 transition-all hover:bg-white flex items-center justify-between">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 font-mono">claude_desktop_config.json</span>
+                        </div>
+                        <p className="text-[10px] text-zinc-500 leading-relaxed">
+                          Add this configuration to your Claude Desktop config file. Replace <span className="font-bold text-zinc-900">&lt;YOUR_API_KEY&gt;</span> with a key generated below.
+                        </p>
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        className="h-8 text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100"
+                        onClick={() => copyToClipboard(`{
   "mcpServers": {
     "thrico": {
       "command": "npx",
@@ -440,45 +469,87 @@ export default function MCPPage() {
     }
   }
 }`)}
-                  >
-                    <Copy className="h-3.5 w-3.5 mr-2" />
-                    Copy Config
-                  </Button>
-                </div>
-                <div className="bg-zinc-900 p-4 overflow-x-auto text-left">
-                  <pre className="text-[10px] font-mono leading-relaxed text-zinc-300">
-                    <span className="text-pink-400">"mcpServers"</span>: {'{'}
-                    <br />
-                    {'  '}
-                    <span className="text-emerald-300">"thrico"</span>: {'{'}
-                    <br />
-                    {'    '}
-                    <span className="text-blue-300">"command"</span>: <span className="text-amber-300">"npx"</span>,
-                    <br />
-                    {'    '}
-                    <span className="text-blue-300">"args"</span>: [
-                    <br />
-                    {'      '}
-                    <span className="text-amber-300">"-y"</span>,
-                    <br />
-                    {'      '}
-                    <span className="text-amber-300">"@modelcontextprotocol/client-sse"</span>,
-                    <br />
-                    {'      '}
-                    <span className="text-amber-300">"--url"</span>,
-                    <br />
-                    {'      '}
-                    <span className="text-amber-300">"https://mcp.thrico.app/sse?token=&lt;YOUR_API_KEY&gt;"</span>
-                    <br />
-                    {'    '}
-                    ]
-                    <br />
-                    {'  '}
-                    {'}'}
-                    <br />
-                    {'}'}
-                  </pre>
-                </div>
+                      >
+                        <Copy className="h-3.5 w-3.5 mr-2" />
+                        Copy Config
+                      </Button>
+                    </div>
+                    <div className="bg-zinc-900 p-4 overflow-x-auto text-left">
+                      <pre className="text-[10px] font-mono leading-relaxed text-zinc-300">
+                        <span className="text-pink-400">"mcpServers"</span>: {'{'}
+                        <br />
+                        {'  '}
+                        <span className="text-emerald-300">"thrico"</span>: {'{'}
+                        <br />
+                        {'    '}
+                        <span className="text-blue-300">"command"</span>: <span className="text-amber-300">"npx"</span>,
+                        <br />
+                        {'    '}
+                        <span className="text-blue-300">"args"</span>: [
+                        <br />
+                        {'      '}
+                        <span className="text-amber-300">"-y"</span>,
+                        <br />
+                        {'      '}
+                        <span className="text-amber-300">"@modelcontextprotocol/client-sse"</span>,
+                        <br />
+                        {'      '}
+                        <span className="text-amber-300">"--url"</span>,
+                        <br />
+                        {'      '}
+                        <span className="text-amber-300">"https://mcp.thrico.app/sse?token=&lt;YOUR_API_KEY&gt;"</span>
+                        <br />
+                        {'    '}
+                        ]
+                        <br />
+                        {'  '}
+                        {'}'}
+                        <br />
+                        {'}'}
+                      </pre>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="web" className="mt-0">
+                    <div className="p-5 border-b border-zinc-200/60 transition-all hover:bg-white flex items-center justify-between">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 font-mono">Claude.ai Remote Extension</span>
+                        </div>
+                        <p className="text-[10px] text-zinc-500 leading-relaxed">
+                          Add as a <span className="font-bold text-zinc-900">Custom Connector</span> in Claude.ai Settings. Use the SSE URL below with your API key.
+                        </p>
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        className="h-8 text-xs font-semibold text-emerald-600 bg-emerald-50 hover:bg-emerald-100"
+                        onClick={() => copyToClipboard(`https://mcp.thrico.app/sse?token=<YOUR_API_KEY>`)}
+                      >
+                        <Copy className="h-3.5 w-3.5 mr-2" />
+                        Copy URL
+                      </Button>
+                    </div>
+                    <div className="bg-zinc-900 p-6 flex flex-col space-y-4">
+                      <div className="space-y-2">
+                        <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Connection URL (SSE)</span>
+                        <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-3 font-mono text-[10px] text-emerald-400 break-all">
+                          https://mcp.thrico.app/sse?token=&lt;YOUR_API_KEY&gt;
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Type</span>
+                          <div className="text-zinc-300 text-[10px] font-medium">MCP (SSE)</div>
+                        </div>
+                        <div className="space-y-1">
+                          <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Auth</span>
+                          <div className="text-zinc-300 text-[10px] font-medium">Bearer Token (Query)</div>
+                        </div>
+                      </div>
+                    </div>
+                  </TabsContent>
+                </Tabs>
               </div>
             </div>
 
