@@ -51,6 +51,8 @@ export function ThemeCustomizer() {
                   background: colors.background,
                   muted: colors.muted,
                   border: colors.border,
+                  buttonColor: colors.buttonColor,
+                  buttonTextColor: colors.buttonTextColor,
                   borderRadius: colors.borderRadius,
                   spacing: colors.spacing,
                   fontSize: colors.fontSize,
@@ -111,20 +113,20 @@ export function ThemeCustomizer() {
 
   if (!isPremium) {
     return (
-      <div className="p-3 bg-linear-to-br from-primary/5 to-primary/10 rounded-lg border border-primary/20">
-        <div className="flex items-start gap-3">
-          <div className="p-2 bg-primary/10 rounded-lg">
-            <Sparkles className="h-4 w-4 text-primary" />
+      <div className="p-2 bg-linear-to-br from-primary/5 to-primary/8 rounded-md border border-primary/15">
+        <div className="flex items-start gap-2">
+          <div className="p-1.5 bg-primary/10 rounded-md shrink-0">
+            <Sparkles className="h-3 w-3 text-primary/70" />
           </div>
-          <div className="flex-1 space-y-2">
-            <h3 className="text-sm font-semibold">Custom Colors</h3>
-            <p className="text-xs text-muted-foreground">
-              Match your brand with custom colors
+          <div className="flex-1 space-y-1.5">
+            <h3 className="text-xs font-semibold">Custom Colors</h3>
+            <p className="text-[10px] text-muted-foreground/70">
+              Match your brand colors
             </p>
             <Button
               onClick={() => openDrawer()}
               size="sm"
-              className="w-full h-7 text-xs"
+              className="w-full h-6 text-[10px]"
             >
               Upgrade
             </Button>
@@ -135,26 +137,26 @@ export function ThemeCustomizer() {
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-1">
       {/* Header */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
         className={cn(
-          "w-full flex items-center justify-between p-3 rounded-lg transition-all",
-          "hover:bg-muted/50 border-2",
-          isExpanded ? "border-primary/30 bg-primary/5" : "border-transparent"
+          "w-full flex items-center justify-between p-2 rounded-md transition-all",
+          "hover:bg-muted/40 border",
+          isExpanded ? "border-primary/25 bg-primary/5" : "border-transparent"
         )}
       >
-        <div className="flex items-center gap-2">
-          <Sparkles className="h-4 w-4 text-primary" />
-          <span className="text-sm font-semibold">Custom Colors</span>
+        <div className="flex items-center gap-1.5">
+          <Sparkles className="h-3 w-3 text-primary/70" />
+          <span className="text-xs font-semibold">Colors</span>
           {hasCustomColors && (
-            <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+            <span className="text-[9px] bg-primary/10 text-primary px-1.5 py-px rounded-full font-medium">
               Active
             </span>
           )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           {hasCustomColors && (
             <Button
               onClick={(e) => {
@@ -163,15 +165,15 @@ export function ThemeCustomizer() {
               }}
               size="sm"
               variant="ghost"
-              className="h-6 text-xs gap-1 px-2"
+              className="h-5 text-[10px] gap-0.5 px-1.5"
             >
-              <RotateCcw className="h-3 w-3" />
+              <RotateCcw className="h-2.5 w-2.5" />
               Reset
             </Button>
           )}
           <ChevronDown
             className={cn(
-              "h-4 w-4 transition-transform",
+              "h-3 w-3 text-muted-foreground/50 transition-transform",
               isExpanded && "rotate-180"
             )}
           />
@@ -181,22 +183,22 @@ export function ThemeCustomizer() {
       {/* Expanded Content */}
       <div
         className={cn(
-          "grid transition-all duration-300 overflow-hidden",
+          "grid transition-all duration-200 overflow-hidden",
           isExpanded
             ? "grid-rows-[1fr] opacity-100"
             : "grid-rows-[0fr] opacity-0"
         )}
       >
         <div className="overflow-hidden">
-          <div className="p-3 space-y-3 bg-muted/30 rounded-lg">
+          <div className="p-2 space-y-2 bg-muted/20 rounded-md">
             {/* Colors Section */}
-            <div className="space-y-3">
-              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            <div className="space-y-2">
+              <div className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wider">
                 Colors
               </div>
 
-              {/* Main Colors - 2 Column Grid */}
-              <div className="grid grid-cols-2 gap-3">
+              {/* All 6 colors in a 3-column grid */}
+              <div className="grid grid-cols-3 gap-2">
                 <ColorPicker
                   label="Primary"
                   value={customColors.primary || "#3B82F6"}
@@ -209,10 +211,6 @@ export function ThemeCustomizer() {
                   onChange={(value) => handleColorChange("secondary", value)}
                   compact
                 />
-              </div>
-
-              {/* Accent & Background */}
-              <div className="grid grid-cols-2 gap-3">
                 <ColorPicker
                   label="Accent"
                   value={customColors.accent || "#10B981"}
@@ -225,10 +223,6 @@ export function ThemeCustomizer() {
                   onChange={(value) => handleColorChange("background", value)}
                   compact
                 />
-              </div>
-
-              {/* Muted & Border */}
-              <div className="grid grid-cols-2 gap-3">
                 <ColorPicker
                   label="Muted"
                   value={customColors.muted || "#F3F4F6"}
@@ -242,19 +236,38 @@ export function ThemeCustomizer() {
                   compact
                 />
               </div>
+
+              {/* Button Colors */}
+              <div className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wider pt-1">
+                Buttons
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <ColorPicker
+                  label="Button BG"
+                  value={customColors.buttonColor || "#3B82F6"}
+                  onChange={(value) => handleColorChange("buttonColor", value)}
+                  compact
+                />
+                <ColorPicker
+                  label="Button Text"
+                  value={customColors.buttonTextColor || "#FFFFFF"}
+                  onChange={(value) => handleColorChange("buttonTextColor", value)}
+                  compact
+                />
+              </div>
             </div>
 
             {/* Advanced Settings Toggle */}
             <button
               onClick={() => setShowAdvanced(!showAdvanced)}
-              className="w-full flex items-center justify-between p-2 rounded-md hover:bg-background/50 transition-colors"
+              className="w-full flex items-center justify-between p-1.5 rounded-md hover:bg-background/50 transition-colors"
             >
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              <span className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-wider">
                 Advanced
               </span>
               <ChevronDown
                 className={cn(
-                  "h-3 w-3 transition-transform",
+                  "h-2.5 w-2.5 text-muted-foreground/40 transition-transform",
                   showAdvanced && "rotate-180"
                 )}
               />
@@ -262,14 +275,14 @@ export function ThemeCustomizer() {
 
             {/* Advanced Settings */}
             {showAdvanced && (
-              <div className="space-y-3 pt-1">
+              <div className="space-y-2.5 pt-0.5">
                 {/* Border Radius */}
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <div className="flex items-center justify-between">
-                    <Label className="text-xs font-medium text-muted-foreground">
-                      Border Radius
+                    <Label className="text-[10px] font-medium text-muted-foreground/70">
+                      Radius
                     </Label>
-                    <span className="text-xs font-mono text-muted-foreground">
+                    <span className="text-[10px] font-mono text-muted-foreground/50">
                       {customColors.borderRadius ?? 10}px
                     </span>
                   </div>
@@ -286,12 +299,12 @@ export function ThemeCustomizer() {
                 </div>
 
                 {/* Spacing */}
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <div className="flex items-center justify-between">
-                    <Label className="text-xs font-medium text-muted-foreground">
+                    <Label className="text-[10px] font-medium text-muted-foreground/70">
                       Spacing
                     </Label>
-                    <span className="text-xs font-mono text-muted-foreground">
+                    <span className="text-[10px] font-mono text-muted-foreground/50">
                       {customColors.spacing ?? 1}x
                     </span>
                   </div>
@@ -308,12 +321,12 @@ export function ThemeCustomizer() {
                 </div>
 
                 {/* Font Size */}
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <div className="flex items-center justify-between">
-                    <Label className="text-xs font-medium text-muted-foreground">
-                      Base Font Size
+                    <Label className="text-[10px] font-medium text-muted-foreground/70">
+                      Font Size
                     </Label>
-                    <span className="text-xs font-mono text-muted-foreground">
+                    <span className="text-[10px] font-mono text-muted-foreground/50">
                       {customColors.fontSize ?? 16}px
                     </span>
                   </div>
@@ -330,11 +343,6 @@ export function ThemeCustomizer() {
                 </div>
               </div>
             )}
-
-            {/* Tip */}
-            <div className="text-xs text-muted-foreground bg-background/50 p-2 rounded border border-border/50">
-              💡 Changes apply instantly with auto-contrast
-            </div>
           </div>
         </div>
       </div>

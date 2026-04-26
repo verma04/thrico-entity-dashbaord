@@ -441,6 +441,8 @@ export interface CustomThemeColors {
   background?: string;
   muted?: string;
   border?: string;
+  buttonColor?: string;
+  buttonTextColor?: string;
   // Additional customization
   borderRadius?: number; // 0-20px
   spacing?: number; // 0.5-2 (multiplier)
@@ -456,6 +458,7 @@ export interface WebsiteBuilderState {
   currentPageId: string | null;
   selectedModuleId: string | null;
   previewDevice: "desktop" | "tablet" | "mobile";
+  zoomLevel: number;
 
   // Global Modules
   globalHeader: ModuleData;
@@ -482,6 +485,7 @@ export interface WebsiteBuilderState {
     visibility: "public" | "members" | "admin"
   ) => void;
   setPreviewDevice: (device: "desktop" | "tablet" | "mobile") => void;
+  setZoomLevel: (zoom: number) => void;
   setModules: (modules: ModuleData[]) => void;
   addModuleToPage: (pageId: string, module: ModuleData) => void;
   deleteModule: (moduleId: string) => void;
@@ -1299,6 +1303,7 @@ export const useWebsiteBuilderStore = create<WebsiteBuilderState>()(
     currentPageId: null,
     selectedModuleId: null,
     previewDevice: "desktop",
+    zoomLevel: 100,
 
     // Computed properties
     get currentTheme() {
@@ -1534,6 +1539,7 @@ export const useWebsiteBuilderStore = create<WebsiteBuilderState>()(
       }),
 
     setPreviewDevice: (device) => set({ previewDevice: device }),
+    setZoomLevel: (zoom) => set({ zoomLevel: zoom }),
 
     setModules: (modules) =>
       set((state) => ({
@@ -1676,6 +1682,7 @@ export const useWebsiteBuilderStore = create<WebsiteBuilderState>()(
       set(() => ({
         theme: websiteData.theme || "academia",
         font: websiteData.font || "inter",
+        customColors: websiteData.customColors || {},
         pages: websiteData.pages || [],
         globalHeader: websiteData.navbar || get().globalHeader,
         globalFooter: websiteData.footer || get().globalFooter,

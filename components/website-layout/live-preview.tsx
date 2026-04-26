@@ -7,6 +7,7 @@ import {
   useWebsiteBuilderStore,
 } from "@/store/useWebsiteBuilderStore";
 import { cn } from "@/lib/utils";
+import { ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
 import {
   DeviceSelector,
   PreviewTopBar,
@@ -384,6 +385,8 @@ const LivePreview = () => {
     globalHeader,
     globalFooter,
     font,
+    zoomLevel,
+    setZoomLevel,
   } = useWebsiteBuilderStore();
 
   // Get current page's modules (excluding old potential navbars/footers if data wasn't migrated)
@@ -428,20 +431,64 @@ const LivePreview = () => {
     impact: "Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif",
   };
 
+  const handleWheel = React.useCallback(
+    (e: React.WheelEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? -5 : 5;
+        setZoomLevel(Math.min(Math.max(25, zoomLevel + delta), 200));
+      }
+    },
+    [zoomLevel, setZoomLevel]
+  );
+
   return (
-    <div className="flex flex-col h-full bg-slate-100 dark:bg-slate-900 relative transition-colors">
+    <div
+      className="flex flex-col h-full bg-slate-100 dark:bg-slate-900 relative transition-colors overflow-hidden"
+      onWheel={handleWheel}
+    >
       {/* Simulation Bar */}
       <PreviewTopBar currentTheme={currentTheme}>
-        <DeviceSelector
-          previewDevice={previewDevice}
-          setPreviewDevice={setPreviewDevice}
-        />
+        <div className="flex items-center gap-4">
+          <DeviceSelector
+            previewDevice={previewDevice}
+            setPreviewDevice={setPreviewDevice}
+          />
+          <div className="h-4 w-px bg-border/50" />
+          <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-md border">
+            <button
+              onClick={() => setZoomLevel(Math.max(25, zoomLevel - 10))}
+              className="p-1 hover:bg-background rounded text-muted-foreground transition-colors"
+              title="Zoom Out"
+            >
+              <ZoomOut className="h-3.5 w-3.5" />
+            </button>
+            <span className="text-[10px] w-10 text-center font-medium">
+              {zoomLevel}%
+            </span>
+            <button
+              onClick={() => setZoomLevel(Math.min(200, zoomLevel + 10))}
+              className="p-1 hover:bg-background rounded text-muted-foreground transition-colors"
+              title="Zoom In"
+            >
+              <ZoomIn className="h-3.5 w-3.5" />
+            </button>
+            <button
+              onClick={() => setZoomLevel(100)}
+              className="p-1 hover:bg-background rounded text-muted-foreground transition-colors ml-1"
+              title="Reset Zoom"
+            >
+              <RotateCcw className="h-3 w-3" />
+            </button>
+          </div>
+        </div>
       </PreviewTopBar>
 
       {/* Preview Container */}
       <PreviewContainer
         previewDevice={previewDevice}
         fontFamily={fontFamilyMap[font]}
+        zoomLevel={zoomLevel}
         className=""
       >
         {/* 1. Global Header */}

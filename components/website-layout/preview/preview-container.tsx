@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 interface PreviewContainerProps {
   previewDevice: string;
   fontFamily: string;
+  zoomLevel: number;
   children: React.ReactNode;
   className?: string;
 }
@@ -10,9 +11,13 @@ interface PreviewContainerProps {
 export const PreviewContainer = ({
   previewDevice,
   fontFamily,
+  zoomLevel,
   children,
   className,
 }: PreviewContainerProps) => {
+  const baseScale = previewDevice === "tablet" ? 0.9 : previewDevice === "mobile" ? 0.85 : 1;
+  const finalScale = baseScale * (zoomLevel / 100);
+
   return (
     <div className="flex-1 overflow-auto bg-muted/30 p-4">
       <div
@@ -27,12 +32,7 @@ export const PreviewContainer = ({
         style={{
           width: previewDevice === "desktop" ? "100%" : undefined,
           maxWidth: previewDevice === "desktop" ? "100%" : undefined,
-          transform:
-            previewDevice === "tablet"
-              ? "scale(0.9)"
-              : previewDevice === "mobile"
-              ? "scale(0.85)"
-              : "scale(1)",
+          transform: `scale(${finalScale})`,
           transformOrigin: "top center",
           fontFamily,
         }}

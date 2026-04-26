@@ -22,6 +22,8 @@ export const GET_WEBSITE = gql`
         background
         muted
         border
+        buttonColor
+        buttonTextColor
         borderRadius
         spacing
         fontSize
@@ -417,6 +419,8 @@ export const UPDATE_WEBSITE_CUSTOM_COLORS = gql`
       background
       muted
       border
+      buttonColor
+      buttonTextColor
       borderRadius
       spacing
       fontSize
@@ -487,6 +491,8 @@ export interface Website {
     background: string;
     muted: string;
     border: string;
+    buttonColor: string;
+    buttonTextColor: string;
     borderRadius: string;
     spacing: string;
     fontSize: string;
@@ -732,6 +738,8 @@ export interface CustomThemeColorsInput {
   background?: string;
   muted?: string;
   border?: string;
+  buttonColor?: string;
+  buttonTextColor?: string;
   borderRadius?: number;
   spacing?: number;
   fontSize?: number;
@@ -745,6 +753,8 @@ export interface UpdateWebsiteCustomColorsResponse {
     background?: string;
     muted?: string;
     border?: string;
+    buttonColor?: string;
+    buttonTextColor?: string;
     borderRadius?: number;
     spacing?: number;
     fontSize?: number;

@@ -60,54 +60,50 @@ const ModuleCard = ({
       ref={provided?.innerRef}
       {...provided?.draggableProps}
       className={cn(
-        "group flex items-center gap-3 p-3 rounded-xl border bg-card text-card-foreground transition-all",
+        "group flex items-center gap-2 p-2 rounded-lg border bg-card text-card-foreground transition-all",
         provided?.snapshot?.isDragging
-          ? "shadow-lg scale-105 border-primary z-50"
-          : "hover:border-primary/50",
+          ? "shadow-lg scale-[1.02] border-primary z-50"
+          : "hover:border-border/80",
         !isDraggable && "border-dashed bg-muted/20 opacity-90",
-        !module.isEnabled && "opacity-60 bg-muted/50 grayscale",
-        selectedModuleId === module.id && "border-primary ring-1 ring-primary",
+        !module.isEnabled && "opacity-50 bg-muted/40 grayscale",
+        selectedModuleId === module.id && "border-primary/60 bg-primary/5",
       )}
     >
       {/* Drag Handle */}
       <div
         {...provided?.dragHandleProps}
         className={cn(
-          "text-muted-foreground",
+          "text-muted-foreground/40",
           isDraggable
             ? "cursor-move hover:text-foreground"
             : "cursor-default opacity-20",
         )}
       >
-        <GripVertical className="h-5 w-5" />
+        <GripVertical className="h-3.5 w-3.5" />
       </div>
 
       {/* Content */}
       <div
-        className="flex-1 cursor-pointer"
+        className="flex-1 cursor-pointer min-w-0"
         onClick={() => selectModule(module.id)}
       >
-        <div className="flex items-center gap-2">
-          <span className="font-medium text-sm">{module.name}</span>
+        <div className="flex items-center gap-1.5">
+          <span className="font-medium text-xs truncate">{module.name}</span>
           {module.isCustomized && (
-            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-              Customized
+            <span className="px-1 py-px rounded text-[9px] font-semibold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 shrink-0">
+              Edited
             </span>
           )}
           {!isDraggable && (
-            <span className="px-1.5 py-0.5 rounded text-[10px] uppercase font-bold bg-muted text-muted-foreground">
+            <span className="px-1 py-px rounded text-[9px] uppercase font-semibold bg-muted text-muted-foreground shrink-0">
               Fixed
             </span>
           )}
         </div>
-        <div className="text-xs text-muted-foreground">
-          Layout:{" "}
-          <span className="capitalize">{module.layout.replace("-", " ")}</span>
-        </div>
       </div>
 
       {/* Actions */}
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -116,17 +112,15 @@ const ModuleCard = ({
             onToggle(module.id, newEnabledState);
           }}
           className={cn(
-            "p-2 rounded-lg transition-colors",
-            module.isEnabled
-              ? "text-muted-foreground hover:bg-muted hover:text-foreground"
-              : "text-muted-foreground hover:bg-muted hover:text-foreground",
+            "p-1 rounded-md transition-colors",
+            "text-muted-foreground/50 hover:bg-muted hover:text-foreground",
           )}
-          title={module.isEnabled ? "Disable Module" : "Enable Module"}
+          title={module.isEnabled ? "Hide" : "Show"}
         >
           {module.isEnabled ? (
-            <Eye className="h-4 w-4" />
+            <Eye className="h-3 w-3" />
           ) : (
-            <EyeOff className="h-4 w-4" />
+            <EyeOff className="h-3 w-3" />
           )}
         </button>
 
@@ -136,14 +130,14 @@ const ModuleCard = ({
             selectModule(module.id);
           }}
           className={cn(
-            "p-2 rounded-lg transition-colors",
+            "p-1 rounded-md transition-colors",
             selectedModuleId === module.id
-              ? "bg-primary text-primary-foreground"
-              : "text-muted-foreground hover:bg-muted hover:text-foreground",
+              ? "bg-primary/10 text-primary"
+              : "text-muted-foreground/50 hover:bg-muted hover:text-foreground",
           )}
           title="Settings"
         >
-          <Settings className="h-4 w-4" />
+          <Settings className="h-3 w-3" />
         </button>
 
         {/* Delete Button - Only show for draggable modules (not header/footer) */}
@@ -154,10 +148,10 @@ const ModuleCard = ({
                 onClick={(e) => {
                   e.stopPropagation();
                 }}
-                className="p-2 rounded-lg transition-colors text-muted-foreground hover:bg-destructive hover:text-destructive-foreground"
-                title="Delete Module"
+                className="p-1 rounded-md transition-colors text-muted-foreground/50 hover:bg-destructive/10 hover:text-destructive"
+                title="Delete"
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="h-3 w-3" />
               </button>
             </DialogTrigger>
             <DialogContent className="z-[2000]">
@@ -258,16 +252,16 @@ const ModuleManager = () => {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+        <h3 className="text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-wider">
           Modules
         </h3>
 
         <AddModuleDialog open={isAddOpen} onOpenChange={setIsAddOpen} />
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-2">
         {/* Global Navigation */}
         <NavigationManager />
 
@@ -277,7 +271,7 @@ const ModuleManager = () => {
               <div
                 {...provided.droppableProps}
                 ref={provided.innerRef}
-                className="space-y-2 py-1"
+                className="space-y-1 py-0.5"
               >
                 {bodyModules.map((module, index) => (
                   <Draggable

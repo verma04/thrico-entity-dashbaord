@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import { Button } from "@/components/ui/button";
-import { X, Plus, Trash2 } from "lucide-react";
+import { X, Plus, Trash2, Maximize2, Minimize2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { NavbarSettings } from "./settings/navbar-settings";
@@ -594,8 +594,8 @@ const ModuleSettings = () => {
   if (!selectedModule) {
     if (selectedModuleId) selectModule(null);
     return (
-      <div className="h-full flex items-center justify-center text-muted-foreground bg-muted/10 rounded-xl border border-dashed m-4">
-        <p>Select a module to edit settings</p>
+      <div className="h-full flex items-center justify-center text-muted-foreground text-xs bg-muted/10 rounded-lg border border-dashed m-3">
+        <p>Select a module to edit</p>
       </div>
     );
   }
@@ -608,104 +608,70 @@ const ModuleSettings = () => {
   return (
     <div
       className={cn(
-        "flex flex-col h-full bg-card border-l transition-all duration-300 min-w-[340px]",
+        "flex flex-col h-full bg-card border-l transition-all duration-200 min-w-[300px]",
         isExpanded
-          ? "w-full md:w-[800px] lg:w-[1000px] shadow-2xl z-1000 "
-          : "w-full"
+          ? "w-full md:w-[700px] lg:w-[900px] shadow-2xl z-50"
+          : "w-[340px]"
       )}
     >
       {/* Header */}
-      <div className="flex items-center w-full justify-between p-4 border-b ">
-        <div className="">
-          <h3 className="font-semibold text-lg">{selectedModule.name}</h3>
-          <p className="text-xs text-muted-foreground capitalize">
-            {selectedModule.type} Module
+      <div className="flex items-center w-full justify-between px-3 py-2.5 border-b shrink-0">
+        <div className="min-w-0">
+          <h3 className="font-semibold text-sm truncate">{selectedModule.name}</h3>
+          <p className="text-[10px] text-muted-foreground/60 capitalize">
+            {selectedModule.type}
           </p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 shrink-0">
           {/* Saving Indicator */}
-          <div className="flex items-center gap-1.5 text-[10px] font-medium transition-all">
+          <div className="flex items-center gap-1 text-[9px] font-medium">
             {isUpdating ? (
               <>
-                <Loader2 className="h-3 w-3 animate-spin text-primary" />
-                <span className="text-muted-foreground">Saving...</span>
+                <Loader2 className="h-2.5 w-2.5 animate-spin text-primary" />
+                <span className="text-muted-foreground">Saving</span>
               </>
             ) : (
               <>
-                <Check className="h-3 w-3 text-green-500" />
-                <span className="text-muted-foreground/50">Saved</span>
+                <Check className="h-2.5 w-2.5 text-green-500" />
+                <span className="text-muted-foreground/40">Saved</span>
               </>
             )}
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setIsExpanded(!isExpanded)}
-              className="p-2 hover:bg-muted rounded-lg transition-colors"
-              title={isExpanded ? "Collapse" : "Expand"}
-            >
-              {isExpanded ? (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M8 3v3a2 2 0 0 1-2 2H3" />
-                  <path d="M21 8h-3a2 2 0 0 1-2-2V3" />
-                  <path d="M3 16h3a2 2 0 0 1 2 2v3" />
-                  <path d="M16 21v-3a2 2 0 0 1 2-2h3" />
-                </svg>
-              ) : (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M15 3h6v6" />
-                  <path d="M9 21H3v-6" />
-                  <path d="M21 3l-7 7" />
-                  <path d="M3 21l7-7" />
-                </svg>
-              )}
-            </button>
-            <button
-              onClick={() => selectModule(null)}
-              className="p-2 hover:bg-muted rounded-full"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
+          <div className="w-px h-4 bg-border/40" />
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="p-1 hover:bg-muted rounded-md transition-colors text-muted-foreground/60 hover:text-foreground"
+            title={isExpanded ? "Collapse" : "Expand"}
+          >
+            {isExpanded ? (
+              <Minimize2 className="h-3.5 w-3.5" />
+            ) : (
+              <Maximize2 className="h-3.5 w-3.5" />
+            )}
+          </button>
+          <button
+            onClick={() => selectModule(null)}
+            className="p-1 hover:bg-muted rounded-md transition-colors text-muted-foreground/60 hover:text-foreground"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-6">
+      <div className="flex-1 overflow-y-auto p-3 space-y-4">
         {/* Module Name Editor */}
-        <div className="space-y-2 pb-4 border-b">
-          <Label className="text-xs font-semibold uppercase text-muted-foreground">
-            Module Name
+        <div className="space-y-1.5 pb-3 border-b">
+          <Label className="text-[10px] font-semibold uppercase text-muted-foreground/60 tracking-wider">
+            Name
           </Label>
           <Input
             value={selectedModule.name}
             onChange={(e) =>
               updateModuleName(selectedModuleId!, e.target.value)
             }
-            placeholder="e.g., Hero Section - Homepage"
-            className="h-9"
+            placeholder="e.g., Hero Section"
+            className="h-8 text-xs"
           />
-          <p className="text-[10px] text-muted-foreground">
-            Give this module a custom name for easier identification
-          </p>
         </div>
 
         {/* Layout Selection */}
@@ -719,11 +685,11 @@ const ModuleSettings = () => {
           type={selectedModule.type}
         />
 
-        <hr className="border-border" />
+        <hr className="border-border/40" />
 
         {/* Content Controls */}
-        <div className="space-y-4">
-          <Label className="uppercase text-xs text-muted-foreground font-bold tracking-wider">
+        <div className="space-y-3">
+          <Label className="uppercase text-[10px] text-muted-foreground/60 font-semibold tracking-wider">
             Content
           </Label>
 
@@ -1325,10 +1291,10 @@ const ModuleSettings = () => {
             </div>
           )}
 
-          <hr className="border-border" />
+          <hr className="border-border/40" />
 
-          <div className="space-y-3">
-            <Label className="uppercase text-xs text-muted-foreground font-bold tracking-wider">
+          <div className="space-y-2">
+            <Label className="uppercase text-[10px] text-muted-foreground/60 font-semibold tracking-wider">
               Visibility
             </Label>
             <RadioGroup
@@ -1339,20 +1305,20 @@ const ModuleSettings = () => {
             >
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="public" id="vis-public" />
-                <Label htmlFor="vis-public" className="font-normal">
+                <Label htmlFor="vis-public" className="font-normal text-xs">
                   Everyone
                 </Label>
               </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="members" id="vis-members" />
-                <Label htmlFor="vis-members" className="font-normal">
+                <Label htmlFor="vis-members" className="font-normal text-xs">
                   Members Only
                 </Label>
               </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="admin" id="vis-admin" />
-                <Label htmlFor="vis-admin" className="font-normal">
-                  Admin Preview Only
+                <Label htmlFor="vis-admin" className="font-normal text-xs">
+                  Admin Only
                 </Label>
               </div>
             </RadioGroup>
@@ -1361,7 +1327,7 @@ const ModuleSettings = () => {
           {/* CONTAINER SETTINGS */}
           {!["navbar", "footer"].includes(selectedModule.type) && (
             <>
-              <hr className="border-border" />
+              <hr className="border-border/40" />
               <ContainerSettings
                 selectedModule={selectedModule}
                 updateModuleContent={updateModuleContent}

@@ -189,6 +189,8 @@ export function applyCustomTheme(
     background?: string;
     muted?: string;
     border?: string;
+    buttonColor?: string;
+    buttonTextColor?: string;
     borderRadius?: number;
     spacing?: number;
     fontSize?: number;
@@ -268,6 +270,20 @@ export function applyCustomTheme(
     container.style.setProperty("--input", `oklch(${borderOklch})`);
   }
 
+  if (colors.buttonColor) {
+    const buttonOklch = hexToOklch(colors.buttonColor);
+    container.style.setProperty("--button-bg", `oklch(${buttonOklch})`);
+    // Auto-generate button text color if not explicitly set
+    const btnTextColor = colors.buttonTextColor || generateForegroundColor(colors.buttonColor);
+    const btnTextOklch = hexToOklch(btnTextColor);
+    container.style.setProperty("--button-text", `oklch(${btnTextOklch})`);
+  }
+
+  if (colors.buttonTextColor && !colors.buttonColor) {
+    const btnTextOklch = hexToOklch(colors.buttonTextColor);
+    container.style.setProperty("--button-text", `oklch(${btnTextOklch})`);
+  }
+
   // Apply border radius customization
   if (colors.borderRadius !== undefined) {
     container.style.setProperty("--radius", `${colors.borderRadius}px`);
@@ -320,6 +336,8 @@ export function resetCustomTheme(
     "--muted-foreground",
     "--border",
     "--input",
+    "--button-bg",
+    "--button-text",
     "--radius",
     "--spacing-unit",
     "--font-size-base",
