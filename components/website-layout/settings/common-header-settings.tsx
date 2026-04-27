@@ -85,8 +85,8 @@ export const CommonHeaderSettings = ({
     <div className="space-y-4">
       {/* Layout Controls */}
       {showLayoutControls && (
-        <div className="space-y-2 p-2 border rounded-lg bg-muted/10">
-          <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-wide">
+        <div className="space-y-3 pb-2 border-b border-border/40">
+          <Label className="text-[10px] uppercase font-semibold text-muted-foreground/60 tracking-wider">
             Layout Controls
           </Label>
 
@@ -263,11 +263,11 @@ export const CommonHeaderSettings = ({
       )}
 
       {/* Title Settings */}
-      <div className="space-y-2 p-3 border rounded-lg bg-background">
+      <div className="space-y-2">
         <div className="flex items-center justify-between">
           <Label
             htmlFor="title-input"
-            className="font-semibold text-xs uppercase text-muted-foreground"
+            className="font-semibold text-[10px] uppercase text-muted-foreground/60 tracking-wider"
           >
             {titleLabel}
           </Label>
@@ -304,17 +304,17 @@ export const CommonHeaderSettings = ({
             value={title}
             onChange={(e) => onTitleChange(e.target.value)}
             placeholder={titlePlaceholder}
-            className="h-9 text-sm"
+            className="h-8 text-xs"
           />
         )}
       </div>
 
       {/* Description Settings */}
-      <div className="space-y-2 p-3 border rounded-lg bg-background">
+      <div className="space-y-2 pb-2">
         <div className="flex items-center justify-between">
           <Label
             htmlFor="desc-input"
-            className="font-semibold text-xs uppercase text-muted-foreground"
+            className="font-semibold text-[10px] uppercase text-muted-foreground/60 tracking-wider"
           >
             {descriptionLabel}
           </Label>
@@ -352,8 +352,8 @@ export const CommonHeaderSettings = ({
             value={description}
             onChange={(e) => onDescriptionChange(e.target.value)}
             placeholder={descriptionPlaceholder}
-            rows={3}
-            className="text-sm resize-none"
+            rows={2}
+            className="text-xs resize-none min-h-[60px]"
           />
         )}
       </div>

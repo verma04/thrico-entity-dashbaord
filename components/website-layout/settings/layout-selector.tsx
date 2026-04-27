@@ -100,73 +100,59 @@ export const LayoutSelector = ({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 pb-2">
       <div className="flex items-center justify-between">
-        <Label className="uppercase text-xs text-muted-foreground font-bold tracking-wider">
-          Layout Style
+        <Label className="uppercase text-[10px] text-muted-foreground/60 font-semibold tracking-wider">
+          Layout
         </Label>
-        <span className="text-[10px] text-muted-foreground bg-muted px-2 py-1 rounded-full">
-          {currentTheme}
+        <span className="text-[9px] text-muted-foreground/50 capitalize font-medium">
+          {currentTheme} Theme
         </span>
       </div>
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-2 gap-1.5">
         {availableLayouts.map((layout) => {
           const { icon: Icon, description, color } = getLayoutInfo(layout);
           const isSelected = currentLayout === layout;
 
           return (
-            <div
+            <button
               key={layout}
               onClick={() => onLayoutChange(layout)}
               className={cn(
-                "group relative cursor-pointer rounded-lg border-2 p-2 transition-all duration-300 ease-out",
-                "hover:shadow-md hover:scale-[1.02] active:scale-[0.98]",
+                "flex items-center gap-2 p-1.5 rounded-md border text-left transition-all duration-150 group",
                 isSelected
-                  ? "border-primary bg-gradient-to-br from-primary/10 to-primary/5 shadow-sm"
-                  : "border-border hover:border-primary/40 bg-card/50 hover:bg-card"
+                  ? "border-primary/50 bg-primary/5 ring-1 ring-primary/15"
+                  : "border-transparent hover:bg-muted/40 hover:border-border/40 bg-muted/20"
               )}
             >
-              {/* Selected indicator */}
-              {isSelected && (
-                <div className="absolute -top-1 -right-1 bg-primary text-primary-foreground rounded-full p-0.5 shadow-md animate-in zoom-in duration-300">
-                  <Check className="h-2.5 w-2.5" strokeWidth={3} />
+              <div
+                className={cn(
+                  "p-1 rounded-md transition-colors",
+                  isSelected ? "bg-primary/15" : "bg-muted/60 group-hover:bg-card"
+                )}
+              >
+                <Icon
+                  className={cn(
+                    "h-3 w-3",
+                    isSelected ? "text-primary" : "text-muted-foreground"
+                  )}
+                  strokeWidth={2}
+                />
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <div
+                  className={cn(
+                    "text-[10px] font-medium truncate capitalize",
+                    isSelected ? "text-primary" : "text-foreground/80 group-hover:text-foreground"
+                  )}
+                >
+                  {layout.replace(/-/g, " ")}
                 </div>
-              )}
-
-              {/* Icon */}
-              <div
-                className={cn(
-                  "mb-1 transition-transform duration-300 group-hover:scale-110",
-                  isSelected ? color : "text-muted-foreground"
-                )}
-              >
-                <Icon className="h-4 w-4 mx-auto" strokeWidth={2} />
               </div>
-
-              {/* Layout name */}
-              <div
-                className={cn(
-                  "text-[10px] font-medium text-center capitalize mb-0.5 transition-colors leading-tight",
-                  isSelected ? "text-primary" : "text-foreground"
-                )}
-              >
-                {layout.replace(/-/g, " ")}
-              </div>
-
-              {/* Description */}
-              <div className="text-[9px] text-center text-muted-foreground leading-tight">
-                {description}
-              </div>
-
-              {/* Hover effect overlay */}
-              <div
-                className={cn(
-                  "absolute inset-0 rounded-lg opacity-0 transition-opacity duration-300",
-                  "bg-gradient-to-br from-primary/5 to-transparent",
-                  !isSelected && "group-hover:opacity-100"
-                )}
-              />
-            </div>
+              
+              {isSelected && <Check className="h-2.5 w-2.5 text-primary shrink-0 mr-1" />}
+            </button>
           );
         })}
       </div>

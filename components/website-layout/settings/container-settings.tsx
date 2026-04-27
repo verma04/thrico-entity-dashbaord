@@ -15,15 +15,15 @@ export const ContainerSettings = ({
   updateModuleContent,
 }: ContainerSettingsProps) => {
   return (
-    <div className="space-y-4">
-      <Label className="uppercase text-xs text-muted-foreground font-bold tracking-wider">
-        Container Settings
+    <div className="space-y-3 pb-2">
+      <Label className="uppercase text-[10px] text-muted-foreground/60 font-semibold tracking-wider">
+        Container
       </Label>
 
       {/* Container Width Option */}
-      <div className="space-y-2">
-        <Label className="text-xs text-gray-600">Container Width</Label>
-        <div className="flex gap-2">
+      <div className="space-y-1.5">
+        <Label className="text-[10px] text-muted-foreground">Width</Label>
+        <div className="flex gap-1.5">
           <button
             onClick={() =>
               updateModuleContent(selectedModule.id, {
@@ -33,13 +33,13 @@ export const ContainerSettings = ({
                 },
               })
             }
-            className={`flex-1 h-9 px-3 rounded-md border text-sm transition ${
+            className={`flex-1 h-7 px-2 rounded border text-[10px] transition-colors ${
               !selectedModule.content.containerSettings?.fullWidth
-                ? "border-primary bg-primary text-white"
-                : "border-input bg-background hover:bg-muted"
+                ? "border-primary bg-primary/10 text-primary font-medium"
+                : "border-border bg-background hover:bg-muted text-muted-foreground"
             }`}
           >
-            Fixed Container
+            Fixed
           </button>
           <button
             onClick={() =>
@@ -50,18 +50,15 @@ export const ContainerSettings = ({
                 },
               })
             }
-            className={`flex-1 h-9 px-3 rounded-md border text-sm transition ${
+            className={`flex-1 h-7 px-2 rounded border text-[10px] transition-colors ${
               selectedModule.content.containerSettings?.fullWidth
-                ? "border-primary bg-primary text-white"
-                : "border-input bg-background hover:bg-muted"
+                ? "border-primary bg-primary/10 text-primary font-medium"
+                : "border-border bg-background hover:bg-muted text-muted-foreground"
             }`}
           >
-            Full Width
+            Full
           </button>
         </div>
-        <p className="text-[10px] text-muted-foreground">
-          Fixed container centers content, full width spans entire screen
-        </p>
       </div>
 
       {/* Text Color */}
@@ -82,11 +79,11 @@ export const ContainerSettings = ({
       </div>
 
       {/* Background Selection */}
-      <div className="space-y-3">
-        <Label className="text-xs text-gray-600">Background</Label>
+      <div className="space-y-2">
+        <Label className="text-[10px] text-muted-foreground">Background</Label>
 
         {/* Mode Selector */}
-        <div className="flex gap-2 mb-3">
+        <div className="flex gap-1.5">
           <button
             onClick={() => {
               const currentBg =
@@ -101,12 +98,12 @@ export const ContainerSettings = ({
                 });
               }
             }}
-            className={`flex-1 h-8 rounded-md text-xs transition ${
+            className={`flex-1 h-7 rounded border text-[10px] transition-colors ${
               !(
                 selectedModule.content.containerSettings?.background || ""
               ).includes("linear-gradient")
-                ? "bg-primary text-white shadow-sm"
-                : "bg-muted text-muted-foreground hover:bg-muted/80"
+                ? "border-primary bg-primary/10 text-primary font-medium"
+                : "border-border bg-background hover:bg-muted text-muted-foreground"
             }`}
           >
             Solid
@@ -125,12 +122,12 @@ export const ContainerSettings = ({
                 });
               }
             }}
-            className={`flex-1 h-8 rounded-md text-xs transition ${
+            className={`flex-1 h-7 rounded border text-[10px] transition-colors ${
               (
                 selectedModule.content.containerSettings?.background || ""
               ).includes("linear-gradient")
-                ? "bg-primary text-white shadow-sm"
-                : "bg-muted text-muted-foreground hover:bg-muted/80"
+                ? "border-primary bg-primary/10 text-primary font-medium"
+                : "border-border bg-background hover:bg-muted text-muted-foreground"
             }`}
           >
             Gradient
@@ -141,7 +138,7 @@ export const ContainerSettings = ({
         {(selectedModule.content.containerSettings?.background || "").includes(
           "linear-gradient"
         ) && (
-          <div className="flex items-center gap-2 mb-3 bg-muted/20 p-1.5 rounded-md border border-dashed">
+          <div className="flex items-center gap-2 bg-muted/20 p-1.5 rounded-md border border-dashed">
             <Label className="text-[10px] text-muted-foreground uppercase font-bold flex-1">
               Gradient Stops
             </Label>
@@ -234,7 +231,7 @@ export const ContainerSettings = ({
                     },
                   })
                 }
-                className="h-9 w-12 rounded-md border border-input cursor-pointer"
+                className="h-8 w-10 rounded border border-input cursor-pointer p-0"
               />
               <Input
                 type="text"
@@ -249,8 +246,8 @@ export const ContainerSettings = ({
                     },
                   })
                 }
-                placeholder="e.g., #ff5500 or bg-slate-50"
-                className="h-9 flex-1 text-sm text-center"
+                placeholder="#fff or bg-slate-50"
+                className="h-8 flex-1 text-xs text-center"
               />
             </div>
           </div>
@@ -612,10 +609,10 @@ export const ContainerSettings = ({
       />
 
       {/* Opacity */}
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         <div className="flex items-center justify-between">
-          <Label className="text-xs text-gray-600">Background Opacity</Label>
-          <span className="text-xs text-muted-foreground">
+          <Label className="text-[10px] text-muted-foreground">Opacity</Label>
+          <span className="text-[10px] text-muted-foreground/80">
             {selectedModule.content.containerSettings?.opacity ?? 100}%
           </span>
         </div>
@@ -633,17 +630,16 @@ export const ContainerSettings = ({
               },
             })
           }
-          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+          className="w-full h-1.5 bg-muted rounded-lg appearance-none cursor-pointer slider-sm"
         />
-        <p className="text-[10px] text-muted-foreground">
-          Control background transparency (0% = transparent, 100% = opaque)
-        </p>
       </div>
 
       {/* CTA Button Settings */}
-      <div className="space-y-3 pt-2 border-t">
+      <div className="space-y-2 pt-2 border-t border-border/40">
         <div className="flex items-center justify-between">
-          <Label className="text-xs text-gray-600">CTA Button</Label>
+          <Label className="text-[10px] text-muted-foreground uppercase font-bold">
+            CTA Button
+          </Label>
           <button
             onClick={() =>
               updateModuleContent(selectedModule.id, {
@@ -667,27 +663,27 @@ export const ContainerSettings = ({
                 },
               })
             }
-            className={`h-6 w-11 rounded-full transition ${
+            className={`h-4 w-7 rounded-full transition-colors flex items-center px-0.5 ${
               selectedModule.content.containerSettings?.button?.enabled
                 ? "bg-primary"
-                : "bg-gray-300"
-            } relative`}
+                : "bg-muted-foreground/30"
+            }`}
           >
             <span
-              className={`block h-4 w-4 rounded-full bg-white shadow transform transition ${
+              className={`block h-3 w-3 rounded-full bg-white shadow-sm transform transition-transform ${
                 selectedModule.content.containerSettings?.button?.enabled
-                  ? "translate-x-6"
-                  : "translate-x-1"
-              } mt-1`}
+                  ? "translate-x-3"
+                  : "translate-x-0"
+              }`}
             />
           </button>
         </div>
 
         {selectedModule.content.containerSettings?.button?.enabled && (
-          <div className="space-y-3 pl-2 border-l-2 border-primary/20">
+          <div className="space-y-2.5 pl-2 border-l border-primary/30">
             {/* Button Text Selector */}
-            <div className="space-y-2">
-              <Label className="text-xs text-gray-600">Button Text</Label>
+            <div className="space-y-1.5">
+              <Label className="text-[10px] text-muted-foreground">Button Text</Label>
               <select
                 value={
                   [
@@ -720,7 +716,7 @@ export const ContainerSettings = ({
                     },
                   });
                 }}
-                className="w-full h-9 px-3 rounded-md border border-input bg-background text-sm"
+                className="w-full h-8 px-2 rounded border border-input bg-background text-xs"
               >
                 <option value="View All">View All</option>
                 <option value="Explore More">Explore More</option>
@@ -734,9 +730,9 @@ export const ContainerSettings = ({
             {!["View All", "Explore More", "Learn More", "See More"].includes(
               selectedModule.content.containerSettings?.button?.text || ""
             ) && (
-              <div className="space-y-2">
-                <Label className="text-xs text-gray-600">
-                  Custom Button Text
+              <div className="space-y-1.5">
+                <Label className="text-[10px] text-muted-foreground">
+                  Custom Text
                 </Label>
                 <Input
                   type="text"
@@ -762,16 +758,16 @@ export const ContainerSettings = ({
                     })
                   }
                   placeholder="Enter button text"
-                  className="h-9"
+                  className="h-8 text-xs"
                 />
               </div>
             )}
 
             {/* Button Icon (Optional) */}
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <Label className="text-xs text-gray-600">
-                  Button Icon (Optional)
+                <Label className="text-[10px] text-muted-foreground">
+                  Button Icon
                 </Label>
                 {selectedModule.content.containerSettings?.button?.icon && (
                   <button
