@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 export default function AppLoading() {
   return (
@@ -62,7 +63,7 @@ export default function AppLoading() {
             transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
             className="absolute inset-0 border-t-2 border-r-2 border-transparent border-t-blue-500 border-r-purple-500 rounded-full scale-90"
           />
-          
+
           {/* Center Logo/Icon */}
           <motion.div
             animate={{
@@ -73,9 +74,14 @@ export default function AppLoading() {
               repeat: Infinity,
               ease: "easeInOut",
             }}
-            className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-600 to-purple-700 flex items-center justify-center shadow-lg shadow-blue-500/20"
+            className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20 overflow-hidden relative"
           >
-            <span className="text-white font-black text-xl italic tracking-tighter">T</span>
+            <Image
+              src="/thrico_app_Icon.jpg"
+              alt="Thrico"
+              fill
+              className="object-cover"
+            />
           </motion.div>
 
           {/* Shimmer effect inside the box */}
@@ -96,7 +102,7 @@ export default function AppLoading() {
         {/* Text and Progress */}
         <div className="flex flex-col items-center gap-6 w-full">
           <div className="flex flex-col items-center gap-2">
-            <motion.h2 
+            <motion.h2
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2 }}
@@ -104,7 +110,7 @@ export default function AppLoading() {
             >
               thrico
             </motion.h2>
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4 }}
@@ -127,15 +133,15 @@ export default function AppLoading() {
               }}
               className="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-blue-500/80 to-transparent shadow-[0_0_10px_rgba(59,130,246,0.5)]"
             />
-            
+
             {/* Subtle base filling */}
-            <motion.div 
+            <motion.div
               initial={{ width: 0 }}
               animate={{ width: "100%" }}
               transition={{
                 duration: 4,
                 repeat: Infinity,
-                ease: "linear"
+                ease: "linear",
               }}
               className="absolute inset-y-0 left-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10"
             />
@@ -167,21 +173,21 @@ export default function AppLoading() {
       {[...Array(6)].map((_, i) => (
         <motion.div
           key={i}
-          initial={{ 
-            x: Math.random() * 100 - 50 + "%", 
+          initial={{
+            x: Math.random() * 100 - 50 + "%",
             y: Math.random() * 100 - 50 + "%",
-            opacity: 0 
+            opacity: 0,
           }}
-          animate={{ 
+          animate={{
             y: ["0%", "-20%", "0%"],
             opacity: [0, 0.4, 0],
-            scale: [1, 1.2, 1]
+            scale: [1, 1.2, 1],
           }}
           transition={{
             duration: 5 + Math.random() * 5,
             repeat: Infinity,
             delay: Math.random() * 5,
-            ease: "easeInOut"
+            ease: "easeInOut",
           }}
           className="absolute w-1 h-1 bg-blue-400 rounded-full blur-[1px] pointer-events-none"
           style={{
