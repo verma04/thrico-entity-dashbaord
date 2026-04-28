@@ -10,11 +10,7 @@ export const GET_USER = gql`
       lastName
       status
       memberStatus
-      profile {
-        phone {
-          phoneNumber
-        }
-      }
+
       permissions {
         website
         moderation
@@ -220,7 +216,6 @@ export const UPDATE_FEED_ENTITY_NAME = gql`
     }
   }
 `;
-
 
 export const GET_KYC_COUNTRIES = gql`
   query GetKycCountries {
