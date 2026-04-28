@@ -10,6 +10,11 @@ export const GET_USER = gql`
       lastName
       status
       memberStatus
+      profile {
+        phone {
+          phoneNumber
+        }
+      }
       permissions {
         website
         moderation

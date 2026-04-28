@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 
 import { RazorpayOrderOptions, useRazorpay } from "react-razorpay";
-import { useCheckEntitySubscription } from "@/graphql/actions";
+import { useCheckEntitySubscription, useGetUser } from "@/graphql/actions";
 import {
   useUpdateToYearly,
   useUpdateToYearlySummary,
@@ -48,6 +48,8 @@ const YearlyUpgrade = ({ planOverview }: { planOverview: PlanOverview }) => {
     useUpdateToYearlySummary();
   const { data: countryData } = useCountry();
   const { Razorpay } = useRazorpay();
+  const { data: userData } = useGetUser();
+  const user = userData?.getUser;
 
   const country = countryData?.country;
   const summary = summaryData?.getUpdateToYearlySummary;
@@ -94,9 +96,9 @@ const YearlyUpgrade = ({ planOverview }: { planOverview: PlanOverview }) => {
             });
           },
           prefill: {
-            name: "User",
-            email: "user@example.com",
-            contact: "9999999999",
+            name: `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim() || "User",
+            email: user?.email ?? "",
+            contact: user?.profile?.phone?.phoneNumber ?? "",
           },
           theme: {
             color: "#6C47FF",

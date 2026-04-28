@@ -25,7 +25,7 @@ import moment from "moment";
 
 import { useRazorpay } from "react-razorpay";
 
-import { useCheckEntitySubscription } from "@/graphql/actions";
+import { useCheckEntitySubscription, useGetUser } from "@/graphql/actions";
 import {
   useUpdateTrialToPackage,
   useVerifyRazorpayPayment,
@@ -66,6 +66,8 @@ export default function BuyPlanPopUp({
   const { Razorpay } = useRazorpay();
   const { refetch, loading: statusLoader } = useCheckEntitySubscription();
   const { data: countryData } = useCountry();
+  const { data: userData } = useGetUser();
+  const user = userData?.getUser;
 
   const country = countryData?.country;
   const taxPercentage = country?.taxPercentage || 0;
@@ -154,9 +156,9 @@ export default function BuyPlanPopUp({
           setShowBuyPlanDialog(true);
         },
         prefill: {
-          name: "John Doe",
-          email: "john.doe@example.com",
-          contact: "9999999999",
+          name: `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim() || "User",
+          email: user?.email ?? "",
+          contact: user?.profile?.phone?.phoneNumber ?? "",
         },
         theme: { color: "#6C47FF" },
         modal: {

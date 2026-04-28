@@ -36,6 +36,7 @@ import {
   useVerifyRazorpayPayment,
   useCountry,
 } from "@/graphql/actions/plan";
+import { useGetUser } from "@/graphql/actions";
 import { RazorpayOrderOptions, useRazorpay } from "react-razorpay";
 import { toast } from "sonner";
 
@@ -55,6 +56,8 @@ const AddonPurchaseModal = ({
   const [quantity, setQuantity] = useState(1);
   const { Razorpay } = useRazorpay();
   const { data: countryData } = useCountry();
+  const { data: userData } = useGetUser();
+  const user = userData?.getUser;
 
   const country = countryData?.country;
   const taxPercentage = country?.taxPercentage || 0;
@@ -102,9 +105,9 @@ const AddonPurchaseModal = ({
             });
           },
           prefill: {
-            name: "User",
-            email: "user@example.com",
-            contact: "9999999999",
+            name: `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim() || "User",
+            email: user?.email ?? "",
+            contact: user?.profile?.phone?.phoneNumber ?? "",
           },
           theme: {
             color: "#6C47FF",

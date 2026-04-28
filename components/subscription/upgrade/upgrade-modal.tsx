@@ -34,7 +34,10 @@ import {
   useUpgradePlan,
   useVerifyRazorpayPayment,
 } from "@/graphql/actions/plan";
-import { useCheckEntitySubscription } from "@/graphql/actions";
+import {
+  useCheckEntitySubscription,
+  useGetUser,
+} from "@/graphql/actions";
 import { useRouter } from "next/navigation";
 
 enum BillingCycle {
@@ -93,6 +96,8 @@ export default function UpgradeModal({
   // GraphQL hooks
   const { Razorpay } = useRazorpay();
   const { refetch } = useCheckEntitySubscription();
+  const { data: userData } = useGetUser();
+  const user = userData?.getUser;
 
   const [verify] = useVerifyRazorpayPayment({
     onCompleted: (data: { verifyRazorpayPayment: boolean }) => {
@@ -130,9 +135,9 @@ export default function UpgradeModal({
           onClose();
         },
         prefill: {
-          name: "Test User",
-          email: "test@gmail.com",
-          contact: "9999999999",
+          name: `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim() || "User",
+          email: user?.email ?? "",
+          contact: user?.profile?.phone?.phoneNumber ?? "",
         },
         theme: {
           color: "#6C47FF",
