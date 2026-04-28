@@ -84,7 +84,7 @@ const AddonPurchaseModal = ({
 
       if (response.razorpayOrder) {
         const options: RazorpayOrderOptions = {
-          key: "rzp_test_AVIthfNy85rAR2",
+          key: "rzp_live_SiqzWXdijA6k6U",
           amount: response.razorpayOrder.amount,
           currency: response.razorpayOrder.currency,
           name: "Thrico",

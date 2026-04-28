@@ -71,7 +71,7 @@ const YearlyUpgrade = ({ planOverview }: { planOverview: PlanOverview }) => {
 
       if (result.razorpayOrder) {
         const options: RazorpayOrderOptions = {
-          key: "rzp_test_AVIthfNy85rAR2",
+          key: "rzp_live_SiqzWXdijA6k6U",
           amount: result.razorpayOrder.amount,
           currency: result.razorpayOrder
             .currency as RazorpayOrderOptions["currency"],

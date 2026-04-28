@@ -131,7 +131,7 @@ function TopUpModal({
       }
 
       const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY || "rzp_test_AVIthfNy85rAR2",
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY || "rzp_live_SiqzWXdijA6k6U",
         amount: orderData.totalAmount,
         currency: orderData.currency,
         name: "Thrico",
@@ -154,7 +154,10 @@ function TopUpModal({
               toast.success("Credits added successfully!");
               onClose();
             } else {
-              toast.error(verifyData?.verifyEmailTopupPayment.message || "Verification failed");
+              toast.error(
+                verifyData?.verifyEmailTopupPayment.message ||
+                  "Verification failed",
+              );
             }
           } catch (err: any) {
             toast.error(err.message || "Payment verification failed");
@@ -171,9 +174,9 @@ function TopUpModal({
   };
 
   const packs = [...(topupData?.getEmailTopups || [])].sort(
-    (a, b) => a.numberOfEmails - b.numberOfEmails
+    (a, b) => a.numberOfEmails - b.numberOfEmails,
   );
-  const selectedPackDetails = packs.find(p => p.topupId === selectedPack);
+  const selectedPackDetails = packs.find((p) => p.topupId === selectedPack);
 
   return (
     <Dialog open onOpenChange={onClose}>
@@ -188,11 +191,13 @@ function TopUpModal({
               </div>
               <div>
                 <DialogTitle className="text-xl font-semibold">
-                  {step === "selection" ? "Add Email Credits" : "Confirm Purchase"}
+                  {step === "selection"
+                    ? "Add Email Credits"
+                    : "Confirm Purchase"}
                 </DialogTitle>
                 <DialogDescription className="text-sm text-muted-foreground">
-                  {step === "selection" 
-                    ? "Choose a credit pack to boost your monthly quota." 
+                  {step === "selection"
+                    ? "Choose a credit pack to boost your monthly quota."
                     : "Review your order summary and taxes before payment."}
                 </DialogDescription>
               </div>
@@ -204,7 +209,9 @@ function TopUpModal({
         {isInitiating && (
           <div className="flex items-center justify-center py-4 bg-secondary/10 border-b border-border/50">
             <Loader2 className="animate-spin h-5 w-5 text-primary" />
-            <span className="ml-2 text-sm text-muted-foreground font-medium">Preparing your summary...</span>
+            <span className="ml-2 text-sm text-muted-foreground font-medium">
+              Preparing your summary...
+            </span>
           </div>
         )}
 
@@ -238,29 +245,51 @@ function TopUpModal({
                         "w-full flex items-center justify-between p-4 rounded-2xl border transition-all text-left group",
                         selectedPack === pack.topupId
                           ? "border-primary bg-primary/5 ring-1 ring-primary/20"
-                          : "border-border bg-background hover:border-primary/50"
+                          : "border-border bg-background hover:border-primary/50",
                       )}
                     >
                       <div className="flex items-center gap-4">
-                        <div className={cn(
-                          "h-10 w-10 rounded-xl flex items-center justify-center border transition-colors",
-                          selectedPack === pack.topupId ? "bg-white border-primary/20 shadow-sm" : "bg-secondary/50 border-transparent group-hover:bg-background"
-                        )}>
-                          <Mail className={cn("h-4 w-4", selectedPack === pack.topupId ? "text-primary" : "text-muted-foreground")} />
+                        <div
+                          className={cn(
+                            "h-10 w-10 rounded-xl flex items-center justify-center border transition-colors",
+                            selectedPack === pack.topupId
+                              ? "bg-white border-primary/20 shadow-sm"
+                              : "bg-secondary/50 border-transparent group-hover:bg-background",
+                          )}
+                        >
+                          <Mail
+                            className={cn(
+                              "h-4 w-4",
+                              selectedPack === pack.topupId
+                                ? "text-primary"
+                                : "text-muted-foreground",
+                            )}
+                          />
                         </div>
                         <div>
-                          <h4 className="text-sm font-semibold text-foreground">{pack.name}</h4>
+                          <h4 className="text-sm font-semibold text-foreground">
+                            {pack.name}
+                          </h4>
                           <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-xs text-muted-foreground">{pack.numberOfEmails.toLocaleString()} units</span>
+                            <span className="text-xs text-muted-foreground">
+                              {pack.numberOfEmails.toLocaleString()} units
+                            </span>
                             <span className="h-0.5 w-0.5 rounded-full bg-border" />
-                            <span className="text-xs font-medium text-emerald-600">₹{(pack.price / pack.numberOfEmails).toFixed(2)} / email</span>
+                            <span className="text-xs font-medium text-emerald-600">
+                              ₹{(pack.price / pack.numberOfEmails).toFixed(2)} /
+                              email
+                            </span>
                           </div>
                         </div>
                       </div>
                       <div className="text-right">
-                        <span className="text-sm font-bold text-foreground">₹{pack.price}</span>
+                        <span className="text-sm font-bold text-foreground">
+                          ₹{pack.price}
+                        </span>
                         {selectedPack === pack.topupId && (
-                          <div className="text-[10px] text-primary font-bold mt-1 uppercase tracking-wider">Selected</div>
+                          <div className="text-[10px] text-primary font-bold mt-1 uppercase tracking-wider">
+                            Selected
+                          </div>
                         )}
                       </div>
                     </button>
@@ -268,83 +297,106 @@ function TopUpModal({
                 )}
               </div>
             </div>
-          ) : orderData && (
-            <div className="grid gap-6 md:grid-cols-2">
-              <div className="space-y-6">
-                <div className="space-y-2">
-                  <h4 className="text-sm font-medium">Purchase Details</h4>
-                  <div className="p-4 rounded-2xl bg-secondary/30 border border-border/50">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="h-8 w-8 rounded-lg bg-white flex items-center justify-center text-primary shadow-sm">
-                        <Mail className="h-4 w-4" />
+          ) : (
+            orderData && (
+              <div className="grid gap-6 md:grid-cols-2">
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium">Purchase Details</h4>
+                    <div className="p-4 rounded-2xl bg-secondary/30 border border-border/50">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="h-8 w-8 rounded-lg bg-white flex items-center justify-center text-primary shadow-sm">
+                          <Mail className="h-4 w-4" />
+                        </div>
+                        <span className="text-sm font-bold">
+                          {selectedPackDetails?.name}
+                        </span>
                       </div>
-                      <span className="text-sm font-bold">{selectedPackDetails?.name}</span>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        Instant top-up of{" "}
+                        {selectedPackDetails?.numberOfEmails.toLocaleString()}{" "}
+                        email transmission units. No expiration date.
+                      </p>
                     </div>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      Instant top-up of {selectedPackDetails?.numberOfEmails.toLocaleString()} email transmission units. No expiration date.
+                  </div>
+
+                  <div className="flex items-start gap-3 p-3 rounded-2xl bg-blue-50/50 border border-blue-100/30">
+                    <Shield className="h-4 w-4 text-blue-600 shrink-0 mt-0.5" />
+                    <p className="text-[10px] text-blue-700 font-medium leading-tight">
+                      Transactions are secured by 256-bit SSL encryption. We do
+                      not store your card details.
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3 p-3 rounded-2xl bg-blue-50/50 border border-blue-100/30">
-                  <Shield className="h-4 w-4 text-blue-600 shrink-0 mt-0.5" />
-                  <p className="text-[10px] text-blue-700 font-medium leading-tight">
-                    Transactions are secured by 256-bit SSL encryption. We do not store your card details.
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <h4 className="text-sm font-medium text-foreground/80">Payment Summary</h4>
-                <div className="rounded-2xl border bg-secondary/20 p-4 space-y-4">
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-muted-foreground flex items-center gap-1.5">
-                      Subtotal
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <HelpCircle className="w-3.5 h-3.5 text-muted-foreground/40 cursor-help" />
-                          </TooltipTrigger>
-                          <TooltipContent className="max-w-72 p-4 bg-popover border shadow-xl">
-                            <div className="space-y-2">
-                              <p className="font-bold text-sm flex items-center gap-1.5 text-foreground">
-                                <Calculator className="w-4 h-4 text-primary" />
-                                Price Breakdown
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                All top-ups inclusive of local taxation based on your billing region.
-                              </p>
-                            </div>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </span>
-                    <span className="font-bold">₹{(orderData.amount / 100).toFixed(2)}</span>
-                  </div>
-
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-muted-foreground">
-                      {orderData.taxName} ({orderData.taxPercentage}%)
-                    </span>
-                    <span className="font-bold text-primary">₹{(orderData.taxAmount / 100).toFixed(2)}</span>
-                  </div>
-
-                  <div className="h-px bg-border/50 border-dashed" />
-
-                  <div className="space-y-1">
-                    <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest leading-none">Total amount due</p>
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-2xl font-black text-foreground">₹{(orderData.totalAmount / 100).toFixed(2)}</span>
-                      <span className="text-xs font-bold text-muted-foreground uppercase">{orderData.currency}</span>
+                <div className="space-y-4">
+                  <h4 className="text-sm font-medium text-foreground/80">
+                    Payment Summary
+                  </h4>
+                  <div className="rounded-2xl border bg-secondary/20 p-4 space-y-4">
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-muted-foreground flex items-center gap-1.5">
+                        Subtotal
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <HelpCircle className="w-3.5 h-3.5 text-muted-foreground/40 cursor-help" />
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-72 p-4 bg-popover border shadow-xl">
+                              <div className="space-y-2">
+                                <p className="font-bold text-sm flex items-center gap-1.5 text-foreground">
+                                  <Calculator className="w-4 h-4 text-primary" />
+                                  Price Breakdown
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  All top-ups inclusive of local taxation based
+                                  on your billing region.
+                                </p>
+                              </div>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </span>
+                      <span className="font-bold">
+                        ₹{(orderData.amount / 100).toFixed(2)}
+                      </span>
                     </div>
+
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="text-muted-foreground">
+                        {orderData.taxName} ({orderData.taxPercentage}%)
+                      </span>
+                      <span className="font-bold text-primary">
+                        ₹{(orderData.taxAmount / 100).toFixed(2)}
+                      </span>
+                    </div>
+
+                    <div className="h-px bg-border/50 border-dashed" />
+
+                    <div className="space-y-1">
+                      <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest leading-none">
+                        Total amount due
+                      </p>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-2xl font-black text-foreground">
+                          ₹{(orderData.totalAmount / 100).toFixed(2)}
+                        </span>
+                        <span className="text-xs font-bold text-muted-foreground uppercase">
+                          {orderData.currency}
+                        </span>
+                      </div>
+                    </div>
+
+                    <Badge
+                      variant="secondary"
+                      className="w-full justify-center bg-primary/10 text-primary border-none font-bold"
+                    >
+                      PREPAID TOP-UP
+                    </Badge>
                   </div>
-                  
-                  <Badge variant="secondary" className="w-full justify-center bg-primary/10 text-primary border-none font-bold">
-                    PREPAID TOP-UP
-                  </Badge>
                 </div>
               </div>
-            </div>
+            )
           )}
         </div>
 
@@ -359,7 +411,9 @@ function TopUpModal({
             <Button
               variant="ghost"
               className="text-xs font-bold hover:bg-white"
-              onClick={step === "selection" ? onClose : () => setStep("selection")}
+              onClick={
+                step === "selection" ? onClose : () => setStep("selection")
+              }
               disabled={isInitiating}
             >
               {step === "selection" ? "Cancel" : "Change Pack"}
@@ -560,7 +614,8 @@ function HistorySection() {
 // ---------------------------------------------------------------------------
 export default function UsageDashboard() {
   const { data, loading } = useGetEmailOverview();
-  const { data: performanceData, loading: perfLoading } = useGetEmailDeliveryPerformance();
+  const { data: performanceData, loading: perfLoading } =
+    useGetEmailDeliveryPerformance();
   const [topOpen, setTopOpen] = useState(false);
   const { setShowBuyPlanDialog } = useSubscriptionStore();
 

@@ -57,7 +57,7 @@ export default function BuyPlanPopUp({
   }
 
   const [billingCycle, setBillingCycle] = useState<BillingCycle>(
-    BillingCycle.Monthly
+    BillingCycle.Monthly,
   );
   const { showBuyPlanDialog, setShowBuyPlanDialog } = useSubscriptionStore();
 
@@ -135,7 +135,7 @@ export default function BuyPlanPopUp({
       if (!order) return;
 
       const options = {
-        key: "rzp_test_AVIthfNy85rAR2",
+        key: "rzp_live_SiqzWXdijA6k6U",
         amount: order.amount,
         currency: order.currency,
         name: "Test Company",
@@ -180,14 +180,14 @@ export default function BuyPlanPopUp({
         const razorpayContainer = document.querySelector(".razorpay-container");
         const razorpayBackdrop = document.querySelector(".razorpay-backdrop");
         const razorpayFrame = document.querySelector(
-          'iframe[src*="checkout.razorpay.com"]'
+          'iframe[src*="checkout.razorpay.com"]',
         );
 
         if (razorpayContainer) {
           (razorpayContainer as HTMLElement).style.setProperty(
             "z-index",
             "999999",
-            "important"
+            "important",
           );
           (razorpayContainer as HTMLElement).style.position = "fixed";
         }
@@ -195,7 +195,7 @@ export default function BuyPlanPopUp({
           (razorpayBackdrop as HTMLElement).style.setProperty(
             "z-index",
             "999998",
-            "important"
+            "important",
           );
           (razorpayBackdrop as HTMLElement).style.position = "fixed";
         }
@@ -203,13 +203,13 @@ export default function BuyPlanPopUp({
           (razorpayFrame as HTMLElement).style.setProperty(
             "z-index",
             "999999",
-            "important"
+            "important",
           );
         }
 
         // Also hide all dialog overlays temporarily
         const dialogOverlays = document.querySelectorAll(
-          "[data-radix-dialog-overlay]"
+          "[data-radix-dialog-overlay]",
         );
         dialogOverlays.forEach((overlay) => {
           (overlay as HTMLElement).style.display = "none";
@@ -431,7 +431,7 @@ export default function BuyPlanPopUp({
                     {moment(
                       billingCycle === "monthly"
                         ? currentDate.clone().add(1, "month")
-                        : currentDate.clone().add(1, "year")
+                        : currentDate.clone().add(1, "year"),
                     ).format("MMM Do YYYY")}
                   </span>
                 </div>
