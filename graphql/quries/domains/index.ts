@@ -45,7 +45,7 @@ export const GET_DOMAIN_DETAILS = gql`
 `;
 
 export const CHECK_DNS_STATUS = gql`
-  mutation CheckUpdatedDnsRecord($input: InputId!) {
+  mutation CheckUpdatedDnsRecord($input: inputId!) {
     checkUpdatedDnsRecord(input: $input) {
       ${details}
     }
@@ -69,7 +69,7 @@ export const GET_THRICO_DOMAIN = gql`
 `;
 
 export const DELETE_DOMAIN = gql`
-  mutation DeleteDomain($input: InputId!) {
+  mutation DeleteDomain($input: inputId!) {
     deleteDomain(input: $input) {
       success
     }
