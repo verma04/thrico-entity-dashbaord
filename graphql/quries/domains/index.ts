@@ -37,8 +37,8 @@ export const ADD_CUSTOM_DOMAIN = gql`
 `;
 
 export const GET_DOMAIN_DETAILS = gql`
-  query GetCustomDomainDetails($input: InputId!) {
-    getCustomDomainDetails(input: $input) {
+ query GetCustomDomainDetails($input: inputId!) {
+  getCustomDomainDetails(input: $input) {
       ${details}
     }
   }
