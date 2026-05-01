@@ -33,7 +33,6 @@ export default function EditPointRulePage() {
         id: ruleId,
         input: {
           points: Number(values.points),
-          trigger: values.trigger,
           dailyCap: values.dailyCap ? Number(values.dailyCap) : null,
           weeklyCap: values.weeklyCap ? Number(values.weeklyCap) : null,
           monthlyCap: values.monthlyCap ? Number(values.monthlyCap) : null,

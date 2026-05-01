@@ -162,6 +162,7 @@ export function PointRuleForm({
                 <Select
                   onValueChange={(val) => formik.setFieldValue("trigger", val)}
                   value={formik.values.trigger}
+                  disabled={isEdit}
                 >
                   <SelectTrigger id="trigger" className="h-11 shadow-none">
                     <SelectValue placeholder="Select trigger type" />
