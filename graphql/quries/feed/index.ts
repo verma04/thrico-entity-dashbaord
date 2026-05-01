@@ -504,9 +504,7 @@ export const ADD_FEED = gql`
 
 export const LIKE_FEED = gql`
   mutation likeFeed($input: InputId) {
-    likeFeed(input: $input) {
-      status
-    }
+    likeFeed(input: $input)
   }
 `;
 export const ADD_COMMENT = gql`
@@ -575,9 +573,7 @@ export const DELETE_COMMENT_FEED = gql`
 
 export const DELETE_FEED = gql`
   mutation DeleteFeed($input: InputId) {
-    deleteFeed(input: $input) {
-      status
-    }
+    deleteFeed(input: $input)
   }
 `;
 
