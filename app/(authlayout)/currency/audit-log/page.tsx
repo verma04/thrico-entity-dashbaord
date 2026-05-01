@@ -22,7 +22,7 @@ import {
   History,
   Info,
 } from "lucide-react";
-import { format } from "date-fns";
+import { safeFormat } from "@/lib/date-utils";
 import {
   Tooltip,
   TooltipContent,
@@ -200,7 +200,7 @@ export default function CurrencyAuditLogPage() {
                   return (
                     <TableRow key={tx.transactionId || idx} className="h-14">
                       <TableCell className="font-mono text-xs text-muted-foreground">
-                        {format(new Date(tx.timestamp), "MMM dd, HH:mm:ss")}
+                        {safeFormat(tx.timestamp, "MMM dd, HH:mm:ss")}
                       </TableCell>
                       <TableCell>{getTypeBadge(tx.type)}</TableCell>
                       <TableCell>

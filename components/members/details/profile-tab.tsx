@@ -16,6 +16,8 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { EmptyContentSection } from "./detail-states";
 
+import { safeLocaleDateString } from "@/lib/date-utils";
+
 export function ProfileTab({ member }: { member: any }) {
   const user = member?.user;
   if (!user) return null;
@@ -191,9 +193,7 @@ export function ProfileTab({ member }: { member: any }) {
                     {member.verification.isVerifiedAt && (
                       <span className="text-xs text-muted-foreground">
                         since{" "}
-                        {new Date(
-                          Number(member.verification.isVerifiedAt),
-                        ).toLocaleDateString()}
+                        {safeLocaleDateString(member.verification.isVerifiedAt)}
                       </span>
                     )}
                   </div>

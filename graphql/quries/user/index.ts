@@ -155,6 +155,7 @@ export const GET_USER_DETIALS = gql`
         avatar
         cover
         lastLoginAt
+        createdAt
         about {
           headline
           social {

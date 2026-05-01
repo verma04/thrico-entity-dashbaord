@@ -4,7 +4,7 @@ import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import UserActions from "./user-actions";
-import { format } from "date-fns";
+import { safeFormat } from "@/lib/date-utils";
 import { Mail, MapPin, Users } from "lucide-react";
 import { UserDetail, useBulkChangeUserStatus } from "@/graphql/actions";
 import { AdminTable, AdminStatusBadge, AdminVerifiedBadge, AdminTableColumn } from "@/components/shared/admin-table/admin-table";
@@ -107,9 +107,7 @@ const columns: AdminTableColumn<UserDetail>[] = [
     header: "Joined",
     cell: (row) => (
       <span className="text-[12px] text-muted-foreground whitespace-nowrap">
-        {row.user?.createdAt
-          ? format(new Date(Number(row.user.createdAt)), "MMM d, yyyy")
-          : "—"}
+        {safeFormat(row.user?.createdAt, "MMM d, yyyy", "—")}
       </span>
     ),
   },

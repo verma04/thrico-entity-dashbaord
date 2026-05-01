@@ -19,7 +19,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
-import { formatDistanceToNow } from "date-fns";
+import { safeFormatDistanceToNow, safeLocaleDateString } from "@/lib/date-utils";
 import { cn } from "@/lib/utils";
 import { useGetGamificationSummary } from "@/graphql/actions/gamification/gamification-quiries";
 import { Trophy, Star, Hash, Flame } from "lucide-react";
@@ -92,7 +92,7 @@ export function UserInfoCard({ member }: { member: any }) {
               {member.isOnline
                 ? "Online Now"
                 : member.lastActive
-                  ? `Seen ${formatDistanceToNow(new Date(Number(member.lastActive)), { addSuffix: true })}`
+                  ? `Seen ${safeFormatDistanceToNow(member.lastActive, { addSuffix: true })}`
                   : "Offline"}
             </span>
           </div>
@@ -244,9 +244,7 @@ export function UserInfoCard({ member }: { member: any }) {
                 <Calendar className="h-4 w-4" /> Joined
               </span>
               <span className="font-black">
-                {user.createdAt
-                  ? new Date(Number(user.createdAt)).toLocaleDateString()
-                  : "N/A"}
+                {safeLocaleDateString(user.createdAt)}
               </span>
             </div>
             {user.profile?.DOB && (
@@ -255,7 +253,7 @@ export function UserInfoCard({ member }: { member: any }) {
                   <Clock className="h-4 w-4" /> DOB
                 </span>
                 <span className="font-semibold">
-                  {new Date(user.profile.DOB).toLocaleDateString()}
+                  {safeLocaleDateString(user.profile.DOB)}
                 </span>
               </div>
             )}
@@ -299,7 +297,7 @@ export function UserInfoCard({ member }: { member: any }) {
                   <MapIcon className="h-4 w-4" /> Last Login
                 </span>
                 <span className="font-semibold">
-                  {formatDistanceToNow(new Date(Number(user.lastLoginAt)), {
+                  {safeFormatDistanceToNow(user.lastLoginAt, {
                     addSuffix: true,
                   })}
                 </span>

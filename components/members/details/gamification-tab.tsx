@@ -19,7 +19,7 @@ import {
   useGetUserEarnedBadges,
   useGetGamificationSummary,
 } from "@/graphql/actions/gamification/gamification-quiries";
-import { formatDistanceToNow } from "date-fns";
+import { safeFormatDistanceToNow, safeLocaleDateString } from "@/lib/date-utils";
 import { cn } from "@/lib/utils";
 
 export function GamificationTab({ userId }: { userId: string }) {
@@ -149,11 +149,8 @@ function MemberBadgesList({ userId }: { userId: string }) {
                 {edge.node.description}
               </p>
               <p className="text-[9px] font-bold text-primary uppercase mt-1">
-                {console.log(edge.node)}
                 {edge.node.userProgress?.createdAt
-                  ? new Date(
-                      Number(edge.node.userProgress.createdAt),
-                    ).toLocaleDateString()
+                  ? safeLocaleDateString(edge.node.userProgress.createdAt)
                   : "Active"}
               </p>
             </div>
@@ -213,9 +210,9 @@ function MemberActivityLog({ userId }: { userId: string }) {
                 {log.ruleAction || log.type}
               </span>
               <span className="text-[10px] text-muted-foreground">
-                {/* {formatDistanceToNow(new Date(Number(log.createdAt)), {
+                {safeFormatDistanceToNow(log.createdAt, {
                   addSuffix: true,
-                })} */}
+                })}
               </span>
             </div>
             <p className="text-xs text-muted-foreground line-clamp-1">

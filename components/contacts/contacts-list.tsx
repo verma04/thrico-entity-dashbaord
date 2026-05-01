@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { type ColumnDef } from "@tanstack/react-table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DataTable } from "@/components/ui/data-table";
-import { format } from "date-fns";
+import { safeFormat } from "@/lib/date-utils";
 import {
   Mail,
   MessageSquare,
@@ -124,9 +124,7 @@ export function ContactsList({ contacts }: { contacts: Contact[] }) {
       cell: ({ row }) => (
         <div className="flex items-center gap-2 text-xs font-bold text-slate-500 whitespace-nowrap italic uppercase">
           <Calendar className="h-3.5 w-3.5 text-indigo-400" />
-          {row.original.createdAt
-            ? format(new Date(Number(row.original.createdAt)), "MMM d, HH:mm")
-            : "-"}
+          {safeFormat(row.original.createdAt, "MMM d, HH:mm", "-")}
         </div>
       ),
     },
@@ -240,14 +238,10 @@ function ContactAction({ contact }: { contact: Contact }) {
               </span>
               <div className="bg-slate-50/50 p-4 rounded-3xl border border-slate-100 italic text-right block w-full">
                 <p className="font-black text-base text-slate-900 uppercase leading-none mb-1.5 tracking-tight">
-                  {contact.createdAt
-                    ? format(new Date(Number(contact.createdAt)), "MMMM d, yyyy")
-                    : "-"}
+                  {safeFormat(contact.createdAt, "MMMM d, yyyy", "-")}
                 </p>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em]">
-                  {contact.createdAt
-                    ? format(new Date(Number(contact.createdAt)), "HH:mm:ss 'UTC'")
-                    : "-"}
+                  {safeFormat(contact.createdAt, "HH:mm:ss 'UTC'", "-")}
                 </p>
               </div>
             </div>

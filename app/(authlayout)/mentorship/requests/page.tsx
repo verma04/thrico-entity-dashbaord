@@ -10,7 +10,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Eye, CheckCircle, XCircle, Info, Settings2 } from "lucide-react";
-import { format } from "date-fns";
+import { safeFormat } from "@/lib/date-utils";
 import { useEntitySettings } from "@/graphql/actions";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import Link from "next/link";
@@ -123,12 +123,10 @@ export default function MentorshipRequestPage() {
       header: "Submitted",
       cell: ({ row }) => {
         const date = row.original.createdAt;
-        return date ? (
+        return (
           <span className="text-sm text-muted-foreground">
-            {format(new Date(date), "MMM dd, yyyy")}
+            {safeFormat(date, "MMM dd, yyyy", "—")}
           </span>
-        ) : (
-          "—"
         );
       },
     },

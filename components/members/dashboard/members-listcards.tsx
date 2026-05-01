@@ -18,7 +18,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useGetAllUser, UserDetail } from "@/graphql/actions";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatDistanceToNow } from "date-fns";
+import { safeFormatDistanceToNow } from "@/lib/date-utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -173,12 +173,9 @@ export const MembersListCards = ({
                     <Calendar className="h-3 w-3" /> Joined
                   </div>
                   <p className="text-xs font-semibold">
-                    {member.user.createdAt
-                      ? formatDistanceToNow(
-                          new Date(Number(member.user.createdAt)),
-                          { addSuffix: true },
-                        )
-                      : "N/A"}
+                    {safeFormatDistanceToNow(member.user.createdAt, {
+                      addSuffix: true,
+                    })}
                   </p>
                 </div>
                 <div className="space-y-1">
