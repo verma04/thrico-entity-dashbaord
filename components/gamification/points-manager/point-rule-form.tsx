@@ -225,11 +225,19 @@ export function PointRuleForm({
                     Frequency Limitations (Anti-Abuse)
                   </h4>
                   
-                  <div className="flex items-start gap-2.5 mb-5 bg-indigo-50/50 border border-indigo-100/50 p-3 rounded-xl">
+                  <div className="flex items-start gap-3 mb-6 bg-indigo-50/50 border border-indigo-100/50 p-4 rounded-xl">
                     <Info className="h-4 w-4 text-indigo-500 mt-0.5 shrink-0" />
-                    <p className="text-[11px] text-indigo-900/70 leading-relaxed font-medium">
-                      These caps are calculated <strong>per individual user</strong>. They ensure that scoring is balanced and prevent members from earning excessive points in a short period.
-                    </p>
+                    <div className="space-y-1.5">
+                      <p className="text-[11px] text-indigo-900/70 leading-relaxed font-semibold">
+                        Frequency-Based Buckets
+                      </p>
+                      <p className="text-[11px] text-indigo-900/60 leading-relaxed">
+                        These limits represent the <strong>maximum number of times</strong> an action can be performed within each period per user.
+                      </p>
+                      <p className="text-[10px] text-indigo-900/40 italic leading-relaxed">
+                        Example: If the daily limit for this action is set to 5, the user can earn points for the first 5 times they perform it each day.
+                      </p>
+                    </div>
                   </div>
                   <div className="grid grid-cols-3 gap-4">
                     <div className="space-y-2">
@@ -324,9 +332,9 @@ export function PointRuleForm({
                   <span className="font-bold">{formik.values.trigger}</span>
                 </div>
                 <div className="flex justify-between text-xs border-b pb-2">
-                  <span className="text-muted-foreground">Daily Limit</span>
+                  <span className="text-muted-foreground">Daily Frequency</span>
                   <span className="font-bold">
-                    {formik.values.dailyCap || "∞"}
+                    {formik.values.dailyCap ? `${formik.values.dailyCap} times` : "∞"}
                   </span>
                 </div>
               </div>
