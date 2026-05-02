@@ -220,10 +220,17 @@ export function PointRuleForm({
 
               <div className="md:col-span-2">
                 <div className="pt-4 border-t border-dashed">
-                  <h4 className="text-sm font-bold mb-4 flex items-center gap-2">
+                  <h4 className="text-sm font-bold mb-3 flex items-center gap-2">
                     <Clock className="h-4 w-4 text-muted-foreground" />
                     Frequency Limitations (Anti-Abuse)
                   </h4>
+                  
+                  <div className="flex items-start gap-2.5 mb-5 bg-indigo-50/50 border border-indigo-100/50 p-3 rounded-xl">
+                    <Info className="h-4 w-4 text-indigo-500 mt-0.5 shrink-0" />
+                    <p className="text-[11px] text-indigo-900/70 leading-relaxed font-medium">
+                      These caps are calculated <strong>per individual user</strong>. They ensure that scoring is balanced and prevent members from earning excessive points in a short period.
+                    </p>
+                  </div>
                   <div className="grid grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <Label
