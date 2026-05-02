@@ -29,16 +29,16 @@ export function FloatingSavePanel({
     <AnimatePresence>
       {hasChanged && (
         <motion.div
-          initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
-          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-          exit={{ opacity: 0, y: 20, filter: "blur(10px)" }}
-          className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-4 px-5 py-3 rounded-2xl bg-zinc-900 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] backdrop-blur-md"
+          initial={{ opacity: 0, y: 20, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 20, scale: 0.95 }}
+          className="fixed bottom-6 right-6 z-[100] flex items-center gap-4 pl-4 pr-3 py-2.5 rounded-2xl bg-zinc-900/95 border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)] backdrop-blur-xl"
         >
-          <div className="flex flex-col">
-            <span className="text-[11px] font-bold text-white/90 leading-none">
+          <div className="flex flex-col min-w-[120px]">
+            <span className="text-[12px] font-semibold text-white tracking-tight leading-none">
               {title}
             </span>
-            <span className="text-[10px] text-zinc-400 mt-0.5">
+            <span className="text-[10px] text-zinc-400 mt-1 font-medium">
               {description}
             </span>
           </div>
@@ -49,20 +49,20 @@ export function FloatingSavePanel({
             <button
               onClick={onReset}
               disabled={isSaving}
-              className="h-9 px-4 rounded-xl text-[12px] font-medium text-zinc-400 hover:text-white hover:bg-white/5 transition-all disabled:opacity-40 flex items-center gap-2"
+              className="h-9 px-3 rounded-xl text-[12px] font-medium text-zinc-400 hover:text-white hover:bg-white/5 transition-all disabled:opacity-40 flex items-center gap-2"
             >
-              <RotateCcw size={13} />
+              <RotateCcw size={14} className="opacity-70" />
               Discard
             </button>
             <button
               onClick={onSave}
               disabled={isSaving}
-              className="h-9 px-5 rounded-xl text-[12px] font-bold bg-white text-zinc-900 hover:bg-zinc-200 transition-all disabled:opacity-60 flex items-center gap-2 shadow-lg"
+              className="h-9 px-4 rounded-xl text-[12px] font-semibold bg-white text-zinc-950 hover:bg-zinc-100 active:scale-[0.98] transition-all disabled:opacity-60 flex items-center gap-2 shadow-sm"
             >
               {isSaving ? (
-                <Loader2 size={13} className="animate-spin" />
+                <Loader2 size={14} className="animate-spin" />
               ) : (
-                <Save size={13} />
+                <Save size={14} />
               )}
               {buttonText}
             </button>
@@ -72,13 +72,15 @@ export function FloatingSavePanel({
       {!hasChanged && saved && (
         <motion.div
           key="saved-floating"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0 }}
-          className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] px-4 py-2 rounded-xl bg-emerald-500 text-white text-[12px] font-bold shadow-xl flex items-center gap-2"
+          initial={{ opacity: 0, y: 10, scale: 0.9 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
+          className="fixed bottom-6 right-6 z-[100] px-4 py-2.5 rounded-2xl bg-zinc-900/95 border border-emerald-500/20 text-emerald-400 text-[12px] font-semibold shadow-lg backdrop-blur-xl flex items-center gap-2.5"
         >
-          <Check size={14} strokeWidth={3} />
-          Saved
+          <div className="w-5 h-5 rounded-full bg-emerald-500/10 flex items-center justify-center">
+            <Check size={12} strokeWidth={3} />
+          </div>
+          Saved successfully
         </motion.div>
       )}
     </AnimatePresence>
