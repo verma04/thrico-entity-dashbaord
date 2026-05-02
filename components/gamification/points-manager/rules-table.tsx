@@ -97,6 +97,42 @@ export function RulesTable({
       ),
     },
     {
+      key: "dailyCap",
+      header: "Daily",
+      cell: (rule: PointRule) => (
+        <div className="flex flex-col">
+          <span className="text-[12px] font-bold text-foreground">
+            {rule.dailyCap ? `${rule.dailyCap}x` : "∞"}
+          </span>
+          <span className="text-[9px] text-muted-foreground uppercase tracking-widest font-bold">Limit</span>
+        </div>
+      ),
+    },
+    {
+      key: "weeklyCap",
+      header: "Weekly",
+      cell: (rule: PointRule) => (
+        <div className="flex flex-col">
+          <span className="text-[12px] font-bold text-foreground">
+            {rule.weeklyCap ? `${rule.weeklyCap}x` : "∞"}
+          </span>
+          <span className="text-[9px] text-muted-foreground uppercase tracking-widest font-bold">Limit</span>
+        </div>
+      ),
+    },
+    {
+      key: "monthlyCap",
+      header: "Monthly",
+      cell: (rule: PointRule) => (
+        <div className="flex flex-col">
+          <span className="text-[12px] font-bold text-foreground">
+            {rule.monthlyCap ? `${rule.monthlyCap}x` : "∞"}
+          </span>
+          <span className="text-[9px] text-muted-foreground uppercase tracking-widest font-bold">Limit</span>
+        </div>
+      ),
+    },
+    {
       key: "status",
       header: "Status",
       cell: (rule: PointRule) => (

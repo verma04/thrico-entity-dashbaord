@@ -337,6 +337,18 @@ export function PointRuleForm({
                     {formik.values.dailyCap ? `${formik.values.dailyCap} times` : "∞"}
                   </span>
                 </div>
+                <div className="flex justify-between text-xs border-b pb-2">
+                  <span className="text-muted-foreground">Weekly Frequency</span>
+                  <span className="font-bold">
+                    {formik.values.weeklyCap ? `${formik.values.weeklyCap} times` : "∞"}
+                  </span>
+                </div>
+                <div className="flex justify-between text-xs border-b pb-2">
+                  <span className="text-muted-foreground">Monthly Frequency</span>
+                  <span className="font-bold">
+                    {formik.values.monthlyCap ? `${formik.values.monthlyCap} times` : "∞"}
+                  </span>
+                </div>
               </div>
             </CardContent>
           </Card>
