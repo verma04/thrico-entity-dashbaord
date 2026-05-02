@@ -64,12 +64,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import moment from "moment";
 import { cn } from "@/lib/utils";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function MCPPage() {
   const [activeTab, setActiveTab] = useState<"keys" | "logs">("keys");
@@ -240,7 +235,9 @@ export default function MCPPage() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => updateKey({ variables: { id: key.id, status: "INACTIVE" } })}
+              onClick={() =>
+                updateKey({ variables: { id: key.id, status: "INACTIVE" } })
+              }
               className="h-8 w-8 text-zinc-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all"
               title="Pause Key"
             >
@@ -251,7 +248,9 @@ export default function MCPPage() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => updateKey({ variables: { id: key.id, status: "ACTIVE" } })}
+              onClick={() =>
+                updateKey({ variables: { id: key.id, status: "ACTIVE" } })
+              }
               className="h-8 w-8 text-zinc-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
               title="Activate Key"
             >
@@ -425,8 +424,12 @@ export default function MCPPage() {
                   <Terminal className="h-6 w-6" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-zinc-900">Claude Integration</h4>
-                  <p className="text-[11px] text-zinc-500 px-4">Connect your workspace tools directly to Claude Desktop.</p>
+                  <h4 className="text-sm font-bold text-zinc-900">
+                    Claude Integration
+                  </h4>
+                  <p className="text-[11px] text-zinc-500 px-4">
+                    Connect your workspace tools directly to Claude Desktop.
+                  </p>
                 </div>
               </div>
 
@@ -434,11 +437,17 @@ export default function MCPPage() {
                 <Tabs defaultValue="desktop" className="w-full">
                   <div className="px-5 pt-4 pb-2 border-b border-zinc-200/60 flex items-center justify-between">
                     <TabsList className="bg-zinc-200/50 p-1 rounded-xl h-9">
-                      <TabsTrigger value="desktop" className="rounded-lg text-[10px] font-bold uppercase tracking-tight data-[state=active]:bg-white">
+                      <TabsTrigger
+                        value="desktop"
+                        className="rounded-lg text-[10px] font-bold uppercase tracking-tight data-[state=active]:bg-white"
+                      >
                         <Monitor className="h-3 w-3 mr-1.5" />
                         Claude Desktop
                       </TabsTrigger>
-                      <TabsTrigger value="web" className="rounded-lg text-[10px] font-bold uppercase tracking-tight data-[state=active]:bg-white">
+                      <TabsTrigger
+                        value="web"
+                        className="rounded-lg text-[10px] font-bold uppercase tracking-tight data-[state=active]:bg-white"
+                      >
                         <Globe className="h-3 w-3 mr-1.5" />
                         Claude.ai Web
                       </TabsTrigger>
@@ -449,17 +458,25 @@ export default function MCPPage() {
                     <div className="p-5 border-b border-zinc-200/60 transition-all hover:bg-white flex items-center justify-between">
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 font-mono">claude_desktop_config.json</span>
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 font-mono">
+                            claude_desktop_config.json
+                          </span>
                         </div>
                         <p className="text-[10px] text-zinc-500 leading-relaxed">
-                          Add this configuration to your Claude Desktop config file. Replace <span className="font-bold text-zinc-900">&lt;YOUR_API_KEY&gt;</span> with a key generated below.
+                          Add this configuration to your Claude Desktop config
+                          file. Replace{" "}
+                          <span className="font-bold text-zinc-900">
+                            &lt;YOUR_API_KEY&gt;
+                          </span>{" "}
+                          with a key generated below.
                         </p>
                       </div>
-                      <Button 
-                        variant="ghost" 
+                      <Button
+                        variant="ghost"
                         size="sm"
                         className="h-8 text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100"
-                        onClick={() => copyToClipboard(`{
+                        onClick={() =>
+                          copyToClipboard(`{
   "mcpServers": {
     "thrico": {
       "command": "npx",
@@ -471,7 +488,8 @@ export default function MCPPage() {
       ]
     }
   }
-}`)}
+}`)
+                        }
                       >
                         <Copy className="h-3.5 w-3.5 mr-2" />
                         Copy Config
@@ -479,36 +497,44 @@ export default function MCPPage() {
                     </div>
                     <div className="bg-zinc-900 p-4 overflow-x-auto text-left">
                       <pre className="text-[10px] font-mono leading-relaxed text-zinc-300">
-                        <span className="text-pink-400">"mcpServers"</span>: {'{'}
+                        <span className="text-pink-400">"mcpServers"</span>:{" "}
+                        {"{"}
                         <br />
-                        {'  '}
-                        <span className="text-emerald-300">"thrico"</span>: {'{'}
+                        {"  "}
+                        <span className="text-emerald-300">"thrico"</span>:{" "}
+                        {"{"}
                         <br />
-                        {'    '}
-                        <span className="text-blue-300">"command"</span>: <span className="text-amber-300">"npx"</span>,
+                        {"    "}
+                        <span className="text-blue-300">"command"</span>:{" "}
+                        <span className="text-amber-300">"npx"</span>,
                         <br />
-                        {'    '}
+                        {"    "}
                         <span className="text-blue-300">"args"</span>: [
                         <br />
-                        {'      '}
+                        {"      "}
                         <span className="text-amber-300">"-y"</span>,
                         <br />
-                        {'      '}
-                        <span className="text-amber-300">"@modelcontextprotocol/client-sse"</span>,
+                        {"      "}
+                        <span className="text-amber-300">
+                          "@modelcontextprotocol/client-sse"
+                        </span>
+                        ,
                         <br />
-                        {'      '}
+                        {"      "}
                         <span className="text-amber-300">"--url"</span>,
                         <br />
-                        {'      '}
-                        <span className="text-amber-300">"https://mcp.thrico.app/sse?token=&lt;YOUR_API_KEY&gt;"</span>
+                        {"      "}
+                        <span className="text-amber-300">
+                          "https://mcp.thrico.app/sse?token=&lt;YOUR_API_KEY&gt;"
+                        </span>
                         <br />
-                        {'    '}
+                        {"    "}
                         ]
                         <br />
-                        {'  '}
-                        {'}'}
+                        {"  "}
+                        {"}"}
                         <br />
-                        {'}'}
+                        {"}"}
                       </pre>
                     </div>
                   </TabsContent>
@@ -517,17 +543,31 @@ export default function MCPPage() {
                     <div className="p-5 border-b border-zinc-200/60 transition-all hover:bg-white flex items-center justify-between">
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-600 font-mono">Claude.ai Quick Setup</span>
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-600 font-mono">
+                            Claude.ai Quick Setup
+                          </span>
                         </div>
                         <p className="text-[10px] text-zinc-500 leading-relaxed">
-                          Find the <span className="font-bold text-zinc-900">Connectors</span> menu in your <span className="font-bold text-zinc-900">Claude.ai Settings</span> sidebar.
+                          Find the{" "}
+                          <span className="font-bold text-zinc-900">
+                            Connectors
+                          </span>{" "}
+                          menu in your{" "}
+                          <span className="font-bold text-zinc-900">
+                            Claude.ai Settings
+                          </span>{" "}
+                          sidebar.
                         </p>
                       </div>
-                      <Button 
-                        variant="ghost" 
+                      <Button
+                        variant="ghost"
                         size="sm"
                         className="h-8 text-xs font-semibold text-emerald-600 bg-emerald-50 hover:bg-emerald-100"
-                        onClick={() => copyToClipboard(`https://mcp.thrico.app/sse?token=<YOUR_API_KEY>`)}
+                        onClick={() =>
+                          copyToClipboard(
+                            `https://mcp.thrico.app/sse?token=<YOUR_API_KEY>`,
+                          )
+                        }
                       >
                         <Copy className="h-3.5 w-3.5 mr-2" />
                         Copy URL
@@ -535,7 +575,9 @@ export default function MCPPage() {
                     </div>
                     <div className="bg-zinc-900 p-5 flex flex-col space-y-5">
                       <div className="space-y-2">
-                        <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">1. Sidebar Menu</span>
+                        <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">
+                          1. Sidebar Menu
+                        </span>
                         <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-2.5 font-medium text-[11px] text-zinc-200 flex items-center gap-2">
                           <Monitor className="h-3 w-3 text-zinc-500" />
                           Settings &gt; Connectors &gt; Add custom connector
@@ -544,21 +586,27 @@ export default function MCPPage() {
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">2. Name</span>
+                          <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">
+                            2. Name
+                          </span>
                           <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-2.5 font-medium text-[11px] text-zinc-200">
                             Thrico MCP
                           </div>
                         </div>
                         <div className="space-y-2">
-                          <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">3. Advanced settings</span>
+                          <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">
+                            3. Advanced settings
+                          </span>
                           <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-2.5 font-medium text-[11px] text-zinc-400 italic">
                             Leave OAuth fields empty
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="space-y-2">
-                        <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">4. Remote MCP server URL</span>
+                        <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">
+                          4. Remote MCP server URL
+                        </span>
                         <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-3 font-mono text-[10px] text-emerald-400 break-all leading-normal">
                           https://mcp.thrico.app/sse?token=&lt;YOUR_API_KEY&gt;
                         </div>
@@ -567,7 +615,8 @@ export default function MCPPage() {
                       <div className="flex items-center gap-2 p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
                         <ShieldCheck className="h-4 w-4 text-emerald-500 shrink-0" />
                         <p className="text-[10px] text-emerald-200/80 leading-snug">
-                          Protocol connection is secured via token. No additional OAuth credentials required.
+                          Protocol connection is secured via token. No
+                          additional OAuth credentials required.
                         </p>
                       </div>
                     </div>
@@ -810,37 +859,51 @@ export default function MCPPage() {
                     Copy this key now. It won't be shown again.
                   </p>
                 </div>
-                
+
                 {/* Step-by-Step Setup Guide */}
                 <div className="flex flex-col gap-4 p-5 bg-zinc-50 rounded-[24px] border border-zinc-200 text-left">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className="h-6 w-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-[10px] font-bold border border-indigo-200">1</div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Quick Setup Guide</span>
+                      <div className="h-6 w-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-[10px] font-bold border border-indigo-200">
+                        1
+                      </div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+                        Quick Setup Guide
+                      </span>
                     </div>
-                    <Badge variant="outline" className="text-[9px] bg-white border-zinc-200 text-zinc-400">Claude.ai Web</Badge>
+                    <Badge
+                      variant="outline"
+                      className="text-[9px] bg-white border-zinc-200 text-zinc-400"
+                    >
+                      Claude.ai Web
+                    </Badge>
                   </div>
-                  
+
                   <div className="space-y-3">
                     <div className="space-y-1">
                       <p className="text-[11px] font-semibold text-zinc-800 flex items-center gap-2">
-                         <Monitor className="h-3.5 w-3.5 text-zinc-400" />
-                         1. Navigate to Connectors
+                        <Monitor className="h-3.5 w-3.5 text-zinc-400" />
+                        1. Navigate to Connectors
                       </p>
                       <p className="text-[10px] text-zinc-500 leading-relaxed ml-5">
-                        Open <b>Settings &gt; Connectors</b> in the Claude.ai sidebar and click <b>Add custom connector</b>.
+                        Open <b>Settings &gt; Connectors</b> in the Claude.ai
+                        sidebar and click <b>Add custom connector</b>.
                       </p>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 ml-5">
                       <div className="space-y-1">
-                        <span className="text-[8px] font-bold text-zinc-400 uppercase tracking-widest">Connector Name</span>
+                        <span className="text-[8px] font-bold text-zinc-400 uppercase tracking-widest">
+                          Connector Name
+                        </span>
                         <div className="text-[10px] font-medium text-zinc-700 bg-white border border-zinc-200 px-2.5 py-1.5 rounded-lg">
                           Thrico MCP
                         </div>
                       </div>
                       <div className="space-y-1">
-                        <span className="text-[8px] font-bold text-zinc-400 uppercase tracking-widest">Type</span>
+                        <span className="text-[8px] font-bold text-zinc-400 uppercase tracking-widest">
+                          Type
+                        </span>
                         <div className="text-[10px] font-medium text-zinc-700 bg-white border border-zinc-200 px-2.5 py-1.5 rounded-lg">
                           MCP (SSE)
                         </div>
@@ -848,13 +911,20 @@ export default function MCPPage() {
                     </div>
 
                     <div className="space-y-1 ml-5">
-                      <span className="text-[8px] font-bold text-zinc-400 uppercase tracking-widest">Remote MCP server URL</span>
+                      <span className="text-[8px] font-bold text-zinc-400 uppercase tracking-widest">
+                        Remote MCP server URL
+                      </span>
                       <div className="group relative">
                         <div className="text-[9px] font-mono text-indigo-600 bg-indigo-50/50 border border-indigo-100 px-3 py-2 rounded-lg break-all leading-normal pr-8">
-                          https://mcp.thrico.app/sse?token={generatedKey?.apiKey}
+                          https://mcp.thrico.app/sse?token=
+                          {generatedKey?.apiKey}
                         </div>
-                        <button 
-                          onClick={() => copyToClipboard(`https://mcp.thrico.app/sse?token=${generatedKey?.apiKey}`)}
+                        <button
+                          onClick={() =>
+                            copyToClipboard(
+                              `https://mcp.thrico.app/sse?token=${generatedKey?.apiKey}`,
+                            )
+                          }
                           className="absolute right-2 top-1/2 -translate-y-1/2 text-indigo-400 hover:text-indigo-600 transition-colors"
                         >
                           <Copy className="h-3 w-3" />
@@ -865,7 +935,10 @@ export default function MCPPage() {
 
                   <div className="pt-2 mt-1 border-t border-zinc-200/60 flex items-center gap-2">
                     <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
-                    <p className="text-[9px] text-zinc-400 italic">No OAuth credentials required. The token in the URL handles authentication.</p>
+                    <p className="text-[9px] text-zinc-400 italic">
+                      No OAuth credentials required. The token in the URL
+                      handles authentication.
+                    </p>
                   </div>
                 </div>
               </div>
@@ -884,28 +957,28 @@ export default function MCPPage() {
           </div>
         </DialogContent>
       </Dialog>
- 
+
       {/* Delete Key Confirmation Dialog */}
-      <Dialog
-        open={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
-      >
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent className="sm:max-w-[400px] rounded-[32px] p-8 border-none shadow-2xl">
           <div className="flex flex-col items-center text-center space-y-6">
             <div className="h-16 w-16 rounded-[22px] bg-red-50 text-red-500 flex items-center justify-center border border-red-100 shadow-sm">
               <Trash2 className="h-8 w-8" />
             </div>
- 
+
             <div className="space-y-2">
               <DialogTitle className="text-xl font-bold tracking-tight text-foreground">
                 Revoke Protocol Key?
               </DialogTitle>
               <DialogDescription className="text-sm px-4">
-                This action will immediately disable <span className="font-bold text-foreground">"{keyToDelete?.name}"</span>. 
-                Any active integrations using this key will stop working.
+                This action will immediately disable{" "}
+                <span className="font-bold text-foreground">
+                  "{keyToDelete?.name}"
+                </span>
+                . Any active integrations using this key will stop working.
               </DialogDescription>
             </div>
- 
+
             <div className="flex flex-col w-full gap-3">
               <Button
                 onClick={() => {

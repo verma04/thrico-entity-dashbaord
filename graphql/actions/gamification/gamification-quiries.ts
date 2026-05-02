@@ -377,6 +377,8 @@ export interface GamificationActivityLogEntry {
 export interface GamificationActivityLogInput {
   limit: number;
   offset: number;
+  startDate?: Date;
+  endDate?: Date;
 }
 
 export interface GetGamificationActivityLogResponse {
@@ -433,6 +435,8 @@ export interface UserGamificationActivityLogInput {
   limit?: number | null;
   offset?: number | null;
   userId?: string | null;
+  startDate?: Date | null;
+  endDate?: Date | null;
 }
 
 export interface GetUserGamificationActivityLogResponse {

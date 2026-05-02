@@ -10,15 +10,24 @@ import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header"
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { cn } from "@/lib/utils";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
+import { DateRange } from "react-day-picker";
+import { startOfDay, endOfDay } from "date-fns";
 
 export function ActivityLogManager() {
   const [offset, setOffset] = useState(0);
   const [search, setSearch] = useState("");
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const limit = 50;
 
   const { data, loading, error, refetch } = useGetGamificationActivityLog({
     variables: {
-      input: { limit, offset },
+      input: { 
+        limit, 
+        offset,
+        startDate: dateRange?.from ? startOfDay(dateRange.from) : undefined,
+        endDate: dateRange?.to ? endOfDay(dateRange.to) : undefined,
+      },
     },
     fetchPolicy: "network-only",
   });
@@ -79,6 +88,12 @@ export function ActivityLogManager() {
                 onChange={setSearch}
                 placeholder="Search audit trail..."
               />
+           </EcosystemActionBar.Item>
+           <EcosystemActionBar.Item>
+             <DateRangePicker 
+               date={dateRange}
+               onDateChange={setDateRange}
+             />
            </EcosystemActionBar.Item>
         </EcosystemActionBar.Group>
 
