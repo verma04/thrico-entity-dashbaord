@@ -31,7 +31,7 @@ export interface AdminTableProps<T = any> {
   columns: AdminTableColumn<T>[];
   data: T[] | undefined;
   loading?: boolean;
-  keyExtractor: (row: T) => string;
+  keyExtractor: (row: T, index: number) => string;
   pageSize?: number;
   emptyIcon?: React.ElementType;
   emptyTitle?: string;
@@ -419,7 +419,7 @@ export function AdminTable<T = any>({
               ) : (
                 paginatedData.map((row, idx) => (
                   <motion.tr
-                    key={keyExtractor(row)}
+                    key={keyExtractor(row, idx)}
                     initial={{ opacity: 0, y: 6 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.18, delay: idx * 0.025 }}
