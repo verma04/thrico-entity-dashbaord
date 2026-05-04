@@ -2,7 +2,6 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
 import {
   Mail,
   Globe,
@@ -19,224 +18,110 @@ import {
   RefreshCw,
   Info,
 } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import {
-  useGetEmailOverview,
-  useGetEmailDomain,
-} from "@/graphql/actions/email";
+import { useGetEmailOverview, useGetEmailDomain } from "@/graphql/actions/email";
 
-// ---------------------------------------------------------------------------
-// Design Tokens
-// ---------------------------------------------------------------------------
-const STYLES = {
-  card: "rounded-xl border border-slate-200/60 bg-white",
-  statCard: "flex flex-col gap-2 p-5 rounded-xl border border-slate-200/60 bg-white shadow-xs",
-  iconWrapper: "h-9 w-9 rounded-lg flex items-center justify-center shrink-0 border border-slate-100",
-  heading: "text-[16px] font-black tracking-tight text-slate-900 leading-none",
-  subtext: "text-[12px] text-slate-500 font-medium leading-none",
-  button: "h-9 px-4 text-[12px] font-black rounded-xl transition-all flex items-center gap-2",
-  primaryBtn: "bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm",
-  secondaryBtn: "bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 shadow-xs",
-};
+/* ── Stat Card ───────────────────────────────────────────────────────────── */
 
-// ---------------------------------------------------------------------------
-// Progress Step
-// ---------------------------------------------------------------------------
+function StatCard({ label, value, icon: Icon }: { label: string; value: string | number; icon: React.ElementType }) {
+  return (
+    <Card className="border-border shadow-none">
+      <CardContent className="p-4 flex items-center gap-3">
+        <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center text-muted-foreground">
+          <Icon className="h-4 w-4" />
+        </div>
+        <div>
+          <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">{label}</p>
+          <p className="text-lg font-semibold tracking-tight">{value}</p>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+/* ── Setup Step ──────────────────────────────────────────────────────────── */
+
 function SetupStep({
   step,
   title,
   description,
   status,
   onClick,
-  delay,
 }: {
   step: number;
   title: string;
   description: string;
   status: "complete" | "current" | "pending";
   onClick: () => void;
-  delay: number;
 }) {
-  const statusConfig = {
-    complete: {
-      icon: <CheckCircle2 className="h-4 w-4" />,
-      bg: "bg-emerald-50/50 border-emerald-100",
-      iconColor: "text-emerald-600",
-    },
-    current: {
-      icon: <Zap className="h-4 w-4" />,
-      bg: "bg-slate-50 border-slate-200",
-      iconColor: "text-slate-900",
-    },
-    pending: {
-      icon: <Clock className="h-4 w-4" />,
-      bg: "bg-slate-50/30 border-slate-100",
-      iconColor: "text-slate-300",
-    },
-  };
-
-  const config = statusConfig[status];
-
   return (
-    <motion.button
-      initial={{ opacity: 0, y: 4 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: delay * 0.03 }}
+    <button
       onClick={onClick}
       className={cn(
-        "group flex items-center gap-4 w-full text-left px-4 py-4 rounded-xl border transition-all duration-200",
-        status === "current" ? "border-indigo-100 bg-indigo-50/30" : "border-slate-100 bg-white hover:border-slate-200 shadow-xs hover:shadow-sm"
+        "group flex items-center gap-3 w-full text-left px-3 py-3 rounded-lg border transition-all",
+        status === "current" ? "border-primary/20 bg-primary/5" : "border-border bg-background hover:bg-muted/30"
       )}
     >
       <div
         className={cn(
-          "h-8 w-8 rounded-lg flex items-center justify-center shrink-0 border",
-          config.bg,
-          config.iconColor
+          "h-7 w-7 rounded-md flex items-center justify-center shrink-0",
+          status === "complete" ? "bg-emerald-50 text-emerald-600" : status === "current" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
         )}
       >
-        {config.icon}
+        {status === "complete" ? <CheckCircle2 className="h-3.5 w-3.5" /> : <span className="text-[10px] font-bold">{step}</span>}
       </div>
-
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-0.5">
-          <span className="text-[9px] uppercase tracking-widest font-black text-slate-400">
-            Step {step}
-          </span>
-          {status === "complete" && (
-            <span className="text-[9px] uppercase tracking-widest font-black text-emerald-600">
-              Complete
-            </span>
-          )}
-        </div>
-        <p className="text-[13px] font-black text-slate-900 truncate leading-none">
-          {title}
-        </p>
-        <p className="text-[11px] font-medium text-slate-500 mt-1.5 truncate leading-none">
-          {description}
-        </p>
+        <p className="text-xs font-semibold text-foreground truncate">{title}</p>
+        <p className="text-[10px] text-muted-foreground truncate">{description}</p>
       </div>
-
-      <ArrowRight className="h-3.5 w-3.5 text-slate-300 group-hover:text-indigo-600 transition-all shrink-0 group-hover:translate-x-0.5" />
-    </motion.button>
+      <ArrowRight className="h-3 w-3 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors shrink-0" />
+    </button>
   );
 }
 
-// ---------------------------------------------------------------------------
-// Quick Stat Card
-// ---------------------------------------------------------------------------
-function QuickStat({
+/* ── Quick Link Card ─────────────────────────────────────────────────────── */
+
+function QuickLinkCard({
   icon: Icon,
-  label,
-  value,
-  color,
-  bg,
-  delay,
+  title,
+  description,
+  onClick,
 }: {
-  icon: React.ComponentType<{ className?: string }>;
-  label: string;
-  value: string | number;
-  color: string;
-  bg: string;
-  delay: number;
+  icon: React.ElementType;
+  title: string;
+  description: string;
+  onClick: () => void;
 }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 4 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: delay * 0.03 }}
-      className={STYLES.statCard}
+    <button
+      onClick={onClick}
+      className="group flex items-start gap-3 p-4 rounded-lg border border-border bg-background hover:bg-muted/30 transition-all text-left"
     >
-      <div className="flex items-center justify-between">
-        <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-          {label}
-        </span>
-        <div className={cn("h-7 w-7 rounded-lg flex items-center justify-center border", bg)}>
-          <Icon className={cn("h-3.5 w-3.5", color)} />
-        </div>
+      <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center text-muted-foreground shrink-0">
+        <Icon className="h-4 w-4" />
       </div>
-      <span className="text-xl font-black text-slate-900 tracking-tight tabular-nums mt-1.5">
-        {value}
-      </span>
-    </motion.div>
+      <div className="min-w-0">
+        <p className="text-xs font-semibold text-foreground">{title}</p>
+        <p className="text-[10px] text-muted-foreground mt-0.5">{description}</p>
+      </div>
+    </button>
   );
 }
 
-// ---------------------------------------------------------------------------
-// Notification Banner
-// ---------------------------------------------------------------------------
-function NotificationBanner({
-  type,
-  message,
-  action,
-  onAction,
-}: {
-  type: "warning" | "error" | "info";
-  message: string;
-  action?: string;
-  onAction?: () => void;
-}) {
-  const config = {
-    warning: {
-      bg: "bg-amber-50/50 border-amber-200/50",
-      icon: <AlertTriangle className="h-4 w-4 text-amber-500" />,
-      text: "text-amber-900",
-    },
-    error: {
-      bg: "bg-rose-50/50 border-rose-200/50",
-      icon: <AlertTriangle className="h-4 w-4 text-rose-500" />,
-      text: "text-rose-900",
-    },
-    info: {
-      bg: "bg-slate-50 border-slate-200",
-      icon: <Shield className="h-4 w-4 text-slate-900" />,
-      text: "text-slate-900",
-    },
-  };
-  const c = config[type];
+/* ── Main Dashboard ──────────────────────────────────────────────────────── */
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: -4 }}
-      animate={{ opacity: 1, y: 0 }}
-      className={cn(
-        "flex items-center gap-3 px-4 py-3 rounded-xl border shadow-xs",
-        c.bg,
-      )}
-    >
-      {c.icon}
-      <span className={cn("text-[13px] font-black flex-1 leading-none", c.text)}>
-        {message}
-      </span>
-      {action && onAction && (
-        <button
-          onClick={onAction}
-          className="text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 transition-all text-slate-700 shadow-xs active:scale-95"
-        >
-          {action}
-        </button>
-      )}
-    </motion.div>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Main Dashboard
-// ---------------------------------------------------------------------------
 export default function EmailDashboard() {
   const router = useRouter();
-
-  const { data: overviewData, loading: overviewLoading } =
-    useGetEmailOverview();
-
-  // Custom Domain Logic
+  const { data: overviewData, loading: overviewLoading } = useGetEmailOverview();
   const { data: emailData, loading: emailLoading } = useGetEmailDomain();
   const domainData = emailData?.getEmailDomain;
 
   if (overviewLoading || emailLoading || !overviewData) {
     return (
       <div className="h-96 flex items-center justify-center">
-        <RefreshCw className="h-5 w-5 text-slate-300 animate-spin" />
+        <RefreshCw className="h-5 w-5 text-muted-foreground animate-spin" />
       </div>
     );
   }
@@ -246,219 +131,109 @@ export default function EmailDashboard() {
   const hasDomain = !!domainData;
 
   const setupSteps = [
-    {
-      step: 1,
-      title: "Confirm Domain",
-      description: "Send emails from @" + (domainData?.domain || "yourdomain.com"),
-      route: "/settings/domains",
-      status: hasDomain ? "complete" : "current",
-    },
-    {
-      step: 2,
-      title: "Design Templates",
-      description: "Create branded email layouts",
-      route: "/email/templates",
-      status: "current",
-    },
-    {
-      step: 3,
-      title: "Send Emails",
-      description: "Write and send to members",
-      route: "/email/send",
-      status: "pending",
-    },
-    {
-      step: 4,
-      title: "Email Stats",
-      description: "Track performance & opens",
-      route: "/email/usage",
-      status: usage.emailsSent > 0 ? "current" : "pending",
-    },
+    { step: 1, title: "Confirm Domain", description: `Send from @${domainData?.domain || "yourdomain.com"}`, route: "/settings/domains", status: hasDomain ? "complete" : "current" },
+    { step: 2, title: "Design Templates", description: "Create branded email layouts", route: "/email/templates", status: "current" },
+    { step: 3, title: "Send Emails", description: "Write and send to members", route: "/email/send", status: "pending" },
+    { step: 4, title: "Track Stats", description: "Monitor performance", route: "/email/usage", status: usage.emailsSent > 0 ? "current" : "pending" },
   ];
 
   return (
-    <div className="max-w-6xl mx-auto py-8 px-6 space-y-8">
-      {/* Notifications */}
+    <div className="max-w-6xl mx-auto py-8 px-6 space-y-8 animate-in fade-in duration-500">
+      {/* Alert */}
       {usagePercent >= 90 && (
-        <NotificationBanner
-          type="error"
-          message={`Usage Alert: You have used ${Math.round(usagePercent)}% of your email quota.`}
-          action="Add Credits"
-          onAction={() => router.push("/email/usage")}
-        />
+        <div className="flex items-center gap-3 px-4 py-3 rounded-lg border border-red-200 bg-red-50 text-red-800">
+          <AlertTriangle className="h-4 w-4 shrink-0" />
+          <span className="text-xs font-semibold flex-1">
+            Usage Alert: You have used {Math.round(usagePercent)}% of your email quota.
+          </span>
+          <Button size="sm" variant="outline" onClick={() => router.push("/email/usage")} className="h-7 text-[10px] border-red-200">
+            Add Credits
+          </Button>
+        </div>
       )}
 
-      {/* Header Section */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 pb-6 border-b border-slate-100">
-        <div className="flex items-start gap-4">
-          <div className="h-11 w-11 rounded-xl bg-indigo-600 flex items-center justify-center text-white shrink-0 shadow-lg shadow-indigo-600/20">
-            <Mail className="h-5 w-5" />
-          </div>
-          <div className="pt-0.5">
-            <h1 className={STYLES.heading}>Email Campaigns</h1>
-            <p className="text-[13px] text-slate-500 mt-2 font-medium leading-none">
-              Overview of your email communications and infrastructure.
-            </p>
-          </div>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight text-foreground">Email Campaigns</h1>
+          <p className="text-xs text-muted-foreground mt-0.5">Overview of your email communications.</p>
         </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => router.push("/email/usage")}
-            className={cn(STYLES.button, STYLES.secondaryBtn)}
-          >
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => router.push("/email/usage")} className="h-9 rounded-lg text-xs">
             Usage Analytics
-          </button>
-          <button
-            onClick={() => router.push("/email/send")}
-            className={cn(STYLES.button, STYLES.primaryBtn)}
-          >
-            <Send className="h-3.5 w-3.5" />
-            New Campaign
-          </button>
+          </Button>
+          <Button size="sm" onClick={() => router.push("/email/send")} className="h-9 rounded-lg gap-2 text-xs">
+            <Send className="h-3.5 w-3.5" /> New Campaign
+          </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left Column: Stats & Quick Links */}
-        <div className="lg:col-span-8 space-y-8">
-          {/* Quick Stats */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <QuickStat
-              icon={BarChart3}
-              label="Sent"
-              value={usage.emailsSent.toLocaleString()}
-              color="text-slate-600"
-              bg="bg-slate-50/50"
-              delay={0}
-            />
-            <QuickStat
-              icon={TrendingUp}
-              label="Quota"
-              value={usage.numberOfEmailsPerMonth.toLocaleString()}
-              color="text-emerald-600"
-              bg="bg-emerald-50/50"
-              delay={1}
-            />
-            <QuickStat
-              icon={Clock}
-              label="Remaining"
-              value={usage.remaining.toLocaleString()}
-              color="text-amber-600"
-              bg="bg-amber-50/50"
-              delay={2}
-            />
-            <div className={cn(STYLES.statCard, "relative overflow-hidden")}>
-               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                  Used
-                </span>
-                <div className="h-7 w-7 rounded-md flex items-center justify-center border bg-slate-100">
-                  <Zap className="h-3.5 w-3.5 text-slate-900" />
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Main Content */}
+        <div className="lg:col-span-8 space-y-6">
+          {/* Stats */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <StatCard label="Sent" value={usage.emailsSent.toLocaleString()} icon={BarChart3} />
+            <StatCard label="Quota" value={usage.numberOfEmailsPerMonth.toLocaleString()} icon={TrendingUp} />
+            <StatCard label="Remaining" value={usage.remaining.toLocaleString()} icon={Clock} />
+            <Card className="border-border shadow-none">
+              <CardContent className="p-4">
+                <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Used</p>
+                <p className="text-lg font-semibold tracking-tight mt-0.5">{Math.round(usagePercent)}%</p>
+                <div className="mt-2 h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                  <div
+                    className={cn(
+                      "h-full rounded-full transition-all duration-700",
+                      usagePercent > 90 ? "bg-red-500" : usagePercent > 70 ? "bg-amber-500" : "bg-foreground"
+                    )}
+                    style={{ width: `${usagePercent}%` }}
+                  />
                 </div>
-              </div>
-              <span className="text-xl font-bold text-slate-900 tracking-tight tabular-nums mt-1">
-                {Math.round(usagePercent)}%
-              </span>
-              <div className="mt-3 h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                <motion.div 
-                  initial={{ width: 0 }}
-                  animate={{ width: `${usagePercent}%` }}
-                  transition={{ duration: 1, ease: "easeOut" }}
-                  className={cn(
-                    "h-full rounded-full",
-                    usagePercent > 90 ? "bg-rose-500" : usagePercent > 70 ? "bg-amber-500" : "bg-slate-900"
-                  )}
-                />
-              </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Quick Links */}
+          <div className="space-y-3">
+            <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Quick Access</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <QuickLinkCard icon={PaintBucket} title="Template Studio" description="Design and manage layouts" onClick={() => router.push("/email/templates")} />
+              <QuickLinkCard icon={Globe} title="Domain Settings" description="DNS and deliverability" onClick={() => router.push("/settings/domains")} />
             </div>
           </div>
 
-          {/* Quick Access Grid */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between px-1">
-              <h3 className="text-[11px] font-bold uppercase tracking-widest text-slate-400">
-                Email Toolbox
-              </h3>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {[
-                {
-                  icon: PaintBucket,
-                  title: "Template Studio",
-                  desc: "Design and manage layouts",
-                  route: "/email/templates",
-                  iconColor: "text-slate-900",
-                },
-                {
-                  icon: Globe,
-                  title: "Domain Verification",
-                  desc: "DNS and deliverability",
-                  route: "/settings/domains",
-                  iconColor: "text-slate-600",
-                },
-              ].map((link, i) => (
-                <button
-                  key={link.route}
-                  onClick={() => router.push(link.route)}
-                  className="group flex items-start gap-4 p-5 rounded-lg border border-slate-200/60 bg-white hover:bg-slate-50 transition-all text-left"
-                >
-                  <div className="h-10 w-10 rounded-md flex items-center justify-center border border-slate-100 bg-slate-50 group-hover:scale-105 transition-transform">
-                    <link.icon className={cn("h-5 w-5", link.iconColor)} />
-                  </div>
-                  <div>
-                    <h4 className="text-[14px] font-semibold text-slate-900">{link.title}</h4>
-                    <p className="text-[12px] text-slate-500 mt-1">{link.desc}</p>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Recent Campaigns Placeholder */}
-          <div className="space-y-4 pt-4">
-            <div className="flex items-center justify-between px-1">
-              <h3 className="text-[11px] font-bold uppercase tracking-widest text-slate-400">
-                Recent Campaigns
-              </h3>
-              <button 
-                onClick={() => router.push("/email/campaigns")}
-                className="text-[11px] font-semibold text-slate-900 hover:underline"
-              >
-                View all
-              </button>
-            </div>
-            <div className={cn(STYLES.card, "divide-y divide-slate-100")}>
-              {usage.emailsSent === 0 ? (
-                <div className="p-8 text-center">
-                  <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-slate-50 text-slate-400 mb-3">
-                    <Send className="h-5 w-5" />
-                  </div>
-                  <p className="text-[13px] font-medium text-slate-900">No campaigns yet</p>
-                  <p className="text-[12px] text-slate-500 mt-1">Ready to send your first email? Click "New Campaign" above.</p>
-                </div>
-              ) : (
-                <div className="p-4 text-center text-slate-500 text-[12px]">
-                  Feature coming soon: Detailed campaign history and per-email analytics.
-                </div>
-              )}
-            </div>
+          {/* Recent Campaigns */}
+          <div className="space-y-3">
+            <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Recent Campaigns</h3>
+            <Card className="border-border shadow-none">
+              <CardContent className="py-10 flex flex-col items-center justify-center text-center">
+                {usage.emailsSent === 0 ? (
+                  <>
+                    <div className="h-9 w-9 rounded-lg bg-muted flex items-center justify-center text-muted-foreground mb-3">
+                      <Send className="h-4 w-4" />
+                    </div>
+                    <p className="text-xs font-medium text-foreground">No campaigns yet</p>
+                    <p className="text-[10px] text-muted-foreground mt-1">Click "New Campaign" to get started.</p>
+                  </>
+                ) : (
+                  <p className="text-xs text-muted-foreground">Campaign history coming soon.</p>
+                )}
+              </CardContent>
+            </Card>
           </div>
         </div>
 
-        {/* Right Column: Setup Guide */}
-        <div className="lg:col-span-4 space-y-6">
-          <div className={cn(STYLES.card, "p-6")}>
-            <div className="flex items-center gap-3 mb-6">
-              <div className="h-8 w-8 rounded-md bg-slate-50 flex items-center justify-center border border-slate-200 text-slate-900">
-                <Shield className="h-4 w-4" />
-              </div>
-              <div>
-                <h2 className="text-[14px] font-semibold text-slate-900">Infrastructure</h2>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              {setupSteps.map((s, i) => (
+        {/* Sidebar */}
+        <div className="lg:col-span-4">
+          <Card className="border-border shadow-none">
+            <CardHeader className="px-5 py-4 border-b border-border/50">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                <Shield className="h-4 w-4 text-muted-foreground" />
+                Setup Guide
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-3 space-y-1.5">
+              {setupSteps.map((s) => (
                 <SetupStep
                   key={s.step}
                   step={s.step}
@@ -466,20 +241,18 @@ export default function EmailDashboard() {
                   description={s.description}
                   status={s.status as any}
                   onClick={() => router.push(s.route)}
-                  delay={i}
                 />
               ))}
-            </div>
-
-            <div className="mt-6 pt-6 border-t border-slate-100">
-              <div className="flex gap-3">
-                <Info className="h-4 w-4 text-slate-300 shrink-0 mt-0.5" />
-                <p className="text-[11px] text-slate-500 leading-normal">
-                  Our system automatically handles DKIM, SPF, and DMARC setups to maximize your inbox deliverability rates.
+            </CardContent>
+            <div className="px-5 py-4 border-t border-border/50">
+              <div className="flex gap-2 items-start">
+                <Info className="h-3.5 w-3.5 text-muted-foreground shrink-0 mt-0.5" />
+                <p className="text-[10px] text-muted-foreground leading-relaxed">
+                  Our system automatically handles DKIM, SPF, and DMARC setups for deliverability.
                 </p>
               </div>
             </div>
-          </div>
+          </Card>
         </div>
       </div>
     </div>
