@@ -41,13 +41,6 @@ export function MemberDetailHeader({ firstName, lastName, memberId }: MemberDeta
           </div>
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="hidden sm:flex gap-2 h-9 rounded-lg text-xs"
-          >
-            <MessageSquare className="h-3.5 w-3.5" /> Message
-          </Button>
           <Link href={`/members/${memberId}/edit`}>
             <Button
               size="sm"
