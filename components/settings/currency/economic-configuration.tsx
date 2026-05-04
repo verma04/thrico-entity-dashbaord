@@ -2,66 +2,62 @@
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 import { Loader2, Palette, Zap, Info } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { useUpdateEntityCurrencyConfig } from "@/graphql/actions";
 import { toast } from "sonner";
+import { useFormik } from "formik";
+import * as Yup from "yup";
 
 interface EconomicConfigProps {
   data: any;
   loading: boolean;
 }
 
+const validationSchema = Yup.object().shape({
+  currencyName: Yup.string().required("Currency Name is required"),
+  normalizationFactor: Yup.number()
+    .positive("Must be positive")
+    .integer("Must be an integer")
+    .required("Required"),
+  tcCoinsAllowed: Yup.boolean(),
+});
+
 export function EconomicConfiguration({ data, loading }: EconomicConfigProps) {
-  const [config, setConfig] = useState({
-    currencyName: "",
-    normalizationFactor: 1,
-    tcCoinsAllowed: true,
-  });
-  const [originalConfig, setOriginalConfig] = useState<any>(null);
   const [saved, setSaved] = useState(false);
-
-  useEffect(() => {
-    if (data?.getEntityCurrencyConfig) {
-      const formatted = {
-        currencyName: data.getEntityCurrencyConfig.currencyName || "",
-        normalizationFactor: data.getEntityCurrencyConfig.normalizationFactor || 1,
-        tcCoinsAllowed: data.getEntityCurrencyConfig.tcCoinsAllowed,
-      };
-      setConfig(formatted);
-      setOriginalConfig(formatted);
-    }
-  }, [data]);
-
-  const hasChanged = originalConfig ? JSON.stringify(config) !== JSON.stringify(originalConfig) : false;
-
-  const handleReset = () => {
-    if (originalConfig) setConfig(originalConfig);
-  };
 
   const [updateConfig, { loading: updating }] = useUpdateEntityCurrencyConfig({
     onCompleted: () => {
       toast.success("Economic configuration updated");
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
-      setOriginalConfig(config);
+      formik.resetForm({ values: formik.values });
     },
     onError: (err: any) => toast.error(err.message),
   });
 
-  const handleSave = () => {
-    updateConfig({
-      variables: {
-        input: {
-          currencyName: config.currencyName,
-          normalizationFactor: parseInt(config.normalizationFactor.toString()),
-          tcCoinsAllowed: config.tcCoinsAllowed,
+  const formik = useFormik({
+    enableReinitialize: true,
+    initialValues: {
+      currencyName: data?.getEntityCurrencyConfig?.currencyName || "",
+      normalizationFactor:
+        data?.getEntityCurrencyConfig?.normalizationFactor || 1,
+      tcCoinsAllowed: data?.getEntityCurrencyConfig?.tcCoinsAllowed ?? true,
+    },
+    validationSchema,
+    onSubmit: (values) => {
+      updateConfig({
+        variables: {
+          input: {
+            currencyName: values.currencyName,
+            normalizationFactor: Number(values.normalizationFactor),
+            tcCoinsAllowed: values.tcCoinsAllowed,
+          },
         },
-      },
-    });
-  };
+      });
+    },
+  });
 
   if (loading) {
     return (
@@ -79,7 +75,9 @@ export function EconomicConfiguration({ data, loading }: EconomicConfigProps) {
         <div className="space-y-1">
           <p className="text-xs font-semibold text-blue-900">How this works</p>
           <p className="text-xs text-blue-800/80 leading-relaxed">
-            Activity Points ÷ Normalization Factor = Entity Currency earned. For most entities, a factor of <strong>100</strong> is a stable starting point.
+            Activity Points ÷ Normalization Factor = Entity Currency earned. For
+            most entities, a factor of <strong>100</strong> is a stable starting
+            point.
           </p>
         </div>
       </div>
@@ -93,17 +91,31 @@ export function EconomicConfiguration({ data, loading }: EconomicConfigProps) {
               <Palette className="h-4 w-4 text-indigo-600" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-foreground">Currency Name</p>
-              <p className="text-xs text-muted-foreground">Your local currency's display name</p>
+              <p className="text-sm font-semibold text-foreground">
+                Currency Name
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Your local currency's display name
+              </p>
             </div>
           </div>
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium text-muted-foreground">Name</Label>
+            <Label className="text-xs font-medium text-muted-foreground">
+              Name
+            </Label>
             <Input
+              id="currencyName"
+              name="currencyName"
               placeholder="e.g. Credits, Gems, Stars"
-              value={config.currencyName}
-              onChange={(e) => setConfig({ ...config, currencyName: e.target.value })}
+              value={formik.values.currencyName}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
             />
+            {formik.touched.currencyName && formik.errors.currencyName && (
+              <p className="text-xs text-red-500 font-medium">
+                {formik.errors.currencyName as string}
+              </p>
+            )}
           </div>
         </div>
 
@@ -114,37 +126,50 @@ export function EconomicConfiguration({ data, loading }: EconomicConfigProps) {
               <Zap className="h-4 w-4 text-emerald-600" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-foreground">Normalization Factor</p>
-              <p className="text-xs text-muted-foreground">Points ÷ Factor = {config.currencyName || "EC"}</p>
+              <p className="text-sm font-semibold text-foreground">
+                Normalization Factor
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Points ÷ Factor = {formik.values.currencyName || "EC"}
+              </p>
             </div>
           </div>
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium text-muted-foreground">Factor</Label>
+            <Label className="text-xs font-medium text-muted-foreground">
+              Factor
+            </Label>
             <Input
+              id="normalizationFactor"
+              name="normalizationFactor"
               type="number"
               className="font-mono font-semibold"
-              value={config.normalizationFactor}
-              onChange={(e) =>
-                setConfig({ ...config, normalizationFactor: parseInt(e.target.value) })
-              }
+              value={formik.values.normalizationFactor}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
             />
+            {formik.touched.normalizationFactor && formik.errors.normalizationFactor && (
+              <p className="text-xs text-red-500 font-medium">
+                {formik.errors.normalizationFactor as string}
+              </p>
+            )}
           </div>
           <div className="px-3 py-2 rounded-lg bg-emerald-50/70 border border-emerald-100 text-xs text-emerald-800">
             <span className="font-medium">Example: </span>
-            100 pts ÷ {config.normalizationFactor || 1} ={" "}
+            100 pts ÷ {formik.values.normalizationFactor || 1} ={" "}
             <span className="font-bold">
-              {(100 / (config.normalizationFactor || 1)).toFixed(2)} {config.currencyName || "EC"}
+              {(100 / (Number(formik.values.normalizationFactor) || 1)).toFixed(2)}{" "}
+              {formik.values.currencyName || "EC"}
             </span>
           </div>
         </div>
       </div>
 
       <FloatingSavePanel
-        hasChanged={hasChanged}
+        hasChanged={formik.dirty}
         saved={saved}
         isSaving={updating}
-        onSave={handleSave}
-        onReset={handleReset}
+        onSave={() => formik.submitForm()}
+        onReset={() => formik.resetForm()}
       />
     </div>
   );
