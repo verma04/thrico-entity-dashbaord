@@ -3,10 +3,18 @@
 import React from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useGetUserDetailsById } from "@/graphql/actions";
-import { ArrowLeft, MessageSquare, Edit3, ChevronRight, User as UserIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import Link from "next/link";
+import { motion } from "framer-motion";
+import {
+  ArrowLeft,
+  MessageSquare,
+  Edit3,
+  ChevronRight,
+  User as UserIcon,
+  Activity,
+  Trophy,
+  Layout,
+} from "lucide-react";
 
 // Internal Components
 import { UserInfoCard } from "@/components/members/details/user-info-card";
@@ -17,11 +25,24 @@ import {
   UserDetailsSkeleton,
   ErrorState,
 } from "@/components/members/details/detail-states";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+function TabsActivePill() {
+  return (
+    <motion.div
+      layoutId="active-tab-indicator"
+      className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-full"
+      transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
+    />
+  );
+}
 
 export default function UserDetailsPage() {
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
+  const [activeTab, setActiveTab] = React.useState("profile");
 
   const { data, loading, error } = useGetUserDetailsById({
     variables: { input: { id } },
@@ -75,7 +96,10 @@ export default function UserDetailsPage() {
               <MessageSquare className="h-4 w-4" /> Message
             </Button>
             <Link href={`/members/${id}/edit`}>
-              <Button size="sm" className="gap-2 font-bold h-10 rounded-xl px-6 bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-600/20 transition-all border-none">
+              <Button
+                size="sm"
+                className="gap-2 font-bold h-10 rounded-xl px-6 bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-600/20 transition-all border-none"
+              >
                 <Edit3 className="h-4 w-4" /> Edit Account
               </Button>
             </Link>
@@ -96,27 +120,36 @@ export default function UserDetailsPage() {
 
             {/* Right Column: Main Content */}
             <div className="lg:col-span-8 space-y-8">
-              <Tabs defaultValue="profile" className="w-full">
-                <div className="mb-6">
-                  <TabsList className="bg-slate-100/80 p-1.5 h-13 w-full lg:w-auto flex lg:inline-flex justify-start lg:justify-center border border-slate-200 rounded-2xl shadow-sm">
-                    <TabsTrigger
-                      value="profile"
-                      className="px-8 font-black text-xs uppercase tracking-wider data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm transition-all h-full rounded-xl"
-                    >
-                      Profile
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="stats"
-                      className="px-8 font-black text-xs uppercase tracking-wider data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm transition-all h-full rounded-xl"
-                    >
-                      Activity Stats
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="gamification"
-                      className="px-8 font-black text-xs uppercase tracking-wider data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm transition-all h-full rounded-xl"
-                    >
-                      Gamification
-                    </TabsTrigger>
+              <Tabs
+                value={activeTab}
+                onValueChange={setActiveTab}
+                className="w-full"
+              >
+                <div className="mb-6 overflow-x-auto no-scrollbar border-b border-slate-200">
+                  <TabsList className="bg-transparent p-0 h-12 w-full lg:w-auto flex justify-start gap-8 rounded-none border-none shadow-none">
+                    {[
+                      { value: "profile", label: "Profile", icon: UserIcon },
+                      {
+                        value: "stats",
+                        label: "Activity Stats",
+                        icon: Activity,
+                      },
+                      {
+                        value: "gamification",
+                        label: "Gamification",
+                        icon: Trophy,
+                      },
+                    ].map((tab) => (
+                      <TabsTrigger
+                        key={tab.value}
+                        value={tab.value}
+                        className="group relative px-1 py-4 font-bold text-xs uppercase tracking-widest text-slate-500 data-[state=active]:text-indigo-600 transition-all h-full rounded-none border-none bg-transparent shadow-none gap-2"
+                      >
+                        <tab.icon className="h-3.5 w-3.5" />
+                        {tab.label}
+                        {activeTab === tab.value && <TabsActivePill />}
+                      </TabsTrigger>
+                    ))}
                   </TabsList>
                 </div>
 
@@ -150,4 +183,3 @@ export default function UserDetailsPage() {
     </div>
   );
 }
-

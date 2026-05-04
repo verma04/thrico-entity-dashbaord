@@ -161,35 +161,18 @@ function MemberBadgesList({ userId }: { userId: string }) {
   );
 }
 
+import { AdminTable, AdminTableColumn } from "@/components/shared/admin-table/admin-table";
+
 function MemberActivityLog({ userId }: { userId: string }) {
   const { data, loading } = useGetUserActivityLog(userId, 5);
   const logs = data?.getUserActivityLog || [];
 
-  if (loading)
-    return (
-      <div className="space-y-3">
-        <Skeleton className="h-12 w-full" />
-        <Skeleton className="h-12 w-full" />
-      </div>
-    );
-
-  if (logs?.length === 0)
-    return (
-      <Card className="p-8 border-dashed flex flex-col items-center justify-center text-center">
-        <Clock className="h-8 w-8 text-muted-foreground/20 mb-2" />
-        <p className="text-xs text-muted-foreground">
-          No recent activity found.
-        </p>
-      </Card>
-    );
-
-  return (
-    <div className="space-y-3">
-      {logs?.map((log: any, idx: number) => (
-        <div
-          key={idx}
-          className="flex gap-4 p-3 rounded-xl border border-border/40 bg-muted/5 hover:bg-muted/10 transition-colors"
-        >
+  const columns: AdminTableColumn<any>[] = [
+    {
+      key: "activity",
+      header: "Activity",
+      cell: (log) => (
+        <div className="flex items-center gap-3">
           <div
             className={cn(
               "h-8 w-8 rounded-full flex items-center justify-center shrink-0 border",
@@ -204,28 +187,51 @@ function MemberActivityLog({ userId }: { userId: string }) {
               <TrendingUp className="h-4 w-4" />
             )}
           </div>
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-black leading-none uppercase tracking-tight">
-                {log.ruleAction || log.type}
-              </span>
-              <span className="text-[10px] text-muted-foreground">
-                {safeFormatDistanceToNow(log.createdAt, {
-                  addSuffix: true,
-                })}
-              </span>
-            </div>
-            <p className="text-xs text-muted-foreground line-clamp-1">
+          <div className="flex flex-col">
+            <span className="text-[11px] font-black uppercase tracking-tight leading-tight">
+              {log.ruleAction || log.type}
+            </span>
+            <span className="text-[10px] text-muted-foreground leading-tight">
               {log.ruleDescription || log.badgeName || "Activity recorded"}
-            </p>
-          </div>
-          <div className="ml-auto flex items-center">
-            <span className="text-sm font-black text-primary">
-              +{log.points}
             </span>
           </div>
         </div>
-      ))}
+      ),
+    },
+    {
+      key: "date",
+      header: "Date",
+      cell: (log) => (
+        <span className="text-[10px] font-medium text-muted-foreground">
+          {safeFormatDistanceToNow(log.createdAt, { addSuffix: true })}
+        </span>
+      ),
+    },
+    {
+      key: "points",
+      header: "Points",
+      className: "text-right",
+      cell: (log) => (
+        <span className="text-xs font-black text-primary">
+          +{log.points} XP
+        </span>
+      ),
+    },
+  ];
+
+  return (
+    <div className="pt-2">
+      <AdminTable
+        data={logs}
+        columns={columns}
+        loading={loading}
+        keyExtractor={(_, idx) => idx.toString()}
+        pageSize={5}
+        emptyIcon={Clock}
+        emptyTitle="No activity found"
+        emptyDescription="This member hasn't earned any points yet."
+        className="border-none shadow-none bg-transparent"
+      />
     </div>
   );
 }
