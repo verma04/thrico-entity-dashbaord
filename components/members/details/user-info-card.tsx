@@ -155,6 +155,11 @@ export function UserInfoCard({ member }: { member: any }) {
         <CardContent className="px-1 pb-2">
           <div className="divide-y divide-border/50">
             <InfoRow icon={Calendar} label="Joined" value={safeLocaleDateString(user.createdAt)} />
+            <InfoRow 
+              icon={UserIcon} 
+              label="Member Since" 
+              value={safeFormatDistanceToNow(user.createdAt, { addSuffix: true })} 
+            />
             {user.profile?.DOB && (
               <InfoRow icon={Clock} label="DOB" value={safeLocaleDateString(user.profile.DOB)} />
             )}
