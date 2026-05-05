@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Network } from "lucide-react";
+import { safeLocaleDateString } from "@/lib/date-utils";
 
 export function ReferralsTab({ userId }: { userId: string }) {
   const [offset, setOffset] = useState(0);
@@ -96,7 +97,7 @@ export function ReferralsTab({ userId }: { userId: string }) {
                 <Avatar className="h-12 w-12 border-2 border-primary/10">
                   {user?.avatar && (
                     <AvatarImage
-                      src={`${process.env.NEXT_PUBLIC_MEDIA_BASE_URL}${user.avatar}`}
+                      src={`https://cdn.thrioc.network/${user?.avatar}`}
                       alt={`${firstName} ${lastName}`}
                     />
                   )}
@@ -110,6 +111,12 @@ export function ReferralsTab({ userId }: { userId: string }) {
                   </p>
                   <p className="text-xs text-muted-foreground truncate mt-0.5">
                     Location: {user?.location?.name || "Unknown"}
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate mt-0.5">
+                    Joined at:{" "}
+                    {user?.createdAt
+                      ? safeLocaleDateString(user.createdAt)
+                      : "Unknown"}
                   </p>
                 </div>
               </CardContent>
