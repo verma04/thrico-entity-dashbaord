@@ -9,6 +9,7 @@ import {
   GET_USER_STATS,
   GET_MEMBERS_STATS,
   GET_GROWTH_STATS,
+  GET_USER_REFERRALS,
 } from "../../quries/user";
 import { TimeRange, DateRangeInput } from "../dashbaord/dashboard-quries";
 
@@ -112,6 +113,24 @@ export interface GetAllUserResponse {
   getAllUser: UserDetail[];
 }
 
+export interface UserReferralData {
+  id: string;
+  user: {
+    profile: {
+      firstName: string;
+      lastName: string;
+    };
+  };
+}
+
+export interface GetUserReferralsResponse {
+  getUserReferrals: {
+    totalCount: number;
+    hasNextPage: boolean;
+    data: UserReferralData[];
+  };
+}
+
 // ---------------------------------------------------------
 // QUERY HOOKS
 // ---------------------------------------------------------
@@ -188,4 +207,12 @@ export const useGetGrowthStats = (
     ...options,
   });
 
-
+export const useGetUserReferrals = (
+  input: { userId: string; limit?: number; offset?: number },
+  options?: any,
+) =>
+  useQuery<GetUserReferralsResponse>(GET_USER_REFERRALS, {
+    variables: { input },
+    skip: !input.userId,
+    ...options,
+  });

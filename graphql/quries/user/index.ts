@@ -334,3 +334,21 @@ export const UPDATE_MEMBER = gql`
     }
   }
 `;
+
+export const GET_USER_REFERRALS = gql`
+  query GetUserReferrals($input: GetUserReferralsInput!) {
+    getUserReferrals(input: $input) {
+      totalCount
+      hasNextPage
+      data {
+        id
+        user {
+          profile {
+            firstName
+            lastName
+          }
+        }
+      }
+    }
+  }
+`;

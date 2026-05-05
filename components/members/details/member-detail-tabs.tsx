@@ -1,16 +1,18 @@
 "use client";
 
 import React from "react";
-import { User as UserIcon, Activity, Trophy } from "lucide-react";
+import { User as UserIcon, Activity, Trophy, Network } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProfileTab } from "./profile-tab";
 import { StatsTab } from "./stats-tab";
 import { GamificationTab } from "./gamification-tab";
+import { ReferralsTab } from "./referrals-tab";
 
 const MEMBER_TABS = [
   { value: "profile", label: "Profile", icon: UserIcon },
   { value: "stats", label: "Activity", icon: Activity },
   { value: "gamification", label: "Gamification", icon: Trophy },
+  { value: "referrals", label: "Referrals", icon: Network },
 ] as const;
 
 interface MemberDetailTabsProps {
@@ -45,6 +47,10 @@ export function MemberDetailTabs({ member, userId }: MemberDetailTabsProps) {
 
         <TabsContent value="gamification" className="mt-0 outline-none">
           <GamificationTab userId={userId} />
+        </TabsContent>
+
+        <TabsContent value="referrals" className="mt-0 outline-none">
+          <ReferralsTab userId={userId} />
         </TabsContent>
       </div>
     </Tabs>
