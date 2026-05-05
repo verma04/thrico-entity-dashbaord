@@ -114,12 +114,14 @@ export interface GetAllUserResponse {
 }
 
 export interface UserReferralData {
-  id: string;
   user: {
-    profile: {
-      firstName: string;
-      lastName: string;
-    };
+    id: string;
+    firstName: string;
+    lastName: string;
+    location: string;
+    avatar: string;
+    cover: string;
+    createdAt: string;
   };
 }
 

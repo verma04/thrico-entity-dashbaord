@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useGetUserReferrals } from "@/graphql/actions";
 import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Network } from "lucide-react";
@@ -59,7 +59,9 @@ export function ReferralsTab({ userId }: { userId: string }) {
           <div className="bg-muted p-4 rounded-full mb-4">
             <Network className="h-8 w-8 text-muted-foreground" />
           </div>
-          <p className="text-lg font-medium text-foreground">No Referrals Found</p>
+          <p className="text-lg font-medium text-foreground">
+            No Referrals Found
+          </p>
           <p className="text-sm text-muted-foreground mt-1">
             This user hasn't referred anyone yet.
           </p>
@@ -72,21 +74,32 @@ export function ReferralsTab({ userId }: { userId: string }) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-medium text-muted-foreground">
-          Total Referrals: <span className="text-foreground font-semibold">{totalCount}</span>
+          Total Referrals:{" "}
+          <span className="text-foreground font-semibold">{totalCount}</span>
         </h3>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {referrals.map((referral: any) => {
-          const profile = referral.user?.profile;
-          const firstName = profile?.firstName || "Unknown";
-          const lastName = profile?.lastName || "User";
-          const initials = `${firstName[0] || ""}${lastName[0] || ""}`.toUpperCase();
+        {referrals.map((referral: any, index: number) => {
+          const user = referral.user;
+          const firstName = user?.firstName || "Unknown";
+          const lastName = user?.lastName || "User";
+          const initials =
+            `${firstName[0] || ""}${lastName[0] || ""}`.toUpperCase();
 
           return (
-             <Card key={referral.id} className="overflow-hidden hover:shadow-md transition-shadow border-border">
+            <Card
+              key={user?.id || index}
+              className="overflow-hidden hover:shadow-md transition-shadow border-border"
+            >
               <CardContent className="p-4 flex items-center gap-4">
                 <Avatar className="h-12 w-12 border-2 border-primary/10">
+                  {user?.avatar && (
+                    <AvatarImage
+                      src={`${process.env.NEXT_PUBLIC_MEDIA_BASE_URL}${user.avatar}`}
+                      alt={`${firstName} ${lastName}`}
+                    />
+                  )}
                   <AvatarFallback className="bg-primary/5 text-primary font-semibold">
                     {initials}
                   </AvatarFallback>
@@ -96,7 +109,7 @@ export function ReferralsTab({ userId }: { userId: string }) {
                     {firstName} {lastName}
                   </p>
                   <p className="text-xs text-muted-foreground truncate mt-0.5">
-                    ID: {referral.id.substring(0, 8)}...
+                    Location: {user?.location || "Unknown"}
                   </p>
                 </div>
               </CardContent>
@@ -116,7 +129,8 @@ export function ReferralsTab({ userId }: { userId: string }) {
             Previous
           </Button>
           <span className="text-xs text-muted-foreground font-medium">
-            Showing {offset + 1}-{Math.min(offset + limit, totalCount)} of {totalCount}
+            Showing {offset + 1}-{Math.min(offset + limit, totalCount)} of{" "}
+            {totalCount}
           </span>
           <Button
             variant="outline"
