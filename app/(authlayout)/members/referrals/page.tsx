@@ -26,7 +26,7 @@ export default function ReferralsPage() {
           <div className="flex items-center gap-3">
             <Avatar className="h-9 w-9">
               <AvatarImage
-                src={`https://cdn.thrioc.network/${user?.avatar}`}
+                src={`https://cdn.thrico.network/${user?.avatar}`}
                 alt={user?.firstName}
               />
               <AvatarFallback className="bg-primary/5 text-primary text-[10px] font-bold">
@@ -65,7 +65,7 @@ export default function ReferralsPage() {
           <div className="flex items-center gap-3">
             <Avatar className="h-9 w-9">
               <AvatarImage
-                src={`https://cdn.thrioc.network/${user?.avatar}`}
+                src={`https://cdn.thrico.network/${user?.avatar}`}
                 alt={user?.firstName}
               />
               <AvatarFallback className="bg-muted text-muted-foreground text-[10px] font-bold">

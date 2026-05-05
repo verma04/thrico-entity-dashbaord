@@ -97,7 +97,7 @@ export function ReferralsTab({ userId }: { userId: string }) {
                 <Avatar className="h-12 w-12 border-2 border-primary/10">
                   {user?.avatar && (
                     <AvatarImage
-                      src={`https://cdn.thrioc.network/${user?.avatar}`}
+                      src={`https://cdn.thrico.network/${user?.avatar}`}
                       alt={`${firstName} ${lastName}`}
                     />
                   )}
