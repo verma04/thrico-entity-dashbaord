@@ -16,88 +16,69 @@ export default function ReferralsPage() {
 
   const columns: AdminTableColumn<any>[] = [
     {
-      key: "referrer",
-      header: "Referrer",
+      key: "relationship",
+      header: "Relationship",
       cell: (row) => {
-        const user = row.referrer?.user;
-        const initials =
-          `${user?.firstName?.[0] || ""}${user?.lastName?.[0] || ""}`.toUpperCase();
+        const referrer = row.referrer?.user;
+        const referee = row.referee?.user;
         return (
-          <div className="flex items-center gap-3">
-            <Avatar className="h-9 w-9">
-              <AvatarImage
-                src={`https://cdn.thrico.network/${user?.avatar}`}
-                alt={user?.firstName}
-              />
-              <AvatarFallback className="bg-primary/5 text-primary text-[10px] font-bold">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col min-w-0">
-              <span className="font-medium text-sm text-foreground truncate">
-                {user?.firstName} {user?.lastName}
-              </span>
-              <span className="text-[11px] text-muted-foreground truncate">
-                {user?.email}
-              </span>
+          <div className="flex items-center gap-4 py-1">
+            <div className="flex items-center gap-2.5 min-w-[180px]">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={`https://cdn.thrico.network/${referrer?.avatar}`} />
+                <AvatarFallback className="text-[10px]">{referrer?.firstName?.[0]}{referrer?.lastName?.[0]}</AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col min-w-0">
+                <span className="text-sm font-medium truncate">{referrer?.firstName} {referrer?.lastName}</span>
+                <span className="text-[10px] text-muted-foreground">Referrer</span>
+              </div>
+            </div>
+
+            <div className="flex flex-col items-center px-2">
+              <div className="h-px w-8 bg-border relative">
+                <div className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-border" />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2.5 min-w-[180px]">
+              <Avatar className="h-8 w-8 border border-primary/10">
+                <AvatarImage src={`https://cdn.thrico.network/${referee?.avatar}`} />
+                <AvatarFallback className="text-[10px]">{referee?.firstName?.[0]}{referee?.lastName?.[0]}</AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col min-w-0">
+                <span className="text-sm font-medium truncate">{referee?.firstName} {referee?.lastName}</span>
+                <span className="text-[10px] text-muted-foreground">Referee</span>
+              </div>
             </div>
           </div>
         );
       },
     },
     {
-      key: "referralsCount",
-      header: "Total Referrals",
+      key: "details",
+      header: "Details",
       cell: (row) => (
-        <Badge variant="secondary" className="font-mono text-[10px] h-5">
-          {row?.referrer?.referralsCount}
-        </Badge>
+        <div className="flex flex-col gap-1">
+          <span className="text-xs text-muted-foreground">Joined {safeLocaleDateString(row.referee?.user?.createdAt)}</span>
+          <div className="flex items-center gap-2">
+            <Badge 
+              variant="outline" 
+              className={row.referee?.isApproved ? "bg-emerald-50 text-emerald-700 border-emerald-100 text-[10px] py-0" : "bg-amber-50 text-amber-700 border-amber-100 text-[10px] py-0"}
+            >
+              {row.referee?.isApproved ? "Approved" : "Pending"}
+            </Badge>
+          </div>
+        </div>
       ),
     },
     {
-      key: "referee",
-      header: "Referee (Invited)",
-      cell: (row) => {
-        const user = row?.referee?.user;
-        const initials =
-          `${user?.firstName?.[0] || ""}${user?.lastName?.[0] || ""}`.toUpperCase();
-        return (
-          <div className="flex items-center gap-3">
-            <Avatar className="h-9 w-9">
-              <AvatarImage
-                src={`https://cdn.thrico.network/${user?.avatar}`}
-                alt={user?.firstName}
-              />
-              <AvatarFallback className="bg-muted text-muted-foreground text-[10px] font-bold">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col min-w-0">
-              <span className="font-medium text-sm text-foreground truncate">
-                {user?.firstName} {user?.lastName}
-              </span>
-              <span className="text-[11px] text-muted-foreground truncate">
-                Joined {safeLocaleDateString(user?.createdAt)}
-              </span>
-            </div>
-          </div>
-        );
-      },
-    },
-    {
-      key: "status",
-      header: "Status",
+      key: "stats",
+      header: "Referrer Stats",
       cell: (row) => (
-        <Badge
-          className={
-            row?.referee?.isApproved
-              ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border-emerald-200 text-[10px] py-0 px-2 uppercase tracking-tight"
-              : "bg-amber-50 text-amber-700 hover:bg-amber-50 border-amber-200 text-[10px] py-0 px-2 uppercase tracking-tight"
-          }
-          variant="outline"
-        >
-          {row?.referee?.isApproved ? "Approved" : "Pending"}
-        </Badge>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground">Total:</span>
+          <Badge variant="secondary" className="text-[10px] font-mono">{row.referrer?.referralsCount || 0}</Badge>
+        </div>
       ),
     },
   ];
