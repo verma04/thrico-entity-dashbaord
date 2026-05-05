@@ -109,7 +109,7 @@ export function ReferralsTab({ userId }: { userId: string }) {
                     {firstName} {lastName}
                   </p>
                   <p className="text-xs text-muted-foreground truncate mt-0.5">
-                    Location: {user?.location || "Unknown"}
+                    Location: {user?.location?.name || "Unknown"}
                   </p>
                 </div>
               </CardContent>

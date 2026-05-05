@@ -118,7 +118,9 @@ export interface UserReferralData {
     id: string;
     firstName: string;
     lastName: string;
-    location: string;
+    location: {
+      name: string;
+    } | null;
     avatar: string;
     cover: string;
     createdAt: string;
