@@ -10,6 +10,7 @@ import {
   GET_MEMBERS_STATS,
   GET_GROWTH_STATS,
   GET_USER_REFERRALS,
+  GET_ALL_REFERRALS,
 } from "../../quries/user";
 import { TimeRange, DateRangeInput } from "../dashbaord/dashboard-quries";
 
@@ -135,6 +136,49 @@ export interface GetUserReferralsResponse {
   };
 }
 
+export interface GetAllReferralsItem {
+  referrer: {
+    user: {
+      createdAt: string;
+      lastName: string;
+      location: { name: string } | null;
+      firstName: string;
+      email: string;
+      cover: string;
+      avatar: string;
+      isOnline: boolean;
+      lastLoginAt: string;
+    };
+    isApproved: boolean;
+    isOnline: boolean;
+    industries: any[];
+    referralsCount: number;
+  };
+  referee: {
+    isApproved: boolean;
+    isOnline: boolean;
+    user: {
+      createdAt: string;
+      lastName: string;
+      location: { name: string } | null;
+      firstName: string;
+      email: string;
+      cover: string;
+      avatar: string;
+      isOnline: boolean;
+      lastLoginAt: string;
+    };
+  };
+}
+
+export interface GetAllReferralsResponse {
+  getAllReferrals: {
+    data: GetAllReferralsItem[];
+    totalCount: number;
+    hasNextPage: boolean;
+  };
+}
+
 // ---------------------------------------------------------
 // QUERY HOOKS
 // ---------------------------------------------------------
@@ -218,5 +262,14 @@ export const useGetUserReferrals = (
   useQuery<GetUserReferralsResponse>(GET_USER_REFERRALS, {
     variables: { input },
     skip: !input.userId,
+    ...options,
+  });
+
+export const useGetAllReferrals = (
+  variables?: { limit?: number; offset?: number },
+  options?: any,
+) =>
+  useQuery<GetAllReferralsResponse>(GET_ALL_REFERRALS, {
+    variables,
     ...options,
   });

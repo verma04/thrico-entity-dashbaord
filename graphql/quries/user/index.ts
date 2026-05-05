@@ -355,3 +355,51 @@ export const GET_USER_REFERRALS = gql`
     }
   }
 `;
+
+export const GET_ALL_REFERRALS = gql`
+  query GetAllReferrals($limit: Int, $offset: Int) {
+    getAllReferrals(limit: $limit, offset: $offset) {
+      data {
+        referrer {
+          user {
+            createdAt
+            lastName
+            location
+            firstName
+            email
+            cover
+            avatar
+            isOnline
+            lastLoginAt
+          }
+          isApproved
+          isOnline
+          industries {
+            id
+            title
+            createdAt
+            updatedAt
+          }
+          referralsCount
+        }
+        referee {
+          isApproved
+          isOnline
+          user {
+            createdAt
+            lastName
+            location
+            firstName
+            email
+            cover
+            avatar
+            isOnline
+            lastLoginAt
+          }
+        }
+      }
+      totalCount
+      hasNextPage
+    }
+  }
+`;
