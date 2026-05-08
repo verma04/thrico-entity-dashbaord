@@ -108,6 +108,13 @@ export interface UserDetail {
       };
     };
   };
+  lastSession?: {
+    deviceId: string;
+    deviceName: string;
+    lastUsed: string;
+    isActive: boolean;
+    createdAt: string;
+  };
 }
 
 export interface GetAllUserResponse {

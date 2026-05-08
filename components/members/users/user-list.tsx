@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import UserActions from "./user-actions";
 import { safeFormat } from "@/lib/date-utils";
-import { Mail, MapPin, Users } from "lucide-react";
+import { Mail, MapPin, Smartphone, Users } from "lucide-react";
 import { UserDetail, useBulkChangeUserStatus } from "@/graphql/actions";
 import { AdminTable, AdminStatusBadge, AdminVerifiedBadge, AdminTableColumn } from "@/components/shared/admin-table/admin-table";
 
@@ -109,6 +109,32 @@ const columns: AdminTableColumn<UserDetail>[] = [
       <span className="text-[12px] text-muted-foreground whitespace-nowrap">
         {safeFormat(row.user?.createdAt, "MMM d, yyyy", "—")}
       </span>
+    ),
+  },
+  {
+    key: "lastSession",
+    header: "Last Session",
+    cell: (row) => (
+      <div className="flex flex-col gap-0.5">
+        {row.lastSession ? (
+          <>
+            <div className="flex items-center gap-1.5 text-[12px] text-foreground/80">
+              <Smartphone className="h-3 w-3 text-muted-foreground/50 shrink-0" />
+              <span className="truncate max-w-[150px] font-medium">
+                {row.lastSession.deviceName || "Unknown Device"}
+              </span>
+              {row.lastSession.isActive && (
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" title="Active now" />
+              )}
+            </div>
+            <span className="text-[11px] text-muted-foreground">
+              {safeFormat(row.lastSession.lastUsed, "MMM d, h:mm a", "Never")}
+            </span>
+          </>
+        ) : (
+          <span className="text-[11px] text-muted-foreground/50">—</span>
+        )}
+      </div>
     ),
   },
   {

@@ -96,6 +96,13 @@ const details = `
         title
         id
       }
+      lastSession {
+        deviceId
+        deviceName
+        lastUsed
+        isActive
+        createdAt
+      }
 `;
 export const GET_ALL_USER = gql`
   query GetAllUser($input: allStatusInput) {

@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   UserCog,
   ExternalLink,
+  Smartphone,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useGetAllUser, UserDetail } from "@/graphql/actions";
@@ -163,6 +164,21 @@ export const MembersListCards = ({
                       +{member.industries.length - 3}
                     </span>
                   )}
+                </div>
+              )}
+              
+              {/* Last Session */}
+              {member.lastSession && (
+                <div className="mt-4 flex items-center gap-2 text-[11px] text-muted-foreground px-1">
+                  <div className="relative">
+                    <Smartphone className="h-3 w-3 shrink-0" />
+                    {member.lastSession.isActive && (
+                      <span className="absolute -top-0.5 -right-0.5 h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    )}
+                  </div>
+                  <span className="truncate">
+                    Last active {safeFormatDistanceToNow(member.lastSession.lastUsed, { addSuffix: true })} on {member.lastSession.deviceName}
+                  </span>
                 </div>
               )}
 
