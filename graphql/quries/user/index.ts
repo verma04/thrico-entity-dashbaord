@@ -103,11 +103,23 @@ const details = `
         isActive
         createdAt
       }
+      referrer {
+        user {
+          id
+          firstName
+          lastName
+          avatar
+        }
+      }
 `;
 export const GET_ALL_USER = gql`
   query GetAllUser($input: allStatusInput) {
     getAllUser(input: $input) {
-    ${details}
+      data {
+        ${details}
+      }
+      totalCount
+      hasNextPage
     }
   }
 `;
@@ -205,6 +217,14 @@ export const GET_USER_DETIALS = gql`
         updatedAt
         title
         id
+      }
+      referrer {
+        user {
+          id
+          firstName
+          lastName
+          avatar
+        }
       }
     }
   }

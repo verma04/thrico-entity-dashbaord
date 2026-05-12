@@ -112,6 +112,35 @@ const columns: AdminTableColumn<UserDetail>[] = [
     ),
   },
   {
+    key: "referrer",
+    header: "Referrer",
+    cell: (row: any) => (
+      <div className="flex items-center gap-1.5 text-[12px] text-foreground/80">
+        {row.referrer?.user ? (
+          <div className="flex items-center gap-2">
+            <Avatar className="h-6 w-6 rounded-full border border-border/60 shrink-0">
+              <AvatarImage
+                src={`https://cdn.thrico.network/${row.referrer.user.avatar}`}
+                alt={row.referrer.user.firstName}
+              />
+              <AvatarFallback className="rounded-full bg-muted text-muted-foreground text-[10px] font-semibold">
+                {row.referrer.user.firstName?.[0]}
+                {row.referrer.user.lastName?.[0]}
+              </AvatarFallback>
+            </Avatar>
+            <span className="truncate max-w-[120px]">
+              {row.referrer.user.firstName} {row.referrer.user.lastName}
+            </span>
+          </div>
+        ) : (
+          <span className="text-[11px] font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+            Direct Join
+          </span>
+        )}
+      </div>
+    ),
+  },
+  {
     key: "lastSession",
     header: "Last Session",
     cell: (row) => (

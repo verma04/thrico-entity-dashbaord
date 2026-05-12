@@ -4,6 +4,7 @@ import React, { useState, useMemo } from "react";
 import { UserList } from "./user-list";
 import { useGetAllUser } from "@/graphql/actions/membership/membership-queries";
 import { MembersListCards } from "../dashboard/members-listcards";
+import { useDebounce } from "use-debounce";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutGrid,
@@ -247,41 +248,34 @@ import { useGetIndustries } from "@/graphql/quries/industries/industry-queries";
 const User = ({ status: initialStatus }: { status?: string }) => {
   const [view, setView] = useState<"grid" | "table">("table");
   const [search, setSearch] = useState("");
+  const [debouncedSearch] = useDebounce(search, 500);
   const [status, setStatus] = useState<StatusValue>(
     (initialStatus as StatusValue) || "ALL",
   );
   const [selectedIndustry, setSelectedIndustry] = useState<string>("ALL");
 
+  const [offset, setOffset] = useState(0);
+  const limit = 50;
+
   const { data: industryData } = useGetIndustries();
   const industries = industryData?.getIndustries || [];
+
+  // Reset offset when filters change
+  React.useEffect(() => {
+    setOffset(0);
+  }, [debouncedSearch, status, selectedIndustry]);
 
   const { data, loading, refetch } = useGetAllUser({
     status: status === "ALL" ? "ALL" : status,
     industryId: selectedIndustry === "ALL" ? null : selectedIndustry,
+    search: debouncedSearch.trim() || null,
+    limit,
+    offset,
   });
 
-  // Client-side search filter
-  const filteredUsers = useMemo(() => {
-    const all = data?.getAllUser || [];
-    if (!search.trim()) return all;
-    const term = search.toLowerCase();
-    return all.filter(
-      (u) =>
-        `${u.user?.firstName} ${u.user?.lastName}`
-          .toLowerCase()
-          .includes(term) || u.user?.email?.toLowerCase().includes(term),
-    );
-  }, [data, search]);
-
-  // For per-tab count badges — count from full unfiltered data
-  const counts = useMemo(() => {
-    const all = data?.getAllUser || [];
-    const result: Record<string, number> = { ALL: all.length };
-    for (const u of all) {
-      result[u.status] = (result[u.status] || 0) + 1;
-    }
-    return result;
-  }, [data]);
+  const usersList = data?.getAllUser?.data || [];
+  const totalCount = data?.getAllUser?.totalCount || 0;
+  const hasNextPage = data?.getAllUser?.hasNextPage || false;
 
   const pageTitle =
     status === "ALL"
@@ -297,7 +291,7 @@ const User = ({ status: initialStatus }: { status?: string }) => {
         description={
           loading
             ? "Loading members…"
-            : `${data?.getAllUser?.length || 0} total members in your community.`
+            : `${totalCount} total members in your community.`
         }
         icon={Users}
         actions={
@@ -405,8 +399,8 @@ const User = ({ status: initialStatus }: { status?: string }) => {
         </EcosystemActionBar.Group>
 
         <EcosystemActionBar.Group align="right">
-          <EcosystemActionBar.Status active={filteredUsers.length > 0}>
-            {filteredUsers.length} Members
+          <EcosystemActionBar.Status active={usersList.length > 0}>
+            Showing {usersList.length} of {totalCount} Members
           </EcosystemActionBar.Status>
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
@@ -416,11 +410,40 @@ const User = ({ status: initialStatus }: { status?: string }) => {
         {/* Section heading (non-ALL statuses only) */}
         <SectionHeader
           status={status}
-          count={filteredUsers.length}
+          count={totalCount}
           loading={loading}
         />
 
-        <ContentArea view={view} loading={loading} users={filteredUsers} />
+        <ContentArea view={view} loading={loading} users={usersList} />
+        
+        {/* Pagination Controls */}
+        {!loading && totalCount > 0 && (
+          <div className="flex items-center justify-between px-4 py-3 border-t border-border mt-4 bg-card rounded-b-xl">
+            <span className="text-xs text-muted-foreground">
+              Showing {offset + 1} to {Math.min(offset + limit, totalCount)} of {totalCount} records
+            </span>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setOffset(Math.max(0, offset - limit))}
+                disabled={offset === 0 || loading}
+                className="h-8 text-xs font-medium"
+              >
+                Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setOffset(offset + limit)}
+                disabled={!hasNextPage || loading}
+                className="h-8 text-xs font-medium"
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        )}
       </EcosystemContainer>
 
       <style>{`

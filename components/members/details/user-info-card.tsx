@@ -13,6 +13,7 @@ import {
   Linkedin,
   Github,
   Link as LinkIcon,
+  Network,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -159,6 +160,11 @@ export function UserInfoCard({ member }: { member: any }) {
               icon={UserIcon} 
               label="Member Since" 
               value={safeFormatDistanceToNow(user.createdAt, { addSuffix: true })} 
+            />
+            <InfoRow
+              icon={Network}
+              label="Referred By"
+              value={member.referrer?.user ? `${member.referrer.user.firstName} ${member.referrer.user.lastName}` : "Direct Join"}
             />
             {user.profile?.DOB && (
               <InfoRow icon={Clock} label="DOB" value={safeLocaleDateString(user.profile.DOB)} />

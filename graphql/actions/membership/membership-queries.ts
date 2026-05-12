@@ -118,7 +118,11 @@ export interface UserDetail {
 }
 
 export interface GetAllUserResponse {
-  getAllUser: UserDetail[];
+  getAllUser: {
+    data: UserDetail[];
+    totalCount: number;
+    hasNextPage: boolean;
+  };
 }
 
 export interface UserReferralData {
@@ -216,6 +220,7 @@ export const useGetAllUser = (input?: {
   limit?: number | null;
   offset?: number | null;
   industryId?: string | null;
+  search?: string | null;
 }) =>
   useQuery<GetAllUserResponse>(GET_ALL_USER, {
     variables: {
@@ -224,6 +229,7 @@ export const useGetAllUser = (input?: {
         limit: input?.limit ?? null,
         offset: input?.offset,
         industryId: input?.industryId ?? null,
+        search: input?.search ?? null,
       },
     },
     fetchPolicy: "network-only",
