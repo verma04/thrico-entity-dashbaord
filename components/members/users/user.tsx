@@ -33,6 +33,7 @@ import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header"
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { Pagination } from "@/components/shared/admin-table/admin-table";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Constants
@@ -255,7 +256,7 @@ const User = ({ status: initialStatus }: { status?: string }) => {
   const [selectedIndustry, setSelectedIndustry] = useState<string>("ALL");
 
   const [offset, setOffset] = useState(0);
-  const limit = 50;
+  const limit = 10;
 
   const { data: industryData } = useGetIndustries();
   const industries = industryData?.getIndustries || [];
@@ -418,30 +419,14 @@ const User = ({ status: initialStatus }: { status?: string }) => {
         
         {/* Pagination Controls */}
         {!loading && totalCount > 0 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-border mt-4 bg-card rounded-b-xl">
-            <span className="text-xs text-muted-foreground">
-              Showing {offset + 1} to {Math.min(offset + limit, totalCount)} of {totalCount} records
-            </span>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setOffset(Math.max(0, offset - limit))}
-                disabled={offset === 0 || loading}
-                className="h-8 text-xs font-medium"
-              >
-                Previous
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setOffset(offset + limit)}
-                disabled={!hasNextPage || loading}
-                className="h-8 text-xs font-medium"
-              >
-                Next
-              </Button>
-            </div>
+          <div className="mt-4 overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+            <Pagination
+              currentPage={Math.floor(offset / limit) + 1}
+              totalPages={Math.ceil(totalCount / limit)}
+              totalItems={totalCount}
+              pageSize={limit}
+              onPageChange={(page) => setOffset((page - 1) * limit)}
+            />
           </div>
         )}
       </EcosystemContainer>

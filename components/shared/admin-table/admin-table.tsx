@@ -201,7 +201,7 @@ function EmptyState({
 // Pagination
 // ─────────────────────────────────────────────────────────────────────────────
 
-function Pagination({
+export function Pagination({
   currentPage,
   totalPages,
   totalItems,

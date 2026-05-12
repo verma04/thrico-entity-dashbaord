@@ -254,6 +254,7 @@ export function UserList({ users }: { users: UserDetail[] }) {
         emptyIcon={Users}
         emptyTitle="No members found"
         emptyDescription="Try adjusting your search or filter criteria."
+        pageSize={100}
       />
     </div>
   );
