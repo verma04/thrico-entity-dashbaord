@@ -256,7 +256,7 @@ const User = ({ status: initialStatus }: { status?: string }) => {
   const [selectedIndustry, setSelectedIndustry] = useState<string>("ALL");
 
   const [offset, setOffset] = useState(0);
-  const limit = 10;
+  const limit = 20;
 
   const { data: industryData } = useGetIndustries();
   const industries = industryData?.getIndustries || [];
