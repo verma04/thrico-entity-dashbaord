@@ -150,6 +150,7 @@ export const GET_PLAN_OVERVIEW = gql`
         benefits
         packageId
         currency
+        storage
       }
       addons {
         addonId

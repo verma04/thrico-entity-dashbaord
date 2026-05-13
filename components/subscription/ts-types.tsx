@@ -10,6 +10,7 @@ export interface CountryPackage {
   adminUsers: number;
   benefits: string[];
   currency: string;
+  storage?: number;
   modules: {
     icon: string;
     name: string;

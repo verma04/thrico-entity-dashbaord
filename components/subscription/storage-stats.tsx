@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Database, HardDrive, FileText, PieChart } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { usePlanOverview } from "@/graphql/actions/plan";
 
 interface StorageStat {
   module: string;
@@ -44,7 +45,10 @@ export const StorageStats = ({
   summary = { totalBytes: 0, totalFileCount: 0 },
 }: StorageStatsProps) => {
   const [showAllStorageModules, setShowAllStorageModules] = React.useState(false);
-  const TOTAL_LIMIT = 5 * 1024 * 1024 * 1024; // 5 GB
+  const { data } = usePlanOverview();
+  
+  const storageLimitGB = data?.getPlanOverview?.package?.storage || 5;
+  const TOTAL_LIMIT = storageLimitGB * 1024 * 1024 * 1024; // Convert GB to Bytes
   const usedBytes = summary.totalBytes || 0;
   const percent = TOTAL_LIMIT > 0 ? Math.min((usedBytes / TOTAL_LIMIT) * 100, 100) : 0;
   const visibleStorageModules = showAllStorageModules ? stats : stats.slice(0, 9);
