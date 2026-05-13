@@ -50,6 +50,10 @@ export default function EditRewardPage() {
       rewardMechanism: reward?.rewardMechanism || "COUPON",
       status: reward?.status || "ACTIVE",
       isActive: reward?.isActive ?? true,
+      url: reward?.url || "",
+      expiryDate: reward?.expiryDate 
+        ? new Date(Number(reward.expiryDate) ? Number(reward.expiryDate) : reward.expiryDate).toISOString().slice(0, 16) 
+        : "",
     },
     validationSchema: couponSchema,
     enableReinitialize: true,
@@ -75,6 +79,10 @@ export default function EditRewardPage() {
                 : [values.rewardMechanism || "COUPON"],
               status: values.status,
               isActive: values.isActive,
+              url: values.url,
+          couponType: values.couponType,
+          couponCode: values.couponCode,
+              expiryDate: values.expiryDate || null,
             },
           },
         });

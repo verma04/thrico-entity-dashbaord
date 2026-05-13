@@ -1,5 +1,5 @@
 import React from "react";
-import { Coins, Crown, Ticket, XCircle } from "lucide-react";
+import { Coins, Ticket, XCircle } from "lucide-react";
 import { RewardType } from "./types";
 
 export const SEGMENT_COLORS = [
@@ -18,22 +18,19 @@ export const SEGMENT_COLORS = [
 ];
 
 export const REWARD_LABELS: Record<RewardType, string> = {
-  TC: "Coins",
+  COINS: "Coins",
   VOUCHER: "Voucher",
-  PREMIUM: "Premium",
-  NOTHING: "No Rewards",
+  NO_REWARDS: "No Rewards",
 };
 
 export const REWARD_BADGE: Record<RewardType, string> = {
-  TC: "bg-amber-50 text-amber-700 border border-amber-100",
+  COINS: "bg-amber-50 text-amber-700 border border-amber-100",
   VOUCHER: "bg-blue-50 text-blue-700 border border-blue-100",
-  PREMIUM: "bg-violet-50 text-violet-700 border border-violet-100",
-  NOTHING: "bg-muted text-muted-foreground border border-border",
+  NO_REWARDS: "bg-muted text-muted-foreground border border-border",
 };
 
 export const REWARD_ICON: Record<RewardType, React.ReactNode> = {
-  TC: <Coins className="h-3 w-3" />,
+  COINS: <Coins className="h-3 w-3" />,
   VOUCHER: <Ticket className="h-3 w-3" />,
-  PREMIUM: <Crown className="h-3 w-3" />,
-  NOTHING: <XCircle className="h-3 w-3" />,
+  NO_REWARDS: <XCircle className="h-3 w-3" />,
 };

@@ -18,7 +18,8 @@ import {
   DialogFooter,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Loader2 } from "lucide-react";
+import { Loader2, RefreshCw, Ticket } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { RewardType, WheelSegment } from "./types";
 
 interface SegmentDialogProps {
@@ -31,6 +32,7 @@ interface SegmentDialogProps {
   updatingSegment: boolean;
   uniqueVoucherRewards: any[];
   vouchersLoading: boolean;
+  getVouchers: (options?: any) => void;
 }
 
 export function SegmentDialog({
@@ -43,6 +45,7 @@ export function SegmentDialog({
   updatingSegment,
   uniqueVoucherRewards,
   vouchersLoading,
+  getVouchers,
 }: SegmentDialogProps) {
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -59,10 +62,40 @@ export function SegmentDialog({
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label className="text-xs font-semibold text-muted-foreground">
+                Reward Type
+              </Label>
+              <Select
+                value={editingSegment?.rewardType}
+                onValueChange={(v) => {
+                  setEditingSegment((p) =>
+                    p ? { ...p, rewardType: v as RewardType } : null,
+                  );
+                  if (v === "VOUCHER") {
+                    getVouchers({
+                      variables: {
+                        mechanism: "SPIN_WHEEL",
+                        pagination: { page: 1, limit: 100 },
+                      },
+                    });
+                  }
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="COINS">Coins</SelectItem>
+                  <SelectItem value="VOUCHER">Voucher</SelectItem>
+                  <SelectItem value="NO_REWARDS">No Rewards</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold text-muted-foreground">
                 Label
               </Label>
               <Input
-                placeholder="e.g. 50 TC"
+                placeholder="e.g. 50 Coins"
                 value={editingSegment?.label || ""}
                 onChange={(e) =>
                   setEditingSegment((p) =>
@@ -71,35 +104,34 @@ export function SegmentDialog({
                 }
               />
             </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-muted-foreground">
-                Reward Type
-              </Label>
-              <Select
-                value={editingSegment?.rewardType}
-                onValueChange={(v) =>
-                  setEditingSegment((p) =>
-                    p ? { ...p, rewardType: v as RewardType } : null,
-                  )
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select type..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="TC">Coins</SelectItem>
-                  <SelectItem value="VOUCHER">Voucher</SelectItem>
-                  <SelectItem value="NOTHING">No Rewards</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
           </div>
 
           {editingSegment?.rewardType === "VOUCHER" && (
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-muted-foreground">
-                Select Voucher
-              </Label>
+              <div className="flex items-center justify-between">
+                <Label className="text-xs font-semibold text-muted-foreground">
+                  Select Voucher
+                </Label>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 text-xs gap-1 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50"
+                  onClick={() =>
+                    getVouchers({
+                      variables: {
+                        mechanism: "SPIN_WHEEL",
+                        pagination: { page: 1, limit: 100 },
+                      },
+                    })
+                  }
+                  disabled={vouchersLoading}
+                >
+                  <RefreshCw
+                    className={cn("h-3 w-3", vouchersLoading && "animate-spin")}
+                  />
+                  Refresh
+                </Button>
+              </div>
               <Select
                 value={editingSegment?.rewardId || ""}
                 onValueChange={(v) => {
@@ -120,13 +152,44 @@ export function SegmentDialog({
                 }}
               >
                 <SelectTrigger>
-                  <SelectValue
-                    placeholder={
-                      vouchersLoading
-                        ? "Loading vouchers..."
-                        : "Select a voucher reward..."
-                    }
-                  />
+                  {editingSegment?.rewardId ? (
+                    (() => {
+                      const selectedReward = uniqueVoucherRewards.find(
+                        (r: any) => r.id === editingSegment.rewardId,
+                      );
+                      if (selectedReward) {
+                        return (
+                          <div className="flex items-center gap-2">
+                            {selectedReward.image ? (
+                              <img
+                                src={selectedReward.image}
+                                alt={selectedReward.title}
+                                className="h-5 w-5 rounded object-cover border border-border/40 shrink-0"
+                              />
+                            ) : (
+                              <div className="h-5 w-5 rounded bg-muted flex items-center justify-center border border-border/40 shrink-0">
+                                <Ticket className="h-3 w-3 text-muted-foreground" />
+                              </div>
+                            )}
+                            <span className="text-xs font-medium text-foreground truncate max-w-[150px]">
+                              {selectedReward.title}
+                            </span>
+                          </div>
+                        );
+                      }
+                      return (
+                        <SelectValue placeholder="Select a voucher reward..." />
+                      );
+                    })()
+                  ) : (
+                    <SelectValue
+                      placeholder={
+                        vouchersLoading
+                          ? "Loading vouchers..."
+                          : "Select a voucher reward..."
+                      }
+                    />
+                  )}
                 </SelectTrigger>
                 <SelectContent>
                   {uniqueVoucherRewards.length === 0 ? (
@@ -151,7 +214,22 @@ export function SegmentDialog({
                   ) : (
                     uniqueVoucherRewards.map((reward: any) => (
                       <SelectItem key={reward.id} value={reward.id}>
-                        {reward.title}
+                        <div className="flex items-center gap-2 py-0.5">
+                          {reward.image ? (
+                            <img
+                              src={reward.image}
+                              alt={reward.title}
+                              className="h-6 w-6 rounded object-cover border border-border/40 shrink-0"
+                            />
+                          ) : (
+                            <div className="h-6 w-6 rounded bg-muted flex items-center justify-center border border-border/40 shrink-0">
+                              <Ticket className="h-3.5 w-3.5 text-muted-foreground" />
+                            </div>
+                          )}
+                          <span className="text-xs font-medium text-foreground truncate">
+                            {reward.title}
+                          </span>
+                        </div>
                       </SelectItem>
                     ))
                   )}
@@ -160,23 +238,40 @@ export function SegmentDialog({
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-muted-foreground">
-                Reward Value
-              </Label>
-              <Input
-                type="number"
-                value={editingSegment?.rewardValue || 0}
-                onChange={(e) =>
-                  setEditingSegment((p) =>
-                    p
-                      ? { ...p, rewardValue: parseInt(e.target.value) || 0 }
-                      : null,
-                  )
-                }
-              />
-            </div>
+          <div
+            className={cn(
+              "grid gap-4",
+              editingSegment?.rewardType === "COINS"
+                ? "grid-cols-2"
+                : "grid-cols-1",
+            )}
+          >
+            {editingSegment?.rewardType === "COINS" && (
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-muted-foreground">
+                  Reward Value
+                </Label>
+                <Input
+                  type="number"
+                  value={editingSegment?.rewardValue || 0}
+                  onChange={(e) => {
+                    const val = parseInt(e.target.value) || 0;
+                    setEditingSegment((p) =>
+                      p
+                        ? {
+                            ...p,
+                            rewardValue: val,
+                            label:
+                              p.rewardType === "COINS"
+                                ? `${val} Coins`
+                                : p.label,
+                          }
+                        : null,
+                    );
+                  }}
+                />
+              </div>
+            )}
             <div className="space-y-1.5">
               <Label className="text-xs font-semibold text-muted-foreground">
                 Probability Weight

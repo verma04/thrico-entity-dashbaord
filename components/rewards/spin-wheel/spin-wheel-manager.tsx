@@ -58,7 +58,7 @@ import {
   useDeleteSpinWheelPrize,
   useGetSpinActivity,
   useGetRewards,
-  useGetVouchersByRewardMechanism,
+  useLazyGetVouchersByRewardMechanism,
 } from "@/graphql/actions/rewards";
 import moment from "moment";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
@@ -93,28 +93,6 @@ export function SpinWheelManager() {
     pagination: { page: 1, limit: 100 },
   });
 
-  const { data: vouchersData, loading: vouchersLoading } =
-    useGetVouchersByRewardMechanism({
-      mechanism: "SPIN_WHEEL",
-      pagination: { page: 1, limit: 100 },
-      pollInterval: 1000,
-    });
-
-  const uniqueVoucherRewards = React.useMemo(() => {
-    if (!vouchersData?.getVouchersByRewardMechanism) return [];
-    const map = new Map();
-    vouchersData.getVouchersByRewardMechanism.forEach((v: any) => {
-      if (v.reward && !map.has(v.reward.id)) {
-        map.set(v.reward.id, v.reward);
-      }
-    });
-    return Array.from(map.values());
-  }, [vouchersData]);
-  const [updateConfig, { loading: savingConfig }] = useUpdateSpinWheelConfig();
-  const [createPrize, { loading: creatingSegment }] = useCreateSpinWheelPrize();
-  const [updatePrize, { loading: updatingSegment }] = useUpdateSpinWheelPrize();
-  const [deletePrize, { loading: deletingSegment }] = useDeleteSpinWheelPrize();
-
   const config = configData?.getSpinWheelConfig;
   const [isActive, setIsActive] = useState(false);
   const [costPerSpin, setCostPerSpin] = useState(0);
@@ -130,6 +108,26 @@ export function SpinWheelManager() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [deletingSegmentId, setDeletingSegmentId] = useState<string | null>(null);
+
+  const [getVouchers, { data: vouchersData, loading: vouchersLoading }] =
+    useLazyGetVouchersByRewardMechanism();
+
+  const uniqueVoucherRewards = React.useMemo(() => {
+    if (!vouchersData?.getVouchersByRewardMechanism) return [];
+    const map = new Map();
+    vouchersData.getVouchersByRewardMechanism.forEach((v: any) => {
+      if (v.reward && !map.has(v.reward.id)) {
+        map.set(v.reward.id, v.reward);
+      }
+    });
+    return Array.from(map.values());
+  }, [vouchersData]);
+
+  const [updateConfig, { loading: savingConfig }] = useUpdateSpinWheelConfig();
+  const [createPrize, { loading: creatingSegment }] = useCreateSpinWheelPrize();
+  const [updatePrize, { loading: updatingSegment }] = useUpdateSpinWheelPrize();
+  const [deletePrize, { loading: deletingSegment }] = useDeleteSpinWheelPrize();
 
   const hasChanged = React.useMemo(() => {
     if (!config) return false;
@@ -176,7 +174,7 @@ export function SpinWheelManager() {
   const totalProbability = segments.reduce((s, seg) => s + seg.probability, 0);
   const avgPayout = segments.reduce(
     (sum, seg) =>
-      seg.rewardType === "TC"
+      seg.rewardType === "COINS"
         ? sum + (seg.rewardValue * seg.probability) / totalProbability
         : sum,
     0,
@@ -226,7 +224,7 @@ export function SpinWheelManager() {
     setEditingSegment({
       id: "",
       label: "",
-      rewardType: "TC",
+      rewardType: "COINS",
       rewardValue: 0,
       probability: 10,
       color: SEGMENT_COLORS[segments.length % SEGMENT_COLORS.length],
@@ -349,7 +347,7 @@ export function SpinWheelManager() {
                 icon={Coins}
                 iconBg="bg-amber-50"
                 iconColor="text-amber-600"
-                title="Cost per Spin (TC)"
+                title="Cost per Spin (Coins)"
               >
                 <Input
                   type="number"
@@ -367,45 +365,15 @@ export function SpinWheelManager() {
               title="Campaign Schedule"
               description="Daily limits and campaign window"
             >
-              <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold text-muted-foreground">
-                    Daily Cap
-                  </Label>
-                  <Input
-                    type="number"
-                    value={maxSpinsPerDay}
-                    onChange={(e) => setMaxSpinsPerDay(Number(e.target.value))}
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold text-muted-foreground">
-                    Start Date
-                  </Label>
-                  <Input
-                    type="date"
-                    value={
-                      campaignStartDate
-                        ? moment(campaignStartDate).format("YYYY-MM-DD")
-                        : ""
-                    }
-                    onChange={(e) => setCampaignStartDate(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold text-muted-foreground">
-                    End Date
-                  </Label>
-                  <Input
-                    type="date"
-                    value={
-                      campaignEndDate
-                        ? moment(campaignEndDate).format("YYYY-MM-DD")
-                        : ""
-                    }
-                    onChange={(e) => setCampaignEndDate(e.target.value)}
-                  />
-                </div>
+              <div className="space-y-1.5 max-w-xs">
+                <Label className="text-xs font-semibold text-muted-foreground">
+                  Daily Cap
+                </Label>
+                <Input
+                  type="number"
+                  value={maxSpinsPerDay}
+                  onChange={(e) => setMaxSpinsPerDay(Number(e.target.value))}
+                />
               </div>
             </SectionCard>
 
@@ -491,14 +459,28 @@ export function SpinWheelManager() {
                               {REWARD_LABELS[seg.rewardType]}
                             </span>
                           </TableCell>
-                          <TableCell className="font-mono text-sm font-medium text-foreground">
-                            {seg.rewardType === "TC" &&
+                          <TableCell className="text-sm font-medium text-foreground">
+                            {seg.rewardType === "COINS" &&
                               `${seg.rewardValue} Coins`}
-                            {seg.rewardType === "VOUCHER" &&
-                              `₹${seg.rewardValue}`}
-                            {seg.rewardType === "PREMIUM" &&
-                              `${seg.rewardValue} Days`}
-                            {seg.rewardType === "NOTHING" && "—"}
+                            {seg.rewardType === "VOUCHER" && (
+                              <div className="flex items-center gap-1.5">
+                                {seg.reward?.image ? (
+                                  <img
+                                    src={seg.reward.image}
+                                    alt=""
+                                    className="h-5 w-5 rounded object-cover border border-border/40 shrink-0"
+                                  />
+                                ) : (
+                                  <div className="h-5 w-5 rounded bg-muted flex items-center justify-center border border-border/40 shrink-0">
+                                    <Ticket className="h-3 w-3 text-muted-foreground" />
+                                  </div>
+                                )}
+                                <span className="text-xs font-medium text-foreground truncate max-w-[100px]" title={seg.reward?.title}>
+                                  {seg.reward?.title || `₹${seg.rewardValue}`}
+                                </span>
+                              </div>
+                            )}
+                            {seg.rewardType === "NO_REWARDS" && "—"}
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
@@ -556,7 +538,7 @@ export function SpinWheelManager() {
                                 variant="ghost"
                                 size="icon"
                                 className="h-7 w-7 rounded-lg hover:text-rose-600"
-                                onClick={() => handleDeleteSegment(seg.id)}
+                                onClick={() => setDeletingSegmentId(seg.id)}
                               >
                                 <Trash2 className="h-3.5 w-3.5" />
                               </Button>
@@ -611,7 +593,38 @@ export function SpinWheelManager() {
         updatingSegment={updatingSegment}
         uniqueVoucherRewards={uniqueVoucherRewards}
         vouchersLoading={vouchersLoading}
+        getVouchers={getVouchers}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={!!deletingSegmentId} onOpenChange={(open) => !open && setDeletingSegmentId(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Confirm Delete</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this segment? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="sm:justify-end gap-2">
+            <Button variant="outline" size="sm" onClick={() => setDeletingSegmentId(null)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={async () => {
+                if (deletingSegmentId) {
+                  await handleDeleteSegment(deletingSegmentId);
+                  setDeletingSegmentId(null);
+                }
+              }}
+              disabled={deletingSegment}
+            >
+              {deletingSegment ? "Deleting..." : "Delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

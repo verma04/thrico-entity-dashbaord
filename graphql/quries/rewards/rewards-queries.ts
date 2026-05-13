@@ -1,16 +1,8 @@
 import { gql } from "@apollo/client";
 
 export const GET_REWARDS = gql`
-  query (
-    $status: String
-    $search: String
-    $pagination: PaginationInput
-  ) {
-    getRewards(
-      status: $status
-      search: $search
-      pagination: $pagination
-    ) {
+  query GetRewards($status: String, $search: String, $pagination: PaginationInput) {
+    getRewards(status: $status, search: $search, pagination: $pagination) {
       id
       title
       description
@@ -32,7 +24,10 @@ export const GET_REWARDS = gql`
       isActive
       rewardMechanism
       createdAt
+      expiryDate
       updatedAt
+      url
+      couponCode
     }
   }
 `;
@@ -67,6 +62,10 @@ export const GET_REWARD_BY_ID = gql`
       discountType
       discountValue
       rewardMechanism
+      url
+      couponType
+      couponCode
+      expiryDate
     }
   }
 `;
@@ -180,6 +179,10 @@ export const CREATE_REWARD = gql`
       discountType
       discountValue
       rewardMechanism
+      url
+      couponType
+      couponCode
+      expiryDate
     }
   }
 `;
@@ -192,6 +195,10 @@ export const UPDATE_REWARD = gql`
       status
       isActive
       rewardMechanism
+      url
+      couponType
+      couponCode
+      expiryDate
     }
   }
 `;
@@ -318,6 +325,7 @@ export const GET_SPIN_WHEEL_PRIZES = gql`
     getSpinWheelPrizes {
       id
       configId
+      rewardId
       label
       type
       value
@@ -325,14 +333,14 @@ export const GET_SPIN_WHEEL_PRIZES = gql`
       color
       sortOrder
       isActive
-      rewardId
+      reward {
+        title
+        isActive
+        image
+        id
+      }
       createdAt
       updatedAt
-      reward {
-        id
-        title
-        description
-      }
     }
   }
 `;
@@ -343,7 +351,7 @@ export const GET_SPIN_WHEEL_PLAYS = gql`
       id
       prizeType
       prizeValue
-      tcSpent
+      coinsSpent
       playedAt
       user {
         id
@@ -375,6 +383,8 @@ export const CREATE_SPIN_WHEEL_PRIZE = gql`
   mutation CreateSpinWheelPrize($input: CreateSpinWheelPrizeInput!) {
     createSpinWheelPrize(input: $input) {
       id
+      configId
+      rewardId
       label
       type
       value
@@ -382,6 +392,13 @@ export const CREATE_SPIN_WHEEL_PRIZE = gql`
       color
       sortOrder
       isActive
+      reward {
+        title
+        couponCode
+        id
+      }
+      createdAt
+      updatedAt
     }
   }
 `;

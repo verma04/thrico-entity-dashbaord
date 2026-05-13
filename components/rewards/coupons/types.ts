@@ -3,14 +3,18 @@ import * as Yup from "yup";
 export const couponSchema = Yup.object().shape({
   title: Yup.string().required("Give your reward a catchy title"),
   description: Yup.string().required("Tell users what they're getting"),
-  tcCost: Yup.number().required("Set a cost in points").min(1, "Price must be at least 1 TC"),
+  tcCost: Yup.number()
+    .required("Set a cost in points")
+    .min(1, "Price must be at least 1 TC"),
   discountType: Yup.string().required("Select how the reward works"),
-  discountValue: Yup.string().required("Enter the value"),
+  discountValue: Yup.string().nullable(),
   validityDays: Yup.number().required("Set an expiration period").min(1),
   totalUsageLimit: Yup.number().min(0),
-  perUserLimit: Yup.number().min(1),
+  perUserLimit: Yup.number().min(0),
   minAccountAge: Yup.number().min(0),
   minActivityRequired: Yup.number().min(0),
+  url: Yup.string().url("Please enter a valid URL").nullable(),
+  expiryDate: Yup.string().nullable(),
 });
 
 export interface Voucher {

@@ -46,7 +46,7 @@ export const GET_SPIN_WHEEL_PLAYS = gql`
       id
       prizeType
       prizeValue
-      tcSpent
+      coinsSpent
       playedAt
       user {
         id

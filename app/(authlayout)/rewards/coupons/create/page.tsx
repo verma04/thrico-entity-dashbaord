@@ -24,9 +24,9 @@ export default function CreateCouponPage() {
       tcCost: 1,
       discountType: "Flat",
       discountValue: "",
-      validityDays: 30,
+      validityDays: 350,
       totalUsageLimit: 0,
-      perUserLimit: 1,
+      perUserLimit: 0,
       minAccountAge: 0,
       minActivityRequired: 0,
       blockWarnedUsers: false,
@@ -34,6 +34,15 @@ export default function CreateCouponPage() {
       inventoryRequired: false,
       image: "",
       rewardMechanism: ["COUPON"],
+      url: "",
+      couponType: "ONE_TO_ONE",
+      couponCode: "",
+      expiryDate: (() => {
+        const d = new Date();
+        d.setDate(d.getDate() + 350);
+        const offset = d.getTimezoneOffset() * 60000;
+        return new Date(d.getTime() - offset).toISOString().slice(0, 16);
+      })(),
     },
     validationSchema: couponSchema,
     onSubmit: async (values) => {
@@ -56,6 +65,10 @@ export default function CreateCouponPage() {
               rewardMechanism: Array.isArray(values.rewardMechanism)
                 ? values.rewardMechanism
                 : [values.rewardMechanism || "COUPON"],
+              url: values.url,
+              couponType: values.couponType,
+              couponCode: values.couponCode,
+              expiryDate: values.expiryDate || null,
             },
           },
         });
@@ -77,9 +90,10 @@ export default function CreateCouponPage() {
     },
   });
 
+  console.log(formik?.errors);
   return (
     <div className="flex flex-col h-full bg-[#fafafa] dark:bg-black/5 overflow-hidden relative">
-      <RewardStudioHeader 
+      <RewardStudioHeader
         title="Reward Studio"
         breadcrumbs={["Rewards", "Coupons", "Create New Reward"]}
         onCancel={() => router.back()}

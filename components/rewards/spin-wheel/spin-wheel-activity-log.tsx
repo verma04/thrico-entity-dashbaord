@@ -49,11 +49,11 @@ export const SpinWheelActivityLog = ({ activityData }: SpinWheelActivityLogProps
       ),
     },
     {
-      accessorKey: "tcSpent",
-      header: "TC Spent",
+      accessorKey: "coinsSpent",
+      header: "Coins Spent",
       cell: ({ row }) => (
         <div className="flex items-center gap-1.5 font-mono text-sm text-muted-foreground">
-          {row.original.tcSpent}
+          {row.original.coinsSpent}
         </div>
       ),
     },

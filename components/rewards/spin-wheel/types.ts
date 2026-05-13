@@ -1,4 +1,4 @@
-export type RewardType = "TC" | "VOUCHER" | "PREMIUM" | "NOTHING";
+export type RewardType = "COINS" | "VOUCHER" | "NO_REWARDS";
 
 export interface WheelSegment {
   id: string;

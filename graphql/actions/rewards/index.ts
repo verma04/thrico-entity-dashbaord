@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@apollo/client";
+import { useMutation, useQuery, useLazyQuery } from "@apollo/client";
 import {
   GET_REWARDS,
   GET_REWARD_BY_ID,
@@ -48,10 +48,21 @@ export const useGetAllVouchers = (variables?: {
   rewardId?: string;
 }) => useQuery(GET_ALL_VOUCHERS, { variables });
 
-export const useGetVouchersByRewardMechanism = (variables: {
-  mechanism: string;
-  pagination?: { page: number; limit: number };
-}) => useQuery(GET_VOUCHERS_BY_REWARD_MECHANISM, { variables, skip: !variables.mechanism });
+export const useGetVouchersByRewardMechanism = (
+  variables: {
+    mechanism: string;
+    pagination?: { page: number; limit: number };
+  },
+  options?: any
+) =>
+  useQuery(GET_VOUCHERS_BY_REWARD_MECHANISM, {
+    variables,
+    skip: !variables.mechanism,
+    ...options,
+  });
+
+export const useLazyGetVouchersByRewardMechanism = (options?: any) =>
+  useLazyQuery(GET_VOUCHERS_BY_REWARD_MECHANISM, options);
 
 export const useGetRedemptions = (variables?: {
   userId?: string;
@@ -59,9 +70,10 @@ export const useGetRedemptions = (variables?: {
   pagination?: { page: number; limit: number };
 }) => useQuery(GET_REDEMPTIONS, { variables });
 
-export const useGetRewardStats = (timeRange?: TimeRange, dateRange?: DateRangeInput) => 
-  useQuery(GET_REWARD_STATS, { variables: { timeRange, dateRange } });
-
+export const useGetRewardStats = (
+  timeRange?: TimeRange,
+  dateRange?: DateRangeInput,
+) => useQuery(GET_REWARD_STATS, { variables: { timeRange, dateRange } });
 
 export const useGetRewardSecuritySettings = () =>
   useQuery(GET_REWARD_SECURITY_SETTINGS);
@@ -69,19 +81,19 @@ export const useGetRewardSecuritySettings = () =>
 export const useCreateReward = (options?: any) =>
   useMutation(CREATE_REWARD, {
     ...options,
-    refetchQueries: [{ query: GET_REWARDS }, { query: GET_REWARD_STATS }],
+    refetchQueries: ["GetRewards", "GetRewardStats"],
   });
 
 export const useUpdateReward = (options?: any) =>
   useMutation(UPDATE_REWARD, {
     ...options,
-    refetchQueries: [{ query: GET_REWARDS }, { query: GET_REWARD_STATS }],
+    refetchQueries: ["GetRewards", "GetRewardStats"],
   });
 
 export const useUploadVouchers = (options?: any) =>
   useMutation(UPLOAD_VOUCHERS, {
     ...options,
-    refetchQueries: [{ query: GET_REWARD_STATS }],
+    refetchQueries: ["GetRewardStats", "GetRewardById"],
   });
 
 export const useUpdateRewardSecuritySettings = (options?: any) =>
@@ -102,5 +114,7 @@ export const useDeleteVoucher = (options?: any) =>
     refetchQueries: [{ query: GET_ALL_VOUCHERS }, { query: GET_REWARD_STATS }],
   });
 
-export const useGetSpinScratchStats = (timeRange?: TimeRange, dateRange?: DateRangeInput) => 
-  useQuery(GET_SPIN_SCRATCH_STATS, { variables: { timeRange, dateRange } });
+export const useGetSpinScratchStats = (
+  timeRange?: TimeRange,
+  dateRange?: DateRangeInput,
+) => useQuery(GET_SPIN_SCRATCH_STATS, { variables: { timeRange, dateRange } });
