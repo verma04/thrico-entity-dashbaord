@@ -1,4 +1,4 @@
-export type PrizeType = "TC" | "VOUCHER" | "PREMIUM" | "NOTHING";
+export type PrizeType = "COINS" | "TC" | "VOUCHER" | "PREMIUM" | "NO_REWARDS" | "NOTHING";
 
 export interface MatchWinSymbol {
   id?: string;

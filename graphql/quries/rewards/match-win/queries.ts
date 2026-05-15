@@ -62,6 +62,9 @@ export const GET_MATCH_WIN_CONFIG = gql`
         probability
         maxWins
         rewardId
+        reward {
+          id
+        }
         createdAt
         updatedAt
       }
@@ -107,6 +110,9 @@ export const GET_MATCH_WIN_DATA = gql`
         probability
         maxWins
         rewardId
+        reward {
+          id
+        }
       }
       updatedAt
     }
@@ -121,7 +127,7 @@ export const GET_MATCH_WIN_PLAYS = gql`
       combinationId
       prizeType
       prizeValue
-      tcSpent
+      coinsSpent
       symbolsWon
       playedAt
       user {

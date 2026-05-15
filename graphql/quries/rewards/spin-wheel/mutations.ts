@@ -24,6 +24,10 @@ export const CREATE_SPIN_WHEEL_PRIZE = gql`
       color
       sortOrder
       isActive
+      rewardId
+      reward {
+        id
+      }
     }
   }
 `;
@@ -37,6 +41,10 @@ export const UPDATE_SPIN_WHEEL_PRIZE = gql`
       value
       probability
       isActive
+      rewardId
+      reward {
+        id
+      }
     }
   }
 `;

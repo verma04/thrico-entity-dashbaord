@@ -98,6 +98,7 @@ interface CombinationsTableProps {
   onEdit: (c: MatchWinCombination) => void;
   onDelete: (id: string) => void;
   onAdd: () => void;
+  currencyName?: string;
 }
 
 export const CombinationsTable = ({
@@ -106,6 +107,7 @@ export const CombinationsTable = ({
   onEdit,
   onDelete,
   onAdd,
+  currencyName = "Tokens",
 }: CombinationsTableProps) => {
   const columns = useMemo<ColumnDef<MatchWinCombination>[]>(
     () => [
@@ -124,7 +126,7 @@ export const CombinationsTable = ({
         cell: ({ row }) => (
           <div className="flex flex-col">
             <span className="font-bold text-slate-900">
-              {row.original.value} {row.original.type}
+              {row.original.value} {row.original.type === "COINS" || row.original.type === "TC" ? currencyName : row.original.type}
             </span>
             <span className="text-[10px] text-slate-400 font-bold tracking-widest uppercase">
               Jackpot Multiplier

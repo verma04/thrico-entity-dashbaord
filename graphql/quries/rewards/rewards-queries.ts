@@ -464,7 +464,7 @@ export const GET_SCRATCH_PLAYS = gql`
       id
       prizeType
       prizeValue
-      tcSpent
+      coinsSpent
       playedAt
       prize {
         id
@@ -569,7 +569,7 @@ export const GET_MATCH_WIN_PLAYS = gql`
       userId
       prizeType
       prizeValue
-      tcSpent
+      coinsSpent
       symbolsWon
       playedAt
       user {

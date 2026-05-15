@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -36,155 +36,92 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   label,
   placeholder = "Start typing...",
   className,
-  minHeight = "200px",
+  minHeight = "150px",
 }) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const [isFocused, setIsFocused] = useState(false);
 
-  const execCommand = (command: string, value?: string) => {
-    document.execCommand(command, false, value);
-    editorRef.current?.focus();
+  // Sync value to DOM only if it's different to prevent cursor jumps
+  useEffect(() => {
+    if (editorRef.current && editorRef.current.innerHTML !== value) {
+      editorRef.current.innerHTML = value || "";
+    }
+  }, [value]);
+
+  const execCommand = (command: string, cmdValue?: string) => {
+    document.execCommand(command, false, cmdValue);
+    if (editorRef.current) {
+      editorRef.current.focus();
+      handleInput();
+    }
   };
 
   const handleInput = () => {
     if (editorRef.current) {
-      onChange(editorRef.current.innerHTML);
-    }
-  };
-
-  const insertLink = () => {
-    const url = prompt("Enter URL:");
-    if (url) {
-      execCommand("createLink", url);
-    }
-  };
-
-  const insertImage = () => {
-    const url = prompt("Enter image URL:");
-    if (url) {
-      execCommand("insertImage", url);
+      const content = editorRef.current.innerHTML;
+      if (content !== value) {
+        onChange(content);
+      }
     }
   };
 
   const toolbarButtons = [
-    {
-      icon: Bold,
-      command: "bold",
-      title: "Bold (Ctrl+B)",
-    },
-    {
-      icon: Italic,
-      command: "italic",
-      title: "Italic (Ctrl+I)",
-    },
-    {
-      icon: Underline,
-      command: "underline",
-      title: "Underline (Ctrl+U)",
-    },
-    {
-      icon: Heading1,
-      command: "formatBlock",
-      value: "h1",
-      title: "Heading 1",
-    },
-    {
-      icon: Heading2,
-      command: "formatBlock",
-      value: "h2",
-      title: "Heading 2",
-    },
-    {
-      icon: Heading3,
-      command: "formatBlock",
-      value: "h3",
-      title: "Heading 3",
-    },
-    {
-      icon: List,
-      command: "insertUnorderedList",
-      title: "Bullet List",
-    },
-    {
-      icon: ListOrdered,
-      command: "insertOrderedList",
-      title: "Numbered List",
-    },
-    {
-      icon: AlignLeft,
-      command: "justifyLeft",
-      title: "Align Left",
-    },
-    {
-      icon: AlignCenter,
-      command: "justifyCenter",
-      title: "Align Center",
-    },
-    {
-      icon: AlignRight,
-      command: "justifyRight",
-      title: "Align Right",
-    },
+    { icon: Bold, command: "bold", title: "Bold" },
+    { icon: Italic, command: "italic", title: "Italic" },
+    { icon: Underline, command: "underline", title: "Underline" },
+    { icon: Heading1, command: "formatBlock", value: "h1", title: "H1" },
+    { icon: Heading2, command: "formatBlock", value: "h2", title: "H2" },
+    { icon: Heading3, command: "formatBlock", value: "h3", title: "H3" },
+    { icon: List, command: "insertUnorderedList", title: "Bullets" },
+    { icon: ListOrdered, command: "insertOrderedList", title: "Numbers" },
+    { icon: AlignLeft, command: "justifyLeft", title: "Align Left" },
+    { icon: AlignCenter, command: "justifyCenter", title: "Align Center" },
+    { icon: AlignRight, command: "justifyRight", title: "Align Right" },
     {
       icon: LinkIcon,
       command: "link",
-      title: "Insert Link",
-      onClick: insertLink,
+      title: "Link",
+      onClick: () => {
+        const url = prompt("Enter URL:");
+        if (url) execCommand("createLink", url);
+      },
     },
-    {
-      icon: ImageIcon,
-      command: "image",
-      title: "Insert Image",
-      onClick: insertImage,
-    },
-    {
-      icon: Code,
-      command: "formatBlock",
-      value: "pre",
-      title: "Code Block",
-    },
+    { icon: Code, command: "formatBlock", value: "pre", title: "Code" },
   ];
 
   return (
-    <div className={cn("space-y-2", className)}>
-      {label && <Label className="text-sm font-medium">{label}</Label>}
+    <div className={cn("flex flex-col border rounded-md bg-background", className)}>
+      {label && <Label className="px-3 py-2 border-b text-xs font-semibold bg-muted/20">{label}</Label>}
 
       {/* Toolbar */}
-      <div className="flex flex-wrap gap-1 p-2 border rounded-t-lg bg-muted/30">
+      <div className="flex flex-wrap gap-0.5 p-1 border-b bg-muted/10">
         {toolbarButtons.map((btn, index) => (
           <Button
             key={index}
             type="button"
             variant="ghost"
             size="sm"
-            className="h-8 w-8 p-0"
-            onClick={() => {
-              if (btn.onClick) {
-                btn.onClick();
-              } else {
-                execCommand(btn.command, btn.value);
-              }
-            }}
+            className="h-7 w-7 p-0 hover:bg-muted"
+            onMouseDown={(e) => e.preventDefault()} // Prevent stealing focus
+            onClick={() => (btn.onClick ? btn.onClick() : execCommand(btn.command, btn.value))}
             title={btn.title}
           >
-            <btn.icon className="h-4 w-4" />
+            <btn.icon className="h-3.5 w-3.5 text-muted-foreground" />
           </Button>
         ))}
       </div>
 
-      {/* Editor */}
+      {/* Editor Area */}
       <div
         ref={editorRef}
         contentEditable
+        suppressContentEditableWarning={true}
         onInput={handleInput}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
-        dangerouslySetInnerHTML={{ __html: value }}
         className={cn(
-          "w-full p-3 border rounded-b-lg bg-background",
-          "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
-          "prose prose-sm max-w-none",
-          isFocused && "ring-2 ring-ring ring-offset-2"
+          "w-full p-4 outline-none overflow-y-auto text-sm leading-relaxed text-foreground",
+          isFocused && "bg-muted/5"
         )}
         style={{ minHeight }}
         data-placeholder={placeholder}
@@ -196,45 +133,14 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
           color: #9ca3af;
           pointer-events: none;
         }
-        [contenteditable] {
-          overflow-y: auto;
-        }
-        [contenteditable] h1 {
-          font-size: 2em;
-          font-weight: bold;
-          margin: 0.5em 0;
-        }
-        [contenteditable] h2 {
-          font-size: 1.5em;
-          font-weight: bold;
-          margin: 0.5em 0;
-        }
-        [contenteditable] h3 {
-          font-size: 1.25em;
-          font-weight: bold;
-          margin: 0.5em 0;
-        }
-        [contenteditable] ul,
-        [contenteditable] ol {
-          margin: 0.5em 0;
-          padding-left: 2em;
-        }
-        [contenteditable] pre {
-          background: #f3f4f6;
-          padding: 1em;
-          border-radius: 0.375rem;
-          overflow-x: auto;
-          font-family: monospace;
-        }
-        [contenteditable] img {
-          max-width: 100%;
-          height: auto;
-          border-radius: 0.375rem;
-        }
-        [contenteditable] a {
-          color: #3b82f6;
-          text-decoration: underline;
-        }
+        [contenteditable] h1 { font-size: 1.5rem; font-weight: 700; margin-top: 1rem; margin-bottom: 0.5rem; }
+        [contenteditable] h2 { font-size: 1.25rem; font-weight: 600; margin-top: 0.75rem; margin-bottom: 0.4rem; }
+        [contenteditable] h3 { font-size: 1.125rem; font-weight: 600; margin-top: 0.5rem; margin-bottom: 0.25rem; }
+        [contenteditable] ul { list-style-type: disc; padding-left: 1.5rem; margin: 0.5rem 0; }
+        [contenteditable] ol { list-style-type: decimal; padding-left: 1.5rem; margin: 0.5rem 0; }
+        [contenteditable] pre { background: #f4f4f5; padding: 0.75rem; border-radius: 0.25rem; font-family: monospace; font-size: 0.875rem; margin: 0.5rem 0; }
+        [contenteditable] a { color: #2563eb; text-decoration: underline; }
+        [contenteditable] blockquote { border-left: 4px solid #e4e4e7; padding-left: 1rem; italic; color: #71717a; margin: 1rem 0; }
       `}</style>
     </div>
   );

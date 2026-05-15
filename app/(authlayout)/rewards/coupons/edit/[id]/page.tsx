@@ -3,10 +3,7 @@
 import React, { useState } from "react";
 import { useFormik } from "formik";
 import { useParams, useRouter } from "next/navigation";
-import {
-  Ticket,
-  Sparkles,
-} from "lucide-react";
+import { Ticket, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
@@ -51,8 +48,16 @@ export default function EditRewardPage() {
       status: reward?.status || "ACTIVE",
       isActive: reward?.isActive ?? true,
       url: reward?.url || "",
-      expiryDate: reward?.expiryDate 
-        ? new Date(Number(reward.expiryDate) ? Number(reward.expiryDate) : reward.expiryDate).toISOString().slice(0, 16) 
+      couponCode: reward?.couponCode || "",
+      couponType: reward?.couponType || "PERCENTAGE",
+      expiryDate: reward?.expiryDate
+        ? new Date(
+            Number(reward.expiryDate)
+              ? Number(reward.expiryDate)
+              : reward.expiryDate,
+          )
+            .toISOString()
+            .slice(0, 16)
         : "",
     },
     validationSchema: couponSchema,
@@ -80,8 +85,8 @@ export default function EditRewardPage() {
               status: values.status,
               isActive: values.isActive,
               url: values.url,
-          couponType: values.couponType,
-          couponCode: values.couponCode,
+              couponType: values.couponType,
+              couponCode: values.couponCode,
               expiryDate: values.expiryDate || null,
             },
           },
@@ -107,9 +112,9 @@ export default function EditRewardPage() {
   if (fetchLoading) {
     return (
       <div className="min-h-screen bg-[#fafafa] dark:bg-black/5">
-        <RewardFormHeader 
-           title="Loading Reward..." 
-           backUrl="/rewards/coupons" 
+        <RewardFormHeader
+          title="Loading Reward..."
+          backUrl="/rewards/coupons"
         />
         <div className="max-w-[1400px] mx-auto px-6 py-10">
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-12">
@@ -167,8 +172,8 @@ export default function EditRewardPage() {
 
   return (
     <div className="min-h-screen bg-[#fafafa] dark:bg-black/5 pb-20">
-      <RewardFormHeader 
-        title="Edit Reward" 
+      <RewardFormHeader
+        title="Edit Reward"
         subtitle={`Editing · ${reward.title}`}
         backUrl="/rewards/coupons"
         icon={Sparkles}
@@ -186,9 +191,9 @@ export default function EditRewardPage() {
           {/* Sticky Preview & Info */}
           <div className="space-y-6">
             <RewardPreviewSidebar formik={formik} />
-            <RewardInfoSidebar 
-              reward={reward} 
-              inventoryRequired={formik.values.inventoryRequired} 
+            <RewardInfoSidebar
+              reward={reward}
+              inventoryRequired={formik.values.inventoryRequired}
             />
           </div>
         </div>

@@ -4,12 +4,7 @@ export const GET_SCRATCH_CONFIG = gql`
   query GetScratchCardConfig {
     getScratchCardConfig {
       id
-      entityId
-      costPerScratch
-      maxScratchesPerDay
       isActive
-      campaignStartDate
-      campaignEndDate
       createdAt
       updatedAt
     }
@@ -20,12 +15,14 @@ export const GET_SCRATCH_PRIZES = gql`
   query GetScratchCardPrizes {
     getScratchCardPrizes {
       id
-      configId
       label
       type
       value
       probability
       isActive
+      minAccountAge
+      minActivity
+      eligibilityDescription
       createdAt
       updatedAt
     }
@@ -38,7 +35,7 @@ export const GET_SCRATCH_PLAYS = gql`
       id
       prizeType
       prizeValue
-      tcSpent
+      coinsSpent
       playedAt
       prize {
         id

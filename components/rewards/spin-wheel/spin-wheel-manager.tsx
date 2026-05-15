@@ -60,6 +60,7 @@ import {
   useGetRewards,
   useLazyGetVouchersByRewardMechanism,
 } from "@/graphql/actions/rewards";
+import { useGetEntityCurrencyConfig } from "@/graphql/actions/currency";
 import moment from "moment";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
@@ -92,6 +93,8 @@ export function SpinWheelManager() {
     status: "ACTIVE",
     pagination: { page: 1, limit: 100 },
   });
+  const { data: currencyConfig } = useGetEntityCurrencyConfig();
+  const currencyName = currencyConfig?.getEntityCurrencyConfig?.currencyName || "Tokens";
 
   const config = configData?.getSpinWheelConfig;
   const [isActive, setIsActive] = useState(false);
@@ -186,6 +189,14 @@ export function SpinWheelManager() {
     savingConfig || creatingSegment || updatingSegment || deletingSegment;
 
   const handleSaveConfig = async () => {
+    if (costPerSpin < 1) {
+      toast.error("Cost per spin must be at least 1");
+      return;
+    }
+    if (maxSpinsPerDay < 1) {
+      toast.error("Daily cap must be at least 1");
+      return;
+    }
     try {
       await updateConfig({
         variables: {
@@ -351,6 +362,7 @@ export function SpinWheelManager() {
               >
                 <Input
                   type="number"
+                  min={1}
                   value={costPerSpin}
                   onChange={(e) => setCostPerSpin(Number(e.target.value))}
                   className="font-mono h-9"
@@ -371,6 +383,7 @@ export function SpinWheelManager() {
                 </Label>
                 <Input
                   type="number"
+                  min={1}
                   value={maxSpinsPerDay}
                   onChange={(e) => setMaxSpinsPerDay(Number(e.target.value))}
                 />
@@ -594,6 +607,7 @@ export function SpinWheelManager() {
         uniqueVoucherRewards={uniqueVoucherRewards}
         vouchersLoading={vouchersLoading}
         getVouchers={getVouchers}
+        currencyName={currencyName}
       />
 
       {/* Delete Confirmation Dialog */}

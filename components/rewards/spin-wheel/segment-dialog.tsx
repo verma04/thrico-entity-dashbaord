@@ -33,6 +33,7 @@ interface SegmentDialogProps {
   uniqueVoucherRewards: any[];
   vouchersLoading: boolean;
   getVouchers: (options?: any) => void;
+  currencyName?: string;
 }
 
 export function SegmentDialog({
@@ -46,6 +47,7 @@ export function SegmentDialog({
   uniqueVoucherRewards,
   vouchersLoading,
   getVouchers,
+  currencyName = "Tokens",
 }: SegmentDialogProps) {
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -84,7 +86,7 @@ export function SegmentDialog({
                   <SelectValue placeholder="Select type..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="COINS">Coins</SelectItem>
+                  <SelectItem value="COINS">{currencyName}</SelectItem>
                   <SelectItem value="VOUCHER">Voucher</SelectItem>
                   <SelectItem value="NO_REWARDS">No Rewards</SelectItem>
                 </SelectContent>

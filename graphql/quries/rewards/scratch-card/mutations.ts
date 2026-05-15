@@ -4,11 +4,18 @@ export const UPSERT_SCRATCH_CONFIG = gql`
   mutation UpsertScratchCardConfig($input: UpsertScratchCardConfigInput!) {
     upsertScratchCardConfig(input: $input) {
       id
-      costPerScratch
-      maxScratchesPerDay
       isActive
-      campaignStartDate
-      campaignEndDate
+      prizes {
+        id
+        label
+        type
+        value
+        probability
+        isActive
+        minAccountAge
+        minActivity
+        eligibilityDescription
+      }
     }
   }
 `;
@@ -22,6 +29,9 @@ export const CREATE_SCRATCH_PRIZE = gql`
       value
       probability
       isActive
+      minAccountAge
+      minActivity
+      eligibilityDescription
     }
   }
 `;
@@ -38,6 +48,9 @@ export const UPDATE_SCRATCH_PRIZE = gql`
       value
       probability
       isActive
+      minAccountAge
+      minActivity
+      eligibilityDescription
     }
   }
 `;

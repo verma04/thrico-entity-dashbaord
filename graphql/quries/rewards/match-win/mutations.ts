@@ -14,9 +14,17 @@ export const UPSERT_MATCH_WIN_CONFIG = gql`
 `;
 
 export const UPDATE_MATCH_WIN_SYMBOL = gql`
-  mutation UpdateMatchWinSymbol($key: String!, $input: MatchWinSymbolInput!) {
-    updateMatchWinSymbol(key: $key, input: $input) {
+  mutation UpsertMatchWinSymbol($configId: ID!, $input: MatchWinSymbolInput!) {
+    upsertMatchWinSymbol(configId: $configId, input: $input) {
       id
+      configId
+      key
+      label
+      icon
+      color
+      sortOrder
+      createdAt
+      updatedAt
     }
   }
 `;
@@ -68,6 +76,9 @@ export const UPSERT_MATCH_WIN_COMBINATION = gql`
       probability
       maxWins
       rewardId
+      reward {
+        id
+      }
       createdAt
       updatedAt
     }
@@ -159,6 +170,9 @@ export const INITIALIZE_MATCH_WIN_CONFIG = gql`
         probability
         maxWins
         rewardId
+        reward {
+          id
+        }
         createdAt
         updatedAt
       }

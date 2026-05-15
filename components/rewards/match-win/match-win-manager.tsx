@@ -3,12 +3,22 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { RefreshCw, Trophy, Settings, History, Loader2, Plus, Users, Activity, LayoutGrid } from "lucide-react";
+import { RefreshCw, Trophy, Settings, History, Loader2, Plus, Users, Activity, LayoutGrid, Coins, Clock, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { SectionCard } from "../spin-wheel/section-card";
 import {
   useGetRewards,
   useGetMatchWinData,
@@ -21,6 +31,7 @@ import {
   useGetInitialMatchWinConfig,
   useInitializeMatchWinConfig,
 } from "@/graphql/actions/rewards";
+import { useGetEntityCurrencyConfig } from "@/graphql/actions/currency";
 import { uniqueId } from "lodash";
 
 import { MatchWinCombination, MatchWinSymbol } from "./types";
@@ -50,6 +61,8 @@ export function MatchWinManager() {
     status: "ACTIVE",
     pagination: { page: 1, limit: 100 },
   });
+  const { data: currencyConfig } = useGetEntityCurrencyConfig();
+  const currencyName = currencyConfig?.getEntityCurrencyConfig?.currencyName || "Tokens";
 
   const [updateConfig, { loading: savingConfig }] = useUpdateMatchWinConfig();
   const [updateSymbol, { loading: updatingSymbol }] = useUpdateMatchWinSymbol();
@@ -68,7 +81,6 @@ export function MatchWinManager() {
   const [isActive, setIsActive] = useState(false);
   const [costPerPlay, setCostPerPlay] = useState(25);
   const [maxPlaysPerDay, setMaxPlaysPerDay] = useState(3);
-  const [festivalMode, setFestivalMode] = useState(false);
 
   const [editingSymbol, setEditingSymbol] = useState<MatchWinSymbol | null>(
     null,
@@ -81,16 +93,16 @@ export function MatchWinManager() {
   const [isCombinationDialogOpen, setIsCombinationDialogOpen] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [deletingCombinationId, setDeletingCombinationId] = useState<string | null>(null);
 
   const hasChanged = React.useMemo(() => {
     if (!config) return false;
     return (
       isActive !== (config.isActive ?? false) ||
       costPerPlay !== (config.costPerPlay ?? 25) ||
-      maxPlaysPerDay !== (config.maxPlaysPerDay ?? 3) ||
-      festivalMode !== (config.festivalMode ?? false)
+      maxPlaysPerDay !== (config.maxPlaysPerDay ?? 3)
     );
-  }, [config, isActive, costPerPlay, maxPlaysPerDay, festivalMode]);
+  }, [config, isActive, costPerPlay, maxPlaysPerDay]);
 
   // Sync from API
   useEffect(() => {
@@ -98,7 +110,6 @@ export function MatchWinManager() {
       setIsActive(config.isActive ?? false);
       setCostPerPlay(config.costPerPlay ?? 25);
       setMaxPlaysPerDay(config.maxPlaysPerDay ?? 3);
-      setFestivalMode(config.festivalMode ?? false);
       setInitialized(true);
     }
   }, [config, initialized]);
@@ -110,7 +121,7 @@ export function MatchWinManager() {
   );
 
   const avgPayout = dbCombinations.reduce((sum: number, comb: any) => {
-    if (comb.type === "TC") {
+    if (comb.type === "COINS" || comb.type === "TC") {
       return sum + comb.value * (Number(comb.probability) || 0);
     }
     return sum;
@@ -120,6 +131,14 @@ export function MatchWinManager() {
     costPerPlay > 0 ? ((costPerPlay - avgPayout) / costPerPlay) * 100 : 0;
 
   const handleSaveConfig = async () => {
+    if (costPerPlay < 1) {
+      toast.error("Play cost must be at least 1");
+      return;
+    }
+    if (maxPlaysPerDay < 1) {
+      toast.error("Max plays per day must be at least 1");
+      return;
+    }
     if (totalProbability > 1) {
       toast.error("Total probability cannot exceed 1.0 (100%)");
       return;
@@ -141,7 +160,6 @@ export function MatchWinManager() {
             costPerPlay,
             maxPlaysPerDay,
             isActive,
-            festivalMode,
             settings: {
               symbols: symbolsToSave,
               prizes: dbCombinations.map(({ __typename, ...c }: any) => c),
@@ -190,8 +208,9 @@ export function MatchWinManager() {
     try {
       await updateSymbol({
         variables: {
-          key: editingSymbol.key,
+          configId: config?.id,
           input: {
+            key: editingSymbol.key,
             label: editingSymbol.label,
             icon: editingSymbol.icon,
             color: editingSymbol.color,
@@ -237,7 +256,6 @@ export function MatchWinManager() {
   };
 
   const handleDeleteCombination = async (id: string) => {
-    if (!confirm("Are you sure?")) return;
     try {
       await deleteCombination({
         variables: { deleteMatchWinCombinationId: id },
@@ -321,119 +339,145 @@ export function MatchWinManager() {
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
 
-      <EcosystemContainer className="p-0">
-        <div className="px-6 pt-6">
-          <MatchWinStats statsData={statsData} />
-        </div>
+      <EcosystemContainer className="p-6 space-y-5">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          {/* Left col: 2/3 */}
+          <div className="lg:col-span-2 space-y-5">
+            <div className="grid grid-cols-2 gap-4">
+              <SectionCard
+                icon={Trophy}
+                iconBg="bg-indigo-50"
+                iconColor="text-indigo-600"
+                title="System Status"
+              >
+                <div className="flex items-center justify-between py-1">
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">
+                      {isActive ? "Active" : "Paused"}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Match & Win availability
+                    </p>
+                  </div>
+                  <Switch
+                    checked={isActive}
+                    onCheckedChange={setIsActive}
+                    className="data-[state=checked]:bg-emerald-500"
+                  />
+                </div>
+              </SectionCard>
 
-      <Tabs defaultValue="config" className="w-full">
-        <div className="flex items-center px-6 py-3 border-b border-border">
-          <TabsList className="h-8 bg-muted/40 border border-border rounded-lg p-0.5 gap-0.5">
-            <TabsTrigger
-              value="config"
-              className="h-7 px-4 rounded-md text-xs font-medium gap-1.5 data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground"
+              <SectionCard
+                icon={Coins}
+                iconBg="bg-amber-50"
+                iconColor="text-amber-600"
+                title="Cost per Play (Coins)"
+              >
+                <Input
+                  type="number"
+                  min={1}
+                  value={costPerPlay}
+                  onChange={(e) => setCostPerPlay(Number(e.target.value))}
+                  className="font-mono h-9"
+                />
+              </SectionCard>
+            </div>
+
+            <SectionCard
+              icon={Clock}
+              iconBg="bg-blue-50"
+              iconColor="text-blue-600"
+              title="Campaign Schedule"
+              description="Daily limits and campaign window"
             >
-              <Settings className="h-3 w-3" />
-              Configuration
-            </TabsTrigger>
-            <TabsTrigger
-              value="activity"
-              className="h-7 px-4 rounded-md text-xs font-medium gap-1.5 data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground"
-            >
-              <History className="h-3 w-3" />
-              Activity Log
-            </TabsTrigger>
-          </TabsList>
-        </div>
-
-        <TabsContent value="config" className="m-0 focus-visible:outline-hidden">
-          <div className="p-6 space-y-5">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-              {/* Left: 2/3 */}
-              <div className="lg:col-span-2 space-y-5">
-                {/* Status Toggle */}
-                <div className="flex items-center justify-between p-4 rounded-xl border border-border bg-card">
-                  <div className="flex items-center gap-3">
-                    <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center", isActive ? "bg-emerald-50" : "bg-muted")}>
-                      <Activity className={cn("h-4 w-4", isActive ? "text-emerald-600" : "text-muted-foreground")} />
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-foreground">{isActive ? "Active" : "Paused"}</p>
-                      <p className="text-xs text-muted-foreground">{isActive ? "Match & Win is live" : "Match & Win is paused"}</p>
-                    </div>
-                  </div>
-                  <Switch checked={isActive} onCheckedChange={setIsActive} className="data-[state=checked]:bg-emerald-500" />
-                </div>
-
-                {/* Symbols */}
-                <div className="rounded-xl border border-border bg-card overflow-hidden">
-                  <div className="flex items-center gap-3 px-5 py-4 border-b border-border bg-muted/20">
-                    <div className="h-8 w-8 rounded-lg bg-slate-100 flex items-center justify-center">
-                      <LayoutGrid className="h-4 w-4 text-slate-600" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-foreground">Symbol Matrix</p>
-                      <p className="text-xs text-muted-foreground">The 3 symbols used in the matching game</p>
-                    </div>
-                  </div>
-                  <div className="p-1">
-                    <SymbolsTable symbols={dbSymbols} onEdit={handleEditSymbol} />
-                  </div>
-                </div>
-
-                {/* Combinations */}
-                <div className="rounded-xl border border-border bg-card overflow-hidden">
-                  <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-muted/20">
-                    <div className="flex items-center gap-3">
-                      <div className="h-8 w-8 rounded-lg bg-amber-50 flex items-center justify-center">
-                        <Trophy className="h-4 w-4 text-amber-600" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-semibold text-foreground">Reward Combinations</p>
-                        <p className="text-xs text-muted-foreground">Winning symbol combinations and their rewards</p>
-                      </div>
-                    </div>
-                    <Button
-                      size="sm"
-                      className="gap-1.5 h-7 text-xs"
-                      onClick={() => { setEditingCombination({ key: "", type: "TC", value: 0, probability: 0.1, maxWins: 0 }); setIsCombinationDialogOpen(true); }}
-                    >
-                      <Plus className="h-3 w-3" /> Add
-                    </Button>
-                  </div>
-                  <div className="p-1">
-                    <CombinationsTable
-                      combinations={dbCombinations}
-                      totalProbability={totalProbability}
-                      onEdit={(c) => { setEditingCombination(c); setIsCombinationDialogOpen(true); }}
-                      onDelete={handleDeleteCombination}
-                      onAdd={() => { setEditingCombination({ key: "", type: "TC", value: 0, probability: 0.1, maxWins: 0 }); setIsCombinationDialogOpen(true); }}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Right: Economy Sidebar */}
-              <div className="sticky top-6">
-                <EconomySidebar
-                  costPerPlay={costPerPlay}
-                  setCostPerPlay={setCostPerPlay}
-                  maxPlaysPerDay={maxPlaysPerDay}
-                  setMaxPlaysPerDay={setMaxPlaysPerDay}
-                  festivalMode={festivalMode}
-                  setFestivalMode={setFestivalMode}
-                  avgPayout={avgPayout}
-                  profitMargin={profitMargin}
+              <div className="space-y-1.5 max-w-xs">
+                <Label className="text-xs font-semibold text-muted-foreground">
+                  Daily Cap
+                </Label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={maxPlaysPerDay}
+                  onChange={(e) => setMaxPlaysPerDay(Number(e.target.value))}
                 />
               </div>
+            </SectionCard>
+
+            <SectionCard
+              icon={LayoutGrid}
+              iconBg="bg-slate-50"
+              iconColor="text-slate-600"
+              title="Symbol Matrix"
+              description="The 3 symbols used in the matching game"
+            >
+              <div className="p-1">
+                <SymbolsTable symbols={dbSymbols} onEdit={handleEditSymbol} />
+              </div>
+            </SectionCard>
+
+            <SectionCard
+              icon={Trophy}
+              iconBg="bg-amber-50"
+              iconColor="text-amber-600"
+              title="Reward Combinations"
+              description="Winning symbol combinations and their rewards"
+              action={
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    setEditingCombination({
+                      key: "",
+                      type: "COINS",
+                      value: 0,
+                      probability: 0.1,
+                      maxWins: 0,
+                    });
+                    setIsCombinationDialogOpen(true);
+                  }}
+                  className="gap-1.5 h-7 text-xs"
+                >
+                  <Plus className="h-3 w-3" /> Add
+                </Button>
+              }
+            >
+              <div className="p-1">
+                <CombinationsTable
+                  combinations={dbCombinations}
+                  totalProbability={totalProbability}
+                  onEdit={(c) => {
+                    setEditingCombination(c);
+                    setIsCombinationDialogOpen(true);
+                  }}
+                  onDelete={setDeletingCombinationId}
+                  onAdd={() => {
+                    setEditingCombination({
+                      key: "",
+                      type: "COINS",
+                      value: 0,
+                      probability: 0.1,
+                      maxWins: 0,
+                    });
+                    setIsCombinationDialogOpen(true);
+                  }}
+                  currencyName={currencyName}
+                />
+              </div>
+            </SectionCard>
+          </div>
+
+          {/* Right col: Preview + Economy */}
+          <div className="space-y-5">
+            <div className="sticky top-6 space-y-6">
+              <EconomySidebar
+                costPerPlay={costPerPlay}
+                maxPlaysPerDay={maxPlaysPerDay}
+                avgPayout={avgPayout}
+                profitMargin={profitMargin}
+                currencyName={currencyName}
+              />
             </div>
           </div>
-        </TabsContent>
-
-        <TabsContent value="activity">
-          <MatchWinActivityLog playsData={playsData} />
-        </TabsContent>
-      </Tabs>
+        </div>
       </EcosystemContainer>
 
       {/* Dialogs */}
@@ -456,6 +500,7 @@ export function MatchWinManager() {
         saving={upsertingCombination}
         rewardsData={rewardsData}
         symbols={dbSymbols}
+        currencyName={currencyName}
       />
 
       <FloatingSavePanel
@@ -467,6 +512,36 @@ export function MatchWinManager() {
         title="Unsaved Changes"
         description="You have modified the match win game configuration."
       />
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={!!deletingCombinationId} onOpenChange={(open) => !open && setDeletingCombinationId(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Confirm Delete</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this combination? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="sm:justify-end gap-2">
+            <Button variant="outline" size="sm" onClick={() => setDeletingCombinationId(null)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={async () => {
+                if (deletingCombinationId) {
+                  await handleDeleteCombination(deletingCombinationId);
+                  setDeletingCombinationId(null);
+                }
+              }}
+              disabled={deletingCombination}
+            >
+              {deletingCombination ? "Deleting..." : "Delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

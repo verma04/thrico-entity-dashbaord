@@ -29,6 +29,7 @@ interface CombinationDialogProps {
   saving: boolean;
   rewardsData: any;
   symbols: MatchWinSymbol[];
+  currencyName?: string;
 }
 
 export const CombinationDialog = ({
@@ -40,6 +41,7 @@ export const CombinationDialog = ({
   saving,
   rewardsData,
   symbols,
+  currencyName = "Tokens",
 }: CombinationDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -110,10 +112,9 @@ export const CombinationDialog = ({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="TC">TC</SelectItem>
+                    <SelectItem value="COINS">{currencyName}</SelectItem>
                     <SelectItem value="VOUCHER">Voucher</SelectItem>
-                    <SelectItem value="PREMIUM">Premium</SelectItem>
-                    <SelectItem value="NOTHING">Nothing</SelectItem>
+                    <SelectItem value="NO_REWARDS">No Rewards</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

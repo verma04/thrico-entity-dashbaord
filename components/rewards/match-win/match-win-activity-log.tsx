@@ -8,10 +8,12 @@ import moment from "moment";
 
 interface MatchWinActivityLogProps {
   playsData: any;
+  currencyName?: string;
 }
 
 export const MatchWinActivityLog = ({
   playsData,
+  currencyName = "Tokens",
 }: MatchWinActivityLogProps) => {
   const data = playsData?.getMatchWinPlays || [];
 
@@ -32,9 +34,9 @@ export const MatchWinActivityLog = ({
       cell: ({ row }) => (
         <Badge
           className="text-[10px] font-bold uppercase tracking-tight"
-          variant={row.original.prizeType === "NOTHING" ? "secondary" : "default"}
+          variant={row.original.prizeType === "NOTHING" || row.original.prizeType === "NO_REWARDS" ? "secondary" : "default"}
         >
-          {row.original.prizeType}
+          {row.original.prizeType === "COINS" || row.original.prizeType === "TC" ? currencyName : row.original.prizeType}
         </Badge>
       ),
     },
@@ -44,7 +46,7 @@ export const MatchWinActivityLog = ({
       cell: ({ row }) => (
         <div className="flex items-center gap-1.5 font-bold text-slate-900">
           <div className="h-4 w-4 rounded-full bg-amber-400 flex items-center justify-center text-[8px] text-amber-900 border border-amber-500/20">
-            TC
+            {currencyName.substring(0, 2).toUpperCase()}
           </div>
           {row.original.prizeValue}
         </div>
