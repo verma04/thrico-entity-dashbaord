@@ -122,7 +122,7 @@ export function MatchWinManager() {
 
   const avgPayout = dbCombinations.reduce((sum: number, comb: any) => {
     if (comb.type === "COINS" || comb.type === "TC") {
-      return sum + comb.value * (Number(comb.probability) || 0);
+      return sum + comb.value * ((Number(comb.probability) || 0) / 100);
     }
     return sum;
   }, 0);
@@ -139,19 +139,10 @@ export function MatchWinManager() {
       toast.error("Max plays per day must be at least 1");
       return;
     }
-    if (totalProbability > 1) {
-      toast.error("Total probability cannot exceed 1.0 (100%)");
+    if (totalProbability > 100) {
+      toast.error("Total probability cannot exceed 100%");
       return;
     }
-    const initialSymbols = {
-      s1: { label: "Star", icon: "star", color: "#FBBF24", key: uniqueId() },
-      s2: { label: "Coin", icon: "coins", color: "#2d1889ff", key: uniqueId() },
-      s3: { label: "Gift", icon: "gift", color: "#fb24dbff", key: uniqueId() },
-    };
-    const symbolsToSave =
-      dbSymbols.length > 0
-        ? dbSymbols.map(({ __typename, ...s }: any) => s)
-        : Object.values(initialSymbols);
 
     try {
       await updateConfig({
@@ -160,10 +151,6 @@ export function MatchWinManager() {
             costPerPlay,
             maxPlaysPerDay,
             isActive,
-            settings: {
-              symbols: symbolsToSave,
-              prizes: dbCombinations.map(({ __typename, ...c }: any) => c),
-            },
           },
         },
       });
@@ -230,6 +217,19 @@ export function MatchWinManager() {
       toast.error("Required data missing");
       return;
     }
+    const isNoRewards = editingCombination.type === "NO_REWARDS";
+    
+    // Client-side validation: if it is a winning combination, make sure all 3 symbols are selected!
+    if (!isNoRewards) {
+      const s1 = editingCombination.symbol1Id || editingCombination.symbol1?.id;
+      const s2 = editingCombination.symbol2Id || editingCombination.symbol2?.id;
+      const s3 = editingCombination.symbol3Id || editingCombination.symbol3?.id;
+      if (!s1 || !s2 || !s3) {
+        toast.error("All 3 symbol slots are required for a winning combination.");
+        return;
+      }
+    }
+
     try {
       await upsertCombination({
         variables: {
@@ -237,13 +237,13 @@ export function MatchWinManager() {
           input: {
             key: editingCombination.key,
             type: editingCombination.type,
-            value: Number(editingCombination.value),
+            value: isNoRewards ? 0 : Number(editingCombination.value),
             probability: Number(editingCombination.probability),
             maxWins: Number(editingCombination.maxWins),
-            rewardId: editingCombination.rewardId || null,
-            symbol1Id: editingCombination.symbol1Id || null,
-            symbol2Id: editingCombination.symbol2Id || null,
-            symbol3Id: editingCombination.symbol3Id || null,
+            rewardId: isNoRewards ? null : (editingCombination.rewardId || null),
+            symbol1Id: isNoRewards ? null : (editingCombination.symbol1Id || editingCombination.symbol1?.id || null),
+            symbol2Id: isNoRewards ? null : (editingCombination.symbol2Id || editingCombination.symbol2?.id || null),
+            symbol3Id: isNoRewards ? null : (editingCombination.symbol3Id || editingCombination.symbol3?.id || null),
           },
         },
       });
@@ -429,7 +429,7 @@ export function MatchWinManager() {
                       key: "",
                       type: "COINS",
                       value: 0,
-                      probability: 0.1,
+                      probability: 10,
                       maxWins: 0,
                     });
                     setIsCombinationDialogOpen(true);
@@ -454,7 +454,7 @@ export function MatchWinManager() {
                       key: "",
                       type: "COINS",
                       value: 0,
-                      probability: 0.1,
+                      probability: 10,
                       maxWins: 0,
                     });
                     setIsCombinationDialogOpen(true);

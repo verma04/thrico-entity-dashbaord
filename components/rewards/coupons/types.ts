@@ -14,6 +14,8 @@ export const couponSchema = Yup.object().shape({
   minAccountAge: Yup.number().min(0),
   minActivityRequired: Yup.number().min(0),
   url: Yup.string().url("Please enter a valid URL").nullable(),
+  howToClaim: Yup.string().nullable(),
+  isActive: Yup.boolean(),
   expiryDate: Yup.string().nullable(),
 });
 

@@ -119,6 +119,23 @@ export function RewardsGalleryTab({
                     </div>
                   )}
                   <div className="absolute top-2.5 left-2.5 flex flex-wrap gap-1.5 max-w-[calc(100%-100px)]">
+                    <div
+                      className={cn(
+                        "flex items-center gap-1 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest shadow-md ring-1 ring-black/5 animate-in fade-in slide-in-from-left-2",
+                        reward.isActive
+                          ? "bg-emerald-500 text-white"
+                          : "bg-rose-500 text-white",
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          "h-1 w-1 rounded-full bg-white",
+                          reward.isActive && "animate-pulse",
+                        )}
+                      />
+                      {reward.isActive ? "Active" : "Inactive"}
+                    </div>
+
                     {(Array.isArray(reward.rewardMechanism)
                       ? reward.rewardMechanism
                       : [reward.rewardMechanism || "COUPON"]
@@ -132,7 +149,7 @@ export function RewardsGalleryTab({
                             "flex items-center gap-1 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest shadow-md ring-1 ring-black/5 animate-in fade-in slide-in-from-left-2",
                             badge.color,
                           )}
-                          style={{ animationDelay: `${idx * 100}ms` }}
+                          style={{ animationDelay: `${(idx + 1) * 100}ms` }}
                         >
                           <BadgeIcon className="h-2 w-2" />
                           {badge.label}
@@ -250,6 +267,23 @@ export function RewardsGalleryTab({
                     <h3 className="text-sm font-black text-foreground truncate group-hover:text-indigo-600 transition-colors uppercase tracking-tight">
                       {reward.title}
                     </h3>
+                    <span
+                      className={cn(
+                        "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg border text-[8px] font-black uppercase tracking-widest shrink-0 animate-in zoom-in-50",
+                        reward.isActive
+                          ? "bg-emerald-50/50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/30"
+                          : "bg-rose-50/50 text-rose-700 border-rose-200 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900/30",
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "h-1 w-1 rounded-full",
+                          reward.isActive ? "bg-emerald-500 animate-pulse" : "bg-rose-500",
+                        )}
+                      />
+                      {reward.isActive ? "Active" : "Inactive"}
+                    </span>
+
                     {(Array.isArray(reward.rewardMechanism)
                       ? reward.rewardMechanism
                       : [reward.rewardMechanism || "COUPON"]
@@ -263,7 +297,7 @@ export function RewardsGalleryTab({
                             "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg border text-[8px] font-black uppercase tracking-widest shrink-0 animate-in zoom-in-50",
                             badge.chip,
                           )}
-                          style={{ animationDelay: `${idx * 100}ms` }}
+                          style={{ animationDelay: `${(idx + 1) * 100}ms` }}
                         >
                           <BadgeIcon className="h-2.5 w-2.5" />
                           {badge.label}

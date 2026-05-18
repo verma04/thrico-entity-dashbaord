@@ -35,8 +35,11 @@ export default function CreateCouponPage() {
       image: "",
       rewardMechanism: ["COUPON"],
       url: "",
+      howToClaim: "",
       couponType: "ONE_TO_ONE",
       couponCode: "",
+      isActive: true,
+      status: "ACTIVE",
       expiryDate: (() => {
         const d = new Date();
         d.setDate(d.getDate() + 350);
@@ -52,6 +55,7 @@ export default function CreateCouponPage() {
             input: {
               title: values.title,
               description: values.description,
+              howToClaim: values.howToClaim,
               categoryId: "cat-002", // Default to internal, can be expanded if category selection is added later
               tcCost: values.tcCost,
               inventoryRequired: values.inventoryRequired,
@@ -68,6 +72,8 @@ export default function CreateCouponPage() {
               url: values.url,
               couponType: values.couponType,
               couponCode: values.couponCode,
+              isActive: values.isActive,
+              status: values.status,
               expiryDate: values.expiryDate || null,
             },
           },

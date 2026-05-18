@@ -94,16 +94,25 @@ export const GET_MATCH_WIN_DATA = gql`
         id
         key
         symbol1 {
+          id
           key
+          label
           icon
+          color
         }
         symbol2 {
+          id
           key
+          label
           icon
+          color
         }
         symbol3 {
+          id
           key
+          label
           icon
+          color
         }
         type
         value

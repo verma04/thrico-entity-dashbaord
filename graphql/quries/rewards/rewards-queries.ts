@@ -27,6 +27,7 @@ export const GET_REWARDS = gql`
       expiryDate
       updatedAt
       url
+      howToClaim
       couponCode
     }
   }
@@ -63,6 +64,7 @@ export const GET_REWARD_BY_ID = gql`
       discountValue
       rewardMechanism
       url
+      howToClaim
       couponType
       couponCode
       expiryDate
@@ -180,6 +182,7 @@ export const CREATE_REWARD = gql`
       discountValue
       rewardMechanism
       url
+      howToClaim
       couponType
       couponCode
       expiryDate
@@ -196,6 +199,7 @@ export const UPDATE_REWARD = gql`
       isActive
       rewardMechanism
       url
+      howToClaim
       couponType
       couponCode
       expiryDate

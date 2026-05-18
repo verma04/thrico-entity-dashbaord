@@ -121,6 +121,40 @@ export const CombinationsTable = ({
         ),
       },
       {
+        id: "pattern",
+        header: "Pattern",
+        cell: ({ row }) => {
+          const { symbol1, symbol2, symbol3, type } = row.original;
+          if (type === "NO_REWARDS" || (!symbol1 && !symbol2 && !symbol3)) {
+            return (
+              <Badge variant="secondary" className="font-semibold text-[10px] bg-slate-100 text-slate-500 border-none rounded-lg py-0.5 px-2">
+                Fallback Outcome
+              </Badge>
+            );
+          }
+          return (
+            <div className="flex items-center gap-1.5 p-1 px-1.5 bg-slate-50/50 border border-slate-200/40 rounded-xl w-fit shadow-inner">
+              {[symbol1, symbol2, symbol3].map((sym, idx) => {
+                if (!sym) return null;
+                return (
+                  <div
+                    key={idx}
+                    className="p-1 rounded-lg bg-white border border-slate-200/60 shadow-sm flex items-center justify-center w-7 h-7"
+                    title={sym.label}
+                  >
+                    <PrizeIcon
+                      iconName={sym.icon}
+                      color={sym.color}
+                      className="h-4 w-4"
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          );
+        },
+      },
+      {
         id: "reward",
         header: "Reward",
         cell: ({ row }) => (
@@ -142,7 +176,7 @@ export const CombinationsTable = ({
             variant="outline"
             className="font-mono font-bold text-indigo-600 bg-white shadow-sm border-indigo-100 rounded-lg"
           >
-            {(row.original.probability * 100).toFixed(1)}%
+            {Number(row.original.probability).toFixed(1)}%
           </Badge>
         ),
       },
@@ -214,12 +248,12 @@ export const CombinationsTable = ({
           <div
             className={cn(
               "px-4 py-1.5 rounded-xl font-mono font-bold text-xs ring-1 ring-inset transition-all",
-              totalProbability > 1
+              totalProbability > 100
                 ? "bg-rose-50 text-rose-600 ring-rose-200/50"
                 : "bg-emerald-50 text-emerald-600 ring-emerald-200/50 shadow-sm shadow-emerald-500/5",
             )}
           >
-            {(totalProbability * 100).toFixed(1)}% / 100%
+            {totalProbability.toFixed(1)}% / 100%
           </div>
         </div>
       </div>

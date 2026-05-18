@@ -63,9 +63,32 @@ export default function RewardsGalleryPage() {
       const reader = new FileReader();
       reader.onload = (e) => {
         const text = e.target?.result as string;
-        const lines = text.split("\n").filter(l => l.trim());
-        const data = lines.slice(1).map(l => ({ code: l.trim() }));
-        
+        const lines = text.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+        if (lines.length < 2) {
+          setUploadData([]);
+          setValidCount(0);
+          setInvalidCount(0);
+          setUploadStep("summary");
+          return;
+        }
+
+        const headers = lines[0].split(",").map(h => h.trim().toLowerCase());
+        const codeIndex = headers.indexOf("code");
+        const cardIndex = headers.indexOf("cardnumber");
+        const pinIndex = headers.indexOf("pin");
+
+        const data = lines.slice(1).map(line => {
+          const parts = line.split(",").map(p => p.trim());
+          const code = codeIndex !== -1 ? parts[codeIndex] : parts[0];
+          const cardNumber = cardIndex !== -1 ? parts[cardIndex] : undefined;
+          const pin = pinIndex !== -1 ? parts[pinIndex] : undefined;
+          return {
+            code: code || "",
+            cardNumber: cardNumber || null,
+            pin: pin || null,
+          };
+        }).filter(item => item.code);
+
         setUploadData(data);
         setValidCount(data.length);
         setInvalidCount(0);
@@ -76,7 +99,7 @@ export default function RewardsGalleryPage() {
   };
 
   const downloadTemplate = () => {
-    const csvContent = "code\nVOUCHER-123\nVOUCHER-456";
+    const csvContent = "code,cardNumber,pin\nVOUCHER-123,6034123456789999,847291\nVOUCHER-456,,";
     const blob = new Blob([csvContent], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -95,8 +118,10 @@ export default function RewardsGalleryPage() {
     try {
       await uploadVouchers({
         variables: {
-          rewardId: uploadRewardId,
-          vouchers: uploadData,
+          input: {
+            rewardId: uploadRewardId,
+            vouchers: uploadData,
+          },
         },
       });
       toast({ title: "Dynamic Ingestion Successful", description: `${validCount} vouchers have been localized.` });

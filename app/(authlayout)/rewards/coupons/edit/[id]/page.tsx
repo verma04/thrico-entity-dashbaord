@@ -48,6 +48,7 @@ export default function EditRewardPage() {
       status: reward?.status || "ACTIVE",
       isActive: reward?.isActive ?? true,
       url: reward?.url || "",
+      howToClaim: reward?.howToClaim || "",
       couponCode: reward?.couponCode || "",
       couponType: reward?.couponType || "PERCENTAGE",
       expiryDate: reward?.expiryDate
@@ -70,6 +71,7 @@ export default function EditRewardPage() {
             input: {
               title: values.title,
               description: values.description,
+              howToClaim: values.howToClaim,
               tcCost: values.tcCost,
               inventoryRequired: values.inventoryRequired,
               perUserLimit: values.perUserLimit,
@@ -184,7 +186,7 @@ export default function EditRewardPage() {
           {/* Form */}
           <div className="space-y-12">
             <form onSubmit={formik.handleSubmit}>
-              <RewardFormSections formik={formik} />
+              <RewardFormSections formik={formik} rewardId={rewardId} />
             </form>
           </div>
 

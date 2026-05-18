@@ -10,6 +10,7 @@ import {
   Target,
   Zap,
   Info,
+  Upload,
 } from "lucide-react";
 import { ImageUploadWithCrop } from "@/components/ui/image-upload-with-crop";
 import { Input } from "@/components/ui/input";
@@ -27,13 +28,140 @@ import { cn } from "@/lib/utils";
 import { CreatorSection } from "./creator-section";
 import { useGetEntityCurrencyConfig } from "@/graphql/actions/currency";
 import Link from "next/link";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
+import { useToast } from "@/hooks/use-toast";
+import { useUploadVouchers } from "@/graphql/actions/rewards";
+import { Button } from "@/components/ui/button";
 
 interface RewardFormSectionsProps {
   formik: any;
+  rewardId?: string;
 }
 
-export function RewardFormSections({ formik }: RewardFormSectionsProps) {
+export function RewardFormSections({
+  formik,
+  rewardId,
+}: RewardFormSectionsProps) {
   const { data: currencyConfig } = useGetEntityCurrencyConfig();
+  const [uploadVouchers, { loading: uploading }] = useUploadVouchers();
+  const { toast } = useToast();
+
+  const [uploadStep, setUploadStep] = React.useState<
+    "idle" | "validating" | "summary"
+  >("idle");
+  const [isDragging, setIsDragging] = React.useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [uploadedFile, setUploadedFile] = React.useState<File | null>(null);
+  const [validCount, setValidCount] = React.useState(0);
+  const [uploadData, setUploadData] = React.useState<any[]>([]);
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) handleFileSelect(file);
+  };
+
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
+  };
+
+  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) handleFileSelect(file);
+  };
+
+  const handleFileSelect = (file: File) => {
+    setUploadedFile(file);
+    setUploadStep("validating");
+
+    setTimeout(() => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const text = e.target?.result as string;
+        const lines = text.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+        if (lines.length < 2) {
+          setUploadData([]);
+          setValidCount(0);
+          setUploadStep("summary");
+          return;
+        }
+
+        const headers = lines[0].split(",").map(h => h.trim().toLowerCase());
+        const codeIndex = headers.indexOf("code");
+        const cardIndex = headers.indexOf("cardnumber");
+        const pinIndex = headers.indexOf("pin");
+
+        const data = lines.slice(1).map(line => {
+          const parts = line.split(",").map(p => p.trim());
+          const code = codeIndex !== -1 ? parts[codeIndex] : parts[0];
+          const cardNumber = cardIndex !== -1 ? parts[cardIndex] : undefined;
+          const pin = pinIndex !== -1 ? parts[pinIndex] : undefined;
+          return {
+            code: code || "",
+            cardNumber: cardNumber || null,
+            pin: pin || null,
+          };
+        }).filter(item => item.code);
+
+        setUploadData(data);
+        setValidCount(data.length);
+        setUploadStep("summary");
+      };
+      reader.readAsText(file);
+    }, 1200);
+  };
+
+  const downloadTemplate = () => {
+    const csvContent = "code,cardNumber,pin\nVOUCHER-123,6034123456789999,847291\nVOUCHER-456,,";
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "vouchers_template.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const confirmUpload = async () => {
+    try {
+      await uploadVouchers({
+        variables: {
+          input: {
+            rewardId,
+            vouchers: uploadData,
+          },
+        },
+      });
+      toast({
+        title: "Dynamic Ingestion Successful",
+        description: `${validCount} vouchers have been localized.`,
+      });
+      resetUpload();
+    } catch {
+      toast({
+        title: "Ingestion Failure",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const resetUpload = () => {
+    setUploadStep("idle");
+    setUploadedFile(null);
+    setValidCount(0);
+    setUploadData([]);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
   const currencyName =
     currencyConfig?.getEntityCurrencyConfig?.currencyName ||
     "Your currency name";
@@ -122,7 +250,49 @@ export function RewardFormSections({ formik }: RewardFormSectionsProps) {
                 />
               </div>
             </div>
+
+            <div className="bg-white dark:bg-muted/5 rounded-2xl border border-border/40 p-5 flex items-center justify-between shadow-sm">
+              <div className="space-y-0.5">
+                <Label
+                  htmlFor="isActive"
+                  className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground block"
+                >
+                  Active Status
+                </Label>
+                <p className="text-[10px] text-muted-foreground">
+                  Allow members to view and redeem this reward.
+                </p>
+              </div>
+              <Switch
+                id="isActive"
+                checked={formik.values.isActive}
+                onCheckedChange={(checked) => {
+                  formik.setFieldValue("isActive", checked);
+                  formik.setFieldValue(
+                    "status",
+                    checked ? "ACTIVE" : "INACTIVE",
+                  );
+                }}
+              />
+            </div>
           </div>
+        </div>
+
+        {/* Full-width Claim Instructions */}
+        <div className="space-y-2 mt-8 pt-6 border-t border-border/25">
+          <Label
+            htmlFor="howToClaim"
+            className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground block"
+          >
+            How to Claim Instructions
+          </Label>
+          <RichTextEditor
+            value={formik.values.howToClaim || ""}
+            onChange={(val) => formik.setFieldValue("howToClaim", val)}
+            placeholder="Step-by-step instructions on how users can claim or redeem this reward..."
+            minHeight="140px"
+          />
+          {err("howToClaim")}
         </div>
       </CreatorSection>
 
@@ -673,6 +843,109 @@ export function RewardFormSections({ formik }: RewardFormSectionsProps) {
                     this reward.
                   </p>
                   {err("couponCode")}
+                </div>
+              )}
+
+              {rewardId && formik.values.couponType === "ONE_TO_ONE" && (
+                <div className="bg-white dark:bg-muted/5 rounded-xl border border-border/40 p-5 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground block">
+                        Voucher Code Inventory
+                      </Label>
+                      <p className="text-[10px] text-muted-foreground">
+                        Upload a CSV file containing unique voucher codes for
+                        this reward.
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={downloadTemplate}
+                      className="text-[9px] font-black text-indigo-600 uppercase tracking-widest hover:bg-indigo-50/50 h-7 px-2.5 rounded-lg shrink-0"
+                    >
+                      Get CSV Template
+                    </Button>
+                  </div>
+
+                  {uploadStep === "idle" ? (
+                    <div
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
+                      onClick={triggerFileInput}
+                      className={cn(
+                        "border-2 border-dashed border-border/60 hover:border-indigo-500/40 rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-300 bg-zinc-50/40 dark:bg-black/5 hover:bg-indigo-500/[0.01]",
+                        isDragging && "border-indigo-500 bg-indigo-500/[0.02]",
+                      )}
+                    >
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={onFileChange}
+                        accept=".csv,.txt"
+                        className="hidden"
+                      />
+                      <Upload className="h-6 w-6 text-indigo-500 mb-2 opacity-60" />
+                      <p className="text-[11px] font-bold text-foreground">
+                        Drag & drop your CSV file here, or{" "}
+                        <span className="text-indigo-600">browse</span>
+                      </p>
+                      <p className="text-[9px] text-muted-foreground mt-1">
+                        Accepts .csv and .txt (each line is a voucher code)
+                      </p>
+                    </div>
+                  ) : uploadStep === "validating" ? (
+                    <div className="border border-border/40 rounded-xl p-8 flex flex-col items-center justify-center text-center bg-zinc-50/20">
+                      <RotateCw className="h-5 w-5 text-indigo-600 animate-spin mb-2" />
+                      <p className="text-[11px] font-bold text-foreground">
+                        Analyzing codes...
+                      </p>
+                      <p className="text-[9px] text-muted-foreground mt-1">
+                        Parsing data structure and compiling codes.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="border border-border/40 rounded-xl p-5 space-y-4 bg-zinc-50/20">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Ticket className="h-4 w-4 text-emerald-500" />
+                          <span className="text-[11px] font-bold text-foreground truncate max-w-[200px]">
+                            {uploadedFile?.name}
+                          </span>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          onClick={resetUpload}
+                          className="text-[9px] font-bold text-muted-foreground uppercase hover:bg-muted h-7 px-2"
+                        >
+                          Reset
+                        </Button>
+                      </div>
+
+                      <div className="bg-emerald-500/[0.03] border border-emerald-500/10 rounded-lg p-3 flex items-center justify-between text-[11px]">
+                        <span className="text-muted-foreground font-medium">
+                          Valid codes found:
+                        </span>
+                        <span className="font-black text-emerald-600 text-xs tabular-nums">
+                          {validCount}
+                        </span>
+                      </div>
+
+                      <Button
+                        type="button"
+                        onClick={confirmUpload}
+                        disabled={uploading}
+                        className="w-full h-9 rounded-xl text-xs font-bold gap-2 shadow-sm"
+                      >
+                        {uploading && (
+                          <RotateCw className="h-3 w-3 animate-spin" />
+                        )}
+                        Confirm and Load {validCount} Vouchers
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
 

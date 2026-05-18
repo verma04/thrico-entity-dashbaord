@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { MatchWinCombination, MatchWinSymbol, PrizeType } from "./types";
+import { PrizeIcon } from "./prize-icon";
 
 interface CombinationDialogProps {
   open: boolean;
@@ -64,37 +65,67 @@ export const CombinationDialog = ({
               />
             </div>
 
-            <div className="space-y-2">
-              <Label>Symbols Selection</Label>
-              <div className="grid grid-cols-3 gap-2">
-                {[1, 2, 3].map((i) => (
-                  <Select
-                    key={i}
-                    value={
-                      (editingCombination as any)[`symbol${i}Id`] || "none"
-                    }
-                    onValueChange={(v) =>
-                      setEditingCombination({
-                        ...editingCombination,
-                        [`symbol${i}Id`]: v === "none" ? undefined : v,
-                      } as any)
-                    }
-                  >
-                    <SelectTrigger className="text-xs">
-                      <SelectValue placeholder={`Symbol ${i}`} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">Empty</SelectItem>
-                      {symbols.map((s) => (
-                        <SelectItem key={s.id} value={s.id!}>
-                          {s.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                ))}
+            {editingCombination.type !== "NO_REWARDS" && (
+              <div className="space-y-3">
+                <Label>Symbols Selection</Label>
+                
+                {/* Live Reels Visual Preview */}
+                <div className="flex items-center justify-center gap-3 p-3 bg-slate-50 border border-slate-200/50 rounded-2xl shadow-inner">
+                  {[1, 2, 3].map((i) => {
+                    const symId = (editingCombination as any)[`symbol${i}Id`] || (editingCombination as any)[`symbol${i}`]?.id;
+                    const sym = symbols.find((s) => s.id === symId);
+                    return (
+                      <div
+                        key={i}
+                        className="w-12 h-12 rounded-xl bg-white border border-slate-200 shadow-sm flex flex-col items-center justify-center text-[10px] font-bold text-slate-300 relative group transition-all"
+                        title={sym?.label || `Slot ${i}`}
+                      >
+                        {sym ? (
+                          <PrizeIcon iconName={sym.icon} color={sym.color} className="h-6 w-6" />
+                        ) : (
+                          <span className="opacity-40">?</span>
+                        )}
+                        <span className="absolute bottom-0.5 text-[8px] opacity-35 font-mono">#{i}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
+                  {[1, 2, 3].map((i) => (
+                    <Select
+                      key={i}
+                      value={
+                        (editingCombination as any)[`symbol${i}Id`] ||
+                        (editingCombination as any)[`symbol${i}`]?.id ||
+                        "none"
+                      }
+                      onValueChange={(v) =>
+                        setEditingCombination({
+                          ...editingCombination,
+                          [`symbol${i}Id`]: v === "none" ? undefined : v,
+                        } as any)
+                      }
+                    >
+                      <SelectTrigger className="text-xs">
+                        <SelectValue placeholder={`Symbol ${i}`} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Empty</SelectItem>
+                        {symbols.map((s) => (
+                          <SelectItem key={s.id} value={s.id!}>
+                            <div className="flex items-center gap-2">
+                              <PrizeIcon iconName={s.icon} color={s.color} className="h-3.5 w-3.5" />
+                              <span className="text-[11px] font-medium">{s.label}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -105,6 +136,7 @@ export const CombinationDialog = ({
                     setEditingCombination({
                       ...editingCombination,
                       type: v as PrizeType,
+                      value: v === "NO_REWARDS" ? 0 : editingCombination.value,
                     })
                   }
                 >
@@ -122,7 +154,8 @@ export const CombinationDialog = ({
                 <Label>Value</Label>
                 <Input
                   type="number"
-                  value={editingCombination.value ?? 0}
+                  disabled={editingCombination.type === "NO_REWARDS"}
+                  value={editingCombination.type === "NO_REWARDS" ? 0 : (editingCombination.value ?? 0)}
                   onChange={(e) =>
                     setEditingCombination({
                       ...editingCombination,
@@ -133,20 +166,28 @@ export const CombinationDialog = ({
               </div>
             </div>
             <div className="space-y-2">
-              <Label>Winning Probability (0 to 1)</Label>
-              <Input
-                type="number"
-                step="0.001"
-                value={editingCombination.probability ?? 0}
-                onChange={(e) =>
-                  setEditingCombination({
-                    ...editingCombination,
-                    probability: Number(e.target.value),
-                  })
-                }
-              />
+              <Label>Winning Probability (%)</Label>
+              <div className="relative">
+                <Input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  max="100"
+                  value={editingCombination.probability ?? 0}
+                  onChange={(e) =>
+                    setEditingCombination({
+                      ...editingCombination,
+                      probability: Number(e.target.value),
+                    })
+                  }
+                  className="pr-8"
+                />
+                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                  <span className="text-muted-foreground sm:text-sm">%</span>
+                </div>
+              </div>
               <p className="text-[10px] text-muted-foreground">
-                Example: 0.05 = 5% chance
+                Enter percentage (e.g. 5 for 5% chance)
               </p>
             </div>
             <div className="space-y-2">

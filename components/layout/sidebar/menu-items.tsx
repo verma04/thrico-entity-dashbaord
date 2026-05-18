@@ -67,6 +67,7 @@ import {
   LogOut,
   Bell,
   Mail,
+  Sparkles,
 } from "lucide-react";
 import { useMemo } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -90,6 +91,19 @@ export const homeItems = [
     path: "/",
     icon: <Home size={18} />,
   },
+  // {
+  //   key: "ai-agent",
+  //   label: "AI Agent Studio",
+  //   path: "/ai-agent",
+  //   icon: <Sparkles size={18} />,
+  //   badge: "New",
+  // },
+  // {
+  //   key: "chat",
+  //   label: "AI Assistant",
+  //   path: "/chat",
+  //   icon: <MessageSquare size={18} />,
+  // },
 ];
 
 // --- 2. COMMUNITY ---
