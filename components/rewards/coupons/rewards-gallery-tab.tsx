@@ -100,7 +100,12 @@ export function RewardsGalleryTab({
             return (
               <div
                 key={reward.id}
-                className="group relative bg-card rounded-2xl border border-border hover:border-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/[0.03] transition-all duration-500 overflow-hidden"
+                className={cn(
+                  "group relative bg-card rounded-2xl border transition-all duration-500 overflow-hidden",
+                  reward.isActive
+                    ? "border-border hover:border-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/[0.03]"
+                    : "border-destructive/20 bg-destructive/[0.01] dark:bg-destructive/[0.02] opacity-75"
+                )}
               >
                 <div className="relative aspect-[4/3] overflow-hidden bg-zinc-50 border-b border-border/50">
                   {reward.image ? (
@@ -111,7 +116,10 @@ export function RewardsGalleryTab({
                           : `https://cdn.thrico.network/${reward.image}`
                       }
                       alt={reward.title}
-                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      className={cn(
+                        "h-full w-full object-cover transition-transform duration-700 group-hover:scale-110",
+                        !reward.isActive && "grayscale"
+                      )}
                     />
                   ) : (
                     <div className="h-full w-full flex flex-col items-center justify-center opacity-10">
@@ -158,10 +166,13 @@ export function RewardsGalleryTab({
                     })}
                   </div>
                   <div className="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest border border-white/10 shadow-lg">
-                    {reward.inventory ?? "∞"} Unit
+                    {reward.couponType === "ONE_TO_ONE"
+                      ? `${reward.remainingVouchers ?? 0}`
+                      : "∞"}{" "}
+                    Unit
                   </div>
                   <div className="absolute inset-0 bg-indigo-900/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center gap-3 backdrop-blur-[2px]">
-                    <Link href={`/rewards/coupons/edit/${reward.id}`}>
+                    <Link href={`/rewards/coupons/${reward.id}/edit`}>
                       <Button
                         size="icon"
                         variant="secondary"
@@ -170,15 +181,18 @@ export function RewardsGalleryTab({
                         <Pencil className="h-4 w-4" />
                       </Button>
                     </Link>
-                    {reward.inventoryRequired && (
-                      <Button
-                        onClick={() => onOpenUploadForReward(reward.id)}
-                        size="icon"
-                        variant="secondary"
-                        className="h-10 w-10 rounded-xl shadow-2xl ring-1 ring-black/10 hover:scale-110 transition-transform"
+                    {reward.couponType === "ONE_TO_ONE" && (
+                      <Link
+                        href={`/rewards/coupons/${reward.id}/manage-voucher`}
                       >
-                        <Upload className="h-4 w-4" />
-                      </Button>
+                        <Button
+                          size="icon"
+                          variant="secondary"
+                          className="h-10 w-10 rounded-xl shadow-2xl ring-1 ring-black/10 hover:scale-110 transition-transform"
+                        >
+                          <Upload className="h-4 w-4" />
+                        </Button>
+                      </Link>
                     )}
                   </div>
                 </div>
@@ -204,29 +218,19 @@ export function RewardsGalleryTab({
 
                     <div className="flex items-center gap-3">
                       <div className="h-4 w-px bg-border/50" />
-                      <button
-                        onClick={() => onManageVouchers(reward.id)}
-                        className="text-[9px] font-black text-indigo-600 uppercase tracking-widest hover:underline underline-offset-4"
-                      >
-                        {" "}
-                        Manage
-                      </button>
+                      {reward.couponType === "ONE_TO_ONE" && (
+                        <Link
+                          href={`/rewards/coupons/${reward.id}/manage-voucher`}
+                        >
+                          <button className="text-[9px] font-black text-indigo-600 uppercase tracking-widest hover:underline underline-offset-4">
+                            Manage
+                          </button>
+                        </Link>
+                      )}
                     </div>
                   </div>
 
                   <div className="flex items-center justify-between pt-3 border-t border-border/40">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] font-bold text-muted-foreground">
-                        Discount:{" "}
-                      </span>
-                      <span className="text-[11px] font-black text-foreground">
-                        {reward.discountType === "Percentage"
-                          ? `${reward.discountValue}%`
-                          : reward.discountType === "Flat"
-                            ? `$${reward.discountValue}`
-                            : reward.discountType}
-                      </span>
-                    </div>
                     <div className="flex items-center gap-1.5">
                       <span className="text-[10px] font-bold text-muted-foreground">
                         Per User Limit:{" "}
@@ -237,6 +241,13 @@ export function RewardsGalleryTab({
                     </div>
                   </div>
                 </div>
+                {!reward.isActive && (
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-[5] bg-destructive/[0.01] dark:bg-destructive/[0.02] backdrop-blur-[0.5px]">
+                    <div className="text-[28px] font-black text-rose-500/20 dark:text-rose-500/30 uppercase tracking-[0.25em] -rotate-12 border-2 border-dashed border-rose-500/20 dark:border-rose-500/30 px-5 py-2 rounded-xl">
+                      Disabled
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })}
@@ -247,14 +258,22 @@ export function RewardsGalleryTab({
             return (
               <div
                 key={reward.id}
-                className="group flex items-center gap-4 p-4 bg-card rounded-2xl border border-border hover:border-indigo-500/20 hover:shadow-lg hover:shadow-indigo-500/[0.02] transition-all duration-300"
+                className={cn(
+                  "group relative flex items-center gap-4 p-4 bg-card rounded-2xl border transition-all duration-300 overflow-hidden",
+                  reward.isActive
+                    ? "border-border hover:border-indigo-500/20 hover:shadow-lg hover:shadow-indigo-500/[0.02]"
+                    : "border-destructive/20 bg-destructive/[0.01] dark:bg-destructive/[0.02] opacity-75"
+                )}
               >
                 <div className="h-14 w-14 rounded-xl bg-zinc-50 border border-border/60 overflow-hidden shrink-0 shadow-sm ring-1 ring-black/[0.03]">
                   {reward.image ? (
                     <img
                       src={`https://cdn.thrico.network/${reward?.image}`}
                       alt={reward.title}
-                      className="h-full w-full object-cover"
+                      className={cn(
+                        "h-full w-full object-cover",
+                        !reward.isActive && "grayscale"
+                      )}
                     />
                   ) : (
                     <div className="h-full w-full flex items-center justify-center opacity-10">
@@ -278,7 +297,9 @@ export function RewardsGalleryTab({
                       <span
                         className={cn(
                           "h-1 w-1 rounded-full",
-                          reward.isActive ? "bg-emerald-500 animate-pulse" : "bg-rose-500",
+                          reward.isActive
+                            ? "bg-emerald-500 animate-pulse"
+                            : "bg-rose-500",
                         )}
                       />
                       {reward.isActive ? "Active" : "Inactive"}
@@ -315,17 +336,12 @@ export function RewardsGalleryTab({
                       {reward.validityDays || "No"} Days Validity
                     </span>
                     <span className="bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded text-[8px] font-black">
-                      STOCK: {reward.inventory ?? "∞"}
+                      STOCK:{" "}
+                      {reward.couponType === "ONE_TO_ONE"
+                        ? (reward.remainingVouchers ?? 0)
+                        : "∞"}
                     </span>
                     <span className="flex items-center gap-1.5">
-                      Discount:{" "}
-                      {reward.discountType === "Percentage"
-                        ? `${reward.discountValue}%`
-                        : reward.discountType === "Flat"
-                          ? `$${reward.discountValue}`
-                          : reward.discountType}
-                    </span>
-                    <span className="flex items-center gap-1.5 border-l border-border pl-4">
                       Limit per User: {reward.perUserLimit ?? "Unlimited"}
                     </span>
                   </div>
@@ -349,7 +365,7 @@ export function RewardsGalleryTab({
                   >
                     <Ticket className="h-3.5 w-3.5" /> Vouchers
                   </Button>
-                  <Link href={`/rewards/coupons/edit/${reward.id}`}>
+                  <Link href={`/rewards/coupons/${reward.id}/edit`}>
                     <Button
                       size="sm"
                       className="h-8 px-4 gap-2 text-[10px] font-black uppercase tracking-widest rounded-xl shadow-md"
@@ -358,6 +374,13 @@ export function RewardsGalleryTab({
                     </Button>
                   </Link>
                 </div>
+                {!reward.isActive && (
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-[5] bg-destructive/[0.01] dark:bg-destructive/[0.02]">
+                    <div className="text-[18px] font-black text-rose-500/20 dark:text-rose-500/30 uppercase tracking-[0.25em] -rotate-2 border border-dashed border-rose-500/20 dark:border-rose-500/30 px-4 py-1 rounded-lg">
+                      Disabled
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })}

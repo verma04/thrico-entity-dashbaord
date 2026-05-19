@@ -96,6 +96,16 @@ const details = `
         title
         id
       }
+      jobFunctions {
+        updatedAt
+        title
+        id
+      }
+      skills {
+        updatedAt
+        title
+        id
+      }
       lastSession {
         deviceId
         deviceName
@@ -218,6 +228,16 @@ export const GET_USER_DETIALS = gql`
         title
         id
       }
+      jobFunctions {
+        updatedAt
+        title
+        id
+      }
+      skills {
+        updatedAt
+        title
+        id
+      }
       referrer {
         user {
           id
@@ -311,6 +331,18 @@ export const ADD_NEW_MEMBER = gql`
         email
         avatar
       }
+      industries {
+        id
+        title
+      }
+      jobFunctions {
+        id
+        title
+      }
+      skills {
+        id
+        title
+      }
     }
   }
 `;
@@ -357,6 +389,18 @@ export const UPDATE_MEMBER = gql`
         lastName
         email
         avatar
+      }
+      industries {
+        id
+        title
+      }
+      jobFunctions {
+        id
+        title
+      }
+      skills {
+        id
+        title
       }
     }
   }

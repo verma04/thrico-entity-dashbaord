@@ -39,6 +39,8 @@ const AddMemberPage = () => {
       DOB: values.dob,
       avatar: values.avatar,
       industryIds: values.industryIds,
+      jobFunctionIds: values.jobFunctionIds,
+      skillIds: values.skillIds,
     };
 
     addMember({ variables: { input } });

@@ -8,6 +8,7 @@ export interface Industry {
   id: string;
   title: string;
   createdAt?: string;
+  updatedAt?: string;
 }
 
 // ---------------------------------------------------------
@@ -18,12 +19,13 @@ export interface GetIndustriesData {
   getIndustries: Industry[];
 }
 
-const GET_INDUSTRIES = gql`
+export const GET_INDUSTRIES = gql`
   query GetIndustries {
     getIndustries {
       id
       title
       createdAt
+      updatedAt
     }
   }
 `;
@@ -49,6 +51,7 @@ export const ADD_INDUSTRY = gql`
     addIndustry(input: $input) {
       id
       title
+      createdAt
     }
   }
 `;
@@ -80,6 +83,7 @@ export const UPDATE_INDUSTRY = gql`
     updateIndustry(input: $input) {
       id
       title
+      updatedAt
     }
   }
 `;
@@ -109,6 +113,7 @@ export const DELETE_INDUSTRY = gql`
   mutation DeleteIndustry($input: DeleteIndustryInput!) {
     deleteIndustry(input: $input) {
       id
+      title
     }
   }
 `;

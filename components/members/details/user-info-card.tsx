@@ -204,12 +204,56 @@ export function UserInfoCard({ member }: { member: any }) {
         </Card>
       )}
 
+      {/* Job Functions */}
+      {member.jobFunctions && member.jobFunctions.length > 0 && (
+        <Card className="border-border">
+          <CardHeader className="pb-2 pt-4 px-4">
+            <CardTitle className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              Job Functions
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-wrap gap-1.5 px-4 pb-4">
+            {member.jobFunctions.map((jf: any) => (
+              <Badge
+                key={jf.id}
+                variant="secondary"
+                className="text-[11px] font-medium"
+              >
+                {jf.title}
+              </Badge>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Skills */}
-      {user.profile?.skills && user.profile.skills.length > 0 && (
+      {member.skills && member.skills.length > 0 && (
         <Card className="border-border">
           <CardHeader className="pb-2 pt-4 px-4">
             <CardTitle className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
               Skills
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-wrap gap-1.5 px-4 pb-4">
+            {member.skills.map((skill: any) => (
+              <Badge
+                key={skill.id}
+                variant="secondary"
+                className="text-[11px] font-medium"
+              >
+                {skill.title}
+              </Badge>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Skills (Legacy) */}
+      {user.profile?.skills && user.profile.skills.length > 0 && (
+        <Card className="border-border">
+          <CardHeader className="pb-2 pt-4 px-4">
+            <CardTitle className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              Profile Skills
             </CardTitle>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-1.5 px-4 pb-4">

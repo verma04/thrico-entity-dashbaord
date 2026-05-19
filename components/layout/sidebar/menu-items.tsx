@@ -122,7 +122,11 @@ export const communityIntelligence = [
         label: "Add New Member",
         path: "/members/create",
       },
-
+      {
+        key: "members-classifications",
+        label: "Classifications",
+        path: "/members/classifications",
+      },
       {
         key: "members-reported",
         label: "Reported Items",
@@ -300,7 +304,7 @@ export const gamificationEngine = [
 
       {
         key: "redemptions",
-        label: "Redemptionsy",
+        label: "Redemption",
         path: "/rewards/Redemptions",
       },
       { key: "rew-fraud", label: "Fraud", path: "/rewards/fraud" },

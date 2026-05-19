@@ -53,8 +53,9 @@ function VouchersContent() {
     loading: vouchersLoading,
     refetch: refetchVouchers,
   } = useGetAllVouchers({
-    status: statusFilter === "all" ? undefined : statusFilter,
+    status: statusFilter === "all" ? undefined : statusFilter.toUpperCase(),
     rewardId: rewardFilter === "all" ? undefined : rewardFilter,
+    pagination: { page: 1, limit: 1000 },
   });
 
   const [markAsUsed] = useMarkVoucherAsUsed();

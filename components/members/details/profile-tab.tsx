@@ -63,6 +63,34 @@ export function ProfileTab({ member }: { member: any }) {
         </section>
       )}
 
+      {/* Job Functions */}
+      {member.jobFunctions && member.jobFunctions.length > 0 && (
+        <section>
+          <SectionTitle icon={Briefcase}>Job Functions</SectionTitle>
+          <div className="flex flex-wrap gap-1.5">
+            {member.jobFunctions.map((jf: any) => (
+              <Badge key={jf.id} variant="secondary" className="text-xs font-medium">
+                {jf.title}
+              </Badge>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Skills */}
+      {member.skills && member.skills.length > 0 && (
+        <section>
+          <SectionTitle icon={GraduationCap}>Skills</SectionTitle>
+          <div className="flex flex-wrap gap-1.5">
+            {member.skills.map((skill: any) => (
+              <Badge key={skill.id} variant="secondary" className="text-xs font-medium">
+                {skill.title}
+              </Badge>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* Experience */}
       <section>
         <SectionTitle icon={Briefcase}>Experience</SectionTitle>

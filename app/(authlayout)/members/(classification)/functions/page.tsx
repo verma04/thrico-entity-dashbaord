@@ -2,13 +2,13 @@
 
 import React, { useState } from "react";
 import {
-  useGetIndustries,
-  useAddIndustry,
-  useUpdateIndustry,
-  useDeleteIndustry,
-  Industry,
-  useBulkAddIndustries,
-} from "@/graphql/quries/industries/industry-queries";
+  useGetFunctions,
+  useAddFunction,
+  useUpdateFunction,
+  useDeleteFunction,
+  MemberFunction,
+  useBulkAddFunctions,
+} from "@/graphql/quries/functions/function-queries";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,11 +17,10 @@ import {
   Plus,
   Pencil,
   Trash2,
-  Search,
   Filter,
   Briefcase,
   Loader2,
-  Building2,
+  UserCheck,
 } from "lucide-react";
 import {
   Dialog,
@@ -41,40 +40,38 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
-import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { notify } from "@/lib/notify";
 import { Input } from "@/components/ui/input";
 
-// ── Color palette for industries ──
-const INDUSTRY_COLORS = [
-  "#6366f1",
-  "#0ea5e9",
-  "#10b981",
-  "#f59e0b",
-  "#ef4444",
-  "#8b5cf6",
-  "#f97316",
-  "#14b8a6",
+// ── Color palette for functions ──
+const FUNCTION_COLORS = [
+  "#3b82f6", // Blue
+  "#10b981", // Emerald
+  "#6366f1", // Indigo
+  "#f59e0b", // Amber
+  "#ec4899", // Pink
+  "#8b5cf6", // Purple
+  "#14b8a6", // Teal
+  "#f97316", // Orange
 ];
 
-function getIndustryColor(index: number) {
-  return INDUSTRY_COLORS[index % INDUSTRY_COLORS.length];
+function getFunctionColor(index: number) {
+  return FUNCTION_COLORS[index % FUNCTION_COLORS.length];
 }
 
 // ── Add/Edit Dialog ──
-function IndustryDialog({
+function FunctionDialog({
   open,
   onOpenChange,
-  editingIndustry,
+  editingFunction,
   isLoading,
   onSave,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  editingIndustry: Industry | null;
+  editingFunction: MemberFunction | null;
   isLoading: boolean;
   onSave: (values: { title: string }) => void;
 }) {
@@ -82,9 +79,9 @@ function IndustryDialog({
 
   React.useEffect(() => {
     if (open) {
-      setTitle(editingIndustry?.title || "");
+      setTitle(editingFunction?.title || "");
     }
-  }, [open, editingIndustry]);
+  }, [open, editingFunction]);
 
   const handleSubmit = () => {
     if (!title.trim()) return;
@@ -96,26 +93,26 @@ function IndustryDialog({
       <DialogContent className="max-w-md rounded-2xl border-slate-200">
         <DialogHeader>
           <DialogTitle className="font-bold text-slate-800">
-            {editingIndustry ? "Edit Industry" : "Add Industry"}
+            {editingFunction ? "Edit Job Function" : "Add Job Function"}
           </DialogTitle>
           <DialogDescription className="font-medium text-slate-500">
-            {editingIndustry
-              ? "Update the industry name"
-              : "Create a new industry to classify your members"}
+            {editingFunction
+              ? "Update the job function name"
+              : "Create a new job function to classify your members' professional roles"}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
           <div className="space-y-2">
             <Label
-              htmlFor="industry-title"
+              htmlFor="function-title"
               className="text-sm font-semibold text-slate-700"
             >
-              Industry Name <span className="text-rose-500">*</span>
+              Function Name <span className="text-rose-500">*</span>
             </Label>
             <Input
-              id="industry-title"
-              placeholder="e.g., Technology, Finance, Healthcare"
+              id="function-title"
+              placeholder="e.g., Engineering, Marketing, Operations"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="rounded-xl border-slate-200 focus-visible:ring-indigo-500/20"
@@ -138,7 +135,7 @@ function IndustryDialog({
             className="rounded-lg font-semibold bg-indigo-600 hover:bg-indigo-700 text-white gap-2"
           >
             {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-            {editingIndustry ? "Update" : "Save Industry"}
+            {editingFunction ? "Update" : "Save Function"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -146,17 +143,17 @@ function IndustryDialog({
   );
 }
 
-// ── Industries Grid ──
-function IndustriesGrid({
-  industries,
+// ── Functions Grid ──
+function FunctionsGrid({
+  functions,
   isLoading,
   onEdit,
   onDelete,
 }: {
-  industries: Industry[];
+  functions: MemberFunction[];
   isLoading: boolean;
-  onEdit: (industry: Industry) => void;
-  onDelete: (industry: Industry) => void;
+  onEdit: (func: MemberFunction) => void;
+  onDelete: (func: MemberFunction) => void;
 }) {
   if (isLoading) {
     return (
@@ -184,15 +181,15 @@ function IndustriesGrid({
     );
   }
 
-  if (industries.length === 0) {
+  if (functions.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 bg-slate-50/50 rounded-xl border border-slate-200 border-dashed m-4">
         <Briefcase className="h-10 w-10 text-slate-300 mb-4" />
         <h3 className="text-xl font-semibold text-slate-800 tracking-tight">
-          No industries found
+          No job functions found
         </h3>
         <p className="text-sm text-slate-500 text-center mt-2 max-w-sm">
-          Try adding a new industry or adjusting your search filters.
+          Try adding a new job function or adjusting your search filters.
         </p>
       </div>
     );
@@ -200,11 +197,11 @@ function IndustriesGrid({
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-4 md:p-6">
-      {industries.map((industry, index) => {
-        const color = getIndustryColor(index);
+      {functions.map((func, index) => {
+        const color = getFunctionColor(index);
         return (
           <Card
-            key={industry.id}
+            key={func.id}
             className="border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 group overflow-hidden rounded-xl hover:border-indigo-500/20 hover:-translate-y-1 bg-white cursor-pointer"
           >
             {/* Color bar */}
@@ -222,14 +219,14 @@ function IndustriesGrid({
                       color: color,
                     }}
                   >
-                    <Building2 className="h-5 w-5" />
+                    <UserCheck className="h-5 w-5" />
                   </div>
                   <div>
                     <h3 className="font-bold text-md w-full text-slate-800 group-hover:text-indigo-600 transition-colors">
-                      {industry.title}
+                      {func.title}
                     </h3>
                     <p className="text-xs font-semibold text-slate-500 mt-1 uppercase tracking-wider">
-                      Industry
+                      Job Function
                     </p>
                   </div>
                 </div>
@@ -241,7 +238,7 @@ function IndustriesGrid({
                     className="h-8 w-8 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg"
                     onClick={(e) => {
                       e.stopPropagation();
-                      onEdit(industry);
+                      onEdit(func);
                     }}
                   >
                     <Pencil className="h-3.5 w-3.5" />
@@ -252,7 +249,7 @@ function IndustriesGrid({
                     className="h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg"
                     onClick={(e) => {
                       e.stopPropagation();
-                      onDelete(industry);
+                      onDelete(func);
                     }}
                   >
                     <Trash2 className="h-3.5 w-3.5" />
@@ -267,168 +264,264 @@ function IndustriesGrid({
   );
 }
 
-// ── Recommended Industries ──
-const RECOMMENDED_INDUSTRIES = [
-  "Advertising & Media",
-  "Advisory & Consulting Services",
-  "Aerospace & Defence",
-  "Agribusiness & Farming",
-  "Airlines & Airport Services",
-  "Architecture & Interior Design",
+// ── Recommended Job Functions ──
+const RECOMMENDED_FUNCTIONS = [
+  "Accounting & Finance",
+  "Administration",
+  "Advertising",
+  "Advisory",
+  "Analytics",
+  "Architecture",
+  "Art & Culture",
   "Automotive",
+  "Audit",
   "Banking",
-  "Beauty",
-  "Chemicals",
+  "Board Member",
+  "Branding",
+  "Business Analysis",
+  "Business Development",
+  "Civil Engineering",
+  "Cloud Computing",
+  "Community Management",
+  "Compliance",
   "Construction",
-  "Consumer Internet",
-  "Consumer Products",
-  "Defence & Security",
-  "Ecology & Environment",
-  "Education & Research",
-  "Entertainment",
+  "Content Writing",
+  "Consulting",
+  "Copywriting",
+  "Corporate Strategy",
+  "Creative Direction",
+  "Customer Services",
+  "Cybersecurity",
+  "Communications",
+  "Data Analytics",
+  "Data Engineering",
+  "Data Entry",
+  "Data Science",
+  "Design (Graphic, Product, UI/UX)",
+  "DevOps",
+  "Digital Marketing",
+  "Documentation",
+  "E-commerce Operations",
+  "Editorial",
+  "Education & Training",
+  "Engineering",
+  "Entrepreneurship",
   "Event Management",
-  "Facilities Management",
-  "Fashion & Apparel",
-  "Financial Services",
-  "Gaming",
-  "Government",
-  "Health & Wellness",
-  "High Tech",
-  "HORECA",
-  "Household Services",
-  "Incubation & Entrepreneurship",
-  "Industrial Manufacturing",
-  "Influencers, Creators & Celebrities",
-  "Information Technology",
-  "Insurance",
-  "Internet, D2C & E-commerce",
-  "Legal",
-  "Life Sciences & Healthcare",
-  "Media Production",
-  "Mill Products",
-  "Mining",
-  "Not For Profit",
-  "Oil, Gas & Energy",
-  "Performing Arts, Museums & Culture",
-  "Profesional Networks",
-  "Professional Association",
-  "Professional Services",
-  "Publishing & Printing",
-  "Real Estate",
-  "Real Estate - Commercial",
-  "Real Estate - Residential",
-  "Retail",
-  "Sports",
-  "Social Media & Networking",
+  "Facility Management",
+  "Fashion Design",
+  "Fintech",
+  "Finance",
+  "Food & Beverage Services",
+  "Front-end Development",
+  "Fundraising",
+  "Game Development",
+  "Government & Policy",
+  "Graphic Design",
+  "Growth Strategy",
+  "Hardware Engineering",
+  "Health & Safety",
+  "Helpdesk Support",
+  "Hospitality Services",
+  "Human Resources (HR)",
+  "Illustration",
+  "Information Security",
+  "Infrastructure Management",
+  "Information Technology (IT)",
+  "Instructional Design",
+  "Insurance Services",
+  "Investment Banking",
+  "Inventory Management",
+  "Java Development",
+  "Journalism",
+  "Judicial Services",
+  "Kindergarten & Early Childhood Education",
+  "Knowledge Management",
+  "Lab Technician",
+  "Language Translation",
+  "Learning & Development",
+  "Legal Services",
+  "Librarians & Library Management",
+  "Logistics",
+  "Management",
+  "Manufacturing",
+  "Market Research",
+  "Marketing",
+  "Mechanical Engineering",
+  "Media & Communication",
+  "Medical Services",
+  "Merchandising",
+  "Military & Protective Services",
+  "Mobile App Development",
+  "Motion Graphics",
+  "Network Engineering",
+  "NGO & Social Work",
+  "Nursing",
+  "Office Management",
+  "Oil & Gas",
+  "Online Tutoring",
+  "Operations",
+  "Outreach Coordination",
+  "Payroll",
+  "Performance Marketing",
+  "Pharmaceutical / Biotechnology",
+  "Photography",
+  "Procurement",
+  "Product Management",
+  "Program Management",
+  "Project Management",
+  "Programming",
+  "Public Relations (PR)",
+  "Purchasing",
+  "Quality Assurance",
+  "Quantitative Analysis",
+  "Real Estate Management",
+  "Recruitment",
+  "Relationship Management",
+  "Renewable Energy",
+  "Research",
+  "Retail Services",
+  "Risk Management",
+  "SAAS",
+  "Sales",
+  "Security Services",
+  "SEO/SEM",
+  "Social Media Management",
+  "Software Development",
+  "Sport & Recreation",
+  "Strategy & Planning",
+  "Supply Chain",
+  "Support Services",
+  "Taxation",
+  "Teaching",
+  "Technology",
   "Telecommunications",
-  "Think Tanks",
-  "Tours & Travels",
-  "Trading",
-  "Transportation, Logistics & Distribution",
-  "Utilities",
-  "VC, Private Equity & Angel Networks",
+  "Testing (QA/Automation)",
+  "Training",
+  "Translation",
+  "Travel/Airlines",
+  "UI/UX Design",
+  "Underwriting",
+  "User Research",
+  "Urban Planning & Zoning",
   "Veterinary Services",
-  "Volunteering",
-  "Zoos & Bootanical Gardens",
+  "Video Editing",
+  "Visual Design",
+  "Voiceover / Voice Acting",
+  "Warehouse Operations",
+  "Web Development",
+  "Wellness Coaching",
+  "Writing & Editing",
+  "XML/Data Structuring",
+  "Youth Program Coordination",
+  "YouTube Channel Management",
+  "CRM Management"
 ];
 
 // ── Main Page ──
-export default function IndustriesPage() {
-  const { data, loading, refetch } = useGetIndustries();
+export default function FunctionsPage() {
+  const { data, loading, refetch } = useGetFunctions();
   const [search, setSearch] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingIndustry, setEditingIndustry] = useState<Industry | null>(null);
-  const [industryToDelete, setIndustryToDelete] = useState<Industry | null>(
+  const [editingFunction, setEditingFunction] = useState<MemberFunction | null>(null);
+  const [functionToDelete, setFunctionToDelete] = useState<MemberFunction | null>(
     null,
   );
 
-  const [addIndustry, { loading: creating }] = useAddIndustry({
+  const [addFunction, { loading: creating }] = useAddFunction({
     onCompleted: () => {
-      notify.success("Industry created successfully");
+      notify.success("Job function created successfully");
       setIsDialogOpen(false);
       refetch();
     },
     onError: (error) =>
-      notify.error(error.message || "Failed to create industry"),
+      notify.error(error.message || "Failed to create job function"),
   });
 
-  const [updateIndustry, { loading: updating }] = useUpdateIndustry({
+  const [updateFunction, { loading: updating }] = useUpdateFunction({
     onCompleted: () => {
-      notify.success("Industry updated successfully");
+      notify.success("Job function updated successfully");
       setIsDialogOpen(false);
-      setEditingIndustry(null);
+      setEditingFunction(null);
       refetch();
     },
     onError: (error) =>
-      notify.error(error.message || "Failed to update industry"),
+      notify.error(error.message || "Failed to update job function"),
   });
 
-  const [deleteIndustry, { loading: deleting }] = useDeleteIndustry({
+  const [deleteFunction, { loading: deleting }] = useDeleteFunction({
     onCompleted: () => {
-      notify.success("Industry deleted successfully");
-      setIndustryToDelete(null);
+      notify.success("Job function deleted successfully");
+      setFunctionToDelete(null);
       refetch();
     },
     onError: (error) =>
-      notify.error(error.message || "Failed to delete industry"),
+      notify.error(error.message || "Failed to delete job function"),
   });
 
-  const [bulkAddIndustries, { loading: bulkAdding }] = useBulkAddIndustries({
+  const [bulkAddFunctions, { loading: bulkAdding }] = useBulkAddFunctions({
     onCompleted: (res) => {
-      const addedCount = res.bulkAddIndustries?.length || 0;
+      const addedCount = res.bulkAddFunctions?.length || 0;
       if (addedCount > 0) {
-        notify.success(`Successfully added ${addedCount} industries`);
+        notify.success(`Successfully added ${addedCount} job functions`);
       } else {
-        notify.info("All recommended industries already exist");
+        notify.info("All recommended job functions already exist");
       }
       refetch();
     },
     onError: (error) =>
-      notify.error(error.message || "Failed to bulk add industries"),
+      notify.error(error.message || "Failed to bulk add job functions"),
   });
 
   const handleSave = async (values: { title: string }) => {
-    if (editingIndustry) {
-      await updateIndustry({
-        variables: { input: { id: editingIndustry.id, title: values.title } },
+    if (editingFunction) {
+      await updateFunction({
+        variables: { input: { id: editingFunction.id, title: values.title } },
       });
     } else {
-      await addIndustry({
+      await addFunction({
         variables: { input: values },
       });
     }
   };
 
   const handleDelete = async () => {
-    if (!industryToDelete) return;
-    await deleteIndustry({
-      variables: { input: { id: industryToDelete.id } },
+    if (!functionToDelete) return;
+    await deleteFunction({
+      variables: { input: { id: functionToDelete.id } },
     });
   };
 
   const handleBulkAdd = async () => {
-    await bulkAddIndustries({
-      variables: { input: { titles: RECOMMENDED_INDUSTRIES } },
+    await bulkAddFunctions({
+      variables: { input: { titles: RECOMMENDED_FUNCTIONS } },
     });
   };
 
-  const industries = data?.getIndustries || [];
-  const filteredIndustries = industries.filter((i) =>
-    i.title.toLowerCase().includes(search.toLowerCase()),
+  const functions = data?.getFunctions || [];
+  const filteredFunctions = functions.filter((f) =>
+    f.title.toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
-    <EcosystemWrapper anonymized-1="member-industries">
-      <EcosystemHeader
-        title="Industries"
-        badgeText="Classification"
-        description="Classify members by industry for better segmentation and analytics."
-        icon={Building2}
-        actions={
+    <>
+      <EcosystemActionBar shadow="none" className="rounded-xl border border-slate-200">
+        <EcosystemActionBar.Group>
+          <EcosystemActionBar.Item grow className="max-w-[360px]">
+            <EcosystemActionBar.Search
+              value={search}
+              onChange={setSearch}
+              placeholder="Search job functions..."
+            />
+          </EcosystemActionBar.Item>
+        </EcosystemActionBar.Group>
+
+        <EcosystemActionBar.Separator />
+
+        <EcosystemActionBar.Group align="right">
           <div className="flex gap-2">
             <Button
               variant="outline"
-              className="font-semibold text-xs px-4 h-10 rounded-lg shadow-sm gap-2 border-indigo-200 text-indigo-600 hover:bg-indigo-50"
+              className="font-semibold text-xs px-4 h-9 rounded-lg shadow-sm gap-2 border-indigo-200 text-indigo-600 hover:bg-indigo-50"
               onClick={handleBulkAdd}
               disabled={bulkAdding}
             >
@@ -440,33 +533,19 @@ export default function IndustriesPage() {
               Add Recommended
             </Button>
             <Button
-              className="font-semibold text-xs px-6 h-10 rounded-lg shadow-sm gap-2"
+              className="font-semibold text-xs px-6 h-9 rounded-lg shadow-sm gap-2 bg-indigo-600 hover:bg-indigo-700 text-white"
               onClick={() => {
-                setEditingIndustry(null);
+                setEditingFunction(null);
                 setIsDialogOpen(true);
               }}
             >
               <Plus className="h-4 w-4" />
-              Add Industry
+              Add Function
             </Button>
           </div>
-        }
-      />
 
-      <EcosystemActionBar shadow="none">
-        <EcosystemActionBar.Group>
-          <EcosystemActionBar.Item grow className="max-w-[400px]">
-            <EcosystemActionBar.Search
-              value={search}
-              onChange={setSearch}
-              placeholder="Search industries..."
-            />
-          </EcosystemActionBar.Item>
-        </EcosystemActionBar.Group>
+          <EcosystemActionBar.Separator />
 
-        <EcosystemActionBar.Separator />
-
-        <EcosystemActionBar.Group align="right">
           <EcosystemActionBar.Item>
             <Button
               variant="outline"
@@ -477,37 +556,37 @@ export default function IndustriesPage() {
             </Button>
           </EcosystemActionBar.Item>
 
-          <EcosystemActionBar.Status active={filteredIndustries.length > 0}>
-            {filteredIndustries.length} Industries
+          <EcosystemActionBar.Status active={filteredFunctions.length > 0}>
+            {filteredFunctions.length} Functions
           </EcosystemActionBar.Status>
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
 
-      <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">
-        <IndustriesGrid
-          industries={filteredIndustries}
+      <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0 mt-4">
+        <FunctionsGrid
+          functions={filteredFunctions}
           isLoading={loading}
-          onEdit={(industry) => {
-            setEditingIndustry(industry);
+          onEdit={(func) => {
+            setEditingFunction(func);
             setIsDialogOpen(true);
           }}
-          onDelete={(industry) => setIndustryToDelete(industry)}
+          onDelete={(func) => setFunctionToDelete(func)}
         />
       </EcosystemContainer>
 
       {/* Add/Edit Dialog */}
-      <IndustryDialog
+      <FunctionDialog
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
-        editingIndustry={editingIndustry}
+        editingFunction={editingFunction}
         isLoading={creating || updating}
         onSave={handleSave}
       />
 
       {/* Delete Confirmation */}
       <AlertDialog
-        open={!!industryToDelete}
-        onOpenChange={(open) => !open && setIndustryToDelete(null)}
+        open={!!functionToDelete}
+        onOpenChange={(open) => !open && setFunctionToDelete(null)}
       >
         <AlertDialogContent className="rounded-2xl border-slate-200">
           <AlertDialogHeader>
@@ -515,9 +594,9 @@ export default function IndustriesPage() {
               Are you absolutely sure?
             </AlertDialogTitle>
             <AlertDialogDescription className="text-slate-500 font-medium">
-              This will permanently delete the industry{" "}
+              This will permanently delete the job function{" "}
               <span className="font-bold text-slate-700">
-                "{industryToDelete?.title}"
+                "{functionToDelete?.title}"
               </span>
               . This action cannot be undone.
             </AlertDialogDescription>
@@ -538,11 +617,11 @@ export default function IndustriesPage() {
               disabled={deleting}
             >
               {deleting && <Loader2 className="h-4 w-4 animate-spin" />}
-              {deleting ? "Deleting..." : "Delete Industry"}
+              {deleting ? "Deleting..." : "Delete Function"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </EcosystemWrapper>
+    </>
   );
 }

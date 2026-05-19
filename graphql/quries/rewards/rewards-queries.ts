@@ -1,7 +1,11 @@
 import { gql } from "@apollo/client";
 
 export const GET_REWARDS = gql`
-  query GetRewards($status: String, $search: String, $pagination: PaginationInput) {
+  query GetRewards(
+    $status: String
+    $search: String
+    $pagination: PaginationInput
+  ) {
     getRewards(status: $status, search: $search, pagination: $pagination) {
       id
       title
@@ -29,6 +33,9 @@ export const GET_REWARDS = gql`
       url
       howToClaim
       couponCode
+      couponType
+      remainingVouchers
+      totalVouchers
     }
   }
 `;
@@ -71,6 +78,28 @@ export const GET_REWARD_BY_ID = gql`
     }
   }
 `;
+export const GET_VOUCHER = gql`
+  query GetVoucher($rewardId: ID!) {
+    getVoucher(rewardId: $rewardId) {
+      id
+      rewardId
+      code
+      cardNumber
+      pin
+      isUsed
+      assignedTo {
+        id
+        firstName
+        lastName
+        email
+        avatar
+      }
+      assignedAt
+      expiryDate
+      createdAt
+    }
+  }
+`;
 
 export const GET_VOUCHERS = gql`
   query GetVouchers($rewardId: ID!, $pagination: PaginationInput) {
@@ -78,8 +107,16 @@ export const GET_VOUCHERS = gql`
       id
       rewardId
       code
+      cardNumber
+      pin
       isUsed
-      assignedTo
+      assignedTo {
+        id
+        firstName
+        lastName
+        email
+        avatar
+      }
       assignedAt
       expiryDate
       createdAt
@@ -239,7 +276,13 @@ export const GET_ALL_VOUCHERS = gql`
       rewardId
       code
       isUsed
-      assignedTo
+      assignedTo {
+        id
+        firstName
+        lastName
+        email
+        avatar
+      }
       assignedAt
       expiryDate
       createdAt
@@ -268,6 +311,29 @@ export const DELETE_VOUCHER = gql`
   }
 `;
 
+export const EDIT_VOUCHER = gql`
+  mutation EditVoucher($voucherId: ID!, $input: VoucherInput!) {
+    editVoucher(voucherId: $voucherId, input: $input) {
+      id
+      rewardId
+      code
+      cardNumber
+      pin
+      isUsed
+      assignedTo {
+        id
+        firstName
+        lastName
+        email
+        avatar
+      }
+      assignedAt
+      expiryDate
+      createdAt
+    }
+  }
+`;
+
 export const GET_VOUCHERS_BY_REWARD_MECHANISM = gql`
   query GetVouchersByRewardMechanism(
     $mechanism: RewardMechanism!
@@ -281,7 +347,13 @@ export const GET_VOUCHERS_BY_REWARD_MECHANISM = gql`
       rewardId
       code
       isUsed
-      assignedTo
+      assignedTo {
+        id
+        firstName
+        lastName
+        email
+        avatar
+      }
       assignedAt
       expiryDate
       createdAt
@@ -682,6 +754,39 @@ export const GET_SPIN_SCRATCH_STATS = gql`
         tcBurned
         tcRewarded
       }
+    }
+  }
+`;
+
+export const GET_VOUCHERS_PAGINATED = gql`
+  query GetVouchersPaginated($rewardId: ID!, $pagination: PaginationInput) {
+    getVouchersPaginated(rewardId: $rewardId, pagination: $pagination) {
+      vouchers {
+        id
+        rewardId
+        code
+        cardNumber
+        pin
+        isUsed
+        assignedTo {
+          id
+          firstName
+          lastName
+          email
+          avatar
+        }
+        assignedAt
+        expiryDate
+        createdAt
+        reward {
+          id
+          title
+          image
+        }
+      }
+      totalCount
+      hasNextPage
+      hasPreviousPage
     }
   }
 `;

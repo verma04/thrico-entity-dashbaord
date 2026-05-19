@@ -30,7 +30,11 @@ import { useGetEntityCurrencyConfig } from "@/graphql/actions/currency";
 import Link from "next/link";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { useToast } from "@/hooks/use-toast";
-import { useUploadVouchers } from "@/graphql/actions/rewards";
+import {
+  useUploadVouchers,
+  useGetVoucher,
+  useGetVouchers,
+} from "@/graphql/actions/rewards";
 import { Button } from "@/components/ui/button";
 
 interface RewardFormSectionsProps {
@@ -44,6 +48,13 @@ export function RewardFormSections({
 }: RewardFormSectionsProps) {
   const { data: currencyConfig } = useGetEntityCurrencyConfig();
   const [uploadVouchers, { loading: uploading }] = useUploadVouchers();
+  const { data: voucherData, refetch: refetchVoucher } = useGetVoucher(
+    rewardId || "",
+  );
+  const { data: vouchersListData } = useGetVouchers({
+    rewardId: rewardId || "",
+    pagination: { page: 1, limit: 100 },
+  });
   const { toast } = useToast();
 
   const [uploadStep, setUploadStep] = React.useState<
@@ -88,7 +99,10 @@ export function RewardFormSections({
       const reader = new FileReader();
       reader.onload = (e) => {
         const text = e.target?.result as string;
-        const lines = text.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+        const lines = text
+          .split(/\r?\n/)
+          .map((line) => line.trim())
+          .filter(Boolean);
         if (lines.length < 2) {
           setUploadData([]);
           setValidCount(0);
@@ -96,22 +110,25 @@ export function RewardFormSections({
           return;
         }
 
-        const headers = lines[0].split(",").map(h => h.trim().toLowerCase());
+        const headers = lines[0].split(",").map((h) => h.trim().toLowerCase());
         const codeIndex = headers.indexOf("code");
         const cardIndex = headers.indexOf("cardnumber");
         const pinIndex = headers.indexOf("pin");
 
-        const data = lines.slice(1).map(line => {
-          const parts = line.split(",").map(p => p.trim());
-          const code = codeIndex !== -1 ? parts[codeIndex] : parts[0];
-          const cardNumber = cardIndex !== -1 ? parts[cardIndex] : undefined;
-          const pin = pinIndex !== -1 ? parts[pinIndex] : undefined;
-          return {
-            code: code || "",
-            cardNumber: cardNumber || null,
-            pin: pin || null,
-          };
-        }).filter(item => item.code);
+        const data = lines
+          .slice(1)
+          .map((line) => {
+            const parts = line.split(",").map((p) => p.trim());
+            const code = codeIndex !== -1 ? parts[codeIndex] : parts[0];
+            const cardNumber = cardIndex !== -1 ? parts[cardIndex] : undefined;
+            const pin = pinIndex !== -1 ? parts[pinIndex] : undefined;
+            return {
+              code: code || "",
+              cardNumber: cardNumber || null,
+              pin: pin || null,
+            };
+          })
+          .filter((item) => item.code);
 
         setUploadData(data);
         setValidCount(data.length);
@@ -122,7 +139,8 @@ export function RewardFormSections({
   };
 
   const downloadTemplate = () => {
-    const csvContent = "code,cardNumber,pin\nVOUCHER-123,6034123456789999,847291\nVOUCHER-456,,";
+    const csvContent =
+      "code,cardNumber,pin\nVOUCHER-123,6034123456789999,847291\nVOUCHER-456,,";
     const blob = new Blob([csvContent], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -843,6 +861,59 @@ export function RewardFormSections({
                     this reward.
                   </p>
                   {err("couponCode")}
+
+                  {/* Display Voucher Extra Details if available */}
+                  {voucherData?.getVoucher && (
+                    <div className="mt-4 pt-4 border-t border-border/40 space-y-3">
+                      <h4 className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                        Global Voucher Details
+                      </h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        {voucherData.getVoucher.code && (
+                          <div>
+                            <span className="text-[9px] text-muted-foreground uppercase">
+                              Code
+                            </span>
+                            <p className="text-[12px] font-mono mt-0.5">
+                              {voucherData.getVoucher.code}
+                            </p>
+                          </div>
+                        )}
+                        {voucherData.getVoucher.cardNumber && (
+                          <div>
+                            <span className="text-[9px] text-muted-foreground uppercase">
+                              Card Number
+                            </span>
+                            <p className="text-[12px] font-mono mt-0.5">
+                              {voucherData.getVoucher.cardNumber}
+                            </p>
+                          </div>
+                        )}
+                        {voucherData.getVoucher.pin && (
+                          <div>
+                            <span className="text-[9px] text-muted-foreground uppercase">
+                              PIN
+                            </span>
+                            <p className="text-[12px] font-mono mt-0.5">
+                              {voucherData.getVoucher.pin}
+                            </p>
+                          </div>
+                        )}
+                        {voucherData.getVoucher.expiryDate && (
+                          <div>
+                            <span className="text-[9px] text-muted-foreground uppercase">
+                              Expiry
+                            </span>
+                            <p className="text-[12px] mt-0.5">
+                              {new Date(
+                                Number(voucherData.getVoucher.expiryDate),
+                              ).toLocaleDateString()}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -946,6 +1017,64 @@ export function RewardFormSections({
                       </Button>
                     </div>
                   )}
+
+                  {/* Voucher Inventory Table */}
+                  {vouchersListData?.getVouchers &&
+                    vouchersListData.getVouchers.length > 0 && (
+                      <div className="mt-6 pt-6 border-t border-border/40 space-y-4">
+                        <h4 className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground flex items-center justify-between">
+                          <span>
+                            Uploaded Vouchers (
+                            {vouchersListData.getVouchers.length})
+                          </span>
+                        </h4>
+                        <div className="rounded-xl border border-border/40 overflow-hidden bg-white dark:bg-black/10">
+                          <table className="w-full text-left text-[11px]">
+                            <thead className="bg-muted/50 border-b border-border/40">
+                              <tr>
+                                <th className="px-4 py-2.5 font-bold text-muted-foreground">
+                                  Code
+                                </th>
+                                <th className="px-4 py-2.5 font-bold text-muted-foreground">
+                                  Status
+                                </th>
+                                <th className="px-4 py-2.5 font-bold text-muted-foreground">
+                                  Created
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-border/40">
+                              {vouchersListData.getVouchers.map((v: any) => (
+                                <tr
+                                  key={v.id}
+                                  className="hover:bg-muted/30 transition-colors"
+                                >
+                                  <td className="px-4 py-2.5 font-mono text-[10px] text-foreground">
+                                    {v.code}
+                                  </td>
+                                  <td className="px-4 py-2.5">
+                                    {v.isUsed ? (
+                                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-rose-500/10 text-rose-600">
+                                        Used
+                                      </span>
+                                    ) : (
+                                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/10 text-emerald-600">
+                                        Available
+                                      </span>
+                                    )}
+                                  </td>
+                                  <td className="px-4 py-2.5 text-muted-foreground">
+                                    {new Date(
+                                      Number(v.createdAt),
+                                    ).toLocaleDateString()}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
                 </div>
               )}
 

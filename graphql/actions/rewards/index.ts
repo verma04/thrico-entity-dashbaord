@@ -13,7 +13,10 @@ import {
   UPDATE_REWARD_SECURITY_SETTINGS,
   MARK_VOUCHER_AS_USED,
   DELETE_VOUCHER,
+  EDIT_VOUCHER,
   GET_VOUCHERS_BY_REWARD_MECHANISM,
+  GET_VOUCHER,
+  GET_VOUCHERS_PAGINATED,
 } from "../../quries/rewards/rewards-queries";
 import { GET_SPIN_SCRATCH_STATS } from "../../quries/rewards/stats";
 import { TimeRange, DateRangeInput } from "../dashbaord/dashboard-quries";
@@ -41,6 +44,17 @@ export const useGetVouchers = (variables: {
   rewardId: string;
   pagination?: { page: number; limit: number };
 }) => useQuery(GET_VOUCHERS, { variables, skip: !variables.rewardId });
+
+export const useGetVouchersPaginated = (variables: {
+  rewardId: string;
+  pagination?: { page: number; limit: number };
+}) => useQuery(GET_VOUCHERS_PAGINATED, { variables, skip: !variables.rewardId });
+
+export const useGetVoucher = (rewardId: string) =>
+  useQuery(GET_VOUCHER, {
+    variables: { rewardId },
+    skip: !rewardId,
+  });
 
 export const useGetAllVouchers = (variables?: {
   pagination?: { page: number; limit: number };
@@ -112,6 +126,12 @@ export const useDeleteVoucher = (options?: any) =>
   useMutation(DELETE_VOUCHER, {
     ...options,
     refetchQueries: [{ query: GET_ALL_VOUCHERS }, { query: GET_REWARD_STATS }],
+  });
+
+export const useEditVoucher = (options?: any) =>
+  useMutation(EDIT_VOUCHER, {
+    ...options,
+    refetchQueries: [{ query: GET_ALL_VOUCHERS }],
   });
 
 export const useGetSpinScratchStats = (

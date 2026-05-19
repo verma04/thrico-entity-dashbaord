@@ -75,11 +75,11 @@ export default function RewardsDashboard() {
   const inventoryRewards = allRewards.filter((r: any) => r.inventoryRequired);
   const lowStockRewards = inventoryRewards.filter(
     (r: any) =>
-      r.remainingStock !== undefined && r.remainingStock <= 10
+      r.remainingVouchers !== undefined && r.remainingVouchers <= 10
   );
   const healthyRewards = inventoryRewards.filter(
     (r: any) =>
-      r.remainingStock === undefined || r.remainingStock > 10
+      r.remainingVouchers === undefined || r.remainingVouchers > 10
   );
 
   const kpis = [
@@ -659,7 +659,7 @@ export default function RewardsDashboard() {
                 {[...lowStockRewards, ...healthyRewards]
                   .slice(0, 9)
                   .map((reward: any) => {
-                    const remaining = reward.remainingStock;
+                    const remaining = reward.remainingVouchers;
                     const total = reward.totalVouchers || 0;
                     const pct =
                       total > 0

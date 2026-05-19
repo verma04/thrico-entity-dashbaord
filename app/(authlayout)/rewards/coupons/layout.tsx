@@ -24,12 +24,12 @@ export default function CouponsLayout({
       icon: LayoutGrid,
       href: "/rewards/coupons",
     },
-    {
-      key: "vouchers",
-      label: "Vouchers",
-      icon: Ticket,
-      href: "/rewards/coupons/vouchers",
-    },
+    // {
+    //   key: "vouchers",
+    //   label: "Vouchers",
+    //   icon: Ticket,
+    //   href: "/rewards/coupons/vouchers",
+    // },
   ];
 
   return (

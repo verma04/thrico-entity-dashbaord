@@ -3,17 +3,9 @@
 import React, { useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  Plus,
-  LayoutGrid,
-  List,
-  RotateCw,
-} from "lucide-react";
+import { Plus, LayoutGrid, List, RotateCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  useGetRewards,
-  useUploadVouchers,
-} from "@/graphql/actions/rewards";
+import { useGetRewards, useUploadVouchers } from "@/graphql/actions/rewards";
 import { useToast } from "@/hooks/use-toast";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
@@ -29,7 +21,9 @@ export default function RewardsGalleryPage() {
   // Batch Upload States
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [uploadRewardId, setUploadRewardId] = useState("");
-  const [uploadStep, setUploadStep] = useState<"idle" | "validating" | "summary">("idle");
+  const [uploadStep, setUploadStep] = useState<
+    "idle" | "validating" | "summary"
+  >("idle");
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
@@ -58,12 +52,15 @@ export default function RewardsGalleryPage() {
   const handleFileSelect = (file: File) => {
     setUploadedFile(file);
     setUploadStep("validating");
-    
+
     setTimeout(() => {
       const reader = new FileReader();
       reader.onload = (e) => {
         const text = e.target?.result as string;
-        const lines = text.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+        const lines = text
+          .split(/\r?\n/)
+          .map((line) => line.trim())
+          .filter(Boolean);
         if (lines.length < 2) {
           setUploadData([]);
           setValidCount(0);
@@ -72,22 +69,25 @@ export default function RewardsGalleryPage() {
           return;
         }
 
-        const headers = lines[0].split(",").map(h => h.trim().toLowerCase());
+        const headers = lines[0].split(",").map((h) => h.trim().toLowerCase());
         const codeIndex = headers.indexOf("code");
         const cardIndex = headers.indexOf("cardnumber");
         const pinIndex = headers.indexOf("pin");
 
-        const data = lines.slice(1).map(line => {
-          const parts = line.split(",").map(p => p.trim());
-          const code = codeIndex !== -1 ? parts[codeIndex] : parts[0];
-          const cardNumber = cardIndex !== -1 ? parts[cardIndex] : undefined;
-          const pin = pinIndex !== -1 ? parts[pinIndex] : undefined;
-          return {
-            code: code || "",
-            cardNumber: cardNumber || null,
-            pin: pin || null,
-          };
-        }).filter(item => item.code);
+        const data = lines
+          .slice(1)
+          .map((line) => {
+            const parts = line.split(",").map((p) => p.trim());
+            const code = codeIndex !== -1 ? parts[codeIndex] : parts[0];
+            const cardNumber = cardIndex !== -1 ? parts[cardIndex] : undefined;
+            const pin = pinIndex !== -1 ? parts[pinIndex] : undefined;
+            return {
+              code: code || "",
+              cardNumber: cardNumber || null,
+              pin: pin || null,
+            };
+          })
+          .filter((item) => item.code);
 
         setUploadData(data);
         setValidCount(data.length);
@@ -99,7 +99,8 @@ export default function RewardsGalleryPage() {
   };
 
   const downloadTemplate = () => {
-    const csvContent = "code,cardNumber,pin\nVOUCHER-123,6034123456789999,847291\nVOUCHER-456,,";
+    const csvContent =
+      "code,cardNumber,pin\nVOUCHER-123,6034123456789999,847291\nVOUCHER-456,,";
     const blob = new Blob([csvContent], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -124,7 +125,10 @@ export default function RewardsGalleryPage() {
           },
         },
       });
-      toast({ title: "Dynamic Ingestion Successful", description: `${validCount} vouchers have been localized.` });
+      toast({
+        title: "Dynamic Ingestion Successful",
+        description: `${validCount} vouchers have been localized.`,
+      });
       resetUpload();
       setIsUploadOpen(false);
       refetch();
@@ -169,7 +173,9 @@ export default function RewardsGalleryPage() {
                 onClick={() => setViewMode("grid")}
                 className={cn(
                   "h-8 w-8 rounded-lg transition-all",
-                  viewMode === "grid" ? "bg-white shadow-sm text-indigo-600" : "text-muted-foreground",
+                  viewMode === "grid"
+                    ? "bg-white shadow-sm text-indigo-600"
+                    : "text-muted-foreground",
                 )}
               >
                 <LayoutGrid size={14} />
@@ -180,7 +186,9 @@ export default function RewardsGalleryPage() {
                 onClick={() => setViewMode("list")}
                 className={cn(
                   "h-8 w-8 rounded-lg transition-all",
-                  viewMode === "list" ? "bg-white shadow-sm text-indigo-600" : "text-muted-foreground",
+                  viewMode === "list"
+                    ? "bg-white shadow-sm text-indigo-600"
+                    : "text-muted-foreground",
                 )}
               >
                 <List size={14} />
@@ -194,7 +202,10 @@ export default function RewardsGalleryPage() {
               onClick={() => refetch()}
               className="h-9 w-9 rounded-xl border-border bg-card text-muted-foreground hover:text-foreground"
             >
-              <RotateCw size={14} className={cn(rewardsLoading ? "animate-spin" : "")} />
+              <RotateCw
+                size={14}
+                className={cn(rewardsLoading ? "animate-spin" : "")}
+              />
             </Button>
           </EcosystemActionBar.Item>
           <EcosystemActionBar.Item>
@@ -204,15 +215,6 @@ export default function RewardsGalleryPage() {
                 New Reward
               </Button>
             </Link>
-          </EcosystemActionBar.Item>
-          <EcosystemActionBar.Item>
-            <Button
-              variant="outline"
-              onClick={() => setIsUploadOpen(true)}
-              className="h-9 px-5 rounded-xl border-indigo-200 bg-indigo-50/30 text-indigo-700 font-bold hover:bg-indigo-50"
-            >
-              Batch Upload
-            </Button>
           </EcosystemActionBar.Item>
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
@@ -224,7 +226,7 @@ export default function RewardsGalleryPage() {
           filteredRewards={filteredRewards}
           searchQuery={searchQuery}
           onManageVouchers={(rewardId) => {
-            router.push(`/rewards/coupons/vouchers?rewardId=${rewardId}`);
+            router.push(`/rewards/coupons/${rewardId}/manage-voucher`);
           }}
           onOpenUploadForReward={openUploadForReward}
         />
