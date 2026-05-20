@@ -478,6 +478,123 @@ export function MemberCreationForm({
                         </p>
                       </div>
 
+                      <div className="space-y-2">
+                        <Label className="text-sm font-bold text-slate-700">
+                          Job Functions
+                        </Label>
+                        <Popover
+                          open={isJobFunctionPopoverOpen}
+                          onOpenChange={setIsJobFunctionPopoverOpen}
+                        >
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              role="combobox"
+                              aria-expanded={isJobFunctionPopoverOpen}
+                              className="w-full justify-between h-auto min-h-[44px] rounded-xl border-slate-200 hover:bg-slate-50 transition-all px-3 py-2 text-left font-normal"
+                            >
+                              <div className="flex flex-wrap gap-1.5">
+                                {formik.values.jobFunctionIds.length > 0 ? (
+                                  formik.values.jobFunctionIds.map(
+                                    (id: string) => {
+                                      const jf = jobFunctions.find(
+                                        (item) => item.id === id,
+                                      );
+                                      return (
+                                        <Badge
+                                          key={id}
+                                          variant="secondary"
+                                          className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-100 py-0.5 px-2 rounded-lg text-[11px] font-bold flex items-center gap-1"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            const next =
+                                              formik.values.jobFunctionIds.filter(
+                                                (iid: string) => iid !== id,
+                                              );
+                                            formik.setFieldValue(
+                                              "jobFunctionIds",
+                                              next,
+                                            );
+                                          }}
+                                        >
+                                          {jf?.title}
+                                          <X className="h-3 w-3" />
+                                        </Badge>
+                                      );
+                                    },
+                                  )
+                                ) : (
+                                  <span className="text-slate-400">
+                                    Select job functions...
+                                  </span>
+                                )}
+                              </div>
+                              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 rounded-2xl shadow-xl border-slate-200 overflow-hidden">
+                            <Command className="border-none">
+                              <CommandInput
+                                placeholder="Search job functions..."
+                                className="h-11 border-none focus:ring-0"
+                              />
+                              <CommandList className="max-h-[300px]">
+                                <CommandEmpty>
+                                  No job functions found.
+                                </CommandEmpty>
+                                <CommandGroup>
+                                  {jobFunctions.map((jf) => (
+                                    <CommandItem
+                                      key={jf.id}
+                                      value={jf.title}
+                                      onSelect={() => {
+                                        const current =
+                                          formik.values.jobFunctionIds;
+                                        const next = current.includes(jf.id)
+                                          ? current.filter(
+                                              (id: string) => id !== jf.id,
+                                            )
+                                          : [...current, jf.id];
+                                        formik.setFieldValue(
+                                          "jobFunctionIds",
+                                          next,
+                                        );
+                                      }}
+                                      className="flex items-center justify-between py-2.5 px-3 cursor-pointer hover:bg-slate-50 transition-colors"
+                                    >
+                                      <div className="flex items-center gap-2">
+                                        <div
+                                          className={cn(
+                                            "h-4 w-4 rounded border border-slate-300 flex items-center justify-center transition-all",
+                                            formik.values.jobFunctionIds.includes(
+                                              jf.id,
+                                            )
+                                              ? "bg-indigo-600 border-indigo-600"
+                                              : "bg-white",
+                                          )}
+                                        >
+                                          {formik.values.jobFunctionIds.includes(
+                                            jf.id,
+                                          ) && (
+                                            <Check className="h-3 w-3 text-white" />
+                                          )}
+                                        </div>
+                                        <span className="text-sm font-semibold text-slate-700">
+                                          {jf.title}
+                                        </span>
+                                      </div>
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                        <p className="text-[10px] uppercase tracking-wider font-bold text-slate-400">
+                          Select one or more job functions that fit the member
+                        </p>
+                      </div>
+
                       <DetailedSkillsSection entitySkills={skills} />
 
                       {/* Headline */}
