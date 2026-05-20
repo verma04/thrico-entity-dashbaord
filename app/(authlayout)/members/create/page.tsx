@@ -41,6 +41,7 @@ const AddMemberPage = () => {
       industryIds: values.industryIds,
       jobFunctionIds: values.jobFunctionIds,
       skillIds: values.skillIds,
+      skills: values.skills,
     };
 
     addMember({ variables: { input } });

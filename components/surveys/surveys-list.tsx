@@ -26,6 +26,7 @@ import {
 import { SurveysTable } from "./surveys-table";
 import { SurveySheet } from "./survey-sheet";
 import { SurveyDialogs } from "./survey-dialogs";
+import { SurveyAIAgentButton } from "./survey-ai-agent";
 
 export function SurveysList({
   shareSurveyAsFeed,
@@ -171,6 +172,7 @@ export function SurveysList({
                 Templates
               </Button>
             </Link>
+            <SurveyAIAgentButton />
             <NewForm />
           </div>
         }

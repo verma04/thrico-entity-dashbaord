@@ -18,7 +18,10 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { safeFormatDistanceToNow, safeLocaleDateString } from "@/lib/date-utils";
+import {
+  safeFormatDistanceToNow,
+  safeLocaleDateString,
+} from "@/lib/date-utils";
 import { cn } from "@/lib/utils";
 
 /* ── Helpers ─────────────────────────────────────────────────────────────── */
@@ -48,7 +51,15 @@ function SocialIcon({ platform }: { platform: string }) {
 
 /* ── Info Row ─────────────────────────────────────────────────────────────── */
 
-function InfoRow({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string }) {
+function InfoRow({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: React.ElementType;
+  label: string;
+  value: string;
+}) {
   return (
     <div className="flex justify-between items-center py-2.5 px-3">
       <span className="text-muted-foreground text-sm flex items-center gap-2">
@@ -101,11 +112,16 @@ export function UserInfoCard({ member }: { member: any }) {
                 {user.firstName} {user.lastName}
               </h2>
               <p className="text-muted-foreground text-sm">
-                {user.profile?.headline || user.about?.headline || "Community Member"}
+                {user.profile?.headline ||
+                  user.about?.headline ||
+                  "Community Member"}
               </p>
               <Badge
                 variant="outline"
-                className={cn("text-[10px] font-medium mt-1", getStatusStyle(member.status))}
+                className={cn(
+                  "text-[10px] font-medium mt-1",
+                  getStatusStyle(member.status),
+                )}
               >
                 {member.status}
               </Badge>
@@ -155,27 +171,51 @@ export function UserInfoCard({ member }: { member: any }) {
         </CardHeader>
         <CardContent className="px-1 pb-2">
           <div className="divide-y divide-border/50">
-            <InfoRow icon={Calendar} label="Joined" value={safeLocaleDateString(user.createdAt)} />
-            <InfoRow 
-              icon={UserIcon} 
-              label="Member Since" 
-              value={safeFormatDistanceToNow(user.createdAt, { addSuffix: true })} 
+            <InfoRow
+              icon={Calendar}
+              label="Joined"
+              value={safeLocaleDateString(user.createdAt)}
+            />
+            <InfoRow
+              icon={UserIcon}
+              label="Member Since"
+              value={safeFormatDistanceToNow(user.createdAt, {
+                addSuffix: true,
+              })}
             />
             <InfoRow
               icon={Network}
               label="Referred By"
-              value={member.referrer?.user ? `${member.referrer.user.firstName} ${member.referrer.user.lastName}` : "Direct Join"}
+              value={
+                member.referrer?.user
+                  ? `${member.referrer.user.firstName} ${member.referrer.user.lastName}`
+                  : "Direct Join"
+              }
             />
             {user.profile?.DOB && (
-              <InfoRow icon={Clock} label="DOB" value={safeLocaleDateString(user.profile.DOB)} />
+              <InfoRow
+                icon={Clock}
+                label="DOB"
+                value={safeLocaleDateString(user.profile.DOB)}
+              />
             )}
-            <InfoRow icon={UserIcon} label="Gender" value={user.profile?.gender || "Not specified"} />
-            <InfoRow icon={Globe} label="Language" value={user.profile?.language || "English"} />
+            <InfoRow
+              icon={UserIcon}
+              label="Gender"
+              value={user.profile?.gender || "Not specified"}
+            />
+            <InfoRow
+              icon={Globe}
+              label="Language"
+              value={user.profile?.language || "English"}
+            />
             {user.lastLoginAt && (
               <InfoRow
                 icon={Clock}
                 label="Last Login"
-                value={safeFormatDistanceToNow(user.lastLoginAt, { addSuffix: true })}
+                value={safeFormatDistanceToNow(user.lastLoginAt, {
+                  addSuffix: true,
+                })}
               />
             )}
           </div>
@@ -258,7 +298,10 @@ export function UserInfoCard({ member }: { member: any }) {
           </CardHeader>
           <CardContent className="flex flex-wrap gap-1.5 px-4 pb-4">
             {user.profile.skills.map((skill: any, idx: number) => {
-              const name = typeof skill === "object" ? skill.name || "Unnamed" : String(skill);
+              const name =
+                typeof skill === "object"
+                  ? skill.name || "Unnamed"
+                  : String(skill);
               return (
                 <Badge
                   key={idx}

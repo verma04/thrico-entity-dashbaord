@@ -61,6 +61,10 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import {
+  DetailedSkillsSection,
+  skillValidationSchema,
+} from "./detailed-skills-section";
 
 export function MemberCreationForm({
   initialValues,
@@ -82,13 +86,15 @@ export function MemberCreationForm({
 
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [isIndustryPopoverOpen, setIsIndustryPopoverOpen] = useState(false);
-  const [isJobFunctionPopoverOpen, setIsJobFunctionPopoverOpen] = useState(false);
+  const [isJobFunctionPopoverOpen, setIsJobFunctionPopoverOpen] =
+    useState(false);
   const [isSkillPopoverOpen, setIsSkillPopoverOpen] = useState(false);
 
   const { data: industryData, loading: loadingIndustries } = useGetIndustries();
   const industries = industryData?.getIndustries || [];
 
-  const { data: jobFunctionData, loading: loadingJobFunctions } = useGetFunctions();
+  const { data: jobFunctionData, loading: loadingJobFunctions } =
+    useGetFunctions();
   const jobFunctions = jobFunctionData?.getFunctions || [];
 
   const { data: skillData, loading: loadingSkills } = useGetSkills();
@@ -108,6 +114,7 @@ export function MemberCreationForm({
     industryIds: Yup.array().of(Yup.string()),
     jobFunctionIds: Yup.array().of(Yup.string()),
     skillIds: Yup.array().of(Yup.string()),
+    skills: Yup.array().of(skillValidationSchema),
   });
 
   const formik = useFormik({
@@ -122,6 +129,7 @@ export function MemberCreationForm({
       industryIds: [],
       jobFunctionIds: [],
       skillIds: [],
+      skills: [],
     },
     enableReinitialize: true,
     validationSchema: memberSchema,
@@ -134,8 +142,21 @@ export function MemberCreationForm({
     formik.setFieldValue(field, value);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = (e?: React.FormEvent) => {
+    if (e && e.preventDefault) {
+      e.preventDefault();
+    }
+
+    // Log validation errors for debugging
+    if (Object.keys(formik.errors).length > 0) {
+      console.log("Form validation errors:", formik.errors);
+      toast({
+        title: "Validation Error",
+        description: "Please check the form for errors.",
+        variant: "destructive",
+      });
+    }
+
     formik.handleSubmit();
   };
 
@@ -457,243 +478,7 @@ export function MemberCreationForm({
                         </p>
                       </div>
 
-                      {/* Job Functions */}
-                      <div className="space-y-2">
-                        <Label className="text-sm font-bold text-slate-700">
-                          Job Functions
-                        </Label>
-                        <Popover
-                          open={isJobFunctionPopoverOpen}
-                          onOpenChange={setIsJobFunctionPopoverOpen}
-                        >
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant="outline"
-                              role="combobox"
-                              aria-expanded={isJobFunctionPopoverOpen}
-                              className="w-full justify-between h-auto min-h-[44px] rounded-xl border-slate-200 hover:bg-slate-50 transition-all px-3 py-2 text-left font-normal"
-                            >
-                              <div className="flex flex-wrap gap-1.5">
-                                {formik.values.jobFunctionIds.length > 0 ? (
-                                  formik.values.jobFunctionIds.map(
-                                    (id: string) => {
-                                      const jf = jobFunctions.find(
-                                        (item) => item.id === id,
-                                      );
-                                      return (
-                                        <Badge
-                                          key={id}
-                                          variant="secondary"
-                                          className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-100 py-0.5 px-2 rounded-lg text-[11px] font-bold flex items-center gap-1"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            const next =
-                                              formik.values.jobFunctionIds.filter(
-                                                (iid: string) => iid !== id,
-                                              );
-                                            formik.setFieldValue(
-                                              "jobFunctionIds",
-                                              next,
-                                            );
-                                          }}
-                                        >
-                                          {jf?.title}
-                                          <X className="h-3 w-3" />
-                                        </Badge>
-                                      );
-                                    },
-                                  )
-                                ) : (
-                                  <span className="text-slate-400">
-                                    Select job functions...
-                                  </span>
-                                )}
-                              </div>
-                              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 rounded-2xl shadow-xl border-slate-200 overflow-hidden">
-                            <Command className="border-none">
-                              <CommandInput
-                                placeholder="Search job functions..."
-                                className="h-11 border-none focus:ring-0"
-                              />
-                              <CommandList className="max-h-[300px]">
-                                <CommandEmpty>No job functions found.</CommandEmpty>
-                                <CommandGroup>
-                                  {jobFunctions.map((jf) => (
-                                    <CommandItem
-                                      key={jf.id}
-                                      value={jf.title}
-                                      onSelect={() => {
-                                        const current =
-                                          formik.values.jobFunctionIds;
-                                        const next = current.includes(
-                                          jf.id,
-                                        )
-                                          ? current.filter(
-                                              (id: string) =>
-                                                id !== jf.id,
-                                            )
-                                          : [...current, jf.id];
-                                        formik.setFieldValue(
-                                          "jobFunctionIds",
-                                          next,
-                                        );
-                                      }}
-                                      className="flex items-center justify-between py-2.5 px-3 cursor-pointer hover:bg-slate-50 transition-colors"
-                                    >
-                                      <div className="flex items-center gap-2">
-                                        <div
-                                          className={cn(
-                                            "h-4 w-4 rounded border border-slate-300 flex items-center justify-center transition-all",
-                                            formik.values.jobFunctionIds.includes(
-                                              jf.id,
-                                            )
-                                              ? "bg-indigo-600 border-indigo-600"
-                                              : "bg-white",
-                                          )}
-                                        >
-                                          {formik.values.jobFunctionIds.includes(
-                                            jf.id,
-                                          ) && (
-                                            <Check className="h-3 w-3 text-white" />
-                                          )}
-                                        </div>
-                                        <span className="text-sm font-semibold text-slate-700">
-                                          {jf.title}
-                                        </span>
-                                      </div>
-                                    </CommandItem>
-                                  ))}
-                                </CommandGroup>
-                              </CommandList>
-                            </Command>
-                          </PopoverContent>
-                        </Popover>
-                        <p className="text-[10px] uppercase tracking-wider font-bold text-slate-400">
-                          Select one or more job functions that fit the member
-                        </p>
-                      </div>
-
-                      {/* Skills */}
-                      <div className="space-y-2">
-                        <Label className="text-sm font-bold text-slate-700">
-                          Skills
-                        </Label>
-                        <Popover
-                          open={isSkillPopoverOpen}
-                          onOpenChange={setIsSkillPopoverOpen}
-                        >
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant="outline"
-                              role="combobox"
-                              aria-expanded={isSkillPopoverOpen}
-                              className="w-full justify-between h-auto min-h-[44px] rounded-xl border-slate-200 hover:bg-slate-50 transition-all px-3 py-2 text-left font-normal"
-                            >
-                              <div className="flex flex-wrap gap-1.5">
-                                {formik.values.skillIds.length > 0 ? (
-                                  formik.values.skillIds.map(
-                                    (id: string) => {
-                                      const s = skills.find(
-                                        (item) => item.id === id,
-                                      );
-                                      return (
-                                        <Badge
-                                          key={id}
-                                          variant="secondary"
-                                          className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-100 py-0.5 px-2 rounded-lg text-[11px] font-bold flex items-center gap-1"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            const next =
-                                              formik.values.skillIds.filter(
-                                                (iid: string) => iid !== id,
-                                              );
-                                            formik.setFieldValue(
-                                              "skillIds",
-                                              next,
-                                            );
-                                          }}
-                                        >
-                                          {s?.title}
-                                          <X className="h-3 w-3" />
-                                        </Badge>
-                                      );
-                                    },
-                                  )
-                                ) : (
-                                  <span className="text-slate-400">
-                                    Select skills...
-                                  </span>
-                                )}
-                              </div>
-                              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 rounded-2xl shadow-xl border-slate-200 overflow-hidden">
-                            <Command className="border-none">
-                              <CommandInput
-                                placeholder="Search skills..."
-                                className="h-11 border-none focus:ring-0"
-                              />
-                              <CommandList className="max-h-[300px]">
-                                <CommandEmpty>No skills found.</CommandEmpty>
-                                <CommandGroup>
-                                  {skills.map((s) => (
-                                    <CommandItem
-                                      key={s.id}
-                                      value={s.title}
-                                      onSelect={() => {
-                                        const current =
-                                          formik.values.skillIds;
-                                        const next = current.includes(
-                                          s.id,
-                                        )
-                                          ? current.filter(
-                                              (id: string) =>
-                                                id !== s.id,
-                                            )
-                                          : [...current, s.id];
-                                        formik.setFieldValue(
-                                          "skillIds",
-                                          next,
-                                        );
-                                      }}
-                                      className="flex items-center justify-between py-2.5 px-3 cursor-pointer hover:bg-slate-50 transition-colors"
-                                    >
-                                      <div className="flex items-center gap-2">
-                                        <div
-                                          className={cn(
-                                            "h-4 w-4 rounded border border-slate-300 flex items-center justify-center transition-all",
-                                            formik.values.skillIds.includes(
-                                              s.id,
-                                            )
-                                              ? "bg-indigo-600 border-indigo-600"
-                                              : "bg-white",
-                                          )}
-                                        >
-                                          {formik.values.skillIds.includes(
-                                            s.id,
-                                          ) && (
-                                            <Check className="h-3 w-3 text-white" />
-                                          )}
-                                        </div>
-                                        <span className="text-sm font-semibold text-slate-700">
-                                          {s.title}
-                                        </span>
-                                      </div>
-                                    </CommandItem>
-                                  ))}
-                                </CommandGroup>
-                              </CommandList>
-                            </Command>
-                          </PopoverContent>
-                        </Popover>
-                        <p className="text-[10px] uppercase tracking-wider font-bold text-slate-400">
-                          Select one or more skills the member possesses
-                        </p>
-                      </div>
+                      <DetailedSkillsSection entitySkills={skills} />
 
                       {/* Headline */}
                       <div className="space-y-2">

@@ -2,12 +2,21 @@
 import React, { useState, useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 
-// Pass the logged in userId and workspaceId as props to this component
-export default function ChatInterface({ userId, workspaceId }: { userId: string, workspaceId: string }) {
+interface ChatInterfaceProps {
+  userId: string;
+  workspaceId: string;
+  /** Optional message to auto-send when the session initialises */
+  initialMessage?: string;
+  /** Shrinks the chat panel height — useful when embedded in drawers */
+  compact?: boolean;
+}
+
+export default function ChatInterface({ userId, workspaceId, initialMessage, compact }: ChatInterfaceProps) {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Array<{ role: string; content: string }>>([]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const initialMessageSentRef = useRef(false);
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
 
   // 1. Auto-scroll to the bottom when messages update
@@ -38,6 +47,18 @@ export default function ChatInterface({ userId, workspaceId }: { userId: string,
       initSession();
     }
   }, [userId, workspaceId]);
+
+  // Auto-send initialMessage once session is ready
+  useEffect(() => {
+    if (sessionId && initialMessage && !initialMessageSentRef.current) {
+      initialMessageSentRef.current = true;
+      setInput(initialMessage);
+      // Trigger send on the next tick so state has settled
+      setTimeout(() => {
+        document.getElementById("chat-send-btn")?.click();
+      }, 100);
+    }
+  }, [sessionId, initialMessage]);
 
   // 3. Handle sending the message & streaming the response via SSE
   const sendMessage = async (e: React.FormEvent) => {
@@ -72,6 +93,7 @@ export default function ChatInterface({ userId, workspaceId }: { userId: string,
       const decoder = new TextDecoder("utf-8");
       
       let buffer = "";
+      let fullReply = "";
       
       while (true) {
         const { value, done } = await reader.read();
@@ -131,7 +153,7 @@ export default function ChatInterface({ userId, workspaceId }: { userId: string,
   };
 
   return (
-    <div className="flex flex-col h-[600px] max-w-2xl mx-auto border rounded-xl overflow-hidden bg-white shadow-sm">
+    <div className={`flex flex-col ${compact ? "h-full" : "h-[600px] max-w-2xl mx-auto border rounded-xl shadow-sm"} overflow-hidden bg-white`}>
       {/* Header */}
       <div className="p-4 border-b bg-gray-50 font-semibold text-gray-700">
         AI Assistant {sessionId && `(Session: ${sessionId.split("-")[0]})`}
@@ -175,6 +197,7 @@ export default function ChatInterface({ userId, workspaceId }: { userId: string,
           className="flex-1 border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
         <button
+          id="chat-send-btn"
           type="submit"
           disabled={!sessionId || !input.trim() || isTyping}
           className="bg-indigo-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 transition-colors"

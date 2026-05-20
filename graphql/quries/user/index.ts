@@ -103,8 +103,15 @@ const details = `
       }
       skills {
         updatedAt
-        title
-        id
+       
+        
+        skillId
+        name
+        category
+        level
+        tags
+        yearsOfExperience
+        description
       }
       lastSession {
         deviceId
@@ -235,8 +242,14 @@ export const GET_USER_DETIALS = gql`
       }
       skills {
         updatedAt
-        title
         id
+        skillId
+        name
+        category
+        level
+        tags
+        yearsOfExperience
+        description
       }
       referrer {
         user {
@@ -341,7 +354,14 @@ export const ADD_NEW_MEMBER = gql`
       }
       skills {
         id
-        title
+
+        skillId
+        name
+        category
+        level
+        tags
+        yearsOfExperience
+        description
       }
     }
   }
@@ -400,7 +420,14 @@ export const UPDATE_MEMBER = gql`
       }
       skills {
         id
-        title
+
+        skillId
+        name
+        category
+        level
+        tags
+        yearsOfExperience
+        description
       }
     }
   }
