@@ -77,14 +77,28 @@ export function ProfileTab({ member }: { member: any }) {
         </section>
       )}
 
+      {/* Interests */}
+      {member.interests && member.interests.length > 0 && (
+        <section>
+          <SectionTitle icon={GraduationCap}>Interests</SectionTitle>
+          <div className="flex flex-wrap gap-1.5">
+            {member.interests.map((interest: any) => (
+              <Badge key={interest.id} variant="secondary" className="text-xs font-medium">
+                {interest.title}
+              </Badge>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* Skills */}
       {member.skills && member.skills.length > 0 && (
         <section>
           <SectionTitle icon={GraduationCap}>Skills</SectionTitle>
           <div className="flex flex-wrap gap-1.5">
             {member.skills.map((skill: any) => (
-              <Badge key={skill.id} variant="secondary" className="text-xs font-medium">
-                {skill.title}
+              <Badge key={skill.skillId || skill.id} variant="secondary" className="text-xs font-medium">
+                {skill.name}
               </Badge>
             ))}
           </div>

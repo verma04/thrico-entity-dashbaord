@@ -101,6 +101,11 @@ const details = `
         title
         id
       }
+      interests {
+        updatedAt
+        title
+        id
+      }
       skills {
         updatedAt
        
@@ -240,6 +245,11 @@ export const GET_USER_DETIALS = gql`
         title
         id
       }
+      interests {
+        updatedAt
+        title
+        id
+      }
       skills {
         updatedAt
         id
@@ -352,6 +362,10 @@ export const ADD_NEW_MEMBER = gql`
         id
         title
       }
+      interests {
+        id
+        title
+      }
       skills {
         id
 
@@ -415,6 +429,10 @@ export const UPDATE_MEMBER = gql`
         title
       }
       jobFunctions {
+        id
+        title
+      }
+      interests {
         id
         title
       }

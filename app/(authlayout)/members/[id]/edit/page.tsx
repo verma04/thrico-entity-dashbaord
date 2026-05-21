@@ -52,6 +52,7 @@ const EditMemberPage = () => {
     jobFunctionIds: member.jobFunctions?.map((jf: any) => jf.id) || [],
     skillIds: member.skills?.map((s: any) => s.id) || [],
     skills: member.skills?.filter((s: any) => s.category) || [],
+    interestIds: member.interests?.map((i: any) => i.id) || [],
     avatar: user.avatar || null,
   };
 
@@ -66,9 +67,10 @@ const EditMemberPage = () => {
       DOB: values.dob,
       avatar: values.avatar,
       industryIds: values.industryIds,
-
+      jobFunctionIds: values.jobFunctionIds,
       skillIds: values.skillIds,
       skills: values.skills,
+      interestIds: values.interestIds,
     };
 
     updateMember({ variables: { input } });

@@ -266,6 +266,28 @@ export function UserInfoCard({ member }: { member: any }) {
         </Card>
       )}
 
+      {/* Interests */}
+      {member.interests && member.interests.length > 0 && (
+        <Card className="border-border">
+          <CardHeader className="pb-2 pt-4 px-4">
+            <CardTitle className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              Interests
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-wrap gap-1.5 px-4 pb-4">
+            {member.interests.map((interest: any) => (
+              <Badge
+                key={interest.id}
+                variant="secondary"
+                className="text-[11px] font-medium"
+              >
+                {interest.title}
+              </Badge>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Skills */}
       {member.skills && member.skills.length > 0 && (
         <Card className="border-border">
@@ -277,11 +299,11 @@ export function UserInfoCard({ member }: { member: any }) {
           <CardContent className="flex flex-wrap gap-1.5 px-4 pb-4">
             {member.skills.map((skill: any) => (
               <Badge
-                key={skill.id}
+                key={skill.skillId || skill.id}
                 variant="secondary"
                 className="text-[11px] font-medium"
               >
-                {skill.title}
+                {skill.name}
               </Badge>
             ))}
           </CardContent>

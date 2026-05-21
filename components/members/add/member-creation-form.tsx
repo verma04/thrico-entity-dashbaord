@@ -52,6 +52,7 @@ import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel"
 import { useGetIndustries } from "@/graphql/quries/industries/industry-queries";
 import { useGetSkills } from "@/graphql/quries/skills/skill-queries";
 import { useGetFunctions } from "@/graphql/quries/functions/function-queries";
+import { useGetInterests } from "@/graphql/quries/interests/interest-queries";
 import { Check, ChevronsUpDown, X } from "lucide-react";
 import {
   Command,
@@ -89,6 +90,7 @@ export function MemberCreationForm({
   const [isJobFunctionPopoverOpen, setIsJobFunctionPopoverOpen] =
     useState(false);
   const [isSkillPopoverOpen, setIsSkillPopoverOpen] = useState(false);
+  const [isInterestPopoverOpen, setIsInterestPopoverOpen] = useState(false);
 
   const { data: industryData, loading: loadingIndustries } = useGetIndustries();
   const industries = industryData?.getIndustries || [];
@@ -99,6 +101,10 @@ export function MemberCreationForm({
 
   const { data: skillData, loading: loadingSkills } = useGetSkills();
   const skills = skillData?.getSkills || [];
+
+  const { data: interestData, loading: loadingInterests } =
+    useGetInterests();
+  const interests = interestData?.getInterests || [];
 
   const memberSchema = Yup.object({
     firstName: Yup.string()
@@ -115,10 +121,11 @@ export function MemberCreationForm({
     jobFunctionIds: Yup.array().of(Yup.string()),
     skillIds: Yup.array().of(Yup.string()),
     skills: Yup.array().of(skillValidationSchema),
+    interestIds: Yup.array().of(Yup.string()),
   });
 
   const formik = useFormik({
-    initialValues: initialValues || {
+    initialValues: {
       firstName: "",
       lastName: "",
       email: "",
@@ -130,6 +137,8 @@ export function MemberCreationForm({
       jobFunctionIds: [],
       skillIds: [],
       skills: [],
+      interestIds: [],
+      ...(initialValues || {}),
     },
     enableReinitialize: true,
     validationSchema: memberSchema,
@@ -592,6 +601,123 @@ export function MemberCreationForm({
                         </Popover>
                         <p className="text-[10px] uppercase tracking-wider font-bold text-slate-400">
                           Select one or more job functions that fit the member
+                        </p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-sm font-bold text-slate-700">
+                          Interests
+                        </Label>
+                        <Popover
+                          open={isInterestPopoverOpen}
+                          onOpenChange={setIsInterestPopoverOpen}
+                        >
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              role="combobox"
+                              aria-expanded={isInterestPopoverOpen}
+                              className="w-full justify-between h-auto min-h-[44px] rounded-xl border-slate-200 hover:bg-slate-50 transition-all px-3 py-2 text-left font-normal"
+                            >
+                              <div className="flex flex-wrap gap-1.5">
+                                {formik.values.interestIds.length > 0 ? (
+                                  formik.values.interestIds.map(
+                                    (id: string) => {
+                                      const interest = interests.find(
+                                        (item) => item.id === id,
+                                      );
+                                      return (
+                                        <Badge
+                                          key={id}
+                                          variant="secondary"
+                                          className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-100 py-0.5 px-2 rounded-lg text-[11px] font-bold flex items-center gap-1"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            const next =
+                                              formik.values.interestIds.filter(
+                                                (iid: string) => iid !== id,
+                                              );
+                                            formik.setFieldValue(
+                                              "interestIds",
+                                              next,
+                                            );
+                                          }}
+                                        >
+                                          {interest?.title}
+                                          <X className="h-3 w-3" />
+                                        </Badge>
+                                      );
+                                    },
+                                  )
+                                ) : (
+                                  <span className="text-slate-400">
+                                    Select interests...
+                                  </span>
+                                )}
+                              </div>
+                              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 rounded-2xl shadow-xl border-slate-200 overflow-hidden">
+                            <Command className="border-none">
+                              <CommandInput
+                                placeholder="Search interests..."
+                                className="h-11 border-none focus:ring-0"
+                              />
+                              <CommandList className="max-h-[300px]">
+                                <CommandEmpty>
+                                  No interests found.
+                                </CommandEmpty>
+                                <CommandGroup>
+                                  {interests.map((interest) => (
+                                    <CommandItem
+                                      key={interest.id}
+                                      value={interest.title}
+                                      onSelect={() => {
+                                        const current =
+                                          formik.values.interestIds;
+                                        const next = current.includes(interest.id)
+                                          ? current.filter(
+                                              (id: string) => id !== interest.id,
+                                            )
+                                          : [...current, interest.id];
+                                        formik.setFieldValue(
+                                          "interestIds",
+                                          next,
+                                        );
+                                      }}
+                                      className="flex items-center justify-between py-2.5 px-3 cursor-pointer hover:bg-slate-50 transition-colors"
+                                    >
+                                      <div className="flex items-center gap-2">
+                                        <div
+                                          className={cn(
+                                            "h-4 w-4 rounded border border-slate-300 flex items-center justify-center transition-all",
+                                            formik.values.interestIds.includes(
+                                              interest.id,
+                                            )
+                                              ? "bg-indigo-600 border-indigo-600"
+                                              : "bg-white",
+                                          )}
+                                        >
+                                          {formik.values.interestIds.includes(
+                                            interest.id,
+                                          ) && (
+                                            <Check className="h-3 w-3 text-white" />
+                                          )}
+                                        </div>
+                                        <span className="text-sm font-semibold text-slate-700">
+                                          {interest.title}
+                                        </span>
+                                      </div>
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                        <p className="text-[10px] uppercase tracking-wider font-bold text-slate-400">
+                          Select one or more interests that fit the member
                         </p>
                       </div>
 

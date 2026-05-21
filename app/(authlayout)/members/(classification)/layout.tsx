@@ -4,7 +4,7 @@ import React from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
-import { Building2, Briefcase, Award } from "lucide-react";
+import { Building2, Briefcase, Award, Heart } from "lucide-react";
 
 export default function ClassificationLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -17,6 +17,8 @@ export default function ClassificationLayout({ children }: { children: React.Rea
     ? "functions"
     : pathname.includes("/members/skills")
     ? "skills"
+    : pathname.includes("/members/interests")
+    ? "interests"
     : "industries";
 
   const tabs = [
@@ -37,6 +39,12 @@ export default function ClassificationLayout({ children }: { children: React.Rea
       label: "Skills",
       icon: <Award className="h-4 w-4" />,
       href: "/members/skills",
+    },
+    {
+      id: "interests",
+      label: "Interests",
+      icon: <Heart className="h-4 w-4" />,
+      href: "/members/interests",
     },
   ];
 
