@@ -231,7 +231,9 @@ export const useGetAllUser = (input?: {
         industryId: input?.industryId ?? null,
         search: input?.search ?? null,
       },
+      
     },
+
     fetchPolicy: "network-only",
   });
 

@@ -27,9 +27,17 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
+
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -57,6 +65,7 @@ import {
   Edit2,
   Clock,
   MapPin,
+
 } from "lucide-react";
 import {
   useEventAgendas,
@@ -64,11 +73,13 @@ import {
   useUpdateEventAgenda,
   useDeleteEventAgenda,
   useEventVenues,
+  useEventSpeakers,
   EventAgenda,
   EventAgendaInput,
 } from "@/graphql/actions/events";
 import { toast } from "sonner";
 import moment from "moment";
+import { DialogTitle } from "@radix-ui/react-dialog";
 
 const sessionSchema = Yup.object().shape({
   title: Yup.string().required("Title is required"),
@@ -89,6 +100,9 @@ function AddSessionModal({
   const [open, setOpen] = useState(false);
   const { data: venuesData } = useEventVenues(eventId);
   const venues = venuesData?.getEventVenues || [];
+
+  const { data: speakersData } = useEventSpeakers(eventId);
+  const speakers = speakersData?.getEventSpeakers || [];
 
   const [addAgenda, { loading: adding }] = useAddEventAgenda({
     onCompleted: () => {
@@ -117,6 +131,7 @@ function AddSessionModal({
       venueId: agenda?.venueId || "",
       videoSteam: agenda?.videoSteam || "",
       isPublished: agenda?.isPublished ?? true,
+      speakerIds: agenda?.speakers?.map((s) => s.id) || [],
     },
     validationSchema: sessionSchema,
     onSubmit: (values) => {
@@ -249,6 +264,43 @@ function AddSessionModal({
           </div>
 
           <div className="space-y-2">
+            <Label>Speakers</Label>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="w-full justify-start font-normal">
+                  {formik.values.speakerIds.length > 0
+                    ? `${formik.values.speakerIds.length} speaker(s) selected`
+                    : "Select speakers"}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-full min-w-[200px]" align="start">
+                <DropdownMenuLabel>Event Speakers</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {speakers.length === 0 && (
+                  <div className="p-2 text-sm text-muted-foreground text-center">
+                    No speakers found.
+                  </div>
+                )}
+                {speakers.map((s: any) => (
+                  <DropdownMenuCheckboxItem
+                    key={s.id}
+                    checked={formik.values.speakerIds.includes(s.id)}
+                    onCheckedChange={(checked) => {
+                      const current = formik.values.speakerIds;
+                      const next = checked
+                        ? [...current, s.id]
+                        : current.filter((id) => id !== s.id);
+                      formik.setFieldValue("speakerIds", next);
+                    }}
+                  >
+                    {s.name}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="videoSteam">Virtual Stream Link</Label>
             <Input
               id="videoSteam"
@@ -351,6 +403,19 @@ export function EventAgendaList({ eventId }: { eventId: string }) {
                           <div className="flex items-center gap-1.5 text-xs text-primary mt-1">
                             <Video className="h-3 w-3" />
                             Virtual Stream Available
+                          </div>
+                        )}
+                        {session.speakers && session.speakers.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {session.speakers.map((speaker) => (
+                              <Badge key={speaker.id} variant="outline" className="text-xs font-normal bg-background">
+                                <Avatar className="h-3.5 w-3.5 mr-1 -ml-1">
+                                  <AvatarImage src={speaker.avatar || ""} />
+                                  <AvatarFallback className="text-[8px]">{speaker.name.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                {speaker.name}
+                              </Badge>
+                            ))}
                           </div>
                         )}
                       </TableCell>

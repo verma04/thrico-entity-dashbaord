@@ -1,96 +1,28 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useFormik } from "formik";
-import * as Yup from "yup";
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Upload, Calendar, Clock } from "lucide-react";
-import { cn } from "@/lib/utils";
-import GooglePlacesInput from "@/components/layout/google-place-input";
 import { useEventById, useUpdateEvent } from "@/graphql/actions/events";
+import { EventsCreationForm } from "@/components/events/create/events-creation-form";
 import moment from "moment";
-
-const eventSchema = Yup.object().shape({
-  title: Yup.string().required("Event title is required"),
-  description: Yup.string().required("Description is required"),
-  location: Yup.mixed().required("Location is required"),
-  seats: Yup.number().min(1, "Must have at least 1 seat"),
-});
+import { useToast } from "@/components/ui/use-toast";
 
 export default function EventGeneralInfo() {
   const params = useParams();
   const eventId = params?.id as string;
   const router = useRouter();
+  const { toast } = useToast();
 
-  const [eventType, setEventType] = useState("IN_PERSON");
-  const [registrationOpen, setRegistrationOpen] = useState(true);
+  const [cover, setCover] = useState<any>(null);
 
   const { data, loading: fetchingEvent } = useEventById(eventId);
   const event = data?.getEventById;
 
   const [updateEvent, { loading: updating }] = useUpdateEvent({
     onCompleted: () => {
-      // Show success toast here if needed
-    },
-  });
-
-  const formik = useFormik({
-    enableReinitialize: true,
-    initialValues: {
-      title: event?.title || "",
-      description: event?.description || "",
-      location: event?.location?.address || event?.location?.name || "",
-      seats: 1500, // Not in schema yet? Add placeholder
-      timezone: "pst",
-      eventType: event?.type || "IN_PERSON",
-      startDate: event?.startDate
-        ? moment(event.startDate).format("YYYY-MM-DD")
-        : "",
-      endDate: event?.endDate ? moment(event.endDate).format("YYYY-MM-DD") : "",
-      startTime: event?.startTime || "",
-    },
-    validationSchema: eventSchema,
-    onSubmit: (values) => {
-      const eventInput = {
-        title: values.title,
-        location: { name: values.location }, // Ensure proper shape
-        description: values.description,
-        startDate: values.startDate
-          ? new Date(values.startDate).toISOString()
-          : undefined,
-        endDate: values.endDate
-          ? new Date(values.endDate).toISOString()
-          : undefined,
-        startTime: values.startTime || undefined,
-        type: values.eventType,
-        lastDateOfRegistration: undefined,
-      };
-
-      updateEvent({
-        variables: {
-          eventId,
-          input: eventInput,
-        },
+      toast({
+        title: "Success",
+        description: "Event updated successfully",
       });
     },
   });
@@ -107,298 +39,65 @@ export default function EventGeneralInfo() {
   }
 
   return (
-    <form onSubmit={formik.handleSubmit}>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* LEFT SIDE - Form Fields */}
-        <div className="lg:col-span-2 space-y-6">
-          <Card className="border-none shadow-sm ring-1 ring-border/50">
-            <CardHeader className="bg-muted/30">
-              <CardTitle>Event Details</CardTitle>
-              <CardDescription>
-                Basic information about your event
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="pt-6 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="title" className="text-sm font-medium">
-                    Event Title <span className="text-destructive">*</span>
-                  </Label>
-                  <Input
-                    id="title"
-                    name="title"
-                    placeholder="Enter event title"
-                    value={formik.values.title}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    className={cn(
-                      formik.touched.title &&
-                        formik.errors.title &&
-                        "border-destructive",
-                    )}
-                  />
-                  {formik.touched.title && formik.errors.title && (
-                    <p className="text-xs text-destructive">
-                      {String(formik.errors.title)}
-                    </p>
-                  )}
-                </div>
+    <EventsCreationForm
+      headerTitle="Edit Event"
+      buttonText="Save Changes"
+      initialValues={{
+        title: event?.title || "",
+        description: event?.description || "",
+        location: event?.location?.address || event?.location?.name || "",
+        type: event?.type?.toLowerCase() || "in_person",
+        startDate: event?.startDate
+          ? moment(event.startDate).format("YYYY-MM-DD")
+          : "",
+        endDate: event?.endDate
+          ? moment(event.endDate).format("YYYY-MM-DD")
+          : "",
+        startTime: event?.startTime || "",
+        lastDateOfRegistration: event?.lastDateOfRegistration
+          ? moment(event.lastDateOfRegistration).format("YYYY-MM-DD")
+          : "",
+        isActive: event?.isActive ?? false,
+      }}
+      initialCoverUrl={
+        event?.cover
+          ? `https://cdn.thrico.network/${event.cover}`
+          : null
+      }
+      loading={updating}
+      onFinish={(values) => {
+        const eventInput: any = {
+          title: values.title,
+          location: { name: values.location },
+          description: values.description,
+          startDate: values.startDate
+            ? new Date(values.startDate).toISOString()
+            : undefined,
+          endDate: values.endDate
+            ? new Date(values.endDate).toISOString()
+            : undefined,
+          startTime: values.startTime || undefined,
+          type: values.type?.toUpperCase(),
+          lastDateOfRegistration: values.lastDateOfRegistration
+            ? new Date(values.lastDateOfRegistration).toISOString()
+            : undefined,
+          isActive: values.isActive,
+        };
 
-                <div className="space-y-2">
-                  <Label htmlFor="location" className="text-sm font-medium">
-                    Location <span className="text-destructive">*</span>
-                  </Label>
-                  <GooglePlacesInput
-                    id="location"
-                    name="location"
-                    onBlur={formik.handleBlur}
-                    placeholder="Select event location"
-                    className={cn(
-                      formik.touched.location &&
-                        formik.errors.location &&
-                        "border-destructive",
-                    )}
-                    onChange={(loc) =>
-                      formik.setFieldValue("location", loc.address || loc.name)
-                    }
-                  />
-                  {formik.touched.location && formik.errors.location && (
-                    <p className="text-xs text-destructive">
-                      {String(formik.errors.location)}
-                    </p>
-                  )}
-                  <p className="text-xs text-muted-foreground">
-                    Select the event location
-                  </p>
-                </div>
-              </div>
+        if (cover) {
+          eventInput.coverImage = cover;
+        }
 
-              <div className="space-y-2">
-                <Label htmlFor="description" className="text-sm font-medium">
-                  Description <span className="text-destructive">*</span>
-                </Label>
-                <Textarea
-                  id="description"
-                  name="description"
-                  placeholder="Enter event description"
-                  className={cn(
-                    "min-h-[120px] resize-none",
-                    formik.touched.description &&
-                      formik.errors.description &&
-                      "border-destructive",
-                  )}
-                  value={formik.values.description}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                />
-                {formik.touched.description && formik.errors.description && (
-                  <p className="text-xs text-destructive">
-                    {String(formik.errors.description)}
-                  </p>
-                )}
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="startDate" className="text-sm font-medium">
-                    Start Date
-                  </Label>
-                  <div className="relative">
-                    <Calendar className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="startDate"
-                      name="startDate"
-                      type="date"
-                      className="pl-10"
-                      value={formik.values.startDate}
-                      onChange={formik.handleChange}
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="endDate" className="text-sm font-medium">
-                    End Date
-                  </Label>
-                  <div className="relative">
-                    <Calendar className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="endDate"
-                      name="endDate"
-                      type="date"
-                      className="pl-10"
-                      value={formik.values.endDate}
-                      onChange={formik.handleChange}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="startTime" className="text-sm font-medium">
-                    Start Time
-                  </Label>
-                  <div className="relative">
-                    <Clock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="startTime"
-                      name="startTime"
-                      type="time"
-                      className="pl-10"
-                      value={formik.values.startTime}
-                      onChange={formik.handleChange}
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="timezone" className="text-sm font-medium">
-                    Timezone
-                  </Label>
-                  <Select
-                    onValueChange={(value) =>
-                      formik.setFieldValue("timezone", value)
-                    }
-                    value={formik.values.timezone}
-                  >
-                    <SelectTrigger id="timezone">
-                      <SelectValue placeholder="Select timezone" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="pst">Pacific Time (PST)</SelectItem>
-                      <SelectItem value="mst">Mountain Time (MST)</SelectItem>
-                      <SelectItem value="cst">Central Time (CST)</SelectItem>
-                      <SelectItem value="est">Eastern Time (EST)</SelectItem>
-                      <SelectItem value="utc">
-                        Coordinated Universal Time (UTC)
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="eventType" className="text-sm font-medium">
-                  Event Type
-                </Label>
-                <Select
-                  onValueChange={(value) => {
-                    setEventType(value);
-                    formik.setFieldValue("eventType", value);
-                  }}
-                  value={formik.values.eventType}
-                >
-                  <SelectTrigger id="eventType">
-                    <SelectValue placeholder="Select event type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="IN_PERSON">
-                      Physical (In Person)
-                    </SelectItem>
-                    <SelectItem value="ONLINE">Online</SelectItem>
-                    <SelectItem value="HYBRID">Hybrid</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="seats" className="text-sm font-medium">
-                    Seat Limit
-                  </Label>
-                  <Input
-                    id="seats"
-                    name="seats"
-                    type="number"
-                    value={formik.values.seats}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    className={cn(
-                      formik.touched.seats &&
-                        formik.errors.seats &&
-                        "border-destructive",
-                    )}
-                  />
-                  {formik.touched.seats && formik.errors.seats && (
-                    <p className="text-xs text-destructive">
-                      {String(formik.errors.seats)}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between p-4 rounded-lg border">
-                <div className="space-y-0.5">
-                  <Label htmlFor="registration" className="text-sm font-medium">
-                    Registration Open
-                  </Label>
-                  <p className="text-sm text-muted-foreground">
-                    Allow attendees to register for this event
-                  </p>
-                </div>
-                <Switch
-                  id="registration"
-                  checked={registrationOpen}
-                  onCheckedChange={setRegistrationOpen}
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          <div className="flex gap-3">
-            <Button
-              type="submit"
-              className="flex-1"
-              disabled={updating || !formik.dirty}
-            >
-              {updating ? "Saving..." : "Save Changes"}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => formik.resetForm()}
-            >
-              Discard Changes
-            </Button>
-          </div>
-        </div>
-
-        {/* RIGHT SIDE - Cover Image */}
-        <div className="lg:col-span-1">
-          <Card className="border-none shadow-sm ring-1 ring-border/50 sticky top-6">
-            <CardHeader className="bg-muted/30">
-              <CardTitle>Cover Image</CardTitle>
-              <CardDescription>
-                Upload an eye-catching cover for your event
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="pt-6">
-              <div className="relative aspect-video border-2 border-dashed rounded-lg overflow-hidden">
-                <Image
-                  src={
-                    event?.cover
-                      ? `https://cdn.thrico.network/${event.cover}`
-                      : "https://cdn.thrico.network/default_event.png"
-                  }
-                  alt="Event Cover"
-                  fill
-                  className="object-cover"
-                />
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/60 backdrop-blur-sm">
-                  <Button variant="secondary" className="gap-2">
-                    <Upload className="h-4 w-4" />
-                    Upload Cover Image
-                  </Button>
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    Recommended size: 1200x630px
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    </form>
+        updateEvent({
+          variables: {
+            eventId,
+            input: eventInput,
+          },
+        });
+      }}
+      onCancel={() => router.back()}
+      cover={cover}
+      setCover={setCover}
+    />
   );
 }

@@ -24,7 +24,7 @@ import {
   Eye,
   Star,
 } from "lucide-react";
-import dayjs from "dayjs";
+import moment from "moment";
 
 interface EventPreviewProps {
   eventData: {
@@ -54,12 +54,13 @@ export function EventPreview({ eventData, coverImage }: EventPreviewProps) {
 
   const formatDate = (date: any) => {
     if (!date) return "Date not set";
-    return dayjs(date).format("MMM DD, YYYY");
+    return moment(date).format("MMM DD, YYYY");
   };
 
   const formatTime = (time: any) => {
     if (!time) return "Time not set";
-    return dayjs(time).format("hh:mm A");
+    // Parse HH:mm if it's a simple time string, or fallback to default parsing
+    return moment(time, ["HH:mm", moment.ISO_8601]).format("hh:mm A");
   };
 
   const getEventTypeBadgeClass = (eventType: string) => {

@@ -77,28 +77,19 @@ export default function EventAnalytics({ eventId }: { eventId: string }) {
     },
   ];
 
-  // Mock data for charts since backend is basic
-  const hourlyData = [
-    { name: "08:00", value: 45 },
-    { name: "10:00", value: 120 },
-    { name: "12:00", value: 380 },
-    { name: "14:00", value: 520 },
-    { name: "16:00", value: 410 },
-    { name: "18:00", value: 250 },
-  ];
+  const hourlyData = stats?.hourlyData || [];
 
-  const ticketDistribution = [
-    { name: "Regular", value: 400, color: "#3b82f6" },
-    { name: "VIP", value: 300, color: "#8b5cf6" },
-    { name: "Early Bird", value: 200, color: "#10b981" },
-    { name: "Student", value: 100, color: "#f59e0b" },
-  ];
+  const ticketDistribution = stats?.ticketDistribution || [];
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Event Analytics</h2>
         <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 px-3 py-1 rounded-full">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+          </span>
           <TrendingUp className="h-4 w-4 text-green-500" />
           Real-time tracking enabled
         </div>
@@ -138,7 +129,7 @@ export default function EventAnalytics({ eventId }: { eventId: string }) {
           <CardHeader>
             <CardTitle>Attendance Flow</CardTitle>
             <CardDescription>
-              Attendee check-ins over time (Hourly)
+              Live attendee check-ins over time
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -228,7 +219,10 @@ export default function EventAnalytics({ eventId }: { eventId: string }) {
                     <span className="text-muted-foreground">{item.name}</span>
                   </div>
                   <span className="font-medium">
-                    {Math.round((item.value / 1000) * 100)}%
+                    {stats?.totalTicketsSold
+                      ? Math.round((item.value / stats.totalTicketsSold) * 100)
+                      : 0}
+                    %
                   </span>
                 </div>
               ))}

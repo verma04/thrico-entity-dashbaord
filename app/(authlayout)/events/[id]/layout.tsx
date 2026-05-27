@@ -14,11 +14,13 @@ import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useEventById } from "@/graphql/actions/events";
+import { Loader2 } from "lucide-react";
 
 const tabItems = [
   { key: "general-info", label: "General Info" },
-  { key: "ticketing", label: "Ticketing" },
-  { key: "registration", label: "Registration" },
+  // { key: "ticketing", label: "Ticketing" },
+  // { key: "registration", label: "Registration" },
   { key: "agenda", label: "Agenda" },
   { key: "speakers", label: "Speakers" },
   { key: "sponsors/tier", label: "Sponsorship" },
@@ -39,7 +41,13 @@ export default function EventsLayout({
   const [active, setActive] = useState<string>("general-info");
   const router = useRouter();
   const pathname = usePathname();
-  const currentTab = pathname?.split("/")[3] || active;
+  const eventId = pathname?.split("/")[2];
+  const basePath = `/events/${eventId}`;
+  const currentTab = pathname === basePath || pathname === `${basePath}/`
+    ? "general-info"
+    : pathname?.replace(`${basePath}/`, "") || active;
+
+  const { data, loading } = useEventById(eventId || "");
 
   return (
     <AnimatePresence>
@@ -51,7 +59,48 @@ export default function EventsLayout({
         className="fixed inset-0 z-50 bg-background overflow-y-auto"
       >
         <div className="sticky top-0 z-40 flex items-center justify-between px-6 py-4 bg-background/80 backdrop-blur-sm border-b border-border">
-          <h1 className="text-xl font-bold">Event Management</h1>
+          <div className="flex items-center gap-4">
+            {data?.getEventById?.cover && (
+              <img 
+                src={`https://cdn.thrico.network/${data.getEventById.cover}`} 
+                alt={data.getEventById.title || "Event Cover"} 
+                className="w-12 h-12 rounded-md object-cover border border-border"
+              />
+            )}
+            <div className="flex flex-col">
+              <div className="flex items-center gap-3">
+                <h1 className="text-xl font-bold">
+                  {loading ? "Loading Event..." : data?.getEventById?.title || "Event Management"}
+                </h1>
+                {loading && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />}
+                {!loading && data?.getEventById?.status && (
+                  <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-secondary text-secondary-foreground rounded-full">
+                    {data?.getEventById?.status}
+                  </span>
+                )}
+              </div>
+              {!loading && data?.getEventById && (
+                <div className="text-sm text-muted-foreground flex items-center gap-2 mt-0.5">
+                  {data.getEventById.startDate && (
+                    <span>
+                      {new Date(data.getEventById.startDate).toLocaleDateString(undefined, { 
+                        month: 'short', 
+                        day: 'numeric',
+                        year: 'numeric'
+                      })}
+                      {data.getEventById.startTime ? ` • ${data.getEventById.startTime}` : ''}
+                    </span>
+                  )}
+                  {data.getEventById.startDate && data.getEventById.location?.name && <span>|</span>}
+                  {data.getEventById.location?.name && (
+                    <span className="truncate max-w-[300px]">
+                      {data.getEventById.location.name}
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
           <Button
             variant="ghost"
             size="icon"
@@ -80,7 +129,11 @@ export default function EventsLayout({
                 value={currentTab}
                 onValueChange={(key) => {
                   const eventId = pathname?.split("/")[2];
-                  router.push(`/events/${eventId}/${key}`);
+                  if (key === "general-info") {
+                    router.push(`/events/${eventId}`);
+                  } else {
+                    router.push(`/events/${eventId}/${key}`);
+                  }
                 }}
                 className="w-full"
               >

@@ -31,8 +31,10 @@ import React, { useState } from "react";
 import { toast } from "sonner";
 import { useUpdateMentorshipStatus } from "@/graphql/mentorship/mentorship-quiries";
 import { useFeatureMentor, useMarkTopMentor, useRemoveMentor } from "@/graphql/mentorship/mentoship-muation";
-import { Star, StarOff } from "lucide-react";
+import { Star, StarOff, MessageSquare } from "lucide-react";
 import { MentorDetailsDialog } from "./mentor-details-dialog";
+import { AddTestimonialDialog } from "./add-testimonial-dialog";
+import { MentorTestimonialsDialog } from "./mentor-testimonials-dialog";
 
 interface Mentor {
   id: string;
@@ -56,11 +58,15 @@ type ActionType =
   | "VIEW_DETAILS"
   | "MARK_TOP"
   | "REMOVE_TOP"
+  | "ADD_TESTIMONIAL"
+  | "MANAGE_TESTIMONIALS"
   | "REMOVE";
 
 export function MentorActions({ mentor, onView, refetch }: MentorActionsProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [isTestimonialOpen, setIsTestimonialOpen] = useState(false);
+  const [isManageTestimonialsOpen, setIsManageTestimonialsOpen] = useState(false);
   const [actionReason, setActionReason] = useState("");
   const [dialogAction, setDialogAction] = useState<ActionType>();
 
@@ -108,12 +114,20 @@ export function MentorActions({ mentor, onView, refetch }: MentorActionsProps) {
       setIsDetailsOpen(true);
       return;
     }
+    if (action === "ADD_TESTIMONIAL") {
+      setIsTestimonialOpen(true);
+      return;
+    }
+    if (action === "MANAGE_TESTIMONIALS") {
+      setIsManageTestimonialsOpen(true);
+      return;
+    }
     setDialogAction(action);
     setIsModalOpen(true);
   };
 
   const confirmAction = async () => {
-    if (!dialogAction || dialogAction === "VIEW_DETAILS") return;
+    if (!dialogAction || dialogAction === "VIEW_DETAILS" || dialogAction === "ADD_TESTIMONIAL" || dialogAction === "MANAGE_TESTIMONIALS") return;
 
 
     if (dialogAction === "MARK_TOP" || dialogAction === "REMOVE_TOP") {
@@ -241,6 +255,22 @@ export function MentorActions({ mentor, onView, refetch }: MentorActionsProps) {
             )}
           </DropdownMenuItem>
 
+          <DropdownMenuItem
+            onClick={() => handleAction("ADD_TESTIMONIAL")}
+            className="cursor-pointer"
+          >
+            <Star className="mr-2 h-4 w-4" />
+            Add Testimonial
+          </DropdownMenuItem>
+
+          <DropdownMenuItem
+            onClick={() => handleAction("MANAGE_TESTIMONIALS")}
+            className="cursor-pointer"
+          >
+            <MessageSquare className="mr-2 h-4 w-4" />
+            Manage Testimonials
+          </DropdownMenuItem>
+
           <DropdownMenuSeparator />
 
           <DropdownMenuItem
@@ -305,6 +335,20 @@ export function MentorActions({ mentor, onView, refetch }: MentorActionsProps) {
         mentor={mentor}
         open={isDetailsOpen}
         onOpenChange={setIsDetailsOpen}
+      />
+
+      <AddTestimonialDialog
+        mentorId={mentor.id}
+        mentorName={mentor.displayName || mentor.name || "Mentor"}
+        open={isTestimonialOpen}
+        onOpenChange={setIsTestimonialOpen}
+      />
+
+      <MentorTestimonialsDialog
+        mentorId={mentor.id}
+        mentorName={mentor.displayName || mentor.name || "Mentor"}
+        open={isManageTestimonialsOpen}
+        onOpenChange={setIsManageTestimonialsOpen}
       />
     </>
   );

@@ -49,7 +49,13 @@ import {
 } from "@/components/ui/select";
 
 import { DateRangePicker } from "@/components/ui/date-range-picker";
-import { useEventStats, TimeRange } from "@/graphql/actions/events";
+import { 
+  useEventStats, 
+  TimeRange, 
+  useEventRegistrationTrend, 
+  useEventTypeDistribution, 
+  useTopPerformingEvents 
+} from "@/graphql/actions/events";
 import { subDays } from "date-fns";
 import { DateRange } from "react-day-picker";
 
@@ -72,15 +78,40 @@ export default function EventsAnalytics() {
     else if (diffDays <= 90) setTimeRange(TimeRange.LAST_90_DAYS);
   };
 
-  const { data, loading, refetch } = useEventStats(
+  const dateRangeParam = dateRange?.from && dateRange?.to
+    ? {
+        startDate: dateRange.from.toISOString(),
+        endDate: dateRange.to.toISOString(),
+      }
+    : undefined;
+
+  const { data, loading, refetch: refetchStats } = useEventStats(
     timeRange,
-    dateRange?.from && dateRange?.to
-      ? {
-          startDate: dateRange.from.toISOString(),
-          endDate: dateRange.to.toISOString(),
-        }
-      : undefined
+    dateRangeParam
   );
+
+  const { data: trendData, refetch: refetchTrend } = useEventRegistrationTrend(
+    timeRange,
+    dateRangeParam
+  );
+
+  const { data: typeData, refetch: refetchType } = useEventTypeDistribution(
+    timeRange,
+    dateRangeParam
+  );
+
+  const { data: topData, refetch: refetchTop } = useTopPerformingEvents(
+    5,
+    timeRange,
+    dateRangeParam
+  );
+
+  const handleRefetch = () => {
+    refetchStats();
+    refetchTrend();
+    refetchType();
+    refetchTop();
+  };
   
   const stats = data?.getEventStats;
 
@@ -119,28 +150,11 @@ export default function EventsAnalytics() {
     },
   ];
 
-  const registrationTrend = [
-    { name: "MON", registrations: 400 },
-    { name: "TUE", registrations: 300 },
-    { name: "WED", registrations: 200 },
-    { name: "THU", registrations: 278 },
-    { name: "FRI", registrations: 189 },
-    { name: "SAT", registrations: 239 },
-    { name: "SUN", registrations: 349 },
-  ];
+  const registrationTrend = trendData?.getEventRegistrationTrend || [];
 
-  const eventTypeDistribution = [
-    { name: "IN_PERSON", value: 40, color: "#18181b" },
-    { name: "ONLINE", value: 30, color: "#71717a" },
-    { name: "HYBRID", value: 30, color: "#a1a1aa" },
-  ];
+  const eventTypeDistribution = typeData?.getEventTypeDistribution || [];
 
-  const topPerformingEvents = [
-    { name: "Tech Summit 2024", attendees: 450, views: 1200 },
-    { name: "Design Workshop", attendees: 320, views: 800 },
-    { name: "Community Meetup", attendees: 280, views: 600 },
-    { name: "Product Launch", attendees: 250, views: 500 },
-  ];
+  const topPerformingEvents = topData?.getTopPerformingEvents || [];
 
   return (
     <EcosystemWrapper anonymized-1="events-analytics">
@@ -171,7 +185,7 @@ export default function EventsAnalytics() {
               variant="outline"
               size="icon"
               className="h-9 w-9 text-zinc-400 hover:text-indigo-600 rounded-lg transition-all"
-              onClick={() => refetch()}
+              onClick={handleRefetch}
             >
               <RotateCcw size={14} className={cn(loading && "animate-spin")} />
             </Button>

@@ -20,8 +20,11 @@ const events = `
     address
     latitude
     longitude
+    lat
+    lng
   }
   visibility
+  isActive
   verification {
     id
     eventId
@@ -91,8 +94,8 @@ export const GET_EVENT_STATS = gql`
 `;
 
 export const GET_EVENT_BY_ID = gql`
-  query GetEventById($id: ID!) {
-    getEventById(id: $id) {
+  query GetEventById($getEventByIdId: ID!) {
+    getEventById(id: $getEventByIdId) {
       ${events}
     }
   }
@@ -238,6 +241,88 @@ export const DELETE_EVENT_SPONSOR = gql`
   }
 `;
 
+// ==========================================
+// SPECIAL SPONSORS
+// ==========================================
+
+const eventSpecialSponsor = `
+  id
+  eventId
+  sponsorShipId
+  sponsorName
+  sponsorLogo
+  sponsorUserName
+  sponsorUserDesignation
+  isApproved
+  createdAt
+`;
+
+const eventSpecialSponsorship = `
+  id
+  eventId
+  sponsorType
+  price
+  currency
+  showPrice
+  content
+  createdAt
+  sponsors {
+    ${eventSpecialSponsor}
+  }
+`;
+
+export const GET_EVENT_SPECIAL_SPONSORSHIPS = gql`
+  query GetEventSpecialSponsorships($eventId: ID!) {
+    getEventSpecialSponsorships(eventId: $eventId) {
+      ${eventSpecialSponsorship}
+    }
+  }
+`;
+
+export const ADD_EVENT_SPECIAL_SPONSORSHIP = gql`
+  mutation AddEventSpecialSponsorship($input: EventSpecialSponsorshipInput!) {
+    addEventSpecialSponsorship(input: $input) {
+      ${eventSpecialSponsorship}
+    }
+  }
+`;
+
+export const UPDATE_EVENT_SPECIAL_SPONSORSHIP = gql`
+  mutation UpdateEventSpecialSponsorship($sponsorshipId: ID!, $input: EventSpecialSponsorshipInput!) {
+    updateEventSpecialSponsorship(sponsorshipId: $sponsorshipId, input: $input) {
+      ${eventSpecialSponsorship}
+    }
+  }
+`;
+
+export const DELETE_EVENT_SPECIAL_SPONSORSHIP = gql`
+  mutation DeleteEventSpecialSponsorship($sponsorshipId: ID!) {
+    deleteEventSpecialSponsorship(sponsorshipId: $sponsorshipId)
+  }
+`;
+
+export const ADD_EVENT_SPECIAL_SPONSOR = gql`
+  mutation AddEventSpecialSponsor($input: EventSpecialSponsorInput!) {
+    addEventSpecialSponsor(input: $input) {
+      ${eventSpecialSponsor}
+    }
+  }
+`;
+
+export const UPDATE_EVENT_SPECIAL_SPONSOR = gql`
+  mutation UpdateEventSpecialSponsor($sponsorId: ID!, $input: EventSpecialSponsorInput!) {
+    updateEventSpecialSponsor(sponsorId: $sponsorId, input: $input) {
+      ${eventSpecialSponsor}
+    }
+  }
+`;
+
+export const DELETE_EVENT_SPECIAL_SPONSOR = gql`
+  mutation DeleteEventSpecialSponsor($sponsorId: ID!) {
+    deleteEventSpecialSponsor(sponsorId: $sponsorId)
+  }
+`;
+
 const eventVenue = `
   id
   eventId
@@ -307,6 +392,13 @@ export const GET_EVENT_AGENDAS = gql`
         id
         name
       }
+      speakers {
+        id
+        name
+        avatar
+        title
+        company
+      }
     }
   }
 `;
@@ -316,6 +408,10 @@ export const ADD_EVENT_AGENDA = gql`
     addEventAgenda(input: $input) {
       id
       title
+      speakers {
+        id
+        name
+      }
     }
   }
 `;
@@ -325,6 +421,10 @@ export const UPDATE_EVENT_AGENDA = gql`
     updateEventAgenda(agendaId: $agendaId, input: $input) {
       id
       title
+      speakers {
+        id
+        name
+      }
     }
   }
 `;
@@ -704,6 +804,15 @@ export const GET_EVENT_DETAIL_STATS = gql`
       totalRevenue
       totalAttendees
       checkInRate
+      hourlyData {
+        name
+        value
+      }
+      ticketDistribution {
+        name
+        value
+        color
+      }
     }
   }
 `;
@@ -752,3 +861,50 @@ export const GET_TOP_PERFORMING_EVENTS = gql`
     }
   }
 `;
+
+// ==========================================
+// TEAM
+// ==========================================
+
+const eventTeamMember = `
+  id
+  eventId
+  firstName
+  lastName
+  avatar
+  linkedin
+  createdAt
+  updatedAt
+  status
+`;
+
+export const GET_EVENT_TEAM = gql`
+  query GetEventTeam($eventId: ID!) {
+    getEventTeam(eventId: $eventId) {
+      ${eventTeamMember}
+    }
+  }
+`;
+
+export const ADD_EVENT_TEAM_MEMBER = gql`
+  mutation AddEventTeamMember($input: EventTeamMemberInput!) {
+    addEventTeamMember(input: $input) {
+      ${eventTeamMember}
+    }
+  }
+`;
+
+export const UPDATE_EVENT_TEAM_MEMBER = gql`
+  mutation UpdateEventTeamMember($teamMemberId: ID!, $input: EventTeamMemberInput!) {
+    updateEventTeamMember(teamMemberId: $teamMemberId, input: $input) {
+      ${eventTeamMember}
+    }
+  }
+`;
+
+export const DELETE_EVENT_TEAM_MEMBER = gql`
+  mutation DeleteEventTeamMember($teamMemberId: ID!) {
+    deleteEventTeamMember(teamMemberId: $teamMemberId)
+  }
+`;
+

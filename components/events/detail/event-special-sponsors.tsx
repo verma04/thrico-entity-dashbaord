@@ -36,13 +36,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Building, Trash2, Upload } from "lucide-react";
 import {
-  EventSponsorship,
-  EventSponsor,
-  useEventSponsorships,
-  useAddEventSponsorship,
-  useDeleteEventSponsorship,
-  useAddEventSponsor,
-  useDeleteEventSponsor,
+  EventSpecialSponsorship,
+  EventSpecialSponsor,
+  useEventSpecialSponsorships,
+  useAddEventSpecialSponsorship,
+  useDeleteEventSpecialSponsorship,
+  useAddEventSpecialSponsor,
+  useDeleteEventSpecialSponsor,
 } from "@/graphql/actions/events";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -64,9 +64,9 @@ const sponsorSchema = Yup.object().shape({
   sponsorDescription: Yup.string(),
 });
 
-function AddSponsorshipTierModal({ eventId }: { eventId: string }) {
+function AddSpecialSponsorshipTierModal({ eventId }: { eventId: string }) {
   const [open, setOpen] = useState(false);
-  const [addSponsorship, { loading }] = useAddEventSponsorship({
+  const [addSponsorship, { loading }] = useAddEventSpecialSponsorship({
     onCompleted: () => {
       formik.resetForm();
       setOpen(false);
@@ -104,14 +104,14 @@ function AddSponsorshipTierModal({ eventId }: { eventId: string }) {
       <DialogTrigger asChild>
         <Button className="gap-2">
           <Plus className="h-4 w-4" />
-          Add Sponsorship Tier
+          Add Special Sponsorship Tier
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add New Tier</DialogTitle>
+          <DialogTitle>Add New Special Tier</DialogTitle>
           <DialogDescription>
-            Create a new sponsorship package.
+            Create a new special sponsorship package.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={formik.handleSubmit} className="space-y-4">
@@ -119,7 +119,7 @@ function AddSponsorshipTierModal({ eventId }: { eventId: string }) {
             <Label htmlFor="sponsorType">Tier Name</Label>
             <Input
               id="sponsorType"
-              placeholder="e.g. Gold"
+              placeholder="e.g. Platinum Partner"
               {...formik.getFieldProps("sponsorType")}
             />
             {formik.touched.sponsorType && formik.errors.sponsorType && (
@@ -151,7 +151,7 @@ function AddSponsorshipTierModal({ eventId }: { eventId: string }) {
             <Label htmlFor="benefitsStr">Benefits (comma separated)</Label>
             <Textarea
               id="benefitsStr"
-              placeholder="Logo on website, 5 VIP Tickets"
+              placeholder="Main Stage Logo, Full access pass"
               {...formik.getFieldProps("benefitsStr")}
             />
             {formik.touched.benefitsStr && formik.errors.benefitsStr && (
@@ -162,7 +162,7 @@ function AddSponsorshipTierModal({ eventId }: { eventId: string }) {
           </div>
           <DialogFooter>
             <Button type="submit" disabled={loading}>
-              {loading ? "Adding..." : "Add Tier"}
+              {loading ? "Adding..." : "Add Special Tier"}
             </Button>
           </DialogFooter>
         </form>
@@ -171,7 +171,7 @@ function AddSponsorshipTierModal({ eventId }: { eventId: string }) {
   );
 }
 
-function AddSponsorModal({
+function AddSpecialSponsorModal({
   eventId,
   sponsorShipId,
   tierName,
@@ -192,7 +192,7 @@ function AddSponsorModal({
     }
   };
 
-  const [addSponsor, { loading }] = useAddEventSponsor({
+  const [addSponsor, { loading }] = useAddEventSpecialSponsor({
     onCompleted: () => {
       formik.resetForm();
       setImagePreview(null);
@@ -240,9 +240,9 @@ function AddSponsorModal({
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add {tierName} Sponsor</DialogTitle>
+          <DialogTitle>Add {tierName} Special Sponsor</DialogTitle>
           <DialogDescription>
-            Add a new company/sponsor to this tier.
+            Add a new company/sponsor to this special tier.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={formik.handleSubmit} className="space-y-4">
@@ -253,14 +253,14 @@ function AddSponsorModal({
                 <Building className="h-10 w-10 text-muted-foreground" />
               </AvatarFallback>
             </Avatar>
-            <label htmlFor={`sponsor-avatar-upload-${sponsorShipId}`}>
+            <label htmlFor={`special-sponsor-avatar-upload-${sponsorShipId}`}>
               <Button
                 variant="outline"
                 size="sm"
                 className="gap-2 cursor-pointer"
                 type="button"
                 onClick={() =>
-                  document.getElementById(`sponsor-avatar-upload-${sponsorShipId}`)?.click()
+                  document.getElementById(`special-sponsor-avatar-upload-${sponsorShipId}`)?.click()
                 }
               >
                 <Upload className="h-3 w-3" />
@@ -268,7 +268,7 @@ function AddSponsorModal({
               </Button>
             </label>
             <input
-              id={`sponsor-avatar-upload-${sponsorShipId}`}
+              id={`special-sponsor-avatar-upload-${sponsorShipId}`}
               type="file"
               accept="image/*"
               className="hidden"
@@ -277,10 +277,10 @@ function AddSponsorModal({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="sponsorName">Sponsor Name</Label>
+            <Label htmlFor="sponsorName">Special Sponsor Name</Label>
             <Input
               id="sponsorName"
-              placeholder="e.g. TechCorp"
+              placeholder="e.g. Special Corp"
               {...formik.getFieldProps("sponsorName")}
             />
             {formik.touched.sponsorName && formik.errors.sponsorName && (
@@ -312,7 +312,7 @@ function AddSponsorModal({
           </div>
           <DialogFooter>
             <Button type="submit" disabled={loading}>
-              {loading ? "Adding..." : "Add Sponsor"}
+              {loading ? "Adding..." : "Add Special Sponsor"}
             </Button>
           </DialogFooter>
         </form>
@@ -321,32 +321,34 @@ function AddSponsorModal({
   );
 }
 
-export function EventSponsorshipList({ eventId }: { eventId: string }) {
-  const { data, loading } = useEventSponsorships(eventId);
-  const tiers: EventSponsorship[] = data?.getEventSponsorships || [];
-
-  const [deleteTier] = useDeleteEventSponsorship({
-    refetchQueries: ["GetEventSponsorships"],
-  });
-
-  const [deleteSponsor] = useDeleteEventSponsor({
-    refetchQueries: ["GetEventSponsorships"],
-  });
+export function EventSpecialSponsorshipList({ eventId }: { eventId: string }) {
+  const { data, loading } = useEventSpecialSponsorships(eventId);
+  const tiers: EventSpecialSponsorship[] = data?.getEventSpecialSponsorships || [];
 
   const [tierToDelete, setTierToDelete] = useState<string | null>(null);
   const [sponsorToDelete, setSponsorToDelete] = useState<string | null>(null);
 
-  const handleDeleteTier = () => {
+  const [deleteTier, { loading: isDeletingTier }] = useDeleteEventSpecialSponsorship({
+    refetchQueries: ["GetEventSpecialSponsorships"],
+    onCompleted: () => setTierToDelete(null),
+  });
+
+  const [deleteSponsor, { loading: isDeletingSponsor }] = useDeleteEventSpecialSponsor({
+    refetchQueries: ["GetEventSpecialSponsorships"],
+    onCompleted: () => setSponsorToDelete(null),
+  });
+
+  const handleDeleteTier = (e: React.MouseEvent) => {
+    e.preventDefault();
     if (tierToDelete) {
       deleteTier({ variables: { sponsorshipId: tierToDelete } });
-      setTierToDelete(null);
     }
   };
 
-  const handleDeleteSponsor = () => {
+  const handleDeleteSponsor = (e: React.MouseEvent) => {
+    e.preventDefault();
     if (sponsorToDelete) {
       deleteSponsor({ variables: { sponsorId: sponsorToDelete } });
-      setSponsorToDelete(null);
     }
   };
 
@@ -356,7 +358,7 @@ export function EventSponsorshipList({ eventId }: { eventId: string }) {
         <div className="flex flex-col items-center gap-2">
           <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
           <p className="text-sm text-muted-foreground">
-            Loading sponsorships...
+            Loading special sponsorships...
           </p>
         </div>
       </div>
@@ -366,17 +368,16 @@ export function EventSponsorshipList({ eventId }: { eventId: string }) {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Sponsorship Tiers</h2>
-        <AddSponsorshipTierModal eventId={eventId} />
+        <h2 className="text-2xl font-bold">Special Sponsorship Tiers</h2>
+        <AddSpecialSponsorshipTierModal eventId={eventId} />
       </div>
 
       {tiers.length === 0 ? (
         <Card className="flex flex-col items-center justify-center p-12 border-dashed">
           <Building className="h-12 w-12 text-muted-foreground/50 mb-4" />
-          <h3 className="text-lg font-medium">No Sponsorships Yet</h3>
+          <h3 className="text-lg font-medium">No Special Sponsorships Yet</h3>
           <p className="text-sm text-muted-foreground mb-4 text-center max-w-sm">
-            Create tiers like "Platinum" or "Gold" to offer packages to
-            partnering companies.
+            Create special tiers for elite partners.
           </p>
         </Card>
       ) : (
@@ -397,7 +398,7 @@ export function EventSponsorshipList({ eventId }: { eventId: string }) {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="flex items-center gap-3">
-                    {tier.sponsorType} Tier
+                    {tier.sponsorType} (Special Tier)
                     {tier.showPrice && (
                       <span className="text-lg font-normal text-muted-foreground">
                         - {tier.currency} {tier.price}
@@ -406,7 +407,7 @@ export function EventSponsorshipList({ eventId }: { eventId: string }) {
                   </CardTitle>
                 </div>
                 <Badge variant="secondary">
-                  {tier.sponsors?.length || 0} Sponsors
+                  {tier.sponsors?.length || 0} Special Sponsors
                 </Badge>
               </div>
             </CardHeader>
@@ -438,10 +439,10 @@ export function EventSponsorshipList({ eventId }: { eventId: string }) {
 
               <div className="md:col-span-2">
                 <h4 className="font-semibold mb-3 text-sm text-muted-foreground uppercase tracking-wider">
-                  Current Sponsors
+                  Current Special Sponsors
                 </h4>
                 <div className="flex flex-wrap gap-4 items-center">
-                  {tier.sponsors?.map((sponsor: EventSponsor) => (
+                  {tier.sponsors?.map((sponsor: EventSpecialSponsor) => (
                     <div
                       key={sponsor.id}
                       className="flex flex-col items-center gap-2 group/sponsor relative"
@@ -479,7 +480,7 @@ export function EventSponsorshipList({ eventId }: { eventId: string }) {
                     </div>
                   ))}
 
-                  <AddSponsorModal
+                  <AddSpecialSponsorModal
                     eventId={eventId}
                     sponsorShipId={tier.id}
                     tierName={tier.sponsorType}
@@ -495,15 +496,19 @@ export function EventSponsorshipList({ eventId }: { eventId: string }) {
       <AlertDialog open={!!tierToDelete} onOpenChange={(open) => !open && setTierToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Sponsorship Tier</AlertDialogTitle>
+            <AlertDialogTitle>Delete Special Sponsorship Tier</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this sponsorship tier? This will also remove all sponsors associated with it. This action cannot be undone.
+              Are you sure you want to delete this special tier? This will also remove all special sponsors associated with it. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteTier} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Delete
+            <AlertDialogCancel disabled={isDeletingTier}>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteTier} 
+              disabled={isDeletingTier}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeletingTier ? "Deleting..." : "Delete"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -513,15 +518,19 @@ export function EventSponsorshipList({ eventId }: { eventId: string }) {
       <AlertDialog open={!!sponsorToDelete} onOpenChange={(open) => !open && setSponsorToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Remove Sponsor</AlertDialogTitle>
+            <AlertDialogTitle>Remove Special Sponsor</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to remove this sponsor? This action cannot be undone.
+              Are you sure you want to remove this special sponsor? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteSponsor} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Remove
+            <AlertDialogCancel disabled={isDeletingSponsor}>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteSponsor} 
+              disabled={isDeletingSponsor}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeletingSponsor ? "Removing..." : "Remove"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

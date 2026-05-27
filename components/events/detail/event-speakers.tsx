@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Button } from "@/components/ui/button";
@@ -59,6 +59,7 @@ import {
   EventSpeaker,
   useEventSpeakers,
   useAddEventSpeaker,
+  useUpdateEventSpeaker,
   useDeleteEventSpeaker,
   useToggleSpeakerFeatured,
 } from "@/graphql/actions/events";
@@ -69,27 +70,65 @@ const speakerSchema = Yup.object().shape({
   bio: Yup.string().required("Bio is required"),
 });
 
-function AddSpeakerModal({ eventId }: { eventId: string }) {
-  const [open, setOpen] = useState(false);
+function SpeakerModal({
+  eventId,
+  speaker,
+  open,
+  onOpenChange,
+}: {
+  eventId: string;
+  speaker?: EventSpeaker | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [avatarFile, setAvatarFile] = useState<any>(null);
 
-  const [addSpeaker, { loading }] = useAddEventSpeaker({
-    onCompleted: () => {
+  React.useEffect(() => {
+    if (open) {
+      if (speaker?.avatar) {
+        setImagePreview(`https://cdn.thrico.network/${speaker.avatar}`);
+      } else {
+        setImagePreview(null);
+      }
+      setAvatarFile(null);
       formik.resetForm();
-      setImagePreview(null);
-      setOpen(false);
+    }
+  }, [open, speaker]);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setAvatarFile(file);
+      const url = URL.createObjectURL(file);
+      setImagePreview(url);
+    }
+  };
+
+  const [addSpeaker, { loading: adding }] = useAddEventSpeaker({
+    onCompleted: () => {
+      onOpenChange(false);
     },
   });
 
+  const [updateSpeaker, { loading: updating }] = useUpdateEventSpeaker({
+    onCompleted: () => {
+      onOpenChange(false);
+    },
+  });
+
+  const loading = adding || updating;
+
   const formik = useFormik({
+    enableReinitialize: true,
     initialValues: {
-      name: "",
-      role: "",
-      bio: "",
-      email: "",
-      twitter: "",
-      linkedin: "",
-      company: "",
+      name: speaker?.name || "",
+      role: speaker?.title || "",
+      bio: speaker?.bio || "",
+      email: speaker?.email || "",
+      twitter: (speaker?.socialLinks as any)?.twitter || "",
+      linkedin: (speaker?.socialLinks as any)?.linkedin || "",
+      company: speaker?.company || "",
     },
     validationSchema: speakerSchema,
     onSubmit: (values) => {
@@ -97,37 +136,47 @@ function AddSpeakerModal({ eventId }: { eventId: string }) {
         twitter: values.twitter,
         linkedin: values.linkedin,
       };
-      addSpeaker({
-        variables: {
-          input: {
-            eventId,
-            name: values.name,
-            title: values.role,
-            company: values.company,
-            bio: values.bio,
-            email: values.email,
-            socialLinks,
-            isFeatured: false,
-            displayOrder: 0,
+
+      const input = {
+        eventId,
+        name: values.name,
+        title: values.role,
+        company: values.company,
+        bio: values.bio,
+        email: values.email,
+        socialLinks,
+        avatarImage: avatarFile,
+        isFeatured: speaker ? speaker.isFeatured : false,
+        displayOrder: speaker ? speaker.displayOrder : 0,
+      };
+
+      if (speaker) {
+        updateSpeaker({
+          variables: {
+            speakerId: speaker.id,
+            input: {
+              ...input,
+              avatar: speaker.avatar,
+            },
           },
-        },
-      });
+        });
+      } else {
+        addSpeaker({
+          variables: {
+            input,
+          },
+        });
+      }
     },
   });
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="gap-2">
-          <Plus className="h-4 w-4" />
-          Add Speaker
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl bg-card text-card-foreground">
         <DialogHeader>
-          <DialogTitle>Add New Speaker</DialogTitle>
+          <DialogTitle>{speaker ? "Edit Speaker" : "Add New Speaker"}</DialogTitle>
           <DialogDescription>
-            Add a new speaker to your event.
+            {speaker ? "Update speaker details." : "Add a new speaker to your event."}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={formik.handleSubmit} className="space-y-4">
@@ -139,15 +188,27 @@ function AddSpeakerModal({ eventId }: { eventId: string }) {
                   <User className="h-10 w-10 text-muted-foreground" />
                 </AvatarFallback>
               </Avatar>
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-2"
-                type="button"
-              >
-                <Upload className="h-3 w-3" />
-                Upload Photo
-              </Button>
+              <label htmlFor="speaker-avatar-upload">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2 cursor-pointer"
+                  type="button"
+                  onClick={() =>
+                    document.getElementById("speaker-avatar-upload")?.click()
+                  }
+                >
+                  <Upload className="h-3 w-3" />
+                  Upload Photo
+                </Button>
+              </label>
+              <input
+                id="speaker-avatar-upload"
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageUpload}
+              />
             </div>
             <div className="md:col-span-2 space-y-4">
               <div className="space-y-2">
@@ -254,7 +315,7 @@ function AddSpeakerModal({ eventId }: { eventId: string }) {
 
           <DialogFooter>
             <Button type="submit" disabled={loading}>
-              {loading ? "Adding..." : "Add Speaker"}
+              {loading ? "Saving..." : speaker ? "Save Changes" : "Add Speaker"}
             </Button>
           </DialogFooter>
         </form>
@@ -274,6 +335,19 @@ export function EventSpeakers({ eventId }: { eventId: string }) {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState("all");
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingSpeaker, setEditingSpeaker] = useState<EventSpeaker | null>(null);
+
+  const handleAdd = () => {
+    setEditingSpeaker(null);
+    setIsModalOpen(true);
+  };
+
+  const handleEdit = (speaker: EventSpeaker) => {
+    setEditingSpeaker(speaker);
+    setIsModalOpen(true);
+  };
 
   const filteredSpeakers = speakers
     .filter(
@@ -313,8 +387,18 @@ export function EventSpeakers({ eventId }: { eventId: string }) {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Speakers & Curators</h2>
-        <AddSpeakerModal eventId={eventId} />
+        <Button className="gap-2" onClick={handleAdd}>
+          <Plus className="h-4 w-4" />
+          Add Speaker
+        </Button>
       </div>
+
+      <SpeakerModal
+        eventId={eventId}
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        speaker={editingSpeaker}
+      />
 
       <div className="flex flex-wrap gap-4 justify-between">
         <div className="relative flex-1 max-w-xs">
@@ -386,7 +470,11 @@ export function EventSpeakers({ eventId }: { eventId: string }) {
                 <div className="flex flex-col items-center pt-6">
                   <Avatar className="h-24 w-24 mb-3">
                     <AvatarImage
-                      src={speaker.avatar || ""}
+                      src={
+                        speaker.avatar
+                          ? `https://cdn.thrico.network/${speaker.avatar}`
+                          : ""
+                      }
                       alt={speaker.name}
                     />
                     <AvatarFallback>
@@ -408,7 +496,7 @@ export function EventSpeakers({ eventId }: { eventId: string }) {
                 </p>
               </CardContent>
               <CardFooter className="flex gap-2 pt-0">
-                <Button variant="outline" size="sm" className="flex-1">
+                <Button variant="outline" size="sm" className="flex-1" onClick={() => handleEdit(speaker)}>
                   Edit
                 </Button>
                 <DropdownMenu>

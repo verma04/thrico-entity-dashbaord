@@ -528,3 +528,135 @@ export function useMentorshipAuditLogs(
     options,
   );
 }
+
+// ---------------------------------------------------------
+// ADD MENTOR TESTIMONIAL
+// ---------------------------------------------------------
+
+export interface MentorTestimonialInput {
+  mentorshipId: string;
+  from: string;
+  testimonial: string;
+  rating: number;
+}
+
+export interface AddMentorTestimonialData {
+  addMentorTestimonial: boolean;
+}
+
+export const ADD_MENTOR_TESTIMONIAL = gql`
+  mutation AddMentorTestimonial($input: MentorTestimonialInput!) {
+    addMentorTestimonial(input: $input)
+  }
+`;
+
+export function useAddMentorTestimonial(
+  options?: MutationHookOptions<
+    AddMentorTestimonialData,
+    { input: MentorTestimonialInput }
+  >,
+) {
+  return useMutation<
+    AddMentorTestimonialData,
+    { input: MentorTestimonialInput }
+  >(ADD_MENTOR_TESTIMONIAL, options);
+}
+
+// ---------------------------------------------------------
+// GET MENTOR TESTIMONIALS
+// ---------------------------------------------------------
+
+export interface MentorTestimonial {
+  id: string;
+  from: string;
+  testimonial: string;
+  rating: number;
+  createdAt: string;
+}
+
+export interface GetMentorTestimonialsData {
+  getMentorTestimonials: MentorTestimonial[];
+}
+
+export const GET_MENTOR_TESTIMONIALS = gql`
+  query GetMentorTestimonials($mentorshipId: ID!) {
+    getMentorTestimonials(mentorshipId: $mentorshipId) {
+      id
+      from
+      testimonial
+      rating
+      createdAt
+    }
+  }
+`;
+
+export function useGetMentorTestimonials(
+  options?: QueryHookOptions<
+    GetMentorTestimonialsData,
+    { mentorshipId: string }
+  >,
+) {
+  return useQuery<GetMentorTestimonialsData, { mentorshipId: string }>(
+    GET_MENTOR_TESTIMONIALS,
+    options,
+  );
+}
+
+// ---------------------------------------------------------
+// UPDATE MENTOR TESTIMONIAL
+// ---------------------------------------------------------
+
+export interface UpdateMentorTestimonialInput {
+  id: string;
+  from: string;
+  testimonial: string;
+  rating: number;
+}
+
+export interface UpdateMentorTestimonialData {
+  updateMentorTestimonial: boolean;
+}
+
+export const UPDATE_MENTOR_TESTIMONIAL = gql`
+  mutation UpdateMentorTestimonial($input: UpdateMentorTestimonialInput!) {
+    updateMentorTestimonial(input: $input)
+  }
+`;
+
+export function useUpdateMentorTestimonial(
+  options?: MutationHookOptions<
+    UpdateMentorTestimonialData,
+    { input: UpdateMentorTestimonialInput }
+  >,
+) {
+  return useMutation<
+    UpdateMentorTestimonialData,
+    { input: UpdateMentorTestimonialInput }
+  >(UPDATE_MENTOR_TESTIMONIAL, options);
+}
+
+// ---------------------------------------------------------
+// DELETE MENTOR TESTIMONIAL
+// ---------------------------------------------------------
+
+export interface DeleteMentorTestimonialData {
+  deleteMentorTestimonial: boolean;
+}
+
+export const DELETE_MENTOR_TESTIMONIAL = gql`
+  mutation DeleteMentorTestimonial($id: ID!) {
+    deleteMentorTestimonial(id: $id)
+  }
+`;
+
+export function useDeleteMentorTestimonial(
+  options?: MutationHookOptions<
+    DeleteMentorTestimonialData,
+    { id: string }
+  >,
+) {
+  return useMutation<DeleteMentorTestimonialData, { id: string }>(
+    DELETE_MENTOR_TESTIMONIAL,
+    options,
+  );
+}

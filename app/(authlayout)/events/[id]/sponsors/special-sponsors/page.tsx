@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { EventSponsorshipList } from "@/components/events/detail/event-sponsors";
+import { EventSpecialSponsorshipList } from "@/components/events/detail/event-special-sponsors";
 
 export default function SpecialSponsorsPage() {
   const params = useParams();
@@ -9,7 +9,7 @@ export default function SpecialSponsorsPage() {
 
   return (
     <div className="w-full">
-      <EventSponsorshipList eventId={eventId} />
+      <EventSpecialSponsorshipList eventId={eventId} />
     </div>
   );
 }
