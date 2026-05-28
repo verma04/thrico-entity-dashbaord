@@ -43,6 +43,16 @@ import {
   EcosystemKPI,
   EcosystemCard,
 } from "@/components/layout/ecosystem/ecosystem-analytics";
+import { 
+  useListings, 
+  useGetListingStats, 
+  useListingTrend, 
+  useListingCategoryDistribution 
+} from "@/graphql/actions/listing";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
+import { DateRange } from "react-day-picker";
+import { subDays } from "date-fns";
+import { cn } from "@/lib/utils";
 
 interface ListingData {
   id: string;
@@ -56,89 +66,39 @@ interface ListingData {
   date: string;
 }
 
-const weeklyListingsData = [
-  { day: "Mon", listings: 45 },
-  { day: "Tue", listings: 52 },
-  { day: "Wed", listings: 38 },
-  { day: "Thu", listings: 65 },
-  { day: "Fri", listings: 78 },
-  { day: "Sat", listings: 95 },
-  { day: "Sun", listings: 82 },
-];
-
-const categoryDistributionData = [
-  { name: "Vehicles", value: 28, color: "#18181b" },
-  { name: "Electronics", value: 35, color: "#3f3f46" },
-  { name: "Real Estate", value: 15, color: "#71717a" },
-  { name: "Furniture", value: 12, color: "#a1a1aa" },
-  { name: "Other", value: 10, color: "#e4e4e7" },
-];
+// Removing dummy data constants
 
 const MarketplaceDashboard = () => {
-  const [timeRange, setTimeRange] = useState("week");
-  const [listingData, setListingData] = useState<ListingData[]>([]);
+  const [timeRange, setTimeRange] = useState("THIS_MONTH");
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
 
-  useEffect(() => {
-    const mockData: ListingData[] = [
-      {
-        id: "1",
-        title: "2022 Tesla Model 3",
-        category: "Vehicles",
-        condition: "Used",
-        price: 35000,
-        status: "approved",
-        views: 1245,
-        likes: 89,
-        date: "2023-05-01",
-      },
-      {
-        id: "2",
-        title: "MacBook Pro 16-inch",
-        category: "Electronics",
-        condition: "New",
-        price: 2400,
-        status: "pending",
-        views: 780,
-        likes: 45,
-        date: "2023-05-02",
-      },
-      {
-        id: "3",
-        title: "Luxury Apartment for Rent",
-        category: "Real Estate",
-        condition: "New",
-        price: 3500,
-        status: "approved",
-        views: 2100,
-        likes: 120,
-        date: "2023-05-03",
-      },
-      {
-        id: "4",
-        title: "Vintage Leather Sofa",
-        category: "Furniture",
-        condition: "Used",
-        price: 850,
-        status: "blocked",
-        views: 320,
-        likes: 15,
-        date: "2023-05-04",
-      },
-      {
-        id: "5",
-        title: "iPhone 14 Pro Max",
-        category: "Electronics",
-        condition: "New",
-        price: 1100,
-        status: "inactive",
-        views: 450,
-        likes: 30,
-        date: "2023-05-05",
-      },
-    ];
+  const dateRangeParam = dateRange?.from && dateRange?.to
+    ? {
+        startDate: dateRange.from.toISOString(),
+        endDate: dateRange.to.toISOString(),
+      }
+    : undefined;
 
-    setListingData(mockData);
-  }, []);
+  const { data: listingsData, loading: listingsLoading } = useListings({
+    variables: { input: { status: "ALL" } },
+  });
+
+  const { data: statsData, loading: statsLoading } = useGetListingStats();
+
+  const { data: trendData, loading: trendLoading } = useListingTrend(
+    timeRange,
+    dateRangeParam
+  );
+
+  const { data: categoryData, loading: categoryLoading } = useListingCategoryDistribution(
+    timeRange,
+    dateRangeParam
+  );
+
+  const listingData = listingsData?.getListing || [];
+  const stats = statsData?.getListingStats;
+  const weeklyListingsData = trendData?.getListingTrend || [];
+  const categoryDistributionData = categoryData?.getListingCategoryDistribution || [];
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, { color: string; icon: any }> = {
@@ -146,7 +106,15 @@ const MarketplaceDashboard = () => {
         color: "text-emerald-600 bg-emerald-50 border-emerald-100",
         icon: <CheckCircle className="w-3 h-3" />,
       },
+      APPROVED: {
+        color: "text-emerald-600 bg-emerald-50 border-emerald-100",
+        icon: <CheckCircle className="w-3 h-3" />,
+      },
       pending: { 
+        color: "text-amber-600 bg-amber-50 border-amber-100", 
+        icon: <Clock className="w-3 h-3" /> 
+      },
+      PENDING: { 
         color: "text-amber-600 bg-amber-50 border-amber-100", 
         icon: <Clock className="w-3 h-3" /> 
       },
@@ -155,6 +123,14 @@ const MarketplaceDashboard = () => {
         icon: <XCircle className="w-3 h-3" />,
       },
       inactive: {
+        color: "text-zinc-500 bg-zinc-50 border-zinc-100",
+        icon: <PauseCircle className="w-3 h-3" />,
+      },
+      DISABLED: {
+        color: "text-zinc-500 bg-zinc-50 border-zinc-100",
+        icon: <PauseCircle className="w-3 h-3" />,
+      },
+      PAUSED: {
         color: "text-zinc-500 bg-zinc-50 border-zinc-100",
         icon: <PauseCircle className="w-3 h-3" />,
       },
@@ -170,10 +146,10 @@ const MarketplaceDashboard = () => {
     );
   };
 
-  const totalListings = listingData.length;
-  const pendingCount = listingData.filter(i => i.status === "pending").length;
-  const totalViews = listingData.reduce((s, i) => s + i.views, 0);
-  const totalLikes = listingData.reduce((s, i) => s + i.likes, 0);
+  const totalListings = stats?.totalListings || 0;
+  const pendingCount = listingData.filter(i => i.status === "PENDING" || i.status === "pending").length;
+  const totalViews = stats?.totalViews || 0;
+  const totalLikes = 0; // Not available in stats yet
 
   return (
     <EcosystemWrapper anonymized-1="marketplace-overview">
@@ -200,10 +176,12 @@ const MarketplaceDashboard = () => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="today" className="text-xs">Today</SelectItem>
-                <SelectItem value="week" className="text-xs">This Week</SelectItem>
-                <SelectItem value="month" className="text-xs">This Month</SelectItem>
-                <SelectItem value="year" className="text-xs">This Year</SelectItem>
+                <SelectItem value="LAST_24_HOURS" className="text-xs">Last 24 Hours</SelectItem>
+                <SelectItem value="LAST_7_DAYS" className="text-xs">Last 7 Days</SelectItem>
+                <SelectItem value="LAST_30_DAYS" className="text-xs">Last 30 Days</SelectItem>
+                <SelectItem value="LAST_90_DAYS" className="text-xs">Last 90 Days</SelectItem>
+                <SelectItem value="THIS_MONTH" className="text-xs">This Month</SelectItem>
+                <SelectItem value="LAST_MONTH" className="text-xs">Last Month</SelectItem>
               </SelectContent>
             </Select>
             <div className="h-4 w-px bg-zinc-200 mx-1" />
@@ -220,7 +198,7 @@ const MarketplaceDashboard = () => {
           <EcosystemKPI
             title="Total Listings"
             value={totalListings.toString()}
-            trend={12}
+            trend={Number(stats?.listingsDiff || 0)}
             icon={Store}
             color="text-zinc-900"
             bg="bg-zinc-100"
@@ -237,19 +215,19 @@ const MarketplaceDashboard = () => {
           <EcosystemKPI
             title="Search Views"
             value={totalViews.toLocaleString()}
-            trend={8}
+            trend={Number(stats?.viewsPercent || 0)}
             icon={Eye}
             color="text-indigo-600"
             bg="bg-indigo-50"
           />
           <EcosystemKPI
-            title="Social Likes"
-            value={totalLikes.toString()}
-            trend={totalLikes}
+            title="Active Listings"
+            value={stats?.activeListings?.toString() || "0"}
+            trend={Number(stats?.activePercent || 0)}
             icon={ThumbsUp}
             color="text-rose-600"
             bg="bg-rose-50"
-            trendLabel="Weekly"
+            trendLabel="Active"
           />
         </div>
 
@@ -271,7 +249,7 @@ const MarketplaceDashboard = () => {
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                     <XAxis 
-                      dataKey="day" 
+                      dataKey="name" 
                       axisLine={false} 
                       tickLine={false} 
                       tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} 
@@ -364,13 +342,13 @@ const MarketplaceDashboard = () => {
                     {listing.category} • {listing.condition}
                   </p>
                 </div>
-                <div className="flex items-center gap-12">
+                 <div className="flex items-center gap-12">
                    <div className="text-right">
-                      <p className="text-xs font-bold text-zinc-900">${listing.price.toLocaleString()}</p>
+                      <p className="text-xs font-bold text-zinc-900">${Number(listing.price || 0).toLocaleString()}</p>
                       <p className="text-[8px] font-bold text-zinc-400 uppercase tracking-tighter">Value</p>
                    </div>
                    <div className="text-right">
-                      <p className="text-xs font-bold text-zinc-900">{listing.views.toLocaleString()}</p>
+                      <p className="text-xs font-bold text-zinc-900">{Number(listing.numberOfViews || 0).toLocaleString()}</p>
                       <p className="text-[8px] font-bold text-zinc-400 uppercase tracking-tighter">Views</p>
                    </div>
                    <div className="w-28 flex justify-end">

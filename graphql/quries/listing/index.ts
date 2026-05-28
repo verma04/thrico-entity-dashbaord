@@ -124,3 +124,22 @@ export const GET_LISTINGS_STATS_BY_ID = gql`
     }
   }
 `;
+
+export const GET_LISTING_TREND = gql`
+  query GetListingTrend($timeRange: String, $dateRange: JSON) {
+    getListingTrend(timeRange: $timeRange, dateRange: $dateRange) {
+      name
+      listings
+    }
+  }
+`;
+
+export const GET_LISTING_CATEGORY_DISTRIBUTION = gql`
+  query GetListingCategoryDistribution($timeRange: String, $dateRange: JSON) {
+    getListingCategoryDistribution(timeRange: $timeRange, dateRange: $dateRange) {
+      name
+      value
+      color
+    }
+  }
+`;

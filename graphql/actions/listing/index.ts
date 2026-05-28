@@ -13,6 +13,8 @@ import {
   GET_LISTINGS,
   GET_LISTINGS_STATS,
   GET_LISTINGS_STATS_BY_ID,
+  GET_LISTING_TREND,
+  GET_LISTING_CATEGORY_DISTRIBUTION,
 } from "../../quries/listing";
 
 export type ListingCategory = {
@@ -136,6 +138,45 @@ export function useGetListingStatsById(
     { getListingStatsById: ListingStatsById },
     { input: { listingId: string } }
   >(GET_LISTINGS_STATS_BY_ID, options);
+}
+
+export type ListingTrend = {
+  name: string;
+  listings: number;
+};
+
+export function useListingTrend(
+  timeRange?: string,
+  dateRange?: { startDate: string; endDate: string },
+  options?: QueryHookOptions<
+    { getListingTrend: ListingTrend[] },
+    { timeRange?: string; dateRange?: { startDate: string; endDate: string } }
+  >,
+) {
+  return useQuery(GET_LISTING_TREND, {
+    variables: { timeRange, dateRange },
+    ...options,
+  });
+}
+
+export type ListingCategoryDistribution = {
+  name: string;
+  value: number;
+  color: string;
+};
+
+export function useListingCategoryDistribution(
+  timeRange?: string,
+  dateRange?: { startDate: string; endDate: string },
+  options?: QueryHookOptions<
+    { getListingCategoryDistribution: ListingCategoryDistribution[] },
+    { timeRange?: string; dateRange?: { startDate: string; endDate: string } }
+  >,
+) {
+  return useQuery(GET_LISTING_CATEGORY_DISTRIBUTION, {
+    variables: { timeRange, dateRange },
+    ...options,
+  });
 }
 
 export function useListings(

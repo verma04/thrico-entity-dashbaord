@@ -115,15 +115,13 @@ export default function PollsAnalytics() {
     },
   ];
 
-  const pollVotesData = [
-    { name: "MON", votes: 45 },
-    { name: "TUE", votes: 32 },
-    { name: "WED", votes: 60 },
-    { name: "THU", votes: 20 },
-    { name: "FRI", votes: 55 },
-    { name: "SAT", votes: 80 },
-    { name: "SUN", votes: 40 },
-  ];
+  const pollVotesData = stats?.trend || [];
+  const registryStats = stats?.registry || {
+    closedPolls: 0,
+    activePolls: 0,
+    drafts: 0,
+    responseRate: 0,
+  };
 
   return (
     <EcosystemWrapper anonymized-1="polls-analytics">
@@ -199,11 +197,15 @@ export default function PollsAnalytics() {
                         stroke="#f1f5f9"
                       />
                       <XAxis
-                        dataKey="name"
+                        dataKey="date"
                         axisLine={false}
                         tickLine={false}
                         tick={{ fontSize: 10, fontWeight: 600, fill: "#94a3b8" }}
                         dy={10}
+                        tickFormatter={(val) => {
+                          if (!val) return "";
+                          return new Date(val).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+                        }}
                       />
                       <YAxis
                         axisLine={false}
@@ -253,9 +255,9 @@ export default function PollsAnalytics() {
             >
               <div className="space-y-5 mt-4">
                 {[
-                  { label: "Closed Polls", value: 70, color: "bg-zinc-900" },
-                  { label: "Active Polls", value: 20, color: "bg-zinc-500" },
-                  { label: "Drafts", value: 10, color: "bg-zinc-300" },
+                  { label: "Closed Polls", value: registryStats.closedPolls, color: "bg-zinc-900" },
+                  { label: "Active Polls", value: registryStats.activePolls, color: "bg-zinc-500" },
+                  { label: "Drafts", value: registryStats.drafts, color: "bg-zinc-300" },
                 ].map((item, i) => (
                   <div key={i} className="group/item">
                     <div className="flex items-center justify-between mb-1.5">
@@ -282,7 +284,7 @@ export default function PollsAnalytics() {
                     Response Rate
                   </p>
                   <p className="text-xl font-bold text-zinc-900 tracking-tight">
-                    84.2%
+                    {registryStats.responseRate}%
                   </p>
                 </div>
                 <Link href="/polls/all">

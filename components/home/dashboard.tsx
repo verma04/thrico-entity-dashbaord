@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import {
   Activity,
   TrendingUp,
@@ -23,6 +24,7 @@ import {
   Circle,
   Users,
   Database,
+  Info,
 } from "lucide-react";
 import { ResponsiveContainer, AreaChart, Area } from "recharts";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
@@ -32,6 +34,7 @@ import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-cont
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useGetCommunityKPIs, TimeRange } from "@/graphql/actions/dashboard";
 import { subDays } from "date-fns";
 import { DateRange } from "react-day-picker";
@@ -53,6 +56,8 @@ interface CommunityKPICardProps {
   icon?: LucideIcon;
   statusColor?: string;
   subtext?: string;
+  suffix?: string;
+  tooltip?: string;
 }
 
 interface DashboardMetricValue {
@@ -76,6 +81,8 @@ const CommunityKPICard = ({
   icon: Icon,
   statusColor = "bg-emerald-500",
   subtext = "vs last period",
+  suffix = "",
+  tooltip,
 }: CommunityKPICardProps) => {
   const isPositive = change >= 0;
   const chartData = trend.map((val, i) => ({ value: val, id: i }));
@@ -85,9 +92,23 @@ const CommunityKPICard = ({
       <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-[radial-gradient(circle_at_90%_10%,hsl(var(--primary)/0.12),transparent_45%)]" />
       {/* Top Header */}
       <div className="relative flex items-start justify-between mb-3">
-        <span className="text-[10px] font-semibold text-muted-foreground/85 uppercase tracking-[0.18em] leading-none">
-          {title}
-        </span>
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] font-semibold text-muted-foreground/85 uppercase tracking-[0.18em] leading-none">
+            {title}
+          </span>
+          {tooltip && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="h-3 w-3 text-muted-foreground/50 cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent className="max-w-[200px] bg-background border border-border/60 text-foreground shadow-xl">
+                  <p className="font-mono text-[10px] text-muted-foreground">{tooltip}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+        </div>
         {Icon ? (
           <div className="h-8 w-8 rounded-lg border border-border/60 bg-background/80 backdrop-blur-sm flex items-center justify-center">
             <Icon className="h-4 w-4 text-muted-foreground/80" />
@@ -102,7 +123,7 @@ const CommunityKPICard = ({
       {/* Main Value & Change */}
       <div className="relative mb-5">
         <h3 className="text-3xl font-semibold text-foreground tracking-tight mb-1.5 tabular-nums">
-          {typeof value === "number" ? Math.round(value) : value}
+          {typeof value === "number" ? Math.round(value).toLocaleString() : value}{suffix}
         </h3>
         <div className="flex items-center gap-2">
           <div
@@ -206,6 +227,9 @@ const ModulePerformanceCard = ({
 );
 import { DashboardDistributionChart } from "./dashboard-distribution-chart";
 import { DashboardSessionRadarChart } from "./dashboard-session-radar-chart";
+import { DashboardContentBreakdownChart } from "./dashboard-content-breakdown-chart";
+import { DashboardGrowthChart } from "./dashboard-growth-chart";
+import { DashboardSectionHeading } from "./dashboard-section-heading";
 
 // ---------------------------------------------------------------------------
 // Main Dashboard Component
@@ -255,49 +279,55 @@ export default function Dashboard() {
 
   const vitals = [
     {
-      title: "Daily Active Users",
-      key: "dailyActiveUsers",
+      title: "Active Users",
+      key: "activeUsers",
       color: "bg-emerald-500",
+      tooltip: "Count of unique users active within the selected date range",
     },
     {
-      title: "Monthly Active Users",
-      key: "monthlyActiveUsers",
+      title: "Total Members",
+      key: "totalMembers",
       color: "bg-blue-500",
+      tooltip: "Total registered members across the platform",
     },
-    { title: "Engagement Rate", key: "engagementRate", color: "bg-amber-400" },
-    { title: "Retention Rate", key: "retentionRate", color: "bg-indigo-500" },
-    { title: "New Members", key: "newMembers", color: "bg-cyan-500" },
-    { title: "Churn Rate", key: "churnRate", color: "bg-rose-500" },
-    { title: "Community Health", key: "healthIndex", color: "bg-red-500" },
-    { title: "Member Happiness", key: "communityNPS", color: "bg-yellow-400" },
+    { title: "Engagement Rate", key: "engagementRate", color: "bg-amber-400", suffix: "%", tooltip: "(DAU / Total Users) × 100" },
+    { title: "Retention Rate", key: "retentionRate", color: "bg-indigo-500", suffix: "%", tooltip: "(MAU / Total Users) × 100" },
+    { title: "New Members", key: "newMembers", color: "bg-cyan-500", tooltip: "Users who joined during the selected period" },
+    { title: "Churn Rate", key: "churnRate", color: "bg-rose-500", suffix: "%", tooltip: "((Total Users - DAU) / Total Users) × 100" },
+    { title: "Community Health", key: "healthIndex", color: "bg-red-500", tooltip: "Weighted Avg: Engagement (40%) + Retention (40%) + Content Activity (20%)" },
+    { title: "Member Happiness", key: "communityNPS", color: "bg-yellow-400", tooltip: "Engagement Rate × 1.2 - Churn Rate × 0.5" },
   ];
 
   const contentFeed = [
-    { title: "Total Posts", key: "totalPosts", icon: FileText },
-    { title: "Post Frequency", key: "contributionFrequency", icon: Zap },
-    { title: "Reply Rate", key: "interactionReciprocity", icon: Repeat },
-    { title: "Post Views", key: "contentReach", icon: Eye },
+    { title: "Total Posts", key: "totalPosts", icon: FileText, tooltip: "Total feed entries, stories, and discussions" },
+    { title: "Post Frequency", key: "contributionFrequency", icon: Zap, suffix: "/wk", tooltip: "(Total Posts / DAU / Days in Period) × 7" },
+    { title: "Reply Rate", key: "interactionReciprocity", icon: Repeat, suffix: "%", tooltip: "(Feed Comments / Total Posts) × 100" },
   ];
 
   const acquisitionRet = [
-    { title: "Member Activation", key: "memberActivationRate", icon: Target },
-    { title: "Word of Mouth", key: "communityAdvocacyIndex", icon: Heart },
-    { title: "Superfan Count", key: "superfanRatio", icon: Star },
+    { title: "Member Activation", key: "memberActivationRate", icon: Target, suffix: "%", tooltip: "((New Members who posted) / New Members) × 100" },
+    { title: "Word of Mouth", key: "communityAdvocacyIndex", icon: Heart, tooltip: "(New Members / DAU) × 10" },
+    { title: "Superfan Count", key: "superfanRatio", icon: Star, suffix: "%", tooltip: "((DAU × 0.12) / Total Users) × 100" },
+    { title: "Referrals Joined", key: "referralsJoined", icon: Users, tooltip: "Members who joined via a referral link" },
+    { title: "Gamification Points", key: "gamificationPointsEarned", icon: Zap, tooltip: "Total gamification points earned by members" },
+    { title: "Badges Earned", key: "badgesEarned", icon: Trophy, tooltip: "Total badges earned by members" },
   ];
 
   const modulePerformanceList = [
-    { title: "Communities", icon: Users, color: "text-blue-600" },
-    { title: "Events", icon: Calendar, color: "text-orange-600" },
-    { title: "Jobs", icon: Target, color: "text-emerald-600" },
-    { title: "Shop & Listings", icon: ShoppingBag, color: "text-purple-600" },
-    { title: "Polls & Surveys", icon: FileText, color: "text-yellow-600" },
-    { title: "Discussions", icon: MessageSquare, color: "text-pink-600" },
+    { title: "Communities", icon: Users, color: "text-blue-600", href: "/communities" },
+    { title: "Events", icon: Calendar, color: "text-orange-600", href: "/events" },
+    { title: "Jobs", icon: Target, color: "text-emerald-600", href: "/jobs" },
+    { title: "Shop", icon: ShoppingBag, color: "text-purple-600", href: "/shop" },
+    { title: "Listings", icon: ShoppingBag, color: "text-violet-600", href: "/marketplace" },
+    { title: "Polls", icon: FileText, color: "text-yellow-600", href: "/polls/page" },
+    { title: "Surveys", icon: FileText, color: "text-amber-600", href: "/polls/page" },
+    { title: "Discussions", icon: MessageSquare, color: "text-pink-600", href: "/forums/page" },
     { title: "Gamification", icon: Trophy, color: "text-amber-600" },
-    { title: "Leaderboard", icon: Trophy, color: "text-yellow-600" },
-    { title: "Offers", icon: Target, color: "text-rose-600" },
+    { title: "Leaderboard", icon: Trophy, color: "text-yellow-600", href: "/leaderboard" },
+    { title: "Offers", icon: Target, color: "text-rose-600", href: "/offers/page" },
     { title: "Stories", icon: Sparkles, color: "text-violet-600" },
-    { title: "Mentorship", icon: Users, color: "text-cyan-600" },
-    { title: "Moderation", icon: Shield, color: "text-red-600" },
+    { title: "Mentorship", icon: Users, color: "text-cyan-600", href: "/mentorship" },
+    { title: "Moderation", icon: Shield, color: "text-red-600", href: "/moderation" },
   ];
 
   const getMetric = (key: string): DashboardMetricValue => {
@@ -367,12 +397,7 @@ export default function Dashboard() {
       <EcosystemContainer className="space-y-10 py-8 px-4 lg:px-6 border-none bg-transparent shadow-none ring-0">
         {/* 1. Core Stats */}
         <section className="space-y-4">
-          <div className="flex items-center gap-3">
-            <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.2em]">
-              Core Community Stats
-            </span>
-            <div className="h-px bg-gradient-to-r from-border to-transparent flex-1" />
-          </div>
+          <DashboardSectionHeading title="Core Community Stats" />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
             {vitals.map((v) => {
               const item = getMetric(v.key);
@@ -384,31 +409,30 @@ export default function Dashboard() {
                   change={item?.change ?? 0}
                   trend={item?.trend ?? [0, 0, 0, 0, 0, 0, 0]}
                   statusColor={v.color}
+                  suffix={(v as any).suffix}
+                  tooltip={(v as any).tooltip}
                 />
               );
             })}
           </div>
         </section>
 
-        <section className="grid grid-cols-1 lg:grid-cols-10 gap-4">
-          <div className="lg:col-span-7">
+        <div className="grid grid-cols-1 lg:grid-cols-10 gap-4">
+          <section className="lg:col-span-7 space-y-4">
+            <DashboardSectionHeading title="Platform Traffic" />
             <DashboardDistributionChart />
-          </div>
-          <div className="lg:col-span-3">
+          </section>
+          <section className="lg:col-span-3 space-y-4">
+            <DashboardSectionHeading title="Login Sessions" />
             <DashboardSessionRadarChart />
-          </div>
-        </section>
+          </section>
+        </div>
 
         {/* 2. Content & Feed */}
         <section className="space-y-4">
-          <div className="flex items-center gap-3">
-            <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.2em]">
-              Content & Feed
-            </span>
-            <div className="h-px bg-gradient-to-r from-border to-transparent flex-1" />
-          </div>
+          <DashboardSectionHeading title="Content & Feed" />
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-            <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-3">
               {contentFeed.map((v) => {
                 const item = getMetric(v.key);
                 return (
@@ -419,6 +443,8 @@ export default function Dashboard() {
                     change={item?.change ?? 0}
                     trend={item?.trend ?? [0, 0, 0, 0, 0, 0, 0]}
                     icon={v.icon}
+                    suffix={(v as any).suffix}
+                    tooltip={(v as any).tooltip}
                   />
                 );
               })}
@@ -491,17 +517,16 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Moderation */}
           <section className="lg:col-span-4 space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Shield className="h-4 w-4 text-rose-500" />
-                <h2 className="text-xs font-semibold text-rose-600 dark:text-rose-400 uppercase tracking-wider">
-                  Safety & Moderation
-                </h2>
-              </div>
-              <div className="text-rose-600 dark:text-rose-400 text-[10px] font-semibold px-2 py-0.5 rounded-md bg-rose-50 dark:bg-rose-500/10 border border-rose-100 dark:border-rose-500/20">
-                7 pending
-              </div>
-            </div>
+            <DashboardSectionHeading
+              title="Safety & Moderation"
+              icon={<Shield className="h-4 w-4 text-rose-500" />}
+              titleClassName="text-rose-600 dark:text-rose-400 tracking-wider text-xs"
+              rightElement={
+                <div className="text-rose-600 dark:text-rose-400 text-[10px] font-semibold px-2 py-0.5 rounded-md bg-rose-50 dark:bg-rose-500/10 border border-rose-100 dark:border-rose-500/20">
+                  {kpis?.moderationStats?.reduce((acc, s) => acc + (s.status === "Urgent" || s.status === "Review" ? s.count : 0), 0) ?? 0} pending
+                </div>
+              }
+            />
 
             <div className="rounded-2xl border border-border/60 bg-gradient-to-b from-background to-muted/20 overflow-hidden shadow-sm">
               <table className="w-full text-left border-collapse">
@@ -562,31 +587,27 @@ export default function Dashboard() {
 
           {/* Module Performance Grid */}
           <section className="lg:col-span-8 space-y-4">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.2em]">
-                  How people use features
-                </span>
-                <div className="h-px bg-gradient-to-r from-border to-transparent flex-1 min-w-10" />
-              </div>
-              {modulePerformanceList.length > 9 && (
-                <Button
-                  variant="link"
-                  className="text-[10px] text-muted-foreground font-medium p-0 h-auto"
-                  onClick={() => setShowAllFeatureModules((prev) => !prev)}
-                >
-                  {showAllFeatureModules ? "View less ←" : "View all →"}
-                </Button>
-              )}
-            </div>
+            <DashboardSectionHeading
+              title="How people use features"
+              rightElement={
+                modulePerformanceList.length > 9 && (
+                  <Button
+                    variant="link"
+                    className="text-[10px] text-muted-foreground font-medium p-0 h-auto"
+                    onClick={() => setShowAllFeatureModules((prev) => !prev)}
+                  >
+                    {showAllFeatureModules ? "View less ←" : "View all →"}
+                  </Button>
+                )
+              }
+            />
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {visibleFeatureModules.map((mod) => {
                 const dataItem = kpis?.modulePerformance?.find(
                   (m) => m.module === mod.title,
                 );
-                return (
+                const card = (
                   <ModulePerformanceCard
-                    key={mod.title}
                     title={mod.title}
                     icon={mod.icon}
                     value={dataItem?.value?.toString() ?? "0"}
@@ -594,21 +615,65 @@ export default function Dashboard() {
                     color={mod.color}
                   />
                 );
+                
+                return mod.href ? (
+                  <Link href={mod.href} key={mod.title} className="block group">
+                    {card}
+                  </Link>
+                ) : (
+                  <div key={mod.title}>{card}</div>
+                );
               })}
             </div>
           </section>
         </div>
 
-        {/* 4. Storage & Acquisition/Retention Combined Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* 3.5. Insights Row (Growth & Content Breakdown) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          <section className="space-y-4">
+            <DashboardSectionHeading title="Community Growth" />
+            <DashboardGrowthChart />
+          </section>
+          <section className="space-y-4">
+            <DashboardSectionHeading title="Content Breakdown" />
+            <DashboardContentBreakdownChart 
+              data={kpis?.contentTypeBreakdown || []} 
+              // loading={kpisLoading} 
+            />
+          </section>
+        </div>
+
+        {/* 4. Growing & Keeping Members */}
+        <section className="space-y-4 mt-20">
+          <DashboardSectionHeading title="Growing & Keeping Members" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-8">
+            {acquisitionRet.map((v) => {
+              const item = getMetric(v.key);
+              return (
+                <CommunityKPICard
+                  key={v.key}
+                  title={v.title}
+                  value={loading ? "..." : (item?.value ?? "0")}
+                  change={item?.change ?? 0}
+                  trend={item?.trend ?? [0, 0, 0, 0, 0, 0, 0]}
+                  icon={v.icon}
+                  suffix={(v as any).suffix}
+                  tooltip={(v as any).tooltip}
+                />
+              );
+            })}
+          </div>
+        </section>
+
+        {/* 5. Platform Storage & Subscription Details Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-16">
           {/* Storage Stats */}
           <section className="lg:col-span-4 space-y-4">
-            <div className="flex items-center gap-2">
-              <Database className="h-4 w-4 text-slate-800" />
-              <h2 className="text-xs font-semibold text-slate-900 uppercase tracking-[0.14em]">
-                Platform Storage
-              </h2>
-            </div>
+            <DashboardSectionHeading
+              title="Platform Storage"
+              icon={<Database className="h-4 w-4 text-slate-800" />}
+              titleClassName="text-slate-900 tracking-[0.14em] text-xs"
+            />
             <div className="h-full">
               {statsLoading || summaryLoading ? (
                 <div className="h-[280px] border border-border/70 rounded-2xl bg-gradient-to-b from-background to-muted/25 animate-pulse flex items-center justify-center">
@@ -622,42 +687,14 @@ export default function Dashboard() {
             </div>
           </section>
 
-          {/* Growing & Keeping Members (Acquisition & Retention) */}
+          {/* Subscription Details */}
           <section className="lg:col-span-8 space-y-4">
-            <div className="flex items-center gap-3">
-              <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.2em]">
-                Growing & Keeping Members
-              </span>
-              <div className="h-px bg-gradient-to-r from-border to-transparent flex-1" />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              {acquisitionRet.map((v) => {
-                const item = getMetric(v.key);
-                return (
-                  <CommunityKPICard
-                    key={v.key}
-                    title={v.title}
-                    value={loading ? "..." : (item?.value ?? "0")}
-                    change={item?.change ?? 0}
-                    trend={item?.trend ?? [0, 0, 0, 0, 0, 0, 0]}
-                    icon={v.icon}
-                  />
-                );
-              })}
+            <DashboardSectionHeading title="Subscription Details" />
+            <div className="h-full">
+              <PlanOverview />
             </div>
           </section>
         </div>
-
-        {/* 5. Subscription Details */}
-        <section className="space-y-4 mt-16">
-          <div className="flex items-center gap-3">
-            <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.2em]">
-              Subscription Details
-            </span>
-            <div className="h-px bg-gradient-to-r from-border to-transparent flex-1" />
-          </div>
-          <PlanOverview />
-        </section>
       </EcosystemContainer>
     </EcosystemWrapper>
   );

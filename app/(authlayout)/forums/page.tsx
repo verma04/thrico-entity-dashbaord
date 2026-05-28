@@ -44,54 +44,10 @@ import {
   EcosystemCard,
 } from "@/components/layout/ecosystem/ecosystem-analytics";
 import { cn } from "@/lib/utils";
+import { useGetDiscussionAnalytics } from "@/graphql/actions/discussion-form";
 
-const postingActivityData = [
-  { name: "MON", threads: 12, posts: 45 },
-  { name: "TUE", threads: 15, posts: 52 },
-  { name: "WED", threads: 18, posts: 38 },
-  { name: "THU", threads: 14, posts: 65 },
-  { name: "FRI", threads: 21, posts: 78 },
-  { name: "SAT", threads: 25, posts: 95 },
-  { name: "SUN", threads: 19, posts: 82 },
-];
-
-const topicDistributionData = [
-  { name: "Technical", value: 35, color: "#18181b" },
-  { name: "Governance", value: 25, color: "#3f3f46" },
-  { name: "General", value: 15, color: "#71717a" },
-  { name: "Events", value: 15, color: "#a1a1aa" },
-  { name: "Support", value: 10, color: "#e4e4e7" },
-];
-
-const forumPerformanceData = [
-  {
-    id: "1",
-    name: "Photography Enthusiasts",
-    slug: "photography",
-    members: 12500,
-    active: 78,
-    lastActivity: "2h ago",
-    icon: "📸",
-  },
-  {
-    id: "2",
-    name: "Tech Innovators",
-    slug: "tech",
-    members: 9800,
-    active: 82,
-    lastActivity: "1h ago",
-    icon: "💻",
-  },
-  {
-    id: "3",
-    name: "Fitness & Health",
-    slug: "fitness",
-    members: 8700,
-    active: 65,
-    lastActivity: "3h ago",
-    icon: "💪",
-  },
-];
+// Removing dummy data constants
+// Dummy data removed
 
 export default function DiscussionForum() {
   const [timeRangeStr, setTimeRangeStr] = useState("LAST_7_DAYS");
@@ -109,15 +65,33 @@ export default function DiscussionForum() {
     if (diffDays <= 1) setTimeRangeStr("LAST_24_HOURS");
     else if (diffDays <= 7) setTimeRangeStr("LAST_7_DAYS");
     else if (diffDays <= 30) setTimeRangeStr("LAST_30_DAYS");
-    else if (diffDays <= 90) setTimeRangeStr("LAST_90_DAYS");
+    else if (diffDays <= 30) setTimeRangeStr("LAST_30_DAYS");
+    else setTimeRangeStr("LAST_90_DAYS");
   };
 
-  const loading = false;
+  const dateRangeParam = dateRange?.from && dateRange?.to
+    ? {
+        startDate: dateRange.from.toISOString(),
+        endDate: dateRange.to.toISOString(),
+      }
+    : undefined;
+
+  const { data, loading } = useGetDiscussionAnalytics({
+    variables: {
+      timeRange: timeRangeStr,
+      dateRange: dateRangeParam,
+    },
+  });
+
+  const stats = data?.getDiscussionAnalytics;
+  const postingActivityData = stats?.trend || [];
+  const topicDistributionData = stats?.topicDistribution || [];
+  const forumPerformanceData = stats?.topForums || [];
 
   const kpis = [
     {
       title: "Total Forums",
-      value: "128",
+      value: (stats?.totalForums || 0).toLocaleString(),
       trend: 3,
       icon: LayoutGrid,
       color: "text-zinc-900",
@@ -125,15 +99,15 @@ export default function DiscussionForum() {
     },
     {
       title: "Active Threads",
-      value: "542",
+      value: (stats?.activeThreads || 0).toLocaleString(),
       trend: 18,
       icon: Hash,
       color: "text-indigo-600",
       bg: "bg-indigo-50",
     },
     {
-      title: "Daily Posts",
-      value: "3,200",
+      title: "New Posts",
+      value: (stats?.dailyPosts || 0).toLocaleString(),
       trend: 24,
       icon: MessageSquare,
       color: "text-emerald-600",
@@ -141,7 +115,7 @@ export default function DiscussionForum() {
     },
     {
       title: "Global Members",
-      value: "1,240",
+      value: (stats?.globalMembers || 0).toLocaleString(),
       trend: 5,
       icon: Users,
       color: "text-blue-600",
@@ -225,11 +199,15 @@ export default function DiscussionForum() {
                       stroke="#f1f5f9"
                     />
                     <XAxis
-                      dataKey="name"
+                      dataKey="date"
                       axisLine={false}
                       tickLine={false}
                       tick={{ fontSize: 10, fontWeight: 600, fill: "#94a3b8" }}
                       dy={10}
+                      tickFormatter={(val) => {
+                        if (!val) return "";
+                        return new Date(val).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+                      }}
                     />
                     <YAxis
                       axisLine={false}
@@ -369,6 +347,11 @@ export default function DiscussionForum() {
                 </div>
               </div>
             ))}
+            {forumPerformanceData.length === 0 && (
+              <div className="text-center py-8 text-sm text-zinc-500 font-medium">
+                No active forums found in this period.
+              </div>
+            )}
           </div>
           <div className="mt-8 flex justify-center">
              <Button variant="ghost" className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] hover:text-indigo-600">

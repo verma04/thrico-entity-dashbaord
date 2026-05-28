@@ -4,6 +4,8 @@ import {
   CHANGE_JOB_VERIFICATION,
   GET_JOB_STATS,
   GET_JOBS,
+  GET_JOB_APPLICATION_TREND,
+  GET_JOB_TYPE_DISTRIBUTION,
 } from "@/graphql/quries/jobs";
 import {
   gql,
@@ -271,5 +273,58 @@ export function useChangeJobVerification(
       },
     ],
     awaitRefetchQueries: true,
+  });
+}
+
+export type JobApplicationTrend = {
+  name: string;
+  applications: number;
+};
+
+export type GetJobApplicationTrendResponse = {
+  getJobApplicationTrend: JobApplicationTrend[];
+};
+
+export function useJobApplicationTrend(
+  timeRange?: TimeRange,
+  dateRange?: DateRangeInput,
+  options?: QueryHookOptions<
+    GetJobApplicationTrendResponse,
+    { timeRange?: TimeRange; dateRange?: DateRangeInput }
+  >,
+): QueryResult<
+  GetJobApplicationTrendResponse,
+  { timeRange?: TimeRange; dateRange?: DateRangeInput }
+> {
+  return useQuery(GET_JOB_APPLICATION_TREND, {
+    variables: { timeRange, dateRange },
+    ...options,
+  });
+}
+
+export type JobTypeDistribution = {
+  name: string;
+  value: number;
+  color: string;
+};
+
+export type GetJobTypeDistributionResponse = {
+  getJobTypeDistribution: JobTypeDistribution[];
+};
+
+export function useJobTypeDistribution(
+  timeRange?: TimeRange,
+  dateRange?: DateRangeInput,
+  options?: QueryHookOptions<
+    GetJobTypeDistributionResponse,
+    { timeRange?: TimeRange; dateRange?: DateRangeInput }
+  >,
+): QueryResult<
+  GetJobTypeDistributionResponse,
+  { timeRange?: TimeRange; dateRange?: DateRangeInput }
+> {
+  return useQuery(GET_JOB_TYPE_DISTRIBUTION, {
+    variables: { timeRange, dateRange },
+    ...options,
   });
 }

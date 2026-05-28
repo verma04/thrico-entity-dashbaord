@@ -77,3 +77,22 @@ export const GET_JOB_STATS = gql`
     }
   }
 `;
+
+export const GET_JOB_APPLICATION_TREND = gql`
+  query GetJobApplicationTrend($timeRange: TimeRange, $dateRange: DateRangeInput) {
+    getJobApplicationTrend(timeRange: $timeRange, dateRange: $dateRange) {
+      name
+      applications
+    }
+  }
+`;
+
+export const GET_JOB_TYPE_DISTRIBUTION = gql`
+  query GetJobTypeDistribution($timeRange: TimeRange, $dateRange: DateRangeInput) {
+    getJobTypeDistribution(timeRange: $timeRange, dateRange: $dateRange) {
+      name
+      value
+      color
+    }
+  }
+`;

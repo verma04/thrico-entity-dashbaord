@@ -11,6 +11,16 @@ export const GET_OFFER_STATS = gql`
       activeOffersChange
       claimsChange
       viewsChange
+      yieldRate
+      trend {
+        date
+        claims
+      }
+      matrix {
+        name
+        value
+        color
+      }
     }
   }
 `;

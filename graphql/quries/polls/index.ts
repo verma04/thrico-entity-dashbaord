@@ -1,3 +1,5 @@
+import { gql } from "@apollo/client";
+
 export const GET_POLL_STATS = gql`
   query GetPollStats($timeRange: TimeRange, $dateRange: DateRangeInput) {
     getPollStats(timeRange: $timeRange, dateRange: $dateRange) {
@@ -9,11 +11,19 @@ export const GET_POLL_STATS = gql`
       activePollsChange
       votesChange
       engagementRateChange
+      trend {
+        date
+        votes
+      }
+      registry {
+        closedPolls
+        activePolls
+        drafts
+        responseRate
+      }
     }
   }
 `;
-
-import { gql } from "@apollo/client";
 
 const polls = `
       id

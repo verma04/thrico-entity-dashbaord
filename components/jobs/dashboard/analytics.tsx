@@ -1,7 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
-import { useJobStats, TimeRange } from "@/graphql/actions/jobs";
+import { 
+  useJobStats, 
+  TimeRange,
+  useJobApplicationTrend,
+  useJobTypeDistribution
+} from "@/graphql/actions/jobs";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { subDays } from "date-fns";
 import { DateRange } from "react-day-picker";
@@ -69,15 +74,33 @@ export default function JobsAnalytics() {
     else if (diffDays <= 90) setTimeRange(TimeRange.LAST_90_DAYS);
   };
 
-  const { data, loading, refetch } = useJobStats(
+  const dateRangeParam = dateRange?.from && dateRange?.to
+    ? {
+        startDate: dateRange.from.toISOString(),
+        endDate: dateRange.to.toISOString(),
+      }
+    : undefined;
+
+  const { data, loading, refetch: refetchStats } = useJobStats(
     timeRange,
-    dateRange?.from && dateRange?.to
-      ? {
-          startDate: dateRange.from.toISOString(),
-          endDate: dateRange.to.toISOString(),
-        }
-      : undefined
+    dateRangeParam
   );
+
+  const { data: trendData, refetch: refetchTrend } = useJobApplicationTrend(
+    timeRange,
+    dateRangeParam
+  );
+
+  const { data: typeData, refetch: refetchType } = useJobTypeDistribution(
+    timeRange,
+    dateRangeParam
+  );
+
+  const handleRefetch = () => {
+    refetchStats();
+    refetchTrend();
+    refetchType();
+  };
 
   const stats = data?.getJobStats;
 
@@ -116,15 +139,9 @@ export default function JobsAnalytics() {
     },
   ];
 
-  const applicationsData = [
-    { name: "MON", applications: 12 },
-    { name: "TUE", applications: 19 },
-    { name: "WED", applications: 15 },
-    { name: "THU", registrations: 22 },
-    { name: "FRI", registrations: 28 },
-    { name: "SAT", registrations: 10 },
-    { name: "SUN", registrations: 8 },
-  ];
+  const applicationsData = trendData?.getJobApplicationTrend || [];
+  
+  const jobMatrixData = typeData?.getJobTypeDistribution || [];
 
   return (
     <EcosystemWrapper anonymized-1="jobs-analytics">
@@ -155,7 +172,7 @@ export default function JobsAnalytics() {
               variant="outline"
               size="icon"
               className="h-9 w-9 text-zinc-400 hover:text-indigo-600 rounded-lg transition-all"
-              onClick={() => refetch()}
+              onClick={handleRefetch}
             >
               <RotateCcw size={14} className={cn(loading && "animate-spin")} />
             </Button>
@@ -229,25 +246,20 @@ export default function JobsAnalytics() {
               icon={BarChart3}
             >
               <div className="space-y-5 mt-4">
-                {[
-                  { label: "Engineering", value: 45, color: "bg-indigo-500" },
-                  { label: "Design", value: 30, color: "bg-purple-500" },
-                  { label: "Product", value: 15, color: "bg-emerald-500" },
-                  { label: "Marketing", value: 10, color: "bg-amber-500" }
-                ].map((item, i) => (
+                {jobMatrixData.map((item, i) => (
                   <div key={i} className="group/item">
                     <div className="flex items-center justify-between mb-1.5">
                       <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest leading-none">
-                        {item.label}
+                        {item.name.replace("-", " ")}
                       </span>
                       <span className="text-xs font-bold text-zinc-900 leading-none">
-                        {item.value}%
+                        {item.value}
                       </span>
                     </div>
                     <div className="h-1.5 w-full bg-zinc-50 rounded-full overflow-hidden border border-zinc-100">
                       <div
-                        className={cn("h-full rounded-full transition-all duration-1000", item.color)}
-                        style={{ width: `${item.value}%` }}
+                        className="h-full rounded-full transition-all duration-1000"
+                        style={{ width: `${Math.min((item.value / Math.max(...jobMatrixData.map(d => d.value), 1)) * 100, 100)}%`, backgroundColor: item.color }}
                       />
                     </div>
                   </div>
@@ -257,7 +269,7 @@ export default function JobsAnalytics() {
               <div className="mt-8 pt-6 border-t border-zinc-100 flex items-center justify-between">
                 <div>
                   <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Active Candidates</p>
-                  <p className="text-xl font-bold text-zinc-900 tracking-tight">2.4k</p>
+                  <p className="text-xl font-bold text-zinc-900 tracking-tight">{stats?.totalApplications?.toLocaleString() ?? "0"}</p>
                 </div>
                 <Link href="/jobs/all">
                   <Button variant="outline" className="h-10 px-4 rounded-lg border-zinc-200 font-bold text-[10px] uppercase tracking-widest text-zinc-600 gap-2 hover:bg-zinc-50 transition-all shadow-sm">

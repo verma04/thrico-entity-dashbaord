@@ -187,3 +187,33 @@ mutation EditDiscussionForum($input: inputEditDiscussionForum) {
       ${forum}
   }
 }`;
+
+export const GET_DISCUSSION_ANALYTICS = gql`
+  query GetDiscussionAnalytics($timeRange: String, $dateRange: JSON) {
+    getDiscussionAnalytics(timeRange: $timeRange, dateRange: $dateRange) {
+      totalForums
+      activeThreads
+      dailyPosts
+      globalMembers
+      trend {
+        date
+        threads
+        posts
+      }
+      topicDistribution {
+        name
+        value
+        color
+      }
+      topForums {
+        id
+        name
+        slug
+        members
+        active
+        lastActivity
+        icon
+      }
+    }
+  }
+`;

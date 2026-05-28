@@ -116,15 +116,8 @@ export default function OffersAnalytics() {
     },
   ];
 
-  const claimsTrendData = [
-    { name: "MON", claims: 5 },
-    { name: "TUE", claims: 8 },
-    { name: "WED", claims: 12 },
-    { name: "THU", claims: 7 },
-    { name: "FRI", claims: 15 },
-    { name: "SAT", claims: 20 },
-    { name: "SUN", claims: 18 },
-  ];
+  const claimsTrendData = stats?.trend || [];
+  const matrixData = stats?.matrix || [];
 
   return (
     <EcosystemWrapper anonymized-1="offers-analytics">
@@ -193,11 +186,15 @@ export default function OffersAnalytics() {
                         stroke="#f1f5f9"
                       />
                       <XAxis
-                        dataKey="name"
+                        dataKey="date"
                         axisLine={false}
                         tickLine={false}
                         tick={{ fontSize: 10, fontWeight: 600, fill: "#94a3b8" }}
                         dy={10}
+                        tickFormatter={(val) => {
+                          if (!val) return "";
+                          return new Date(val).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+                        }}
                       />
                       <YAxis
                         axisLine={false}
@@ -246,15 +243,11 @@ export default function OffersAnalytics() {
               icon={BarChart3}
             >
               <div className="space-y-5 mt-4">
-                {[
-                  { label: "High Yield Rewards", value: 60, color: "bg-zinc-900" },
-                  { label: "Active Discounts", value: 25, color: "bg-zinc-500" },
-                  { label: "Partner Streams", value: 15, color: "bg-zinc-300" },
-                ].map((item, i) => (
+                {matrixData.map((item: any, i: number) => (
                   <div key={i} className="group/item">
                     <div className="flex items-center justify-between mb-1.5">
                       <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest leading-none">
-                        {item.label}
+                        {item.name}
                       </span>
                       <span className="text-xs font-bold text-zinc-900 leading-none">
                         {item.value}%
@@ -262,8 +255,8 @@ export default function OffersAnalytics() {
                     </div>
                     <div className="h-1.5 w-full bg-zinc-50 rounded-full overflow-hidden border border-zinc-100">
                       <div
-                        className={cn("h-full rounded-full transition-all duration-1000", item.color)}
-                        style={{ width: `${item.value}%` }}
+                        className="h-full rounded-full transition-all duration-1000"
+                        style={{ width: `${item.value}%`, backgroundColor: item.color }}
                       />
                     </div>
                   </div>
@@ -276,7 +269,7 @@ export default function OffersAnalytics() {
                     Yield Rate
                   </p>
                   <p className="text-xl font-bold text-zinc-900 tracking-tight">
-                    18.4%
+                    {stats?.yieldRate ?? 0}%
                   </p>
                 </div>
                 <Link href="/offers/all">

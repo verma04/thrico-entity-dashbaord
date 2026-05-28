@@ -27,13 +27,13 @@ export const GET_MODULE_ACTIVITY = gql`
 export const GET_COMMUNITY_KPIS = gql`
   query GetCommunityKPIs($timeRange: TimeRange, $dateRange: DateRangeInput) {
     getCommunityKPIs(timeRange: $timeRange, dateRange: $dateRange) {
-      # 1. Core Community Vitals
-      dailyActiveUsers {
+      # 1. Core Vitals
+      activeUsers {
         value
         change
         trend
       }
-      monthlyActiveUsers {
+      totalMembers {
         value
         change
         trend
@@ -112,6 +112,21 @@ export const GET_COMMUNITY_KPIS = gql`
         change
         trend
       }
+      referralsJoined {
+        value
+        change
+        trend
+      }
+      gamificationPointsEarned {
+        value
+        change
+        trend
+      }
+      badgesEarned {
+        value
+        change
+        trend
+      }
 
       # 4. Moderation Overview
       moderationStats {
@@ -145,6 +160,19 @@ export const GET_LOGIN_SESSIONS_REPORT = gql`
       time
       desktop
       mobile
+    }
+  }
+`;
+
+export const GET_GROWTH_STATS = gql`
+  query GetGrowthStats($timeRange: TimeRange, $groupBy: GroupBy, $dateRange: DateRangeInput) {
+    getGrowthStats(timeRange: $timeRange, groupBy: $groupBy, dateRange: $dateRange) {
+      data {
+        date
+        count
+      }
+      totalNewMembers
+      growthRate
     }
   }
 `;

@@ -15,7 +15,11 @@ import {
   GET_DISCUSSION_FORUM_COMMENTS,
   POST_DISCUSSION_FORUM_COMMENTS,
   UPVOTE_DISCUSSION_FORUM,
+  GET_DISCUSSION_ANALYTICS,
 } from "../quries/discussion-form";
+
+export const useGetDiscussionAnalytics = (options?: any) =>
+  useQuery(GET_DISCUSSION_ANALYTICS, options);
 
 export const addDiscussionForumCategory = (options: any) =>
   useMutation(ADD_DISCUSSION_FORUM_CATEGORY, {

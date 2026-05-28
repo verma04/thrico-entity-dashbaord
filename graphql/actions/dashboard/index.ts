@@ -5,6 +5,7 @@ import {
   GET_COMMUNITY_KPIS,
   GET_DEVICE_DISTRIBUTION,
   GET_LOGIN_SESSIONS_REPORT,
+  GET_GROWTH_STATS,
 } from "../../quries/dashboard";
 
 export enum TimeRange {
@@ -128,6 +129,9 @@ export interface CommunityKPIs {
   memberActivationRate: CommunityKPIData;
   communityAdvocacyIndex: CommunityKPIData;
   superfanRatio: CommunityKPIData;
+  referralsJoined?: CommunityKPIData;
+  gamificationPointsEarned?: CommunityKPIData;
+  badgesEarned?: CommunityKPIData;
   moderationStats: ModerationStat[];
   modulePerformance: ModulePerformance[];
 }
@@ -171,3 +175,24 @@ export const useGetLoginSessionsReport = (timeRange?: TimeRange, groupBy?: Group
     }
   );
 
+export interface GrowthDataPoint {
+  date: string;
+  count: number;
+}
+
+export interface GetGrowthStatsResponse {
+  getGrowthStats: {
+    data: GrowthDataPoint[];
+    totalNewMembers: number;
+    growthRate: number;
+  };
+}
+
+export const useGetGrowthStats = (timeRange?: TimeRange, groupBy?: GroupBy, dateRange?: DateRangeInput, options?: any) =>
+  useQuery<GetGrowthStatsResponse, { timeRange?: TimeRange; groupBy?: GroupBy; dateRange?: DateRangeInput }>(
+    GET_GROWTH_STATS,
+    {
+      variables: { timeRange, groupBy, dateRange },
+      ...options,
+    }
+  );

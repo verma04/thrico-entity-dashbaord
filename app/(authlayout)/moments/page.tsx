@@ -29,6 +29,18 @@ import {
   EcosystemCard,
   EcosystemStatusIndicator,
 } from "@/components/layout/ecosystem/ecosystem-analytics";
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  ResponsiveContainer,
+  Tooltip as RechartsTooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
@@ -42,21 +54,21 @@ export default function MomentsDashboardPage() {
 
   const kpis = [
     {
-      title: "Aggregate Moments",
+      title: "Total Moments",
       value: stats?.totalMoments ?? 0,
       icon: Video,
       color: "text-indigo-500",
       bg: "bg-indigo-500/10",
     },
     {
-      title: "Propagation Count",
+      title: "Total Views",
       value: stats?.totalViews?.toLocaleString() ?? 0,
       icon: Eye,
       color: "text-emerald-500",
       bg: "bg-emerald-500/10",
     },
     {
-      title: "Sentiment Yield",
+      title: "Total Engagement",
       value: (
         (stats?.totalReactions ?? 0) + (stats?.totalComments ?? 0)
       ).toLocaleString(),
@@ -127,34 +139,106 @@ export default function MomentsDashboardPage() {
         </div>
 
         {/* Status Placeholder / Future Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          <div className="lg:col-span-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-8">
             <EcosystemCard
               title="Historical Manifest"
               description="Temporal video propagation & engagement telemetry"
               icon={TrendingUp}
               decorationIcon={Zap}
-              className="min-h-[400px] flex items-center justify-center text-center"
             >
-              <div className="flex flex-col items-center justify-center space-y-4 max-w-md mx-auto">
-                <div className="w-16 h-16 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-300 shadow-sm">
-                  <Activity className="h-8 w-8 animate-pulse" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-slate-900 tracking-tight uppercase mb-1">
-                    Analytics Pending
-                  </h3>
-                  <p className="text-xs font-medium text-slate-400 uppercase tracking-wider leading-relaxed">
-                    We are currently processing video telemetry. Insights will
-                    be available once ingestion is complete.
-                  </p>
-                </div>
-                <Button
-                  variant="outline"
-                  className="h-9 px-6 rounded-lg border-slate-200 font-bold text-xs uppercase tracking-wide text-slate-500 hover:bg-slate-50"
-                >
-                  Contact Support
-                </Button>
+              <div className="h-[320px] w-full mt-6">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={stats?.growth || []}>
+                    <defs>
+                      <linearGradient id="colorGrowth" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#6366f1" stopOpacity={0.1} />
+                        <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <XAxis 
+                      dataKey="date" 
+                      axisLine={false} 
+                      tickLine={false} 
+                      tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} 
+                      dy={10} 
+                      tickFormatter={(val) => {
+                        if (!val) return "";
+                        return new Date(val).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+                      }}
+                    />
+                    <YAxis 
+                      axisLine={false} 
+                      tickLine={false} 
+                      tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} 
+                    />
+                    <RechartsTooltip
+                      contentStyle={{ backgroundColor: "#18181b", border: "none", borderRadius: "12px" }}
+                      itemStyle={{ color: "#fff", fontWeight: 700, fontSize: "11px" }}
+                      labelStyle={{ display: "none" }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="count"
+                      stroke="#6366f1"
+                      strokeWidth={3}
+                      fillOpacity={1}
+                      fill="url(#colorGrowth)"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </EcosystemCard>
+          </div>
+
+          <div className="lg:col-span-4">
+            <EcosystemCard
+              title="Engagement Mix"
+              description="Interaction distribution"
+              icon={Activity}
+            >
+              <div className="h-[320px] w-full mt-6">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={stats?.engagement || []}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <XAxis 
+                      dataKey="name" 
+                      axisLine={false} 
+                      tickLine={false} 
+                      tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} 
+                      dy={10} 
+                    />
+                    <YAxis 
+                      axisLine={false} 
+                      tickLine={false} 
+                      tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} 
+                    />
+                    <RechartsTooltip
+                      contentStyle={{
+                        backgroundColor: "#18181b",
+                        border: "none",
+                        borderRadius: "12px",
+                        boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
+                      }}
+                      itemStyle={{ color: "#fff", fontWeight: 700, fontSize: '11px' }}
+                      labelStyle={{ display: "none" }}
+                      cursor={{ fill: '#f8fafc' }}
+                    />
+                    <Bar 
+                      dataKey="value" 
+                      fill="#8b5cf6" 
+                      radius={[4, 4, 0, 0]} 
+                      barSize={40} 
+                    >
+                      {
+                        (stats?.engagement || []).map((entry: any, index: number) => (
+                          <Cell key={`cell-${index}`} fill={index === 0 ? "#8b5cf6" : "#ec4899"} />
+                        ))
+                      }
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
             </EcosystemCard>
           </div>

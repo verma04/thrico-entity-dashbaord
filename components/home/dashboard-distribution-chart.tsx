@@ -1,8 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
-import { Monitor, Smartphone, Tablet } from "lucide-react"
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
+import { Monitor, Smartphone, LayoutGrid } from "lucide-react"
 
 import {
   Card,
@@ -11,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+
 import {
   ChartContainer,
   ChartLegend,
@@ -43,18 +44,18 @@ const chartConfig = {
     label: "Visitors",
   },
   web: {
-    label: "Web",
-    color: "hsl(var(--chart-1))",
+    label: "Web App",
+    color: "#6366f1", // Indigo
     icon: Monitor,
   },
   ios: {
-    label: "iOS",
-    color: "hsl(var(--chart-2))",
+    label: "iOS Native",
+    color: "#0ea5e9", // Sky
     icon: Smartphone,
   },
   android: {
-    label: "Android",
-    color: "hsl(var(--chart-3))",
+    label: "Android Native",
+    color: "#10b981", // Emerald
     icon: Smartphone,
   },
 } satisfies ChartConfig
@@ -63,150 +64,164 @@ export function DashboardDistributionChart() {
   const [timeRange, setTimeRange] = React.useState("90d")
 
   const { data, loading } = useGetDeviceDistribution(timeRangeMap[timeRange])
-
   const chartData = data?.getDeviceDistribution || []
 
+  // Calculate totals for a premium metric display
+  const totals = React.useMemo(() => {
+    return chartData.reduce(
+      (acc, curr) => ({
+        web: acc.web + curr.web,
+        ios: acc.ios + curr.ios,
+        android: acc.android + curr.android,
+      }),
+      { web: 0, ios: 0, android: 0 }
+    )
+  }, [chartData])
+
+  const totalAll = totals.web + totals.ios + totals.android
+
   return (
-    <Card className="border-border/60 bg-gradient-to-b from-background to-muted/20 shadow-sm overflow-hidden min-h-[450px]">
-      <CardHeader className="flex items-center gap-2 space-y-0 border-b border-border/60 py-5 sm:flex-row">
-        <div className="grid flex-1 gap-1">
-          <CardTitle className="text-lg font-semibold tracking-tight">Device Distribution</CardTitle>
-          <CardDescription className="text-xs text-muted-foreground">
-            Visitor traffic across Web, iOS, and Android platforms
-          </CardDescription>
+    <Card className="border-border/60 bg-gradient-to-b from-background to-muted/10 shadow-sm overflow-hidden flex flex-col h-full">
+      <CardHeader className="flex flex-col gap-4 border-b border-border/40 pb-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="space-y-1.5 w-full">
+          <CardTitle className="text-primary tracking-wider flex items-center gap-2">
+            <div className="p-1.5 rounded-md bg-primary/10"><LayoutGrid className="h-4 w-4 text-primary" /></div>
+            Platform Traffic
+          </CardTitle>
+          <CardDescription>Visitor engagement across Web, iOS, and Android platforms.</CardDescription>
+          
+          {!loading && totalAll > 0 && (
+            <div className="flex items-center gap-4 pt-3">
+              <div className="flex items-center gap-1.5">
+                <div className="h-2 w-2 rounded-full bg-[#6366f1]" />
+                <span className="text-xs font-medium text-muted-foreground">Web <span className="text-foreground font-semibold">{(totals.web / totalAll * 100).toFixed(0)}%</span></span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="h-2 w-2 rounded-full bg-[#0ea5e9]" />
+                <span className="text-xs font-medium text-muted-foreground">iOS <span className="text-foreground font-semibold">{(totals.ios / totalAll * 100).toFixed(0)}%</span></span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="h-2 w-2 rounded-full bg-[#10b981]" />
+                <span className="text-xs font-medium text-muted-foreground">Android <span className="text-foreground font-semibold">{(totals.android / totalAll * 100).toFixed(0)}%</span></span>
+              </div>
+            </div>
+          )}
         </div>
+        
         <Select value={timeRange} onValueChange={setTimeRange}>
           <SelectTrigger
-            className="w-[160px] rounded-xl sm:ml-auto h-9 text-xs bg-background/50 border-border/70"
-            aria-label="Select a value"
+            className="w-[140px] rounded-lg h-8 text-[11px] font-medium bg-background/50 border-border/70 hover:bg-accent/50 transition-colors"
+            aria-label="Select time range"
           >
             <SelectValue placeholder="Last 3 months" />
           </SelectTrigger>
-          <SelectContent className="rounded-xl border-border/60">
-            <SelectItem value="90d" className="text-xs">
-              Last 3 months
-            </SelectItem>
-            <SelectItem value="30d" className="text-xs">
-              Last 30 days
-            </SelectItem>
-            <SelectItem value="7d" className="text-xs">
-              Last 7 days
-            </SelectItem>
+          <SelectContent className="rounded-xl border-border/60 backdrop-blur-xl bg-background/95">
+            <SelectItem value="90d" className="text-xs font-medium">Last 3 months</SelectItem>
+            <SelectItem value="30d" className="text-xs font-medium">Last 30 days</SelectItem>
+            <SelectItem value="7d" className="text-xs font-medium">Last 7 days</SelectItem>
           </SelectContent>
         </Select>
       </CardHeader>
-      <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6 relative">
+      
+      <CardContent className="flex-1 px-0 pb-0 pt-6 relative min-h-[300px]">
         {loading && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/50 backdrop-blur-[1px]">
-            <div className="flex flex-col items-center gap-2">
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest">
-                Loading Distribution...
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/50 backdrop-blur-sm transition-all duration-300">
+            <div className="flex flex-col items-center gap-3 bg-background/90 p-4 rounded-xl shadow-lg border border-border/50">
+              <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                Analyzing Traffic
               </p>
             </div>
           </div>
         )}
-        <ChartContainer
-          config={chartConfig}
-          className="aspect-auto h-[350px] w-full"
-        >
-          <AreaChart data={chartData}>
-            <defs>
-              <linearGradient id="fillWeb" x1="0" y1="0" x2="0" y2="1">
-                <stop
-                  offset="5%"
-                  stopColor="var(--color-web)"
-                  stopOpacity={0.8}
-                />
-                <stop
-                  offset="95%"
-                  stopColor="var(--color-web)"
-                  stopOpacity={0.1}
-                />
-              </linearGradient>
-              <linearGradient id="fillIos" x1="0" y1="0" x2="0" y2="1">
-                <stop
-                  offset="5%"
-                  stopColor="var(--color-ios)"
-                  stopOpacity={0.8}
-                />
-                <stop
-                  offset="95%"
-                  stopColor="var(--color-ios)"
-                  stopOpacity={0.1}
-                />
-              </linearGradient>
-              <linearGradient id="fillAndroid" x1="0" y1="0" x2="0" y2="1">
-                <stop
-                  offset="5%"
-                  stopColor="var(--color-android)"
-                  stopOpacity={0.8}
-                />
-                <stop
-                  offset="95%"
-                  stopColor="var(--color-android)"
-                  stopOpacity={0.1}
-                />
-              </linearGradient>
-            </defs>
-            <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-muted-foreground/20" />
-            <XAxis
-              dataKey="date"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              minTickGap={32}
-              tickFormatter={(value) => {
-                const date = new Date(value)
-                return date.toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                })
-              }}
-              className="text-[10px] font-medium text-muted-foreground"
-            />
-            <ChartTooltip
-              cursor={false}
-              content={
-                <ChartTooltipContent
-                  labelFormatter={(value) => {
-                    return new Date(value).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })
-                  }}
-                  indicator="dot"
-                />
-              }
-            />
-            <Area
-              dataKey="android"
-              type="natural"
-              fill="url(#fillAndroid)"
-              stroke="var(--color-android)"
-              stackId="a"
-              strokeWidth={2}
-            />
-            <Area
-              dataKey="ios"
-              type="natural"
-              fill="url(#fillIos)"
-              stroke="var(--color-ios)"
-              stackId="a"
-              strokeWidth={2}
-            />
-            <Area
-              dataKey="web"
-              type="natural"
-              fill="url(#fillWeb)"
-              stroke="var(--color-web)"
-              stackId="a"
-              strokeWidth={2}
-            />
-            <ChartLegend content={<ChartLegendContent />} className="pt-4" />
-          </AreaChart>
-        </ChartContainer>
+        
+        <div className="px-2 sm:px-6 h-full">
+          <ChartContainer
+            config={chartConfig}
+            className="aspect-auto h-full min-h-[300px] w-full"
+          >
+            <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <defs>
+                <linearGradient id="fillWeb" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#6366f1" stopOpacity={0.4} />
+                  <stop offset="95%" stopColor="#6366f1" stopOpacity={0.0} />
+                </linearGradient>
+                <linearGradient id="fillIos" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.4} />
+                  <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0.0} />
+                </linearGradient>
+                <linearGradient id="fillAndroid" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
+                  <stop offset="95%" stopColor="#10b981" stopOpacity={0.0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid vertical={false} strokeDasharray="4 4" className="stroke-muted-foreground/15" />
+              <XAxis
+                dataKey="date"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={12}
+                minTickGap={40}
+                tickFormatter={(value) => {
+                  const date = new Date(value)
+                  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+                }}
+                className="text-[10px] font-semibold text-muted-foreground/70"
+              />
+              <YAxis 
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+                tickFormatter={(value) => `${value}`}
+                className="text-[10px] font-semibold text-muted-foreground/70"
+              />
+              <ChartTooltip
+                cursor={{ stroke: 'hsl(var(--muted-foreground)/0.3)', strokeWidth: 1, strokeDasharray: '4 4' }}
+                content={
+                  <ChartTooltipContent
+                    labelFormatter={(value) => {
+                      return new Date(value).toLocaleDateString("en-US", {
+                        weekday: 'short',
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })
+                    }}
+                    indicator="dot"
+                    className="backdrop-blur-xl bg-background/95 border-border/50 shadow-xl rounded-xl"
+                  />
+                }
+              />
+              <Area
+                dataKey="android"
+                type="monotone"
+                fill="url(#fillAndroid)"
+                stroke="#10b981"
+                stackId="a"
+                strokeWidth={2}
+                activeDot={{ r: 6, strokeWidth: 0, fill: '#10b981' }}
+              />
+              <Area
+                dataKey="ios"
+                type="monotone"
+                fill="url(#fillIos)"
+                stroke="#0ea5e9"
+                stackId="a"
+                strokeWidth={2}
+                activeDot={{ r: 6, strokeWidth: 0, fill: '#0ea5e9' }}
+              />
+              <Area
+                dataKey="web"
+                type="monotone"
+                fill="url(#fillWeb)"
+                stroke="#6366f1"
+                stackId="a"
+                strokeWidth={2}
+                activeDot={{ r: 6, strokeWidth: 0, fill: '#6366f1' }}
+              />
+            </AreaChart>
+          </ChartContainer>
+        </div>
       </CardContent>
     </Card>
   )
