@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import { UserList } from "./user-list";
-import { useGetAllUser } from "@/graphql/actions/membership/membership-queries";
+import { useGetAllUser, useSearchUserWithAI } from "@/graphql/actions/membership/membership-queries";
 import { MembersListCards } from "../dashboard/members-listcards";
 import { useDebounce } from "use-debounce";
 import { motion, AnimatePresence } from "framer-motion";
@@ -16,6 +16,9 @@ import {
   Ban,
   UserX,
   CheckCircle2,
+  Sparkles,
+  Search,
+  Loader2,
 } from "lucide-react";
 import {
   Select,
@@ -266,6 +269,11 @@ const User = ({ status: initialStatus }: { status?: string }) => {
     setOffset(0);
   }, [debouncedSearch, status, selectedIndustry]);
 
+  const [aiSearch, setAiSearch] = useState("");
+  const [isAiMode, setIsAiMode] = useState(false);
+  const [searchUserWithAI, { data: aiData, loading: aiLoading }] =
+    useSearchUserWithAI();
+
   const { data, loading, refetch } = useGetAllUser({
     status: status === "ALL" ? "ALL" : status,
     industryId: selectedIndustry === "ALL" ? null : selectedIndustry,
@@ -274,9 +282,30 @@ const User = ({ status: initialStatus }: { status?: string }) => {
     offset,
   });
 
-  const usersList = data?.getAllUser?.data || [];
-  const totalCount = data?.getAllUser?.totalCount || 0;
-  const hasNextPage = data?.getAllUser?.hasNextPage || false;
+  // AI search handler
+  const handleAiSearch = () => {
+    if (!aiSearch.trim()) return;
+    setIsAiMode(true);
+    searchUserWithAI({
+      variables: { query: aiSearch.trim(), limit, offset },
+    });
+  };
+
+  const handleClearAiSearch = () => {
+    setIsAiMode(false);
+    setAiSearch("");
+  };
+
+  const usersList = isAiMode
+    ? aiData?.searchUserWithAI?.data || []
+    : data?.getAllUser?.data || [];
+  const totalCount = isAiMode
+    ? aiData?.searchUserWithAI?.totalCount || 0
+    : data?.getAllUser?.totalCount || 0;
+  const hasNextPage = isAiMode
+    ? aiData?.searchUserWithAI?.hasNextPage || false
+    : data?.getAllUser?.hasNextPage || false;
+  const isLoading = isAiMode ? aiLoading : loading;
 
   const pageTitle =
     status === "ALL"
@@ -288,13 +317,15 @@ const User = ({ status: initialStatus }: { status?: string }) => {
       {/* ── Header ────────────────────────────────────────────────────────── */}
       <EcosystemHeader
         title={pageTitle}
-        badgeText="Member List"
+        badgeText={isAiMode ? "AI Search" : "Member List"}
         description={
-          loading
+          isLoading
             ? "Loading members…"
-            : `${totalCount} total members in your community.`
+            : isAiMode
+              ? `Found ${totalCount} members matching your AI search.`
+              : `${totalCount} total members in your community.`
         }
-        icon={Users}
+        icon={isAiMode ? Sparkles : Users}
         actions={
           <div className="flex items-center gap-2">
             <Button
@@ -304,7 +335,7 @@ const User = ({ status: initialStatus }: { status?: string }) => {
               className="h-9 w-9 rounded-lg border-border text-muted-foreground hover:text-foreground transition-all"
             >
               <RefreshCw
-                className={cn("h-3.5 w-3.5", loading && "animate-spin")}
+                className={cn("h-3.5 w-3.5", isLoading && "animate-spin")}
               />
             </Button>
             <ViewToggle value={view} onChange={setView} />
@@ -316,11 +347,70 @@ const User = ({ status: initialStatus }: { status?: string }) => {
       <EcosystemActionBar shadow="none">
         <EcosystemActionBar.Group>
           <EcosystemActionBar.Item grow className="max-w-xs">
-            <EcosystemActionBar.Search
-              value={search}
-              onChange={setSearch}
-              placeholder="Search by name or email…"
-            />
+            {isAiMode ? (
+              <div className="flex items-center gap-2 w-full">
+                <div className="relative flex-1">
+                  <Sparkles className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-violet-500" />
+                  <input
+                    type="text"
+                    value={aiSearch}
+                    onChange={(e) => setAiSearch(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleAiSearch()}
+                    placeholder="e.g. Software engineers in India with AI skills…"
+                    className="w-full h-9 pl-8 pr-3 rounded-lg border border-violet-200 bg-violet-50/50 text-xs font-medium text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-300 transition-all"
+                  />
+                </div>
+                <Button
+                  size="sm"
+                  onClick={handleAiSearch}
+                  disabled={aiLoading || !aiSearch.trim()}
+                  className="h-9 px-3 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-xs font-semibold gap-1.5 transition-all"
+                >
+                  {aiLoading ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Search className="h-3.5 w-3.5" />
+                  )}
+                  Search
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleClearAiSearch}
+                  className="h-9 px-3 rounded-lg text-xs font-semibold text-muted-foreground hover:text-foreground transition-all"
+                >
+                  Clear
+                </Button>
+              </div>
+            ) : (
+              <EcosystemActionBar.Search
+                value={search}
+                onChange={setSearch}
+                placeholder="Search by name or email…"
+              />
+            )}
+          </EcosystemActionBar.Item>
+          <EcosystemActionBar.Item>
+            <Button
+              variant={isAiMode ? "default" : "outline"}
+              size="sm"
+              onClick={() => {
+                if (isAiMode) {
+                  handleClearAiSearch();
+                } else {
+                  setIsAiMode(true);
+                }
+              }}
+              className={cn(
+                "h-9 px-3 rounded-lg text-xs font-semibold gap-1.5 transition-all",
+                isAiMode
+                  ? "bg-violet-600 hover:bg-violet-700 text-white"
+                  : "border-border hover:border-violet-300 hover:bg-violet-50 hover:text-violet-700",
+              )}
+            >
+              <Sparkles className="h-3.5 w-3.5" />
+              AI Search
+            </Button>
           </EcosystemActionBar.Item>
         </EcosystemActionBar.Group>
 
@@ -328,75 +418,79 @@ const User = ({ status: initialStatus }: { status?: string }) => {
 
         {/* Inline status quick-select (mirrors the tabs for mobile accessibility) */}
         <EcosystemActionBar.Group>
-          <EcosystemActionBar.Item>
-            <Select
-              value={status}
-              onValueChange={(v) => setStatus(v as StatusValue)}
-            >
-              <SelectTrigger className="w-[130px] h-9 rounded-lg border-border bg-card text-xs font-semibold text-foreground shadow-none focus:ring-2 focus:ring-ring/20">
-                <div className="flex items-center gap-2">
-                  {STATUS_TABS.find((t) => t.value === status)?.dot && (
-                    <span
-                      className={cn(
-                        "h-1.5 w-1.5 rounded-full shrink-0",
-                        STATUS_TABS.find((t) => t.value === status)?.dot,
-                      )}
-                    />
-                  )}
-                  <SelectValue placeholder="Status" />
-                </div>
-              </SelectTrigger>
-              <SelectContent className="rounded-xl border-border shadow-lg p-1">
-                {STATUS_TABS.map((opt) => (
-                  <SelectItem
-                    key={opt.value}
-                    value={opt.value}
-                    className="rounded-lg text-xs font-semibold py-2"
-                  >
-                    <div className="flex items-center gap-2">
-                      {opt.dot && (
-                        <span
-                          className={cn(
-                            "h-1.5 w-1.5 rounded-full shrink-0",
-                            opt.dot,
-                          )}
-                        />
-                      )}
-                      {opt.label}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </EcosystemActionBar.Item>
+          {!isAiMode && (
+            <EcosystemActionBar.Item>
+              <Select
+                value={status}
+                onValueChange={(v) => setStatus(v as StatusValue)}
+              >
+                <SelectTrigger className="w-[130px] h-9 rounded-lg border-border bg-card text-xs font-semibold text-foreground shadow-none focus:ring-2 focus:ring-ring/20">
+                  <div className="flex items-center gap-2">
+                    {STATUS_TABS.find((t) => t.value === status)?.dot && (
+                      <span
+                        className={cn(
+                          "h-1.5 w-1.5 rounded-full shrink-0",
+                          STATUS_TABS.find((t) => t.value === status)?.dot,
+                        )}
+                      />
+                    )}
+                    <SelectValue placeholder="Status" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent className="rounded-xl border-border shadow-lg p-1">
+                  {STATUS_TABS.map((opt) => (
+                    <SelectItem
+                      key={opt.value}
+                      value={opt.value}
+                      className="rounded-lg text-xs font-semibold py-2"
+                    >
+                      <div className="flex items-center gap-2">
+                        {opt.dot && (
+                          <span
+                            className={cn(
+                              "h-1.5 w-1.5 rounded-full shrink-0",
+                              opt.dot,
+                            )}
+                          />
+                        )}
+                        {opt.label}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </EcosystemActionBar.Item>
+          )}
 
-          <EcosystemActionBar.Item>
-            <Select
-              value={selectedIndustry}
-              onValueChange={(v) => setSelectedIndustry(v)}
-            >
-              <SelectTrigger className="w-[160px] h-9 rounded-lg border-border bg-card text-xs font-semibold text-foreground shadow-none focus:ring-2 focus:ring-ring/20">
-                <SelectValue placeholder="Industry" />
-              </SelectTrigger>
-              <SelectContent className="rounded-xl border-border shadow-lg p-1">
-                <SelectItem
-                  value="ALL"
-                  className="rounded-lg text-xs font-semibold py-2"
-                >
-                  All Industries
-                </SelectItem>
-                {industries.map((ind) => (
+          {!isAiMode && (
+            <EcosystemActionBar.Item>
+              <Select
+                value={selectedIndustry}
+                onValueChange={(v) => setSelectedIndustry(v)}
+              >
+                <SelectTrigger className="w-[160px] h-9 rounded-lg border-border bg-card text-xs font-semibold text-foreground shadow-none focus:ring-2 focus:ring-ring/20">
+                  <SelectValue placeholder="Industry" />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl border-border shadow-lg p-1">
                   <SelectItem
-                    key={ind.id}
-                    value={ind.id}
+                    value="ALL"
                     className="rounded-lg text-xs font-semibold py-2"
                   >
-                    {ind.title}
+                    All Industries
                   </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </EcosystemActionBar.Item>
+                  {industries.map((ind) => (
+                    <SelectItem
+                      key={ind.id}
+                      value={ind.id}
+                      className="rounded-lg text-xs font-semibold py-2"
+                    >
+                      {ind.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </EcosystemActionBar.Item>
+          )}
         </EcosystemActionBar.Group>
 
         <EcosystemActionBar.Group align="right">
@@ -415,10 +509,10 @@ const User = ({ status: initialStatus }: { status?: string }) => {
           loading={loading}
         />
 
-        <ContentArea view={view} loading={loading} users={usersList} />
+        <ContentArea view={view} loading={isLoading} users={usersList} />
         
         {/* Pagination Controls */}
-        {!loading && totalCount > 0 && (
+        {!isLoading && totalCount > 0 && (
           <div className="mt-4 overflow-hidden rounded-xl border border-border bg-card shadow-sm">
             <Pagination
               currentPage={Math.floor(offset / limit) + 1}

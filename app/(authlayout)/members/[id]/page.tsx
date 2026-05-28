@@ -29,25 +29,28 @@ export default function UserDetailsPage() {
   if (error || !member) return <ErrorState onBack={() => router.back()} />;
 
   return (
-    <div className="flex flex-col h-full bg-background overflow-hidden">
+    <div className="flex flex-col h-full bg-slate-50/50 overflow-hidden">
       <MemberDetailHeader
         firstName={user.firstName}
         lastName={user.lastName}
         memberId={id}
+        status={member.status}
+        isOnline={member.isOnline}
+        isVerified={member.verification?.isVerified}
       />
 
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-7xl mx-auto px-6 py-6">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             {/* Sidebar */}
-            <div className="lg:col-span-4">
+            <div className="lg:col-span-4 2xl:col-span-3">
               <div className="sticky top-4">
                 <UserInfoCard member={member} />
               </div>
             </div>
 
             {/* Main Content */}
-            <div className="lg:col-span-8">
+            <div className="lg:col-span-8 2xl:col-span-9">
               <MemberDetailTabs member={member} userId={user?.id} />
             </div>
           </div>

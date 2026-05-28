@@ -328,3 +328,29 @@ export function useJobTypeDistribution(
     ...options,
   });
 }
+
+export type JobApplicant = {
+  id: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  resume: string;
+  createdAt: string;
+};
+
+export type JobApplicantsResponse = {
+  data: JobApplicant[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+};
+
+export function useJobApplicants(jobId: string, page: number = 1, limit: number = 5, options?: QueryHookOptions<{ getJobApplicants: JobApplicantsResponse }, { jobId: string, page: number, limit: number }>) {
+  // Import GET_JOB_APPLICANTS directly inside or rely on the updated import at the top of the file
+  return useQuery(require("@/graphql/quries/jobs").GET_JOB_APPLICANTS, {
+    variables: { jobId, page, limit },
+    ...options,
+  });
+}
+

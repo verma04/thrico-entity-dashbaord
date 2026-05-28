@@ -2,8 +2,21 @@
 
 import React from "react";
 import { cn } from "@/lib/utils";
-import { LucideIcon, TrendingUp, TrendingDown, Activity } from "lucide-react";
+import {
+  LucideIcon,
+  TrendingUp,
+  TrendingDown,
+  Activity,
+  Info,
+} from "lucide-react";
 import { formatNumber } from "@/lib/formatNumber";
+import { ResponsiveContainer, AreaChart, Area } from "recharts";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 // ---------------------------------------------------------------------------
 // KPI Stat Card
@@ -12,74 +25,147 @@ interface EcosystemKPIProps {
   title: string;
   value: string | number | React.ReactNode;
   trend?: number;
-  icon: LucideIcon;
+  trendData?: number[];
+  icon?: LucideIcon;
   color?: string;
   bg?: string;
   trendLabel?: string;
+  tooltip?: string;
+  suffix?: string;
 }
 
 export function EcosystemKPI({
   title,
   value,
   trend,
+  trendData,
   icon: Icon,
-  color = "text-foreground/70",
-  bg = "bg-muted",
+  color = "text-foreground",
+  bg = "bg-primary",
   trendLabel = "vs last period",
+  tooltip,
+  suffix = "",
 }: EcosystemKPIProps) {
-  const isPositive = trend !== undefined && trend > 0;
+  const isPositive = trend !== undefined && trend >= 0;
   const isNegative = trend !== undefined && trend < 0;
+  
+  // Create dummy flat trend if none provided but we want the aesthetic
+  const chartData = (trendData ?? [0, 0, 0, 0, 0, 0, 0]).map((val, i) => ({ value: val, id: i }));
 
-  const formattedValue =
-    typeof value === "number" ? formatNumber(value) : value;
+  const formattedValue = typeof value === "number" ? formatNumber(value) : value;
 
   return (
-    <div className="group relative flex flex-col gap-4 rounded-xl border border-border bg-card p-5 transition-all duration-200 hover:border-border/80 hover:shadow-sm overflow-hidden">
-      {/* Top row — label + icon */}
-      <div className="flex items-center justify-between">
-        <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider leading-none">
-          {title}
-        </span>
-        <div
-          className={cn(
-            "h-8 w-8 rounded-lg flex items-center justify-center shrink-0 border border-border/50",
-            bg,
-          )}
-        >
-          <Icon className={cn("h-4 w-4", color)} />
-        </div>
-      </div>
+    <div className="group relative overflow-hidden rounded-xl border border-border/50 bg-card shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-border hover:shadow-md flex flex-col justify-between">
+      {/* Colored top accent strip */}
+      <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-primary/60 to-primary/20 opacity-80" />
+      <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-[radial-gradient(circle_at_90%_10%,hsl(var(--primary)/0.06),transparent_50%)]" />
 
-      {/* Main value */}
-      <div className="flex flex-col gap-1">
-        <div className="flex items-center gap-2.5">
-          <span className="text-2xl font-semibold text-foreground tracking-tight tabular-nums">
-            {formattedValue}
-          </span>
-          {trend !== undefined && trend !== 0 && (
-            <div
-              className={cn(
-                "inline-flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-md",
-                isPositive &&
-                  "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400",
-                isNegative &&
-                  "bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400",
-              )}
-            >
-              {isPositive ? (
-                <TrendingUp className="h-3 w-3" />
-              ) : (
-                <TrendingDown className="h-3 w-3" />
-              )}
-              {Math.abs(trend)}%
+      {/* Top Header */}
+      <div className="relative p-4 flex flex-col flex-1">
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex items-center gap-1.5">
+            <span className="text-[9px] font-bold text-muted-foreground/70 uppercase tracking-[0.22em] leading-none">
+              {title}
+            </span>
+            {tooltip && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="h-3 w-3 text-muted-foreground/40 cursor-help hover:text-muted-foreground/70 transition-colors" />
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-[200px] bg-background border border-border/60 text-foreground shadow-xl">
+                    <p className="font-mono text-[10px] text-muted-foreground">{tooltip}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+          </div>
+          {Icon ? (
+            <div className="h-7 w-7 rounded-lg border border-border/50 bg-muted/60 flex items-center justify-center group-hover:bg-muted transition-colors">
+              <Icon className={cn("h-3 w-3", color)} />
+            </div>
+          ) : (
+            <div className="h-7 w-7 rounded-lg border border-border/50 bg-muted/60 flex items-center justify-center">
+              <div className={cn("h-2 w-2 rounded-full", bg)} />
             </div>
           )}
         </div>
 
-        {/* Bottom label */}
-        {trendLabel && (
-          <p className="text-[11px] text-muted-foreground/70">{trendLabel}</p>
-        )}
+        {/* Main Value & Change */}
+        <div className="mb-3">
+          <h3 className="text-[1.4rem] font-bold text-foreground tracking-tight leading-none mb-1.5 tabular-nums">
+            {formattedValue}{suffix}
+          </h3>
+
+          <div className="flex items-center gap-1.5">
+            {trend !== undefined && trend !== 0 ? (
+              <div
+                className={cn(
+                  "flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-semibold",
+                  isPositive
+                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                    : "bg-rose-500/10 text-rose-600 dark:text-rose-400",
+                )}
+              >
+                {isPositive ? (
+                  <TrendingUp className="h-2 w-2" />
+                ) : (
+                  <TrendingDown className="h-2 w-2" />
+                )}
+                {isPositive ? "+" : ""}
+                {typeof trend === "number" ? trend.toFixed(1) : trend}%
+              </div>
+            ) : (
+              <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-semibold bg-muted text-muted-foreground">
+                <Activity className="h-2 w-2" />
+                0%
+              </div>
+            )}
+            {trendLabel && (
+              <span className="text-[9px] font-medium text-muted-foreground/50 uppercase tracking-wider">
+                {trendLabel}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Sparkline — flush to bottom */}
+      <div className="relative h-9 mt-auto pointer-events-none">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={chartData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+            <defs>
+              <linearGradient
+                id={`gradient-${title.replace(/\s+/g, "")}`}
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="1"
+              >
+                <stop
+                  offset="5%"
+                  stopColor={isPositive ? "#10b981" : isNegative ? "#f43f5e" : "#8b5cf6"}
+                  stopOpacity={0.15}
+                />
+                <stop
+                  offset="95%"
+                  stopColor={isPositive ? "#10b981" : isNegative ? "#f43f5e" : "#8b5cf6"}
+                  stopOpacity={0}
+                />
+              </linearGradient>
+            </defs>
+            <Area
+              type="monotone"
+              dataKey="value"
+              stroke={isPositive ? "#10b981" : isNegative ? "#f43f5e" : "#8b5cf6"}
+              strokeWidth={1.5}
+              fillOpacity={1}
+              fill={`url(#gradient-${title.replace(/\s+/g, "")})`}
+              isAnimationActive={true}
+              dot={false}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
       </div>
     </div>
   );

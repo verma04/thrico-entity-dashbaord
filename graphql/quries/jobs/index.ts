@@ -96,3 +96,22 @@ export const GET_JOB_TYPE_DISTRIBUTION = gql`
     }
   }
 `;
+
+export const GET_JOB_APPLICANTS = gql`
+  query GetJobApplicants($jobId: ID!, $page: Int, $limit: Int) {
+    getJobApplicants(jobId: $jobId, page: $page, limit: $limit) {
+      data {
+        id
+        fullName
+        email
+        phone
+        resume
+        createdAt
+      }
+      total
+      page
+      limit
+      totalPages
+    }
+  }
+`;

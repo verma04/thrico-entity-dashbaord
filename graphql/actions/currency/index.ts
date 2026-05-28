@@ -5,12 +5,19 @@ import {
   GET_TC_CONVERSION_CAP,
   GET_REDEMPTION_CAP,
   GET_CURRENCY_TRANSACTIONS,
+  GET_CURRENCY_STATS,
   UPDATE_ENTITY_CURRENCY_CONFIG,
   UPSERT_ACTIVITY_CAP,
   UPDATE_TC_CONVERSION_CAP,
   UPDATE_REDEMPTION_CAP,
   RE_SEED_DEFAULT_CURRENCY,
 } from "../../quries/currency/currency-queries";
+
+export const useGetCurrencyStats = (timeRange: any, dateRange: any) =>
+  useQuery(GET_CURRENCY_STATS, {
+    variables: { timeRange, dateRange },
+    fetchPolicy: "cache-and-network",
+  });
 
 export const useGetEntityCurrencyConfig = () =>
   useQuery(GET_ENTITY_CURRENCY_CONFIG);

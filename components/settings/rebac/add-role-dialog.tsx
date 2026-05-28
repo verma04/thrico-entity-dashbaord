@@ -96,6 +96,7 @@ export default function AddRoleDialog({ open, onOpenChange, role }: AddRoleDialo
     domain: false,
     permissions: false,
     adminUsers: false,
+    users:false,
   };
 
   const [formData, setFormData] = useState({ name: "", description: "" });

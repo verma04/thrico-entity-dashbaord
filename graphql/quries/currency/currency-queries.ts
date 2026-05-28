@@ -77,6 +77,20 @@ export const GET_CURRENCY_TRANSACTIONS = gql`
   }
 `;
 
+export const GET_CURRENCY_STATS = gql`
+  query GetCurrencyStats($timeRange: TimeRange, $dateRange: DateRangeInput) {
+    getCurrencyStats(timeRange: $timeRange, dateRange: $dateRange) {
+      totalEarned
+      redemptionVolume
+      activeUsers
+      currencyFlow {
+        name
+        amount
+      }
+    }
+  }
+`;
+
 export const UPDATE_ENTITY_CURRENCY_CONFIG = gql`
   mutation UpdateEntityCurrencyConfig(
     $input: UpdateEntityCurrencyConfigInput!

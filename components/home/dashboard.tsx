@@ -21,7 +21,6 @@ import {
   Sparkles,
   RefreshCcw,
   LucideIcon,
-  Circle,
   Users,
   Database,
   Info,
@@ -86,90 +85,106 @@ const CommunityKPICard = ({
 }: CommunityKPICardProps) => {
   const isPositive = change >= 0;
   const chartData = trend.map((val, i) => ({ value: val, id: i }));
+  const isLoading = value === "...";
+
+  // Derive accent color from statusColor for the top strip
+  const accentColorMap: Record<string, string> = {
+    "bg-emerald-500": "from-emerald-400 to-emerald-600",
+    "bg-blue-500": "from-blue-400 to-blue-600",
+    "bg-amber-400": "from-amber-300 to-amber-500",
+    "bg-indigo-500": "from-indigo-400 to-indigo-600",
+    "bg-cyan-500": "from-cyan-400 to-cyan-600",
+    "bg-rose-500": "from-rose-400 to-rose-600",
+    "bg-red-500": "from-red-400 to-red-600",
+    "bg-yellow-400": "from-yellow-300 to-yellow-500",
+  };
+  const accentGradient = accentColorMap[statusColor] ?? "from-primary to-primary/60";
 
   return (
-    <div className="h-[170px] group relative overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-b from-background via-background to-muted/30 p-5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 flex flex-col justify-between">
-      <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-[radial-gradient(circle_at_90%_10%,hsl(var(--primary)/0.12),transparent_45%)]" />
-      {/* Top Header */}
-      <div className="relative flex items-start justify-between mb-3">
-        <div className="flex items-center gap-1.5">
-          <span className="text-[10px] font-semibold text-muted-foreground/85 uppercase tracking-[0.18em] leading-none">
-            {title}
-          </span>
-          {tooltip && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Info className="h-3 w-3 text-muted-foreground/50 cursor-help" />
-                </TooltipTrigger>
-                <TooltipContent className="max-w-[200px] bg-background border border-border/60 text-foreground shadow-xl">
-                  <p className="font-mono text-[10px] text-muted-foreground">{tooltip}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+    <div className="group relative overflow-hidden rounded-xl border border-border/50 bg-card shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-border hover:shadow-md flex flex-col justify-between">
+      {/* Colored top accent strip */}
+      <div className={cn("absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r", accentGradient, "opacity-80")} />
+      {/* Subtle hover glow */}
+      <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100 bg-[radial-gradient(ellipse_at_80%_0%,hsl(var(--primary)/0.06),transparent_60%)]" />
+
+      <div className="relative p-4 flex flex-col flex-1">
+        {/* Top Header */}
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex items-center gap-1.5">
+            <span className="text-[9px] font-bold text-muted-foreground/70 uppercase tracking-[0.22em] leading-none">
+              {title}
+            </span>
+            {tooltip && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="h-3 w-3 text-muted-foreground/40 cursor-help hover:text-muted-foreground/70 transition-colors" />
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-[200px] bg-popover border border-border/60 text-foreground shadow-xl">
+                    <p className="font-mono text-[10px] text-muted-foreground leading-relaxed">{tooltip}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+          </div>
+          {Icon ? (
+            <div className="h-7 w-7 rounded-lg border border-border/50 bg-muted/60 flex items-center justify-center group-hover:bg-muted transition-colors">
+              <Icon className="h-3 w-3 text-muted-foreground/70" />
+            </div>
+          ) : (
+            <div className="h-7 w-7 rounded-lg border border-border/50 bg-muted/60 flex items-center justify-center">
+              <div className={cn("h-2 w-2 rounded-full", statusColor)} />
+            </div>
           )}
         </div>
-        {Icon ? (
-          <div className="h-8 w-8 rounded-lg border border-border/60 bg-background/80 backdrop-blur-sm flex items-center justify-center">
-            <Icon className="h-4 w-4 text-muted-foreground/80" />
+
+        {/* Main Value & Change */}
+        {isLoading ? (
+          <div className="mb-3 space-y-1.5">
+            <div className="h-6 w-20 rounded-md bg-muted animate-pulse" />
+            <div className="h-4 w-14 rounded-full bg-muted animate-pulse" />
           </div>
         ) : (
-          <div className="h-8 w-8 rounded-lg border border-border/60 bg-background/80 backdrop-blur-sm flex items-center justify-center">
-            <div className={cn("h-2.5 w-2.5 rounded-full", statusColor)} />
+          <div className="mb-3">
+            <h3 className="text-[1.4rem] font-bold text-foreground tracking-tight leading-none mb-1.5 tabular-nums">
+              {typeof value === "number" ? Math.round(value).toLocaleString() : value}{suffix}
+            </h3>
+            <div className="flex items-center gap-1.5">
+              <div
+                className={cn(
+                  "flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-semibold",
+                  isPositive
+                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                    : "bg-rose-500/10 text-rose-600 dark:text-rose-400",
+                )}
+              >
+                {isPositive ? (
+                  <TrendingUp className="h-2 w-2" />
+                ) : (
+                  <TrendingDown className="h-2 w-2" />
+                )}
+                {isPositive ? "+" : ""}
+                {typeof change === "number" ? Math.round(change) : change}%
+              </div>
+              <span className="text-[9px] font-medium text-muted-foreground/50 uppercase tracking-wider">
+                {subtext}
+              </span>
+            </div>
           </div>
         )}
       </div>
 
-      {/* Main Value & Change */}
-      <div className="relative mb-5">
-        <h3 className="text-3xl font-semibold text-foreground tracking-tight mb-1.5 tabular-nums">
-          {typeof value === "number" ? Math.round(value).toLocaleString() : value}{suffix}
-        </h3>
-        <div className="flex items-center gap-2">
-          <div
-            className={cn(
-              "flex items-center gap-0.5 px-2 py-1 rounded-full text-[10px] font-semibold border",
-              isPositive
-                ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20 dark:text-emerald-300"
-                : "bg-rose-500/10 text-rose-600 border-rose-500/20 dark:text-rose-300",
-            )}
-          >
-            {isPositive ? (
-              <TrendingUp className="h-2.5 w-2.5" />
-            ) : (
-              <TrendingDown className="h-2.5 w-2.5" />
-            )}
-            {isPositive ? "+" : ""}
-            {typeof change === "number" ? Math.round(change) : change}%
-          </div>
-          <span className="text-[10px] font-medium text-muted-foreground/65 uppercase tracking-wider">
-            {subtext}
-          </span>
-        </div>
-      </div>
-
-      {/* Sparkline */}
-      <div className="relative h-10 -mx-5 -mb-5 mt-1">
+      {/* Sparkline — flush to bottom */}
+      <div className="relative h-9 -mx-0 mt-auto">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={chartData}>
+          <AreaChart data={chartData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient
                 id={`gradient-${title.replace(/\s+/g, "")}`}
-                x1="0"
-                y1="0"
-                x2="0"
-                y2="1"
+                x1="0" y1="0" x2="0" y2="1"
               >
-                <stop
-                  offset="5%"
-                  stopColor={isPositive ? "#10b981" : "#f43f5e"}
-                  stopOpacity={0.08}
-                />
-                <stop
-                  offset="95%"
-                  stopColor={isPositive ? "#10b981" : "#f43f5e"}
-                  stopOpacity={0}
-                />
+                <stop offset="5%" stopColor={isPositive ? "#10b981" : "#f43f5e"} stopOpacity={0.15} />
+                <stop offset="95%" stopColor={isPositive ? "#10b981" : "#f43f5e"} stopOpacity={0} />
               </linearGradient>
             </defs>
             <Area
@@ -180,6 +195,7 @@ const CommunityKPICard = ({
               fillOpacity={1}
               fill={`url(#gradient-${title.replace(/\s+/g, "")})`}
               isAnimationActive={true}
+              dot={false}
             />
           </AreaChart>
         </ResponsiveContainer>
@@ -191,6 +207,21 @@ const CommunityKPICard = ({
 // ---------------------------------------------------------------------------
 // Module Performance Card
 // ---------------------------------------------------------------------------
+// Map color class to border/bg accent
+const colorToBorderMap: Record<string, { border: string; bg: string }> = {
+  "text-blue-600":   { border: "border-l-blue-500",   bg: "bg-blue-500/8" },
+  "text-orange-600": { border: "border-l-orange-500", bg: "bg-orange-500/8" },
+  "text-emerald-600":{ border: "border-l-emerald-500",bg: "bg-emerald-500/8" },
+  "text-purple-600": { border: "border-l-purple-500", bg: "bg-purple-500/8" },
+  "text-violet-600": { border: "border-l-violet-500", bg: "bg-violet-500/8" },
+  "text-yellow-600": { border: "border-l-yellow-500", bg: "bg-yellow-500/8" },
+  "text-amber-600":  { border: "border-l-amber-500",  bg: "bg-amber-500/8" },
+  "text-pink-600":   { border: "border-l-pink-500",   bg: "bg-pink-500/8" },
+  "text-cyan-600":   { border: "border-l-cyan-500",   bg: "bg-cyan-500/8" },
+  "text-red-600":    { border: "border-l-red-500",    bg: "bg-red-500/8" },
+  "text-rose-600":   { border: "border-l-rose-500",   bg: "bg-rose-500/8" },
+};
+
 const ModulePerformanceCard = ({
   title,
   value,
@@ -203,28 +234,35 @@ const ModulePerformanceCard = ({
   subtext: string;
   icon: LucideIcon;
   color?: string;
-}) => (
-  <div className="rounded-2xl border border-border/60 bg-gradient-to-b from-background to-muted/20 p-4 shadow-sm transition-all duration-300 group hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-lg">
-    <div className="flex items-center gap-3.5">
-      <div className="h-10 w-10 rounded-xl bg-background border border-border/70 flex items-center justify-center group-hover:scale-105 transition-transform">
-        <Icon className={cn("h-4.5 w-4.5", color)} />
+}) => {
+  const accent = colorToBorderMap[color] ?? { border: "border-l-primary", bg: "bg-primary/5" };
+  return (
+    <div className={cn(
+      "rounded-xl border border-l-[3px] border-border/50 bg-card p-3.5 shadow-sm transition-all duration-200 group hover:-translate-y-0.5 hover:shadow-md hover:border-border/80 flex items-center gap-3",
+      accent.border,
+    )}>
+      <div className={cn(
+        "h-9 w-9 rounded-lg flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-110",
+        accent.bg,
+      )}>
+        <Icon className={cn("h-4 w-4", color)} />
       </div>
-      <div className="min-w-0">
-        <h4 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.15em] leading-none mb-1.5">
+      <div className="min-w-0 flex-1">
+        <h4 className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-[0.18em] leading-none mb-1.5">
           {title}
         </h4>
         <div className="flex items-baseline gap-1.5">
-          <span className="text-lg font-semibold text-foreground tracking-tight tabular-nums">
+          <span className="text-base font-bold text-foreground tracking-tight tabular-nums leading-none">
             {value}
           </span>
-          <span className="text-[10px] text-muted-foreground/60 truncate">
+          <span className="text-[9px] text-muted-foreground/50 truncate leading-none">
             {subtext}
           </span>
         </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 import { DashboardDistributionChart } from "./dashboard-distribution-chart";
 import { DashboardSessionRadarChart } from "./dashboard-session-radar-chart";
 import { DashboardContentBreakdownChart } from "./dashboard-content-breakdown-chart";
@@ -387,9 +425,9 @@ export default function Dashboard() {
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
 
-      <EcosystemContainer className="space-y-10 py-8 px-4 lg:px-6 border-none bg-transparent shadow-none ring-0">
+      <EcosystemContainer className="space-y-8 py-8 px-4 lg:px-6 border-none bg-transparent shadow-none ring-0">
         {/* 1. Core Stats */}
-        <section className="space-y-4">
+        <section className="space-y-3">
           <DashboardSectionHeading title="Core Community Stats" />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
             {vitals.map((v) => {
@@ -422,7 +460,7 @@ export default function Dashboard() {
         </div>
 
         {/* 2. Content & Feed */}
-        <section className="space-y-4">
+        <section className="space-y-3">
           <DashboardSectionHeading title="Content & Feed" />
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
             <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-3">
@@ -444,59 +482,62 @@ export default function Dashboard() {
             </div>
 
             {/* Content Type Breakdown */}
-            <div className="lg:col-span-4 rounded-2xl border border-border/60 bg-gradient-to-b from-background to-muted/25 p-5 shadow-sm">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-[11px] font-semibold text-foreground uppercase tracking-[0.16em]">
-                  What members are posting
-                </h3>
+            <div className="lg:col-span-4 rounded-2xl border border-border/50 bg-card p-5 shadow-sm">
+              <div className="flex items-center justify-between mb-5">
+                <div>
+                  <p className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em] mb-0.5">What members post</p>
+                  <h3 className="text-sm font-semibold text-foreground leading-none">Content Mix</h3>
+                </div>
                 {kpis?.contentTypeBreakdown &&
                   kpis.contentTypeBreakdown.length > 3 && (
                     <Button
-                      variant="link"
-                      className="text-[10px] text-muted-foreground font-medium p-0 h-auto"
+                      variant="ghost"
+                      size="sm"
+                      className="text-[10px] text-muted-foreground font-medium h-7 px-2 rounded-lg hover:bg-muted"
                       onClick={() =>
                         setShowAllContentTypes(!showAllContentTypes)
                       }
                     >
-                      {showAllContentTypes ? "View less ←" : "View all →"}
+                      {showAllContentTypes ? "Less" : "More"}
                     </Button>
                   )}
               </div>
-              <div className="space-y-5">
+              <div className="space-y-4">
                 {(showAllContentTypes
                   ? kpis?.contentTypeBreakdown
-                  : kpis?.contentTypeBreakdown?.slice(0, 3)
-                )?.map((item, i) => (
-                  <div key={i} className="space-y-1.5">
-                    <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-muted-foreground font-medium capitalize">
-                        {item?.type?.toLowerCase() === "dashboard"
-                          ? "Text feed"
-                          : item?.type?.replace(/[-_]/g, " ")?.toLowerCase()}
-                      </span>
-                      <span className="text-foreground font-semibold tabular-nums">
-                        {Math?.round(item?.percentage)}%
-                      </span>
+                  : kpis?.contentTypeBreakdown?.slice(0, 4)
+                )?.map((item, i) => {
+                  const barColors = [
+                    "bg-gradient-to-r from-indigo-500 to-blue-400",
+                    "bg-gradient-to-r from-violet-500 to-purple-400",
+                    "bg-gradient-to-r from-pink-500 to-rose-400",
+                    "bg-gradient-to-r from-amber-500 to-orange-400",
+                    "bg-gradient-to-r from-emerald-500 to-teal-400",
+                  ];
+                  return (
+                    <div key={i} className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] text-foreground/80 font-medium capitalize">
+                          {item?.type?.toLowerCase() === "dashboard"
+                            ? "Text feed"
+                            : item?.type?.replace(/[-_]/g, " ")?.toLowerCase()}
+                        </span>
+                        <span className="text-[11px] font-bold text-foreground tabular-nums">
+                          {Math?.round(item?.percentage)}%
+                        </span>
+                      </div>
+                      <div className="h-1.5 w-full bg-muted/80 rounded-full overflow-hidden">
+                        <div
+                          className={cn(
+                            "h-full rounded-full transition-all duration-700 ease-out",
+                            barColors[i % barColors.length],
+                          )}
+                          style={{ width: `${item.percentage}%` }}
+                        />
+                      </div>
                     </div>
-                    <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
-                      <div
-                        className={cn(
-                          "h-full rounded-full transition-all duration-700 shadow-sm",
-                          i === 0
-                            ? "bg-indigo-500"
-                            : i === 1
-                              ? "bg-purple-500"
-                              : i === 2
-                                ? "bg-pink-500"
-                                : i === 3
-                                  ? "bg-amber-500"
-                                  : "bg-muted-foreground/30",
-                        )}
-                        style={{ width: `${item.percentage}%` }}
-                      />
-                    </div>
-                  </div>
-                )) || (
+                  );
+                }) || (
                   <div className="flex flex-col items-center justify-center h-36 text-muted-foreground/40 text-[11px]">
                     No data available
                   </div>
@@ -507,94 +548,77 @@ export default function Dashboard() {
         </section>
 
         {/* 3. Moderation Overview & Module Performance */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Moderation */}
-          <section className="lg:col-span-4 space-y-4">
+          <section className="lg:col-span-4 space-y-3">
             <DashboardSectionHeading
               title="Safety & Moderation"
-              icon={<Shield className="h-4 w-4 text-rose-500" />}
-              titleClassName="text-rose-600 dark:text-rose-400 tracking-wider text-xs"
+              icon={<Shield className="h-3.5 w-3.5 text-rose-500" />}
+              titleClassName="text-rose-600 dark:text-rose-400"
               rightElement={
-                <div className="text-rose-600 dark:text-rose-400 text-[10px] font-semibold px-2 py-0.5 rounded-md bg-rose-50 dark:bg-rose-500/10 border border-rose-100 dark:border-rose-500/20">
+                <div className="text-rose-600 dark:text-rose-400 text-[10px] font-bold px-2.5 py-1 rounded-full bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/25 tabular-nums">
                   {kpis?.moderationStats?.reduce((acc, s) => acc + (s.status === "Urgent" || s.status === "Review" ? s.count : 0), 0) ?? 0} pending
                 </div>
               }
             />
 
-            <div className="rounded-2xl border border-border/60 bg-gradient-to-b from-background to-muted/20 overflow-hidden shadow-sm">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="border-b border-border/70 bg-muted/40">
-                    <th className="px-4 py-3 text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
-                      Type
-                    </th>
-                    <th className="px-4 py-3 text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
-                      Count
-                    </th>
-                    <th className="px-4 py-3 text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
-                      Status
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {kpis?.moderationStats?.map((stat, i) => (
-                    <tr key={i} className="hover:bg-muted/35 transition-colors">
-                      <td className="px-4 py-3 text-[12px] text-foreground/80">
-                        {stat.type}
-                      </td>
-                      <td className="px-4 py-3 text-[12px] font-semibold text-foreground tabular-nums">
-                        {stat.count}
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-1.5">
-                          <Circle
-                            className={cn(
-                              "h-1.5 w-1.5 fill-current",
-                              stat.status === "Urgent"
-                                ? "text-rose-500"
-                                : stat.status === "Review"
-                                  ? "text-amber-500"
-                                  : "text-emerald-500",
-                            )}
-                          />
-                          <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
-                            {stat.status}
-                          </span>
-                        </div>
-                      </td>
-                    </tr>
-                  )) || (
-                    <tr>
-                      <td
-                        colSpan={3}
-                        className="px-4 py-8 text-center text-[11px] text-muted-foreground/50"
-                      >
-                        No active alerts
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+            <div className="rounded-2xl border border-border/50 bg-card overflow-hidden shadow-sm">
+              {/* Table header */}
+              <div className="grid grid-cols-3 border-b border-border/50 bg-muted/30 px-4 py-2.5">
+                <span className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em]">Type</span>
+                <span className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em]">Count</span>
+                <span className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em]">Status</span>
+              </div>
+              <div className="divide-y divide-border/40">
+                {kpis?.moderationStats?.map((stat, i) => (
+                  <div key={i} className="grid grid-cols-3 items-center px-4 py-3 hover:bg-muted/25 transition-colors">
+                    <span className="text-[12px] text-foreground/85 font-medium truncate pr-2">{stat.type}</span>
+                    <span className="text-[13px] font-bold text-foreground tabular-nums">{stat.count}</span>
+                    <div>
+                      <span className={cn(
+                        "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider",
+                        stat.status === "Urgent"
+                          ? "bg-rose-500/10 text-rose-600 dark:text-rose-400"
+                          : stat.status === "Review"
+                            ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                            : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+                      )}>
+                        <span className={cn(
+                          "h-1 w-1 rounded-full",
+                          stat.status === "Urgent" ? "bg-rose-500" : stat.status === "Review" ? "bg-amber-500" : "bg-emerald-500"
+                        )} />
+                        {stat.status}
+                      </span>
+                    </div>
+                  </div>
+                )) || (
+                  <div className="px-4 py-10 text-center text-[11px] text-muted-foreground/40">
+                    <Shield className="h-6 w-6 mx-auto mb-2 opacity-30" />
+                    No active alerts
+                  </div>
+                )}
+              </div>
             </div>
           </section>
 
           {/* Module Performance Grid */}
-          <section className="lg:col-span-8 space-y-4">
+          <section className="lg:col-span-8 space-y-3">
             <DashboardSectionHeading
-              title="How people use features"
+              title="Feature Modules"
               rightElement={
                 modulePerformanceList.length > 9 && (
                   <Button
-                    variant="link"
-                    className="text-[10px] text-muted-foreground font-medium p-0 h-auto"
+                    variant="ghost"
+                    size="sm"
+                    className="text-[10px] text-muted-foreground font-medium h-7 px-2.5 rounded-lg hover:bg-muted"
                     onClick={() => setShowAllFeatureModules((prev) => !prev)}
                   >
-                    {showAllFeatureModules ? "View less ←" : "View all →"}
+                    {showAllFeatureModules ? "Show less" : "Show all"}
                   </Button>
                 )
               }
             />
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5">
               {visibleFeatureModules.map((mod) => {
                 const dataItem = kpis?.modulePerformance?.find(
                   (m) => m.module === mod.title,
@@ -610,7 +634,7 @@ export default function Dashboard() {
                 );
                 
                 return mod.href ? (
-                  <Link href={mod.href} key={mod.title} className="block group">
+                  <Link href={mod.href} key={mod.title} className="block">
                     {card}
                   </Link>
                 ) : (
@@ -622,12 +646,12 @@ export default function Dashboard() {
         </div>
 
         {/* 3.5. Insights Row (Growth & Content Breakdown) */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          <section className="space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <section className="space-y-3">
             <DashboardSectionHeading title="Community Growth" />
             <DashboardGrowthChart />
           </section>
-          <section className="space-y-4">
+          <section className="space-y-3">
             <DashboardSectionHeading title="Content Breakdown" />
             <DashboardContentBreakdownChart 
               data={kpis?.contentTypeBreakdown || []} 
@@ -637,9 +661,9 @@ export default function Dashboard() {
         </div>
 
         {/* 4. Growing & Keeping Members */}
-        <section className="space-y-4 mt-20">
+        <section className="space-y-3">
           <DashboardSectionHeading title="Growing & Keeping Members" />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {acquisitionRet.map((v) => {
               const item = getMetric(v.key);
               return (
@@ -659,13 +683,12 @@ export default function Dashboard() {
         </section>
 
         {/* 5. Platform Storage & Subscription Details Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-16">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Storage Stats */}
-          <section className="lg:col-span-4 space-y-4">
+          <section className="lg:col-span-4 space-y-3">
             <DashboardSectionHeading
               title="Platform Storage"
-              icon={<Database className="h-4 w-4 text-slate-800" />}
-              titleClassName="text-slate-900 tracking-[0.14em] text-xs"
+              icon={<Database className="h-3.5 w-3.5 text-slate-500" />}
             />
             <div className="h-full">
               {statsLoading || summaryLoading ? (
@@ -681,7 +704,7 @@ export default function Dashboard() {
           </section>
 
           {/* Subscription Details */}
-          <section className="lg:col-span-8 space-y-4">
+          <section className="lg:col-span-8 space-y-3">
             <DashboardSectionHeading title="Subscription Details" />
             <div className="h-full">
               <PlanOverview />

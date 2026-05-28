@@ -519,3 +519,29 @@ export const GET_ALL_REFERRALS = gql`
     }
   }
 `;
+
+export const SEARCH_USER_WITH_AI = gql`
+  query SearchUserWithAI($query: String!, $limit: Int, $offset: Int) {
+    searchUserWithAI(query: $query, limit: $limit, offset: $offset) {
+      data {
+        ${details}
+      }
+      totalCount
+      hasNextPage
+    }
+  }
+`;
+
+export const GET_USER_NEO4J_RELATIONSHIPS = gql`
+  query GetUserNeo4jRelationships($userId: ID!) {
+    getUserNeo4jRelationships(userId: $userId) {
+      type
+      otherUserId
+      otherFirstName
+      otherLastName
+      otherAvatar
+      createdAt
+    }
+  }
+`;
+

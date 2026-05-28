@@ -109,34 +109,42 @@ export default function FeedPage() {
       />
 
       <EcosystemActionBar shadow="none">
-        <div className="flex items-center justify-between w-full">
-          <div className="flex items-center gap-6">
-            <EcosystemStatusIndicator
-              status="active"
-              label="Feed Status: Active"
-            />
-            <div className="h-4 w-px bg-slate-200" />
+        <EcosystemActionBar.Group>
+          <EcosystemActionBar.Item>
+            <div className="flex items-center gap-2.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1.5">
+              <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-[11px] font-medium text-emerald-700 dark:text-emerald-300">
+                Feed Status: Active
+              </span>
+            </div>
+          </EcosystemActionBar.Item>
+          <EcosystemActionBar.Separator />
+          <EcosystemActionBar.Item>
             <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
               <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
               <span>Verified System</span>
             </div>
-          </div>
+          </EcosystemActionBar.Item>
+        </EcosystemActionBar.Group>
 
-          <div className="flex items-center gap-3">
+        <EcosystemActionBar.Group align="right">
+          <EcosystemActionBar.Item>
             <DateRangePicker
               date={dateRange}
               onDateChange={handleDateChange}
               defaultValue="LAST_7_DAYS"
             />
-            <div className="h-4 w-px bg-slate-200 mx-1" />
+          </EcosystemActionBar.Item>
+          <EcosystemActionBar.Separator />
+          <EcosystemActionBar.Item>
             <Link href="/feed/settings">
-              <Button className="h-10 px-6 rounded-xl bg-slate-900 border-slate-800 font-black text-[10px] uppercase tracking-widest gap-2 shadow-xl hover:bg-black transition-all active:scale-95 group">
-                Feed Settings
+              <Button className="h-9 px-4 rounded-xl bg-slate-900 border-slate-800 font-black text-[10px] uppercase tracking-widest gap-2 shadow-xl hover:bg-black transition-all active:scale-95 group">
+                Settings
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Button>
             </Link>
-          </div>
-        </div>
+          </EcosystemActionBar.Item>
+        </EcosystemActionBar.Group>
       </EcosystemActionBar>
 
       <EcosystemContainer className="space-y-12 p-8 lg:p-12">
@@ -145,38 +153,43 @@ export default function FeedPage() {
           {[
             {
               title: "Total Reach",
-              value: kpis?.aggregateReach,
-              trend: kpis?.reachTrend,
+              value: kpis?.aggregateReach ?? "0",
+              trend: kpis?.reachTrend ?? 0,
               icon: LayoutGrid,
               color: "text-indigo-500",
-              bg: "bg-indigo-500/10",
+              bg: "bg-indigo-500",
+              tooltip: "Estimated reach based on total posts, shares, and interactions",
             },
             {
               title: "Active Posts",
-              value: kpis?.activeDialogue,
-              trend: kpis?.dialogueTrend,
+              value: kpis?.activeDialogue ?? "0",
+              trend: kpis?.dialogueTrend ?? 0,
               icon: Activity,
               color: "text-emerald-500",
-              bg: "bg-emerald-500/10",
+              bg: "bg-emerald-500",
+              tooltip: "Total number of interactions (likes + comments) in this period",
             },
             {
-              title: "Engagement Rate",
-              value: kpis?.networkVelocity?.toFixed(2),
-              trend: kpis?.velocityTrend,
+              title: "Network Velocity",
+              value: kpis?.networkVelocity?.toFixed(2) ?? "0",
+              trend: kpis?.velocityTrend ?? 0,
               icon: TrendingUp,
               color: "text-violet-500",
-              bg: "bg-violet-500/10",
+              bg: "bg-violet-500",
+              tooltip: "Average interactions per post",
             },
             {
-              title: "Total Interactions",
-              value: kpis?.engagementYield?.toFixed(2),
-              trend: kpis?.yieldTrend,
+              title: "Engagement Yield",
+              value: kpis?.engagementYield?.toFixed(2) ?? "0",
+              trend: kpis?.yieldTrend ?? 0,
               icon: Zap,
               color: "text-amber-500",
-              bg: "bg-amber-500/10",
+              bg: "bg-amber-500",
+              suffix: "%",
+              tooltip: "Percentage of reach that resulted in interaction",
             },
           ].map((kpi, i) => (
-            <EcosystemKPI key={i} {...kpi} trendLabel="Change" />
+            <EcosystemKPI key={i} {...kpi} trendLabel="vs last period" />
           ))}
         </div>
 
@@ -310,6 +323,53 @@ export default function FeedPage() {
             </EcosystemCard>
           </div>
         </div>
+
+        {/* Promoted Events Section */}
+        {promotedEvents && promotedEvents.length > 0 && (
+          <div className="mt-4">
+            <EcosystemCard
+              title="Promoted Events"
+              description="Upcoming events actively promoted in the feed"
+              icon={Sparkles}
+            >
+              <div className="flex flex-col gap-2">
+                {promotedEvents.map((event: any, index: number) => (
+                  <div key={index} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-4 py-4 rounded-xl border border-border/40 bg-gradient-to-r from-muted/30 to-transparent hover:bg-muted/60 transition-colors group">
+                    <div className="flex items-start gap-4">
+                      <div className="h-10 w-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex flex-col items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                        <span className="text-[10px] font-bold uppercase leading-none mb-0.5">
+                          {event.date ? event.date.split(" ")[0] : "TBA"}
+                        </span>
+                        <span className="text-sm font-black leading-none">
+                          {event.date ? event.date.split(" ")[1]?.replace(",", "") : ""}
+                        </span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm font-semibold text-foreground truncate group-hover:text-indigo-600 transition-colors">
+                          {event.title}
+                        </h4>
+                        <p className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5">
+                          {event.description}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-6 sm:ml-auto shrink-0 pl-14 sm:pl-0">
+                      <div className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
+                        <MapPin className="h-3.5 w-3.5 text-amber-500" />
+                        <span className="max-w-[120px] truncate">{event.location}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
+                        <Clock className="h-3.5 w-3.5 text-emerald-500" />
+                        <span>{event.time}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </EcosystemCard>
+          </div>
+        )}
       </EcosystemContainer>
     </EcosystemWrapper>
   );

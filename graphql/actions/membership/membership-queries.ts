@@ -1,4 +1,4 @@
-import { useQuery } from "@apollo/client";
+import { useQuery, useLazyQuery } from "@apollo/client";
 import {
   GET_MEMBERS_TERMS_AND_CONDITIONS,
   GET_USER_ANALYTICS,
@@ -11,6 +11,8 @@ import {
   GET_GROWTH_STATS,
   GET_USER_REFERRALS,
   GET_ALL_REFERRALS,
+  SEARCH_USER_WITH_AI,
+  GET_USER_NEO4J_RELATIONSHIPS,
 } from "../../quries/user";
 import { TimeRange, DateRangeInput } from "../dashbaord/dashboard-quries";
 
@@ -286,5 +288,41 @@ export const useGetAllReferrals = (
 ) =>
   useQuery<GetAllReferralsResponse>(GET_ALL_REFERRALS, {
     variables,
+    ...options,
+  });
+
+export interface SearchUserWithAIResponse {
+  searchUserWithAI: {
+    data: UserDetail[];
+    totalCount: number;
+    hasNextPage: boolean;
+  };
+}
+
+export const useSearchUserWithAI = () =>
+  useLazyQuery<SearchUserWithAIResponse>(SEARCH_USER_WITH_AI, {
+    fetchPolicy: "network-only",
+  });
+
+export interface Neo4jRelationship {
+  type: string;
+  otherUserId: string;
+  otherFirstName: string;
+  otherLastName: string;
+  otherAvatar: string;
+  createdAt: string;
+}
+
+export interface GetUserNeo4jRelationshipsResponse {
+  getUserNeo4jRelationships: Neo4jRelationship[];
+}
+
+export const useGetUserNeo4jRelationships = (
+  userId: string,
+  options?: any,
+) =>
+  useQuery<GetUserNeo4jRelationshipsResponse>(GET_USER_NEO4J_RELATIONSHIPS, {
+    variables: { userId },
+    skip: !userId,
     ...options,
   });

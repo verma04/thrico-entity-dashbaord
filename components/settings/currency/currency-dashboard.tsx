@@ -3,6 +3,7 @@
 import React from "react";
 import {
   useGetEntityCurrencyConfig,
+  useGetCurrencyStats,
 } from "@/graphql/actions";
 import { Coins, CreditCard, Activity, Settings2, TrendingUp, BarChart3 } from "lucide-react";
 import {
@@ -17,34 +18,30 @@ import {
 import { formatNumber } from "@/lib/formatNumber";
 import { EcosystemKPI, EcosystemCard } from "@/components/layout/ecosystem/ecosystem-analytics";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const chartData = [
-  { name: "Jan", amount: 4000 },
-  { name: "Feb", amount: 3000 },
-  { name: "Mar", amount: 5000 },
-  { name: "Apr", amount: 2780 },
-  { name: "May", amount: 1890 },
-  { name: "Jun", amount: 2390 },
-  { name: "Jul", amount: 3490 },
-];
-
-export function CurrencyDashboard() {
+export function CurrencyDashboard({ timeRange, dateRange }: { timeRange?: any, dateRange?: any }) {
   const { data: configData, loading: configLoading } = useGetEntityCurrencyConfig();
   const config = configData?.getEntityCurrencyConfig;
   const currencyName = config?.currencyName || "EC";
 
+  const { data: statsData, loading: statsLoading } = useGetCurrencyStats(timeRange, dateRange);
+  const stats = statsData?.getCurrencyStats;
+
+  const isLoading = configLoading || statsLoading;
+
   const kpis = [
     {
       title: `Total ${currencyName} Earned`,
-      value: configLoading ? "—" : "124,500",
-      trend: 12,
+      value: isLoading ? "—" : formatNumber(stats?.totalEarned || 0),
+      trend: 12, // Trend could be dynamically calculated if we fetched previous period stats
       icon: Coins,
       color: "text-zinc-900",
       bg: "bg-zinc-100",
     },
     {
       title: "Redemption Volume",
-      value: configLoading ? "—" : "42,100",
+      value: isLoading ? "—" : formatNumber(stats?.redemptionVolume || 0),
       trend: -2,
       icon: CreditCard,
       color: "text-indigo-600",
@@ -52,13 +49,15 @@ export function CurrencyDashboard() {
     },
     {
       title: "Active Users",
-      value: configLoading ? "—" : "1,240",
+      value: isLoading ? "—" : formatNumber(stats?.activeUsers || 0),
       trend: 8,
       icon: Activity,
       color: "text-emerald-600",
       bg: "bg-emerald-50",
     },
   ];
+
+  const chartData = stats?.currencyFlow || [];
 
   return (
     <div className="space-y-6">

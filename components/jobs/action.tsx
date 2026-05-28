@@ -10,6 +10,7 @@ import {
   XCircle,
   Undo,
   BarChart3,
+  Users2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,11 +39,14 @@ import {
 import { getModalDescription, getModalTitle } from "./utils";
 import Details from "./details";
 
+import ApplicantsDrawer from "./applicants-drawer";
+
 const Actions = (record: Job) => {
   const [isAuditModalOpen, setIsAuditModalOpen] = useState(false);
   const [isAnalytics, setIsAnalytics] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isApplicantsDrawerOpen, setIsApplicantsDrawerOpen] = useState(false);
   const [activeJob, setActiveJob] = useState<Job | null>(null);
   const [dialogAction, setDialogAction] = useState<
     | "APPROVE"
@@ -81,6 +85,12 @@ const Actions = (record: Job) => {
     setIsModalOpen(false);
   };
 
+  const handleViewApplicants = (job: Job) => {
+    setActiveJob(job);
+    setIsApplicantsDrawerOpen(true);
+    setIsModalOpen(false);
+  };
+
   const handleViewSettings = (user: Job) => {
     router.push(`/communities/${user.id}/manage`);
   };
@@ -95,6 +105,7 @@ const Actions = (record: Job) => {
     setActionReason("");
     setActiveJob(null);
     setIsDrawerOpen(false);
+    setIsApplicantsDrawerOpen(false);
   };
 
   const [action, { loading }] = useChangeJobStatus({
@@ -149,6 +160,10 @@ const Actions = (record: Job) => {
           <DropdownMenuItem onClick={() => handleViewDetails(record)}>
             <Eye className="mr-2 h-4 w-4" />
             View Details
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleViewApplicants(record)}>
+            <Users2 className="mr-2 h-4 w-4" />
+            View Applicants
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => handleAnalytics(record)}>
             <BarChart3 className="mr-2 h-4 w-4" />
@@ -257,6 +272,14 @@ const Actions = (record: Job) => {
           isDrawerOpen={isDrawerOpen}
           setIsDrawerOpen={setIsDrawerOpen}
           handleAction={handleAction}
+        />
+      )}
+
+      {activeJob && (
+        <ApplicantsDrawer
+          job={activeJob}
+          isOpen={isApplicantsDrawerOpen}
+          setIsOpen={setIsApplicantsDrawerOpen}
         />
       )}
     </>

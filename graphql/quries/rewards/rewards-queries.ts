@@ -145,6 +145,7 @@ export const GET_REDEMPTIONS = gql`
       status
       metadata
       claimedAt
+      createdAt
       user {
         id
         firstName
