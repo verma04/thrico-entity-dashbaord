@@ -377,19 +377,12 @@ export default function Dashboard() {
             variant="outline"
             size="sm"
             className="h-9 px-3.5 rounded-xl text-xs gap-2 border-border/70 bg-background/80 backdrop-blur-sm hover:bg-muted/60"
-            onClick={() => refetch()}
+            onClick={() => window.location.reload()}
           >
             <RefreshCcw
               className={cn("h-3.5 w-3.5", loading && "animate-spin")}
             />
             Refresh
-          </Button>
-          <Button
-            size="sm"
-            className="h-9 px-4 rounded-xl text-xs gap-2 shadow-sm shadow-primary/20"
-          >
-            <Sparkles className="h-3.5 w-3.5" />
-            Insights
           </Button>
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
