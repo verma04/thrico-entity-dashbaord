@@ -364,17 +364,8 @@ export default function Feed({ feed }: { feed: FeedProps }) {
             )}
           </div>
 
-          <div className="flex items-center justify-between mt-8 mb-5 px-0.5">
-            <div className="flex items-center gap-4">
-               <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-muted text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                  <TrendingUp className="h-3 w-3 text-emerald-500" />
-                  {feed?.totalReactions || 0} Growth
-               </div>
-               <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-muted text-[10px] font-bold uppercase tracking-widest text-muted-foreground border border-border/50">
-                  {feed?.totalComment || 0} Dialogue
-               </div>
-            </div>
-            <Analytics />
+          <div className="flex items-center justify-end mt-8 mb-5 px-0.5">
+            <Analytics feedId={feed.id.toString()} />
           </div>
 
           <Separator className="mb-5 opacity-40" />

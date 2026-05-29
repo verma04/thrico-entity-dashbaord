@@ -467,7 +467,7 @@ export default function Dashboard() {
       tooltip: "((New Members who posted) / New Members) × 100",
     },
     {
-      title: "Word of Mouth",
+      title: "Advocacy Index",
       key: "communityAdvocacyIndex",
       icon: Heart,
       tooltip: "(New Members / DAU) × 10",
