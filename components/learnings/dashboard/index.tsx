@@ -177,8 +177,8 @@ export default function LearningsDashboard() {
         <div className="flex items-center justify-between w-full overflow-hidden">
           <div className="flex items-center gap-2 px-1 shrink-0">
             <ShieldCheck className="h-4 w-4 text-emerald-500" />
-            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest italic">
-              Verified Knowledge Node
+            <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground italic">
+              Verified Node
             </span>
           </div>
 

@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useGetLeaderboard } from "@/graphql/actions";
 import { LeaderboardTable } from "./leaderboard-table";
-import { Trophy, Users, TrendingUp, RotateCcw } from "lucide-react";
+import { Trophy, Users, TrendingUp, RotateCcw, ShieldCheck } from "lucide-react";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
@@ -31,38 +31,34 @@ export function LeaderboardManager() {
       />
 
       <EcosystemActionBar shadow="none">
-        <EcosystemActionBar.Group>
-          <div className="flex items-center gap-3 px-1">
-             <div className="h-2 w-2 rounded-full bg-amber-500 animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
-             <span className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]"> Real-Time Ranking Nexus</span>
+        <div className="flex items-center justify-between w-full">
+          <div className="flex items-center gap-2 px-1">
+            <ShieldCheck className="h-4 w-4 text-emerald-500" />
+            <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground italic">
+              Verified Node
+            </span>
           </div>
-        </EcosystemActionBar.Group>
 
-        <EcosystemActionBar.Group align="right">
-          <EcosystemActionBar.Item>
-             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-muted/50 border border-border/50">
-                <Users className="h-3.5 w-3.5 text-muted-foreground" />
-                <span className="text-[11px] font-bold text-foreground">
-                  {leaderboard?.totalUsers?.toLocaleString() ?? 0} Members Indexed
+          <div className="flex items-center gap-3">
+             <div className="flex items-center gap-1.5 px-3 h-9 rounded-lg bg-zinc-50 border border-zinc-200">
+                <Users className="h-3.5 w-3.5 text-zinc-500" />
+                <span className="text-[10px] font-bold text-zinc-900 uppercase tracking-widest">
+                  {leaderboard?.totalUsers?.toLocaleString() ?? 0} Members
                 </span>
              </div>
-          </EcosystemActionBar.Item>
 
-          <EcosystemActionBar.Item>
+             <div className="h-4 w-px bg-zinc-200 mx-1" />
+
              <Button
                 variant="outline"
                 size="icon"
-                className="h-9 w-9 border-border rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted"
+                className="h-9 w-9 text-zinc-400 hover:text-indigo-600 rounded-lg transition-all"
                 onClick={() => refetch()}
               >
                 <RotateCcw className={cn(loading && "animate-spin")} size={14} />
               </Button>
-          </EcosystemActionBar.Item>
-
-          <EcosystemActionBar.Status active={entries.length > 0}>
-             Top {entries.length} Visualized
-          </EcosystemActionBar.Status>
-        </EcosystemActionBar.Group>
+          </div>
+        </div>
       </EcosystemActionBar>
 
       <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0 space-y-6">

@@ -8,6 +8,7 @@ export interface Moment {
   videoUrl: string;
   thumbnailUrl: string;
   status: string;
+  totalViews: number;
   createdAt: string;
   owner: {
     firstName: string;
@@ -35,6 +36,7 @@ export interface MomentAnalytics {
   totalReactions: number;
   totalComments: number;
   activeCreators: number;
+  totalWatchTime: number;
   growth: {
     date: string;
     count: number;
@@ -65,7 +67,7 @@ export interface GetMomentDashboardKPIsResponse {
   getMomentAnalytics: MomentAnalytics;
 }
 
-export const useGetAllMoments = (variables?: { pagination?: { page?: number; limit?: number } }) =>
+export const useGetAllMoments = (variables?: { pagination?: { page?: number; limit?: number }, sortBy?: string, sortOrder?: string }) =>
   useQuery<GetAllMomentsResponse>(GET_ALL_MOMENTS, {
     variables,
   });

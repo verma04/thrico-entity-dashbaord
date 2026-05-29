@@ -24,6 +24,16 @@ export const GET_MODULE_ACTIVITY = gql`
   }
 `;
 
+export const GET_FEATURE_MODULE_PERFORMANCE = gql`
+  query GetFeatureModulePerformance($timeRange: TimeRange, $dateRange: DateRangeInput) {
+    getFeatureModulePerformance(timeRange: $timeRange, dateRange: $dateRange) {
+      module
+      value
+      subtext
+    }
+  }
+`;
+
 export const GET_COMMUNITY_KPIS = gql`
   query GetCommunityKPIs($timeRange: TimeRange, $dateRange: DateRangeInput) {
     getCommunityKPIs(timeRange: $timeRange, dateRange: $dateRange) {

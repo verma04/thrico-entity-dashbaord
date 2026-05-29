@@ -27,17 +27,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { ChartTimeFilter, ChartTimeFilterValue, getChartTimeFilter } from "./chart-time-filter"
 
 import {
   useGetDeviceDistribution,
   TimeRange,
 } from "@/graphql/actions/dashboard"
-
-const timeRangeMap: Record<string, TimeRange> = {
-  "90d": TimeRange.LAST_90_DAYS,
-  "30d": TimeRange.LAST_30_DAYS,
-  "7d": TimeRange.LAST_7_DAYS,
-}
 
 const chartConfig = {
   visitors: {
@@ -61,9 +56,10 @@ const chartConfig = {
 } satisfies ChartConfig
 
 export function DashboardDistributionChart() {
-  const [timeRange, setTimeRange] = React.useState("90d")
+  const [filterKey, setFilterKey] = React.useState("90d")
+  const [filterValue, setFilterValue] = React.useState<ChartTimeFilterValue>(getChartTimeFilter("90d"))
 
-  const { data, loading } = useGetDeviceDistribution(timeRangeMap[timeRange])
+  const { data, loading } = useGetDeviceDistribution(filterValue.timeRange, filterValue.dateRange)
   const chartData = data?.getDeviceDistribution || []
 
   // Calculate totals for a premium metric display
@@ -108,19 +104,13 @@ export function DashboardDistributionChart() {
           )}
         </div>
         
-        <Select value={timeRange} onValueChange={setTimeRange}>
-          <SelectTrigger
-            className="w-[140px] rounded-lg h-8 text-[11px] font-medium bg-background/50 border-border/70 hover:bg-accent/50 transition-colors"
-            aria-label="Select time range"
-          >
-            <SelectValue placeholder="Last 3 months" />
-          </SelectTrigger>
-          <SelectContent className="rounded-xl border-border/60 backdrop-blur-xl bg-background/95">
-            <SelectItem value="90d" className="text-xs font-medium">Last 3 months</SelectItem>
-            <SelectItem value="30d" className="text-xs font-medium">Last 30 days</SelectItem>
-            <SelectItem value="7d" className="text-xs font-medium">Last 7 days</SelectItem>
-          </SelectContent>
-        </Select>
+        <ChartTimeFilter
+          value={filterKey}
+          onChange={(key, val) => {
+            setFilterKey(key)
+            setFilterValue(val)
+          }}
+        />
       </CardHeader>
       
       <CardContent className="flex-1 px-0 pb-0 pt-6 relative min-h-[300px]">

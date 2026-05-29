@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { MonitorSmartphone, Laptop, Smartphone } from "lucide-react"
-import { PolarAngleAxis, PolarGrid, Radar, RadarChart, ResponsiveContainer, PolarRadiusAxis } from "recharts"
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis } from "recharts"
 
 import {
   Card,
@@ -68,7 +68,7 @@ export function DashboardSessionRadarChart() {
   const totalSessions = totals.desktop + totals.mobile;
 
   return (
-    <Card className="border-border/60 bg-gradient-to-b from-background to-muted/10 shadow-sm relative flex flex-col h-full overflow-hidden">
+    <Card className="border-border/60 shadow-sm relative flex flex-col h-full overflow-hidden">
       <CardHeader className="flex flex-col gap-1 pb-2 border-b border-border/40 relative z-10">
         <div className="space-y-1.5 w-full">
           <CardTitle className="text-rose-500 tracking-wider flex items-center gap-2 text-base">
@@ -104,8 +104,6 @@ export function DashboardSessionRadarChart() {
       
       <CardContent className="flex-1 pb-4 relative min-h-[300px]">
         {/* Abstract Background Elements */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-[#6366f1]/5 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute top-1/2 left-1/2 w-32 h-32 bg-[#f43f5e]/5 rounded-full blur-2xl pointer-events-none" />
 
         {loading && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/50 backdrop-blur-sm transition-all duration-300">
@@ -120,53 +118,46 @@ export function DashboardSessionRadarChart() {
         
         <ChartContainer
           config={chartConfig}
-          className="mx-auto aspect-square max-h-[320px] w-full pt-4"
+          className="mx-auto aspect-[4/3] w-full pt-4"
         >
-          <RadarChart data={formattedData} margin={{ top: 10, right: 10, bottom: 10, left: 10 }}>
+          <BarChart data={formattedData} margin={{ top: 10, right: 10, bottom: 10, left: -20 }}>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--muted-foreground)/0.2)" />
+            <XAxis
+              dataKey="month"
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+              tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12, fontWeight: 500 }}
+            />
+            <YAxis 
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+              tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+            />
             <ChartTooltip
-              cursor={false}
+              cursor={{ fill: "hsl(var(--muted)/0.4)" }}
               content={
-                <ChartTooltipContent 
-                  indicator="dot" 
+                <ChartTooltipContent
                   className="backdrop-blur-xl bg-background/95 border-border/50 shadow-xl rounded-xl"
                 />
               }
             />
-            <PolarGrid 
-              radialLines={true} 
-              gridType="polygon" 
-              className="stroke-muted-foreground/15" 
-            />
-            <PolarAngleAxis 
-              dataKey="month" 
-              className="text-[11px] font-semibold fill-muted-foreground" 
-              tick={{ fill: "hsl(var(--foreground))", fontSize: 11, fontWeight: 600 }}
-            />
-            <PolarRadiusAxis 
-              angle={30} 
-              domain={[0, 'auto']} 
-              tick={false} 
-              axisLine={false} 
-            />
-            <Radar
+            <Bar
               name="Desktop"
               dataKey="desktop"
-              fill="#6366f1"
-              fillOpacity={0.25}
-              stroke="#6366f1"
-              strokeWidth={2}
-              activeDot={{ r: 5, strokeWidth: 0, fill: '#6366f1' }}
+              stackId="a"
+              fill="var(--color-desktop)"
+              radius={[0, 0, 4, 4]}
             />
-            <Radar
+            <Bar
               name="Mobile"
               dataKey="mobile"
-              fill="#f43f5e"
-              fillOpacity={0.25}
-              stroke="#f43f5e"
-              strokeWidth={2}
-              activeDot={{ r: 5, strokeWidth: 0, fill: '#f43f5e' }}
+              stackId="a"
+              fill="var(--color-mobile)"
+              radius={[4, 4, 0, 0]}
             />
-          </RadarChart>
+          </BarChart>
         </ChartContainer>
       </CardContent>
     </Card>

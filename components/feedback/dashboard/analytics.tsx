@@ -25,9 +25,28 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Link from "next/link";
-
+import { DateRangePicker } from "@/components/ui/date-range-picker";
+import { subDays } from "date-fns";
+import { DateRange } from "react-day-picker";
 export default function FeedbackAnalytics() {
   const [timeRange, setTimeRange] = useState<TimeRange>(TimeRange.LAST_7_DAYS);
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: subDays(new Date(), 7),
+    to: new Date(),
+  });
+
+  const handleDateChange = (range: DateRange | undefined) => {
+    setDateRange(range);
+    if (!range?.from || !range?.to) return;
+    const diffDays = Math.round(
+      (range.to.getTime() - range.from.getTime()) / (1000 * 60 * 60 * 24),
+    );
+    if (diffDays <= 1) setTimeRange(TimeRange.LAST_24_HOURS);
+    else if (diffDays <= 7) setTimeRange(TimeRange.LAST_7_DAYS);
+    else if (diffDays <= 30) setTimeRange(TimeRange.LAST_30_DAYS);
+    else if (diffDays <= 90) setTimeRange(TimeRange.LAST_90_DAYS);
+  };
+
   const { data, loading, refetch } = useGetFeedbackStats(timeRange);
 
   const stats = data?.getFeedbackStats;
@@ -88,33 +107,29 @@ export default function FeedbackAnalytics() {
 
       <EcosystemActionBar shadow="none">
         <div className="flex items-center justify-between w-full">
-           <div className="flex items-center gap-6">
-              <EcosystemStatusIndicator status="active" label="Dialogue Stream: Operational" />
-              <div className="h-4 w-px bg-slate-200" />
-              <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
-                 <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
-                 <span>Sentiment Matrix: Optimal</span>
-              </div>
-           </div>
+          <div className="flex items-center gap-2 px-1">
+            <ShieldCheck className="h-4 w-4 text-emerald-500" />
+            <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground italic">
+              Verified Node
+            </span>
+          </div>
 
-           <div className="flex items-center gap-3">
-              <Select value={timeRange} onValueChange={(val) => setTimeRange(val as TimeRange)}>
-                <SelectTrigger className="h-10 w-[200px] rounded-xl border-slate-200 font-bold text-slate-600 bg-white shadow-sm">
-                  <Timer className="h-4 w-4 mr-2 text-indigo-500" />
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="rounded-2xl border-slate-100 shadow-2xl">
-                  <SelectItem value={TimeRange.LAST_24_HOURS} className="font-bold uppercase text-[10px]">Real-time Cycle</SelectItem>
-                  <SelectItem value={TimeRange.LAST_7_DAYS} className="font-bold uppercase text-[10px]">Last 7 Cycles</SelectItem>
-                  <SelectItem value={TimeRange.LAST_30_DAYS} className="font-bold uppercase text-[10px]">Last 30 Cycles</SelectItem>
-                  <SelectItem value={TimeRange.LAST_90_DAYS} className="font-bold uppercase text-[10px]">Last 90 Cycles</SelectItem>
-                </SelectContent>
-              </Select>
-              <div className="h-4 w-px bg-slate-200 mx-1" />
-              <Button variant="outline" size="icon" className="h-10 w-10 text-slate-400 hover:text-indigo-600 rounded-xl transition-all shadow-sm bg-white" onClick={() => refetch()}>
-                <RotateCcw className={cn("h-4 w-4", loading && "animate-spin")} />
-              </Button>
-           </div>
+          <div className="flex items-center gap-3">
+            <DateRangePicker
+              date={dateRange}
+              onDateChange={handleDateChange}
+              defaultValue="LAST_7_DAYS"
+            />
+            <div className="h-4 w-px bg-zinc-200 mx-1" />
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-9 w-9 text-zinc-400 hover:text-indigo-600 rounded-lg transition-all"
+              onClick={() => refetch()}
+            >
+              <RotateCcw size={14} className={cn(loading && "animate-spin")} />
+            </Button>
+          </div>
         </div>
       </EcosystemActionBar>
 

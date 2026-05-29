@@ -34,8 +34,17 @@ import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-cont
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { useGetCommunityKPIs, TimeRange } from "@/graphql/actions/dashboard";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  useGetCommunityKPIs,
+  useGetFeatureModulePerformance,
+  TimeRange,
+} from "@/graphql/actions/dashboard";
 import { subDays } from "date-fns";
 import { DateRange } from "react-day-picker";
 import { StorageStats } from "@/components/subscription/storage-stats";
@@ -99,12 +108,19 @@ const CommunityKPICard = ({
     "bg-red-500": "from-red-400 to-red-600",
     "bg-yellow-400": "from-yellow-300 to-yellow-500",
   };
-  const accentGradient = accentColorMap[statusColor] ?? "from-primary to-primary/60";
+  const accentGradient =
+    accentColorMap[statusColor] ?? "from-primary to-primary/60";
 
   return (
     <div className="group relative overflow-hidden rounded-xl border border-border/50 bg-card shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-border hover:shadow-md flex flex-col justify-between">
       {/* Colored top accent strip */}
-      <div className={cn("absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r", accentGradient, "opacity-80")} />
+      <div
+        className={cn(
+          "absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r",
+          accentGradient,
+          "opacity-80",
+        )}
+      />
       {/* Subtle hover glow */}
       <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100 bg-[radial-gradient(ellipse_at_80%_0%,hsl(var(--primary)/0.06),transparent_60%)]" />
 
@@ -122,7 +138,9 @@ const CommunityKPICard = ({
                     <Info className="h-3 w-3 text-muted-foreground/40 cursor-help hover:text-muted-foreground/70 transition-colors" />
                   </TooltipTrigger>
                   <TooltipContent className="max-w-[200px] bg-popover border border-border/60 text-foreground shadow-xl">
-                    <p className="font-mono text-[10px] text-muted-foreground leading-relaxed">{tooltip}</p>
+                    <p className="font-mono text-[10px] text-muted-foreground leading-relaxed">
+                      {tooltip}
+                    </p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -148,7 +166,10 @@ const CommunityKPICard = ({
         ) : (
           <div className="mb-3">
             <h3 className="text-[1.4rem] font-bold text-foreground tracking-tight leading-none mb-1.5 tabular-nums">
-              {typeof value === "number" ? Math.round(value).toLocaleString() : value}{suffix}
+              {typeof value === "number"
+                ? Math.round(value).toLocaleString()
+                : value}
+              {suffix}
             </h3>
             <div className="flex items-center gap-1.5">
               <div
@@ -178,14 +199,28 @@ const CommunityKPICard = ({
       {/* Sparkline — flush to bottom */}
       <div className="relative h-9 -mx-0 mt-auto">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={chartData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+          <AreaChart
+            data={chartData}
+            margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
+          >
             <defs>
               <linearGradient
                 id={`gradient-${title.replace(/\s+/g, "")}`}
-                x1="0" y1="0" x2="0" y2="1"
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="1"
               >
-                <stop offset="5%" stopColor={isPositive ? "#10b981" : "#f43f5e"} stopOpacity={0.15} />
-                <stop offset="95%" stopColor={isPositive ? "#10b981" : "#f43f5e"} stopOpacity={0} />
+                <stop
+                  offset="5%"
+                  stopColor={isPositive ? "#10b981" : "#f43f5e"}
+                  stopOpacity={0.15}
+                />
+                <stop
+                  offset="95%"
+                  stopColor={isPositive ? "#10b981" : "#f43f5e"}
+                  stopOpacity={0}
+                />
               </linearGradient>
             </defs>
             <Area
@@ -210,17 +245,20 @@ const CommunityKPICard = ({
 // ---------------------------------------------------------------------------
 // Map color class to border/bg accent
 const colorToBorderMap: Record<string, { border: string; bg: string }> = {
-  "text-blue-600":   { border: "border-l-blue-500",   bg: "bg-blue-500/8" },
+  "text-blue-600": { border: "border-l-blue-500", bg: "bg-blue-500/8" },
   "text-orange-600": { border: "border-l-orange-500", bg: "bg-orange-500/8" },
-  "text-emerald-600":{ border: "border-l-emerald-500",bg: "bg-emerald-500/8" },
+  "text-emerald-600": {
+    border: "border-l-emerald-500",
+    bg: "bg-emerald-500/8",
+  },
   "text-purple-600": { border: "border-l-purple-500", bg: "bg-purple-500/8" },
   "text-violet-600": { border: "border-l-violet-500", bg: "bg-violet-500/8" },
   "text-yellow-600": { border: "border-l-yellow-500", bg: "bg-yellow-500/8" },
-  "text-amber-600":  { border: "border-l-amber-500",  bg: "bg-amber-500/8" },
-  "text-pink-600":   { border: "border-l-pink-500",   bg: "bg-pink-500/8" },
-  "text-cyan-600":   { border: "border-l-cyan-500",   bg: "bg-cyan-500/8" },
-  "text-red-600":    { border: "border-l-red-500",    bg: "bg-red-500/8" },
-  "text-rose-600":   { border: "border-l-rose-500",   bg: "bg-rose-500/8" },
+  "text-amber-600": { border: "border-l-amber-500", bg: "bg-amber-500/8" },
+  "text-pink-600": { border: "border-l-pink-500", bg: "bg-pink-500/8" },
+  "text-cyan-600": { border: "border-l-cyan-500", bg: "bg-cyan-500/8" },
+  "text-red-600": { border: "border-l-red-500", bg: "bg-red-500/8" },
+  "text-rose-600": { border: "border-l-rose-500", bg: "bg-rose-500/8" },
 };
 
 const ModulePerformanceCard = ({
@@ -236,16 +274,23 @@ const ModulePerformanceCard = ({
   icon: LucideIcon;
   color?: string;
 }) => {
-  const accent = colorToBorderMap[color] ?? { border: "border-l-primary", bg: "bg-primary/5" };
+  const accent = colorToBorderMap[color] ?? {
+    border: "border-l-primary",
+    bg: "bg-primary/5",
+  };
   return (
-    <div className={cn(
-      "rounded-xl border border-l-[3px] border-border/50 bg-card p-3.5 shadow-sm transition-all duration-200 group hover:-translate-y-0.5 hover:shadow-md hover:border-border/80 flex items-center gap-3",
-      accent.border,
-    )}>
-      <div className={cn(
-        "h-9 w-9 rounded-lg flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-110",
-        accent.bg,
-      )}>
+    <div
+      className={cn(
+        "rounded-xl border border-l-[3px] border-border/50 bg-card p-3.5 shadow-sm transition-all duration-200 group hover:-translate-y-0.5 hover:shadow-md hover:border-border/80 flex items-center gap-3",
+        accent.border,
+      )}
+    >
+      <div
+        className={cn(
+          "h-9 w-9 rounded-lg flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-110",
+          accent.bg,
+        )}
+      >
         <Icon className={cn("h-4 w-4", color)} />
       </div>
       <div className="min-w-0 flex-1">
@@ -270,12 +315,19 @@ import { DashboardContentBreakdownChart } from "./dashboard-content-breakdown-ch
 import { DashboardGrowthChart } from "./dashboard-growth-chart";
 import { DashboardSectionHeading } from "./dashboard-section-heading";
 
+const timeRangeMap: Record<string, TimeRange> = {
+  "24h": TimeRange.LAST_24_HOURS,
+  "7d": TimeRange.LAST_7_DAYS,
+  "30d": TimeRange.LAST_30_DAYS,
+  "90d": TimeRange.LAST_90_DAYS,
+};
+
 // ---------------------------------------------------------------------------
 // Main Dashboard Component
 // ---------------------------------------------------------------------------
 export default function Dashboard() {
-  const [timeRange, setTimeRange] = useState<TimeRange>(TimeRange.LAST_7_DAYS);
-  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+  const [timeRange, setTimeRange] = React.useState("7d");
+  const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
     from: subDays(new Date(), 7),
     to: new Date(),
   });
@@ -284,35 +336,47 @@ export default function Dashboard() {
 
   const handleDateChange = (range: DateRange | undefined) => {
     setDateRange(range);
-
-    // Simple mapping logic: if the range matches a preset, set the enum
-    if (!range?.from || !range?.to) return;
-
-    const diffDays = Math.round(
-      (range.to.getTime() - range.from.getTime()) / (1000 * 60 * 60 * 24),
-    );
-
-    if (diffDays <= 1) setTimeRange(TimeRange.LAST_24_HOURS);
-    else if (diffDays <= 7) setTimeRange(TimeRange.LAST_7_DAYS);
-    else if (diffDays <= 30) setTimeRange(TimeRange.LAST_30_DAYS);
-    else if (diffDays <= 90) setTimeRange(TimeRange.LAST_90_DAYS);
-    // If custom, we currently still use the closest enum until backend supports custom
+    // Determine time range loosely based on duration for fallback
+    if (range?.from && range?.to) {
+      const days = Math.round(
+        (range.to.getTime() - range.from.getTime()) / (1000 * 60 * 60 * 24),
+      );
+      if (days <= 1) setTimeRange("24h");
+      else if (days <= 7) setTimeRange("7d");
+      else if (days <= 30) setTimeRange("30d");
+      else setTimeRange("90d");
+    }
   };
 
-  const { data, loading, refetch } = useGetCommunityKPIs(
-    timeRange,
-    dateRange?.from && dateRange?.to
-      ? {
-          startDate: dateRange.from.toISOString(),
-          endDate: dateRange.to.toISOString(),
-        }
-      : undefined,
+  const formattedDateRange = React.useMemo(() => {
+    if (!dateRange?.from || !dateRange?.to) return undefined;
+    return {
+      startDate: dateRange.from.toISOString(),
+      endDate: dateRange.to.toISOString(),
+    };
+  }, [dateRange]);
+
+  const { data: kpiData, loading: loadingKpis, refetch: refetchKpis } = useGetCommunityKPIs(
+    timeRangeMap[timeRange],
+    formattedDateRange,
   );
+  
+  const { data: featureData, loading: loadingFeatures, refetch: refetchFeatures } = useGetFeatureModulePerformance(
+    timeRangeMap[timeRange],
+    formattedDateRange,
+  );
+  
+  const loading = loadingKpis || loadingFeatures;
+  const refetch = () => {
+    refetchKpis();
+    refetchFeatures();
+  };
 
   const { data: statsData, loading: statsLoading } = useGetStorageStats();
   const { data: summaryData, loading: summaryLoading } = useGetStorageSummary();
 
-  const kpis = data?.getCommunityKPIs;
+  const kpis = kpiData?.getCommunityKPIs;
+  const featureModules = featureData?.getFeatureModulePerformance;
   const storageStats = statsData?.getStorageStats;
   const storageSummary = summaryData?.getStorageSummary;
 
@@ -329,44 +393,182 @@ export default function Dashboard() {
       color: "bg-blue-500",
       tooltip: "Total registered members across the platform",
     },
-    { title: "Engagement Rate", key: "engagementRate", color: "bg-amber-400", suffix: "%", tooltip: "(DAU / Total Users) × 100" },
-    { title: "Retention Rate", key: "retentionRate", color: "bg-indigo-500", suffix: "%", tooltip: "(MAU / Total Users) × 100" },
-    { title: "New Members", key: "newMembers", color: "bg-cyan-500", tooltip: "Users who joined during the selected period" },
-    { title: "Churn Rate", key: "churnRate", color: "bg-rose-500", suffix: "%", tooltip: "((Total Users - DAU) / Total Users) × 100" },
-    { title: "Community Health", key: "healthIndex", color: "bg-red-500", tooltip: "Weighted Avg: Engagement (40%) + Retention (40%) + Content Activity (20%)" },
-    { title: "Member Happiness", key: "communityNPS", color: "bg-yellow-400", tooltip: "Engagement Rate × 1.2 - Churn Rate × 0.5" },
+    {
+      title: "Engagement Rate",
+      key: "engagementRate",
+      color: "bg-amber-400",
+      suffix: "%",
+      tooltip: "(DAU / Total Users) × 100",
+    },
+    {
+      title: "Retention Rate",
+      key: "retentionRate",
+      color: "bg-indigo-500",
+      suffix: "%",
+      tooltip: "(MAU / Total Users) × 100",
+    },
+    {
+      title: "New Members",
+      key: "newMembers",
+      color: "bg-cyan-500",
+      tooltip: "Users who joined during the selected period",
+    },
+    {
+      title: "Churn Rate",
+      key: "churnRate",
+      color: "bg-rose-500",
+      suffix: "%",
+      tooltip: "((Total Users - DAU) / Total Users) × 100",
+    },
+    {
+      title: "Community Health",
+      key: "healthIndex",
+      color: "bg-red-500",
+      tooltip:
+        "Weighted Avg: Engagement (40%) + Retention (40%) + Content Activity (20%)",
+    },
+    {
+      title: "Member Happiness",
+      key: "communityNPS",
+      color: "bg-yellow-400",
+      tooltip: "Engagement Rate × 1.2 - Churn Rate × 0.5",
+    },
   ];
 
   const contentFeed = [
-    { title: "Total Posts", key: "totalPosts", icon: FileText, tooltip: "Total feed entries, stories, and discussions" },
-    { title: "Post Frequency", key: "contributionFrequency", icon: Zap, suffix: "/wk", tooltip: "(Total Posts / DAU / Days in Period) × 7" },
-    { title: "Reply Rate", key: "interactionReciprocity", icon: Repeat, suffix: "%", tooltip: "(Feed Comments / Total Posts) × 100" },
+    {
+      title: "Total Posts",
+      key: "totalPosts",
+      icon: FileText,
+      tooltip: "Total feed entries, stories, and discussions",
+    },
+    {
+      title: "Post Frequency",
+      key: "contributionFrequency",
+      icon: Zap,
+      suffix: "/wk",
+      tooltip: "(Total Posts / DAU / Days in Period) × 7",
+    },
+    {
+      title: "Reply Rate",
+      key: "interactionReciprocity",
+      icon: Repeat,
+      suffix: "%",
+      tooltip: "(Feed Comments / Total Posts) × 100",
+    },
   ];
 
   const acquisitionRet = [
-    { title: "Member Activation", key: "memberActivationRate", icon: Target, suffix: "%", tooltip: "((New Members who posted) / New Members) × 100" },
-    { title: "Word of Mouth", key: "communityAdvocacyIndex", icon: Heart, tooltip: "(New Members / DAU) × 10" },
-    { title: "Superfan Count", key: "superfanRatio", icon: Star, suffix: "%", tooltip: "((DAU × 0.12) / Total Users) × 100" },
-    { title: "Referrals Joined", key: "referralsJoined", icon: Users, tooltip: "Members who joined via a referral link" },
-    { title: "Gamification Points", key: "gamificationPointsEarned", icon: Zap, tooltip: "Total gamification points earned by members" },
-    { title: "Badges Earned", key: "badgesEarned", icon: Trophy, tooltip: "Total badges earned by members" },
+    {
+      title: "Member Activation",
+      key: "memberActivationRate",
+      icon: Target,
+      suffix: "%",
+      tooltip: "((New Members who posted) / New Members) × 100",
+    },
+    {
+      title: "Word of Mouth",
+      key: "communityAdvocacyIndex",
+      icon: Heart,
+      tooltip: "(New Members / DAU) × 10",
+    },
+    {
+      title: "Superfan Count",
+      key: "superfanRatio",
+      icon: Star,
+      suffix: "%",
+      tooltip: "((DAU × 0.12) / Total Users) × 100",
+    },
+    {
+      title: "Referrals Joined",
+      key: "referralsJoined",
+      icon: Users,
+      tooltip: "Members who joined via a referral link",
+    },
+    {
+      title: "Gamification Points",
+      key: "gamificationPointsEarned",
+      icon: Zap,
+      tooltip: "Total gamification points earned by members",
+    },
+    {
+      title: "Badges Earned",
+      key: "badgesEarned",
+      icon: Trophy,
+      tooltip: "Total badges earned by members",
+    },
   ];
 
   const modulePerformanceList = [
-    { title: "Communities", icon: Users, color: "text-blue-600", href: "/communities" },
-    { title: "Events", icon: Calendar, color: "text-orange-600", href: "/events" },
+    {
+      title: "Communities",
+      icon: Users,
+      color: "text-blue-600",
+      href: "/communities",
+    },
+    {
+      title: "Events",
+      icon: Calendar,
+      color: "text-orange-600",
+      href: "/events",
+    },
     { title: "Jobs", icon: Target, color: "text-emerald-600", href: "/jobs" },
-    { title: "Shop", icon: ShoppingBag, color: "text-purple-600", href: "/shop" },
-    { title: "Listings", icon: ShoppingBag, color: "text-violet-600", href: "/marketplace" },
-    { title: "Polls", icon: FileText, color: "text-yellow-600", href: "/polls/page" },
-    { title: "Surveys", icon: FileText, color: "text-amber-600", href: "/polls/page" },
-    { title: "Discussions", icon: MessageSquare, color: "text-pink-600", href: "/forums/page" },
+    {
+      title: "Shop",
+      icon: ShoppingBag,
+      color: "text-purple-600",
+      href: "/shop",
+    },
+    {
+      title: "Listings",
+      icon: ShoppingBag,
+      color: "text-violet-600",
+      href: "/marketplace",
+    },
+    {
+      title: "Polls",
+      icon: FileText,
+      color: "text-yellow-600",
+      href: "/polls/page",
+    },
+    {
+      title: "Surveys",
+      icon: FileText,
+      color: "text-amber-600",
+      href: "/polls/page",
+    },
+    {
+      title: "Discussions",
+      icon: MessageSquare,
+      color: "text-pink-600",
+      href: "/forums/page",
+    },
     { title: "Gamification", icon: Trophy, color: "text-amber-600" },
-    { title: "Leaderboard", icon: Trophy, color: "text-yellow-600", href: "/leaderboard" },
-    { title: "Offers", icon: Target, color: "text-rose-600", href: "/offers/page" },
+    {
+      title: "Leaderboard",
+      icon: Trophy,
+      color: "text-yellow-600",
+      href: "/leaderboard",
+    },
+    {
+      title: "Offers",
+      icon: Target,
+      color: "text-rose-600",
+      href: "/offers/page",
+    },
     { title: "Stories", icon: Sparkles, color: "text-violet-600" },
-    { title: "Mentorship", icon: Users, color: "text-cyan-600", href: "/mentorship" },
-    { title: "Moderation", icon: Shield, color: "text-red-600", href: "/moderation" },
+    {
+      title: "Mentorship",
+      icon: Users,
+      color: "text-cyan-600",
+      href: "/mentorship",
+    },
+    {
+      title: "Moderation",
+      icon: Shield,
+      color: "text-red-600",
+      href: "/moderation",
+    },
   ];
 
   const getMetric = (key: string): DashboardMetricValue => {
@@ -454,7 +656,7 @@ export default function Dashboard() {
         </div>
 
         {/* 2. Content & Feed */}
-        <section className="space-y-3">
+        <section className="space-y-3 mt-20">
           <DashboardSectionHeading title="Content & Feed" />
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
             <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-3">
@@ -479,11 +681,15 @@ export default function Dashboard() {
             <div className="lg:col-span-4 rounded-2xl border border-border/50 bg-card p-5 shadow-sm">
               <div className="flex items-center justify-between mb-5">
                 <div>
-                  <p className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em] mb-0.5">What members post</p>
-                  <h3 className="text-sm font-semibold text-foreground leading-none">Content Mix</h3>
+                  <p className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em] mb-0.5">
+                    What members post
+                  </p>
+                  <h3 className="text-sm font-semibold text-foreground leading-none">
+                    Content Mix
+                  </h3>
                 </div>
                 {kpis?.contentTypeBreakdown &&
-                  kpis.contentTypeBreakdown.length > 3 && (
+                  kpis.contentTypeBreakdown.length > 2 && (
                     <Button
                       variant="ghost"
                       size="sm"
@@ -499,7 +705,7 @@ export default function Dashboard() {
               <div className="space-y-4">
                 {(showAllContentTypes
                   ? kpis?.contentTypeBreakdown
-                  : kpis?.contentTypeBreakdown?.slice(0, 4)
+                  : kpis?.contentTypeBreakdown?.slice(0, 2)
                 )?.map((item, i) => {
                   const barColors = [
                     "bg-gradient-to-r from-indigo-500 to-blue-400",
@@ -551,7 +757,15 @@ export default function Dashboard() {
               titleClassName="text-rose-600 dark:text-rose-400"
               rightElement={
                 <div className="text-rose-600 dark:text-rose-400 text-[10px] font-bold px-2.5 py-1 rounded-full bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/25 tabular-nums">
-                  {kpis?.moderationStats?.reduce((acc, s) => acc + (s.status === "Urgent" || s.status === "Review" ? s.count : 0), 0) ?? 0} pending
+                  {kpis?.moderationStats?.reduce(
+                    (acc, s) =>
+                      acc +
+                      (s.status === "Urgent" || s.status === "Review"
+                        ? s.count
+                        : 0),
+                    0,
+                  ) ?? 0}{" "}
+                  pending
                 </div>
               }
             />
@@ -559,28 +773,49 @@ export default function Dashboard() {
             <div className="rounded-2xl border border-border/50 bg-card overflow-hidden shadow-sm">
               {/* Table header */}
               <div className="grid grid-cols-3 border-b border-border/50 bg-muted/30 px-4 py-2.5">
-                <span className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em]">Type</span>
-                <span className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em]">Count</span>
-                <span className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em]">Status</span>
+                <span className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em]">
+                  Type
+                </span>
+                <span className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em]">
+                  Count
+                </span>
+                <span className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em]">
+                  Status
+                </span>
               </div>
               <div className="divide-y divide-border/40">
                 {kpis?.moderationStats?.map((stat, i) => (
-                  <div key={i} className="grid grid-cols-3 items-center px-4 py-3 hover:bg-muted/25 transition-colors">
-                    <span className="text-[12px] text-foreground/85 font-medium truncate pr-2">{stat.type}</span>
-                    <span className="text-[13px] font-bold text-foreground tabular-nums">{stat.count}</span>
+                  <div
+                    key={i}
+                    className="grid grid-cols-3 items-center px-4 py-3 hover:bg-muted/25 transition-colors"
+                  >
+                    <span className="text-[12px] text-foreground/85 font-medium truncate pr-2">
+                      {stat.type}
+                    </span>
+                    <span className="text-[13px] font-bold text-foreground tabular-nums">
+                      {stat.count}
+                    </span>
                     <div>
-                      <span className={cn(
-                        "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider",
-                        stat.status === "Urgent"
-                          ? "bg-rose-500/10 text-rose-600 dark:text-rose-400"
-                          : stat.status === "Review"
-                            ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
-                            : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
-                      )}>
-                        <span className={cn(
-                          "h-1 w-1 rounded-full",
-                          stat.status === "Urgent" ? "bg-rose-500" : stat.status === "Review" ? "bg-amber-500" : "bg-emerald-500"
-                        )} />
+                      <span
+                        className={cn(
+                          "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider",
+                          stat.status === "Urgent"
+                            ? "bg-rose-500/10 text-rose-600 dark:text-rose-400"
+                            : stat.status === "Review"
+                              ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                              : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            "h-1 w-1 rounded-full",
+                            stat.status === "Urgent"
+                              ? "bg-rose-500"
+                              : stat.status === "Review"
+                                ? "bg-amber-500"
+                                : "bg-emerald-500",
+                          )}
+                        />
                         {stat.status}
                       </span>
                     </div>
@@ -614,8 +849,8 @@ export default function Dashboard() {
             />
             <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5">
               {visibleFeatureModules.map((mod) => {
-                const dataItem = kpis?.modulePerformance?.find(
-                  (m) => m.module === mod.title,
+                const dataItem = featureModules?.find(
+                  (m) => m.module.toLowerCase() === mod.title.toLowerCase() || m.module.includes(mod.title) || mod.title.includes(m.module),
                 );
                 const card = (
                   <ModulePerformanceCard
@@ -626,7 +861,7 @@ export default function Dashboard() {
                     color={mod.color}
                   />
                 );
-                
+
                 return mod.href ? (
                   <Link href={mod.href} key={mod.title} className="block">
                     {card}
@@ -647,9 +882,9 @@ export default function Dashboard() {
           </section>
           <section className="space-y-3">
             <DashboardSectionHeading title="Content Breakdown" />
-            <DashboardContentBreakdownChart 
-              data={kpis?.contentTypeBreakdown || []} 
-              // loading={kpisLoading} 
+            <DashboardContentBreakdownChart
+              data={kpis?.contentTypeBreakdown || []}
+              // loading={kpisLoading}
             />
           </section>
         </div>

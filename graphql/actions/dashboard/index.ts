@@ -6,6 +6,7 @@ import {
   GET_DEVICE_DISTRIBUTION,
   GET_LOGIN_SESSIONS_REPORT,
   GET_GROWTH_STATS,
+  GET_FEATURE_MODULE_PERFORMANCE,
 } from "../../quries/dashboard";
 
 export enum TimeRange {
@@ -82,6 +83,19 @@ export const useGetDashboardStats = (dateRange?: DateRangeInput, options?: any) 
 export const useGetModuleActivity = (timeRange?: TimeRange, dateRange?: DateRangeInput, options?: any) =>
   useQuery<GetModuleActivityResponse, { timeRange?: TimeRange; dateRange?: DateRangeInput }>(
     GET_MODULE_ACTIVITY,
+    {
+      variables: { timeRange, dateRange },
+      ...options,
+    }
+  );
+
+export interface GetFeatureModulePerformanceResponse {
+  getFeatureModulePerformance: ModulePerformance[];
+}
+
+export const useGetFeatureModulePerformance = (timeRange?: TimeRange, dateRange?: DateRangeInput, options?: any) =>
+  useQuery<GetFeatureModulePerformanceResponse, { timeRange?: TimeRange; dateRange?: DateRangeInput }>(
+    GET_FEATURE_MODULE_PERFORMANCE,
     {
       variables: { timeRange, dateRange },
       ...options,

@@ -1,14 +1,15 @@
 import { gql } from "@apollo/client";
 
 export const GET_ALL_MOMENTS = gql`
-  query GetAllMoments($pagination: PaginationInput) {
-    getAllMoments(pagination: $pagination) {
+  query GetAllMoments($pagination: PaginationInput, $sortBy: String, $sortOrder: String) {
+    getAllMoments(pagination: $pagination, sortBy: $sortBy, sortOrder: $sortOrder) {
       data {
         id
         caption
         videoUrl
         thumbnailUrl
         status
+        totalViews
         createdAt
         owner {
           firstName
@@ -51,6 +52,7 @@ export const GET_MOMENT_DASHBOARD_KPIs = gql`
     getMomentAnalytics(timeRange: $timeRange, dateRange: $dateRange) {
       totalMoments
       totalViews
+      totalWatchTime
       totalReactions
       totalComments
       activeCreators
