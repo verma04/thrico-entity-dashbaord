@@ -2,7 +2,7 @@
 
 import {
   Dices, RectangleHorizontal, Trophy, Coins, TrendingDown, TrendingUp,
-  Flame, LayoutDashboard, ArrowRight,
+  Flame, LayoutDashboard, ArrowRight, ShieldCheck, RotateCcw,
 } from "lucide-react";
 import { useGetSpinScratchStats, TimeRange } from "@/graphql/actions/rewards";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
@@ -187,20 +187,31 @@ export default function EngagementDashboardPage() {
       />
 
       <EcosystemActionBar shadow="none">
-        <EcosystemActionBar.Group>
-          <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between w-full">
+          <div className="flex items-center gap-2 px-1">
+            <ShieldCheck className="h-4 w-4 text-emerald-500" />
+            <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground italic">
+              Verified Node
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3">
             <DateRangePicker 
               date={dateRange}
               onDateChange={handleDateChange}
               defaultValue="LAST_7_DAYS"
             />
             <div className="h-4 w-px bg-zinc-200 mx-1" />
-            <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-xs font-medium text-muted-foreground">Live stats</span>
-            </div>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-9 w-9 text-zinc-400 hover:text-indigo-600 rounded-lg transition-all"
+              onClick={() => {}}
+            >
+              <RotateCcw size={14} className={cn(loading && "animate-spin")} />
+            </Button>
           </div>
-        </EcosystemActionBar.Group>
+        </div>
       </EcosystemActionBar>
 
       <EcosystemContainer className="p-6 space-y-6">

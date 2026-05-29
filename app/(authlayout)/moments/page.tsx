@@ -30,7 +30,6 @@ import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-cont
 import {
   EcosystemKPI,
   EcosystemCard,
-  EcosystemStatusIndicator,
 } from "@/components/layout/ecosystem/ecosystem-analytics";
 import {
   Area,
@@ -124,38 +123,31 @@ export default function MomentsDashboardPage() {
 
       <EcosystemActionBar shadow="none">
         <div className="flex items-center justify-between w-full">
-          <div className="flex items-center gap-6">
-            <EcosystemStatusIndicator
-              status="active"
-              label="Reality Stream: Active"
-            />
-            <div className="h-4 w-px bg-slate-200" />
-            <div className="flex items-center gap-2 text-xs font-semibold text-slate-400 uppercase tracking-wide">
-              <ShieldCheck className="h-4 w-4 text-emerald-500" />
-              <span>Verified Node</span>
-            </div>
-            <div className="h-4 w-px bg-slate-200" />
+          <div className="flex items-center gap-2 px-1">
+            <ShieldCheck className="h-4 w-4 text-emerald-500" />
+            <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground italic">
+              Verified Node
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3">
             <DateRangePicker 
               date={dateRange}
               onDateChange={handleDateChange}
               defaultValue="LAST_30_DAYS"
             />
-          </div>
-
-          <div className="flex items-center gap-3">
+            <div className="h-4 w-px bg-zinc-200 mx-1" />
             <Button
               variant="outline"
               size="icon"
-              className="h-10 w-10 text-slate-400 hover:text-indigo-600 rounded-lg transition-all bg-white border-slate-200"
+              className="h-9 w-9 text-zinc-400 hover:text-indigo-600 rounded-lg transition-all"
               onClick={() => refetch()}
             >
-              <RotateCcw
-                className={cn("h-4 w-4", statsLoading && "animate-spin")}
-              />
+              <RotateCcw size={14} className={cn(statsLoading && "animate-spin")} />
             </Button>
-            <div className="h-4 w-px bg-slate-200 mx-1" />
+            <div className="h-4 w-px bg-zinc-200 mx-1" />
             <Link href="/moments/create">
-              <Button className="h-10 px-6 rounded-lg bg-slate-900 border-none font-bold text-xs uppercase tracking-wide gap-2 shadow-sm hover:bg-black transition-all active:scale-95 group">
+              <Button className="h-9 px-5 rounded-lg bg-zinc-900 border-none font-bold text-xs uppercase tracking-wide gap-2 shadow-sm hover:bg-black transition-all active:scale-95">
                 <Plus className="h-4 w-4" />
                 Create Moment
               </Button>

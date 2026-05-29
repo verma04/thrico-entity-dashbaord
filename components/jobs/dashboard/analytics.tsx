@@ -157,7 +157,7 @@ export default function JobsAnalytics() {
           <div className="flex items-center gap-2 px-1">
             <ShieldCheck className="h-4 w-4 text-emerald-500" />
             <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground italic">
-              Verified Job Stream
+              Verified Node
             </span>
           </div>
 

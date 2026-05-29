@@ -13,13 +13,14 @@ import {
   Repeat,
   Eye,
   Shield,
+  ShieldCheck,
   MessageSquare,
   Trophy,
   Calendar,
   ShoppingBag,
   Target,
   Sparkles,
-  RefreshCcw,
+  RotateCcw,
   LucideIcon,
   Users,
   Database,
@@ -391,38 +392,31 @@ export default function Dashboard() {
       />
 
       <EcosystemActionBar shadow="none">
-        <EcosystemActionBar.Group>
-          <EcosystemActionBar.Item>
-            <div className="flex items-center gap-2.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1.5">
-              <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[11px] font-medium text-emerald-700 dark:text-emerald-300">
-                All systems running normally
-              </span>
-            </div>
-          </EcosystemActionBar.Item>
-          <EcosystemActionBar.Separator />
-          <EcosystemActionBar.Item>
+        <div className="flex items-center justify-between w-full">
+          <div className="flex items-center gap-2 px-1">
+            <ShieldCheck className="h-4 w-4 text-emerald-500" />
+            <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground italic">
+              Verified Node
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3">
             <DateRangePicker
               date={dateRange}
               onDateChange={handleDateChange}
               defaultValue="LAST_7_DAYS"
             />
-          </EcosystemActionBar.Item>
-        </EcosystemActionBar.Group>
-
-        <EcosystemActionBar.Group align="right">
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-9 px-3.5 rounded-xl text-xs gap-2 border-border/70 bg-background/80 backdrop-blur-sm hover:bg-muted/60"
-            onClick={() => window.location.reload()}
-          >
-            <RefreshCcw
-              className={cn("h-3.5 w-3.5", loading && "animate-spin")}
-            />
-            Refresh
-          </Button>
-        </EcosystemActionBar.Group>
+            <div className="h-4 w-px bg-zinc-200 mx-1" />
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-9 w-9 text-zinc-400 hover:text-indigo-600 rounded-lg transition-all"
+              onClick={() => refetch()}
+            >
+              <RotateCcw size={14} className={cn(loading && "animate-spin")} />
+            </Button>
+          </div>
+        </div>
       </EcosystemActionBar>
 
       <EcosystemContainer className="space-y-8 py-8 px-4 lg:px-6 border-none bg-transparent shadow-none ring-0">

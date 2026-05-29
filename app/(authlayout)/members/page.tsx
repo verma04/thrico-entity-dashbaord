@@ -38,7 +38,6 @@ import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-cont
 import {
   EcosystemKPI,
   EcosystemCard,
-  EcosystemStatusIndicator,
 } from "@/components/layout/ecosystem/ecosystem-analytics";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -154,37 +153,31 @@ export default function MembersPage() {
       />
 
       <EcosystemActionBar shadow="none">
-        <EcosystemActionBar.Group>
-          <EcosystemActionBar.Item>
-            <EcosystemStatusIndicator status="active" label="System: Active" />
-          </EcosystemActionBar.Item>
-          <EcosystemActionBar.Separator />
-          <EcosystemActionBar.Item>
+        <div className="flex items-center justify-between w-full">
+          <div className="flex items-center gap-2 px-1">
+            <ShieldCheck className="h-4 w-4 text-emerald-500" />
+            <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground italic">
+              Verified Node
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3">
             <DateRangePicker
               date={dateRange}
               onDateChange={handleDateChange}
               defaultValue="LAST_7_DAYS"
             />
-          </EcosystemActionBar.Item>
-        </EcosystemActionBar.Group>
-
-        <EcosystemActionBar.Group align="right">
-          <EcosystemActionBar.Item>
+            <div className="h-4 w-px bg-zinc-200 mx-1" />
             <Button
               variant="outline"
-              className="h-10 px-4 rounded-xl border-slate-200 font-bold hover:bg-slate-50 transition-all gap-2"
+              size="icon"
+              className="h-9 w-9 text-zinc-400 hover:text-indigo-600 rounded-lg transition-all"
               onClick={() => handleRefresh()}
             >
-              <RotateCcw
-                className={cn(
-                  "h-4 w-4 text-emerald-500",
-                  (loading || growthLoading) && "animate-spin",
-                )}
-              />
-              Refresh
+              <RotateCcw size={14} className={cn((loading || growthLoading) && "animate-spin")} />
             </Button>
-          </EcosystemActionBar.Item>
-        </EcosystemActionBar.Group>
+          </div>
+        </div>
       </EcosystemActionBar>
 
       <EcosystemContainer className="space-y-12 p-8 lg:p-12">

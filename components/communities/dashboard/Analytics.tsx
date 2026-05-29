@@ -13,6 +13,7 @@ import {
   LayoutGrid,
   Activity,
   RotateCcw,
+  ShieldCheck,
   BarChart3,
   Globe,
   Timer,
@@ -152,9 +153,9 @@ export default function CommunitiesAnalytics() {
       <EcosystemActionBar shadow="none">
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-2 px-1">
-            <Activity className="h-4 w-4 text-emerald-500" />
+            <ShieldCheck className="h-4 w-4 text-emerald-500" />
             <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground italic">
-              System Status: Working normally
+              Verified Node
             </span>
           </div>
 
@@ -164,19 +165,14 @@ export default function CommunitiesAnalytics() {
               onDateChange={handleDateChange}
               defaultValue="LAST_7_DAYS"
             />
-            <div className="h-4 w-px bg-border mx-1" />
+            <div className="h-4 w-px bg-zinc-200 mx-1" />
             <Button
               variant="outline"
-              className="h-9 px-4 rounded-xl border-slate-200 font-bold hover:bg-slate-50 transition-all gap-2"
+              size="icon"
+              className="h-9 w-9 text-zinc-400 hover:text-indigo-600 rounded-lg transition-all"
               onClick={() => refetch()}
             >
-              <RotateCcw
-                className={cn(
-                  "h-3.5 w-3.5 text-emerald-500",
-                  loading && "animate-spin",
-                )}
-              />
-              Refresh
+              <RotateCcw size={14} className={cn(loading && "animate-spin")} />
             </Button>
           </div>
         </div>
