@@ -206,7 +206,7 @@ export default function EngagementDashboardPage() {
       <EcosystemContainer className="p-6 space-y-6">
         {/* KPI Grid */}
         <div>
-          <h2 className="text-sm font-semibold text-foreground mb-3">All-Time Metrics</h2>
+          <h2 className="text-sm font-semibold text-foreground mb-3">Metrics Overview</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {kpis.map((kpi) => (
               <StatCard key={kpi.label} {...kpi} />
@@ -226,7 +226,7 @@ export default function EngagementDashboardPage() {
               plays={stats?.spinStatsToday?.plays ?? 0}
               tcBurned={stats?.spinStatsToday?.tcBurned ?? 0}
               tcRewarded={stats?.spinStatsToday?.tcRewarded ?? 0}
-              href="/rewards/engagement/spin-wheel"
+              href="/engagement-games/spin-wheel"
               loading={loading}
             />
             <TodayCard
@@ -237,7 +237,7 @@ export default function EngagementDashboardPage() {
               plays={stats?.scratchStatsToday?.plays ?? 0}
               tcBurned={stats?.scratchStatsToday?.tcBurned ?? 0}
               tcRewarded={stats?.scratchStatsToday?.tcRewarded ?? 0}
-              href="/rewards/engagement/scratch-card"
+              href="/engagement-games/scratch-card"
               loading={loading}
             />
             <TodayCard
@@ -248,7 +248,7 @@ export default function EngagementDashboardPage() {
               plays={stats?.matchWinStatsToday?.plays ?? 0}
               tcBurned={stats?.matchWinStatsToday?.tcBurned ?? 0}
               tcRewarded={stats?.matchWinStatsToday?.tcRewarded ?? 0}
-              href="/rewards/engagement/match-win"
+              href="/engagement-games/match-win"
               loading={loading}
             />
           </div>

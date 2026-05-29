@@ -47,8 +47,8 @@ export const GET_MOMENT_DETAILS = gql`
   }
 `;
 export const GET_MOMENT_DASHBOARD_KPIs = gql`
-  query GetMomentDashboardKPIs($timeRange: TimeRange!) {
-    getMomentAnalytics(timeRange: $timeRange) {
+  query GetMomentDashboardKPIs($timeRange: TimeRange, $dateRange: DateRangeInput) {
+    getMomentAnalytics(timeRange: $timeRange, dateRange: $dateRange) {
       totalMoments
       totalViews
       totalReactions

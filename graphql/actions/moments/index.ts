@@ -1,6 +1,6 @@
 import { useQuery, useMutation } from "@apollo/client";
 import { GET_ALL_MOMENTS, GET_MOMENT_DETAILS, GET_MOMENT_DASHBOARD_KPIs, ADMIN_DELETE_MOMENT, ADMIN_GENERATE_MOMENT_UPLOAD_URL, ADMIN_CONFIRM_MOMENT_UPLOAD } from "../../quries/moments";
-import { TimeRange } from "../dashboard";
+import { TimeRange, DateRangeInput } from "../dashboard";
 
 export interface Moment {
   id: string;
@@ -75,9 +75,9 @@ export const useGetMomentDetails = (id: string) =>
     variables: { input: { id } },
   });
 
-export const useGetMomentDashboardKPIs = (timeRange: TimeRange) =>
-  useQuery<GetMomentDashboardKPIsResponse, { timeRange: TimeRange }>(GET_MOMENT_DASHBOARD_KPIs, {
-    variables: { timeRange },
+export const useGetMomentDashboardKPIs = (timeRange: TimeRange, dateRange?: DateRangeInput) =>
+  useQuery<GetMomentDashboardKPIsResponse, { timeRange: TimeRange, dateRange?: DateRangeInput }>(GET_MOMENT_DASHBOARD_KPIs, {
+    variables: { timeRange, dateRange },
   });
 
 export const useAdminDeleteMoment = () => {
