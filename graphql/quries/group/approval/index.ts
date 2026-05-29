@@ -95,6 +95,7 @@ export const GET_COMMUNITIES = gql`
       updatedAt
       tagline
       location
+      numberOfUser
       requireAdminApprovalForPosts
       verification {
         id
