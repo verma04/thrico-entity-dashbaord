@@ -16,7 +16,7 @@ const details = `
   theme
   interests
   categories
-  numberOfUser
+
   numberOfLikes
    tagline
   numberOfPost
