@@ -356,16 +356,21 @@ export default function Dashboard() {
     };
   }, [dateRange]);
 
-  const { data: kpiData, loading: loadingKpis, refetch: refetchKpis } = useGetCommunityKPIs(
+  const {
+    data: kpiData,
+    loading: loadingKpis,
+    refetch: refetchKpis,
+  } = useGetCommunityKPIs(timeRangeMap[timeRange], formattedDateRange);
+
+  const {
+    data: featureData,
+    loading: loadingFeatures,
+    refetch: refetchFeatures,
+  } = useGetFeatureModulePerformance(
     timeRangeMap[timeRange],
     formattedDateRange,
   );
-  
-  const { data: featureData, loading: loadingFeatures, refetch: refetchFeatures } = useGetFeatureModulePerformance(
-    timeRangeMap[timeRange],
-    formattedDateRange,
-  );
-  
+
   const loading = loadingKpis || loadingFeatures;
   const refetch = () => {
     refetchKpis();
@@ -850,7 +855,10 @@ export default function Dashboard() {
             <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5">
               {visibleFeatureModules.map((mod) => {
                 const dataItem = featureModules?.find(
-                  (m) => m.module.toLowerCase() === mod.title.toLowerCase() || m.module.includes(mod.title) || mod.title.includes(m.module),
+                  (m) =>
+                    m.module.toLowerCase() === mod.title.toLowerCase() ||
+                    m.module.includes(mod.title) ||
+                    mod.title.includes(m.module),
                 );
                 const card = (
                   <ModulePerformanceCard
@@ -890,7 +898,7 @@ export default function Dashboard() {
         </div>
 
         {/* 4. Growing & Keeping Members */}
-        <section className="space-y-3">
+        <section className="space-y-3 mt-20">
           <DashboardSectionHeading title="Growing & Keeping Members" />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {acquisitionRet.map((v) => {
