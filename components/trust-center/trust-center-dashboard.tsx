@@ -40,6 +40,9 @@ export interface Ticket {
   priority: "low" | "medium" | "high" | "urgent";
   lastActivity: string;
   creator: string;
+  creatorAvatar?: string;
+  creatorId?: string;
+  creatorData?: any;
   type: "conversation" | "appeal" | "alert" | "policy" | "announcement";
   replyMode?: "interactive" | "read-only";
   allowedReplies?: boolean;

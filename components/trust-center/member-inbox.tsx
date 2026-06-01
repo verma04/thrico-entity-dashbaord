@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import {
-  Inbox,
+  Headset,
   MessageSquare,
   ChevronRight,
   Send,
@@ -13,9 +13,10 @@ import {
   UserCheck,
   ShieldAlert,
   X,
-  Search,
+  MoreVertical,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
 import { useSearchUserByName } from "@/graphql/actions/mentorship/mentorship-actions";
 import { useQuery } from "@apollo/client";
 import { GET_SUPPORT_TICKETS } from "@/graphql/quries/trust-center";
@@ -27,6 +28,7 @@ import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { EcosystemCard } from "@/components/layout/ecosystem/ecosystem-analytics";
 import { Ticket, Strike } from "./trust-center-dashboard";
+import { getMediaUrls } from "@/lib/media-utils";
 
 interface MemberInboxPortalProps {
   onSignPolicy: (id: string, signature: string) => void;
@@ -62,14 +64,17 @@ export default function MemberInboxPortal({
   const [limit] = useState(10);
   const [offset, setOffset] = useState(0);
 
-  const { data: ticketsData, loading: ticketsLoading } = useQuery(GET_SUPPORT_TICKETS, {
-    variables: {
-      category: activeCategory === "ALL" ? null : activeCategory,
-      limit,
-      offset,
+  const { data: ticketsData, loading: ticketsLoading } = useQuery(
+    GET_SUPPORT_TICKETS,
+    {
+      variables: {
+        category: activeCategory === "ALL" ? null : activeCategory,
+        limit,
+        offset,
+      },
+      fetchPolicy: "cache-and-network",
     },
-    fetchPolicy: "cache-and-network",
-  });
+  );
 
   const rawTickets = ticketsData?.getSupportTickets?.items || [];
   const totalTickets = ticketsData?.getSupportTickets?.totalCount || 0;
@@ -81,18 +86,32 @@ export default function MemberInboxPortal({
     status: t.status?.toLowerCase() || "open",
     priority: t.priority?.toLowerCase() || "medium",
     lastActivity: new Date(t.updatedAt).toLocaleDateString(),
-    creator: t.createdBy ? `${t.createdBy.firstName} ${t.createdBy.lastName}` : "Unknown",
+    creator: t.createdBy
+      ? `${t.createdBy.firstName} ${t.createdBy.lastName}`
+      : "System",
+    creatorAvatar: t.createdBy?.avatar,
+    creatorId: t.createdBy?.id,
+    creatorData: t.createdBy,
     type: t.category === "ANNOUNCEMENT" ? "announcement" : "conversation",
     replyMode: t.allowReplies ? "interactive" : "read-only",
     allowedReplies: t.allowReplies,
     messages: (t.messages || []).map((m: any) => ({
       id: m.id,
-      sender: m.senderType === "SYSTEM" ? "system" : m.senderType === "ADMIN" ? "staff" : "user",
+      sender:
+        m.senderType === "SYSTEM"
+          ? "system"
+          : m.senderType === "ADMIN"
+            ? "staff"
+            : "user",
       senderName: m.senderName || "Unknown",
       body: m.body,
       timestamp: new Date(m.createdAt).toLocaleDateString(),
     })),
-    linkedUser: t.targetUserIds?.length ? `${t.targetUserIds.length} Users` : t.targetUserId ? "Specific User" : undefined,
+    linkedUser: t.targetUserIds?.length
+      ? `${t.targetUserIds.length} Users`
+      : t.targetUserId
+        ? "Specific User"
+        : undefined,
     subCategory: t.subCategory,
     description: t.description,
   }));
@@ -117,7 +136,9 @@ export default function MemberInboxPortal({
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [selectedUsers, setSelectedUsers] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [recipientType, setRecipientType] = useState<"all" | "one" | "multiple">("one");
+  const [recipientType, setRecipientType] = useState<
+    "all" | "one" | "multiple"
+  >("one");
   const [allowReplies, setAllowReplies] = useState(true);
   const [appealSubject, setAppealSubject] = useState("");
   const [appealDesc, setAppealDesc] = useState("");
@@ -128,7 +149,11 @@ export default function MemberInboxPortal({
   useEffect(() => {
     if (recipientType === "all") {
       setNewCat("Announcement");
-    } else if (newCat === "Announcement" || newCat === "Policy Updates" || newCat === "Security Notices") {
+    } else if (
+      newCat === "Announcement" ||
+      newCat === "Policy Updates" ||
+      newCat === "Security Notices"
+    ) {
       setNewCat("Entity Support");
     }
   }, [recipientType]);
@@ -169,7 +194,9 @@ export default function MemberInboxPortal({
     if (recipientType === "one" && selectedUser) {
       linkedUserStr = `${selectedUser.user.firstName} ${selectedUser.user.lastName}`;
     } else if (recipientType === "multiple" && selectedUsers.length > 0) {
-      linkedUserStr = selectedUsers.map(u => `${u.user.firstName} ${u.user.lastName}`).join(", ");
+      linkedUserStr = selectedUsers
+        .map((u) => `${u.user.firstName} ${u.user.lastName}`)
+        .join(", ");
     }
 
     onCreateTicket(
@@ -183,7 +210,13 @@ export default function MemberInboxPortal({
     );
     setNewSubject("");
     setNewDesc("");
-    setNewSubCat(newCat === "Moderation" ? "Block" : newCat === "Entity Support" ? "Policy Update" : "");
+    setNewSubCat(
+      newCat === "Moderation"
+        ? "Block"
+        : newCat === "Entity Support"
+          ? "Policy Update"
+          : "",
+    );
     setSelectedUser(null);
     setSelectedUsers([]);
     setSearchQuery("");
@@ -217,20 +250,19 @@ export default function MemberInboxPortal({
         <div className="md:col-span-5 rounded-xl border border-border bg-card shadow-sm overflow-hidden flex flex-col">
           <div className="px-4 py-3 border-b border-border bg-muted/30 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="h-7 w-7 rounded-lg bg-muted border border-border flex items-center justify-center">
-                <Inbox className="h-3.5 w-3.5 text-muted-foreground" />
+              <div className="h-7 w-7 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
+                <Headset className="h-3.5 w-3.5 text-primary" />
               </div>
               <span className="text-sm font-semibold text-foreground">
-                Inbox
+                Global Support Desk
               </span>
             </div>
             <Button
-              variant="outline"
               size="sm"
               onClick={() => setTicketModalOpen(true)}
               className="h-7 text-xs gap-1 rounded-lg"
             >
-              <Plus className="h-3 w-3" /> New
+              <Plus className="h-3 w-3" /> New Broadcast
             </Button>
           </div>
 
@@ -260,9 +292,9 @@ export default function MemberInboxPortal({
           <div className="flex-1 overflow-y-auto divide-y divide-border max-h-[440px]">
             {filteredTickets.length === 0 ? (
               <div className="py-12 text-center">
-                <Inbox className="h-8 w-8 text-muted-foreground/30 mx-auto mb-2" />
+                <Headset className="h-8 w-8 text-muted-foreground/30 mx-auto mb-2" />
                 <p className="text-xs text-muted-foreground">
-                  No items in this category
+                  No tickets found
                 </p>
               </div>
             ) : (
@@ -273,44 +305,95 @@ export default function MemberInboxPortal({
                     key={t.id}
                     onClick={() => setSelectedTicketId(t.id)}
                     className={cn(
-                      "px-4 py-3 cursor-pointer transition-colors",
-                      isActive ? "bg-muted/60" : "hover:bg-muted/30",
+                      "px-4 py-3 cursor-pointer transition-all border-b border-border/40 last:border-0",
+                      isActive
+                        ? "bg-muted/80 shadow-inner"
+                        : "hover:bg-muted/40",
                     )}
                   >
-                    <div className="flex items-center justify-between mb-1">
-                      <Badge
-                        variant="outline"
-                        className="text-[9px] font-medium px-1.5 h-4"
-                      >
-                        {t.category}
-                      </Badge>
-                      <span className="text-[10px] text-muted-foreground">
+                    <div className="flex items-start justify-between gap-2 mb-1.5">
+                      <div className="flex items-center gap-2 overflow-hidden">
+                        {t.creatorData?.id ? (
+                          <UserProfileHoverCard user={t.creatorData}>
+                            <div className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                              <div className="h-6 w-6 shrink-0 rounded-full bg-muted border border-border overflow-hidden flex items-center justify-center">
+                                {t.creatorAvatar ? (
+                                  <Image
+                                    src={getMediaUrls(t.creatorAvatar)}
+                                    alt="Avatar"
+                                    width={24}
+                                    height={24}
+                                    className="h-full w-full object-cover"
+                                  />
+                                ) : (
+                                  <UserCheck className="h-3 w-3 text-muted-foreground" />
+                                )}
+                              </div>
+
+                              <div className="min-w-0">
+                                <p className="text-[12px] font-semibold text-foreground truncate">
+                                  {t.creator}
+                                </p>
+                                <p className="text-[10px] text-muted-foreground truncate">
+                                  {t.subject}
+                                </p>
+                              </div>
+                            </div>
+                          </UserProfileHoverCard>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <div className="h-6 w-6 shrink-0 rounded-full bg-muted border border-border overflow-hidden flex items-center justify-center">
+                              {t.creatorAvatar ? (
+                                <Image
+                                  src={`https://cdn.thrico.network/${t.creatorAvatar}`}
+                                  alt="Avatar"
+                                  width={24}
+                                  height={24}
+                                  className="h-full w-full object-cover"
+                                />
+                              ) : (
+                                <UserCheck className="h-3 w-3 text-muted-foreground" />
+                              )}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-[12px] font-semibold text-foreground truncate">
+                                {t.creator}
+                              </p>
+                              <p className="text-[10px] text-muted-foreground truncate">
+                                {t.subject}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      <span className="text-[10px] text-muted-foreground shrink-0 mt-0.5">
                         {t.lastActivity}
                       </span>
                     </div>
-                    <p className="text-[13px] font-medium text-foreground truncate">
-                      {t.subject}
-                    </p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-[10px] text-muted-foreground">
-                        {t.id}
-                      </span>
+
+                    <div className="flex items-center gap-2 mt-2 ml-8">
                       <Badge
                         variant="outline"
                         className={cn(
                           "text-[9px] h-4 px-1.5 border",
-                          STATUS_STYLES[t.status],
+                          STATUS_STYLES[t.status] || STATUS_STYLES.open,
                         )}
                       >
-                        {t.status.replace("_", " ")}
+                        {t.status.toUpperCase().replace("_", " ")}
                       </Badge>
+                      <Badge
+                        variant="secondary"
+                        className="text-[9px] h-4 px-1.5 border border-border/50 bg-background/50"
+                      >
+                        {t.category}
+                      </Badge>
+                      {t.priority === "urgent" && (
+                        <span className="flex h-2 w-2 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]"></span>
+                      )}
+                      {t.priority === "high" && (
+                        <span className="flex h-2 w-2 rounded-full bg-amber-500"></span>
+                      )}
                     </div>
-                    {t.linkedUser && (
-                      <div className="mt-1 flex items-center gap-1 text-[9px] text-muted-foreground">
-                        <UserCheck className="h-3 w-3" />
-                        Target User: {t.linkedUser}
-                      </div>
-                    )}
                   </div>
                 );
               })
@@ -320,7 +403,8 @@ export default function MemberInboxPortal({
           {/* Pagination controls */}
           <div className="p-3 border-t border-border flex items-center justify-between">
             <span className="text-[11px] text-muted-foreground font-medium">
-              Showing {Math.min(offset + 1, totalTickets)} - {Math.min(offset + limit, totalTickets)} of {totalTickets}
+              Showing {Math.min(offset + 1, totalTickets)} -{" "}
+              {Math.min(offset + limit, totalTickets)} of {totalTickets}
             </span>
             <div className="flex items-center gap-1">
               <Button
@@ -350,18 +434,112 @@ export default function MemberInboxPortal({
           {selectedTicket ? (
             <>
               {/* Header */}
-              <div className="px-4 py-3 border-b border-border bg-muted/30">
-                <div className="flex items-center gap-2 mb-1">
-                  <Badge variant="outline" className="text-[9px] h-4 px-1.5">
-                    {selectedTicket.category}
-                  </Badge>
-                  <span className="text-[10px] text-muted-foreground">
-                    {selectedTicket.id}
-                  </span>
+              <div className="px-5 py-4 border-b border-border bg-card">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1.5">
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        variant="outline"
+                        className="text-[9px] h-4 px-1.5 border-primary/20 text-primary"
+                      >
+                        {selectedTicket.id}
+                      </Badge>
+                      <Badge
+                        variant="secondary"
+                        className="text-[9px] h-4 px-1.5"
+                      >
+                        {selectedTicket.category}
+                      </Badge>
+                    </div>
+                    <h3 className="text-base font-semibold text-foreground">
+                      {selectedTicket.subject}
+                    </h3>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-muted-foreground shrink-0"
+                  >
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
                 </div>
-                <h3 className="text-sm font-semibold text-foreground">
-                  {selectedTicket.subject}
-                </h3>
+                <div className="mt-4 flex items-center gap-3 p-3 rounded-lg border border-border bg-muted/30">
+                  {selectedTicket.creatorData?.id ? (
+                    <UserProfileHoverCard user={selectedTicket.creatorData}>
+                      <div className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                        <div className="h-8 w-8 rounded-full bg-muted overflow-hidden flex items-center justify-center">
+                          {selectedTicket.creatorAvatar ? (
+                            <Image
+                              src={`https://cdn.thrico.network/${selectedTicket.creatorAvatar}`}
+                              alt="Avatar"
+                              width={32}
+                              height={32}
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <UserCheck className="h-4 w-4 text-muted-foreground" />
+                          )}
+                        </div>
+                        <div className="min-w-0 text-left">
+                          <p className="text-xs font-semibold text-foreground truncate">
+                            {selectedTicket.creator}
+                          </p>
+                          <p className="text-[10px] text-muted-foreground truncate">
+                            Requester
+                          </p>
+                        </div>
+                      </div>
+                    </UserProfileHoverCard>
+                  ) : (
+                    <>
+                      <div className="h-8 w-8 rounded-full bg-muted overflow-hidden flex items-center justify-center">
+                        {selectedTicket.creatorAvatar ? (
+                          <Image
+                            src={`https://cdn.thrico.network/${selectedTicket.creatorAvatar}`}
+                            alt="Avatar"
+                            width={32}
+                            height={32}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <UserCheck className="h-4 w-4 text-muted-foreground" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-semibold text-foreground truncate">
+                          {selectedTicket.creator}
+                        </p>
+                        <p className="text-[10px] text-muted-foreground truncate">
+                          Requester
+                        </p>
+                      </div>
+                    </>
+                  )}
+
+                  <div className="shrink-0 flex items-center gap-2 border-l border-border pl-3 ml-auto">
+                    <div className="text-[10px] text-muted-foreground text-right">
+                      Status:{" "}
+                      <span className="font-medium text-foreground">
+                        {selectedTicket.status.toUpperCase()}
+                      </span>
+                    </div>
+                    <div className="text-[10px] text-muted-foreground text-right ml-2">
+                      Priority:{" "}
+                      <span
+                        className={cn(
+                          "font-medium",
+                          selectedTicket.priority === "urgent"
+                            ? "text-rose-500"
+                            : selectedTicket.priority === "high"
+                              ? "text-amber-500"
+                              : "text-foreground",
+                        )}
+                      >
+                        {selectedTicket.priority.toUpperCase()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* Messages */}
@@ -486,8 +664,8 @@ export default function MemberInboxPortal({
                           className={cn(
                             "px-3 py-2 rounded-xl text-xs leading-relaxed",
                             isUser
-                              ? "bg-primary text-primary-foreground rounded-tr-sm"
-                              : "bg-muted border border-border text-foreground rounded-tl-sm",
+                              ? "bg-muted border border-border text-foreground rounded-tr-sm"
+                              : "bg-primary text-primary-foreground rounded-tl-sm",
                           )}
                         >
                           {m.body}
@@ -504,7 +682,7 @@ export default function MemberInboxPortal({
                   <div className="flex items-center gap-2 px-3 py-2 bg-muted rounded-lg text-muted-foreground">
                     <Lock className="h-3.5 w-3.5" />
                     <span className="text-[11px] font-medium">
-                      Replies disabled for this thread. Only admins can post.
+                      Replies are locked for this thread.
                     </span>
                   </div>
                 ) : (
@@ -517,12 +695,11 @@ export default function MemberInboxPortal({
                     />
                     <div className="flex justify-end">
                       <Button
-                        size="sm"
                         onClick={handleSendReply}
-                        className="h-8 text-xs px-4"
+                        className="h-8 text-xs px-4 bg-primary text-primary-foreground hover:bg-primary/90"
                       >
                         <Send className="h-3.5 w-3.5 mr-1.5" />
-                        Send Reply
+                        Reply as Admin
                       </Button>
                     </div>
                   </div>
@@ -530,19 +707,19 @@ export default function MemberInboxPortal({
               </div>
             </>
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center p-8">
-              <Inbox className="h-10 w-10 text-muted-foreground/30 mb-2" />
-              <p className="text-sm font-medium text-foreground">
-                No thread selected
+            <div className="flex-1 flex flex-col items-center justify-center p-8 bg-muted/10">
+              <Headset className="h-10 w-10 text-muted-foreground/20 mb-3" />
+              <p className="text-sm font-semibold text-foreground">
+                No active thread
               </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Select a conversation from the inbox
+              <p className="text-xs text-muted-foreground mt-1 max-w-[220px] text-center leading-relaxed">
+                Select a ticket from the queue on the left to review details and
+                respond.
               </p>
             </div>
           )}
         </div>
       </div>
-
 
       {/* ── Modal: Create Ticket ── */}
       {ticketModalOpen && (
@@ -580,7 +757,9 @@ export default function MemberInboxPortal({
                   </Button>
                   <Button
                     type="button"
-                    variant={recipientType === "multiple" ? "default" : "outline"}
+                    variant={
+                      recipientType === "multiple" ? "default" : "outline"
+                    }
                     className="flex-1 h-8 text-xs"
                     onClick={() => {
                       setRecipientType("multiple");
@@ -608,11 +787,14 @@ export default function MemberInboxPortal({
                   <label className="text-[11px] font-medium text-muted-foreground">
                     Target Users
                   </label>
-                  
+
                   {selectedUsers.length > 0 && (
                     <div className="flex flex-wrap gap-2 mb-2 p-2 border border-border rounded-md bg-muted/30 max-h-24 overflow-y-auto">
                       {selectedUsers.map((u) => (
-                        <div key={u.id} className="flex items-center gap-1.5 bg-background border border-border px-2 py-1 rounded-full">
+                        <div
+                          key={u.id}
+                          className="flex items-center gap-1.5 bg-background border border-border px-2 py-1 rounded-full"
+                        >
                           <div className="h-4 w-4 rounded-full overflow-hidden bg-muted shrink-0">
                             {u.user?.avatar ? (
                               <Image
@@ -632,7 +814,13 @@ export default function MemberInboxPortal({
                           <button
                             type="button"
                             className="text-muted-foreground hover:text-foreground ml-0.5"
-                            onClick={() => setSelectedUsers(selectedUsers.filter(user => user.id !== u.id))}
+                            onClick={() =>
+                              setSelectedUsers(
+                                selectedUsers.filter(
+                                  (user) => user.id !== u.id,
+                                ),
+                              )
+                            }
                           >
                             <X className="h-3 w-3" />
                           </button>
@@ -652,45 +840,51 @@ export default function MemberInboxPortal({
                     {searchQuery.length >= 2 &&
                       searchData?.searchUserByName && (
                         <div className="absolute z-10 w-full mt-1 bg-card border border-border rounded-md shadow-md max-h-48 overflow-y-auto">
-                          {searchData.searchUserByName.filter((u: any) => !selectedUsers.find(su => su.id === u.id)).length === 0 ? (
+                          {searchData.searchUserByName.filter(
+                            (u: any) =>
+                              !selectedUsers.find((su) => su.id === u.id),
+                          ).length === 0 ? (
                             <div className="p-3 text-xs text-muted-foreground text-center">
                               No more users found
                             </div>
                           ) : (
                             searchData.searchUserByName
-                              .filter((u: any) => !selectedUsers.find(su => su.id === u.id))
+                              .filter(
+                                (u: any) =>
+                                  !selectedUsers.find((su) => su.id === u.id),
+                              )
                               .map((u: any) => (
-                              <div
-                                key={u.id}
-                                className="flex items-center gap-2 p-2 hover:bg-muted cursor-pointer transition-colors"
-                                onClick={() => {
-                                  setSelectedUsers([...selectedUsers, u]);
-                                  setSearchQuery("");
-                                }}
-                              >
-                                <div className="h-6 w-6 rounded-full overflow-hidden bg-muted shrink-0">
-                                  {u.user?.avatar ? (
-                                    <Image
-                                      src={`https://cdn.thrico.network/${u.user.avatar}`}
-                                      alt="Avatar"
-                                      width={24}
-                                      height={24}
-                                      className="h-full w-full object-cover"
-                                    />
-                                  ) : (
-                                    <UserCheck className="h-4 w-4 m-1 text-muted-foreground" />
-                                  )}
+                                <div
+                                  key={u.id}
+                                  className="flex items-center gap-2 p-2 hover:bg-muted cursor-pointer transition-colors"
+                                  onClick={() => {
+                                    setSelectedUsers([...selectedUsers, u]);
+                                    setSearchQuery("");
+                                  }}
+                                >
+                                  <div className="h-6 w-6 rounded-full overflow-hidden bg-muted shrink-0">
+                                    {u.user?.avatar ? (
+                                      <Image
+                                        src={`https://cdn.thrico.network/${u.user.avatar}`}
+                                        alt="Avatar"
+                                        width={24}
+                                        height={24}
+                                        className="h-full w-full object-cover"
+                                      />
+                                    ) : (
+                                      <UserCheck className="h-4 w-4 m-1 text-muted-foreground" />
+                                    )}
+                                  </div>
+                                  <div>
+                                    <p className="text-xs font-medium text-foreground">
+                                      {u.user?.firstName} {u.user?.lastName}
+                                    </p>
+                                    <p className="text-[9px] text-muted-foreground">
+                                      {u.status}
+                                    </p>
+                                  </div>
                                 </div>
-                                <div>
-                                  <p className="text-xs font-medium text-foreground">
-                                    {u.user?.firstName} {u.user?.lastName}
-                                  </p>
-                                  <p className="text-[9px] text-muted-foreground">
-                                    {u.status}
-                                  </p>
-                                </div>
-                              </div>
-                            ))
+                              ))
                           )}
                         </div>
                       )}
