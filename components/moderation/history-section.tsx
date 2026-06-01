@@ -92,7 +92,7 @@ export function HistorySection() {
   const totalPages = Math.ceil(currentTotal / LIMIT);
 
   const getLabelBadge = (label: string) => {
-    const l = label.toLowerCase();
+    const l = label?.toLowerCase();
     if (l === "safe") {
       return (
         <Badge className="bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-emerald-100 transition-colors gap-1.5 px-2 font-bold text-[10px] uppercase tracking-tighter">

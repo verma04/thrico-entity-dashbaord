@@ -1,8 +1,8 @@
 import { gql } from "@apollo/client";
 
 export const GET_SUPPORT_TICKETS = gql`
-  query GetSupportTickets($status: TicketStatus, $category: TicketCategory, $limit: Int, $offset: Int) {
-    getSupportTickets(status: $status, category: $category, limit: $limit, offset: $offset) {
+  query GetSupportTickets($status: TicketStatus, $category: TicketCategory, $first: Int, $after: String) {
+    getSupportTickets(status: $status, category: $category, first: $first, after: $after) {
       items {
         id
         subject
@@ -35,6 +35,11 @@ export const GET_SUPPORT_TICKETS = gql`
         }
       }
       totalCount
+      pageInfo {
+        endCursor
+        hasNextPage
+        hasPreviousPage
+      }
     }
   }
 `;

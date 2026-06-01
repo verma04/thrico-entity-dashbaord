@@ -61,16 +61,17 @@ export default function MemberInboxPortal({
   onCreateAppeal,
 }: MemberInboxPortalProps) {
   const [activeCategory, setActiveCategory] = useState<string>("ALL");
-  const [limit] = useState(10);
-  const [offset, setOffset] = useState(0);
+  const [pageSize] = useState(10);
+  const [afterCursor, setAfterCursor] = useState<string | null>(null);
+  const [cursorStack, setCursorStack] = useState<string[]>([]);
 
   const { data: ticketsData, loading: ticketsLoading } = useQuery(
     GET_SUPPORT_TICKETS,
     {
       variables: {
         category: activeCategory === "ALL" ? null : activeCategory,
-        limit,
-        offset,
+        first: pageSize,
+        after: afterCursor,
       },
       fetchPolicy: "cache-and-network",
     },
@@ -78,6 +79,7 @@ export default function MemberInboxPortal({
 
   const rawTickets = ticketsData?.getSupportTickets?.items || [];
   const totalTickets = ticketsData?.getSupportTickets?.totalCount || 0;
+  const pageInfo = ticketsData?.getSupportTickets?.pageInfo;
 
   const fetchedTickets: Ticket[] = rawTickets.map((t: any) => ({
     id: t.id,
@@ -273,7 +275,8 @@ export default function MemberInboxPortal({
                 key={cat}
                 onClick={() => {
                   setActiveCategory(cat);
-                  setOffset(0);
+                  setAfterCursor(null);
+                  setCursorStack([]);
                   setSelectedTicketId(null);
                 }}
                 className={cn(
@@ -403,16 +406,20 @@ export default function MemberInboxPortal({
           {/* Pagination controls */}
           <div className="p-3 border-t border-border flex items-center justify-between">
             <span className="text-[11px] text-muted-foreground font-medium">
-              Showing {Math.min(offset + 1, totalTickets)} -{" "}
-              {Math.min(offset + limit, totalTickets)} of {totalTickets}
+              {totalTickets} total tickets
             </span>
             <div className="flex items-center gap-1">
               <Button
                 variant="outline"
                 size="sm"
                 className="h-7 text-xs px-2"
-                disabled={offset === 0}
-                onClick={() => setOffset(Math.max(0, offset - limit))}
+                disabled={cursorStack.length === 0}
+                onClick={() => {
+                  const newStack = [...cursorStack];
+                  newStack.pop();
+                  setCursorStack(newStack);
+                  setAfterCursor(newStack.length > 0 ? newStack[newStack.length - 1] : null);
+                }}
               >
                 Previous
               </Button>
@@ -420,8 +427,13 @@ export default function MemberInboxPortal({
                 variant="outline"
                 size="sm"
                 className="h-7 text-xs px-2"
-                disabled={offset + limit >= totalTickets}
-                onClick={() => setOffset(offset + limit)}
+                disabled={!pageInfo?.hasNextPage}
+                onClick={() => {
+                  if (pageInfo?.endCursor) {
+                    setCursorStack([...cursorStack, afterCursor || "__start__"]);
+                    setAfterCursor(pageInfo.endCursor);
+                  }
+                }}
               >
                 Next
               </Button>
