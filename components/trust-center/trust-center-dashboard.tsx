@@ -46,7 +46,7 @@ export interface Ticket {
   type: "conversation" | "appeal" | "alert" | "policy" | "announcement";
   replyMode?: "interactive" | "read-only";
   allowedReplies?: boolean;
-  messages: Message[];
+  messages?: Message[];
   signed?: boolean;
   signedAt?: string;
   signatureText?: string;

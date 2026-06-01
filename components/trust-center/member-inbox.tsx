@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
 import { useSearchUserByName } from "@/graphql/actions/mentorship/mentorship-actions";
 import { useQuery } from "@apollo/client";
-import { GET_SUPPORT_TICKETS } from "@/graphql/quries/trust-center";
+import { GET_SUPPORT_TICKETS, GET_TICKET_MESSAGES } from "@/graphql/quries/trust-center";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -97,18 +97,7 @@ export default function MemberInboxPortal({
     type: t.category === "ANNOUNCEMENT" ? "announcement" : "conversation",
     replyMode: t.allowReplies ? "interactive" : "read-only",
     allowedReplies: t.allowReplies,
-    messages: (t.messages || []).map((m: any) => ({
-      id: m.id,
-      sender:
-        m.senderType === "SYSTEM"
-          ? "system"
-          : m.senderType === "ADMIN"
-            ? "staff"
-            : "user",
-      senderName: m.senderName || "Unknown",
-      body: m.body,
-      timestamp: new Date(m.createdAt).toLocaleDateString(),
-    })),
+
     linkedUser: t.targetUserIds?.length
       ? `${t.targetUserIds.length} Users`
       : t.targetUserId
@@ -125,6 +114,45 @@ export default function MemberInboxPortal({
       setSelectedTicketId(fetchedTickets[0].id);
     }
   }, [fetchedTickets, selectedTicketId]);
+
+  const [messagesPageSize] = useState(20);
+  const [messagesCursorStack, setMessagesCursorStack] = useState<string[]>([]);
+  const [messagesAfterCursor, setMessagesAfterCursor] = useState<string | null>(null);
+
+  // Reset message pagination when selected ticket changes
+  useEffect(() => {
+    setMessagesCursorStack([]);
+    setMessagesAfterCursor(null);
+  }, [selectedTicketId]);
+
+  const { data: messagesData, loading: messagesLoading } = useQuery(
+    GET_TICKET_MESSAGES,
+    {
+      variables: {
+        ticketId: selectedTicketId,
+        first: messagesPageSize,
+        after: messagesAfterCursor,
+      },
+      skip: !selectedTicketId,
+      fetchPolicy: "cache-and-network",
+    }
+  );
+
+  const rawMessages = messagesData?.getTicketMessages?.items || [];
+  const messagesPageInfo = messagesData?.getTicketMessages?.pageInfo;
+
+  const ticketMessages = rawMessages.map((m: any) => ({
+    id: m.id,
+    sender:
+      m.senderType === "SYSTEM"
+        ? "system"
+        : m.senderType === "ADMIN"
+          ? "staff"
+          : "user",
+    senderName: m.senderName || "Unknown",
+    body: m.body,
+    timestamp: new Date(m.createdAt).toLocaleDateString(),
+  }));
   const [replyText, setReplyText] = useState("");
   const [signatureName, setSignatureName] = useState("");
 
@@ -635,57 +663,102 @@ export default function MemberInboxPortal({
                 )}
 
                 {/* Messages thread */}
-                {selectedTicket.messages?.map((m) => {
-                  const isUser = m.sender === "user";
-                  const isSystem = m.sender === "system";
-                  return (
-                    <div
-                      key={m.id}
-                      className={cn(
-                        "flex gap-2.5 max-w-[88%]",
-                        isUser ? "ml-auto flex-row-reverse" : "",
-                      )}
+                {messagesPageInfo?.hasNextPage && (
+                  <div className="flex justify-center mb-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-xs h-7"
+                      onClick={() => {
+                        if (messagesPageInfo.endCursor) {
+                          setMessagesCursorStack([...messagesCursorStack, messagesAfterCursor || "__start__"]);
+                          setMessagesAfterCursor(messagesPageInfo.endCursor);
+                        }
+                      }}
                     >
+                      Load Older Messages
+                    </Button>
+                  </div>
+                )}
+                {messagesCursorStack.length > 0 && (
+                  <div className="flex justify-center mb-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-xs h-7"
+                      onClick={() => {
+                        const newStack = [...messagesCursorStack];
+                        newStack.pop();
+                        setMessagesCursorStack(newStack);
+                        setMessagesAfterCursor(newStack.length > 0 ? newStack[newStack.length - 1] : null);
+                      }}
+                    >
+                      Show Newer Messages
+                    </Button>
+                  </div>
+                )}
+
+                {messagesLoading ? (
+                  <div className="py-8 text-center text-xs text-muted-foreground">
+                    Loading messages...
+                  </div>
+                ) : ticketMessages.length === 0 ? (
+                  <div className="py-8 text-center text-xs text-muted-foreground">
+                    No messages yet.
+                  </div>
+                ) : (
+                  ticketMessages.map((m: any) => {
+                    const isUser = m.sender === "user";
+                    const isSystem = m.sender === "system";
+                    return (
                       <div
+                        key={m.id}
                         className={cn(
-                          "h-7 w-7 rounded-lg shrink-0 flex items-center justify-center text-[10px] font-medium border",
-                          isUser
-                            ? "bg-primary text-primary-foreground border-primary/20"
-                            : isSystem
-                              ? "bg-muted text-muted-foreground border-border"
-                              : "bg-muted text-muted-foreground border-border",
+                          "flex gap-2.5 max-w-[88%]",
+                          isUser ? "ml-auto flex-row-reverse" : "",
                         )}
                       >
-                        {isUser ? "U" : isSystem ? "S" : "M"}
-                      </div>
-                      <div className="space-y-1">
                         <div
                           className={cn(
-                            "flex items-center gap-2",
-                            isUser && "justify-end",
-                          )}
-                        >
-                          <span className="text-[11px] font-medium text-foreground">
-                            {m.senderName}
-                          </span>
-                          <span className="text-[10px] text-muted-foreground">
-                            {m.timestamp}
-                          </span>
-                        </div>
-                        <div
-                          className={cn(
-                            "px-3 py-2 rounded-xl text-xs leading-relaxed",
+                            "h-7 w-7 rounded-lg shrink-0 flex items-center justify-center text-[10px] font-medium border",
                             isUser
-                              ? "bg-muted border border-border text-foreground rounded-tr-sm"
-                              : "bg-primary text-primary-foreground rounded-tl-sm",
+                              ? "bg-primary text-primary-foreground border-primary/20"
+                              : isSystem
+                                ? "bg-muted text-muted-foreground border-border"
+                                : "bg-muted text-muted-foreground border-border",
                           )}
                         >
-                          {m.body}
+                          {isUser ? "U" : isSystem ? "S" : "M"}
+                        </div>
+                        <div className="space-y-1">
+                          <div
+                            className={cn(
+                              "flex items-center gap-2",
+                              isUser && "justify-end",
+                            )}
+                          >
+                            <span className="text-[11px] font-medium text-foreground">
+                              {m.senderName}
+                            </span>
+                            <span className="text-[10px] text-muted-foreground">
+                              {m.timestamp}
+                            </span>
+                          </div>
+                          <div
+                            className={cn(
+                              "px-3 py-2 rounded-xl text-xs leading-relaxed",
+                              isUser
+                                ? "bg-muted border border-border text-foreground rounded-tr-sm"
+                                : "bg-primary text-primary-foreground rounded-tl-sm",
+                            )}
+                          >
+                            {m.body}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })
+                )}
               </div>
 
               {/* Reply input */}

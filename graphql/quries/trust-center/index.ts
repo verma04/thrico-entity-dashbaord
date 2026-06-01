@@ -80,6 +80,26 @@ export const GET_SUPPORT_TICKET = gql`
   }
 `;
 
+export const GET_TICKET_MESSAGES = gql`
+  query GetTicketMessages($ticketId: ID!, $first: Int, $after: String) {
+    getTicketMessages(ticketId: $ticketId, first: $first, after: $after) {
+      items {
+        id
+        senderType
+        senderId
+        senderName
+        body
+        createdAt
+      }
+      pageInfo {
+        endCursor
+        hasNextPage
+        hasPreviousPage
+      }
+    }
+  }
+`;
+
 export const CREATE_SUPPORT_TICKET = gql`
   mutation CreateSupportTicket($input: CreateSupportTicketInput!) {
     createSupportTicket(input: $input) {
