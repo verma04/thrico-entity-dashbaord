@@ -331,6 +331,7 @@ const GET_LEADERBOARD = gql`
     getLeaderboard(pagination: $pagination) {
       entries {
         user {
+          id
           firstName
           lastName
           avatar
@@ -372,6 +373,11 @@ export interface GamificationActivityLogEntry {
     lastName: string;
     avatar: string;
   };
+  ruleAction?: string;
+  ruleDescription?: string;
+  badgeName?: string;
+  badgeDescription?: string;
+  badgeIcon?: string;
 }
 
 export interface GamificationActivityLogInput {
@@ -398,6 +404,11 @@ export const GET_GAMIFICATION_ACTIVITY_LOG = gql`
         lastName
         avatar
       }
+      ruleAction
+      ruleDescription
+      badgeName
+      badgeDescription
+      badgeIcon
     }
   }
 `;

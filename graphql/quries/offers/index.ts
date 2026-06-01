@@ -48,6 +48,13 @@ export const GET_OFFERS = gql`
         isVerified
         verificationReason
       }
+      addedBy
+      creator {
+        id
+        firstName
+        lastName
+        avatar
+      }
       createdAt
     }
   }

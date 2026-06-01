@@ -3,8 +3,8 @@ import React from "react";
 import Poll from "@/components/polls/polls";
 import { By } from "@/components/polls/ts-types";
 
-const page = () => {
+const PollsAdminPage = () => {
   return <Poll by={By.ENTITY} />;
 };
 
-export default page;
+export default PollsAdminPage;

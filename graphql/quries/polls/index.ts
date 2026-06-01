@@ -40,6 +40,13 @@ const polls = `
       createdAt
       endDate
       status
+      addedBy
+      user {
+        id
+        firstName
+        lastName
+        avatar
+      }
 `;
 export const ADD_POOL = gql`
   mutation AddPolls($input: inputAddPolls) {

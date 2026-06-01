@@ -156,3 +156,58 @@ export function useBulkAddIndustries(
     options,
   );
 }
+
+// ---------------------------------------------------------
+// GET USERS BY INDUSTRY
+// ---------------------------------------------------------
+
+export interface IndustryUser {
+  id: string;
+  globalUserId: string;
+  firstName: string | null;
+  lastName: string | null;
+  avatar: string | null;
+  headline: string | null;
+}
+
+export interface GetUsersByIndustryResponse {
+  getUsersByIndustryNeo4j: {
+    data: IndustryUser[];
+    totalCount: number;
+    hasNextPage: boolean;
+    cursor: string | null;
+  };
+}
+
+export interface GetUsersByIndustryVars {
+  industryId: string;
+  limit?: number;
+  cursor?: string;
+}
+
+export const GET_USERS_BY_INDUSTRY_NEO4J = gql`
+  query GetUsersByIndustryNeo4j($industryId: ID!, $limit: Int, $cursor: String) {
+    getUsersByIndustryNeo4j(industryId: $industryId, limit: $limit, cursor: $cursor) {
+      data {
+        id
+        globalUserId
+        firstName
+        lastName
+        avatar
+        headline
+      }
+      totalCount
+      hasNextPage
+      cursor
+    }
+  }
+`;
+
+export function useGetUsersByIndustryNeo4j(
+  options?: QueryHookOptions<GetUsersByIndustryResponse, GetUsersByIndustryVars>,
+) {
+  return useQuery<GetUsersByIndustryResponse, GetUsersByIndustryVars>(
+    GET_USERS_BY_INDUSTRY_NEO4J,
+    options,
+  );
+}

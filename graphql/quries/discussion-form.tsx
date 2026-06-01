@@ -28,6 +28,7 @@ const forum = `
         firstName
         lastName
         id
+        avatar
       }
       verification {
         isVerifiedAt

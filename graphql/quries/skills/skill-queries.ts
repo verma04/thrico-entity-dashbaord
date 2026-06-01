@@ -156,3 +156,58 @@ export function useBulkAddSkills(
     options,
   );
 }
+
+// ---------------------------------------------------------
+// GET USERS BY SKILL
+// ---------------------------------------------------------
+
+export interface SkillUser {
+  id: string;
+  globalUserId: string;
+  firstName: string | null;
+  lastName: string | null;
+  avatar: string | null;
+  headline: string | null;
+}
+
+export interface GetUsersBySkillResponse {
+  getUsersBySkillNeo4j: {
+    data: SkillUser[];
+    totalCount: number;
+    hasNextPage: boolean;
+    cursor: string | null;
+  };
+}
+
+export interface GetUsersBySkillVars {
+  skillId: string;
+  limit?: number;
+  cursor?: string;
+}
+
+export const GET_USERS_BY_SKILL_NEO4J = gql`
+  query GetUsersBySkillNeo4j($skillId: ID!, $limit: Int, $cursor: String) {
+    getUsersBySkillNeo4j(skillId: $skillId, limit: $limit, cursor: $cursor) {
+      data {
+        id
+        globalUserId
+        firstName
+        lastName
+        avatar
+        headline
+      }
+      totalCount
+      hasNextPage
+      cursor
+    }
+  }
+`;
+
+export function useGetUsersBySkillNeo4j(
+  options?: QueryHookOptions<GetUsersBySkillResponse, GetUsersBySkillVars>,
+) {
+  return useQuery<GetUsersBySkillResponse, GetUsersBySkillVars>(
+    GET_USERS_BY_SKILL_NEO4J,
+    options,
+  );
+}

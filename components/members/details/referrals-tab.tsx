@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Network } from "lucide-react";
 import { safeLocaleDateString } from "@/lib/date-utils";
+import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
 
 export function ReferralsTab({ userId }: { userId: string }) {
   const [offset, setOffset] = useState(0);
@@ -94,21 +95,41 @@ export function ReferralsTab({ userId }: { userId: string }) {
               className="overflow-hidden hover:shadow-md transition-shadow border-border"
             >
               <CardContent className="p-4 flex items-center gap-4">
-                <Avatar className="h-12 w-12 border-2 border-primary/10">
-                  {user?.avatar && (
-                    <AvatarImage
-                      src={`https://cdn.thrico.network/${user?.avatar}`}
-                      alt={`${firstName} ${lastName}`}
-                    />
-                  )}
-                  <AvatarFallback className="bg-primary/5 text-primary font-semibold">
-                    {initials}
-                  </AvatarFallback>
-                </Avatar>
+                <UserProfileHoverCard
+                  user={{
+                    id: user?.id,
+                    firstName,
+                    lastName,
+                    avatar: user?.avatar,
+                  }}
+                >
+                  <div className="cursor-pointer">
+                    <Avatar className="h-12 w-12 border-2 border-primary/10">
+                      {user?.avatar && (
+                        <AvatarImage
+                          src={`https://cdn.thrico.network/${user?.avatar}`}
+                          alt={`${firstName} ${lastName}`}
+                        />
+                      )}
+                      <AvatarFallback className="bg-primary/5 text-primary font-semibold">
+                        {initials}
+                      </AvatarFallback>
+                    </Avatar>
+                  </div>
+                </UserProfileHoverCard>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm truncate text-foreground">
-                    {firstName} {lastName}
-                  </p>
+                  <UserProfileHoverCard
+                    user={{
+                      id: user?.id,
+                      firstName,
+                      lastName,
+                      avatar: user?.avatar,
+                    }}
+                  >
+                    <p className="font-semibold text-sm truncate text-foreground hover:underline cursor-pointer w-fit">
+                      {firstName} {lastName}
+                    </p>
+                  </UserProfileHoverCard>
                   <p className="text-xs text-muted-foreground truncate mt-0.5">
                     Location: {user?.location?.name || "Unknown"}
                   </p>

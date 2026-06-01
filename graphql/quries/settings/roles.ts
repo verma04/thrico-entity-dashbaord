@@ -19,6 +19,7 @@ export const GET_ROLES = gql`
         domain
         permissions
         adminUsers
+        users
       }
       modulePermissions {
         id
@@ -51,6 +52,7 @@ export const GET_ROLE_BY_ID = gql`
         domain
         permissions
         adminUsers
+        users
       }
       modulePermissions {
         id
@@ -123,6 +125,7 @@ export const GET_ADMIN_USERS = gql`
           domain
           permissions
           adminUsers
+          users
         }
         modulePermissions {
           id
@@ -170,6 +173,7 @@ export const CREATE_ADMIN = gql`
           domain
           permissions
           adminUsers
+          users
         }
       }
       status

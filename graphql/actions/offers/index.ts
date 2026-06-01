@@ -44,6 +44,13 @@ export interface Offer {
     verificationReason: string;
   };
   createdAt: string;
+  addedBy?: string;
+  creator?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    avatar: string;
+  };
 }
 
 export interface GetOffersInput {

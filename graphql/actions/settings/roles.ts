@@ -25,6 +25,7 @@ export interface AdminAccess {
   domain: boolean;
   permissions: boolean;
   adminUsers: boolean;
+  users: boolean;
 }
 
 export interface ModulePermission {

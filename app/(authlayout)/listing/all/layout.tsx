@@ -1,14 +1,14 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { 
-  CheckCircle, 
-  Clock, 
-  XCircle, 
-  Ban, 
-  List, 
-  Search, 
-  ClipboardList
+import {
+  CheckCircle,
+  Clock,
+  XCircle,
+  Ban,
+  List,
+  Search,
+  ClipboardList,
 } from "lucide-react";
 import { ListingStats } from "@/components/listings/listing-stats";
 import { CreateListingDialog } from "@/components/listings/create-listing-dialog";
@@ -16,21 +16,26 @@ import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header"
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
 const STATUS_OPTIONS = [
-  { value: "ALL",      label: "All Items", icon: List,          dot: "" },
-  { value: "APPROVED", label: "Approved",  icon: CheckCircle,   dot: "bg-emerald-500" },
-  { value: "PENDING",  label: "Pending",   icon: Clock,         dot: "bg-amber-500" },
-  { value: "DISABLED", label: "Disabled",  icon: XCircle,       dot: "bg-orange-500" },
-  { value: "REJECTED", label: "Rejected",  icon: XCircle,       dot: "bg-red-500" },
+  { value: "ALL", label: "All Items", icon: List, dot: "" },
+  {
+    value: "APPROVED",
+    label: "Approved",
+    icon: CheckCircle,
+    dot: "bg-emerald-500",
+  },
+  { value: "PENDING", label: "Pending", icon: Clock, dot: "bg-amber-500" },
+  { value: "DISABLED", label: "Disabled", icon: XCircle, dot: "bg-orange-500" },
+  { value: "REJECTED", label: "Rejected", icon: XCircle, dot: "bg-red-500" },
 ];
 
 function RootLayout({ children }: { children: React.ReactNode }) {
@@ -39,7 +44,8 @@ function RootLayout({ children }: { children: React.ReactNode }) {
   const status = searchParams.get("status") || "ALL";
   const searchQuery = searchParams.get("q") || "";
 
-  const currentStatus = STATUS_OPTIONS.find(opt => opt.value === status) || STATUS_OPTIONS[0];
+  const currentStatus =
+    STATUS_OPTIONS.find((opt) => opt.value === status) || STATUS_OPTIONS[0];
 
   const updateFilters = (updates: Record<string, string | null>) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -55,17 +61,6 @@ function RootLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <EcosystemWrapper>
-      <ListingStats />
-
-      {/* Header */}
-      <EcosystemHeader 
-        title="Listings"
-        badgeText="Product Registry"
-        description="Comprehensive oversight of all service listings, physical inventory, and digital marketplace assets."
-        icon={ClipboardList}
-        actions={<CreateListingDialog />}
-      />
-
       {/* Action Bar */}
       <EcosystemActionBar>
         <EcosystemActionBar.Group>
@@ -110,7 +105,12 @@ function RootLayout({ children }: { children: React.ReactNode }) {
                   >
                     <div className="flex items-center gap-2">
                       {opt.dot && (
-                        <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", opt.dot)} />
+                        <span
+                          className={cn(
+                            "h-1.5 w-1.5 rounded-full shrink-0",
+                            opt.dot,
+                          )}
+                        />
                       )}
                       {opt.label}
                     </div>
@@ -122,13 +122,13 @@ function RootLayout({ children }: { children: React.ReactNode }) {
         </EcosystemActionBar.Group>
 
         <EcosystemActionBar.Group align="right">
-          <EcosystemActionBar.Status active>Live Inventory</EcosystemActionBar.Status>
+          <EcosystemActionBar.Status active>
+            Live Inventory
+          </EcosystemActionBar.Status>
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
 
-      <EcosystemContainer>
-        {children}
-      </EcosystemContainer>
+      <EcosystemContainer>{children}</EcosystemContainer>
     </EcosystemWrapper>
   );
 }

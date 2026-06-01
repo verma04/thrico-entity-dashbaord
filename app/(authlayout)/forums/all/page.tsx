@@ -3,8 +3,8 @@
 import Forum from "@/components/discussion-forum/forum/Forum";
 import React from "react";
 
-const page = () => {
+const ForumsAllPage = () => {
   return <Forum status={"ALL"} />;
 };
 
-export default page;
+export default ForumsAllPage;

@@ -37,6 +37,12 @@ const details = `
       isVerified
       verificationReason
     }
+    creator {
+      id
+      firstName
+      lastName
+      avatar
+    }
 `;
 export const ALL_GROUP = gql`
   query GetAllGroupStatus($input: allStatusInput) {
@@ -96,12 +102,17 @@ export const GET_COMMUNITIES = gql`
       tagline
       location
       numberOfUser
-      requireAdminApprovalForPosts
       verification {
         id
         isVerifiedAt
         isVerified
         verificationReason
+      }
+      creator {
+        id
+        firstName
+        lastName
+        avatar
       }
     }
   }

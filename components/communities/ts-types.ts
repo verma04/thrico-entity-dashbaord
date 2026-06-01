@@ -58,6 +58,12 @@ export interface communityEntity {
   rules: string;
   verification: verification;
   tagline: string;
+  creator?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    avatar: string;
+  };
 }
 
 export interface requests {

@@ -58,6 +58,7 @@
     "formik": "^2.4.9",
     "framer-motion": "^12.23.25",
     "graphql": "^16.12.0",
+    "link-preview-js": "^4.0.3",
     "lodash": "^4.17.21",
     "lucide-react": "^0.555.0",
     "moment": "^2.30.1",

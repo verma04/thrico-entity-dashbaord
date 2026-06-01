@@ -544,4 +544,3 @@ export const GET_USER_NEO4J_RELATIONSHIPS = gql`
     }
   }
 `;
-

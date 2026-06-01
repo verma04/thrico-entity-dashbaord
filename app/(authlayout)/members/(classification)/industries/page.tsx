@@ -8,6 +8,7 @@ import {
   useDeleteIndustry,
   Industry,
   useBulkAddIndustries,
+  useGetUsersByIndustryNeo4j,
 } from "@/graphql/quries/industries/industry-queries";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -21,6 +22,7 @@ import {
   Briefcase,
   Loader2,
   Building2,
+  Users,
 } from "lucide-react";
 import {
   Dialog,
@@ -44,6 +46,15 @@ import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-acti
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { notify } from "@/lib/notify";
 import { Input } from "@/components/ui/input";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
 
 // ── Color palette for industries ──
 const INDUSTRY_COLORS = [
@@ -149,11 +160,13 @@ function IndustriesGrid({
   isLoading,
   onEdit,
   onDelete,
+  onViewUsers,
 }: {
   industries: Industry[];
   isLoading: boolean;
   onEdit: (industry: Industry) => void;
   onDelete: (industry: Industry) => void;
+  onViewUsers: (industry: Industry) => void;
 }) {
   if (isLoading) {
     return (
@@ -202,6 +215,7 @@ function IndustriesGrid({
         return (
           <Card
             key={industry.id}
+            onClick={() => onViewUsers(industry)}
             className="border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 group overflow-hidden rounded-xl hover:border-indigo-500/20 hover:-translate-y-1 bg-white cursor-pointer"
           >
             {/* Color bar */}
@@ -329,6 +343,97 @@ const RECOMMENDED_INDUSTRIES = [
   "Zoos & Bootanical Gardens",
 ];
 
+// ── Industry Users Sheet ──
+function IndustryUsersSheet({
+  industry,
+  open,
+  onOpenChange,
+}: {
+  industry: Industry | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const { data, loading } = useGetUsersByIndustryNeo4j({
+    variables: { industryId: industry?.id || "", limit: 50 },
+    skip: !industry,
+  });
+
+  const users = data?.getUsersByIndustryNeo4j?.data || [];
+  const totalCount = data?.getUsersByIndustryNeo4j?.totalCount || 0;
+
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent className="sm:max-w-md w-full overflow-y-auto">
+        <SheetHeader className="mb-6">
+          <SheetTitle className="text-xl font-bold flex items-center gap-2">
+            <Users className="h-5 w-5 text-indigo-500" />
+            {industry?.title} Users
+          </SheetTitle>
+          <SheetDescription>
+            {loading
+              ? "Loading..."
+              : `Found ${totalCount} users in this industry`}
+          </SheetDescription>
+        </SheetHeader>
+
+        <div className="space-y-4">
+          {loading ? (
+            Array(5)
+              .fill(0)
+              .map((_, i) => (
+                <div key={i} className="flex items-center gap-4">
+                  <Skeleton className="h-10 w-10 rounded-full" />
+                  <div className="space-y-2 flex-1">
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-3 w-1/2" />
+                  </div>
+                </div>
+              ))
+          ) : users.length === 0 ? (
+            <div className="text-center py-10 text-slate-500">
+              <Users className="h-10 w-10 mx-auto text-slate-300 mb-3" />
+              <p>No users found for this industry.</p>
+            </div>
+          ) : (
+            users.map((user) => (
+              <UserProfileHoverCard
+                key={user.id}
+                user={{ ...user, id: user.id }}
+              >
+                <div className="flex items-start gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100 cursor-pointer">
+                  <Avatar className="h-10 w-10 border border-slate-200">
+                    <AvatarImage
+                      src={
+                        user.avatar
+                          ? `https://cdn.thrico.network/${user.avatar}`
+                          : ""
+                      }
+                      alt={user.firstName || ""}
+                    />
+                    <AvatarFallback className="bg-indigo-50 text-indigo-600 font-semibold">
+                      {user.firstName?.charAt(0) || "U"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm text-slate-900 truncate">
+                      {user.firstName} {user.lastName}
+                    </p>
+                    {user.headline && (
+                      <p className="text-xs text-slate-500 line-clamp-2 mt-0.5">
+                        {user.headline}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </UserProfileHoverCard>
+            ))
+          )}
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+}
+
 // ── Main Page ──
 export default function IndustriesPage() {
   const { data, loading, refetch } = useGetIndustries();
@@ -338,6 +443,7 @@ export default function IndustriesPage() {
   const [industryToDelete, setIndustryToDelete] = useState<Industry | null>(
     null,
   );
+  const [viewingIndustry, setViewingIndustry] = useState<Industry | null>(null);
 
   const [addIndustry, { loading: creating }] = useAddIndustry({
     onCompleted: () => {
@@ -416,7 +522,10 @@ export default function IndustriesPage() {
 
   return (
     <>
-      <EcosystemActionBar shadow="none" className="rounded-xl border border-slate-200">
+      <EcosystemActionBar
+        shadow="none"
+        className="rounded-xl border border-slate-200"
+      >
         <EcosystemActionBar.Group>
           <EcosystemActionBar.Item grow className="max-w-[360px]">
             <EcosystemActionBar.Search
@@ -483,8 +592,15 @@ export default function IndustriesPage() {
             setIsDialogOpen(true);
           }}
           onDelete={(industry) => setIndustryToDelete(industry)}
+          onViewUsers={(industry) => setViewingIndustry(industry)}
         />
       </EcosystemContainer>
+
+      <IndustryUsersSheet
+        industry={viewingIndustry}
+        open={!!viewingIndustry}
+        onOpenChange={(open) => !open && setViewingIndustry(null)}
+      />
 
       {/* Add/Edit Dialog */}
       <IndustryDialog

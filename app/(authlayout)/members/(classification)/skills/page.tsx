@@ -8,6 +8,7 @@ import {
   useDeleteSkill,
   Skill,
   useBulkAddSkills,
+  useGetUsersBySkillNeo4j,
 } from "@/graphql/quries/skills/skill-queries";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -21,6 +22,7 @@ import {
   Loader2,
   Award,
   Sparkles,
+  Users,
 } from "lucide-react";
 import {
   Dialog,
@@ -44,6 +46,15 @@ import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-acti
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { notify } from "@/lib/notify";
 import { Input } from "@/components/ui/input";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 // ── Color palette for skills ──
 const SKILL_COLORS = [
@@ -143,17 +154,110 @@ function SkillDialog({
   );
 }
 
+// ── Skill Users Sheet ──
+function SkillUsersSheet({
+  skill,
+  open,
+  onOpenChange,
+}: {
+  skill: Skill | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const { data, loading } = useGetUsersBySkillNeo4j({
+    variables: { skillId: skill?.id || "", limit: 50 },
+    skip: !skill,
+  });
+
+  const users = data?.getUsersBySkillNeo4j?.data || [];
+  const totalCount = data?.getUsersBySkillNeo4j?.totalCount || 0;
+
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent className="sm:max-w-md w-full overflow-y-auto">
+        <SheetHeader className="mb-6">
+          <SheetTitle className="text-xl font-bold flex items-center gap-2">
+            <Users className="h-5 w-5 text-indigo-500" />
+            {skill?.title} Users
+          </SheetTitle>
+          <SheetDescription>
+            {loading
+              ? "Loading..."
+              : `Found ${totalCount} users with this skill`}
+          </SheetDescription>
+        </SheetHeader>
+
+        <div className="space-y-4 mt-6">
+          {loading ? (
+            Array(5)
+              .fill(0)
+              .map((_, i) => (
+                <div key={i} className="flex items-center gap-4 p-3">
+                  <Skeleton className="h-10 w-10 rounded-full" />
+                  <div className="space-y-2 flex-1">
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-3 w-1/2" />
+                  </div>
+                </div>
+              ))
+          ) : users.length === 0 ? (
+            <div className="text-center py-10 text-slate-500">
+              <Users className="h-10 w-10 mx-auto text-slate-300 mb-3" />
+              <p>No users found for this skill.</p>
+            </div>
+          ) : (
+            users.map((user) => (
+              <UserProfileHoverCard
+                key={user.id}
+                user={{ ...user, id: user.id }}
+              >
+                <div className="flex items-start gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100 cursor-pointer">
+                  <Avatar className="h-10 w-10 border border-slate-200">
+                    <AvatarImage
+                      src={
+                        user.avatar
+                          ? `https://cdn.thrico.network/${user.avatar}`
+                          : ""
+                      }
+                      alt={user.firstName || ""}
+                    />
+                    <AvatarFallback className="bg-indigo-50 text-indigo-600 font-semibold">
+                      {user.firstName?.charAt(0) || "U"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-slate-900 truncate">
+                      {user.firstName} {user.lastName}
+                    </p>
+                    {user.headline && (
+                      <p className="text-xs text-slate-500 truncate">
+                        {user.headline}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </UserProfileHoverCard>
+            ))
+          )}
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+}
+
 // ── Skills Grid ──
 function SkillsGrid({
   skills,
   isLoading,
   onEdit,
   onDelete,
+  onViewUsers,
 }: {
   skills: Skill[];
   isLoading: boolean;
   onEdit: (skill: Skill) => void;
   onDelete: (skill: Skill) => void;
+  onViewUsers: (skill: Skill) => void;
 }) {
   if (isLoading) {
     return (
@@ -202,6 +306,7 @@ function SkillsGrid({
         return (
           <Card
             key={skill.id}
+            onClick={() => onViewUsers(skill)}
             className="border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 group overflow-hidden rounded-xl hover:border-indigo-500/20 hover:-translate-y-1 bg-white cursor-pointer"
           >
             {/* Color bar */}
@@ -374,7 +479,7 @@ const RECOMMENDED_SKILLS = [
   "Work Ethic",
   "Conflict Resolution",
   "Flexibility",
-  "Self-motivation"
+  "Self-motivation",
 ];
 
 // ── Main Page ──
@@ -383,9 +488,8 @@ export default function SkillsPage() {
   const [search, setSearch] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingSkill, setEditingSkill] = useState<Skill | null>(null);
-  const [skillToDelete, setSkillToDelete] = useState<Skill | null>(
-    null,
-  );
+  const [skillToDelete, setSkillToDelete] = useState<Skill | null>(null);
+  const [viewingSkill, setViewingSkill] = useState<Skill | null>(null);
 
   const [addSkill, { loading: creating }] = useAddSkill({
     onCompleted: () => {
@@ -393,8 +497,7 @@ export default function SkillsPage() {
       setIsDialogOpen(false);
       refetch();
     },
-    onError: (error) =>
-      notify.error(error.message || "Failed to create skill"),
+    onError: (error) => notify.error(error.message || "Failed to create skill"),
   });
 
   const [updateSkill, { loading: updating }] = useUpdateSkill({
@@ -404,8 +507,7 @@ export default function SkillsPage() {
       setEditingSkill(null);
       refetch();
     },
-    onError: (error) =>
-      notify.error(error.message || "Failed to update skill"),
+    onError: (error) => notify.error(error.message || "Failed to update skill"),
   });
 
   const [deleteSkill, { loading: deleting }] = useDeleteSkill({
@@ -414,8 +516,7 @@ export default function SkillsPage() {
       setSkillToDelete(null);
       refetch();
     },
-    onError: (error) =>
-      notify.error(error.message || "Failed to delete skill"),
+    onError: (error) => notify.error(error.message || "Failed to delete skill"),
   });
 
   const [bulkAddSkills, { loading: bulkAdding }] = useBulkAddSkills({
@@ -464,7 +565,10 @@ export default function SkillsPage() {
 
   return (
     <>
-      <EcosystemActionBar shadow="none" className="rounded-xl border border-slate-200">
+      <EcosystemActionBar
+        shadow="none"
+        className="rounded-xl border border-slate-200"
+      >
         <EcosystemActionBar.Group>
           <EcosystemActionBar.Item grow className="max-w-[360px]">
             <EcosystemActionBar.Search
@@ -531,6 +635,7 @@ export default function SkillsPage() {
             setIsDialogOpen(true);
           }}
           onDelete={(skill) => setSkillToDelete(skill)}
+          onViewUsers={(skill) => setViewingSkill(skill)}
         />
       </EcosystemContainer>
 
@@ -582,6 +687,13 @@ export default function SkillsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* View Users Sheet */}
+      <SkillUsersSheet
+        skill={viewingSkill}
+        open={!!viewingSkill}
+        onOpenChange={(open) => !open && setViewingSkill(null)}
+      />
     </>
   );
 }

@@ -5,7 +5,11 @@ import { AdminTable } from "@/components/shared/admin-table/admin-table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from "date-fns";
 import { GamificationActivityLogEntry } from "@/graphql/actions/gamification/gamification-quiries";
-import { History, Activity } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import {
+  UserProfileHoverCard,
+  UserProfileHoverData,
+} from "@/components/shared/user-profile-hover-card";
 
 interface ActivityLogTableProps {
   logs: GamificationActivityLogEntry[];
@@ -16,76 +20,123 @@ export function ActivityLogTable({ logs, isLoading }: ActivityLogTableProps) {
   const columns = [
     {
       key: "user",
-      header: "Member Participant",
+      header: "Member",
       cell: (log: GamificationActivityLogEntry) => {
         const user = log.user;
+        const hoverUser: UserProfileHoverData = {
+          id: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          avatar: user.avatar,
+        };
         return (
-          <div className="flex items-center gap-3">
-            <Avatar className="h-9 w-9 border border-border bg-white shadow-sm shrink-0 rounded-xl">
-              <AvatarImage
-                src={`https://cdn.thrico.network/${user.avatar}`}
-                alt={user.firstName}
-                className="object-cover"
-              />
-              <AvatarFallback className="text-[10px] bg-muted text-muted-foreground font-bold uppercase">
-                {user.firstName.substring(0, 2)}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col min-w-0">
-              <span className="text-sm font-bold text-foreground leading-none">
-                {user.firstName} {user.lastName}
-              </span>
-              <span className="text-[9px] text-muted-foreground font-mono mt-1 tracking-tight">
-                IDENTITY: {user.id.substring(0, 8).toUpperCase()}
-              </span>
+          <UserProfileHoverCard user={hoverUser}>
+            <div className="flex items-center gap-3 cursor-pointer">
+              <Avatar className="h-8 w-8 border border-border shrink-0">
+                <AvatarImage
+                  src={`https://cdn.thrico.network/${user.avatar}`}
+                  alt={user.firstName}
+                  className="object-cover"
+                />
+                <AvatarFallback className="text-[10px] bg-muted text-muted-foreground font-medium">
+                  {user.firstName.substring(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col min-w-0">
+                <span className="text-sm font-medium text-foreground leading-tight hover:underline">
+                  {user.firstName} {user.lastName}
+                </span>
+                <span className="text-[11px] text-muted-foreground">
+                  ID: {user.id.substring(0, 8)}
+                </span>
+              </div>
             </div>
-          </div>
+          </UserProfileHoverCard>
         );
       },
     },
     {
       key: "activity",
-      header: "Event Protocol",
+      header: "Activity",
       cell: (log: GamificationActivityLogEntry) => (
-        <div className="flex items-center gap-2">
-           <div className="h-5 w-5 rounded bg-muted flex items-center justify-center">
-              <Activity className="h-2.5 w-2.5 text-muted-foreground" />
-           </div>
-           <span className="text-[11px] font-black text-foreground uppercase tracking-widest italic">
-             {log.type.replace(/_/g, " ").toLowerCase()}
-           </span>
-        </div>
+        <Badge variant="secondary" className="font-medium text-xs capitalize">
+          {log.type.replace(/_/g, " ").toLowerCase()}
+        </Badge>
       ),
     },
     {
-      key: "delta",
-      header: "Yield Impact",
+      key: "details",
+      header: "Details",
+      cell: (log: GamificationActivityLogEntry) => {
+        if (log.badgeName) {
+          return (
+            <div className="flex flex-col max-w-[280px]">
+              <div className="flex items-center gap-1.5">
+                {log.badgeIcon && (
+                  <img
+                    src={`https://cdn.thrico.network/${log.badgeIcon}`}
+                    alt={log.badgeName}
+                    className="h-4 w-4"
+                  />
+                )}
+                <span className="text-xs font-semibold text-blue-600">
+                  {log.badgeName}
+                </span>
+              </div>
+              {log.badgeDescription && (
+                <span className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5">
+                  {log.badgeDescription}
+                </span>
+              )}
+            </div>
+          );
+        }
+        if (log.ruleAction) {
+          return (
+            <div className="flex flex-col max-w-[280px]">
+              <span className="text-xs font-medium text-foreground capitalize">
+                {log.ruleAction.replace(/_/g, " ").toLowerCase()}
+              </span>
+              {log.ruleDescription && (
+                <span className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5">
+                  {log.ruleDescription}
+                </span>
+              )}
+            </div>
+          );
+        }
+        return <span className="text-xs text-muted-foreground">—</span>;
+      },
+    },
+    {
+      key: "points",
+      header: "Points",
       cell: (log: GamificationActivityLogEntry) => {
         const points = log.points;
         const isPositive = points > 0;
         return (
-          <div className="flex items-center gap-2 pr-4">
-             <div className="flex items-center gap-1.5 font-mono text-[13px] font-black leading-none">
-               <span className={isPositive ? "text-emerald-600" : "text-rose-600"}>
-                 {isPositive ? "+" : ""}{points}
-               </span>
-               <span className="text-[9px] text-zinc-400 font-black tracking-widest">PTS</span>
-             </div>
-          </div>
+          <span
+            className={`font-mono text-sm font-semibold ${
+              isPositive ? "text-emerald-600" : "text-rose-600"
+            }`}
+          >
+            {isPositive ? "+" : ""}
+            {points}
+          </span>
         );
       },
     },
     {
-      key: "timeline",
-      header: "Temporal Log",
+      key: "date",
+      header: "Date",
       cell: (log: GamificationActivityLogEntry) => (
         <div className="flex flex-col">
-           <span className="text-[11px] text-muted-foreground font-bold uppercase tracking-tight">
-             {format(new Date(log.createdAt), "MMM d, yyyy")}
-           </span>
-           <span className="text-[9px] text-muted-foreground/60 font-medium">
-             {format(new Date(log.createdAt), "hh:mm a")} — Node Logged
-           </span>
+          <span className="text-xs text-foreground">
+            {format(new Date(log.createdAt), "MMM d, yyyy")}
+          </span>
+          <span className="text-[11px] text-muted-foreground">
+            {format(new Date(log.createdAt), "hh:mm a")}
+          </span>
         </div>
       ),
     },
@@ -97,8 +148,8 @@ export function ActivityLogTable({ logs, isLoading }: ActivityLogTableProps) {
       data={logs || []}
       loading={isLoading}
       keyExtractor={(log) => log.id}
-      emptyTitle="No activity signals detected"
-      emptyDescription="The system audit log will reflect all gamification state changes once interaction begins."
+      emptyTitle="No activity logged yet"
+      emptyDescription="Activity will appear here once members start earning points and badges."
     />
   );
 }

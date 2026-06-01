@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Users, ShieldCheck, ShieldAlert, Key, Settings2 } from "lucide-react";
-import { motion } from "framer-motion";
+import { Users, ShieldCheck, ShieldAlert, Key } from "lucide-react";
 import UsersTab from "./users-tab";
 import RolesTab from "./roles-tab";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
@@ -11,8 +10,8 @@ import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-acti
 import { cn } from "@/lib/utils";
 
 const TABS = [
-  { id: "users", label: "Team Members", icon: Users, description: "Manage platform access" },
-  { id: "roles", label: "Roles", icon: ShieldAlert, description: "Define permission logic" },
+  { id: "users", label: "Members", icon: Users },
+  { id: "roles", label: "Roles", icon: ShieldAlert },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
@@ -24,8 +23,8 @@ export default function RebacSettings() {
     <EcosystemWrapper>
       <EcosystemHeader
         title="Users & Access"
-        description="Manage team members, roles, and platform permissions."
-        badgeText="IAM"
+        description="Manage team members and their permissions."
+        badgeText="Settings"
         icon={ShieldCheck}
       />
 
@@ -58,7 +57,7 @@ export default function RebacSettings() {
             <EcosystemActionBar.Item>
                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-zinc-200 bg-zinc-50/50 text-xs text-zinc-400">
                   <Key className="h-3 w-3" />
-                  IAM Active
+                  Active
                </div>
             </EcosystemActionBar.Item>
          </EcosystemActionBar.Group>
@@ -68,11 +67,6 @@ export default function RebacSettings() {
         {activeTab === "users" && <UsersTab />}
         {activeTab === "roles" && <RolesTab />}
       </div>
-
-      <style jsx global>{`
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-      `}</style>
     </EcosystemWrapper>
   );
 }

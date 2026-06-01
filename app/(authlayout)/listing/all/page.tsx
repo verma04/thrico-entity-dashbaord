@@ -5,7 +5,7 @@ import { useListings } from "../../../../graphql/actions/listing";
 import TableLoading from "@/components/layout/table-loading";
 import { ListingsTable } from "@/components/listings/listings-table";
 
-const Page = () => {
+const ListingsAllPage = () => {
   const searchParams = useSearchParams();
   const statusParam = searchParams.get("status") || "ALL";
   const searchQuery = searchParams.get("q") || "";
@@ -39,4 +39,4 @@ const Page = () => {
   );
 };
 
-export default Page;
+export default ListingsAllPage;

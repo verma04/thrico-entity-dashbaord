@@ -11,9 +11,12 @@ export const GET_ALL_MOMENTS = gql`
         status
         totalViews
         createdAt
+        addedBy
         owner {
+          id
           firstName
           lastName
+          avatar
         }
       }
       meta {

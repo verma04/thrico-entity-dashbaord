@@ -23,6 +23,13 @@ const jobs = `
         isVerified
         verificationReason
       }
+      addedBy
+      postedBy {
+        id
+        firstName
+        lastName
+        avatar
+      }
 
       company {
         id

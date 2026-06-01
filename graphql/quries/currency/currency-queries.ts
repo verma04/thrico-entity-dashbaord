@@ -56,13 +56,19 @@ export const GET_REDEMPTION_CAP = gql`
 
 export const GET_CURRENCY_TRANSACTIONS = gql`
   query GetCurrencyTransactions(
-    $userId: String!
+    $userId: String
     $limit: Int
     $cursor: String
   ) {
     getCurrencyTransactions(userId: $userId, limit: $limit, cursor: $cursor) {
       items {
         userId
+        userBasicInfo {
+          id
+          firstName
+          lastName
+          avatar
+        }
         transactionId
         type
         entityId

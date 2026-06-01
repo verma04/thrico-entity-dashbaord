@@ -46,6 +46,13 @@ export type MarketPlaceListing = {
     verificationReason?: string;
     isVerifiedAt?: string;
   };
+  addedBy?: string;
+  postedBy?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    avatar: string;
+  };
 };
 
 export type GetListingsVars = {

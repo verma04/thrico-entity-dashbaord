@@ -21,6 +21,8 @@ import { ListingDetailsDrawer } from "./listing-details-drawer";
 import { AnalyticsDialog } from "./analytics-dialog";
 import Image from "next/image";
 import moment from "moment";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
 
 interface Listing {
   id: string;
@@ -37,6 +39,13 @@ interface Listing {
   views: number;
   createdAt: Date;
   media: Array<{ url: string }>;
+  addedBy?: string;
+  postedBy?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    avatar: string;
+  };
 }
 
 export function ListingsTable({ listings }: { listings: Listing[] }) {
@@ -95,6 +104,52 @@ export function ListingsTable({ listings }: { listings: Listing[] }) {
           {listing.status}
         </AdminStatusBadge>
       ),
+    },
+    {
+      key: "creator",
+      header: "Creator",
+    cell: (listing: Listing) => {
+        if (!listing.postedBy) {
+          return (
+            <div className="flex items-center gap-2">
+              <Avatar className="h-6 w-6 rounded-full border border-border/60">
+                <AvatarFallback className="text-[10px] bg-primary/10 text-primary font-bold">
+                  EN
+                </AvatarFallback>
+              </Avatar>
+              <span className="text-[12px] font-semibold text-muted-foreground">
+                Entity
+              </span>
+            </div>
+          );
+        }
+        
+        return (
+          <UserProfileHoverCard user={listing.postedBy}>
+            <div className="flex items-center gap-2 cursor-pointer group">
+              <Avatar className="h-6 w-6 rounded-full border border-border/60">
+                <AvatarImage
+                  src={
+                    listing.postedBy.avatar
+                      ? listing.postedBy.avatar.startsWith("http")
+                        ? listing.postedBy.avatar
+                        : `https://cdn.thrico.network/${listing.postedBy.avatar}`
+                      : ""
+                  }
+                  alt={`${listing.postedBy.firstName} ${listing.postedBy.lastName}`}
+                />
+                <AvatarFallback className="text-[10px] bg-muted">
+                  {listing.postedBy.firstName?.charAt(0)}
+                  {listing.postedBy.lastName?.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
+              <span className="text-[12px] font-medium group-hover:text-primary transition-colors truncate max-w-[100px]">
+                {listing.postedBy.firstName} {listing.postedBy.lastName}
+              </span>
+            </div>
+          </UserProfileHoverCard>
+        );
+      },
     },
     {
       key: "engagement",

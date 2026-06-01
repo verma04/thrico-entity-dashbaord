@@ -44,6 +44,7 @@ import Analytics from "./analytics";
 import Comments from "./comment/comment";
 import PollVote from "../polls/poll-vote";
 import FeedMedia from "./feed-media";
+import FeedDescription from "./feed-description";
 import { cn } from "@/lib/utils";
 import { getPreferredMediaUrl } from "@/lib/media-utils";
 import { useDeleteFeed, usePinFeed } from "@/graphql/actions/feed";
@@ -124,18 +125,18 @@ export default function Feed({ feed }: { feed: FeedProps }) {
   const isJob = feed.source === "jobs";
 
   return (
-    <div className="w-full animate-in fade-in slide-in-from-bottom-3 duration-500">
-      <Card className="w-full rounded-[32px] bg-card border border-border shadow-sm overflow-hidden transition-all hover:shadow-md ring-1 ring-border/50">
-        <div className="p-6">
+    <div className="w-full">
+      <Card className="w-full rounded-xl bg-card border border-border shadow-sm overflow-hidden">
+        <div className="p-5">
           {feed.isPinned && (
-            <div className="flex items-center gap-2 mb-4 px-2 py-1 bg-amber-500/10 w-fit rounded-lg border border-amber-500/20 animate-in fade-in slide-in-from-left-2 duration-500">
-              <Pin className="h-3 w-3 text-amber-600 fill-amber-600" />
-              <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-amber-700">
-                Pinned Insight
+            <div className="flex items-center gap-1.5 mb-4 px-2 py-1 bg-muted w-fit rounded-md border border-border">
+              <Pin className="h-3.5 w-3.5 text-muted-foreground" />
+              <span className="text-xs font-medium text-muted-foreground">
+                Pinned
               </span>
             </div>
           )}
-          
+
           <div className="flex justify-between items-start mb-6">
             <FeedUserDetails {...feed} />
             <AlertDialog
@@ -147,23 +148,20 @@ export default function Feed({ feed }: { feed: FeedProps }) {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-10 w-10 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+                    className="h-8 w-8 rounded-md text-muted-foreground hover:text-foreground"
                   >
-                    <MoreVertical className="h-4.5 w-4.5" />
+                    <MoreVertical className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="end"
-                  className="w-[200px] rounded-2xl border-border shadow-xl p-1.5 bg-card/95 backdrop-blur-xl"
-                >
+                <DropdownMenuContent align="end" className="w-48">
                   {feed.isOwner ? (
                     <>
                       <DropdownMenuItem
                         onClick={handlePin}
                         disabled={isPinning}
-                        className="text-amber-600 focus:bg-amber-50 focus:text-amber-700 rounded-xl px-4 py-3 font-bold text-[12px] transition-all cursor-pointer"
+                        className="cursor-pointer"
                       >
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2">
                           {isPinning ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
                           ) : (
@@ -174,64 +172,56 @@ export default function Feed({ feed }: { feed: FeedProps }) {
                               )}
                             />
                           )}
-                          {feed.isPinned ? "Unpin Insight" : "Pin to Top"}
+                          {feed.isPinned ? "Unpin Post" : "Pin to Top"}
                         </div>
                       </DropdownMenuItem>
-                      
-                      <Separator className="my-1.5 opacity-50" />
+
+                      <Separator className="my-1" />
 
                       <AlertDialogTrigger asChild>
-                        <DropdownMenuItem className="text-destructive focus:bg-destructive/10 focus:text-destructive rounded-xl px-4 py-3 font-bold text-[12px] transition-all cursor-pointer">
-                          <div className="flex items-center gap-3">
+                        <DropdownMenuItem className="text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer">
+                          <div className="flex items-center gap-2">
                             <Trash2 className="h-4 w-4" />
-                            Purge Content
+                            Delete Post
                           </div>
                         </DropdownMenuItem>
                       </AlertDialogTrigger>
                     </>
                   ) : (
-                    <DropdownMenuItem className="text-muted-foreground focus:bg-muted rounded-xl px-4 py-3 font-bold text-[12px] transition-all cursor-pointer">
-                      <ShieldCheck className="h-4 w-4 mr-3" />
-                      View Policy
+                    <DropdownMenuItem className="text-muted-foreground cursor-pointer">
+                      <ShieldCheck className="h-4 w-4 mr-2" />
+                      Report Post
                     </DropdownMenuItem>
                   )}
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              <AlertDialogContent className="rounded-[32px] border-border shadow-2xl p-8 max-w-md">
+              <AlertDialogContent>
                 <AlertDialogHeader>
-                  <div className="h-14 w-14 rounded-2xl bg-destructive/10 flex items-center justify-center mb-6">
-                    <Trash2 className="h-7 w-7 text-destructive" />
-                  </div>
-                  <AlertDialogTitle className="text-xl font-bold text-foreground tracking-tight mb-2">
-                    Purge this content?
-                  </AlertDialogTitle>
-                  <AlertDialogDescription className="text-sm font-medium text-muted-foreground leading-relaxed">
-                    This will permanently clear the metadata and media associated with this post from the global registry.
+                  <AlertDialogTitle>Delete this post?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will permanently remove the post and all its contents
+                    from the feed. This action cannot be undone.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
-                <AlertDialogFooter className="mt-8 gap-3">
-                  <AlertDialogCancel className="h-12 rounded-xl border-border font-bold text-xs uppercase tracking-widest text-muted-foreground hover:bg-muted transition-all flex-1">
-                    Abort
-                  </AlertDialogCancel>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={handleDelete}
                     disabled={isDeleting}
-                    className="h-12 rounded-xl bg-destructive hover:bg-destructive/90 border-none font-bold text-xs uppercase tracking-widest text-white shadow-lg shadow-destructive/20 transition-all flex-1 active:scale-95 disabled:opacity-50"
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                   >
-                    {isDeleting ? "Purging..." : "Confirm Purge"}
+                    {isDeleting ? "Deleting..." : "Delete"}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-4">
             {feed?.description && (
               <div className="px-0.5">
-                <p className="text-[17px] leading-relaxed text-foreground font-medium tracking-tight whitespace-pre-wrap">
-                  {feed?.description}
-                </p>
+                <FeedDescription text={feed.description} />
               </div>
             )}
 
@@ -240,135 +230,147 @@ export default function Feed({ feed }: { feed: FeedProps }) {
             )}
 
             {feed?.moment && (
-              <div className="group relative mt-4 rounded-2xl overflow-hidden shadow-xl shadow-indigo-500/10 border border-border bg-black aspect-9/16 max-h-[580px] mx-auto cursor-pointer">
+              <div className="group relative mt-2 rounded-xl overflow-hidden border border-border bg-black aspect-9/16 max-h-[500px] mx-auto cursor-pointer">
                 <img
                   src={getPreferredMediaUrl(feed.moment.thumbnailUrl)}
-                  className="w-full h-full object-cover opacity-85 group-hover:scale-110 transition-transform duration-1000"
+                  className="w-full h-full object-cover opacity-90 transition-opacity group-hover:opacity-100"
                   alt="Moment Thumbnail"
                 />
-                <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-8">
-                  <div className="flex items-center gap-4 mb-2">
-                    <div className="h-12 w-12 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white shadow-2xl transition-transform group-hover:scale-110">
-                      <Play className="h-5 w-5 fill-white" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center text-white">
+                      <Play className="h-4 w-4 fill-white" />
                     </div>
                     <div>
-                      <p className="text-white font-bold text-lg tracking-tight leading-none mb-1">
+                      <p className="text-white font-medium text-sm">
                         Watch Moment
                       </p>
-                      <p className="text-white/40 text-[10px] font-bold uppercase tracking-[0.2em]">
-                        {feed.moment.totalReactions} Ecosystem Views
+                      <p className="text-white/70 text-xs">
+                        {feed.moment.totalReactions} views
                       </p>
                     </div>
                   </div>
-                </div>
-                <div className="absolute top-6 left-6">
-                  <Badge className="bg-primary/20 backdrop-blur-lg border-white/20 text-white font-bold text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-lg">
-                    <Zap className="h-3 w-3 mr-1.5 fill-current" />
-                    Instant Flash
-                  </Badge>
                 </div>
               </div>
             )}
 
             {feed?.poll && (
-              <div className="mt-2 rounded-[28px] overflow-hidden border border-emerald-500/10 bg-emerald-500/5 p-1">
+              <div className="mt-2 rounded-xl overflow-hidden border border-border bg-muted/20 p-2">
                 <PollVote data={feed.poll as any} />
               </div>
             )}
 
-            {isJob && feed.job && (
-              <div className="bg-primary/5 p-8 rounded-[32px] border border-primary/10 flex flex-col gap-6 group cursor-pointer hover:bg-card hover:shadow-xl hover:shadow-primary/5 transition-all duration-500 relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition-transform duration-1000 rotate-12">
-                  <Briefcase className="h-24 w-24" />
+            {feed?.celebration && (
+              <div className="mt-2 p-4 rounded-xl border border-border bg-muted/10 flex flex-col sm:flex-row gap-4 items-start">
+                {feed.celebration.cover && (
+                  <div className="w-full sm:w-24 sm:h-24 h-48 rounded-lg overflow-hidden bg-muted border border-border flex-shrink-0 relative">
+                    <img 
+                      src={getPreferredMediaUrl(feed.celebration.cover)} 
+                      alt={feed.celebration.title} 
+                      className="w-full h-full object-cover" 
+                    />
+                  </div>
+                )}
+                <div className="flex-1 flex flex-col justify-center">
+                  <Badge variant="secondary" className="text-[10px] uppercase font-semibold mb-2 w-fit border-border">
+                    {feed.celebration.celebrationType?.replace(/_/g, ' ')}
+                  </Badge>
+                  <h4 className="font-semibold text-foreground text-[15px] mb-1.5">
+                    {feed.celebration.title}
+                  </h4>
+                  {feed.celebration.description && (
+                    <p className="text-[13px] text-muted-foreground line-clamp-2 leading-relaxed">
+                      {feed.celebration.description}
+                    </p>
+                  )}
                 </div>
+              </div>
+            )}
+
+            {isJob && feed.job && (
+              <div className="mt-2 p-4 rounded-xl border border-border bg-muted/10 flex flex-col gap-3">
                 <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-xl bg-card shadow-sm flex items-center justify-center border border-border transition-transform group-hover:scale-110 duration-500">
-                      <Briefcase className="h-6 w-6 text-primary" />
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-lg bg-background shadow-sm flex items-center justify-center border border-border">
+                      <Briefcase className="h-5 w-5 text-muted-foreground" />
                     </div>
                     <div>
-                      <h4 className="font-bold text-foreground tracking-tight text-lg mb-0.5">
+                      <h4 className="font-semibold text-foreground text-sm">
                         {feed.job.title}
                       </h4>
-                      <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
-                        Opportunity Registry
+                      <p className="text-xs text-muted-foreground">
+                        Job Opening
                       </p>
                     </div>
                   </div>
-                  <Badge
-                    variant="outline"
-                    className="bg-primary/10 text-primary font-bold text-[10px] uppercase tracking-wider rounded-lg border-primary/20"
-                  >
+                  <Badge variant="secondary" className="text-xs font-normal">
                     {feed.job.jobType}
                   </Badge>
                 </div>
 
-                <div className="flex flex-wrap gap-5 mt-1 text-sm font-medium text-muted-foreground">
-                   <div className="flex items-center gap-1.5">
-                      <MapPin className="h-4 w-4 text-emerald-500" />
-                      <span>{feed.job.location}</span>
-                   </div>
-                   <div className="flex items-center gap-1.5">
-                      <DollarSign className="h-4 w-4 text-primary" />
-                      <span className="text-foreground font-bold">{feed.job.salary}</span>
-                   </div>
+                <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-1.5">
+                    <MapPin className="h-3.5 w-3.5" />
+                    <span>{feed.job.location}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <DollarSign className="h-3.5 w-3.5" />
+                    <span>{feed.job.salary}</span>
+                  </div>
                 </div>
 
-                <Button className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-bold text-xs uppercase tracking-widest mt-2 shadow-lg shadow-primary/20 group/btn transition-all">
-                  Open Career Registry
-                  <ChevronRight className="h-3.5 w-3.5 ml-2 transition-transform group-hover/btn:translate-x-1" />
+                <Button variant="outline" className="w-full h-9 text-xs">
+                  View Job Details
                 </Button>
               </div>
             )}
 
             {isMarketplace && feed.marketPlace && (
-              <div className="bg-amber-500/5 p-8 rounded-[32px] border border-amber-500/10 flex flex-col gap-6 group cursor-pointer hover:bg-card hover:shadow-xl hover:shadow-amber-500/5 transition-all duration-500 relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition-transform duration-1000 -rotate-12 text-amber-500">
-                  <ShoppingBag className="h-24 w-24" />
-                </div>
+              <div className="mt-2 p-4 rounded-xl border border-border bg-muted/10 flex flex-col gap-3">
                 <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-xl bg-card shadow-sm flex items-center justify-center border border-border transition-transform group-hover:scale-110 duration-500">
-                      <ShoppingBag className="h-6 w-6 text-amber-600" />
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-lg bg-background shadow-sm flex items-center justify-center border border-border">
+                      <ShoppingBag className="h-5 w-5 text-muted-foreground" />
                     </div>
                     <div>
-                      <h4 className="font-bold text-foreground tracking-tight text-lg mb-0.5">
+                      <h4 className="font-semibold text-foreground text-sm">
                         {feed.marketPlace.title}
                       </h4>
-                      <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
-                        Marketplace Node
+                      <p className="text-xs text-muted-foreground">
+                        Marketplace Listing
                       </p>
                     </div>
                   </div>
-                  <div className="bg-emerald-500 text-white font-bold text-[14px] rounded-xl px-4 py-2 shadow-lg shadow-emerald-500/20">
+                  <div className="font-medium text-sm">
                     ${feed.marketPlace.price}
                   </div>
                 </div>
 
-                <div className="flex items-center gap-5 mt-1 text-sm font-medium text-muted-foreground">
-                   <div className="flex items-center gap-1.5">
-                      <MapPin className="h-4 w-4 text-emerald-500" />
-                      <span>{feed.marketPlace.location.name}</span>
-                   </div>
-                   <div className="flex items-center gap-1.5">
-                      <LayoutGrid className="h-4 w-4 text-amber-600" />
-                      <span className="uppercase text-[10px] font-bold tracking-widest">{feed.marketPlace.category || "General"}</span>
-                   </div>
+                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-1.5">
+                    <MapPin className="h-3.5 w-3.5" />
+                    <span>{feed.marketPlace.location.name}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <LayoutGrid className="h-3.5 w-3.5" />
+                    <span className="capitalize">
+                      {feed.marketPlace.category || "General"}
+                    </span>
+                  </div>
                 </div>
 
-                <Button className="w-full h-12 bg-foreground text-background hover:bg-foreground/90 rounded-xl font-bold text-xs uppercase tracking-widest mt-2 shadow-lg transition-all group/btn">
-                  Interrogate Offering
-                  <ShoppingBag className="h-3.5 w-3.5 ml-2 transition-transform group-hover/btn:-translate-y-0.5" />
+                <Button variant="outline" className="w-full h-9 text-xs">
+                  View Listing
                 </Button>
               </div>
             )}
           </div>
 
-          <div className="flex items-center justify-end mt-8 mb-5 px-0.5">
+          <div className="flex items-center justify-end mt-4 mb-4 px-0.5">
             <Analytics feedId={feed.id.toString()} />
           </div>
 
-          <Separator className="mb-5 opacity-40" />
+          <Separator className="mb-4" />
 
           <div className="flex items-center justify-between gap-3 px-0.5">
             <div className="flex items-center gap-1.5">
@@ -378,10 +380,10 @@ export default function Feed({ feed }: { feed: FeedProps }) {
             <Button
               variant="ghost"
               size="sm"
-              className="rounded-xl h-10 px-4 text-muted-foreground font-bold text-[13px] hover:bg-muted hover:text-foreground transition-all flex items-center gap-2"
+              className="text-muted-foreground flex items-center gap-2"
             >
-              <Repeat2 className="h-4 w-4" strokeWidth={2.5} />
-              Redistribute
+              <Repeat2 className="h-4 w-4" />
+              Share
             </Button>
           </div>
         </div>

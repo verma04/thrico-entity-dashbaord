@@ -12,6 +12,7 @@ import moment from "moment";
 import type { FeedProps } from "./types";
 import UserAvatar from "../layout/user-avatar";
 import { useGetEntity } from "@/graphql/actions";
+import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
 
 const FeedUserDetails: React.FC<FeedProps> = ({
   user,
@@ -26,25 +27,55 @@ const FeedUserDetails: React.FC<FeedProps> = ({
   const displayAvatar = isEntity ? data?.getEntity?.logo : user?.avatar;
   const displayRole = isEntity ? "Community Management" : (user?.about?.currentPosition || "Community Member");
 
+  const hoverData = {
+    id: user?.id,
+    firstName: user?.firstName,
+    lastName: user?.lastName,
+    avatar: user?.avatar,
+    headline: user?.about?.currentPosition,
+  };
+
   return (
     <div className="flex items-center gap-3.5 w-full">
       <div className="relative shrink-0">
-        <UserAvatar
-          size={42}
-          src={displayAvatar}
-          className="rounded-xl border border-border shadow-sm bg-card"
-        />
-        {isEntity && (
-          <span className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full bg-primary border-2 border-background flex items-center justify-center">
-             <div className="h-1.5 w-1.5 rounded-full bg-primary-foreground animate-pulse" />
-          </span>
+        {!isEntity && user ? (
+          <UserProfileHoverCard user={hoverData}>
+            <div className="cursor-pointer">
+              <UserAvatar
+                size={42}
+                src={displayAvatar}
+                className="rounded-xl border border-border shadow-sm bg-card"
+              />
+            </div>
+          </UserProfileHoverCard>
+        ) : (
+          <>
+            <UserAvatar
+              size={42}
+              src={displayAvatar}
+              className="rounded-xl border border-border shadow-sm bg-card"
+            />
+            {isEntity && (
+              <span className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full bg-primary border-2 border-background flex items-center justify-center">
+                 <div className="h-1.5 w-1.5 rounded-full bg-primary-foreground animate-pulse" />
+              </span>
+            )}
+          </>
         )}
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex flex-col sm:flex-row sm:items-center gap-x-2 gap-y-0.5">
-          <span className="font-bold text-[15px] text-foreground tracking-tight leading-none truncate">
-            {displayName}
-          </span>
+          {!isEntity && user ? (
+            <UserProfileHoverCard user={hoverData}>
+              <span className="font-bold text-[15px] text-foreground tracking-tight leading-none truncate cursor-pointer hover:underline">
+                {displayName}
+              </span>
+            </UserProfileHoverCard>
+          ) : (
+            <span className="font-bold text-[15px] text-foreground tracking-tight leading-none truncate">
+              {displayName}
+            </span>
+          )}
           <div className="flex items-center gap-1.5">
             <span className="hidden sm:inline text-muted-foreground/30 font-light select-none text-xs">•</span>
             <span className="text-[12px] font-bold text-muted-foreground/60 uppercase tracking-widest leading-none">

@@ -147,14 +147,14 @@ export function DashboardSessionRadarChart() {
               name="Desktop"
               dataKey="desktop"
               stackId="a"
-              fill="var(--color-desktop)"
+              fill="#6366f1"
               radius={[0, 0, 4, 4]}
             />
             <Bar
               name="Mobile"
               dataKey="mobile"
               stackId="a"
-              fill="var(--color-mobile)"
+              fill="#f43f5e"
               radius={[4, 4, 0, 0]}
             />
           </BarChart>

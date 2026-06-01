@@ -80,6 +80,16 @@ export interface FeedProps {
       url: string;
     }[];
   };
+  celebration?: {
+    id: string;
+    status: string;
+    userId: string;
+    entityId: string;
+    celebrationType: string;
+    title: string;
+    description: string;
+    cover: string;
+  };
 }
 
 export interface commentProps {

@@ -8,6 +8,7 @@ import {
   useDeleteInterest,
   Interest,
   useBulkAddInterests,
+  useGetUsersByInterestNeo4j,
 } from "@/graphql/quries/interests/interest-queries";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -21,6 +22,7 @@ import {
   Loader2,
   Heart,
   Sparkles,
+  Users,
 } from "lucide-react";
 import {
   Dialog,
@@ -44,6 +46,15 @@ import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-acti
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { notify } from "@/lib/notify";
 import { Input } from "@/components/ui/input";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 // ── Color palette for interests ──
 const INTEREST_COLORS = [
@@ -143,17 +154,110 @@ function InterestDialog({
   );
 }
 
+// ── Interest Users Sheet ──
+function InterestUsersSheet({
+  interest,
+  open,
+  onOpenChange,
+}: {
+  interest: Interest | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const { data, loading } = useGetUsersByInterestNeo4j({
+    variables: { interestId: interest?.id || "", limit: 50 },
+    skip: !interest,
+  });
+
+  const users = data?.getUsersByInterestNeo4j?.data || [];
+  const totalCount = data?.getUsersByInterestNeo4j?.totalCount || 0;
+
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent className="sm:max-w-md w-full overflow-y-auto">
+        <SheetHeader className="mb-6">
+          <SheetTitle className="text-xl font-bold flex items-center gap-2">
+            <Users className="h-5 w-5 text-indigo-500" />
+            {interest?.title} Users
+          </SheetTitle>
+          <SheetDescription>
+            {loading
+              ? "Loading..."
+              : `Found ${totalCount} users with this interest`}
+          </SheetDescription>
+        </SheetHeader>
+
+        <div className="space-y-4 mt-6">
+          {loading ? (
+            Array(5)
+              .fill(0)
+              .map((_, i) => (
+                <div key={i} className="flex items-center gap-4 p-3">
+                  <Skeleton className="h-10 w-10 rounded-full" />
+                  <div className="space-y-2 flex-1">
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-3 w-1/2" />
+                  </div>
+                </div>
+              ))
+          ) : users.length === 0 ? (
+            <div className="text-center py-10 text-slate-500">
+              <Users className="h-10 w-10 mx-auto text-slate-300 mb-3" />
+              <p>No users found for this interest.</p>
+            </div>
+          ) : (
+            users.map((user) => (
+              <UserProfileHoverCard
+                key={user.id}
+                user={{ ...user, id: user.id }}
+              >
+                <div className="flex items-start gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100 cursor-pointer">
+                  <Avatar className="h-10 w-10 border border-slate-200">
+                    <AvatarImage
+                      src={
+                        user.avatar
+                          ? `https://cdn.thrico.network/${user.avatar}`
+                          : ""
+                      }
+                      alt={user.firstName || ""}
+                    />
+                    <AvatarFallback className="bg-indigo-50 text-indigo-600 font-semibold">
+                      {user.firstName?.charAt(0) || "U"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-slate-900 truncate">
+                      {user.firstName} {user.lastName}
+                    </p>
+                    {user.headline && (
+                      <p className="text-xs text-slate-500 truncate">
+                        {user.headline}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </UserProfileHoverCard>
+            ))
+          )}
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+}
+
 // ── Interests Grid ──
 function InterestsGrid({
   interests,
   isLoading,
   onEdit,
   onDelete,
+  onViewUsers,
 }: {
   interests: Interest[];
   isLoading: boolean;
   onEdit: (interest: Interest) => void;
   onDelete: (interest: Interest) => void;
+  onViewUsers: (interest: Interest) => void;
 }) {
   if (isLoading) {
     return (
@@ -202,6 +306,7 @@ function InterestsGrid({
         return (
           <Card
             key={interest.id}
+            onClick={() => onViewUsers(interest)}
             className="border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 group overflow-hidden rounded-xl hover:border-rose-500/20 hover:-translate-y-1 bg-white cursor-pointer"
           >
             {/* Color bar */}
@@ -905,7 +1010,7 @@ const RECOMMENDED_INTERESTS = [
   "Monetization Tactics",
   "Camera Setup",
   "Storyboarding",
-  "Influencer Marketing"
+  "Influencer Marketing",
 ];
 
 // ── Main Page ──
@@ -917,6 +1022,7 @@ export default function InterestsPage() {
   const [interestToDelete, setInterestToDelete] = useState<Interest | null>(
     null,
   );
+  const [viewingInterest, setViewingInterest] = useState<Interest | null>(null);
 
   const [addInterest, { loading: creating }] = useAddInterest({
     onCompleted: () => {
@@ -995,7 +1101,10 @@ export default function InterestsPage() {
 
   return (
     <>
-      <EcosystemActionBar shadow="none" className="rounded-xl border border-slate-200">
+      <EcosystemActionBar
+        shadow="none"
+        className="rounded-xl border border-slate-200"
+      >
         <EcosystemActionBar.Group>
           <EcosystemActionBar.Item grow className="max-w-[360px]">
             <EcosystemActionBar.Search
@@ -1062,6 +1171,7 @@ export default function InterestsPage() {
             setIsDialogOpen(true);
           }}
           onDelete={(interest) => setInterestToDelete(interest)}
+          onViewUsers={(interest) => setViewingInterest(interest)}
         />
       </EcosystemContainer>
 
@@ -1113,6 +1223,13 @@ export default function InterestsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* View Users Sheet */}
+      <InterestUsersSheet
+        interest={viewingInterest}
+        open={!!viewingInterest}
+        onOpenChange={(open) => !open && setViewingInterest(null)}
+      />
     </>
   );
 }

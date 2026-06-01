@@ -11,6 +11,7 @@ import {
   AdminVerifiedBadge,
   AdminTableColumn,
 } from "@/components/shared/admin-table/admin-table";
+import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Column definitions
@@ -84,6 +85,52 @@ const columns: AdminTableColumn<communityEntity>[] = [
         <span>{moment(row.createdAt).format("MMM DD, YYYY")}</span>
       </div>
     ),
+  },
+  {
+    key: "creator",
+    header: "Creator",
+    cell: (row) => {
+      if (!row.creator) {
+        return (
+          <div className="flex items-center gap-2">
+            <Avatar className="h-6 w-6 rounded-full border border-border/60">
+              <AvatarFallback className="text-[10px] bg-primary/10 text-primary font-bold">
+                EN
+              </AvatarFallback>
+            </Avatar>
+            <span className="text-[12px] font-semibold text-muted-foreground">
+              Entity
+            </span>
+          </div>
+        );
+      }
+      
+      return (
+        <UserProfileHoverCard user={row.creator}>
+          <div className="flex items-center gap-2 cursor-pointer group">
+            <Avatar className="h-6 w-6 rounded-full border border-border/60">
+              <AvatarImage
+                src={
+                  row.creator.avatar
+                    ? row.creator.avatar.startsWith("http")
+                      ? row.creator.avatar
+                      : `https://cdn.thrico.network/${row.creator.avatar}`
+                    : ""
+                }
+                alt={`${row.creator.firstName} ${row.creator.lastName}`}
+              />
+              <AvatarFallback className="text-[10px] bg-muted">
+                {row.creator.firstName?.charAt(0)}
+                {row.creator.lastName?.charAt(0)}
+              </AvatarFallback>
+            </Avatar>
+            <span className="text-[12px] font-medium group-hover:text-primary transition-colors truncate max-w-[100px]">
+              {row.creator.firstName} {row.creator.lastName}
+            </span>
+          </div>
+        </UserProfileHoverCard>
+      );
+    },
   },
   {
     key: "actions",

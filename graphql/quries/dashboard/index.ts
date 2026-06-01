@@ -137,6 +137,16 @@ export const GET_COMMUNITY_KPIS = gql`
         change
         trend
       }
+      leaderboardParticipants {
+        value
+        change
+        trend
+      }
+      totalCurrencyPayouts {
+        value
+        change
+        trend
+      }
 
       # 4. Moderation Overview
       moderationStats {

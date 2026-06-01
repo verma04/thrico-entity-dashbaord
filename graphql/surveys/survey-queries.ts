@@ -1,5 +1,8 @@
 import { gql, QueryHookOptions, useQuery } from "@apollo/client";
-import { DateRangeInput, TimeRange } from "../actions/dashbaord/dashboard-quries";
+import {
+  DateRangeInput,
+  TimeRange,
+} from "../actions/dashbaord/dashboard-quries";
 export { TimeRange };
 export type { DateRangeInput };
 
@@ -74,35 +77,34 @@ export const GET_SURVEY = gql`
   query GetSurvey($id: ID!) {
     getSurvey(id: $id) {
       id
-      appearance
-      previewType
-      description
-      fields {
-        id
-        formId
-        question
-        type
-        order
-        options
-        required
-        maxLength
-        scale
-        ratingType
-        min
-        max
-        labels
-        allowMultiple
-        fieldName
-        defaultValue
-        allowedTypes
-        maxSize
-      }
-      status
       title
+      description
+      status
       startDate
       endDate
       createdAt
       updatedAt
+      form {
+        appearance
+        previewType
+        questions {
+          id
+          formId
+          question
+          type
+          order
+          options
+          required
+          maxLength
+          scale
+          ratingType
+          min
+          max
+          labels
+          allowMultiple
+          legalText
+        }
+      }
     }
   }
 `;

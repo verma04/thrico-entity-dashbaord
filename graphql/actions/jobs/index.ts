@@ -53,7 +53,13 @@ export type Job = {
   skills: string[];
   isFeatured: boolean;
   entity: string;
-  postedBy: string;
+  addedBy: string;
+  postedBy: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    avatar: string;
+  };
   company: JobCompany;
   numberOfApplicant: number;
   numberOfViews: number;

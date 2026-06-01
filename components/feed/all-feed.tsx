@@ -7,10 +7,19 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Feed from "./feed";
 import { useAllFeed } from "@/graphql/actions/feed";
 
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { Activity, RefreshCw, Filter } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import AddFeed from "./add-feed";
+
 export default function AdminFeed() {
   const [hasMore, setHasMore] = useState(true);
 
-  const { data, loading, fetchMore } = useAllFeed({
+  const { data, loading, fetchMore, refetch } = useAllFeed({
     variables: {
       input: {
         offset: 0,
@@ -31,7 +40,7 @@ export default function AdminFeed() {
             limit: 10,
           },
         },
-        updateQuery(prev, { fetchMoreResult, variables }) {
+        updateQuery(prev, { fetchMoreResult }) {
           if (!fetchMoreResult || fetchMoreResult?.getAllFeed?.length === 0) {
             setHasMore(false);
             return prev;
@@ -47,16 +56,18 @@ export default function AdminFeed() {
     }
   };
 
+  const feeds = data?.getAllFeed || [];
+
   return (
-    <div className="bg-transparent">
-      <div className="px-4 py-6">
+    <EcosystemWrapper>
+      <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">
         <InfiniteScroll
-          dataLength={data?.getAllFeed?.length || 0}
+          dataLength={feeds.length}
           next={loadMoreData}
           hasMore={hasMore}
           loader={
             isFetchingMore ? (
-              <div className="space-y-6 mt-6 pb-20">
+              <div className="space-y-6 mt-6 pb-20 max-w-2xl mx-auto">
                 <Skeleton className="h-[200px] w-full rounded-[24px]" />
                 <Skeleton className="h-[200px] w-full rounded-[24px]" />
               </div>
@@ -75,12 +86,18 @@ export default function AdminFeed() {
           }
         >
           <div className="max-w-2xl mx-auto space-y-6 pb-20">
-            {data?.getAllFeed?.map((item) => (
+            {feeds.map((item: any) => (
               <Feed key={item.id} feed={item} />
             ))}
+            {loading && !isFetchingMore && (
+              <div className="space-y-6 mt-6 pb-20 max-w-2xl mx-auto">
+                <Skeleton className="h-[200px] w-full rounded-[24px]" />
+                <Skeleton className="h-[200px] w-full rounded-[24px]" />
+              </div>
+            )}
           </div>
         </InfiniteScroll>
-      </div>
-    </div>
+      </EcosystemContainer>
+    </EcosystemWrapper>
   );
 }

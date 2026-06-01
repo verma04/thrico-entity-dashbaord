@@ -1,14 +1,18 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { ColumnDef } from "@tanstack/react-table";
-import { AppDataTable } from "@/components/ui/app-data-table";
-import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { Offer } from "@/graphql/actions/offers";
 import { Calendar, Tag, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { OfferActions } from "./offer-actions";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
+import {
+  AdminTable,
+  AdminStatusBadge,
+  AdminTableColumn,
+} from "@/components/shared/admin-table/admin-table";
 
 interface OffersTableProps {
   offers: Offer[];
@@ -36,16 +40,16 @@ export function OffersTable({
     }
   };
 
-  const columns = useMemo<ColumnDef<Offer>[]>(
+  const columns = useMemo<AdminTableColumn<Offer>[]>(
     () => [
       {
-        accessorKey: "title",
+        key: "title",
         header: "Offer",
-        cell: ({ row }) => {
-          const offer = row.original;
+        cell: (row) => {
+          const offer = row;
           return (
             <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-lg bg-primary/5 border border-primary/10 flex items-center justify-center shrink-0 overflow-hidden">
+              <div className="h-10 w-10 rounded-lg bg-primary/5 border border-primary/10 flex items-center justify-center shrink-0 overflow-hidden">
                 {offer.image ? (
                   <img
                     src={`https://cdn.thrico.network/${offer.image}`}
@@ -53,26 +57,15 @@ export function OffersTable({
                     className="h-full w-full object-cover"
                   />
                 ) : (
-                  <Tag className="h-6 w-6 text-primary/40" />
+                  <Tag className="h-5 w-5 text-primary/40" />
                 )}
               </div>
-              <div className="flex flex-col gap-0.5">
-                <div className="flex items-center gap-2">
-                  <span className="font-bold text-foreground leading-tight">
-                    {offer.title}
-                  </span>
-                  <Badge
-                    variant="outline"
-                    className={cn(
-                      "text-[10px] uppercase font-bold px-1.5 py-0 h-4",
-                      getStatusColor(offer.status),
-                    )}
-                  >
-                    {offer.status}
-                  </Badge>
-                </div>
-                <span className="text-xs text-muted-foreground line-clamp-1 max-w-[200px]">
-                  {offer.description}
+              <div className="flex flex-col min-w-0">
+                <span className="text-[13px] font-bold text-foreground leading-tight truncate max-w-[180px]">
+                  {offer.title}
+                </span>
+                <span className="text-[11px] text-muted-foreground truncate max-w-[180px] mt-0.5">
+                  {offer.description || "No description"}
                 </span>
               </div>
             </div>
@@ -80,72 +73,130 @@ export function OffersTable({
         },
       },
       {
-        accessorKey: "category.name",
+        key: "category",
         header: "Category",
-        cell: ({ row }) => {
-          const category = row.original.category;
+        cell: (row) => {
+          const category = row.category;
           return (
-            <Badge
-              variant="outline"
-              className="gap-1.5 font-medium border-transparent bg-muted/50 text-foreground"
-            >
+            <div className="flex items-center gap-1.5 text-[12px] text-foreground">
               <div
-                className="h-2 w-2 rounded-full"
-                style={{ backgroundColor: category?.color }}
+                className="h-2 w-2 rounded-full shrink-0"
+                style={{ backgroundColor: category?.color || "#cbd5e1" }}
               />
-              {category?.name}
-            </Badge>
+              <span className="truncate max-w-[120px]">{category?.name || "—"}</span>
+            </div>
           );
         },
       },
       {
-        accessorKey: "discount",
+        key: "discount",
         header: "Discount",
-        cell: ({ row }) => (
-          <Badge variant="secondary" className="font-bold">
-            {row.original.discount}
-          </Badge>
+        cell: (row) => (
+          <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-muted text-foreground">
+            {row.discount}
+          </span>
         ),
       },
       {
-        id: "validity",
-        header: "Validity",
-        cell: ({ row }) => {
-          const offer = row.original;
+        key: "status",
+        header: "Status",
+        cell: (row) => (
+          <span
+            className={cn(
+              "inline-flex items-center px-2 py-0.5 rounded-md border text-[10px] uppercase tracking-wide font-bold",
+              getStatusColor(row.status)
+            )}
+          >
+            {row.status}
+          </span>
+        ),
+      },
+      {
+        key: "creator",
+        header: "Creator",
+        cell: (row) => {
+          const offer = row;
+          if (!offer.creator) {
+            return (
+              <div className="flex items-center gap-2">
+                <Avatar className="h-6 w-6 rounded-full border border-border/60">
+                  <AvatarFallback className="text-[10px] bg-primary/10 text-primary font-bold">
+                    EN
+                  </AvatarFallback>
+                </Avatar>
+                <span className="text-[12px] font-semibold text-muted-foreground">
+                  Entity
+                </span>
+              </div>
+            );
+          }
+          
           return (
-            <div className="flex flex-col gap-1 text-xs text-muted-foreground">
+            <UserProfileHoverCard user={offer.creator}>
+              <div className="flex items-center gap-2 cursor-pointer group">
+                <Avatar className="h-6 w-6 rounded-full border border-border/60">
+                  <AvatarImage
+                    src={
+                      offer.creator.avatar
+                        ? offer.creator.avatar.startsWith("http")
+                          ? offer.creator.avatar
+                          : `https://cdn.thrico.network/${offer.creator.avatar}`
+                        : ""
+                    }
+                    alt={`${offer.creator.firstName} ${offer.creator.lastName}`}
+                  />
+                  <AvatarFallback className="text-[10px] bg-muted">
+                    {offer.creator.firstName?.charAt(0)}
+                    {offer.creator.lastName?.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="text-[12px] font-medium group-hover:text-primary transition-colors truncate max-w-[100px]">
+                  {offer.creator.firstName} {offer.creator.lastName}
+                </span>
+              </div>
+            </UserProfileHoverCard>
+          );
+        },
+      },
+      {
+        key: "validity",
+        header: "Validity",
+        cell: (row) => {
+          const offer = row;
+          return (
+            <div className="flex flex-col gap-1 text-[11px] text-muted-foreground">
               <div className="flex items-center gap-1.5">
-                <Calendar className="h-3 w-3" />
+                <Calendar className="h-3 w-3 shrink-0" />
                 {format(new Date(offer.validityStart), "MMM d, yyyy")}
               </div>
-              <div className="flex items-center gap-1.5 text-[10px] opacity-70">
-                <span>to</span>
-                {format(new Date(offer.validityEnd), "MMM d, yyyy")}
+              <div className="flex items-center gap-1.5 opacity-70">
+                <span className="pl-4">to {format(new Date(offer.validityEnd), "MMM d, yyyy")}</span>
               </div>
             </div>
           );
         },
       },
       {
-        id: "stats",
+        key: "stats",
         header: "Stats",
-        cell: ({ row }) => {
-          const offer = row.original;
+        cell: (row) => {
+          const offer = row;
           return (
-            <div className="flex items-center gap-4">
-              <div className="flex flex-col">
-                <span className="font-mono font-bold text-sm text-foreground">
-                  {offer.claimsCount}
+            <div className="flex items-center gap-3">
+              <div className="flex flex-col text-center">
+                <span className="font-bold text-[12px] text-foreground">
+                  {offer.claimsCount || 0}
                 </span>
-                <span className="text-[10px] text-muted-foreground uppercase font-medium">
+                <span className="text-[9px] text-muted-foreground uppercase tracking-wider">
                   Claims
                 </span>
               </div>
-              <div className="flex flex-col opacity-60">
-                <span className="font-mono font-bold text-sm text-foreground">
-                  {offer.viewsCount}
+              <div className="h-6 w-px bg-border/60"></div>
+              <div className="flex flex-col text-center">
+                <span className="font-bold text-[12px] text-foreground">
+                  {offer.viewsCount || 0}
                 </span>
-                <span className="text-[10px] text-muted-foreground uppercase font-medium">
+                <span className="text-[9px] text-muted-foreground uppercase tracking-wider">
                   Views
                 </span>
               </div>
@@ -154,16 +205,16 @@ export function OffersTable({
         },
       },
       {
-        id: "actions",
-        header: () => <div className="text-right">Actions</div>,
-        cell: ({ row }) => (
-          <div className="flex justify-end">
-            <OfferActions
-              offer={row.original}
-              onEdit={onEdit}
-              refetch={refetch}
-            />
-          </div>
+        key: "actions",
+        header: "",
+        headerClassName: "w-12 text-right",
+        className: "text-right",
+        cell: (row) => (
+          <OfferActions
+            offer={row}
+            onEdit={onEdit}
+            refetch={refetch}
+          />
         ),
       },
     ],
@@ -171,12 +222,14 @@ export function OffersTable({
   );
 
   return (
-    <AppDataTable
+    <AdminTable<Offer>
       columns={columns}
       data={offers}
-      isLoading={isLoading}
-      searchableColumns={[{ id: "title", placeholder: "Search offers..." }]}
-      isShowExportButtons={true}
+      loading={isLoading}
+      keyExtractor={(o) => o.id}
+      emptyIcon={Tag}
+      emptyTitle="No offers found"
+      emptyDescription="Try adjusting your search or filter criteria."
     />
   );
 }

@@ -8,7 +8,13 @@ import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrappe
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
-import { ClipboardList, Sparkles, Filter, Search, PlusCircle } from "lucide-react";
+import {
+  ClipboardList,
+  Sparkles,
+  Filter,
+  Search,
+  PlusCircle,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
@@ -158,72 +164,26 @@ export function SurveysList({
     !isUpdating;
 
   return (
-    <EcosystemWrapper anonymized-1="surveys-registry">
-      <EcosystemHeader
-        title="Feedback Registry"
-        badgeText="Community Insights"
-        description="Review interaction datasets, sentiment tracking, and global response protocols."
-        icon={ClipboardList}
-        actions={
-          <div className="flex items-center gap-3 relative ml-auto">
-            <Link href="/surveys/templates">
-              <Button variant="outline" className="font-bold text-[10px] uppercase tracking-widest px-6 h-9 rounded-lg shadow-sm gap-2 border-zinc-200 text-zinc-600">
-                <Sparkles className="h-3.5 w-3.5 text-indigo-500" />
-                Templates
-              </Button>
-            </Link>
-            <SurveyAIAgentButton />
-            <NewForm />
-          </div>
-        }
-      />
-
-      <EcosystemActionBar shadow="none">
-        <div className="relative w-full md:max-w-[360px] group">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-indigo-500 transition-colors" />
-          <Input
-            placeholder="Search registry nodes..."
-            className="pl-10 h-10 bg-white border-zinc-200 rounded-lg focus-visible:ring-2 focus-visible:ring-indigo-500/10 transition-all font-medium text-zinc-700 placeholder:text-zinc-400 border shadow-sm"
-          />
+    <>
+      <div className="">
+        <SurveysTable
+          surveys={surveys}
+          loading={loading}
+          onEditDetails={setEditingDetailsSurvey}
+          onDelete={setSurveyToDelete}
+          onPublish={(id) =>
+            publishSurvey({ variables: { publishSurveyId: id } })
+          }
+          onDraft={(id) => draftSurvey({ variables: { draftSurveyId: id } })}
+          onShare={setSharingSurvey}
+          shareSurveyAsFeed={shareSurveyAsFeed}
+        />
+      </div>
+      {error && (
+        <div className="p-4 rounded-lg bg-rose-50 text-rose-600 text-xs font-bold uppercase tracking-tight border border-rose-100 shadow-sm mt-4">
+          Synchronization error: Failed to retrieve interaction registry.
         </div>
-
-        <div className="flex items-center gap-3 ml-auto">
-          <DateRangePicker 
-            date={dateRange}
-            onDateChange={setDateRange}
-          />
-          <div className="h-4 w-px bg-zinc-200 mx-1 hidden md:block" />
-          <Button variant="outline" size="icon" className="h-10 w-10 shrink-0 rounded-lg border border-zinc-200 text-zinc-400 hover:text-indigo-600 hover:bg-zinc-50 shadow-sm md:hidden">
-            <Filter className="h-4 w-4" />
-          </Button>
-          <div className="flex items-center gap-2 px-4 py-2 bg-zinc-50 border border-zinc-100 rounded-lg text-[10px] font-bold text-zinc-500 uppercase tracking-widest whitespace-nowrap shadow-sm">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]" />
-            {surveys.length} Active Datasets
-          </div>
-        </div>
-      </EcosystemActionBar>
-
-      <EcosystemContainer className="p-6 lg:p-8 space-y-6">
-        <div className="rounded-lg border border-zinc-200 bg-white shadow-sm overflow-hidden">
-          <SurveysTable
-            surveys={surveys}
-            loading={loading}
-            onEditDetails={setEditingDetailsSurvey}
-            onDelete={setSurveyToDelete}
-            onPublish={(id) =>
-              publishSurvey({ variables: { publishSurveyId: id } })
-            }
-            onDraft={(id) => draftSurvey({ variables: { draftSurveyId: id } })}
-            onShare={setSharingSurvey}
-            shareSurveyAsFeed={shareSurveyAsFeed}
-          />
-        </div>
-        {error && (
-          <div className="p-4 rounded-lg bg-rose-50 text-rose-600 text-xs font-bold uppercase tracking-tight border border-rose-100 shadow-sm">
-            Synchronization error: Failed to retrieve interaction registry.
-          </div>
-        )}
-      </EcosystemContainer>
+      )}
 
       <SurveySheet
         survey={editingDetailsSurvey}
@@ -262,6 +222,6 @@ export function SurveysList({
         shareDescription={shareDescription}
         onShareDescriptionChange={setShareDescription}
       />
-    </EcosystemWrapper>
+    </>
   );
 }

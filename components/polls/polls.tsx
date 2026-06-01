@@ -32,12 +32,22 @@ const Poll: React.FC<PollProps> = ({ by }) => {
           description={isAdmin ? "Manage and view administrative polls." : "View and moderate community polls."}
           badgeText={isAdmin ? "Admin" : "Community"}
           icon={BarChart3}
+          actions={
+            isAdmin && (
+              <Link href="/polls/create">
+                 <Button className="font-semibold text-xs px-6 h-10 rounded-lg shadow-sm gap-2">
+                   <Plus className="h-4 w-4" />
+                   Create Poll
+                 </Button>
+              </Link>
+            )
+          }
        />
 
        <EcosystemActionBar shadow="none">
-          <EcosystemActionBar.Group grow>
-             <div className="flex items-center gap-3 px-1">
-                <div className="flex flex-col">
+          <EcosystemActionBar.Group>
+             <EcosystemActionBar.Item grow className="max-w-xs">
+                <div className="flex flex-col px-1 justify-center h-full">
                    <span className="text-[11px] font-semibold text-foreground uppercase tracking-tight leading-none">
                       {isAdmin ? "Admin" : "Community"} Polls
                    </span>
@@ -45,32 +55,25 @@ const Poll: React.FC<PollProps> = ({ by }) => {
                       Active Stream
                    </span>
                 </div>
-             </div>
+             </EcosystemActionBar.Item>
           </EcosystemActionBar.Group>
 
-          <EcosystemActionBar.Group align="right">
-             {isAdmin && (
-                <EcosystemActionBar.Item>
-                   <Link href="/polls/create">
-                      <Button size="sm" className="h-9 px-6 rounded-xl gap-2 font-semibold uppercase tracking-tight">
-                        <Plus className="h-4 w-4" />
-                        Create Poll
-                      </Button>
-                   </Link>
-                </EcosystemActionBar.Item>
-             )}
-             
+          <EcosystemActionBar.Separator />
+
+          <EcosystemActionBar.Group>
              <EcosystemActionBar.Item>
                 <Button
                   variant="outline"
                   size="icon"
-                  className="h-9 w-9 text-zinc-400 hover:text-foreground rounded-xl transition-all bg-white border-zinc-200"
+                  className="h-9 w-9 rounded-lg border border-border text-muted-foreground hover:text-foreground"
                   onClick={() => refetch()}
                 >
                   <RotateCw className={cn("h-4 w-4", loading && "animate-spin")} />
                 </Button>
              </EcosystemActionBar.Item>
+          </EcosystemActionBar.Group>
 
+          <EcosystemActionBar.Group align="right">
              <EcosystemActionBar.Status active={polls.length > 0}>
                 {polls.length} Polls
              </EcosystemActionBar.Status>

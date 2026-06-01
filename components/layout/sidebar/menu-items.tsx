@@ -206,6 +206,13 @@ export const contentModeration = [
       },
     ],
   },
+  {
+    key: "trust-center",
+    label: "Trust Center",
+    path: "/trust-center",
+    icon: <ShieldCheck size={18} />,
+    badge: "Active",
+  },
 ];
 
 // --- 3. REWARDS & GAMES ---
@@ -477,8 +484,11 @@ export const modules = [
     path: "/surveys",
     icon: <ClipboardList size={18} />,
     children: [
+      { key: "sur-dash", label: "Dashboard", path: "/surveys" },
+
       { key: "sur-create", label: "Create Surveys", path: "/surveys/create" },
       { key: "sur-manage", label: "Manage Surveys", path: "/surveys/all" },
+
       {
         key: "sur-reported",
         label: "Reported Items",
@@ -548,17 +558,17 @@ export const adminSettings = [
       {
         key: "cust-logo",
         label: "Setup Logo",
-        path: "/settings/appearance#logo",
+        path: "/settings/branding",
       },
       {
         key: "cust-brand",
         label: "Brand Look",
-        path: "/settings/appearance#branding",
+        path: "/settings/appearance",
       },
       {
         key: "cust-dom",
         label: "Setup Domain",
-        path: "/settings/domain#setup",
+        path: "/settings/domains",
       },
       {
         key: "cust-web",
@@ -631,9 +641,9 @@ export const adminSettings = [
         label: "Subscription & Plan",
         path: "/settings/subscription",
       },
-      { key: "acc-inv", label: "Invoices", path: "/settings/invoices" },
-      { key: "acc-audit", label: "Audit Log", path: "/audit-logs" },
-      { key: "acc-export", label: "Export Data", path: "/settings/export" },
+      // { key: "acc-inv", label: "Invoices", path: "/settings/invoices" },
+      { key: "acc-audit", label: "Audit Log", path: "/audit-log" },
+      // { key: "acc-export", label: "Export Data", path: "/settings/export" },
     ],
   },
   {
@@ -644,12 +654,12 @@ export const adminSettings = [
       {
         key: "pol-privacy",
         label: "Privacy Policy",
-        path: "/settings/policies/privacy",
+        path: "/settings/privacy",
       },
       {
         key: "pol-terms",
         label: "Terms of Use",
-        path: "/settings/policies/terms",
+        path: "/settings/policies",
       },
       { key: "pol-taxes", label: "Taxes & Duties", path: "/settings/taxes" },
     ],
@@ -741,6 +751,7 @@ export const useFilteredExtendedItems = () => {
       if (
         isHome ||
         item.key === "home-dashboard" ||
+        item.key === "trust-center" ||
         item.key === "community-intelligence" ||
         item.key === "mod-dashboard" ||
         item.key === "mod-reported" ||

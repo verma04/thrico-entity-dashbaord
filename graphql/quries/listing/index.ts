@@ -3,6 +3,12 @@ import { gql } from "@apollo/client";
 const list = `
   id
     addedBy
+    postedBy {
+      id
+      firstName
+      lastName
+      avatar
+    }
     entityId
     title
     price

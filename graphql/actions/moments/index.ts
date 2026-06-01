@@ -11,9 +11,12 @@ export interface Moment {
   totalViews: number;
   createdAt: string;
   owner: {
+    id: string;
     firstName: string;
     lastName: string;
+    avatar?: string;
   };
+  addedBy?: string;
 }
 
 export interface MomentDetails extends Moment {

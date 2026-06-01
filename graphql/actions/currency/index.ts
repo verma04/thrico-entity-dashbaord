@@ -25,12 +25,12 @@ export const useGetActivityCaps = () => useQuery(GET_ACTIVITY_CAPS);
 export const useGetTCConversionCap = () => useQuery(GET_TC_CONVERSION_CAP);
 export const useGetRedemptionCap = () => useQuery(GET_REDEMPTION_CAP);
 
-export const useGetCurrencyTransactions = (variables: {
-  userId: string;
+export const useGetCurrencyTransactions = (variables?: {
+  userId?: string | null;
   limit?: number;
   cursor?: string;
 }) =>
-  useQuery(GET_CURRENCY_TRANSACTIONS, { variables, skip: !variables.userId });
+  useQuery(GET_CURRENCY_TRANSACTIONS, { variables, skip: variables?.userId === "" });
 
 export const useUpdateEntityCurrencyConfig = (options?: any) =>
   useMutation(UPDATE_ENTITY_CURRENCY_CONFIG, {

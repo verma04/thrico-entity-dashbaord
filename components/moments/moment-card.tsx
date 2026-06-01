@@ -11,6 +11,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
 
 interface MomentCardProps {
   moment: Moment;
@@ -119,16 +121,49 @@ export const MomentCard: React.FC<MomentCardProps> = ({
         {/* Bottom info bar — overlaid on image */}
         <div className="absolute bottom-0 inset-x-0 p-3">
           {/* Creator avatar + name */}
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-zinc-700 border border-white/10 flex items-center justify-center shrink-0 text-[8px] font-bold text-white">
-              {initials}
+          {!moment?.owner ? (
+            <div className="flex items-center gap-2">
+              <Avatar className="h-6 w-6 rounded-full border border-border/60">
+                <AvatarFallback className="text-[10px] bg-primary/10 text-primary font-bold">
+                  EN
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col min-w-0">
+                <span className="text-[10px] font-semibold text-white/90 leading-none truncate">
+                  Entity
+                </span>
+              </div>
             </div>
-            <div className="flex flex-col min-w-0">
-              <span className="text-[10px] font-semibold text-white/90 leading-none truncate">
-                {creatorName}
-              </span>
-            </div>
-          </div>
+          ) : (
+            <UserProfileHoverCard user={moment.owner}>
+              <div
+                className="flex items-center gap-2 cursor-pointer group/creator"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Avatar className="h-6 w-6 rounded-full border border-border/60">
+                  <AvatarImage
+                    src={
+                      moment.owner.avatar
+                        ? moment.owner.avatar.startsWith("http")
+                          ? moment.owner.avatar
+                          : `https://cdn.thrico.network/${moment.owner.avatar}`
+                        : ""
+                    }
+                    alt={`${moment.owner.firstName} ${moment.owner.lastName}`}
+                  />
+                  <AvatarFallback className="text-[10px] bg-muted text-black">
+                    {moment.owner.firstName?.charAt(0)}
+                    {moment.owner.lastName?.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col min-w-0">
+                  <span className="text-[10px] font-semibold text-white/90 leading-none truncate group-hover/creator:text-white transition-colors">
+                    {moment.owner.firstName} {moment.owner.lastName}
+                  </span>
+                </div>
+              </div>
+            </UserProfileHoverCard>
+          )}
         </div>
       </div>
 

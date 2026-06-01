@@ -10,6 +10,7 @@ import {
   AdminStatusBadge,
   AdminTableColumn,
 } from "@/components/shared/admin-table/admin-table";
+import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Job Type Badge
@@ -113,6 +114,52 @@ const columns: AdminTableColumn<Job>[] = [
         <span>{moment(row.createdAt).format("MMM DD, YYYY")}</span>
       </div>
     ),
+  },
+  {
+    key: "creator",
+    header: "Creator",
+    cell: (row) => {
+      if (!row.postedBy) {
+        return (
+          <div className="flex items-center gap-2">
+            <Avatar className="h-6 w-6 rounded-full border border-border/60">
+              <AvatarFallback className="text-[10px] bg-primary/10 text-primary font-bold">
+                EN
+              </AvatarFallback>
+            </Avatar>
+            <span className="text-[12px] font-semibold text-muted-foreground">
+              Entity
+            </span>
+          </div>
+        );
+      }
+      
+      return (
+        <UserProfileHoverCard user={row.postedBy}>
+          <div className="flex items-center gap-2 cursor-pointer group">
+            <Avatar className="h-6 w-6 rounded-full border border-border/60">
+              <AvatarImage
+                src={
+                  row.postedBy.avatar
+                    ? row.postedBy.avatar.startsWith("http")
+                      ? row.postedBy.avatar
+                      : `https://cdn.thrico.network/${row.postedBy.avatar}`
+                    : ""
+                }
+                alt={`${row.postedBy.firstName} ${row.postedBy.lastName}`}
+              />
+              <AvatarFallback className="text-[10px] bg-muted">
+                {row.postedBy.firstName?.charAt(0)}
+                {row.postedBy.lastName?.charAt(0)}
+              </AvatarFallback>
+            </Avatar>
+            <span className="text-[12px] font-medium group-hover:text-primary transition-colors truncate max-w-[100px]">
+              {row.postedBy.firstName} {row.postedBy.lastName}
+            </span>
+          </div>
+        </UserProfileHoverCard>
+      );
+    },
   },
   {
     key: "actions",

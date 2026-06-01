@@ -42,6 +42,11 @@ import {
   useGetRewards,
 } from "@/graphql/actions/rewards";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  UserProfileHoverCard,
+  UserProfileHoverData,
+} from "@/components/shared/user-profile-hover-card";
 import moment from "moment";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
@@ -557,29 +562,47 @@ export default function RewardsDashboard() {
                       </div>
                     ))
                   : redemptions.length > 0
-                    ? redemptions.map((act: any, i: number) => (
+                    ? redemptions.map((act: any, i: number) => {
+                        const hoverUser: UserProfileHoverData = {
+                          id: act.user?.id,
+                          firstName: act.user?.firstName,
+                          lastName: act.user?.lastName,
+                          avatar: act.user?.avatar,
+                        };
+                        return (
                         <div
                           key={i}
                           className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-muted/60 transition-colors group/item cursor-default"
                         >
-                          <div className="h-8 w-8 rounded-lg bg-muted border border-border flex items-center justify-center font-semibold text-muted-foreground group-hover/item:bg-indigo-50 group-hover/item:border-indigo-100 group-hover/item:text-indigo-600 transition-colors shrink-0 text-xs">
-                            {act.user?.firstName?.charAt(0)}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-[12px] font-semibold text-foreground truncate leading-none">
-                              {act.user?.firstName} {act.user?.lastName}
-                            </p>
-                            <p className="text-[11px] text-muted-foreground truncate leading-none mt-0.5">
-                              {act.reward?.title}
-                            </p>
-                          </div>
+                          <UserProfileHoverCard user={hoverUser}>
+                            <div className="flex items-center gap-3 cursor-pointer flex-1 min-w-0">
+                              <Avatar className="h-8 w-8 border border-border shrink-0 group-hover/item:border-indigo-200 transition-colors">
+                                <AvatarImage
+                                  src={act.user?.avatar ? `https://cdn.thrico.network/${act.user.avatar}` : ""}
+                                  alt={act.user?.firstName}
+                                  className="object-cover"
+                                />
+                                <AvatarFallback className="text-[10px] bg-muted text-muted-foreground font-semibold group-hover/item:bg-indigo-50 group-hover/item:text-indigo-600 transition-colors">
+                                  {act.user?.firstName?.charAt(0)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-[12px] font-semibold text-foreground truncate leading-none hover:underline">
+                                  {act.user?.firstName} {act.user?.lastName}
+                                </p>
+                                <p className="text-[11px] text-muted-foreground truncate leading-none mt-0.5">
+                                  {act.reward?.title}
+                                </p>
+                              </div>
+                            </div>
+                          </UserProfileHoverCard>
                           <div className="flex items-center gap-1 text-[10px] text-muted-foreground/70 font-medium shrink-0">
                             <Clock className="h-3 w-3" />
-                            {/* {moment(act.claimedAt).fromNow(true)} */}
-                                  {moment(act.createdAt).fromNow(true)}
+                            {moment(act.createdAt).fromNow(true)}
                           </div>
                         </div>
-                      ))
+                        );
+                      })
                     : (
                         <div className="py-10 text-center space-y-3">
                           <div className="h-12 w-12 bg-muted rounded-2xl flex items-center justify-center mx-auto border border-border">

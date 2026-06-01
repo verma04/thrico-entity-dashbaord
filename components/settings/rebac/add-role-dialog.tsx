@@ -57,6 +57,7 @@ const adminAccessLabels: Record<string, string> = {
   domain: "Domain",
   permissions: "Permissions",
   adminUsers: "Admin Users",
+  users: "Users",
 };
 
 export default function AddRoleDialog({ open, onOpenChange, role }: AddRoleDialogProps) {

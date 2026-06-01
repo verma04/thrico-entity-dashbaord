@@ -14,6 +14,8 @@ import Actions from "./Actions";
 import { getStatusTag, getVerificationTag } from "../discussion-forum/utils";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface CommunityCardProps {
   record: communityEntity;
@@ -75,7 +77,48 @@ export default function CommunityCard({ record }: CommunityCardProps) {
             {record.description || "Inspiration, collaboration, and shared growth within our vibrant network."}
           </p>
 
-          <div className="mt-6 grid grid-cols-2 gap-4">
+          {!record.creator ? (
+            <div className="mt-3">
+               <div className="flex items-center gap-2 w-fit">
+                  <Avatar className="h-6 w-6 rounded-full border border-indigo-100">
+                     <AvatarFallback className="text-[10px] bg-indigo-50 text-indigo-600 font-black">
+                        EN
+                     </AvatarFallback>
+                  </Avatar>
+                  <span className="text-[11px] font-bold text-indigo-600 uppercase tracking-wider">
+                     Entity
+                  </span>
+               </div>
+            </div>
+          ) : (
+            <div className="mt-3">
+              <UserProfileHoverCard user={record.creator}>
+                 <div className="flex items-center gap-2 cursor-pointer group w-fit">
+                    <Avatar className="h-6 w-6 rounded-full border border-slate-200">
+                       <AvatarImage
+                          src={
+                            record.creator.avatar
+                              ? record.creator.avatar.startsWith("http")
+                                ? record.creator.avatar
+                                : `https://cdn.thrico.network/${record.creator.avatar}`
+                              : ""
+                          }
+                          alt={`${record.creator.firstName} ${record.creator.lastName}`}
+                       />
+                       <AvatarFallback className="text-[10px] bg-slate-100 text-slate-600 font-bold">
+                          {record.creator.firstName?.charAt(0)}
+                          {record.creator.lastName?.charAt(0)}
+                       </AvatarFallback>
+                    </Avatar>
+                    <span className="text-[11px] font-bold text-slate-600 group-hover:text-indigo-600 transition-colors uppercase tracking-wider">
+                       {record.creator.firstName} {record.creator.lastName}
+                    </span>
+                 </div>
+              </UserProfileHoverCard>
+            </div>
+          )}
+
+          <div className="mt-5 grid grid-cols-2 gap-4">
              <div className="bg-slate-50 rounded-2xl p-3 border border-slate-100 group-hover:bg-indigo-50/50 group-hover:border-indigo-100 transition-colors">
                 <div className="flex items-center gap-1.5 text-[10px] font-black text-slate-400 uppercase tracking-wider mb-1">
                    <Users className="h-3 w-3" /> Growth

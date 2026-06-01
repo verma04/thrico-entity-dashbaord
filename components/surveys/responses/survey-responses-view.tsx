@@ -10,6 +10,7 @@ import {
 import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
+import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
 import {
   ArrowLeft,
   MessageSquare,
@@ -64,28 +65,57 @@ export const SurveyResponsesView: React.FC<SurveyResponsesViewProps> = ({
       header: "Respondent",
       cell: ({ row }) => {
         const respondent = row.original.respondent;
-        return (
-          <div className="flex items-center gap-3">
-            <Avatar className="h-9 w-9 border border-border">
-              <AvatarImage
-                src={respondent?.avatar}
-                alt={respondent?.firstName}
-              />
-              <AvatarFallback className="bg-primary/5 text-primary text-xs">
-                {respondent?.firstName?.[0] || <User className="h-4 w-4" />}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col">
-              <span className="font-medium text-foreground">
-                {respondent?.firstName
-                  ? `${respondent.firstName} ${respondent.lastName}`
-                  : "Anonymous Respondent"}
-              </span>
-              <span className="text-[10px] text-muted-foreground font-mono uppercase tracking-tight">
-                {row.original.respondentId.slice(0, 8)}...
-              </span>
+
+        if (!respondent?.id) {
+          return (
+            <div className="flex items-center gap-3">
+              <Avatar className="h-9 w-9 border border-border">
+                <AvatarFallback className="bg-primary/5 text-primary text-xs">
+                  <User className="h-4 w-4" />
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col">
+                <span className="font-medium text-foreground">
+                  Anonymous Respondent
+                </span>
+                <span className="text-[10px] text-muted-foreground font-mono uppercase tracking-tight">
+                  {row.original.respondentId.slice(0, 8)}...
+                </span>
+              </div>
             </div>
-          </div>
+          );
+        }
+
+        const avatarUrl = respondent?.avatar 
+          ? respondent.avatar.startsWith("http") 
+            ? respondent.avatar 
+            : `https://cdn.thrico.network/${respondent.avatar}`
+          : "";
+
+        return (
+          <UserProfileHoverCard user={respondent}>
+            <div className="flex items-center gap-3 cursor-pointer hover:bg-accent/50 p-1.5 -ml-1.5 rounded-md transition-colors">
+              <Avatar className="h-9 w-9 border border-border">
+                <AvatarImage
+                  src={avatarUrl}
+                  alt={respondent?.firstName || ""}
+                />
+                <AvatarFallback className="bg-primary/5 text-primary text-xs">
+                  {respondent?.firstName?.[0] || <User className="h-4 w-4" />}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col">
+                <span className="font-medium text-foreground hover:underline">
+                  {respondent?.firstName
+                    ? `${respondent.firstName} ${respondent.lastName || ""}`
+                    : "Anonymous Respondent"}
+                </span>
+                <span className="text-[10px] text-muted-foreground font-mono uppercase tracking-tight">
+                  {row.original.respondentId.slice(0, 8)}...
+                </span>
+              </div>
+            </div>
+          </UserProfileHoverCard>
         );
       },
     },
@@ -213,7 +243,15 @@ export const SurveyResponsesView: React.FC<SurveyResponsesViewProps> = ({
           <SheetHeader className="px-8 pt-8 pb-6 bg-linear-to-br from-primary/5 to-transparent border-b sticky top-0 z-10 backdrop-blur-md">
             <div className="flex items-center gap-4 mb-4">
               <Avatar className="h-14 w-14 ring-4 ring-background shadow-lg">
-                <AvatarImage src={selectedResponse?.respondent?.avatar} />
+                <AvatarImage 
+                  src={
+                    selectedResponse?.respondent?.avatar
+                      ? selectedResponse.respondent.avatar.startsWith("http")
+                        ? selectedResponse.respondent.avatar
+                        : `https://cdn.thrico.network/${selectedResponse.respondent.avatar}`
+                      : ""
+                  } 
+                />
                 <AvatarFallback className="bg-primary/10 text-primary text-xl font-bold">
                   {selectedResponse?.respondent?.firstName?.[0] || "?"}
                 </AvatarFallback>
@@ -256,9 +294,11 @@ export const SurveyResponsesView: React.FC<SurveyResponsesViewProps> = ({
                     ([questionId, answer]: [string, any], idx) => {
                       // This assumes you might have logic to find the question text by ID
                       // For now, displaying it as is or attempting to map if survey data has fields
-                      const questionField = survey?.fields?.find(
-                        (f: any) => f.id === questionId,
-                      );
+                      const questionField =
+                        survey?.form?.questions?.find(
+                          (f: any) => f.id === questionId,
+                        ) ||
+                        survey?.fields?.find((f: any) => f.id === questionId);
 
                       return (
                         <Card

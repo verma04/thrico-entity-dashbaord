@@ -4,6 +4,7 @@ import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import UserActions from "./user-actions";
+import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
 import { safeFormat } from "@/lib/date-utils";
 import { Mail, MapPin, Smartphone, Users } from "lucide-react";
 import { UserDetail, useBulkChangeUserStatus } from "@/graphql/actions";
@@ -17,28 +18,40 @@ const columns: AdminTableColumn<UserDetail>[] = [
   {
     key: "member",
     header: "Member",
-    cell: (row) => (
-      <div className="flex items-center gap-3">
-        <Avatar className="h-9 w-9 rounded-lg border border-border/60 shrink-0">
-          <AvatarImage
-            src={`https://cdn.thrico.network/${row.user?.avatar}`}
-            alt={row.user?.firstName}
-          />
-          <AvatarFallback className="rounded-lg bg-muted text-muted-foreground text-xs font-semibold">
-            {row.user?.firstName?.[0]}
-            {row.user?.lastName?.[0]}
-          </AvatarFallback>
-        </Avatar>
-        <div className="flex flex-col min-w-0">
-          <p className="text-[13px] font-semibold text-foreground leading-tight truncate">
-            {row.user?.firstName} {row.user?.lastName}
-          </p>
-          <p className="text-[11px] text-muted-foreground leading-tight mt-0.5 truncate">
-            {row.user?.about?.currentPosition || "Community Member"}
-          </p>
-        </div>
-      </div>
-    ),
+    cell: (row) => {
+      if (!row.user) return null;
+
+      return (
+        <UserProfileHoverCard user={row.user}>
+          <div className="flex items-center gap-3 cursor-pointer group">
+            <Avatar className="h-9 w-9 rounded-lg border border-border/60 shrink-0">
+              <AvatarImage
+                src={
+                  row.user.avatar
+                    ? row.user.avatar.startsWith("http")
+                      ? row.user.avatar
+                      : `https://cdn.thrico.network/${row.user.avatar}`
+                    : ""
+                }
+                alt={`${row.user.firstName} ${row.user.lastName}`}
+              />
+              <AvatarFallback className="rounded-lg bg-muted text-muted-foreground text-xs font-semibold">
+                {row.user.firstName?.charAt(0)}
+                {row.user.lastName?.charAt(0)}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col min-w-0">
+              <p className="text-[13px] font-semibold text-foreground leading-tight truncate group-hover:text-primary transition-colors">
+                {row.user.firstName} {row.user.lastName}
+              </p>
+              <p className="text-[11px] text-muted-foreground leading-tight mt-0.5 truncate">
+                {row.user.about?.currentPosition || "Community Member"}
+              </p>
+            </div>
+          </div>
+        </UserProfileHoverCard>
+      );
+    },
   },
   {
     key: "contact",
@@ -117,21 +130,29 @@ const columns: AdminTableColumn<UserDetail>[] = [
     cell: (row: any) => (
       <div className="flex items-center gap-1.5 text-[12px] text-foreground/80">
         {row.referrer?.user ? (
-          <div className="flex items-center gap-2">
-            <Avatar className="h-6 w-6 rounded-full border border-border/60 shrink-0">
-              <AvatarImage
-                src={`https://cdn.thrico.network/${row.referrer.user.avatar}`}
-                alt={row.referrer.user.firstName}
-              />
-              <AvatarFallback className="rounded-full bg-muted text-muted-foreground text-[10px] font-semibold">
-                {row.referrer.user.firstName?.[0]}
-                {row.referrer.user.lastName?.[0]}
-              </AvatarFallback>
-            </Avatar>
-            <span className="truncate max-w-[120px]">
-              {row.referrer.user.firstName} {row.referrer.user.lastName}
-            </span>
-          </div>
+          <UserProfileHoverCard user={row.referrer.user}>
+            <div className="flex items-center gap-2 cursor-pointer group">
+              <Avatar className="h-6 w-6 rounded-full border border-border/60 shrink-0">
+                <AvatarImage
+                  src={
+                    row.referrer.user.avatar
+                      ? row.referrer.user.avatar.startsWith("http")
+                        ? row.referrer.user.avatar
+                        : `https://cdn.thrico.network/${row.referrer.user.avatar}`
+                      : ""
+                  }
+                  alt={row.referrer.user.firstName}
+                />
+                <AvatarFallback className="rounded-full bg-muted text-muted-foreground text-[10px] font-semibold">
+                  {row.referrer.user.firstName?.charAt(0)}
+                  {row.referrer.user.lastName?.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
+              <span className="truncate max-w-[120px] group-hover:text-primary transition-colors">
+                {row.referrer.user.firstName} {row.referrer.user.lastName}
+              </span>
+            </div>
+          </UserProfileHoverCard>
         ) : (
           <span className="text-[11px] font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
             Direct Join

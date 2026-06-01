@@ -156,3 +156,58 @@ export function useBulkAddInterests(
     options,
   );
 }
+
+// ---------------------------------------------------------
+// GET USERS BY INTEREST
+// ---------------------------------------------------------
+
+export interface InterestUser {
+  id: string;
+  globalUserId: string;
+  firstName: string | null;
+  lastName: string | null;
+  avatar: string | null;
+  headline: string | null;
+}
+
+export interface GetUsersByInterestResponse {
+  getUsersByInterestNeo4j: {
+    data: InterestUser[];
+    totalCount: number;
+    hasNextPage: boolean;
+    cursor: string | null;
+  };
+}
+
+export interface GetUsersByInterestVars {
+  interestId: string;
+  limit?: number;
+  cursor?: string;
+}
+
+export const GET_USERS_BY_INTEREST_NEO4J = gql`
+  query GetUsersByInterestNeo4j($interestId: ID!, $limit: Int, $cursor: String) {
+    getUsersByInterestNeo4j(interestId: $interestId, limit: $limit, cursor: $cursor) {
+      data {
+        id
+        globalUserId
+        firstName
+        lastName
+        avatar
+        headline
+      }
+      totalCount
+      hasNextPage
+      cursor
+    }
+  }
+`;
+
+export function useGetUsersByInterestNeo4j(
+  options?: QueryHookOptions<GetUsersByInterestResponse, GetUsersByInterestVars>,
+) {
+  return useQuery<GetUsersByInterestResponse, GetUsersByInterestVars>(
+    GET_USERS_BY_INTEREST_NEO4J,
+    options,
+  );
+}

@@ -105,7 +105,7 @@ export function MentorsManager() {
 
       <EcosystemActionBar shadow="none">
         <EcosystemActionBar.Group>
-          <EcosystemActionBar.Item grow className="max-w-[400px]">
+          <EcosystemActionBar.Item grow className="max-w-xs">
             <EcosystemActionBar.Search
               value={search}
               onChange={setSearch}
@@ -116,7 +116,7 @@ export function MentorsManager() {
 
         <EcosystemActionBar.Separator />
 
-        <EcosystemActionBar.Group align="right">
+        <EcosystemActionBar.Group>
           <EcosystemActionBar.Item>
             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
               <SelectTrigger className="w-[180px] h-9 rounded-lg border-border bg-card text-sm font-medium text-foreground shadow-none focus:ring-2 focus:ring-ring/20">
@@ -164,7 +164,9 @@ export function MentorsManager() {
               </SelectContent>
             </Select>
           </EcosystemActionBar.Item>
+        </EcosystemActionBar.Group>
 
+        <EcosystemActionBar.Group align="right">
           <EcosystemActionBar.Status active={mentors.length > 0}>
              {mentors.length} Active Mentors
           </EcosystemActionBar.Status>
