@@ -53,6 +53,7 @@ import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { DateRange } from "react-day-picker";
 import { subDays } from "date-fns";
 import { cn } from "@/lib/utils";
+import { withModulePermission } from "@/components/hoc/with-module-permission";
 
 interface ListingData {
   id: string;
@@ -333,7 +334,7 @@ const MarketplaceDashboard = () => {
               >
                 <div className="flex-1 min-w-0">
                   <Link
-                    href={`/listing/${listing.id}`}
+                    href={`/listing/${listing.id}/manage`}
                     className="text-sm font-semibold text-zinc-900 hover:text-indigo-600 transition-colors block truncate"
                   >
                     {listing.title}
@@ -364,4 +365,4 @@ const MarketplaceDashboard = () => {
   );
 };
 
-export default MarketplaceDashboard;
+export default withModulePermission(MarketplaceDashboard, "LISTING", "canRead");

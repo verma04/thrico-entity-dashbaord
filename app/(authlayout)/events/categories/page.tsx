@@ -1,5 +1,9 @@
 "use client";
 
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -199,7 +203,7 @@ function AddCategoryModal({
   );
 }
 
-export default function CategoriesPage() {
+function CategoriesPage() {
   const [categories, setCategories] = useState<EventCategory[]>(initialCategories);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -260,3 +264,8 @@ export default function CategoriesPage() {
     </EcosystemWrapper>
   );
 }
+
+export default withSubscriptionCheck(
+  withModulePermission(CategoriesPage, "EVENTS", "canRead"),
+  "events"
+);

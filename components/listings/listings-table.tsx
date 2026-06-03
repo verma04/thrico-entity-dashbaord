@@ -1,12 +1,17 @@
 "use client";
 
 import React, { useState } from "react";
-import { AdminTable, AdminStatusBadge, AdminVerifiedBadge } from "@/components/shared/admin-table/admin-table";
+import {
+  AdminTable,
+  AdminStatusBadge,
+  AdminVerifiedBadge,
+} from "@/components/shared/admin-table/admin-table";
 import {
   MoreHorizontal,
   Eye,
   TrendingUp,
   MapPin,
+  Settings,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,12 +33,14 @@ interface Listing {
   id: string;
   title: string;
   price: number;
-  location: {
-    name?: string;
-    address?: string;
-    latitude?: number;
-    longitude?: number;
-  } | string;
+  location:
+    | {
+        name?: string;
+        address?: string;
+        latitude?: number;
+        longitude?: number;
+      }
+    | string;
   status: string;
   verified: boolean;
   views: number;
@@ -108,7 +115,7 @@ export function ListingsTable({ listings }: { listings: Listing[] }) {
     {
       key: "creator",
       header: "Creator",
-    cell: (listing: Listing) => {
+      cell: (listing: Listing) => {
         if (!listing.postedBy) {
           return (
             <div className="flex items-center gap-2">
@@ -123,7 +130,7 @@ export function ListingsTable({ listings }: { listings: Listing[] }) {
             </div>
           );
         }
-        
+
         return (
           <UserProfileHoverCard user={listing.postedBy}>
             <div className="flex items-center gap-2 cursor-pointer group">
@@ -180,14 +187,30 @@ export function ListingsTable({ listings }: { listings: Listing[] }) {
         <div className="flex justify-end pr-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-muted rounded-lg">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0 hover:bg-muted rounded-lg"
+              >
                 <MoreHorizontal className="w-4 h-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[180px] rounded-xl shadow-xl">
+            <DropdownMenuContent
+              align="end"
+              className="w-[180px] rounded-xl shadow-xl"
+            >
               <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold px-3 py-2">
                 Operations
               </DropdownMenuLabel>
+              <DropdownMenuItem
+                className="rounded-lg mx-1 cursor-pointer gap-2"
+                onClick={() => {
+                  window.location.href = `/listing/${listing.id}/manage`;
+                }}
+              >
+                <Settings className="w-3.5 h-3.5" />
+                Manage Listing
+              </DropdownMenuItem>
               <DropdownMenuItem
                 className="rounded-lg mx-1 cursor-pointer gap-2"
                 onClick={() => {
@@ -201,12 +224,11 @@ export function ListingsTable({ listings }: { listings: Listing[] }) {
               <DropdownMenuItem
                 className="rounded-lg mx-1 cursor-pointer gap-2"
                 onClick={() => {
-                  setSelectedListing(listing);
-                  setAnalyticsOpen(true);
+                  window.location.href = `/listing/${listing.id}/audit-log`;
                 }}
               >
                 <TrendingUp className="w-3.5 h-3.5 text-indigo-500" />
-                Performance
+                Audit Log
               </DropdownMenuItem>
               <DropdownMenuSeparator className="opacity-50" />
               <DropdownMenuItem className="rounded-lg mx-1 cursor-pointer gap-2 text-destructive focus:text-destructive focus:bg-destructive/5">

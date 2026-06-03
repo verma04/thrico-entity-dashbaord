@@ -1,5 +1,9 @@
 "use client";
 
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
+
 import React, { useState } from "react";
 import {
   useGetWallOfFameCategories,
@@ -271,7 +275,7 @@ function CategoriesGrid({
 }
 
 // ── Main Page ──
-export default function WallOfFameCategoriesPage() {
+function WallOfFameCategoriesPage() {
   const { data, loading, refetch } = useGetWallOfFameCategories();
   const [search, setSearch] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -444,3 +448,8 @@ export default function WallOfFameCategoriesPage() {
     </EcosystemWrapper>
   );
 }
+
+export default withSubscriptionCheck(
+  withModulePermission(WallOfFameCategoriesPage, "WALL_OF_FAME", "canRead"),
+  "wall-of-fame"
+);

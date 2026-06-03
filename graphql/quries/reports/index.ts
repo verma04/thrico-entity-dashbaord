@@ -16,8 +16,8 @@ export enum ReportModule {
 }
 
 export const GET_ALL_REPORTS = gql`
-  query GetAllReports($module: ReportModule, $status: ReportStatus, $page: Int, $limit: Int) {
-    getAllReports(module: $module, status: $status, page: $page, limit: $limit) {
+  query GetAllReports($module: ReportModule, $targetId: ID, $status: ReportStatus, $page: Int, $limit: Int) {
+    getAllReports(module: $module, targetId: $targetId, status: $status, page: $page, limit: $limit) {
       pagination {
         currentPage
         totalPages

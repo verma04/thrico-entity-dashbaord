@@ -6,12 +6,7 @@ import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrappe
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
-import {
-  ShieldAlert,
-  ShieldCheck,
-  RotateCcw,
-  LayoutGrid,
-} from "lucide-react";
+import { ShieldAlert, RotateCcw, LayoutGrid } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -25,8 +20,10 @@ import { cn } from "@/lib/utils";
 
 export default function Reports({
   preselectedModule,
+  canEdit = true,
 }: {
   preselectedModule?: ReportModule;
+  canEdit?: boolean;
 }) {
   const [selectedModule, setSelectedModule] = useState<ReportModule | "ALL">(
     preselectedModule || "ALL",
@@ -46,11 +43,12 @@ export default function Reports({
 
   const availableModules = Object.values(ReportModule) as ReportModule[];
   const reports = data?.getAllReports?.reports || [];
-  
-  const filteredReports = reports.filter(r => 
-    r.reason?.toLowerCase().includes(search.toLowerCase()) ||
-    r.description?.toLowerCase().includes(search.toLowerCase()) ||
-    r.module?.toLowerCase().includes(search.toLowerCase())
+
+  const filteredReports = reports.filter(
+    (r) =>
+      r.reason?.toLowerCase().includes(search.toLowerCase()) ||
+      r.description?.toLowerCase().includes(search.toLowerCase()) ||
+      r.module?.toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
@@ -76,7 +74,7 @@ export default function Reports({
         <EcosystemActionBar.Group align="right">
           <EcosystemActionBar.Item>
             {!preselectedModule && (
-               <Select
+              <Select
                 value={selectedModule}
                 onValueChange={(val: any) => setSelectedModule(val)}
               >
@@ -91,7 +89,11 @@ export default function Reports({
                     All Modules
                   </SelectItem>
                   {availableModules.map((mod) => (
-                    <SelectItem key={mod} value={mod} className="rounded-lg text-xs py-2">
+                    <SelectItem
+                      key={mod}
+                      value={mod}
+                      className="rounded-lg text-xs py-2"
+                    >
                       {mod}
                     </SelectItem>
                   ))}
@@ -112,13 +114,17 @@ export default function Reports({
           </EcosystemActionBar.Item>
 
           <EcosystemActionBar.Status active={filteredReports.length > 0}>
-             {filteredReports.length} Reports
+            {filteredReports.length} Reports
           </EcosystemActionBar.Status>
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
 
       <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">
-        <ReportsList data={filteredReports} loading={loading} />
+        <ReportsList
+          data={filteredReports}
+          loading={loading}
+          canEdit={canEdit}
+        />
       </EcosystemContainer>
     </EcosystemWrapper>
   );

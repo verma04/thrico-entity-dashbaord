@@ -48,6 +48,7 @@ interface ProductCreationFormProps {
   categories: { id: string; name: string }[];
   entityName?: string;
   mode?: "create" | "edit";
+  embedded?: boolean;
 }
 
 export function ProductCreationForm({
@@ -61,6 +62,7 @@ export function ProductCreationForm({
   categories,
   entityName = "My Store",
   mode = "create",
+  embedded = false,
 }: ProductCreationFormProps) {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("general");
@@ -185,25 +187,27 @@ export function ProductCreationForm({
       <>
         <div className="flex flex-col h-full bg-background min-h-0 rounded-t-[inherit]">
         {/* Header section - Sticky */}
-        <div className="sticky top-0 z-30 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 border-b px-6 py-4">
-          <div className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-3 mb-1">
-                <div className="p-2.5 rounded-xl bg-primary/10 ring-1 ring-primary/20">
-                  <ShoppingBag className="h-5 w-5 text-primary" />
+        {!embedded && (
+          <div className="sticky top-0 z-30 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 border-b px-6 py-4">
+            <div className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-3 mb-1">
+                  <div className="p-2.5 rounded-xl bg-primary/10 ring-1 ring-primary/20">
+                    <ShoppingBag className="h-5 w-5 text-primary" />
+                  </div>
+                  <h1 className="text-2xl font-bold tracking-tight">
+                    {mode === "create" ? "Create Product" : "Edit Product"}
+                  </h1>
                 </div>
-                <h1 className="text-2xl font-bold tracking-tight">
-                  {mode === "create" ? "Create Product" : "Edit Product"}
-                </h1>
-              </div>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground ml-1">
-                <span>Shop</span>
-                <ChevronRight className="h-3 w-3" />
-                <span>{mode === "create" ? "New" : "Edit"} Product</span>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground ml-1">
+                  <span>Shop</span>
+                  <ChevronRight className="h-3 w-3" />
+                  <span>{mode === "create" ? "New" : "Edit"} Product</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Main Content Area - Scrollable */}
         <div className="flex-1 overflow-y-auto pb-20 sm:pb-0">

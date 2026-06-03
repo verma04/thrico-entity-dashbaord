@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import {
+  Loader2,
   Headset,
   MessageSquare,
   ChevronRight,
@@ -14,12 +15,16 @@ import {
   ShieldAlert,
   X,
   MoreVertical,
+  Search,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
-import { useSearchUserByName } from "@/graphql/actions/mentorship/mentorship-actions";
 import { useQuery } from "@apollo/client";
-import { GET_SUPPORT_TICKETS, GET_TICKET_MESSAGES } from "@/graphql/quries/trust-center";
+import { CreateTicketModal } from "./create-ticket-modal";
+import {
+  GET_SUPPORT_TICKETS,
+  GET_TICKET_MESSAGES,
+} from "@/graphql/quries/trust-center";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,6 +34,13 @@ import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-cont
 import { EcosystemCard } from "@/components/layout/ecosystem/ecosystem-analytics";
 import { Ticket, Strike } from "./trust-center-dashboard";
 import { getMediaUrls } from "@/lib/media-utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface MemberInboxPortalProps {
   onSignPolicy: (id: string, signature: string) => void;
@@ -38,9 +50,14 @@ interface MemberInboxPortalProps {
     category: any,
     subCategory: string | undefined,
     description: string,
-    linkedUser?: string,
+    targetUserId?: string,
+    targetUserIds?: string[],
     allowReplies?: boolean,
     recipientType?: "all" | "one" | "multiple",
+  ) => void;
+  onUpdateTicket?: (
+    id: string,
+    input: { status?: string; priority?: string; allowReplies?: boolean },
   ) => void;
   onCreateAppeal: (subject: string, description: string) => void;
 }
@@ -58,9 +75,12 @@ export default function MemberInboxPortal({
   onSignPolicy,
   onReply,
   onCreateTicket,
+  onUpdateTicket,
   onCreateAppeal,
 }: MemberInboxPortalProps) {
   const [activeCategory, setActiveCategory] = useState<string>("ALL");
+  const [activeStatus, setActiveStatus] = useState<string>("ALL");
+  const [activePriority, setActivePriority] = useState<string>("ALL");
   const [pageSize] = useState(10);
   const [afterCursor, setAfterCursor] = useState<string | null>(null);
   const [cursorStack, setCursorStack] = useState<string[]>([]);
@@ -70,6 +90,8 @@ export default function MemberInboxPortal({
     {
       variables: {
         category: activeCategory === "ALL" ? null : activeCategory,
+        status: activeStatus === "ALL" ? null : activeStatus,
+        priority: activePriority === "ALL" ? null : activePriority,
         first: pageSize,
         after: afterCursor,
       },
@@ -117,7 +139,9 @@ export default function MemberInboxPortal({
 
   const [messagesPageSize] = useState(20);
   const [messagesCursorStack, setMessagesCursorStack] = useState<string[]>([]);
-  const [messagesAfterCursor, setMessagesAfterCursor] = useState<string | null>(null);
+  const [messagesAfterCursor, setMessagesAfterCursor] = useState<string | null>(
+    null,
+  );
 
   // Reset message pagination when selected ticket changes
   useEffect(() => {
@@ -135,7 +159,7 @@ export default function MemberInboxPortal({
       },
       skip: !selectedTicketId,
       fetchPolicy: "cache-and-network",
-    }
+    },
   );
 
   const rawMessages = messagesData?.getTicketMessages?.items || [];
@@ -154,53 +178,14 @@ export default function MemberInboxPortal({
     timestamp: new Date(m.createdAt).toLocaleDateString(),
   }));
   const [replyText, setReplyText] = useState("");
+  const [isReplying, setIsReplying] = useState(false);
   const [signatureName, setSignatureName] = useState("");
 
   // Modals
   const [ticketModalOpen, setTicketModalOpen] = useState(false);
   const [appealModalOpen, setAppealModalOpen] = useState(false);
-  const [newSubject, setNewSubject] = useState("");
-  const [newCat, setNewCat] = useState<Ticket["category"]>("Entity Support");
-  const [newSubCat, setNewSubCat] = useState<string>("Policy Update");
-  const [newDesc, setNewDesc] = useState("");
-  const [selectedUser, setSelectedUser] = useState<any>(null);
-  const [selectedUsers, setSelectedUsers] = useState<any[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [recipientType, setRecipientType] = useState<
-    "all" | "one" | "multiple"
-  >("one");
-  const [allowReplies, setAllowReplies] = useState(true);
   const [appealSubject, setAppealSubject] = useState("");
   const [appealDesc, setAppealDesc] = useState("");
-
-  const [searchUser, { data: searchData, loading: searching }] =
-    useSearchUserByName();
-
-  useEffect(() => {
-    if (recipientType === "all") {
-      setNewCat("Announcement");
-    } else if (
-      newCat === "Announcement" ||
-      newCat === "Policy Updates" ||
-      newCat === "Security Notices"
-    ) {
-      setNewCat("Entity Support");
-    }
-  }, [recipientType]);
-
-  useEffect(() => {
-    if (newCat === "Moderation") setNewSubCat("Block");
-    else if (newCat === "Entity Support") setNewSubCat("Policy Update");
-    else setNewSubCat("");
-  }, [newCat]);
-
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setSearchQuery(value);
-    if (value.length >= 2) {
-      searchUser({ variables: { name: value } });
-    }
-  };
 
   // Filtering is now handled by the backend
   const filteredTickets = fetchedTickets;
@@ -210,49 +195,15 @@ export default function MemberInboxPortal({
     fetchedTickets[0] ||
     null;
 
-  const handleSendReply = () => {
+  const handleSendReply = async () => {
     if (!replyText.trim() || !selectedTicket) return;
-    onReply(selectedTicket.id, replyText.trim());
-    setReplyText("");
-  };
-
-  const handleLaunchTicket = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newSubject.trim() || !newDesc.trim()) return;
-
-    let linkedUserStr = undefined;
-    if (recipientType === "one" && selectedUser) {
-      linkedUserStr = `${selectedUser.user.firstName} ${selectedUser.user.lastName}`;
-    } else if (recipientType === "multiple" && selectedUsers.length > 0) {
-      linkedUserStr = selectedUsers
-        .map((u) => `${u.user.firstName} ${u.user.lastName}`)
-        .join(", ");
+    setIsReplying(true);
+    try {
+      await onReply(selectedTicket.id, replyText.trim());
+      setReplyText("");
+    } finally {
+      setIsReplying(false);
     }
-
-    onCreateTicket(
-      newSubject.trim(),
-      newCat,
-      newSubCat,
-      newDesc.trim(),
-      linkedUserStr,
-      allowReplies,
-      recipientType,
-    );
-    setNewSubject("");
-    setNewDesc("");
-    setNewSubCat(
-      newCat === "Moderation"
-        ? "Block"
-        : newCat === "Entity Support"
-          ? "Policy Update"
-          : "",
-    );
-    setSelectedUser(null);
-    setSelectedUsers([]);
-    setSearchQuery("");
-    setRecipientType("one");
-    setAllowReplies(true);
-    setTicketModalOpen(false);
   };
 
   const handleLaunchAppeal = (e: React.FormEvent) => {
@@ -296,27 +247,72 @@ export default function MemberInboxPortal({
             </Button>
           </div>
 
-          {/* Category filter */}
-          <div className="px-3 py-2 border-b border-border flex gap-1 overflow-x-auto">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => {
-                  setActiveCategory(cat);
+          {/* Category and extra filters */}
+          <div className="px-3 py-2 border-b border-border flex flex-col gap-2">
+            <div className="flex gap-1 overflow-x-auto pb-1">
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => {
+                    setActiveCategory(cat);
+                    setAfterCursor(null);
+                    setCursorStack([]);
+                    setSelectedTicketId(null);
+                  }}
+                  className={cn(
+                    "px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors whitespace-nowrap cursor-pointer",
+                    activeCategory === cat
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:bg-muted",
+                  )}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <Select
+                value={activeStatus}
+                onValueChange={(v) => {
+                  setActiveStatus(v);
                   setAfterCursor(null);
                   setCursorStack([]);
                   setSelectedTicketId(null);
                 }}
-                className={cn(
-                  "px-2.5 py-1 rounded-md text-[11px] font-medium transition-colors whitespace-nowrap cursor-pointer",
-                  activeCategory === cat
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-muted",
-                )}
               >
-                {cat}
-              </button>
-            ))}
+                <SelectTrigger className="h-6 text-[10px] w-[120px] bg-muted/50 border-transparent hover:bg-muted font-medium">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">All Status</SelectItem>
+                  <SelectItem value="OPEN">Open</SelectItem>
+                  <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
+                  <SelectItem value="RESOLVED">Resolved</SelectItem>
+                  <SelectItem value="CLOSED">Closed</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select
+                value={activePriority}
+                onValueChange={(v) => {
+                  setActivePriority(v);
+                  setAfterCursor(null);
+                  setCursorStack([]);
+                  setSelectedTicketId(null);
+                }}
+              >
+                <SelectTrigger className="h-6 text-[10px] w-[120px] bg-muted/50 border-transparent hover:bg-muted font-medium">
+                  <SelectValue placeholder="Priority" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">All Priorities</SelectItem>
+                  <SelectItem value="LOW">Low</SelectItem>
+                  <SelectItem value="MEDIUM">Medium</SelectItem>
+                  <SelectItem value="HIGH">High</SelectItem>
+                  <SelectItem value="URGENT">Urgent</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {/* Items */}
@@ -446,7 +442,9 @@ export default function MemberInboxPortal({
                   const newStack = [...cursorStack];
                   newStack.pop();
                   setCursorStack(newStack);
-                  setAfterCursor(newStack.length > 0 ? newStack[newStack.length - 1] : null);
+                  setAfterCursor(
+                    newStack.length > 0 ? newStack[newStack.length - 1] : null,
+                  );
                 }}
               >
                 Previous
@@ -458,7 +456,10 @@ export default function MemberInboxPortal({
                 disabled={!pageInfo?.hasNextPage}
                 onClick={() => {
                   if (pageInfo?.endCursor) {
-                    setCursorStack([...cursorStack, afterCursor || "__start__"]);
+                    setCursorStack([
+                      ...cursorStack,
+                      afterCursor || "__start__",
+                    ]);
                     setAfterCursor(pageInfo.endCursor);
                   }
                 }}
@@ -556,27 +557,81 @@ export default function MemberInboxPortal({
                     </>
                   )}
 
-                  <div className="shrink-0 flex items-center gap-2 border-l border-border pl-3 ml-auto">
-                    <div className="text-[10px] text-muted-foreground text-right">
-                      Status:{" "}
-                      <span className="font-medium text-foreground">
-                        {selectedTicket.status.toUpperCase()}
+                  <div className="shrink-0 flex items-center gap-3 border-l border-border pl-4 ml-auto">
+                    <div className="flex flex-col items-end gap-1">
+                      <span className="text-[9px] text-muted-foreground uppercase font-semibold tracking-wider">
+                        Status
                       </span>
+                      {onUpdateTicket ? (
+                        <Select
+                          value={selectedTicket.status.toUpperCase()}
+                          onValueChange={(val) =>
+                            onUpdateTicket(selectedTicket.id, { status: val })
+                          }
+                        >
+                          <SelectTrigger className="h-6 text-[10px] px-2 py-0 border-transparent bg-muted/50 hover:bg-muted font-medium w-[110px]">
+                            <SelectValue placeholder="Status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="OPEN">Open</SelectItem>
+                            <SelectItem value="IN_PROGRESS">
+                              In Progress
+                            </SelectItem>
+                            <SelectItem value="RESOLVED">Resolved</SelectItem>
+                            <SelectItem value="CLOSED">Closed</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <div className="text-[10px] font-medium text-foreground h-6 flex items-center px-2 bg-muted/50 rounded-md">
+                          {selectedTicket.status.toUpperCase()}
+                        </div>
+                      )}
                     </div>
-                    <div className="text-[10px] text-muted-foreground text-right ml-2">
-                      Priority:{" "}
-                      <span
-                        className={cn(
-                          "font-medium",
-                          selectedTicket.priority === "urgent"
-                            ? "text-rose-500"
-                            : selectedTicket.priority === "high"
-                              ? "text-amber-500"
-                              : "text-foreground",
-                        )}
-                      >
-                        {selectedTicket.priority.toUpperCase()}
+
+                    <div className="flex flex-col items-end gap-1">
+                      <span className="text-[9px] text-muted-foreground uppercase font-semibold tracking-wider">
+                        Priority
                       </span>
+                      {onUpdateTicket ? (
+                        <Select
+                          value={selectedTicket.priority.toUpperCase()}
+                          onValueChange={(val) =>
+                            onUpdateTicket(selectedTicket.id, { priority: val })
+                          }
+                        >
+                          <SelectTrigger
+                            className={cn(
+                              "h-6 text-[10px] px-2 py-0 border-transparent font-medium w-[90px]",
+                              selectedTicket.priority === "urgent"
+                                ? "bg-rose-500/10 text-rose-600 hover:bg-rose-500/20"
+                                : selectedTicket.priority === "high"
+                                  ? "bg-amber-500/10 text-amber-600 hover:bg-amber-500/20"
+                                  : "bg-muted/50 hover:bg-muted",
+                            )}
+                          >
+                            <SelectValue placeholder="Priority" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="LOW">Low</SelectItem>
+                            <SelectItem value="MEDIUM">Medium</SelectItem>
+                            <SelectItem value="HIGH">High</SelectItem>
+                            <SelectItem value="URGENT">Urgent</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <span
+                          className={cn(
+                            "font-medium text-[10px] h-6 flex items-center px-2 rounded-md",
+                            selectedTicket.priority === "urgent"
+                              ? "bg-rose-500/10 text-rose-600"
+                              : selectedTicket.priority === "high"
+                                ? "bg-amber-500/10 text-amber-600"
+                                : "bg-muted/50 text-foreground",
+                          )}
+                        >
+                          {selectedTicket.priority.toUpperCase()}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -671,29 +726,15 @@ export default function MemberInboxPortal({
                       className="text-xs h-7"
                       onClick={() => {
                         if (messagesPageInfo.endCursor) {
-                          setMessagesCursorStack([...messagesCursorStack, messagesAfterCursor || "__start__"]);
+                          setMessagesCursorStack([
+                            ...messagesCursorStack,
+                            messagesAfterCursor || "__start__",
+                          ]);
                           setMessagesAfterCursor(messagesPageInfo.endCursor);
                         }
                       }}
                     >
                       Load Older Messages
-                    </Button>
-                  </div>
-                )}
-                {messagesCursorStack.length > 0 && (
-                  <div className="flex justify-center mb-4">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-xs h-7"
-                      onClick={() => {
-                        const newStack = [...messagesCursorStack];
-                        newStack.pop();
-                        setMessagesCursorStack(newStack);
-                        setMessagesAfterCursor(newStack.length > 0 ? newStack[newStack.length - 1] : null);
-                      }}
-                    >
-                      Show Newer Messages
                     </Button>
                   </div>
                 )}
@@ -707,7 +748,7 @@ export default function MemberInboxPortal({
                     No messages yet.
                   </div>
                 ) : (
-                  ticketMessages.map((m: any) => {
+                  [...ticketMessages].reverse().map((m: any) => {
                     const isUser = m.sender === "user";
                     const isSystem = m.sender === "system";
                     return (
@@ -752,12 +793,37 @@ export default function MemberInboxPortal({
                                 : "bg-primary text-primary-foreground rounded-tl-sm",
                             )}
                           >
-                            {m.body}
+                            <div
+                              dangerouslySetInnerHTML={{ __html: m.body }}
+                              className="[&_ul]:list-disc [&_ul]:ml-4 [&_ol]:list-decimal [&_ol]:ml-4 [&_h1]:text-lg [&_h1]:font-bold [&_h2]:text-base [&_h2]:font-bold [&_h3]:text-sm [&_h3]:font-bold [&_p]:mb-2 last:[&_p]:mb-0 [&_a]:underline"
+                            />
                           </div>
                         </div>
                       </div>
                     );
                   })
+                )}
+
+                {messagesCursorStack.length > 0 && (
+                  <div className="flex justify-center mt-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-xs h-7"
+                      onClick={() => {
+                        const newStack = [...messagesCursorStack];
+                        newStack.pop();
+                        setMessagesCursorStack(newStack);
+                        setMessagesAfterCursor(
+                          newStack.length > 0
+                            ? newStack[newStack.length - 1]
+                            : null,
+                        );
+                      }}
+                    >
+                      Show Newer Messages
+                    </Button>
+                  </div>
                 )}
               </div>
 
@@ -781,9 +847,14 @@ export default function MemberInboxPortal({
                     <div className="flex justify-end">
                       <Button
                         onClick={handleSendReply}
+                        disabled={isReplying}
                         className="h-8 text-xs px-4 bg-primary text-primary-foreground hover:bg-primary/90"
                       >
-                        <Send className="h-3.5 w-3.5 mr-1.5" />
+                        {isReplying ? (
+                          <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                        ) : (
+                          <Send className="h-3.5 w-3.5 mr-1.5" />
+                        )}
                         Reply as Admin
                       </Button>
                     </div>
@@ -807,373 +878,14 @@ export default function MemberInboxPortal({
       </div>
 
       {/* ── Modal: Create Ticket ── */}
-      {ticketModalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="w-full max-w-md rounded-xl border border-border bg-card shadow-xl p-5 space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-foreground">
-                New Message / Ticket
-              </h3>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7"
-                onClick={() => setTicketModalOpen(false)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-            <form onSubmit={handleLaunchTicket} className="space-y-4">
-              <div className="space-y-1.5">
-                <label className="text-[11px] font-medium text-muted-foreground">
-                  Recipient
-                </label>
-                <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    variant={recipientType === "one" ? "default" : "outline"}
-                    className="flex-1 h-8 text-xs"
-                    onClick={() => {
-                      setRecipientType("one");
-                      setAllowReplies(true);
-                    }}
-                  >
-                    Specific User
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={
-                      recipientType === "multiple" ? "default" : "outline"
-                    }
-                    className="flex-1 h-8 text-xs"
-                    onClick={() => {
-                      setRecipientType("multiple");
-                      setAllowReplies(true);
-                    }}
-                  >
-                    Multiple
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={recipientType === "all" ? "default" : "outline"}
-                    className="flex-1 h-8 text-xs"
-                    onClick={() => {
-                      setRecipientType("all");
-                      setAllowReplies(false);
-                    }}
-                  >
-                    All Members
-                  </Button>
-                </div>
-              </div>
-
-              {recipientType === "multiple" && (
-                <div className="space-y-1">
-                  <label className="text-[11px] font-medium text-muted-foreground">
-                    Target Users
-                  </label>
-
-                  {selectedUsers.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-2 p-2 border border-border rounded-md bg-muted/30 max-h-24 overflow-y-auto">
-                      {selectedUsers.map((u) => (
-                        <div
-                          key={u.id}
-                          className="flex items-center gap-1.5 bg-background border border-border px-2 py-1 rounded-full"
-                        >
-                          <div className="h-4 w-4 rounded-full overflow-hidden bg-muted shrink-0">
-                            {u.user?.avatar ? (
-                              <Image
-                                src={`https://cdn.thrico.network/${u.user.avatar}`}
-                                alt="Avatar"
-                                width={16}
-                                height={16}
-                                className="h-full w-full object-cover"
-                              />
-                            ) : (
-                              <UserCheck className="h-2.5 w-2.5 m-0.5 text-muted-foreground" />
-                            )}
-                          </div>
-                          <span className="text-[10px] font-medium text-foreground">
-                            {u.user?.firstName}
-                          </span>
-                          <button
-                            type="button"
-                            className="text-muted-foreground hover:text-foreground ml-0.5"
-                            onClick={() =>
-                              setSelectedUsers(
-                                selectedUsers.filter(
-                                  (user) => user.id !== u.id,
-                                ),
-                              )
-                            }
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Search to add users..."
-                      value={searchQuery}
-                      onChange={handleSearch}
-                      className="h-9 pl-9 text-xs"
-                    />
-                    {searchQuery.length >= 2 &&
-                      searchData?.searchUserByName && (
-                        <div className="absolute z-10 w-full mt-1 bg-card border border-border rounded-md shadow-md max-h-48 overflow-y-auto">
-                          {searchData.searchUserByName.filter(
-                            (u: any) =>
-                              !selectedUsers.find((su) => su.id === u.id),
-                          ).length === 0 ? (
-                            <div className="p-3 text-xs text-muted-foreground text-center">
-                              No more users found
-                            </div>
-                          ) : (
-                            searchData.searchUserByName
-                              .filter(
-                                (u: any) =>
-                                  !selectedUsers.find((su) => su.id === u.id),
-                              )
-                              .map((u: any) => (
-                                <div
-                                  key={u.id}
-                                  className="flex items-center gap-2 p-2 hover:bg-muted cursor-pointer transition-colors"
-                                  onClick={() => {
-                                    setSelectedUsers([...selectedUsers, u]);
-                                    setSearchQuery("");
-                                  }}
-                                >
-                                  <div className="h-6 w-6 rounded-full overflow-hidden bg-muted shrink-0">
-                                    {u.user?.avatar ? (
-                                      <Image
-                                        src={`https://cdn.thrico.network/${u.user.avatar}`}
-                                        alt="Avatar"
-                                        width={24}
-                                        height={24}
-                                        className="h-full w-full object-cover"
-                                      />
-                                    ) : (
-                                      <UserCheck className="h-4 w-4 m-1 text-muted-foreground" />
-                                    )}
-                                  </div>
-                                  <div>
-                                    <p className="text-xs font-medium text-foreground">
-                                      {u.user?.firstName} {u.user?.lastName}
-                                    </p>
-                                    <p className="text-[9px] text-muted-foreground">
-                                      {u.status}
-                                    </p>
-                                  </div>
-                                </div>
-                              ))
-                          )}
-                        </div>
-                      )}
-                  </div>
-                </div>
-              )}
-
-              {recipientType === "one" && (
-                <div className="space-y-1">
-                  <label className="text-[11px] font-medium text-muted-foreground">
-                    Target User
-                  </label>
-                  {!selectedUser ? (
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        placeholder="Search users by name..."
-                        value={searchQuery}
-                        onChange={handleSearch}
-                        className="h-9 pl-9 text-xs"
-                      />
-                      {searchQuery.length >= 2 &&
-                        searchData?.searchUserByName && (
-                          <div className="absolute z-10 w-full mt-1 bg-card border border-border rounded-md shadow-md max-h-48 overflow-y-auto">
-                            {searchData.searchUserByName.length === 0 ? (
-                              <div className="p-3 text-xs text-muted-foreground text-center">
-                                No users found
-                              </div>
-                            ) : (
-                              searchData.searchUserByName.map((u: any) => (
-                                <div
-                                  key={u.id}
-                                  className="flex items-center gap-2 p-2 hover:bg-muted cursor-pointer transition-colors"
-                                  onClick={() => {
-                                    setSelectedUser(u);
-                                    setSearchQuery("");
-                                  }}
-                                >
-                                  <div className="h-6 w-6 rounded-full overflow-hidden bg-muted shrink-0">
-                                    {u.user?.avatar ? (
-                                      <Image
-                                        src={`https://cdn.thrico.network/${u.user.avatar}`}
-                                        alt="Avatar"
-                                        width={24}
-                                        height={24}
-                                        className="h-full w-full object-cover"
-                                      />
-                                    ) : (
-                                      <UserCheck className="h-4 w-4 m-1 text-muted-foreground" />
-                                    )}
-                                  </div>
-                                  <div>
-                                    <p className="text-xs font-medium text-foreground">
-                                      {u.user?.firstName} {u.user?.lastName}
-                                    </p>
-                                    <p className="text-[9px] text-muted-foreground">
-                                      {u.status}
-                                    </p>
-                                  </div>
-                                </div>
-                              ))
-                            )}
-                          </div>
-                        )}
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-between p-2 border border-border rounded-md bg-muted/50">
-                      <div className="flex items-center gap-2">
-                        <div className="h-6 w-6 rounded-full overflow-hidden bg-background shrink-0">
-                          {selectedUser.user?.avatar ? (
-                            <Image
-                              src={`https://cdn.thrico.network/${selectedUser.user.avatar}`}
-                              alt="Avatar"
-                              width={24}
-                              height={24}
-                              className="h-full w-full object-cover"
-                            />
-                          ) : (
-                            <UserCheck className="h-4 w-4 m-1 text-muted-foreground" />
-                          )}
-                        </div>
-                        <span className="text-xs font-medium text-foreground">
-                          {selectedUser.user?.firstName}{" "}
-                          {selectedUser.user?.lastName}
-                        </span>
-                      </div>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 px-2 text-[10px]"
-                        onClick={() => setSelectedUser(null)}
-                      >
-                        Change
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              <div className="space-y-1">
-                <label className="text-[11px] font-medium text-muted-foreground">
-                  Subject
-                </label>
-                <Input
-                  required
-                  placeholder="Summarize the request"
-                  value={newSubject}
-                  onChange={(e) => setNewSubject(e.target.value)}
-                  className="h-9 text-xs"
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[11px] font-medium text-muted-foreground">
-                  Category
-                </label>
-                <select
-                  value={newCat}
-                  onChange={(e) => setNewCat(e.target.value as any)}
-                  className="w-full h-9 px-3 text-xs bg-background border border-input rounded-md"
-                >
-                  {recipientType === "all" ? (
-                    <>
-                      <option value="Announcement">Announcement</option>
-                      <option value="Policy Updates">Policy Updates</option>
-                      <option value="Security Notices">Security Notices</option>
-                    </>
-                  ) : (
-                    <>
-                      <option value="General Inquiry">General Inquiry</option>
-                      <option value="Entity Support">Entity Support</option>
-                      <option value="Moderation">Moderation</option>
-                      <option value="Appeals">Appeals</option>
-                    </>
-                  )}
-                </select>
-              </div>
-
-              {(newCat === "Moderation" || newCat === "Entity Support") && (
-                <div className="space-y-1">
-                  <label className="text-[11px] font-medium text-muted-foreground">
-                    Sub-Category
-                  </label>
-                  <select
-                    value={newSubCat}
-                    onChange={(e) => setNewSubCat(e.target.value)}
-                    className="w-full h-9 px-3 text-xs bg-background border border-input rounded-md"
-                  >
-                    {newCat === "Moderation" && (
-                      <>
-                        <option value="Block">Block</option>
-                        <option value="Warning">Warning</option>
-                      </>
-                    )}
-                    {newCat === "Entity Support" && (
-                      <>
-                        <option value="Policy Update">Policy Update</option>
-                        <option value="Platform Update">Platform Update</option>
-                      </>
-                    )}
-                  </select>
-                </div>
-              )}
-
-              <div className="space-y-1">
-                <label className="text-[11px] font-medium text-muted-foreground">
-                  Details
-                </label>
-                <RichTextEditor
-                  value={newDesc}
-                  onChange={(val) => setNewDesc(val)}
-                  placeholder="Describe the issue..."
-                  minHeight="120px"
-                />
-              </div>
-
-              <div className="space-y-2 pt-2 border-t border-border">
-                <label className="flex items-start gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={allowReplies}
-                    onChange={(e) => setAllowReplies(e.target.checked)}
-                    className="mt-1"
-                  />
-                  <div>
-                    <span className="text-xs font-medium text-foreground">
-                      Allow user replies
-                    </span>
-                    <p className="text-[10px] text-muted-foreground">
-                      {allowReplies
-                        ? "Users can reply to this thread."
-                        : "Only admins can reply to this thread."}
-                    </p>
-                  </div>
-                </label>
-              </div>
-
-              <Button type="submit" className="w-full h-9 text-xs">
-                Send Message
-              </Button>
-            </form>
-          </div>
-        </div>
-      )}
+      <CreateTicketModal
+        isOpen={ticketModalOpen}
+        onClose={() => setTicketModalOpen(false)}
+        onCreateTicket={async (subject, category, subCategory, description, targetUserId, targetUserIds, allowReplies, recipientType) => {
+          await onCreateTicket(subject, category, subCategory, description, targetUserId, targetUserIds, allowReplies, recipientType);
+          setTicketModalOpen(false);
+        }}
+      />
 
       {/* ── Modal: Appeal ── */}
       {appealModalOpen && (

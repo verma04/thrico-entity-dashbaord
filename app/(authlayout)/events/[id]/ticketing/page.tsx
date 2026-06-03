@@ -1,9 +1,13 @@
 "use client";
 
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
+
 import { useParams } from "next/navigation";
 import EventTicketing from "@/components/events/detail/event-ticketing";
 
-export default function TicketingPage() {
+function TicketingPage() {
   const params = useParams();
   const eventId = params?.id as string;
 
@@ -13,3 +17,8 @@ export default function TicketingPage() {
     </div>
   );
 }
+
+export default withSubscriptionCheck(
+  withModulePermission(TicketingPage, "EVENTS", "canRead"),
+  "events"
+);

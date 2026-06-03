@@ -230,17 +230,6 @@ export default function UserActions({ user }: { user: UserDetail }) {
     );
   }
 
-  actions.push(
-    { type: "separator" },
-
-    {
-      label: "Block",
-      icon: Lock,
-      onClick: () => handleAction(Action.BLOCK),
-      color: "text-red-600",
-    },
-  );
-
   return (
     <>
       <DropdownMenu>

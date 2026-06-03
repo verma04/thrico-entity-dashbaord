@@ -5,16 +5,11 @@ import List from "./communities-list";
 import { getCommunities } from "@/graphql/actions/group";
 import TableLoading from "../layout/table-loading";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  LayoutGrid,
-  List as ListIcon,
-  Users,
-  RefreshCw,
-} from "lucide-react";
+import { LayoutGrid, List as ListIcon, Users, RefreshCw } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import CommunityCard from "./community-card";
-import Create from "./add/Create";
+
 import {
   Select,
   SelectContent,
@@ -34,19 +29,21 @@ import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrappe
 // ─────────────────────────────────────────────────────────────────────────────
 
 const STATUS_OPTIONS = [
-  { value: "ALL",      label: "All",      dot: "" },
+  { value: "ALL", label: "All", dot: "" },
   { value: "APPROVED", label: "Approved", dot: "bg-emerald-500" },
-  { value: "PENDING",  label: "Pending",  dot: "bg-amber-500" },
+  { value: "PENDING", label: "Pending", dot: "bg-amber-500" },
   { value: "DISABLED", label: "Disabled", dot: "bg-orange-500" },
   { value: "REJECTED", label: "Rejected", dot: "bg-red-500" },
-  { value: "PAUSED",   label: "Paused",   dot: "bg-slate-400" },
+  { value: "PAUSED", label: "Paused", dot: "bg-slate-400" },
 ];
 
 interface CommunitiesProps {
   status?: string;
 }
 
-export default function Communities({ status: initialStatus }: CommunitiesProps) {
+export default function Communities({
+  status: initialStatus,
+}: CommunitiesProps) {
   const [view, setView] = useState<"grid" | "table">("table");
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState(initialStatus || "ALL");
@@ -92,7 +89,9 @@ export default function Communities({ status: initialStatus }: CommunitiesProps)
               onClick={() => refetch?.()}
               className="h-9 w-9 rounded-lg border-border text-muted-foreground hover:text-foreground transition-all"
             >
-              <RefreshCw className={cn("h-3.5 w-3.5", loading && "animate-spin")} />
+              <RefreshCw
+                className={cn("h-3.5 w-3.5", loading && "animate-spin")}
+              />
             </Button>
 
             {/* View toggle */}
@@ -118,7 +117,6 @@ export default function Communities({ status: initialStatus }: CommunitiesProps)
                 </TabsTrigger>
               </TabsList>
             </Tabs>
-            <Create />
           </div>
         }
       />
@@ -162,7 +160,10 @@ export default function Communities({ status: initialStatus }: CommunitiesProps)
                     <div className="flex items-center gap-2">
                       {opt.dot && (
                         <span
-                          className={cn("h-1.5 w-1.5 rounded-full shrink-0", opt.dot)}
+                          className={cn(
+                            "h-1.5 w-1.5 rounded-full shrink-0",
+                            opt.dot,
+                          )}
                         />
                       )}
                       {opt.label}
@@ -210,7 +211,9 @@ export default function Communities({ status: initialStatus }: CommunitiesProps)
                       <div className="h-12 w-12 bg-muted rounded-xl flex items-center justify-center mx-auto mb-3 text-muted-foreground/40">
                         <Users className="h-6 w-6" />
                       </div>
-                      <p className="text-sm font-semibold text-foreground">No results found</p>
+                      <p className="text-sm font-semibold text-foreground">
+                        No results found
+                      </p>
                       <p className="text-xs text-muted-foreground mt-1">
                         Try adjusting your search or filters.
                       </p>

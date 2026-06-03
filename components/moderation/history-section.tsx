@@ -95,24 +95,24 @@ export function HistorySection() {
     const l = label?.toLowerCase();
     if (l === "safe") {
       return (
-        <Badge className="bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-emerald-100 transition-colors gap-1.5 px-2 font-bold text-[10px] uppercase tracking-tighter">
-          <ShieldCheck className="w-3 h-3" />
+        <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/15 transition-colors gap-1.5 px-2.5 py-0.5 font-bold text-[9px] uppercase tracking-wider">
+          <ShieldCheck className="w-3.5 h-3.5" />
           CLEAN
         </Badge>
       );
     }
     if (l === "spam") {
       return (
-        <Badge className="bg-amber-50 text-amber-600 border-amber-100 hover:bg-amber-100 transition-colors gap-1.5 px-2 font-bold text-[10px] uppercase tracking-tighter">
-          <AlertCircle className="w-3 h-3" />
+        <Badge className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 hover:bg-amber-500/15 transition-colors gap-1.5 px-2.5 py-0.5 font-bold text-[9px] uppercase tracking-wider">
+          <AlertCircle className="w-3.5 h-3.5" />
           SPAM
         </Badge>
       );
     }
     if (l === "offensive" || l === "harassment") {
       return (
-        <Badge className="bg-rose-50 text-rose-600 border-rose-100 hover:bg-rose-100 transition-colors gap-1.5 px-2 font-bold text-[10px] uppercase tracking-tighter">
-          <AlertCircle className="w-3 h-3" />
+        <Badge className="bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20 hover:bg-rose-500/15 transition-colors gap-1.5 px-2.5 py-0.5 font-bold text-[9px] uppercase tracking-wider">
+          <AlertCircle className="w-3.5 h-3.5" />
           {l}
         </Badge>
       );
@@ -120,7 +120,7 @@ export function HistorySection() {
     return (
       <Badge
         variant="outline"
-        className="text-muted-foreground font-bold text-[10px] uppercase tracking-tighter"
+        className="text-muted-foreground border-border font-bold text-[9px] uppercase tracking-wider px-2.5 py-0.5"
       >
         {label}
       </Badge>
@@ -131,14 +131,14 @@ export function HistorySection() {
     const d = decision.toLowerCase();
     if (d === "approved" || d === "allow") {
       return (
-        <Badge className="bg-indigo-50 text-indigo-600 border-indigo-100 font-bold text-[10px] uppercase tracking-tighter">
+        <Badge className="bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20 font-bold text-[9px] uppercase tracking-wider px-2.5 py-0.5">
           APPROVED
         </Badge>
       );
     }
     if (d === "rejected" || d === "block" || d === "flagged") {
       return (
-        <Badge className="bg-amber-50 text-amber-600 border-amber-100 font-bold text-[10px] uppercase tracking-tighter">
+        <Badge className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 font-bold text-[9px] uppercase tracking-wider px-2.5 py-0.5">
           FLAGGED
         </Badge>
       );
@@ -146,7 +146,7 @@ export function HistorySection() {
     return (
       <Badge
         variant="secondary"
-        className="font-bold text-[10px] uppercase tracking-tighter"
+        className="font-bold text-[9px] uppercase tracking-wider px-2.5 py-0.5"
       >
         {decision}
       </Badge>
@@ -154,11 +154,11 @@ export function HistorySection() {
   };
 
   return (
-    <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden min-h-[500px] flex flex-col">
-      <div className="px-6 py-5 border-b border-border bg-muted/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden min-h-[500px] flex flex-col hover:shadow-md hover:border-border/80 transition-all duration-300">
+      <div className="px-6 py-5 border-b border-border bg-muted/20 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-background border border-border flex items-center justify-center shadow-sm">
-            <History className="h-5 w-5 text-indigo-600" />
+          <div className="h-10 w-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shadow-sm text-indigo-600 dark:text-indigo-400">
+            <History className="h-5 w-5" />
           </div>
           <div>
             <h3 className="text-sm font-bold text-foreground uppercase tracking-tight">
@@ -178,16 +178,16 @@ export function HistorySection() {
           }}
           className="w-full md:w-auto"
         >
-          <TabsList className="bg-zinc-100/80 p-1 border border-border rounded-lg h-9">
+          <TabsList className="bg-muted/80 p-1 border border-border rounded-lg h-9">
             <TabsTrigger
               value="moderation"
-              className="text-[10px] font-bold uppercase tracking-wider px-4 data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm transition-all"
+              className="text-[10px] font-bold uppercase tracking-wider px-4 data-[state=active]:bg-background data-[state=active]:text-indigo-600 dark:data-[state=active]:text-indigo-400 data-[state=active]:shadow-sm transition-all"
             >
               System logs
             </TabsTrigger>
             <TabsTrigger
               value="tokens"
-              className="text-[10px] font-bold uppercase tracking-wider px-4 data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm transition-all"
+              className="text-[10px] font-bold uppercase tracking-wider px-4 data-[state=active]:bg-background data-[state=active]:text-indigo-600 dark:data-[state=active]:text-indigo-400 data-[state=active]:shadow-sm transition-all"
             >
               Compute usage
             </TabsTrigger>
@@ -277,7 +277,7 @@ export function HistorySection() {
 
       <div className="flex-1 relative">
         {loading ? (
-          <div className="p-0">
+          <div className="p-0 overflow-x-auto">
             <Table>
               <TableHeader className="bg-muted/50">
                 <TableRow className="border-border pointer-events-none hover:bg-transparent">
@@ -344,43 +344,56 @@ export function HistorySection() {
         ) : (
           <div className="animate-in fade-in duration-500">
             {activeTab === "moderation" ? (
-              <Table>
-                <TableHeader className="bg-muted/50">
-                  <TableRow className="border-border hover:bg-transparent">
-                    <TableHead className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-6 h-10">
-                      Time
-                    </TableHead>
-                    <TableHead className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-6 h-10">
-                      Content Type
-                    </TableHead>
-                    <TableHead className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-6 h-10">
-                      System Label
-                    </TableHead>
-                    <TableHead className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-6 h-10">
-                      Decision
-                    </TableHead>
-                    <TableHead className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-6 h-10">
-                      User
-                    </TableHead>
-                    <TableHead className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-6 h-10 text-right">
-                      Details
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {moderationItems.length > 0 ? (
-                    moderationItems.map((log) => (
-                      <TableRow
-                        key={log.id}
-                        className="group hover:bg-zinc-50/80 transition-colors border-zinc-50"
-                      >
-                        <TableCell className="px-6 py-4 whitespace-nowrap">
-                          <span className="text-xs font-medium text-muted-foreground">
-                            {formatDistanceToNow(new Date(log.createdAt), {
-                              addSuffix: true,
-                            })}
-                          </span>
-                        </TableCell>
+              <div className="overflow-x-auto w-full">
+                <Table>
+                  <TableHeader className="bg-muted/50">
+                    <TableRow className="border-border hover:bg-transparent">
+                      <TableHead className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-6 h-10">
+                        Time
+                      </TableHead>
+                      <TableHead className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-6 h-10">
+                        Content Type
+                      </TableHead>
+                      <TableHead className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-6 h-10">
+                        System Label
+                      </TableHead>
+                      <TableHead className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-6 h-10">
+                        Decision
+                      </TableHead>
+                      <TableHead className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-6 h-10">
+                        User
+                      </TableHead>
+                      <TableHead className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-6 h-10 text-right">
+                        Details
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {moderationItems.length > 0 ? (
+                      moderationItems.map((log) => (
+                        <TableRow
+                          key={log.id}
+                          className={cn(
+                            "group transition-colors border-zinc-50 dark:border-zinc-900 relative",
+                            (log.decision?.toLowerCase() === "flagged" || 
+                             log.decision?.toLowerCase() === "rejected" || 
+                             log.decision?.toLowerCase() === "block")
+                              ? "bg-rose-500/[0.02] hover:bg-rose-500/[0.04] dark:bg-rose-950/5 dark:hover:bg-rose-950/10"
+                              : "hover:bg-zinc-50/80 dark:hover:bg-zinc-900/40"
+                          )}
+                        >
+                          <TableCell className="px-6 py-4 whitespace-nowrap relative">
+                            {(log.decision?.toLowerCase() === "flagged" || 
+                              log.decision?.toLowerCase() === "rejected" || 
+                              log.decision?.toLowerCase() === "block") && (
+                              <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-rose-500" />
+                            )}
+                            <span className="text-xs font-medium text-muted-foreground">
+                              {formatDistanceToNow(new Date(log.createdAt), {
+                                addSuffix: true,
+                              })}
+                            </span>
+                          </TableCell>
                         <TableCell className="px-6 py-4">
                           <span className="text-[11px] font-bold text-zinc-700 uppercase tracking-wide">
                             {log.contentType}
@@ -437,7 +450,9 @@ export function HistorySection() {
                   )}
                 </TableBody>
               </Table>
-            ) : (
+            </div>
+          ) : (
+            <div className="overflow-x-auto w-full">
               <Table>
                 <TableHeader className="bg-muted/50">
                   <TableRow className="border-border hover:bg-transparent">
@@ -526,6 +541,7 @@ export function HistorySection() {
                   )}
                 </TableBody>
               </Table>
+            </div>
             )}
           </div>
         )}

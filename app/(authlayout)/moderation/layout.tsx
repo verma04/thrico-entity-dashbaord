@@ -1,46 +1,49 @@
 "use client";
+import * as React from "react";
 
-import { LayoutDashboard, Ban, Link2, Flag, Settings } from "lucide-react";
+import { Ban, Link2 } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
+import { useModulePermission } from "@/hooks/use-module-permission";
+import { PermissionDenied } from "@/components/shared/permission-denied";
+
+interface TabItem {
+  key: string;
+  label: string;
+  icon: React.ReactNode;
+}
 
 function ModerationLayout({ children }: { children: React.ReactNode }) {
-  const items = [
-    {
-      key: "dashboard",
-      label: "Overview",
-      icon: <LayoutDashboard className="h-4 w-4" />,
-      section: "System",
-    },
+  const hasModeration = useModulePermission("MODERATION");
+  const hasAiModeration = useModulePermission("AI_MODERATION");
 
-    {
-      key: "banned-words",
-      label: "Banned Words",
-      icon: <Ban className="h-4 w-4" />,
-      section: "Moderation Tools",
-    },
-    {
-      key: "blocked-links",
-      label: "Blocked Links",
-      icon: <Link2 className="h-4 w-4" />,
-      section: "Moderation Tools",
-    },
-    {
-      key: "settings",
-      label: "Ai Moderation Engine",
-      icon: <Settings className="h-4 w-4" />,
-      section: "Management",
-    },
-  ];
+  if (!hasModeration && !hasAiModeration) {
+    return <PermissionDenied moduleKey="moderation" />;
+  }
+
+  // Filter tabs based on permissions
+  const items: TabItem[] = [];
+
+  if (hasModeration) {
+    items.push(
+      {
+        key: "banned-words",
+        label: "Banned Words",
+        icon: <Ban size={18} />,
+      },
+      {
+        key: "blocked-links",
+        label: "Blocked Links",
+        icon: <Link2 size={18} />,
+      }
+    );
+  }
 
   return (
-    <MenuItemsLayout
-      items={items}
-      active="moderation"
-      hideDefaultTabs={true}
-      showAdminTabs={false}
-    >
-      {children}
-    </MenuItemsLayout>
+    <>
+      <MenuItemsLayout active={"moderation"} items={items}>
+        {children}
+      </MenuItemsLayout>
+    </>
   );
 }
 

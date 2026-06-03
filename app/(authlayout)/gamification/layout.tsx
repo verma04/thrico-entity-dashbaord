@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Trophy,
   Medal,
@@ -11,6 +13,7 @@ import {
   Swords,
 } from "lucide-react";
 import GamificationMenuLayout from "@/components/gamification/gamification-menu-layout";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 
 function GamificationLayout({ children }: { children: React.ReactNode }) {
   const items = [
@@ -61,4 +64,4 @@ function GamificationLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default GamificationLayout;
+export default withSubscriptionCheck(GamificationLayout, "gamification");

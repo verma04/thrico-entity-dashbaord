@@ -50,8 +50,9 @@ import { subDays } from "date-fns";
 import { DateRange } from "react-day-picker";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import moment from "moment";
+import { withModulePermission } from "@/components/hoc/with-module-permission";
 
-export default function MembersPage() {
+function MembersPage() {
   const [timeRange, setTimeRange] = React.useState<TimeRange>(
     TimeRange.LAST_7_DAYS,
   );
@@ -285,3 +286,5 @@ export default function MembersPage() {
     </EcosystemWrapper>
   );
 }
+
+export default withModulePermission(MembersPage, "NETWORK", "canRead");

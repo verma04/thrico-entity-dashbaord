@@ -22,6 +22,7 @@ export interface FeedProps {
   addedBy: "ENTITY" | "USER";
   isPinned?: boolean;
   pinnedAt?: string;
+  isCommunityFeed?: boolean;
   media?: {
     url: string;
   }[];

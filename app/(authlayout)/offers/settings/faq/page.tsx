@@ -1,6 +1,8 @@
 "use client";
 
 import { ModuleFaqListManager } from "@/components/common/module-faq-manager";
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 
 const OffersFaqPage = () => {
   return (
@@ -12,4 +14,7 @@ const OffersFaqPage = () => {
   );
 };
 
-export default OffersFaqPage;
+export default withSubscriptionCheck(
+  withModulePermission(OffersFaqPage, "OFFERS", "canEdit"),
+  "offers"
+);

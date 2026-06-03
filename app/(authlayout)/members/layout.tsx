@@ -5,9 +5,13 @@ import { usePathname } from "next/navigation";
 import { CardContent } from "@/components/ui/card";
 import { Users, Plus, Building2 } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+import { useModulePermission } from "@/hooks/use-module-permission";
 
 function MembersLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const canRead = useModulePermission("NETWORK", "canRead");
+  const canCreate = useModulePermission("NETWORK", "canCreate");
 
   // Determine active classification tab key dynamically based on current route
   let classificationKey = "classifications";
@@ -19,28 +23,34 @@ function MembersLayout({ children }: { children: React.ReactNode }) {
     classificationKey = "skills";
   }
 
-  const items = [
-    {
-      key: "all",
-      label: "Members",
-      icon: <Users className="h-4 w-4" />,
-    },
-    {
-      key: "create",
-      label: "Create Member",
-      icon: <Plus className="h-4 w-4" />,
-    },
-    {
-      key: classificationKey,
-      label: "Classifications",
-      icon: <Building2 className="h-4 w-4" />,
-    },
-    {
-      key: "referrals",
-      label: "Referrals",
-      icon: <Users className="h-4 w-4" />,
-    },
-  ];
+  const items = React.useMemo(() => {
+    return [
+      {
+        key: "all",
+        label: "Members",
+        icon: <Users className="h-4 w-4" />,
+        locked: !canRead,
+      },
+      {
+        key: "create",
+        label: "Create Member",
+        icon: <Plus className="h-4 w-4" />,
+        locked: !canCreate,
+      },
+      {
+        key: classificationKey,
+        label: "Classifications",
+        icon: <Building2 className="h-4 w-4" />,
+        locked: !canRead,
+      },
+      {
+        key: "referrals",
+        label: "Referrals",
+        icon: <Users className="h-4 w-4" />,
+        locked: !canRead,
+      },
+    ];
+  }, [classificationKey, canRead, canCreate]);
 
   return (
     <MenuItemsLayout active="members" items={items}>
@@ -49,4 +59,4 @@ function MembersLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default MembersLayout;
+export default withSubscriptionCheck(MembersLayout, "NETWORK");

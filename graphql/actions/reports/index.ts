@@ -4,6 +4,7 @@ export { GET_ALL_REPORTS, UPDATE_REPORT_STATUS, ReportModule };
 
 export interface GetAllReportsVariables {
   module?: ReportModule;
+  targetId?: string;
   status?: string;
   page?: number;
   limit?: number;

@@ -5,6 +5,7 @@ import { useEntitySettings, useUpdateEntitySettings } from "@/graphql/actions";
 import { Briefcase, ShieldCheck, Zap } from "lucide-react";
 import { PlatformSettingsPage, SettingsField } from "@/components/ui/platform/settings-page";
 import { toast } from "sonner";
+import { withModulePermission } from "@/components/hoc/with-module-permission";
 
 const FIELDS: SettingsField[] = [
   {
@@ -56,4 +57,8 @@ const JobsSettings = () => {
   );
 };
 
-export default JobsSettings;
+export default withModulePermission(
+  JobsSettings,
+  "JOBS",
+  "canRead"
+);

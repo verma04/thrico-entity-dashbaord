@@ -1,14 +1,5 @@
-import RebacSettings from "@/components/settings/rebac/rebac-settings";
+import { redirect } from "next/navigation";
 
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Users & Persons - ReBAC",
-  description: "Manage users, persons, and relationship-based access control.",
-};
-
-const page = () => {
-  return <RebacSettings />;
-};
-
-export default page;
+export default function UsersRootPage() {
+  redirect("/settings/users/all");
+}

@@ -57,9 +57,10 @@ export function CommunityCreationForm({
   onCancel,
   cover,
   setCover,
+  initialCoverUrl,
 }: any) {
   const { toast } = useToast();
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(initialCoverUrl || null);
   const [cropModalVisible, setCropModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
@@ -75,17 +76,17 @@ export function CommunityCreationForm({
   });
 
   const formik = useFormik({
-    initialValues: initialValues || {
-      title: "",
-      tagline: "",
-      description: "",
-      privacy: "",
-      communityType: "",
-      joiningTerms: "",
-      requireAdminApprovalForPosts: false,
-      allowMemberInvites: false,
-      enableEvents: false,
-      enableRatingsAndReviews: false,
+    initialValues: {
+      title: initialValues?.title || "",
+      tagline: initialValues?.tagline || "",
+      description: initialValues?.description || "",
+      privacy: initialValues?.privacy || "",
+      communityType: initialValues?.communityType || "",
+      joiningTerms: initialValues?.joiningTerms || "",
+      requireAdminApprovalForPosts: initialValues?.requireAdminApprovalForPosts ?? false,
+      allowMemberInvites: initialValues?.allowMemberInvites ?? false,
+      enableEvents: initialValues?.enableEvents ?? false,
+      enableRatingsAndReviews: initialValues?.enableRatingsAndReviews ?? false,
     },
     validationSchema: communitySchema,
     onSubmit: (values) => {
@@ -138,13 +139,13 @@ export function CommunityCreationForm({
                   <Users className="h-5 w-5 text-primary" />
                 </div>
                 <h1 className="text-2xl font-bold tracking-tight">
-                  Create Community
+                  {initialValues?.title ? "Edit Community" : "Create Community"}
                 </h1>
               </div>
               <div className="flex items-center gap-2 text-xs text-muted-foreground ml-1">
                 <span>Communities</span>
                 <ChevronRight className="h-3 w-3" />
-                <span>Create New Community</span>
+                <span>{initialValues?.title ? "Edit Details" : "Create New Community"}</span>
               </div>
             </div>
             </div>
@@ -710,7 +711,7 @@ export function CommunityCreationForm({
       </div>
 
       <FloatingSavePanel
-        hasChanged={formik.dirty}
+        hasChanged={!initialValues?.title || formik.dirty}
         saved={false}
         isSaving={loading}
         onSave={handleSubmit}
@@ -721,7 +722,7 @@ export function CommunityCreationForm({
         }}
         title="Unsaved Community Data"
         description="You have unfilled form data."
-        buttonText="Create Community"
+        buttonText={initialValues?.title ? "Save Changes" : "Create Community"}
       />
       </>
     </FormikProvider>

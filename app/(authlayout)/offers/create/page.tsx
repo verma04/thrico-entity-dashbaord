@@ -42,6 +42,8 @@ import * as Yup from "yup";
 import { Offer } from "@/types/offer-types";
 import { useRouter } from "next/navigation";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 
 const offerSchema = Yup.object().shape({
   title: Yup.string()
@@ -60,7 +62,7 @@ const offerSchema = Yup.object().shape({
   website: Yup.string().url("Must be a valid URL"),
 });
 
-export default function CreateOfferPage() {
+function CreateOfferPage() {
   const { addOffer, categories } = useOfferStore();
   const { toast } = useToast();
   const router = useRouter();
@@ -611,3 +613,8 @@ export default function CreateOfferPage() {
     </div>
   );
 }
+
+export default withSubscriptionCheck(
+  withModulePermission(CreateOfferPage, "OFFERS", "canCreate"),
+  "offers"
+);

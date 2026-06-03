@@ -1,5 +1,9 @@
 "use client";
 
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
+
 import React from "react";
 import { TemplateGallery } from "@/components/surveys/templates/template-gallery";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
@@ -10,7 +14,7 @@ import { Layout, Sparkles, ArrowLeft, RotateCcw, Search, Globe, ShieldCheck } fr
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 
-export default function SurveyTemplatesPage() {
+function SurveyTemplatesPage() {
   const router = useRouter();
 
   return (
@@ -57,3 +61,8 @@ export default function SurveyTemplatesPage() {
     </EcosystemWrapper>
   );
 }
+
+export default withSubscriptionCheck(
+  withModulePermission(SurveyTemplatesPage, "SURVEYS", "canRead"),
+  "surveys"
+);

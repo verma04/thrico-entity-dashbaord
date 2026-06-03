@@ -49,7 +49,7 @@ export function UsageChart() {
           </div>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1.5">
-              <div className="h-1.5 w-1.5 rounded-full bg-slate-900" />
+              <div className="h-1.5 w-1.5 rounded-full bg-slate-900 dark:bg-slate-100" />
               <span className="text-[10px] font-medium text-muted-foreground">Sent</span>
             </div>
             <div className="flex items-center gap-1.5">

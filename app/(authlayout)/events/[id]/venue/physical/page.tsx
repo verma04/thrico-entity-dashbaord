@@ -1,5 +1,9 @@
 "use client";
 
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
+
 import { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -141,7 +145,7 @@ function AddVenueModal() {
 import { useParams } from "next/navigation";
 import { EventVenuesList } from "@/components/events/detail/event-venues";
 
-export default function PhysicalVenuePage() {
+function PhysicalVenuePage() {
   const params = useParams();
   const eventId = params?.id as string;
 
@@ -151,3 +155,8 @@ export default function PhysicalVenuePage() {
     </div>
   );
 }
+
+export default withSubscriptionCheck(
+  withModulePermission(PhysicalVenuePage, "EVENTS", "canRead"),
+  "events"
+);

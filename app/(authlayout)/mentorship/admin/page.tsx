@@ -1,5 +1,9 @@
 "use client";
 
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
+
 import React, { useState } from "react";
 import { Mentor } from "@/types/mentor-types";
 import { MentorEditor } from "@/components/mentorship/mentor-editor";
@@ -9,7 +13,7 @@ import { useMentorStore } from "@/store/useMentorStore";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 
-export default function AdminMentorsPage() {
+function AdminMentorsPage() {
   const { getAdminMentorsCount, getFilteredMentors } = useMentorStore();
   const [selectedMentor, setSelectedMentor] = useState<Mentor | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
@@ -63,3 +67,8 @@ export default function AdminMentorsPage() {
     </div>
   );
 }
+
+export default withSubscriptionCheck(
+  withModulePermission(AdminMentorsPage, "MENTORSHIP", "canEdit"),
+  "mentorship"
+);

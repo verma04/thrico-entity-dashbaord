@@ -1,9 +1,13 @@
 "use client";
+
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
 import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 // Redirect to faq page as there is no main settings page
-export default function WallOfFameSettingsPage() {
+function WallOfFameSettingsPage() {
   const router = useRouter();
 
   useEffect(() => {
@@ -12,3 +16,8 @@ export default function WallOfFameSettingsPage() {
 
   return null;
 }
+
+export default withSubscriptionCheck(
+  withModulePermission(WallOfFameSettingsPage, "WALL_OF_FAME", "canEdit"),
+  "wall-of-fame"
+);

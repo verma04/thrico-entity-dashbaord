@@ -4,6 +4,7 @@ import * as React from "react";
 import { Video, Settings, List, PlayCircle } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
 import { Card } from "@/components/ui/card";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 
 function MomentsLayout({ children }: { children: React.ReactNode }) {
   const items = [
@@ -26,4 +27,4 @@ function MomentsLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default MomentsLayout;
+export default withSubscriptionCheck(MomentsLayout, "moments");

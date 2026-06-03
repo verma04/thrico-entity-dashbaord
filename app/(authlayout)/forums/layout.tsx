@@ -4,6 +4,7 @@ import * as React from "react";
 import { List, FolderTree, Settings } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
 import { Card } from "@/components/ui/card";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 
 function ForumsLayout({ children }: { children: React.ReactNode }) {
   const items = [
@@ -26,4 +27,4 @@ function ForumsLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default ForumsLayout;
+export default withSubscriptionCheck(ForumsLayout, "forums");

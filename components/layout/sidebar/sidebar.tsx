@@ -18,6 +18,7 @@ import {
   Trophy,
   Users,
   PanelLeft,
+  Lock,
 } from "lucide-react";
 import { useSidebarSectionStore } from "@/store/useSidebarStore";
 import {
@@ -84,6 +85,7 @@ interface MenuItem {
   children?: MenuItem[];
   isLogout?: boolean;
   badge?: string;
+  isLocked?: boolean;
 }
 
 /* ─── Section Label (collapsible) ───────────────────────────────── */
@@ -173,12 +175,15 @@ function MenuItemRow({
     : null;
 
   const rowBase = cn(
-    "group relative flex items-center w-full transition-colors duration-150 cursor-pointer select-none",
+    "group relative flex items-center w-full transition-colors duration-150 select-none",
+    item.isLocked ? "cursor-not-allowed opacity-60" : "cursor-pointer",
     depth === 0
       ? "h-9 px-3 rounded-lg gap-2.5 my-px"
       : "h-8 px-3 rounded-md gap-2 my-px",
-    isActive
+    isActive && !item.isLocked
       ? "bg-accent text-foreground"
+      : item.isLocked
+      ? "text-muted-foreground"
       : "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
   );
 
@@ -193,13 +198,13 @@ function MenuItemRow({
       <SidebarMenuItem>
         <SidebarMenuButton
           asChild={false}
-          isActive={isActive}
+          isActive={isActive && !item.isLocked}
           tooltip={tooltipLabel}
           className={cn(
             rowBase,
             "justify-between h-auto! py-0 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-0! group-data-[collapsible=icon]:justify-center",
           )}
-          onClick={() => !isCollapsed && toggleGroup(item.key)}
+          onClick={() => !item.isLocked && !isCollapsed && toggleGroup(item.key)}
         >
           <span
             className={cn(
@@ -212,7 +217,7 @@ function MenuItemRow({
             <span
               className={cn(
                 "truncate text-[13px] leading-none tracking-[-0.01em] transition-colors duration-150 group-data-[collapsible=icon]:hidden",
-                isActive
+                isActive && !item.isLocked
                   ? "font-medium text-foreground"
                   : "font-normal text-inherit",
               )}
@@ -220,13 +225,17 @@ function MenuItemRow({
               {item.label}
             </span>
           </span>
-          <ChevronRight
-            size={11}
-            className={cn(
-              "shrink-0 text-muted-foreground/30 transition-transform duration-150 group-data-[collapsible=icon]:hidden",
-              isOpen && "rotate-90 text-muted-foreground",
-            )}
-          />
+          {item.isLocked ? (
+            <Lock size={12} className="shrink-0 text-muted-foreground/40 group-data-[collapsible=icon]:hidden" />
+          ) : (
+            <ChevronRight
+              size={11}
+              className={cn(
+                "shrink-0 text-muted-foreground/30 transition-transform duration-150 group-data-[collapsible=icon]:hidden",
+                isOpen && "rotate-90 text-muted-foreground",
+              )}
+            />
+          )}
         </SidebarMenuButton>
 
         {isOpen && !isCollapsed && (
@@ -278,7 +287,7 @@ function MenuItemRow({
     <SidebarMenuItem>
       <SidebarMenuButton
         asChild
-        isActive={isActive}
+        isActive={isActive && !item.isLocked}
         tooltip={tooltipLabel}
         className={cn(
           rowBase,
@@ -286,22 +295,28 @@ function MenuItemRow({
         )}
       >
         <Link
-          href={item.path || "#"}
-          className="flex items-center gap-2.5 flex-1 min-w-0 group-data-[collapsible=icon]:justify-center"
+          href={item.isLocked ? "#" : item.path || "#"}
+          className={cn(
+            "flex items-center gap-2.5 flex-1 min-w-0 group-data-[collapsible=icon]:justify-center",
+            item.isLocked && "pointer-events-none"
+          )}
         >
           {activeBar}
           {iconEl}
           <span
             className={cn(
               "text-[13px] leading-none tracking-[-0.01em] transition-colors duration-150 truncate group-data-[collapsible=icon]:hidden",
-              isActive
+              isActive && !item.isLocked
                 ? "text-foreground font-medium"
                 : "text-inherit font-normal",
             )}
           >
             {item.label}
           </span>
-          {item.badge && (
+          {item.isLocked && (
+            <Lock size={12} className="ml-auto text-muted-foreground/50 shrink-0 group-data-[collapsible=icon]:hidden" />
+          )}
+          {!item.isLocked && item.badge && (
             <Badge
               variant="outline"
               className="ml-auto text-[9px] h-[17px] px-1.5 bg-primary/8 text-primary border-primary/20 rounded font-semibold uppercase tracking-wider shrink-0 group-data-[collapsible=icon]:hidden"

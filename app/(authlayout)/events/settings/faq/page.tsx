@@ -1,5 +1,9 @@
 "use client";
 
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
+
 import { ModuleFaqListManager } from "@/components/common/module-faq-manager";
 
 const EventsFaqPage = () => {
@@ -12,4 +16,9 @@ const EventsFaqPage = () => {
   );
 };
 
-export default EventsFaqPage;
+
+
+export default withSubscriptionCheck(
+  withModulePermission(EventsFaqPage, "EVENTS", "canEdit"),
+  "events"
+);

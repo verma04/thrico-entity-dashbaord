@@ -1,5 +1,9 @@
 "use client";
 
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
+
 import { ModuleFaqListManager } from "@/components/common/module-faq-manager";
 
 const WallOfFameFaqPage = () => {
@@ -12,4 +16,9 @@ const WallOfFameFaqPage = () => {
   );
 };
 
-export default WallOfFameFaqPage;
+
+
+export default withSubscriptionCheck(
+  withModulePermission(WallOfFameFaqPage, "WALL_OF_FAME", "canEdit"),
+  "wall-of-fame"
+);

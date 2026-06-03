@@ -186,7 +186,7 @@ export function ProductTable({
                     className="gap-2 cursor-pointer font-medium text-[13px]"
                   >
                     <Link
-                      href={`/shop/${product.id}`}
+                      href={`/shop/${product.id}/manage`}
                       className="flex items-center w-full"
                     >
                       <Pencil className="h-4 w-4 text-slate-500" />

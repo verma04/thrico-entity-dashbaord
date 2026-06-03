@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -189,10 +190,12 @@ export default function RolesTab() {
          </EcosystemActionBar.Group>
          <EcosystemActionBar.Group align="right">
             <EcosystemActionBar.Item>
-               <Button onClick={() => { setSelectedRole(null); setShowAddDialog(true); }} size="sm" className="h-9 px-5 rounded-xl gap-2 font-medium">
-                 <Plus className="h-4 w-4" />
-                 Add Role
-               </Button>
+               <Link href="/settings/users/roles/create">
+                 <Button size="sm" className="h-9 px-5 rounded-xl gap-2 font-medium">
+                   <Plus className="h-4 w-4" />
+                   Add Role
+                 </Button>
+               </Link>
             </EcosystemActionBar.Item>
             <EcosystemActionBar.Item>
                <Button variant="outline" size="icon" onClick={() => refetch()} className="h-9 w-9 rounded-xl text-muted-foreground border-border hover:text-foreground hover:bg-muted">

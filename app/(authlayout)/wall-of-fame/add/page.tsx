@@ -1,5 +1,9 @@
 "use client";
 
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
+
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { InductionForm } from "@/components/wall-of-fame/add/induction-form";
@@ -54,4 +58,9 @@ const AddToWallOfFamePage = () => {
   );
 };
 
-export default AddToWallOfFamePage;
+
+
+export default withSubscriptionCheck(
+  withModulePermission(AddToWallOfFamePage, "WALL_OF_FAME", "canCreate"),
+  "wall-of-fame"
+);

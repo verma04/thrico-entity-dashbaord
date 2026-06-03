@@ -5,6 +5,7 @@ import { GraduationCap, Settings, List, LayoutDashboard } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
 import { Card } from "@/components/ui/card";
 import { useEntitySettings } from "@/graphql/actions";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 
 function MentorshipLayout({ children }: { children: React.ReactNode }) {
   const { data: settingsData } = useEntitySettings();
@@ -54,4 +55,4 @@ function MentorshipLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default MentorshipLayout;
+export default withSubscriptionCheck(MentorshipLayout, "mentorship");

@@ -736,18 +736,39 @@ export const useFilteredExtendedItems = () => {
     const isSuperAdmin = user?.isSuperAdmin;
     const isSystemRole = user?.role?.isSystem;
 
+    const hasModulePermission = (moduleName: string, action: string = "canRead") => {
+      if (!user) return false;
+      if (user.isSuperAdmin || user.role?.isSystem) return true;
+      if (user.permissions && moduleName in user.permissions) {
+        return !!user.permissions[moduleName as keyof typeof user.permissions];
+      }
+      const modulePermission = user.modulePermissions?.find(
+        (m) => m.module.toUpperCase() === moduleName.toUpperCase(),
+      );
+      // @ts-ignore
+      return !!modulePermission?.[action];
+    };
+
     const enabledModuleIds = new Set(
       modulesSub
         .filter((m) => m.enabled)
         .map((m) => m.name?.toLowerCase().replace(/'/g, "_")),
     );
 
-    return items.filter((item) => {
+    const filteredList = items.reduce((acc, item) => {
       // 1. Super admin and system roles can see everything that is subscribed (or core)
       const isSuperAdmin = user?.isSuperAdmin;
       const isSystemRole = user?.role?.isSystem;
 
-      // 2. Home items and Dashboard should always be visible
+      // Check moderation items
+      if (item.key === "mod-dashboard" || item.key === "mod-reported") {
+        if (!hasModulePermission("MODERATION")) return acc;
+      }
+      if (item.key === "mod-manual" || item.key === "mod-ai") {
+        if (!hasModulePermission("MODERATION") && !hasModulePermission("AI_MODERATION")) return acc;
+      }
+
+      // 2. Home items and Dashboard should always be visible (or conditionally)
       if (
         isHome ||
         item.key === "home-dashboard" ||
@@ -758,7 +779,21 @@ export const useFilteredExtendedItems = () => {
         item.key === "mod-manual" ||
         item.key === "mod-ai"
       ) {
-        return true;
+        // If it's a mod item, we already returned early if no permission.
+        // For mod-manual children, filter them based on exact permission
+        if (item.key === "mod-manual" && item.children) {
+          const mappedItem = { ...item };
+          mappedItem.children = mappedItem.children.filter((child: any) => {
+            if (child.key === "mod-moderation") return hasModulePermission("AI_MODERATION");
+            if (child.key === "mod-banned" || child.key === "mod-links") return hasModulePermission("MODERATION");
+            return true;
+          });
+          if (mappedItem.children.length > 0) acc.push(mappedItem);
+          return acc;
+        }
+
+        acc.push(item);
+        return acc;
       }
 
       const moduleKey = item.key?.toLowerCase().replace(/'/g, "_");
@@ -775,14 +810,28 @@ export const useFilteredExtendedItems = () => {
       }
 
       const isSubscribed = enabledModuleIds.has(subKey);
-      if (!isSubscribed) return false;
+      const mappedItem = { ...item, isLocked: !isSubscribed };
 
-      if (isSuperAdmin || isSystemRole) return true;
+      if (isSuperAdmin || isSystemRole) {
+        acc.push(mappedItem);
+        return acc;
+      }
 
       // 3. Regular users need explicit module permissions
-      return modulePermissions.some(
+      const hasPermission = modulePermissions.some(
         (mp: any) => mp.module === item.key?.toUpperCase() && mp.canRead,
       );
+
+      if (hasPermission) {
+        acc.push(mappedItem);
+      }
+      return acc;
+    }, []);
+
+    return filteredList.sort((a, b) => {
+      if (a.isLocked === b.isLocked) return 0;
+      if (a.isLocked) return 1;
+      return -1;
     });
   };
 
@@ -821,18 +870,98 @@ export const useFilteredManagementItems = () => {
   const user = useUserStore((state) => state.user);
   const isSuperAdmin = user?.isSuperAdmin;
   const isSystemRole = user?.role?.isSystem;
-  const permissions = user?.permissions;
+
+  const hasModulePermission = (moduleName: string, action: string = "canRead") => {
+    if (!user) return false;
+    if (user.isSuperAdmin || user.role?.isSystem) return true;
+    if (user.permissions && moduleName in user.permissions) {
+      return !!user.permissions[moduleName as keyof typeof user.permissions];
+    }
+    const modulePermission = user.modulePermissions?.find(
+      (m) => m.module.toUpperCase() === moduleName.toUpperCase(),
+    );
+    // @ts-ignore
+    return !!modulePermission?.[action];
+  };
 
   const filteredItems = useMemo(() => {
     if (isSuperAdmin || isSystemRole) return adminSettings;
 
-    return adminSettings.filter((item) => {
-      // Basic permission check - can be expanded
-      if (item.key === "configuration" && !permissions?.website) return false;
-      if (item.key === "team" && !isSuperAdmin) return false;
-      return true;
-    });
-  }, [user, isSuperAdmin, isSystemRole, permissions]);
+    return adminSettings
+      .map((section) => {
+        // Deep copy the section to avoid mutating original
+        const filteredSection = { ...section };
+
+        // Top level section permission checks
+        if (section.key === "customisation") {
+          const canSeeAny =
+            hasModulePermission("APPEARANCE") ||
+            hasModulePermission("DOMAIN") ||
+            hasModulePermission("PLATFORM_FEATURES") ||
+            hasModulePermission("LANGUAGES") ||
+            hasModulePermission("INTEGRATIONS");
+          if (!canSeeAny) return null;
+        }
+
+        if (section.key === "team") {
+          const canSeeAny =
+            hasModulePermission("ADMIN_USERS") ||
+            hasModulePermission("USERS_AND_PERMISSIONS") ||
+            hasModulePermission("PERMISSIONS");
+          if (!canSeeAny) return null;
+        }
+
+        if (section.key === "account") {
+          const canSeeAny =
+            hasModulePermission("BILLING") ||
+            hasModulePermission("SUBSCRIPTION") ||
+            hasModulePermission("AUDIT_LOGS");
+          if (!canSeeAny) return null;
+        }
+
+        if (section.key === "policies") {
+          const canSeeAny =
+            hasModulePermission("POLICIES") ||
+            hasModulePermission("CUSTOMER_PRIVACY") ||
+            hasModulePermission("TAXES_AND_DUTIES");
+          if (!canSeeAny) return null;
+        }
+
+        if (section.key === "support") {
+          if (!hasModulePermission("CONTACT_SUPPORT") && !hasModulePermission("FEEDBACK")) return null;
+        }
+
+        // Filter children if they exist
+        if (filteredSection.children) {
+          filteredSection.children = filteredSection.children.filter((child) => {
+            if (child.key === "cust-logo" || child.key === "cust-brand") return hasModulePermission("APPEARANCE");
+            if (child.key === "cust-dom") return hasModulePermission("DOMAIN");
+            if (child.key === "cust-mod") return hasModulePermission("PLATFORM_FEATURES");
+            if (child.key === "cust-lang") return hasModulePermission("LANGUAGES");
+            if (child.key === "cust-int") return hasModulePermission("INTEGRATIONS");
+            if (child.key === "team-users") return hasModulePermission("USERS_AND_PERMISSIONS") || hasModulePermission("ADMIN_USERS");
+            if (child.key === "acc-bill") return hasModulePermission("BILLING");
+            if (child.key === "acc-plan") return hasModulePermission("SUBSCRIPTION");
+            if (child.key === "acc-audit") return hasModulePermission("AUDIT_LOGS");
+            if (child.key === "pol-privacy") return hasModulePermission("CUSTOMER_PRIVACY");
+            if (child.key === "pol-terms") return hasModulePermission("POLICIES");
+            if (child.key === "pol-taxes") return hasModulePermission("TAXES_AND_DUTIES");
+            if (child.key === "sup-manager") return hasModulePermission("CONTACT_SUPPORT");
+            
+            // Allow default access for others if parent is allowed
+            return true;
+          });
+
+          // If all children were filtered out, don't show the section (unless it's supposed to be empty)
+          if (filteredSection.children.length === 0 && section.children && section.children.length > 0) {
+            return null;
+          }
+        }
+
+        return filteredSection;
+      })
+      .filter(Boolean) as typeof adminSettings;
+  }, [user, isSuperAdmin, isSystemRole]);
 
   return {
     managementItems: filteredItems,

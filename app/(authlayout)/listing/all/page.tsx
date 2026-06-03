@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { useListings } from "../../../../graphql/actions/listing";
 import TableLoading from "@/components/layout/table-loading";
 import { ListingsTable } from "@/components/listings/listings-table";
+import { withModulePermission } from "@/components/hoc/with-module-permission";
 
 const ListingsAllPage = () => {
   const searchParams = useSearchParams();
@@ -39,4 +40,4 @@ const ListingsAllPage = () => {
   );
 };
 
-export default ListingsAllPage;
+export default withModulePermission(ListingsAllPage, "LISTING", "canRead");

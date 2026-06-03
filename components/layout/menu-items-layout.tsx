@@ -2,15 +2,17 @@
 
 import React from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Wrench, AlertTriangle, X } from "lucide-react";
+import { LayoutDashboard, Wrench, AlertTriangle, X, Lock } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useUserStore } from "@/store/store";
 
 type MenuItem = {
   key: string;
   label: string;
   icon: React.ReactNode;
   section?: string;
+  locked?: boolean;
 };
 
 type MenuItemsLayoutProps = {
@@ -39,17 +41,19 @@ function TabButton({
 }) {
   return (
     <button
-      onClick={onClick}
+      onClick={item.locked ? undefined : onClick}
       className={cn(
         "group/tab relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12.5px] font-medium transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/50 whitespace-nowrap",
-        isActive
-          ? "text-indigo-700 bg-primary/5"
-          : "text-muted-foreground hover:text-foreground hover:bg-muted/30",
+        item.locked
+          ? "cursor-not-allowed opacity-50 text-muted-foreground bg-transparent"
+          : isActive
+            ? "text-indigo-700 bg-primary/5"
+            : "text-muted-foreground hover:text-foreground hover:bg-muted/30",
         fullWidth && "w-full justify-center",
       )}
     >
       {/* Animated pill background */}
-      {isActive && (
+      {isActive && !item.locked && (
         <motion.span
           layoutId="menu-tab-pill"
           className="absolute inset-0 rounded-lg border border-primary/10 shadow-sm"
@@ -61,9 +65,11 @@ function TabButton({
       <span
         className={cn(
           "relative z-10 shrink-0 transition-all duration-200",
-          isActive
-            ? "text-indigo-700"
-            : "text-muted-foreground group-hover/tab:text-foreground",
+          item.locked
+            ? "text-muted-foreground/60"
+            : isActive
+              ? "text-indigo-700"
+              : "text-muted-foreground group-hover/tab:text-foreground",
         )}
       >
         {React.isValidElement(item.icon)
@@ -77,11 +83,12 @@ function TabButton({
       {/* Label */}
       <span
         className={cn(
-          "relative z-10 leading-none tracking-tight transition-all",
-          isActive ? "font-bold" : "font-medium",
+          "relative z-10 leading-none tracking-tight transition-all flex items-center gap-1",
+          isActive && !item.locked ? "font-bold" : "font-medium",
         )}
       >
         {item.label}
+        {item.locked && <Lock className="h-3 w-3 ml-0.5 text-muted-foreground/50" />}
       </span>
     </button>
   );
@@ -196,6 +203,19 @@ const MenuItemsLayout = ({
 }: MenuItemsLayoutProps) => {
   const router = useRouter();
   const pathname = usePathname();
+  const user = useUserStore((state) => state.user);
+
+  const hasSettingsPerm = React.useMemo(() => {
+    if (!user) return false;
+    if (user.isSuperAdmin || user.role?.isSystem) return true;
+    return !!user.permissions?.settings;
+  }, [user]);
+
+  const hasReportsPerm = React.useMemo(() => {
+    if (!user) return false;
+    if (user.isSuperAdmin || user.role?.isSystem) return true;
+    return !!user.permissions?.reports;
+  }, [user]);
   const pathParts = pathname.split("/").filter(Boolean);
   const activeSegments = active.split("/").filter(Boolean);
   const activeIndex = pathname.startsWith(`/${active}`)
@@ -235,12 +255,14 @@ const MenuItemsLayout = ({
                 label: "Reported Items",
                 icon: <AlertTriangle />,
                 section: "Admin",
+                locked: !hasReportsPerm,
               },
               {
                 key: "settings",
                 label: "Settings",
                 icon: <Wrench />,
                 section: "Admin",
+                locked: !hasSettingsPerm,
               },
             ]
           : []),

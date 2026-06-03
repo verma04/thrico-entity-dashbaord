@@ -1,5 +1,9 @@
 "use client";
 
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
+
 import React, { useState } from "react";
 import {
   useGetMentorCategories,
@@ -274,7 +278,7 @@ function CategoriesGrid({
 }
 
 // ── Main Page ──
-export default function MentorCategoriesPage() {
+function MentorCategoriesPage() {
   const { data, loading, refetch } = useGetMentorCategories();
   const [search, setSearch] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -453,3 +457,8 @@ export default function MentorCategoriesPage() {
     </EcosystemWrapper>
   );
 }
+
+export default withSubscriptionCheck(
+  withModulePermission(MentorCategoriesPage, "MENTORSHIP", "canRead"),
+  "mentorship"
+);

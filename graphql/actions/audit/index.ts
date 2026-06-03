@@ -45,6 +45,7 @@ export interface GetAuditLogsVariables {
     limit: number;
   };
   module?: string;
+  resourceId?: string;
 }
 
 export const useGetAuditLogs = (variables: GetAuditLogsVariables, options?: any) => 

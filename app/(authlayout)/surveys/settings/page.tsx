@@ -1,5 +1,9 @@
 "use client";
 
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
+
 import React from "react";
 import { useEntitySettings, useUpdateEntitySettings } from "@/graphql/actions";
 import { FileText, ShieldCheck, Zap } from "lucide-react";
@@ -56,4 +60,9 @@ const SurveysSettings = () => {
   );
 };
 
-export default SurveysSettings;
+
+
+export default withSubscriptionCheck(
+  withModulePermission(SurveysSettings, "SURVEYS", "canEdit"),
+  "surveys"
+);

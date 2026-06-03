@@ -23,7 +23,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import debounce from "lodash/debounce";
-import { useAllPages } from "@/graphql/actions/commany";
+import { useSearchCompanies } from "@/graphql/actions/commany";
 import {
   Check,
   ChevronsUpDown,
@@ -59,11 +59,11 @@ export function CompanyAutocompleteSelect({
   const [value, setValue] = useState<string>("");
   const [showDrawer, setShowDrawer] = useState(false);
 
-  const { data, loading, refetch } = useAllPages({
+  const { data, loading, refetch } = useSearchCompanies({
     variables: {
       input: {
-        value: value,
-        limit: 10,
+        search: value,
+        limit: 20,
       },
     },
   });
@@ -75,14 +75,32 @@ export function CompanyAutocompleteSelect({
     }
 
     try {
-      await refetch();
-      if (data?.getAllPages) {
-        setOptions(data.getAllPages);
+      await refetch({ input: { search: searchText, limit: 20 } });
+      if (data?.getSearchCompanies) {
+        setOptions(
+          data.getSearchCompanies.edges.map((edge) => ({
+            id: edge.node.id,
+            name: edge.node.title,
+            logo: "",
+          })),
+        );
       }
     } catch (error) {
       console.log("Error fetching users:", error);
     }
   }, 500);
+
+  useEffect(() => {
+    if (data?.getSearchCompanies) {
+      setOptions(
+        data.getSearchCompanies.edges.map((edge) => ({
+          id: edge.node.id,
+          name: edge.node.title,
+          logo: "",
+        })),
+      );
+    }
+  }, [data]);
 
   useEffect(() => {
     return () => {
@@ -183,7 +201,7 @@ export function CompanyAutocompleteSelect({
                   {options.map((page) => (
                     <CommandItem
                       key={page.id}
-                      value={page.id}
+                      value={page.name}
                       onSelect={(currentValue) => {
                         onChange({
                           id: page.id,
@@ -203,7 +221,7 @@ export function CompanyAutocompleteSelect({
                           "mr-2 h-4 w-4",
                           selectedValue?.id === page.id
                             ? "opacity-100"
-                            : "opacity-0"
+                            : "opacity-0",
                         )}
                       />
                       <Avatar className="h-5 w-5">

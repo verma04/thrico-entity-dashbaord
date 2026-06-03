@@ -1,5 +1,9 @@
 "use client";
 
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
+
 import React, { useState } from "react";
 import { useMentorshipRequests } from "@/graphql/mentorship/mentorship-quiries";
 import { MentorEditor } from "@/components/mentorship/mentor-editor";
@@ -15,7 +19,7 @@ import { useEntitySettings } from "@/graphql/actions";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import Link from "next/link";
 
-export default function MentorshipRequestPage() {
+function MentorshipRequestPage() {
   const [selectedMentor, setSelectedMentor] = useState<any | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const { data: settingsData } = useEntitySettings();
@@ -197,3 +201,8 @@ export default function MentorshipRequestPage() {
     </div>
   );
 }
+
+export default withSubscriptionCheck(
+  withModulePermission(MentorshipRequestPage, "MENTORSHIP", "canRead"),
+  "mentorship"
+);

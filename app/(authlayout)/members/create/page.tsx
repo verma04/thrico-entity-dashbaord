@@ -4,6 +4,7 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { MemberCreationForm } from "@/components/members/add/member-creation-form";
 import { useToast } from "@/components/ui/use-toast";
+import { withModulePermission } from "@/components/hoc/with-module-permission";
 
 import { useAddNewMember } from "@/graphql/actions/membership/membership-mutations";
 
@@ -63,4 +64,4 @@ const AddMemberPage = () => {
   );
 };
 
-export default AddMemberPage;
+export default withModulePermission(AddMemberPage, "NETWORK", "canCreate");

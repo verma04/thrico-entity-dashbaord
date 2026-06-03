@@ -3,6 +3,7 @@
 import * as React from "react";
 import { List, Tag, Plus } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 
 function EventsLayout({ children }: { children: React.ReactNode }) {
   const items = [
@@ -30,4 +31,4 @@ function EventsLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default EventsLayout;
+export default withSubscriptionCheck(EventsLayout, "events");

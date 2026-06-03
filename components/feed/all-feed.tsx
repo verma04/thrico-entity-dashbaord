@@ -40,7 +40,7 @@ export default function AdminFeed() {
             limit: 10,
           },
         },
-        updateQuery(prev, { fetchMoreResult }) {
+        updateQuery(prev: any, { fetchMoreResult }: any) {
           if (!fetchMoreResult || fetchMoreResult?.getAllFeed?.length === 0) {
             setHasMore(false);
             return prev;

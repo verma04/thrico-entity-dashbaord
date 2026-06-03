@@ -225,6 +225,85 @@ export default function ProfilePage() {
         </div>
       </div>
 
+      {/* Permissions Section */}
+      <div className="pt-2 pb-6">
+        <Card className="border-border/40 shadow-sm overflow-hidden bg-background">
+          <CardHeader className="bg-muted/30 pb-4 border-b border-border/40">
+            <CardTitle className="text-lg font-black flex items-center gap-2">
+              <Shield className="h-5 w-5 text-primary" /> Permissions & Access
+            </CardTitle>
+            <CardDescription className="text-xs font-medium">
+              Overview of your current role's system and module permissions.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pt-6 space-y-8">
+            {/* System Permissions */}
+            {user?.permissions && Object.keys(user.permissions).filter(k => k !== '__typename').length > 0 && (
+              <div className="space-y-4">
+                <h4 className="text-[11px] uppercase font-black tracking-widest flex items-center gap-2 text-muted-foreground">
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary" /> System Capabilities
+                </h4>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {Object.entries(user.permissions)
+                    .filter(([key]) => key !== "__typename")
+                    .map(([key, value]) => (
+                    <div key={key} className={cn("flex items-center gap-3 p-3 rounded-lg border transition-colors", value ? "bg-primary/5 border-primary/20" : "bg-muted/30 border-border/40 opacity-70")}>
+                      {value ? (
+                        <CheckCircle2 className="h-4 w-4 text-primary" />
+                      ) : (
+                        <AlertCircle className="h-4 w-4 text-muted-foreground/40" />
+                      )}
+                      <span className={cn(
+                        "text-xs font-bold capitalize",
+                        value ? "text-foreground" : "text-muted-foreground/60"
+                      )}>
+                        {key.replace(/([A-Z])/g, ' $1').trim()}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Module Permissions */}
+            {user?.modulePermissions && user.modulePermissions.length > 0 && (
+              <div className="space-y-4">
+                <h4 className="text-[11px] uppercase font-black tracking-widest flex items-center gap-2 text-muted-foreground pt-4 border-t border-border/40">
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500" /> Module Access
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {user.modulePermissions.map((mod: any, idx: number) => (
+                    <div key={idx} className="p-4 rounded-xl bg-muted/20 border border-border/50 hover:bg-muted/30 transition-colors flex flex-col justify-between">
+                      <div className="font-black text-sm capitalize mb-4 text-foreground/90">
+                        {mod.module.toLowerCase().replace(/_/g, ' ')}
+                      </div>
+                      <div className="flex items-center justify-between gap-2 text-[11px] font-bold">
+                        <div className="flex flex-col items-center gap-1.5">
+                          {mod.canRead ? <CheckCircle2 className="h-4 w-4 text-green-500" /> : <Shield className="h-4 w-4 text-muted-foreground/30" />}
+                          <span className={mod.canRead ? "text-foreground" : "text-muted-foreground/50"}>Read</span>
+                        </div>
+                        <div className="flex flex-col items-center gap-1.5">
+                          {mod.canEdit ? <CheckCircle2 className="h-4 w-4 text-green-500" /> : <Shield className="h-4 w-4 text-muted-foreground/30" />}
+                          <span className={mod.canEdit ? "text-foreground" : "text-muted-foreground/50"}>Edit</span>
+                        </div>
+                        <div className="flex flex-col items-center gap-1.5">
+                          {mod.canCreate ? <CheckCircle2 className="h-4 w-4 text-green-500" /> : <Shield className="h-4 w-4 text-muted-foreground/30" />}
+                          <span className={mod.canCreate ? "text-foreground" : "text-muted-foreground/50"}>Create</span>
+                        </div>
+                        <div className="flex flex-col items-center gap-1.5">
+                          {mod.canDelete ? <CheckCircle2 className="h-4 w-4 text-green-500" /> : <Shield className="h-4 w-4 text-muted-foreground/30" />}
+                          <span className={mod.canDelete ? "text-foreground" : "text-muted-foreground/50"}>Delete</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
       <FloatingSavePanel
         hasChanged={hasChanged}
         saved={saved}

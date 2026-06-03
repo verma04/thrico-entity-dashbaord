@@ -1,5 +1,9 @@
 "use client";
 
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
+
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -63,4 +67,9 @@ const AddMentorPage = () => {
   );
 };
 
-export default AddMentorPage;
+
+
+export default withSubscriptionCheck(
+  withModulePermission(AddMentorPage, "MENTORSHIP", "canCreate"),
+  "mentorship"
+);

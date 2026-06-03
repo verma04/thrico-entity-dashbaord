@@ -1,9 +1,13 @@
 "use client";
 
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
+
 import { useParams } from "next/navigation";
 import { EventSponsorshipList } from "@/components/events/detail/event-sponsors";
 
-export default function EventSponsorshipTierPage() {
+function EventSponsorshipTierPage() {
   const params = useParams();
   const eventId = params?.id as string;
 
@@ -13,3 +17,8 @@ export default function EventSponsorshipTierPage() {
     </div>
   );
 }
+
+export default withSubscriptionCheck(
+  withModulePermission(EventSponsorshipTierPage, "EVENTS", "canRead"),
+  "events"
+);

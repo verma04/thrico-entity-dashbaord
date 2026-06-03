@@ -6,11 +6,11 @@ import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrappe
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { useRouter, usePathname } from "next/navigation";
 import { useMutation } from "@apollo/client";
-import { CREATE_ANNOUNCEMENT, CREATE_SUPPORT_TICKET } from "@/graphql/quries/trust-center";
+import { CREATE_ANNOUNCEMENT, CREATE_SUPPORT_TICKET, REPLY_SUPPORT_TICKET, UPDATE_SUPPORT_TICKET } from "@/graphql/quries/trust-center";
 import { TrustCenterActionBar } from "./trust-center-action-bar";
 import MemberInboxPortal from "./member-inbox";
 import ModeratorWorkspace from "./moderator-workspace";
-import AdminControlRoom from "./admin-control-room";
+import { AnnouncementsManager } from "./announcements-manager";
 
 // ===========================================================================
 // SHARED TYPES
@@ -86,16 +86,18 @@ export default function TrustCenterDashboard() {
   const router = useRouter();
   const pathname = usePathname();
 
-  let currentRole: "member" | "moderator" | "admin" = "member";
+  let currentRole: "member" | "moderator" | "announcements" = "member";
   if (pathname.includes("/moderator")) currentRole = "moderator";
-  if (pathname.includes("/admin")) currentRole = "admin";
+  if (pathname.includes("/announcements")) currentRole = "announcements";
 
-  const [role, setRole] = useState<"member" | "moderator" | "admin">(currentRole);
+  const [role, setRole] = useState<"member" | "moderator" | "announcements">(currentRole);
 
   const [createTicketMutation] = useMutation(CREATE_SUPPORT_TICKET);
   const [createAnnouncementMutation] = useMutation(CREATE_ANNOUNCEMENT);
+  const [replyTicketMutation] = useMutation(REPLY_SUPPORT_TICKET);
+  const [updateTicketMutation] = useMutation(UPDATE_SUPPORT_TICKET);
 
-  const handleRoleChange = (newRole: "member" | "moderator" | "admin") => {
+  const handleRoleChange = (newRole: "member" | "moderator" | "announcements") => {
     setRole(newRole);
     router.push(`/trust-center/${newRole}`);
   };
@@ -105,7 +107,8 @@ export default function TrustCenterDashboard() {
     category: any,
     subCategory: string | undefined,
     description: string,
-    linkedUser?: string,
+    targetUserId?: string,
+    targetUserIds?: string[],
     allowReplies: boolean = true,
     recipientType: "all" | "one" | "multiple" = "one"
   ) => {
@@ -130,17 +133,39 @@ export default function TrustCenterDashboard() {
             input: {
               subject,
               description,
-              category: "ENTITY_SUPPORT",
-              subCategory: subCategory?.toUpperCase().replace(" ", "_"),
+              category: category.toUpperCase().replace(" ", "_"),
+              subCategory: subCategory ? subCategory.toUpperCase().replace(" ", "_") : null,
               recipientType: recipientType === "multiple" ? "MULTIPLE" : "ONE",
               allowReplies,
-              targetUserIds: linkedUser ? linkedUser.split(", ") : []
+              targetUserId,
+              targetUserIds
             }
           }
         });
       }
     } catch (e) {
       console.error("Failed to create:", e);
+    }
+  };
+
+  const handleReplyTicket = async (ticketId: string, body: string) => {
+    try {
+      await replyTicketMutation({
+        variables: { ticketId, body },
+        refetchQueries: ["GetTicketMessages", "GetSupportTickets"],
+      });
+    } catch (e) {
+      console.error("Failed to reply:", e);
+    }
+  };
+
+  const handleUpdateTicket = async (ticketId: string, input: { status?: string; priority?: string; allowReplies?: boolean }) => {
+    try {
+      await updateTicketMutation({
+        variables: { id: ticketId, input },
+      });
+    } catch (e) {
+      console.error("Failed to update ticket:", e);
     }
   };
 
@@ -189,7 +214,8 @@ export default function TrustCenterDashboard() {
         {role === "member" && (
           <MemberInboxPortal
             onSignPolicy={(id, signature) => console.log("Sign policy", id, signature)}
-            onReply={(id, body) => console.log("Reply", id, body)}
+            onReply={handleReplyTicket}
+            onUpdateTicket={handleUpdateTicket}
             onCreateTicket={handleCreateTicket}
             onCreateAppeal={(subject, description) => console.log("Create appeal", subject, description)}
           />
@@ -204,13 +230,8 @@ export default function TrustCenterDashboard() {
           />
         )}
 
-        {role === "admin" && (
-          <AdminControlRoom
-            broadcastStats={{ totalAnnouncements: 0, policyComplianceRate: 0 }}
-            tickets={[]}
-            reports={[]}
-            onSendBroadcast={handleAdminBroadcast}
-          />
+        {role === "announcements" && (
+          <AnnouncementsManager />
         )}
       </div>
     </EcosystemWrapper>

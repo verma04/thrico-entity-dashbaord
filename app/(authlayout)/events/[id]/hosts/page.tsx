@@ -1,5 +1,9 @@
 "use client";
 
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
+
 import { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -56,7 +60,7 @@ const hostSchema = Yup.object().shape({
   role: Yup.string().required("Role is required"),
 });
 
-export default function EventHosts() {
+function EventHosts() {
   const [hosts, setHosts] = useState([
     {
       id: "1",
@@ -342,3 +346,8 @@ export default function EventHosts() {
     </div>
   );
 }
+
+export default withSubscriptionCheck(
+  withModulePermission(EventHosts, "EVENTS", "canRead"),
+  "events"
+);

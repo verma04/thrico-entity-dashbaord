@@ -94,44 +94,44 @@ export default function DomainChange() {
         variant="outline" 
         size="sm" 
         onClick={() => setIsOpen(true)}
-        className="h-8 px-3 text-[11px] font-bold uppercase tracking-wider text-slate-500 hover:text-slate-900 border-slate-200 hover:bg-slate-50 shadow-none transition-all"
+        className="h-8 px-3 text-[11px] font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground border-border/50 hover:bg-muted shadow-none transition-all"
       >
         Change Domain
       </Button>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="sm:max-w-md p-0 overflow-hidden border-slate-200/60 rounded-lg shadow-none">
-          <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/30">
+        <DialogContent className="sm:max-w-md p-0 overflow-hidden border-border/50 rounded-lg shadow-none">
+          <div className="px-6 py-5 border-b border-border/50 bg-muted/30">
             <DialogHeader>
-              <DialogTitle className="text-[15px] font-semibold text-slate-900 tracking-tight">
+              <DialogTitle className="text-[15px] font-semibold text-foreground tracking-tight">
                 Update subdomain
               </DialogTitle>
-              <DialogDescription className="text-[12px] text-slate-400 mt-1 font-medium">
+              <DialogDescription className="text-[12px] text-muted-foreground mt-1 font-medium">
                 You can change your default system domain once. This will update your public URL.
               </DialogDescription>
             </DialogHeader>
           </div>
 
           <div className="p-6 space-y-6">
-            <div className="flex items-center gap-3 p-3 rounded-md bg-slate-50 border border-slate-100">
-              <AlertCircle className="h-4 w-4 text-slate-400 shrink-0" />
-              <p className="text-[11px] font-semibold text-slate-500">
+            <div className="flex items-center gap-3 p-3 rounded-md bg-muted/50 border border-border/50">
+              <AlertCircle className="h-4 w-4 text-muted-foreground shrink-0" />
+              <p className="text-[11px] font-semibold text-muted-foreground">
                 There is no overhead cost for this migration.
               </p>
             </div>
 
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <div className="text-[12px] font-mono text-slate-300 select-none">
+                <div className="text-[12px] font-mono text-muted-foreground/50 select-none">
                   https://
                 </div>
                 <Input
                   placeholder="mydomain"
                   value={domain}
                   onChange={(e) => handleDomainChange(e.target.value)}
-                  className="flex-1 h-10 border-slate-200 focus:border-slate-400 focus:ring-0 rounded-md text-[13px] font-mono shadow-none transition-all"
+                  className="flex-1 h-10 border-border/50 focus:border-foreground focus:ring-0 rounded-md text-[13px] font-mono shadow-none transition-all"
                 />
-                <div className="text-[12px] font-mono text-slate-300 select-none">
+                <div className="text-[12px] font-mono text-muted-foreground/50 select-none">
                   .thrico.community
                 </div>
               </div>
@@ -139,14 +139,14 @@ export default function DomainChange() {
               {/* Availability Status */}
               <div className="min-h-[40px]">
                 {checkLoading && domain && (
-                  <div className="flex items-center gap-2 px-1 text-[11px] font-bold text-slate-400 uppercase tracking-widest animate-pulse">
+                  <div className="flex items-center gap-2 px-1 text-[11px] font-bold text-muted-foreground uppercase tracking-widest animate-pulse">
                     <Loader2 className="h-3 w-3 animate-spin" />
                     Checking...
                   </div>
                 )}
 
                 {isDomainAvailable && (
-                  <div className="flex items-center gap-2.5 p-3 rounded-md bg-emerald-50/50 border border-emerald-100/50">
+                  <div className="flex items-center gap-2.5 p-3 rounded-md bg-emerald-50 border-emerald-200 dark:bg-emerald-500/10 dark:border-emerald-500/20">
                     <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
                     <span className="text-[11px] font-bold text-emerald-700 uppercase tracking-wider">
                       Available: <span className="lowercase font-mono ml-1">{fullDomain}</span>
@@ -155,7 +155,7 @@ export default function DomainChange() {
                 )}
 
                 {isDomainTaken && (
-                  <div className="flex items-center gap-2.5 p-3 rounded-md bg-rose-50/50 border border-rose-100/50">
+                  <div className="flex items-center gap-2.5 p-3 rounded-md bg-rose-50 border-rose-200 dark:bg-rose-500/10 dark:border-rose-500/20">
                     <AlertTriangle className="h-4 w-4 text-rose-500 shrink-0" />
                     <span className="text-[11px] font-bold text-rose-700 uppercase tracking-wider">
                       Taken: <span className="lowercase font-mono ml-1">{domain}</span>
@@ -165,11 +165,11 @@ export default function DomainChange() {
               </div>
             </div>
 
-            <DialogFooter className="gap-2 sm:gap-2 pt-4 border-t border-slate-100">
+            <DialogFooter className="gap-2 sm:gap-2 pt-4 border-t border-border/50">
               <Button 
                 variant="ghost" 
                 onClick={() => setIsOpen(false)}
-                className="h-9 px-4 text-[11px] font-bold uppercase tracking-wider text-slate-500 hover:text-slate-900 hover:bg-slate-50"
+                className="h-9 px-4 text-[11px] font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted"
               >
                 Cancel
               </Button>
@@ -178,7 +178,7 @@ export default function DomainChange() {
                 disabled={
                   !domain || !isDomainAvailable || checkLoading || changeLoading
                 }
-                className="h-9 px-6 text-[11px] font-bold uppercase tracking-wider bg-slate-900 hover:bg-black text-white gap-2 rounded-md transition-all active:scale-[0.98]"
+                className="h-9 px-6 text-[11px] font-bold uppercase tracking-wider bg-slate-900 dark:bg-slate-100 hover:bg-black dark:hover:bg-white text-white dark:text-slate-900 gap-2 rounded-md transition-all active:scale-[0.98]"
               >
                 {changeLoading && (
                   <Loader2 className="h-3 w-3 animate-spin" />

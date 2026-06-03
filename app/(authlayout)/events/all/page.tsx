@@ -1,5 +1,9 @@
 "use client";
 
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
+
 import { useState, useMemo } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -222,4 +226,9 @@ function AllEventsPage() {
   );
 }
 
-export default AllEventsPage;
+
+
+export default withSubscriptionCheck(
+  withModulePermission(AllEventsPage, "EVENTS", "canRead"),
+  "events"
+);

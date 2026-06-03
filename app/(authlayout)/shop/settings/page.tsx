@@ -1,5 +1,9 @@
 "use client";
 
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
+
 import React from "react";
 import { useEntitySettings, useUpdateEntitySettings } from "@/graphql/actions";
 import { ShoppingBag, ShieldCheck, Zap } from "lucide-react";
@@ -56,4 +60,9 @@ const ShopSettings = () => {
   );
 };
 
-export default ShopSettings;
+
+
+export default withSubscriptionCheck(
+  withModulePermission(ShopSettings, "SHOP", "canEdit"),
+  "shop"
+);

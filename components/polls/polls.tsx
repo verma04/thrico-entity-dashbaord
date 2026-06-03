@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { getPolls } from "../../graphql/actions/polls";
 import { BarChart3, Plus, RotateCw, Filter, LayoutGrid, Terminal } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,35 +12,42 @@ import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-acti
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-const Poll: React.FC<PollProps> = ({ by }) => {
+const Poll: React.FC<PollProps> = ({ by: initialBy }) => {
+  const [byFilter, setByFilter] = useState<By>(initialBy || By.ENTITY);
+  
   const { data, loading, refetch } = getPolls({
     variables: {
       input: {
-        by: by,
+        by: byFilter,
       },
     },
   });
 
   const polls = data?.getPolls || [];
-  const isAdmin = by === By.ENTITY;
+  const isAdmin = byFilter === By.ENTITY;
 
   return (
     <EcosystemWrapper>
        <EcosystemHeader
-          title={isAdmin ? "Polls" : "User Polls"}
-          description={isAdmin ? "Manage and view administrative polls." : "View and moderate community polls."}
+          title="Polls"
+          description="Manage and view administrative and community polls."
           badgeText={isAdmin ? "Admin" : "Community"}
           icon={BarChart3}
           actions={
-            isAdmin && (
-              <Link href="/polls/create">
-                 <Button className="font-semibold text-xs px-6 h-10 rounded-lg shadow-sm gap-2">
-                   <Plus className="h-4 w-4" />
-                   Create Poll
-                 </Button>
-              </Link>
-            )
+            <Link href="/polls/create">
+               <Button className="font-semibold text-xs px-6 h-10 rounded-lg shadow-sm gap-2">
+                 <Plus className="h-4 w-4" />
+                 Create Poll
+               </Button>
+            </Link>
           }
        />
 
@@ -61,6 +68,22 @@ const Poll: React.FC<PollProps> = ({ by }) => {
           <EcosystemActionBar.Separator />
 
           <EcosystemActionBar.Group>
+             <EcosystemActionBar.Item>
+                <Select
+                  value={byFilter}
+                  onValueChange={(value) => setByFilter(value as By)}
+                >
+                  <SelectTrigger className="w-[140px] h-9 border-none bg-muted/50 rounded-lg text-xs font-semibold focus:ring-0">
+                    <Filter className="w-3.5 h-3.5 mr-2 text-muted-foreground" />
+                    <SelectValue placeholder="Filter Polls" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={By.ENTITY}>Admin Polls</SelectItem>
+                    <SelectItem value={By.USER}>User Polls</SelectItem>
+                    <SelectItem value={By.ALL}>All Polls</SelectItem>
+                  </SelectContent>
+                </Select>
+             </EcosystemActionBar.Item>
              <EcosystemActionBar.Item>
                 <Button
                   variant="outline"

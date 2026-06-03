@@ -33,6 +33,7 @@ import { communityEntity } from "./ts-types";
 import { getModalDescription, getModalTitle } from "./utils";
 import Manage from "./settings/Manage";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   changeDiscussionCommunityStatus,
   changeDiscussionCommunityVerification,
@@ -68,21 +69,13 @@ const Actions = (record: communityEntity) => {
       | "UNVERIFY"
       | "REAPPROVE"
       | "PAUSE",
-    user: communityEntity | null
+    user: communityEntity | null,
   ) => {
     setSelectedCommunity(user);
     setDialogAction(action);
     setIsModalOpen(true);
   };
-
-  const handleViewDetails = (user: communityEntity) => {
-    router.push(`/communities/${user.id}/discussion`);
-  };
   const router = useRouter();
-
-  const handleViewSettings = (user: communityEntity) => {
-    router.push(`/communities/${user.id}/manage`);
-  };
 
   const handleEdit = (user: communityEntity) => {
     setSelectedCommunity(user);
@@ -144,22 +137,38 @@ const Actions = (record: communityEntity) => {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => handleViewDetails(record)}>
-            <Eye className="mr-2 h-4 w-4" />
-            View Details
+          <DropdownMenuItem asChild>
+            <Link
+              href={`/communities/${record.id}/about`}
+              className="w-full cursor-pointer"
+            >
+              <Eye className="mr-2 h-4 w-4" />
+              View Details
+            </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setIsAuditModalOpen(true)}>
-            <ListOrdered className="mr-2 h-4 w-4" />
-            Audit Log
+          <DropdownMenuItem className="cursor-pointer">
+            <Link
+              href={`/communities/${record.id}/audit-log`}
+              className="w-full cursor-pointer"
+            >
+              <ListOrdered className="mr-2 h-4 w-4" />
+              Audit Log
+            </Link>
           </DropdownMenuItem>
 
           {record?.status === "PENDING" && (
             <>
-              <DropdownMenuItem onClick={() => handleAction("APPROVE", record)}>
+              <DropdownMenuItem
+                onClick={() => handleAction("APPROVE", record)}
+                className="cursor-pointer"
+              >
                 <CheckCircle className="mr-2 h-4 w-4 text-green-600" />
                 Approve Community
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleAction("REJECT", record)}>
+              <DropdownMenuItem
+                onClick={() => handleAction("REJECT", record)}
+                className="cursor-pointer"
+              >
                 <ThumbsDown className="mr-2 h-4 w-4 text-purple-600" />
                 Reject Community
               </DropdownMenuItem>
@@ -167,7 +176,10 @@ const Actions = (record: communityEntity) => {
           )}
 
           {record?.status === "REJECTED" && (
-            <DropdownMenuItem onClick={() => handleAction("REAPPROVE", record)}>
+            <DropdownMenuItem
+              onClick={() => handleAction("REAPPROVE", record)}
+              className="cursor-pointer"
+            >
               <Undo className="mr-2 h-4 w-4" />
               Re-approve Community
             </DropdownMenuItem>
@@ -175,23 +187,37 @@ const Actions = (record: communityEntity) => {
 
           {record?.status === "APPROVED" && (
             <>
-              <DropdownMenuItem onClick={() => handleAction("DISABLE", record)}>
+              <DropdownMenuItem
+                onClick={() => handleAction("DISABLE", record)}
+                className="cursor-pointer"
+              >
                 <UserX className="mr-2 h-4 w-4 text-yellow-600" />
                 Disable Community
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleAction("PAUSE", record)}>
+              <DropdownMenuItem
+                onClick={() => handleAction("PAUSE", record)}
+                className="cursor-pointer"
+              >
                 <StopCircle className="mr-2 h-4 w-4 text-yellow-600" />
                 Pause Community
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleViewSettings(record)}>
-                <Settings className="mr-2 h-4 w-4" />
-                Manage Settings
+              <DropdownMenuItem asChild>
+                <Link
+                  href={`/communities/${record.id}/setting`}
+                  className="w-full cursor-pointer"
+                >
+                  <Settings className="mr-2 h-4 w-4" />
+                  Manage Settings
+                </Link>
               </DropdownMenuItem>
             </>
           )}
 
           {record?.status === "DISABLED" && (
-            <DropdownMenuItem onClick={() => handleAction("ENABLE", record)}>
+            <DropdownMenuItem
+              onClick={() => handleAction("ENABLE", record)}
+              className="cursor-pointer"
+            >
               <CheckCircle className="mr-2 h-4 w-4 text-green-600" />
               Enable Community
             </DropdownMenuItem>

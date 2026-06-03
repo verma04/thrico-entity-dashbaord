@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Coins, ShieldAlert, ScrollText, Activity, LayoutDashboard, History } from "lucide-react";
 import GamificationMenuLayout from "@/components/gamification/gamification-menu-layout";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 
 function CurrencyLayout({ children }: { children: React.ReactNode }) {
   const items = [
@@ -45,4 +46,4 @@ function CurrencyLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default CurrencyLayout;
+export default withSubscriptionCheck(CurrencyLayout, "currency");

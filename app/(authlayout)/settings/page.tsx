@@ -2,6 +2,7 @@ import Identity from "@/components/settings/general/identity";
 import { GeneralSettingsLayout } from "@/components/settings/general/general-settings-layout";
 import React from "react";
 import type { Metadata } from "next";
+import { GeneralSettingsAccess } from "./access";
 
 export const metadata: Metadata = {
   title: "General Settings",
@@ -11,9 +12,11 @@ export const metadata: Metadata = {
 
 const page = () => {
   return (
-    <GeneralSettingsLayout>
-      <Identity />
-    </GeneralSettingsLayout>
+    <GeneralSettingsAccess>
+      <GeneralSettingsLayout>
+        <Identity />
+      </GeneralSettingsLayout>
+    </GeneralSettingsAccess>
   );
 };
 

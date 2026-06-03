@@ -12,8 +12,10 @@ import { Button } from "@/components/ui/button";
 import { MoreHorizontal, ShieldCheck, Trash2, Eye } from "lucide-react";
 import { Report } from "./types";
 import { useUpdateReportStatus } from "@/graphql/actions/reports";
+import { useRouter } from "next/navigation";
 
-export default function Actions({ report }: { report: Report }) {
+export default function Actions({ report, canEdit = true }: { report: Report; canEdit?: boolean }) {
+  const router = useRouter();
   const [updateStatus, { loading }] = useUpdateReportStatus({
     onCompleted: () => {
       // success handling
@@ -22,6 +24,27 @@ export default function Actions({ report }: { report: Report }) {
       console.error(e);
     },
   });
+
+  const handleViewTarget = () => {
+    switch (report.module) {
+      case "COMMUNITY":
+        router.push(`/communities/${report.targetId}/about`);
+        break;
+      case "JOB":
+        router.push(`/jobs/${report.targetId}`);
+        break;
+      case "LISTING":
+        router.push(`/listing/${report.targetId}`);
+        break;
+      case "USER":
+      case "MEMBER":
+        router.push(`/members/${report.targetId}`);
+        break;
+      default:
+        console.log("View target not implemented for module:", report.module);
+        break;
+    }
+  };
 
   const handleUpdate = (status: "RESOLVED" | "DISMISSED") => {
     updateStatus({
@@ -42,15 +65,12 @@ export default function Actions({ report }: { report: Report }) {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-        <DropdownMenuItem
-          className="cursor-pointer"
-          onClick={() => console.log("View", report.id)}
-        >
+        <DropdownMenuItem className="cursor-pointer" onClick={handleViewTarget}>
           <Eye className="mr-2 h-4 w-4" />
           View Target
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        {report.status !== "RESOLVED" && (
+        {canEdit && report.status !== "RESOLVED" && (
           <DropdownMenuItem
             className="cursor-pointer text-blue-600 focus:text-blue-600"
             onClick={() => handleUpdate("RESOLVED")}
@@ -59,7 +79,7 @@ export default function Actions({ report }: { report: Report }) {
             Mark Resolved
           </DropdownMenuItem>
         )}
-        {report.status !== "DISMISSED" && (
+        {canEdit && report.status !== "DISMISSED" && (
           <DropdownMenuItem
             className="cursor-pointer text-red-600 focus:text-red-600"
             onClick={() => handleUpdate("DISMISSED")}

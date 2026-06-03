@@ -13,12 +13,7 @@ import {
   MessageSquare,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetFooter,
-} from "@/components/ui/sheet";
+
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -96,19 +91,19 @@ export function ForumEditForm({
         className="flex flex-col h-full bg-background overflow-hidden"
       >
         {/* Header */}
-        <SheetHeader className="px-6 pt-6 pb-4 border-b">
+        <div className="px-6 pt-6 pb-4 border-b">
           <div className="flex items-center gap-2">
-            <SheetTitle className="text-2xl">Edit Discussion Post</SheetTitle>
+            <h2 className="text-2xl font-semibold tracking-tight">Edit Discussion Post</h2>
             {hasChanges && (
               <Badge variant="secondary" className="animate-pulse">
                 Unsaved Changes
               </Badge>
             )}
           </div>
-          <SheetDescription>
+          <p className="text-sm text-muted-foreground mt-1">
             Update your post content and customize visibility settings
-          </SheetDescription>
-        </SheetHeader>
+          </p>
+        </div>
 
         <Tabs
           value={activeTab}
@@ -313,49 +308,47 @@ export function ForumEditForm({
 
         <Separator />
 
-        <SheetFooter className="px-6 py-4 bg-muted/30">
-          <div className="flex items-center justify-between w-full">
+        <div className="px-6 py-4 bg-muted/30 flex items-center justify-between w-full">
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={onCancel}
+            disabled={loading}
+            className="gap-2"
+          >
+            <X className="h-4 w-4" />
+            Cancel
+          </Button>
+          <div className="flex gap-2">
             <Button
               type="button"
-              variant="ghost"
-              onClick={onCancel}
-              disabled={loading}
+              variant="outline"
+              onClick={() => formik.resetForm()}
+              disabled={!formik.dirty || loading}
               className="gap-2"
             >
-              <X className="h-4 w-4" />
-              Cancel
+              <RotateCcw className="h-4 w-4" />
+              Reset Changes
             </Button>
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => formik.resetForm()}
-                disabled={!formik.dirty || loading}
-                className="gap-2"
-              >
-                <RotateCcw className="h-4 w-4" />
-                Reset Changes
-              </Button>
-              <Button
-                type="submit"
-                disabled={!canSubmit}
-                className="gap-2 px-6"
-              >
-                {loading ? (
-                  <>
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <Save className="h-4 w-4" />
-                    Save Changes
-                  </>
-                )}
-              </Button>
-            </div>
+            <Button
+              type="submit"
+              disabled={!canSubmit}
+              className="gap-2 px-6"
+            >
+              {loading ? (
+                <>
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4" />
+                  Save Changes
+                </>
+              )}
+            </Button>
           </div>
-        </SheetFooter>
+        </div>
       </form>
     </FormikProvider>
   );

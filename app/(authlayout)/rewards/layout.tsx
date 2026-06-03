@@ -12,6 +12,7 @@ import {
   Gamepad2,
 } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 
 function RewardsLayout({ children }: { children: React.ReactNode }) {
   const items = [
@@ -70,4 +71,4 @@ function RewardsLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default RewardsLayout;
+export default withSubscriptionCheck(RewardsLayout, "rewards");

@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Tag, Settings, List, FolderTree, Plus } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 
 function OffersLayout({ children }: { children: React.ReactNode }) {
   const items = [
@@ -30,4 +31,4 @@ function OffersLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default OffersLayout;
+export default withSubscriptionCheck(OffersLayout, "offers");

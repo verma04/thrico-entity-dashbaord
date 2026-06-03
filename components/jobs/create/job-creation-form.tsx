@@ -39,6 +39,8 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { CompanyAutocompleteSelect } from "./company-auto-complete";
+import { JobTitleAutocomplete } from "./job-title-auto-complete";
+import { SkillsAutocomplete } from "./skills-auto-complete";
 import GooglePlacesInput from "@/components/layout/google-place-input";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { cn } from "@/lib/utils";
@@ -53,7 +55,7 @@ interface ListingCreationFormProps {
 const jobSchema = Yup.object().shape({
   title: Yup.string().required("Job title is required"),
   company: Yup.mixed().required("Company name is required"),
-  location: Yup.string().required("Location is required"),
+  location: Yup.object().nullable().required("Location is required"),
   salary: Yup.string(),
   jobType: Yup.string().required("Job type is required"),
   workplaceType: Yup.string().required("Work arrangement is required"),
@@ -235,13 +237,15 @@ export function JobCreationForm({
                 <Briefcase className="h-5 w-5 text-primary" />
               </div>
               <h1 className="text-2xl font-bold tracking-tight">
-                Create Job Posting
+                {initialValues?.title ? "Edit Job Posting" : "Create Job Posting"}
               </h1>
             </div>
             <div className="flex items-center gap-2 text-xs text-muted-foreground ml-1">
               <span>Jobs</span>
               <ChevronRight className="h-3 w-3" />
-              <span>Create New Listing</span>
+              <span>
+                {initialValues?.title ? "Edit Listing" : "Create New Listing"}
+              </span>
             </div>
           </div>
         </div>
@@ -267,18 +271,14 @@ export function JobCreationForm({
                         <Label htmlFor="title" className="text-sm font-medium">
                           Job Title <span className="text-destructive">*</span>
                         </Label>
-                        <Input
-                          id="title"
-                          name="title"
-                          placeholder="e.g., Senior Frontend Developer"
+                        <JobTitleAutocomplete
                           value={formik.values.title}
-                          onChange={formik.handleChange}
+                          onChange={(val) => formik.setFieldValue("title", val)}
                           onBlur={formik.handleBlur}
-                          className={cn(
-                            formik.touched.title &&
-                              formik.errors.title &&
-                              "border-destructive",
-                          )}
+                          placeholder="e.g., Senior Frontend Developer"
+                          error={
+                            !!(formik.touched.title && formik.errors.title)
+                          }
                         />
                         {formik.touched.title && formik.errors.title && (
                           <p className="text-xs text-destructive">
@@ -561,12 +561,21 @@ export function JobCreationForm({
                         CheckCircle2,
                       )}
                       <Separator />
-                      {renderListSection(
-                        "skills",
-                        "Required Skills",
-                        "e.g., TypeScript, Next.js, TailwindCSS",
-                        Briefcase,
-                      )}
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-2">
+                          <div className="p-1.5 rounded-md bg-primary/10">
+                            <Briefcase className="h-4 w-4 text-primary" />
+                          </div>
+                          <Label className="text-base font-semibold">Required Skills</Label>
+                          <Badge variant="secondary" className="ml-1">
+                            {formik.values.skills.filter((s: string) => s.trim() !== "").length}
+                          </Badge>
+                        </div>
+                        <SkillsAutocomplete
+                          value={formik.values.skills}
+                          onChange={(val) => formik.setFieldValue("skills", val)}
+                        />
+                      </div>
                       <Separator />
                       {renderListSection(
                         "benefits",

@@ -72,7 +72,7 @@ const Actions = (record: Job) => {
       | "UNVERIFY"
       | "REAPPROVE"
       | "PAUSE",
-    listing: Job | null
+    listing: Job | null,
   ) => {
     setActiveJob(listing);
     setDialogAction(action);
@@ -86,18 +86,19 @@ const Actions = (record: Job) => {
   };
 
   const handleViewApplicants = (job: Job) => {
-    setActiveJob(job);
-    setIsApplicantsDrawerOpen(true);
-    setIsModalOpen(false);
+    router.push(`/jobs/${job.id}/applicants`);
   };
 
-  const handleViewSettings = (user: Job) => {
-    router.push(`/communities/${user.id}/manage`);
+  const handleViewSettings = (job: Job) => {
+    router.push(`/jobs/${job.id}/settings`);
   };
 
-  const handleAnalytics = (user: Job) => {
-    setActiveJob(user);
-    setIsAnalytics(true);
+  const handleAnalytics = (job: Job) => {
+    router.push(`/jobs/${job.id}/manage`);
+  };
+
+  const handleAuditLog = (job: Job) => {
+    router.push(`/jobs/${job.id}/audit-log`);
   };
 
   const onCompleted = () => {
@@ -115,7 +116,7 @@ const Actions = (record: Job) => {
   const [changeVerification, { loading: verifyBtn }] = useChangeJobVerification(
     {
       onCompleted,
-    }
+    },
   );
 
   const confirmAction = () => {
@@ -157,9 +158,9 @@ const Actions = (record: Job) => {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => handleViewDetails(record)}>
-            <Eye className="mr-2 h-4 w-4" />
-            View Details
+          <DropdownMenuItem onClick={() => handleViewSettings(record)}>
+            <Settings className="mr-2 h-4 w-4" />
+            Manage
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => handleViewApplicants(record)}>
             <Users2 className="mr-2 h-4 w-4" />
@@ -169,7 +170,7 @@ const Actions = (record: Job) => {
             <BarChart3 className="mr-2 h-4 w-4" />
             View Analytics
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setIsAuditModalOpen(true)}>
+          <DropdownMenuItem onClick={() => handleAuditLog(record)}>
             <List className="mr-2 h-4 w-4" />
             Audit Log
           </DropdownMenuItem>
@@ -199,10 +200,6 @@ const Actions = (record: Job) => {
               <DropdownMenuItem onClick={() => handleAction("DISABLE", record)}>
                 <XCircle className="mr-2 h-4 w-4 text-amber-600" />
                 Disable Job
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleViewSettings(record)}>
-                <Settings className="mr-2 h-4 w-4" />
-                Manage Settings
               </DropdownMenuItem>
             </>
           )}
@@ -250,7 +247,9 @@ const Actions = (record: Job) => {
               }
               onClick={confirmAction}
               disabled={
-                (isReasonRequired && !actionReason.trim()) || loading || verifyBtn
+                (isReasonRequired && !actionReason.trim()) ||
+                loading ||
+                verifyBtn
               }
             >
               {dialogAction === "APPROVE" && "Approve Job"}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -202,10 +203,12 @@ export default function UsersTab() {
          </EcosystemActionBar.Group>
          <EcosystemActionBar.Group align="right">
             <EcosystemActionBar.Item>
-               <Button onClick={() => setShowAddDialog(true)} size="sm" className="h-9 px-5 rounded-xl gap-2 font-medium">
-                 <UserPlus className="h-4 w-4" />
-                 Add Member
-               </Button>
+               <Link href="/settings/users/create">
+                 <Button size="sm" className="h-9 px-5 rounded-xl gap-2 font-medium">
+                   <UserPlus className="h-4 w-4" />
+                   Add Member
+                 </Button>
+               </Link>
             </EcosystemActionBar.Item>
             <EcosystemActionBar.Item>
                <Button variant="outline" size="icon" onClick={() => refetch()} className="h-9 w-9 rounded-xl text-muted-foreground border-border hover:text-foreground hover:bg-muted">

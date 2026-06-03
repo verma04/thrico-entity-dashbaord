@@ -1,5 +1,9 @@
 "use client";
 
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
+
 import React, { useState, useMemo } from "react";
 import {
   useGetAllMoments,
@@ -14,7 +18,7 @@ import { MomentPreviewDialog } from "@/components/moments/moment-preview-dialog"
 import { MomentsEmptyState } from "@/components/moments/moments-empty-state";
 import { MomentsLoadingState } from "@/components/moments/moments-loading-state";
 
-export default function MomentsListPage() {
+function MomentsListPage() {
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get("q") || "";
   const [selectedMoment, setSelectedMoment] = useState<Moment | null>(null);
@@ -95,3 +99,8 @@ export default function MomentsListPage() {
     </EcosystemWrapper>
   );
 }
+
+export default withSubscriptionCheck(
+  withModulePermission(MomentsListPage, "MOMENTS", "canRead"),
+  "moments"
+);

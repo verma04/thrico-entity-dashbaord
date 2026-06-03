@@ -2,7 +2,14 @@
 
 import React from "react";
 import { OffersManager } from "@/components/offers/offers-manager";
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 
-export default function AllOffersPage() {
+function AllOffersPage() {
   return <OffersManager />;
 }
+
+export default withSubscriptionCheck(
+  withModulePermission(AllOffersPage, "OFFERS", "canRead"),
+  "offers"
+);

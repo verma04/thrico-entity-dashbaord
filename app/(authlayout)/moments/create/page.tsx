@@ -1,5 +1,9 @@
 "use client";
 
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
+
 import React from "react";
 import { useRouter } from "next/navigation";
 import { MomentCreationForm } from "@/components/moments/add/moment-creation-form";
@@ -177,4 +181,9 @@ const CreateMomentPage = () => {
   );
 };
 
-export default CreateMomentPage;
+
+
+export default withSubscriptionCheck(
+  withModulePermission(CreateMomentPage, "MOMENTS", "canCreate"),
+  "moments"
+);

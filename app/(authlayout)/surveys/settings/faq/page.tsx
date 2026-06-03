@@ -1,5 +1,9 @@
 "use client";
 
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
+
 import { ModuleFaqListManager } from "@/components/common/module-faq-manager";
 
 const SurveysFaqPage = () => {
@@ -12,4 +16,9 @@ const SurveysFaqPage = () => {
   );
 };
 
-export default SurveysFaqPage;
+
+
+export default withSubscriptionCheck(
+  withModulePermission(SurveysFaqPage, "SURVEYS", "canEdit"),
+  "surveys"
+);

@@ -7,8 +7,8 @@ export const GET_AUDIT_LOG_MODULES = gql`
 `;
 
 export const GET_AUDIT_LOGS = gql`
-  query AuditLogs($pagination: PaginationInput, $module: String) {
-    auditLogs(pagination: $pagination, module: $module) {
+  query AuditLogs($pagination: PaginationInput, $module: String, $resourceId: String) {
+    auditLogs(pagination: $pagination, module: $module, resourceId: $resourceId) {
       data {
         id
         adminId

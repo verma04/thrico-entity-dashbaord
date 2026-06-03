@@ -16,8 +16,8 @@ const details = `
   theme
   interests
   categories
-
   numberOfLikes
+  numberOfUser
    tagline
   numberOfPost
   numberOfViews
@@ -30,7 +30,13 @@ const details = `
   enableRatingsAndReviews
   requireAdminApprovalForPosts
   allowMemberPosts
-  rules
+  rules {
+    id
+    title
+    description
+    isActive
+    order
+  }
    verification {
       id
       isVerifiedAt
@@ -131,6 +137,79 @@ mutation UpdateBasicInfo($input: UpdateBasicInfoInput!) {
       ${details}
   }
 }`;
+
+export const UPDATE_COMMUNITY = gql`
+mutation UpdateCommunity($input: UpdateCommunityInput!) {
+  updateCommunity(input: $input) {
+      ${details}
+  }
+}`;
+
+export const DELETE_COMMUNITY = gql`
+mutation DeleteCommunity($id: ID!) {
+  deleteCommunity(id: $id)
+}`;
+
+export const GET_COMMUNITY_RATINGS = gql`
+  query GetCommunityRatings($communityId: ID!, $limit: Int, $offset: Int, $sortBy: String, $filterRating: String) {
+    getCommunityRatings(communityId: $communityId, limit: $limit, offset: $offset, sortBy: $sortBy, filterRating: $filterRating) {
+      data {
+        id
+        userId
+        groupId
+        rating
+        review
+        isVerified
+        verifiedBy
+        verifiedAt
+        verificationReason
+        isHelpful
+        helpfulCount
+        unhelpfulCount
+        createdAt
+        updatedAt
+        user {
+          id
+          firstName
+          lastName
+          avatar
+        }
+      }
+      totalCount
+      summary {
+        totalRatings
+        averageRating
+        oneStar
+        twoStar
+        threeStar
+        fourStar
+        fiveStar
+      }
+    }
+  }
+`;
+
+export const DELETE_COMMUNITY_RATING = gql`
+  mutation DeleteCommunityRating($id: ID!) {
+    deleteCommunityRating(id: $id)
+  }
+`;
+
+export const UPDATE_COMMUNITY_RATING = gql`
+  mutation UpdateCommunityRating($input: UpdateCommunityRatingInput!) {
+    updateCommunityRating(input: $input) {
+      id
+      rating
+      review
+    }
+  }
+`;
+
+export const VOTE_COMMUNITY_RATING_HELPFULNESS = gql`
+  mutation VoteCommunityRatingHelpfulness($ratingId: ID!, $isHelpful: Boolean!) {
+    voteCommunityRatingHelpfulness(ratingId: $ratingId, isHelpful: $isHelpful)
+  }
+`;
 export const UPDATE_COMMUNITY_PERMISSIONS = gql`
 mutation UpdateCommunityPermissions($input: UpdateCommunityPermissionsInput!) {
   updateCommunityPermissions(input: $input) {

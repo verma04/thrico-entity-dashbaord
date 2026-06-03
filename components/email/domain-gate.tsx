@@ -70,7 +70,7 @@ export function EmailDomainGate({ children }: EmailDomainGateProps) {
   if (emailLoading) {
     return (
       <div className="h-96 flex items-center justify-center">
-        <RefreshCw className="h-6 w-6 text-slate-300 animate-spin" />
+        <RefreshCw className="h-6 w-6 text-muted-foreground/50 animate-spin" />
       </div>
     );
   }
@@ -114,9 +114,9 @@ export function EmailDomainGate({ children }: EmailDomainGateProps) {
           className="max-w-6xl mx-auto space-y-8"
         >
           {/* Header Section */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-6 border-b border-slate-100">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-6 border-b border-border/50">
             <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-400 shrink-0">
+              <div className="h-12 w-12 rounded-xl bg-muted/50 border border-border/50 flex items-center justify-center text-muted-foreground shrink-0">
                 {status === "pending" ? (
                   <RefreshCw className="h-6 w-6 animate-spin text-amber-500" />
                 ) : status === "failed" ? (
@@ -126,14 +126,14 @@ export function EmailDomainGate({ children }: EmailDomainGateProps) {
                 )}
               </div>
               <div>
-                <h1 className="text-[20px] font-semibold tracking-tight text-slate-900">
+                <h1 className="text-[20px] font-semibold tracking-tight text-foreground">
                   {status === "pending"
                     ? "Domain Verification Pending"
                     : status === "failed"
                       ? "Domain Verification Failed"
                       : "Email Domain Required"}
                 </h1>
-                <p className="text-[13px] text-slate-500 mt-1 font-medium">
+                <p className="text-[13px] text-muted-foreground mt-1 font-medium">
                   {domainData?.domain ||
                     "Configure your custom domain to start sending emails."}
                 </p>
@@ -144,7 +144,7 @@ export function EmailDomainGate({ children }: EmailDomainGateProps) {
                 variant="outline"
                 onClick={() => checkVerification()}
                 disabled={checking}
-                className="h-10 px-4 text-[12px] font-semibold border-slate-200 hover:bg-slate-50 gap-2 transition-colors"
+                className="h-10 px-4 text-[12px] font-semibold border-border/50 hover:bg-muted gap-2 transition-colors"
               >
                 {checking ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -155,7 +155,7 @@ export function EmailDomainGate({ children }: EmailDomainGateProps) {
               </Button>
               <Button
                 onClick={() => router.push("/settings/domains")}
-                className="h-10 px-5 bg-slate-900 hover:bg-black text-white text-[12px] font-semibold shadow-sm transition-all"
+                className="h-10 px-5 bg-slate-900 dark:bg-slate-100 hover:bg-black dark:hover:bg-white text-white dark:text-slate-900 text-[12px] font-semibold shadow-sm transition-all"
               >
                 Configure Settings
               </Button>
@@ -164,22 +164,22 @@ export function EmailDomainGate({ children }: EmailDomainGateProps) {
 
           {/* Setup Instructions */}
           {!domainData && (
-            <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center space-y-6 shadow-sm">
-              <div className="h-16 w-16 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-300 mx-auto">
+            <div className="rounded-2xl border border-border/50 bg-card p-12 text-center space-y-6 shadow-sm">
+              <div className="h-16 w-16 rounded-full bg-slate-50 border border-border/50 flex items-center justify-center text-muted-foreground/50 mx-auto">
                 <Globe className="h-8 w-8" />
               </div>
               <div className="max-w-md mx-auto space-y-2">
-                <h3 className="text-[16px] font-semibold text-slate-900">
+                <h3 className="text-[16px] font-semibold text-foreground">
                   Get Started with Custom Domain
                 </h3>
-                <p className="text-[13px] text-slate-500 leading-relaxed">
+                <p className="text-[13px] text-muted-foreground leading-relaxed">
                   To send professional emails from your own domain, you first
                   need to configure and verify it in your domain settings.
                 </p>
               </div>
               <Button
                 onClick={() => router.push("/settings/domains")}
-                className="h-11 px-8 bg-slate-900 hover:bg-black text-white text-[12px] font-bold uppercase tracking-wider rounded-xl transition-all shadow-lg shadow-slate-200"
+                className="h-11 px-8 bg-slate-900 dark:bg-slate-100 hover:bg-black dark:hover:bg-white text-white dark:text-slate-900 text-[12px] font-bold uppercase tracking-wider rounded-xl transition-all shadow-lg shadow-none"
               >
                 Add Your Domain
               </Button>
@@ -189,16 +189,16 @@ export function EmailDomainGate({ children }: EmailDomainGateProps) {
           {domainData && (
             <div className="space-y-6">
               {/* Alert instructions header */}
-              <div className="px-5 py-4 border border-slate-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50">
+              <div className="px-5 py-4 border border-border/50 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-muted/30">
                 <div className="flex items-center gap-4">
-                  <div className="h-10 w-10 rounded-lg bg-white text-slate-600 flex items-center justify-center border border-slate-200 shrink-0 shadow-sm">
+                  <div className="h-10 w-10 rounded-lg bg-card text-foreground flex items-center justify-center border border-border/50 shrink-0 shadow-sm">
                     <Globe className="h-5 w-5" />
                   </div>
                   <div>
-                    <h3 className="text-[14px] font-semibold text-slate-900 tracking-tight leading-none">
+                    <h3 className="text-[14px] font-semibold text-foreground tracking-tight leading-none">
                       DNS Configuration
                     </h3>
-                    <p className="text-[12px] text-slate-500 mt-1.5 max-w-md">
+                    <p className="text-[12px] text-muted-foreground mt-1.5 max-w-md">
                       Apply these records at your registrar to route traffic.
                     </p>
                   </div>
@@ -207,25 +207,25 @@ export function EmailDomainGate({ children }: EmailDomainGateProps) {
               </div>
 
               {/* Records table */}
-              <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-                <div className="px-5 py-4 border-b border-slate-100 bg-slate-50/50">
-                  <h3 className="text-[13px] font-semibold text-slate-900">
+              <div className="rounded-xl border border-border/50 bg-card shadow-sm overflow-hidden">
+                <div className="px-5 py-4 border-b border-border/50 bg-muted/30">
+                  <h3 className="text-[13px] font-semibold text-foreground">
                     Required DNS Records
                   </h3>
                 </div>
                 <Table>
-                  <TableHeader className="bg-slate-50/30">
-                    <TableRow className="hover:bg-transparent border-slate-100">
-                      <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider h-11 px-6">
+                  <TableHeader className="bg-muted/30">
+                    <TableRow className="hover:bg-transparent border-border/50">
+                      <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider h-11 px-6">
                         Type
                       </TableHead>
-                      <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider h-11 px-6">
+                      <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider h-11 px-6">
                         Host / Name
                       </TableHead>
-                      <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider h-11 px-6">
+                      <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider h-11 px-6">
                         Value
                       </TableHead>
-                      <TableHead className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider h-11 px-6 text-right">
+                      <TableHead className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider h-11 px-6 text-right">
                         Status
                       </TableHead>
                     </TableRow>
@@ -234,23 +234,23 @@ export function EmailDomainGate({ children }: EmailDomainGateProps) {
                     {records.map((record, i) => (
                       <TableRow
                         key={i}
-                        className="border-slate-100 hover:bg-slate-50/50 transition-colors group"
+                        className="border-border/50 hover:bg-muted/30 transition-colors group"
                       >
                         <TableCell className="px-6 py-4">
-                          <span className="text-[11px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                          <span className="text-[11px] font-bold text-foreground bg-muted px-2 py-0.5 rounded border border-border/50">
                             {record.type}
                           </span>
                         </TableCell>
                         <TableCell className="px-6 py-4">
                           <div className="flex items-center gap-2 group-hover:gap-3 transition-all">
-                            <span className="font-mono text-[11px] text-slate-500 max-w-[200px] truncate block">
+                            <span className="font-mono text-[11px] text-muted-foreground max-w-[200px] truncate block">
                               {record.name}
                             </span>
                             <Button
                               variant="ghost"
                               size="icon"
                               onClick={() => copyToClipboard(record.name)}
-                              className="h-7 w-7 text-slate-400 hover:text-slate-900 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                              className="h-7 w-7 text-muted-foreground/50 hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
                             >
                               <Copy className="h-3 w-3" />
                             </Button>
@@ -258,14 +258,14 @@ export function EmailDomainGate({ children }: EmailDomainGateProps) {
                         </TableCell>
                         <TableCell className="px-6 py-4">
                           <div className="flex items-center gap-2 group-hover:gap-3 transition-all">
-                            <span className="font-mono text-[11px] text-slate-600 bg-slate-50 border border-slate-200 px-2 py-1.5 rounded truncate max-w-[280px] block">
+                            <span className="font-mono text-[11px] text-foreground bg-muted/50 border border-border/50 px-2 py-1.5 rounded truncate max-w-[280px] block">
                               {record.value}
                             </span>
                             <Button
                               variant="ghost"
                               size="icon"
                               onClick={() => copyToClipboard(record.value)}
-                              className="h-8 w-8 text-slate-400 hover:text-slate-900 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                              className="h-8 w-8 text-muted-foreground/50 hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
                             >
                               <Copy className="h-3.5 w-3.5" />
                             </Button>
@@ -273,12 +273,12 @@ export function EmailDomainGate({ children }: EmailDomainGateProps) {
                         </TableCell>
                         <TableCell className="px-6 py-4 text-right">
                           {record.verified ? (
-                            <span className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-emerald-600">
+                            <span className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-emerald-600 dark:text-emerald-400">
                               <CheckCircle2 className="h-4 w-4" />
                               <span className="hidden sm:inline">Verified</span>
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-amber-600 font-mono">
+                            <span className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-amber-600 dark:text-amber-400 font-mono">
                               <Clock className="h-4 w-4" />
                               <span className="hidden sm:inline uppercase tracking-widest text-[10px]">
                                 Pending

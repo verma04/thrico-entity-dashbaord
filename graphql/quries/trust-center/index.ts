@@ -1,8 +1,8 @@
 import { gql } from "@apollo/client";
 
 export const GET_SUPPORT_TICKETS = gql`
-  query GetSupportTickets($status: TicketStatus, $category: TicketCategory, $first: Int, $after: String) {
-    getSupportTickets(status: $status, category: $category, first: $first, after: $after) {
+  query GetSupportTickets($status: TicketStatus, $category: TicketCategory, $priority: TicketPriority, $first: Int, $after: String) {
+    getSupportTickets(status: $status, category: $category, priority: $priority, first: $first, after: $after) {
       items {
         id
         subject
@@ -118,6 +118,7 @@ export const UPDATE_SUPPORT_TICKET = gql`
       id
       status
       priority
+      allowReplies
       updatedAt
     }
   }
@@ -170,5 +171,23 @@ export const CREATE_ANNOUNCEMENT = gql`
       expiry
       announcementId
     }
+  }
+`;
+
+export const UPDATE_ANNOUNCEMENT = gql`
+  mutation UpdateAnnouncement($id: ID!, $input: UpdateAnnouncementInput!) {
+    updateAnnouncement(id: $id, input: $input) {
+      id
+      subject
+      description
+      category
+      allowReplies
+    }
+  }
+`;
+
+export const DELETE_ANNOUNCEMENT = gql`
+  mutation DeleteAnnouncement($id: ID!) {
+    deleteAnnouncement(id: $id)
   }
 `;

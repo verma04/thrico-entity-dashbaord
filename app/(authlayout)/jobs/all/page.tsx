@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { JobStatus, useJobs } from "@/graphql/actions/jobs";
 import TableLoading from "@/components/layout/table-loading";
 import Jobs from "@/components/jobs/jobs";
+import { withModulePermission } from "@/components/hoc/with-module-permission";
 
 const Page = () => {
   const searchParams = useSearchParams();
@@ -41,4 +42,8 @@ const Page = () => {
   );
 };
 
-export default Page;
+export default withModulePermission(
+  Page,
+  "JOBS",
+  "canRead"
+);

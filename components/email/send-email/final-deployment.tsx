@@ -25,8 +25,8 @@ export function FinalDeployment({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-base font-semibold text-slate-900">Review &amp; Send</h2>
-        <p className="text-sm text-slate-500 mt-1">Check everything looks good before sending your campaign.</p>
+        <h2 className="text-base font-semibold text-foreground">Review &amp; Send</h2>
+        <p className="text-sm text-muted-foreground mt-1">Check everything looks good before sending your campaign.</p>
       </div>
 
       {/* Status Checks */}
@@ -37,22 +37,22 @@ export function FinalDeployment({
             className={cn(
               "p-4 rounded-2xl border flex items-start gap-3",
               check.ok
-                ? "bg-emerald-50/50 border-emerald-100"
+                ? "bg-emerald-50 dark:bg-emerald-500/10/50 border-emerald-100"
                 : "bg-red-50/50 border-red-100"
             )}
           >
             <div className={cn(
               "h-8 w-8 rounded-xl flex items-center justify-center shrink-0 border",
               check.ok
-                ? "bg-white border-emerald-100 text-emerald-600"
-                : "bg-white border-red-100 text-red-500"
+                ? "bg-card border-emerald-100 text-emerald-600 dark:text-emerald-400"
+                : "bg-card border-red-100 text-red-500"
             )}>
               {check.ok
                 ? <CheckCircle2 className="h-4 w-4" />
                 : <AlertTriangle className="h-4 w-4" />}
             </div>
             <div>
-              <p className="text-sm font-semibold text-slate-900">{check.label}</p>
+              <p className="text-sm font-semibold text-foreground">{check.label}</p>
               <p className={cn("text-xs mt-0.5", check.ok ? "text-emerald-700" : "text-red-600")}>
                 {check.message}
               </p>
@@ -62,14 +62,14 @@ export function FinalDeployment({
       </div>
 
       {/* Summary */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 space-y-5">
+      <div className="rounded-2xl border border-border/50 bg-card p-6 space-y-5">
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center">
-            <Send className="h-4 w-4 text-slate-600" />
+          <div className="h-9 w-9 rounded-xl bg-muted border border-border/50 flex items-center justify-center">
+            <Send className="h-4 w-4 text-foreground/80" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-slate-900">Campaign Summary</h3>
-            <p className="text-xs text-slate-500">Ready to send</p>
+            <h3 className="text-sm font-semibold text-foreground">Campaign Summary</h3>
+            <p className="text-xs text-muted-foreground">Ready to send</p>
           </div>
         </div>
 
@@ -81,15 +81,15 @@ export function FinalDeployment({
             { label: "Priority", value: "Standard" },
           ].map((item, i) => (
             <div key={i} className="space-y-1">
-              <span className="text-xs font-medium text-slate-400">{item.label}</span>
-              <p className="text-sm font-semibold text-slate-900 truncate">{item.value}</p>
+              <span className="text-xs font-medium text-muted-foreground/80">{item.label}</span>
+              <p className="text-sm font-semibold text-foreground truncate">{item.value}</p>
             </div>
           ))}
         </div>
       </div>
 
       {!allOk && (
-        <div className="p-4 rounded-2xl bg-amber-50 border border-amber-100 flex items-start gap-3">
+        <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 flex items-start gap-3">
           <Shield className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
           <p className="text-sm text-amber-800 font-medium">
             Some checks have not passed. Please fix the issues above before sending.

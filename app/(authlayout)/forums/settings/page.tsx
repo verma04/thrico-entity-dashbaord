@@ -1,5 +1,9 @@
 "use client";
 
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
+
 import React from "react";
 import { useEntitySettings, useUpdateEntitySettings } from "@/graphql/actions";
 import { MessageSquare, Settings2 } from "lucide-react";
@@ -56,5 +60,10 @@ const Page = () => {
   );
 };
 
-export default Page;
 
+
+
+export default withSubscriptionCheck(
+  withModulePermission(Page, "FORUMS", "canEdit"),
+  "forums"
+);

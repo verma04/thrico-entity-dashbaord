@@ -6,6 +6,7 @@ import { useAddJob } from "@/graphql/actions/jobs";
 import { useGetEntity } from "@/graphql/actions";
 import { JobCreationForm } from "@/components/jobs/create/job-creation-form";
 import { useToast } from "@/components/ui/use-toast";
+import { withModulePermission } from "@/components/hoc/with-module-permission";
 
 const CreateJobPage = () => {
   const router = useRouter();
@@ -44,10 +45,25 @@ const CreateJobPage = () => {
       variables: {
         input: {
           ...values,
-          entity: entityData.getEntity.id,
-          company: {
-            id: values.company?.id || values.company,
-          },
+          location: values.location
+            ? {
+                name: JSON.stringify(values.location.name),
+                latitude: String(values.location.latitude),
+                longitude: String(values.location.longitude),
+                address: JSON.stringify(
+                  values.location.address || values.location.name,
+                ),
+              }
+            : null,
+
+          company:
+            typeof values.company === "string"
+              ? { name: values.company }
+              : {
+                  id: values.company.id,
+                  name: values.company.name,
+                  logo: values.company.logo,
+                },
           applicationDeadline: new Date().toISOString(),
         },
       },
@@ -70,4 +86,4 @@ const CreateJobPage = () => {
   );
 };
 
-export default CreateJobPage;
+export default withModulePermission(CreateJobPage, "JOBS", "canCreate");

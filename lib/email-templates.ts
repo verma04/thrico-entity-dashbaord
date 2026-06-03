@@ -83,10 +83,6 @@ export const STARTER_TEMPLATES = {
         fontSize: 32,
       },
       {
-        ...defaultBlock("image", "i1"),
-        content: "https://images.unsplash.com/photo-1549439602-43bbcb45f612?q=80&w=1200",
-      },
-      {
         ...defaultBlock("text", "t1"),
         content: "Welcome to Thrico! We're excited to have you join our growing community of innovators. Your journey starts today, and we're here to support you every step of the way.",
         align: "center" as TextAlign,
@@ -123,10 +119,6 @@ export const STARTER_TEMPLATES = {
         align: "left" as TextAlign,
       },
       {
-        ...defaultBlock("image", "i1"),
-        content: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=1200",
-      },
-      {
         ...defaultBlock("text", "t1"),
         content: "It's been a busy month for the team! We've launched several new features including gRPC integration, advanced usage tracking, and a brand new email builder.",
       },
@@ -160,10 +152,6 @@ export const STARTER_TEMPLATES = {
         fontSize: 36,
       },
       {
-        ...defaultBlock("image", "i1"),
-        content: "https://images.unsplash.com/photo-1540575861501-7ad05823c21b?q=80&w=1200",
-      },
-      {
         ...defaultBlock("text", "t1"),
         content: "Join us for an exclusive evening of networking, innovation, and insights into the future of digital ecosystems.",
         align: "center" as TextAlign,
@@ -194,10 +182,6 @@ export const STARTER_TEMPLATES = {
         content: "New Infrastructure Launch",
         align: "center" as TextAlign,
         color: "#6366f1",
-      },
-      {
-        ...defaultBlock("image", "i1"),
-        content: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200",
       },
       {
         ...defaultBlock("text", "t1"),

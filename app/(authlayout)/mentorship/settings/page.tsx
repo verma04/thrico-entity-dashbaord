@@ -1,5 +1,9 @@
 "use client";
 
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
+
 import React from "react";
 import { useEntitySettings, useUpdateEntitySettings } from "@/graphql/actions";
 import { GraduationCap, ShieldCheck, Zap } from "lucide-react";
@@ -56,4 +60,9 @@ const MentorshipSettings = () => {
   );
 };
 
-export default MentorshipSettings;
+
+
+export default withSubscriptionCheck(
+  withModulePermission(MentorshipSettings, "MENTORSHIP", "canEdit"),
+  "mentorship"
+);

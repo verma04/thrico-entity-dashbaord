@@ -1,5 +1,9 @@
 "use client";
 
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
+
 import {
   Card,
   CardContent,
@@ -14,7 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useParams } from "next/navigation";
 import { EventHybridVenue } from "@/components/events/detail/event-hybrid-venue";
 
-export default function HybridVenuePage() {
+function HybridVenuePage() {
   const params = useParams();
   const eventId = params?.id as string;
 
@@ -24,3 +28,8 @@ export default function HybridVenuePage() {
     </div>
   );
 }
+
+export default withSubscriptionCheck(
+  withModulePermission(HybridVenuePage, "EVENTS", "canRead"),
+  "events"
+);

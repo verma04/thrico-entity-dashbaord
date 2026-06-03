@@ -19,10 +19,10 @@ export function StepIndicator({ currentStep, steps }: StepIndicatorProps) {
               className={cn(
                 "h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold transition-all border",
                 i < currentStep
-                  ? "bg-emerald-500 text-white border-emerald-500"
+                  ? "bg-emerald-50 dark:bg-emerald-500/100 text-white dark:text-slate-900 border-emerald-500"
                   : i === currentStep
-                    ? "bg-slate-900 text-white border-slate-900"
-                    : "bg-white text-slate-400 border-slate-200"
+                    ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 border-slate-900"
+                    : "bg-card text-muted-foreground/80 border-border/50"
               )}
             >
               {i < currentStep ? <CheckCircle2 className="h-4 w-4" /> : i + 1}
@@ -30,7 +30,7 @@ export function StepIndicator({ currentStep, steps }: StepIndicatorProps) {
             <span
               className={cn(
                 "text-sm font-medium hidden sm:block transition-colors",
-                i === currentStep ? "text-slate-900" : i < currentStep ? "text-slate-500" : "text-slate-400"
+                i === currentStep ? "text-foreground" : i < currentStep ? "text-muted-foreground" : "text-muted-foreground/80"
               )}
             >
               {step}

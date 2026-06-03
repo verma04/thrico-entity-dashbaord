@@ -1,5 +1,9 @@
 "use client";
 
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
+
 import { useEntitySettings, useUpdateEntitySettings } from "@/graphql/actions";
 import { Calendar, ShieldCheck, Zap } from "lucide-react";
 import { PlatformSettingsPage, SettingsField } from "@/components/ui/platform/settings-page";
@@ -56,5 +60,10 @@ const EventsSettings = () => {
   );
 };
 
-export default EventsSettings;
 
+
+
+export default withSubscriptionCheck(
+  withModulePermission(EventsSettings, "EVENTS", "canEdit"),
+  "events"
+);

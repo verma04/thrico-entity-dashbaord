@@ -1,5 +1,9 @@
 "use client";
 
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
+
 import { useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useGetCustomForm } from "@/graphql/surveys/survey-queries";
@@ -10,7 +14,7 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 
-export default function EditSurveyPage() {
+function EditSurveyPage() {
   const params = useParams();
   const router = useRouter();
   const id = params?.id as string;
@@ -101,3 +105,8 @@ export default function EditSurveyPage() {
     </Sheet>
   );
 }
+
+export default withSubscriptionCheck(
+  withModulePermission(EditSurveyPage, "SURVEYS", "canRead"),
+  "surveys"
+);

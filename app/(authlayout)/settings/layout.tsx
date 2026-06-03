@@ -5,21 +5,16 @@ import {
   ArrowLeft,
   ArrowUpRight,
   Blocks,
-  ChevronDown,
   Earth,
   FileStack,
   HandCoins,
   Headset,
   Fingerprint,
-  Home,
   Languages,
-  Layers,
   ListTodo,
   Lock,
   PaintBucket,
-  Receipt,
   Search,
-  ShieldCheck,
   UserCheck,
   Terminal,
   ChevronRight,
@@ -77,10 +72,9 @@ const buildSections = (items: MenuItem[]): MenuSection[] => {
   const sections: MenuSection[] = [];
 
   // Account
-  const accountItems = [
-    find("/settings/profile"),
-    find("/settings"),
-  ].filter(Boolean) as MenuItem[];
+  const accountItems = [find("/settings/profile"), find("/settings")].filter(
+    Boolean,
+  ) as MenuItem[];
   if (accountItems.length)
     sections.push({ title: "Account", items: accountItems });
 
@@ -167,7 +161,9 @@ function SectionGroup({
       <div
         className={cn(
           "overflow-hidden transition-all duration-200 ease-in-out",
-          open ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0 pointer-events-none",
+          open
+            ? "max-h-[600px] opacity-100"
+            : "max-h-0 opacity-0 pointer-events-none",
         )}
       >
         <ul className="list-none m-0 py-0.5 flex flex-col gap-0">
@@ -231,32 +227,61 @@ function SettingsLayout({ children }: { children: React.ReactNode }) {
   const user = useUserStore((state) => state.user);
   const isSuperAdmin = user?.isSuperAdmin;
   const isSystemRole = user?.role?.isSystem;
-  const permissions = user?.permissions;
+
+  // Helper to check permissions synchronously
+  const hasModulePermission = (
+    moduleName: string,
+    action: string = "canRead",
+  ) => {
+    if (!user) return false;
+    if (user.isSuperAdmin || user.role?.isSystem) return true;
+    if (user.permissions && moduleName in user.permissions) {
+      return !!user.permissions[moduleName as keyof typeof user.permissions];
+    }
+    const modulePermission = user.modulePermissions?.find(
+      (m) => m.module.toUpperCase() === moduleName.toUpperCase(),
+    );
+    // @ts-ignore
+    return !!modulePermission?.[action];
+  };
 
   const filteredMenuItems = useMemo(() => {
     if (isSuperAdmin || isSystemRole) return allMenuItems;
     return allMenuItems.filter((item) => {
       if (item.key === "/settings/profile") return true;
-      if (item.key === "/settings") return permissions?.settings;
-      if (item.key === "/settings/appearance") return permissions?.appearance;
-      if (item.key === "/settings/domains") return permissions?.domain;
-      if (item.key === "/settings/moderation") return permissions?.moderation;
+      if (item.key === "/settings")
+        return hasModulePermission("GENERAL_SETTINGS");
+      if (item.key === "/settings/appearance")
+        return hasModulePermission("APPEARANCE");
+      if (item.key === "/settings/domains")
+        return hasModulePermission("DOMAIN");
+      if (item.key === "/settings/moderation")
+        return hasModulePermission("MODERATION");
       if (item.key === "/settings/subscription")
-        return permissions?.subscription;
+        return hasModulePermission("SUBSCRIPTION");
       if (item.key === "/settings/modules")
-        return permissions?.platformFeatures;
-      if (item.key === "/settings/billing") return permissions?.subscription;
-      if (item.key === "/settings/users") return permissions?.adminUsers;
-      if (item.key === "/settings/taxes") return permissions?.settings;
-      if (item.key === "/settings/languages") return permissions?.settings;
-      if (item.key === "/settings/privacy") return permissions?.settings;
-      if (item.key === "/settings/policies") return permissions?.settings;
+        return hasModulePermission("PLATFORM_FEATURES");
+      if (item.key === "/settings/billing")
+        return hasModulePermission("BILLING");
+      if (item.key === "/settings/users")
+        return hasModulePermission("USERS_AND_PERMISSIONS");
+      if (item.key === "/settings/taxes")
+        return hasModulePermission("TAXES_AND_DUTIES");
+      if (item.key === "/settings/languages")
+        return hasModulePermission("LANGUAGES");
+      if (item.key === "/settings/privacy")
+        return hasModulePermission("CUSTOMER_PRIVACY");
+      if (item.key === "/settings/policies")
+        return hasModulePermission("POLICIES");
+      if (item.key === "/settings/contact")
+        return hasModulePermission("CONTACT_SUPPORT");
       if (item.key === "/settings/integrations")
-        return permissions?.platformFeatures;
-      if (item.key === "/settings/mcp") return permissions?.platformFeatures;
+        return hasModulePermission("INTEGRATIONS");
+      if (item.key === "/settings/mcp")
+        return hasModulePermission("PLATFORM_FEATURES");
       return true;
     });
-  }, [user, isSuperAdmin, isSystemRole, permissions]);
+  }, [user, isSuperAdmin, isSystemRole]);
 
   /* Search filter */
   const visibleItems = useMemo(() => {

@@ -1,9 +1,13 @@
 "use client";
 
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
+
 import { useParams } from "next/navigation";
 import EventRegistration from "@/components/events/detail/event-registration";
 
-export default function RegistrationPage() {
+function RegistrationPage() {
   const params = useParams();
   const eventId = params?.id as string;
 
@@ -13,3 +17,8 @@ export default function RegistrationPage() {
     </div>
   );
 }
+
+export default withSubscriptionCheck(
+  withModulePermission(RegistrationPage, "EVENTS", "canRead"),
+  "events"
+);

@@ -27,8 +27,9 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Link from "next/link";
+import { withModulePermission } from "@/components/hoc/with-module-permission";
 
-export default function ListingAnalytics() {
+function ListingAnalytics() {
   const [timeRange, setTimeRange] = useState("month");
   
   // Prepare Mock Data
@@ -233,3 +234,5 @@ export default function ListingAnalytics() {
     </EcosystemWrapper>
   );
 }
+
+export default withModulePermission(ListingAnalytics, "LISTING", "canRead");

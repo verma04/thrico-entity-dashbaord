@@ -124,13 +124,13 @@ export default function SendEmail() {
   return (
     <div className="w-full flex flex-col gap-10 p-8 lg:p-10 animate-in fade-in duration-500">
       {/* Header */}
-      <div className="flex items-center gap-4 pb-8 border-b border-slate-100">
-        <div className="h-12 w-12 rounded-2xl bg-slate-900 flex items-center justify-center text-white shrink-0">
+      <div className="flex items-center gap-4 pb-8 border-b border-border/50">
+        <div className="h-12 w-12 rounded-2xl bg-slate-900 dark:bg-slate-100 flex items-center justify-center text-white dark:text-slate-900 shrink-0">
           <Send className="h-5 w-5" />
         </div>
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-slate-900">Send Campaign</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Select a template, add recipients, and send your email.</p>
+          <h1 className="text-xl font-bold tracking-tight text-foreground">Send Campaign</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">Select a template, add recipients, and send your email.</p>
         </div>
       </div>
 
@@ -138,7 +138,7 @@ export default function SendEmail() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-10 items-start">
         <div className="lg:col-span-3 flex flex-col gap-8">
           {/* Step Indicator */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-5">
+          <div className="bg-card rounded-2xl border border-border/50 p-5">
             <StepIndicator currentStep={step} steps={stepNames} />
           </div>
 
@@ -180,15 +180,15 @@ export default function SendEmail() {
           </div>
 
           {/* Navigation */}
-          <div className="flex items-center justify-between pt-6 border-t border-slate-100">
+          <div className="flex items-center justify-between pt-6 border-t border-border/50">
             <button
               onClick={() => setStep(Math.max(0, step - 1))}
               disabled={step === 0}
               className={cn(
                 "flex items-center gap-2 h-11 px-6 rounded-xl text-sm font-semibold transition-all border",
                 step === 0
-                  ? "opacity-30 cursor-not-allowed border-slate-200 bg-white text-slate-400"
-                  : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                  ? "opacity-30 cursor-not-allowed border-border/50 bg-card text-muted-foreground/80"
+                  : "border-border/50 bg-card text-foreground/90 hover:bg-muted"
               )}
             >
               <ChevronLeft className="h-4 w-4" />
@@ -202,8 +202,8 @@ export default function SendEmail() {
                 className={cn(
                   "flex items-center gap-2 h-11 px-8 rounded-xl text-sm font-semibold transition-all",
                   canProceed()
-                    ? "bg-slate-900 text-white hover:bg-black shadow-sm"
-                    : "bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed"
+                    ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 hover:bg-black dark:hover:bg-white shadow-sm"
+                    : "bg-muted/50 text-muted-foreground/80 border border-border/50 cursor-not-allowed"
                 )}
               >
                 Continue
@@ -216,8 +216,8 @@ export default function SendEmail() {
                 className={cn(
                   "flex items-center gap-2 h-11 px-8 rounded-xl text-sm font-semibold transition-all",
                   (!isDomainVerified || recipients.length === 0 || recipients.length > remainingQuota)
-                    ? "bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed"
-                    : "bg-slate-900 text-white hover:bg-black shadow-sm"
+                    ? "bg-muted/50 text-muted-foreground/80 border border-border/50 cursor-not-allowed"
+                    : "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 hover:bg-black dark:hover:bg-white shadow-sm"
                 )}
               >
                 Send Campaign
@@ -247,25 +247,25 @@ export default function SendEmail() {
               initial={{ scale: 0.97, opacity: 0, y: 10 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.97, opacity: 0, y: 10 }}
-              className="bg-white rounded-3xl shadow-xl max-w-md w-full overflow-hidden border border-slate-200"
+              className="bg-card rounded-3xl shadow-xl max-w-md w-full overflow-hidden border border-border/50"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="p-8 text-center space-y-5">
-                <div className="h-16 w-16 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-500 mx-auto">
+                <div className="h-16 w-16 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400 mx-auto">
                   <AlertTriangle className="h-8 w-8" />
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-lg font-bold text-slate-900">Send this campaign?</h3>
-                  <p className="text-sm text-slate-500 leading-relaxed">
-                    This will send to <span className="font-semibold text-slate-900">{recipients.length.toLocaleString()} recipients</span>. This cannot be undone once sent.
+                  <h3 className="text-lg font-bold text-foreground">Send this campaign?</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    This will send to <span className="font-semibold text-foreground">{recipients.length.toLocaleString()} recipients</span>. This cannot be undone once sent.
                   </p>
                 </div>
               </div>
-              <div className="p-6 bg-slate-50/50 flex gap-3 border-t border-slate-100">
+              <div className="p-6 bg-muted/30 flex gap-3 border-t border-border/50">
                 <button
                   onClick={() => setShowConfirm(false)}
                   disabled={isSending}
-                  className="flex-1 h-11 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-all"
+                  className="flex-1 h-11 rounded-xl border border-border/50 bg-card text-sm font-semibold text-foreground/80 hover:bg-muted transition-all"
                 >
                   Cancel
                 </button>
@@ -273,7 +273,7 @@ export default function SendEmail() {
                   onClick={handleSend}
                   disabled={isSending}
                   className={cn(
-                    "flex-1 h-11 rounded-xl text-sm font-semibold text-white transition-all flex items-center justify-center gap-2 shadow-sm",
+                    "flex-1 h-11 rounded-xl text-sm font-semibold text-white dark:text-slate-900 transition-all flex items-center justify-center gap-2 shadow-sm",
                     isSending ? "bg-slate-400" : "bg-emerald-600 hover:bg-emerald-700"
                   )}
                 >

@@ -1,5 +1,9 @@
 "use client";
 
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
+
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAddEvent } from "@/graphql/actions/events";
@@ -66,4 +70,9 @@ const CreateEventPage = () => {
   );
 };
 
-export default CreateEventPage;
+
+
+export default withSubscriptionCheck(
+  withModulePermission(CreateEventPage, "EVENTS", "canCreate"),
+  "events"
+);

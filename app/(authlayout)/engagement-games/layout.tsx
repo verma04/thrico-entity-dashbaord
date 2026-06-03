@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
 } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 
 function EngagementLayout({ children }: { children: React.ReactNode }) {
   const items = [
@@ -48,4 +49,4 @@ function EngagementLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default EngagementLayout;
+export default withSubscriptionCheck(EngagementLayout, "engagement-games");

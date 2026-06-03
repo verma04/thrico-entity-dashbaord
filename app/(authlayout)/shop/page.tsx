@@ -1,5 +1,9 @@
 "use client";
 
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
+
 import React, { useState } from "react";
 import Link from "next/link";
 import {
@@ -31,7 +35,7 @@ import { useGetShopStats, TimeRange } from "@/graphql/actions/shop/shop-hooks";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
-export default function ShopDashboardPage() {
+function ShopDashboardPage() {
   const [timeRange, setTimeRange] = useState<TimeRange>(TimeRange.LAST_7_DAYS);
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
     from: subDays(new Date(), 7),
@@ -151,3 +155,8 @@ export default function ShopDashboardPage() {
     </EcosystemWrapper>
   );
 }
+
+export default withSubscriptionCheck(
+  withModulePermission(ShopDashboardPage, "SHOP", "canRead"),
+  "shop"
+);

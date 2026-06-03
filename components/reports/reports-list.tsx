@@ -7,13 +7,16 @@ import moment from "moment";
 import { Report } from "./types";
 import Actions from "./Actions";
 import { cn } from "@/lib/utils";
+import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
 
 export default function ReportsList({ 
   data, 
-  loading 
+  loading,
+  canEdit = true
 }: { 
   data: Report[]; 
   loading?: boolean;
+  canEdit?: boolean;
 }) {
   const columns = [
     {
@@ -53,9 +56,23 @@ export default function ReportsList({
              <User className="h-3.5 w-3.5 text-zinc-400" />
           </div>
           <div className="flex flex-col">
-            <span className="text-xs font-medium text-foreground leading-none">
-              {report.reporter ? `${report.reporter.firstName} ${report.reporter.lastName}` : "System"}
-            </span>
+            {report.reporter ? (
+              <UserProfileHoverCard
+                user={{
+                  id: report.reporter.id,
+                  firstName: report.reporter.firstName,
+                  lastName: report.reporter.lastName,
+                }}
+              >
+                <span className="text-xs font-medium text-foreground leading-none cursor-pointer hover:underline hover:text-indigo-600 transition-colors">
+                  {report.reporter.firstName} {report.reporter.lastName}
+                </span>
+              </UserProfileHoverCard>
+            ) : (
+              <span className="text-xs font-medium text-foreground leading-none">
+                System
+              </span>
+            )}
             <span className="text-[9px] text-zinc-400 mt-1 uppercase tracking-tighter">
               {report.reporter ? "Member" : "Watchdog"}
             </span>
@@ -99,7 +116,7 @@ export default function ReportsList({
       headerClassName: "w-[50px]",
       cell: (report: Report) => (
         <div className="flex justify-end pr-2">
-          <Actions report={report} />
+          <Actions report={report} canEdit={canEdit} />
         </div>
       ),
     },

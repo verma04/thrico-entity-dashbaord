@@ -1,5 +1,9 @@
 "use client";
 
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
+
 import React, { useState } from "react";
 import {
   Download,
@@ -49,7 +53,7 @@ import { useGetDiscussionAnalytics } from "@/graphql/actions/discussion-form";
 // Removing dummy data constants
 // Dummy data removed
 
-export default function DiscussionForum() {
+function DiscussionForum() {
   const [timeRangeStr, setTimeRangeStr] = useState("LAST_7_DAYS");
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
     from: subDays(new Date(), 7),
@@ -363,3 +367,8 @@ export default function DiscussionForum() {
     </EcosystemWrapper>
   );
 }
+
+export default withSubscriptionCheck(
+  withModulePermission(DiscussionForum, "FORUMS", "canRead"),
+  "forums"
+);

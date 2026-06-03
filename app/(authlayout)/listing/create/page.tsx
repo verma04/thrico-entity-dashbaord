@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAddListing } from "@/graphql/actions/listing";
 import { ListingCreationForm } from "@/components/listings/listing-creation-form";
 import { useToast } from "@/components/ui/use-toast";
+import { withModulePermission } from "@/components/hoc/with-module-permission";
 
 const CreateListingPage = () => {
   const router = useRouter();
@@ -32,8 +33,8 @@ const CreateListingPage = () => {
       variables: {
         input: {
           ...values,
-          price: values.price.toString(),
-          media: values.media.map((m: any) => ({ url: m.url || m.name })),
+          price: parseInt(values.price, 10),
+          media: values.media.map((m: any) => m.file || m.originFileObj),
           location: {
             name: values.location,
             address: values.location,
@@ -61,4 +62,4 @@ const CreateListingPage = () => {
   );
 };
 
-export default CreateListingPage;
+export default withModulePermission(CreateListingPage, "LISTING", "canCreate");

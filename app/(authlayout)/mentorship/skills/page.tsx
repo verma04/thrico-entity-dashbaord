@@ -1,5 +1,9 @@
 "use client";
 
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
+
 import React, { useState } from "react";
 import {
   useGetMentorSkills,
@@ -272,7 +276,7 @@ function SkillsGrid({
 }
 
 // ── Main Page ──
-export default function MentorSkillsPage() {
+function MentorSkillsPage() {
   const { data, loading, refetch } = useGetMentorSkills();
   const [search, setSearch] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -445,3 +449,8 @@ export default function MentorSkillsPage() {
     </EcosystemWrapper>
   );
 }
+
+export default withSubscriptionCheck(
+  withModulePermission(MentorSkillsPage, "MENTORSHIP", "canRead"),
+  "mentorship"
+);

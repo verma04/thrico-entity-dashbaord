@@ -9,8 +9,9 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { safeLocaleDateString } from "@/lib/date-utils";
 import { Badge } from "@/components/ui/badge";
+import { withModulePermission } from "@/components/hoc/with-module-permission";
 
-export default function ReferralsPage() {
+function ReferralsPage() {
   const { data, loading } = useGetAllReferrals({ limit: 100, offset: 0 });
   const referrals = data?.getAllReferrals?.data || [];
 
@@ -110,3 +111,5 @@ export default function ReferralsPage() {
     </div>
   );
 }
+
+export default withModulePermission(ReferralsPage, "NETWORK", "canRead");

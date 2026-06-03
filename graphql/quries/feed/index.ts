@@ -114,6 +114,111 @@ export const GET_ALL_FEED = gql`
   }
 `;
 
+export const GET_COMMUNITY_FEED = gql`
+  query GetCommunityFeeds($communityId: ID!, $status: String, $input: PaginationInput) {
+    getCommunityFeeds(communityId: $communityId, status: $status, input: $input) {
+      isLiked
+      id
+      description
+      user {
+        firstName
+        avatar
+        lastName
+        id
+      }
+      createdAt
+      totalComment
+      totalReactions
+      totalReShare
+      isWishList
+      isOwner
+      source
+      media {
+        url
+      }
+      privacy
+      addedBy
+      poll {
+        id
+        title
+        question
+        resultVisibility
+        options {
+          id
+          text
+          order
+          votes
+        }
+        updatedAt
+        createdAt
+        endDate
+        status
+        totalVotes
+        isVoted
+        votedOptionId
+      }
+      moment {
+        id
+        videoUrl
+        hlsUrl
+        thumbnailUrl
+        optimizedVideoUrl
+        caption
+        createdAt
+        updatedAt
+        totalReshares
+        totalComments
+        totalReactions
+      }
+      job {
+        title
+        description
+        location
+        jobType
+        salary
+        experienceLevel
+        workplaceType
+        applicationDeadline
+      }
+      marketPlace {
+        id
+        addedBy
+        entityId
+        title
+        price
+        condition
+        status
+        sku
+        slug
+        description
+        category
+        isApproved
+        isExpired
+        createdAt
+        updatedAt
+        tag
+        isFeatured
+        numberOfViews
+        interests
+        categories
+        location {
+          name
+          latitude
+          longitude
+          address
+          lat
+          lng
+        }
+        media {
+          url
+        }
+      }
+      isPinned
+      pinnedAt
+    }
+  }
+`;
+
 export const GET_ADMIN_FEED = gql`
   query GetAdminFeed($input: PaginationInput) {
     getAdminFeed(input: $input) {
@@ -574,6 +679,12 @@ export const DELETE_COMMENT_FEED = gql`
 export const DELETE_FEED = gql`
   mutation DeleteFeed($input: InputId) {
     deleteFeed(input: $input)
+  }
+`;
+
+export const DELETE_COMMUNITY_FEED = gql`
+  mutation DeleteCommunityFeed($input: InputId) {
+    deleteCommunityFeed(input: $input)
   }
 `;
 

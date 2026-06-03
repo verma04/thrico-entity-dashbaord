@@ -1,9 +1,18 @@
 "use client";
 
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
+
 import React from "react";
 import Reports from "../../../../components/reports/Reports";
 import { ReportModule } from "@/graphql/actions";
 
-export default function CommunityReportsPage() {
+function CommunityReportsPage() {
   return <Reports preselectedModule={ReportModule.SURVEY} />;
 }
+
+export default withSubscriptionCheck(
+  withModulePermission(CommunityReportsPage, "SURVEYS", "canRead"),
+  "surveys"
+);

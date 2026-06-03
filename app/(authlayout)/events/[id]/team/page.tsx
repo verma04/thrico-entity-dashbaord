@@ -1,9 +1,13 @@
 "use client";
 
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
+
 import { useParams } from "next/navigation";
 import EventTeam from "@/components/events/detail/event-team";
 
-export default function TeamPage() {
+function TeamPage() {
   const params = useParams();
   const eventId = params?.id as string;
 
@@ -13,3 +17,8 @@ export default function TeamPage() {
     </div>
   );
 }
+
+export default withSubscriptionCheck(
+  withModulePermission(TeamPage, "EVENTS", "canRead"),
+  "events"
+);

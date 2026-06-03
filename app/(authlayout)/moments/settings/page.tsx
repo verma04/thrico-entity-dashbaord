@@ -1,5 +1,9 @@
 "use client";
 
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
+
 import React from "react";
 import { Film, Globe, Video, Bell, Shield, ShieldCheck } from "lucide-react";
 import { PlatformSettingsPage, SettingsField } from "@/components/ui/platform/settings-page";
@@ -52,7 +56,7 @@ const DEFAULT_SETTINGS = {
   moderatedFeed: true,
 };
 
-export default function MomentsSettingsPage() {
+function MomentsSettingsPage() {
   const [savedSettings] = useState(DEFAULT_SETTINGS);
 
   const handleSave = async (settings: typeof DEFAULT_SETTINGS) => {
@@ -72,3 +76,8 @@ export default function MomentsSettingsPage() {
     />
   );
 }
+
+export default withSubscriptionCheck(
+  withModulePermission(MomentsSettingsPage, "MOMENTS", "canEdit"),
+  "moments"
+);

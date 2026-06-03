@@ -1,5 +1,9 @@
 "use client";
 
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
+
 import React from "react";
 import { useEntitySettings, useUpdateEntitySettings } from "@/graphql/actions";
 import { BarChart2, ShieldCheck, Zap } from "lucide-react";
@@ -56,4 +60,9 @@ const PollsSettings = () => {
   );
 };
 
-export default PollsSettings;
+
+
+export default withSubscriptionCheck(
+  withModulePermission(PollsSettings, "POLLS", "canEdit"),
+  "polls"
+);

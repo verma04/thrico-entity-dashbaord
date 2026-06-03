@@ -77,20 +77,20 @@ export const AddDomain = () => {
     <>
       <Button
         onClick={() => setIsOpen(true)}
-        className="h-8 px-4 text-[11px] font-bold uppercase tracking-wider bg-slate-900 hover:bg-black text-white gap-2 rounded-md shadow-none"
+        className="h-8 px-4 text-[11px] font-bold uppercase tracking-wider bg-slate-900 dark:bg-slate-100 hover:bg-black dark:hover:bg-white text-white dark:text-slate-900 gap-2 rounded-md shadow-none"
       >
         <Plus className="h-3.5 w-3.5" />
         Connect Domain
       </Button>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="sm:max-w-md p-0 overflow-hidden border-slate-200/60 rounded-lg shadow-none">
-          <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/30">
+        <DialogContent className="sm:max-w-md p-0 overflow-hidden border-border/50 rounded-lg shadow-none">
+          <div className="px-6 py-5 border-b border-border/50 bg-muted/30">
             <DialogHeader>
-              <DialogTitle className="text-[15px] font-semibold text-slate-900 tracking-tight">
+              <DialogTitle className="text-[15px] font-semibold text-foreground tracking-tight">
                 Connect domain
               </DialogTitle>
-              <DialogDescription className="text-[12px] text-slate-400 mt-1 font-medium">
+              <DialogDescription className="text-[12px] text-muted-foreground mt-1 font-medium">
                 Add an external domain namespace to this workspace infrastructure.
               </DialogDescription>
             </DialogHeader>
@@ -104,12 +104,12 @@ export const AddDomain = () => {
                   name="website"
                   render={({ field }) => (
                     <FormItem className="space-y-2">
-                      <Label htmlFor="domain" className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+                      <Label htmlFor="domain" className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
                         Domain namespace
                       </Label>
                       <FormControl>
                         <div className="relative">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 text-[12px] font-mono select-none">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/50 text-[12px] font-mono select-none">
                             https://
                           </span>
                           <Input
@@ -118,7 +118,7 @@ export const AddDomain = () => {
                             placeholder="acme-corp.com"
                             disabled={loading}
                             autoFocus
-                            className="pl-[68px] h-10 border-slate-200 focus:border-slate-400 focus:ring-0 rounded-md text-[13px] font-mono shadow-none transition-all placeholder:text-slate-300"
+                            className="pl-[68px] h-10 border-border/50 focus:border-foreground focus:ring-0 rounded-md text-[13px] font-mono shadow-none transition-all placeholder:text-muted-foreground/30"
                           />
                         </div>
                       </FormControl>
@@ -127,20 +127,20 @@ export const AddDomain = () => {
                   )}
                 />
 
-                <DialogFooter className="gap-2 sm:gap-2 pt-4 border-t border-slate-100">
+                <DialogFooter className="gap-2 sm:gap-2 pt-4 border-t border-border/50">
                   <Button
                     type="button"
                     variant="ghost"
                     onClick={() => setIsOpen(false)}
                     disabled={loading}
-                    className="h-9 px-4 text-[11px] font-bold uppercase tracking-wider text-slate-500 hover:text-slate-900 hover:bg-slate-50"
+                    className="h-9 px-4 text-[11px] font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted"
                   >
                     Cancel
                   </Button>
                   <Button
                     type="submit"
                     disabled={loading}
-                    className="h-9 px-6 text-[11px] font-bold uppercase tracking-wider bg-slate-900 hover:bg-black text-white gap-2 rounded-md transition-all active:scale-[0.98]"
+                    className="h-9 px-6 text-[11px] font-bold uppercase tracking-wider bg-slate-900 dark:bg-slate-100 hover:bg-black dark:hover:bg-white text-white dark:text-slate-900 gap-2 rounded-md transition-all active:scale-[0.98]"
                   >
                     {loading && <Loader2 className="h-3 w-3 animate-spin" />}
                     {loading ? "Provisioning..." : "Connect Domain"}

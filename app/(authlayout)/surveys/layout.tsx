@@ -4,6 +4,7 @@ import * as React from "react";
 import { ClipboardList, Settings, List, Plus } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
 import { Card } from "@/components/ui/card";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 
 function SurveysLayout({ children }: { children: React.ReactNode }) {
   const items = [
@@ -31,4 +32,4 @@ function SurveysLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default SurveysLayout;
+export default withSubscriptionCheck(SurveysLayout, "surveys");

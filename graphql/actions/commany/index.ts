@@ -6,7 +6,7 @@ import {
   useMutation,
   useQuery,
 } from "@apollo/client";
-import { ADD_PAGES, GET_ALL_PAGES } from "../../quries/commany";
+import { ADD_PAGES, GET_ALL_PAGES, GET_SEARCH_COMPANIES, GET_SEARCH_JOB_TITLE, GET_SEARCH_SKILLS } from "../../quries/commany";
 
 export type Page = {
   name: string;
@@ -43,6 +43,31 @@ export type PageInput = {
 
 // --- Apollo Client Hooks ---
 
+export type ClassificationSearchInput = {
+  search?: string | null;
+  limit?: number | null;
+  cursor?: string | null;
+};
+
+export type SearchCompanyNode = {
+  id: string;
+  title: string;
+};
+
+export type SearchCompanyEdge = {
+  node: SearchCompanyNode;
+};
+
+export type SearchCompaniesResponse = {
+  getSearchCompanies: {
+    edges: SearchCompanyEdge[];
+    pageInfo: {
+      hasNextPage: boolean;
+      endCursor: string;
+    };
+  };
+};
+
 export function useAllPages(
   options?: QueryHookOptions<
     { getAllPages: Page[] },
@@ -56,4 +81,45 @@ export function useAddPage(
   options?: MutationHookOptions<{ addPage: Page }, { input: PageInput }>
 ): MutationTuple<{ addPage: Page }, { input: PageInput }> {
   return useMutation(ADD_PAGES, options);
+}
+
+export function useSearchCompanies(
+  options?: QueryHookOptions<SearchCompaniesResponse, { input?: ClassificationSearchInput }>
+): QueryResult<SearchCompaniesResponse, { input?: ClassificationSearchInput }> {
+  return useQuery(GET_SEARCH_COMPANIES, options);
+}
+
+export type SearchJobTitleResponse = {
+  getSearchJobTitle: {
+    edges: SearchCompanyEdge[]; // reusing edge type since it has node { id, title }
+    pageInfo: {
+      hasNextPage: boolean;
+      endCursor: string;
+    };
+  };
+};
+
+export function useSearchJobTitle(
+  options?: QueryHookOptions<SearchJobTitleResponse, { input?: ClassificationSearchInput }>
+): QueryResult<SearchJobTitleResponse, { input?: ClassificationSearchInput }> {
+  return useQuery(GET_SEARCH_JOB_TITLE, options);
+}
+
+export type SearchSkillsResponse = {
+  getSearchSkills: {
+    edges: {
+      node: SearchCompanyNode;
+      cursor: string;
+    }[];
+    pageInfo: {
+      hasNextPage: boolean;
+      endCursor: string;
+    };
+  };
+};
+
+export function useSearchSkills(
+  options?: QueryHookOptions<SearchSkillsResponse, { input?: ClassificationSearchInput }>
+): QueryResult<SearchSkillsResponse, { input?: ClassificationSearchInput }> {
+  return useQuery(GET_SEARCH_SKILLS, options);
 }

@@ -4,6 +4,7 @@ import * as React from "react";
 import { ShoppingBag, Settings, List, Images, Plus } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
 import { Card } from "@/components/ui/card";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 
 function ShopLayout({ children }: { children: React.ReactNode }) {
   const items = [
@@ -36,4 +37,4 @@ function ShopLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default ShopLayout;
+export default withSubscriptionCheck(ShopLayout, "shop");

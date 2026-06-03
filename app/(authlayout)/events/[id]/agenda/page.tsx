@@ -1,9 +1,13 @@
 "use client";
 
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
+
 import { useParams } from "next/navigation";
 import { EventAgendaList } from "@/components/events/detail/event-agenda";
 
-export default function AgendaPage() {
+function AgendaPage() {
   const params = useParams();
   const eventId = params?.id as string;
 
@@ -13,3 +17,8 @@ export default function AgendaPage() {
     </div>
   );
 }
+
+export default withSubscriptionCheck(
+  withModulePermission(AgendaPage, "EVENTS", "canRead"),
+  "events"
+);

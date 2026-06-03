@@ -1,9 +1,11 @@
 import {
   ADD_JOB,
+  UPDATE_JOB,
   CHANGE_JOB_STATUS,
   CHANGE_JOB_VERIFICATION,
   GET_JOB_STATS,
   GET_JOBS,
+  GET_JOB_BY_ID,
   GET_JOB_APPLICATION_TREND,
   GET_JOB_TYPE_DISTRIBUTION,
 } from "@/graphql/quries/jobs";
@@ -94,6 +96,26 @@ export type PostJobInput = {
   };
 };
 
+export type UpdateJobInput = {
+  id: string;
+  title?: string;
+  description?: string;
+  location?: string | JobLocation;
+  jobType?: string;
+  salary?: string;
+  experienceLevel?: string;
+  workplaceType?: string;
+  applicationDeadline?: string;
+  requirements?: string[];
+  responsibilities?: string[];
+  benefits?: string[];
+  skills?: string[];
+  isFeatured?: boolean;
+  company?: {
+    id: string;
+  };
+};
+
 // --- Apollo Client Hook ---
 
 export function useAddJob(
@@ -156,6 +178,14 @@ export function useAddJob(
   });
 }
 
+export function useUpdateJob(
+  options?: MutationHookOptions<{ updateJob: Job }, { input: UpdateJobInput }>,
+) {
+  return useMutation(UPDATE_JOB, {
+    ...options,
+  });
+}
+
 export enum JobStatus {
   ALL = "ALL",
   APPROVED = "APPROVED",
@@ -176,6 +206,12 @@ export function useJobs(
   options?: QueryHookOptions<{ getJob: Job[] }, { input?: GetJobInput }>,
 ): QueryResult<{ getJob: Job[] }, { input?: GetJobInput }> {
   return useQuery(GET_JOBS, options);
+}
+
+export function useGetJobById(
+  options?: QueryHookOptions<{ getJobById: Job }, { id: string }>,
+): QueryResult<{ getJobById: Job }, { id: string }> {
+  return useQuery(GET_JOB_BY_ID, options);
 }
 
 export type JobStats = {
@@ -354,7 +390,7 @@ export type JobApplicantsResponse = {
 
 export function useJobApplicants(jobId: string, page: number = 1, limit: number = 5, options?: QueryHookOptions<{ getJobApplicants: JobApplicantsResponse }, { jobId: string, page: number, limit: number }>) {
   // Import GET_JOB_APPLICANTS directly inside or rely on the updated import at the top of the file
-  return useQuery(require("@/graphql/quries/jobs").GET_JOB_APPLICANTS, {
+  return useQuery<{ getJobApplicants: JobApplicantsResponse }, { jobId: string, page: number, limit: number }>(require("@/graphql/quries/jobs").GET_JOB_APPLICANTS, {
     variables: { jobId, page, limit },
     ...options,
   });

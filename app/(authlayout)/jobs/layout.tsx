@@ -3,6 +3,7 @@ import * as React from "react";
 
 import { List, Plus } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 interface TabItem {
   key: string;
   label: string;
@@ -20,6 +21,11 @@ function JobsLayout({ children }: { children: React.ReactNode }) {
       label: "Create Job",
       icon: <Plus size={18} />,
     },
+    {
+      key: "audit-log",
+      label: "Audit Log",
+      icon: <List size={18} />,
+    },
   ];
 
   return (
@@ -31,4 +37,4 @@ function JobsLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default JobsLayout;
+export default withSubscriptionCheck(JobsLayout, "jobs");

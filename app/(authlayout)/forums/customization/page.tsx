@@ -1,5 +1,9 @@
 "use client";
 
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
+
 import { useState } from "react";
 
 import { useToast } from "@/hooks/use-toast";
@@ -11,6 +15,11 @@ const saveTermsAndConditions = async (type: string, content: string) => {
   return { success: true };
 };
 
-export default function TermsPage() {
+function TermsPage() {
   <></>;
 }
+
+export default withSubscriptionCheck(
+  withModulePermission(TermsPage, "FORUMS", "canEdit"),
+  "forums"
+);

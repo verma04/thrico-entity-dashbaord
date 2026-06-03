@@ -1,5 +1,9 @@
 "use client";
 
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
+
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useEventById, useUpdateEvent } from "@/graphql/actions/events";
@@ -7,7 +11,7 @@ import { EventsCreationForm } from "@/components/events/create/events-creation-f
 import moment from "moment";
 import { useToast } from "@/components/ui/use-toast";
 
-export default function EventGeneralInfo() {
+function EventGeneralInfo() {
   const params = useParams();
   const eventId = params?.id as string;
   const router = useRouter();
@@ -101,3 +105,8 @@ export default function EventGeneralInfo() {
     />
   );
 }
+
+export default withSubscriptionCheck(
+  withModulePermission(EventGeneralInfo, "EVENTS", "canRead"),
+  "events"
+);

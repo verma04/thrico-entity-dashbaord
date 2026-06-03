@@ -6,7 +6,9 @@ import {
   ADD_COMMENT,
   ADD_FEED,
   DELETE_COMMENT_FEED,
+  DELETE_COMMUNITY_FEED,
   GET_ALL_FEED,
+  GET_COMMUNITY_FEED,
   GET_FEED_COMMENTS,
   LIKE_FEED,
   NUMBER_OF_FEED,
@@ -26,6 +28,9 @@ import {
 
 export const useAllFeed = (options: any) => useQuery(GET_ALL_FEED, options);
 
+export const useCommunityFeeds = (options: any) =>
+  useQuery(GET_COMMUNITY_FEED, options);
+
 export const useAdminFeed = (options: any) => useQuery(GET_ADMIN_FEED, options);
 
 export const useJobFeed = (options: any) => useQuery(GET_JOB_FEED, options);
@@ -41,6 +46,9 @@ export const usePinnedFeed = (options: any) =>
 
 export const useDeleteFeed = (options: any) =>
   useMutation(DELETE_FEED, options);
+
+export const useDeleteCommunityFeed = (options: any) =>
+  useMutation(DELETE_COMMUNITY_FEED, options);
 
 export const usePinFeed = (options: any) => useMutation(PIN_FEED, options);
 

@@ -433,10 +433,9 @@ export function ListingCreationForm({
                       {formik.values.media.length > 0 ? (
                         <img
                           src={
-                            formik.values.media[0].thumbUrl ||
                             formik.values.media[0].file
                               ? URL.createObjectURL(formik.values.media[0].file)
-                              : ""
+                              : formik.values.media[0].thumbUrl || formik.values.media[0].url || ""
                           }
                           alt="Preview"
                           className="w-full h-full object-cover"

@@ -1,9 +1,13 @@
 "use client";
 
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
+
 import { useParams } from "next/navigation";
 import EventSettings from "@/components/events/detail/event-settings";
 
-export default function SettingsPage() {
+function SettingsPage() {
   const params = useParams();
   const eventId = params?.id as string;
 
@@ -13,3 +17,8 @@ export default function SettingsPage() {
     </div>
   );
 }
+
+export default withSubscriptionCheck(
+  withModulePermission(SettingsPage, "EVENTS", "canEdit"),
+  "events"
+);

@@ -1,5 +1,9 @@
 "use client";
 
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
@@ -19,7 +23,7 @@ import {
 import { BannerList } from "@/components/shop/banners/banner-list";
 import { BannerDialog } from "@/components/shop/banners/banner-dialog";
 
-export default function BannerManagerPage() {
+function BannerManagerPage() {
   const { data, loading } = useShopBanners();
   const [createBanner, { loading: creating }] = useCreateShopBanner();
   const [deleteBanner] = useDeleteShopBanner();
@@ -126,3 +130,8 @@ export default function BannerManagerPage() {
     </EcosystemWrapper>
   );
 }
+
+export default withSubscriptionCheck(
+  withModulePermission(BannerManagerPage, "SHOP", "canRead"),
+  "shop"
+);

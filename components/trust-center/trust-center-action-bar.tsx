@@ -7,9 +7,9 @@ import { cn } from "@/lib/utils";
 interface TrustCenterActionBarProps {
   nextSyncSeconds: number;
   syncing: boolean;
-  role: "member" | "moderator" | "admin";
+  role: "member" | "moderator" | "announcements";
   onSync: () => void;
-  onRoleChange: (role: "member" | "moderator" | "admin") => void;
+  onRoleChange: (role: "member" | "moderator" | "announcements") => void;
 }
 
 export function TrustCenterActionBar({
@@ -33,10 +33,10 @@ export function TrustCenterActionBar({
       active: role === "moderator",
     },
     {
-      key: "admin",
-      label: "Admin Console",
+      key: "announcements",
+      label: "Announcements",
       icon: <SlidersHorizontal className="h-4 w-4" />,
-      active: role === "admin",
+      active: role === "announcements",
     },
   ] as const;
 

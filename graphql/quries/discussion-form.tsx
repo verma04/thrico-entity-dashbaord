@@ -83,7 +83,7 @@ export const GET_DISCUSSION_FORUM = gql`
 `;
 
 export const GET_DISCUSSION_FORUM_COMMENTS = gql`
-  query GetDiscussionForumComments($input: InputId) {
+  query GetDiscussionForumComments($input: inputId) {
     getDiscussionForumComments(input: $input) {
       id
 
@@ -162,10 +162,7 @@ export const GET_BY_ID_DISCUSSION_FORUM = gql`
     $input: inputGetDiscussionForumDetailsByID
   ) {
     getDiscussionForumDetailsByID(input: $input) {
-      upVotes
-      downVotes
-      isLikeByYou
-      voteType
+      ${forum}
       totalComments
     }
   }

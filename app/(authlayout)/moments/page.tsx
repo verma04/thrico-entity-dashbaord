@@ -1,5 +1,9 @@
 "use client";
 
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
+
 import React from "react";
 import {
   Video,
@@ -52,7 +56,7 @@ import {
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
-export default function MomentsDashboardPage() {
+function MomentsDashboardPage() {
   const [timeRange, setTimeRange] = React.useState<TimeRange>(
     TimeRange.LAST_30_DAYS,
   );
@@ -501,3 +505,8 @@ export default function MomentsDashboardPage() {
     </EcosystemWrapper>
   );
 }
+
+export default withSubscriptionCheck(
+  withModulePermission(MomentsDashboardPage, "MOMENTS", "canRead"),
+  "moments"
+);

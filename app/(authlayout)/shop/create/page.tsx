@@ -1,5 +1,9 @@
 "use client";
 
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
+
 import React from "react";
 import { useRouter } from "next/navigation";
 import { useCreateShopProduct } from "@/graphql/actions/shop/shop-hooks";
@@ -85,4 +89,9 @@ const CreateProductPage = () => {
   );
 };
 
-export default CreateProductPage;
+
+
+export default withSubscriptionCheck(
+  withModulePermission(CreateProductPage, "SHOP", "canCreate"),
+  "shop"
+);

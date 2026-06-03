@@ -39,6 +39,7 @@ import { subDays } from "date-fns";
 import { DateRange } from "react-day-picker";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import moment from "moment";
+import { AccessDeniedAlert } from "@/components/shared/access-denied-alert";
 
 const STATUS_COLORS = ["#18181b", "#3f3f46", "#71717a", "#a1a1aa", "#e4e4e7"];
 
@@ -81,7 +82,7 @@ export default function CommunitiesAnalytics() {
     else if (diffDays <= 90) setTimeRange(TimeRange.LAST_90_DAYS);
   };
 
-  const { data, loading, refetch } = useGetCommunitiesStats(
+  const { data, loading, refetch, error } = useGetCommunitiesStats(
     timeRange,
     dateRange?.from && dateRange?.to
       ? {
@@ -91,6 +92,63 @@ export default function CommunitiesAnalytics() {
       : undefined,
   );
   const stats = data?.getCommunitiesStats;
+
+  if (error) {
+    return (
+      <EcosystemWrapper anonymized-1="communities-analytics">
+        <EcosystemHeader
+          title="Community Stats"
+          description="Check your growth, members, and health."
+          badgeText="Overview"
+          icon={Users2}
+        />
+        
+        <EcosystemActionBar shadow="none">
+          <div className="flex items-center justify-between w-full opacity-50 pointer-events-none">
+            <div className="flex items-center gap-2 px-1">
+              <ShieldCheck className="h-4 w-4 text-emerald-500" />
+              <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground italic">
+                Verified Node
+              </span>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <DateRangePicker
+                date={dateRange}
+                onDateChange={() => {}}
+                defaultValue="LAST_7_DAYS"
+              />
+              <div className="h-4 w-px bg-zinc-200 mx-1" />
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-9 w-9 text-zinc-400 rounded-lg"
+                disabled
+              >
+                <RotateCcw size={14} />
+              </Button>
+            </div>
+          </div>
+        </EcosystemActionBar>
+
+        <EcosystemContainer className="p-6 lg:p-8">
+          <div className="max-w-3xl">
+            <EcosystemCard 
+              title="Access Restricted" 
+              description="You need additional permissions to view this dashboard."
+              icon={ShieldCheck}
+            >
+              <div className="p-2">
+                <AccessDeniedAlert 
+                  message={error.message || "You do not have permission to view community analytics."} 
+                />
+              </div>
+            </EcosystemCard>
+          </div>
+        </EcosystemContainer>
+      </EcosystemWrapper>
+    );
+  }
 
   const kpis = [
     {

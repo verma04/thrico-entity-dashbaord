@@ -47,14 +47,14 @@ import FeedMedia from "./feed-media";
 import FeedDescription from "./feed-description";
 import { cn } from "@/lib/utils";
 import { getPreferredMediaUrl } from "@/lib/media-utils";
-import { useDeleteFeed, usePinFeed } from "@/graphql/actions/feed";
-import { GET_PINNED_FEED } from "@/graphql/quries/feed";
+import { useDeleteFeed, usePinFeed, useDeleteCommunityFeed } from "@/graphql/actions/feed";
+import { GET_PINNED_FEED, GET_COMMUNITY_FEED } from "@/graphql/quries/feed";
 import { useState } from "react";
 import { toast } from "sonner";
 
 export default function Feed({ feed }: { feed: FeedProps }) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [deleteFeed, { loading: isDeleting }] = useDeleteFeed({
+  const [deleteFeedGlobal, { loading: isDeletingGlobal }] = useDeleteFeed({
     onCompleted: () => {
       setIsDeleteDialogOpen(false);
       toast.success("Post deleted successfully", {
@@ -69,6 +69,25 @@ export default function Feed({ feed }: { feed: FeedProps }) {
       });
     },
   });
+
+  const [deleteFeedCommunity, { loading: isDeletingCommunity }] = useDeleteCommunityFeed({
+    onCompleted: () => {
+      setIsDeleteDialogOpen(false);
+      toast.success("Community post deleted successfully", {
+        description: "The post has been permanently removed from the community feed.",
+        icon: <Trash2 className="h-4 w-4 text-emerald-500" />,
+      });
+    },
+    onError: (error: any) => {
+      toast.error("Failed to delete community post", {
+        description:
+          error.message || "Something went wrong while deleting this post.",
+      });
+    },
+    refetchQueries: [GET_COMMUNITY_FEED],
+  });
+
+  const isDeleting = feed.isCommunityFeed ? isDeletingCommunity : isDeletingGlobal;
 
   const [pinFeed, { loading: isPinning }] = usePinFeed({
     refetchQueries: [{ query: GET_PINNED_FEED }],
@@ -102,11 +121,19 @@ export default function Feed({ feed }: { feed: FeedProps }) {
   });
 
   const handleDelete = () => {
-    deleteFeed({
-      variables: {
-        input: { id: feed.id },
-      },
-    });
+    if (feed.isCommunityFeed) {
+      deleteFeedCommunity({
+        variables: {
+          input: { id: feed.id },
+        },
+      });
+    } else {
+      deleteFeedGlobal({
+        variables: {
+          input: { id: feed.id },
+        },
+      });
+    }
   };
 
   const handlePin = (e: React.MouseEvent) => {

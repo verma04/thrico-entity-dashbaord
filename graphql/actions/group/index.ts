@@ -6,6 +6,10 @@ import {
   GET_COMMUNITIES,
   GET_COMMUNITY_BY_ID,
   GET_COMMUNITY_REQUEST,
+  UPDATE_COMMUNITY,
+  DELETE_COMMUNITY,
+  DELETE_COMMUNITY_RATING,
+  UPDATE_COMMUNITY_RATING,
   UPDATE_COMMUNITY_BASIC_INFO,
   UPDATE_COMMUNITY_PERMISSIONS,
   UPDATE_COMMUNITY_RULES,
@@ -17,66 +21,57 @@ import {
   GetCommunitySignupTrendResponse,
   GetTopActiveCommunitiesResponse,
   GetCommunityActivityTrendResponse,
+  GET_COMMUNITY_RATINGS,
+  VOTE_COMMUNITY_RATING_HELPFULNESS,
 } from "../../quries/group/approval";
+
+export const getCommunityRatings = (options: any) =>
+  useQuery(GET_COMMUNITY_RATINGS, options);
+
+export const deleteCommunityRating = (options: any) =>
+  useMutation(DELETE_COMMUNITY_RATING, {
+    ...options,
+    update(cache, { data: { deleteCommunityRating } }) {
+      if (deleteCommunityRating && options?.variables?.id) {
+        cache.evict({ id: `CommunityRating:${options.variables.id}` });
+        cache.gc();
+      }
+    },
+  });
+
+export const updateCommunityRating = (options: any) =>
+  useMutation(UPDATE_COMMUNITY_RATING, options);
+
+export const voteCommunityRatingHelpfulness = (options: any) =>
+  useMutation(VOTE_COMMUNITY_RATING_HELPFULNESS, options);
 
 export const addCommunity = (options: any) =>
   useMutation(ADD_COMMUNITY, {
     ...options,
     update(cache, { data: { addCommunity } }) {
-      try {
-        if (addCommunity.status === "APPROVED") {
-          // Update for status: "APPROVED"
-          const approvedData: any = cache.readQuery({
-            query: GET_COMMUNITIES,
-            variables: {
-              input: {
-                status: "APPROVED",
-              },
-            },
-          });
+      if (addCommunity) {
+        const statusesToUpdate = ["ALL", addCommunity.status];
 
-          cache.writeQuery({
-            query: GET_COMMUNITIES,
-            data: {
-              getCommunities: [
-                addCommunity,
-                ...(approvedData?.getCommunities || []),
-              ],
-            },
-            variables: {
-              input: {
-                status: "APPROVED",
-              },
-            },
-          });
+        statusesToUpdate.forEach((status) => {
+          try {
+            const cachedData: any = cache.readQuery({
+              query: GET_COMMUNITIES,
+              variables: { input: { status } },
+            });
 
-          // Update for status: "ALL"
-          const allData: any = cache.readQuery({
-            query: GET_COMMUNITIES,
-            variables: {
-              input: {
-                status: "ALL",
-              },
-            },
-          });
-
-          cache.writeQuery({
-            query: GET_COMMUNITIES,
-            data: {
-              getCommunities: [
-                addCommunity,
-                ...(allData?.getCommunities || []),
-              ],
-            },
-            variables: {
-              input: {
-                status: "ALL",
-              },
-            },
-          });
-        }
-      } catch (error) {
-        console.log(error);
+            if (cachedData && cachedData.getCommunities) {
+              cache.writeQuery({
+                query: GET_COMMUNITIES,
+                variables: { input: { status } },
+                data: {
+                  getCommunities: [addCommunity, ...cachedData.getCommunities],
+                },
+              });
+            }
+          } catch (error) {
+            // Ignore if query not in cache yet
+          }
+        });
       }
     },
   });
@@ -86,6 +81,78 @@ export const getCommunities = (options: any) =>
 
 export const getCommunityById = (options: any) =>
   useQuery(GET_COMMUNITY_BY_ID, options);
+
+export const updateCommunity = (options: any) =>
+  useMutation(UPDATE_COMMUNITY, {
+    ...options,
+    update(cache, { data: { updateCommunity } }) {
+      try {
+        const approvedData: any = cache.readQuery({
+          query: GET_COMMUNITY_BY_ID,
+          variables: {
+            input: {
+              communityId: updateCommunity.id,
+            },
+          },
+        });
+
+        cache.writeQuery({
+          query: GET_COMMUNITY_BY_ID,
+          data: {
+            getCommunityById: updateCommunity,
+          },
+          variables: {
+            input: {
+              communityId: updateCommunity.id,
+            },
+          },
+        });
+      } catch (error) {
+        console.log(error);
+      }
+    },
+  });
+
+export const deleteCommunity = (options: any) =>
+  useMutation(DELETE_COMMUNITY, {
+    ...options,
+    update(cache, { data: { deleteCommunity } }) {
+      if (deleteCommunity && options?.variables?.id) {
+        const idToRemove = options.variables.id;
+
+        const statuses = [
+          "ALL",
+          "APPROVED",
+          "PENDING",
+          "DISABLED",
+          "REJECTED",
+          "PAUSED",
+        ];
+
+        statuses.forEach((status) => {
+          try {
+            const cachedData: any = cache.readQuery({
+              query: GET_COMMUNITIES,
+              variables: { input: { status } },
+            });
+            if (cachedData && cachedData.getCommunities) {
+              cache.writeQuery({
+                query: GET_COMMUNITIES,
+                variables: { input: { status } },
+                data: {
+                  getCommunities: cachedData.getCommunities.filter(
+                    (c: any) => c.id !== idToRemove,
+                  ),
+                },
+              });
+            }
+          } catch (e) {
+            // Ignore if query not in cache yet
+          }
+        });
+      }
+    },
+  });
 
 export const updateBasicInfo = (options: any) =>
   useMutation(UPDATE_COMMUNITY_BASIC_INFO, {

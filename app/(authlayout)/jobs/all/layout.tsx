@@ -32,12 +32,17 @@ import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrappe
 // ─────────────────────────────────────────────────────────────────────────────
 
 const STATUS_OPTIONS = [
-  { value: "ALL",      label: "All Jobs",  icon: List,          dot: "" },
-  { value: "APPROVED", label: "Approved",  icon: CheckCircle,   dot: "bg-emerald-500" },
-  { value: "PENDING",  label: "Pending",   icon: Clock,         dot: "bg-amber-500" },
-  { value: "DISABLED", label: "Disabled",  icon: XCircle,       dot: "bg-orange-500" },
-  { value: "REJECTED", label: "Rejected",  icon: XCircle,       dot: "bg-red-500" },
-  { value: "PAUSED",   label: "Paused",    icon: StopCircle,    dot: "bg-slate-400" },
+  { value: "ALL", label: "All Jobs", icon: List, dot: "" },
+  {
+    value: "APPROVED",
+    label: "Approved",
+    icon: CheckCircle,
+    dot: "bg-emerald-500",
+  },
+  { value: "PENDING", label: "Pending", icon: Clock, dot: "bg-amber-500" },
+  { value: "DISABLED", label: "Disabled", icon: XCircle, dot: "bg-orange-500" },
+  { value: "REJECTED", label: "Rejected", icon: XCircle, dot: "bg-red-500" },
+  { value: "PAUSED", label: "Paused", icon: StopCircle, dot: "bg-slate-400" },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -73,7 +78,6 @@ function RootLayout({ children }: { children: React.ReactNode }) {
         badgeText="Recruitment"
         description="Oversee and manage all job postings across your community."
         icon={Briefcase}
-        actions={<Create />}
       />
 
       {/* Action Bar */}
@@ -120,7 +124,12 @@ function RootLayout({ children }: { children: React.ReactNode }) {
                   >
                     <div className="flex items-center gap-2">
                       {opt.dot && (
-                        <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", opt.dot)} />
+                        <span
+                          className={cn(
+                            "h-1.5 w-1.5 rounded-full shrink-0",
+                            opt.dot,
+                          )}
+                        />
                       )}
                       {opt.label}
                     </div>
@@ -132,7 +141,9 @@ function RootLayout({ children }: { children: React.ReactNode }) {
         </EcosystemActionBar.Group>
 
         <EcosystemActionBar.Group align="right">
-          <EcosystemActionBar.Status active>Live Postings</EcosystemActionBar.Status>
+          <EcosystemActionBar.Status active>
+            Live Postings
+          </EcosystemActionBar.Status>
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
 

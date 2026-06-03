@@ -1,5 +1,9 @@
 "use client";
 
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
+
 import React from "react";
 import { useRouter } from "next/navigation";
 import { SurveyCreationForm } from "@/components/surveys/add/survey-creation-form";
@@ -59,4 +63,9 @@ const AddSurveyPage = () => {
   );
 };
 
-export default AddSurveyPage;
+
+
+export default withSubscriptionCheck(
+  withModulePermission(AddSurveyPage, "SURVEYS", "canCreate"),
+  "surveys"
+);

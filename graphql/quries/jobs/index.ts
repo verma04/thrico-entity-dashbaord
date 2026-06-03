@@ -48,9 +48,25 @@ ${jobs}
   }
 `;
 
+export const UPDATE_JOB = gql`
+  mutation UpdateJob($input: UpdateJobInput!) {
+    updateJob(input: $input) {
+${jobs}
+    }
+  }
+`;
+
 export const GET_JOBS = gql`
   query GetJob($input: GetJobInput) {
     getJob(input: $input) {
+      ${jobs}
+    }
+  }
+`;
+
+export const GET_JOB_BY_ID = gql`
+  query GetJobById($id: ID!) {
+    getJobById(id: $id) {
       ${jobs}
     }
   }

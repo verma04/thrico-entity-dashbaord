@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import { withModulePermission } from "@/components/hoc/with-module-permission";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -31,9 +32,11 @@ const tabItems = [
   { key: "media", label: "Media" },
   { key: "analytics", label: "Analytics" },
   { key: "settings", label: "Settings" },
+  { key: "reported-items", label: "Reported Items" },
+  { key: "audit-log", label: "Audit Log" },
 ];
 
-export default function EventsLayout({
+function EventsLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -154,3 +157,5 @@ export default function EventsLayout({
     </AnimatePresence>
   );
 }
+
+export default withModulePermission(EventsLayout, "EVENTS", "canRead");

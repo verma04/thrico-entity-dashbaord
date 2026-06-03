@@ -78,7 +78,7 @@ export function ProductCard({ product, refetch }: ProductCardProps) {
               </DropdownMenuLabel>
               <DropdownMenuItem asChild className="gap-2 cursor-pointer font-medium text-[13px]">
                 <Link
-                  href={`/shop/${product.id}`}
+                  href={`/shop/${product.id}/manage`}
                   className="flex items-center w-full"
                 >
                   <Pencil className="h-4 w-4 text-slate-500" />
@@ -185,8 +185,8 @@ export function ProductCard({ product, refetch }: ProductCardProps) {
           </div>
         </CardContent>
 
-        <CardFooter className="flex items-center justify-between border-t border-slate-50 p-5 py-4 bg-slate-50/30">
-          <div className="scale-90 origin-left">
+        <CardFooter className="flex flex-col gap-4 p-5 pt-0">
+          <div className="w-full flex items-center justify-between border-t border-slate-100 pt-4">
             <span
               className={cn(
                 "inline-flex items-center px-2 py-0.5 rounded-md border text-[10px] uppercase tracking-wide font-bold",
@@ -195,12 +195,16 @@ export function ProductCard({ product, refetch }: ProductCardProps) {
             >
               {product.status || "DRAFT"}
             </span>
+            <Link href={`/shop/${product.id}/manage`}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 gap-2 px-3 hover:bg-indigo-50 hover:text-indigo-600 rounded-xl"
+              >
+                Edit Details
+              </Button>
+            </Link>
           </div>
-          <Link href={`/shop/${product.id}`}>
-            <Button variant="ghost" size="sm" className="h-8 rounded-lg text-xs font-bold text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50">
-              Edit Details
-            </Button>
-          </Link>
         </CardFooter>
       </Card>
 
