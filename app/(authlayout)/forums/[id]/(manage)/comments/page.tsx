@@ -1,8 +1,8 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import Comment from "@/components/discussion-forum/forum-comments/forum-comment";
-import PostComment from "@/components/discussion-forum/forum-comments/forum-post-comment";
+import Comment from "@/components/discussion-forum/comments/forum-comment";
+import PostComment from "@/components/discussion-forum/comments/forum-post-comment";
 
 export default function ForumCommentsPage() {
   const params = useParams();
