@@ -20,7 +20,7 @@ export default function ForumCommentsPage() {
       </div>
 
       <PostComment id={id} />
-      
+
       <div className="pt-4">
         <h3 className="text-lg font-medium mb-4">All Comments</h3>
         <Comment id={id} />
