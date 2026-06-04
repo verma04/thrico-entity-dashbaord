@@ -1,240 +1,146 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 
 export default function AppLoading() {
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.15,
-        delayChildren: 0.1,
-      },
-    },
-  };
+  const [phase, setPhase] = useState<"enter" | "pulse" | "progress">("enter");
+  const progress = useMotionValue(0);
+  const progressWidth = useTransform(progress, [0, 1], ["0%", "100%"]);
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 10 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.8,
-        ease: "easeOut",
-      },
-    },
-  };
+  useEffect(() => {
+    const t1 = setTimeout(() => setPhase("pulse"), 700);
+    const t2 = setTimeout(() => {
+      setPhase("progress");
+      animate(progress, 1, {
+        duration: 1.9,
+        ease: [0.25, 0.46, 0.45, 0.94],
+      });
+    }, 1400);
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, [progress]);
 
   return (
-    <div className="relative min-h-screen w-full flex flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-background via-background to-background dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
-      {/* Premium Ambient Background */}
-      <div className="absolute inset-0 z-0">
-        {/* Primary gradient glow */}
-        <motion.div
-          animate={{
-            scale: [1, 1.1, 1],
-            opacity: [0.15, 0.25, 0.15],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-          className="absolute top-1/3 left-1/4 w-96 h-96 rounded-full bg-blue-400/30 blur-[100px] dark:bg-blue-500/20"
-        />
+    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white dark:bg-black overflow-hidden select-none">
 
-        {/* Secondary gradient glow */}
-        <motion.div
-          animate={{
-            scale: [1.1, 1, 1.1],
-            opacity: [0.1, 0.2, 0.1],
-          }}
-          transition={{
-            duration: 10,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-          className="absolute bottom-1/3 right-1/4 w-96 h-96 rounded-full bg-slate-400/20 blur-[100px] dark:bg-slate-500/10"
-        />
+      {/* ── Subtle noise grain ── */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-[0.025] dark:opacity-[0.05]"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E")`,
+          backgroundSize: "300px 300px",
+        }}
+      />
 
-        {/* Subtle accent glow */}
-        <motion.div
-          animate={{
-            opacity: [0.05, 0.15, 0.05],
-          }}
-          transition={{
-            duration: 6,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-          className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/5 dark:from-slate-200/5 dark:via-transparent dark:to-slate-200/5"
-        />
-      </div>
-
-      {/* Main Content Container */}
+      {/* ── Logo ── */}
       <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="relative z-10 flex flex-col items-center gap-16 max-w-md w-full px-6"
+        initial={{ opacity: 0, scale: 0.86 }}
+        animate={
+          phase === "enter"
+            ? { opacity: 1, scale: 1 }
+            : phase === "pulse"
+              ? { opacity: 1, scale: [1, 1.04, 1] }
+              : { opacity: 1, scale: 1 }
+        }
+        transition={
+          phase === "enter"
+            ? { duration: 0.6, ease: [0.16, 1, 0.3, 1] }
+            : phase === "pulse"
+              ? { duration: 0.75, ease: "easeInOut", times: [0, 0.5, 1] }
+              : { duration: 0.3, ease: "easeOut" }
+        }
+        style={{ willChange: "transform, opacity" }}
       >
-        {/* Premium Apple-style Icon Container */}
-        <motion.div variants={itemVariants} className="relative">
-          <motion.div
-            animate={{
-              scale: [1, 1.02, 1],
+        {/* Squircle shadow */}
+        <div
+          className="relative"
+          style={{
+            filter:
+              "drop-shadow(0 22px 48px rgba(0,0,0,0.14)) drop-shadow(0 4px 12px rgba(0,0,0,0.08))",
+          }}
+        >
+          {/* Icon */}
+          <div
+            className="relative overflow-hidden"
+            style={{
+              width: 116,
+              height: 116,
+              borderRadius: "26.66%", // Apple squircle
             }}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-            className="relative w-32 h-32"
           >
-            {/* Outer glow ring */}
-            <motion.div
-              animate={{
-                opacity: [0.5, 0.8, 0.5],
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-              className="absolute inset-0 rounded-[40px] bg-gradient-to-br from-blue-400/30 via-slate-200/10 to-blue-400/30 dark:from-blue-500/20 dark:to-blue-400/10 blur-2xl"
+            <Image
+              src="/thrico_app_Icon.jpg"
+              alt="Thrico"
+              fill
+              priority
+              className="object-cover"
+              sizes="116px"
             />
-
-            {/* Main container with premium glass effect */}
-            <div className="absolute inset-0 rounded-[40px] bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-white/60 dark:border-slate-700/60 shadow-2xl overflow-hidden">
-              {/* Inner shine effect */}
-              <div className="absolute inset-0 rounded-[40px] bg-gradient-to-br from-white/40 via-transparent to-transparent dark:from-white/10 dark:via-transparent dark:to-transparent pointer-events-none" />
-
-              {/* Smooth rotating light border */}
-              <motion.div
-                animate={{
-                  rotate: 360,
-                }}
-                transition={{
-                  duration: 8,
-                  repeat: Infinity,
-                  ease: "linear",
-                }}
-                className="absolute inset-0 rounded-[40px] bg-gradient-to-r from-blue-400/0 via-blue-400/30 to-blue-400/0 dark:from-blue-500/0 dark:via-blue-500/20 dark:to-blue-500/0"
-                style={{
-                  boxShadow: "inset 0 0 60px rgba(59, 130, 246, 0.1)",
-                }}
-              />
-
-              {/* Center Logo */}
-              <div className="relative w-full h-full flex items-center justify-center">
-                <motion.div
-                  animate={{
-                    scale: [1, 1.05, 1],
-                  }}
-                  transition={{
-                    duration: 3,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  }}
-                  className="relative w-20 h-20 rounded-2xl overflow-hidden shadow-lg"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-transparent" />
-                  <Image
-                    src="/thrico_app_Icon.jpg"
-                    alt="Thrico"
-                    fill
-                    className="object-cover"
-                  />
-                </motion.div>
-              </div>
-            </div>
-          </motion.div>
-        </motion.div>
-
-        {/* Progress Indicators */}
-        <div className="flex flex-col items-center gap-8 w-full">
-          {/* Minimalist Progress Indicator */}
-          <motion.div variants={itemVariants} className="w-full max-w-xs">
-            <div className="relative h-1.5 bg-gradient-to-r from-slate-200/30 to-slate-300/30 dark:from-slate-700/30 dark:to-slate-600/30 rounded-full overflow-hidden backdrop-blur-sm">
-              {/* Animated progress fill */}
-              <motion.div
-                animate={{
-                  x: ["-100%", "100%"],
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-                className="absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-blue-500 to-transparent dark:via-blue-400 shadow-lg shadow-blue-400/40"
-              />
-            </div>
-          </motion.div>
-
-          {/* Subtle Loading Dots */}
-          <motion.div
-            variants={itemVariants}
-            className="flex items-center gap-1.5"
-          >
-            {[0, 1, 2].map((i) => (
-              <motion.div
-                key={i}
-                animate={{
-                  scale: [0.8, 1, 0.8],
-                  opacity: [0.4, 0.9, 0.4],
-                }}
-                transition={{
-                  duration: 1.5,
-                  repeat: Infinity,
-                  delay: i * 0.2,
-                  ease: "easeInOut",
-                }}
-                className="w-1 h-1 rounded-full bg-blue-400/70 dark:bg-blue-500"
-              />
-            ))}
-          </motion.div>
+            {/* Apple-style specular gloss */}
+            <div
+              aria-hidden
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background:
+                  "linear-gradient(155deg, rgba(255,255,255,0.20) 0%, rgba(255,255,255,0.06) 40%, transparent 65%)",
+              }}
+            />
+          </div>
         </div>
       </motion.div>
 
-      {/* Floating Ambient Particles */}
-      {[...Array(4)].map((_, i) => (
-        <motion.div
-          key={i}
-          initial={
-            {
-              // x: Math.random() * window?.innerWidth - window?.innerWidth / 2,
-              // y: Math.random() * window?.innerHeight,
-              // opacity: 0,
-            }
-          }
-          animate={{
-            y: [null, Math.random() * 100 - 50],
-            opacity: [0, 0.3, 0],
-          }}
-          transition={{
-            duration: 6 + Math.random() * 4,
-            repeat: Infinity,
-            delay: Math.random() * 2,
-            ease: "easeInOut",
-          }}
-          className="absolute w-0.5 h-0.5 bg-blue-400/40 dark:bg-blue-500/30 rounded-full blur-sm pointer-events-none"
-          style={{
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-          }}
-        />
-      ))}
-
-      {/* Subtle Footer Text */}
+      {/* ── Bottom zone: progress + wordmark ── */}
       <motion.div
+        className="absolute bottom-[9%] flex flex-col items-center gap-[14px]"
         initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.2, duration: 1 }}
-        className="absolute bottom-10 text-xs font-medium text-muted-foreground/40 dark:text-slate-500/40 uppercase tracking-widest"
+        animate={{ opacity: phase === "progress" ? 1 : 0 }}
+        transition={{ duration: 0.35, ease: "easeOut" }}
       >
-        Thrico Network
+        {/* Thin progress track */}
+        <div
+          className="relative overflow-hidden rounded-full"
+          style={{
+            width: 196,
+            height: 2.5,
+            background: "oklch(0.88 0 0 / 60%)",
+          }}
+        >
+          {/* Fill — light mode: near-black, dark mode: near-white */}
+          <motion.div
+            className="absolute inset-y-0 left-0 rounded-full bg-[oklch(0.15_0_0)] dark:bg-[oklch(0.92_0_0)]"
+            style={{ width: progressWidth }}
+          />
+          {/* Shimmer at leading edge */}
+          <motion.div
+            aria-hidden
+            className="absolute inset-y-0 rounded-full"
+            style={{
+              width: 32,
+              left: progressWidth,
+              x: "-60%",
+              background:
+                "linear-gradient(90deg, transparent, rgba(255,255,255,0.6) 50%, transparent)",
+              filter: "blur(1.5px)",
+            }}
+          />
+        </div>
+
+        {/* Wordmark */}
+        <motion.span
+          initial={{ opacity: 0, y: 5 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.5, ease: "easeOut" }}
+          className="text-[10.5px] font-semibold tracking-[0.25em] uppercase text-black/35 dark:text-white/30"
+          style={{ fontFamily: "var(--font-avant-garde), sans-serif" }}
+        >
+          Thrico
+        </motion.span>
       </motion.div>
     </div>
   );

@@ -53,3 +53,15 @@ export const CHANGE_COMMUNITY_MEMBER_ROLE = gql`
     changeCommunityMemberRole(communityId: $communityId, userId: $userId, role: $role)
   }
 `;
+
+export const APPROVE_COMMUNITY_MEMBER_REQUEST = gql`
+  mutation ApproveCommunityMemberRequest($communityId: ID!, $userId: ID!) {
+    approveCommunityMemberRequest(communityId: $communityId, userId: $userId)
+  }
+`;
+
+export const REJECT_COMMUNITY_MEMBER_REQUEST = gql`
+  mutation RejectCommunityMemberRequest($communityId: ID!, $userId: ID!) {
+    rejectCommunityMemberRequest(communityId: $communityId, userId: $userId)
+  }
+`;

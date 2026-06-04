@@ -63,15 +63,15 @@ function BlockCard({
     <div
       draggable
       onDragStart={() => onDragStart({ key: block.key, label: block.label, type: block.type as any })}
-      className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-white hover:shadow-sm cursor-grab active:cursor-grabbing transition-all group border border-transparent hover:border-slate-200"
+      className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-card hover:shadow-sm cursor-grab active:cursor-grabbing transition-all group border border-transparent hover:border-border"
     >
       <span style={{ color }} className="opacity-60 group-hover:opacity-100 transition-opacity shrink-0">
         {block.icon}
       </span>
-      <span className="text-[11.5px] text-slate-500 group-hover:text-slate-800 transition-colors flex-1 leading-tight">
+      <span className="text-[11.5px] text-muted-foreground group-hover:text-foreground transition-colors flex-1 leading-tight">
         {block.label}
       </span>
-      <GripVertical size={11} className="text-slate-200 group-hover:text-slate-400 shrink-0" />
+      <GripVertical size={11} className="text-slate-200 group-hover:text-muted-foreground shrink-0" />
     </div>
   );
 }
@@ -87,14 +87,14 @@ function SectionHead({
       {pinned && <Sparkles size={10} style={{ color }} className="shrink-0" />}
       <span
         className="text-[10px] font-bold uppercase tracking-wider leading-none"
-        style={{ color: pinned ? color : "#94a3b8" }}
+        style={{ color: pinned ? color : "var(--muted-foreground)" }}
       >
         {label}
       </span>
       {count !== undefined && (
-        <span className="text-[9px] text-slate-400 font-medium ml-0.5">({count})</span>
+        <span className="text-[9px] text-muted-foreground font-medium ml-0.5">({count})</span>
       )}
-      {!pinned && <div className="flex-1 h-px bg-slate-100 ml-1" />}
+      {!pinned && <div className="flex-1 h-px bg-muted ml-1" />}
     </div>
   );
 }
@@ -148,11 +148,11 @@ export function BlockLibrary({ onDragStart, module }: BlockLibraryProps) {
                 onClick={() => toggle(`trig-${mod.key}`)}
                 className="w-full flex items-center gap-2 px-1 pt-2 pb-1 group"
               >
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 group-hover:text-slate-600 flex-1 text-left">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground group-hover:text-muted-foreground flex-1 text-left">
                   {mod.label}
                 </span>
-                <span className="text-[9px] text-slate-300">({mod.blocks.length})</span>
-                <ChevronRight size={10} className={cn("text-slate-300 transition-transform", !isCollapsed && "rotate-90")} />
+                <span className="text-[9px] text-muted-foreground">({mod.blocks.length})</span>
+                <ChevronRight size={10} className={cn("text-muted-foreground transition-transform", !isCollapsed && "rotate-90")} />
               </button>
               {!isCollapsed && (
                 <div className="space-y-0.5">
@@ -247,7 +247,7 @@ export function BlockLibrary({ onDragStart, module }: BlockLibraryProps) {
       ))}
 
       <div className="px-1 pt-2">
-        <p className="text-[10px] text-slate-400 leading-relaxed">
+        <p className="text-[10px] text-muted-foreground leading-relaxed">
           Drag <span className="font-semibold text-amber-600">Condition</span> or{" "}
           <span className="font-semibold text-purple-600">Delay</span> between any two nodes to add branching or timing logic.
         </p>
@@ -261,10 +261,10 @@ export function BlockLibrary({ onDragStart, module }: BlockLibraryProps) {
     : SMART_SUGGESTIONS.map((s) => s.label);
 
   return (
-    <div className="w-[248px] border-r border-slate-200 bg-slate-50 flex flex-col overflow-hidden shrink-0">
+    <div className="w-[248px] border-r border-border bg-muted/50 flex flex-col overflow-hidden shrink-0">
 
       {/* ── Header ── */}
-      <div className="px-4 pt-4 pb-0 border-b border-slate-200 shrink-0">
+      <div className="px-4 pt-4 pb-0 border-b border-border shrink-0">
         {/* Module banner */}
         {module ? (
           <div
@@ -275,20 +275,20 @@ export function BlockLibrary({ onDragStart, module }: BlockLibraryProps) {
             <p className="text-[11px] font-bold leading-none" style={{ color: activeColor }}>
               {module}
             </p>
-            <span className="text-[9px] text-slate-400 ml-auto font-medium">Module</span>
+            <span className="text-[9px] text-muted-foreground ml-auto font-medium">Module</span>
           </div>
         ) : (
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3">Block Library</p>
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-3">Block Library</p>
         )}
 
         {/* Search */}
         <div className="relative mb-3">
-          <Search size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search blocks…"
-            className="w-full bg-white border border-slate-200 rounded-lg text-[12px] text-slate-700 pl-8 pr-3 py-2 focus:outline-none focus:border-[#5B6CFF]/50 placeholder-slate-400"
+            className="w-full bg-card border border-border rounded-lg text-[12px] text-foreground pl-8 pr-3 py-2 focus:outline-none focus:border-[#5B6CFF]/50 placeholder-slate-400"
           />
         </div>
 
@@ -302,7 +302,7 @@ export function BlockLibrary({ onDragStart, module }: BlockLibraryProps) {
                 "flex-1 flex items-center justify-center gap-1.5 py-2 text-[11px] font-semibold border-b-2 transition-all",
                 tab === t.key
                   ? "border-[#5B6CFF] text-[#5B6CFF]"
-                  : "border-transparent text-slate-400 hover:text-slate-600",
+                  : "border-transparent text-muted-foreground hover:text-muted-foreground",
               )}
             >
               {t.icon}
@@ -333,7 +333,7 @@ export function BlockLibrary({ onDragStart, module }: BlockLibraryProps) {
             {suggestions.map((label, i) => (
               <button
                 key={i}
-                className="w-full text-left text-[11px] text-slate-500 hover:text-slate-700 px-3 py-1.5 flex items-start gap-2 transition-colors hover:bg-black/5"
+                className="w-full text-left text-[11px] text-muted-foreground hover:text-foreground px-3 py-1.5 flex items-start gap-2 transition-colors hover:bg-black/5"
               >
                 <Zap size={10} className="mt-0.5 shrink-0" style={{ color: activeColor }} />
                 {label}

@@ -14,7 +14,7 @@ export type CampaignStatus = "draft" | "active" | "inactive";
 export type CampaignFrequency = "one-time" | "recurring";
 export type CronType = "weekly" | "monthly" | "custom";
 export type ChannelType = "email";
-export type CampaignModule = "Communities" | "Events" | "Shop" | "Jobs" | "Listings" | "Users";
+export type CampaignModule = "Communities" | "Jobs" | "Users";
 
 export interface WorkflowNode {
   id: string;
@@ -87,22 +87,22 @@ export const NODE_STYLES: Record<NodeType, {
   iconBg: string; iconColor: string;
 }> = {
   trigger: {
-    bg: "bg-white", border: "border-blue-200", headerBg: "bg-blue-50",
+    bg: "bg-card", border: "border-blue-200", headerBg: "bg-blue-50",
     badgeBg: "bg-blue-100", badgeText: "text-blue-700", badgeLabel: "TRIGGER",
     iconBg: "bg-blue-100", iconColor: "text-blue-600",
   },
   condition: {
-    bg: "bg-white", border: "border-amber-200", headerBg: "bg-amber-50",
+    bg: "bg-card", border: "border-amber-200", headerBg: "bg-amber-50",
     badgeBg: "bg-amber-100", badgeText: "text-amber-700", badgeLabel: "CONDITION",
     iconBg: "bg-amber-100", iconColor: "text-amber-600",
   },
   action: {
-    bg: "bg-white", border: "border-emerald-200", headerBg: "bg-emerald-50",
+    bg: "bg-card", border: "border-emerald-200", headerBg: "bg-emerald-50",
     badgeBg: "bg-emerald-100", badgeText: "text-emerald-700", badgeLabel: "ACTION",
     iconBg: "bg-emerald-100", iconColor: "text-emerald-600",
   },
   delay: {
-    bg: "bg-white", border: "border-purple-200", headerBg: "bg-purple-50",
+    bg: "bg-card", border: "border-purple-200", headerBg: "bg-purple-50",
     badgeBg: "bg-purple-100", badgeText: "text-purple-700", badgeLabel: "DELAY",
     iconBg: "bg-purple-100", iconColor: "text-purple-600",
   },
@@ -135,43 +135,11 @@ export const BLOCK_MODULES = [
     ],
   },
   {
-    key: "events", label: "Events", color: "#8B5CF6",
-    icon: <Calendar size={14} />,
-    blocks: [
-      { key: "event-registered", label: "Event Registered", icon: <UserCheck size={13} />, type: "trigger" as NodeType, group: "Triggers" },
-      { key: "event-attended",   label: "Event Attended",   icon: <Check size={13} />,     type: "trigger" as NodeType, group: "Triggers" },
-    ],
-  },
-  {
     key: "jobs", label: "Jobs", color: "#F59E0B",
     icon: <Briefcase size={14} />,
     blocks: [
       { key: "job-posted",  label: "Job Posted",  icon: <ListChecks size={13} />, type: "trigger" as NodeType, group: "Triggers" },
       { key: "job-applied", label: "Job Applied", icon: <Send size={13} />,       type: "trigger" as NodeType, group: "Triggers" },
-    ],
-  },
-  {
-    key: "shop", label: "Shop", color: "#10B981",
-    icon: <Store size={14} />,
-    blocks: [
-      { key: "product-purchased", label: "Product Purchased", icon: <ShoppingBag size={13} />, type: "trigger" as NodeType, group: "Triggers" },
-      { key: "shop-visited",      label: "Shop Visited",      icon: <Plus size={13} />,        type: "trigger" as NodeType, group: "Triggers" },
-    ],
-  },
-  {
-    key: "listings", label: "Listings", color: "#EF4444",
-    icon: <ShoppingBag size={14} />,
-    blocks: [
-      { key: "listing-created", label: "Listing Created", icon: <Plus size={13} />,      type: "trigger" as NodeType, group: "Triggers" },
-      { key: "listing-viewed",  label: "Listing Viewed",  icon: <UserCheck size={13} />, type: "trigger" as NodeType, group: "Triggers" },
-    ],
-  },
-  {
-    key: "surveys", label: "Surveys", color: "#6366F1",
-    icon: <ClipboardList size={14} />,
-    blocks: [
-      { key: "survey-submitted", label: "Survey Submitted", icon: <Check size={13} />, type: "trigger" as NodeType, group: "Triggers" },
-      { key: "low-rating",       label: "Low Rating Given",  icon: <Star size={13} />, type: "trigger" as NodeType, group: "Triggers" },
     ],
   },
   {
@@ -202,32 +170,6 @@ export const MODULE_BLOCKS: Record<string, Block[]> = {
     { key: "send-notification",      label: "Send Notification",        icon: <Bell size={13} />,    type: "action",    group: "Actions" },
     { key: "add-tag",                label: "Add Tag",                  icon: <Tag size={13} />,     type: "action",    group: "Actions" },
   ],
-  Events: [
-    // Triggers
-    { key: "event-registered",       label: "Event Registered",         icon: <UserCheck size={13} />, type: "trigger", group: "Triggers" },
-    { key: "event-attended",         label: "Event Attended",           icon: <Check size={13} />,     type: "trigger", group: "Triggers" },
-    { key: "event-cancelled",        label: "Event Cancelled",          icon: <LogOut size={13} />,    type: "trigger", group: "Triggers" },
-    { key: "waitlist-opened",        label: "Spot Available (Waitlist)", icon: <Plus size={13} />,    type: "trigger", group: "Triggers" },
-    // Actions
-    { key: "send-event-reminder",    label: "Send Event Reminder",      icon: <Bell size={13} />,      type: "action",  group: "Actions" },
-    { key: "send-event-confirmation",label: "Send Confirmation Email",   icon: <Mail size={13} />,      type: "action",  group: "Actions" },
-    { key: "send-post-event-survey", label: "Send Post-Event Survey",   icon: <Send size={13} />,      type: "action",  group: "Actions" },
-    { key: "add-to-waitlist",        label: "Add to Waitlist",          icon: <ListChecks size={13} />,type: "action",  group: "Actions" },
-    { key: "add-tag",                label: "Add Tag",                  icon: <Tag size={13} />,       type: "action",  group: "Actions" },
-  ],
-  Shop: [
-    // Triggers
-    { key: "product-purchased",      label: "Product Purchased",        icon: <ShoppingBag size={13} />, type: "trigger", group: "Triggers" },
-    { key: "shop-visited",           label: "Shop Visited",             icon: <UserCheck size={13} />,   type: "trigger", group: "Triggers" },
-    { key: "cart-abandoned",         label: "Cart Abandoned",           icon: <LogOut size={13} />,      type: "trigger", group: "Triggers" },
-    { key: "product-reviewed",       label: "Product Reviewed",         icon: <Star size={13} />,        type: "trigger", group: "Triggers" },
-    // Actions
-    { key: "send-order-confirmation",label: "Send Order Confirmation",  icon: <Mail size={13} />,        type: "action",  group: "Actions" },
-    { key: "send-shipping-update",   label: "Send Shipping Update",     icon: <Send size={13} />,        type: "action",  group: "Actions" },
-    { key: "send-review-request",    label: "Request a Review",         icon: <Star size={13} />,        type: "action",  group: "Actions" },
-    { key: "send-upsell-email",      label: "Send Upsell Email",        icon: <Zap size={13} />,         type: "action",  group: "Actions" },
-    { key: "add-tag",                label: "Add Tag",                  icon: <Tag size={13} />,         type: "action",  group: "Actions" },
-  ],
   Jobs: [
     // Triggers
     { key: "job-posted",             label: "Job Posted",               icon: <ListChecks size={13} />,  type: "trigger", group: "Triggers" },
@@ -239,19 +181,6 @@ export const MODULE_BLOCKS: Record<string, Block[]> = {
     { key: "send-job-match-alert",   label: "Send Job Match Alert",     icon: <Bell size={13} />,        type: "action",  group: "Actions" },
     { key: "notify-recruiter",       label: "Notify Recruiter",         icon: <Send size={13} />,        type: "action",  group: "Actions" },
     { key: "send-interview-invite",  label: "Send Interview Invite",    icon: <Calendar size={13} />,    type: "action",  group: "Actions" },
-    { key: "add-tag",                label: "Add Tag",                  icon: <Tag size={13} />,         type: "action",  group: "Actions" },
-  ],
-  Listings: [
-    // Triggers
-    { key: "listing-created",        label: "Listing Created",          icon: <Plus size={13} />,        type: "trigger", group: "Triggers" },
-    { key: "listing-viewed",         label: "Listing Viewed",           icon: <UserCheck size={13} />,   type: "trigger", group: "Triggers" },
-    { key: "listing-inquiry",        label: "New Inquiry Received",      icon: <Send size={13} />,       type: "trigger", group: "Triggers" },
-    { key: "listing-expired",        label: "Listing Expired",          icon: <LogOut size={13} />,      type: "trigger", group: "Triggers" },
-    // Actions
-    { key: "send-listing-approved",  label: "Send Approval Email",      icon: <Mail size={13} />,        type: "action",  group: "Actions" },
-    { key: "notify-seller-views",    label: "Notify Seller on 10 Views", icon: <Bell size={13} />,      type: "action",  group: "Actions" },
-    { key: "send-price-drop-alert",  label: "Send Price Drop Alert",    icon: <Zap size={13} />,         type: "action",  group: "Actions" },
-    { key: "send-inquiry-reply",     label: "Auto-Reply to Inquiry",    icon: <Send size={13} />,        type: "action",  group: "Actions" },
     { key: "add-tag",                label: "Add Tag",                  icon: <Tag size={13} />,         type: "action",  group: "Actions" },
   ],
   // ── Users module ───────────────────────────────────────────────────────
@@ -311,26 +240,6 @@ export const MODULE_CONDITION_FIELDS: Record<string, { value: string; label: str
     { value: "community.member_count",  label: "Community · Member count",  group: "Community" },
     { value: "community.visibility",    label: "Community · Visibility",    group: "Community" },
   ],
-  Events: [
-    { value: "user.city",               label: "User · City",               group: "User" },
-    { value: "user.skills",             label: "User · Skills",             group: "User" },
-    { value: "user.age",                label: "User · Age",                group: "User" },
-    { value: "event.category",          label: "Event · Category",          group: "Event" },
-    { value: "event.location",          label: "Event · Location",          group: "Event" },
-    { value: "event.mode",              label: "Event · Mode (online/offline)", group: "Event" },
-    { value: "event.capacity",          label: "Event · Capacity",          group: "Event" },
-    { value: "event.days_until",        label: "Event · Days until event",  group: "Event" },
-    { value: "registration.ticket_type", label: "Registration · Ticket type", group: "Registration" },
-  ],
-  Shop: [
-    { value: "user.city",               label: "User · City",               group: "User" },
-    { value: "user.age",                label: "User · Age",                group: "User" },
-    { value: "product.category",        label: "Product · Category",        group: "Product" },
-    { value: "product.price",           label: "Product · Price",           group: "Product" },
-    { value: "order.total",             label: "Order · Total amount",      group: "Order" },
-    { value: "order.item_count",        label: "Order · Item count",        group: "Order" },
-    { value: "order.payment_method",    label: "Order · Payment method",    group: "Order" },
-  ],
   Jobs: [
     { value: "user.city",               label: "User · City",               group: "User" },
     { value: "user.skills",             label: "User · Skills",             group: "User" },
@@ -341,16 +250,6 @@ export const MODULE_CONDITION_FIELDS: Record<string, { value: string; label: str
     { value: "job.type",                label: "Job · Type (full/part/remote)", group: "Job" },
     { value: "job.salary_range",        label: "Job · Salary range",        group: "Job" },
     { value: "application.status",      label: "Application · Status",      group: "Application" },
-  ],
-  Listings: [
-    { value: "user.city",               label: "User · City",               group: "User" },
-    { value: "user.age",                label: "User · Age",                group: "User" },
-    { value: "listing.category",        label: "Listing · Category",        group: "Listing" },
-    { value: "listing.price",           label: "Listing · Price",           group: "Listing" },
-    { value: "listing.location",        label: "Listing · Location",        group: "Listing" },
-    { value: "listing.views",           label: "Listing · View count",      group: "Listing" },
-    { value: "listing.condition",       label: "Listing · Condition (new/used)", group: "Listing" },
-    { value: "listing.days_active",     label: "Listing · Days active",     group: "Listing" },
   ],
   // Users module — member lifecycle conditions
   Users: [
@@ -374,10 +273,7 @@ export const OPERATORS = ["equals", "not equals", "contains", "not contains", "g
 // ─── Campaign Modules options ─────────────────────────────────────────────────
 export const CAMPAIGN_MODULES: { value: CampaignModule; label: string; color: string; icon: React.ReactNode; isMobileOnly?: boolean }[] = [
   { value: "Communities", label: "Communities", color: "#3B82F6", icon: <Users size={16} />, isMobileOnly: true },
-  { value: "Events",      label: "Events",      color: "#8B5CF6", icon: <Calendar size={16} /> },
-  { value: "Shop",        label: "Shop",        color: "#10B981", icon: <Store size={16} /> },
   { value: "Jobs",        label: "Jobs",        color: "#F59E0B", icon: <Briefcase size={16} />, isMobileOnly: true },
-  { value: "Listings",    label: "Listings",    color: "#EF4444", icon: <ShoppingBag size={16} />, isMobileOnly: true },
   { value: "Users",       label: "Users",       color: "#EC4899", icon: <UserPlus size={16} />, isMobileOnly: true },
 ];
 

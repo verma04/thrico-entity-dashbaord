@@ -19,7 +19,7 @@ function CanvasContent() {
 
 export default function NewCampaignCanvasPage() {
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-slate-50">
+    <div className="flex flex-col h-screen overflow-hidden bg-muted/50">
       <Suspense fallback={<div className="flex-1 flex items-center justify-center">Loading...</div>}>
         <CanvasContent />
       </Suspense>

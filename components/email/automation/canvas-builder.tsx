@@ -179,6 +179,13 @@ export function CanvasBuilder({ campaignId, onBack }: CanvasBuilderProps) {
   const handleCanvasDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     if (!dragBlockRef.current || !canvasRef.current) return;
+
+    if (dragBlockRef.current.type === "trigger" && nodes.some(n => n.type === "trigger")) {
+      toast.error("Only one trigger is allowed per campaign.");
+      dragBlockRef.current = null;
+      return;
+    }
+
     const rect = canvasRef.current.getBoundingClientRect();
     const newNode: WorkflowNode = {
       id: uid(), type: dragBlockRef.current.type,
@@ -191,7 +198,7 @@ export function CanvasBuilder({ campaignId, onBack }: CanvasBuilderProps) {
     setSelectedId(newNode.id);
     setShowSettings(false);
     dragBlockRef.current = null;
-  }, [canvasOffset]);
+  }, [canvasOffset, nodes]);
 
   // ── Node move ─────────────────────────────────────────────────────────────
   const handleNodeDragMove = useCallback((id: string, dx: number, dy: number) => {
@@ -228,12 +235,20 @@ export function CanvasBuilder({ campaignId, onBack }: CanvasBuilderProps) {
       setConnectingFrom(null); setWireStart(null); setWireCursor(null);
       return;
     }
+
+    const toNode = nodes.find(n => n.id === toId);
+    if (toNode?.type === "trigger") {
+      toast.error("Triggers must be the top-level starting point.");
+      setConnectingFrom(null); setWireStart(null); setWireCursor(null);
+      return;
+    }
+
     setEdges((prev) => {
       if (prev.some((e) => e.from === connectingFrom && e.to === toId)) return prev;
       return [...prev, { id: uid(), from: connectingFrom, to: toId }];
     });
     setConnectingFrom(null); setWireStart(null); setWireCursor(null);
-  }, [connectingFrom]);
+  }, [connectingFrom, nodes]);
 
   // ── Track cursor while wiring ─────────────────────────────────────────────
   useEffect(() => {
@@ -281,14 +296,34 @@ export function CanvasBuilder({ campaignId, onBack }: CanvasBuilderProps) {
     try {
       if (!isEditMode) {
         // Create full campaign
+        const actionNodes = nodes.filter(n => n.type === 'action');
+        const formattedActionConfig = actionNodes.map(n => {
+          if (n.blockKey === "send-email-action" || n.blockKey === "send-welcome-email") {
+            return { type: "EMAIL", templateId: n.config?.templateId || "default" };
+          }
+          if (n.blockKey === "add-to-community") {
+            return { type: "COMMUNITY_JOIN", communityId: n.config?.communityId };
+          }
+          if (n.blockKey === "send-notification") {
+            return { type: "NOTIFICATION", message: n.config?.message };
+          }
+          return { type: "UNKNOWN", ...n.config };
+        });
+
+        const conditionNodes = nodes.filter(n => n.type === 'condition');
+        const formattedSegmentationConfig = {
+          operator: "AND",
+          conditions: conditionNodes.map(n => n.config)
+        };
+
         const res = await createCampaign({
           variables: {
             name: campaignName,
             entityId,
             triggerType,
             triggerConfig: { ...triggerNode?.config, canvasNodes: nodes, canvasEdges: edges },
-            actionConfig: { nodes: nodes.filter(n => n.type === 'action') },
-            segmentationConfig: { nodes: nodes.filter(n => n.type === 'condition') },
+            actionConfig: formattedActionConfig,
+            segmentationConfig: formattedSegmentationConfig,
             description: "Campaign built from canvas"
           }
         });
@@ -305,14 +340,20 @@ export function CanvasBuilder({ campaignId, onBack }: CanvasBuilderProps) {
            await updateCampaign({ variables: { id: newId, status: newStatus } });
         }
       } else {
-        // Just update status as supported by the schema for now
+        // Update existing campaign
         await updateCampaign({ 
           variables: { 
              id: campaignId, 
-             status: newStatus || status 
+             status: newStatus || status,
+             name: campaignName,
+             triggerType,
+             triggerConfig: { ...triggerNode?.config, canvasNodes: nodes, canvasEdges: edges },
+             actionConfig: formattedActionConfig,
+             segmentationConfig: formattedSegmentationConfig,
+             description: "Campaign updated from canvas"
           } 
         });
-        toast.success(newStatus === "active" ? "Campaign Activated!" : "Draft Status Saved!");
+        toast.success(newStatus === "active" ? "Campaign Activated!" : "Campaign Saved!");
         if (newStatus) setStatus(newStatus);
       }
     } catch (err: any) {
@@ -322,31 +363,31 @@ export function CanvasBuilder({ campaignId, onBack }: CanvasBuilderProps) {
 
   if (loading) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center bg-slate-50 gap-3">
+      <div className="flex-1 flex flex-col items-center justify-center bg-muted/50 gap-3">
         <Loader2 className="h-8 w-8 text-[#5B6CFF] animate-spin" />
-        <p className="text-sm text-slate-500 font-medium">Loading campaign flow...</p>
+        <p className="text-sm text-muted-foreground font-medium">Loading campaign flow...</p>
       </div>
     );
   }
 
   const statusMeta: Record<CampaignStatus, { label: string; color: string; bg: string; border: string }> = {
-    draft:    { label: "Draft",    color: "text-slate-600",  bg: "bg-slate-50",  border: "border-slate-200" },
+    draft:    { label: "Draft",    color: "text-muted-foreground",  bg: "bg-muted/50",  border: "border-border" },
     active:   { label: "Active",   color: "text-emerald-700", bg: "bg-emerald-50", border: "border-emerald-200" },
     inactive: { label: "Inactive", color: "text-blue-700",   bg: "bg-blue-50",   border: "border-blue-200" },
   };
   const sm = statusMeta[status];
   const moduleColor = module ? MODULE_COLORS[module] : "#5B6CFF";
-  const selCls = "w-full bg-white border border-slate-200 rounded-xl text-[12px] text-slate-700 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#5B6CFF]/15 focus:border-[#5B6CFF]/50";
+  const selCls = "w-full bg-card border border-border rounded-xl text-[12px] text-foreground px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#5B6CFF]/15 focus:border-[#5B6CFF]/50";
 
   return (
     <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
       {/* ── Toolbar ── */}
-      <div className="flex items-center gap-2.5 px-5 py-3 border-b border-slate-200 bg-white shrink-0">
+      <div className="flex items-center gap-2.5 px-5 py-3 border-b border-border bg-card shrink-0">
         {/* Back */}
-        <button onClick={onBack} className="flex items-center gap-1.5 text-[12px] text-slate-500 hover:text-[#5B6CFF] transition-colors mr-1">
+        <button onClick={onBack} className="flex items-center gap-1.5 text-[12px] text-muted-foreground hover:text-[#5B6CFF] transition-colors mr-1">
           <ChevronRight size={13} className="rotate-180" /> Campaigns
         </button>
-        <div className="w-px h-4 bg-slate-200" />
+        <div className="w-px h-4 bg-muted" />
 
         {/* Mode badge */}
         {isEditMode ? (
@@ -358,7 +399,7 @@ export function CanvasBuilder({ campaignId, onBack }: CanvasBuilderProps) {
             New Campaign
           </span>
         )}
-        <div className="w-px h-4 bg-slate-200" />
+        <div className="w-px h-4 bg-muted" />
 
         {/* Campaign name */}
         {isEditingName ? (
@@ -366,10 +407,10 @@ export function CanvasBuilder({ campaignId, onBack }: CanvasBuilderProps) {
             onChange={(e) => setCampaignName(e.target.value)}
             onBlur={() => setIsEditingName(false)}
             onKeyDown={(e) => e.key === "Enter" && setIsEditingName(false)}
-            className="text-[14px] font-semibold text-slate-800 bg-transparent border-b border-[#5B6CFF]/50 focus:outline-none px-1 min-w-0 max-w-[180px]" />
+            className="text-[14px] font-semibold text-foreground bg-transparent border-b border-[#5B6CFF]/50 focus:outline-none px-1 min-w-0 max-w-[180px]" />
         ) : (
           <button onClick={() => setIsEditingName(true)}
-            className="text-[14px] font-semibold text-slate-800 hover:text-[#5B6CFF] transition-colors truncate max-w-[180px]">
+            className="text-[14px] font-semibold text-foreground hover:text-[#5B6CFF] transition-colors truncate max-w-[180px]">
             {campaignName}
           </button>
         )}
@@ -377,7 +418,7 @@ export function CanvasBuilder({ campaignId, onBack }: CanvasBuilderProps) {
         {/* Status pill */}
         <div className={cn("flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-semibold", sm.color, sm.bg, sm.border)}>
           <span className={cn("h-1.5 w-1.5 rounded-full",
-            status === "active" ? "bg-emerald-500" : status === "inactive" ? "bg-blue-400" : "bg-slate-400")} />
+            status === "active" ? "bg-emerald-500" : status === "inactive" ? "bg-blue-400" : "bg-muted-foreground")} />
           {sm.label}
         </div>
 
@@ -399,7 +440,7 @@ export function CanvasBuilder({ campaignId, onBack }: CanvasBuilderProps) {
         )}
 
         {/* Node type counters */}
-        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200">
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted/50 border border-border">
           {([
             { icon: <Play size={9} className="text-blue-500" />,    count: nodes.filter((n) => n.type === "trigger").length,   color: "text-blue-600" },
             { icon: <GitBranch size={9} className="text-amber-500" />, count: nodes.filter((n) => n.type === "condition").length, color: "text-amber-600" },
@@ -415,7 +456,7 @@ export function CanvasBuilder({ campaignId, onBack }: CanvasBuilderProps) {
         {/* Live audience */}
         <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-50 border border-indigo-100">
           <Users size={12} className="text-[#5B6CFF]" />
-          <span className="text-[11px] font-semibold text-slate-600"><span className="text-slate-900 font-bold">2,340</span> match</span>
+          <span className="text-[11px] font-semibold text-muted-foreground"><span className="text-foreground font-bold">2,340</span> match</span>
         </div>
 
         {/* Settings button */}
@@ -425,7 +466,7 @@ export function CanvasBuilder({ campaignId, onBack }: CanvasBuilderProps) {
             "flex items-center gap-1.5 h-8 px-3 rounded-xl border text-[12px] font-semibold transition-all",
             showSettings
               ? "bg-[#5B6CFF] border-[#5B6CFF] text-white"
-              : "bg-white border-slate-200 hover:border-slate-300 text-slate-600"
+              : "bg-card border-border hover:border-border text-muted-foreground"
           )}
         >
           <Settings2 size={13} /> Settings
@@ -434,7 +475,7 @@ export function CanvasBuilder({ campaignId, onBack }: CanvasBuilderProps) {
         <button 
           onClick={() => handleSave()}
           disabled={isSaving}
-          className="flex items-center gap-2 h-8 px-3 bg-white border border-slate-200 hover:border-slate-300 disabled:opacity-50 text-slate-600 text-[12px] font-semibold rounded-xl transition-all">
+          className="flex items-center gap-2 h-8 px-3 bg-card border border-border hover:border-border disabled:opacity-50 text-muted-foreground text-[12px] font-semibold rounded-xl transition-all">
           {isSaving ? <Loader2 size={12} className="animate-spin" /> : null}
           Save Draft
         </button>
@@ -454,8 +495,8 @@ export function CanvasBuilder({ campaignId, onBack }: CanvasBuilderProps) {
         {/* ── Canvas ── */}
         <div
           ref={canvasRef}
-          className="flex-1 relative overflow-hidden bg-[#f7f8fc]"
-          style={{ cursor: connectingFrom ? "crosshair" : "default", backgroundImage: "radial-gradient(circle, #d1d5db 1px, transparent 1px)", backgroundSize: "28px 28px" }}
+          className="flex-1 relative overflow-hidden bg-background"
+          style={{ cursor: connectingFrom ? "crosshair" : "default", backgroundImage: "radial-gradient(circle, var(--border) 1px, transparent 1px)", backgroundSize: "28px 28px" }}
           onDrop={handleCanvasDrop}
           onDragOver={(e) => e.preventDefault()}
           onMouseDown={handleCanvasMouseDown}
@@ -464,12 +505,12 @@ export function CanvasBuilder({ campaignId, onBack }: CanvasBuilderProps) {
           {nodes.length === 0 && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div className="text-center space-y-4">
-                <div className="h-16 w-16 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-300 mx-auto">
+                <div className="h-16 w-16 rounded-2xl bg-card border border-border shadow-sm flex items-center justify-center text-muted-foreground mx-auto">
                   <GitBranch size={26} />
                 </div>
                 <div>
-                  <p className="text-slate-600 text-[14px] font-semibold">Build your workflow</p>
-                  <p className="text-slate-400 text-[12px] mt-1">Drag blocks from the left panel onto the canvas</p>
+                  <p className="text-muted-foreground text-[14px] font-semibold">Build your workflow</p>
+                  <p className="text-muted-foreground text-[12px] mt-1">Drag blocks from the left panel onto the canvas</p>
                 </div>
               </div>
             </div>
@@ -506,20 +547,20 @@ export function CanvasBuilder({ campaignId, onBack }: CanvasBuilderProps) {
           {/* Zoom controls */}
           <div className="absolute bottom-4 right-4 flex flex-col gap-1.5">
             {["+", "−"].map((s) => (
-              <button key={s} className="h-8 w-8 rounded-lg bg-white border border-slate-200 shadow-sm text-slate-500 hover:text-slate-800 text-sm font-bold flex items-center justify-center transition-all hover:shadow-md">{s}</button>
+              <button key={s} className="h-8 w-8 rounded-lg bg-card border border-border shadow-sm text-muted-foreground hover:text-foreground text-sm font-bold flex items-center justify-center transition-all hover:shadow-md">{s}</button>
             ))}
             <button onClick={() => setCanvasOffset({ x: 0, y: 0 })} title="Reset view"
-              className="h-8 w-8 rounded-lg bg-white border border-slate-200 shadow-sm text-slate-500 hover:text-slate-800 flex items-center justify-center transition-all hover:shadow-md">
+              className="h-8 w-8 rounded-lg bg-card border border-border shadow-sm text-muted-foreground hover:text-foreground flex items-center justify-center transition-all hover:shadow-md">
               <SlidersHorizontal size={13} />
             </button>
           </div>
 
           {/* Counter */}
           <div className="absolute bottom-4 left-4 flex items-center gap-3">
-            <div className="text-[11px] text-slate-400 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-lg border border-slate-200 shadow-sm">
+            <div className="text-[11px] text-muted-foreground bg-card/90 backdrop-blur-sm px-2.5 py-1 rounded-lg border border-border shadow-sm">
               {nodes.length} nodes · {edges.length} connections
             </div>
-            <div className="text-[11px] text-slate-400 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-lg border border-slate-200 shadow-sm flex items-center gap-1.5">
+            <div className="text-[11px] text-muted-foreground bg-card/90 backdrop-blur-sm px-2.5 py-1 rounded-lg border border-border shadow-sm flex items-center gap-1.5">
               <span className="inline-block h-2 w-2 rounded-full bg-[#5B6CFF]" /> Drag blue dot to connect
             </div>
           </div>
@@ -536,19 +577,19 @@ export function CanvasBuilder({ campaignId, onBack }: CanvasBuilderProps) {
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: 320, opacity: 0 }}
               transition={{ type: "spring", stiffness: 420, damping: 35 }}
-              className="w-[300px] border-l border-slate-200 bg-white flex flex-col overflow-hidden shrink-0"
+              className="w-[300px] border-l border-border bg-card flex flex-col overflow-hidden shrink-0"
             >
               {/* Header */}
-              <div className="flex items-center gap-3 px-4 py-4 border-b border-slate-200 bg-slate-50">
-                <div className="h-8 w-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-[#5B6CFF]">
+              <div className="flex items-center gap-3 px-4 py-4 border-b border-border bg-muted/50">
+                <div className="h-8 w-8 rounded-lg bg-card border border-border flex items-center justify-center text-[#5B6CFF]">
                   <Settings2 size={15} />
                 </div>
                 <div className="flex-1">
-                  <p className="text-[13px] font-bold text-slate-800">Campaign Settings</p>
-                  <p className="text-[10px] text-slate-400">Status, module & schedule</p>
+                  <p className="text-[13px] font-bold text-foreground">Campaign Settings</p>
+                  <p className="text-[10px] text-muted-foreground">Status, module & schedule</p>
                 </div>
                 <button onClick={() => setShowSettings(false)}
-                  className="h-7 w-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all">
+                  className="h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-all">
                   <X size={14} />
                 </button>
               </div>
@@ -557,14 +598,14 @@ export function CanvasBuilder({ campaignId, onBack }: CanvasBuilderProps) {
 
                 {/* ── Status ── */}
                 <div>
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Status</label>
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-2">Status</label>
                   <div className="grid grid-cols-3 gap-1.5">
                     {(["draft", "active", "inactive"] as CampaignStatus[]).map((s) => {
                       const m = statusMeta[s];
                       return (
                         <button key={s} onClick={() => setStatus(s)}
                           className={cn("flex flex-col items-center gap-1 py-2.5 px-2 rounded-xl border text-center transition-all text-[11px] font-semibold",
-                            status === s ? `${m.color} ${m.bg} ${m.border} ring-1 ring-offset-1 ring-[#5B6CFF]/20` : "bg-white border-slate-200 text-slate-500 hover:border-slate-300")}>
+                            status === s ? `${m.color} ${m.bg} ${m.border} ring-1 ring-offset-1 ring-[#5B6CFF]/20` : "bg-card border-border text-muted-foreground hover:border-border")}>
                           {s === "draft" ? <Hash size={13} /> : s === "active" ? <Play size={13} /> : <CheckCircle size={13} />}
                           {m.label}
                         </button>
@@ -575,19 +616,19 @@ export function CanvasBuilder({ campaignId, onBack }: CanvasBuilderProps) {
 
                 {/* ── Module ── */}
                 <div>
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Module</label>
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-2">Module</label>
                   <div className="space-y-1.5">
                     {CAMPAIGN_MODULES.map((mod) => (
                       <button key={mod.value} onClick={() => setModule(mod.value)}
                         className={cn("w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border text-left transition-all",
-                          module === mod.value ? "ring-1 ring-offset-1" : "bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50")}
+                          module === mod.value ? "ring-1 ring-offset-1" : "bg-card border-border hover:border-border hover:bg-muted/50")}
                         style={module === mod.value ? { backgroundColor: `${mod.color}0e`, borderColor: mod.color } : {}}>
                         <div className="h-7 w-7 rounded-lg flex items-center justify-center shrink-0"
                           style={{ backgroundColor: `${mod.color}18`, color: mod.color }}>
                           {mod.icon}
                         </div>
                         <span className="text-[12px] font-semibold"
-                          style={{ color: module === mod.value ? mod.color : "#475569" }}>
+                          style={{ color: module === mod.value ? mod.color : "var(--foreground)" }}>
                           {mod.label}
                         </span>
                         {module === mod.value && (
@@ -605,7 +646,7 @@ export function CanvasBuilder({ campaignId, onBack }: CanvasBuilderProps) {
 
                 {/* ── Frequency ── */}
                 <div>
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Frequency</label>
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-2">Frequency</label>
                   <div className="grid grid-cols-2 gap-1.5">
                     {([
                       { value: "one-time" as CampaignFrequency,  label: "One Time",  icon: <Play size={13} /> },
@@ -615,7 +656,7 @@ export function CanvasBuilder({ campaignId, onBack }: CanvasBuilderProps) {
                         className={cn("flex flex-col items-center gap-1.5 py-2.5 rounded-xl border text-[11px] font-semibold transition-all",
                           frequency === opt.value
                             ? "bg-indigo-50 border-[#5B6CFF] text-[#5B6CFF] ring-1 ring-[#5B6CFF]/20 ring-offset-1"
-                            : "bg-white border-slate-200 text-slate-500 hover:border-slate-300")}>
+                            : "bg-card border-border text-muted-foreground hover:border-border")}>
                         {opt.icon} {opt.label}
                       </button>
                     ))}
@@ -633,7 +674,7 @@ export function CanvasBuilder({ campaignId, onBack }: CanvasBuilderProps) {
                         ]).map((t) => (
                           <button key={t.value} onClick={() => setCronType(t.value)}
                             className={cn("flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-all",
-                              cronType === t.value ? "bg-[#5B6CFF] border-[#5B6CFF] text-white" : "bg-white border-slate-200 text-slate-500 hover:border-slate-300")}>
+                              cronType === t.value ? "bg-[#5B6CFF] border-[#5B6CFF] text-white" : "bg-card border-border text-muted-foreground hover:border-border")}>
                             {t.icon} {t.label}
                           </button>
                         ))}
@@ -646,7 +687,7 @@ export function CanvasBuilder({ campaignId, onBack }: CanvasBuilderProps) {
                             {WEEKDAYS.map((d) => (
                               <button key={d} onClick={() => setCronDay(d)}
                                 className={cn("px-2 py-0.5 rounded-md text-[10px] font-bold border transition-all",
-                                  cronDay === d ? "bg-[#5B6CFF] border-[#5B6CFF] text-white" : "bg-white border-slate-200 text-slate-500")}>
+                                  cronDay === d ? "bg-[#5B6CFF] border-[#5B6CFF] text-white" : "bg-card border-border text-muted-foreground")}>
                                 {d}
                               </button>
                             ))}
@@ -662,7 +703,7 @@ export function CanvasBuilder({ campaignId, onBack }: CanvasBuilderProps) {
                             {MONTH_DATES.map((d) => (
                               <button key={d} onClick={() => setCronDate(d)}
                                 className={cn("h-6 w-6 rounded-md text-[10px] font-bold border transition-all",
-                                  cronDate === d ? "bg-[#5B6CFF] border-[#5B6CFF] text-white" : "bg-white border-slate-200 text-slate-500")}>
+                                  cronDate === d ? "bg-[#5B6CFF] border-[#5B6CFF] text-white" : "bg-card border-border text-muted-foreground")}>
                                 {d}
                               </button>
                             ))}
@@ -674,9 +715,9 @@ export function CanvasBuilder({ campaignId, onBack }: CanvasBuilderProps) {
                       {cronType === "custom" && (
                         <div>
                           <p className="text-[10px] text-indigo-600 font-medium mb-1.5">Cron expression</p>
-                          <input className="w-full font-mono bg-white border border-slate-200 rounded-lg text-[11px] text-slate-700 px-2.5 py-2 focus:outline-none focus:border-[#5B6CFF]/50"
+                          <input className="w-full font-mono bg-card border border-border rounded-lg text-[11px] text-foreground px-2.5 py-2 focus:outline-none focus:border-[#5B6CFF]/50"
                             placeholder="0 9 * * 1" />
-                          <p className="text-[10px] text-slate-400 mt-1">min · hour · day · month · weekday</p>
+                          <p className="text-[10px] text-muted-foreground mt-1">min · hour · day · month · weekday</p>
                         </div>
                       )}
                     </div>
@@ -685,17 +726,17 @@ export function CanvasBuilder({ campaignId, onBack }: CanvasBuilderProps) {
 
                 {/* ── Channel ── */}
                 <div>
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Channel Type</label>
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-2">Channel Type</label>
                   <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl border border-[#5B6CFF] bg-indigo-50 text-[#5B6CFF] text-[12px] font-bold">
                     <Mail size={14} /> Email
                     <CheckCircle size={13} className="ml-auto text-[#5B6CFF]" />
                   </div>
-                  <p className="text-[10px] text-slate-400 mt-1.5">More channels coming soon.</p>
+                  <p className="text-[10px] text-muted-foreground mt-1.5">More channels coming soon.</p>
                 </div>
               </div>
 
               {/* Footer */}
-              <div className="p-4 border-t border-slate-100">
+              <div className="p-4 border-t border-border">
                 <button onClick={() => setShowSettings(false)}
                   className="w-full h-9 bg-[#5B6CFF] hover:bg-[#4a5ce8] text-white text-[12px] font-bold rounded-xl transition-all">
                   Apply Settings

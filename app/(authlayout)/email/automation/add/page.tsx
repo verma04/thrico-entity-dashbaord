@@ -46,7 +46,7 @@ const CAMPAIGN_TEMPLATES: CampaignTemplate[] = [
     frequency: "one-time",
     category: "General",
     gradient: "from-slate-100 to-slate-200",
-    icon: <Plus size={22} className="text-slate-400" />,
+    icon: <Plus size={22} className="text-muted-foreground" />,
     nodes: 0,
     suggestedName: "",
   },
@@ -66,20 +66,6 @@ const CAMPAIGN_TEMPLATES: CampaignTemplate[] = [
     nodes: 3,
     suggestedName: "Welcome New Community Members",
     isMobileOnly: true,
-  },
-  {
-    id: "event-reminder",
-    label: "Event Reminder",
-    description: "Automatically remind registered attendees 24h before an event",
-    module: "Events",
-    frequency: "one-time",
-    category: "Events",
-    gradient: "from-violet-400 to-purple-600",
-    icon: <CalendarDays size={22} className="text-white" />,
-    emailTemplateId: "t-event-reminder",
-    emailTemplateName: "Event Reminder",
-    nodes: 4,
-    suggestedName: "Event 24h Reminder",
   },
   {
     id: "job-applied",
@@ -128,61 +114,6 @@ const CAMPAIGN_TEMPLATES: CampaignTemplate[] = [
     emailTemplateName: "Re-engagement Campaign",
     nodes: 5,
     suggestedName: "Inactive Member Re-engagement",
-    isMobileOnly: true,
-  },
-  {
-    id: "shop-abandoned",
-    label: "Abandoned Cart",
-    description: "Recover users who viewed listings but didn't complete purchase",
-    module: "Shop",
-    frequency: "one-time",
-    category: "Shop",
-    gradient: "from-fuchsia-400 to-purple-600",
-    icon: <ShoppingBag size={22} className="text-white" />,
-    emailTemplateId: "t-promo",
-    emailTemplateName: "Promotional Offer",
-    nodes: 5,
-    suggestedName: "Shop Cart Recovery",
-  },
-  {
-    id: "survey-followup",
-    label: "Survey Follow-up",
-    description: "Thank respondents and share high-level survey results",
-    module: "Communities",
-    frequency: "one-time",
-    category: "Surveys",
-    gradient: "from-cyan-400 to-sky-600",
-    icon: <ClipboardList size={22} className="text-white" />,
-    emailTemplateId: "t-survey-followup",
-    emailTemplateName: "Survey Follow-up",
-    nodes: 3,
-    suggestedName: "Post-Survey Thank You",
-    isMobileOnly: true,
-  },
-  {
-    id: "low-rating-alert",
-    label: "Low Rating Alert",
-    description: "Trigger internal notification when a survey scores below 3/5",
-    module: "Communities",
-    frequency: "one-time",
-    category: "Surveys",
-    gradient: "from-red-400 to-rose-600",
-    icon: <Star size={22} className="text-white" />,
-    nodes: 4,
-    suggestedName: "Low Rating Follow-up",
-    isMobileOnly: true,
-  },
-  {
-    id: "listing-expiry",
-    label: "Listing Expiry Reminder",
-    description: "Remind sellers 3 days before their listing expires",
-    module: "Listings",
-    frequency: "recurring",
-    category: "Listings",
-    gradient: "from-yellow-400 to-amber-500",
-    icon: <CalendarDays size={22} className="text-white" />,
-    nodes: 3,
-    suggestedName: "Listing Expiry Alert",
     isMobileOnly: true,
   },
   // ── New templates ──────────────────────────────────────────────────
@@ -250,7 +181,7 @@ const CAMPAIGN_TEMPLATES: CampaignTemplate[] = [
   },
 ];
 
-const TEMPLATE_CATEGORIES = ["All", "General", "Communities", "Events", "Jobs", "Newsletter", "Marketing", "Shop", "Surveys", "Listings", "Gamification"];
+const TEMPLATE_CATEGORIES = ["All", "General", "Communities", "Jobs", "Newsletter", "Marketing", "Gamification"];
 
 // ─── Small reusable components ────────────────────────────────────────────────
 function Chip({ active, onClick, children, color }: {
@@ -259,7 +190,7 @@ function Chip({ active, onClick, children, color }: {
   return (
     <button type="button" onClick={onClick}
       className={cn("px-3 py-1.5 rounded-lg text-[11px] font-semibold border transition-all",
-        active ? "text-white shadow-sm" : "bg-white text-slate-500 border-slate-200 hover:border-slate-300 hover:text-slate-700")}
+        active ? "text-white shadow-sm" : "bg-card text-muted-foreground border-border hover:border-border hover:text-foreground")}
       style={active ? { backgroundColor: color ?? "#5B6CFF", borderColor: color ?? "#5B6CFF" } : {}}>
       {children}
     </button>
@@ -269,11 +200,11 @@ function Chip({ active, onClick, children, color }: {
 function FieldLabel({ children, hint }: { children: React.ReactNode; hint?: string }) {
   return (
     <div className="flex items-center gap-2 mb-2">
-      <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">{children}</label>
+      <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">{children}</label>
       {hint && (
         <div className="group relative">
-          <Info size={11} className="text-slate-300 cursor-help" />
-          <div className="hidden group-hover:block absolute left-full ml-2 top-1/2 -translate-y-1/2 w-48 bg-slate-800 text-white text-[10px] px-2.5 py-1.5 rounded-lg z-50 shadow-lg">
+          <Info size={11} className="text-muted-foreground cursor-help" />
+          <div className="hidden group-hover:block absolute left-full ml-2 top-1/2 -translate-y-1/2 w-48 bg-primary/80 text-white text-[10px] px-2.5 py-1.5 rounded-lg z-50 shadow-lg">
             {hint}
           </div>
         </div>
@@ -302,16 +233,16 @@ function TemplateCard({ t, selected, onClick }: {
     <button onClick={onClick}
       className={cn("group relative text-left rounded-2xl border-2 p-3 transition-all duration-300",
         selected ? "border-[#5B6CFF] bg-indigo-50/40 shadow-xl shadow-[#5B6CFF]/10 scale-[1.02]"
-                 : "border-slate-200 bg-white hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5")}
+                 : "border-border bg-card hover:border-border hover:shadow-md hover:-translate-y-0.5")}
     >
       {selected && <BorderBeam size={120} duration={4} colorFrom="#5B6CFF" colorTo="#9c40ff" />}
 
       {/* Thumbnail */}
       <div className="relative w-full aspect-3/2 rounded-xl overflow-hidden mb-3">
         {isBlank ? (
-          <div className="absolute inset-0 bg-slate-50 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center gap-2">
-            <Plus size={18} className="text-slate-300" />
-            <span className="text-[10px] font-semibold text-slate-300">Blank Canvas</span>
+          <div className="absolute inset-0 bg-muted/50 border-2 border-dashed border-border flex flex-col items-center justify-center gap-2">
+            <Plus size={18} className="text-muted-foreground" />
+            <span className="text-[10px] font-semibold text-muted-foreground">Blank Canvas</span>
           </div>
         ) : (
           <>
@@ -319,17 +250,17 @@ function TemplateCard({ t, selected, onClick }: {
               <div className="opacity-80">{t.icon}</div>
             </div>
             {/* Canvas preview - simulated nodes */}
-            <div className="absolute inset-x-0 bottom-0 bg-white p-2 flex flex-col gap-1" style={{ height: "63%" }}>
+            <div className="absolute inset-x-0 bottom-0 bg-card p-2 flex flex-col gap-1" style={{ height: "63%" }}>
               {Array.from({ length: Math.min(t.nodes, 3) }).map((_, i) => (
                 <div key={i} className="flex items-center gap-1">
                   <div className="h-1.5 w-1.5 rounded-full bg-slate-300 shrink-0" />
-                  <div className={cn("h-1.5 rounded-full bg-slate-200", i === 0 ? "w-3/4" : i === 1 ? "w-1/2" : "w-2/3")} />
+                  <div className={cn("h-1.5 rounded-full bg-muted", i === 0 ? "w-3/4" : i === 1 ? "w-1/2" : "w-2/3")} />
                 </div>
               ))}
               {t.emailTemplateName && (
-                <div className="mt-auto flex items-center gap-1 pt-1 border-t border-slate-100">
+                <div className="mt-auto flex items-center gap-1 pt-1 border-t border-border">
                   <Mail size={8} className="text-indigo-400 shrink-0" />
-                  <span className="text-[8px] text-slate-400 truncate">{t.emailTemplateName}</span>
+                  <span className="text-[8px] text-muted-foreground truncate">{t.emailTemplateName}</span>
                 </div>
               )}
             </div>
@@ -351,16 +282,16 @@ function TemplateCard({ t, selected, onClick }: {
 
       {/* Info */}
       <div className="px-0.5">
-        <p className="text-[12px] font-bold text-slate-800 leading-tight flex items-center gap-2">
+        <p className="text-[12px] font-bold text-foreground leading-tight flex items-center gap-2">
           {t.label}
           {t.isMobileOnly && (
              <span className="inline-flex h-4 px-1.5 rounded bg-amber-500/10 text-amber-600 border border-amber-500/20 text-[8px] font-bold uppercase tracking-wider items-center">Mobile</span>
           )}
         </p>
-        <p className="text-[10px] text-slate-400 mt-0.5 leading-tight line-clamp-2">{t.description}</p>
+        <p className="text-[10px] text-muted-foreground mt-0.5 leading-tight line-clamp-2">{t.description}</p>
         <div className="flex items-center gap-2 mt-2 flex-wrap">
           {t.module && (
-            <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500">
+            <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground">
               {t.module}
             </span>
           )}
@@ -370,7 +301,7 @@ function TemplateCard({ t, selected, onClick }: {
             </span>
           )}
           {!isBlank && (
-            <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-400">
+            <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground">
               {t.nodes} nodes
             </span>
           )}
@@ -402,7 +333,7 @@ export default function NewCampaignPage() {
     setForm((p) => ({ ...p, [key]: val }));
 
   const canProceed = form.name.trim().length > 0 && form.module !== "";
-  const inp = "w-full bg-white border border-slate-200 rounded-xl text-[13px] text-slate-700 px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#5B6CFF]/20 focus:border-[#5B6CFF]/50 placeholder-slate-400 transition-all";
+  const inp = "w-full bg-card border border-border rounded-xl text-[13px] text-foreground px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#5B6CFF]/20 focus:border-[#5B6CFF]/50 placeholder-slate-400 transition-all";
 
   // Apply template defaults when user picks one
   const applyTemplate = (t: CampaignTemplate) => {
@@ -463,15 +394,15 @@ export default function NewCampaignPage() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="min-h-screen bg-muted/50 flex flex-col">
 
       {/* ── Top bar ── */}
-      <div className="flex items-center gap-4 px-8 py-4 bg-white/70 backdrop-blur-md border-b border-slate-200/60 shrink-0 sticky top-0 z-50">
+      <div className="flex items-center gap-4 px-8 py-4 bg-card/70 backdrop-blur-md border-b border-border shrink-0 sticky top-0 z-50">
         <button onClick={handleBack}
-          className="flex items-center gap-1.5 text-[12px] text-slate-500 hover:text-[#5B6CFF] transition-colors">
+          className="flex items-center gap-1.5 text-[12px] text-muted-foreground hover:text-[#5B6CFF] transition-colors">
           <ChevronLeft size={14} /> Back
         </button>
-        <div className="w-px h-4 bg-slate-200" />
+        <div className="w-px h-4 bg-muted" />
         <div className="flex items-center gap-2">
           {[
             { label: "Template", step: 0 },
@@ -479,8 +410,8 @@ export default function NewCampaignPage() {
             { label: "Schedule & Users", step: 2 },
           ].map((s, i) => (
             <React.Fragment key={s.step}>
-              {i > 0 && <ChevronRight size={11} className="text-slate-300" />}
-              <span className={cn("text-[11px] font-bold", step === s.step ? "text-[#5B6CFF]" : "text-slate-400")}>
+              {i > 0 && <ChevronRight size={11} className="text-muted-foreground" />}
+              <span className={cn("text-[11px] font-bold", step === s.step ? "text-[#5B6CFF]" : "text-muted-foreground")}>
                 {s.label}
               </span>
             </React.Fragment>
@@ -491,7 +422,7 @@ export default function NewCampaignPage() {
         <div className="flex items-center gap-1.5">
           {[0, 1, 2].map((s) => (
             <div key={s} className={cn("h-1.5 rounded-full transition-all",
-              s === step ? "w-6 bg-[#5B6CFF]" : s < step ? "w-3 bg-[#5B6CFF]/40" : "w-3 bg-slate-200")} />
+              s === step ? "w-6 bg-[#5B6CFF]" : s < step ? "w-3 bg-[#5B6CFF]/40" : "w-3 bg-muted")} />
           ))}
         </div>
       </div>
@@ -512,10 +443,10 @@ export default function NewCampaignPage() {
                     <Sparkles size={17} className="text-[#5B6CFF]" />
                   </div>
                   <div>
-                    <h1 className="text-2xl font-bold text-slate-900 tracking-tight leading-none">
+                    <h1 className="text-2xl font-bold text-foreground tracking-tight leading-none">
                       Start with a template
                     </h1>
-                    <p className="text-sm text-slate-500 mt-1">
+                    <p className="text-sm text-muted-foreground mt-1">
                       Choose a pre-built campaign workflow, or start from scratch.
                     </p>
                   </div>
@@ -529,8 +460,8 @@ export default function NewCampaignPage() {
                     <button key={cat} onClick={() => setCategory(cat)}
                       className={cn("text-[11px] font-semibold px-3 py-1.5 rounded-full border transition-all",
                         category === cat
-                          ? "bg-slate-900 border-slate-900 text-white"
-                          : "bg-white border-slate-200 text-slate-500 hover:border-slate-300 hover:text-slate-700")}>
+                          ? "bg-primary border-slate-900 text-white"
+                          : "bg-card border-border text-muted-foreground hover:border-border hover:text-foreground")}>
                       {cat}
                     </button>
                   ))}
@@ -561,7 +492,7 @@ export default function NewCampaignPage() {
                 {filteredTemplates.length === 0 && (
                   <div className="flex flex-col items-center justify-center py-20 text-center">
                     <LayoutTemplate size={32} className="text-slate-200 mb-3" />
-                    <p className="text-slate-500 font-medium">No templates in this category</p>
+                    <p className="text-muted-foreground font-medium">No templates in this category</p>
                     <button onClick={() => setCategory("All")} className="mt-3 text-[#5B6CFF] text-sm font-semibold hover:underline">
                       View all
                     </button>
@@ -570,17 +501,17 @@ export default function NewCampaignPage() {
               </div>
 
               {/* Bottom action bar */}
-              <div className="sticky bottom-0 bg-white border-t border-slate-200 px-8 py-4 flex items-center gap-4">
+              <div className="sticky bottom-0 bg-card border-t border-border px-8 py-4 flex items-center gap-4">
                 {selectedTemplate && selectedTemplate.id !== "blank" ? (
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <div className={cn("h-8 w-8 rounded-lg bg-linear-to-br flex items-center justify-center shrink-0", selectedTemplate.gradient)}>
                       <div className="scale-75 opacity-90">{selectedTemplate.icon}</div>
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[12px] font-bold text-slate-800 truncate">{selectedTemplate.label}</p>
+                      <p className="text-[12px] font-bold text-foreground truncate">{selectedTemplate.label}</p>
                       <div className="flex items-center gap-2 mt-0.5">
                         {selectedTemplate.module && (
-                          <span className="text-[10px] text-slate-400">{selectedTemplate.module}</span>
+                          <span className="text-[10px] text-muted-foreground">{selectedTemplate.module}</span>
                         )}
                         {selectedTemplate.emailTemplateName && (
                           <span className="flex items-center gap-1 text-[10px] text-indigo-500 font-semibold">
@@ -591,7 +522,7 @@ export default function NewCampaignPage() {
                     </div>
                   </div>
                 ) : (
-                  <p className="flex-1 text-[12px] text-slate-400">
+                  <p className="flex-1 text-[12px] text-muted-foreground">
                     {selectedTemplateId ? "Starting from a blank canvas" : "No template selected — will use blank canvas"}
                   </p>
                 )}
@@ -619,7 +550,7 @@ export default function NewCampaignPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-[11px] font-bold text-[#5B6CFF] leading-none truncate">{selectedTemplate.label}</p>
-                      <p className="text-[10px] text-slate-400 mt-0.5 truncate">{selectedTemplate.description}</p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5 truncate">{selectedTemplate.description}</p>
                     </div>
                     {selectedTemplate.emailTemplateName && (
                       <a href="/email/templates" target="_blank"
@@ -632,8 +563,8 @@ export default function NewCampaignPage() {
                 )}
 
                 <div>
-                  <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Campaign Settings</h1>
-                  <p className="text-sm text-slate-500 mt-1">Define your campaign's basics before building the workflow.</p>
+                  <h1 className="text-2xl font-bold text-foreground tracking-tight">Campaign Settings</h1>
+                  <p className="text-sm text-muted-foreground mt-1">Define your campaign's basics before building the workflow.</p>
                 </div>
 
                 <div className="glass-card rounded-3xl p-8 space-y-6">
@@ -656,7 +587,7 @@ export default function NewCampaignPage() {
                       ] as { value: CampaignStatus; label: string; color: string; icon: React.ReactNode }[]).map((s) => (
                         <button key={s.value} type="button" onClick={() => update("status", s.value)}
                           className={cn("flex items-center gap-2 px-4 py-2.5 rounded-xl border text-[12px] font-semibold transition-all",
-                            form.status === s.value ? "text-white shadow-sm" : "bg-white text-slate-500 border-slate-200 hover:border-slate-300")}
+                            form.status === s.value ? "text-white shadow-sm" : "bg-card text-muted-foreground border-border hover:border-border")}
                           style={form.status === s.value ? { backgroundColor: s.color, borderColor: s.color } : {}}>
                           {s.icon} {s.label}
                         </button>
@@ -671,7 +602,7 @@ export default function NewCampaignPage() {
                       {CAMPAIGN_MODULES.map((mod) => (
                         <button key={mod.value} type="button" onClick={() => update("module", mod.value)}
                           className={cn("flex flex-col items-center gap-2 pt-3 pb-2.5 px-2 rounded-xl border text-center transition-all relative overflow-hidden",
-                            form.module === mod.value ? "shadow-sm" : "bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50")}
+                            form.module === mod.value ? "shadow-sm" : "bg-card border-border hover:border-border hover:bg-muted/50")}
                           style={form.module === mod.value ? { backgroundColor: `${mod.color}0e`, borderColor: mod.color } : {}}>
                           {mod.isMobileOnly && (
                             <div className="absolute top-0 right-0 p-1">
@@ -693,7 +624,7 @@ export default function NewCampaignPage() {
 
                   {/* Description */}
                   <div>
-                    <FieldLabel>Description <span className="normal-case text-slate-400 font-normal">(optional)</span></FieldLabel>
+                    <FieldLabel>Description <span className="normal-case text-muted-foreground font-normal">(optional)</span></FieldLabel>
                     <textarea rows={2} className={`${inp} resize-none`}
                       placeholder="Short description of this campaign's purpose…"
                       value={form.description} onChange={(e) => update("description", e.target.value)} />
@@ -715,8 +646,8 @@ export default function NewCampaignPage() {
               className="flex-1 flex items-start justify-center py-12 px-8">
               <div className="w-full max-w-2xl space-y-6">
                 <div>
-                  <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Schedule & Audience</h1>
-                  <p className="text-sm text-slate-500 mt-1">Configure when to send and who receives this campaign.</p>
+                  <h1 className="text-2xl font-bold text-foreground tracking-tight">Schedule & Audience</h1>
+                  <p className="text-sm text-muted-foreground mt-1">Configure when to send and who receives this campaign.</p>
                 </div>
 
                 <div className="glass-card rounded-3xl p-8 space-y-8">
@@ -734,15 +665,15 @@ export default function NewCampaignPage() {
                           className={cn("flex items-start gap-3 p-4 rounded-xl border text-left transition-all",
                             form.frequency === opt.value
                               ? "border-[#5B6CFF] bg-indigo-50 ring-1 ring-[#5B6CFF]/20"
-                              : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50")}>
+                              : "border-border bg-card hover:border-border hover:bg-muted/50")}>
                           <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center shrink-0 transition-all",
-                            form.frequency === opt.value ? "bg-[#5B6CFF] text-white" : "bg-slate-100 text-slate-400")}>
+                            form.frequency === opt.value ? "bg-[#5B6CFF] text-white" : "bg-muted text-muted-foreground")}>
                             {opt.icon}
                           </div>
                           <div>
                             <p className={cn("text-[13px] font-semibold",
-                              form.frequency === opt.value ? "text-[#5B6CFF]" : "text-slate-700")}>{opt.label}</p>
-                            <p className="text-[11px] text-slate-400 mt-0.5">{opt.desc}</p>
+                              form.frequency === opt.value ? "text-[#5B6CFF]" : "text-foreground")}>{opt.label}</p>
+                            <p className="text-[11px] text-muted-foreground mt-0.5">{opt.desc}</p>
                           </div>
                         </button>
                       ))}
@@ -769,7 +700,7 @@ export default function NewCampaignPage() {
                           </div>
                           {form.cronType === "weekly" && (
                             <div>
-                              <p className="text-[11px] text-slate-500 mb-2 font-medium">Day of week</p>
+                              <p className="text-[11px] text-muted-foreground mb-2 font-medium">Day of week</p>
                               <div className="flex gap-1.5 flex-wrap">
                                 {WEEKDAYS.map((d) => (
                                   <Chip key={d} active={form.cronDay === d} onClick={() => update("cronDay", d)}>{d}</Chip>
@@ -782,14 +713,14 @@ export default function NewCampaignPage() {
                           )}
                           {form.cronType === "monthly" && (
                             <div>
-                              <p className="text-[11px] text-slate-500 mb-2 font-medium">Day of month</p>
+                              <p className="text-[11px] text-muted-foreground mb-2 font-medium">Day of month</p>
                               <div className="flex gap-1 flex-wrap">
                                 {MONTH_DATES.map((d) => (
                                   <button key={d} type="button" onClick={() => update("cronDate", d)}
                                     className={cn("h-7 w-7 rounded-lg text-[11px] font-semibold transition-all border",
                                       form.cronDate === d
                                         ? "bg-[#5B6CFF] text-white border-[#5B6CFF]"
-                                        : "bg-white text-slate-500 border-slate-200 hover:border-slate-300")}>
+                                        : "bg-card text-muted-foreground border-border hover:border-border")}>
                                     {d}
                                   </button>
                                 ))}
@@ -802,11 +733,11 @@ export default function NewCampaignPage() {
                           )}
                           {form.cronType === "custom" && (
                             <div>
-                              <p className="text-[11px] text-slate-500 mb-2 font-medium">Cron expression</p>
-                              <input className="w-full font-mono bg-white border border-slate-200 rounded-xl text-[12px] text-slate-700 px-3 py-2.5 focus:outline-none focus:border-[#5B6CFF]/50"
+                              <p className="text-[11px] text-muted-foreground mb-2 font-medium">Cron expression</p>
+                              <input className="w-full font-mono bg-card border border-border rounded-xl text-[12px] text-foreground px-3 py-2.5 focus:outline-none focus:border-[#5B6CFF]/50"
                                 placeholder="0 9 * * 1  (every Monday 9 AM)" />
-                              <p className="text-[11px] text-slate-400 mt-1">
-                                Format: <span className="font-mono text-slate-600">minute  hour  day-month  month  day-week</span>
+                              <p className="text-[11px] text-muted-foreground mt-1">
+                                Format: <span className="font-mono text-muted-foreground">minute  hour  day-month  month  day-week</span>
                               </p>
                             </div>
                           )}
@@ -823,8 +754,8 @@ export default function NewCampaignPage() {
                         className="flex items-center gap-2.5 px-4 py-3 rounded-xl border border-[#5B6CFF] bg-indigo-50 text-[#5B6CFF] text-[12px] font-bold ring-1 ring-[#5B6CFF]/20">
                         <Mail size={15} /> Email <CheckCircle size={13} className="ml-1 text-[#5B6CFF]" />
                       </button>
-                      <div className="flex items-center gap-2.5 px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-300 text-[12px] font-semibold cursor-not-allowed select-none">
-                        Push Notification <span className="text-[10px] px-1.5 py-0.5 bg-slate-200 text-slate-400 rounded-md ml-1">Soon</span>
+                      <div className="flex items-center gap-2.5 px-4 py-3 rounded-xl border border-border bg-muted/50 text-muted-foreground text-[12px] font-semibold cursor-not-allowed select-none">
+                        Push Notification <span className="text-[10px] px-1.5 py-0.5 bg-muted text-muted-foreground rounded-md ml-1">Soon</span>
                       </div>
                     </div>
                   </div>
@@ -841,15 +772,15 @@ export default function NewCampaignPage() {
                           className={cn("flex items-start gap-3 p-4 rounded-xl border text-left transition-all",
                             form.targetUsers === opt.value
                               ? "border-[#5B6CFF] bg-indigo-50 ring-1 ring-[#5B6CFF]/20"
-                              : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50")}>
+                              : "border-border bg-card hover:border-border hover:bg-muted/50")}>
                           <div className={cn("h-9 w-9 rounded-xl flex items-center justify-center shrink-0",
-                            form.targetUsers === opt.value ? "bg-[#5B6CFF] text-white" : "bg-slate-100 text-slate-400")}>
+                            form.targetUsers === opt.value ? "bg-[#5B6CFF] text-white" : "bg-muted text-muted-foreground")}>
                             {opt.icon}
                           </div>
                           <div>
                             <p className={cn("text-[13px] font-semibold",
-                              form.targetUsers === opt.value ? "text-[#5B6CFF]" : "text-slate-700")}>{opt.label}</p>
-                            <p className="text-[11px] text-slate-400 mt-0.5">{opt.desc}</p>
+                              form.targetUsers === opt.value ? "text-[#5B6CFF]" : "text-foreground")}>{opt.label}</p>
+                            <p className="text-[11px] text-muted-foreground mt-0.5">{opt.desc}</p>
                           </div>
                         </button>
                       ))}
@@ -858,8 +789,8 @@ export default function NewCampaignPage() {
                 </div>
 
                 {/* Summary */}
-                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                  <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-3">Campaign Summary</p>
+                <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+                  <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-3">Campaign Summary</p>
                   <div className="grid grid-cols-2 gap-y-3 gap-x-6">
                     {[
                       { label: "Template",  value: selectedTemplate?.label ?? "Blank" },
@@ -872,17 +803,17 @@ export default function NewCampaignPage() {
                       { label: "Audience",  value: form.targetUsers === "all" ? "All Users" : "Segmented" },
                     ].map(({ label, value }) => (
                       <div key={label}>
-                        <p className="text-[10px] text-slate-400 font-medium">{label}</p>
-                        <p className="text-[12px] text-slate-800 font-semibold mt-0.5 truncate">{value}</p>
+                        <p className="text-[10px] text-muted-foreground font-medium">{label}</p>
+                        <p className="text-[12px] text-foreground font-semibold mt-0.5 truncate">{value}</p>
                       </div>
                     ))}
                   </div>
                   {/* Email template link */}
                   {selectedTemplate?.emailTemplateName && (
-                    <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
+                    <div className="mt-3 pt-3 border-t border-border flex items-center justify-between">
                       <div className="flex items-center gap-1.5">
                         <Mail size={11} className="text-indigo-400" />
-                        <span className="text-[11px] text-slate-600 font-semibold">{selectedTemplate.emailTemplateName}</span>
+                        <span className="text-[11px] text-muted-foreground font-semibold">{selectedTemplate.emailTemplateName}</span>
                         <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-indigo-50 text-indigo-500 border border-indigo-100">Email template linked</span>
                       </div>
                       <a href="/email/templates" target="_blank"
@@ -895,7 +826,7 @@ export default function NewCampaignPage() {
 
                 <div className="flex gap-3">
                   <button onClick={() => setStep(1)}
-                    className="flex-1 h-11 bg-white border border-slate-200 hover:border-slate-300 text-slate-600 text-[13px] font-semibold rounded-xl transition-all flex items-center justify-center gap-2">
+                    className="flex-1 h-11 bg-card border border-border hover:border-border text-muted-foreground text-[13px] font-semibold rounded-xl transition-all flex items-center justify-center gap-2">
                     <ChevronLeft size={14} /> Back
                   </button>
                   <button onClick={handleLaunch} disabled={isSaving}

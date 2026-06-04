@@ -11,7 +11,7 @@ export default function AutomationEditPage({ params }: EditPageProps) {
   const router = useRouter();
 
   return (
-    <div className="flex flex-col h-full min-h-[calc(100vh-120px)] bg-slate-50 overflow-hidden">
+    <div className="flex flex-col h-full min-h-[calc(100vh-120px)] bg-muted/50 overflow-hidden">
       <CanvasBuilder
         campaignId={params.id}
         onBack={() => router.push("/email/automation")}

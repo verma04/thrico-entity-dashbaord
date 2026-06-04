@@ -109,13 +109,13 @@ function TemplateThumbnail({
       {/* Gradient top bar (simulating email header) */}
       <div className={cn("absolute inset-x-0 top-0 h-1/3 bg-linear-to-br", template.previewColor)} />
       {/* Body lines (simulating email content) */}
-      <div className="absolute inset-x-0 bottom-0 bg-white border border-slate-100 rounded-b-lg p-1.5 flex flex-col gap-1"
+      <div className="absolute inset-x-0 bottom-0 bg-card border border-border rounded-b-lg p-1.5 flex flex-col gap-1"
         style={{ height: "70%" }}>
-        <div className="h-1.5 bg-slate-200 rounded-full w-2/3" />
-        <div className="h-1 bg-slate-100 rounded-full w-full" />
-        <div className="h-1 bg-slate-100 rounded-full w-5/6" />
-        <div className="h-1 bg-slate-100 rounded-full w-3/4" />
-        <div className="mt-auto h-3 bg-slate-200 rounded w-1/2 self-center" />
+        <div className="h-1.5 bg-muted rounded-full w-2/3" />
+        <div className="h-1 bg-muted rounded-full w-full" />
+        <div className="h-1 bg-muted rounded-full w-5/6" />
+        <div className="h-1 bg-muted rounded-full w-3/4" />
+        <div className="mt-auto h-3 bg-muted rounded w-1/2 self-center" />
       </div>
     </div>
   );
@@ -157,11 +157,11 @@ export function TemplatePicker({ value, onChange, createHref = "/email/templates
             <div className="p-3">
               <div className="flex items-start gap-2">
                 <div className="flex-1 min-w-0">
-                  <p className="text-[12px] font-semibold text-slate-800 truncate">{selected.name}</p>
-                  <p className="text-[10px] text-slate-500 mt-0.5 leading-tight line-clamp-2">{selected.description}</p>
+                  <p className="text-[12px] font-semibold text-foreground truncate">{selected.name}</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5 leading-tight line-clamp-2">{selected.description}</p>
                   <div className="flex flex-wrap gap-1 mt-1.5">
                     {selected.tags.map((tag) => (
-                      <span key={tag} className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-white border border-slate-200 text-slate-500">
+                      <span key={tag} className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-card border border-border text-muted-foreground">
                         {tag}
                       </span>
                     ))}
@@ -183,13 +183,13 @@ export function TemplatePicker({ value, onChange, createHref = "/email/templates
         ) : (
           /* Empty state */
           <button onClick={() => setOpen(true)}
-            className="w-full flex flex-col items-center gap-2.5 p-4 rounded-xl border-2 border-dashed border-slate-200 hover:border-[#5B6CFF]/40 hover:bg-indigo-50/30 transition-all group">
-            <div className="h-10 w-10 rounded-xl bg-slate-100 group-hover:bg-[#5B6CFF]/10 flex items-center justify-center transition-all">
-              <LayoutTemplate size={18} className="text-slate-400 group-hover:text-[#5B6CFF] transition-colors" />
+            className="w-full flex flex-col items-center gap-2.5 p-4 rounded-xl border-2 border-dashed border-border hover:border-[#5B6CFF]/40 hover:bg-indigo-50/30 transition-all group">
+            <div className="h-10 w-10 rounded-xl bg-muted group-hover:bg-[#5B6CFF]/10 flex items-center justify-center transition-all">
+              <LayoutTemplate size={18} className="text-muted-foreground group-hover:text-[#5B6CFF] transition-colors" />
             </div>
             <div className="text-center">
-              <p className="text-[12px] font-semibold text-slate-700 group-hover:text-[#5B6CFF] transition-colors">Choose a template</p>
-              <p className="text-[10px] text-slate-400 mt-0.5">Pick from your library or create a new one</p>
+              <p className="text-[12px] font-semibold text-foreground group-hover:text-[#5B6CFF] transition-colors">Choose a template</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">Pick from your library or create a new one</p>
             </div>
           </button>
         )}
@@ -211,13 +211,13 @@ export function TemplatePicker({ value, onChange, createHref = "/email/templates
 
   // ── Open: template gallery picker ─────────────────────────────────────────
   return (
-    <div className="rounded-xl border border-slate-200 overflow-hidden bg-white shadow-sm">
+    <div className="rounded-xl border border-border overflow-hidden bg-card shadow-sm">
       {/* Picker header */}
-      <div className="flex items-center gap-2 px-3 py-3 border-b border-slate-100">
+      <div className="flex items-center gap-2 px-3 py-3 border-b border-border">
         <Mail size={13} className="text-[#5B6CFF] shrink-0" />
-        <span className="text-[12px] font-bold text-slate-700 flex-1">Choose Template</span>
+        <span className="text-[12px] font-bold text-foreground flex-1">Choose Template</span>
         <button onClick={() => setOpen(false)}
-          className="h-6 w-6 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all">
+          className="h-6 w-6 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-all">
           <X size={13} />
         </button>
       </div>
@@ -225,13 +225,13 @@ export function TemplatePicker({ value, onChange, createHref = "/email/templates
       {/* Search */}
       <div className="px-3 pt-2.5">
         <div className="relative">
-          <Search size={11} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search size={11} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search templates…"
             autoFocus
-            className="w-full bg-slate-50 border border-slate-200 rounded-lg text-[11px] text-slate-700 pl-7 pr-3 py-1.5 focus:outline-none focus:border-[#5B6CFF]/50"
+            className="w-full bg-muted/50 border border-border rounded-lg text-[11px] text-foreground pl-7 pr-3 py-1.5 focus:outline-none focus:border-[#5B6CFF]/50"
           />
         </div>
       </div>
@@ -244,7 +244,7 @@ export function TemplatePicker({ value, onChange, createHref = "/email/templates
               "shrink-0 text-[10px] font-semibold px-2.5 py-1 rounded-full border transition-all whitespace-nowrap",
               category === cat
                 ? "bg-[#5B6CFF] border-[#5B6CFF] text-white"
-                : "bg-white border-slate-200 text-slate-500 hover:border-slate-300",
+                : "bg-card border-border text-muted-foreground hover:border-border",
             )}>
             {cat}
           </button>
@@ -254,7 +254,7 @@ export function TemplatePicker({ value, onChange, createHref = "/email/templates
       {/* Template grid */}
       <div className="px-3 pb-3 max-h-[320px] overflow-y-auto space-y-2">
         {filtered.length === 0 ? (
-          <p className="text-[11px] text-slate-400 text-center py-6">No templates match your search.</p>
+          <p className="text-[11px] text-muted-foreground text-center py-6">No templates match your search.</p>
         ) : (
           filtered.map((t) => {
             const isSelected = t.id === value;
@@ -269,7 +269,7 @@ export function TemplatePicker({ value, onChange, createHref = "/email/templates
                   "w-full flex items-center gap-3 p-3 rounded-xl border text-left transition-all",
                   isSelected
                     ? "border-[#5B6CFF] bg-indigo-50 ring-1 ring-[#5B6CFF]/20"
-                    : "border-slate-200 hover:border-slate-300 hover:bg-slate-50",
+                    : "border-border hover:border-border hover:bg-muted/50",
                 )}
               >
                 {/* Mini thumbnail */}
@@ -280,15 +280,15 @@ export function TemplatePicker({ value, onChange, createHref = "/email/templates
                 {/* Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <p className="text-[11px] font-semibold text-slate-800 truncate">{t.name}</p>
+                    <p className="text-[11px] font-semibold text-foreground truncate">{t.name}</p>
                     {isSelected && <Check size={11} className="text-[#5B6CFF] shrink-0" />}
                   </div>
-                  <p className="text-[10px] text-slate-500 leading-tight mt-0.5 line-clamp-2">{t.description}</p>
+                  <p className="text-[10px] text-muted-foreground leading-tight mt-0.5 line-clamp-2">{t.description}</p>
                   <div className="flex items-center gap-1.5 mt-1.5">
-                    <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500">
+                    <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground">
                       {t.category}
                     </span>
-                    <span className="text-[9px] text-slate-400">{t.lastEdited}</span>
+                    <span className="text-[9px] text-muted-foreground">{t.lastEdited}</span>
                   </div>
                 </div>
 
@@ -300,7 +300,7 @@ export function TemplatePicker({ value, onChange, createHref = "/email/templates
                         <Check size={11} className="text-white" />
                       </div>
                     ) : (
-                      <ChevronRight size={13} className="text-slate-400" />
+                      <ChevronRight size={13} className="text-muted-foreground" />
                     )}
                   </div>
                 )}
@@ -311,7 +311,7 @@ export function TemplatePicker({ value, onChange, createHref = "/email/templates
       </div>
 
       {/* Footer: create new */}
-      <div className="border-t border-slate-100 px-3 py-2.5">
+      <div className="border-t border-border px-3 py-2.5">
         <a
           href={createHref}
           target="_blank"

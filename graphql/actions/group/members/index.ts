@@ -4,6 +4,8 @@ import {
   GET_COMMUNITY_MEMBER_REQUESTS,
   REMOVE_COMMUNITY_MEMBER,
   CHANGE_COMMUNITY_MEMBER_ROLE,
+  APPROVE_COMMUNITY_MEMBER_REQUEST,
+  REJECT_COMMUNITY_MEMBER_REQUEST,
 } from "../../../quries/group/members";
 
 export const getCommunityMembers = (options: any) =>
@@ -18,3 +20,8 @@ export const removeCommunityMember = (options?: any) =>
 export const changeCommunityMemberRole = (options?: any) =>
   useMutation(CHANGE_COMMUNITY_MEMBER_ROLE, options);
 
+export const approveCommunityMemberRequest = (options?: any) =>
+  useMutation(APPROVE_COMMUNITY_MEMBER_REQUEST, options);
+
+export const rejectCommunityMemberRequest = (options?: any) =>
+  useMutation(REJECT_COMMUNITY_MEMBER_REQUEST, options);

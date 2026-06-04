@@ -112,7 +112,7 @@ export function CanvasNode({
           height: 16,
           borderRadius: "50%",
           background: isConnectTarget ? "#5B6CFF" : "white",
-          border: `2px solid ${isConnectTarget ? "#5B6CFF" : "#cbd5e1"}`,
+          border: `2px solid ${isConnectTarget ? "#5B6CFF" : "var(--border)"}`,
           cursor: isConnecting ? "crosshair" : "default",
           zIndex: 20,
           transition: "all 0.15s",
@@ -152,14 +152,14 @@ export function CanvasNode({
               e.stopPropagation();
               onDelete(node.id);
             }}
-            className="h-5 w-5 rounded flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all"
+            className="h-5 w-5 rounded flex items-center justify-center text-muted-foreground hover:text-red-500 hover:bg-red-50 transition-all"
           >
             <X size={11} />
           </button>
         </div>
 
         {/* Body */}
-        <div className="px-3 py-3 flex items-center gap-3 bg-white">
+        <div className="px-3 py-3 flex items-center gap-3 bg-card">
           <div
             className={cn(
               "h-9 w-9 rounded-lg flex items-center justify-center shrink-0",
@@ -169,18 +169,18 @@ export function CanvasNode({
             <span className={s.iconColor}>{NODE_ICONS[node.type]}</span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[13px] font-semibold text-slate-800 leading-tight truncate">
+            <p className="text-[13px] font-semibold text-foreground leading-tight truncate">
               {node.label}
             </p>
-            <p className="text-[11px] text-slate-400 mt-0.5 truncate">
+            <p className="text-[11px] text-muted-foreground mt-0.5 truncate">
               {node.config?.description || "Click to configure"}
             </p>
           </div>
-          <GripVertical size={13} className="text-slate-300 shrink-0" />
+          <GripVertical size={13} className="text-muted-foreground shrink-0" />
         </div>
 
         {/* Bottom: output port */}
-        <div className="flex justify-center py-2 bg-white relative">
+        <div className="flex justify-center py-2 bg-card relative">
           <div
             data-port="output"
             onMouseDown={handleOutputPortMouseDown}

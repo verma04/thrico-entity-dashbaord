@@ -35,6 +35,8 @@ import {
   MoreVertical,
   UserX,
   ShieldCheck,
+  Check,
+  X,
 } from "lucide-react";
 import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
 import { useToast } from "@/components/ui/use-toast";
@@ -44,6 +46,8 @@ import {
   getCommunityMemberRequests,
   removeCommunityMember,
   changeCommunityMemberRole,
+  approveCommunityMemberRequest,
+  rejectCommunityMemberRequest,
 } from "@/graphql/actions/group/members";
 
 const ROLES = [
@@ -66,6 +70,7 @@ export default function MembersPage() {
   const [activeTab, setActiveTab] = useState("all-members");
   const [removingMember, setRemovingMember] = useState<{ userId: string; name: string } | null>(null);
   const [pendingRoleChange, setPendingRoleChange] = useState<{ userId: string; name: string; role: string; roleLabel: string } | null>(null);
+  const [processingRequestId, setProcessingRequestId] = useState<string | null>(null);
 
   // — Queries —
   const { data: membersData, loading: membersLoading, fetchMore: fetchMoreMembers, refetch: refetchMembers } =
@@ -75,7 +80,7 @@ export default function MembersPage() {
       skip: activeTab !== "all-members",
     });
 
-  const { data: requestsData, loading: requestsLoading, fetchMore: fetchMoreRequests } =
+  const { data: requestsData, loading: requestsLoading, fetchMore: fetchMoreRequests, refetch: refetchRequests } =
     getCommunityMemberRequests({
       variables: { communityId, limit: 10, offset: 0 },
       fetchPolicy: "cache-and-network",
@@ -101,6 +106,31 @@ export default function MembersPage() {
     },
     onError: (err: any) =>
       toast({ title: "Error updating role", description: err.message, variant: "destructive" }),
+  });
+
+  const [doApproveRequest] = approveCommunityMemberRequest({
+    onCompleted: () => {
+      toast({ title: "Request approved successfully" });
+      setProcessingRequestId(null);
+      refetchMembers();
+      refetchRequests();
+    },
+    onError: (err: any) => {
+      toast({ title: "Error approving request", description: err.message, variant: "destructive" });
+      setProcessingRequestId(null);
+    }
+  });
+
+  const [doRejectRequest] = rejectCommunityMemberRequest({
+    onCompleted: () => {
+      toast({ title: "Request rejected successfully" });
+      setProcessingRequestId(null);
+      refetchRequests();
+    },
+    onError: (err: any) => {
+      toast({ title: "Error rejecting request", description: err.message, variant: "destructive" });
+      setProcessingRequestId(null);
+    }
   });
 
   const membersList = membersData?.getCommunityMembers?.data ?? [];
@@ -349,9 +379,46 @@ export default function MembersPage() {
                         </p>
                       </div>
 
-                      <Badge variant="outline" className="text-orange-600 border-orange-200 bg-orange-50 shrink-0 px-2.5 py-0.5 rounded-md font-semibold text-[10px] uppercase tracking-wider">
-                        Pending
-                      </Badge>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <Button
+                          size="sm"
+                          variant="default"
+                          className="h-8 gap-1 rounded-lg bg-green-600 hover:bg-green-700 text-white"
+                          onClick={() => {
+                            setProcessingRequestId(request.userId);
+                            doApproveRequest({
+                              variables: { communityId, userId: request.userId },
+                            });
+                          }}
+                          disabled={processingRequestId === request.userId}
+                        >
+                          {processingRequestId === request.userId ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Check className="h-4 w-4" />
+                          )}
+                          Approve
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 gap-1 rounded-lg text-red-600 border-red-200 hover:border-red-300 hover:text-red-700 hover:bg-red-50"
+                          onClick={() => {
+                            setProcessingRequestId(request.userId);
+                            doRejectRequest({
+                              variables: { communityId, userId: request.userId },
+                            });
+                          }}
+                          disabled={processingRequestId === request.userId}
+                        >
+                          {processingRequestId === request.userId ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <X className="h-4 w-4" />
+                          )}
+                          Reject
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>

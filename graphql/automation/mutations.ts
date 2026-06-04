@@ -26,8 +26,26 @@ export const CREATE_AUTOMATION_CAMPAIGN = gql`
 `;
 
 export const UPDATE_AUTOMATION_CAMPAIGN = gql`
-  mutation UpdateAutomationCampaign($id: ID!, $status: AutomationCampaignStatus) {
-    updateAutomationCampaign(id: $id, status: $status) {
+  mutation UpdateAutomationCampaign(
+    $id: ID!, 
+    $status: AutomationCampaignStatus,
+    $name: String,
+    $triggerType: String,
+    $triggerConfig: JSON,
+    $actionConfig: JSON,
+    $segmentationConfig: JSON,
+    $description: String
+  ) {
+    updateAutomationCampaign(
+      id: $id, 
+      status: $status,
+      name: $name,
+      triggerType: $triggerType,
+      triggerConfig: $triggerConfig,
+      actionConfig: $actionConfig,
+      segmentationConfig: $segmentationConfig,
+      description: $description
+    ) {
       id
       status
     }

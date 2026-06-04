@@ -20,7 +20,7 @@ import {
   Repeat,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { MOCK_CAMPAIGNS, MODULE_COLORS } from "./types";
+import { MODULE_COLORS } from "./types";
 import { useQuery } from "@apollo/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { GET_AUTOMATION_CAMPAIGNS, GET_AUTOMATION_JOB_LOGS } from "@/graphql/automation/queries";
@@ -50,11 +50,11 @@ const STATUS_STYLE: Record<
     cardBorder: "border-emerald-200 hover:border-emerald-300",
   },
   draft: {
-    pill: "bg-slate-50 text-slate-500 border border-slate-200",
-    dot: "bg-slate-400",
+    pill: "bg-muted/50 text-muted-foreground border border-border",
+    dot: "bg-muted-foreground",
     label: "Draft",
     accent: "bg-slate-300",
-    cardBorder: "border-slate-200 hover:border-slate-300",
+    cardBorder: "border-border hover:border-border",
   },
   inactive: {
     pill: "bg-blue-50 text-blue-600 border border-blue-200",
@@ -126,9 +126,7 @@ export function CampaignsList({ onCreate }: CampaignsListProps) {
     skip: !logsOpenFor
   });
 
-  // Merge mock with real for demonstration if requested, but usually we just want real
-  // Let's use real ones if they exist, otherwise show mock to not look empty during dev
-  const displayCampaigns = campaigns.length > 0 ? campaigns : MOCK_CAMPAIGNS;
+  const displayCampaigns = campaigns;
 
   const handleNew = () => router.push("/email/automation/add");
   const handleEdit = (id: string) => router.push(`/email/automation/edit/${id}`);
@@ -142,7 +140,7 @@ export function CampaignsList({ onCreate }: CampaignsListProps) {
       trend: "+2 this month",
       trendColor: "text-emerald-600",
       color: "text-emerald-600",
-      bg: "bg-white border-emerald-100",
+      bg: "bg-card border-emerald-100",
       icon: <Circle size={10} className="fill-emerald-500 text-emerald-500" />,
       subMetric: "Across 4 modules",
     },
@@ -155,7 +153,7 @@ export function CampaignsList({ onCreate }: CampaignsListProps) {
       trend: "+12.4%",
       trendColor: "text-emerald-600",
       color: "text-[#5B6CFF]",
-      bg: "bg-white border-[#5B6CFF]/20",
+      bg: "bg-card border-[#5B6CFF]/20",
       icon: <Users size={12} className="text-[#5B6CFF]" />,
       subMetric: "Total people",
     },
@@ -164,9 +162,9 @@ export function CampaignsList({ onCreate }: CampaignsListProps) {
       value: "14,820",
       trend: "+8.2%",
       trendColor: "text-emerald-600",
-      color: "text-slate-800",
-      bg: "bg-white border-slate-200",
-      icon: <Mail size={12} className="text-slate-500" />,
+      color: "text-foreground",
+      bg: "bg-card border-border",
+      icon: <Mail size={12} className="text-muted-foreground" />,
       subMetric: "98.2% delivery rate",
     },
     {
@@ -175,22 +173,22 @@ export function CampaignsList({ onCreate }: CampaignsListProps) {
       trend: "-1.4%",
       trendColor: "text-rose-600",
       color: "text-amber-600",
-      bg: "bg-white border-amber-100",
+      bg: "bg-card border-amber-100",
       icon: <TrendingUp size={12} className="text-amber-500" />,
       subMetric: "Industry avg: 18.2%",
     },
   ];
 
   return (
-    <div className="flex-1 overflow-y-auto p-8 bg-slate-50">
+    <div className="flex-1 overflow-y-auto p-8 bg-muted/50">
       <div className="max-w-5xl mx-auto space-y-8">
         {/* ── Header ── */}
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">
               Automated Emails
             </h1>
-            <p className="text-sm text-slate-500 mt-1">
+            <p className="text-sm text-muted-foreground mt-1">
               Automatically send emails based on what happens in your community.
             </p>
           </div>
@@ -207,11 +205,11 @@ export function CampaignsList({ onCreate }: CampaignsListProps) {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
-          className="rounded-2xl border border-slate-200 bg-white px-6 py-5 shadow-sm"
+          className="rounded-2xl border border-border bg-card px-6 py-5 shadow-sm"
         >
           <div className="flex items-center gap-2 mb-4">
             <Layers size={13} className="text-[#5B6CFF]" />
-            <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+            <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
               How it works
             </p>
           </div>
@@ -231,28 +229,28 @@ export function CampaignsList({ onCreate }: CampaignsListProps) {
                     <p className={cn("text-[12px] font-bold", step.color)}>
                       {step.label}
                     </p>
-                    <p className="text-[11px] text-slate-500 mt-0.5">
+                    <p className="text-[11px] text-muted-foreground mt-0.5">
                       {step.desc}
                     </p>
                   </div>
                 </div>
                 {i < FLOW_STEPS.length - 1 && (
-                  <ArrowRight size={14} className="text-slate-300 shrink-0" />
+                  <ArrowRight size={14} className="text-muted-foreground shrink-0" />
                 )}
               </React.Fragment>
             ))}
           </div>
-          <p className="text-[11px] text-slate-400 mt-3 text-center">
+          <p className="text-[11px] text-muted-foreground mt-3 text-center">
             Example:{" "}
-            <span className="text-slate-600 font-medium">
+            <span className="text-muted-foreground font-medium">
               User joins community
             </span>{" "}
             →{" "}
-            <span className="text-slate-600 font-medium">
+            <span className="text-muted-foreground font-medium">
               User is from Pune
             </span>{" "}
             →{" "}
-            <span className="text-slate-600 font-medium">
+            <span className="text-muted-foreground font-medium">
               Send welcome email
             </span>
           </p>
@@ -266,19 +264,19 @@ export function CampaignsList({ onCreate }: CampaignsListProps) {
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.05 + i * 0.04 }}
-              className={cn("rounded-2xl border p-5 shadow-sm bg-white", s.bg)}
+              className={cn("rounded-2xl border p-5 shadow-sm bg-card", s.bg)}
             >
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center shrink-0 border border-slate-100", s.bg)}>
+                  <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center shrink-0 border border-border", s.bg)}>
                     {s.icon}
                   </div>
-                  <p className="text-[11px] text-slate-500 font-bold tracking-tight uppercase">
+                  <p className="text-[11px] text-muted-foreground font-bold tracking-tight uppercase">
                     {s.label}
                   </p>
                 </div>
                 {s.trend && (
-                  <span className={cn("text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-slate-50 border border-slate-100", s.trendColor)}>
+                  <span className={cn("text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-muted/50 border border-border", s.trendColor)}>
                     {s.trend}
                   </span>
                 )}
@@ -288,7 +286,7 @@ export function CampaignsList({ onCreate }: CampaignsListProps) {
                   {s.value}
                 </p>
                 {s.subMetric && (
-                  <p className="text-[10px] text-slate-400 font-medium leading-none">
+                  <p className="text-[10px] text-muted-foreground font-medium leading-none">
                     {s.subMetric}
                   </p>
                 )}
@@ -299,14 +297,14 @@ export function CampaignsList({ onCreate }: CampaignsListProps) {
 
         {/* ── Campaigns ── */}
         <div className="space-y-3">
-          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-1">
+          <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider px-1">
             Your Campaigns ({loading ? "..." : displayCampaigns.length})
           </p>
           
           {loading ? (
             <div className="space-y-3">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-24 w-full bg-white rounded-2xl border border-slate-200 animate-pulse" />
+                <div key={i} className="h-24 w-full bg-card rounded-2xl border border-border animate-pulse" />
               ))}
             </div>
           ) : displayCampaigns.map((c, i) => {
@@ -340,7 +338,7 @@ export function CampaignsList({ onCreate }: CampaignsListProps) {
                 onMouseEnter={() => setHoveredId(c.id)}
                 onMouseLeave={() => setHoveredId(null)}
                 className={cn(
-                  "group flex items-center gap-4 pl-0 pr-5 py-5 rounded-2xl border bg-white hover:shadow-md transition-all cursor-pointer overflow-hidden",
+                  "group flex items-center gap-4 pl-0 pr-5 py-5 rounded-2xl border bg-card hover:shadow-md transition-all cursor-pointer overflow-hidden",
                   st.cardBorder,
                 )}
               >
@@ -366,7 +364,7 @@ export function CampaignsList({ onCreate }: CampaignsListProps) {
                 {/* Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 flex-wrap">
-                    <p className="text-[14px] font-semibold text-slate-800">
+                    <p className="text-[14px] font-semibold text-foreground">
                       {c.name}
                     </p>
                     <span
@@ -394,8 +392,8 @@ export function CampaignsList({ onCreate }: CampaignsListProps) {
                     </span>
                   </div>
                   <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                    <p className="text-[11px] text-slate-400">
-                      <span className="font-medium text-slate-600">Trigger:</span>{" "}
+                    <p className="text-[11px] text-muted-foreground">
+                      <span className="font-medium text-muted-foreground">Trigger:</span>{" "}
                       {triggerLabel}
                     </p>
                     <span className="text-slate-200">·</span>
@@ -404,7 +402,7 @@ export function CampaignsList({ onCreate }: CampaignsListProps) {
                       "text-[10px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1",
                       c.frequency === "recurring"
                         ? "bg-purple-50 text-purple-600 border border-purple-200"
-                        : "bg-slate-50 text-slate-500 border border-slate-200"
+                        : "bg-muted/50 text-muted-foreground border border-border"
                     )}>
                       {c.frequency === "recurring" ? <Repeat size={9} /> : <Play size={9} />}
                       {c.frequency === "recurring"
@@ -416,11 +414,11 @@ export function CampaignsList({ onCreate }: CampaignsListProps) {
                       <Mail size={9} /> Email
                     </span>
                     <span className="text-slate-200">·</span>
-                    <p className="text-[11px] text-slate-400">
+                    <p className="text-[11px] text-muted-foreground">
                       {nodeCount} nodes · {audienceCount.toLocaleString()} users
                     </p>
                     <span className="text-slate-200">·</span>
-                    <p className="text-[11px] text-slate-400">Edited {lastEditedLabel}</p>
+                    <p className="text-[11px] text-muted-foreground">Edited {lastEditedLabel}</p>
                   </div>
                 </div>
 
@@ -428,24 +426,24 @@ export function CampaignsList({ onCreate }: CampaignsListProps) {
                 <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
                     onClick={(e) => { e.stopPropagation(); setLogsOpenFor(c.id); }}
-                    className="h-8 px-3 text-[11px] font-semibold text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg transition-all flex items-center gap-1.5"
+                    className="h-8 px-3 text-[11px] font-semibold text-muted-foreground hover:text-foreground bg-muted/50 hover:bg-muted border border-border rounded-lg transition-all flex items-center gap-1.5"
                   >
                     <Zap size={12} /> Logs
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); handleEdit(c.id); }}
-                    className="h-8 px-3 text-[11px] font-semibold text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg transition-all flex items-center gap-1.5"
+                    className="h-8 px-3 text-[11px] font-semibold text-muted-foreground hover:text-foreground bg-muted/50 hover:bg-muted border border-border rounded-lg transition-all flex items-center gap-1.5"
                   >
                     <Settings2 size={12} /> Edit
                   </button>
-                  <button className="h-8 w-8 flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all">
+                  <button className="h-8 w-8 flex items-center justify-center text-muted-foreground hover:text-red-500 hover:bg-red-50 rounded-lg transition-all">
                     <Trash2 size={13} />
                   </button>
                 </div>
 
                 <ChevronRight
                   size={15}
-                  className="text-slate-300 group-hover:text-[#5B6CFF] transition-colors shrink-0"
+                  className="text-muted-foreground group-hover:text-[#5B6CFF] transition-colors shrink-0"
                 />
               </motion.div>
             );
@@ -457,15 +455,15 @@ export function CampaignsList({ onCreate }: CampaignsListProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
-          className="rounded-2xl border border-dashed border-slate-200 p-8 text-center"
+          className="rounded-2xl border border-dashed border-border p-8 text-center"
         >
           <div className="h-12 w-12 rounded-2xl bg-[#5B6CFF]/8 border border-[#5B6CFF]/15 flex items-center justify-center mx-auto mb-3">
             <Plus size={20} className="text-[#5B6CFF]" />
           </div>
-          <p className="text-[13px] font-semibold text-slate-700">
+          <p className="text-[13px] font-semibold text-foreground">
             Create a new campaign
           </p>
-          <p className="text-[12px] text-slate-400 mt-1">
+          <p className="text-[12px] text-muted-foreground mt-1">
             Drag triggers, conditions and actions onto the canvas to design your
             workflow.
           </p>
@@ -479,45 +477,45 @@ export function CampaignsList({ onCreate }: CampaignsListProps) {
       </div>
 
       <Dialog open={!!logsOpenFor} onOpenChange={(open) => !open && setLogsOpenFor(null)}>
-        <DialogContent className="max-w-2xl bg-white border-none shadow-xl">
+        <DialogContent className="max-w-2xl bg-card border-none shadow-xl">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-slate-900 flex items-center gap-2">
+            <DialogTitle className="text-xl font-bold text-foreground flex items-center gap-2">
               <Zap size={20} className="text-[#5B6CFF]" /> Execution Logs
             </DialogTitle>
           </DialogHeader>
           <ScrollArea className="h-[400px] mt-4 pr-4">
             {logsLoading ? (
               <div className="space-y-3">
-                 <div className="h-16 bg-slate-50 animate-pulse rounded-xl border border-slate-100"/>
-                 <div className="h-16 bg-slate-50 animate-pulse rounded-xl border border-slate-100"/>
+                 <div className="h-16 bg-muted/50 animate-pulse rounded-xl border border-border"/>
+                 <div className="h-16 bg-muted/50 animate-pulse rounded-xl border border-border"/>
               </div>
             ) : logsData?.getAutomationExecutionLogs?.length ? (
               <div className="space-y-3">
                 {logsData.getAutomationExecutionLogs.map((log: any) => (
-                  <div key={log.id} className="p-4 rounded-xl border border-slate-200 bg-slate-50/50">
+                  <div key={log.id} className="p-4 rounded-xl border border-border bg-muted/30">
                     <div className="flex justify-between items-start mb-2">
                       <span className={cn("text-[10px] font-bold px-2 py-0.5 rounded-full",
                          log.status === "SUCCESS" ? "bg-emerald-100 text-emerald-700" :
-                         log.status === "FAILED" ? "bg-red-100 text-red-700" : "bg-slate-200 text-slate-700"
+                         log.status === "FAILED" ? "bg-red-100 text-red-700" : "bg-muted text-foreground"
                       )}>
                         {log.status || "UNKNOWN"}
                       </span>
-                      <span className="text-[11px] text-slate-400">
+                      <span className="text-[11px] text-muted-foreground">
                         {new Date(parseInt(log.executedAt) || log.executedAt).toLocaleString()}
                       </span>
                     </div>
-                    <p className="text-[13px] font-semibold text-slate-800">{log.actionType}</p>
+                    <p className="text-[13px] font-semibold text-foreground">{log.actionType}</p>
                     {log.errorMessage ? (
                       <p className="text-[12px] text-red-500 mt-1">{log.errorMessage}</p>
                     ) : (
-                      <p className="text-[12px] text-slate-500 mt-1">{log.result || "Executed successfully"}</p>
+                      <p className="text-[12px] text-muted-foreground mt-1">{log.result || "Executed successfully"}</p>
                     )}
                   </div>
                 ))}
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-10 text-center">
-                <p className="text-slate-500 text-sm">No execution logs found for this campaign.</p>
+                <p className="text-muted-foreground text-sm">No execution logs found for this campaign.</p>
               </div>
             )}
           </ScrollArea>

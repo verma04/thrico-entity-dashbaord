@@ -66,7 +66,7 @@ export function ConditionBuilder({ groups, onChange, module }: ConditionBuilderP
   const toggleLogic = (gid: string) =>
     onChange(groups.map((g) => g.id === gid ? { ...g, logic: g.logic === "AND" ? "OR" : "AND" } : g));
 
-  const selBase = "bg-white border border-slate-200 rounded-lg text-[11px] text-slate-700 px-2 py-1.5 focus:outline-none focus:border-[#5B6CFF]/60 transition-colors";
+  const selBase = "bg-card border border-border rounded-lg text-[11px] text-foreground px-2 py-1.5 focus:outline-none focus:border-[#5B6CFF]/60 transition-colors";
 
   return (
     <div className="space-y-3">
@@ -96,7 +96,7 @@ export function ConditionBuilder({ groups, onChange, module }: ConditionBuilderP
               <div key={rule.id} className="flex items-center gap-2">
                 {/* AND/OR connector label */}
                 {ri > 0 ? (
-                  <span className="text-[10px] text-slate-500 font-bold w-6 text-center shrink-0">
+                  <span className="text-[10px] text-muted-foreground font-bold w-6 text-center shrink-0">
                     {group.logic}
                   </span>
                 ) : (
@@ -132,12 +132,12 @@ export function ConditionBuilder({ groups, onChange, module }: ConditionBuilderP
                   value={rule.value}
                   onChange={(e) => updateRule(group.id, rule.id, { value: e.target.value })}
                   placeholder="value"
-                  className="w-20 bg-white border border-slate-200 rounded-lg text-[11px] text-slate-700 px-2 py-1.5 focus:outline-none focus:border-[#5B6CFF]/60"
+                  className="w-20 bg-card border border-border rounded-lg text-[11px] text-foreground px-2 py-1.5 focus:outline-none focus:border-[#5B6CFF]/60"
                 />
 
                 <button
                   onClick={() => removeRule(group.id, rule.id)}
-                  className="text-slate-400 hover:text-red-500 transition-colors shrink-0"
+                  className="text-muted-foreground hover:text-red-500 transition-colors shrink-0"
                 >
                   <Minus size={12} />
                 </button>
@@ -156,7 +156,7 @@ export function ConditionBuilder({ groups, onChange, module }: ConditionBuilderP
 
       <button
         onClick={addGroup}
-        className="w-full border border-dashed border-slate-300 rounded-xl py-2.5 text-[12px] text-slate-500 hover:text-slate-700 hover:border-slate-400 transition-all flex items-center justify-center gap-2"
+        className="w-full border border-dashed border-border rounded-xl py-2.5 text-[12px] text-muted-foreground hover:text-foreground hover:border-slate-400 transition-all flex items-center justify-center gap-2"
       >
         <Plus size={13} /> Add condition group
       </button>

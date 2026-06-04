@@ -75,10 +75,10 @@ export function EdgeLine({ edgeId, from, to, nodes, onDelete }: EdgeLineProps) {
         className="opacity-0 group-hover/edge:opacity-100 transition-opacity"
         onClick={() => onDelete(edgeId)}
       >
-        <circle r="9" fill="white" stroke="#e2e8f0" strokeWidth="1" />
+        <circle r="9" fill="hsl(var(--card))" stroke="var(--border)" strokeWidth="1" />
         {/* × icon */}
-        <line x1="-4" y1="-4" x2="4" y2="4" stroke="#94a3b8" strokeWidth="1.5" strokeLinecap="round" />
-        <line x1="4" y1="-4" x2="-4" y2="4" stroke="#94a3b8" strokeWidth="1.5" strokeLinecap="round" />
+        <line x1="-4" y1="-4" x2="4" y2="4" stroke="var(--muted-foreground)" strokeWidth="1.5" strokeLinecap="round" />
+        <line x1="4" y1="-4" x2="-4" y2="4" stroke="var(--muted-foreground)" strokeWidth="1.5" strokeLinecap="round" />
       </g>
     </g>
   );
