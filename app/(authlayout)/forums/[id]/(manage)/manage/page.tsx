@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
-import { ForumEditForm } from "@/components/discussion-forum/post/forum-edit-form";
+import { ForumEditForm } from "@/components/forums/post/forum-edit-form";
 import {
   editDiscussionForum,
   getDiscussionForumCategory,
@@ -15,22 +15,24 @@ export default function EditForumPage() {
   const router = useRouter();
   const id = params?.id as string;
 
-  const { data: categoryData, loading: categoriesLoading } = getDiscussionForumCategory({
-    variables: {
-      input: {
-        status: "ALL",
+  const { data: categoryData, loading: categoriesLoading } =
+    getDiscussionForumCategory({
+      variables: {
+        input: {
+          status: "ALL",
+        },
       },
-    },
-  });
+    });
 
-  const { data: forumData, loading: fetchingForum } = getDiscussionForumDetailsByID({
-    variables: {
-      input: {
-        discussionForumId: id,
+  const { data: forumData, loading: fetchingForum } =
+    getDiscussionForumDetailsByID({
+      variables: {
+        input: {
+          discussionForumId: id,
+        },
       },
-    },
-    skip: !id,
-  });
+      skip: !id,
+    });
 
   const forum = forumData?.getDiscussionForumDetailsByID;
 
@@ -74,7 +76,9 @@ export default function EditForumPage() {
     <div className="bg-background rounded-xl border border-border shadow-sm p-6 max-w-3xl mx-auto">
       <div className="mb-6">
         <h2 className="text-xl font-semibold tracking-tight">Edit Forum</h2>
-        <p className="text-sm text-muted-foreground">Modify this community discussion forum</p>
+        <p className="text-sm text-muted-foreground">
+          Modify this community discussion forum
+        </p>
       </div>
 
       <ForumEditForm

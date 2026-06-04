@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import ForumList from "@/components/discussion-forum/forum/forum-list";
+import ForumList from "@/components/forums/forum/forum-list";
 import { getDiscussionForum } from "@/graphql/actions/discussion-form";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -53,7 +53,10 @@ export function ForumsTab({ userId }: { userId: string }) {
           },
         },
         updateQuery(prev: any, { fetchMoreResult }: any) {
-          if (!fetchMoreResult || fetchMoreResult?.getDiscussionForum?.length === 0) {
+          if (
+            !fetchMoreResult ||
+            fetchMoreResult?.getDiscussionForum?.length === 0
+          ) {
             setHasMore(false);
             return prev;
           }
@@ -61,7 +64,10 @@ export function ForumsTab({ userId }: { userId: string }) {
             setHasMore(false);
           }
           return {
-            getDiscussionForum: [...prev.getDiscussionForum, ...fetchMoreResult.getDiscussionForum],
+            getDiscussionForum: [
+              ...prev.getDiscussionForum,
+              ...fetchMoreResult.getDiscussionForum,
+            ],
           };
         },
       });
@@ -83,7 +89,9 @@ export function ForumsTab({ userId }: { userId: string }) {
             disabled={isFetchingMore}
             className="w-full sm:w-auto"
           >
-            {isFetchingMore && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {isFetchingMore && (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            )}
             Load More
           </Button>
         </div>

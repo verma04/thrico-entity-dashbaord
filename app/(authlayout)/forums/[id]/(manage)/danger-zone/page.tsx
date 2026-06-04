@@ -35,10 +35,10 @@ import {
   changeDiscussionForumVerification,
   getDiscussionForumDetailsByID,
 } from "@/graphql/actions/discussion-form";
-import { getModalTitle, getModalDescription } from "@/components/discussion-forum/utils";
+import { getModalTitle, getModalDescription } from "@/components/forums/utils";
 import { withModulePermission } from "@/components/hoc/with-module-permission";
 
-type ActionType = 
+type ActionType =
   | "APPROVE"
   | "DISABLE"
   | "ENABLE"
@@ -77,13 +77,15 @@ function ForumDangerZonePage() {
     setActionReason("");
   };
 
-  const [changeStatus, { loading: statusLoading }] = changeDiscussionForumStatus({
-    onCompleted,
-  });
+  const [changeStatus, { loading: statusLoading }] =
+    changeDiscussionForumStatus({
+      onCompleted,
+    });
 
-  const [changeVerification, { loading: verifyLoading }] = changeDiscussionForumVerification({
-    onCompleted,
-  });
+  const [changeVerification, { loading: verifyLoading }] =
+    changeDiscussionForumVerification({
+      onCompleted,
+    });
 
   const confirmAction = () => {
     if (dialogAction === "VERIFY" || dialogAction === "UNVERIFY") {
@@ -119,19 +121,31 @@ function ForumDangerZonePage() {
 
   const getActionButtonText = () => {
     switch (dialogAction) {
-      case "APPROVE": return "Approve Forum";
-      case "DISABLE": return "Disable Forum";
-      case "ENABLE": return "Enable Forum";
-      case "REJECT": return "Reject Forum";
-      case "VERIFY": return "Verify Forum";
-      case "UNVERIFY": return "Remove Verification";
-      case "REAPPROVE": return "Re-approve Forum";
-      default: return "Confirm";
+      case "APPROVE":
+        return "Approve Forum";
+      case "DISABLE":
+        return "Disable Forum";
+      case "ENABLE":
+        return "Enable Forum";
+      case "REJECT":
+        return "Reject Forum";
+      case "VERIFY":
+        return "Verify Forum";
+      case "UNVERIFY":
+        return "Remove Verification";
+      case "REAPPROVE":
+        return "Re-approve Forum";
+      default:
+        return "Confirm";
     }
   };
 
   const getActionVariant = () => {
-    if (dialogAction === "DISABLE" || dialogAction === "REJECT" || dialogAction === "UNVERIFY") {
+    if (
+      dialogAction === "DISABLE" ||
+      dialogAction === "REJECT" ||
+      dialogAction === "UNVERIFY"
+    ) {
       return "destructive";
     }
     return "default";
@@ -157,15 +171,15 @@ function ForumDangerZonePage() {
           Moderation & Danger Zone
         </h2>
         <p className="text-muted-foreground mt-1 text-sm">
-          Administrative actions to manage the visibility and status of this forum.
+          Administrative actions to manage the visibility and status of this
+          forum.
         </p>
       </div>
 
       <div className="grid gap-6">
-        
         {/* Verification Options */}
-        {forum.status === "APPROVED" && (
-          forum?.verification?.isVerified ? (
+        {forum.status === "APPROVED" &&
+          (forum?.verification?.isVerified ? (
             <Card className="border-amber-200 bg-amber-50/30">
               <CardHeader>
                 <CardTitle className="text-amber-900 flex items-center gap-2">
@@ -207,8 +221,7 @@ function ForumDangerZonePage() {
                 </Button>
               </CardContent>
             </Card>
-          )
-        )}
+          ))}
 
         {/* Status Changes */}
         {forum.status === "PENDING" && (
@@ -241,7 +254,8 @@ function ForumDangerZonePage() {
                   Reject Forum
                 </CardTitle>
                 <CardDescription>
-                  Reject this forum submission. It will not be visible to the community.
+                  Reject this forum submission. It will not be visible to the
+                  community.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -287,7 +301,8 @@ function ForumDangerZonePage() {
                 Disable Forum
               </CardTitle>
               <CardDescription>
-                Disable this active forum. Users will no longer be able to interact with it.
+                Disable this active forum. Users will no longer be able to
+                interact with it.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -309,7 +324,8 @@ function ForumDangerZonePage() {
                 Enable Forum
               </CardTitle>
               <CardDescription className="text-emerald-700/80">
-                Re-enable this disabled forum, allowing users to interact with it again.
+                Re-enable this disabled forum, allowing users to interact with
+                it again.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -323,13 +339,14 @@ function ForumDangerZonePage() {
             </CardContent>
           </Card>
         )}
-
       </div>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{dialogAction && getModalTitle(dialogAction)}</DialogTitle>
+            <DialogTitle>
+              {dialogAction && getModalTitle(dialogAction)}
+            </DialogTitle>
             <DialogDescription>
               {dialogAction && getModalDescription(dialogAction)}
             </DialogDescription>
@@ -368,9 +385,7 @@ function ForumDangerZonePage() {
             <Button
               variant={getActionVariant()}
               onClick={confirmAction}
-              disabled={
-                (isReasonRequired && !actionReason.trim()) || loading
-              }
+              disabled={(isReasonRequired && !actionReason.trim()) || loading}
             >
               {loading ? (
                 <>
