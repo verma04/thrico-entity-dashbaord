@@ -93,12 +93,17 @@ export default function UsersTab() {
               <span className="text-sm font-medium text-foreground">
                 {user.firstName} {user.lastName}
               </span>
-              {user.isSuperAdmin && (
+              {user.isSuperAdmin ? (
                 <span className="inline-flex items-center gap-1 text-[9px] font-medium text-indigo-600 bg-indigo-50 border border-indigo-100 px-1.5 py-0.5 rounded-md">
                   <ShieldCheck className="w-2.5 h-2.5" />
                   Owner
                 </span>
-              )}
+              ) : user.role?.isSystem ? (
+                <span className="inline-flex items-center gap-1 text-[9px] font-medium text-emerald-600 bg-emerald-50 border border-emerald-100 px-1.5 py-0.5 rounded-md">
+                  <ShieldCheck className="w-2.5 h-2.5" />
+                  System
+                </span>
+              ) : null}
             </div>
             <span className="text-[11px] text-muted-foreground">
               {user.email}
@@ -123,7 +128,7 @@ export default function UsersTab() {
       key: "access",
       header: "Access",
       cell: (user: AdminUser) => {
-        if (user.isSuperAdmin) {
+        if (user.isSuperAdmin || user.role?.isSystem) {
           return (
             <div className="flex items-center gap-1.5 text-muted-foreground">
                <Globe className="h-3 w-3" />
@@ -154,7 +159,7 @@ export default function UsersTab() {
       header: "",
       headerClassName: "w-[50px]",
       cell: (user: AdminUser) => {
-        if (user.isSuperAdmin) return (
+        if (user.isSuperAdmin || user.role?.isSystem) return (
            <div className="flex justify-end pr-2 opacity-20">
               <Lock className="h-3.5 w-3.5" />
            </div>

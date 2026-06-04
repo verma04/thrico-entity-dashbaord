@@ -3,7 +3,7 @@
 import React from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, Trash2, Image as ImageIcon } from "lucide-react";
+import { GripVertical, Trash2, Pencil, Image as ImageIcon } from "lucide-react";
 import { TableRow, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 
@@ -21,9 +21,10 @@ interface ShopBanner {
 interface BannerRowProps {
   banner: ShopBanner;
   onRemove: (id: string) => void;
+  onEdit: (id: string) => void;
 }
 
-export function SortableBannerRow({ banner, onRemove }: BannerRowProps) {
+export function SortableBannerRow({ banner, onRemove, onEdit }: BannerRowProps) {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: banner.id });
 
@@ -69,14 +70,24 @@ export function SortableBannerRow({ banner, onRemove }: BannerRowProps) {
         )}
       </TableCell>
       <TableCell className="text-right">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => onRemove(banner.id)}
-          className="hover:text-destructive hover:bg-destructive/10 transition-colors"
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
+        <div className="flex items-center justify-end gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onEdit(banner.id)}
+            className="hover:text-primary hover:bg-primary/10 transition-colors"
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onRemove(banner.id)}
+            className="hover:text-destructive hover:bg-destructive/10 transition-colors"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
       </TableCell>
     </TableRow>
   );

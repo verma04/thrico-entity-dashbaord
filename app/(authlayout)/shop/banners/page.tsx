@@ -21,39 +21,15 @@ import {
   useReorderShopBanners,
 } from "@/graphql/actions/shop";
 import { BannerList } from "@/components/shop/banners/banner-list";
-import { BannerDialog } from "@/components/shop/banners/banner-dialog";
+import { useRouter } from "next/navigation";
 
 function BannerManagerPage() {
+  const router = useRouter();
   const { data, loading } = useShopBanners();
-  const [createBanner, { loading: creating }] = useCreateShopBanner();
   const [deleteBanner] = useDeleteShopBanner();
   const [reorderBanners] = useReorderShopBanners();
 
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-
   const banners = data?.getShopBanners || [];
-
-  const handleCreateBanner = async (input: {
-    title: string;
-    image: string;
-    linkedProductId?: string | null;
-  }) => {
-    try {
-      await createBanner({
-        variables: {
-          input: {
-            ...input,
-            sortOrder: banners.length,
-            isActive: true,
-          },
-        },
-      });
-      toast.success("Banner added successfully!");
-    } catch (error: any) {
-      toast.error("Failed to add banner: " + error.message);
-      throw error;
-    }
-  };
 
   const handleRemoveBanner = async (id: string) => {
     try {
@@ -95,7 +71,7 @@ function BannerManagerPage() {
         icon={ImageIcon}
         actions={
           <Button
-            onClick={() => setIsDialogOpen(true)}
+            onClick={() => router.push("/shop/banners/create")}
             className="font-semibold text-xs px-6 h-10 rounded-lg shadow-sm gap-2"
           >
             <Plus className="h-4 w-4" /> Add New Banner
@@ -118,15 +94,9 @@ function BannerManagerPage() {
           loading={loading}
           onRemove={handleRemoveBanner}
           onReorder={handleReorder}
+          onEdit={(id) => router.push(`/shop/banners/${id}/edit`)}
         />
       </EcosystemContainer>
-
-      <BannerDialog
-        isOpen={isDialogOpen}
-        onOpenChange={setIsDialogOpen}
-        onSubmit={handleCreateBanner}
-        isLoading={creating}
-      />
     </EcosystemWrapper>
   );
 }

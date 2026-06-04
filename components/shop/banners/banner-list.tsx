@@ -58,6 +58,7 @@ interface BannerListProps {
   loading: boolean;
   onRemove: (id: string) => void;
   onReorder: (activeId: string, overId: string) => void;
+  onEdit: (id: string) => void;
 }
 
 export function BannerList({
@@ -65,6 +66,7 @@ export function BannerList({
   loading,
   onRemove,
   onReorder,
+  onEdit,
 }: BannerListProps) {
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -149,6 +151,7 @@ export function BannerList({
                         key={banner.id}
                         banner={banner}
                         onRemove={handleRemoveClick}
+                        onEdit={onEdit}
                       />
                     ))}
                   </SortableContext>

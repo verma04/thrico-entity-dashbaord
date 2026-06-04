@@ -23,6 +23,8 @@ import {
   RotateCcw,
   Sun,
   Contrast,
+  Sparkles,
+  ArrowUpRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -99,6 +101,8 @@ interface ImageUploadWithCropProps {
   disablePreview?: boolean;
   customUploadHandler?: (file: File) => Promise<string>;
   returnKeyOnly?: boolean;
+  returnFileOnly?: boolean;
+  onFileChange?: (file: File) => void;
   children?: React.ReactNode;
 }
 
@@ -173,6 +177,8 @@ export const ImageUploadWithCrop = ({
   disablePreview = false,
   customUploadHandler,
   returnKeyOnly = false,
+  returnFileOnly = false,
+  onFileChange,
   children,
 }: ImageUploadWithCropProps) => {
   const [isEditorOpen, setIsEditorOpen] = useState(false);
@@ -440,6 +446,16 @@ export const ImageUploadWithCrop = ({
           `Dimensions: ${customWidth}x${customHeight}`,
         );
 
+        if (returnFileOnly) {
+          onFileChange?.(file);
+          const localUrl = URL.createObjectURL(file);
+          onImageUpdate(localUrl, localUrl);
+          setIsEditorOpen(false);
+          setImgSrc("");
+          if (fileInputRef.current) fileInputRef.current.value = "";
+          return;
+        }
+
         if (customUploadHandler) {
           setIsCustomUploading(true);
           try {
@@ -467,14 +483,14 @@ export const ImageUploadWithCrop = ({
 
   return (
     <>
-      <div className={cn("group space-y-3", className)}>
+      <div className={cn("group space-y-2.5", className)}>
         {label && (
-          <div className="flex items-center justify-between px-0.5">
-            <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest leading-none">
+          <div className="flex items-center justify-between">
+            <Label className="text-sm font-medium text-foreground">
               {label}
             </Label>
             {!hideRecommendedSize && !currentImage && (
-              <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">
+              <span className="text-[10px] font-medium text-muted-foreground bg-muted/60 px-2 py-0.5 rounded-md border border-border/50">
                 {recommendedWidth} × {recommendedHeight}px
               </span>
             )}
@@ -484,41 +500,43 @@ export const ImageUploadWithCrop = ({
         {children ? (
           <div
             onClick={() => !uploading && fileInputRef.current?.click()}
-            className="cursor-pointer transition-transform hover:scale-[1.01] active:scale-100"
+            className="cursor-pointer transition-all duration-200 hover:opacity-90 active:scale-[0.99]"
           >
             {children}
           </div>
         ) : currentImage && !disablePreview ? (
-          <div className="relative group/preview overflow-hidden rounded-2xl border border-border shadow-sm bg-zinc-50/50">
+          <div className="relative group/preview overflow-hidden rounded-xl border border-border bg-background shadow-sm">
             <div
               className={cn(
-                "relative aspect-video flex items-center justify-center p-6 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]",
+                "relative aspect-video flex items-center justify-center p-4 bg-muted/30",
                 previewClassName,
               )}
             >
               <img
                 src={
-                  currentImage?.startsWith("https://cdn.thrico.network/")
+                  currentImage?.startsWith("http") || currentImage?.startsWith("blob:") || currentImage?.startsWith("data:")
                     ? currentImage
                     : `https://cdn.thrico.network/${currentImage}`
                 }
                 alt={label}
                 className={cn(
-                  "relative z-10 max-h-full max-w-full object-contain shadow-2xl transition-transform duration-500 group-hover/preview:scale-[1.02]",
+                  "relative z-10 max-h-full max-w-full object-contain transition-transform duration-300 group-hover/preview:scale-[1.02]",
                   circularCrop && "rounded-full",
                 )}
               />
-              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/preview:opacity-100 transition-all duration-300 z-20 backdrop-blur-[2px] flex items-center justify-center p-4">
-                <div className="flex gap-2 w-full max-w-[240px] translate-y-2 group-hover/preview:translate-y-0 transition-transform duration-300">
+
+              {/* Hover overlay */}
+              <div className="absolute inset-0 bg-foreground/50 opacity-0 group-hover/preview:opacity-100 transition-all duration-200 z-20 backdrop-blur-sm flex items-center justify-center">
+                <div className="flex gap-2 translate-y-1 group-hover/preview:translate-y-0 transition-transform duration-200">
                   <Button
                     type="button"
                     variant="secondary"
                     size="sm"
                     onClick={() => fileInputRef.current?.click()}
-                    className="flex-1 h-10 bg-white hover:bg-zinc-50 text-foreground border-none shadow-xl font-bold text-xs rounded-xl"
+                    className="h-9 bg-background hover:bg-background/90 text-foreground border-none shadow-lg font-medium text-xs rounded-lg gap-1.5"
                     disabled={uploading}
                   >
-                    <Upload className="h-3.5 w-3.5 mr-2" />
+                    <Upload className="h-3.5 w-3.5" />
                     {changeButtonText}
                   </Button>
                   <Button
@@ -526,7 +544,7 @@ export const ImageUploadWithCrop = ({
                     variant="destructive"
                     size="sm"
                     onClick={handleRemove}
-                    className="h-10 w-10 p-0 bg-white/10 hover:bg-rose-500 hover:text-white backdrop-blur-md border-none shadow-xl shrink-0 rounded-xl text-white transition-colors"
+                    className="h-9 w-9 p-0 bg-background/20 hover:bg-destructive hover:text-destructive-foreground backdrop-blur-sm border-none shadow-lg shrink-0 rounded-lg text-background transition-colors"
                     disabled={uploading}
                     aria-label={removeButtonText || "Remove image"}
                   >
@@ -538,29 +556,30 @@ export const ImageUploadWithCrop = ({
 
             {/* Loading Overlay */}
             {uploading && (
-              <div className="absolute inset-0 z-30 bg-white/80 backdrop-blur-md flex flex-col items-center justify-center gap-3 animate-in fade-in duration-300">
+              <div className="absolute inset-0 z-30 bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center gap-3 animate-in fade-in duration-200">
                 <div className="relative">
-                  <div className="h-12 w-12 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center">
-                    <Loader2 className="h-5 w-5 text-indigo-600 animate-spin" />
+                  <div className="h-10 w-10 rounded-xl bg-muted border border-border flex items-center justify-center">
+                    <Loader2 className="h-4 w-4 text-foreground animate-spin" />
                   </div>
                 </div>
-                <span className="text-[11px] font-bold text-indigo-600 tracking-widest uppercase">
-                  Uploading Asset...
+                <span className="text-xs font-medium text-muted-foreground">
+                  Uploading...
                 </span>
               </div>
             )}
           </div>
         ) : (
+          /* Dropzone */
           <div
             className={cn(
-              "relative flex flex-col items-center justify-center min-h-[180px] p-8 border-2 border-dashed border-border rounded-2xl transition-all duration-300",
-              "group/drop bg-zinc-50/50 hover:bg-zinc-50",
+              "relative flex flex-col items-center justify-center min-h-[160px] p-6 border border-dashed border-border rounded-xl transition-all duration-200",
+              "bg-muted/20 hover:bg-muted/40",
               enableDragDrop && "cursor-pointer",
               !uploading &&
                 enableDragDrop &&
-                "hover:border-indigo-400/50 hover:shadow-lg hover:shadow-indigo-500/5",
+                "hover:border-primary/40",
               uploading && "opacity-60 cursor-not-allowed",
-              isDragging && "border-indigo-500 bg-indigo-50/30 scale-[1.01]",
+              isDragging && "border-primary bg-primary/5 scale-[1.005]",
               dropzoneClassName,
             )}
             onClick={() => !uploading && fileInputRef.current?.click()}
@@ -577,48 +596,47 @@ export const ImageUploadWithCrop = ({
               }
             }}
           >
-            <div className="relative mb-5">
+            <div className="relative mb-4">
               <div
                 className={cn(
-                  "h-14 w-14 rounded-2xl flex items-center justify-center border border-border bg-white shadow-sm transition-all duration-500 group-hover/drop:scale-110 group-hover/drop:rotate-3 group-hover/drop:border-indigo-200 group-hover/drop:shadow-indigo-100 group-hover/drop:shadow-xl",
-                  isDragging &&
-                    "scale-110 rotate-3 border-indigo-300 shadow-xl shadow-indigo-100 bg-indigo-50",
+                  "h-11 w-11 rounded-xl flex items-center justify-center border border-border bg-background shadow-sm transition-all duration-200",
+                  isDragging && "border-primary/50 shadow-md bg-primary/5",
+                  !isDragging && !uploading && "group-hover:border-primary/30",
                 )}
               >
-                <Upload
-                  className={cn(
-                    "h-6 w-6 transition-colors duration-300",
-                    isDragging || uploading
-                      ? "text-indigo-600"
-                      : "text-slate-400 group-hover/drop:text-indigo-600",
-                  )}
-                />
+                {uploading ? (
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                ) : (
+                  <Upload
+                    className={cn(
+                      "h-5 w-5 transition-colors duration-200",
+                      isDragging
+                        ? "text-primary"
+                        : "text-muted-foreground",
+                    )}
+                  />
+                )}
               </div>
-              {uploading && (
-                <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-1 shadow-md border border-border">
-                  <Loader2 className="h-3 w-3 animate-spin text-indigo-600" />
-                </div>
-              )}
             </div>
 
-            <div className="space-y-2 text-center">
+            <div className="space-y-1.5 text-center">
               <p
                 className={cn(
-                  "text-sm font-bold tracking-tight transition-colors duration-300",
+                  "text-sm font-medium transition-colors duration-200",
                   isDragging
-                    ? "text-indigo-600"
-                    : "text-slate-900 group-hover/drop:text-indigo-600",
+                    ? "text-primary"
+                    : "text-foreground",
                 )}
               >
                 {isDragging
-                  ? `Drop to finish upload`
+                  ? `Drop to upload`
                   : uploadButtonText || `Upload ${label}`}
               </p>
-              <p className="text-[11px] font-medium text-slate-500 leading-tight">
+              <p className="text-xs text-muted-foreground">
                 {customDescription || (
                   <>
-                    Drag and drop your file or{" "}
-                    <span className="text-indigo-600 font-bold underline underline-offset-2">
+                    Drag & drop or{" "}
+                    <span className="text-primary font-medium">
                       browse
                     </span>
                   </>
@@ -627,10 +645,10 @@ export const ImageUploadWithCrop = ({
             </div>
 
             {!hideRecommendedSize && !customDescription && (
-              <div className="mt-6 pt-6 border-t border-slate-200/60 w-full flex items-center justify-center gap-4">
-                <div className="flex items-center gap-1.5 text-[9px] font-bold text-slate-400 uppercase tracking-widest bg-white px-3 py-1.5 rounded-lg border border-border/60">
-                  MAX {maxFileSize}MB
-                </div>
+              <div className="mt-4 pt-3 border-t border-border/40 w-full flex items-center justify-center">
+                <span className="text-[10px] font-medium text-muted-foreground/70">
+                  Max {maxFileSize}MB
+                </span>
               </div>
             )}
           </div>
@@ -647,32 +665,35 @@ export const ImageUploadWithCrop = ({
         />
       </div>
 
+      {/* Crop Editor Dialog */}
       <Dialog open={isEditorOpen} onOpenChange={setIsEditorOpen}>
-        <DialogContent className="max-w-4xl p-0 gap-0 overflow-hidden border-none shadow-2xl rounded-[32px] bg-white">
-          <div className="flex flex-col md:flex-row h-[600px] md:h-[700px]">
-            {/* Main Preview Area */}
-            <div className="flex-1 bg-zinc-50/50 relative overflow-hidden flex flex-col">
-              <div className="p-6 border-b border-border bg-white flex items-center justify-between">
+        <DialogContent className="max-w-4xl p-0 gap-0 overflow-hidden border border-border shadow-2xl rounded-2xl bg-background">
+          <div className="flex flex-col md:flex-row h-[600px] md:h-[680px]">
+            {/* Main Canvas Area */}
+            <div className="flex-1 bg-muted/30 relative overflow-hidden flex flex-col">
+              {/* Header */}
+              <div className="px-5 py-4 border-b border-border bg-background flex items-center justify-between">
                 <div>
-                  <h3 className="text-base font-bold text-foreground">
-                    Aesthetic Studio
+                  <h3 className="text-sm font-semibold text-foreground">
+                    Image Editor
                   </h3>
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                    Visual Asset Refinement
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Crop, rotate & adjust your image
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="px-3 py-1.5 rounded-full bg-zinc-100 border border-border flex items-center gap-2">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-muted/60 border border-border/50">
                     <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-tight font-mono">
-                      {Math.round(customWidth)} × {Math.round(customHeight)} PX
+                    <span className="text-[10px] font-medium text-muted-foreground font-mono">
+                      {Math.round(customWidth)} × {Math.round(customHeight)}
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div className="flex-1 relative flex items-center justify-center p-8 overflow-hidden">
-                <div className="relative shadow-2xl rounded-xl overflow-hidden bg-white">
+              {/* Canvas */}
+              <div className="flex-1 relative flex items-center justify-center p-6 overflow-hidden">
+                <div className="relative rounded-lg overflow-hidden bg-background shadow-lg border border-border/50">
                   <ReactCrop
                     crop={crop}
                     onChange={(_, percentCrop) => setCrop(percentCrop)}
@@ -697,96 +718,100 @@ export const ImageUploadWithCrop = ({
                   </ReactCrop>
                 </div>
 
-                {/* Visual Indicators Overlay */}
-                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 bg-white/90 backdrop-blur-md px-5 py-2.5 rounded-2xl border border-border shadow-xl z-30">
+                {/* Floating Toolbar */}
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1 bg-background/95 backdrop-blur-md px-2 py-1.5 rounded-lg border border-border shadow-lg z-30">
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => setRotation((r) => (r - 90) % 360)}
-                    className="h-8 w-8 rounded-lg hover:bg-slate-100"
+                    className="h-8 w-8 rounded-md hover:bg-muted"
                     title="Rotate Left"
                   >
-                    <RotateCcw className="h-4 w-4 text-slate-600" />
+                    <RotateCcw className="h-3.5 w-3.5 text-muted-foreground" />
                   </Button>
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => setRotation((r) => (r + 90) % 360)}
-                    className="h-8 w-8 rounded-lg hover:bg-slate-100"
+                    className="h-8 w-8 rounded-md hover:bg-muted"
                     title="Rotate Right"
                   >
-                    <RotateCw className="h-4 w-4 text-slate-600" />
+                    <RotateCw className="h-3.5 w-3.5 text-muted-foreground" />
                   </Button>
-                  <div className="w-px h-4 bg-slate-200 mx-1" />
+
+                  <div className="w-px h-4 bg-border mx-0.5" />
+
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => setFlipHorizontal(!flipHorizontal)}
                     className={cn(
-                      "h-8 w-8 rounded-lg",
+                      "h-8 w-8 rounded-md",
                       flipHorizontal
-                        ? "bg-indigo-50 text-indigo-600"
-                        : "hover:bg-slate-100 text-slate-600",
+                        ? "bg-primary/10 text-primary"
+                        : "hover:bg-muted text-muted-foreground",
                     )}
                     title="Flip Horizontal"
                   >
-                    <FlipHorizontal className="h-4 w-4" />
+                    <FlipHorizontal className="h-3.5 w-3.5" />
                   </Button>
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => setFlipVertical(!flipVertical)}
                     className={cn(
-                      "h-8 w-8 rounded-lg",
+                      "h-8 w-8 rounded-md",
                       flipVertical
-                        ? "bg-indigo-50 text-indigo-600"
-                        : "hover:bg-slate-100 text-slate-600",
+                        ? "bg-primary/10 text-primary"
+                        : "hover:bg-muted text-muted-foreground",
                     )}
                     title="Flip Vertical"
                   >
-                    <FlipVertical className="h-4 w-4" />
+                    <FlipVertical className="h-3.5 w-3.5" />
                   </Button>
-                  <div className="w-px h-4 bg-slate-200 mx-1" />
+
+                  <div className="w-px h-4 bg-border mx-0.5" />
+
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={handleReset}
-                    className="h-8 w-8 rounded-lg text-rose-500 hover:bg-rose-50 hover:text-rose-600"
+                    className="h-8 w-8 rounded-md text-destructive hover:bg-destructive/10 hover:text-destructive"
                     title="Reset All"
                   >
-                    <RotateCcw className="h-4 w-4" />
+                    <RotateCcw className="h-3.5 w-3.5" />
                   </Button>
                 </div>
               </div>
             </div>
 
-            {/* Right Controls Panel */}
-            <div className="w-full md:w-[340px] border-l border-border bg-white p-8 flex flex-col gap-8 overflow-y-auto">
-              <div className="space-y-6">
+            {/* Right Panel */}
+            <div className="w-full md:w-[320px] border-l border-border bg-background flex flex-col">
+              <div className="flex-1 overflow-y-auto p-5">
                 <Tabs defaultValue="dimensions" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2 h-10 bg-slate-100 p-1 rounded-xl mb-6">
+                  <TabsList className="grid w-full grid-cols-2 h-9 bg-muted p-1 rounded-lg mb-5">
                     <TabsTrigger
                       value="dimensions"
-                      className="rounded-lg text-[10px] font-black uppercase tracking-wider"
+                      className="rounded-md text-xs font-medium data-[state=active]:shadow-sm"
                     >
                       Layout
                     </TabsTrigger>
                     <TabsTrigger
                       value="adjust"
-                      className="rounded-lg text-[10px] font-black uppercase tracking-wider"
+                      className="rounded-md text-xs font-medium data-[state=active]:shadow-sm"
                     >
                       Adjust
                     </TabsTrigger>
                   </TabsList>
 
-                  <TabsContent value="dimensions" className="space-y-6">
-                    <div>
-                      <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-4 block">
-                        Dimensions & Presets
-                      </Label>
-
-                      {showAspectRatioPresets && (
-                        <div className="grid grid-cols-2 gap-2 mb-4">
+                  <TabsContent value="dimensions" className="space-y-5 mt-0">
+                    {/* Aspect Ratio Presets */}
+                    {showAspectRatioPresets && (
+                      <div>
+                        <Label className="text-xs font-medium text-muted-foreground mb-3 block">
+                          Aspect Ratio
+                        </Label>
+                        <div className="grid grid-cols-2 gap-1.5">
                           {aspectRatioPresets.map((preset) => (
                             <Button
                               key={preset.label}
@@ -814,109 +839,116 @@ export const ImageUploadWithCrop = ({
                                 }
                               }}
                               className={cn(
-                                "h-10 rounded-xl border-border font-bold text-[11px] uppercase transition-all",
+                                "h-9 rounded-lg text-xs font-medium transition-all",
                                 selectedAspectRatio === preset.value
-                                  ? "bg-indigo-50 border-indigo-200 text-indigo-600 shadow-sm"
-                                  : "hover:bg-zinc-50",
+                                  ? "bg-primary/10 border-primary/30 text-primary shadow-sm"
+                                  : "hover:bg-muted/80",
                               )}
                             >
                               {preset.label}
                             </Button>
                           ))}
                         </div>
-                      )}
+                      </div>
+                    )}
 
-                      {showDimensions && (
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="space-y-1.5">
+                    {/* Dimensions */}
+                    {showDimensions && (
+                      <div>
+                        <Label className="text-xs font-medium text-muted-foreground mb-3 block">
+                          Dimensions
+                        </Label>
+                        <div className="grid grid-cols-2 gap-2.5">
+                          <div className="space-y-1">
                             <Input
                               type="number"
-                              className="h-10 rounded-xl border-border bg-zinc-50/50 font-mono text-xs font-bold focus-visible:ring-indigo-500"
+                              className="h-9 rounded-lg border-border bg-muted/30 font-mono text-xs focus-visible:ring-primary/30"
                               value={customWidth}
                               onChange={(e) =>
                                 setCustomWidth(Number(e.target.value))
                               }
                             />
-                            <span className="text-[9px] font-bold text-muted-foreground uppercase text-center block">
+                            <span className="text-[10px] text-muted-foreground text-center block">
                               Width
                             </span>
                           </div>
-                          <div className="space-y-1.5">
+                          <div className="space-y-1">
                             <Input
                               type="number"
-                              className="h-10 rounded-xl border-border bg-zinc-50/50 font-mono text-xs font-bold focus-visible:ring-indigo-500"
+                              className="h-9 rounded-lg border-border bg-muted/30 font-mono text-xs focus-visible:ring-primary/30"
                               value={customHeight}
                               onChange={(e) =>
                                 setCustomHeight(Number(e.target.value))
                               }
                             />
-                            <span className="text-[9px] font-bold text-muted-foreground uppercase text-center block">
+                            <span className="text-[10px] text-muted-foreground text-center block">
                               Height
                             </span>
                           </div>
                         </div>
-                      )}
-                    </div>
+                      </div>
+                    )}
 
-                    <div className="h-px bg-zinc-100" />
+                    <div className="h-px bg-border/60" />
 
-                    <div className="space-y-5">
-                      {enableZoom && (
-                        <div className="space-y-3">
-                          <div className="flex items-center justify-between">
-                            <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                              Scaling
-                            </Label>
-                            <span className="text-[10px] font-bold text-indigo-600">
-                              {(zoom * 100).toFixed(0)}%
-                            </span>
-                          </div>
-                          <Slider
-                            min={0.5}
-                            max={3}
-                            step={0.1}
-                            value={[zoom]}
-                            onValueChange={(v) => setZoom(v[0])}
-                            className="py-2"
-                          />
+                    {/* Zoom Slider */}
+                    {enableZoom && (
+                      <div className="space-y-2.5">
+                        <div className="flex items-center justify-between">
+                          <Label className="text-xs font-medium text-muted-foreground">
+                            Scale
+                          </Label>
+                          <span className="text-[10px] font-medium text-primary">
+                            {(zoom * 100).toFixed(0)}%
+                          </span>
                         </div>
-                      )}
+                        <Slider
+                          min={0.5}
+                          max={3}
+                          step={0.1}
+                          value={[zoom]}
+                          onValueChange={(v) => setZoom(v[0])}
+                          className="py-1.5"
+                        />
+                      </div>
+                    )}
 
-                      {showQualitySlider && (
-                        <div className="space-y-3">
-                          <div className="flex items-center justify-between">
-                            <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                              Quality
-                            </Label>
-                            <span className="text-[10px] font-bold text-indigo-600">
-                              {imageQuality}%
-                            </span>
-                          </div>
-                          <Slider
-                            min={1}
-                            max={100}
-                            step={1}
-                            value={[imageQuality]}
-                            onValueChange={(v) => setImageQuality(v[0])}
-                            className="py-2"
-                          />
+                    {/* Quality Slider */}
+                    {showQualitySlider && (
+                      <div className="space-y-2.5">
+                        <div className="flex items-center justify-between">
+                          <Label className="text-xs font-medium text-muted-foreground">
+                            Quality
+                          </Label>
+                          <span className="text-[10px] font-medium text-primary">
+                            {imageQuality}%
+                          </span>
                         </div>
-                      )}
-                    </div>
+                        <Slider
+                          min={1}
+                          max={100}
+                          step={1}
+                          value={[imageQuality]}
+                          onValueChange={(v) => setImageQuality(v[0])}
+                          className="py-1.5"
+                        />
+                      </div>
+                    )}
                   </TabsContent>
 
-                  <TabsContent value="adjust" className="space-y-8">
+                  <TabsContent value="adjust" className="space-y-5 mt-0">
+                    {/* Brightness & Contrast */}
                     {showAdjustments && (
-                      <div className="space-y-6">
-                        <div className="space-y-4">
+                      <div className="space-y-5">
+                        <div className="space-y-2.5">
                           <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <Sun className="h-3.5 w-3.5 text-slate-400" />
-                              <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                            <div className="flex items-center gap-1.5">
+                              <Sun className="h-3.5 w-3.5 text-muted-foreground" />
+                              <Label className="text-xs font-medium text-muted-foreground">
                                 Brightness
                               </Label>
                             </div>
-                            <span className="text-[10px] font-black text-indigo-600">
+                            <span className="text-[10px] font-medium text-primary">
                               {brightness}%
                             </span>
                           </div>
@@ -926,19 +958,19 @@ export const ImageUploadWithCrop = ({
                             step={1}
                             value={[brightness]}
                             onValueChange={(v) => setBrightness(v[0])}
-                            className="py-2"
+                            className="py-1.5"
                           />
                         </div>
 
-                        <div className="space-y-4">
+                        <div className="space-y-2.5">
                           <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <Contrast className="h-3.5 w-3.5 text-slate-400" />
-                              <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                            <div className="flex items-center gap-1.5">
+                              <Contrast className="h-3.5 w-3.5 text-muted-foreground" />
+                              <Label className="text-xs font-medium text-muted-foreground">
                                 Contrast
                               </Label>
                             </div>
-                            <span className="text-[10px] font-black text-indigo-600">
+                            <span className="text-[10px] font-medium text-primary">
                               {contrast}%
                             </span>
                           </div>
@@ -948,15 +980,16 @@ export const ImageUploadWithCrop = ({
                             step={1}
                             value={[contrast]}
                             onValueChange={(v) => setContrast(v[0])}
-                            className="py-2"
+                            className="py-1.5"
                           />
                         </div>
                       </div>
                     )}
 
+                    {/* Format Selector */}
                     {showFormatSelector && (
-                      <div className="space-y-3">
-                        <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                      <div className="space-y-2.5">
+                        <Label className="text-xs font-medium text-muted-foreground">
                           Export Format
                         </Label>
                         <Select
@@ -965,27 +998,27 @@ export const ImageUploadWithCrop = ({
                             setOutputFormat(v)
                           }
                         >
-                          <SelectTrigger className="h-11 rounded-xl border-border bg-zinc-50/50 font-bold text-xs">
+                          <SelectTrigger className="h-9 rounded-lg border-border bg-muted/30 text-xs">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent className="rounded-xl p-1 shadow-2xl">
+                          <SelectContent className="rounded-lg shadow-lg">
                             <SelectItem
                               value="png"
-                              className="rounded-lg font-bold text-xs py-2"
+                              className="rounded-md text-xs py-2"
                             >
-                              PNG / Lossless
+                              PNG — Lossless
                             </SelectItem>
                             <SelectItem
                               value="jpeg"
-                              className="rounded-lg font-bold text-xs py-2"
+                              className="rounded-md text-xs py-2"
                             >
-                              JPEG / Optimized
+                              JPEG — Optimized
                             </SelectItem>
                             <SelectItem
                               value="webp"
-                              className="rounded-lg font-bold text-xs py-2"
+                              className="rounded-md text-xs py-2"
                             >
-                              WebP / Modern
+                              WebP — Modern
                             </SelectItem>
                           </SelectContent>
                         </Select>
@@ -995,25 +1028,26 @@ export const ImageUploadWithCrop = ({
                 </Tabs>
               </div>
 
-              <div className="mt-auto pt-8 border-t border-border flex gap-3">
+              {/* Footer Actions */}
+              <div className="p-4 border-t border-border flex gap-2">
                 <Button
                   variant="ghost"
                   onClick={() => setIsEditorOpen(false)}
-                  className="flex-1 h-12 rounded-xl font-bold text-xs uppercase text-muted-foreground hover:bg-zinc-50"
+                  className="flex-1 h-10 rounded-lg text-xs font-medium text-muted-foreground hover:bg-muted"
                 >
                   {cancelButtonText}
                 </Button>
                 <Button
                   onClick={handleSave}
                   disabled={uploading}
-                  className="flex-[1.5] h-12 rounded-xl font-bold text-xs uppercase bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-200 gap-2"
+                  className="flex-[1.5] h-10 rounded-lg text-xs font-medium gap-1.5 shadow-sm"
                 >
                   {uploading ? (
-                    <Loader2 className="h-4 w-4 animate-spin text-white" />
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
                   ) : (
-                    <CheckCircle2 className="h-4 w-4" />
+                    <CheckCircle2 className="h-3.5 w-3.5" />
                   )}
-                  {saveButtonText || "Save Asset"}
+                  {saveButtonText || "Save & Upload"}
                 </Button>
               </div>
             </div>
