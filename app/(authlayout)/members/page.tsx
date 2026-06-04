@@ -168,11 +168,11 @@ function MembersPage() {
               onDateChange={handleDateChange}
               defaultValue="LAST_7_DAYS"
             />
-            <div className="h-4 w-px bg-zinc-200 mx-1" />
+            <div className="h-4 w-px bg-muted mx-1" />
             <Button
               variant="outline"
               size="icon"
-              className="h-9 w-9 text-zinc-400 hover:text-indigo-600 rounded-lg transition-all"
+              className="h-9 w-9 text-muted-foreground hover:text-indigo-600 rounded-lg transition-all"
               onClick={() => handleRefresh()}
             >
               <RotateCcw size={14} className={cn((loading || growthLoading) && "animate-spin")} />
@@ -203,7 +203,7 @@ function MembersPage() {
                     <Skeleton className="h-[300px] w-full rounded-xl" />
                   </div>
                 ) : growthData.length === 0 ? (
-                  <div className="flex items-center justify-center h-full text-slate-400 font-black text-[10px] uppercase tracking-widest italic bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
+                  <div className="flex items-center justify-center h-full text-muted-foreground font-black text-[10px] uppercase tracking-widest italic bg-muted/30 rounded-xl border border-dashed border-border">
                     No growth data available for this period
                   </div>
                 ) : (

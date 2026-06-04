@@ -77,7 +77,7 @@ export const AddDomain = () => {
     <>
       <Button
         onClick={() => setIsOpen(true)}
-        className="h-8 px-4 text-[11px] font-bold uppercase tracking-wider bg-slate-900 dark:bg-slate-100 hover:bg-black dark:hover:bg-white text-white dark:text-slate-900 gap-2 rounded-md shadow-none"
+        className="h-8 px-4 text-[11px] font-bold uppercase tracking-wider bg-primary text-primary-foreground  hover:bg-black dark:hover:bg-card text-white  gap-2 rounded-md shadow-none"
       >
         <Plus className="h-3.5 w-3.5" />
         Connect Domain
@@ -140,7 +140,7 @@ export const AddDomain = () => {
                   <Button
                     type="submit"
                     disabled={loading}
-                    className="h-9 px-6 text-[11px] font-bold uppercase tracking-wider bg-slate-900 dark:bg-slate-100 hover:bg-black dark:hover:bg-white text-white dark:text-slate-900 gap-2 rounded-md transition-all active:scale-[0.98]"
+                    className="h-9 px-6 text-[11px] font-bold uppercase tracking-wider bg-primary text-primary-foreground  hover:bg-black dark:hover:bg-card text-white  gap-2 rounded-md transition-all active:scale-[0.98]"
                   >
                     {loading && <Loader2 className="h-3 w-3 animate-spin" />}
                     {loading ? "Provisioning..." : "Connect Domain"}

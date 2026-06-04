@@ -35,12 +35,12 @@ const STATUS_STYLE: Record<string, { bg: string; text: string; border: string; d
   APPROVED: { bg: "bg-emerald-50", text: "text-emerald-700", border: "border-emerald-200", dot: "bg-emerald-500" },
   PENDING: { bg: "bg-amber-50", text: "text-amber-700", border: "border-amber-200", dot: "bg-amber-500" },
   BLOCKED: { bg: "bg-red-50", text: "text-red-600", border: "border-red-200", dot: "bg-red-500" },
-  REJECTED: { bg: "bg-slate-100", text: "text-slate-500", border: "border-slate-200", dot: "bg-slate-400" },
+  REJECTED: { bg: "bg-muted", text: "text-muted-foreground", border: "border-border", dot: "bg-muted-foreground" },
   DISABLED: { bg: "bg-orange-50", text: "text-orange-600", border: "border-orange-200", dot: "bg-orange-500" },
 };
 
 function getStatusStyle(status: string) {
-  return STATUS_STYLE[status] ?? { bg: "bg-slate-50", text: "text-slate-600", border: "border-slate-200", dot: "bg-slate-400" };
+  return STATUS_STYLE[status] ?? { bg: "bg-muted/50", text: "text-muted-foreground", border: "border-border", dot: "bg-muted-foreground" };
 }
 
 const SOCIAL_ICONS: Record<string, React.ElementType> = {
@@ -157,7 +157,7 @@ export function UserInfoCard({ member }: { member: any }) {
                   src={`https://cdn.thrico.network/${user.avatar}`}
                   alt={user.firstName}
                 />
-                <AvatarFallback className="text-xl font-bold bg-slate-100 text-slate-500">
+                <AvatarFallback className="text-xl font-bold bg-muted text-muted-foreground">
                   {user.firstName?.[0]}
                   {user.lastName?.[0]}
                 </AvatarFallback>
@@ -354,7 +354,7 @@ export function UserInfoCard({ member }: { member: any }) {
                     ? skill.name || "Unnamed"
                     : String(skill),
               }))}
-              colorClass="bg-slate-50 text-slate-600 border-slate-200"
+              colorClass="bg-muted/50 text-muted-foreground border-border"
             />
           </CardContent>
         </Card>

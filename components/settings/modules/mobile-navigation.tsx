@@ -36,10 +36,10 @@ interface MobileNavigationProps {
 
 const getNavIcon = (icon: string | null) => {
   if (!icon || typeof icon !== "string" || !(icon in LucideIcons)) {
-    return <Puzzle className="h-4 w-4 text-slate-500" />;
+    return <Puzzle className="h-4 w-4 text-muted-foreground" />;
   }
   const IconComponent = (LucideIcons as any)[icon] as React.ElementType;
-  return <IconComponent className="h-4 w-4 text-slate-500" />;
+  return <IconComponent className="h-4 w-4 text-muted-foreground" />;
 };
 
 const MobileNavigation: React.FC<MobileNavigationProps> = ({
@@ -55,15 +55,15 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
   return (
     <div className="space-y-5">
       {/* Info bar */}
-      <div className="flex items-start gap-2.5 px-4 py-3 bg-slate-50 border border-slate-100 rounded-lg">
-        <Info className="h-3.5 w-3.5 text-slate-400 mt-0.5 shrink-0" />
+      <div className="flex items-start gap-2.5 px-4 py-3 bg-muted/50 border border-border rounded-lg">
+        <Info className="h-3.5 w-3.5 text-muted-foreground mt-0.5 shrink-0" />
         <div className="space-y-0.5">
-          <p className="text-[12px] font-semibold text-slate-700">
+          <p className="text-[12px] font-semibold text-foreground">
             Home and Profile are fixed nav items. Select up to 3 additional modules.
           </p>
           <p className={cn(
             "text-[11px] font-semibold",
-            remainingSlots === 0 ? "text-amber-600" : "text-slate-400"
+            remainingSlots === 0 ? "text-amber-600" : "text-muted-foreground"
           )}>
             {remainingSlots === 0
               ? "All 3 slots filled"
@@ -74,22 +74,22 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* Preview panel */}
-        <div className="rounded-xl border border-slate-200/80 bg-white shadow-sm overflow-hidden">
-          <div className="px-4 py-3 border-b border-slate-100">
-            <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest">
+        <div className="rounded-xl border border-border/80 bg-card shadow-sm overflow-hidden">
+          <div className="px-4 py-3 border-b border-border">
+            <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">
               Preview
             </p>
-            <p className="text-[13px] font-semibold text-slate-800 mt-0.5 leading-none">
+            <p className="text-[13px] font-semibold text-foreground mt-0.5 leading-none">
               Mobile Navigation Bar
             </p>
           </div>
 
           <div className="p-4">
             {/* Phone frame */}
-            <div className="bg-slate-50 rounded-xl border border-slate-200 p-3">
+            <div className="bg-muted/50 rounded-xl border border-border p-3">
               {/* Status bar sim */}
-              <div className="flex items-center justify-between px-2 pb-2 border-b border-slate-200/60 mb-3">
-                <span className="text-[9px] font-semibold text-slate-400">09:41</span>
+              <div className="flex items-center justify-between px-2 pb-2 border-b border-border/60 mb-3">
+                <span className="text-[9px] font-semibold text-muted-foreground">09:41</span>
                 <div className="flex items-center gap-1">
                   <div className="h-1.5 w-4 bg-slate-300 rounded-full" />
                   <div className="h-1.5 w-1.5 bg-slate-300 rounded-full" />
@@ -97,10 +97,10 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
               </div>
 
               {/* Nav bar */}
-              <div className="bg-white rounded-lg border border-slate-200 shadow-sm px-3 py-2.5 flex items-end justify-between gap-2">
+              <div className="bg-card rounded-lg border border-border shadow-sm px-3 py-2.5 flex items-end justify-between gap-2">
                 {/* Fixed: Home */}
                 <NavItem label="Home" isActive>
-                  <Home className="h-4 w-4 text-slate-900" />
+                  <Home className="h-4 w-4 text-foreground" />
                 </NavItem>
 
                 {/* Dynamic slots */}
@@ -113,22 +113,22 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
                 {/* Empty slots */}
                 {Array.from({ length: Math.max(0, 3 - navigationModules.length) }).map((_, i) => (
                   <NavItem key={`empty-${i}`} label="—" isEmpty>
-                    <div className="h-4 w-4 rounded border border-dashed border-slate-300" />
+                    <div className="h-4 w-4 rounded border border-dashed border-border" />
                   </NavItem>
                 ))}
 
                 {/* Fixed: Menu */}
                 <NavItem label="Menu">
-                  <Menu className="h-4 w-4 text-slate-500" />
+                  <Menu className="h-4 w-4 text-muted-foreground" />
                 </NavItem>
 
                 {/* Fixed: Profile */}
                 <NavItem label="Profile">
-                  <User className="h-4 w-4 text-slate-500" />
+                  <User className="h-4 w-4 text-muted-foreground" />
                 </NavItem>
               </div>
 
-              <p className="text-center text-[9px] text-slate-300 font-medium mt-2 uppercase tracking-widest">
+              <p className="text-center text-[9px] text-muted-foreground font-medium mt-2 uppercase tracking-widest">
                 Mobile Preview
               </p>
             </div>
@@ -136,24 +136,24 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
             {/* Legend */}
             <div className="flex items-center gap-4 mt-3 px-1">
               <div className="flex items-center gap-1.5">
-                <div className="h-2 w-2 rounded-full bg-slate-900" />
-                <span className="text-[10px] text-slate-400">Active / Fixed</span>
+                <div className="h-2 w-2 rounded-full bg-primary" />
+                <span className="text-[10px] text-muted-foreground">Active / Fixed</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <div className="h-2 w-2 rounded-sm border border-dashed border-slate-300" />
-                <span className="text-[10px] text-slate-400">Empty slot</span>
+                <div className="h-2 w-2 rounded-sm border border-dashed border-border" />
+                <span className="text-[10px] text-muted-foreground">Empty slot</span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Drag-to-reorder panel */}
-        <div className="rounded-xl border border-slate-200/80 bg-white shadow-sm overflow-hidden">
-          <div className="px-4 py-3 border-b border-slate-100">
-            <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest">
+        <div className="rounded-xl border border-border/80 bg-card shadow-sm overflow-hidden">
+          <div className="px-4 py-3 border-b border-border">
+            <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">
               Order
             </p>
-            <p className="text-[13px] font-semibold text-slate-800 mt-0.5 leading-none">
+            <p className="text-[13px] font-semibold text-foreground mt-0.5 leading-none">
               Drag to reorder
             </p>
           </div>
@@ -167,14 +167,14 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
                     {...provided.droppableProps}
                     className={cn(
                       "space-y-2 min-h-[120px] rounded-lg transition-colors",
-                      snapshot.isDraggingOver && "bg-slate-50"
+                      snapshot.isDraggingOver && "bg-muted/50"
                     )}
                   >
                     {navigationModules.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center h-28 text-slate-400">
+                      <div className="flex flex-col items-center justify-center h-28 text-muted-foreground">
                         <Puzzle className="h-6 w-6 mb-2 opacity-20" />
                         <p className="text-[12px]">No modules selected</p>
-                        <p className="text-[11px] text-slate-300 mt-0.5">
+                        <p className="text-[11px] text-muted-foreground mt-0.5">
                           Enable modules in the Registry tab
                         </p>
                       </div>
@@ -188,29 +188,29 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
                               className={cn(
                                 "flex items-center gap-3 px-3 py-2.5 rounded-lg border transition-all duration-200",
                                 dragSnapshot.isDragging
-                                  ? "bg-white border-slate-300 shadow-md"
-                                  : "bg-slate-50/80 border-slate-100 hover:border-slate-200 hover:bg-white"
+                                  ? "bg-card border-border shadow-md"
+                                  : "bg-muted/50/80 border-border hover:border-border hover:bg-card"
                               )}
                             >
                               {/* Drag handle */}
                               <div
                                 {...dragProvided.dragHandleProps}
-                                className="cursor-grab active:cursor-grabbing text-slate-300 hover:text-slate-500 transition-colors shrink-0"
+                                className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-muted-foreground transition-colors shrink-0"
                               >
                                 <GripVertical className="h-4 w-4" />
                               </div>
 
                               {/* Position number */}
-                              <span className="text-[10px] font-semibold text-slate-400 w-4 text-center tabular-nums shrink-0">
+                              <span className="text-[10px] font-semibold text-muted-foreground w-4 text-center tabular-nums shrink-0">
                                 {idx + 1}
                               </span>
 
                               {/* Icon + name */}
                               <div className="flex items-center gap-2.5 flex-1 min-w-0">
-                                <div className="h-6 w-6 rounded-md bg-white border border-slate-200/80 flex items-center justify-center shrink-0">
+                                <div className="h-6 w-6 rounded-md bg-card border border-border/80 flex items-center justify-center shrink-0">
                                   {getNavIcon(module.icon)}
                                 </div>
-                                <span className="text-[13px] font-medium text-slate-800 truncate">
+                                <span className="text-[13px] font-medium text-foreground truncate">
                                   {module.name}
                                 </span>
                               </div>
@@ -221,7 +221,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
                                 size="icon"
                                 onClick={() => toggleNavigation(module.id)}
                                 disabled={userRole === "directory"}
-                                className="h-6 w-6 rounded-md text-slate-300 hover:text-red-500 hover:bg-red-50 transition-colors shrink-0"
+                                className="h-6 w-6 rounded-md text-muted-foreground hover:text-red-500 hover:bg-red-50 transition-colors shrink-0"
                               >
                                 <X className="h-3.5 w-3.5" />
                               </Button>
@@ -237,19 +237,19 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
             </DragDropContext>
 
             {/* Slot usage meter */}
-            <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
-              <span className="text-[11px] text-slate-400">Navigation slots</span>
+            <div className="mt-4 pt-3 border-t border-border flex items-center justify-between">
+              <span className="text-[11px] text-muted-foreground">Navigation slots</span>
               <div className="flex items-center gap-1.5">
                 {[0, 1, 2].map((i) => (
                   <div
                     key={i}
                     className={cn(
                       "h-2 w-8 rounded-full transition-colors",
-                      i < navCount ? "bg-slate-800" : "bg-slate-100 border border-slate-200"
+                      i < navCount ? "bg-primary/80" : "bg-muted border border-border"
                     )}
                   />
                 ))}
-                <span className="text-[11px] font-semibold text-slate-500 ml-1 tabular-nums">
+                <span className="text-[11px] font-semibold text-muted-foreground ml-1 tabular-nums">
                   {navCount} / 3
                 </span>
               </div>
@@ -278,8 +278,8 @@ function NavItem({
       <div
         className={cn(
           "h-8 w-8 flex items-center justify-center rounded-lg",
-          isActive && "bg-slate-900",
-          !isActive && !isEmpty && "bg-slate-100",
+          isActive && "bg-primary",
+          !isActive && !isEmpty && "bg-muted",
           isEmpty && "bg-transparent"
         )}
       >
@@ -288,7 +288,7 @@ function NavItem({
       <span
         className={cn(
           "text-[8px] font-semibold text-center leading-none max-w-[36px] truncate",
-          isEmpty ? "text-slate-300" : "text-slate-500"
+          isEmpty ? "text-muted-foreground" : "text-muted-foreground"
         )}
       >
         {label}

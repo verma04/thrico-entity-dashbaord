@@ -178,7 +178,7 @@ export default function DomainChange() {
                 disabled={
                   !domain || !isDomainAvailable || checkLoading || changeLoading
                 }
-                className="h-9 px-6 text-[11px] font-bold uppercase tracking-wider bg-slate-900 dark:bg-slate-100 hover:bg-black dark:hover:bg-white text-white dark:text-slate-900 gap-2 rounded-md transition-all active:scale-[0.98]"
+                className="h-9 px-6 text-[11px] font-bold uppercase tracking-wider bg-primary text-primary-foreground  hover:bg-black dark:hover:bg-card text-white  gap-2 rounded-md transition-all active:scale-[0.98]"
               >
                 {changeLoading && (
                   <Loader2 className="h-3 w-3 animate-spin" />

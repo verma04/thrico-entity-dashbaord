@@ -229,8 +229,8 @@ export const DomainDetail = ({ id }: DomainDetailProps) => {
             </div>
             <div className="p-8">
               <div className="flex items-center gap-4 p-4 bg-muted border border-border/50 rounded-lg group transition-all">
-                <div className="h-8 w-8 rounded bg-white border border-border/50 flex items-center justify-center shrink-0">
-                  <Globe className="h-4 w-4 text-slate-400" />
+                <div className="h-8 w-8 rounded bg-card border border-border/50 flex items-center justify-center shrink-0">
+                  <Globe className="h-4 w-4 text-muted-foreground" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">External Resource</p>
@@ -346,7 +346,7 @@ export const DomainDetail = ({ id }: DomainDetailProps) => {
                 <Button
                   onClick={() => check({ variables: { input: { id } } })}
                   disabled={checking}
-                  className="h-9 px-6 text-[11px] font-bold uppercase tracking-wider bg-slate-900 dark:bg-slate-100 hover:bg-black dark:hover:bg-white text-white dark:text-slate-900 rounded-md shadow-none gap-2 transition-all active:scale-[0.98]"
+                  className="h-9 px-6 text-[11px] font-bold uppercase tracking-wider bg-primary text-primary-foreground  hover:bg-black dark:hover:bg-card text-white  rounded-md shadow-none gap-2 transition-all active:scale-[0.98]"
                 >
                   {checking ? "Scanning network..." : "Re-Verify DNS Namespace"}
                 </Button>

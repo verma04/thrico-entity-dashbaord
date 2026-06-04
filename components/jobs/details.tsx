@@ -52,7 +52,7 @@ const getStatusBadge = (status: string) => {
     DISABLED: {
       variant: "outline",
       icon: <XCircle className="w-3.5 h-3.5 mr-1" />,
-      className: "border-slate-200 bg-slate-50 text-slate-700",
+      className: "border-border bg-muted/50 text-foreground",
     },
   };
 
@@ -73,7 +73,7 @@ const getVerificationBadge = (isVerified: boolean) => {
       Verified
     </Badge>
   ) : (
-    <Badge variant="outline" className="border-slate-200 bg-slate-50 text-slate-500 font-medium px-2.5 py-0.5">
+    <Badge variant="outline" className="border-border bg-muted/50 text-muted-foreground font-medium px-2.5 py-0.5">
       <Shield className="w-3.5 h-3.5 mr-1 opacity-50" />
       Unverified
     </Badge>
@@ -311,7 +311,7 @@ const Details = ({
 
               {job?.status === "APPROVED" && (
                 <>
-                  <Button variant="outline" className="border-slate-200 hover:bg-slate-50 transition-colors" onClick={() => handleAction("DISABLE", job)}>
+                  <Button variant="outline" className="border-border hover:bg-muted/50 transition-colors" onClick={() => handleAction("DISABLE", job)}>
                     <XCircle className="mr-2 h-4 w-4" />
                     Disable
                   </Button>

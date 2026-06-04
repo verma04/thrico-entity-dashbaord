@@ -14,7 +14,7 @@ export default function ThankYou() {
         </p>
       </div>
 
-      <Card className="bg-white mb-8 p-6">
+      <Card className="bg-card mb-8 p-6">
         <h3 className="text-xl font-bold mb-4">What happens next:</h3>
         <ul className="space-y-3">
           <li className="flex items-start gap-3">

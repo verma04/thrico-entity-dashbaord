@@ -104,16 +104,16 @@ function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-xl border border-zinc-200/60 bg-white overflow-hidden">
-      <div className="flex items-start gap-3 px-5 py-4 border-b border-zinc-100 bg-zinc-50/40">
-        <div className="w-7 h-7 rounded-lg bg-zinc-100 border border-zinc-200/60 flex items-center justify-center text-zinc-500 shrink-0 mt-0.5">
+    <div className="rounded-xl border border-border/60 bg-card overflow-hidden">
+      <div className="flex items-start gap-3 px-5 py-4 border-b border-border bg-muted/50/40">
+        <div className="w-7 h-7 rounded-lg bg-muted border border-border/60 flex items-center justify-center text-muted-foreground shrink-0 mt-0.5">
           <Icon size={13} strokeWidth={2} />
         </div>
         <div>
-          <p className="text-[13.5px] font-semibold text-zinc-900 leading-none">
+          <p className="text-[13.5px] font-semibold text-foreground leading-none">
             {title}
           </p>
-          <p className="mt-1 text-[12px] text-zinc-400 leading-snug">
+          <p className="mt-1 text-[12px] text-muted-foreground leading-snug">
             {description}
           </p>
         </div>
@@ -142,7 +142,7 @@ function InfoRow({
 }) {
   return (
     <div className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
-      <span className="text-[12px] text-zinc-400 font-medium">{label}</span>
+      <span className="text-[12px] text-muted-foreground font-medium">{label}</span>
       <div className="flex items-center gap-1.5">
         {dot && (
           <div
@@ -165,8 +165,8 @@ function InfoRow({
         ) : (
           <span
             className={cn(
-              "text-[12.5px] font-medium text-zinc-700",
-              mono && "font-mono text-[11px] text-zinc-500",
+              "text-[12.5px] font-medium text-foreground",
+              mono && "font-mono text-[11px] text-muted-foreground",
               valueClass
             )}
           >

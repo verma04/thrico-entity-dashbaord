@@ -101,12 +101,12 @@ function SkillDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md rounded-2xl border-slate-200">
+      <DialogContent className="max-w-md rounded-2xl border-border">
         <DialogHeader>
-          <DialogTitle className="font-bold text-slate-800">
+          <DialogTitle className="font-bold text-foreground">
             {editingSkill ? "Edit Skill" : "Add Skill"}
           </DialogTitle>
-          <DialogDescription className="font-medium text-slate-500">
+          <DialogDescription className="font-medium text-muted-foreground">
             {editingSkill
               ? "Update the skill name"
               : "Create a new professional skill to classify your members' areas of expertise"}
@@ -117,7 +117,7 @@ function SkillDialog({
           <div className="space-y-2">
             <Label
               htmlFor="skill-title"
-              className="text-sm font-semibold text-slate-700"
+              className="text-sm font-semibold text-foreground"
             >
               Skill Name <span className="text-rose-500">*</span>
             </Label>
@@ -126,7 +126,7 @@ function SkillDialog({
               placeholder="e.g., React, TypeScript, Product Strategy"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="rounded-xl border-slate-200 focus-visible:ring-indigo-500/20"
+              className="rounded-xl border-border focus-visible:ring-indigo-500/20"
               onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
             />
           </div>
@@ -135,7 +135,7 @@ function SkillDialog({
         <DialogFooter className="pt-2">
           <Button
             variant="outline"
-            className="rounded-lg font-semibold border-slate-200"
+            className="rounded-lg font-semibold border-border"
             onClick={() => onOpenChange(false)}
           >
             Cancel
@@ -201,8 +201,8 @@ function SkillUsersSheet({
                 </div>
               ))
           ) : users.length === 0 ? (
-            <div className="text-center py-10 text-slate-500">
-              <Users className="h-10 w-10 mx-auto text-slate-300 mb-3" />
+            <div className="text-center py-10 text-muted-foreground">
+              <Users className="h-10 w-10 mx-auto text-muted-foreground/30 mb-3" />
               <p>No users found for this skill.</p>
             </div>
           ) : (
@@ -211,8 +211,8 @@ function SkillUsersSheet({
                 key={user.id}
                 user={{ ...user, id: user.id }}
               >
-                <div className="flex items-start gap-4 p-3 rounded-xl hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100 cursor-pointer">
-                  <Avatar className="h-10 w-10 border border-slate-200">
+                <div className="flex items-start gap-4 p-3 rounded-xl hover:bg-muted/50 transition-colors border border-transparent hover:border-border cursor-pointer">
+                  <Avatar className="h-10 w-10 border border-border">
                     <AvatarImage
                       src={
                         user.avatar
@@ -226,11 +226,11 @@ function SkillUsersSheet({
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-slate-900 truncate">
+                    <p className="font-semibold text-foreground truncate">
                       {user.firstName} {user.lastName}
                     </p>
                     {user.headline && (
-                      <p className="text-xs text-slate-500 truncate">
+                      <p className="text-xs text-muted-foreground truncate">
                         {user.headline}
                       </p>
                     )}
@@ -267,7 +267,7 @@ function SkillsGrid({
           .map((_, i) => (
             <Card
               key={i}
-              className="border border-slate-200 rounded-xl overflow-hidden"
+              className="border border-border rounded-xl overflow-hidden"
             >
               <Skeleton className="h-1.5 w-full" />
               <CardContent className="p-6">
@@ -287,12 +287,12 @@ function SkillsGrid({
 
   if (skills.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 bg-slate-50/50 rounded-xl border border-slate-200 border-dashed m-4">
-        <Sparkles className="h-10 w-10 text-slate-300 mb-4" />
-        <h3 className="text-xl font-semibold text-slate-800 tracking-tight">
+      <div className="flex flex-col items-center justify-center py-20 bg-muted/50 rounded-xl border border-border border-dashed m-4">
+        <Sparkles className="h-10 w-10 text-muted-foreground mb-4" />
+        <h3 className="text-xl font-semibold text-foreground tracking-tight">
           No skills found
         </h3>
-        <p className="text-sm text-slate-500 text-center mt-2 max-w-sm">
+        <p className="text-sm text-muted-foreground text-center mt-2 max-w-sm">
           Try adding a new skill or adjusting your search filters.
         </p>
       </div>
@@ -307,7 +307,7 @@ function SkillsGrid({
           <Card
             key={skill.id}
             onClick={() => onViewUsers(skill)}
-            className="border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 group overflow-hidden rounded-xl hover:border-indigo-500/20 hover:-translate-y-1 bg-white cursor-pointer"
+            className="border border-border shadow-sm hover:shadow-md transition-all duration-300 group overflow-hidden rounded-xl hover:border-indigo-500/20 hover:-translate-y-1 bg-card cursor-pointer"
           >
             {/* Color bar */}
             <div
@@ -327,10 +327,10 @@ function SkillsGrid({
                     <Award className="h-5 w-5" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-md w-full text-slate-800 group-hover:text-indigo-600 transition-colors">
+                    <h3 className="font-bold text-md w-full text-foreground group-hover:text-indigo-600 transition-colors">
                       {skill.title}
                     </h3>
-                    <p className="text-xs font-semibold text-slate-500 mt-1 uppercase tracking-wider">
+                    <p className="text-xs font-semibold text-muted-foreground mt-1 uppercase tracking-wider">
                       Skill
                     </p>
                   </div>
@@ -340,7 +340,7 @@ function SkillsGrid({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg"
+                    className="h-8 w-8 text-muted-foreground hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 rounded-lg"
                     onClick={(e) => {
                       e.stopPropagation();
                       onEdit(skill);
@@ -351,7 +351,7 @@ function SkillsGrid({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg"
+                    className="h-8 w-8 text-muted-foreground hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-lg"
                     onClick={(e) => {
                       e.stopPropagation();
                       onDelete(skill);
@@ -567,7 +567,7 @@ export default function SkillsPage() {
     <>
       <EcosystemActionBar
         shadow="none"
-        className="rounded-xl border border-slate-200"
+        className="rounded-xl border border-border"
       >
         <EcosystemActionBar.Group>
           <EcosystemActionBar.Item grow className="max-w-[360px]">
@@ -585,7 +585,7 @@ export default function SkillsPage() {
           <div className="flex gap-2">
             <Button
               variant="outline"
-              className="font-semibold text-xs px-4 h-9 rounded-lg shadow-sm gap-2 border-indigo-200 text-indigo-600 hover:bg-indigo-50"
+              className="font-semibold text-xs px-4 h-9 rounded-lg shadow-sm gap-2 border-indigo-200 text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/50"
               onClick={handleBulkAdd}
               disabled={bulkAdding}
             >
@@ -653,14 +653,14 @@ export default function SkillsPage() {
         open={!!skillToDelete}
         onOpenChange={(open) => !open && setSkillToDelete(null)}
       >
-        <AlertDialogContent className="rounded-2xl border-slate-200">
+        <AlertDialogContent className="rounded-2xl border-border">
           <AlertDialogHeader>
-            <AlertDialogTitle className="font-bold text-slate-800">
+            <AlertDialogTitle className="font-bold text-foreground">
               Are you absolutely sure?
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-slate-500 font-medium">
+            <AlertDialogDescription className="text-muted-foreground font-medium">
               This will permanently delete the skill{" "}
-              <span className="font-bold text-slate-700">
+              <span className="font-bold text-foreground">
                 "{skillToDelete?.title}"
               </span>
               . This action cannot be undone.
@@ -669,7 +669,7 @@ export default function SkillsPage() {
           <AlertDialogFooter>
             <AlertDialogCancel
               disabled={deleting}
-              className="rounded-lg font-semibold border-slate-200"
+              className="rounded-lg font-semibold border-border"
             >
               Cancel
             </AlertDialogCancel>

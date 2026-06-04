@@ -189,12 +189,12 @@ export const ComparisonTableSettings = ({
                         ref={provided.innerRef}
                         {...provided.draggableProps}
                         className={cn(
-                          "bg-white dark:bg-slate-950 border rounded-lg overflow-hidden transition-all shadow-sm",
+                          "bg-card  border rounded-lg overflow-hidden transition-all shadow-sm",
                           snapshot.isDragging && "shadow-xl ring-2 ring-primary"
                         )}
                       >
                         {/* Row Header */}
-                        <div className="bg-slate-50 dark:bg-slate-900/50 p-3 border-b flex items-center gap-3">
+                        <div className="bg-muted/50  p-3 border-b flex items-center gap-3">
                           <div
                             {...provided.dragHandleProps}
                             className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground"
@@ -238,7 +238,7 @@ export const ComparisonTableSettings = ({
                                     {column}
                                   </Label>
                                   {/* Type toggle */}
-                                  <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded p-0.5">
+                                  <div className="flex items-center bg-muted  rounded p-0.5">
                                     <button
                                       type="button"
                                       onClick={() =>
@@ -247,7 +247,7 @@ export const ComparisonTableSettings = ({
                                       className={cn(
                                         "p-1 rounded text-[10px]",
                                         isBoolean &&
-                                          "bg-white shadow text-primary"
+                                          "bg-card shadow text-primary"
                                       )}
                                       title="Boolean (Check/X)"
                                     >
@@ -260,7 +260,7 @@ export const ComparisonTableSettings = ({
                                       }
                                       className={cn(
                                         "p-1 rounded text-[10px]",
-                                        isText && "bg-white shadow text-primary"
+                                        isText && "bg-card shadow text-primary"
                                       )}
                                       title="Text"
                                     >
@@ -341,7 +341,7 @@ export const ComparisonTableSettings = ({
         </DragDropContext>
 
         {rows.length === 0 && (
-          <div className="text-center py-8 bg-slate-50 border rounded-lg border-dashed">
+          <div className="text-center py-8 bg-muted/50 border rounded-lg border-dashed">
             <p className="text-sm text-muted-foreground mb-3">
               No features added yet.
             </p>

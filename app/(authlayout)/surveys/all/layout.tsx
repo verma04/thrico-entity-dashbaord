@@ -60,7 +60,7 @@ export default function RootLayout({
             <Link href="/surveys/templates">
               <Button
                 variant="outline"
-                className="font-bold text-[10px] uppercase tracking-widest px-6 h-9 rounded-lg shadow-sm gap-2 border-zinc-200 text-zinc-600"
+                className="font-bold text-[10px] uppercase tracking-widest px-6 h-9 rounded-lg shadow-sm gap-2 border-border text-muted-foreground"
               >
                 <Sparkles className="h-3.5 w-3.5 text-indigo-500" />
                 Templates

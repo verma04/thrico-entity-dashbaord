@@ -18,6 +18,7 @@ interface RecipientManagerProps {
   userGroups: EmailUserGroup[];
   userGroupsLoading: boolean;
   remainingQuota: number;
+  totalRecipientCount: number;
 }
 
 export function RecipientManager({
@@ -31,6 +32,7 @@ export function RecipientManager({
   userGroups,
   userGroupsLoading,
   remainingQuota,
+  totalRecipientCount,
 }: RecipientManagerProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -70,10 +72,13 @@ export function RecipientManager({
   };
 
   const importGroup = (group: EmailUserGroup) => {
-    const uniqueEmails = Array.from(new Set([...recipients, ...group.emails]));
-    const addedCount = uniqueEmails.length - recipients.length;
-    setRecipients(uniqueEmails);
-    toast.success(`${addedCount} recipients added from "${group.name}".`);
+    const groupIdentifier = `GROUP:${group.name}`;
+    if (recipients.includes(groupIdentifier)) {
+      toast.error(`Group "${group.name}" is already added.`);
+      return;
+    }
+    setRecipients([...recipients, groupIdentifier]);
+    toast.success(`Group "${group.name}" added (${group.count} recipients).`);
   };
 
   const modes = [
@@ -82,7 +87,7 @@ export function RecipientManager({
     { key: "community", icon: Users, label: "Groups" },
   ] as const;
 
-  const quotaExceeded = recipients.length > remainingQuota;
+  const quotaExceeded = totalRecipientCount > remainingQuota;
 
   // Find "All Users" group for quick total
   const allUsersGroup = userGroups.find((g) => g.name === "All Users");
@@ -93,12 +98,12 @@ export function RecipientManager({
         <div>
           <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
             Add Recipients
-            {recipients.length > 0 && (
+            {totalRecipientCount > 0 && (
               <span className={cn(
                 "text-xs font-medium px-2 py-0.5 rounded-full",
                 quotaExceeded ? "bg-red-50 text-red-600" : "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700"
               )}>
-                {recipients.length} added
+                {totalRecipientCount} added
               </span>
             )}
           </h2>
@@ -236,7 +241,7 @@ export function RecipientManager({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className={cn("h-2 w-2 rounded-full", quotaExceeded ? "bg-red-500" : "bg-emerald-50 dark:bg-emerald-500/100")} />
-              <span className="text-sm font-semibold text-foreground">{recipients.length} recipients</span>
+              <span className="text-sm font-semibold text-foreground">{totalRecipientCount} recipients</span>
               <span className="text-xs text-muted-foreground/80">/ {remainingQuota} credits remaining</span>
             </div>
             <button
@@ -252,26 +257,34 @@ export function RecipientManager({
             <div className="p-3 rounded-xl bg-red-50 border border-red-100 flex items-start gap-2.5">
               <AlertCircle className="h-4 w-4 text-red-500 shrink-0 mt-0.5" />
               <p className="text-xs text-red-700 font-medium">
-                {recipients.length} recipients exceeds your {remainingQuota} remaining credits. Remove some or upgrade your plan.
+                {totalRecipientCount} recipients exceeds your {remainingQuota} remaining credits. Remove some or upgrade your plan.
               </p>
             </div>
           )}
 
           <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto">
-            {recipients.map((email) => (
-              <div
-                key={email}
-                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted text-foreground/90 text-xs font-medium border border-border/50 group"
-              >
-                {email}
-                <button
-                  onClick={() => setRecipients(recipients.filter((e) => e !== email))}
-                  className="opacity-0 group-hover:opacity-100 hover:text-red-500 transition-all"
+            {recipients.map((item) => {
+              const isGroup = item.startsWith("GROUP:");
+              const displayName = isGroup ? item.split("GROUP:")[1] : item;
+              return (
+                <div
+                  key={item}
+                  className={cn(
+                    "inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium border border-border/50 group",
+                    isGroup ? "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-500/10 dark:text-indigo-300 dark:border-indigo-500/20" : "bg-muted text-foreground/90"
+                  )}
                 >
-                  <X className="h-3 w-3" />
-                </button>
-              </div>
-            ))}
+                  {isGroup && <Users className="h-3 w-3 opacity-70" />}
+                  {displayName}
+                  <button
+                    onClick={() => setRecipients(recipients.filter((e) => e !== item))}
+                    className="opacity-0 group-hover:opacity-100 hover:text-red-500 transition-all"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

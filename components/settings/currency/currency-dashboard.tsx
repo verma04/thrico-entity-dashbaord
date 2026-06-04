@@ -36,8 +36,8 @@ export function CurrencyDashboard({ timeRange, dateRange }: { timeRange?: any, d
       value: isLoading ? "—" : formatNumber(stats?.totalEarned || 0),
       trend: 12, // Trend could be dynamically calculated if we fetched previous period stats
       icon: Coins,
-      color: "text-zinc-900",
-      bg: "bg-zinc-100",
+      color: "text-foreground",
+      bg: "bg-muted",
     },
     {
       title: "Redemption Volume",
@@ -133,28 +133,28 @@ export function CurrencyDashboard({ timeRange, dateRange }: { timeRange?: any, d
             description="Active economic variables"
             icon={Settings2}
           >
-            <div className="space-y-1 mt-4 overflow-hidden rounded-lg border border-zinc-100">
-              <div className="flex items-center justify-between px-4 py-3 bg-zinc-50/50">
-                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest leading-none">
+            <div className="space-y-1 mt-4 overflow-hidden rounded-lg border border-border">
+              <div className="flex items-center justify-between px-4 py-3 bg-muted/50">
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-none">
                   Currency Node
                 </span>
-                <span className="text-xs font-bold text-zinc-900 leading-none">
+                <span className="text-xs font-bold text-foreground leading-none">
                   {config?.currencyName || "—"}
                 </span>
               </div>
-              <div className="flex items-center justify-between px-4 py-3 bg-zinc-50/50">
-                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest leading-none">
+              <div className="flex items-center justify-between px-4 py-3 bg-muted/50">
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-none">
                   Normalization
                 </span>
-                <span className="text-xs font-bold text-zinc-900 font-mono leading-none">
+                <span className="text-xs font-bold text-foreground font-mono leading-none">
                   {config?.normalizationFactor || "—"}
                 </span>
               </div>
-              <div className="flex items-center justify-between px-4 py-3 bg-zinc-50/50">
-                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest leading-none">
+              <div className="flex items-center justify-between px-4 py-3 bg-muted/50">
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-none">
                   Max Burn Rate
                 </span>
-                <span className="text-xs font-bold text-zinc-900 leading-none">
+                <span className="text-xs font-bold text-foreground leading-none">
                   {config?.maxTcPercentage || 30}%
                 </span>
               </div>
@@ -163,14 +163,14 @@ export function CurrencyDashboard({ timeRange, dateRange }: { timeRange?: any, d
             {config && (
               <div className="mt-8 px-1">
                 <div className="flex items-center justify-between mb-2 px-1">
-                  <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest leading-none">
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-none">
                     TC Capacity
                   </span>
-                  <span className="text-xs font-bold text-zinc-900 leading-none">
+                  <span className="text-xs font-bold text-foreground leading-none">
                     {config?.maxTcPercentage || 30}%
                   </span>
                 </div>
-                <div className="h-1.5 w-full bg-zinc-50 rounded-full overflow-hidden border border-zinc-100">
+                <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden border border-border">
                   <div
                     className="h-full bg-indigo-500 rounded-full transition-all duration-1000"
                     style={{ width: `${config?.maxTcPercentage || 30}%` }}
@@ -179,8 +179,8 @@ export function CurrencyDashboard({ timeRange, dateRange }: { timeRange?: any, d
               </div>
             )}
 
-            <div className="mt-8 pt-6 border-t border-zinc-100 italic">
-               <p className="text-[9px] font-medium text-zinc-400 leading-relaxed">
+            <div className="mt-8 pt-6 border-t border-border italic">
+               <p className="text-[9px] font-medium text-muted-foreground leading-relaxed">
                   Registry integrity verified at {new Date().toLocaleTimeString()}. Economic parameters are automatically synchronized across all system nodes.
                </p>
             </div>

@@ -118,8 +118,8 @@ const PlanOverview = () => {
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-lg bg-muted" />
           <div className="space-y-2">
-            <div className="h-4 w-40 bg-slate-100 rounded" />
-            <div className="h-3 w-56 bg-slate-100 rounded" />
+            <div className="h-4 w-40 bg-muted rounded" />
+            <div className="h-3 w-56 bg-muted rounded" />
           </div>
         </div>
         <div className="space-y-3">
@@ -136,8 +136,8 @@ const PlanOverview = () => {
       {/* Header */}
       <div className="px-5 py-4 border-b border-border/50 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="h-9 w-9 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center shrink-0">
-            <Crown className="h-4.5 w-4.5 text-white dark:text-slate-900" />
+          <div className="h-9 w-9 rounded-lg bg-slate-900 dark:bg-muted flex items-center justify-center shrink-0">
+            <Crown className="h-4.5 w-4.5 text-white dark:text-foreground" />
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
@@ -279,10 +279,10 @@ const PlanOverview = () => {
         planOverview.subscriptionType === "paid" &&
         planOverview?.billingCycle === "monthly" && (
           <div className="border-t border-border/50 px-5 py-4">
-            <div className="flex items-center justify-between gap-4 px-4 py-3.5 rounded-lg bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 dark:text-slate-900">
+            <div className="flex items-center justify-between gap-4 px-4 py-3.5 rounded-lg bg-slate-900 dark:bg-muted text-white dark:text-foreground dark:text-foreground">
               <div className="flex items-center gap-3">
-                <div className="h-7 w-7 rounded-md bg-white/10 dark:bg-slate-900/10 flex items-center justify-center shrink-0">
-                  <Sparkles className="h-3.5 w-3.5 text-white dark:text-slate-900" />
+                <div className="h-7 w-7 rounded-md bg-card/10 dark:bg-slate-900/10 flex items-center justify-center shrink-0">
+                  <Sparkles className="h-3.5 w-3.5 text-white dark:text-foreground" />
                 </div>
                 <div>
                   <p className="text-[13px] font-semibold leading-none">

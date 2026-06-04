@@ -461,10 +461,10 @@ export default function FooterManager() {
                   previewDevice === "mobile" ? "w-[320px] h-[580px]" : "w-full aspect-video"
                 )}>
                   <div className="absolute inset-0 overflow-y-auto">
-                    <div className="bg-slate-50 min-h-full flex flex-col">
+                    <div className="bg-muted/50 min-h-full flex flex-col">
                       <div className="flex-1 p-8 space-y-6">
-                        <div className="h-8 w-1/3 bg-slate-200 rounded-lg animate-pulse" />
-                        <div className="h-64 bg-slate-200 rounded-3xl animate-pulse" />
+                        <div className="h-8 w-1/3 bg-muted rounded-lg animate-pulse" />
+                        <div className="h-64 bg-muted rounded-3xl animate-pulse" />
                       </div>
                       <LivePreviewFooter
                         content={{

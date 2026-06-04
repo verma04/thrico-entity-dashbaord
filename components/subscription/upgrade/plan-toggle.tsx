@@ -10,14 +10,14 @@ export const PlanToggle = ({ isYearly, onToggle, maxSavings }: PlanToggleProps) 
   return (
     <div className="flex items-center gap-3">
       {/* Toggle pill */}
-      <div className="flex items-center p-0.5 bg-slate-100 rounded-lg border border-slate-200/80">
+      <div className="flex items-center p-0.5 bg-muted rounded-lg border border-border">
         <button
           onClick={() => onToggle(false)}
           className={cn(
             "px-3 py-1.5 rounded-md text-[12px] font-semibold transition-all duration-150",
             !isYearly
-              ? "bg-white text-slate-900 shadow-sm border border-slate-200"
-              : "text-slate-400 hover:text-slate-600"
+              ? "bg-card text-foreground shadow-sm border border-border"
+              : "text-muted-foreground hover:text-muted-foreground"
           )}
         >
           Monthly
@@ -27,8 +27,8 @@ export const PlanToggle = ({ isYearly, onToggle, maxSavings }: PlanToggleProps) 
           className={cn(
             "px-3 py-1.5 rounded-md text-[12px] font-semibold transition-all duration-150",
             isYearly
-              ? "bg-white text-slate-900 shadow-sm border border-slate-200"
-              : "text-slate-400 hover:text-slate-600"
+              ? "bg-card text-foreground shadow-sm border border-border"
+              : "text-muted-foreground hover:text-muted-foreground"
           )}
         >
           Annual

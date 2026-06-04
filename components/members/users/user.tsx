@@ -76,7 +76,7 @@ const STATUS_TABS = [
     label: "Rejected",
     icon: UserX,
     dot: "bg-slate-400",
-    color: "text-slate-500",
+    color: "text-muted-foreground",
   },
   {
     value: "DISABLED",

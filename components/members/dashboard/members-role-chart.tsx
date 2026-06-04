@@ -76,7 +76,7 @@ export const MembersRoleChart = ({ timeRange }: MembersRoleChartProps) => {
                     height={36}
                     iconType="circle"
                     formatter={(value) => (
-                      <span className="text-xs font-medium text-slate-600">
+                      <span className="text-xs font-medium text-muted-foreground">
                         {value}
                       </span>
                     )}
@@ -85,7 +85,7 @@ export const MembersRoleChart = ({ timeRange }: MembersRoleChartProps) => {
               </ResponsiveContainer>
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none pb-12">
                 <div className="text-center">
-                  <span className="text-2xl font-bold text-slate-800 tracking-tight">
+                  <span className="text-2xl font-bold text-foreground tracking-tight">
                     {(totalMembers / 1000).toFixed(1)}k
                   </span>
                   <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">

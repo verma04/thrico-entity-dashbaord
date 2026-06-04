@@ -80,9 +80,9 @@ export const ContentSectionSettings: React.FC<ContentSectionSettingsProps> = ({
         <Label className="text-xs uppercase font-black text-blue-600 tracking-widest">
           Section Header
         </Label>
-        <div className="space-y-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+        <div className="space-y-4 p-4 bg-muted/50 rounded-2xl border border-border">
           <div className="space-y-1.5">
-            <Label className="text-[10px] font-bold uppercase text-slate-500">
+            <Label className="text-[10px] font-bold uppercase text-muted-foreground">
               Section Label
             </Label>
             <Input
@@ -93,7 +93,7 @@ export const ContentSectionSettings: React.FC<ContentSectionSettingsProps> = ({
             />
           </div>
           <div className="space-y-1.5">
-            <Label className="text-[10px] font-bold uppercase text-slate-500">
+            <Label className="text-[10px] font-bold uppercase text-muted-foreground">
               Title
             </Label>
             <Input
@@ -104,7 +104,7 @@ export const ContentSectionSettings: React.FC<ContentSectionSettingsProps> = ({
             />
           </div>
           <div className="space-y-1.5">
-            <Label className="text-[10px] font-bold uppercase text-slate-500">
+            <Label className="text-[10px] font-bold uppercase text-muted-foreground">
               Description
             </Label>
             <Textarea
@@ -116,7 +116,7 @@ export const ContentSectionSettings: React.FC<ContentSectionSettingsProps> = ({
             />
           </div>
           <div className="space-y-1.5">
-            <Label className="text-[10px] font-bold uppercase text-slate-500">
+            <Label className="text-[10px] font-bold uppercase text-muted-foreground">
               Text Color
             </Label>
             <div className="flex gap-2">
@@ -124,7 +124,7 @@ export const ContentSectionSettings: React.FC<ContentSectionSettingsProps> = ({
                 type="color"
                 value={content.textColor || "#000000"}
                 onChange={(e) => onChange({ textColor: e.target.value })}
-                className="h-10 w-12 rounded-xl border border-slate-200 cursor-pointer"
+                className="h-10 w-12 rounded-xl border border-border cursor-pointer"
               />
               <Input
                 value={content.textColor || ""}
@@ -141,11 +141,11 @@ export const ContentSectionSettings: React.FC<ContentSectionSettingsProps> = ({
       <div className="space-y-4 border-t pt-6">
         <Label className="text-xs uppercase font-black text-blue-600 tracking-widest flex items-center gap-2">
           Featured Media{" "}
-          <span className="text-[10px] font-normal text-slate-400 font-sans tracking-normal uppercase">
+          <span className="text-[10px] font-normal text-muted-foreground font-sans tracking-normal uppercase">
             (Top of Section)
           </span>
         </Label>
-        <div className="space-y-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+        <div className="space-y-4 p-4 bg-muted/50 rounded-2xl border border-border">
           <ImageUploadWithCrop
             label="Featured Image"
             currentImage={content.image || ""}
@@ -154,8 +154,8 @@ export const ContentSectionSettings: React.FC<ContentSectionSettingsProps> = ({
             recommendedHeight={800}
             aspectRatio={3 / 2}
           />
-          <div className="space-y-1.5 pt-2 border-t border-slate-200">
-            <Label className="text-[10px] font-bold uppercase text-slate-500">
+          <div className="space-y-1.5 pt-2 border-t border-border">
+            <Label className="text-[10px] font-bold uppercase text-muted-foreground">
               Video URL
             </Label>
             <Input
@@ -210,7 +210,7 @@ export const ContentSectionSettings: React.FC<ContentSectionSettingsProps> = ({
                         ref={provided.innerRef}
                         {...provided.draggableProps}
                         className={cn(
-                          "p-5 bg-white border rounded-2xl shadow-sm space-y-4 transition-all",
+                          "p-5 bg-card border rounded-2xl shadow-sm space-y-4 transition-all",
                           snapshot.isDragging
                             ? "shadow-2xl ring-4 ring-blue-500/10 scale-[1.02] z-50"
                             : ""
@@ -219,25 +219,25 @@ export const ContentSectionSettings: React.FC<ContentSectionSettingsProps> = ({
                         <div className="flex justify-between items-center pb-2 border-b border-slate-50">
                           <div className="flex items-center gap-3">
                             <div {...provided.dragHandleProps}>
-                              <GripVertical className="h-4 w-4 text-slate-300 cursor-grab active:cursor-grabbing" />
+                              <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab active:cursor-grabbing" />
                             </div>
                             <div className="flex items-center gap-2">
                               {block.type === "text" && (
-                                <Type className="h-4 w-4 text-slate-400" />
+                                <Type className="h-4 w-4 text-muted-foreground" />
                               )}
                               {block.type === "image" && (
-                                <ImageIcon className="h-4 w-4 text-slate-400" />
+                                <ImageIcon className="h-4 w-4 text-muted-foreground" />
                               )}
                               {block.type === "video" && (
-                                <Video className="h-4 w-4 text-slate-400" />
+                                <Video className="h-4 w-4 text-muted-foreground" />
                               )}
                               {block.type === "quote" && (
-                                <QuoteIcon className="h-4 w-4 text-slate-400" />
+                                <QuoteIcon className="h-4 w-4 text-muted-foreground" />
                               )}
                               {block.type === "code" && (
-                                <CodeIcon className="h-4 w-4 text-slate-400" />
+                                <CodeIcon className="h-4 w-4 text-muted-foreground" />
                               )}
-                              <span className="text-[10px] font-black uppercase text-slate-400 tracking-tighter">
+                              <span className="text-[10px] font-black uppercase text-muted-foreground tracking-tighter">
                                 Block {index + 1} • {block.type}
                               </span>
                             </div>
@@ -254,7 +254,7 @@ export const ContentSectionSettings: React.FC<ContentSectionSettingsProps> = ({
 
                         <div className="space-y-4">
                           <div className="space-y-1.5">
-                            <Label className="text-[10px] font-bold uppercase text-slate-500 tracking-wider">
+                            <Label className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider">
                               Type
                             </Label>
                             <Select
@@ -263,7 +263,7 @@ export const ContentSectionSettings: React.FC<ContentSectionSettingsProps> = ({
                                 updateBlock(index, { type: val })
                               }
                             >
-                              <SelectTrigger className="h-9 rounded-xl text-xs bg-slate-50 border-slate-100">
+                              <SelectTrigger className="h-9 rounded-xl text-xs bg-muted/50 border-border">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
@@ -284,7 +284,7 @@ export const ContentSectionSettings: React.FC<ContentSectionSettingsProps> = ({
 
                           {block.type !== "image" && block.type !== "video" && (
                             <div className="space-y-1.5">
-                              <Label className="text-[10px] font-bold uppercase text-slate-500 tracking-wider">
+                              <Label className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider">
                                 {block.type === "quote"
                                   ? "Quote Title (optional)"
                                   : "Title / Label"}
@@ -301,7 +301,7 @@ export const ContentSectionSettings: React.FC<ContentSectionSettingsProps> = ({
                           )}
 
                           <div className="space-y-1.5">
-                            <Label className="text-[10px] font-bold uppercase text-slate-500 tracking-wider">
+                            <Label className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider">
                               {block.type === "image" && "Upload Image"}
                               {block.type === "video" && "Video URL"}
                               {block.type === "quote" && "Quote Text"}
@@ -356,7 +356,7 @@ export const ContentSectionSettings: React.FC<ContentSectionSettingsProps> = ({
 
                           {block.type === "quote" && (
                             <div className="space-y-1.5">
-                              <Label className="text-[10px] font-bold uppercase text-slate-500 tracking-wider">
+                              <Label className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider">
                                 Author
                               </Label>
                               <Input
@@ -381,9 +381,9 @@ export const ContentSectionSettings: React.FC<ContentSectionSettingsProps> = ({
         </DragDropContext>
 
         {blocks.length === 0 && (
-          <div className="text-center py-12 bg-slate-50 rounded-4xl border border-dashed border-slate-200">
-            <Type className="w-10 h-10 text-slate-300 mx-auto mb-3 opacity-50" />
-            <p className="text-xs text-slate-400 font-medium">
+          <div className="text-center py-12 bg-muted/50 rounded-4xl border border-dashed border-border">
+            <Type className="w-10 h-10 text-muted-foreground mx-auto mb-3 opacity-50" />
+            <p className="text-xs text-muted-foreground font-medium">
               No content blocks yet. Click "Add Block" to start building.
             </p>
           </div>
@@ -395,10 +395,10 @@ export const ContentSectionSettings: React.FC<ContentSectionSettingsProps> = ({
         <Label className="text-xs uppercase font-black text-blue-600 tracking-widest">
           Call-to-Action
         </Label>
-        <div className="space-y-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+        <div className="space-y-4 p-4 bg-muted/50 rounded-2xl border border-border">
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label className="text-[10px] font-bold uppercase text-slate-500">
+              <Label className="text-[10px] font-bold uppercase text-muted-foreground">
                 Button Text
               </Label>
               <Input
@@ -409,7 +409,7 @@ export const ContentSectionSettings: React.FC<ContentSectionSettingsProps> = ({
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-[10px] font-bold uppercase text-slate-500">
+              <Label className="text-[10px] font-bold uppercase text-muted-foreground">
                 Button Link
               </Label>
               <Input
@@ -421,7 +421,7 @@ export const ContentSectionSettings: React.FC<ContentSectionSettingsProps> = ({
             </div>
           </div>
           <div className="space-y-1.5">
-            <Label className="text-[10px] font-bold uppercase text-slate-500">
+            <Label className="text-[10px] font-bold uppercase text-muted-foreground">
               Button Style
             </Label>
             <Select
@@ -447,7 +447,7 @@ export const ContentSectionSettings: React.FC<ContentSectionSettingsProps> = ({
         <Label className="text-xs uppercase font-black text-blue-600 tracking-widest font-sans">
           Section Alignment
         </Label>
-        <div className="grid grid-cols-3 gap-2 p-1 bg-slate-100 rounded-xl border border-slate-200">
+        <div className="grid grid-cols-3 gap-2 p-1 bg-muted rounded-xl border border-border">
           {["left", "center", "right"].map((align) => (
             <button
               key={align}
@@ -456,8 +456,8 @@ export const ContentSectionSettings: React.FC<ContentSectionSettingsProps> = ({
                 "py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all",
                 content.alignment === align ||
                   (!content.alignment && align === "left")
-                  ? "bg-white text-blue-600 shadow-sm ring-1 ring-slate-200"
-                  : "text-slate-400 hover:text-slate-600 hover:bg-white/50"
+                  ? "bg-card text-blue-600 shadow-sm ring-1 ring-slate-200"
+                  : "text-muted-foreground hover:text-muted-foreground hover:bg-card/50"
               )}
             >
               {align}

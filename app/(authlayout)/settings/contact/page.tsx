@@ -53,12 +53,12 @@ export default function ContactPage() {
 
       <div className="flex flex-col lg:flex-row gap-6 items-start">
         {/* Contact Form - Main Area */}
-        <div className="flex-1 w-full rounded-xl border border-slate-200/80 bg-white shadow-sm overflow-hidden">
-          <div className="px-5 py-4 border-b border-slate-100 bg-slate-50/50">
-            <h2 className="text-[14px] font-semibold text-slate-900 leading-none tracking-tight">
+        <div className="flex-1 w-full rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+          <div className="px-5 py-4 border-b border-border bg-muted/50">
+            <h2 className="text-[14px] font-semibold text-foreground leading-none tracking-tight">
               Submit a Request
             </h2>
-            <p className="text-[11px] text-slate-500 mt-1">
+            <p className="text-[11px] text-muted-foreground mt-1">
               We typically reply within 2 hours during business hours.
             </p>
           </div>
@@ -67,23 +67,23 @@ export default function ContactPage() {
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div className="space-y-2">
-                  <label htmlFor="subject" className="text-[12px] font-semibold text-slate-700">
+                  <label htmlFor="subject" className="text-[12px] font-semibold text-foreground">
                     Subject Line
                   </label>
                   <Input 
                     id="subject" 
                     placeholder="Briefly describe your issue..." 
                     required 
-                    className="h-9 text-[13px] border-slate-200 shadow-sm"
+                    className="h-9 text-[13px] border-border shadow-sm"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <label htmlFor="priority" className="text-[12px] font-semibold text-slate-700">
+                  <label htmlFor="priority" className="text-[12px] font-semibold text-foreground">
                     Routing Priority
                   </label>
                   <Select defaultValue="medium">
-                    <SelectTrigger id="priority" className="h-9 text-[13px] border-slate-200 shadow-sm">
+                    <SelectTrigger id="priority" className="h-9 text-[13px] border-border shadow-sm">
                       <SelectValue placeholder="Select priority" />
                     </SelectTrigger>
                     <SelectContent>
@@ -97,26 +97,26 @@ export default function ContactPage() {
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="message" className="text-[12px] font-semibold text-slate-700">
+                <label htmlFor="message" className="text-[12px] font-semibold text-foreground">
                   Message Details
                 </label>
                 <Textarea
                   id="message"
                   placeholder="Provide any relevant context, links, or steps to reproduce..."
-                  className="min-h-[160px] resize-y text-[13px] border-slate-200 shadow-sm py-3"
+                  className="min-h-[160px] resize-y text-[13px] border-border shadow-sm py-3"
                   required
                 />
               </div>
 
               <div className="flex items-center justify-between pt-2">
-                <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
+                <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
                    <Info className="h-3.5 w-3.5" />
                    Secure transmission
                 </div>
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="h-9 px-6 text-[12px] font-semibold bg-slate-900 hover:bg-black text-white shadow-sm gap-2 transition-all"
+                  className="h-9 px-6 text-[12px] font-semibold shadow-sm gap-2 transition-all"
                 >
                   {loading ? (
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -148,20 +148,20 @@ export default function ContactPage() {
                     {manager.initials}
                   </AvatarFallback>
                 </Avatar>
-                <h3 className="text-[14px] font-bold text-slate-900">{manager.name}</h3>
+                <h3 className="text-[14px] font-bold text-foreground">{manager.name}</h3>
                 <p className="text-[11px] font-medium text-emerald-700 mt-0.5 tracking-tight uppercase">{manager.role}</p>
               </div>
 
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-lg bg-white border border-emerald-100 flex items-center justify-center shrink-0">
+                  <div className="h-8 w-8 rounded-lg bg-card border border-emerald-100/50 flex items-center justify-center shrink-0">
                     <Mail className="h-4 w-4 text-emerald-600" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest leading-none mb-1">Email</p>
+                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest leading-none mb-1">Email</p>
                     <a
                       href={`mailto:${manager.email}`}
-                      className="text-[12px] font-medium text-slate-700 hover:text-emerald-700 truncate block transition-colors"
+                      className="text-[12px] font-medium text-foreground hover:text-emerald-700 truncate block transition-colors"
                     >
                       {manager.email}
                     </a>
@@ -169,14 +169,14 @@ export default function ContactPage() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-lg bg-white border border-emerald-100 flex items-center justify-center shrink-0">
+                  <div className="h-8 w-8 rounded-lg bg-card border border-emerald-100/50 flex items-center justify-center shrink-0">
                     <Phone className="h-4 w-4 text-emerald-600" />
                   </div>
                   <div>
-                    <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest leading-none mb-1">Direct Line</p>
+                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest leading-none mb-1">Direct Line</p>
                     <a
                       href={`tel:${manager.phone}`}
-                      className="text-[12px] font-medium text-slate-700 hover:text-emerald-700 transition-colors"
+                      className="text-[12px] font-medium text-foreground hover:text-emerald-700 transition-colors"
                     >
                       {manager.phone}
                     </a>
@@ -184,12 +184,12 @@ export default function ContactPage() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-lg bg-white border border-emerald-100 flex items-center justify-center shrink-0">
+                  <div className="h-8 w-8 rounded-lg bg-card border border-emerald-100/50 flex items-center justify-center shrink-0">
                     <MapPin className="h-4 w-4 text-emerald-600" />
                   </div>
                   <div>
-                    <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest leading-none mb-1">Timezone</p>
-                    <p className="text-[12px] font-medium text-slate-700">{manager.location}</p>
+                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest leading-none mb-1">Timezone</p>
+                    <p className="text-[12px] font-medium text-foreground">{manager.location}</p>
                   </div>
                 </div>
               </div>

@@ -45,7 +45,7 @@ export const CustomDomain = () => {
         </div>
       </div>
       <div className="flex items-center justify-end">
-        <div className="h-7 w-7 rounded-md border border-border/50 bg-muted flex items-center justify-center text-muted-foreground group-hover:bg-slate-900 dark:group-hover:bg-slate-100 group-hover:text-white dark:group-hover:text-slate-900 group-hover:border-slate-900 dark:group-hover:border-slate-100 transition-all">
+        <div className="h-7 w-7 rounded-md border border-border/50 bg-muted flex items-center justify-center text-muted-foreground group-hover:bg-primary text-primary-foreground dark:group-hover:bg-muted group-hover:text-white dark:group-hover:text-foreground group-hover:border-slate-900 dark:group-hover:border-border transition-all">
           <ArrowRight className="h-3.5 w-3.5" />
         </div>
       </div>

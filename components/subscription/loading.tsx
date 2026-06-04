@@ -9,7 +9,7 @@ export default function PaymentLoading() {
       <motion.div 
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="flex flex-col items-center p-12 text-center rounded-3xl bg-white/5 border border-white/10 shadow-2xl overflow-hidden relative"
+        className="flex flex-col items-center p-12 text-center rounded-3xl bg-card/5 border border-white/10 shadow-2xl overflow-hidden relative"
       >
         {/* Animated background glow */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-blue-500/20 blur-[80px] -z-10" />

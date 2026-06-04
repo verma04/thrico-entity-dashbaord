@@ -172,7 +172,7 @@ export default function MCPPage() {
               "h-8 w-8 rounded-lg flex items-center justify-center shrink-0 border",
               key.status === "ACTIVE"
                 ? "bg-emerald-50 border-emerald-100 text-emerald-600"
-                : "bg-zinc-50 border-zinc-200 text-zinc-400",
+                : "bg-muted/50 border-border text-muted-foreground",
             )}
           >
             <Key className="h-4 w-4" />
@@ -181,7 +181,7 @@ export default function MCPPage() {
             <span className="text-sm font-semibold text-foreground">
               {key.name}
             </span>
-            <span className="text-[10px] text-zinc-400 font-mono">
+            <span className="text-[10px] text-muted-foreground font-mono">
               {key.id}
             </span>
           </div>
@@ -208,7 +208,7 @@ export default function MCPPage() {
           {key.permissions.map((p: string) => (
             <span
               key={p}
-              className="text-[10px] bg-zinc-100 text-zinc-600 px-1.5 py-0.5 rounded border border-zinc-200/50 uppercase font-medium"
+              className="text-[10px] bg-muted text-muted-foreground px-1.5 py-0.5 rounded border border-border uppercase font-medium"
             >
               {p}
             </span>
@@ -220,7 +220,7 @@ export default function MCPPage() {
       key: "createdAt",
       header: "Created At",
       cell: (key: any) => (
-        <div className="text-xs text-zinc-500 flex items-center gap-1.5">
+        <div className="text-xs text-muted-foreground flex items-center gap-1.5">
           <Clock className="h-3 w-3 opacity-60" />
           {moment(key.createdAt).format("MMM D, YYYY · HH:mm")}
         </div>
@@ -238,7 +238,7 @@ export default function MCPPage() {
               onClick={() =>
                 updateKey({ variables: { id: key.id, status: "INACTIVE" } })
               }
-              className="h-8 w-8 text-zinc-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all"
+              className="h-8 w-8 text-muted-foreground hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all"
               title="Pause Key"
             >
               <Pause className="h-4 w-4" />
@@ -251,7 +251,7 @@ export default function MCPPage() {
               onClick={() =>
                 updateKey({ variables: { id: key.id, status: "ACTIVE" } })
               }
-              className="h-8 w-8 text-zinc-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
+              className="h-8 w-8 text-muted-foreground hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
               title="Activate Key"
             >
               <Play className="h-4 w-4" />
@@ -265,7 +265,7 @@ export default function MCPPage() {
                 setKeyToDelete(key);
                 setIsDeleteDialogOpen(true);
               }}
-              className="h-8 w-8 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+              className="h-8 w-8 text-muted-foreground hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
               title="Delete Key"
             >
               <Trash2 className="h-4 w-4" />
@@ -281,7 +281,7 @@ export default function MCPPage() {
       key: "timestamp",
       header: "Time",
       cell: (log: any) => (
-        <div className="text-xs text-zinc-500 tabular-nums">
+        <div className="text-xs text-muted-foreground tabular-nums">
           {moment(log.timestamp).format("HH:mm:ss")}
           <div className="text-[9px] opacity-60">
             {moment(log.timestamp).format("MMM D")}
@@ -308,7 +308,7 @@ export default function MCPPage() {
             <span className="text-xs font-semibold text-foreground uppercase tracking-tight">
               {log.actionName}
             </span>
-            <span className="text-[9px] text-zinc-400 font-medium">
+            <span className="text-[9px] text-muted-foreground font-medium">
               {log.triggerSource}
             </span>
           </div>
@@ -331,7 +331,7 @@ export default function MCPPage() {
       key: "payload",
       header: "Payload",
       cell: (log: any) => (
-        <div className="max-w-[200px] truncate font-mono text-[10px] text-zinc-500 bg-zinc-50 px-2 py-1 rounded border border-zinc-100">
+        <div className="max-w-[200px] truncate font-mono text-[10px] text-muted-foreground bg-muted/50 px-2 py-1 rounded border border-border">
           {typeof log.payload === "string"
             ? log.payload
             : JSON.stringify(log.payload)}
@@ -342,7 +342,7 @@ export default function MCPPage() {
       key: "result",
       header: "Result",
       cell: (log: any) => (
-        <div className="max-w-[200px] truncate font-mono text-[10px] text-zinc-600">
+        <div className="max-w-[200px] truncate font-mono text-[10px] text-muted-foreground">
           {typeof log.result === "string"
             ? log.result
             : JSON.stringify(log.result)}
@@ -362,14 +362,14 @@ export default function MCPPage() {
 
       <EcosystemActionBar shadow="none">
         <EcosystemActionBar.Group grow>
-          <div className="flex bg-zinc-100 p-1 rounded-xl w-fit">
+          <div className="flex bg-muted p-1 rounded-xl w-fit">
             <button
               onClick={() => setActiveTab("keys")}
               className={cn(
                 "px-4 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 flex items-center gap-2",
                 activeTab === "keys"
-                  ? "bg-white text-foreground shadow-sm"
-                  : "text-zinc-500 hover:text-zinc-700",
+                  ? "bg-card text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground",
               )}
             >
               <Key className="h-3.5 w-3.5" />
@@ -380,8 +380,8 @@ export default function MCPPage() {
               className={cn(
                 "px-4 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 flex items-center gap-2",
                 activeTab === "logs"
-                  ? "bg-white text-foreground shadow-sm"
-                  : "text-zinc-500 hover:text-zinc-700",
+                  ? "bg-card text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground",
               )}
             >
               <Activity className="h-3.5 w-3.5" />
@@ -404,7 +404,7 @@ export default function MCPPage() {
               variant="outline"
               size="icon"
               onClick={() => refetchLogs()}
-              className="h-9 w-9 rounded-xl border-zinc-200 text-zinc-400 hover:text-foreground"
+              className="h-9 w-9 rounded-xl border-border text-muted-foreground hover:text-foreground"
             >
               <RefreshCcw
                 className={cn("h-3.5 w-3.5", logsLoading && "animate-spin")}
@@ -416,37 +416,37 @@ export default function MCPPage() {
 
       <EcosystemContainer className="mt-6 border-none bg-transparent shadow-none ring-0 p-0">
         {activeTab === "keys" ? (
-          <div className="bg-white rounded-3xl border border-zinc-200/60 shadow-sm overflow-hidden p-6 mx-1">
+          <div className="bg-card rounded-3xl border border-border shadow-sm overflow-hidden p-6 mx-1">
             {/* Connection Guide */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
-              <div className="lg:col-span-1 p-5 rounded-3xl bg-transparent border-2 border-dashed border-zinc-200 flex flex-col items-center justify-center text-center space-y-3 group hover:border-primary/30 transition-all">
-                <div className="h-12 w-12 rounded-2xl bg-zinc-100 text-zinc-400 flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-all">
+              <div className="lg:col-span-1 p-5 rounded-3xl bg-transparent border-2 border-dashed border-border flex flex-col items-center justify-center text-center space-y-3 group hover:border-primary/30 transition-all">
+                <div className="h-12 w-12 rounded-2xl bg-muted text-muted-foreground flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-all">
                   <Terminal className="h-6 w-6" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-zinc-900">
+                  <h4 className="text-sm font-bold text-foreground">
                     Claude Integration
                   </h4>
-                  <p className="text-[11px] text-zinc-500 px-4">
+                  <p className="text-[11px] text-muted-foreground px-4">
                     Connect your workspace tools directly to Claude Desktop.
                   </p>
                 </div>
               </div>
 
-              <div className="lg:col-span-2 p-1 bg-zinc-50 rounded-3xl border border-zinc-200/60 overflow-hidden flex flex-col">
+              <div className="lg:col-span-2 p-1 bg-muted/50 rounded-3xl border border-border overflow-hidden flex flex-col">
                 <Tabs defaultValue="desktop" className="w-full">
-                  <div className="px-5 pt-4 pb-2 border-b border-zinc-200/60 flex items-center justify-between">
-                    <TabsList className="bg-zinc-200/50 p-1 rounded-xl h-9">
+                  <div className="px-5 pt-4 pb-2 border-b border-border flex items-center justify-between">
+                    <TabsList className="bg-muted/50 p-1 rounded-xl h-9">
                       <TabsTrigger
                         value="desktop"
-                        className="rounded-lg text-[10px] font-bold uppercase tracking-tight data-[state=active]:bg-white"
+                        className="rounded-lg text-[10px] font-bold uppercase tracking-tight data-[state=active]:bg-background"
                       >
                         <Monitor className="h-3 w-3 mr-1.5" />
                         Claude Desktop
                       </TabsTrigger>
                       <TabsTrigger
                         value="web"
-                        className="rounded-lg text-[10px] font-bold uppercase tracking-tight data-[state=active]:bg-white"
+                        className="rounded-lg text-[10px] font-bold uppercase tracking-tight data-[state=active]:bg-background"
                       >
                         <Globe className="h-3 w-3 mr-1.5" />
                         Claude.ai Web
@@ -455,17 +455,17 @@ export default function MCPPage() {
                   </div>
 
                   <TabsContent value="desktop" className="mt-0">
-                    <div className="p-5 border-b border-zinc-200/60 transition-all hover:bg-white flex items-center justify-between">
+                    <div className="p-5 border-b border-border transition-all hover:bg-card flex items-center justify-between">
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 font-mono">
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground font-mono">
                             claude_desktop_config.json
                           </span>
                         </div>
-                        <p className="text-[10px] text-zinc-500 leading-relaxed">
+                        <p className="text-[10px] text-muted-foreground leading-relaxed">
                           Add this configuration to your Claude Desktop config
                           file. Replace{" "}
-                          <span className="font-bold text-zinc-900">
+                          <span className="font-bold text-foreground">
                             &lt;YOUR_API_KEY&gt;
                           </span>{" "}
                           with a key generated below.
@@ -495,8 +495,8 @@ export default function MCPPage() {
                         Copy Config
                       </Button>
                     </div>
-                    <div className="bg-zinc-900 p-4 overflow-x-auto text-left">
-                      <pre className="text-[10px] font-mono leading-relaxed text-zinc-300">
+                    <div className="bg-primary text-primary-foreground p-4 overflow-x-auto text-left">
+                      <pre className="text-[10px] font-mono leading-relaxed text-primary-foreground/80">
                         <span className="text-pink-400">"mcpServers"</span>:{" "}
                         {"{"}
                         <br />
@@ -540,20 +540,20 @@ export default function MCPPage() {
                   </TabsContent>
 
                   <TabsContent value="web" className="mt-0">
-                    <div className="p-5 border-b border-zinc-200/60 transition-all hover:bg-white flex items-center justify-between">
+                    <div className="p-5 border-b border-border transition-all hover:bg-card flex items-center justify-between">
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
                           <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-600 font-mono">
                             Claude.ai Quick Setup
                           </span>
                         </div>
-                        <p className="text-[10px] text-zinc-500 leading-relaxed">
+                        <p className="text-[10px] text-muted-foreground leading-relaxed">
                           Find the{" "}
-                          <span className="font-bold text-zinc-900">
+                          <span className="font-bold text-foreground">
                             Connectors
                           </span>{" "}
                           menu in your{" "}
-                          <span className="font-bold text-zinc-900">
+                          <span className="font-bold text-foreground">
                             Claude.ai Settings
                           </span>{" "}
                           sidebar.
@@ -573,41 +573,41 @@ export default function MCPPage() {
                         Copy URL
                       </Button>
                     </div>
-                    <div className="bg-zinc-900 p-5 flex flex-col space-y-5">
+                    <div className="bg-primary text-primary-foreground p-5 flex flex-col space-y-5">
                       <div className="space-y-2">
-                        <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">
+                        <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
                           1. Sidebar Menu
                         </span>
-                        <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-2.5 font-medium text-[11px] text-zinc-200 flex items-center gap-2">
-                          <Monitor className="h-3 w-3 text-zinc-500" />
+                        <div className="bg-primary/50 border border-border rounded-lg p-2.5 font-medium text-[11px] text-zinc-200 flex items-center gap-2">
+                          <Monitor className="h-3 w-3 text-muted-foreground" />
                           Settings &gt; Connectors &gt; Add custom connector
                         </div>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">
+                          <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
                             2. Name
                           </span>
-                          <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-2.5 font-medium text-[11px] text-zinc-200">
+                          <div className="bg-primary/50 border border-border rounded-lg p-2.5 font-medium text-[11px] text-zinc-200">
                             Thrico MCP
                           </div>
                         </div>
                         <div className="space-y-2">
-                          <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">
+                          <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
                             3. Advanced settings
                           </span>
-                          <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-2.5 font-medium text-[11px] text-zinc-400 italic">
+                          <div className="bg-primary/50 border border-border rounded-lg p-2.5 font-medium text-[11px] text-muted-foreground italic">
                             Leave OAuth fields empty
                           </div>
                         </div>
                       </div>
 
                       <div className="space-y-2">
-                        <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">
+                        <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
                           4. Remote MCP server URL
                         </span>
-                        <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-3 font-mono text-[10px] text-emerald-400 break-all leading-normal">
+                        <div className="bg-primary/50 border border-border rounded-lg p-3 font-mono text-[10px] text-emerald-400 break-all leading-normal">
                           https://mcp.thrico.app/sse?token=&lt;YOUR_API_KEY&gt;
                         </div>
                       </div>
@@ -648,7 +648,7 @@ export default function MCPPage() {
             />
           </div>
         ) : (
-          <div className="bg-white rounded-3xl border border-zinc-200/60 shadow-sm overflow-hidden p-6 mx-1">
+          <div className="bg-card rounded-3xl border border-border shadow-sm overflow-hidden p-6 mx-1">
             <AdminTable
               columns={logColumns}
               data={logsData?.mcpLogs || []}
@@ -680,7 +680,7 @@ export default function MCPPage() {
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <label className="text-[11px] font-bold uppercase tracking-widest text-zinc-400 ml-1">
+              <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground ml-1">
                 Key Name
               </label>
               <Input
@@ -693,7 +693,7 @@ export default function MCPPage() {
                   "h-11 rounded-xl transition-all font-medium",
                   formik.touched.name && formik.errors.name
                     ? "border-red-500 focus-visible:ring-red-500/20"
-                    : "border-zinc-200 focus-visible:ring-primary/20",
+                    : "border-border focus-visible:ring-primary/20",
                 )}
               />
               {formik.touched.name && formik.errors.name && (
@@ -705,7 +705,7 @@ export default function MCPPage() {
 
             <div className="space-y-3 pt-2">
               <div className="flex items-center justify-between">
-                <label className="text-[11px] font-bold uppercase tracking-widest text-zinc-400 ml-1">
+                <label className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground ml-1">
                   Resource Permissions
                 </label>
                 {formik.touched.permissions && formik.errors.permissions && (
@@ -718,9 +718,9 @@ export default function MCPPage() {
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="outline"
-                    className="w-full justify-between h-11 rounded-xl border-zinc-200 font-normal text-left px-3 text-xs"
+                    className="w-full justify-between h-11 rounded-xl border-border font-normal text-left px-3 text-xs"
                   >
-                    <span className="text-zinc-500">
+                    <span className="text-muted-foreground">
                       {formik.values.permissions.length === 0
                         ? "Select permissions..."
                         : `${formik.values.permissions.length} permission(s) selected`}
@@ -812,7 +812,7 @@ export default function MCPPage() {
               <div className="relative group">
                 <div
                   className={cn(
-                    "w-full bg-zinc-950 text-white rounded-2xl p-5 font-mono text-sm break-all pr-20 transition-all duration-500 border border-zinc-800",
+                    "w-full bg-primary text-white rounded-2xl p-5 font-mono text-sm break-all pr-20 transition-all duration-500 border border-border",
                     !showFullKey && "blur-[6px] select-none opacity-50",
                   )}
                 >
@@ -824,7 +824,7 @@ export default function MCPPage() {
                     size="icon"
                     variant="ghost"
                     onClick={() => setShowFullKey(!showFullKey)}
-                    className="h-9 w-9 bg-zinc-800/50 hover:bg-zinc-800 text-zinc-400 hover:text-white rounded-lg border border-zinc-700/50"
+                    className="h-9 w-9 bg-primary/50 hover:bg-primary/80 text-muted-foreground hover:text-white rounded-lg border border-border"
                   >
                     {showFullKey ? (
                       <EyeOff className="h-4 w-4" />
@@ -838,7 +838,7 @@ export default function MCPPage() {
                     onClick={() => copyToClipboard(generatedKey?.apiKey)}
                     disabled={!showFullKey}
                     className={cn(
-                      "h-9 w-9 bg-zinc-800/50 hover:bg-zinc-800 text-zinc-400 hover:text-white rounded-lg border border-zinc-700/50 transition-all",
+                      "h-9 w-9 bg-primary/50 hover:bg-primary/80 text-muted-foreground hover:text-white rounded-lg border border-border transition-all",
                       copied &&
                         "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
                     )}
@@ -861,19 +861,19 @@ export default function MCPPage() {
                 </div>
 
                 {/* Step-by-Step Setup Guide */}
-                <div className="flex flex-col gap-4 p-5 bg-zinc-50 rounded-[24px] border border-zinc-200 text-left">
+                <div className="flex flex-col gap-4 p-5 bg-muted/50 rounded-[24px] border border-border text-left">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className="h-6 w-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-[10px] font-bold border border-indigo-200">
                         1
                       </div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                         Quick Setup Guide
                       </span>
                     </div>
                     <Badge
                       variant="outline"
-                      className="text-[9px] bg-white border-zinc-200 text-zinc-400"
+                      className="text-[9px] bg-card border-border text-muted-foreground"
                     >
                       Claude.ai Web
                     </Badge>
@@ -881,11 +881,11 @@ export default function MCPPage() {
 
                   <div className="space-y-3">
                     <div className="space-y-1">
-                      <p className="text-[11px] font-semibold text-zinc-800 flex items-center gap-2">
-                        <Monitor className="h-3.5 w-3.5 text-zinc-400" />
+                      <p className="text-[11px] font-semibold text-foreground flex items-center gap-2">
+                        <Monitor className="h-3.5 w-3.5 text-muted-foreground" />
                         1. Navigate to Connectors
                       </p>
-                      <p className="text-[10px] text-zinc-500 leading-relaxed ml-5">
+                      <p className="text-[10px] text-muted-foreground leading-relaxed ml-5">
                         Open <b>Settings &gt; Connectors</b> in the Claude.ai
                         sidebar and click <b>Add custom connector</b>.
                       </p>
@@ -893,25 +893,25 @@ export default function MCPPage() {
 
                     <div className="grid grid-cols-2 gap-3 ml-5">
                       <div className="space-y-1">
-                        <span className="text-[8px] font-bold text-zinc-400 uppercase tracking-widest">
+                        <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">
                           Connector Name
                         </span>
-                        <div className="text-[10px] font-medium text-zinc-700 bg-white border border-zinc-200 px-2.5 py-1.5 rounded-lg">
+                        <div className="text-[10px] font-medium text-foreground bg-card border border-border px-2.5 py-1.5 rounded-lg">
                           Thrico MCP
                         </div>
                       </div>
                       <div className="space-y-1">
-                        <span className="text-[8px] font-bold text-zinc-400 uppercase tracking-widest">
+                        <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">
                           Type
                         </span>
-                        <div className="text-[10px] font-medium text-zinc-700 bg-white border border-zinc-200 px-2.5 py-1.5 rounded-lg">
+                        <div className="text-[10px] font-medium text-foreground bg-card border border-border px-2.5 py-1.5 rounded-lg">
                           MCP (SSE)
                         </div>
                       </div>
                     </div>
 
                     <div className="space-y-1 ml-5">
-                      <span className="text-[8px] font-bold text-zinc-400 uppercase tracking-widest">
+                      <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">
                         Remote MCP server URL
                       </span>
                       <div className="group relative">
@@ -933,9 +933,9 @@ export default function MCPPage() {
                     </div>
                   </div>
 
-                  <div className="pt-2 mt-1 border-t border-zinc-200/60 flex items-center gap-2">
+                  <div className="pt-2 mt-1 border-t border-border flex items-center gap-2">
                     <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
-                    <p className="text-[9px] text-zinc-400 italic">
+                    <p className="text-[9px] text-muted-foreground italic">
                       No OAuth credentials required. The token in the URL
                       handles authentication.
                     </p>
@@ -950,7 +950,7 @@ export default function MCPPage() {
                 formik.resetForm();
                 setShowFullKey(false);
               }}
-              className="w-full h-12 rounded-xl bg-zinc-900 text-white hover:bg-zinc-800 text-xs font-bold uppercase tracking-wider"
+              className="w-full h-12 rounded-xl bg-primary text-primary-foreground text-white hover:bg-primary/80 text-xs font-bold uppercase tracking-wider"
             >
               I've secured the key
             </Button>
@@ -996,7 +996,7 @@ export default function MCPPage() {
                   setIsDeleteDialogOpen(false);
                   setKeyToDelete(null);
                 }}
-                className="w-full h-12 rounded-xl text-zinc-500 hover:text-zinc-700 text-xs font-bold uppercase tracking-wider"
+                className="w-full h-12 rounded-xl text-muted-foreground hover:text-foreground text-xs font-bold uppercase tracking-wider"
               >
                 Cancel
               </Button>

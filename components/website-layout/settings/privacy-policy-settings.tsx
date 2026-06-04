@@ -38,9 +38,9 @@ export const PrivacyPolicySettings: React.FC<PrivacyPolicySettingsProps> = ({
           <Shield className="w-3 h-3" />
           Document Basics
         </Label>
-        <div className="space-y-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+        <div className="space-y-4 p-4 bg-muted/50 rounded-2xl border border-border">
           <div className="space-y-1.5">
-            <Label className="text-[10px] font-bold uppercase text-slate-500">
+            <Label className="text-[10px] font-bold uppercase text-muted-foreground">
               Page Title
             </Label>
             <Input
@@ -52,7 +52,7 @@ export const PrivacyPolicySettings: React.FC<PrivacyPolicySettingsProps> = ({
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-[10px] font-bold uppercase text-slate-500">
+            <Label className="text-[10px] font-bold uppercase text-muted-foreground">
               Last Updated Date
             </Label>
             <Input
@@ -65,7 +65,7 @@ export const PrivacyPolicySettings: React.FC<PrivacyPolicySettingsProps> = ({
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-[10px] font-bold uppercase text-slate-500">
+            <Label className="text-[10px] font-bold uppercase text-muted-foreground">
               Introduction / Preamble
             </Label>
             <Textarea
@@ -105,11 +105,11 @@ export const PrivacyPolicySettings: React.FC<PrivacyPolicySettingsProps> = ({
           {sections.map((section: any, index: number) => (
             <div
               key={index}
-              className="group p-5 bg-white border rounded-2xl shadow-sm space-y-4 transition-all hover:shadow-md"
+              className="group p-5 bg-card border rounded-2xl shadow-sm space-y-4 transition-all hover:shadow-md"
             >
               <div className="flex justify-between items-center pb-2 border-b border-slate-50">
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-black uppercase text-slate-400">
+                  <span className="text-[10px] font-black uppercase text-muted-foreground">
                     Section {index + 1}
                   </span>
                 </div>
@@ -130,7 +130,7 @@ export const PrivacyPolicySettings: React.FC<PrivacyPolicySettingsProps> = ({
 
               <div className="space-y-4">
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] font-bold uppercase text-slate-500 tracking-wider">
+                  <Label className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider">
                     Section Title
                   </Label>
                   <Input
@@ -149,7 +149,7 @@ export const PrivacyPolicySettings: React.FC<PrivacyPolicySettingsProps> = ({
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] font-bold uppercase text-slate-500 tracking-wider">
+                  <Label className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider">
                     Content
                   </Label>
                   <Textarea
@@ -172,9 +172,9 @@ export const PrivacyPolicySettings: React.FC<PrivacyPolicySettingsProps> = ({
           ))}
 
           {sections.length === 0 && (
-            <div className="text-center py-12 bg-slate-50 rounded-4xl border border-dashed border-slate-200">
-              <FileText className="w-10 h-10 text-slate-300 mx-auto mb-3 opacity-50" />
-              <p className="text-xs text-slate-400 font-medium font-sans">
+            <div className="text-center py-12 bg-muted/50 rounded-4xl border border-dashed border-border">
+              <FileText className="w-10 h-10 text-muted-foreground mx-auto mb-3 opacity-50" />
+              <p className="text-xs text-muted-foreground font-medium font-sans">
                 No policy sections yet. Add one manually or use a template.
               </p>
             </div>
@@ -188,9 +188,9 @@ export const PrivacyPolicySettings: React.FC<PrivacyPolicySettingsProps> = ({
           <Mail className="w-3 h-3" />
           Contact Details
         </Label>
-        <div className="space-y-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+        <div className="space-y-4 p-4 bg-muted/50 rounded-2xl border border-border">
           <div className="space-y-1.5">
-            <Label className="text-[10px] font-bold uppercase text-slate-500">
+            <Label className="text-[10px] font-bold uppercase text-muted-foreground">
               Privacy Email
             </Label>
             <Input
@@ -203,7 +203,7 @@ export const PrivacyPolicySettings: React.FC<PrivacyPolicySettingsProps> = ({
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-[10px] font-bold uppercase text-slate-500">
+            <Label className="text-[10px] font-bold uppercase text-muted-foreground">
               Physical Address (Optional)
             </Label>
             <Textarea
@@ -257,12 +257,12 @@ export const PrivacyPolicySettings: React.FC<PrivacyPolicySettingsProps> = ({
               onClick={() =>
                 addTemplateSection(template.title, template.content)
               }
-              className="h-auto py-3 px-4 rounded-xl border-slate-200 hover:border-blue-200 hover:bg-blue-50/30 flex flex-col items-start gap-1 text-left"
+              className="h-auto py-3 px-4 rounded-xl border-border hover:border-blue-200 hover:bg-blue-50/30 flex flex-col items-start gap-1 text-left"
             >
               <span className="text-[10px] font-black uppercase text-blue-600 tracking-wider font-sans">
                 {template.label}
               </span>
-              <span className="text-[9px] text-slate-400 line-clamp-1 font-normal font-sans">
+              <span className="text-[9px] text-muted-foreground line-clamp-1 font-normal font-sans">
                 {template.title}
               </span>
             </Button>

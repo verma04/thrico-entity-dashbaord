@@ -39,7 +39,7 @@ const STATUS_BADGE: Record<string, { label: string; className: string }> = {
   },
   REJECTED: {
     label: "Rejected",
-    className: "bg-slate-100 text-slate-500 border-slate-200",
+    className: "bg-muted text-muted-foreground border-border",
   },
   DISABLED: {
     label: "Disabled",

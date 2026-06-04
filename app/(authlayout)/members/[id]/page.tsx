@@ -29,7 +29,7 @@ export default function UserDetailsPage() {
   if (error || !member) return <ErrorState onBack={() => router.back()} />;
 
   return (
-    <div className="flex flex-col h-full bg-slate-50/50 overflow-hidden">
+    <div className="flex flex-col h-full bg-background overflow-hidden">
       <MemberDetailHeader
         firstName={user.firstName}
         lastName={user.lastName}

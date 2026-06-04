@@ -257,7 +257,7 @@ export const MemberSpotlightSettings = ({
         </Droppable>
 
         {members.length === 0 && (
-          <div className="text-center py-8 border-2 border-dashed rounded-xl bg-slate-50">
+          <div className="text-center py-8 border-2 border-dashed rounded-xl bg-muted/50">
             <p className="text-sm text-muted-foreground mb-2">
               No members featured yet
             </p>

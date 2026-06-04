@@ -36,7 +36,7 @@ const formatBytes = (bytes: number | undefined, decimals = 1) => {
 };
 
 const moduleBarColors: Record<string, string> = {
-  default: "bg-slate-500",
+  default: "bg-muted/500",
   media: "bg-blue-500",
   documents: "bg-emerald-500",
   images: "bg-violet-500",
@@ -87,8 +87,8 @@ export const StorageStats = ({
       {/* Header */}
       <div className="px-5 py-4 border-b border-border/50 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-lg bg-slate-900 dark:bg-slate-100 flex items-center justify-center shrink-0">
-            <Database className="h-4.5 w-4.5 text-white dark:text-slate-900" />
+          <div className="h-9 w-9 rounded-lg bg-slate-900 dark:bg-muted flex items-center justify-center shrink-0">
+            <Database className="h-4.5 w-4.5 text-white dark:text-foreground" />
           </div>
           <div>
             <h2 className="text-[14px] font-semibold text-foreground leading-none tracking-tight">
@@ -144,7 +144,7 @@ export const StorageStats = ({
               {(100 - percent).toFixed(1)}% remaining
             </span>
           )}
-          <span className="text-slate-400 flex items-center gap-1">
+          <span className="text-muted-foreground flex items-center gap-1">
             <FileText className="h-3 w-3" />
             {summary.totalFileCount.toLocaleString()} files
           </span>
@@ -183,7 +183,7 @@ export const StorageStats = ({
                 >
                   <div className="flex items-center gap-2 min-w-0">
                     <div className="h-5 w-5 rounded bg-muted flex items-center justify-center shrink-0">
-                      <PieChart className="h-2.5 w-2.5 text-slate-400" />
+                      <PieChart className="h-2.5 w-2.5 text-muted-foreground" />
                     </div>
                     <span className="text-[12px] font-medium text-foreground capitalize truncate">
                       {stat.module.replace(/_/g, " ")}

@@ -119,14 +119,14 @@ const FeedSourceOrdering: React.FC<FeedSourceOrderingProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <h3 className="text-[14px] font-semibold text-zinc-900 tracking-tight">
+            <h3 className="text-[14px] font-semibold text-foreground tracking-tight">
               Feed Order
             </h3>
             <span className="px-1.5 py-0.5 rounded bg-emerald-50 text-[9px] font-bold text-emerald-600 uppercase tracking-wider border border-emerald-100">
               Live Order
             </span>
           </div>
-          <p className="text-[12px] text-zinc-400 max-w-md">
+          <p className="text-[12px] text-muted-foreground max-w-md">
             Drag and drop to change the order of content in your feed.
           </p>
         </div>
@@ -156,35 +156,35 @@ const FeedSourceOrdering: React.FC<FeedSourceOrderingProps> = ({
                       className={cn(
                         "group relative flex items-center gap-4 p-3 rounded-xl border transition-all duration-200",
                         snapshot.isDragging
-                          ? "bg-white border-zinc-900 shadow-xl z-50 scale-[1.02]"
-                          : "bg-zinc-50/50 border-zinc-100 hover:border-zinc-200 hover:bg-white",
+                          ? "bg-card border-zinc-900 shadow-xl z-50 scale-[1.02]"
+                          : "bg-muted/30 border-border hover:border-border hover:bg-card",
                       )}
                     >
                       {/* Drag Handle */}
                       <div
                         {...provided.dragHandleProps}
-                        className="p-1.5 rounded-lg text-zinc-300 hover:text-zinc-900 hover:bg-zinc-100 transition-colors cursor-grab active:cursor-grabbing"
+                        className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-grab active:cursor-grabbing"
                       >
                         <GripVertical size={16} />
                       </div>
 
                       {/* Rank Indicator */}
-                      <div className="flex items-center justify-center w-6 h-6 rounded-lg bg-white border border-zinc-100 text-[10px] font-bold text-zinc-400 tabular-nums">
+                      <div className="flex items-center justify-center w-6 h-6 rounded-lg bg-card border border-border text-[10px] font-bold text-muted-foreground tabular-nums">
                         {index + 1}
                       </div>
 
                       {/* Icon & Label */}
                       <div className="flex items-center gap-3.5 flex-1 min-w-0">
-                        <div className="w-10 h-10 rounded-xl bg-white border border-zinc-100 flex items-center justify-center text-zinc-900 shrink-0 shadow-sm group-hover:bg-zinc-50 transition-colors">
+                        <div className="w-10 h-10 rounded-xl bg-card border border-border flex items-center justify-center text-foreground shrink-0 shadow-sm group-hover:bg-muted/50 transition-colors">
                           <source.icon size={18} strokeWidth={2} />
                         </div>
                         <div className="min-w-0">
-                          <h4 className="text-[13.5px] font-medium text-zinc-900 leading-none">
+                          <h4 className="text-[13.5px] font-medium text-foreground leading-none">
                             {source.label
                               .replace("Show ", "")
                               .replace(" in Feed", "")}
                           </h4>
-                          <p className="mt-1.5 text-[11.5px] text-zinc-400 leading-relaxed truncate max-w-[300px]">
+                          <p className="mt-1.5 text-[11.5px] text-muted-foreground leading-relaxed truncate max-w-[300px]">
                             {source.description}
                           </p>
                         </div>
@@ -212,9 +212,9 @@ const FeedSourceOrdering: React.FC<FeedSourceOrderingProps> = ({
       </DragDropContext>
 
       {/* Footer Disclaimer */}
-      <div className="flex items-start gap-2.5 p-4 rounded-xl bg-zinc-50 border border-zinc-100/80">
-        <Info size={14} className="text-zinc-400 mt-0.5 shrink-0" />
-        <p className="text-[11px] text-zinc-500 leading-relaxed font-medium">
+      <div className="flex items-start gap-2.5 p-4 rounded-xl bg-muted/50 border border-border/80">
+        <Info size={14} className="text-muted-foreground mt-0.5 shrink-0" />
+        <p className="text-[11px] text-muted-foreground leading-relaxed font-medium">
           Changes will be applied to all users once saved.
         </p>
       </div>
@@ -226,24 +226,24 @@ const FeedSourceOrdering: React.FC<FeedSourceOrderingProps> = ({
             initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
             animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
             exit={{ opacity: 0, y: 20, filter: "blur(10px)" }}
-            className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-4 px-5 py-3 rounded-2xl bg-zinc-900 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] backdrop-blur-md"
+            className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-4 px-5 py-3 rounded-2xl bg-primary text-primary-foreground border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] backdrop-blur-md"
           >
             <div className="flex flex-col">
               <span className="text-[11px] font-bold text-white/90 leading-none">
                 Unsaved Changes
               </span>
-              <span className="text-[10px] text-zinc-400 mt-0.5">
+              <span className="text-[10px] text-muted-foreground mt-0.5">
                 You have changed the order
               </span>
             </div>
 
-            <div className="w-px h-8 bg-white/10 mx-1" />
+            <div className="w-px h-8 bg-card/10 mx-1" />
 
             <div className="flex items-center gap-2">
               <button
                 onClick={handleReset}
                 disabled={isSaving}
-                className="h-9 px-4 rounded-xl text-[12px] font-medium text-zinc-400 hover:text-white hover:bg-white/5 transition-all disabled:opacity-40 flex items-center gap-2"
+                className="h-9 px-4 rounded-xl text-[12px] font-medium text-muted-foreground hover:text-white hover:bg-card/5 transition-all disabled:opacity-40 flex items-center gap-2"
               >
                 <RotateCcw size={13} />
                 Discard
@@ -251,7 +251,7 @@ const FeedSourceOrdering: React.FC<FeedSourceOrderingProps> = ({
               <button
                 onClick={handleSaveOrder}
                 disabled={isSaving}
-                className="h-9 px-5 rounded-xl text-[12px] font-bold bg-white text-zinc-900 hover:bg-zinc-200 transition-all disabled:opacity-60 flex items-center gap-2 shadow-lg"
+                className="h-9 px-5 rounded-xl text-[12px] font-bold bg-card text-foreground hover:bg-muted transition-all disabled:opacity-60 flex items-center gap-2 shadow-lg"
               >
                 {isSaving ? (
                   <Loader2 size={13} className="animate-spin" />

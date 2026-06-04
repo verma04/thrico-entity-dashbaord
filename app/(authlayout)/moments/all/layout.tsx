@@ -52,20 +52,20 @@ export default function MomentsLayout({ children }: { children: React.ReactNode 
       {/* Action Bar */}
       <EcosystemActionBar showLiveIndicator={false}>
         <div className="relative w-full md:w-[450px] group">
-          <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-indigo-600 transition-colors" />
+          <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-indigo-600 transition-colors" />
           <Input 
             placeholder="Search by caption, owner or ID..."
             value={searchQuery}
             onChange={(e) => updateFilters({ q: e.target.value })}
-            className="h-12 pl-12 pr-4 rounded-xl border border-slate-200 bg-slate-50 focus-visible:ring-4 focus-visible:ring-indigo-500/5 transition-all font-medium text-slate-700 placeholder:text-slate-400 shadow-sm"
+            className="h-12 pl-12 pr-4 rounded-xl border border-border bg-muted/50 focus-visible:ring-4 focus-visible:ring-indigo-500/5 transition-all font-medium text-foreground placeholder:text-muted-foreground shadow-sm"
           />
         </div>
 
         <div className="flex items-center gap-4 pr-4 ml-auto">
-           <Button variant="outline" size="icon" className="h-10 w-10 rounded-lg border border-slate-200 text-slate-400 hover:text-indigo-600 hover:bg-slate-50 shadow-sm">
+           <Button variant="outline" size="icon" className="h-10 w-10 rounded-lg border border-border text-muted-foreground hover:text-indigo-600 hover:bg-muted/50 shadow-sm">
               <Filter className="h-4 w-4" />
            </Button>
-           <div className="flex items-center gap-2 px-4 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs font-semibold text-slate-600 uppercase tracking-wide whitespace-nowrap">
+           <div className="flex items-center gap-2 px-4 py-2 bg-muted border border-border rounded-xl text-xs font-semibold text-muted-foreground uppercase tracking-wide whitespace-nowrap">
               <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
               Live Moments
            </div>

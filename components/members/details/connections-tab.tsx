@@ -85,9 +85,9 @@ function getRelConfig(type: string) {
   return (
     RELATIONSHIP_CONFIG[type] ?? {
       label: type.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
-      color: "text-slate-700",
-      bg: "bg-slate-50",
-      border: "border-slate-200",
+      color: "text-foreground",
+      bg: "bg-muted/50",
+      border: "border-border",
       icon: Network,
     }
   );

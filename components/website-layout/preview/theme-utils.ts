@@ -1,4 +1,4 @@
-import { ThemeType, FontFamily } from "@/store/useWebsiteBuilderStore";
+import { ThemeType, FontType as FontFamily } from "@/store/useWebsiteBuilderStore";
 
 export const THEME_FONT_MAP: Record<ThemeType, string> = {
   academia: "var(--font-playfair)", // Serif

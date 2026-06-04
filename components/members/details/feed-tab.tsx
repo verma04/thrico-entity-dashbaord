@@ -64,10 +64,10 @@ export function FeedTab({ userId }: { userId: string }) {
   if (feeds.length === 0 && !loading) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
-        <div className="h-12 w-12 rounded-2xl bg-zinc-100 flex items-center justify-center mb-4">
+        <div className="h-12 w-12 rounded-2xl bg-muted flex items-center justify-center mb-4">
           <span className="text-xl">📭</span>
         </div>
-        <p className="text-[13px] font-bold text-zinc-400 uppercase tracking-widest">
+        <p className="text-[13px] font-bold text-muted-foreground uppercase tracking-widest">
           No feed available
         </p>
       </div>
@@ -91,13 +91,13 @@ export function FeedTab({ userId }: { userId: string }) {
           }
           endMessage={
             <div className="flex flex-col items-center justify-center py-20 animate-in fade-in slide-in-from-bottom-4 duration-700">
-              <div className="h-12 w-12 rounded-2xl bg-zinc-100 flex items-center justify-center mb-4">
+              <div className="h-12 w-12 rounded-2xl bg-muted flex items-center justify-center mb-4">
                 <span className="text-xl">✨</span>
               </div>
-              <p className="text-[13px] font-bold text-zinc-400 uppercase tracking-widest text-center">
+              <p className="text-[13px] font-bold text-muted-foreground uppercase tracking-widest text-center">
                 You've reached the end of the feed
               </p>
-              <div className="mt-2 h-1 w-12 rounded-full bg-zinc-100" />
+              <div className="mt-2 h-1 w-12 rounded-full bg-muted" />
             </div>
           }
         >

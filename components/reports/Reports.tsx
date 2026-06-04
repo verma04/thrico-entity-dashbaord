@@ -78,13 +78,13 @@ export default function Reports({
                 value={selectedModule}
                 onValueChange={(val: any) => setSelectedModule(val)}
               >
-                <SelectTrigger className="h-9 w-[180px] rounded-xl border-zinc-200 bg-white text-xs font-medium focus:ring-2 focus:ring-zinc-500/10 transition-all">
+                <SelectTrigger className="h-9 w-[180px] rounded-xl border-border bg-card text-xs font-medium focus:ring-2 focus:ring-zinc-500/10 transition-all">
                   <div className="flex items-center gap-2">
-                    <LayoutGrid className="h-3.5 w-3.5 text-zinc-400" />
+                    <LayoutGrid className="h-3.5 w-3.5 text-muted-foreground" />
                     <SelectValue placeholder="All Modules" />
                   </div>
                 </SelectTrigger>
-                <SelectContent className="rounded-xl border-zinc-100 shadow-2xl p-1">
+                <SelectContent className="rounded-xl border-border shadow-2xl p-1">
                   <SelectItem value="ALL" className="rounded-lg text-xs py-2">
                     All Modules
                   </SelectItem>
@@ -106,7 +106,7 @@ export default function Reports({
             <Button
               variant="outline"
               size="icon"
-              className="h-9 w-9 text-zinc-400 hover:text-foreground rounded-xl transition-all bg-white border-zinc-200"
+              className="h-9 w-9 text-muted-foreground hover:text-foreground rounded-xl transition-all bg-card border-border"
               onClick={() => refetch()}
             >
               <RotateCcw size={14} className={cn(loading && "animate-spin")} />

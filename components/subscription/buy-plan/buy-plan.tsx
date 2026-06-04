@@ -51,14 +51,14 @@ const BuyPlan = ({ displayStatus = "no_subscription" }: BuyPlanProps) => {
   const message = statusMessages[displayStatus] ?? statusMessages.no_subscription;
 
   return (
-    <div className="rounded-xl border border-slate-200/80 bg-white shadow-sm overflow-hidden">
+    <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
       {/* Section header */}
-      <div className="px-5 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="px-5 py-4 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
+          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
             Select a Plan
           </p>
-          <p className="text-[13px] text-slate-500 mt-1 max-w-lg">{message}</p>
+          <p className="text-[13px] text-muted-foreground mt-1 max-w-lg">{message}</p>
         </div>
         <PlanToggle
           isYearly={isYearly}
@@ -86,7 +86,7 @@ const BuyPlan = ({ displayStatus = "no_subscription" }: BuyPlanProps) => {
       </div>
 
       {/* Custom form */}
-      <div className="border-t border-slate-100 px-5 py-5">
+      <div className="border-t border-border px-5 py-5">
         <CustomRequestForm />
       </div>
 

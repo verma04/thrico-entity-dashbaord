@@ -246,7 +246,7 @@ export const ContainerSettings = ({
                     },
                   })
                 }
-                placeholder="#fff or bg-slate-50"
+                placeholder="#fff or bg-muted/50"
                 className="h-8 flex-1 text-xs text-center"
               />
             </div>
@@ -670,7 +670,7 @@ export const ContainerSettings = ({
             }`}
           >
             <span
-              className={`block h-3 w-3 rounded-full bg-white shadow-sm transform transition-transform ${
+              className={`block h-3 w-3 rounded-full bg-card shadow-sm transform transition-transform ${
                 selectedModule.content.containerSettings?.button?.enabled
                   ? "translate-x-3"
                   : "translate-x-0"

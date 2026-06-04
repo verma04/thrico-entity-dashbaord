@@ -30,7 +30,7 @@ export default function RebacSettings() {
 
       <EcosystemActionBar shadow="none">
          <EcosystemActionBar.Group grow>
-            <div className="flex items-center gap-1 bg-zinc-100/50 p-1 rounded-xl border border-zinc-200/50 w-fit">
+            <div className="flex items-center gap-1 bg-muted/50 p-1 rounded-xl border border-border/50 w-fit">
               {TABS.map((tab) => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.id;
@@ -41,11 +41,11 @@ export default function RebacSettings() {
                     className={cn(
                       "group/tab relative flex items-center gap-2 px-4 py-1.5 rounded-lg text-[12px] font-medium transition-all duration-200",
                       isActive
-                        ? "bg-white text-zinc-900 shadow-sm border border-zinc-200/50"
-                        : "text-zinc-500 hover:text-zinc-800 hover:bg-white/50"
+                        ? "bg-card text-foreground shadow-sm border border-border/50"
+                        : "text-muted-foreground hover:text-foreground hover:bg-card/50"
                     )}
                   >
-                    <Icon className={cn("h-3.5 w-3.5 shrink-0 transition-all duration-200", isActive ? "text-zinc-900" : "text-zinc-400 group-hover/tab:text-zinc-600")} strokeWidth={isActive ? 2 : 1.5} />
+                    <Icon className={cn("h-3.5 w-3.5 shrink-0 transition-all duration-200", isActive ? "text-foreground" : "text-muted-foreground group-hover/tab:text-muted-foreground")} strokeWidth={isActive ? 2 : 1.5} />
                     {tab.label}
                   </button>
                 );
@@ -55,7 +55,7 @@ export default function RebacSettings() {
 
          <EcosystemActionBar.Group align="right">
             <EcosystemActionBar.Item>
-               <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-zinc-200 bg-zinc-50/50 text-xs text-zinc-400">
+               <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-border bg-muted/30 text-xs text-muted-foreground">
                   <Key className="h-3 w-3" />
                   Active
                </div>

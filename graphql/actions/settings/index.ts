@@ -42,6 +42,7 @@ export interface EntitySettings {
   allowEntityDiscussionForumInFeed: boolean;
   allowEntityPollsInFeed: boolean;
   allowEntityFeedInFeed: boolean;
+  allowEntityMomentsInFeed: boolean;
   feedOrder: string[];
   feedEntityName: string;
 }
@@ -84,7 +85,6 @@ export interface UpdateEntitySettingsInput {
   allowEntityPollsInFeed?: boolean;
   allowEntityFeedInFeed?: boolean;
   allowEntityMomentsInFeed?: boolean;
-  allowEntityFeedInFeed?: boolean;
 
   // FAQ & Terms Fields
   termAndConditionsEvents?: string | null;

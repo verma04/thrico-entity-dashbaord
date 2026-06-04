@@ -172,20 +172,20 @@ export function MemberCreationForm({
   return (
     <FormikProvider value={formik}>
       <>
-        <div className="flex flex-col h-full bg-slate-50/50 overflow-hidden rounded-t-[inherit]">
+        <div className="flex flex-col h-full bg-muted/30 overflow-hidden rounded-t-[inherit]">
           {/* Header section - Sticky */}
-          <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200 px-6 py-4">
+          <div className="sticky top-0 z-30 bg-card/80 backdrop-blur-md border-b border-border px-6 py-4">
             <div className="max-w-5xl mx-auto w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
                 <div className="flex items-center gap-3 mb-1">
                   <div className="p-2.5 rounded-xl bg-indigo-600/10 ring-1 ring-indigo-600/20">
                     <User className="h-5 w-5 text-indigo-600" />
                   </div>
-                  <h1 className="text-2xl font-black tracking-tight text-slate-900">
+                  <h1 className="text-2xl font-black tracking-tight text-foreground">
                     {isEdit ? "Edit Member Details" : "Add New Member"}
                   </h1>
                 </div>
-                <div className="flex items-center gap-2 text-xs font-medium text-slate-500 ml-1">
+                <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground ml-1">
                   <span>Community</span>
                   <ChevronRight className="h-3 w-3" />
                   <span>Members</span>
@@ -206,15 +206,15 @@ export function MemberCreationForm({
               <div className="lg:col-span-8 space-y-8">
                 <form onSubmit={handleSubmit} className="space-y-8">
                   {/* Personal Info */}
-                  <Card className="border-none shadow-sm ring-1 ring-slate-200 overflow-hidden rounded-2xl bg-white">
-                    <CardHeader className="bg-slate-50/50 border-b border-slate-100 pb-4">
+                  <Card className="border-none shadow-sm ring-1 ring-slate-200 overflow-hidden rounded-2xl bg-card">
+                    <CardHeader className="bg-muted/30 border-b border-border pb-4">
                       <div className="flex items-center gap-2 mb-1">
                         <User className="h-4 w-4 text-indigo-600" />
-                        <CardTitle className="text-lg font-bold text-slate-800">
+                        <CardTitle className="text-lg font-bold text-foreground">
                           Personal Information
                         </CardTitle>
                       </div>
-                      <CardDescription className="text-slate-500 font-medium">
+                      <CardDescription className="text-muted-foreground font-medium">
                         {isEdit
                           ? "Update identity details of the member"
                           : "Basic identity details of the new member"}
@@ -226,7 +226,7 @@ export function MemberCreationForm({
                         <div className="space-y-2">
                           <Label
                             htmlFor="firstName"
-                            className="text-sm font-bold text-slate-700"
+                            className="text-sm font-bold text-foreground"
                           >
                             First Name <span className="text-rose-500">*</span>
                           </Label>
@@ -234,7 +234,7 @@ export function MemberCreationForm({
                             id="firstName"
                             name="firstName"
                             placeholder="John"
-                            className="h-11 rounded-xl border-slate-200 focus:ring-4 focus:ring-indigo-500/5 transition-all"
+                            className="h-11 rounded-xl border-border focus:ring-4 focus:ring-indigo-500/5 transition-all"
                             value={formik.values.firstName}
                             onChange={formik.handleChange}
                             onBlur={formik.handleBlur}
@@ -251,7 +251,7 @@ export function MemberCreationForm({
                         <div className="space-y-2">
                           <Label
                             htmlFor="lastName"
-                            className="text-sm font-bold text-slate-700"
+                            className="text-sm font-bold text-foreground"
                           >
                             Last Name <span className="text-rose-500">*</span>
                           </Label>
@@ -259,7 +259,7 @@ export function MemberCreationForm({
                             id="lastName"
                             name="lastName"
                             placeholder="Doe"
-                            className="h-11 rounded-xl border-slate-200 focus:ring-4 focus:ring-indigo-500/5 transition-all"
+                            className="h-11 rounded-xl border-border focus:ring-4 focus:ring-indigo-500/5 transition-all"
                             value={formik.values.lastName}
                             onChange={formik.handleChange}
                             onBlur={formik.handleBlur}
@@ -278,7 +278,7 @@ export function MemberCreationForm({
                         <div className="space-y-2">
                           <Label
                             htmlFor="email"
-                            className="text-sm font-bold text-slate-700"
+                            className="text-sm font-bold text-foreground"
                           >
                             Email Address{" "}
                             <span className="text-rose-500">*</span>
@@ -289,12 +289,12 @@ export function MemberCreationForm({
                               name="email"
                               type="email"
                               placeholder="john.doe@example.com"
-                              className="h-11 pl-10 rounded-xl border-slate-200 focus:ring-4 focus:ring-indigo-500/5 transition-all"
+                              className="h-11 pl-10 rounded-xl border-border focus:ring-4 focus:ring-indigo-500/5 transition-all"
                               value={formik.values.email}
                               onChange={formik.handleChange}
                               onBlur={formik.handleBlur}
                             />
-                            <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                            <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                           </div>
                           {formik.touched.email && formik.errors.email && (
                             <p className="text-xs font-semibold text-rose-500">
@@ -305,7 +305,7 @@ export function MemberCreationForm({
 
                         {/* Date of Birth */}
                         <div className="space-y-2">
-                          <Label className="text-sm font-bold text-slate-700">
+                          <Label className="text-sm font-bold text-foreground">
                             Date of Birth
                           </Label>
                           <Popover
@@ -316,11 +316,11 @@ export function MemberCreationForm({
                               <Button
                                 variant="outline"
                                 className={cn(
-                                  "w-full h-11 justify-start text-left font-normal rounded-xl border-slate-200 hover:bg-slate-50 transition-all",
-                                  !formik.values.dob && "text-slate-400",
+                                  "w-full h-11 justify-start text-left font-normal rounded-xl border-border hover:bg-muted/50 transition-all",
+                                  !formik.values.dob && "text-muted-foreground",
                                 )}
                               >
-                                <CalendarIcon className="mr-2 h-4 w-4 text-slate-400" />
+                                <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
                                 {formik.values.dob ? (
                                   format(formik.values.dob, "PPP")
                                 ) : (
@@ -329,7 +329,7 @@ export function MemberCreationForm({
                               </Button>
                             </PopoverTrigger>
                             <PopoverContent
-                              className="w-auto p-0 rounded-2xl shadow-xl border-slate-100"
+                              className="w-auto p-0 rounded-2xl shadow-xl border-border"
                               align="start"
                             >
                               <Calendar
@@ -355,22 +355,22 @@ export function MemberCreationForm({
                   </Card>
 
                   {/* Professional Info */}
-                  <Card className="border-none shadow-sm ring-1 ring-slate-200 overflow-hidden rounded-2xl bg-white">
-                    <CardHeader className="bg-slate-50/50 border-b border-slate-100 pb-4">
+                  <Card className="border-none shadow-sm ring-1 ring-slate-200 overflow-hidden rounded-2xl bg-card">
+                    <CardHeader className="bg-muted/30 border-b border-border pb-4">
                       <div className="flex items-center gap-2 mb-1">
                         <Layout className="h-4 w-4 text-indigo-600" />
-                        <CardTitle className="text-lg font-bold text-slate-800">
+                        <CardTitle className="text-lg font-bold text-foreground">
                           Professional Information
                         </CardTitle>
                       </div>
-                      <CardDescription className="text-slate-500 font-medium">
+                      <CardDescription className="text-muted-foreground font-medium">
                         Work related details and industry classification
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="pt-8 space-y-6">
                       {/* Industries */}
                       <div className="space-y-2">
-                        <Label className="text-sm font-bold text-slate-700">
+                        <Label className="text-sm font-bold text-foreground">
                           Industries
                         </Label>
                         <Popover
@@ -382,7 +382,7 @@ export function MemberCreationForm({
                               variant="outline"
                               role="combobox"
                               aria-expanded={isIndustryPopoverOpen}
-                              className="w-full justify-between h-auto min-h-[44px] rounded-xl border-slate-200 hover:bg-slate-50 transition-all px-3 py-2 text-left font-normal"
+                              className="w-full justify-between h-auto min-h-[44px] rounded-xl border-border hover:bg-muted/50 transition-all px-3 py-2 text-left font-normal"
                             >
                               <div className="flex flex-wrap gap-1.5">
                                 {formik.values.industryIds.length > 0 ? (
@@ -415,7 +415,7 @@ export function MemberCreationForm({
                                     },
                                   )
                                 ) : (
-                                  <span className="text-slate-400">
+                                  <span className="text-muted-foreground">
                                     Select industries...
                                   </span>
                                 )}
@@ -423,7 +423,7 @@ export function MemberCreationForm({
                               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                             </Button>
                           </PopoverTrigger>
-                          <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 rounded-2xl shadow-xl border-slate-200 overflow-hidden">
+                          <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 rounded-2xl shadow-xl border-border overflow-hidden">
                             <Command className="border-none">
                               <CommandInput
                                 placeholder="Search industries..."
@@ -452,17 +452,17 @@ export function MemberCreationForm({
                                           next,
                                         );
                                       }}
-                                      className="flex items-center justify-between py-2.5 px-3 cursor-pointer hover:bg-slate-50 transition-colors"
+                                      className="flex items-center justify-between py-2.5 px-3 cursor-pointer hover:bg-muted/50 transition-colors"
                                     >
                                       <div className="flex items-center gap-2">
                                         <div
                                           className={cn(
-                                            "h-4 w-4 rounded border border-slate-300 flex items-center justify-center transition-all",
+                                            "h-4 w-4 rounded border border-border flex items-center justify-center transition-all",
                                             formik.values.industryIds.includes(
                                               industry.id,
                                             )
                                               ? "bg-indigo-600 border-indigo-600"
-                                              : "bg-white",
+                                              : "bg-card",
                                           )}
                                         >
                                           {formik.values.industryIds.includes(
@@ -471,7 +471,7 @@ export function MemberCreationForm({
                                             <Check className="h-3 w-3 text-white" />
                                           )}
                                         </div>
-                                        <span className="text-sm font-semibold text-slate-700">
+                                        <span className="text-sm font-semibold text-foreground">
                                           {industry.title}
                                         </span>
                                       </div>
@@ -482,13 +482,13 @@ export function MemberCreationForm({
                             </Command>
                           </PopoverContent>
                         </Popover>
-                        <p className="text-[10px] uppercase tracking-wider font-bold text-slate-400">
+                        <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">
                           Select one or more industries the member belongs to
                         </p>
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-sm font-bold text-slate-700">
+                        <Label className="text-sm font-bold text-foreground">
                           Job Functions
                         </Label>
                         <Popover
@@ -500,7 +500,7 @@ export function MemberCreationForm({
                               variant="outline"
                               role="combobox"
                               aria-expanded={isJobFunctionPopoverOpen}
-                              className="w-full justify-between h-auto min-h-[44px] rounded-xl border-slate-200 hover:bg-slate-50 transition-all px-3 py-2 text-left font-normal"
+                              className="w-full justify-between h-auto min-h-[44px] rounded-xl border-border hover:bg-muted/50 transition-all px-3 py-2 text-left font-normal"
                             >
                               <div className="flex flex-wrap gap-1.5">
                                 {formik.values.jobFunctionIds.length > 0 ? (
@@ -533,7 +533,7 @@ export function MemberCreationForm({
                                     },
                                   )
                                 ) : (
-                                  <span className="text-slate-400">
+                                  <span className="text-muted-foreground">
                                     Select job functions...
                                   </span>
                                 )}
@@ -541,7 +541,7 @@ export function MemberCreationForm({
                               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                             </Button>
                           </PopoverTrigger>
-                          <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 rounded-2xl shadow-xl border-slate-200 overflow-hidden">
+                          <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 rounded-2xl shadow-xl border-border overflow-hidden">
                             <Command className="border-none">
                               <CommandInput
                                 placeholder="Search job functions..."
@@ -569,17 +569,17 @@ export function MemberCreationForm({
                                           next,
                                         );
                                       }}
-                                      className="flex items-center justify-between py-2.5 px-3 cursor-pointer hover:bg-slate-50 transition-colors"
+                                      className="flex items-center justify-between py-2.5 px-3 cursor-pointer hover:bg-muted/50 transition-colors"
                                     >
                                       <div className="flex items-center gap-2">
                                         <div
                                           className={cn(
-                                            "h-4 w-4 rounded border border-slate-300 flex items-center justify-center transition-all",
+                                            "h-4 w-4 rounded border border-border flex items-center justify-center transition-all",
                                             formik.values.jobFunctionIds.includes(
                                               jf.id,
                                             )
                                               ? "bg-indigo-600 border-indigo-600"
-                                              : "bg-white",
+                                              : "bg-card",
                                           )}
                                         >
                                           {formik.values.jobFunctionIds.includes(
@@ -588,7 +588,7 @@ export function MemberCreationForm({
                                             <Check className="h-3 w-3 text-white" />
                                           )}
                                         </div>
-                                        <span className="text-sm font-semibold text-slate-700">
+                                        <span className="text-sm font-semibold text-foreground">
                                           {jf.title}
                                         </span>
                                       </div>
@@ -599,13 +599,13 @@ export function MemberCreationForm({
                             </Command>
                           </PopoverContent>
                         </Popover>
-                        <p className="text-[10px] uppercase tracking-wider font-bold text-slate-400">
+                        <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">
                           Select one or more job functions that fit the member
                         </p>
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-sm font-bold text-slate-700">
+                        <Label className="text-sm font-bold text-foreground">
                           Interests
                         </Label>
                         <Popover
@@ -617,7 +617,7 @@ export function MemberCreationForm({
                               variant="outline"
                               role="combobox"
                               aria-expanded={isInterestPopoverOpen}
-                              className="w-full justify-between h-auto min-h-[44px] rounded-xl border-slate-200 hover:bg-slate-50 transition-all px-3 py-2 text-left font-normal"
+                              className="w-full justify-between h-auto min-h-[44px] rounded-xl border-border hover:bg-muted/50 transition-all px-3 py-2 text-left font-normal"
                             >
                               <div className="flex flex-wrap gap-1.5">
                                 {formik.values.interestIds.length > 0 ? (
@@ -650,7 +650,7 @@ export function MemberCreationForm({
                                     },
                                   )
                                 ) : (
-                                  <span className="text-slate-400">
+                                  <span className="text-muted-foreground">
                                     Select interests...
                                   </span>
                                 )}
@@ -658,7 +658,7 @@ export function MemberCreationForm({
                               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                             </Button>
                           </PopoverTrigger>
-                          <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 rounded-2xl shadow-xl border-slate-200 overflow-hidden">
+                          <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 rounded-2xl shadow-xl border-border overflow-hidden">
                             <Command className="border-none">
                               <CommandInput
                                 placeholder="Search interests..."
@@ -686,17 +686,17 @@ export function MemberCreationForm({
                                           next,
                                         );
                                       }}
-                                      className="flex items-center justify-between py-2.5 px-3 cursor-pointer hover:bg-slate-50 transition-colors"
+                                      className="flex items-center justify-between py-2.5 px-3 cursor-pointer hover:bg-muted/50 transition-colors"
                                     >
                                       <div className="flex items-center gap-2">
                                         <div
                                           className={cn(
-                                            "h-4 w-4 rounded border border-slate-300 flex items-center justify-center transition-all",
+                                            "h-4 w-4 rounded border border-border flex items-center justify-center transition-all",
                                             formik.values.interestIds.includes(
                                               interest.id,
                                             )
                                               ? "bg-indigo-600 border-indigo-600"
-                                              : "bg-white",
+                                              : "bg-card",
                                           )}
                                         >
                                           {formik.values.interestIds.includes(
@@ -705,7 +705,7 @@ export function MemberCreationForm({
                                             <Check className="h-3 w-3 text-white" />
                                           )}
                                         </div>
-                                        <span className="text-sm font-semibold text-slate-700">
+                                        <span className="text-sm font-semibold text-foreground">
                                           {interest.title}
                                         </span>
                                       </div>
@@ -716,7 +716,7 @@ export function MemberCreationForm({
                             </Command>
                           </PopoverContent>
                         </Popover>
-                        <p className="text-[10px] uppercase tracking-wider font-bold text-slate-400">
+                        <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">
                           Select one or more interests that fit the member
                         </p>
                       </div>
@@ -727,7 +727,7 @@ export function MemberCreationForm({
                       <div className="space-y-2">
                         <Label
                           htmlFor="headline"
-                          className="text-sm font-bold text-slate-700"
+                          className="text-sm font-bold text-foreground"
                         >
                           Headline
                         </Label>
@@ -735,12 +735,12 @@ export function MemberCreationForm({
                           id="headline"
                           name="headline"
                           placeholder="e.g. Senior Software Engineer at Tech Corp"
-                          className="h-11 rounded-xl border-slate-200 focus:ring-4 focus:ring-indigo-500/5 transition-all"
+                          className="h-11 rounded-xl border-border focus:ring-4 focus:ring-indigo-500/5 transition-all"
                           value={formik.values.headline}
                           onChange={formik.handleChange}
                           onBlur={formik.handleBlur}
                         />
-                        <p className="text-[10px] uppercase tracking-wider font-bold text-slate-400">
+                        <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">
                           A short summary of their current role or expertise
                         </p>
                       </div>
@@ -749,7 +749,7 @@ export function MemberCreationForm({
                       <div className="space-y-2">
                         <Label
                           htmlFor="about"
-                          className="text-sm font-bold text-slate-700"
+                          className="text-sm font-bold text-foreground"
                         >
                           About User
                         </Label>
@@ -757,7 +757,7 @@ export function MemberCreationForm({
                           id="about"
                           name="about"
                           placeholder="Tell us more about the member..."
-                          className="min-h-[120px] rounded-xl border-slate-200 focus:ring-4 focus:ring-indigo-500/5 transition-all resize-none"
+                          className="min-h-[120px] rounded-xl border-border focus:ring-4 focus:ring-indigo-500/5 transition-all resize-none"
                           value={formik.values.about}
                           onChange={formik.handleChange}
                           onBlur={formik.handleBlur}
@@ -771,11 +771,11 @@ export function MemberCreationForm({
               {/* Sidebar Info */}
               <div className="lg:col-span-4">
                 <div className="sticky top-24 space-y-6">
-                  <Card className="border-none shadow-md shadow-indigo-600/5 ring-1 ring-slate-200 rounded-3xl overflow-hidden bg-white">
+                  <Card className="border-none shadow-md shadow-indigo-600/5 ring-1 ring-slate-200 rounded-3xl overflow-hidden bg-card">
                     <div className="h-24 bg-linear-to-br from-indigo-600 to-violet-700" />
                     <div className="px-6 pb-8 -mt-12 text-center">
-                      <div className="inline-flex p-1 bg-white rounded-3xl shadow-lg mb-4 group relative cursor-pointer">
-                        <div className="h-24 w-24 rounded-2xl bg-slate-100 flex items-center justify-center overflow-hidden">
+                      <div className="inline-flex p-1 bg-card rounded-3xl shadow-lg mb-4 group relative cursor-pointer">
+                        <div className="h-24 w-24 rounded-2xl bg-muted flex items-center justify-center overflow-hidden">
                           {imageUrl ? (
                             <Image
                               src={`https://cdn.thrico.network/${imageUrl}`}
@@ -785,7 +785,7 @@ export function MemberCreationForm({
                               className="h-full w-full object-cover transition-transform group-hover:scale-110"
                             />
                           ) : (
-                            <User className="h-10 w-10 text-slate-300" />
+                            <User className="h-10 w-10 text-muted-foreground" />
                           )}
                         </div>
 
@@ -800,7 +800,7 @@ export function MemberCreationForm({
                             label=""
                             aspectRatio={1}
                             className="p-0"
-                            dropzoneClassName="h-8 w-8 rounded-full bg-white shadow-md border-slate-200 flex items-center justify-center p-0"
+                            dropzoneClassName="h-8 w-8 rounded-full bg-card shadow-md border-border flex items-center justify-center p-0"
                             previewClassName="hidden"
                           >
                             <div className="h-8 w-8 rounded-full bg-indigo-600 text-white flex items-center justify-center shadow-lg border-2 border-white ring-1 ring-indigo-100">
@@ -809,7 +809,7 @@ export function MemberCreationForm({
                           </ImageUploadWithCrop>
                         </div>
                       </div>
-                      <h3 className="text-xl font-black text-slate-900 leading-tight">
+                      <h3 className="text-xl font-black text-foreground leading-tight">
                         {formik.values.firstName || formik.values.lastName
                           ? `${formik.values.firstName} ${formik.values.lastName}`
                           : "New Member Preview"}
@@ -818,12 +818,12 @@ export function MemberCreationForm({
                         {formik.values.headline || "Professional Headline"}
                       </p>
 
-                      <div className="mt-6 pt-6 border-t border-slate-100 flex flex-col gap-3">
+                      <div className="mt-6 pt-6 border-t border-border flex flex-col gap-3">
                         <div className="flex items-center gap-3 text-left">
-                          <div className="h-8 w-8 rounded-lg bg-slate-50 flex items-center justify-center border border-slate-100">
-                            <Mail className="h-3.5 w-3.5 text-slate-400" />
+                          <div className="h-8 w-8 rounded-lg bg-muted/50 flex items-center justify-center border border-border">
+                            <Mail className="h-3.5 w-3.5 text-muted-foreground" />
                           </div>
-                          <span className="text-xs font-semibold text-slate-500 truncate max-w-[200px]">
+                          <span className="text-xs font-semibold text-muted-foreground truncate max-w-[200px]">
                             {formik.values.email || "No email provided"}
                           </span>
                         </div>
@@ -831,16 +831,16 @@ export function MemberCreationForm({
                     </div>
                   </Card>
 
-                  <Card className="border-none shadow-sm ring-1 ring-slate-200 rounded-2xl bg-white">
+                  <Card className="border-none shadow-sm ring-1 ring-slate-200 rounded-2xl bg-card">
                     <CardContent className="p-5 flex items-start gap-4">
                       <div className="h-8 w-8 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center shrink-0 mt-0.5">
                         <Mail className="h-4 w-4" />
                       </div>
                       <div className="space-y-1">
-                        <h4 className="text-[11px] font-bold text-slate-800 uppercase tracking-widest">
+                        <h4 className="text-[11px] font-bold text-foreground uppercase tracking-widest">
                           Automated Invitation
                         </h4>
-                        <p className="text-[12px] text-slate-500 font-medium leading-relaxed">
+                        <p className="text-[12px] text-muted-foreground font-medium leading-relaxed">
                           An invitation email will be sent automatically to the
                           provided address using your configured domain. You can
                           monitor its delivery status in the{" "}

@@ -44,19 +44,19 @@ import { AccessDeniedAlert } from "@/components/shared/access-denied-alert";
 const STATUS_COLORS = ["#18181b", "#3f3f46", "#71717a", "#a1a1aa", "#e4e4e7"];
 
 const ChartSkeleton = () => (
-  <div className="h-full w-full flex items-center justify-center bg-zinc-50/50 rounded-xl border border-dashed border-zinc-200">
+  <div className="h-full w-full flex items-center justify-center bg-muted/30 rounded-xl border border-dashed border-border">
     <div className="flex flex-col items-center gap-4 text-center px-6">
-      <div className="h-6 w-6 border-2 border-zinc-200 border-t-zinc-900 rounded-full animate-spin" />
-      <p className="text-xs font-medium text-zinc-400">Getting info...</p>
+      <div className="h-6 w-6 border-2 border-border border-t-primary rounded-full animate-spin" />
+      <p className="text-xs font-medium text-muted-foreground">Getting info...</p>
     </div>
   </div>
 );
 
 const EmptyChart = ({ message }: { message: string }) => (
-  <div className="h-full w-full flex items-center justify-center bg-zinc-50/50 rounded-xl border border-dashed border-zinc-200">
+  <div className="h-full w-full flex items-center justify-center bg-muted/30 rounded-xl border border-dashed border-border">
     <div className="flex flex-col items-center gap-2">
       <Search size={20} className="text-zinc-200" />
-      <p className="text-xs font-medium text-zinc-400 text-center px-6">
+      <p className="text-xs font-medium text-muted-foreground text-center px-6">
         {message}
       </p>
     </div>
@@ -118,11 +118,11 @@ export default function CommunitiesAnalytics() {
                 onDateChange={() => {}}
                 defaultValue="LAST_7_DAYS"
               />
-              <div className="h-4 w-px bg-zinc-200 mx-1" />
+              <div className="h-4 w-px bg-muted mx-1" />
               <Button
                 variant="outline"
                 size="icon"
-                className="h-9 w-9 text-zinc-400 rounded-lg"
+                className="h-9 w-9 text-muted-foreground rounded-lg"
                 disabled
               >
                 <RotateCcw size={14} />
@@ -223,11 +223,11 @@ export default function CommunitiesAnalytics() {
               onDateChange={handleDateChange}
               defaultValue="LAST_7_DAYS"
             />
-            <div className="h-4 w-px bg-zinc-200 mx-1" />
+            <div className="h-4 w-px bg-muted mx-1" />
             <Button
               variant="outline"
               size="icon"
-              className="h-9 w-9 text-zinc-400 hover:text-indigo-600 rounded-lg transition-all"
+              className="h-9 w-9 text-muted-foreground hover:text-indigo-600 rounded-lg transition-all"
               onClick={() => refetch()}
             >
               <RotateCcw size={14} className={cn(loading && "animate-spin")} />
@@ -271,30 +271,30 @@ export default function CommunitiesAnalytics() {
                       return (
                         <div
                           key={community.name}
-                          className="flex items-center gap-4 p-3 rounded-xl hover:bg-zinc-50 transition-colors group"
+                          className="flex items-center gap-4 p-3 rounded-xl hover:bg-muted/50 transition-colors group"
                         >
-                          <div className="w-8 h-8 rounded-lg bg-zinc-50 border border-zinc-100 flex items-center justify-center text-xs font-bold text-zinc-400">
+                          <div className="w-8 h-8 rounded-lg bg-muted/50 border border-border flex items-center justify-center text-xs font-bold text-muted-foreground">
                             {idx + 1}
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between mb-1.5">
-                              <span className="text-sm font-semibold text-zinc-900 truncate">
+                              <span className="text-sm font-semibold text-foreground truncate">
                                 {community.name}
                               </span>
-                              <div className="flex items-center gap-4 text-zinc-500">
+                              <div className="flex items-center gap-4 text-muted-foreground">
                                 <span className="flex items-center gap-1.5 text-xs font-medium tabular-nums">
-                                  <Users size={12} className="text-zinc-400" />
+                                  <Users size={12} className="text-muted-foreground" />
                                   {community.members.toLocaleString()}
                                 </span>
-                                <span className="flex items-center gap-1.5 text-xs font-medium tabular-nums px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-500">
+                                <span className="flex items-center gap-1.5 text-xs font-medium tabular-nums px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
                                   <Eye size={10} />
                                   {community.views.toLocaleString()}
                                 </span>
                               </div>
                             </div>
-                            <div className="h-1.5 w-full rounded-full bg-zinc-100 overflow-hidden">
+                            <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
                               <div
-                                className="h-full bg-zinc-900 rounded-full transition-all duration-1000"
+                                className="h-full bg-primary rounded-full transition-all duration-1000"
                                 style={{ width: `${barWidth}%` }}
                               />
                             </div>
@@ -317,10 +317,10 @@ export default function CommunitiesAnalytics() {
                   .map((creator: TopCreator, idx: number) => (
                     <div
                       key={creator.name}
-                      className="flex items-center justify-between p-3 rounded-xl border border-zinc-100 bg-white hover:border-zinc-200 hover:shadow-sm transition-all group"
+                      className="flex items-center justify-between p-3 rounded-xl border border-border bg-card hover:border-border hover:shadow-sm transition-all group"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-lg bg-zinc-50 border border-zinc-100 flex items-center justify-center text-xs font-bold text-zinc-500 overflow-hidden">
+                        <div className="h-9 w-9 rounded-lg bg-muted/50 border border-border flex items-center justify-center text-xs font-bold text-muted-foreground overflow-hidden">
                           {creator.avatar ? (
                             <img
                               src={`https://cdn.thrico.network${creator?.avatar}`}
@@ -332,15 +332,15 @@ export default function CommunitiesAnalytics() {
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-zinc-900 truncate">
+                          <p className="text-sm font-semibold text-foreground truncate">
                             {creator.name}
                           </p>
-                          <p className="text-[10px] font-medium text-zinc-400 uppercase tracking-wider">
+                          <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
                             {creator.communitiesCreated} Groups
                           </p>
                         </div>
                       </div>
-                      <div className="text-xs font-bold text-zinc-300 group-hover:text-zinc-400 transition-colors">
+                      <div className="text-xs font-bold text-muted-foreground group-hover:text-muted-foreground transition-colors">
                         #{idx + 1}
                       </div>
                     </div>
@@ -395,10 +395,10 @@ export default function CommunitiesAnalytics() {
                       </ResponsiveContainer>
                       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                         <div className="text-center translate-y-1">
-                          <span className="text-2xl font-bold text-zinc-900 block leading-none">
+                          <span className="text-2xl font-bold text-foreground block leading-none">
                             {totalStatusCount}
                           </span>
-                          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mt-1">
+                          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">
                             TOTAL
                           </p>
                         </div>
@@ -412,7 +412,7 @@ export default function CommunitiesAnalytics() {
                     (item: StatusDistributionPoint, i: number) => (
                       <div
                         key={item.name}
-                        className="flex items-center justify-between p-2.5 rounded-lg bg-zinc-50/50 border border-zinc-100"
+                        className="flex items-center justify-between p-2.5 rounded-lg bg-muted/30 border border-border"
                       >
                         <div className="flex items-center gap-2.5">
                           <div
@@ -422,11 +422,11 @@ export default function CommunitiesAnalytics() {
                                 STATUS_COLORS[i % STATUS_COLORS.length],
                             }}
                           />
-                          <span className="text-xs font-semibold text-zinc-600">
+                          <span className="text-xs font-semibold text-muted-foreground">
                             {item.name}
                           </span>
                         </div>
-                        <span className="text-xs font-bold text-zinc-900 tabular-nums">
+                        <span className="text-xs font-bold text-foreground tabular-nums">
                           {item.value}
                         </span>
                       </div>
@@ -436,19 +436,19 @@ export default function CommunitiesAnalytics() {
               </div>
             </EcosystemCard>
 
-            <div className="bg-zinc-900 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden group">
+            <div className="bg-primary text-primary-foreground rounded-2xl p-6 text-white shadow-lg relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                 <TrendingUp size={48} />
               </div>
               <h4 className="text-base font-bold tracking-tight mb-2">
                 Growth
               </h4>
-              <p className="text-xs text-zinc-400 leading-relaxed font-medium mb-6">
+              <p className="text-xs text-muted-foreground leading-relaxed font-medium mb-6">
                 Communities are growing by 12.4% each year.
               </p>
               <Button
                 size="sm"
-                className="w-full font-bold bg-white text-zinc-900 hover:bg-zinc-100 transition-colors"
+                className="w-full font-bold bg-card text-foreground hover:bg-muted transition-colors"
               >
                 View Details
               </Button>

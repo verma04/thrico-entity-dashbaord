@@ -79,14 +79,14 @@ function SeoPreview({
   const displayDomain = safeBaseUrl.replace("https://", "").replace("http://", "");
 
   const getTitleStatus = (length: number) => {
-    if (length === 0) return "text-slate-400";
+    if (length === 0) return "text-muted-foreground";
     if (length > 60) return "text-destructive";
     if (length >= 50) return "text-amber-500";
     return "text-emerald-500";
   };
 
   const getDescStatus = (length: number) => {
-    if (length === 0) return "text-slate-400";
+    if (length === 0) return "text-muted-foreground";
     if (length > 160) return "text-destructive";
     if (length >= 140) return "text-amber-500";
     return "text-emerald-500";
@@ -96,18 +96,18 @@ function SeoPreview({
   const descLength = description?.length || 0;
 
   return (
-    <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-xl shadow-slate-200/50 space-y-6">
+    <div className="rounded-3xl border border-border bg-card p-6 shadow-xl shadow-slate-200/50 space-y-6">
       <div className="flex items-center gap-2 px-1">
         <Globe className="h-4 w-4 text-indigo-500" />
-        <h4 className="text-[10px] font-black text-slate-900 uppercase tracking-widest">
+        <h4 className="text-[10px] font-black text-foreground uppercase tracking-widest">
           Search Engine Projection
         </h4>
       </div>
 
-      <div className="bg-slate-50/50 rounded-2xl p-6 space-y-1 border border-slate-50">
+      <div className="bg-muted/30 rounded-2xl p-6 space-y-1 border border-slate-50">
         <div className="flex items-center gap-2 mb-1">
           <div className="w-4 h-4 rounded-full bg-linear-to-br from-blue-500 to-emerald-500 shadow-sm" />
-          <span className="text-[10px] font-bold text-slate-400">
+          <span className="text-[10px] font-bold text-muted-foreground">
             {displayDomain}
           </span>
         </div>
@@ -117,7 +117,7 @@ function SeoPreview({
         <div className="text-[11px] text-emerald-700 mb-2 truncate max-w-full">
           {baseUrl}/{slug || "page"}
         </div>
-        <div className="text-sm text-slate-500 line-clamp-2 leading-relaxed font-medium">
+        <div className="text-sm text-muted-foreground line-clamp-2 leading-relaxed font-medium">
           {displayDescription}
         </div>
       </div>
@@ -125,19 +125,19 @@ function SeoPreview({
       <div className="grid grid-cols-2 gap-6 text-[10px] px-1">
         <div className="space-y-3">
           <div className="flex justify-between items-center">
-            <span className="font-black text-slate-400 uppercase tracking-tighter">
+            <span className="font-black text-muted-foreground uppercase tracking-tighter">
               Title Amplitude
             </span>
             <span className={cn("font-black", getTitleStatus(titleLength))}>
               {titleLength} / 60
             </span>
           </div>
-          <div className="h-1 bg-slate-100 rounded-full overflow-hidden">
+          <div className="h-1 bg-muted rounded-full overflow-hidden">
             <div
               className={cn(
                 "h-full transition-all duration-500",
                 titleLength === 0
-                  ? "bg-slate-200"
+                  ? "bg-muted"
                   : titleLength > 60
                     ? "bg-destructive"
                     : titleLength >= 50
@@ -151,19 +151,19 @@ function SeoPreview({
 
         <div className="space-y-3">
           <div className="flex justify-between items-center">
-            <span className="font-black text-slate-400 uppercase tracking-tighter">
+            <span className="font-black text-muted-foreground uppercase tracking-tighter">
               Desc Density
             </span>
             <span className={cn("font-black", getDescStatus(descLength))}>
               {descLength} / 160
             </span>
           </div>
-          <div className="h-1 bg-slate-100 rounded-full overflow-hidden">
+          <div className="h-1 bg-muted rounded-full overflow-hidden">
             <div
               className={cn(
                 "h-full transition-all duration-500",
                 descLength === 0
-                  ? "bg-slate-200"
+                  ? "bg-muted"
                   : descLength > 160
                     ? "bg-destructive"
                     : descLength >= 140
@@ -209,20 +209,20 @@ function SchemaPreview({ schemaMarkup }: { schemaMarkup: string }) {
   const { valid, data, error } = parseSchema();
 
   return (
-    <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-xl shadow-slate-200/50 space-y-6">
+    <div className="rounded-3xl border border-border bg-card p-6 shadow-xl shadow-slate-200/50 space-y-6">
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
           <div
             className={cn(
               "w-2.5 h-2.5 rounded-full animate-pulse",
               valid === null
-                ? "bg-slate-200"
+                ? "bg-muted"
                 : valid
                   ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"
                   : "bg-destructive shadow-[0_0_8px_rgba(239,68,68,0.5)]",
             )}
           />
-          <h4 className="text-[10px] font-black text-slate-900 uppercase tracking-widest">
+          <h4 className="text-[10px] font-black text-foreground uppercase tracking-widest">
             Semantic Schema Index
           </h4>
         </div>
@@ -240,9 +240,9 @@ function SchemaPreview({ schemaMarkup }: { schemaMarkup: string }) {
         )}
       </div>
 
-      <div className="bg-slate-50/50 rounded-2xl p-6 border border-slate-50 min-h-[140px] flex flex-col justify-center">
+      <div className="bg-muted/30 rounded-2xl p-6 border border-slate-50 min-h-[140px] flex flex-col justify-center">
         {valid === null ? (
-          <div className="text-[10px] font-bold text-slate-400 text-center uppercase tracking-widest leading-relaxed">
+          <div className="text-[10px] font-bold text-muted-foreground text-center uppercase tracking-widest leading-relaxed">
             Awaiting semantic injection...
             <br />
             Generate or paste JSON-LD markup
@@ -252,14 +252,14 @@ function SchemaPreview({ schemaMarkup }: { schemaMarkup: string }) {
             <p className="text-[10px] font-black text-destructive uppercase tracking-widest">
               Critical Syntax Failure
             </p>
-            <p className="text-[11px] text-destructive/80 font-mono bg-white p-3 rounded-xl border border-destructive/10 overflow-x-auto">
+            <p className="text-[11px] text-destructive/80 font-mono bg-card p-3 rounded-xl border border-destructive/10 overflow-x-auto">
               {error}
             </p>
           </div>
         ) : (
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+              <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
                 Entity Class:
               </span>
               <span className="text-xs font-bold text-indigo-600 font-mono bg-indigo-50 px-2 py-0.5 rounded-md">
@@ -268,18 +268,18 @@ function SchemaPreview({ schemaMarkup }: { schemaMarkup: string }) {
             </div>
             {data.name && (
               <div className="space-y-1">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
                   Designation
                 </span>
-                <p className="text-xs font-bold text-slate-900">{data.name}</p>
+                <p className="text-xs font-bold text-foreground">{data.name}</p>
               </div>
             )}
             {data.description && (
               <div className="space-y-1">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">
                   Description Extract
                 </span>
-                <p className="text-xs font-medium text-slate-500 line-clamp-2 leading-relaxed">
+                <p className="text-xs font-medium text-muted-foreground line-clamp-2 leading-relaxed">
                   {data.description}
                 </p>
               </div>
@@ -586,21 +586,21 @@ export default function SeoManager() {
       </div>
 
       <Dialog open={isModalVisible} onOpenChange={setIsModalVisible}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto rounded-[40px] border-none shadow-2xl p-0 overflow-hidden text-slate-900">
-          <div className="bg-slate-900 p-8 text-white relative overflow-hidden">
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto rounded-[40px] border-none shadow-2xl p-0 overflow-hidden text-foreground">
+          <div className="bg-primary text-primary-foreground p-8 text-white relative overflow-hidden">
             <div className="absolute top-0 right-0 p-12 opacity-10 rotate-12 scale-150">
               <Globe className="h-40 w-40" />
             </div>
             <div className="relative z-10">
               <div className="flex items-center gap-3 mb-2">
-                <div className="px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-white font-black text-[9px] uppercase tracking-widest border border-white/10">
+                <div className="px-3 py-1 rounded-full bg-card/10 backdrop-blur-md text-white font-black text-[9px] uppercase tracking-widest border border-white/10">
                   SEO Optimization Protocol
                 </div>
               </div>
               <DialogTitle className="text-3xl font-black italic uppercase tracking-tighter">
                 Metadata Architecture
               </DialogTitle>
-              <DialogDescription className="text-slate-400 font-bold text-[11px] uppercase tracking-wider mt-1">
+              <DialogDescription className="text-muted-foreground font-bold text-[11px] uppercase tracking-wider mt-1">
                 Configure search engine visibility and semantic indices for the
                 selected node.
               </DialogDescription>
@@ -612,7 +612,7 @@ export default function SeoManager() {
               <form onSubmit={handleSave} className="space-y-10">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
                   <div className="order-2 lg:order-1 space-y-6">
-                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">
+                    <h3 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] px-1">
                       Simulation Preview
                     </h3>
                     <SeoPreview
@@ -626,7 +626,7 @@ export default function SeoManager() {
                   </div>
 
                   <div className="order-1 lg:order-2 space-y-6">
-                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">
+                    <h3 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] px-1">
                       Invariant Definitions
                     </h3>
                     <div className="space-y-6">
@@ -636,14 +636,14 @@ export default function SeoManager() {
                         rules={{ required: "Meta title is required" }}
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">
+                            <FormLabel className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1">
                               Meta Title
                             </FormLabel>
                             <FormControl>
                               <Input
                                 {...field}
                                 placeholder="Enter meta title"
-                                className="h-12 rounded-xl border-slate-200 bg-slate-50/50 focus:bg-white focus:ring-4 focus:ring-indigo-500/5 transition-all font-medium"
+                                className="h-12 rounded-xl border-border bg-muted/30 focus:bg-card focus:ring-4 focus:ring-indigo-500/5 transition-all font-medium"
                               />
                             </FormControl>
                             <FormMessage />
@@ -657,7 +657,7 @@ export default function SeoManager() {
                         rules={{ required: "Meta description is required" }}
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">
+                            <FormLabel className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1">
                               Meta Description
                             </FormLabel>
                             <FormControl>
@@ -665,7 +665,7 @@ export default function SeoManager() {
                                 {...field}
                                 placeholder="Enter meta description"
                                 rows={4}
-                                className="rounded-xl border-slate-200 bg-slate-50/50 focus:bg-white focus:ring-4 focus:ring-indigo-500/5 transition-all font-medium resize-none shadow-none"
+                                className="rounded-xl border-border bg-muted/30 focus:bg-card focus:ring-4 focus:ring-indigo-500/5 transition-all font-medium resize-none shadow-none"
                               />
                             </FormControl>
                             <FormMessage />
@@ -678,14 +678,14 @@ export default function SeoManager() {
                         name="keywords"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">
+                            <FormLabel className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1">
                               Meta Keywords
                             </FormLabel>
                             <FormControl>
                               <Input
                                 {...field}
                                 placeholder="Enter keywords separated by commas"
-                                className="h-12 rounded-xl border-slate-200 bg-slate-50/50 focus:bg-white focus:ring-4 focus:ring-indigo-500/5 transition-all font-medium"
+                                className="h-12 rounded-xl border-border bg-muted/30 focus:bg-card focus:ring-4 focus:ring-indigo-500/5 transition-all font-medium"
                               />
                             </FormControl>
                             <FormMessage />
@@ -698,7 +698,7 @@ export default function SeoManager() {
 
                 <div className="space-y-6 pt-6 border-t border-slate-50">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">
+                    <h3 className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] px-1">
                       Schema Markup (JSON-LD)
                     </h3>
                     <Button
@@ -706,7 +706,7 @@ export default function SeoManager() {
                       variant="outline"
                       size="sm"
                       onClick={generateSchemaMarkup}
-                      className="h-9 px-4 rounded-xl border-slate-200 font-bold text-slate-600 gap-2 hover:bg-slate-50 transition-all font-black text-[10px] uppercase tracking-widest shadow-sm shadow-slate-200"
+                      className="h-9 px-4 rounded-xl border-border font-bold text-muted-foreground gap-2 hover:bg-muted/50 transition-all font-black text-[10px] uppercase tracking-widest shadow-sm shadow-slate-200"
                     >
                       <Wand2 className="h-3.5 w-3.5 text-indigo-500" />
                       Auto-Generate Schema
@@ -726,14 +726,14 @@ export default function SeoManager() {
                         name="schemaMarkup"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-[10px] font-bold text-slate-500 uppercase tracking-widest text-center block">
+                            <FormLabel className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest text-center block">
                               Schema Code Repository
                             </FormLabel>
                             <FormControl>
                               <Textarea
                                 {...field}
                                 placeholder='Click "Auto-Generate" to create schema markup or paste your own...'
-                                className="font-mono text-[11px] h-[300px] rounded-xl border-slate-200 bg-slate-50/50 focus:bg-white focus:ring-4 focus:ring-indigo-500/5 transition-all p-4 resize-none shadow-none"
+                                className="font-mono text-[11px] h-[300px] rounded-xl border-border bg-muted/30 focus:bg-card focus:ring-4 focus:ring-indigo-500/5 transition-all p-4 resize-none shadow-none"
                               />
                             </FormControl>
                             <FormMessage />
@@ -750,14 +750,14 @@ export default function SeoManager() {
                     variant="ghost"
                     onClick={() => setIsModalVisible(false)}
                     disabled={isSaving}
-                    className="h-12 px-8 rounded-xl font-bold text-slate-500 hover:bg-slate-50 transition-all"
+                    className="h-12 px-8 rounded-xl font-bold text-muted-foreground hover:bg-muted/50 transition-all"
                   >
                     Cancel
                   </Button>
                   <Button
                     type="submit"
                     disabled={isSaving}
-                    className="h-12 px-12 rounded-xl bg-slate-900 hover:bg-black text-white font-black text-[11px] uppercase tracking-widest shadow-xl shadow-slate-200 transition-all active:scale-95 group"
+                    className="h-12 px-12 rounded-xl bg-primary text-primary-foreground hover:bg-black text-white font-black text-[11px] uppercase tracking-widest shadow-xl shadow-slate-200 transition-all active:scale-95 group"
                   >
                     <SaveIcon
                       className={cn(

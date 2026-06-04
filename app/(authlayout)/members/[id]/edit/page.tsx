@@ -81,7 +81,7 @@ const EditMemberPage = () => {
   };
 
   return (
-    <div className="h-full overflow-hidden bg-white">
+    <div className="h-full overflow-hidden bg-background">
       <MemberCreationForm
         initialValues={initialValues}
         loading={mutationLoading}

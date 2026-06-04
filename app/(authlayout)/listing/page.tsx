@@ -124,15 +124,15 @@ const MarketplaceDashboard = () => {
         icon: <XCircle className="w-3 h-3" />,
       },
       inactive: {
-        color: "text-zinc-500 bg-zinc-50 border-zinc-100",
+        color: "text-muted-foreground bg-muted/50 border-border",
         icon: <PauseCircle className="w-3 h-3" />,
       },
       DISABLED: {
-        color: "text-zinc-500 bg-zinc-50 border-zinc-100",
+        color: "text-muted-foreground bg-muted/50 border-border",
         icon: <PauseCircle className="w-3 h-3" />,
       },
       PAUSED: {
-        color: "text-zinc-500 bg-zinc-50 border-zinc-100",
+        color: "text-muted-foreground bg-muted/50 border-border",
         icon: <PauseCircle className="w-3 h-3" />,
       },
     };
@@ -164,7 +164,7 @@ const MarketplaceDashboard = () => {
       <EcosystemActionBar shadow="none">
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-2 px-1">
-            <Clock className="h-4 w-4 text-zinc-400" />
+            <Clock className="h-4 w-4 text-muted-foreground" />
             <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
               Last Sync: Just now
             </span>
@@ -172,7 +172,7 @@ const MarketplaceDashboard = () => {
 
           <div className="flex items-center gap-3">
             <Select value={timeRange} onValueChange={setTimeRange}>
-              <SelectTrigger className="h-9 w-[160px] rounded-lg border-zinc-200 bg-white text-xs font-semibold">
+              <SelectTrigger className="h-9 w-[160px] rounded-lg border-border bg-card text-xs font-semibold">
                 <Calendar className="h-3.5 w-3.5 mr-2 text-indigo-500" />
                 <SelectValue />
               </SelectTrigger>
@@ -185,8 +185,8 @@ const MarketplaceDashboard = () => {
                 <SelectItem value="LAST_MONTH" className="text-xs">Last Month</SelectItem>
               </SelectContent>
             </Select>
-            <div className="h-4 w-px bg-zinc-200 mx-1" />
-            <Button variant="outline" size="sm" className="h-9 gap-2 text-xs font-bold border-zinc-200">
+            <div className="h-4 w-px bg-muted mx-1" />
+            <Button variant="outline" size="sm" className="h-9 gap-2 text-xs font-bold border-border">
               <Download className="h-3.5 w-3.5" />
               Export
             </Button>
@@ -201,8 +201,8 @@ const MarketplaceDashboard = () => {
             value={totalListings.toString()}
             trend={Number(stats?.listingsDiff || 0)}
             icon={Store}
-            color="text-zinc-900"
-            bg="bg-zinc-100"
+            color="text-foreground"
+            bg="bg-muted"
           />
           <EcosystemKPI
             title="Pending Review"
@@ -311,9 +311,9 @@ const MarketplaceDashboard = () => {
                   <div key={i} className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className="h-2 w-2 rounded-full" style={{ backgroundColor: item.color }} />
-                      <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">{item.name}</span>
+                      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{item.name}</span>
                     </div>
-                    <span className="text-xs font-bold text-zinc-900">{item.value}%</span>
+                    <span className="text-xs font-bold text-foreground">{item.value}%</span>
                   </div>
                 ))}
               </div>
@@ -330,27 +330,27 @@ const MarketplaceDashboard = () => {
             {listingData.map((listing) => (
               <div
                 key={listing.id}
-                className="flex items-center justify-between p-4 rounded-xl border border-zinc-100 hover:bg-zinc-50 transition-all group"
+                className="flex items-center justify-between p-4 rounded-xl border border-border hover:bg-muted/50 transition-all group"
               >
                 <div className="flex-1 min-w-0">
                   <Link
                     href={`/listing/${listing.id}/manage`}
-                    className="text-sm font-semibold text-zinc-900 hover:text-indigo-600 transition-colors block truncate"
+                    className="text-sm font-semibold text-foreground hover:text-indigo-600 transition-colors block truncate"
                   >
                     {listing.title}
                   </Link>
-                  <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mt-0.5">
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">
                     {listing.category} • {listing.condition}
                   </p>
                 </div>
                  <div className="flex items-center gap-12">
                    <div className="text-right">
-                      <p className="text-xs font-bold text-zinc-900">${Number(listing.price || 0).toLocaleString()}</p>
-                      <p className="text-[8px] font-bold text-zinc-400 uppercase tracking-tighter">Value</p>
+                      <p className="text-xs font-bold text-foreground">${Number(listing.price || 0).toLocaleString()}</p>
+                      <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-tighter">Value</p>
                    </div>
                    <div className="text-right">
-                      <p className="text-xs font-bold text-zinc-900">{Number(listing.numberOfViews || 0).toLocaleString()}</p>
-                      <p className="text-[8px] font-bold text-zinc-400 uppercase tracking-tighter">Views</p>
+                      <p className="text-xs font-bold text-foreground">{Number(listing.numberOfViews || 0).toLocaleString()}</p>
+                      <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-tighter">Views</p>
                    </div>
                    <div className="w-28 flex justify-end">
                       {getStatusBadge(listing.status)}

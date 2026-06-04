@@ -167,11 +167,11 @@ export default function JobsAnalytics() {
               onDateChange={handleDateChange}
               defaultValue="LAST_7_DAYS"
             />
-            <div className="h-4 w-px bg-zinc-200 mx-1" />
+            <div className="h-4 w-px bg-muted mx-1" />
             <Button
               variant="outline"
               size="icon"
-              className="h-9 w-9 text-zinc-400 hover:text-indigo-600 rounded-lg transition-all"
+              className="h-9 w-9 text-muted-foreground hover:text-indigo-600 rounded-lg transition-all"
               onClick={handleRefetch}
             >
               <RotateCcw size={14} className={cn(loading && "animate-spin")} />
@@ -196,7 +196,7 @@ export default function JobsAnalytics() {
             >
               <div className="h-[350px] w-full mt-6">
                 {loading ? (
-                  <div className="h-full w-full flex items-center justify-center bg-zinc-50/50 rounded-xl border border-dashed border-zinc-200">
+                  <div className="h-full w-full flex items-center justify-center bg-muted/30 rounded-xl border border-dashed border-border">
                     <div className="h-8 w-8 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
                   </div>
                 ) : (
@@ -249,14 +249,14 @@ export default function JobsAnalytics() {
                 {jobMatrixData.map((item, i) => (
                   <div key={i} className="group/item">
                     <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest leading-none">
+                      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-none">
                         {item.name.replace("-", " ")}
                       </span>
-                      <span className="text-xs font-bold text-zinc-900 leading-none">
+                      <span className="text-xs font-bold text-foreground leading-none">
                         {item.value}
                       </span>
                     </div>
-                    <div className="h-1.5 w-full bg-zinc-50 rounded-full overflow-hidden border border-zinc-100">
+                    <div className="h-1.5 w-full bg-muted/50 rounded-full overflow-hidden border border-border">
                       <div
                         className="h-full rounded-full transition-all duration-1000"
                         style={{ width: `${Math.min((item.value / Math.max(...jobMatrixData.map(d => d.value), 1)) * 100, 100)}%`, backgroundColor: item.color }}
@@ -266,13 +266,13 @@ export default function JobsAnalytics() {
                 ))}
               </div>
 
-              <div className="mt-8 pt-6 border-t border-zinc-100 flex items-center justify-between">
+              <div className="mt-8 pt-6 border-t border-border flex items-center justify-between">
                 <div>
-                  <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Active Candidates</p>
-                  <p className="text-xl font-bold text-zinc-900 tracking-tight">{stats?.totalApplications?.toLocaleString() ?? "0"}</p>
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Active Candidates</p>
+                  <p className="text-xl font-bold text-foreground tracking-tight">{stats?.totalApplications?.toLocaleString() ?? "0"}</p>
                 </div>
                 <Link href="/jobs/all">
-                  <Button variant="outline" className="h-10 px-4 rounded-lg border-zinc-200 font-bold text-[10px] uppercase tracking-widest text-zinc-600 gap-2 hover:bg-zinc-50 transition-all shadow-sm">
+                  <Button variant="outline" className="h-10 px-4 rounded-lg border-border font-bold text-[10px] uppercase tracking-widest text-muted-foreground gap-2 hover:bg-muted/50 transition-all shadow-sm">
                     All Jobs
                     <ArrowRight className="h-3.5 w-3.5" />
                   </Button>
@@ -280,7 +280,7 @@ export default function JobsAnalytics() {
               </div>
             </EcosystemCard>
 
-            <div className="p-8 rounded-2xl bg-zinc-900 text-white shadow-xl relative overflow-hidden group">
+            <div className="p-8 rounded-2xl bg-primary text-primary-foreground text-white shadow-xl relative overflow-hidden group">
               <div className="relative z-10 space-y-4">
                 <div className="flex items-center gap-3">
                   <div className="h-9 w-9 rounded-lg bg-orange-500/20 flex items-center justify-center text-orange-400 border border-orange-400/20">
@@ -288,7 +288,7 @@ export default function JobsAnalytics() {
                   </div>
                   <h4 className="text-sm font-bold uppercase tracking-wider">Growth Signal</h4>
                 </div>
-                <p className="text-xs font-medium text-zinc-400 leading-relaxed">
+                <p className="text-xs font-medium text-muted-foreground leading-relaxed">
                   Platform hiring velocity has increased by 18% in the current cycle.
                 </p>
                 <Button

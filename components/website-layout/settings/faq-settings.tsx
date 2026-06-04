@@ -52,9 +52,9 @@ export const FaqSettings: React.FC<FaqSettingsProps> = ({
           <Layout className="w-3 h-3" />
           General FAQ Info
         </Label>
-        <div className="space-y-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+        <div className="space-y-4 p-4 bg-muted/50 rounded-2xl border border-border">
           <div className="space-y-1.5">
-            <Label className="text-[10px] font-bold uppercase text-slate-500">
+            <Label className="text-[10px] font-bold uppercase text-muted-foreground">
               Section Title
             </Label>
             <Input
@@ -65,7 +65,7 @@ export const FaqSettings: React.FC<FaqSettingsProps> = ({
             />
           </div>
           <div className="space-y-1.5">
-            <Label className="text-[10px] font-bold uppercase text-slate-500">
+            <Label className="text-[10px] font-bold uppercase text-muted-foreground">
               Section Subtitle
             </Label>
             <Textarea
@@ -84,9 +84,9 @@ export const FaqSettings: React.FC<FaqSettingsProps> = ({
           <Settings2 className="w-3 h-3" />
           Highlight Layout Sidebar
         </Label>
-        <div className="space-y-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+        <div className="space-y-4 p-4 bg-muted/50 rounded-2xl border border-border">
           <div className="space-y-1.5">
-            <Label className="text-[10px] font-bold uppercase text-slate-500">
+            <Label className="text-[10px] font-bold uppercase text-muted-foreground">
               Sidebar Title
             </Label>
             <Input
@@ -97,7 +97,7 @@ export const FaqSettings: React.FC<FaqSettingsProps> = ({
             />
           </div>
           <div className="space-y-1.5">
-            <Label className="text-[10px] font-bold uppercase text-slate-500">
+            <Label className="text-[10px] font-bold uppercase text-muted-foreground">
               Sidebar Subtitle
             </Label>
             <Textarea
@@ -108,7 +108,7 @@ export const FaqSettings: React.FC<FaqSettingsProps> = ({
             />
           </div>
           <div className="space-y-1.5">
-            <Label className="text-[10px] font-bold uppercase text-slate-500">
+            <Label className="text-[10px] font-bold uppercase text-muted-foreground">
               Button Text
             </Label>
             <Input
@@ -144,16 +144,16 @@ export const FaqSettings: React.FC<FaqSettingsProps> = ({
           {questions.map((faq: any, index: number) => (
             <div
               key={index}
-              className="group p-5 bg-white border rounded-2xl shadow-sm space-y-4 transition-all hover:shadow-md relative"
+              className="group p-5 bg-card border rounded-2xl shadow-sm space-y-4 transition-all hover:shadow-md relative"
             >
               <div className="flex justify-between items-center border-b pb-3 mb-2">
-                <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-2">
-                  <GripVertical className="w-3 h-3 text-slate-300" />
+                <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2">
+                  <GripVertical className="w-3 h-3 text-muted-foreground" />
                   Question {index + 1}
                 </span>
                 <button
                   onClick={() => removeQuestion(index)}
-                  className="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                  className="p-1.5 text-muted-foreground hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
@@ -161,7 +161,7 @@ export const FaqSettings: React.FC<FaqSettingsProps> = ({
 
               <div className="space-y-4">
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] font-bold uppercase text-slate-500">
+                  <Label className="text-[10px] font-bold uppercase text-muted-foreground">
                     Question
                   </Label>
                   <Input
@@ -174,7 +174,7 @@ export const FaqSettings: React.FC<FaqSettingsProps> = ({
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] font-bold uppercase text-slate-500">
+                  <Label className="text-[10px] font-bold uppercase text-muted-foreground">
                     Answer
                   </Label>
                   <Textarea
@@ -187,7 +187,7 @@ export const FaqSettings: React.FC<FaqSettingsProps> = ({
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-[10px] font-bold uppercase text-slate-500">
+                  <Label className="text-[10px] font-bold uppercase text-muted-foreground">
                     Category (Optional)
                   </Label>
                   <Input
@@ -204,9 +204,9 @@ export const FaqSettings: React.FC<FaqSettingsProps> = ({
           ))}
 
           {questions.length === 0 && (
-            <div className="text-center py-12 bg-slate-50 rounded-3xl border border-dashed border-slate-200">
+            <div className="text-center py-12 bg-muted/50 rounded-3xl border border-dashed border-border">
               <HelpCircle className="w-12 h-12 text-slate-200 mx-auto mb-4" />
-              <p className="text-slate-400 font-medium">
+              <p className="text-muted-foreground font-medium">
                 No questions yet. Add your first FAQ to get started!
               </p>
             </div>
@@ -252,12 +252,12 @@ export const FaqSettings: React.FC<FaqSettingsProps> = ({
               type="button"
               variant="outline"
               onClick={() => addQuestion(template.question, template.answer)}
-              className="h-auto py-3 px-4 rounded-xl border-slate-200 hover:border-amber-200 hover:bg-amber-50/30 text-left flex flex-col items-start gap-1 group transition-all"
+              className="h-auto py-3 px-4 rounded-xl border-border hover:border-amber-200 hover:bg-amber-50/30 text-left flex flex-col items-start gap-1 group transition-all"
             >
               <span className="text-[10px] font-black uppercase text-amber-600 tracking-tighter group-hover:tracking-widest transition-all">
                 Add {template.label} Template
               </span>
-              <span className="text-xs font-bold text-slate-700">
+              <span className="text-xs font-bold text-foreground">
                 {template.question}
               </span>
             </Button>
@@ -267,17 +267,17 @@ export const FaqSettings: React.FC<FaqSettingsProps> = ({
 
       {/* Display Options */}
       <div className="space-y-4">
-        <Label className="text-xs uppercase font-black text-slate-600 tracking-widest flex items-center gap-2">
+        <Label className="text-xs uppercase font-black text-muted-foreground tracking-widest flex items-center gap-2">
           <Settings2 className="w-3 h-3" />
           Display Options
         </Label>
-        <div className="space-y-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+        <div className="space-y-4 p-4 bg-muted/50 rounded-2xl border border-border">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label className="text-xs font-bold text-slate-700">
+              <Label className="text-xs font-bold text-foreground">
                 Show Categories
               </Label>
-              <p className="text-[10px] text-slate-400">
+              <p className="text-[10px] text-muted-foreground">
                 Group FAQ items by their category labels
               </p>
             </div>
@@ -285,15 +285,15 @@ export const FaqSettings: React.FC<FaqSettingsProps> = ({
               type="checkbox"
               checked={content.showCategories || false}
               onChange={(e) => onChange({ showCategories: e.target.checked })}
-              className="w-5 h-5 rounded-lg border-slate-300 text-blue-600 focus:ring-blue-500"
+              className="w-5 h-5 rounded-lg border-border text-blue-600 focus:ring-blue-500"
             />
           </div>
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label className="text-xs font-bold text-slate-700">
+              <Label className="text-xs font-bold text-foreground">
                 Enable Search
               </Label>
-              <p className="text-[10px] text-slate-400">
+              <p className="text-[10px] text-muted-foreground">
                 Allow users to search through FAQ content
               </p>
             </div>
@@ -301,7 +301,7 @@ export const FaqSettings: React.FC<FaqSettingsProps> = ({
               type="checkbox"
               checked={content.enableSearch || false}
               onChange={(e) => onChange({ enableSearch: e.target.checked })}
-              className="w-5 h-5 rounded-lg border-slate-300 text-blue-600 focus:ring-blue-500"
+              className="w-5 h-5 rounded-lg border-border text-blue-600 focus:ring-blue-500"
             />
           </div>
         </div>

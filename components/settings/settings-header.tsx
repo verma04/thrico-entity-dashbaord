@@ -30,25 +30,25 @@ export function SettingsHeader({
   };
 
   return (
-    <div className={cn("flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-6 border-b border-slate-100 w-full", className)}>
+    <div className={cn("flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-6 border-b border-border w-full", className)}>
       <div className="space-y-1.5">
-        <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+        <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
           <Icon className="h-3 w-3" />
           {breadcrumb}
         </div>
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
           {title}
         </h1>
-        <p className="text-sm text-slate-500 max-w-2xl">
+        <p className="text-sm text-muted-foreground max-w-2xl">
           {description}
         </p>
       </div>
       <div className="flex items-center gap-3 pt-1">
-        <div className="h-10 w-10 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-200">
+        <div className="h-10 w-10 rounded-lg bg-muted/50 flex items-center justify-center text-muted-foreground border border-border">
           <Icon className="h-5 w-5" />
         </div>
         <div className="text-right hidden sm:block">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Status</p>
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Status</p>
           <p className={cn(
             "text-xs font-semibold flex items-center gap-1 justify-end",
             statusColors[status].split(" ")[0]

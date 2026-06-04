@@ -111,7 +111,7 @@ function JobDangerZonePage() {
               Disabling this job will affect all associated data, including:
             </p>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              <div className="flex flex-col p-4 bg-white dark:bg-muted/50 rounded-xl border border-red-100 shadow-sm">
+              <div className="flex flex-col p-4 bg-card dark:bg-muted/50 rounded-xl border border-red-100 shadow-sm">
                 <span className="text-muted-foreground text-[11px] font-semibold uppercase tracking-wider flex items-center gap-1.5 mb-1.5">
                   <Users className="h-3.5 w-3.5 text-red-500" /> Applicants
                 </span>
@@ -119,7 +119,7 @@ function JobDangerZonePage() {
                   {job?.numberOfApplicant ?? 0}
                 </span>
               </div>
-              <div className="flex flex-col p-4 bg-white dark:bg-muted/50 rounded-xl border border-red-100 shadow-sm">
+              <div className="flex flex-col p-4 bg-card dark:bg-muted/50 rounded-xl border border-red-100 shadow-sm">
                 <span className="text-muted-foreground text-[11px] font-semibold uppercase tracking-wider flex items-center gap-1.5 mb-1.5">
                   <Eye className="h-3.5 w-3.5 text-red-500" /> Views
                 </span>

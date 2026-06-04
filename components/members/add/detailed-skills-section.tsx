@@ -101,10 +101,10 @@ export function DetailedSkillsSection({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between mb-2">
-        <Label className="text-sm font-bold text-slate-700">
+        <Label className="text-sm font-bold text-foreground">
           Detailed Skills
         </Label>
-        <p className="text-[10px] uppercase tracking-wider font-bold text-slate-400">
+        <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">
           Add specific skills with proficiency
         </p>
       </div>
@@ -121,7 +121,7 @@ export function DetailedSkillsSection({
                 return (
                   <div
                     key={index}
-                    className="p-4 rounded-xl border border-slate-200 bg-slate-50 relative"
+                    className="p-4 rounded-xl border border-border bg-muted/50 relative"
                   >
                     <div className="absolute top-4 right-4">
                       <Button
@@ -137,13 +137,13 @@ export function DetailedSkillsSection({
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
                       <div className="space-y-2">
-                        <Label className="text-xs font-semibold text-slate-600">
+                        <Label className="text-xs font-semibold text-muted-foreground">
                           Skill Name <span className="text-rose-500">*</span>
                         </Label>
                         <Input
                           name={`skills.${index}.name`}
                           placeholder="e.g. React.js"
-                          className="h-10 rounded-lg bg-white"
+                          className="h-10 rounded-lg bg-card"
                           value={skill.name}
                           onChange={(e) =>
                             setFieldValue(
@@ -160,7 +160,7 @@ export function DetailedSkillsSection({
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-xs font-semibold text-slate-600">
+                        <Label className="text-xs font-semibold text-muted-foreground">
                           Category <span className="text-rose-500">*</span>
                         </Label>
                         <Popover
@@ -178,7 +178,7 @@ export function DetailedSkillsSection({
                               role="combobox"
                               aria-expanded={openComboboxes[index]}
                               className={cn(
-                                "w-full justify-between h-10 rounded-lg bg-white",
+                                "w-full justify-between h-10 rounded-lg bg-card",
                                 !skill.category && "text-muted-foreground",
                               )}
                             >
@@ -281,7 +281,7 @@ export function DetailedSkillsSection({
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-xs font-semibold text-slate-600">
+                        <Label className="text-xs font-semibold text-muted-foreground">
                           Level <span className="text-rose-500">*</span>
                         </Label>
                         <Select
@@ -290,7 +290,7 @@ export function DetailedSkillsSection({
                             setFieldValue(`skills.${index}.level`, val)
                           }
                         >
-                          <SelectTrigger className="h-10 rounded-lg bg-white">
+                          <SelectTrigger className="h-10 rounded-lg bg-card">
                             <SelectValue placeholder="Select level" />
                           </SelectTrigger>
                           <SelectContent>
@@ -309,14 +309,14 @@ export function DetailedSkillsSection({
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-xs font-semibold text-slate-600">
+                        <Label className="text-xs font-semibold text-muted-foreground">
                           Years of Experience
                         </Label>
                         <Input
                           type="number"
                           name={`skills.${index}.yearsOfExperience`}
                           placeholder="e.g. 3"
-                          className="h-10 rounded-lg bg-white"
+                          className="h-10 rounded-lg bg-card"
                           value={skill.yearsOfExperience}
                           onChange={(e) =>
                             setFieldValue(
@@ -330,7 +330,7 @@ export function DetailedSkillsSection({
                     </div>
 
                     <div className="mt-4 space-y-2">
-                      <Label className="text-xs font-semibold text-slate-600">
+                      <Label className="text-xs font-semibold text-muted-foreground">
                         Tags <span className="text-rose-500">*</span>
                       </Label>
                       <div className="flex flex-wrap gap-2 mb-2">
@@ -349,7 +349,7 @@ export function DetailedSkillsSection({
                       </div>
                       <Input
                         placeholder="Type a tag and press enter..."
-                        className="h-10 rounded-lg bg-white"
+                        className="h-10 rounded-lg bg-card"
                         value={tagInput[index] || ""}
                         onChange={(e) =>
                           setTagInput({ ...tagInput, [index]: e.target.value })
@@ -364,12 +364,12 @@ export function DetailedSkillsSection({
                     </div>
 
                     <div className="mt-4 space-y-2">
-                      <Label className="text-xs font-semibold text-slate-600">
+                      <Label className="text-xs font-semibold text-muted-foreground">
                         Description
                       </Label>
                       <Textarea
                         placeholder="Describe how you used this skill..."
-                        className="min-h-[80px] rounded-lg bg-white resize-none"
+                        className="min-h-[80px] rounded-lg bg-card resize-none"
                         value={skill.description}
                         onChange={(e) =>
                           setFieldValue(
@@ -383,9 +383,9 @@ export function DetailedSkillsSection({
                 );
               })
             ) : (
-              <div className="text-center p-8 border border-dashed border-slate-300 rounded-xl bg-slate-50/50">
-                <Star className="h-8 w-8 text-slate-300 mx-auto mb-2" />
-                <p className="text-sm text-slate-500 font-medium">
+              <div className="text-center p-8 border border-dashed border-border rounded-xl bg-muted/30">
+                <Star className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground font-medium">
                   No detailed skills added yet.
                 </p>
               </div>

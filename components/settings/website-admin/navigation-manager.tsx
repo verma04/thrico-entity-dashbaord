@@ -383,7 +383,7 @@ export default function NavigationManager() {
                 )}>
                   <div className="absolute inset-0 overflow-y-auto">
                     {/* Simulated Page Content */}
-                    <div className="bg-slate-50 min-h-full">
+                    <div className="bg-muted/50 min-h-full">
                        <LivePreviewNavbar
                         content={{
                           logoText: formik.values.logoText,
@@ -395,13 +395,13 @@ export default function NavigationManager() {
                         previewDevice={previewDevice}
                       />
                       <div className="p-8 space-y-6">
-                        <div className="h-8 w-1/3 bg-slate-200 rounded-lg animate-pulse" />
+                        <div className="h-8 w-1/3 bg-muted rounded-lg animate-pulse" />
                         <div className="grid grid-cols-2 gap-4">
-                          <div className="h-32 bg-slate-200 rounded-2xl animate-pulse" />
-                          <div className="h-32 bg-slate-200 rounded-2xl animate-pulse" />
+                          <div className="h-32 bg-muted rounded-2xl animate-pulse" />
+                          <div className="h-32 bg-muted rounded-2xl animate-pulse" />
                         </div>
-                        <div className="h-64 bg-slate-200 rounded-3xl animate-pulse" />
-                        <div className="h-32 bg-slate-200 rounded-2xl animate-pulse" />
+                        <div className="h-64 bg-muted rounded-3xl animate-pulse" />
+                        <div className="h-32 bg-muted rounded-2xl animate-pulse" />
                       </div>
                     </div>
                   </div>

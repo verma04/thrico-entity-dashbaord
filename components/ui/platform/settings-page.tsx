@@ -97,11 +97,11 @@ export function PlatformSettingsPage<T extends Record<string, any>>({
         <div className="flex flex-col gap-8">
           {/* skeleton header */}
           {!hideHeader && (
-            <div className="flex items-center gap-3 pb-6 border-b border-zinc-100 dark:border-zinc-800">
-              <div className="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-zinc-800 animate-pulse" />
+            <div className="flex items-center gap-3 pb-6 border-b border-border ">
+              <div className="w-9 h-9 rounded-xl bg-muted  animate-pulse" />
               <div className="space-y-2">
-                <div className="h-4 w-40 bg-zinc-100 dark:bg-zinc-800 rounded-md animate-pulse" />
-                <div className="h-3 w-64 bg-zinc-50 dark:bg-zinc-800/50 rounded-md animate-pulse" />
+                <div className="h-4 w-40 bg-muted  rounded-md animate-pulse" />
+                <div className="h-3 w-64 bg-muted/50  rounded-md animate-pulse" />
               </div>
             </div>
           )}
@@ -110,7 +110,7 @@ export function PlatformSettingsPage<T extends Record<string, any>>({
             {[1, 2].map((i) => (
               <div
                 key={i}
-                className="h-[72px] rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50/60 dark:bg-zinc-900/50 animate-pulse"
+                className="h-[72px] rounded-xl border border-border  bg-muted/50/60  animate-pulse"
               />
             ))}
           </div>
@@ -123,25 +123,25 @@ export function PlatformSettingsPage<T extends Record<string, any>>({
     <PlatformContainer className="py-0">
       {/* ── Page Header ── */}
       {!hideHeader && (
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-zinc-100 dark:border-zinc-800">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-border ">
           <div className="flex items-center gap-3 min-w-0">
             {HeaderIcon && (
-              <div className="w-9 h-9 rounded-xl bg-zinc-900 dark:bg-zinc-100 flex items-center justify-center text-white dark:text-zinc-900 shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-primary  flex items-center justify-center text-white  shrink-0">
                 <HeaderIcon size={16} strokeWidth={2} />
               </div>
             )}
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <h1 className="text-[15px] font-semibold text-zinc-900 dark:text-white tracking-tight leading-none">
+                <h1 className="text-[15px] font-semibold text-foreground  tracking-tight leading-none">
                   {title}
                 </h1>
                 {badge && (
-                  <span className="px-1.5 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-[10px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wide border border-zinc-200/60 dark:border-zinc-700">
+                  <span className="px-1.5 py-0.5 rounded-md bg-muted  text-[10px] font-medium text-muted-foreground  uppercase tracking-wide border border-border/60 ">
                     {badge}
                   </span>
                 )}
               </div>
-              <p className="mt-1 text-[12.5px] text-zinc-400 dark:text-zinc-500 font-normal leading-snug max-w-md truncate">
+              <p className="mt-1 text-[12.5px] text-muted-foreground  font-normal leading-snug max-w-md truncate">
                 {description}
               </p>
             </div>
@@ -169,14 +169,14 @@ export function PlatformSettingsPage<T extends Record<string, any>>({
           >
             {/* Section label */}
             <div className="flex items-center gap-2.5">
-              <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-[0.12em] select-none">
+              <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.12em] select-none">
                 {sectionName}
               </span>
-              <div className="flex-1 h-px bg-zinc-100 dark:bg-zinc-800" />
+              <div className="flex-1 h-px bg-muted " />
             </div>
 
             {/* Rows */}
-            <div className="rounded-xl border border-zinc-200/60 dark:border-zinc-800/60 bg-white dark:bg-zinc-950 overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-800/50">
+            <div className="rounded-xl border border-border/60  bg-card  overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-800/50">
               {sectionFields.map((field) => (
                 <SettingRow
                   key={field.key}
@@ -214,13 +214,13 @@ function SettingRow({
     <div
       className={cn(
         "group flex items-center justify-between gap-6 px-5 py-4 transition-colors duration-150",
-        isDirty ? "bg-amber-50/40 dark:bg-amber-900/20" : "hover:bg-zinc-50/60 dark:hover:bg-zinc-900/50"
+        isDirty ? "bg-amber-50/40 dark:bg-amber-900/20" : "hover:bg-muted/50/60 "
       )}
     >
       {/* Left: icon + label + description */}
       <div className="flex items-start gap-3 min-w-0">
         {Icon && (
-          <div className="mt-0.5 w-7 h-7 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800 flex items-center justify-center text-zinc-500 dark:text-zinc-400 shrink-0 group-hover:bg-zinc-50 dark:group-hover:bg-zinc-800 group-hover:text-zinc-700 dark:group-hover:text-zinc-300 transition-colors">
+          <div className="mt-0.5 w-7 h-7 rounded-lg bg-muted  border border-border/60  flex items-center justify-center text-muted-foreground  shrink-0 group-hover:bg-muted/50 dark:group-hover:bg-primary/80 group-hover:text-foreground dark:group-hover:text-muted-foreground transition-colors">
             <Icon size={13} strokeWidth={2} />
           </div>
         )}
@@ -229,7 +229,7 @@ function SettingRow({
             htmlFor={id}
             className={cn(
               "text-[13.5px] font-medium leading-none cursor-pointer",
-              isDirty ? "text-amber-700 dark:text-amber-500" : "text-zinc-800 dark:text-zinc-200"
+              isDirty ? "text-amber-700 dark:text-amber-500" : "text-foreground "
             )}
           >
             {label}
@@ -237,7 +237,7 @@ function SettingRow({
               <span className="ml-2 inline-block w-1.5 h-1.5 rounded-full bg-amber-400 align-middle translate-y-[-1px]" />
             )}
           </Label>
-          <p className="mt-1 text-[12px] text-zinc-400 leading-relaxed font-normal max-w-[400px]">
+          <p className="mt-1 text-[12px] text-muted-foreground leading-relaxed font-normal max-w-[400px]">
             {description}
           </p>
         </div>
@@ -250,7 +250,7 @@ function SettingRow({
             id={id}
             checked={!!value}
             onCheckedChange={onChange}
-            className="data-[state=checked]:bg-zinc-900 dark:data-[state=checked]:bg-zinc-100 data-[state=unchecked]:bg-zinc-200 dark:data-[state=unchecked]:bg-zinc-800 [&>span]:dark:bg-zinc-900"
+            className="data-[state=checked]:bg-primary dark:data-[state=checked]:bg-muted data-[state=unchecked]:bg-muted dark:data-[state=unchecked]:bg-primary/80 [&>span]:"
           />
         )}
         {(type === "text" || type === "number") && (
@@ -261,7 +261,7 @@ function SettingRow({
             onChange={(e) =>
               onChange(type === "number" ? Number(e.target.value) : e.target.value)
             }
-            className="h-8 w-40 text-[13px] rounded-lg border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 focus-visible:ring-1 focus-visible:ring-zinc-300 dark:focus-visible:ring-zinc-700 focus-visible:ring-offset-0 font-medium shadow-none dark:text-white"
+            className="h-8 w-40 text-[13px] rounded-lg border-border  bg-card  focus-visible:ring-1 focus-visible:ring-zinc-300 dark:focus-visible:ring-zinc-700 focus-visible:ring-offset-0 font-medium shadow-none "
             placeholder={`Enter value…`}
           />
         )}

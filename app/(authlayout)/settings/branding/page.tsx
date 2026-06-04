@@ -29,14 +29,14 @@ const BrandingPage = () => {
     return (
       <PlatformContainer className="py-0">
         <div className="flex flex-col gap-8">
-          <div className="flex items-center gap-3 pb-6 border-b border-zinc-100">
-            <div className="w-9 h-9 rounded-xl bg-zinc-100 animate-pulse" />
+          <div className="flex items-center gap-3 pb-6 border-b border-border">
+            <div className="w-9 h-9 rounded-xl bg-muted animate-pulse" />
             <div className="space-y-2">
-              <div className="h-4 w-40 bg-zinc-100 rounded-md animate-pulse" />
-              <div className="h-3 w-64 bg-zinc-50 rounded-md animate-pulse" />
+              <div className="h-4 w-40 bg-muted rounded-md animate-pulse" />
+              <div className="h-3 w-64 bg-muted/50 rounded-md animate-pulse" />
             </div>
           </div>
-          <div className="h-[400px] w-full bg-zinc-50 rounded-xl animate-pulse" />
+          <div className="h-[400px] w-full bg-muted/50 rounded-xl animate-pulse" />
         </div>
       </PlatformContainer>
     );
@@ -45,28 +45,28 @@ const BrandingPage = () => {
   return (
     <GeneralSettingsLayout>
       <PlatformContainer className="py-0">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-zinc-100">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-border">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-9 h-9 rounded-xl bg-zinc-900 flex items-center justify-center text-white shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-primary text-primary-foreground flex items-center justify-center text-white shrink-0">
             <Layers size={16} strokeWidth={2} />
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h1 className="text-[15px] font-semibold text-zinc-900 tracking-tight leading-none">
+              <h1 className="text-[15px] font-semibold text-foreground tracking-tight leading-none">
                 Branding
               </h1>
-              <span className="px-1.5 py-0.5 rounded-md bg-zinc-100 text-[10px] font-medium text-zinc-500 uppercase tracking-wide border border-zinc-200/60">
+              <span className="px-1.5 py-0.5 rounded-md bg-muted text-[10px] font-medium text-muted-foreground uppercase tracking-wide border border-border/60">
                 Visual Assets
               </span>
             </div>
-            <p className="mt-1 text-[12.5px] text-zinc-400 font-normal leading-snug">
+            <p className="mt-1 text-[12.5px] text-muted-foreground font-normal leading-snug">
               Manage your entity's visual identity, logo, and favicon.
             </p>
           </div>
         </div>
         <button
           onClick={() => refetch()}
-          className="h-8 px-3 rounded-lg text-[12px] font-medium text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition-colors flex items-center gap-1.5 shrink-0"
+          className="h-8 px-3 rounded-lg text-[12px] font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors flex items-center gap-1.5 shrink-0"
         >
           <RotateCcw size={12} />
           Refresh

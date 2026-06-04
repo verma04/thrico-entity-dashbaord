@@ -80,11 +80,11 @@ export default function GeneralSettings() {
       <PlatformContainer className="py-0">
         <div className="flex flex-col gap-8">
           {/* skeleton header */}
-          <div className="flex items-center gap-3 pb-6 border-b border-zinc-100">
-            <div className="w-9 h-9 rounded-xl bg-zinc-100 animate-pulse" />
+          <div className="flex items-center gap-3 pb-6 border-b border-border">
+            <div className="w-9 h-9 rounded-xl bg-muted animate-pulse" />
             <div className="space-y-2">
-              <div className="h-4 w-40 bg-zinc-100 rounded-md animate-pulse" />
-              <div className="h-3 w-64 bg-zinc-50 rounded-md animate-pulse" />
+              <div className="h-4 w-40 bg-muted rounded-md animate-pulse" />
+              <div className="h-3 w-64 bg-muted/50 rounded-md animate-pulse" />
             </div>
           </div>
           {/* skeleton tabs */}
@@ -92,7 +92,7 @@ export default function GeneralSettings() {
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="h-10 w-28 bg-zinc-100 rounded-lg animate-pulse"
+                className="h-10 w-28 bg-muted rounded-lg animate-pulse"
               />
             ))}
           </div>
@@ -106,21 +106,21 @@ export default function GeneralSettings() {
   return (
     <PlatformContainer className="py-0">
       {/* ── Page Header ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-zinc-100">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-border">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-9 h-9 rounded-xl bg-zinc-900 flex items-center justify-center text-white shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-white shrink-0">
             <Store size={16} strokeWidth={2} />
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h1 className="text-[15px] font-semibold text-zinc-900 tracking-tight leading-none">
+              <h1 className="text-[15px] font-semibold text-foreground tracking-tight leading-none">
                 General Settings
               </h1>
-              <span className="px-1.5 py-0.5 rounded-md bg-zinc-100 text-[10px] font-medium text-zinc-500 uppercase tracking-wide border border-zinc-200/60">
+              <span className="px-1.5 py-0.5 rounded-md bg-muted text-[10px] font-medium text-muted-foreground uppercase tracking-wide border border-border/60">
                 Identity
               </span>
             </div>
-            <p className="mt-1 text-[12.5px] text-zinc-400 font-normal leading-snug">
+            <p className="mt-1 text-[12.5px] text-muted-foreground font-normal leading-snug">
               Manage your entity's profile, visual identity, and billing
               information.
             </p>
@@ -128,7 +128,7 @@ export default function GeneralSettings() {
         </div>
         <button
           onClick={() => refetch()}
-          className="h-8 px-3 rounded-lg text-[12px] font-medium text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition-colors flex items-center gap-1.5 shrink-0"
+          className="h-8 px-3 rounded-lg text-[12px] font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors flex items-center gap-1.5 shrink-0"
         >
           <RotateCcw size={12} />
           Refresh
@@ -136,7 +136,7 @@ export default function GeneralSettings() {
       </div>
 
       {/* ── Tab Bar ── */}
-      <div className="mt-5 flex gap-1.5 border-b border-zinc-100 pb-0 -mb-px">
+      <div className="mt-5 flex gap-1.5 border-b border-border pb-0 -mb-px">
         {TABS.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.key;
@@ -147,8 +147,8 @@ export default function GeneralSettings() {
               className={cn(
                 "relative flex items-center gap-2 px-3.5 py-2.5 rounded-t-lg text-[12.5px] font-medium transition-colors duration-150 border border-transparent",
                 isActive
-                  ? "text-zinc-900 bg-white border-zinc-200 border-b-white -mb-px z-10"
-                  : "text-zinc-400 hover:text-zinc-700 hover:bg-zinc-50",
+                  ? "text-foreground bg-card border-border border-b-card -mb-px z-10"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
               )}
             >
               <Icon size={13} strokeWidth={isActive ? 2.2 : 1.8} />
@@ -228,7 +228,7 @@ export default function GeneralSettings() {
                 title="Primary Logo"
                 description="Used in the header, email templates, and all public-facing surfaces. Use PNG or SVG with a transparent background."
               >
-                <div className="p-4 rounded-lg border border-zinc-100 bg-zinc-50/40">
+                <div className="p-4 rounded-lg border border-border bg-muted/50/40">
                   <EntityLogoUpload
                     currentImage={communityImage}
                     onImageUpdate={handleLogoUpdate}
@@ -241,7 +241,7 @@ export default function GeneralSettings() {
                 title="Browser Favicon"
                 description="Displayed in browser tabs and bookmarks. Recommend 32×32px or 64×64px ICO, PNG, or SVG."
               >
-                <div className="p-4 rounded-lg border border-zinc-100 bg-zinc-50/40">
+                <div className="p-4 rounded-lg border border-border bg-muted/50/40">
                   <FaviconUpload
                     currentImage={faviconImage}
                     onImageUpdate={handleFaviconUpdate}
@@ -250,16 +250,16 @@ export default function GeneralSettings() {
               </SectionCard>
 
               {/* Asset guidelines */}
-              <div className="rounded-xl border border-zinc-200/60 bg-zinc-900 p-5 text-white">
+              <div className="rounded-xl border border-border/60 bg-primary p-5 text-white">
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="w-6 h-6 rounded-md bg-white/10 flex items-center justify-center">
-                    <ImageIcon size={12} className="text-zinc-300" />
+                  <div className="w-6 h-6 rounded-md bg-card/10 flex items-center justify-center">
+                    <ImageIcon size={12} className="text-muted-foreground" />
                   </div>
                   <p className="text-[12px] font-semibold text-zinc-100">
                     Asset Guidelines
                   </p>
                 </div>
-                <p className="text-[12px] text-zinc-400 leading-relaxed">
+                <p className="text-[12px] text-muted-foreground leading-relaxed">
                   Use high-quality assets with transparent backgrounds. PNG or
                   SVG are preferred formats. Minimum recommended size is
                   256×256px for the logo.
@@ -322,17 +322,17 @@ function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-xl border border-zinc-200/60 bg-white overflow-hidden">
+    <div className="rounded-xl border border-border/60 bg-card overflow-hidden">
       {/* Card header */}
-      <div className="flex items-start gap-3 px-5 py-4 border-b border-zinc-100 bg-zinc-50/40">
-        <div className="w-7 h-7 rounded-lg bg-zinc-100 border border-zinc-200/60 flex items-center justify-center text-zinc-500 shrink-0 mt-0.5">
+      <div className="flex items-start gap-3 px-5 py-4 border-b border-border bg-muted/50/40">
+        <div className="w-7 h-7 rounded-lg bg-muted border border-border/60 flex items-center justify-center text-muted-foreground shrink-0 mt-0.5">
           <Icon size={13} strokeWidth={2} />
         </div>
         <div>
-          <p className="text-[13.5px] font-semibold text-zinc-900 leading-none">
+          <p className="text-[13.5px] font-semibold text-foreground leading-none">
             {title}
           </p>
-          <p className="mt-1 text-[12px] text-zinc-400 leading-snug">
+          <p className="mt-1 text-[12px] text-muted-foreground leading-snug">
             {description}
           </p>
         </div>
@@ -362,7 +362,7 @@ function InfoRow({
 }) {
   return (
     <div className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
-      <span className="text-[12px] text-zinc-400 font-medium">{label}</span>
+      <span className="text-[12px] text-muted-foreground font-medium">{label}</span>
       <div className="flex items-center gap-1.5">
         {dot && (
           <div
@@ -385,8 +385,8 @@ function InfoRow({
         ) : (
           <span
             className={cn(
-              "text-[12.5px] font-medium text-zinc-700",
-              mono && "font-mono text-[11px] text-zinc-500",
+              "text-[12.5px] font-medium text-foreground",
+              mono && "font-mono text-[11px] text-muted-foreground",
               valueClass,
             )}
           >

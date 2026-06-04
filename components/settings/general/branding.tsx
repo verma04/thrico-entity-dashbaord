@@ -31,7 +31,7 @@ export default function Branding({
         title="Primary Logo"
         description="Used in the header, email templates, and all public-facing surfaces. Use PNG or SVG with a transparent background."
       >
-        <div className="p-4 rounded-lg border border-zinc-100 bg-zinc-50/40">
+        <div className="p-4 rounded-lg border border-border bg-muted/50/40">
           <ImageUploadWithCrop
             currentImage={currentImage}
             onImageUpdate={onImageUpdate}
@@ -86,7 +86,7 @@ export default function Branding({
         title="Browser Favicon"
         description="Displayed in browser tabs and bookmarks. Recommend 32×32px or 64×64px ICO, PNG, or SVG."
       >
-        <div className="p-4 rounded-lg border border-zinc-100 bg-zinc-50/40">
+        <div className="p-4 rounded-lg border border-border bg-muted/50/40">
           <FaviconUpload
             currentImage={faviconImage}
             onImageUpdate={onFaviconUpdate}
@@ -95,16 +95,16 @@ export default function Branding({
       </SectionCard>
 
       {/* Asset guidelines */}
-      <div className="rounded-xl border border-zinc-200/60 bg-zinc-900 p-5 text-white">
+      <div className="rounded-xl border border-border/60 bg-primary p-5 text-white">
         <div className="flex items-center gap-2 mb-2">
-          <div className="w-6 h-6 rounded-md bg-white/10 flex items-center justify-center">
-            <ImageIcon size={12} className="text-zinc-300" />
+          <div className="w-6 h-6 rounded-md bg-card/10 flex items-center justify-center">
+            <ImageIcon size={12} className="text-muted-foreground" />
           </div>
           <p className="text-[12px] font-semibold text-zinc-100">
             Asset Guidelines
           </p>
         </div>
-        <p className="text-[12px] text-zinc-400 leading-relaxed">
+        <p className="text-[12px] text-muted-foreground leading-relaxed">
           Use high-quality assets with transparent backgrounds. PNG or SVG are
           preferred formats. Minimum recommended size is 256×256px for the logo.
         </p>
@@ -125,16 +125,16 @@ function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-xl border border-zinc-200/60 bg-white overflow-hidden">
-      <div className="flex items-start gap-3 px-5 py-4 border-b border-zinc-100 bg-zinc-50/40">
-        <div className="w-7 h-7 rounded-lg bg-zinc-100 border border-zinc-200/60 flex items-center justify-center text-zinc-500 shrink-0 mt-0.5">
+    <div className="rounded-xl border border-border/60 bg-card overflow-hidden">
+      <div className="flex items-start gap-3 px-5 py-4 border-b border-border bg-muted/50/40">
+        <div className="w-7 h-7 rounded-lg bg-muted border border-border/60 flex items-center justify-center text-muted-foreground shrink-0 mt-0.5">
           <Icon size={13} strokeWidth={2} />
         </div>
         <div>
-          <p className="text-[13.5px] font-semibold text-zinc-900 leading-none">
+          <p className="text-[13.5px] font-semibold text-foreground leading-none">
             {title}
           </p>
-          <p className="mt-1 text-[12px] text-zinc-400 leading-snug">
+          <p className="mt-1 text-[12px] text-muted-foreground leading-snug">
             {description}
           </p>
         </div>

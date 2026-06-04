@@ -54,7 +54,7 @@ const AddMemberPage = () => {
   };
 
   return (
-    <div className="h-full overflow-hidden bg-white">
+    <div className="h-full overflow-hidden bg-background">
       <MemberCreationForm
         loading={loading}
         onFinish={onFinish}

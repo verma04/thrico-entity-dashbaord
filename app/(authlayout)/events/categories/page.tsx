@@ -118,17 +118,17 @@ function AddCategoryModal({
           Add Category
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-md rounded-2xl border-slate-200">
+      <DialogContent className="max-w-md rounded-2xl border-border">
         <DialogHeader>
-          <DialogTitle className="font-bold text-slate-800">Add Event Category</DialogTitle>
-          <DialogDescription className="font-medium text-slate-500">
+          <DialogTitle className="font-bold text-foreground">Add Event Category</DialogTitle>
+          <DialogDescription className="font-medium text-muted-foreground">
             Create a new category to organize your events
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
           <div className="space-y-2">
-            <Label htmlFor="cat-name" className="text-sm font-semibold text-slate-700">
+            <Label htmlFor="cat-name" className="text-sm font-semibold text-foreground">
               Category Name <span className="text-rose-500">*</span>
             </Label>
             <Input
@@ -136,28 +136,28 @@ function AddCategoryModal({
               placeholder="e.g., Hackathon"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="rounded-xl border-slate-200 focus-visible:ring-indigo-500/20"
+              className="rounded-xl border-border focus-visible:ring-indigo-500/20"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="cat-desc" className="text-sm font-semibold text-slate-700">Description</Label>
+            <Label htmlFor="cat-desc" className="text-sm font-semibold text-foreground">Description</Label>
             <Input
               id="cat-desc"
               placeholder="Brief description of this category"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="rounded-xl border-slate-200 focus-visible:ring-indigo-500/20"
+              className="rounded-xl border-border focus-visible:ring-indigo-500/20"
             />
           </div>
 
           <div className="space-y-2">
-            <Label className="text-sm font-semibold text-slate-700">Icon</Label>
+            <Label className="text-sm font-semibold text-foreground">Icon</Label>
             <Select value={icon} onValueChange={setIcon}>
-              <SelectTrigger className="rounded-xl border-slate-200 font-semibold focus:ring-indigo-500/20">
+              <SelectTrigger className="rounded-xl border-border font-semibold focus:ring-indigo-500/20">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="rounded-xl border-slate-200">
+              <SelectContent className="rounded-xl border-border">
                 {Object.entries(CATEGORY_ICONS).map(([key, iconEl]) => (
                   <SelectItem key={key} value={key} className="font-medium rounded-lg">
                     <div className="flex items-center gap-2">
@@ -171,7 +171,7 @@ function AddCategoryModal({
           </div>
 
           <div className="space-y-2">
-            <Label className="text-sm font-semibold text-slate-700">Color</Label>
+            <Label className="text-sm font-semibold text-foreground">Color</Label>
             <div className="flex flex-wrap gap-2 pt-1">
               {CATEGORY_COLORS.map((c) => (
                 <button
@@ -191,7 +191,7 @@ function AddCategoryModal({
         </div>
 
         <DialogFooter className="pt-2">
-          <Button variant="outline" className="rounded-lg font-semibold border-slate-200" onClick={() => setOpen(false)}>
+          <Button variant="outline" className="rounded-lg font-semibold border-border" onClick={() => setOpen(false)}>
             Cancel
           </Button>
           <Button onClick={handleSubmit} disabled={!name} className="rounded-lg font-semibold bg-indigo-600 hover:bg-indigo-700 text-white">
@@ -238,20 +238,20 @@ function CategoriesPage() {
 
       <EcosystemActionBar>
         <div className="relative w-full md:max-w-[400px] group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-indigo-500 transition-colors" />
           <Input
             placeholder="Search categories..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-12 h-12 bg-slate-50 border-slate-200 rounded-xl focus-visible:ring-4 focus-visible:ring-indigo-500/5 transition-all font-medium text-slate-700 placeholder:text-slate-400 border shadow-sm"
+            className="pl-12 h-12 bg-muted border-border rounded-xl focus-visible:ring-4 focus-visible:ring-indigo-500/5 transition-all font-medium text-foreground placeholder:text-muted-foreground border shadow-sm"
           />
         </div>
 
         <div className="flex items-center gap-4 pr-4 ml-auto">
-           <Button variant="outline" size="icon" className="h-10 w-10 rounded-lg border border-slate-200 text-slate-400 hover:text-indigo-600 hover:bg-slate-50 shadow-sm">
+           <Button variant="outline" size="icon" className="h-10 w-10 rounded-lg border border-border text-muted-foreground hover:text-indigo-600 hover:bg-muted shadow-sm">
               <Filter className="h-4 w-4" />
            </Button>
-           <div className="flex items-center gap-2 px-4 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs font-semibold text-slate-600 uppercase tracking-wide whitespace-nowrap">
+           <div className="flex items-center gap-2 px-4 py-2 bg-muted border border-border rounded-xl text-xs font-semibold text-muted-foreground uppercase tracking-wide whitespace-nowrap">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
               {filteredCategories.length} Categories
            </div>

@@ -60,10 +60,10 @@ interface ModuleItem {
 
 const getNavIcon = (icon: string | null) => {
   if (!icon || typeof icon !== "string" || !(icon in LucideIcons)) {
-    return <Puzzle className="h-4 w-4 text-slate-500" />;
+    return <Puzzle className="h-4 w-4 text-muted-foreground" />;
   }
   const IconComponent = (LucideIcons as any)[icon] as React.ElementType;
-  return <IconComponent className="h-4 w-4 text-slate-500" />;
+  return <IconComponent className="h-4 w-4 text-muted-foreground" />;
 };
 
 type ActiveTab = "management" | "navigation";
@@ -228,16 +228,16 @@ export default function ModuleManagement() {
   if (loading) {
     return (
       <EcosystemWrapper>
-        <div className="rounded-xl border border-slate-200/80 bg-white shadow-sm p-5 animate-pulse space-y-4">
+        <div className="rounded-xl border border-border/80 bg-card shadow-sm p-5 animate-pulse space-y-4">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-lg bg-slate-100" />
+            <div className="h-9 w-9 rounded-lg bg-muted" />
             <div className="space-y-2">
-              <div className="h-4 w-40 bg-slate-100 rounded" />
-              <div className="h-3 w-64 bg-slate-100 rounded" />
+              <div className="h-4 w-40 bg-muted rounded" />
+              <div className="h-3 w-64 bg-muted rounded" />
             </div>
           </div>
           {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="h-12 bg-slate-50 rounded-lg" />
+            <div key={i} className="h-12 bg-muted/50 rounded-lg" />
           ))}
         </div>
       </EcosystemWrapper>
@@ -296,24 +296,24 @@ export default function ModuleManagement() {
               {notification.message}
             </p>
             {notification.description && (
-              <p className="text-[11px] text-slate-400 mt-1">{notification.description}</p>
+              <p className="text-[11px] text-muted-foreground mt-1">{notification.description}</p>
             )}
           </div>
         </div>
       )}
 
       {/* Main card */}
-      <div className="rounded-xl border border-slate-200/80 bg-white shadow-sm overflow-hidden">
+      <div className="rounded-xl border border-border/80 bg-card shadow-sm overflow-hidden">
         {/* Card header with tabs + stats */}
-        <div className="px-5 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg">
+        <div className="px-5 py-4 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-1 bg-muted p-0.5 rounded-lg">
             <button
               onClick={() => setActiveTab("management")}
               className={cn(
                 "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-semibold transition-all duration-150",
                 activeTab === "management"
-                  ? "bg-white text-slate-900 shadow-sm border border-slate-200"
-                  : "text-slate-500 hover:text-slate-700"
+                  ? "bg-card text-foreground shadow-sm border border-border"
+                  : "text-muted-foreground hover:text-foreground"
               )}
             >
               <LayoutGrid className="h-3.5 w-3.5" />
@@ -324,8 +324,8 @@ export default function ModuleManagement() {
               className={cn(
                 "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-semibold transition-all duration-150",
                 activeTab === "navigation"
-                  ? "bg-white text-slate-900 shadow-sm border border-slate-200"
-                  : "text-slate-500 hover:text-slate-700"
+                  ? "bg-card text-foreground shadow-sm border border-border"
+                  : "text-muted-foreground hover:text-foreground"
               )}
             >
               <Smartphone className="h-3.5 w-3.5" />
@@ -336,10 +336,10 @@ export default function ModuleManagement() {
           <div className="flex items-center gap-3">
             {/* Stat pills */}
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-semibold text-slate-500 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-md">
+              <span className="text-[11px] font-semibold text-muted-foreground bg-muted/50 border border-border px-2.5 py-1 rounded-md">
                 {enabledCount} / {modules.length} enabled
               </span>
-              <span className="text-[11px] font-semibold text-slate-500 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-md">
+              <span className="text-[11px] font-semibold text-muted-foreground bg-muted/50 border border-border px-2.5 py-1 rounded-md">
                 {navCount} / 3 in nav
               </span>
             </div>
@@ -352,27 +352,27 @@ export default function ModuleManagement() {
           <div className="p-5 space-y-4">
             {/* Search */}
             <div className="relative max-w-sm">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
               <Input
                 placeholder="Search modules..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9 h-8 text-[13px] border-slate-200 bg-slate-50 focus:bg-white"
+                className="pl-9 h-8 text-[13px] border-border bg-muted/50 focus:bg-card"
               />
             </div>
 
             {/* Column headers */}
-            <div className="grid grid-cols-[1fr_auto_auto_auto] items-center gap-4 px-3 pb-1 border-b border-slate-100">
-              <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Module</span>
-              <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest text-center w-16">Popular</span>
-              <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest text-center w-16">Enabled</span>
-              <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest text-center w-16">Mobile Nav</span>
+            <div className="grid grid-cols-[1fr_auto_auto_auto] items-center gap-4 px-3 pb-1 border-b border-border">
+              <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Module</span>
+              <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest text-center w-16">Popular</span>
+              <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest text-center w-16">Enabled</span>
+              <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest text-center w-16">Mobile Nav</span>
             </div>
 
             {/* Module rows */}
             <div className="space-y-1">
               {filteredModules.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 text-slate-400">
+                <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
                   <Puzzle className="h-8 w-8 mb-2 opacity-30" />
                   <p className="text-[13px]">No modules found</p>
                 </div>
@@ -380,20 +380,20 @@ export default function ModuleManagement() {
                 filteredModules.map((module) => (
                   <div
                     key={module.id}
-                    className="grid grid-cols-[1fr_auto_auto_auto] items-center gap-4 px-3 py-3 rounded-lg border border-transparent hover:bg-slate-50 hover:border-slate-100 transition-colors group"
+                    className="grid grid-cols-[1fr_auto_auto_auto] items-center gap-4 px-3 py-3 rounded-lg border border-transparent hover:bg-muted/50 hover:border-border transition-colors group"
                   >
                     {/* Module info */}
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="h-7 w-7 rounded-md bg-slate-100 border border-slate-200/60 flex items-center justify-center shrink-0">
+                      <div className="h-7 w-7 rounded-md bg-muted border border-border/60 flex items-center justify-center shrink-0">
                         {getNavIcon(module.icon)}
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-[13px] font-medium text-slate-800 truncate">
+                          <span className="text-[13px] font-medium text-foreground truncate">
                             {module.name}
                           </span>
                           {module.required && (
-                            <span className="text-[10px] font-semibold text-slate-500 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded uppercase tracking-wide">
+                            <span className="text-[10px] font-semibold text-muted-foreground bg-muted border border-border px-1.5 py-0.5 rounded uppercase tracking-wide">
                               Required
                             </span>
                           )}
@@ -418,7 +418,7 @@ export default function ModuleManagement() {
                                 "h-6 w-6 rounded flex items-center justify-center transition-colors",
                                 module.isPopular
                                   ? "text-amber-500 bg-amber-50 border border-amber-200"
-                                  : "text-slate-300 hover:text-amber-400 hover:bg-amber-50 border border-transparent hover:border-amber-100"
+                                  : "text-muted-foreground hover:text-amber-400 hover:bg-amber-50 border border-transparent hover:border-amber-100"
                               )}
                             >
                               <Star className="h-3.5 w-3.5" fill={module.isPopular ? "currentColor" : "none"} />

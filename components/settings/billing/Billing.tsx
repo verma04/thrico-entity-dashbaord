@@ -68,14 +68,14 @@ export default function Billing() {
       header: "Date",
       cell: (record: BillingRecord) => (
         <div className="flex items-center gap-3">
-          <div className="h-8 w-8 rounded-lg bg-zinc-100 border border-zinc-200 flex items-center justify-center shrink-0">
-            <Calendar className="h-4 w-4 text-zinc-400" />
+          <div className="h-8 w-8 rounded-lg bg-muted border border-border flex items-center justify-center shrink-0">
+            <Calendar className="h-4 w-4 text-muted-foreground" />
           </div>
           <div className="flex flex-col">
             <span className="text-sm font-medium text-foreground leading-none">
               {moment(record.date).format("MMM D, YYYY")}
             </span>
-            <span className="text-[10px] text-zinc-400 mt-1">Invoiced</span>
+            <span className="text-[10px] text-muted-foreground mt-1">Invoiced</span>
           </div>
         </div>
       ),
@@ -85,14 +85,14 @@ export default function Billing() {
       header: "Description",
       cell: (record: BillingRecord) => (
         <div className="flex items-center gap-3">
-          <div className="h-6 w-6 rounded bg-slate-100 flex items-center justify-center shrink-0">
-            <FileText className="h-3.5 w-3.5 text-zinc-400" />
+          <div className="h-6 w-6 rounded bg-muted flex items-center justify-center shrink-0">
+            <FileText className="h-3.5 w-3.5 text-muted-foreground" />
           </div>
           <div className="flex flex-col">
             <span className="text-sm font-medium text-foreground leading-tight">
               {record.description}
             </span>
-            <span className="text-[10px] text-zinc-400 uppercase mt-0.5">
+            <span className="text-[10px] text-muted-foreground uppercase mt-0.5">
               {record.planName}
             </span>
           </div>
@@ -107,7 +107,7 @@ export default function Billing() {
           <span className="text-sm font-semibold text-foreground tabular-nums">
             {record.amount}
           </span>
-          <span className="text-[10px] text-zinc-400">Total</span>
+          <span className="text-[10px] text-muted-foreground">Total</span>
         </div>
       ),
     },
@@ -140,7 +140,7 @@ export default function Billing() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-zinc-400 hover:text-foreground hover:bg-zinc-100 rounded-lg transition-all"
+                className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-all"
               >
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
@@ -179,7 +179,7 @@ export default function Billing() {
 
       <EcosystemActionBar shadow="none">
         <EcosystemActionBar.Group>
-          <div className="flex items-center gap-2.5 text-xs text-zinc-400 px-1">
+          <div className="flex items-center gap-2.5 text-xs text-muted-foreground px-1">
             <CreditCard className="h-3.5 w-3.5" />
             <span>Active Subscription</span>
           </div>
@@ -207,11 +207,11 @@ export default function Billing() {
           </div>
 
           <div className="space-y-4">
-            <div className="flex items-start gap-4 p-4 rounded-2xl bg-zinc-50 border border-zinc-200/50">
-              <div className="h-8 w-8 rounded-full bg-white flex items-center justify-center shadow-sm shrink-0 border border-zinc-200">
-                <Receipt className="h-4 w-4 text-zinc-400" />
+            <div className="flex items-start gap-4 p-4 rounded-2xl bg-muted/50 border border-border">
+              <div className="h-8 w-8 rounded-full bg-card flex items-center justify-center shadow-sm shrink-0 border border-border">
+                <Receipt className="h-4 w-4 text-muted-foreground" />
               </div>
-              <p className="text-[12px] text-zinc-500 leading-relaxed">
+              <p className="text-[12px] text-muted-foreground leading-relaxed">
                 Invoices are generated automatically at the end of each cycle.
                 Contact support if you need help with your receipts.
               </p>
@@ -244,16 +244,16 @@ function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-xl border border-zinc-200/60 bg-white overflow-hidden">
-      <div className="flex items-start gap-3 px-5 py-4 border-b border-zinc-100 bg-zinc-50/40">
-        <div className="w-7 h-7 rounded-lg bg-zinc-100 border border-zinc-200/60 flex items-center justify-center text-zinc-500 shrink-0 mt-0.5">
+    <div className="rounded-xl border border-border bg-card overflow-hidden">
+      <div className="flex items-start gap-3 px-5 py-4 border-b border-border bg-muted/30">
+        <div className="w-7 h-7 rounded-lg bg-muted border border-border flex items-center justify-center text-muted-foreground shrink-0 mt-0.5">
           <Icon size={13} strokeWidth={2} />
         </div>
         <div>
-          <p className="text-[13.5px] font-semibold text-zinc-900 leading-none">
+          <p className="text-[13.5px] font-semibold text-foreground leading-none">
             {title}
           </p>
-          <p className="mt-1 text-[12px] text-zinc-400 leading-snug">
+          <p className="mt-1 text-[12px] text-muted-foreground leading-snug">
             {description}
           </p>
         </div>

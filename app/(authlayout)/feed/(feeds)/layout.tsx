@@ -62,7 +62,7 @@ function RootLayout({ children }: { children: React.ReactNode }) {
                   "group/tab relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12.5px] font-medium transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/50 whitespace-nowrap",
                   activeTab === tab.key
                     ? "text-indigo-700"
-                    : "text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100/70"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/70"
                 )}
               >
                 {/* Animated pill background */}
@@ -80,7 +80,7 @@ function RootLayout({ children }: { children: React.ReactNode }) {
                     "relative z-10 shrink-0 transition-all duration-200",
                     activeTab === tab.key
                       ? "text-indigo-600"
-                      : "text-zinc-400 group-hover/tab:text-zinc-600"
+                      : "text-muted-foreground group-hover/tab:text-muted-foreground"
                   )}
                 >
                   <tab.icon className="h-3.5 w-3.5" />
@@ -96,7 +96,7 @@ function RootLayout({ children }: { children: React.ReactNode }) {
                       "relative z-10 ml-0.5 flex h-4 items-center justify-center rounded-full px-1.5 text-[10px] font-medium",
                       activeTab === tab.key
                         ? "bg-indigo-100 text-indigo-700"
-                        : "bg-zinc-100 text-zinc-500"
+                        : "bg-muted text-muted-foreground"
                     )}
                   >
                     {tab.count}

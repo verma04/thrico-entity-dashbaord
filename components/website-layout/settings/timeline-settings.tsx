@@ -113,7 +113,7 @@ const TimelineSettings: React.FC<TimelineSettingsProps> = ({
   return (
     <div className="space-y-6">
       {/* Header Settings */}
-      <div className="p-4 bg-slate-50 border rounded-lg space-y-4">
+      <div className="p-4 bg-muted/50 border rounded-lg space-y-4">
         <div className="flex items-center gap-2 mb-2">
           <Layout className="w-4 h-4 text-primary" />
           <h3 className="font-semibold text-sm">Header Settings</h3>
@@ -121,19 +121,19 @@ const TimelineSettings: React.FC<TimelineSettingsProps> = ({
 
         <div className="grid gap-4">
           <div>
-            <Label className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5 block">
+            <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5 block">
               Section Title
             </Label>
             <Input
               value={content.title || ""}
               onChange={(e) => onChange({ title: e.target.value })}
               placeholder="e.g. Our Journey"
-              className="bg-white"
+              className="bg-card"
             />
           </div>
 
           <div>
-            <Label className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5 block">
+            <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5 block">
               Description
             </Label>
             <Textarea
@@ -141,15 +141,15 @@ const TimelineSettings: React.FC<TimelineSettingsProps> = ({
               onChange={(e) => onChange({ description: e.target.value })}
               placeholder="Brief description of your timeline..."
               rows={2}
-              className="bg-white"
+              className="bg-card"
             />
           </div>
 
           <div>
-            <Label className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5 block">
+            <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5 block">
               Header Alignment
             </Label>
-            <div className="flex items-center gap-2 p-1 bg-white border rounded-md w-fit">
+            <div className="flex items-center gap-2 p-1 bg-card border rounded-md w-fit">
               {[
                 { value: "left", icon: AlignLeft },
                 { value: "center", icon: AlignCenter },
@@ -158,10 +158,10 @@ const TimelineSettings: React.FC<TimelineSettingsProps> = ({
                 <button
                   key={option.value}
                   onClick={() => onChange({ align: option.value })}
-                  className={`p-2 rounded hover:bg-slate-100 transition-colors ${
+                  className={`p-2 rounded hover:bg-muted transition-colors ${
                     (content.align || "center") === option.value
-                      ? "bg-slate-100 text-primary"
-                      : "text-slate-400"
+                      ? "bg-muted text-primary"
+                      : "text-muted-foreground"
                   }`}
                   title={`Align ${option.value}`}
                 >
@@ -204,25 +204,25 @@ const TimelineSettings: React.FC<TimelineSettingsProps> = ({
                       <div
                         ref={provided.innerRef}
                         {...provided.draggableProps}
-                        className={`group bg-white border rounded-lg overflow-hidden transition-all duration-200 ${
+                        className={`group bg-card border rounded-lg overflow-hidden transition-all duration-200 ${
                           snapshot.isDragging
                             ? "shadow-xl scale-[1.02] border-primary/50 z-50"
-                            : "hover:border-slate-300"
+                            : "hover:border-border"
                         }`}
                       >
                         {/* Drag Handle & Header */}
-                        <div className="flex items-center justify-between p-3 bg-slate-50/50 border-b gap-3">
+                        <div className="flex items-center justify-between p-3 bg-muted/30 border-b gap-3">
                           <div className="flex items-center gap-3 flex-1">
                             <div
                               {...provided.dragHandleProps}
-                              className="text-slate-400 hover:text-slate-600 cursor-grab active:cursor-grabbing p-1 hover:bg-slate-200/50 rounded"
+                              className="text-muted-foreground hover:text-muted-foreground cursor-grab active:cursor-grabbing p-1 hover:bg-muted/50 rounded"
                             >
                               <GripVertical className="w-4 h-4" />
                             </div>
                             <span className="font-medium text-sm truncate">
                               {milestone.title || "Untitled Milestone"}
                             </span>
-                            <span className="text-xs font-mono bg-slate-100 px-2 py-0.5 rounded text-slate-500">
+                            <span className="text-xs font-mono bg-muted px-2 py-0.5 rounded text-muted-foreground">
                               {milestone.date}
                             </span>
                           </div>
@@ -237,7 +237,7 @@ const TimelineSettings: React.FC<TimelineSettingsProps> = ({
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="h-7 w-7 p-0 text-slate-400 hover:text-red-500 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity"
+                                className="h-7 w-7 p-0 text-muted-foreground hover:text-red-500 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity"
                               >
                                 <Trash2 className="w-4 h-4" />
                               </Button>
@@ -248,7 +248,7 @@ const TimelineSettings: React.FC<TimelineSettingsProps> = ({
                               side="left"
                             >
                               <div className="space-y-3">
-                                <p className="text-xs text-slate-600 font-medium">
+                                <p className="text-xs text-muted-foreground font-medium">
                                   Delete this milestone?
                                 </p>
                                 <div className="flex gap-2">
@@ -281,7 +281,7 @@ const TimelineSettings: React.FC<TimelineSettingsProps> = ({
                         <div className="p-4 grid gap-4">
                           <div className="grid grid-cols-3 gap-4">
                             <div className="col-span-1">
-                              <Label className="text-xs text-slate-500 mb-1.5 block">
+                              <Label className="text-xs text-muted-foreground mb-1.5 block">
                                 Date / Year
                               </Label>
                               <Input
@@ -296,7 +296,7 @@ const TimelineSettings: React.FC<TimelineSettingsProps> = ({
                               />
                             </div>
                             <div className="col-span-2">
-                              <Label className="text-xs text-slate-500 mb-1.5 block">
+                              <Label className="text-xs text-muted-foreground mb-1.5 block">
                                 Title
                               </Label>
                               <Input
@@ -313,7 +313,7 @@ const TimelineSettings: React.FC<TimelineSettingsProps> = ({
                           </div>
 
                           <div>
-                            <Label className="text-xs text-slate-500 mb-1.5 block">
+                            <Label className="text-xs text-muted-foreground mb-1.5 block">
                               Description
                             </Label>
                             <Textarea
@@ -325,7 +325,7 @@ const TimelineSettings: React.FC<TimelineSettingsProps> = ({
                               }
                               placeholder="Describe what happened..."
                               rows={2}
-                              className="text-sm resize-none bg-slate-50/30 focus:bg-white transition-colors"
+                              className="text-sm resize-none bg-muted/50/30 focus:bg-card transition-colors"
                             />
                           </div>
                         </div>

@@ -13,7 +13,7 @@ const FeedOrderingPage = () => {
     return (
       <div className="flex flex-col gap-3 max-w-2xl">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="h-16 w-full rounded-xl bg-zinc-50 animate-pulse" />
+          <div key={i} className="h-16 w-full rounded-xl bg-muted/50 animate-pulse" />
         ))}
       </div>
     );

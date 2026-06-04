@@ -9,15 +9,15 @@ export const UpgradeHeader = ({ subscriptionType, isHighTier }: UpgradeHeaderPro
   return (
     <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-1">
       <div>
-        <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-1.5">
+        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-1.5">
           {isHighTier ? "Maximum Tier" : "Available Plans"}
         </p>
-        <h2 className="text-[20px] font-semibold text-slate-900 tracking-tight leading-tight">
+        <h2 className="text-[20px] font-semibold text-foreground tracking-tight leading-tight">
           {isHighTier
             ? "You're on our highest tier"
             : "Choose the right plan for your team"}
         </h2>
-        <p className="text-[13px] text-slate-400 mt-1.5 max-w-lg leading-relaxed">
+        <p className="text-[13px] text-muted-foreground mt-1.5 max-w-lg leading-relaxed">
           {isHighTier
             ? "You've unlocked all features. For custom scale or white-label solutions, contact our enterprise team."
             : subscriptionType === "trail"
@@ -28,7 +28,7 @@ export const UpgradeHeader = ({ subscriptionType, isHighTier }: UpgradeHeaderPro
       {!isHighTier && (
         <a
           href="#custom"
-          className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-slate-500 hover:text-slate-900 transition-colors shrink-0"
+          className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-muted-foreground hover:text-foreground transition-colors shrink-0"
         >
           Need custom?
           <ArrowUpRight className="h-3.5 w-3.5" />

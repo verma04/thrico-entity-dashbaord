@@ -69,7 +69,7 @@ export default function CurrencySettingsPage() {
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-2 px-1">
             <ShieldCheck className="h-4 w-4 text-emerald-500" />
-            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest italic">
+            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest italic">
               Verified Economic Ledger Active
             </span>
           </div>
@@ -80,32 +80,32 @@ export default function CurrencySettingsPage() {
               onDateChange={handleDateChange}
               defaultValue="LAST_7_DAYS"
             />
-            <div className="h-4 w-px bg-zinc-200 mx-1" />
+            <div className="h-4 w-px bg-border mx-1" />
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button
                   variant="outline"
-                  className="h-9 px-4 rounded-lg border-zinc-200 font-bold text-[10px] uppercase tracking-widest text-zinc-600 gap-2 hover:bg-zinc-50 transition-all shadow-sm"
+                  className="h-9 px-4 rounded-lg border-border font-bold text-[10px] uppercase tracking-widest text-muted-foreground gap-2 hover:bg-muted/50 transition-all shadow-sm"
                 >
                   <RotateCcw className="h-3.5 w-3.5" />
                   Reset Node
                 </Button>
               </AlertDialogTrigger>
-              <AlertDialogContent className="rounded-lg border-zinc-200 shadow-xl">
+              <AlertDialogContent className="rounded-lg border-border shadow-xl">
                 <AlertDialogHeader>
-                  <AlertDialogTitle className="text-zinc-900 font-bold tracking-tight">
+                  <AlertDialogTitle className="text-foreground font-bold tracking-tight">
                     Reset currency nodes?
                   </AlertDialogTitle>
-                  <AlertDialogDescription className="text-zinc-500 text-sm">
+                  <AlertDialogDescription className="text-muted-foreground text-sm">
                     This will synchronize all economic parameters, caps, and redemption protocols back to the platform core defaults.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel className="rounded-lg border-zinc-200 font-bold text-[10px] uppercase tracking-widest">
+                  <AlertDialogCancel className="rounded-lg border-border font-bold text-[10px] uppercase tracking-widest">
                     Cancel
                   </AlertDialogCancel>
                   <AlertDialogAction
-                    className="bg-zinc-900 hover:bg-zinc-800 rounded-lg font-bold text-[10px] uppercase tracking-widest"
+                    className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg font-bold text-[10px] uppercase tracking-widest"
                     onClick={() => reSeed()}
                     disabled={resetting}
                   >

@@ -59,7 +59,7 @@ export default function ClassificationLayout({ children }: { children: React.Rea
         />
 
         {/* Modern Sub-tabs Navigation */}
-        <div className="border-b border-slate-200 bg-white rounded-xl shadow-sm px-6 flex items-center justify-between">
+        <div className="border-b border-border bg-card rounded-xl shadow-sm px-6 flex items-center justify-between">
           <div className="flex gap-6">
             {tabs.map((tab) => {
               const isActive = activeTab === tab.id;
@@ -70,7 +70,7 @@ export default function ClassificationLayout({ children }: { children: React.Rea
                   className={`flex items-center gap-2 px-1 py-4 text-sm font-semibold border-b-2 transition-all duration-200 -mb-[2px] ${
                     isActive
                       ? "border-indigo-600 text-indigo-600"
-                      : "border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300"
+                      : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
                   }`}
                 >
                   {tab.icon}

@@ -126,7 +126,7 @@ export const AchievementsSettings = ({
                 {...provided.droppableProps}
                 className={cn(
                   "space-y-4",
-                  snapshot.isDraggingOver && "bg-slate-50 rounded-xl p-2"
+                  snapshot.isDraggingOver && "bg-muted/50 rounded-xl p-2"
                 )}
               >
                 {achievements.map((achievement: any, index: number) => (
@@ -140,7 +140,7 @@ export const AchievementsSettings = ({
                         ref={provided.innerRef}
                         {...provided.draggableProps}
                         className={cn(
-                          "p-4 bg-white border rounded-2xl shadow-sm space-y-4",
+                          "p-4 bg-card border rounded-2xl shadow-sm space-y-4",
                           snapshot.isDragging
                             ? "shadow-xl ring-2 ring-blue-500/20"
                             : ""
@@ -149,9 +149,9 @@ export const AchievementsSettings = ({
                         <div className="flex justify-between items-center">
                           <div className="flex items-center gap-3">
                             <div {...provided.dragHandleProps}>
-                              <GripVertical className="h-4 w-4 text-slate-400 cursor-grab active:cursor-grabbing" />
+                              <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab active:cursor-grabbing" />
                             </div>
-                            <span className="text-sm font-bold text-slate-700">
+                            <span className="text-sm font-bold text-foreground">
                               {achievement.title || "Achievement"}
                             </span>
                           </div>
@@ -168,7 +168,7 @@ export const AchievementsSettings = ({
                         {/* Title & Category */}
                         <div className="grid grid-cols-2 gap-3">
                           <div className="space-y-1">
-                            <Label className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">
+                            <Label className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">
                               Title
                             </Label>
                             <Input
@@ -185,7 +185,7 @@ export const AchievementsSettings = ({
                             />
                           </div>
                           <div className="space-y-1">
-                            <Label className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">
+                            <Label className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">
                               Category
                             </Label>
                             <Input
@@ -205,7 +205,7 @@ export const AchievementsSettings = ({
 
                         {/* Description */}
                         <div className="space-y-1">
-                          <Label className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">
+                          <Label className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">
                             Description
                           </Label>
                           <Textarea
@@ -225,7 +225,7 @@ export const AchievementsSettings = ({
 
                         {/* Icon Selection */}
                         <div className="space-y-2">
-                          <Label className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">
+                          <Label className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">
                             Icon / Badge Source
                           </Label>
                           <Tabs
@@ -282,7 +282,7 @@ export const AchievementsSettings = ({
 
                         {/* Date */}
                         <div className="space-y-1">
-                          <Label className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">
+                          <Label className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">
                             Year / Date
                           </Label>
                           <Input

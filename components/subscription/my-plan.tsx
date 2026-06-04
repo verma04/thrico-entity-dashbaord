@@ -34,10 +34,10 @@ const variantStyles = {
     bar: "bg-emerald-500",
   },
   default: {
-    wrap: "bg-slate-50 border-slate-200",
-    icon: "bg-slate-100 text-slate-600",
-    title: "text-slate-800",
-    desc: "text-slate-500",
+    wrap: "bg-muted/50 border-border",
+    icon: "bg-muted text-muted-foreground",
+    title: "text-foreground",
+    desc: "text-muted-foreground",
     bar: "bg-slate-400",
   },
 };

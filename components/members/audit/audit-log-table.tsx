@@ -58,15 +58,15 @@ export function AuditLogTable({
       header: "Target Entity",
       cell: (log: AuditLog) => (
         <div className="flex items-center gap-3">
-          <div className="h-8 w-8 rounded-lg bg-zinc-50 border border-zinc-200 flex items-center justify-center shrink-0">
-             <Terminal className="h-4 w-4 text-zinc-400" />
+          <div className="h-8 w-8 rounded-lg bg-muted/50 border border-border flex items-center justify-center shrink-0">
+             <Terminal className="h-4 w-4 text-muted-foreground" />
           </div>
           <div className="flex flex-col">
             <div className="flex items-center gap-1.5">
                <span className="text-sm font-black text-foreground uppercase tracking-tight">
                   {log.entity.name}
                </span>
-               <span className="inline-flex h-4 items-center px-1.5 rounded-md text-[8px] font-black uppercase tracking-widest bg-zinc-100 text-zinc-500 border border-zinc-200/50">
+               <span className="inline-flex h-4 items-center px-1.5 rounded-md text-[8px] font-black uppercase tracking-widest bg-muted text-muted-foreground border border-border/50">
                   {log.entity.type}
                </span>
             </div>
@@ -118,8 +118,8 @@ export function AuditLogTable({
       header: "Authority",
       cell: (log: AuditLog) => (
         <div className="flex items-center gap-3">
-          <div className="h-7 w-7 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center shrink-0">
-             <User className="h-3.5 w-3.5 text-zinc-500" />
+          <div className="h-7 w-7 rounded-full bg-muted border border-border flex items-center justify-center shrink-0">
+             <User className="h-3.5 w-3.5 text-muted-foreground" />
           </div>
           <div className="flex flex-col">
             <span className="text-xs font-bold text-foreground leading-none">

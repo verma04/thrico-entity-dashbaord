@@ -48,8 +48,8 @@ export const DomainsPage = () => {
         <div className={cn(STYLES.card, "overflow-hidden")}>
           <div className="px-5 py-4 border-b border-border/50 flex items-center justify-between gap-4 bg-muted/30">
             <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-md bg-slate-900 dark:bg-slate-100 flex items-center justify-center shrink-0">
-                <Globe className="h-4 w-4 text-white dark:text-slate-900" />
+              <div className="h-8 w-8 rounded-md bg-primary text-primary-foreground  flex items-center justify-center shrink-0">
+                <Globe className="h-4 w-4 text-white " />
               </div>
               <div>
                 <h2 className={STYLES.heading}>

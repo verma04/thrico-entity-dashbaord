@@ -146,7 +146,7 @@ export default function BillingDetailsForm() {
             name="accountType"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
+                <FormLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
                   Account Type
                 </FormLabel>
                 <Select onValueChange={field.onChange} value={field.value}>
@@ -170,7 +170,7 @@ export default function BillingDetailsForm() {
             name="panNumber"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
+                <FormLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
                   PAN Number
                 </FormLabel>
                 <FormControl>
@@ -195,7 +195,7 @@ export default function BillingDetailsForm() {
           name="gstNumber"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
+              <FormLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
                 GST Number {accountType === "enterprise" ? "*" : "(Optional)"}
               </FormLabel>
               <FormControl>
@@ -215,7 +215,7 @@ export default function BillingDetailsForm() {
         />
 
         <div className="space-y-3 pt-2">
-          <p className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider">
+          <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
             Billing Address
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -328,7 +328,7 @@ export default function BillingDetailsForm() {
         </div>
 
         <div className="flex items-center justify-between pt-2">
-          <p className="text-[11px] text-zinc-500">
+          <p className="text-[11px] text-muted-foreground">
             All fields are secured and encrypted in transit.
           </p>
         </div>

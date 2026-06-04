@@ -50,6 +50,22 @@ export default function SendEmail() {
   const remainingQuota = usage ? usage.remaining : 0;
   const userGroups = userGroupsData?.getEmailUserGroups || [];
 
+  const totalRecipientCount = useMemo(() => {
+    let count = 0;
+    recipients.forEach((item) => {
+      if (item.startsWith("GROUP:")) {
+        const groupName = item.split("GROUP:")[1];
+        const group = userGroups.find((g) => g.name === groupName);
+        if (group) {
+          count += group.count;
+        }
+      } else {
+        count += 1;
+      }
+    });
+    return count;
+  }, [recipients, userGroups]);
+
   const checks = [
     {
       label: "Sender Domain",
@@ -58,8 +74,8 @@ export default function SendEmail() {
     },
     {
       label: "Email Credits",
-      ok: remainingQuota >= recipients.length && recipients.length > 0,
-      message: remainingQuota >= recipients.length ? `${recipients.length} recipients within quota` : "Exceeds your remaining quota",
+      ok: remainingQuota >= totalRecipientCount && totalRecipientCount > 0,
+      message: remainingQuota >= totalRecipientCount ? `${totalRecipientCount} recipients within quota` : "Exceeds your remaining quota",
     },
     {
       label: "Template",
@@ -68,8 +84,8 @@ export default function SendEmail() {
     },
     {
       label: "Recipients",
-      ok: recipients.length > 0,
-      message: recipients.length > 0 ? `${recipients.length} recipients added` : "No recipients added",
+      ok: totalRecipientCount > 0,
+      message: totalRecipientCount > 0 ? `${totalRecipientCount} recipients added` : "No recipients added",
     },
   ];
 
@@ -89,11 +105,11 @@ export default function SendEmail() {
   };
 
   const handleSend = async () => {
-    if (!selectedTemplateId || !subject || recipients.length === 0) {
+    if (!selectedTemplateId || !subject || totalRecipientCount === 0) {
       toast.error("Please complete all required fields.");
       return;
     }
-    if (recipients.length > remainingQuota) {
+    if (totalRecipientCount > remainingQuota) {
       toast.error("Recipient count exceeds your remaining quota.");
       return;
     }
@@ -114,7 +130,7 @@ export default function SendEmail() {
 
   const canProceed = () => {
     if (step === 0) return !!selectedTemplateId;
-    if (step === 1) return recipients.length > 0 && recipients.length <= remainingQuota;
+    if (step === 1) return totalRecipientCount > 0 && totalRecipientCount <= remainingQuota;
     if (step === 2) return !!subject;
     return true;
   };
@@ -163,6 +179,7 @@ export default function SendEmail() {
                     userGroups={userGroups}
                     userGroupsLoading={userGroupsLoading}
                     remainingQuota={remainingQuota}
+                    totalRecipientCount={totalRecipientCount}
                   />
                 </motion.div>
               )}
@@ -173,7 +190,7 @@ export default function SendEmail() {
               )}
               {step === 3 && (
                 <motion.div key="review" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }}>
-                  <FinalDeployment checks={checks} selectedTemplate={selectedTemplate || null} recipientsCount={recipients.length} isDomainVerified={isDomainVerified} domain={domain || null} />
+                  <FinalDeployment checks={checks} selectedTemplate={selectedTemplate || null} recipientsCount={totalRecipientCount} isDomainVerified={isDomainVerified} domain={domain || null} />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -212,10 +229,10 @@ export default function SendEmail() {
             ) : (
               <button
                 onClick={() => setShowConfirm(true)}
-                disabled={!isDomainVerified || recipients.length === 0 || recipients.length > remainingQuota}
+                disabled={!isDomainVerified || totalRecipientCount === 0 || totalRecipientCount > remainingQuota}
                 className={cn(
                   "flex items-center gap-2 h-11 px-8 rounded-xl text-sm font-semibold transition-all",
-                  (!isDomainVerified || recipients.length === 0 || recipients.length > remainingQuota)
+                  (!isDomainVerified || totalRecipientCount === 0 || totalRecipientCount > remainingQuota)
                     ? "bg-muted/50 text-muted-foreground/80 border border-border/50 cursor-not-allowed"
                     : "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 hover:bg-black dark:hover:bg-white shadow-sm"
                 )}
@@ -257,7 +274,7 @@ export default function SendEmail() {
                 <div className="space-y-2">
                   <h3 className="text-lg font-bold text-foreground">Send this campaign?</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    This will send to <span className="font-semibold text-foreground">{recipients.length.toLocaleString()} recipients</span>. This cannot be undone once sent.
+                    This will send to <span className="font-semibold text-foreground">{totalRecipientCount.toLocaleString()} recipients</span>. This cannot be undone once sent.
                   </p>
                 </div>
               </div>

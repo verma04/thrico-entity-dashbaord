@@ -45,8 +45,8 @@ export const PlanCard = ({
   return (
     <div
       className={cn(
-        "relative flex flex-col rounded-xl border bg-white shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md",
-        isPopular ? "border-slate-900 ring-1 ring-slate-900/10" : "border-slate-200/80"
+        "relative flex flex-col rounded-xl border bg-card shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md",
+        isPopular ? "border-slate-900 ring-1 ring-slate-900/10" : "border-border"
       )}
     >
       {/* Popular ribbon */}
@@ -59,13 +59,13 @@ export const PlanCard = ({
       )}
 
       {/* Header */}
-      <div className={cn("px-5 pt-5 pb-4", isPopular && "border-b border-slate-100")}>
-        <h3 className="text-[15px] font-semibold text-slate-900 tracking-tight">{pkg.name}</h3>
+      <div className={cn("px-5 pt-5 pb-4", isPopular && "border-b border-border")}>
+        <h3 className="text-[15px] font-semibold text-foreground tracking-tight">{pkg.name}</h3>
         <div className="flex items-baseline gap-1.5 mt-3">
-          <span className="text-[28px] font-bold text-slate-900 leading-none tabular-nums tracking-tight">
+          <span className="text-[28px] font-bold text-foreground leading-none tabular-nums tracking-tight">
             {formatPrice(pkg.monthlyPrice, pkg.yearlyPrice, isYearly, pkg.currency)}
           </span>
-          <span className="text-[12px] text-slate-400">
+          <span className="text-[12px] text-muted-foreground">
             / {isYearly ? "yr" : "mo"}
           </span>
         </div>
@@ -77,13 +77,13 @@ export const PlanCard = ({
       </div>
 
       {/* Specs */}
-      <div className="px-5 py-3 border-b border-slate-100 space-y-2">
-        <div className="flex items-center gap-2 text-[12px] text-slate-600">
-          <TabletSmartphone className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+      <div className="px-5 py-3 border-b border-border space-y-2">
+        <div className="flex items-center gap-2 text-[12px] text-muted-foreground">
+          <TabletSmartphone className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
           {pkg.accessType === "WebOnly" ? "Web Only" : "Web + Mobile"}
         </div>
-        <div className="flex items-center gap-2 text-[12px] text-slate-600">
-          <Users2 className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+        <div className="flex items-center gap-2 text-[12px] text-muted-foreground">
+          <Users2 className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
           {pkg.numberOfUsers} members
           {extraUsers > 0 && (
             <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-100 px-1.5 py-0.5 rounded">
@@ -91,8 +91,8 @@ export const PlanCard = ({
             </span>
           )}
         </div>
-        <div className="flex items-center gap-2 text-[12px] text-slate-600">
-          <ShieldAlert className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+        <div className="flex items-center gap-2 text-[12px] text-muted-foreground">
+          <ShieldAlert className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
           {pkg.adminUsers} admin{pkg.adminUsers > 1 ? "s" : ""}
           {extraAdmins > 0 && (
             <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-100 px-1.5 py-0.5 rounded">
@@ -104,11 +104,11 @@ export const PlanCard = ({
 
       {/* Benefits */}
       {pkg.benefits.filter((b) => b.trim()).length > 0 && (
-        <div className="px-5 py-3 border-b border-slate-100 space-y-2">
+        <div className="px-5 py-3 border-b border-border space-y-2">
           {pkg.benefits
             .filter((b) => b.trim())
             .map((benefit, i) => (
-              <div key={i} className="flex items-start gap-2 text-[12px] text-slate-700">
+              <div key={i} className="flex items-start gap-2 text-[12px] text-foreground">
                 <Check className="h-3.5 w-3.5 text-emerald-500 mt-0.5 shrink-0" />
                 {benefit}
               </div>
@@ -118,11 +118,11 @@ export const PlanCard = ({
 
       {/* Modules */}
       <div className="px-5 py-3 flex-1 space-y-2">
-        <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
+        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
           Modules
         </p>
         {visibleModules.map((module, i) => (
-          <div key={i} className="flex items-center gap-2 text-[12px] text-slate-600">
+          <div key={i} className="flex items-center gap-2 text-[12px] text-muted-foreground">
             {renderModuleIcon(module.icon)}
             {module.name}
           </div>
@@ -130,7 +130,7 @@ export const PlanCard = ({
         {hasMoreModules && (
           <button
             onClick={() => setShowAllModules(!showAllModules)}
-            className="flex items-center gap-1 text-[12px] text-slate-400 hover:text-slate-700 transition-colors mt-1"
+            className="flex items-center gap-1 text-[12px] text-muted-foreground hover:text-foreground transition-colors mt-1"
           >
             {showAllModules ? (
               <>
@@ -154,7 +154,7 @@ export const PlanCard = ({
             "w-full h-9 text-[12px] font-semibold gap-2",
             isPopular
               ? "bg-slate-900 hover:bg-black text-white"
-              : "bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 shadow-sm"
+              : "bg-card hover:bg-muted/50 text-foreground border border-border shadow-sm"
           )}
           variant="ghost"
         >

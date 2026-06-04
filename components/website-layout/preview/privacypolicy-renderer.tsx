@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { ModuleData } from "@/store/useWebsiteBuilderStore";
 import { cn } from "@/lib/utils";
 import { DynamicIcon } from "./DynamicIcon";
+import { Shield, Mail, MapPin } from "lucide-react";
 import { ModuleContainer } from "../modules/module-container";
 
 interface PrivacyPolicyRendererProps {

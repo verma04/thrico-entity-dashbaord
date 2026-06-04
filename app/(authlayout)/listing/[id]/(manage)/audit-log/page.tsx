@@ -55,7 +55,7 @@ export default function ListingAuditLog() {
     let parsedState = statePayload;
     if (!parsedState)
       return (
-        <span className="text-xs text-zinc-400 italic block mt-2">No data</span>
+        <span className="text-xs text-muted-foreground italic block mt-2">No data</span>
       );
 
     if (typeof parsedState === "string") {
@@ -63,7 +63,7 @@ export default function ListingAuditLog() {
         parsedState = JSON.parse(parsedState);
       } catch {
         return (
-          <span className="text-[11px] font-mono text-zinc-700 break-all block mt-2 p-3 bg-zinc-50 border border-zinc-200/60 rounded-xl shadow-sm">
+          <span className="text-[11px] font-mono text-foreground break-all block mt-2 p-3 bg-muted/50 border border-border/60 rounded-xl shadow-sm">
             {parsedState}
           </span>
         );
@@ -72,7 +72,7 @@ export default function ListingAuditLog() {
 
     if (typeof parsedState !== "object" || parsedState === null) {
       return (
-        <span className="text-[11px] font-mono text-zinc-700 break-all block mt-2 p-3 bg-zinc-50 border border-zinc-200/60 rounded-xl shadow-sm">
+        <span className="text-[11px] font-mono text-foreground break-all block mt-2 p-3 bg-muted/50 border border-border/60 rounded-xl shadow-sm">
           {String(parsedState)}
         </span>
       );
@@ -133,12 +133,12 @@ export default function ListingAuditLog() {
       cell: (log: any) => (
         <div className="flex flex-col">
           <div className="flex items-center gap-2">
-            <Clock className="h-3.5 w-3.5 text-zinc-400" />
+            <Clock className="h-3.5 w-3.5 text-muted-foreground" />
             <span className="text-sm font-medium text-foreground">
               {moment(log.createdAt).format("MMM D, YYYY")}
             </span>
           </div>
-          <span className="text-[10px] text-zinc-500 ml-5.5 tabular-nums font-medium">
+          <span className="text-[10px] text-muted-foreground ml-5.5 tabular-nums font-medium">
             {moment(log.createdAt).format("HH:mm:ss")}
           </span>
         </div>
@@ -149,15 +149,15 @@ export default function ListingAuditLog() {
       header: "Action",
       cell: (log: any) => (
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-xl bg-zinc-100/80 border border-zinc-200 flex items-center justify-center shrink-0">
-            <Terminal className="h-4 w-4 text-zinc-500" />
+          <div className="h-9 w-9 rounded-xl bg-muted/80 border border-border flex items-center justify-center shrink-0">
+            <Terminal className="h-4 w-4 text-muted-foreground" />
           </div>
           <div className="flex flex-col">
             <span className="text-sm font-semibold text-foreground">
               {log.action}
             </span>
             <div className="flex items-center gap-2 mt-0.5">
-              <span className="inline-flex h-4 items-center px-1.5 rounded-md text-[9px] font-semibold uppercase tracking-widest bg-zinc-100 text-zinc-500 border border-zinc-200/50">
+              <span className="inline-flex h-4 items-center px-1.5 rounded-md text-[9px] font-semibold uppercase tracking-widest bg-muted text-muted-foreground border border-border/50">
                 {log.module || "SYSTEM"}
               </span>
             </div>
@@ -170,8 +170,8 @@ export default function ListingAuditLog() {
       header: "Performed By",
       cell: (log: any) => (
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-full bg-zinc-50 border border-zinc-200 flex items-center justify-center shrink-0 shadow-sm">
-            <User className="h-4 w-4 text-zinc-400" />
+          <div className="h-9 w-9 rounded-full bg-muted/50 border border-border flex items-center justify-center shrink-0 shadow-sm">
+            <User className="h-4 w-4 text-muted-foreground" />
           </div>
           <div className="flex flex-col">
             <span className="text-sm font-semibold text-foreground leading-none">
@@ -179,7 +179,7 @@ export default function ListingAuditLog() {
                 ? `${log.admin.firstName} ${log.admin?.lastName || ""}`
                 : "System"}
             </span>
-            <span className="text-[10px] font-medium text-zinc-400 mt-1 uppercase tracking-tighter">
+            <span className="text-[10px] font-medium text-muted-foreground mt-1 uppercase tracking-tighter">
               {log?.ipAddress || "Internal"}
             </span>
           </div>
@@ -191,7 +191,7 @@ export default function ListingAuditLog() {
       header: "Target ID",
       cell: (log: any) => (
         <div className="flex items-center gap-2">
-          <span className="font-mono text-xs font-medium text-zinc-600 truncate max-w-[140px] bg-zinc-100/50 px-2.5 py-1 rounded-lg border border-zinc-200 shadow-sm">
+          <span className="font-mono text-xs font-medium text-muted-foreground truncate max-w-[140px] bg-muted/50 px-2.5 py-1 rounded-lg border border-border shadow-sm">
             {log.resourceId || log.targetUserId || "System"}
           </span>
         </div>
@@ -207,7 +207,7 @@ export default function ListingAuditLog() {
             variant="ghost"
             size="icon"
             onClick={() => setSelectedLogId(log.id)}
-            className="h-8 w-8 text-zinc-400 hover:text-foreground hover:bg-zinc-100 rounded-lg transition-all"
+            className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-all"
           >
             <Eye className="h-4 w-4" />
           </Button>
@@ -258,15 +258,15 @@ export default function ListingAuditLog() {
         onOpenChange={(open) => !open && setSelectedLogId(null)}
       >
         <DialogContent className="sm:max-w-[700px] rounded-3xl p-0 overflow-hidden border-border/60 shadow-2xl">
-          <DialogHeader className="bg-zinc-50 border-b border-border/50 p-6 flex flex-row items-center gap-4">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white border border-border/60 text-zinc-900 shadow-sm">
+          <DialogHeader className="bg-muted/50 border-b border-border/50 p-6 flex flex-row items-center gap-4">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-card border border-border/60 text-foreground shadow-sm">
               <Terminal className="h-6 w-6" />
             </div>
             <div className="space-y-1 mt-2">
               <DialogTitle className="text-xl font-bold text-foreground tracking-tight">
                 Log Details
               </DialogTitle>
-              <p className="text-[10px] font-semibold text-zinc-400 uppercase tracking-widest">
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
                 ID: {selectedLogId}
               </p>
             </div>
@@ -275,8 +275,8 @@ export default function ListingAuditLog() {
           <div className="p-6 overflow-y-auto max-h-[70vh] scrollbar-hide">
             {logDetailsLoading ? (
               <div className="flex flex-col items-center justify-center py-16 gap-4">
-                <RotateCcw className="h-8 w-8 animate-spin text-zinc-300" />
-                <p className="text-xs font-semibold text-zinc-400 uppercase tracking-widest">
+                <RotateCcw className="h-8 w-8 animate-spin text-muted-foreground" />
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
                   Loading Details...
                 </p>
               </div>
@@ -325,11 +325,11 @@ export default function ListingAuditLog() {
                     },
                   ].map((s, i) => (
                     <div key={i} className="space-y-2">
-                      <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500 ml-1">
+                      <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground ml-1">
                         {s.label}
                       </span>
-                      <div className="flex items-center gap-3 px-3.5 py-2.5 bg-zinc-50 rounded-xl border border-zinc-200/60 shadow-sm">
-                        <s.icon className="h-4 w-4 text-zinc-400 shrink-0" />
+                      <div className="flex items-center gap-3 px-3.5 py-2.5 bg-muted/50 rounded-xl border border-border/60 shadow-sm">
+                        <s.icon className="h-4 w-4 text-muted-foreground shrink-0" />
                         <span
                           className={cn(
                             "text-sm font-semibold text-foreground truncate",
@@ -345,10 +345,10 @@ export default function ListingAuditLog() {
 
                 {logDetailsData.auditLogById.reason && (
                   <div className="space-y-2">
-                    <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500 ml-1">
+                    <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground ml-1">
                       Reason
                     </span>
-                    <div className="p-4 rounded-xl bg-zinc-50 border border-zinc-200/60 shadow-sm text-sm font-medium text-zinc-700 leading-relaxed italic">
+                    <div className="p-4 rounded-xl bg-muted/50 border border-border/60 shadow-sm text-sm font-medium text-foreground leading-relaxed italic">
                       "{logDetailsData.auditLogById.reason}"
                     </div>
                   </div>
@@ -385,7 +385,7 @@ export default function ListingAuditLog() {
             ) : null}
           </div>
 
-          <div className="bg-zinc-50/80 p-5 flex items-center justify-end border-t border-border/50 backdrop-blur-sm">
+          <div className="bg-muted/50/80 p-5 flex items-center justify-end border-t border-border/50 backdrop-blur-sm">
             <Button
               variant="outline"
               className="rounded-xl text-xs font-bold uppercase tracking-widest px-8 shadow-sm h-11"

@@ -27,23 +27,23 @@ export function PlatformSettingRow({
   isDirty,
 }: PlatformSettingRowProps) {
   return (
-    <div className="group/row flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-5 border-b border-zinc-100 last:border-0 hover:bg-zinc-50/40 transition-colors duration-200">
+    <div className="group/row flex flex-col sm:flex-row sm:items-center justify-between gap-6 p-5 border-b border-border last:border-0 hover:bg-muted/50/40 transition-colors duration-200">
       <div className="flex gap-4">
         {Icon && (
-          <div className="w-9 h-9 rounded-[10px] bg-zinc-50 border border-zinc-100 flex items-center justify-center text-zinc-400 shrink-0 group-hover/row:bg-white group-hover/row:text-zinc-600 transition-colors">
+          <div className="w-9 h-9 rounded-[10px] bg-muted/50 border border-border flex items-center justify-center text-muted-foreground shrink-0 group-hover/row:bg-card group-hover/row:text-muted-foreground transition-colors">
             {Icon}
           </div>
         )}
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <Label className="text-[14px] font-semibold text-zinc-900 cursor-pointer">
+            <Label className="text-[14px] font-semibold text-foreground cursor-pointer">
               {label}
             </Label>
             {isDirty && (
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
             )}
           </div>
-          <p className="text-[12.5px] text-zinc-500 font-medium max-w-[500px] leading-relaxed">
+          <p className="text-[12.5px] text-muted-foreground font-medium max-w-[500px] leading-relaxed">
             {description}
           </p>
         </div>
@@ -64,7 +64,7 @@ export function PlatformSettingRow({
             onChange={(e) =>
               onChange(type === "number" ? Number(e.target.value) : e.target.value)
             }
-            className="h-9 w-full sm:w-48 bg-white border-zinc-200 text-sm rounded-[10px] focus-visible:ring-offset-0 focus-visible:ring-4 focus-visible:ring-indigo-500/5 focus-visible:border-indigo-500/30 transition-all font-medium py-1 px-3 shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
+            className="h-9 w-full sm:w-48 bg-card border-border text-sm rounded-[10px] focus-visible:ring-offset-0 focus-visible:ring-4 focus-visible:ring-indigo-500/5 focus-visible:border-indigo-500/30 transition-all font-medium py-1 px-3 shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
             placeholder={`Enter ${label.toLowerCase()}...`}
           />
         )}
@@ -75,8 +75,8 @@ export function PlatformSettingRow({
 
 export function PlatformSectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <div className="px-5 py-3 bg-zinc-50/50 border-b border-zinc-100">
-      <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest whitespace-nowrap">
+    <div className="px-5 py-3 bg-muted/50/50 border-b border-border">
+      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest whitespace-nowrap">
         {children}
       </span>
     </div>

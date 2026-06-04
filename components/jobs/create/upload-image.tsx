@@ -73,7 +73,7 @@ const SortableImage = ({
       <div
         {...attributes}
         {...listeners}
-        className="absolute top-1 left-1 bg-white rounded-full p-1 cursor-grab active:cursor-grabbing"
+        className="absolute top-1 left-1 bg-card rounded-full p-1 cursor-grab active:cursor-grabbing"
       >
         <GripVertical className="h-4 w-4 text-muted-foreground" />
       </div>

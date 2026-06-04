@@ -21,18 +21,18 @@ export default function AppearancePage() {
 
       <div className="flex-1 w-full">
         {loading && (
-          <div className="flex flex-col items-center justify-center py-20 bg-slate-50/50 rounded-xl border border-slate-200 shadow-sm space-y-4">
-            <Loader2 className="animate-spin text-slate-400" size={20} />
-            <span className="font-medium text-slate-500 text-[12px]">Synchronizing Theme Engine...</span>
+          <div className="flex flex-col items-center justify-center py-20 bg-muted/50 rounded-xl border border-border shadow-sm space-y-4">
+            <Loader2 className="animate-spin text-muted-foreground" size={20} />
+            <span className="font-medium text-muted-foreground text-[12px]">Synchronizing Theme Engine...</span>
           </div>
         )}
 
         {error && (
-          <div className="flex items-start gap-3 px-4 py-4 rounded-xl border bg-red-50 border-red-200 shadow-sm">
-            <AlertCircle className="h-5 w-5 text-red-600 shrink-0" />
+          <div className="flex items-start gap-3 px-4 py-4 rounded-xl border bg-destructive/10 border-destructive/20 shadow-sm">
+            <AlertCircle className="h-5 w-5 text-destructive shrink-0" />
             <div>
-              <p className="text-[13px] font-semibold text-red-800">Theme Initialization Failed</p>
-              <p className="text-[12px] text-red-700/80 mt-1 max-w-lg">{error.message}</p>
+              <p className="text-[13px] font-semibold text-destructive">Theme Initialization Failed</p>
+              <p className="text-[12px] text-destructive/80 mt-1 max-w-lg">{error.message}</p>
             </div>
           </div>
         )}
