@@ -48,6 +48,11 @@ export const GET_COMMUNITY_KPIS = gql`
         change
         trend
       }
+      blockMembers {
+        value
+        change
+        trend
+      }
       engagementRate {
         value
         change

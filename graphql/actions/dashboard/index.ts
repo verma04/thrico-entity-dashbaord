@@ -129,6 +129,7 @@ export interface ModulePerformance {
 export interface CommunityKPIs {
   dailyActiveUsers: CommunityKPIData;
   monthlyActiveUsers: CommunityKPIData;
+  blockMembers: CommunityKPIData;
   engagementRate: CommunityKPIData;
   retentionRate: CommunityKPIData;
   newMembers: CommunityKPIData;

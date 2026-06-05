@@ -43,6 +43,12 @@ export interface Ticket {
   creatorAvatar?: string;
   creatorId?: string;
   creatorData?: any;
+  targetUser?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    avatar: string;
+  };
   type: "conversation" | "appeal" | "alert" | "policy" | "announcement";
   replyMode?: "interactive" | "read-only";
   allowedReplies?: boolean;
@@ -100,52 +106,6 @@ export default function TrustCenterDashboard() {
   const handleRoleChange = (newRole: "member" | "moderator" | "announcements") => {
     setRole(newRole);
     router.push(`/trust-center/${newRole}`);
-  };
-
-  const handleCreateTicket = async (
-    subject: string,
-    category: any,
-    subCategory: string | undefined,
-    description: string,
-    targetUserId?: string,
-    targetUserIds?: string[],
-    allowReplies: boolean = true,
-    recipientType: "all" | "one" | "multiple" = "one"
-  ) => {
-    const isBroadcast = recipientType === "all";
-
-    try {
-      if (isBroadcast) {
-        await createAnnouncementMutation({
-          variables: {
-            input: {
-              subject,
-              description,
-              category: category === "Policy Updates" ? "POLICY_UPDATES" : category === "Security Notices" ? "SECURITY_NOTICES" : "ANNOUNCEMENT",
-              allowReplies,
-              ttl: "no"
-            }
-          }
-        });
-      } else {
-        await createTicketMutation({
-          variables: {
-            input: {
-              subject,
-              description,
-              category: category.toUpperCase().replace(" ", "_"),
-              subCategory: subCategory ? subCategory.toUpperCase().replace(" ", "_") : null,
-              recipientType: recipientType === "multiple" ? "MULTIPLE" : "ONE",
-              allowReplies,
-              targetUserId,
-              targetUserIds
-            }
-          }
-        });
-      }
-    } catch (e) {
-      console.error("Failed to create:", e);
-    }
   };
 
   const handleReplyTicket = async (ticketId: string, body: string) => {
@@ -216,7 +176,6 @@ export default function TrustCenterDashboard() {
             onSignPolicy={(id, signature) => console.log("Sign policy", id, signature)}
             onReply={handleReplyTicket}
             onUpdateTicket={handleUpdateTicket}
-            onCreateTicket={handleCreateTicket}
             onCreateAppeal={(subject, description) => console.log("Create appeal", subject, description)}
           />
         )}

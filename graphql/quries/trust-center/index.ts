@@ -25,13 +25,11 @@ export const GET_SUPPORT_TICKETS = gql`
           lastName
           avatar
         }
-        messages {
+        targetUser {
           id
-          senderType
-          senderId
-          senderName
-          body
-          createdAt
+          firstName
+          lastName
+          avatar
         }
       }
       totalCount
@@ -73,6 +71,12 @@ export const GET_SUPPORT_TICKET = gql`
         senderType
         senderId
         senderName
+        senderUser {
+          id
+          firstName
+          lastName
+          avatar
+        }
         body
         createdAt
       }
@@ -88,6 +92,12 @@ export const GET_TICKET_MESSAGES = gql`
         senderType
         senderId
         senderName
+        senderUser {
+          id
+          firstName
+          lastName
+          avatar
+        }
         body
         createdAt
       }

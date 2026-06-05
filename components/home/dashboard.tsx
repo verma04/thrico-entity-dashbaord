@@ -410,16 +410,22 @@ export default function Dashboard() {
 
   const vitals = [
     {
-      title: "Active Users",
+      title: "New Members",
+      key: "newMembers",
+      color: "bg-cyan-500",
+      tooltip: "Users who joined during the selected period",
+    },
+    {
+      title: "Active Members",
       key: "activeUsers",
       color: "bg-emerald-500",
       tooltip: "Count of unique users active within the selected date range",
     },
     {
-      title: "Total Members",
-      key: "totalMembers",
+      title: "Block Members",
+      key: "blockMembers",
       color: "bg-blue-500",
-      tooltip: "Total registered members across the platform",
+      tooltip: "Total blocked members across the platform",
     },
     {
       title: "Engagement Rate",
@@ -435,12 +441,7 @@ export default function Dashboard() {
       suffix: "%",
       tooltip: "(MAU / Total Users) × 100",
     },
-    {
-      title: "New Members",
-      key: "newMembers",
-      color: "bg-cyan-500",
-      tooltip: "Users who joined during the selected period",
-    },
+
     {
       title: "Churn Rate",
       key: "churnRate",

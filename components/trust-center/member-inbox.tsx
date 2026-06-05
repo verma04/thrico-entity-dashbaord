@@ -20,7 +20,7 @@ import {
 import { cn } from "@/lib/utils";
 import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
 import { useQuery } from "@apollo/client";
-import { CreateTicketModal } from "./create-ticket-modal";
+import { useRouter } from "next/navigation";
 import {
   GET_SUPPORT_TICKETS,
   GET_TICKET_MESSAGES,
@@ -45,16 +45,6 @@ import {
 interface MemberInboxPortalProps {
   onSignPolicy: (id: string, signature: string) => void;
   onReply: (id: string, body: string) => void;
-  onCreateTicket: (
-    subject: string,
-    category: any,
-    subCategory: string | undefined,
-    description: string,
-    targetUserId?: string,
-    targetUserIds?: string[],
-    allowReplies?: boolean,
-    recipientType?: "all" | "one" | "multiple",
-  ) => void;
   onUpdateTicket?: (
     id: string,
     input: { status?: string; priority?: string; allowReplies?: boolean },
@@ -74,10 +64,10 @@ const STATUS_STYLES: Record<string, string> = {
 export default function MemberInboxPortal({
   onSignPolicy,
   onReply,
-  onCreateTicket,
   onUpdateTicket,
   onCreateAppeal,
 }: MemberInboxPortalProps) {
+  const router = useRouter();
   const [activeCategory, setActiveCategory] = useState<string>("ALL");
   const [activeStatus, setActiveStatus] = useState<string>("ALL");
   const [activePriority, setActivePriority] = useState<string>("ALL");
@@ -127,6 +117,7 @@ export default function MemberInboxPortal({
         : undefined,
     subCategory: t.subCategory,
     description: t.description,
+    targetUser: t.targetUser,
   }));
 
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
@@ -170,10 +161,11 @@ export default function MemberInboxPortal({
     sender:
       m.senderType === "SYSTEM"
         ? "system"
-        : m.senderType === "ADMIN"
+        : m.senderType === "ADMIN" || m.senderType === "STAFF"
           ? "staff"
           : "user",
     senderName: m.senderName || "Unknown",
+    senderAvatar: m.senderUser?.avatar,
     body: m.body,
     timestamp: new Date(m.createdAt).toLocaleDateString(),
   }));
@@ -181,8 +173,6 @@ export default function MemberInboxPortal({
   const [isReplying, setIsReplying] = useState(false);
   const [signatureName, setSignatureName] = useState("");
 
-  // Modals
-  const [ticketModalOpen, setTicketModalOpen] = useState(false);
   const [appealModalOpen, setAppealModalOpen] = useState(false);
   const [appealSubject, setAppealSubject] = useState("");
   const [appealDesc, setAppealDesc] = useState("");
@@ -228,27 +218,34 @@ export default function MemberInboxPortal({
       {/* ── Inbox ── */}
       <div className="xl:col-span-12 grid grid-cols-1 md:grid-cols-12 gap-4 min-h-[560px]">
         {/* Ticket list */}
-        <div className="md:col-span-5 rounded-xl border border-border bg-card shadow-sm overflow-hidden flex flex-col">
-          <div className="px-4 py-3 border-b border-border bg-muted/30 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="h-7 w-7 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
-                <Headset className="h-3.5 w-3.5 text-primary" />
+        <div className="md:col-span-5 rounded-xl border border-border/50 bg-card shadow-sm ring-1 ring-border/30 overflow-hidden flex flex-col group/panel transition-all duration-300 hover:shadow-md hover:border-border/80">
+          <div className="px-4 py-3 border-b border-border/60 bg-muted/30 flex items-center justify-between relative">
+            {/* Top accent strip */}
+            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary/80 via-primary/40 to-transparent" />
+            <div className="flex items-center gap-2.5">
+              <div className="h-8 w-8 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center transition-transform duration-200 group-hover/panel:scale-105">
+                <Headset className="h-4 w-4 text-primary" />
               </div>
-              <span className="text-sm font-semibold text-foreground">
-                Global Support Desk
-              </span>
+              <div>
+                <span className="text-sm font-semibold text-foreground block leading-tight">
+                  Global Support Desk
+                </span>
+                <span className="text-[10px] text-muted-foreground/60 font-medium">
+                  Admin messaging console
+                </span>
+              </div>
             </div>
             <Button
               size="sm"
-              onClick={() => setTicketModalOpen(true)}
-              className="h-7 text-xs gap-1 rounded-lg"
+              onClick={() => router.push("/trust-center/member/create")}
+              className="h-7 text-xs gap-1.5 rounded-lg shadow-sm"
             >
               <Plus className="h-3 w-3" /> New Broadcast
             </Button>
           </div>
 
           {/* Category and extra filters */}
-          <div className="px-3 py-2 border-b border-border flex flex-col gap-2">
+          <div className="px-3 py-2.5 border-b border-border/60 bg-background/50 flex flex-col gap-2">
             <div className="flex gap-1 overflow-x-auto pb-1">
               {categories.map((cat) => (
                 <button
@@ -327,26 +324,38 @@ export default function MemberInboxPortal({
             ) : (
               filteredTickets.map((t) => {
                 const isActive = selectedTicket?.id === t.id;
+                const displayUser = t.targetUser || t.creatorData;
+                const displayAvatar = t.targetUser
+                  ? t.targetUser.avatar
+                  : t.creatorAvatar;
+                const displayName = t.targetUser
+                  ? `${t.targetUser.firstName} ${t.targetUser.lastName}`
+                  : t.creator;
+
                 return (
                   <div
                     key={t.id}
                     onClick={() => setSelectedTicketId(t.id)}
                     className={cn(
-                      "px-4 py-3 cursor-pointer transition-all border-b border-border/40 last:border-0",
+                      "px-4 py-3.5 cursor-pointer transition-all duration-200 border-b border-border/30 last:border-0 relative group/item",
                       isActive
-                        ? "bg-muted/80 shadow-inner"
+                        ? "bg-primary/[0.04] shadow-inner"
                         : "hover:bg-muted/40",
                     )}
                   >
+                    {/* Active indicator */}
+                    {isActive && (
+                      <div className="absolute left-0 top-2 bottom-2 w-[3px] rounded-full bg-primary" />
+                    )}
                     <div className="flex items-start justify-between gap-2 mb-1.5">
                       <div className="flex items-center gap-2 overflow-hidden">
-                        {t.creatorData?.id ? (
-                          <UserProfileHoverCard user={t.creatorData}>
+                        {displayUser?.id ? (
+                          <UserProfileHoverCard user={displayUser}>
                             <div className="flex items-center gap-2 hover:opacity-80 transition-opacity">
                               <div className="h-6 w-6 shrink-0 rounded-full bg-muted border border-border overflow-hidden flex items-center justify-center">
-                                {t.creatorAvatar ? (
+                                {displayAvatar ? (
                                   <Image
-                                    src={getMediaUrls(t.creatorAvatar)}
+                                    src={`https://cdn.thrico.network/${displayAvatar}`}
                                     alt="Avatar"
                                     width={24}
                                     height={24}
@@ -359,7 +368,7 @@ export default function MemberInboxPortal({
 
                               <div className="min-w-0">
                                 <p className="text-[12px] font-semibold text-foreground truncate">
-                                  {t.creator}
+                                  {displayName}
                                 </p>
                                 <p className="text-[10px] text-muted-foreground truncate">
                                   {t.subject}
@@ -370,9 +379,9 @@ export default function MemberInboxPortal({
                         ) : (
                           <div className="flex items-center gap-2">
                             <div className="h-6 w-6 shrink-0 rounded-full bg-muted border border-border overflow-hidden flex items-center justify-center">
-                              {t.creatorAvatar ? (
+                              {displayAvatar ? (
                                 <Image
-                                  src={`https://cdn.thrico.network/${t.creatorAvatar}`}
+                                  src={getMediaUrls(displayAvatar)}
                                   alt="Avatar"
                                   width={24}
                                   height={24}
@@ -384,7 +393,7 @@ export default function MemberInboxPortal({
                             </div>
                             <div className="min-w-0">
                               <p className="text-[12px] font-semibold text-foreground truncate">
-                                {t.creator}
+                                {displayName}
                               </p>
                               <p className="text-[10px] text-muted-foreground truncate">
                                 {t.subject}
@@ -428,8 +437,8 @@ export default function MemberInboxPortal({
           </div>
 
           {/* Pagination controls */}
-          <div className="p-3 border-t border-border flex items-center justify-between">
-            <span className="text-[11px] text-muted-foreground font-medium">
+          <div className="p-3.5 border-t border-border/60 bg-muted/20 flex items-center justify-between">
+            <span className="text-[11px] text-muted-foreground font-semibold tabular-nums">
               {totalTickets} total tickets
             </span>
             <div className="flex items-center gap-1">
@@ -471,11 +480,13 @@ export default function MemberInboxPortal({
         </div>
 
         {/* Thread view */}
-        <div className="md:col-span-7 rounded-xl border border-border bg-card shadow-sm overflow-hidden flex flex-col">
+        <div className="md:col-span-7 rounded-xl border border-border/50 bg-card shadow-sm ring-1 ring-border/30 overflow-hidden flex flex-col transition-all duration-300 hover:shadow-md hover:border-border/80">
           {selectedTicket ? (
             <>
               {/* Header */}
-              <div className="px-5 py-4 border-b border-border bg-card">
+              <div className="px-5 py-4 border-b border-border/60 bg-card relative">
+                {/* Top accent strip */}
+                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary/60 via-primary/30 to-transparent" />
                 <div className="flex items-start justify-between">
                   <div className="space-y-1.5">
                     <div className="flex items-center gap-2">
@@ -504,7 +515,7 @@ export default function MemberInboxPortal({
                     <MoreVertical className="h-4 w-4" />
                   </Button>
                 </div>
-                <div className="mt-4 flex items-center gap-3 p-3 rounded-lg border border-border bg-muted/30">
+                <div className="mt-4 flex items-center gap-3 p-3.5 rounded-xl border border-border/50 bg-gradient-to-r from-muted/40 to-muted/20 ring-1 ring-border/20">
                   {selectedTicket.creatorData?.id ? (
                     <UserProfileHoverCard user={selectedTicket.creatorData}>
                       <div className="flex items-center gap-3 hover:opacity-80 transition-opacity">
@@ -761,7 +772,7 @@ export default function MemberInboxPortal({
                       >
                         <div
                           className={cn(
-                            "h-7 w-7 rounded-lg shrink-0 flex items-center justify-center text-[10px] font-medium border",
+                            "h-7 w-7 rounded-lg shrink-0 flex items-center justify-center text-[10px] font-medium border overflow-hidden",
                             isUser
                               ? "bg-primary text-primary-foreground border-primary/20"
                               : isSystem
@@ -769,7 +780,17 @@ export default function MemberInboxPortal({
                                 : "bg-muted text-muted-foreground border-border",
                           )}
                         >
-                          {isUser ? "U" : isSystem ? "S" : "M"}
+                          {m.senderAvatar ? (
+                            <Image
+                              src={getMediaUrls(m.senderAvatar)}
+                              alt="Avatar"
+                              width={28}
+                              height={28}
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            isUser ? "U" : isSystem ? "S" : "M"
+                          )}
                         </div>
                         <div className="space-y-1">
                           <div
@@ -828,7 +849,7 @@ export default function MemberInboxPortal({
               </div>
 
               {/* Reply input */}
-              <div className="p-3 border-t border-border">
+              <div className="p-4 border-t border-border/60 bg-muted/10">
                 {selectedTicket.replyMode === "read-only" ? (
                   <div className="flex items-center gap-2 px-3 py-2 bg-muted rounded-lg text-muted-foreground">
                     <Lock className="h-3.5 w-3.5" />
@@ -863,12 +884,14 @@ export default function MemberInboxPortal({
               </div>
             </>
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center p-8 bg-muted/10">
-              <Headset className="h-10 w-10 text-muted-foreground/20 mb-3" />
+            <div className="flex-1 flex flex-col items-center justify-center p-8 bg-gradient-to-b from-muted/10 to-muted/5">
+              <div className="h-16 w-16 rounded-2xl bg-muted/50 border border-border/50 flex items-center justify-center mb-4">
+                <Headset className="h-7 w-7 text-muted-foreground/30" />
+              </div>
               <p className="text-sm font-semibold text-foreground">
                 No active thread
               </p>
-              <p className="text-xs text-muted-foreground mt-1 max-w-[220px] text-center leading-relaxed">
+              <p className="text-xs text-muted-foreground mt-1.5 max-w-[240px] text-center leading-relaxed">
                 Select a ticket from the queue on the left to review details and
                 respond.
               </p>
@@ -876,16 +899,6 @@ export default function MemberInboxPortal({
           )}
         </div>
       </div>
-
-      {/* ── Modal: Create Ticket ── */}
-      <CreateTicketModal
-        isOpen={ticketModalOpen}
-        onClose={() => setTicketModalOpen(false)}
-        onCreateTicket={async (subject, category, subCategory, description, targetUserId, targetUserIds, allowReplies, recipientType) => {
-          await onCreateTicket(subject, category, subCategory, description, targetUserId, targetUserIds, allowReplies, recipientType);
-          setTicketModalOpen(false);
-        }}
-      />
 
       {/* ── Modal: Appeal ── */}
       {appealModalOpen && (
