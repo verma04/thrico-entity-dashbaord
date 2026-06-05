@@ -413,13 +413,13 @@ export default function Dashboard() {
       title: "New Members",
       key: "newMembers",
       color: "bg-cyan-500",
-      tooltip: "Users who joined during the selected period",
+      tooltip: "Members who joined during the selected period",
     },
     {
       title: "Active Members",
       key: "activeUsers",
       color: "bg-emerald-500",
-      tooltip: "Count of unique users active within the selected date range",
+      tooltip: "Count of unique members active within the selected date range",
     },
     {
       title: "Block Members",
@@ -432,14 +432,14 @@ export default function Dashboard() {
       key: "engagementRate",
       color: "bg-amber-400",
       suffix: "%",
-      tooltip: "(DAU / Total Users) × 100",
+      tooltip: "(DAU / Total Members) × 100",
     },
     {
       title: "Retention Rate",
       key: "retentionRate",
       color: "bg-indigo-500",
       suffix: "%",
-      tooltip: "(MAU / Total Users) × 100",
+      tooltip: "(MAU / Total Members) × 100",
     },
 
     {
@@ -447,7 +447,7 @@ export default function Dashboard() {
       key: "churnRate",
       color: "bg-rose-500",
       suffix: "%",
-      tooltip: "((Total Users - DAU) / Total Users) × 100",
+      tooltip: "((Total Members - DAU) / Total Members) × 100",
     },
     {
       title: "Community Health",
@@ -506,7 +506,7 @@ export default function Dashboard() {
       key: "superfanRatio",
       icon: Star,
       suffix: "%",
-      tooltip: "((DAU × 0.12) / Total Users) × 100",
+      tooltip: "((DAU × 0.12) / Total Members) × 100",
     },
     {
       title: "Referrals Joined",
