@@ -101,19 +101,49 @@ export const DELETE_ROLE = gql`
 `;
 
 export const GET_ADMIN_USERS = gql`
-  query GetAdminUsers {
-    getAdminUsers {
-      id
-      status
-      email
-      firstName
-      lastName
-      role {
+  query GetAdminUsers($page: Int, $limit: Int) {
+    getAdminUsers(page: $page, limit: $limit) {
+      data {
         id
-        name
-        description
+        status
+        email
+        firstName
+        lastName
         isSystem
-        adminAccess {
+        role {
+          id
+          name
+          description
+          isSystem
+          adminAccess {
+            website
+            moderation
+            reports
+            settings
+            subscription
+            platformFeatures
+            appearance
+            auditLogs
+            domain
+            permissions
+            adminUsers
+            general
+            module
+            billing
+            usersAndPermissions
+            taxesAndDuties
+            languages
+            customerPrivacy
+            policies
+            contactSupport
+            integrations
+            users
+          }
+        }
+        roleId
+        memberStatus
+        isSuperAdmin
+        permissions {
           website
           moderation
           reports
@@ -125,6 +155,16 @@ export const GET_ADMIN_USERS = gql`
           domain
           permissions
           adminUsers
+          general
+          module
+          billing
+          usersAndPermissions
+          taxesAndDuties
+          languages
+          customerPrivacy
+          policies
+          contactSupport
+          integrations
           users
         }
         modulePermissions {
@@ -136,7 +176,10 @@ export const GET_ADMIN_USERS = gql`
           canDelete
         }
       }
-      isSuperAdmin
+      total
+      page
+      limit
+      totalPages
     }
   }
 `;

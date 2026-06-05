@@ -104,10 +104,18 @@ export interface AdminUser {
   role: Role;
   isSuperAdmin: boolean;
   avatar?: string;
+  permissions?: AdminAccess;
+  modulePermissions?: ModulePermission[];
 }
 
 export interface GetAdminUsersResponse {
-  getAdminUsers: AdminUser[];
+  getAdminUsers: {
+    data: AdminUser[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
 }
 
 export interface AdminRegisterInput {
