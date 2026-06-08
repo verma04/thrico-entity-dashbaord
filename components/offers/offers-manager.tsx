@@ -6,9 +6,7 @@ import {
   useGetOfferCategories,
   useCreateOffer,
   useUpdateOffer,
-  useDeleteOffer,
   Offer,
-  CreateOfferInput,
 } from "@/graphql/actions/offers";
 import { OffersTable } from "./offers-table";
 import { OfferCard } from "./offer-card";
@@ -129,7 +127,7 @@ export function OffersManager() {
       <EcosystemActionBar shadow="none">
         <EcosystemActionBar.Group>
           <EcosystemActionBar.Item grow className="max-w-xs">
-             <EcosystemActionBar.Search
+            <EcosystemActionBar.Search
               value={search}
               onChange={setSearch}
               placeholder="Search offers..."
@@ -141,7 +139,10 @@ export function OffersManager() {
 
         <EcosystemActionBar.Group>
           <EcosystemActionBar.Item>
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <Select
+              value={selectedCategory}
+              onValueChange={setSelectedCategory}
+            >
               <SelectTrigger className="w-[170px] h-9 rounded-lg border-border bg-card text-sm font-medium text-foreground shadow-none focus:ring-2 focus:ring-ring/20">
                 <div className="flex items-center gap-2">
                   <LayoutGrid className="h-3.5 w-3.5 text-muted-foreground" />
@@ -149,9 +150,18 @@ export function OffersManager() {
                 </div>
               </SelectTrigger>
               <SelectContent className="rounded-xl border-border shadow-lg p-1">
-                <SelectItem value="all" className="rounded-lg text-sm font-medium py-2">All Categories</SelectItem>
+                <SelectItem
+                  value="all"
+                  className="rounded-lg text-sm font-medium py-2"
+                >
+                  All Categories
+                </SelectItem>
                 {categories.map((cat: any) => (
-                  <SelectItem key={cat.id} value={cat.id} className="rounded-lg text-sm font-medium py-2">
+                  <SelectItem
+                    key={cat.id}
+                    value={cat.id}
+                    className="rounded-lg text-sm font-medium py-2"
+                  >
                     {cat.name}
                   </SelectItem>
                 ))}
@@ -165,10 +175,30 @@ export function OffersManager() {
                 <SelectValue placeholder="All Status" />
               </SelectTrigger>
               <SelectContent className="rounded-xl border-border shadow-lg p-1">
-                <SelectItem value="all" className="rounded-lg text-sm font-medium py-2">All Status</SelectItem>
-                <SelectItem value="ACTIVE" className="rounded-lg text-sm font-medium py-2 text-emerald-600">Active</SelectItem>
-                <SelectItem value="INACTIVE" className="rounded-lg text-sm font-medium py-2 text-muted-foreground">Inactive</SelectItem>
-                <SelectItem value="EXPIRED" className="rounded-lg text-sm font-medium py-2 text-rose-600">Expired</SelectItem>
+                <SelectItem
+                  value="all"
+                  className="rounded-lg text-sm font-medium py-2"
+                >
+                  All Status
+                </SelectItem>
+                <SelectItem
+                  value="ACTIVE"
+                  className="rounded-lg text-sm font-medium py-2 text-emerald-600"
+                >
+                  Active
+                </SelectItem>
+                <SelectItem
+                  value="INACTIVE"
+                  className="rounded-lg text-sm font-medium py-2 text-muted-foreground"
+                >
+                  Inactive
+                </SelectItem>
+                <SelectItem
+                  value="EXPIRED"
+                  className="rounded-lg text-sm font-medium py-2 text-rose-600"
+                >
+                  Expired
+                </SelectItem>
               </SelectContent>
             </Select>
           </EcosystemActionBar.Item>
@@ -176,7 +206,7 @@ export function OffersManager() {
 
         <EcosystemActionBar.Group align="right">
           <EcosystemActionBar.Status active={offers.length > 0}>
-             {offers.length} Offers
+            {offers.length} Offers
           </EcosystemActionBar.Status>
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
@@ -203,11 +233,11 @@ export function OffersManager() {
               {view === "grid" ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                   {offers.map((offer: Offer) => (
-                    <OfferCard 
-                      key={offer.id} 
-                      offer={offer} 
+                    <OfferCard
+                      key={offer.id}
+                      offer={offer}
                       onEdit={handleEdit}
-                      refetch={refetchOffers} 
+                      refetch={refetchOffers}
                     />
                   ))}
                   {offers.length === 0 && (
@@ -215,9 +245,12 @@ export function OffersManager() {
                       <div className="h-12 w-12 bg-muted rounded-xl flex items-center justify-center mx-auto mb-3 text-muted-foreground/40">
                         <Tag className="h-6 w-6" />
                       </div>
-                      <p className="text-sm font-semibold text-foreground">No offers found</p>
+                      <p className="text-sm font-semibold text-foreground">
+                        No offers found
+                      </p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        Try adjusting your search or filters, or create a new offer.
+                        Try adjusting your search or filters, or create a new
+                        offer.
                       </p>
                     </div>
                   )}

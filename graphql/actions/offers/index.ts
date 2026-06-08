@@ -13,6 +13,7 @@ import {
   DELETE_OFFER,
   VERIFY_OFFER,
   CHANGE_OFFER_STATUS,
+  GET_OFFER_BY_ID,
 } from "@/graphql/quries/offers";
 export * from "./offer-quiries";
 export * from "./offers-mutation";
@@ -141,6 +142,15 @@ export const useGetOffers = (
 ) =>
   useQuery<{ getOffers: Offer[] }, { input?: GetOffersInput }>(GET_OFFERS, {
     variables: { input },
+    ...options,
+  });
+
+export const useGetOfferById = (
+  id: string,
+  options?: QueryHookOptions<{ getOfferById: Offer }, { id: string }>,
+) =>
+  useQuery<{ getOfferById: Offer }, { id: string }>(GET_OFFER_BY_ID, {
+    variables: { id },
     ...options,
   });
 

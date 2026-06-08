@@ -60,6 +60,46 @@ export const GET_OFFERS = gql`
   }
 `;
 
+export const GET_OFFER_BY_ID = gql`
+  query GetOfferById($id: ID!) {
+    getOfferById(id: $id) {
+      id
+      title
+      description
+      image
+      discount
+      validityStart
+      validityEnd
+      status
+      claimsCount
+      viewsCount
+      isActive
+      category {
+        id
+        name
+        color
+      }
+      location
+      company
+      timeline
+      termsAndConditions
+      website
+      verification {
+        isVerified
+        verificationReason
+      }
+      addedBy
+      creator {
+        id
+        firstName
+        lastName
+        avatar
+      }
+      createdAt
+    }
+  }
+`;
+
 export const GET_OFFER_CATEGORIES = gql`
   query GetOfferCategories {
     getOfferCategories {

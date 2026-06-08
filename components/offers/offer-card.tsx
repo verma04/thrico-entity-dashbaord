@@ -16,6 +16,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useRouter } from "next/navigation";
 
 interface OfferCardProps {
   offer: Offer;
@@ -24,6 +25,7 @@ interface OfferCardProps {
 }
 
 export function OfferCard({ offer, onEdit, refetch }: OfferCardProps) {
+  const router = useRouter();
   const getStatusColor = (status: string) => {
     switch (status) {
       case "ACTIVE":
@@ -173,7 +175,12 @@ export function OfferCard({ offer, onEdit, refetch }: OfferCardProps) {
               {offer.status}
             </span>
           </div>
-          <Button variant="ghost" size="sm" className="h-8 rounded-lg text-xs font-bold text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="h-8 rounded-lg text-xs font-bold text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50"
+            onClick={() => router.push(`/offers/${offer.id}`)}
+          >
              View Details <ExternalLink className="ml-1.5 h-3.5 w-3.5 stroke-[3px]" />
           </Button>
         </CardFooter>

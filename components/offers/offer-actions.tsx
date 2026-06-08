@@ -41,6 +41,7 @@ import {
   useDeleteOffer,
 } from "@/graphql/actions/offers";
 import { GET_OFFERS } from "@/graphql/quries/offers";
+import { useRouter } from "next/navigation";
 
 interface OfferActionsProps {
   offer: Offer;
@@ -49,6 +50,7 @@ interface OfferActionsProps {
 }
 
 export function OfferActions({ offer, onEdit, refetch }: OfferActionsProps) {
+  const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [actionReason, setActionReason] = useState("");
   const [dialogAction, setDialogAction] = useState<
@@ -174,14 +176,17 @@ export function OfferActions({ offer, onEdit, refetch }: OfferActionsProps) {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-[180px]">
           <DropdownMenuItem
-            onClick={() => onEdit(offer)}
+            onClick={() =>
+              router.push(`/offers/${offer.id}/manage
+            `)
+            }
             className="cursor-pointer"
           >
             <Eye className="mr-2 h-4 w-4" />
             View Details
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() => onEdit(offer)}
+            onClick={() => router.push(`/offers/${offer.id}/settings`)}
             className="cursor-pointer"
           >
             <Edit className="mr-2 h-4 w-4 text-blue-600" />

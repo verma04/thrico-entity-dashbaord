@@ -184,6 +184,84 @@ export const GET_ADMIN_USERS = gql`
   }
 `;
 
+export const GET_ADMIN_BY_ID = gql`
+  query GetAdminById($adminId: ID!) {
+    getAdminById(adminId: $adminId) {
+      id
+      status
+      email
+      firstName
+      lastName
+      isSystem
+      role {
+        id
+        name
+        description
+        isSystem
+        adminAccess {
+          website
+          moderation
+          reports
+          settings
+          subscription
+          platformFeatures
+          appearance
+          auditLogs
+          domain
+          permissions
+          adminUsers
+          general
+          module
+          billing
+          usersAndPermissions
+          taxesAndDuties
+          languages
+          customerPrivacy
+          policies
+          contactSupport
+          integrations
+          users
+        }
+      }
+      roleId
+      memberStatus
+      isSuperAdmin
+      permissions {
+        website
+        moderation
+        reports
+        settings
+        subscription
+        platformFeatures
+        appearance
+        auditLogs
+        domain
+        permissions
+        adminUsers
+        general
+        module
+        billing
+        usersAndPermissions
+        taxesAndDuties
+        languages
+        customerPrivacy
+        policies
+        contactSupport
+        integrations
+        users
+      }
+      modulePermissions {
+        id
+        module
+        canRead
+        canCreate
+        canEdit
+        canDelete
+      }
+    }
+  }
+`;
+
 export const CREATE_ADMIN = gql`
   mutation CreateAdmin($input: AdminRegisterInput!) {
     createAdmin(input: $input) {

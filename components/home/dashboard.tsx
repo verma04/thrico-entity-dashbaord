@@ -422,7 +422,7 @@ export default function Dashboard() {
       tooltip: "Count of unique members active within the selected date range",
     },
     {
-      title: "Block Members",
+      title: "Blocked Members",
       key: "blockMembers",
       color: "bg-blue-500",
       tooltip: "Total blocked members across the platform",

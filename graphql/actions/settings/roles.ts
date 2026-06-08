@@ -7,6 +7,7 @@ import {
   UPDATE_ROLE,
   DELETE_ROLE,
   GET_ADMIN_USERS,
+  GET_ADMIN_BY_ID,
   CREATE_ADMIN,
   UPDATE_ADMIN_USER,
   UPDATE_ADMIN_PASSWORD,
@@ -185,6 +186,13 @@ export const useDeleteRole = (options?: any) =>
 
 export const useGetAdminUsers = (options?: any) =>
   useQuery<GetAdminUsersResponse>(GET_ADMIN_USERS, options);
+
+export const useGetAdminById = (adminId: string, options?: any) =>
+  useQuery<{ getAdminById: AdminUser }>(GET_ADMIN_BY_ID, {
+    variables: { adminId },
+    skip: !adminId,
+    ...options,
+  });
 
 export const useCreateAdmin = (options?: any) =>
   useMutation<CreateAdminResponse, { input: AdminRegisterInput }>(
