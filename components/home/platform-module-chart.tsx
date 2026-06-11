@@ -44,7 +44,7 @@ export function PlatformModuleChart() {
   // Filter to only show modules that are in the user's subscription
   const chartData = moduleActivity
     .filter((activity) => {
-      // If no modules loaded yet, show all
+      // If no modules loaded yet, View More
       if (modules.length === 0) return true;
 
       // Filter to only show modules that are in the user's subscription

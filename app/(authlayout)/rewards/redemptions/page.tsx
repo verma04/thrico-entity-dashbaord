@@ -10,7 +10,7 @@ import {
   Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { RedemptionsTable } from "@/components/rewards/redemptions/redemptions-table";
+import { RedemptionsTable } from "@/componentsrewards/redemptions /redemptions-table";
 import { useGetRedemptions } from "@/graphql/actions/rewards";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";

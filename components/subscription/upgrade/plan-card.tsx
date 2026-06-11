@@ -38,7 +38,9 @@ export const PlanCard = ({
   const [showAllModules, setShowAllModules] = useState(false);
   const moduleLimit = 6;
   const hasMoreModules = pkg.modules.length > moduleLimit;
-  const visibleModules = showAllModules ? pkg.modules : pkg.modules.slice(0, moduleLimit);
+  const visibleModules = showAllModules
+    ? pkg.modules
+    : pkg.modules.slice(0, moduleLimit);
 
   const isPopular = pkg.isPopular;
 
@@ -46,7 +48,9 @@ export const PlanCard = ({
     <div
       className={cn(
         "relative flex flex-col rounded-xl border bg-card shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md",
-        isPopular ? "border-slate-900 ring-1 ring-slate-900/10" : "border-border"
+        isPopular
+          ? "border-slate-900 ring-1 ring-slate-900/10"
+          : "border-border",
       )}
     >
       {/* Popular ribbon */}
@@ -59,11 +63,20 @@ export const PlanCard = ({
       )}
 
       {/* Header */}
-      <div className={cn("px-5 pt-5 pb-4", isPopular && "border-b border-border")}>
-        <h3 className="text-[15px] font-semibold text-foreground tracking-tight">{pkg.name}</h3>
+      <div
+        className={cn("px-5 pt-5 pb-4", isPopular && "border-b border-border")}
+      >
+        <h3 className="text-[15px] font-semibold text-foreground tracking-tight">
+          {pkg.name}
+        </h3>
         <div className="flex items-baseline gap-1.5 mt-3">
           <span className="text-[28px] font-bold text-foreground leading-none tabular-nums tracking-tight">
-            {formatPrice(pkg.monthlyPrice, pkg.yearlyPrice, isYearly, pkg.currency)}
+            {formatPrice(
+              pkg.monthlyPrice,
+              pkg.yearlyPrice,
+              isYearly,
+              pkg.currency,
+            )}
           </span>
           <span className="text-[12px] text-muted-foreground">
             / {isYearly ? "yr" : "mo"}
@@ -108,7 +121,10 @@ export const PlanCard = ({
           {pkg.benefits
             .filter((b) => b.trim())
             .map((benefit, i) => (
-              <div key={i} className="flex items-start gap-2 text-[12px] text-foreground">
+              <div
+                key={i}
+                className="flex items-start gap-2 text-[12px] text-foreground"
+              >
                 <Check className="h-3.5 w-3.5 text-emerald-500 mt-0.5 shrink-0" />
                 {benefit}
               </div>
@@ -122,7 +138,10 @@ export const PlanCard = ({
           Modules
         </p>
         {visibleModules.map((module, i) => (
-          <div key={i} className="flex items-center gap-2 text-[12px] text-muted-foreground">
+          <div
+            key={i}
+            className="flex items-center gap-2 text-[12px] text-muted-foreground"
+          >
             {renderModuleIcon(module.icon)}
             {module.name}
           </div>
@@ -134,11 +153,12 @@ export const PlanCard = ({
           >
             {showAllModules ? (
               <>
-                <ChevronUp className="h-3.5 w-3.5" /> Show less
+                <ChevronUp className="h-3.5 w-3.5" /> View less
               </>
             ) : (
               <>
-                <ChevronDown className="h-3.5 w-3.5" /> {pkg.modules.length - moduleLimit} more
+                <ChevronDown className="h-3.5 w-3.5" />{" "}
+                {pkg.modules.length - moduleLimit} more
               </>
             )}
           </button>
@@ -154,7 +174,7 @@ export const PlanCard = ({
             "w-full h-9 text-[12px] font-semibold gap-2",
             isPopular
               ? "bg-slate-900 hover:bg-black text-white"
-              : "bg-card hover:bg-muted/50 text-foreground border border-border shadow-sm"
+              : "bg-card hover:bg-muted/50 text-foreground border border-border shadow-sm",
           )}
           variant="ghost"
         >

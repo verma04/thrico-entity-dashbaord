@@ -883,7 +883,7 @@ export default function Dashboard() {
                     className="text-[10px] text-muted-foreground font-medium h-7 px-2.5 rounded-lg hover:bg-muted"
                     onClick={() => setShowAllFeatureModules((prev) => !prev)}
                   >
-                    {showAllFeatureModules ? "Show less" : "Show all"}
+                    {showAllFeatureModules ? "View less" : "View More"}
                   </Button>
                 )
               }

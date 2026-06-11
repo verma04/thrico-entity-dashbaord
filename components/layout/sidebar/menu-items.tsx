@@ -312,7 +312,7 @@ export const gamificationEngine = [
       {
         key: "redemptions",
         label: "Redemption",
-        path: "/rewards/Redemptions",
+        path: "rewards/redemptions ",
       },
       { key: "rew-fraud", label: "Fraud", path: "/rewards/fraud" },
     ],
@@ -736,7 +736,10 @@ export const useFilteredExtendedItems = () => {
     const isSuperAdmin = user?.isSuperAdmin;
     const isSystemRole = user?.role?.isSystem;
 
-    const hasModulePermission = (moduleName: string, action: string = "canRead") => {
+    const hasModulePermission = (
+      moduleName: string,
+      action: string = "canRead",
+    ) => {
       if (!user) return false;
       if (user.isSuperAdmin || user.role?.isSystem) return true;
       if (user.permissions && moduleName in user.permissions) {
@@ -765,7 +768,11 @@ export const useFilteredExtendedItems = () => {
         if (!hasModulePermission("MODERATION")) return acc;
       }
       if (item.key === "mod-manual" || item.key === "mod-ai") {
-        if (!hasModulePermission("MODERATION") && !hasModulePermission("AI_MODERATION")) return acc;
+        if (
+          !hasModulePermission("MODERATION") &&
+          !hasModulePermission("AI_MODERATION")
+        )
+          return acc;
       }
 
       // 2. Home items and Dashboard should always be visible (or conditionally)
@@ -784,8 +791,10 @@ export const useFilteredExtendedItems = () => {
         if (item.key === "mod-manual" && item.children) {
           const mappedItem = { ...item };
           mappedItem.children = mappedItem.children.filter((child: any) => {
-            if (child.key === "mod-moderation") return hasModulePermission("AI_MODERATION");
-            if (child.key === "mod-banned" || child.key === "mod-links") return hasModulePermission("MODERATION");
+            if (child.key === "mod-moderation")
+              return hasModulePermission("AI_MODERATION");
+            if (child.key === "mod-banned" || child.key === "mod-links")
+              return hasModulePermission("MODERATION");
             return true;
           });
           if (mappedItem.children.length > 0) acc.push(mappedItem);
@@ -871,7 +880,10 @@ export const useFilteredManagementItems = () => {
   const isSuperAdmin = user?.isSuperAdmin;
   const isSystemRole = user?.role?.isSystem;
 
-  const hasModulePermission = (moduleName: string, action: string = "canRead") => {
+  const hasModulePermission = (
+    moduleName: string,
+    action: string = "canRead",
+  ) => {
     if (!user) return false;
     if (user.isSuperAdmin || user.role?.isSystem) return true;
     if (user.permissions && moduleName in user.permissions) {
@@ -928,32 +940,58 @@ export const useFilteredManagementItems = () => {
         }
 
         if (section.key === "support") {
-          if (!hasModulePermission("CONTACT_SUPPORT") && !hasModulePermission("FEEDBACK")) return null;
+          if (
+            !hasModulePermission("CONTACT_SUPPORT") &&
+            !hasModulePermission("FEEDBACK")
+          )
+            return null;
         }
 
         // Filter children if they exist
         if (filteredSection.children) {
-          filteredSection.children = filteredSection.children.filter((child) => {
-            if (child.key === "cust-logo" || child.key === "cust-brand") return hasModulePermission("APPEARANCE");
-            if (child.key === "cust-dom") return hasModulePermission("DOMAIN");
-            if (child.key === "cust-mod") return hasModulePermission("PLATFORM_FEATURES");
-            if (child.key === "cust-lang") return hasModulePermission("LANGUAGES");
-            if (child.key === "cust-int") return hasModulePermission("INTEGRATIONS");
-            if (child.key === "team-users") return hasModulePermission("USERS_AND_PERMISSIONS") || hasModulePermission("ADMIN_USERS");
-            if (child.key === "acc-bill") return hasModulePermission("BILLING");
-            if (child.key === "acc-plan") return hasModulePermission("SUBSCRIPTION");
-            if (child.key === "acc-audit") return hasModulePermission("AUDIT_LOGS");
-            if (child.key === "pol-privacy") return hasModulePermission("CUSTOMER_PRIVACY");
-            if (child.key === "pol-terms") return hasModulePermission("POLICIES");
-            if (child.key === "pol-taxes") return hasModulePermission("TAXES_AND_DUTIES");
-            if (child.key === "sup-manager") return hasModulePermission("CONTACT_SUPPORT");
-            
-            // Allow default access for others if parent is allowed
-            return true;
-          });
+          filteredSection.children = filteredSection.children.filter(
+            (child) => {
+              if (child.key === "cust-logo" || child.key === "cust-brand")
+                return hasModulePermission("APPEARANCE");
+              if (child.key === "cust-dom")
+                return hasModulePermission("DOMAIN");
+              if (child.key === "cust-mod")
+                return hasModulePermission("PLATFORM_FEATURES");
+              if (child.key === "cust-lang")
+                return hasModulePermission("LANGUAGES");
+              if (child.key === "cust-int")
+                return hasModulePermission("INTEGRATIONS");
+              if (child.key === "team-users")
+                return (
+                  hasModulePermission("USERS_AND_PERMISSIONS") ||
+                  hasModulePermission("ADMIN_USERS")
+                );
+              if (child.key === "acc-bill")
+                return hasModulePermission("BILLING");
+              if (child.key === "acc-plan")
+                return hasModulePermission("SUBSCRIPTION");
+              if (child.key === "acc-audit")
+                return hasModulePermission("AUDIT_LOGS");
+              if (child.key === "pol-privacy")
+                return hasModulePermission("CUSTOMER_PRIVACY");
+              if (child.key === "pol-terms")
+                return hasModulePermission("POLICIES");
+              if (child.key === "pol-taxes")
+                return hasModulePermission("TAXES_AND_DUTIES");
+              if (child.key === "sup-manager")
+                return hasModulePermission("CONTACT_SUPPORT");
+
+              // Allow default access for others if parent is allowed
+              return true;
+            },
+          );
 
           // If all children were filtered out, don't show the section (unless it's supposed to be empty)
-          if (filteredSection.children.length === 0 && section.children && section.children.length > 0) {
+          if (
+            filteredSection.children.length === 0 &&
+            section.children &&
+            section.children.length > 0
+          ) {
             return null;
           }
         }

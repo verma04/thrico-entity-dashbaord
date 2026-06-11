@@ -64,7 +64,9 @@ import { DateRange } from "react-day-picker";
 import { TimeRange } from "@/graphql/actions/rewards";
 
 export default function RewardsDashboard() {
-  const [timeRange, setTimeRange] = React.useState<TimeRange>(TimeRange.LAST_7_DAYS);
+  const [timeRange, setTimeRange] = React.useState<TimeRange>(
+    TimeRange.LAST_7_DAYS,
+  );
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
     from: subDays(new Date(), 7),
     to: new Date(),
@@ -82,12 +84,13 @@ export default function RewardsDashboard() {
     else if (diffDays <= 90) setTimeRange(TimeRange.LAST_90_DAYS);
   };
 
-  const formattedDateRange = dateRange?.from && dateRange?.to
-    ? {
-        startDate: dateRange.from.toISOString(),
-        endDate: dateRange.to.toISOString(),
-      }
-    : undefined;
+  const formattedDateRange =
+    dateRange?.from && dateRange?.to
+      ? {
+          startDate: dateRange.from.toISOString(),
+          endDate: dateRange.to.toISOString(),
+        }
+      : undefined;
 
   const {
     data: statsData,
@@ -109,12 +112,10 @@ export default function RewardsDashboard() {
   // Inventory computed
   const inventoryRewards = allRewards.filter((r: any) => r.inventoryRequired);
   const lowStockRewards = inventoryRewards.filter(
-    (r: any) =>
-      r.remainingVouchers !== undefined && r.remainingVouchers <= 10
+    (r: any) => r.remainingVouchers !== undefined && r.remainingVouchers <= 10,
   );
   const healthyRewards = inventoryRewards.filter(
-    (r: any) =>
-      r.remainingVouchers === undefined || r.remainingVouchers > 10
+    (r: any) => r.remainingVouchers === undefined || r.remainingVouchers > 10,
   );
 
   const kpis = [
@@ -183,7 +184,7 @@ export default function RewardsDashboard() {
       title: "History",
       desc: "Full log of all claimed rewards",
       icon: History,
-      link: "/rewards/redemptions",
+      link: "rewards/redemptions ",
       color: "emerald",
       stat: stats?.totalRedemptions || 0,
       statLabel: "total",
@@ -251,10 +252,21 @@ export default function RewardsDashboard() {
   };
 
   const getStockColor = (remaining: number | undefined) => {
-    if (remaining === undefined) return { text: "text-slate-500", bg: "bg-slate-100", bar: "bg-slate-300" };
-    if (remaining <= 5) return { text: "text-rose-600", bg: "bg-rose-50", bar: "bg-rose-500" };
-    if (remaining <= 10) return { text: "text-amber-600", bg: "bg-amber-50", bar: "bg-amber-500" };
-    return { text: "text-emerald-600", bg: "bg-emerald-50", bar: "bg-emerald-500" };
+    if (remaining === undefined)
+      return {
+        text: "text-slate-500",
+        bg: "bg-slate-100",
+        bar: "bg-slate-300",
+      };
+    if (remaining <= 5)
+      return { text: "text-rose-600", bg: "bg-rose-50", bar: "bg-rose-500" };
+    if (remaining <= 10)
+      return { text: "text-amber-600", bg: "bg-amber-50", bar: "bg-amber-500" };
+    return {
+      text: "text-emerald-600",
+      bg: "bg-emerald-50",
+      bar: "bg-emerald-500",
+    };
   };
 
   return (
@@ -279,7 +291,7 @@ export default function RewardsDashboard() {
           </div>
 
           <div className="flex items-center gap-2">
-            <DateRangePicker 
+            <DateRangePicker
               date={dateRange}
               onDateChange={handleDateChange}
               defaultValue="LAST_7_DAYS"
@@ -299,10 +311,7 @@ export default function RewardsDashboard() {
               title="Refresh data"
             >
               <RotateCcw
-                className={cn(
-                  "h-3.5 w-3.5",
-                  statsLoading && "animate-spin"
-                )}
+                className={cn("h-3.5 w-3.5", statsLoading && "animate-spin")}
               />
             </Button>
             <Link href="/rewards/coupons/create">
@@ -335,13 +344,11 @@ export default function RewardsDashboard() {
               <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight leading-tight max-w-lg">
                 Scratch Cards, Spin Wheels
                 <br />
-                <span className="text-white/70">
-                  &amp; Match-to-Win Games
-                </span>
+                <span className="text-white/70">&amp; Match-to-Win Games</span>
               </h2>
               <p className="text-white/55 text-sm leading-relaxed max-w-sm">
-                Boost engagement by up to 3× with gamified rewards. Members
-                love instant-reveal experiences.
+                Boost engagement by up to 3× with gamified rewards. Members love
+                instant-reveal experiences.
               </p>
               <div className="flex items-center gap-3 pt-1">
                 <Link href="/rewards/coupons/create">
@@ -393,7 +400,7 @@ export default function RewardsDashboard() {
                   }}
                   className={cn(
                     "rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 flex flex-col items-center justify-center gap-2 group-hover:rotate-0 transition-all duration-500",
-                    item.size
+                    item.size,
                   )}
                 >
                   <item.icon className="h-7 w-7 text-white opacity-80" />
@@ -437,8 +444,8 @@ export default function RewardsDashboard() {
                         No activity yet
                       </p>
                       <p className="text-xs text-muted-foreground max-w-[200px] leading-relaxed">
-                        Redemption trends will appear here once members
-                        start claiming rewards
+                        Redemption trends will appear here once members start
+                        claiming rewards
                       </p>
                     </div>
                     <Link href="/rewards/coupons/create">
@@ -548,80 +555,84 @@ export default function RewardsDashboard() {
               icon={Users}
             >
               <div className="space-y-1 mt-3">
-                {redemptionsLoading
-                  ? [1, 2, 3, 4, 5].map((i) => (
+                {redemptionsLoading ? (
+                  [1, 2, 3, 4, 5].map((i) => (
+                    <div
+                      key={i}
+                      className="flex gap-3 p-2.5 rounded-lg animate-pulse"
+                    >
+                      <Skeleton className="h-8 w-8 rounded-lg shrink-0" />
+                      <div className="space-y-1.5 flex-1">
+                        <Skeleton className="h-3 w-24" />
+                        <Skeleton className="h-2.5 w-32" />
+                      </div>
+                    </div>
+                  ))
+                ) : redemptions.length > 0 ? (
+                  redemptions.map((act: any, i: number) => {
+                    const hoverUser: UserProfileHoverData = {
+                      id: act.user?.id,
+                      firstName: act.user?.firstName,
+                      lastName: act.user?.lastName,
+                      avatar: act.user?.avatar,
+                    };
+                    return (
                       <div
                         key={i}
-                        className="flex gap-3 p-2.5 rounded-lg animate-pulse"
+                        className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-muted/60 transition-colors group/item cursor-default"
                       >
-                        <Skeleton className="h-8 w-8 rounded-lg shrink-0" />
-                        <div className="space-y-1.5 flex-1">
-                          <Skeleton className="h-3 w-24" />
-                          <Skeleton className="h-2.5 w-32" />
+                        <UserProfileHoverCard user={hoverUser}>
+                          <div className="flex items-center gap-3 cursor-pointer flex-1 min-w-0">
+                            <Avatar className="h-8 w-8 border border-border shrink-0 group-hover/item:border-indigo-200 transition-colors">
+                              <AvatarImage
+                                src={
+                                  act.user?.avatar
+                                    ? `https://cdn.thrico.network/${act.user.avatar}`
+                                    : ""
+                                }
+                                alt={act.user?.firstName}
+                                className="object-cover"
+                              />
+                              <AvatarFallback className="text-[10px] bg-muted text-muted-foreground font-semibold group-hover/item:bg-indigo-50 group-hover/item:text-indigo-600 transition-colors">
+                                {act.user?.firstName?.charAt(0)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[12px] font-semibold text-foreground truncate leading-none hover:underline">
+                                {act.user?.firstName} {act.user?.lastName}
+                              </p>
+                              <p className="text-[11px] text-muted-foreground truncate leading-none mt-0.5">
+                                {act.reward?.title}
+                              </p>
+                            </div>
+                          </div>
+                        </UserProfileHoverCard>
+                        <div className="flex items-center gap-1 text-[10px] text-muted-foreground/70 font-medium shrink-0">
+                          <Clock className="h-3 w-3" />
+                          {moment(act.createdAt).fromNow(true)}
                         </div>
                       </div>
-                    ))
-                  : redemptions.length > 0
-                    ? redemptions.map((act: any, i: number) => {
-                        const hoverUser: UserProfileHoverData = {
-                          id: act.user?.id,
-                          firstName: act.user?.firstName,
-                          lastName: act.user?.lastName,
-                          avatar: act.user?.avatar,
-                        };
-                        return (
-                        <div
-                          key={i}
-                          className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-muted/60 transition-colors group/item cursor-default"
-                        >
-                          <UserProfileHoverCard user={hoverUser}>
-                            <div className="flex items-center gap-3 cursor-pointer flex-1 min-w-0">
-                              <Avatar className="h-8 w-8 border border-border shrink-0 group-hover/item:border-indigo-200 transition-colors">
-                                <AvatarImage
-                                  src={act.user?.avatar ? `https://cdn.thrico.network/${act.user.avatar}` : ""}
-                                  alt={act.user?.firstName}
-                                  className="object-cover"
-                                />
-                                <AvatarFallback className="text-[10px] bg-muted text-muted-foreground font-semibold group-hover/item:bg-indigo-50 group-hover/item:text-indigo-600 transition-colors">
-                                  {act.user?.firstName?.charAt(0)}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-[12px] font-semibold text-foreground truncate leading-none hover:underline">
-                                  {act.user?.firstName} {act.user?.lastName}
-                                </p>
-                                <p className="text-[11px] text-muted-foreground truncate leading-none mt-0.5">
-                                  {act.reward?.title}
-                                </p>
-                              </div>
-                            </div>
-                          </UserProfileHoverCard>
-                          <div className="flex items-center gap-1 text-[10px] text-muted-foreground/70 font-medium shrink-0">
-                            <Clock className="h-3 w-3" />
-                            {moment(act.createdAt).fromNow(true)}
-                          </div>
-                        </div>
-                        );
-                      })
-                    : (
-                        <div className="py-10 text-center space-y-3">
-                          <div className="h-12 w-12 bg-muted rounded-2xl flex items-center justify-center mx-auto border border-border">
-                            <History className="h-5 w-5 text-muted-foreground/40" />
-                          </div>
-                          <div className="space-y-1">
-                            <p className="text-sm font-semibold text-foreground">
-                              No activity yet
-                            </p>
-                            <p className="text-[11px] text-muted-foreground/60 max-w-[150px] mx-auto leading-relaxed">
-                              Activity appears when members start redeeming
-                            </p>
-                          </div>
-                        </div>
-                      )}
+                    );
+                  })
+                ) : (
+                  <div className="py-10 text-center space-y-3">
+                    <div className="h-12 w-12 bg-muted rounded-2xl flex items-center justify-center mx-auto border border-border">
+                      <History className="h-5 w-5 text-muted-foreground/40" />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm font-semibold text-foreground">
+                        No activity yet
+                      </p>
+                      <p className="text-[11px] text-muted-foreground/60 max-w-[150px] mx-auto leading-relaxed">
+                        Activity appears when members start redeeming
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="mt-4 pt-4 border-t border-border">
-                <Link href="/rewards/redemptions">
+                <Link href="rewards/redemptions ">
                   <Button
                     variant="outline"
                     size="sm"
@@ -670,7 +681,8 @@ export default function RewardsDashboard() {
                   No inventory-tracked rewards
                 </p>
                 <p className="text-xs text-muted-foreground max-w-[220px] leading-relaxed">
-                  Enable inventory tracking on a reward to monitor stock levels here
+                  Enable inventory tracking on a reward to monitor stock levels
+                  here
                 </p>
               </div>
               <Link href="/rewards/coupons/create">
@@ -758,17 +770,15 @@ export default function RewardsDashboard() {
                                 "inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-bold shrink-0",
                                 remaining !== undefined && remaining <= 10
                                   ? "bg-rose-50 text-rose-600 border border-rose-100"
-                                  : "bg-emerald-50 text-emerald-600 border border-emerald-100"
+                                  : "bg-emerald-50 text-emerald-600 border border-emerald-100",
                               )}
                             >
-                              {remaining !== undefined &&
-                              remaining <= 5 ? (
+                              {remaining !== undefined && remaining <= 5 ? (
                                 <>
                                   <AlertTriangle className="h-2.5 w-2.5" />
                                   Critical
                                 </>
-                              ) : remaining !== undefined &&
-                                remaining <= 10 ? (
+                              ) : remaining !== undefined && remaining <= 10 ? (
                                 <>
                                   <AlertTriangle className="h-2.5 w-2.5" />
                                   Low
@@ -788,7 +798,7 @@ export default function RewardsDashboard() {
                               <div
                                 className={cn(
                                   "h-full rounded-full transition-all duration-700",
-                                  colors.bar
+                                  colors.bar,
                                 )}
                                 style={{
                                   width: `${Math.max(pct, 2)}%`,
@@ -799,7 +809,7 @@ export default function RewardsDashboard() {
                               <span
                                 className={cn(
                                   "font-bold tabular-nums",
-                                  colors.text
+                                  colors.text,
                                 )}
                               >
                                 {remaining ?? "∞"} remaining
@@ -854,7 +864,7 @@ export default function RewardsDashboard() {
                     className={cn(
                       "group relative p-4 rounded-xl bg-card border border-border hover:shadow-md transition-all duration-300 cursor-pointer h-full flex flex-col gap-3",
                       "ring-2 ring-transparent",
-                      colors.ring
+                      colors.ring,
                     )}
                   >
                     <div className="flex items-center justify-between">
@@ -862,7 +872,7 @@ export default function RewardsDashboard() {
                         <item.icon
                           className={cn(
                             "h-4 w-4 text-muted-foreground transition-colors",
-                            `group-hover:${colors.icon.replace("text-", "text-")}`
+                            `group-hover:${colors.icon.replace("text-", "text-")}`,
                           )}
                           size={16}
                         />
@@ -881,14 +891,11 @@ export default function RewardsDashboard() {
                       <div
                         className={cn(
                           "inline-flex self-start items-center gap-1 px-2 py-0.5 rounded-full border text-[9px] font-bold uppercase tracking-wide",
-                          colors.badge
+                          colors.badge,
                         )}
                       >
                         <span
-                          className={cn(
-                            "h-1 w-1 rounded-full",
-                            colors.dot
-                          )}
+                          className={cn("h-1 w-1 rounded-full", colors.dot)}
                         />
                         {item.stat} {item.statLabel}
                       </div>
@@ -897,14 +904,11 @@ export default function RewardsDashboard() {
                       <div
                         className={cn(
                           "inline-flex self-start items-center gap-1 px-2 py-0.5 rounded-full border text-[9px] font-bold uppercase tracking-wide",
-                          colors.badge
+                          colors.badge,
                         )}
                       >
                         <span
-                          className={cn(
-                            "h-1 w-1 rounded-full",
-                            colors.dot
-                          )}
+                          className={cn("h-1 w-1 rounded-full", colors.dot)}
                         />
                         {item.statLabel}
                       </div>

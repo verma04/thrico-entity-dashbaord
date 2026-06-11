@@ -15,7 +15,7 @@ export const CommunitiesModule = ({
 }: CommunitiesModuleProps) => {
   const communities = content.communities || [];
 
-  // If no valid communities, show all 6 with defaults
+  // If no valid communities, View More 6 with defaults
   const displayIndices = [1, 2, 3, 4, 5, 6];
 
   return (
@@ -40,7 +40,7 @@ export const CommunitiesModule = ({
           layout === "cards" &&
             "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
           layout === "masonry" &&
-            "columns-1 sm:columns-2 lg:columns-3 gap-4 sm:gap-6 space-y-4 sm:space-y-6"
+            "columns-1 sm:columns-2 lg:columns-3 gap-4 sm:gap-6 space-y-4 sm:space-y-6",
         )}
       >
         {displayIndices.map((i) => {
@@ -61,7 +61,7 @@ export const CommunitiesModule = ({
                 layout === "grid" && "flex flex-col h-full",
                 layout === "list" && "flex flex-col sm:flex-row gap-4",
                 layout === "cards" && "flex flex-col",
-                layout === "masonry" && "break-inside-avoid"
+                layout === "masonry" && "break-inside-avoid",
               )}
             >
               {layout !== "list" && (
@@ -71,7 +71,7 @@ export const CommunitiesModule = ({
                     layout === "grid" && "h-48 sm:h-56 md:h-64",
                     layout === "cards" && "h-40 sm:h-48",
                     layout === "masonry" &&
-                      `h-${[32, 48, 24, 64, 32, 24][i - 1]}`
+                      `h-${[32, 48, 24, 64, 32, 24][i - 1]}`,
                   )}
                 >
                   <div
