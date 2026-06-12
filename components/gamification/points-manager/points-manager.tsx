@@ -43,7 +43,7 @@ export function PointsManager() {
   });
 
   const { data: gamificationStatsData, refetch: refetchStats } =
-    useGetGamificationStats({
+    useGetGamificationStats(undefined, undefined, {
       notifyOnNetworkStatusChange: true,
     });
 

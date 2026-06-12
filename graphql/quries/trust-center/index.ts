@@ -161,10 +161,28 @@ export const GET_ALL_ANNOUNCEMENTS = gql`
   query GetAllAnnouncements {
     getAllAnnouncements {
       id
-      note
+      subject
       description
       category
       entity
+      allowReplies
+      isActive
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const GET_ANNOUNCEMENT = gql`
+  query GetAnnouncement($getAnnouncementId: ID!) {
+    getAnnouncement(id: $getAnnouncementId) {
+      id
+      subject
+      description
+      category
+      entity
+      allowReplies
+      isActive
       createdAt
       updatedAt
     }
