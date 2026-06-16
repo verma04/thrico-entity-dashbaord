@@ -26,6 +26,7 @@ import { getDiscussionForumDetailsByID } from "@/graphql/actions/discussion-form
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { useModuleStore } from "@/store/useModuleStore";
 
 const tabItems = [
   { key: "manage", label: "Overview", icon: MessageSquare },
@@ -37,6 +38,8 @@ const tabItems = [
 ];
 
 function ForumManagementLayout({ children }: { children: React.ReactNode }) {
+  const moduleName = useModuleStore((state) => state.forumModuleName);
+  const singularName = useModuleStore((state) => state.forumSingularName);
   const router = useRouter();
   const pathname = usePathname();
   const id = pathname?.split("/")[2];
@@ -97,8 +100,8 @@ function ForumManagementLayout({ children }: { children: React.ReactNode }) {
                   <div className="flex items-center gap-2.5">
                     <h1 className="text-lg font-semibold tracking-tight">
                       {loading
-                        ? "Loading Forum..."
-                        : forum?.title || "Forum Details"}
+                        ? `Loading ${singularName}...`
+                        : forum?.title || `${singularName} Details`}
                     </h1>
                     {loading && (
                       <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
@@ -198,13 +201,13 @@ function ForumManagementLayout({ children }: { children: React.ReactNode }) {
                   href="/forums/all"
                   className="text-xs font-medium"
                 >
-                  Forums
+                  {moduleName}
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbPage className="text-xs font-medium">
-                  {forum?.title || "Forum Details"}
+                  {forum?.title || `${singularName} Details`}
                 </BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>

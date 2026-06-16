@@ -3,6 +3,7 @@
 import React from "react";
 import { Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useModuleStore } from "@/store/useModuleStore";
 
 interface MomentsEmptyStateProps {
   onAction?: () => void;
@@ -11,6 +12,8 @@ interface MomentsEmptyStateProps {
 export const MomentsEmptyState: React.FC<MomentsEmptyStateProps> = ({
   onAction,
 }) => {
+  const moduleName = useModuleStore((state) => state.momentModuleName);
+  const singularName = useModuleStore((state) => state.momentSingularName);
   return (
     <div className="flex flex-col items-center justify-center py-16 rounded-2xl border border-dashed border-zinc-200 bg-zinc-50/50">
       <div className="relative mb-5">
@@ -23,10 +26,10 @@ export const MomentsEmptyState: React.FC<MomentsEmptyStateProps> = ({
       </div>
 
       <h3 className="text-sm font-semibold text-zinc-800 tracking-tight mb-1">
-        No moments found
+        No {moduleName.toLowerCase()} found
       </h3>
       <p className="text-[12px] text-zinc-400 max-w-[200px] text-center leading-relaxed mb-5">
-        Try a different search query or upload a new moment.
+        Try a different search query or upload a new {singularName.toLowerCase()}.
       </p>
 
       {onAction && (
@@ -36,7 +39,7 @@ export const MomentsEmptyState: React.FC<MomentsEmptyStateProps> = ({
           className="h-8 px-4 text-[11px] font-semibold rounded-lg border-zinc-200 text-zinc-600 hover:bg-white hover:border-zinc-300 hover:text-zinc-900 transition-all"
           onClick={onAction}
         >
-          Upload moment
+          Upload {singularName.toLowerCase()}
         </Button>
       )}
     </div>

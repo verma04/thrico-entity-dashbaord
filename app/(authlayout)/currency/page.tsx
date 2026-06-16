@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useModuleStore } from "@/store/useModuleStore";
 import { CurrencyDashboard } from "@/components/settings/currency/currency-dashboard";
 import { Button } from "@/components/ui/button";
 import { useReSeedDefaultCurrency, TimeRange } from "@/graphql/actions";
@@ -26,6 +27,7 @@ import { subDays } from "date-fns";
 import { DateRange } from "react-day-picker";
 
 export default function CurrencySettingsPage() {
+  const currencyModuleName = useModuleStore((state) => state.currencyModuleName);
   const [reSeed, { loading: resetting }] = useReSeedDefaultCurrency({
     onCompleted: () => toast.success("Currency settings reset to defaults"),
     onError: (err: any) => toast.error(err.message),
@@ -59,9 +61,9 @@ export default function CurrencySettingsPage() {
   return (
     <EcosystemWrapper anonymized-1="currency-intelligence">
       <EcosystemHeader
-        title="Economic Node"
-        badgeText="Currency Stats"
-        description="Monitor your entity's local economy — earnings, redemptions, and active circulation at a glance."
+        title={`${currencyModuleName} Dashboard`}
+        badgeText={`${currencyModuleName} Stats`}
+        description={`Monitor your entity's local economy — ${currencyModuleName.toLowerCase()} earnings, redemptions, and active circulation at a glance.`}
         icon={Coins}
       />
 

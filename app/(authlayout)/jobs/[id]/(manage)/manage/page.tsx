@@ -26,8 +26,10 @@ import {
   GraduationCap,
   Loader2,
 } from "lucide-react";
+import { useModuleStore } from "@/store/useModuleStore";
 
 export default function JobManagePage() {
+  const singularName = useModuleStore((state) => state.jobSingularName);
   const pathname = usePathname();
   const id = pathname?.split("/")[2];
 
@@ -49,7 +51,7 @@ export default function JobManagePage() {
   if (!job) {
     return (
       <div className="text-center py-20 text-muted-foreground">
-        Job not found.
+        {singularName} not found.
       </div>
     );
   }
@@ -125,9 +127,9 @@ export default function JobManagePage() {
       <Card className="border-none shadow-lg shadow-black/[0.03] ring-1 ring-border/40 overflow-hidden">
         <CardHeader className="pb-4">
           <CardTitle className="text-base font-semibold">
-            Job Overview
+            {singularName} Overview
           </CardTitle>
-          <CardDescription>Details about this job listing</CardDescription>
+          <CardDescription>Details about this {singularName.toLowerCase()} listing</CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -144,7 +146,7 @@ export default function JobManagePage() {
               },
               job.jobType && {
                 icon: Briefcase,
-                label: "Job Type",
+                label: `${singularName} Type`,
                 value: job.jobType.replace("-", " "),
               },
               job.workplaceType && {

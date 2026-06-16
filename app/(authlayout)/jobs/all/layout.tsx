@@ -26,13 +26,14 @@ import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header"
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { useModuleStore } from "@/store/useModuleStore";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Status options
 // ─────────────────────────────────────────────────────────────────────────────
 
-const STATUS_OPTIONS = [
-  { value: "ALL", label: "All Jobs", icon: List, dot: "" },
+const getStatusOptions = (moduleName: string) => [
+  { value: "ALL", label: `All ${moduleName}`, icon: List, dot: "" },
   {
     value: "APPROVED",
     label: "Approved",
@@ -50,6 +51,11 @@ const STATUS_OPTIONS = [
 // ─────────────────────────────────────────────────────────────────────────────
 
 function RootLayout({ children }: { children: React.ReactNode }) {
+  const moduleName = useModuleStore((state) => state.jobModuleName);
+  const singularName = useModuleStore((state) => state.jobSingularName);
+  
+  const STATUS_OPTIONS = getStatusOptions(moduleName);
+
   const router = useRouter();
   const searchParams = useSearchParams();
   const status = searchParams.get("status") || "ALL";
@@ -74,9 +80,9 @@ function RootLayout({ children }: { children: React.ReactNode }) {
     <EcosystemWrapper>
       {/* Header */}
       <EcosystemHeader
-        title="Jobs"
+        title={moduleName}
         badgeText="Recruitment"
-        description="Oversee and manage all job postings across your community."
+        description={`Oversee and manage all ${singularName.toLowerCase()} postings across your community.`}
         icon={Briefcase}
       />
 

@@ -5,22 +5,27 @@ import { List, Plus, History } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 import { useModulePermission } from "@/hooks/use-module-permission";
+import { useGetModuleCustomName } from "@/graphql/actions";
+import { useModuleStore } from "@/store/useModuleStore";
 
 function CommunitiesLayout({ children }: { children: React.ReactNode }) {
   const canCreate = useModulePermission("COMMUNITIES", "canCreate");
   const canRead = useModulePermission("COMMUNITIES", "canRead");
 
+  const moduleName = useModuleStore((state) => state.communityModuleName);
+  const singularName = useModuleStore((state) => state.communitySingularName);
+
   const items = React.useMemo(() => {
     return [
       {
         key: "all",
-        label: "All Communities",
+        label: `All ${moduleName}`,
         icon: <List className="h-4 w-4" />,
         locked: !canRead,
       },
       {
         key: "create",
-        label: "Create Community",
+        label: `Create ${singularName}`,
         icon: <Plus className="h-4 w-4" />,
         locked: !canCreate,
       },
@@ -31,7 +36,7 @@ function CommunitiesLayout({ children }: { children: React.ReactNode }) {
         locked: !canRead,
       },
     ];
-  }, [canCreate, canRead]);
+  }, [canCreate, canRead, moduleName]);
 
   return (
     <MenuItemsLayout active="communities" items={items}>

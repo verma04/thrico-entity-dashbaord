@@ -8,8 +8,10 @@ import { useRouter } from "next/navigation";
 import { useCreateShopProduct } from "@/graphql/actions/shop/shop-hooks";
 import { ProductCreationForm } from "@/components/shop/product-creation-form";
 import { useToast } from "@/components/ui/use-toast";
+import { useModuleStore } from "@/store/useModuleStore";
 
 const CreateProductPage = () => {
+  const singularName = useModuleStore((state) => state.shopSingularName);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -17,14 +19,14 @@ const CreateProductPage = () => {
     onCompleted: (data: any) => {
       toast({
         title: "Success",
-        description: "Product created successfully!",
+        description: `${singularName} created successfully!`,
       });
       router.push("/shop/all");
     },
     onError: (error: any) => {
       toast({
         title: "Error",
-        description: error.message || "Failed to create product",
+        description: error.message || `Failed to create ${singularName.toLowerCase()}`,
         variant: "destructive",
       });
     },

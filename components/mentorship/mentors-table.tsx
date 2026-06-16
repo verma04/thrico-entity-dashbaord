@@ -19,17 +19,22 @@ interface MentorsTableProps {
   onRefetch: () => void;
 }
 
+import { useModuleStore } from "@/store/useModuleStore";
+
 export function MentorsTable({
   mentors,
   isLoading,
   onEdit,
   onRefetch,
 }: MentorsTableProps) {
+  const moduleName = useModuleStore((state) => state.mentorshipModuleName);
+  const singularName = useModuleStore((state) => state.mentorshipSingularName);
+
   const columns = useMemo<AdminTableColumn<any>[]>(
     () => [
       {
         key: "name",
-        header: "Mentor",
+        header: singularName,
         cell: (row) => {
           const mentor = row;
           return (
@@ -104,7 +109,7 @@ export function MentorsTable({
       },
       {
         key: "mentorSince",
-        header: "Mentor Since",
+        header: `${singularName} Since`,
         cell: (row) => {
           const date = row.mentorSince || row.createdAt;
           if (!date) return <span className="text-muted-foreground">-</span>;
@@ -151,7 +156,7 @@ export function MentorsTable({
       loading={isLoading}
       keyExtractor={(m) => m.id}
       emptyIcon={GraduationCap}
-      emptyTitle="No mentors found"
+      emptyTitle={`No ${singularName.toLowerCase()}s found`}
       emptyDescription="Try adjusting your search or filter criteria."
     />
   );

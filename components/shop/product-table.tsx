@@ -51,6 +51,8 @@ interface ProductTableProps {
   onPageSizeChange: (size: number) => void;
 }
 
+import { useModuleStore } from "@/store/useModuleStore";
+
 export function ProductTable({
   products,
   loading,
@@ -60,13 +62,15 @@ export function ProductTable({
   onPageChange,
   onPageSizeChange,
 }: ProductTableProps) {
+  const singularName = useModuleStore((state) => state.shopSingularName);
+  const moduleName = useModuleStore((state) => state.shopModuleName);
   const [deleteProduct, { loading: isDeleting }] = useDeleteShopProduct({
     onCompleted: () => {
-      toast.success("Product deleted successfully");
+      toast.success(`${singularName} deleted successfully`);
       refetch();
     },
     onError: (err) => {
-      toast.error(err.message || "Failed to delete product");
+      toast.error(err.message || `Failed to delete ${singularName.toLowerCase()}`);
     },
   });
 
@@ -74,7 +78,7 @@ export function ProductTable({
     () => [
       {
         key: "product",
-        header: "Product",
+        header: singularName,
         cell: (row) => {
           const product = row;
           return (
@@ -190,7 +194,7 @@ export function ProductTable({
                       className="flex items-center w-full"
                     >
                       <Pencil className="h-4 w-4 text-slate-500" />
-                      Edit Product
+                      Edit {singularName}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem
@@ -205,7 +209,7 @@ export function ProductTable({
                     onClick={() => setShowDeleteDialog(true)}
                   >
                     <Trash2 className="h-4 w-4" />
-                    Delete Product
+                    Delete {singularName}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -220,7 +224,7 @@ export function ProductTable({
                       Are you absolutely sure?
                     </AlertDialogTitle>
                     <AlertDialogDescription className="text-sm font-medium text-slate-500">
-                      This will permanently delete the product{" "}
+                      This will permanently delete the {singularName.toLowerCase()}{" "}
                       <strong>{product.title}</strong> and all its variants.
                       This action cannot be undone.
                     </AlertDialogDescription>
@@ -266,7 +270,7 @@ export function ProductTable({
       loading={loading}
       keyExtractor={(p) => p.id}
       emptyIcon={ShoppingBag}
-      emptyTitle="No products found"
+      emptyTitle={`No ${moduleName.toLowerCase()} found`}
       emptyDescription="Try adjusting your search or filter criteria."
     />
   );

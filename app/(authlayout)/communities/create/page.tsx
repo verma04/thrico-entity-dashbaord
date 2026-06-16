@@ -5,24 +5,28 @@ import { useRouter } from "next/navigation";
 import { addCommunity } from "@/graphql/actions/group";
 import { CommunityCreationForm } from "@/components/communities/add/community-creation-form";
 import { useToast } from "@/components/ui/use-toast";
+import { useModuleStore } from "@/store/useModuleStore";
 
 const CreateCommunityPage = () => {
   const router = useRouter();
   const { toast } = useToast();
   const [cover, setCover] = useState<string>();
 
+  const moduleName = useModuleStore((state) => state.communityModuleName);
+  const singularName = useModuleStore((state) => state.communitySingularName);
+
   const [add, { loading }] = addCommunity({
     onCompleted: (data: any) => {
       toast({
         title: "Success",
-        description: "Community created successfully!",
+        description: `${singularName} created successfully!`,
       });
       router.push("/communities/all");
     },
     onError: (error: any) => {
       toast({
         title: "Error",
-        description: error.message || "Failed to create community",
+        description: error.message || `Failed to create ${singularName.toLowerCase()}`,
         variant: "destructive",
       });
     },

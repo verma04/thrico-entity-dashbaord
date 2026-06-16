@@ -39,6 +39,7 @@ import GooglePlacesInput from "@/components/layout/google-place-input";
 import { ImageUpload } from "./image-upload";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { cn } from "@/lib/utils";
+import { useModuleStore } from "@/store/useModuleStore";
 
 interface ListingCreationFormProps {
   initialValues?: Record<string, any>;
@@ -91,6 +92,10 @@ export function ListingCreationForm({
   onFinish,
   onCancel,
 }: ListingCreationFormProps) {
+  const moduleName = useModuleStore((state) => state.listingModuleName);
+  const singularName = useModuleStore((state) => state.listingSingularName);
+  const [currentStep, setCurrentStep] = useState(0);
+
   const formik = useFormik({
     initialValues: {
       title: initialValues?.title || "",
@@ -110,7 +115,6 @@ export function ListingCreationForm({
   return (
     <div className="flex flex-col h-full bg-background overflow-hidden rounded-t-[inherit]">
       {/* Header section - Sticky */}
-      {/* Header section - Sticky */}
       <div className="sticky top-0 z-30 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 border-b px-6 py-4">
         <div className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
@@ -118,14 +122,14 @@ export function ListingCreationForm({
               <div className="p-2.5 rounded-xl bg-primary/10 ring-1 ring-primary/20">
                 <ShoppingBag className="h-5 w-5 text-primary" />
               </div>
-              <h1 className="text-2xl font-bold tracking-tight">
-                Create Marketplace Listing
-              </h1>
+              <h2 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+                Create {singularName}
+              </h2>
             </div>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground ml-1">
-              <span>Listings</span>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium">
+              <span>{moduleName}</span>
               <ChevronRight className="h-3 w-3" />
-              <span>Create New Listing</span>
+              <span>Create New {singularName}</span>
             </div>
           </div>
         </div>
@@ -170,21 +174,21 @@ export function ListingCreationForm({
                   </CardHeader>
                   <CardContent className="pt-6 space-y-6">
                     <div className="space-y-2">
-                      <Label htmlFor="title" className="text-sm font-medium">
-                        Listing Title{" "}
+                      <Label htmlFor="title" className="text-sm font-semibold">
+                        {singularName} Title{" "}
                         <span className="text-destructive">*</span>
                       </Label>
                       <Input
                         id="title"
                         name="title"
-                        placeholder="e.g., iPhone 14 Pro Max 256GB"
+                        placeholder={`e.g., New ${singularName}`}
                         value={formik.values.title}
                         onChange={formik.handleChange}
                         onBlur={formik.handleBlur}
                         className={cn(
                           formik.touched.title &&
                             formik.errors.title &&
-                            "border-destructive"
+                            "border-destructive",
                         )}
                       />
                       {formik.touched.title && formik.errors.title && (
@@ -209,7 +213,7 @@ export function ListingCreationForm({
                           "min-h-[120px] resize-none",
                           formik.touched.description &&
                             formik.errors.description &&
-                            "border-destructive"
+                            "border-destructive",
                         )}
                         value={formik.values.description}
                         onChange={formik.handleChange}
@@ -255,7 +259,7 @@ export function ListingCreationForm({
                               "pl-10",
                               formik.touched.price &&
                                 formik.errors.price &&
-                                "border-destructive"
+                                "border-destructive",
                             )}
                             value={formik.values.price}
                             onChange={formik.handleChange}
@@ -286,7 +290,7 @@ export function ListingCreationForm({
                               "pl-10",
                               formik.touched.location &&
                                 formik.errors.location &&
-                                "border-destructive"
+                                "border-destructive",
                             )}
                             initialValue={
                               formik.values.location
@@ -302,7 +306,7 @@ export function ListingCreationForm({
                               console.log("Location selected:", loc);
                               formik.setFieldValue(
                                 "location",
-                                loc.address || loc.name
+                                loc.address || loc.name,
                               );
                             }}
                           />
@@ -343,7 +347,7 @@ export function ListingCreationForm({
                           className={cn(
                             formik.touched.category &&
                               formik.errors.category &&
-                              "border-destructive"
+                              "border-destructive",
                           )}
                         >
                           <SelectValue placeholder="Select a category" />
@@ -416,7 +420,11 @@ export function ListingCreationForm({
             <div className="lg:col-span-4">
               <div className="sticky top-6 space-y-6">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-bold">Listing Preview</h3>
+                  <div className="p-6">
+                    <h3 className="text-lg font-bold">
+                      {singularName} Preview
+                    </h3>
+                  </div>
                   <Badge
                     variant="outline"
                     className="bg-green-500/5 text-green-600 border-green-500/20"
@@ -435,7 +443,9 @@ export function ListingCreationForm({
                           src={
                             formik.values.media[0].file
                               ? URL.createObjectURL(formik.values.media[0].file)
-                              : formik.values.media[0].thumbUrl || formik.values.media[0].url || ""
+                              : formik.values.media[0].thumbUrl ||
+                                formik.values.media[0].url ||
+                                ""
                           }
                           alt="Preview"
                           className="w-full h-full object-cover"
@@ -451,8 +461,8 @@ export function ListingCreationForm({
                     </div>
 
                     <div className="space-y-3">
-                      <h4 className="font-bold text-lg leading-tight">
-                        {formik.values.title || "Listing Title"}
+                      <h4 className="text-lg font-bold line-clamp-2">
+                        {formik.values.title || `${singularName} Title`}
                       </h4>
                       <div className="flex items-baseline gap-2">
                         <span className="text-2xl font-bold text-primary">
@@ -461,7 +471,7 @@ export function ListingCreationForm({
                         {formik.values.condition && (
                           <Badge variant="secondary" className="text-xs">
                             {CONDITIONS.find(
-                              (c) => c.value === formik.values.condition
+                              (c) => c.value === formik.values.condition,
                             )?.label || formik.values.condition}
                           </Badge>
                         )}
@@ -492,9 +502,12 @@ export function ListingCreationForm({
                     <Separator className="opacity-50" />
 
                     <div>
-                      <h5 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
-                        Description
-                      </h5>
+                      <h3 className="text-lg font-semibold text-foreground">
+                        Basic Details
+                      </h3>
+                      <p className="text-sm text-muted-foreground mb-2">
+                        Core details about your {singularName.toLowerCase()}
+                      </p>
                       <p className="text-sm line-clamp-4 text-foreground/80 leading-relaxed">
                         {formik.values.description ||
                           "Describe your item in detail..."}
@@ -536,9 +549,10 @@ export function ListingCreationForm({
           if (onCancel) onCancel();
           else window.history.back();
         }}
-        title="Unsaved Marketplace Listing"
-        description="You have unfilled form data."
-        buttonText="Publish Listing"
+        step={currentStep}
+        title={`Unsaved Marketplace ${singularName}`}
+        description="You have unsaved changes. Do you want to publish now or save as draft?"
+        buttonText={`Publish ${singularName}`}
       />
     </div>
   );

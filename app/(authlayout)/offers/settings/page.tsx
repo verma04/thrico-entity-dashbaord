@@ -7,25 +7,28 @@ import { PlatformSettingsPage, SettingsField } from "@/components/ui/platform/se
 import { toast } from "sonner";
 import { withModulePermission } from "@/components/hoc/with-module-permission";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+import { useModuleStore } from "@/store/useModuleStore";
 
-const FIELDS: SettingsField[] = [
+const FIELDS = (singularName: string, moduleName: string): SettingsField[] => [
   {
     key: "allowOffers",
-    label: "Allow Offer Creation",
-    description: "Enable or disable the ability for members to create new perks and offers.",
+    label: `Allow ${singularName} Creation`,
+    description: `Enable or disable the ability for members to create new perks and ${moduleName.toLowerCase()}.`,
     icon: ShieldCheck,
     section: "Marketplace Governance",
   },
   {
     key: "autoApproveOffers",
-    label: "Auto Approve Offers",
-    description: "Automatically validate and publish new offer listings without manual review.",
+    label: `Auto Approve ${moduleName}`,
+    description: `Automatically validate and publish new ${singularName.toLowerCase()} listings without manual review.`,
     icon: Zap,
     section: "Automation Protocols",
   },
 ];
 
 const OffersSettings = () => {
+  const moduleName = useModuleStore((state) => state.offerModuleName);
+  const singularName = useModuleStore((state) => state.offerSingularName);
   const { data, loading } = useEntitySettings();
   const [update, { loading: loadingBtn }] = useUpdateEntitySettings({});
 
@@ -36,20 +39,20 @@ const OffersSettings = () => {
           input: settings,
         },
       });
-      toast.success("Offers settings updated successfully");
+      toast.success(`${moduleName} settings updated successfully`);
     } catch (error) {
-      toast.error("Failed to update offers configuration");
+      toast.error(`Failed to update ${moduleName.toLowerCase()} configuration`);
       throw error;
     }
   };
 
   return (
     <PlatformSettingsPage
-      title="Benefit Ecosystem"
+      title={moduleName}
       description="Configure perks, discounts, and automated incentive delivery workflows."
       headerIcon={Percent}
       badge="Perks"
-      fields={FIELDS}
+      fields={FIELDS(singularName, moduleName)}
       data={data?.getEntitySettings}
       loading={loading}
       onSave={handleSave}

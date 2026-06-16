@@ -9,14 +9,16 @@ import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-cont
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { useModuleStore } from "@/store/useModuleStore";
 
 export default function QuickTracePage() {
+  const currencyModuleName = useModuleStore((state) => state.currencyModuleName);
   return (
     <EcosystemWrapper>
       <EcosystemHeader
         title="Quick Trace"
-        badgeText="Currency"
-        description="A snapshot of recent currency movements and conversions."
+        badgeText={currencyModuleName}
+        description={`A snapshot of recent ${currencyModuleName.toLowerCase()} movements and conversions.`}
         icon={Activity}
       />
 

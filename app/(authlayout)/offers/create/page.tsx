@@ -44,6 +44,7 @@ import { useRouter } from "next/navigation";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { withModulePermission } from "@/components/hoc/with-module-permission";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+import { useModuleStore } from "@/store/useModuleStore";
 
 const offerSchema = Yup.object().shape({
   title: Yup.string()
@@ -66,6 +67,8 @@ function CreateOfferPage() {
   const { addOffer, categories } = useOfferStore();
   const { toast } = useToast();
   const router = useRouter();
+  const singularName = useModuleStore((state) => state.offerSingularName);
+  const moduleName = useModuleStore((state) => state.offerModuleName);
 
   const formik = useFormik({
     initialValues: {
@@ -100,7 +103,7 @@ function CreateOfferPage() {
 
       addOffer(offerData);
       toast({
-        title: "Offer Created",
+        title: `${singularName} Created`,
         description: `"${values.title}" has been created.`,
       });
       router.push("/offers/all");
@@ -122,11 +125,11 @@ function CreateOfferPage() {
                 <Tag className="h-5 w-5 text-primary" />
               </div>
               <h1 className="text-2xl font-bold tracking-tight">
-                Create New Offer
+                Create New {singularName}
               </h1>
             </div>
             <div className="flex items-center gap-2 text-xs text-muted-foreground ml-1">
-              <span>Offers</span>
+              <span>{moduleName}</span>
               <ChevronRight className="h-3 w-3" />
               <span>Create New</span>
             </div>
@@ -143,9 +146,9 @@ function CreateOfferPage() {
                 {/* Image Upload */}
                 <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden">
                   <CardHeader className="bg-muted/30 pb-4">
-                    <CardTitle className="text-xl">Offer Image</CardTitle>
+                    <CardTitle className="text-xl">{singularName} Image</CardTitle>
                     <CardDescription>
-                      Upload an eye-catching image for your offer (800x400px
+                      Upload an eye-catching image for your {singularName.toLowerCase()} (800x400px
                       recommended)
                     </CardDescription>
                   </CardHeader>
@@ -169,7 +172,7 @@ function CreateOfferPage() {
                   <CardHeader className="bg-muted/30 pb-4">
                     <CardTitle className="text-xl">Basic Information</CardTitle>
                     <CardDescription>
-                      Core details about your offer
+                      Core details about your {singularName.toLowerCase()}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="pt-6 space-y-6">
@@ -205,7 +208,7 @@ function CreateOfferPage() {
                         id="description"
                         {...formik.getFieldProps("description")}
                         rows={4}
-                        placeholder="Describe the offer in detail..."
+                        placeholder={`Describe the ${singularName.toLowerCase()} in detail...`}
                         className={cn(
                           "resize-none",
                           formik.touched.description &&
@@ -311,7 +314,7 @@ function CreateOfferPage() {
                   <CardHeader className="bg-muted/30 pb-4">
                     <CardTitle className="text-xl">Validity Period</CardTitle>
                     <CardDescription>
-                      Set the start and end dates for this offer
+                      Set the start and end dates for this {singularName.toLowerCase()}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="pt-6 space-y-6">
@@ -442,9 +445,9 @@ function CreateOfferPage() {
                       >
                         <Star className="h-4 w-4 text-yellow-500" />
                         <div>
-                          <div className="font-medium">Featured Offer</div>
+                          <div className="font-medium">Featured {singularName}</div>
                           <div className="text-xs text-muted-foreground">
-                            Display this offer prominently
+                            Display this {singularName.toLowerCase()} prominently
                           </div>
                         </div>
                       </Label>
@@ -463,7 +466,7 @@ function CreateOfferPage() {
                       >
                         <TrendingUp className="h-4 w-4 text-green-500" />
                         <div>
-                          <div className="font-medium">Trending Offer</div>
+                          <div className="font-medium">Trending {singularName}</div>
                           <div className="text-xs text-muted-foreground">
                             Mark as trending
                           </div>
@@ -479,7 +482,7 @@ function CreateOfferPage() {
             <div className="lg:col-span-4">
               <div className="sticky top-6 space-y-6">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-bold">Offer Preview</h3>
+                  <h3 className="text-lg font-bold">{singularName} Preview</h3>
                   <Badge
                     variant="outline"
                     className="bg-green-500/5 text-green-600 border-green-500/20"
@@ -512,7 +515,7 @@ function CreateOfferPage() {
                     <div className="space-y-3">
                       <div className="flex items-start justify-between gap-2">
                         <h4 className="font-bold text-lg leading-tight flex-1">
-                          {formik.values.title || "Offer Title"}
+                          {formik.values.title || `${singularName} Title`}
                         </h4>
                         {formik.values.discount && (
                           <Badge className="bg-primary text-primary-foreground">
@@ -551,7 +554,7 @@ function CreateOfferPage() {
                       </h5>
                       <p className="text-sm line-clamp-4 text-foreground/80 leading-relaxed">
                         {formik.values.description ||
-                          "Describe your offer in detail..."}
+                          `Describe your ${singularName.toLowerCase()} in detail...`}
                       </p>
                     </div>
 
@@ -584,7 +587,7 @@ function CreateOfferPage() {
                     )}
 
                     <Button className="w-full mt-4" disabled>
-                      Claim Offer
+                      Claim {singularName}
                     </Button>
 
                     <p className="text-[10px] text-center text-muted-foreground italic">
@@ -606,9 +609,9 @@ function CreateOfferPage() {
           formik.resetForm();
           handleCancel();
         }}
-        title="Unsaved Offer Data"
+        title={`Unsaved ${singularName} Data`}
         description="You have unfilled form data."
-        buttonText="Create Offer"
+        buttonText={`Create ${singularName}`}
       />
     </div>
   );

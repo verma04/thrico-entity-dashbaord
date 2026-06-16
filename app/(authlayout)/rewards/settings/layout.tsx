@@ -4,6 +4,7 @@ import React from "react";
 import { Building2, Network, ScanLine, ToggleRight } from "lucide-react";
 import { PlatformSettingsLayout } from "@/components/ui/platform/layout";
 import { PartnerNetworkProvider } from "@/components/rewards/settings/partner-network-context";
+import { useModuleStore } from "@/store/useModuleStore";
 
 const TABS = [
   {
@@ -26,12 +27,14 @@ const TABS = [
   },
 ];
 
-const BREADCRUMB = [
-  { label: "Rewards", href: "/rewards" },
-  { label: "Partner Network" },
-];
-
 function RewardsSettingsLayout({ children }: { children: React.ReactNode }) {
+  const rewardsModuleName = useModuleStore((state) => state.rewardsModuleName);
+
+  const BREADCRUMB = [
+    { label: rewardsModuleName, href: "/rewards" },
+    { label: "Partner Network" },
+  ];
+
   return (
     <PartnerNetworkProvider>
       <PlatformSettingsLayout

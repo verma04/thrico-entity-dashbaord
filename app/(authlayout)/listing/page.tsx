@@ -54,6 +54,7 @@ import { DateRange } from "react-day-picker";
 import { subDays } from "date-fns";
 import { cn } from "@/lib/utils";
 import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { useModuleStore } from "@/store/useModuleStore";
 
 interface ListingData {
   id: string;
@@ -70,6 +71,8 @@ interface ListingData {
 // Removing dummy data constants
 
 const MarketplaceDashboard = () => {
+  const moduleName = useModuleStore((state) => state.listingModuleName);
+  const singularName = useModuleStore((state) => state.listingSingularName);
   const [timeRange, setTimeRange] = useState("THIS_MONTH");
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
 
@@ -197,7 +200,7 @@ const MarketplaceDashboard = () => {
       <EcosystemContainer className="p-6 lg:p-8 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <EcosystemKPI
-            title="Total Listings"
+            title={`Total ${moduleName}`}
             value={totalListings.toString()}
             trend={Number(stats?.listingsDiff || 0)}
             icon={Store}
@@ -222,7 +225,7 @@ const MarketplaceDashboard = () => {
             bg="bg-indigo-50"
           />
           <EcosystemKPI
-            title="Active Listings"
+            title={`Active ${moduleName}`}
             value={stats?.activeListings?.toString() || "0"}
             trend={Number(stats?.activePercent || 0)}
             icon={ThumbsUp}
@@ -235,7 +238,7 @@ const MarketplaceDashboard = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div className="lg:col-span-8">
             <EcosystemCard
-              title="Listing Velocity"
+              title={`${singularName} Velocity`}
               description="New entries published over time"
               icon={TrendingUp}
             >
@@ -323,7 +326,7 @@ const MarketplaceDashboard = () => {
 
         <EcosystemCard
           title="Recent Catalog Performance"
-          description="Detailed metrics for latest active listings"
+          description={`Detailed metrics for latest active ${moduleName.toLowerCase()}`}
           icon={Clock}
         >
           <div className="space-y-1 mt-4">

@@ -19,8 +19,10 @@ import { Separator } from "@/components/ui/separator";
 import { Save, X, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
+import { useModuleStore } from "@/store/useModuleStore";
 
 const AddListing = () => {
+  const singularName = useModuleStore((state) => state.listingSingularName);
   const router = useRouter();
   const { toast } = useToast();
   const [fileList, setFileList] = useState<File[]>([]);
@@ -42,7 +44,7 @@ const AddListing = () => {
     console.log("Form values:", formData);
     toast({
       title: "Success",
-      description: "Listing added successfully",
+      description: `${singularName} added successfully`,
     });
     router.push("/all-listings");
   };
@@ -82,7 +84,7 @@ const AddListing = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Add New Listing</h1>
+        <h1 className="text-3xl font-bold">Add New {singularName}</h1>
       </div>
 
       <Card>
@@ -94,7 +96,7 @@ const AddListing = () => {
 
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="title">Listing Title *</Label>
+                  <Label htmlFor="title">{singularName} Title *</Label>
                   <Input
                     id="title"
                     placeholder="Enter a descriptive title"
@@ -111,7 +113,7 @@ const AddListing = () => {
                   <Textarea
                     id="description"
                     rows={4}
-                    placeholder="Describe your listing in detail"
+                    placeholder={`Describe your ${singularName.toLowerCase()} in detail`}
                     value={formData.description}
                     onChange={(e) =>
                       setFormData({ ...formData, description: e.target.value })
@@ -228,7 +230,7 @@ const AddListing = () => {
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold mb-4">Listing Settings</h3>
+              <h3 className="text-lg font-semibold mb-4">{singularName} Settings</h3>
               <Separator className="mb-4" />
 
               <div className="space-y-4">
@@ -257,7 +259,7 @@ const AddListing = () => {
                     checked={isFeatured}
                     onCheckedChange={setIsFeatured}
                   />
-                  <Label htmlFor="featured">Featured Listing</Label>
+                  <Label htmlFor="featured">Featured {singularName}</Label>
                 </div>
 
                 {isFeatured && (
@@ -282,7 +284,7 @@ const AddListing = () => {
             <div className="flex gap-2">
               <Button type="submit">
                 <Save className="w-4 h-4 mr-2" />
-                Save Listing
+                Save {singularName}
               </Button>
               <Button type="button" variant="outline" onClick={handleCancel}>
                 <X className="w-4 h-4 mr-2" />

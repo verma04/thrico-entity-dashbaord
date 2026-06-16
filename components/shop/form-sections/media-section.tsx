@@ -11,9 +11,11 @@ import {
 import { Label } from "@/components/ui/label";
 import { MultiImageUpload } from "@/components/ui/multi-image-upload";
 import { ProductFormValues } from "../product-form";
+import { useModuleStore } from "@/store/useModuleStore";
 
 export function MediaSection() {
   const { values, setFieldValue } = useFormikContext<ProductFormValues>();
+  const singularName = useModuleStore((state) => state.shopSingularName);
 
   const handleImagesChange = (imgs: string[]) => {
     setFieldValue("images", imgs);
@@ -26,8 +28,8 @@ export function MediaSection() {
   return (
     <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden">
       <CardHeader className="bg-muted/30 pb-4">
-        <CardTitle className="text-xl">Product Media</CardTitle>
-        <CardDescription>Upload images for your product</CardDescription>
+        <CardTitle className="text-xl">{singularName} Media</CardTitle>
+        <CardDescription>Upload images for your {singularName.toLowerCase()}</CardDescription>
       </CardHeader>
       <CardContent className="pt-6 space-y-6">
         <div className="space-y-2">

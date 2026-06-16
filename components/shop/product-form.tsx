@@ -21,6 +21,7 @@ import { Loader2 } from "lucide-react";
 import { useShopStore } from "@/store/useShopStore";
 import { Label } from "@/components/ui/label";
 import { getCategoryDefaultImage } from "@/lib/shop-utils";
+import { useModuleStore } from "@/store/useModuleStore";
 
 // Validation Schema with Yup
 const productSchema = Yup.object().shape({
@@ -70,6 +71,7 @@ export function ProductForm({
   categories,
   entityName = "My Store",
 }: ProductFormProps) {
+  const singularName = useModuleStore((state) => state.shopSingularName);
   const {
     variants,
     options,
@@ -130,7 +132,7 @@ export function ProductForm({
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Product Details</CardTitle>
+              <CardTitle>{singularName} Details</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
@@ -223,7 +225,7 @@ export function ProductForm({
                 <Textarea
                   id="description"
                   name="description"
-                  placeholder="Describe your product..."
+                  placeholder={`Describe your ${singularName.toLowerCase()}...`}
                   className="min-h-[120px]"
                   value={formik.values.description}
                   onChange={formik.handleChange}
@@ -231,7 +233,7 @@ export function ProductForm({
               </div>
 
               <div className="space-y-2">
-                <Label>Product Image</Label>
+                <Label>{singularName} Image</Label>
                 <ImageUploadWithCrop
                   currentImage={formik.values.image}
                   onImageUpdate={(url) => formik.setFieldValue("image", url)}
@@ -277,7 +279,7 @@ export function ProductForm({
             <CardContent>
               {!hasVariants ? (
                 <div className="text-center py-8 text-muted-foreground text-sm">
-                  This product has no variants.
+                  This {singularName.toLowerCase()} has no variants.
                   <br />
                   Enable variants to add options like Size or Color.
                 </div>
@@ -296,7 +298,7 @@ export function ProductForm({
           className="min-w-[150px]"
         >
           {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {initialData ? "Update Product" : "Create Product"}
+          {initialData ? `Update ${singularName}` : `Create ${singularName}`}
         </Button>
       </div>
     </form>

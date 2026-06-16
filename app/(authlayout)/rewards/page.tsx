@@ -62,8 +62,10 @@ import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { subDays } from "date-fns";
 import { DateRange } from "react-day-picker";
 import { TimeRange } from "@/graphql/actions/rewards";
+import { useModuleStore } from "@/store/useModuleStore";
 
 export default function RewardsDashboard() {
+  const rewardsModuleName = useModuleStore((state) => state.rewardsModuleName);
   const [timeRange, setTimeRange] = React.useState<TimeRange>(
     TimeRange.LAST_7_DAYS,
   );
@@ -272,9 +274,9 @@ export default function RewardsDashboard() {
   return (
     <EcosystemWrapper data-section="rewards-dashboard">
       <EcosystemHeader
-        title="Rewards"
-        description="Inspire engagement with high-value rewards and interactive gamification."
-        badgeText="Rewards Center"
+        title={rewardsModuleName}
+        description={`Inspire engagement with high-value ${rewardsModuleName.toLowerCase()} and interactive gamification.`}
+        badgeText={`${rewardsModuleName} Center`}
         icon={Gift}
       />
 

@@ -6,11 +6,11 @@ import { ReportModule } from "@/graphql/actions";
 import { withModulePermission } from "@/components/hoc/with-module-permission";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 
-function CommunityReportsPage() {
+function OfferReportsPage() {
   return <Reports preselectedModule={ReportModule.OFFER} />;
 }
 
 export default withSubscriptionCheck(
-  withModulePermission(CommunityReportsPage, "OFFERS", "canRead"),
+  withModulePermission(OfferReportsPage, "OFFERS", "canRead"),
   "offers"
 );

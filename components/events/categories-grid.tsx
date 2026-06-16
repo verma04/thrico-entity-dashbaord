@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2, Tag, Mic, Users, Globe, BookOpen, PartyPopper, Briefcase, GraduationCap, Calendar } from "lucide-react";
+import { useModuleStore } from "@/store/useModuleStore";
 
 export const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   conference: <Mic className="h-5 w-5" />,
@@ -39,6 +40,8 @@ interface CategoriesGridProps {
 }
 
 export function CategoriesGrid({ categories, onDeleteCategory }: CategoriesGridProps) {
+  const moduleName = useModuleStore((state) => state.eventModuleName);
+
   if (categories.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 bg-slate-50/50 rounded-xl border border-slate-200 border-dashed m-4">
@@ -78,7 +81,7 @@ export function CategoriesGrid({ categories, onDeleteCategory }: CategoriesGridP
                 <div>
                   <h3 className="font-bold text-lg text-slate-800 group-hover:text-indigo-600 transition-colors">{category.name}</h3>
                   <p className="text-xs font-semibold text-slate-500 mt-1 uppercase tracking-wider">
-                    {category.eventCount} events
+                    {category.eventCount} {moduleName.toLowerCase()}
                   </p>
                 </div>
               </div>

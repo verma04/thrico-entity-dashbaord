@@ -33,7 +33,11 @@ const STATUS_OPTIONS = [
   { value: "REJECTED", label: "Rejected",  icon: Ban,           dot: "bg-rose-500" },
 ];
 
+import { useModuleStore } from "@/store/useModuleStore";
+
 export function MentorsManager() {
+  const moduleName = useModuleStore((state) => state.mentorshipModuleName);
+  const singularName = useModuleStore((state) => state.mentorshipSingularName);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("ALL");
@@ -89,15 +93,15 @@ export function MentorsManager() {
   return (
     <EcosystemWrapper>
       <EcosystemHeader
-        title="Mentorship Program"
+        title={`${moduleName} Program`}
         badgeText="Expert Network"
-        description="Oversee and manage the mentors in your ecosystem, approve applications, and feature top performers."
+        description={`Oversee and manage the ${singularName.toLowerCase()}s in your ecosystem, approve applications, and feature top performers.`}
         icon={GraduationCap}
         actions={
           <Link href="/mentorship/add-mentor">
             <Button className="font-semibold text-xs px-6 h-10 rounded-lg shadow-sm gap-2">
               <Plus className="h-4 w-4" />
-              Onboard Mentor
+              Onboard {singularName}
             </Button>
           </Link>
         }
@@ -109,7 +113,7 @@ export function MentorsManager() {
             <EcosystemActionBar.Search
               value={search}
               onChange={setSearch}
-              placeholder="Search mentors by name..."
+              placeholder={`Search ${singularName.toLowerCase()}s by name...`}
             />
           </EcosystemActionBar.Item>
         </EcosystemActionBar.Group>
@@ -168,7 +172,7 @@ export function MentorsManager() {
 
         <EcosystemActionBar.Group align="right">
           <EcosystemActionBar.Status active={mentors.length > 0}>
-             {mentors.length} Active Mentors
+             {mentors.length} Active {singularName}s
           </EcosystemActionBar.Status>
         </EcosystemActionBar.Group>
       </EcosystemActionBar>

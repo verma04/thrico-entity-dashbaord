@@ -28,13 +28,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Link from "next/link";
 import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { useModuleStore } from "@/store/useModuleStore";
 
 function ListingAnalytics() {
+  const moduleName = useModuleStore((state) => state.listingModuleName);
+  const singularName = useModuleStore((state) => state.listingSingularName);
   const [timeRange, setTimeRange] = useState("month");
   
   // Prepare Mock Data
   const kpis = [
-    { title: "Total Listings", value: "1,024", trend: 12, icon: Store, color: "text-indigo-500", bg: "bg-indigo-500/10" },
+    { title: `Total ${moduleName}`, value: "1,024", trend: 12, icon: Store, color: "text-indigo-500", bg: "bg-indigo-500/10" },
     { title: "Total Users", value: "256", trend: 8, icon: Users, color: "text-emerald-500", bg: "bg-emerald-500/10" },
     { title: "Total Views", value: "125.4k", trend: 24, icon: Eye, color: "text-violet-500", bg: "bg-violet-500/10" },
     { title: "Interactions", value: "8.4k", trend: 5, icon: ThumbsUp, color: "text-amber-500", bg: "bg-amber-500/10" },
@@ -56,9 +59,9 @@ function ListingAnalytics() {
   return (
     <EcosystemWrapper anonymized-1="listing-analytics">
       <EcosystemHeader
-        title="Listing Analytics"
+        title={`${singularName} Analytics`}
         badgeText="Overview"
-        description="Monitor how your community is interacting with listings. Track traffic, engagement, and category distribution."
+        description={`Monitor how your community is interacting with ${moduleName.toLowerCase()}. Track traffic, engagement, and category distribution.`}
         icon={Store}
       />
 
@@ -198,7 +201,7 @@ function ListingAnalytics() {
                   <TableHeader className="bg-muted/30">
                     <TableRow className="hover:bg-transparent border-border">
                       <TableHead className="py-6 px-10 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">User</TableHead>
-                      <TableHead className="text-right py-6 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Listings</TableHead>
+                      <TableHead className="text-right py-6 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">{moduleName}</TableHead>
                       <TableHead className="text-right py-6 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Views</TableHead>
                       <TableHead className="text-right py-6 px-10 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Likes</TableHead>
                     </TableRow>

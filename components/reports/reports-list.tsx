@@ -8,6 +8,7 @@ import { Report } from "./types";
 import Actions from "./Actions";
 import { cn } from "@/lib/utils";
 import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
+import { useModuleStore } from "@/store/useModuleStore";
 
 export default function ReportsList({ 
   data, 
@@ -18,6 +19,8 @@ export default function ReportsList({
   loading?: boolean;
   canEdit?: boolean;
 }) {
+  const moduleName = useModuleStore((state) => state.communityModuleName);
+  
   const columns = [
     {
       key: "reason",
@@ -43,7 +46,7 @@ export default function ReportsList({
       header: "Module",
       cell: (report: Report) => (
         <span className="inline-flex h-4 items-center px-1.5 rounded bg-zinc-100 border border-zinc-200/50 text-[9px] font-medium text-zinc-500 uppercase tracking-widest">
-          {report.module}
+          {report.module === "COMMUNITY" ? moduleName : report.module}
         </span>
       ),
     },

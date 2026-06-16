@@ -10,7 +10,7 @@ import {
   Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { RedemptionsTable } from "@/componentsrewards/redemptions /redemptions-table";
+
 import { useGetRedemptions } from "@/graphql/actions/rewards";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
@@ -21,8 +21,11 @@ import { RotateCw, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 import { cn } from "@/lib/utils";
+import { RedemptionsTable } from "@/components/rewards/redemptions/redemptions-table";
+import { useModuleStore } from "@/store/useModuleStore";
 
 export default function RedemptionsPage() {
+  const rewardsModuleName = useModuleStore((state) => state.rewardsModuleName);
   const { data, loading } = useGetRedemptions();
   const redemptions = data?.getRedemptions || [];
 
@@ -100,7 +103,7 @@ export default function RedemptionsPage() {
       <EcosystemHeader
         title="Redemption History"
         badgeText="Reports"
-        description="A complete log of every reward claimed by your community members."
+        description={`A complete log of every ${rewardsModuleName.toLowerCase()} claimed by your community members.`}
         icon={History}
       />
 

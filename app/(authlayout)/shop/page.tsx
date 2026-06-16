@@ -34,8 +34,11 @@ import { Button } from "@/components/ui/button";
 import { useGetShopStats, TimeRange } from "@/graphql/actions/shop/shop-hooks";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { useModuleStore } from "@/store/useModuleStore";
 
 function ShopDashboardPage() {
+  const moduleName = useModuleStore((state) => state.shopModuleName);
+  const singularName = useModuleStore((state) => state.shopSingularName);
   const [timeRange, setTimeRange] = useState<TimeRange>(TimeRange.LAST_7_DAYS);
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
     from: subDays(new Date(), 7),
@@ -74,7 +77,7 @@ function ShopDashboardPage() {
       bg: "bg-indigo-50",
     },
     {
-      title: "Active Products",
+      title: `Active ${moduleName}`,
       value: loading ? "—" : (stats?.activeProducts?.toLocaleString() ?? "0"),
       trend: stats?.productsChange,
       icon: Package,
@@ -138,7 +141,7 @@ function ShopDashboardPage() {
             <Link href="/shop/all?action=create">
               <Button className="h-9 px-6 rounded-lg bg-zinc-900 border-zinc-800 font-bold text-[10px] uppercase tracking-widest gap-2 shadow-sm hover:bg-black transition-all active:scale-95 group">
                 <Plus className="h-4 w-4 transition-transform group-hover:rotate-90" />
-                Add Product
+                Add {singularName}
               </Button>
             </Link>
           </div>

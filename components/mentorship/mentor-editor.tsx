@@ -60,12 +60,15 @@ const mentorSchema = Yup.object().shape({
   yearsOfExperience: Yup.number().min(0, "Must be 0 or greater"),
 });
 
+import { useModuleStore } from "@/store/useModuleStore";
+
 export const MentorEditor: React.FC<MentorEditorProps> = ({
   mentor,
   open,
   onOpenChange,
   onRefetch,
 }) => {
+  const singularName = useModuleStore((state) => state.mentorshipSingularName);
   const { data: categoriesData } = useGetMentorCategories();
   const [updateMentorGql, { loading: updating }] = useUpdateMentor();
   const { toast: sonnerToast } = useToast();
@@ -105,7 +108,7 @@ export const MentorEditor: React.FC<MentorEditorProps> = ({
           });
           
           sonnerToast({
-            title: "Mentor Updated",
+            title: `${singularName} Updated`,
             description: `"${values.name}" has been synchronized with the registry.`,
           });
           
@@ -140,9 +143,9 @@ export const MentorEditor: React.FC<MentorEditorProps> = ({
     <Sheet open={open} onOpenChange={handleClose}>
       <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto">
         <SheetHeader className="pb-4">
-          <SheetTitle>{mentor ? "Edit Mentor" : "Create New Mentor"}</SheetTitle>
+          <SheetTitle>{mentor ? `Edit ${singularName}` : `Create New ${singularName}`}</SheetTitle>
           <SheetDescription>
-            {mentor ? "Update mentor details." : "Add a new mentor to the platform."}
+            {mentor ? `Update ${singularName.toLowerCase()} details.` : `Add a new ${singularName.toLowerCase()} to the platform.`}
           </SheetDescription>
         </SheetHeader>
 
@@ -333,7 +336,7 @@ export const MentorEditor: React.FC<MentorEditorProps> = ({
               />
               <Label htmlFor="isTopMentor" className="flex items-center gap-2 cursor-pointer font-bold text-xs uppercase tracking-wider text-zinc-600">
                 <TrendingUp className={cn("h-4 w-4", formik.values.isTopMentor ? "text-emerald-500" : "text-zinc-400")} />
-                Elite Tier (Top Mentor)
+                Elite Tier (Top {singularName})
               </Label>
             </div>
           </div>
@@ -348,7 +351,7 @@ export const MentorEditor: React.FC<MentorEditorProps> = ({
               ) : (
                 <Save className="h-4 w-4 mr-2" />
               )}
-              {mentor ? "Sync Updates" : "Onboard Mentor"}
+              {mentor ? "Sync Updates" : `Onboard ${singularName}`}
             </Button>
           </SheetFooter>
         </form>

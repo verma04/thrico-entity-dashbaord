@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/popover";
 import { useShopProducts } from "@/graphql/actions/shop";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useModuleStore } from "@/store/useModuleStore";
 
 interface ProductPickerProps {
   value?: string;
@@ -32,6 +33,7 @@ export function ProductPicker({
   onSelect,
   className,
 }: ProductPickerProps) {
+  const singularName = useModuleStore((state) => state.shopSingularName);
   const [open, setOpen] = React.useState(false);
   const [search, setSearch] = React.useState("");
 
@@ -64,7 +66,7 @@ export function ProductPicker({
               <span className="truncate">{selectedProduct.title}</span>
             </div>
           ) : (
-            "Select product..."
+            `Select ${singularName.toLowerCase()}...`
           )}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
@@ -72,12 +74,12 @@ export function ProductPicker({
       <PopoverContent className="w-[300px] p-0" align="start">
         <Command shouldFilter={false}>
           <CommandInput
-            placeholder="Search products..."
+            placeholder={`Search ${singularName.toLowerCase()}s...`}
             onValueChange={setSearch}
             value={search}
           />
           <CommandList>
-            <CommandEmpty>No product found.</CommandEmpty>
+            <CommandEmpty>No {singularName.toLowerCase()} found.</CommandEmpty>
             <CommandGroup>
               {products
                 .filter((p: any) =>

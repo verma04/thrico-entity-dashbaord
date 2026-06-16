@@ -37,6 +37,7 @@ import {
 import Image from "next/image";
 import { ImageCropper } from "../communities/add/image-cropper";
 import { useToast } from "@/components/ui/use-toast";
+import { useModuleStore } from "@/store/useModuleStore";
 
 interface OfferDialogProps {
   isOpen: boolean;
@@ -71,6 +72,7 @@ export function OfferDialog({
   onSave,
 }: OfferDialogProps) {
   const { toast } = useToast();
+  const singularName = useModuleStore((state) => state.offerSingularName);
   const [imageUrl, setImageUrl] = React.useState<string | null>(
     editingOffer?.image || null,
   );
@@ -140,14 +142,14 @@ export function OfferDialog({
               <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
                 <Tag className="h-4 w-4 text-primary" />
               </div>
-              {editingOffer ? "Edit Offer" : "Create New Offer"}
+              {editingOffer ? `Edit ${singularName}` : `Create New ${singularName}`}
             </DialogTitle>
           </DialogHeader>
 
           <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6 custom-scrollbar">
             <div className="grid grid-cols-2 gap-6">
               <div className="col-span-2 space-y-2">
-                <Label htmlFor="title">Offer Title</Label>
+                <Label htmlFor="title">{singularName} Title</Label>
                 <Input
                   id="title"
                   placeholder="e.g., Summer Special 20% Off"
@@ -164,7 +166,7 @@ export function OfferDialog({
                 <Label htmlFor="description">Description</Label>
                 <Textarea
                   id="description"
-                  placeholder="Describe the offer details..."
+                  placeholder={`Describe the ${singularName.toLowerCase()} details...`}
                   className="min-h-[100px] resize-none"
                   {...formik.getFieldProps("description")}
                 />
@@ -269,7 +271,7 @@ export function OfferDialog({
                         imageUrl ||
                         "https://cdn.thrico.network/defaultEventCover.png"
                       }
-                      alt="Offer cover"
+                      alt={`${singularName} cover`}
                       width={600}
                       height={200}
                       className="object-cover w-full h-full"
@@ -315,7 +317,7 @@ export function OfferDialog({
                 <Label htmlFor="location">Location</Label>
                 <Input
                   id="location"
-                  placeholder="Offer location"
+                  placeholder={`${singularName} location`}
                   {...formik.getFieldProps("location")}
                 />
               </div>
@@ -324,7 +326,7 @@ export function OfferDialog({
                 <Label htmlFor="timeline">Timeline</Label>
                 <Input
                   id="timeline"
-                  placeholder="Offer timeline (e.g. 2 weeks)"
+                  placeholder={`${singularName} timeline (e.g. 2 weeks)`}
                   {...formik.getFieldProps("timeline")}
                 />
               </div>
@@ -372,8 +374,8 @@ export function OfferDialog({
               {isLoading
                 ? "Saving..."
                 : editingOffer
-                  ? "Update Offer"
-                  : "Create Offer"}
+                  ? `Update ${singularName}`
+                  : `Create ${singularName}`}
             </Button>
           </DialogFooter>
         </form>

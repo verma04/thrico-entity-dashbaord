@@ -23,8 +23,10 @@ import {
   Activity,
   Star,
 } from "lucide-react";
+import { useModuleStore } from "@/store/useModuleStore";
 
 export default function ListingManagePage() {
+  const singularName = useModuleStore((state) => state.listingSingularName);
   const pathname = usePathname();
   const id = pathname?.split("/")[2];
 
@@ -50,7 +52,7 @@ export default function ListingManagePage() {
   if (!listing) {
     return (
       <div className="text-center py-20 text-muted-foreground">
-        Listing not found.
+        {singularName} not found.
       </div>
     );
   }
@@ -127,9 +129,9 @@ export default function ListingManagePage() {
       <Card className="border-none shadow-lg shadow-black/[0.03] ring-1 ring-border/40 overflow-hidden">
         <CardHeader className="pb-4">
           <CardTitle className="text-base font-semibold">
-            Listing Overview
+            {singularName} Overview
           </CardTitle>
-          <CardDescription>Details about this marketplace listing</CardDescription>
+          <CardDescription>Details about this marketplace {singularName.toLowerCase()}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">

@@ -43,6 +43,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import Image from "next/image";
 import { ImageCropper } from "@/components/communities/add/image-cropper";
+import { useModuleStore } from "@/store/useModuleStore";
 
 const validationSchema = Yup.object({
   title: Yup.string().required("Title is required"),
@@ -64,6 +65,7 @@ export default function OfferSettingsPage() {
   const id = params?.id as string;
   const router = useRouter();
   const { toast } = useToast();
+  const singularName = useModuleStore((state) => state.offerSingularName);
 
   const { data, loading } = useGetOfferById(id, {
     skip: !id,
@@ -74,7 +76,7 @@ export default function OfferSettingsPage() {
 
   const [changeStatus, { loading: updatingStatus }] = useChangeOfferStatus({
     onCompleted: () => {
-      toast({ title: "Success", description: "Offer status updated." });
+      toast({ title: "Success", description: `${singularName} status updated.` });
     },
     onError: (err: any) => {
       toast({
@@ -89,13 +91,13 @@ export default function OfferSettingsPage() {
     onCompleted: () => {
       toast({
         title: "Success",
-        description: "Offer updated successfully",
+        description: `${singularName} updated successfully`,
       });
     },
     onError: (error: any) => {
       toast({
         title: "Error",
-        description: error.message || "Failed to update offer",
+        description: error.message || `Failed to update ${singularName.toLowerCase()}`,
         variant: "destructive",
       });
     },
@@ -105,7 +107,7 @@ export default function OfferSettingsPage() {
     onCompleted: () => {
       toast({
         title: "Success",
-        description: "Offer verification updated",
+        description: `${singularName} verification updated`,
       });
       setIsVerifyModalOpen(false);
       setVerifyReason("");
@@ -199,7 +201,7 @@ export default function OfferSettingsPage() {
       <div className="flex h-64 items-center justify-center">
         <div className="flex flex-col items-center gap-2 text-muted-foreground">
           <Loader2 className="h-6 w-6 animate-spin" />
-          <p className="text-sm">Loading offer details...</p>
+          <p className="text-sm">Loading {singularName.toLowerCase()} details...</p>
         </div>
       </div>
     );
@@ -284,7 +286,7 @@ export default function OfferSettingsPage() {
                 Status Management
               </CardTitle>
               <CardDescription className="mt-1">
-                Change the current status of this offer.
+                Change the current status of this {singularName.toLowerCase()}.
               </CardDescription>
             </div>
             <div className="flex items-center gap-2">
@@ -341,7 +343,7 @@ export default function OfferSettingsPage() {
                 Verification
               </CardTitle>
               <CardDescription className="mt-1">
-                Manage the verification status of this offer.
+                Manage the verification status of this {singularName.toLowerCase()}.
               </CardDescription>
             </div>
             <div className="flex items-center gap-2">
@@ -376,7 +378,7 @@ export default function OfferSettingsPage() {
                 ) : (
                   <CheckCircle2 className="h-4 w-4" />
                 )}
-                Verify Offer
+                Verify {singularName}
               </button>
             ) : (
               <button
@@ -412,14 +414,14 @@ export default function OfferSettingsPage() {
       {/* Edit Form Container */}
       <div className="rounded-2xl border-none shadow-lg shadow-black/[0.03] ring-1 ring-border/40 bg-card overflow-hidden relative">
         <div className="bg-muted/30 px-6 py-4 border-b border-border/40">
-          <h3 className="font-semibold text-foreground">Edit Offer Details</h3>
-          <p className="text-sm text-muted-foreground">Update the information for this offer.</p>
+          <h3 className="font-semibold text-foreground">Edit {singularName} Details</h3>
+          <p className="text-sm text-muted-foreground">Update the information for this {singularName.toLowerCase()}.</p>
         </div>
         <div className="p-6">
           <form onSubmit={formik.handleSubmit} className="space-y-8">
             <div className="grid grid-cols-2 gap-6">
               <div className="col-span-2 space-y-2">
-                <Label htmlFor="title">Offer Title</Label>
+                <Label htmlFor="title">{singularName} Title</Label>
                 <Input
                   id="title"
                   placeholder="e.g., Summer Special 20% Off"
@@ -436,7 +438,7 @@ export default function OfferSettingsPage() {
                 <Label htmlFor="description">Description</Label>
                 <Textarea
                   id="description"
-                  placeholder="Describe the offer details..."
+                  placeholder={`Describe the ${singularName.toLowerCase()} details...`}
                   className="min-h-[100px] resize-none"
                   {...formik.getFieldProps("description")}
                 />
@@ -580,7 +582,7 @@ export default function OfferSettingsPage() {
                 <Label htmlFor="location">Location</Label>
                 <Input
                   id="location"
-                  placeholder="Offer location"
+                  placeholder={`${singularName} location`}
                   {...formik.getFieldProps("location")}
                 />
               </div>
@@ -589,7 +591,7 @@ export default function OfferSettingsPage() {
                 <Label htmlFor="timeline">Timeline</Label>
                 <Input
                   id="timeline"
-                  placeholder="Offer timeline (e.g. 2 weeks)"
+                  placeholder={`${singularName} timeline (e.g. 2 weeks)`}
                   {...formik.getFieldProps("timeline")}
                 />
               </div>
@@ -665,12 +667,12 @@ export default function OfferSettingsPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {verifyAction === "VERIFY" ? "Verify Offer" : "Remove Verification"}
+              {verifyAction === "VERIFY" ? `Verify ${singularName}` : "Remove Verification"}
             </DialogTitle>
             <DialogDescription>
               {verifyAction === "VERIFY"
-                ? "Confirm verification for this offer. Please provide a reason."
-                : "Are you sure you want to remove verification from this offer?"}
+                ? `Confirm verification for this ${singularName.toLowerCase()}. Please provide a reason.`
+                : `Are you sure you want to remove verification from this ${singularName.toLowerCase()}?`}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">

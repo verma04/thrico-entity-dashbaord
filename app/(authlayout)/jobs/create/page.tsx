@@ -7,8 +7,10 @@ import { useGetEntity } from "@/graphql/actions";
 import { JobCreationForm } from "@/components/jobs/create/job-creation-form";
 import { useToast } from "@/components/ui/use-toast";
 import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { useModuleStore } from "@/store/useModuleStore";
 
 const CreateJobPage = () => {
+  const singularName = useModuleStore((state) => state.jobSingularName);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -16,14 +18,14 @@ const CreateJobPage = () => {
     onCompleted: (data: any) => {
       toast({
         title: "Success",
-        description: "Job created successfully!",
+        description: `${singularName} created successfully!`,
       });
       router.push("/jobs/all");
     },
     onError: (error: any) => {
       toast({
         title: "Error",
-        description: error.message || "Failed to create job",
+        description: error.message || `Failed to create ${singularName.toLowerCase()}`,
         variant: "destructive",
       });
     },

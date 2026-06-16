@@ -10,8 +10,10 @@ import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrappe
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { PointRuleForm } from "@/components/gamification/points-manager/point-rule-form";
+import { useModuleStore } from "@/store/useModuleStore";
 
 export default function CreatePointRulePage() {
+  const gamificationModuleName = useModuleStore((state) => state.gamificationModuleName);
   const router = useRouter();
   const { data: moduleData } = useGetEntityGamificationModules();
   const [createPointRule, { loading: isCreating }] = useCreatePointRule();
@@ -40,14 +42,14 @@ export default function CreatePointRulePage() {
     <EcosystemWrapper>
       <EcosystemHeader
         title="Point Engine"
-        badgeText="Gamification Studio"
+        badgeText={`${gamificationModuleName} Studio`}
         description="Define new rules for how members earn points across your community."
         icon={Zap}
       />
 
       <div className="sticky top-0 z-30 bg-background/95 backdrop-blur border-b px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span>Gamification</span>
+          <span>{gamificationModuleName}</span>
           <ChevronRight className="h-3 w-3" />
           <span>Points</span>
           <ChevronRight className="h-3 w-3" />

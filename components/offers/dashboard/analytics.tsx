@@ -50,7 +50,11 @@ import {
 } from "@/components/ui/select";
 import Link from "next/link";
 
+import { useModuleStore } from "@/store/useModuleStore";
+
 export default function OffersAnalytics() {
+  const moduleName = useModuleStore((state) => state.offerModuleName);
+  const singularName = useModuleStore((state) => state.offerSingularName);
   const [timeRange, setTimeRange] = useState<TimeRange>(TimeRange.LAST_7_DAYS);
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: subDays(new Date(), 7),
@@ -83,7 +87,7 @@ export default function OffersAnalytics() {
 
   const kpis = [
     {
-      title: "Aggregate Offers",
+      title: `Aggregate ${moduleName}`,
       value: loading ? "..." : (stats?.totalOffers?.toLocaleString() ?? "0"),
       trend: stats?.totalOffersChange ?? 0,
       icon: Tag,
@@ -122,8 +126,8 @@ export default function OffersAnalytics() {
   return (
     <EcosystemWrapper anonymized-1="offers-analytics">
       <EcosystemHeader
-        title="Commerce Analytics"
-        description="Monitor offer velocity, claim trends, and customer conversion cycles."
+        title={`${moduleName} Analytics`}
+        description={`Monitor ${singularName.toLowerCase()} velocity, claim trends, and customer conversion cycles.`}
         badgeText="Overview"
         icon={ShoppingBag}
       />

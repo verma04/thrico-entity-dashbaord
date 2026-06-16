@@ -13,8 +13,10 @@ import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-cont
 import { Layout, Sparkles, ArrowLeft, RotateCcw, Search, Globe, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { useModuleStore } from "@/store/useModuleStore";
 
 function SurveyTemplatesPage() {
+  const singularName = useModuleStore((state) => state.surveySingularName);
   const router = useRouter();
 
   return (
@@ -22,7 +24,7 @@ function SurveyTemplatesPage() {
       <EcosystemHeader
         title="Template Gallery"
         badgeText="Research Acceleration"
-        description="Leverage pre-instantiated architectural survey nodes designed for high engagement and quality community insights."
+        description={`Leverage pre-instantiated architectural ${singularName.toLowerCase()} nodes designed for high engagement and quality community insights.`}
         icon={Sparkles}
       />
 

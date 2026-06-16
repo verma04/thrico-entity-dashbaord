@@ -29,6 +29,7 @@ import Vote from "./votes/forum-vote";
 // import Comment from "../forum-comments/forum-comment";
 // import PostComment from "../forum-comments/forum-post-comment";
 import { useGetEntity } from "@/graphql/actions";
+import { useModuleStore } from "@/store/useModuleStore";
 
 const Details = ({
   selectedForum,
@@ -52,6 +53,7 @@ const Details = ({
   ) => void;
 }) => {
   const { data: entity } = useGetEntity();
+  const singularName = useModuleStore((state) => state.forumSingularName);
 
   return (
     <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
@@ -59,9 +61,9 @@ const Details = ({
         <SheetHeader>
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              <SheetTitle>Forum Post Details</SheetTitle>
+              <SheetTitle>{singularName} Post Details</SheetTitle>
               <SheetDescription>
-                View and manage discussion forum post
+                View and manage {singularName.toLowerCase()} post
               </SheetDescription>
             </div>
             <div className="flex items-center gap-2 flex-wrap">

@@ -3,6 +3,7 @@
 import React from "react";
 import { Settings, MessageCircleQuestion, BarChart2 } from "lucide-react";
 import { PlatformSettingsLayout } from "@/components/ui/platform/layout";
+import { useModuleStore } from "@/store/useModuleStore";
 
 const TABS = [
   {
@@ -19,15 +20,17 @@ const TABS = [
   },
 ];
 
-const BREADCRUMB = [
-  { label: "Opinion Framework", href: "/polls" },
-  { label: "Poll Configuration" },
-];
-
 function PollsSettingsLayout({ children }: { children: React.ReactNode }) {
+  const singularName = useModuleStore((state) => state.pollSingularName);
+
+  const BREADCRUMB = [
+    { label: `${singularName} Framework`, href: "/polls" },
+    { label: `${singularName} Configuration` },
+  ];
+
   return (
     <PlatformSettingsLayout
-      title="Opinion Framework"
+      title={`${singularName} Framework`}
       description="Configure public sentiment gathering and automated polling workflows."
       headerIcon={BarChart2}
       tabs={TABS}

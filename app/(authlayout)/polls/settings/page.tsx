@@ -3,33 +3,38 @@
 import { withModulePermission } from "@/components/hoc/with-module-permission";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 
-
 import React from "react";
-import { useEntitySettings, useUpdateEntitySettings } from "@/graphql/actions";
 import { BarChart2, ShieldCheck, Zap } from "lucide-react";
-import { PlatformSettingsPage, SettingsField } from "@/components/ui/platform/settings-page";
+import {
+  PlatformSettingsPage,
+  SettingsField,
+} from "@/components/ui/platform/settings-page";
 import { toast } from "sonner";
-
-const FIELDS: SettingsField[] = [
-  {
-    key: "allowPolls",
-    label: "Allow Poll Creation",
-    description: "Enable or disable the ability for members to create new polling modules.",
-    icon: ShieldCheck,
-    section: "Engagement Controls",
-  },
-  {
-    key: "autoApprovePolls",
-    label: "Auto Approve Polls",
-    description: "Automatically validate and publish new polls without review.",
-    icon: Zap,
-    section: "Automation Protocols",
-  },
-];
+import { useModuleStore } from "@/store/useModuleStore";
+import { useEntitySettings, useUpdateEntitySettings } from "@/graphql/actions";
 
 const PollsSettings = () => {
   const { data, loading } = useEntitySettings();
   const [update, { loading: loadingBtn }] = useUpdateEntitySettings({});
+  const moduleName = useModuleStore((state) => state.pollModuleName);
+  const singularName = useModuleStore((state) => state.pollSingularName);
+
+  const FIELDS: SettingsField[] = [
+    {
+      key: "allowPolls",
+      label: `Allow ${singularName} Creation`,
+      description: `Enable or disable the ability for members to create new ${singularName.toLowerCase()} modules.`,
+      icon: ShieldCheck,
+      section: "Engagement Controls",
+    },
+    {
+      key: "autoApprovePolls",
+      label: `Auto Approve ${moduleName}`,
+      description: `Automatically validate and publish new ${moduleName.toLowerCase()} without review.`,
+      icon: Zap,
+      section: "Automation Protocols",
+    },
+  ];
 
   const handleSave = async (settings: any) => {
     try {
@@ -38,16 +43,16 @@ const PollsSettings = () => {
           input: settings,
         },
       });
-      toast.success("Polls settings updated successfully");
+      toast.success(`${moduleName} settings updated successfully`);
     } catch (error) {
-      toast.error("Failed to update polls configuration");
+      toast.error(`Failed to update ${moduleName.toLowerCase()} configuration`);
       throw error;
     }
   };
 
   return (
     <PlatformSettingsPage
-      title="Opinion Framework"
+      title={`${singularName} Framework`}
       description="Configure public sentiment gathering and automated polling workflows."
       headerIcon={BarChart2}
       badge="Sentiment"
@@ -60,9 +65,7 @@ const PollsSettings = () => {
   );
 };
 
-
-
 export default withSubscriptionCheck(
   withModulePermission(PollsSettings, "POLLS", "canEdit"),
-  "polls"
+  "polls",
 );

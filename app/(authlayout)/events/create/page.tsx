@@ -9,8 +9,10 @@ import { useRouter } from "next/navigation";
 import { useAddEvent } from "@/graphql/actions/events";
 import { EventsCreationForm } from "@/components/events/create/events-creation-form";
 import { useToast } from "@/components/ui/use-toast";
+import { useModuleStore } from "@/store/useModuleStore";
 
 const CreateEventPage = () => {
+  const singularName = useModuleStore((state) => state.eventSingularName);
   const router = useRouter();
   const { toast } = useToast();
   const [cover, setCover] = useState<string>();
@@ -19,14 +21,14 @@ const CreateEventPage = () => {
     onCompleted: (data: any) => {
       toast({
         title: "Success",
-        description: "Event created successfully!",
+        description: `${singularName} created successfully!`,
       });
       router.push("/events/all");
     },
     onError: (error: any) => {
       toast({
         title: "Error",
-        description: error.message || "Failed to create event",
+        description: error.message || `Failed to create ${singularName.toLowerCase()}`,
         variant: "destructive",
       });
     },

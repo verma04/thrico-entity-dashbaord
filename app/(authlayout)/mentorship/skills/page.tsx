@@ -78,9 +78,9 @@ function SkillDialog({
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  editingSkill: MentorSkill | null;
   isLoading: boolean;
   onSave: (values: { title: string }) => void;
+  singularName: string;
 }) {
   const [title, setTitle] = React.useState("");
 
@@ -100,12 +100,12 @@ function SkillDialog({
       <DialogContent className="max-w-md rounded-2xl border-slate-200">
         <DialogHeader>
           <DialogTitle className="font-bold text-slate-800">
-            {editingSkill ? "Edit Skill" : "Add Mentor Skill"}
+            {editingSkill ? "Edit Skill" : `Add ${singularName} Skill`}
           </DialogTitle>
           <DialogDescription className="font-medium text-slate-500">
             {editingSkill
               ? "Update the skill name"
-              : "Create a new skill that mentors can offer"}
+              : `Create a new skill that ${singularName.toLowerCase()}s can offer`}
           </DialogDescription>
         </DialogHeader>
 
@@ -161,6 +161,7 @@ function SkillsGrid({
   isLoading: boolean;
   onEdit: (skill: MentorSkill) => void;
   onDelete: (skill: MentorSkill) => void;
+  singularName: string;
 }) {
   if (isLoading) {
     return (
@@ -265,7 +266,7 @@ function SkillsGrid({
               </div>
 
               <p className="text-sm text-slate-600 font-medium mt-4 line-clamp-2 leading-relaxed">
-                Mentor expertise skill identifier
+                {singularName} expertise skill identifier
               </p>
             </CardContent>
           </Card>
@@ -275,8 +276,11 @@ function SkillsGrid({
   );
 }
 
+import { useModuleStore } from "@/store/useModuleStore";
+
 // ── Main Page ──
 function MentorSkillsPage() {
+  const singularName = useModuleStore((state) => state.mentorshipSingularName);
   const { data, loading, refetch } = useGetMentorSkills();
   const [search, setSearch] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -338,9 +342,9 @@ function MentorSkillsPage() {
   return (
     <EcosystemWrapper>
       <EcosystemHeader
-        title="Mentor Skills"
+        title={`${singularName} Skills`}
         badgeText="Competency"
-        description="Manage the set of skills that mentors can claim and mentees can search for."
+        description={`Manage the set of skills that ${singularName.toLowerCase()}s can claim and mentees can search for.`}
         icon={Wrench}
         actions={
           <Button
@@ -395,6 +399,7 @@ function MentorSkillsPage() {
             setIsDialogOpen(true);
           }}
           onDelete={(skill) => setSkillToDelete(skill)}
+          singularName={singularName}
         />
       </EcosystemContainer>
 
@@ -405,6 +410,7 @@ function MentorSkillsPage() {
         editingSkill={editingSkill}
         isLoading={creating || updating}
         onSave={handleSave}
+        singularName={singularName}
       />
 
       {/* Delete Confirmation */}

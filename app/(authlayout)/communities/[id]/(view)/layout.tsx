@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getCommunityById } from "../../../../../graphql/actions/group";
+import { useModuleStore } from "@/store/useModuleStore";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
@@ -62,6 +63,9 @@ function CommunitiesLayout({
       },
     },
   });
+
+  const moduleName = useModuleStore((state) => state.communityModuleName);
+  const singularName = useModuleStore((state) => state.communitySingularName);
 
   const community = data?.getCommunityById;
 
@@ -111,8 +115,8 @@ function CommunitiesLayout({
                   <div className="flex items-center gap-2.5">
                     <h1 className="text-lg font-semibold tracking-tight">
                       {loading
-                        ? "Loading Community..."
-                        : community?.title || "Community Details"}
+                        ? "Loading..."
+                        : community?.title || `${singularName} Details`}
                     </h1>
                     {loading && (
                       <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
@@ -211,13 +215,13 @@ function CommunitiesLayout({
                   href="/communities/all"
                   className="text-xs font-medium"
                 >
-                  Communities
+                  {moduleName}
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbPage className="text-xs font-medium">
-                  {community?.title || "Community Details"}
+                  {community?.title || `${singularName} Details`}
                 </BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>

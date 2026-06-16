@@ -19,6 +19,7 @@ import Actions from "./poll-actions";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
+import { useModuleStore } from "@/store/useModuleStore";
 
 export default function List({
   data,
@@ -27,11 +28,14 @@ export default function List({
   data: poll[];
   isLoading?: boolean;
 }) {
+  const moduleName = useModuleStore((state) => state.pollModuleName);
+  const singularName = useModuleStore((state) => state.pollSingularName);
+
   const columns = useMemo<AdminTableColumn<poll>[]>(
     () => [
       {
         key: "title",
-        header: "Poll",
+        header: singularName,
         cell: (row) => {
           const poll = row;
           return (
@@ -164,8 +168,8 @@ export default function List({
       loading={isLoading}
       keyExtractor={(poll) => poll.id}
       emptyIcon={BarChart3}
-      emptyTitle="No polls found"
-      emptyDescription="Create a new poll to start gathering feedback."
+      emptyTitle={`No ${moduleName.toLowerCase()} found`}
+      emptyDescription={`Create a new ${singularName.toLowerCase()} to start gathering feedback.`}
     />
   );
 }

@@ -6,8 +6,10 @@ import { useAddListing } from "@/graphql/actions/listing";
 import { ListingCreationForm } from "@/components/listings/listing-creation-form";
 import { useToast } from "@/components/ui/use-toast";
 import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { useModuleStore } from "@/store/useModuleStore";
 
 const CreateListingPage = () => {
+  const singularName = useModuleStore((state) => state.listingSingularName);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -15,14 +17,14 @@ const CreateListingPage = () => {
     onCompleted: (data: any) => {
       toast({
         title: "Success",
-        description: "Listing created successfully!",
+        description: `${singularName} created successfully!`,
       });
       router.push("/listing/all");
     },
     onError: (error: any) => {
       toast({
         title: "Error",
-        description: error.message || "Failed to create listing",
+        description: error.message || `Failed to create ${singularName.toLowerCase()}`,
         variant: "destructive",
       });
     },

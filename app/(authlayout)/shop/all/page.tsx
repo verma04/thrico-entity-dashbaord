@@ -29,8 +29,11 @@ import { toast } from "sonner";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion, AnimatePresence } from "framer-motion";
 import TableLoading from "@/components/layout/table-loading";
+import { useModuleStore } from "@/store/useModuleStore";
 
 function ShopPage() {
+  const moduleName = useModuleStore((state) => state.shopModuleName);
+  const singularName = useModuleStore((state) => state.shopSingularName);
   const [view, setView] = useState<"grid" | "table">("grid");
   const [search, setSearch] = useState("");
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -69,12 +72,12 @@ function ShopPage() {
 
   const [createProduct, { loading: creating }] = useCreateShopProduct({
     onCompleted: () => {
-      toast.success("Product created successfully!");
+      toast.success(`${singularName} created successfully!`);
       setIsSheetOpen(false);
       refetch();
     },
     onError: (err) => {
-      toast.error("Failed to create product: " + err.message);
+      toast.error(`Failed to create ${singularName.toLowerCase()}: ` + err.message);
     },
   });
 
@@ -134,9 +137,9 @@ function ShopPage() {
   return (
     <EcosystemWrapper>
       <EcosystemHeader
-        title="Products"
+        title={moduleName}
         badgeText="Shop Directory"
-        description="Manage your shop products, inventory, and variants."
+        description={`Manage your ${moduleName.toLowerCase()}, inventory, and variants.`}
         icon={ShoppingBag}
         actions={
           <div className="flex items-center gap-2">
@@ -164,7 +167,7 @@ function ShopPage() {
             </Tabs>
             <Button onClick={handleCreate} className="font-semibold text-xs px-6 h-10 rounded-lg shadow-sm gap-2">
               <Plus className="h-4 w-4" />
-              Add Product
+              Add {singularName}
             </Button>
           </div>
         }
@@ -176,7 +179,7 @@ function ShopPage() {
             <EcosystemActionBar.Search
               value={search}
               onChange={setSearch}
-              placeholder="Search products..."
+              placeholder={`Search ${moduleName.toLowerCase()}...`}
             />
           </EcosystemActionBar.Item>
         </EcosystemActionBar.Group>
@@ -193,7 +196,7 @@ function ShopPage() {
 
         <EcosystemActionBar.Group align="right">
           <EcosystemActionBar.Status active={filteredProducts.length > 0}>
-             {filteredProducts.length} Products
+             {filteredProducts.length} {moduleName}
           </EcosystemActionBar.Status>
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
@@ -231,9 +234,9 @@ function ShopPage() {
                       <div className="h-12 w-12 bg-muted rounded-xl flex items-center justify-center mx-auto mb-3 text-muted-foreground/40">
                         <Tag className="h-6 w-6" />
                       </div>
-                      <p className="text-sm font-semibold text-foreground">No products found</p>
+                      <p className="text-sm font-semibold text-foreground">No {moduleName.toLowerCase()} found</p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        Try adjusting your search or filters, or create a new product.
+                        Try adjusting your search or filters, or create a new {singularName.toLowerCase()}.
                       </p>
                     </div>
                   )}

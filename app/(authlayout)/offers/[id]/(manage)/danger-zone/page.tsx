@@ -21,8 +21,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { AlertTriangle, Loader2, Trash2 } from "lucide-react";
+import { useModuleStore } from "@/store/useModuleStore";
 
 export default function OfferDangerZonePage() {
+  const singularName = useModuleStore((state) => state.offerSingularName);
   const params = useParams();
   const id = params?.id as string;
   const router = useRouter();
@@ -40,14 +42,14 @@ export default function OfferDangerZonePage() {
     onCompleted: () => {
       toast({
         title: "Success",
-        description: "Offer deleted successfully",
+        description: `${singularName} deleted successfully`,
       });
       router.push("/offers/all");
     },
     onError: (error: any) => {
       toast({
         title: "Error",
-        description: error.message || "Failed to delete offer",
+        description: error.message || `Failed to delete ${singularName.toLowerCase()}`,
         variant: "destructive",
       });
       setIsDeleteDialogOpen(false);
@@ -77,7 +79,7 @@ export default function OfferDangerZonePage() {
             <div>
               <CardTitle className="text-destructive text-lg">Danger Zone</CardTitle>
               <CardDescription className="mt-1">
-                Irreversible and destructive actions for this offer.
+                Irreversible and destructive actions for this {singularName.toLowerCase()}.
               </CardDescription>
             </div>
           </div>
@@ -85,9 +87,9 @@ export default function OfferDangerZonePage() {
         <CardContent>
           <div className="flex items-center justify-between p-4 rounded-xl border border-destructive/20 bg-card">
             <div>
-              <h4 className="font-semibold text-foreground">Delete Offer</h4>
+              <h4 className="font-semibold text-foreground">Delete {singularName}</h4>
               <p className="text-sm text-muted-foreground mt-1">
-                Once you delete an offer, there is no going back. Please be certain.
+                Once you delete an {singularName.toLowerCase()}, there is no going back. Please be certain.
               </p>
             </div>
             <Button
@@ -96,7 +98,7 @@ export default function OfferDangerZonePage() {
               className="ml-4 whitespace-nowrap"
             >
               <Trash2 className="h-4 w-4 mr-2" />
-              Delete Offer
+              Delete {singularName}
             </Button>
           </div>
         </CardContent>
@@ -110,7 +112,7 @@ export default function OfferDangerZonePage() {
               Confirm Deletion
             </DialogTitle>
             <DialogDescription className="pt-2">
-              Are you sure you want to permanently delete the offer{" "}
+              Are you sure you want to permanently delete the {singularName.toLowerCase()}{" "}
               <span className="font-semibold text-foreground">
                 "{offer?.title}"
               </span>
@@ -136,7 +138,7 @@ export default function OfferDangerZonePage() {
                   Deleting...
                 </>
               ) : (
-                "Yes, delete offer"
+                "Yes, delete " + singularName.toLowerCase()
               )}
             </Button>
           </DialogFooter>

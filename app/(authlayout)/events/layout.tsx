@@ -4,12 +4,20 @@ import * as React from "react";
 import { List, Tag, Plus } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+import { useGetModuleCustomName } from "@/graphql/actions";
+import { useModuleStore } from "@/store/useModuleStore";
 
 function EventsLayout({ children }: { children: React.ReactNode }) {
+  const setEventModuleName = useModuleStore((state) => state.setEventModuleName);
+  useGetModuleCustomName("events", setEventModuleName);
+
+  const moduleName = useModuleStore((state) => state.eventModuleName);
+  const singularName = useModuleStore((state) => state.eventSingularName);
+
   const items = [
     {
       key: "all",
-      label: "All Events",
+      label: `All ${moduleName}`,
       icon: <List className="h-4 w-4" />,
     },
     {
@@ -19,7 +27,7 @@ function EventsLayout({ children }: { children: React.ReactNode }) {
     },
     {
       key: "create",
-      label: "Create Event",
+      label: `Create ${singularName}`,
       icon: <Plus className="h-4 w-4" />,
     },
   ];

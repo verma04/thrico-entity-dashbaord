@@ -49,6 +49,7 @@ import { CommunityPreview } from "./community-preview";
 import { ImageCropper } from "./image-cropper";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { cn } from "@/lib/utils";
+import { useModuleStore } from "@/store/useModuleStore";
 
 export function CommunityCreationForm({
   initialValues,
@@ -64,14 +65,17 @@ export function CommunityCreationForm({
   const [cropModalVisible, setCropModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
+  const moduleName = useModuleStore((state) => state.communityModuleName);
+  const singularName = useModuleStore((state) => state.communitySingularName);
+
   const communitySchema = Yup.object({
     title: Yup.string()
-      .required("Community name is required")
+      .required(`${singularName} name is required`)
       .max(50, "Max 50 characters"),
     tagline: Yup.string().max(100, "Max 100 characters"),
     description: Yup.string().max(300, "Max 300 characters"),
     privacy: Yup.string().required("Privacy setting is required"),
-    communityType: Yup.string().required("Community type is required"),
+    communityType: Yup.string().required(`${singularName} type is required`),
     joiningTerms: Yup.string().required("Joining terms are required"),
   });
 
@@ -139,13 +143,13 @@ export function CommunityCreationForm({
                   <Users className="h-5 w-5 text-primary" />
                 </div>
                 <h1 className="text-2xl font-bold tracking-tight">
-                  {initialValues?.title ? "Edit Community" : "Create Community"}
+                  {initialValues?.title ? `Edit ${singularName}` : `Create ${singularName}`}
                 </h1>
               </div>
               <div className="flex items-center gap-2 text-xs text-muted-foreground ml-1">
-                <span>Communities</span>
+                <span>{moduleName}</span>
                 <ChevronRight className="h-3 w-3" />
-                <span>{initialValues?.title ? "Edit Details" : "Create New Community"}</span>
+                <span>{initialValues?.title ? "Edit Details" : `Create New ${singularName}`}</span>
               </div>
             </div>
             </div>
@@ -164,7 +168,7 @@ export function CommunityCreationForm({
                         Basic Information
                       </CardTitle>
                       <CardDescription>
-                        Core details about your community
+                        Core details about your {singularName.toLowerCase()}
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="pt-6 space-y-6">
@@ -178,7 +182,7 @@ export function CommunityCreationForm({
                                 imageUrl ||
                                 "https://cdn.thrico.network/default_communities.png"
                               }
-                              alt="Community cover"
+                              alt={`${singularName} cover`}
                               width={1536}
                               height={1024}
                               className="object-cover w-full h-full"
@@ -220,7 +224,7 @@ export function CommunityCreationForm({
                         <Input
                           id="title"
                           name="title"
-                          placeholder="Enter community name"
+                          placeholder={`Enter ${singularName.toLowerCase()} name`}
                           maxLength={50}
                           value={formik.values.title || ""}
                           onChange={formik.handleChange}
@@ -233,7 +237,7 @@ export function CommunityCreationForm({
                           </p>
                         )}
                         <p className="text-xs text-muted-foreground">
-                          This will be the main name of your community.
+                          This will be the main name of your {singularName.toLowerCase()}.
                         </p>
                       </div>
 
@@ -254,7 +258,7 @@ export function CommunityCreationForm({
                               <TooltipContent>
                                 <p>
                                   A short, catchy headline that appears below
-                                  your community name.
+                                  your {singularName.toLowerCase()} name.
                                 </p>
                               </TooltipContent>
                             </Tooltip>
@@ -263,7 +267,7 @@ export function CommunityCreationForm({
                         <Input
                           id="tagline"
                           name="tagline"
-                          placeholder="Enter a catchy headline for your community"
+                          placeholder={`Enter a catchy headline for your ${singularName.toLowerCase()}`}
                           maxLength={100}
                           value={formik.values.tagline || ""}
                           onChange={formik.handleChange}
@@ -275,7 +279,7 @@ export function CommunityCreationForm({
                           </p>
                         )}
                         <p className="text-xs text-muted-foreground">
-                          A brief tagline that describes your community's
+                          A brief tagline that describes your {singularName.toLowerCase()}'s
                           purpose.
                         </p>
                       </div>
@@ -291,7 +295,7 @@ export function CommunityCreationForm({
                         <Textarea
                           id="description"
                           name="description"
-                          placeholder="Describe what your community is about"
+                          placeholder={`Describe what your ${singularName.toLowerCase()} is about`}
                           maxLength={300}
                           rows={4}
                           className="resize-none"
@@ -306,7 +310,7 @@ export function CommunityCreationForm({
                             </p>
                           )}
                         <p className="text-xs text-muted-foreground">
-                          Tell potential members what your community is about
+                          Tell potential members what your {singularName.toLowerCase()} is about
                           and why they should join.
                         </p>
                       </div>
@@ -317,7 +321,7 @@ export function CommunityCreationForm({
                   <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden">
                     <CardHeader className="bg-muted/30 pb-4">
                       <CardTitle className="text-xl">
-                        Community Settings
+                        {singularName} Settings
                       </CardTitle>
                       <CardDescription>
                         Configure privacy, type, and joining requirements
@@ -353,7 +357,7 @@ export function CommunityCreationForm({
                                 <span className="font-medium">Public</span>
                               </div>
                               <p className="text-sm text-muted-foreground">
-                                Anyone can see and join this community
+                                Anyone can see and join this {singularName.toLowerCase()}
                               </p>
                             </Label>
                           </div>
@@ -389,7 +393,7 @@ export function CommunityCreationForm({
                             <Laptop className="h-4 w-4 text-primary" />
                           </div>
                           <Label className="text-base font-semibold">
-                            Community Type{" "}
+                            {singularName} Type{" "}
                             <span className="text-destructive">*</span>
                           </Label>
                         </div>
@@ -411,7 +415,7 @@ export function CommunityCreationForm({
                                 <span className="font-medium">Virtual</span>
                               </div>
                               <p className="text-sm text-muted-foreground">
-                                Online-only community
+                                Online-only {singularName.toLowerCase()}
                               </p>
                             </Label>
                           </div>
@@ -487,7 +491,7 @@ export function CommunityCreationForm({
                                 Anyone Can Join
                               </div>
                               <p className="text-sm text-muted-foreground">
-                                Anyone can join this community directly
+                                Anyone can join this {singularName.toLowerCase()} directly
                               </p>
                             </Label>
                           </div>
@@ -504,7 +508,7 @@ export function CommunityCreationForm({
                                 Admin Only Add
                               </div>
                               <p className="text-sm text-muted-foreground">
-                                Only admins can add members to this community
+                                Only admins can add members to this {singularName.toLowerCase()}
                               </p>
                             </Label>
                           </div>
@@ -526,7 +530,7 @@ export function CommunityCreationForm({
                         Additional Settings
                       </CardTitle>
                       <CardDescription>
-                        Optional features to enhance your community
+                        Optional features to enhance your {singularName.toLowerCase()}
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="pt-6 space-y-4">
@@ -564,7 +568,7 @@ export function CommunityCreationForm({
                             Allow members to invite others
                           </Label>
                           <p className="text-sm text-muted-foreground">
-                            Members can invite friends to join the community
+                            Members can invite friends to join the {singularName.toLowerCase()}
                           </p>
                         </div>
                         <Switch
@@ -582,11 +586,11 @@ export function CommunityCreationForm({
                             htmlFor="events"
                             className="text-sm font-medium"
                           >
-                            Enable community events
+                            Enable {singularName.toLowerCase()} events
                           </Label>
                           <p className="text-sm text-muted-foreground">
                             Allow creating and managing events within the
-                            community
+                            {singularName.toLowerCase()}
                           </p>
                         </div>
                         <Switch
@@ -604,10 +608,10 @@ export function CommunityCreationForm({
                             htmlFor="ratings"
                             className="text-sm font-medium"
                           >
-                            Enable community ratings and reviews
+                            Enable {singularName.toLowerCase()} ratings and reviews
                           </Label>
                           <p className="text-sm text-muted-foreground">
-                            Allow members to rate and review community content
+                            Allow members to rate and review {singularName.toLowerCase()} content
                           </p>
                         </div>
                         <Switch
@@ -630,7 +634,7 @@ export function CommunityCreationForm({
               <div className="lg:col-span-4">
                 <div className="sticky top-6 space-y-6">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-bold">Community Preview</h3>
+                    <h3 className="text-lg font-bold">{singularName} Preview</h3>
                     <Badge
                       variant="outline"
                       className="bg-green-500/5 text-green-600 border-green-500/20"
@@ -657,7 +661,7 @@ export function CommunityCreationForm({
                           <span className="text-primary font-bold">•</span>
                           <span>
                             Choose a clear, descriptive name that reflects your
-                            community's purpose
+                            {singularName.toLowerCase()}'s purpose
                           </span>
                         </li>
                         <li className="flex gap-2">
@@ -670,7 +674,7 @@ export function CommunityCreationForm({
                           <span className="text-primary font-bold">•</span>
                           <span>
                             Upload a high-quality cover image that represents
-                            your community
+                            your {singularName.toLowerCase()}
                           </span>
                         </li>
                         <li className="flex gap-2">
@@ -684,7 +688,7 @@ export function CommunityCreationForm({
                           <span className="text-primary font-bold">•</span>
                           <span>
                             Consider your privacy settings carefully based on
-                            your community goals
+                            your {singularName.toLowerCase()} goals
                           </span>
                         </li>
                       </ul>
@@ -720,9 +724,9 @@ export function CommunityCreationForm({
           if (onCancel) onCancel();
           else window.history.back();
         }}
-        title="Unsaved Community Data"
+        title={`Unsaved ${singularName} Data`}
         description="You have unfilled form data."
-        buttonText={initialValues?.title ? "Save Changes" : "Create Community"}
+        buttonText={initialValues?.title ? "Save Changes" : `Create ${singularName}`}
       />
       </>
     </FormikProvider>

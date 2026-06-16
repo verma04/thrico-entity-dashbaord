@@ -16,6 +16,7 @@ import {
   UPDATE_USER_PROFILE,
   GET_MY_OTHER_ACCOUNTS,
   SWITCH_TO_OTHER_ACCOUNT,
+  GET_MODULE_CUSTOM_NAME,
 } from "../quries";
 import { GET_MEMBERS_TERMS_AND_CONDITIONS } from "../quries/user";
 export * from "./membership/membership-queries";
@@ -177,8 +178,12 @@ export interface SubscriptionDetails {
     showInMobileNavigation: boolean;
     showInMobileNavigationSortNumber?: number;
     showInWebNavigation: boolean;
+    showInWebNavigationSortNumber?: number;
     enabled: boolean;
     isPopular: boolean;
+    customName?: string | null;
+    isPublicFacing?: boolean;
+    canRename?: boolean;
   }[];
 }
 export interface CheckEntitySubscriptionQuery {
@@ -215,7 +220,9 @@ export interface InputUpdateEntityModule {
   showInMobileNavigation: boolean;
   showInMobileNavigationSortNumber?: number;
   showInWebNavigation: boolean;
+  showInWebNavigationSortNumber?: number;
   isPopular: boolean;
+  customName?: string | null;
 }
 
 export interface UpdateEntityModuleResponse {
@@ -309,3 +316,8 @@ export * from "./contacts";
 export * from "./theme";
 export * from "./mcp";
 
+export const useGetModuleCustomName = (id: string) =>
+  useQuery(GET_MODULE_CUSTOM_NAME, {
+    variables: { id },
+    skip: !id,
+  });

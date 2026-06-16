@@ -44,6 +44,7 @@ import { SkillsAutocomplete } from "./skills-auto-complete";
 import GooglePlacesInput from "@/components/layout/google-place-input";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { cn } from "@/lib/utils";
+import { useModuleStore } from "@/store/useModuleStore";
 
 interface ListingCreationFormProps {
   initialValues?: Record<string, any>;
@@ -79,6 +80,9 @@ export function JobCreationForm({
   onFinish,
   onCancel,
 }: ListingCreationFormProps) {
+  const moduleName = useModuleStore((state) => state.jobModuleName);
+  const singularName = useModuleStore((state) => state.jobSingularName);
+
   const formik = useFormik({
     initialValues: {
       title: initialValues?.title || "",
@@ -237,11 +241,11 @@ export function JobCreationForm({
                 <Briefcase className="h-5 w-5 text-primary" />
               </div>
               <h1 className="text-2xl font-bold tracking-tight">
-                {initialValues?.title ? "Edit Job Posting" : "Create Job Posting"}
+                {initialValues?.title ? `Edit ${singularName} Posting` : `Create ${singularName} Posting`}
               </h1>
             </div>
             <div className="flex items-center gap-2 text-xs text-muted-foreground ml-1">
-              <span>Jobs</span>
+              <span>{moduleName}</span>
               <ChevronRight className="h-3 w-3" />
               <span>
                 {initialValues?.title ? "Edit Listing" : "Create New Listing"}
@@ -269,7 +273,7 @@ export function JobCreationForm({
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <Label htmlFor="title" className="text-sm font-medium">
-                          Job Title <span className="text-destructive">*</span>
+                          {singularName} Title <span className="text-destructive">*</span>
                         </Label>
                         <JobTitleAutocomplete
                           value={formik.values.title}
@@ -388,7 +392,7 @@ export function JobCreationForm({
                           htmlFor="jobType"
                           className="text-sm font-medium"
                         >
-                          Job Type <span className="text-destructive">*</span>
+                          {singularName} Type <span className="text-destructive">*</span>
                         </Label>
                         <Select
                           onValueChange={(value) =>
@@ -623,7 +627,7 @@ export function JobCreationForm({
                       </div>
                       <div>
                         <h4 className="font-bold text-lg leading-tight">
-                          {formik.values.title || "Job Position Title"}
+                          {formik.values.title || `${singularName} Position Title`}
                         </h4>
                         <p className="text-muted-foreground text-sm flex items-center gap-1 mt-1">
                           {formik.values.company?.name || "Company Name"}
@@ -709,7 +713,7 @@ export function JobCreationForm({
                     <Plus className="h-3 w-3 text-primary" />
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Make sure your job description includes key performance
+                    Make sure your {singularName.toLowerCase()} description includes key performance
                     indicators and growth opportunities to attract the best
                     talent.
                   </p>
@@ -730,9 +734,9 @@ export function JobCreationForm({
           if (onCancel) onCancel();
           else window.history.back();
         }}
-        title="Unsaved Job Posting"
+        title={`Unsaved ${singularName} Posting`}
         description="You have unfilled form data."
-        buttonText="Publish Job"
+        buttonText={`Publish ${singularName}`}
       />
     </div>
   );

@@ -16,8 +16,10 @@ import { Separator } from "@/components/ui/separator";
 import { Loader2, Settings2, CheckCircle, PauseCircle, Ban } from "lucide-react";
 import { JobCreationForm } from "@/components/jobs/create/job-creation-form";
 import { cn } from "@/lib/utils";
+import { useModuleStore } from "@/store/useModuleStore";
 
 export default function JobSettingsPage() {
+  const singularName = useModuleStore((state) => state.jobSingularName);
   const params = useParams();
   const id = params?.id as string;
   const router = useRouter();
@@ -30,7 +32,7 @@ export default function JobSettingsPage() {
 
   const [changeStatus, { loading: updatingStatus }] = useChangeJobStatus({
     onCompleted: () => {
-      toast({ title: "Success", description: "Job status updated." });
+      toast({ title: "Success", description: `${singularName} status updated.` });
     },
     onError: (err: any) => {
       toast({
@@ -45,13 +47,13 @@ export default function JobSettingsPage() {
     onCompleted: () => {
       toast({
         title: "Success",
-        description: "Job updated successfully",
+        description: `${singularName} updated successfully`,
       });
     },
     onError: (error: any) => {
       toast({
         title: "Error",
-        description: error.message || "Failed to update job",
+        description: error.message || `Failed to update ${singularName.toLowerCase()}`,
         variant: "destructive",
       });
     },
@@ -64,7 +66,7 @@ export default function JobSettingsPage() {
       <div className="flex h-64 items-center justify-center">
         <div className="flex flex-col items-center gap-2 text-muted-foreground">
           <Loader2 className="h-6 w-6 animate-spin" />
-          <p className="text-sm">Loading job details...</p>
+          <p className="text-sm">Loading {singularName.toLowerCase()} details...</p>
         </div>
       </div>
     );
@@ -125,7 +127,7 @@ export default function JobSettingsPage() {
                 Status Management
               </CardTitle>
               <CardDescription className="mt-1">
-                Change the current publication status of this job.
+                Change the current publication status of this {singularName.toLowerCase()}.
               </CardDescription>
             </div>
             <div className="flex items-center gap-2">
@@ -173,8 +175,8 @@ export default function JobSettingsPage() {
       {/* Edit Form Container */}
       <div className="rounded-2xl border-none shadow-lg shadow-black/[0.03] ring-1 ring-border/40 bg-card overflow-hidden relative">
         <div className="bg-muted/30 px-6 py-4 border-b border-border/40">
-          <h3 className="font-semibold text-foreground">Edit Job Details</h3>
-          <p className="text-sm text-muted-foreground">Update the information for this job listing.</p>
+          <h3 className="font-semibold text-foreground">Edit {singularName} Details</h3>
+          <p className="text-sm text-muted-foreground">Update the information for this {singularName.toLowerCase()} listing.</p>
         </div>
         <div className="p-6">
           <JobCreationForm

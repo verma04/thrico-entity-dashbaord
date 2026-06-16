@@ -38,10 +38,11 @@ import {
 } from "../../graphql/actions/jobs";
 import { getModalDescription, getModalTitle } from "./utils";
 import Details from "./details";
-
 import ApplicantsDrawer from "./applicants-drawer";
+import { useModuleStore } from "@/store/useModuleStore";
 
 const Actions = (record: Job) => {
+  const singularName = useModuleStore((state) => state.jobSingularName);
   const [isAuditModalOpen, setIsAuditModalOpen] = useState(false);
   const [isAnalytics, setIsAnalytics] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -179,11 +180,11 @@ const Actions = (record: Job) => {
             <>
               <DropdownMenuItem onClick={() => handleAction("APPROVE", record)}>
                 <CheckCircle className="mr-2 h-4 w-4 text-green-600" />
-                Approve Job
+                Approve {singularName}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleAction("REJECT", record)}>
                 <ThumbsDown className="mr-2 h-4 w-4 text-purple-600" />
-                Reject Job
+                Reject {singularName}
               </DropdownMenuItem>
             </>
           )}
@@ -191,7 +192,7 @@ const Actions = (record: Job) => {
           {record?.status === "REJECTED" && (
             <DropdownMenuItem onClick={() => handleAction("REAPPROVE", record)}>
               <Undo className="mr-2 h-4 w-4" />
-              Re-approve Job
+              Re-approve {singularName}
             </DropdownMenuItem>
           )}
 
@@ -199,7 +200,7 @@ const Actions = (record: Job) => {
             <>
               <DropdownMenuItem onClick={() => handleAction("DISABLE", record)}>
                 <XCircle className="mr-2 h-4 w-4 text-amber-600" />
-                Disable Job
+                Disable {singularName}
               </DropdownMenuItem>
             </>
           )}
@@ -207,7 +208,7 @@ const Actions = (record: Job) => {
           {record?.status === "DISABLED" && (
             <DropdownMenuItem onClick={() => handleAction("ENABLE", record)}>
               <CheckCircle className="mr-2 h-4 w-4 text-green-600" />
-              Enable Job
+              Enable {singularName}
             </DropdownMenuItem>
           )}
         </DropdownMenuContent>
@@ -216,9 +217,9 @@ const Actions = (record: Job) => {
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{getModalTitle(dialogAction)}</DialogTitle>
+            <DialogTitle>{getModalTitle(singularName, dialogAction)}</DialogTitle>
             <DialogDescription>
-              {getModalDescription(dialogAction)}
+              {getModalDescription(singularName, dialogAction)}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -252,14 +253,14 @@ const Actions = (record: Job) => {
                 verifyBtn
               }
             >
-              {dialogAction === "APPROVE" && "Approve Job"}
-              {dialogAction === "DISABLE" && "Disable Job"}
-              {dialogAction === "ENABLE" && "Enable Job"}
-              {dialogAction === "REJECT" && "Reject Job"}
-              {dialogAction === "VERIFY" && "Verify Job"}
+              {dialogAction === "APPROVE" && `Approve ${singularName}`}
+              {dialogAction === "DISABLE" && `Disable ${singularName}`}
+              {dialogAction === "ENABLE" && `Enable ${singularName}`}
+              {dialogAction === "REJECT" && `Reject ${singularName}`}
+              {dialogAction === "VERIFY" && `Verify ${singularName}`}
               {dialogAction === "UNVERIFY" && "Remove Verification"}
-              {dialogAction === "REAPPROVE" && "Re-approve Job"}
-              {dialogAction === "PAUSE" && "Pause Job"}
+              {dialogAction === "REAPPROVE" && `Re-approve ${singularName}`}
+              {dialogAction === "PAUSE" && `Pause ${singularName}`}
             </Button>
           </DialogFooter>
         </DialogContent>

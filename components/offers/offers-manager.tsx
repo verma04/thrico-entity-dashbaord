@@ -29,7 +29,11 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion, AnimatePresence } from "framer-motion";
 import TableLoading from "@/components/layout/table-loading";
 
+import { useModuleStore } from "@/store/useModuleStore";
+
 export function OffersManager() {
+  const moduleName = useModuleStore((state) => state.offerModuleName);
+  const singularName = useModuleStore((state) => state.offerSingularName);
   const [view, setView] = useState<"grid" | "table">("table");
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
@@ -53,7 +57,7 @@ export function OffersManager() {
   // Mutations
   const [createOffer, { loading: isCreating }] = useCreateOffer({
     onCompleted: () => {
-      toast.success("Offer created successfully");
+      toast.success(`${singularName} created successfully`);
       setIsDialogOpen(false);
       refetchOffers();
     },
@@ -62,7 +66,7 @@ export function OffersManager() {
 
   const [updateOffer, { loading: isUpdating }] = useUpdateOffer({
     onCompleted: () => {
-      toast.success("Offer updated successfully");
+      toast.success(`${singularName} updated successfully`);
       setIsDialogOpen(false);
       setEditingOffer(null);
       refetchOffers();
@@ -81,9 +85,9 @@ export function OffersManager() {
   return (
     <EcosystemWrapper>
       <EcosystemHeader
-        title="All Offers"
+        title={`All ${moduleName}`}
         badgeText="Marketing & Discounts"
-        description="Manage all active and inactive offers across the platform."
+        description={`Manage all active and inactive ${moduleName.toLowerCase()} across the platform.`}
         icon={Tag}
         actions={
           <div className="flex items-center gap-2">
@@ -118,7 +122,7 @@ export function OffersManager() {
               className="font-semibold text-xs px-6 h-10 rounded-lg shadow-sm gap-2"
             >
               <Plus className="h-4 w-4" />
-              Create Offer
+              Create {singularName}
             </Button>
           </div>
         }
@@ -130,7 +134,7 @@ export function OffersManager() {
             <EcosystemActionBar.Search
               value={search}
               onChange={setSearch}
-              placeholder="Search offers..."
+              placeholder={`Search ${moduleName.toLowerCase()}...`}
             />
           </EcosystemActionBar.Item>
         </EcosystemActionBar.Group>
@@ -206,7 +210,7 @@ export function OffersManager() {
 
         <EcosystemActionBar.Group align="right">
           <EcosystemActionBar.Status active={offers.length > 0}>
-            {offers.length} Offers
+            {offers.length} {moduleName}
           </EcosystemActionBar.Status>
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
@@ -246,11 +250,11 @@ export function OffersManager() {
                         <Tag className="h-6 w-6" />
                       </div>
                       <p className="text-sm font-semibold text-foreground">
-                        No offers found
+                        No {moduleName.toLowerCase()} found
                       </p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        Try adjusting your search or filters, or create a new
-                        offer.
+                        Try adjusting your search or filters, or create a new{" "}
+                        {singularName.toLowerCase()}.
                       </p>
                     </div>
                   )}

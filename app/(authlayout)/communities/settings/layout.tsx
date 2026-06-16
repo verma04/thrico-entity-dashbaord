@@ -3,6 +3,7 @@
 import React from "react";
 import { Settings, MessageCircleQuestion, Users, Globe } from "lucide-react";
 import { PlatformSettingsLayout } from "@/components/ui/platform/layout";
+import { useModuleStore } from "@/store/useModuleStore";
 
 const TABS = [
   {
@@ -19,16 +20,19 @@ const TABS = [
   },
 ];
 
-const BREADCRUMB = [
-  { label: "Community Ecosystem", href: "/communities" },
-  { label: "Global Settings" },
-];
-
 function CommunitySettingsLayout({ children }: { children: React.ReactNode }) {
+  const moduleName = useModuleStore((state) => state.communityModuleName);
+  const singularName = useModuleStore((state) => state.communitySingularName);
+
+  const BREADCRUMB = [
+    { label: `${singularName} Ecosystem`, href: "/communities" },
+    { label: "Global Settings" },
+  ];
+
   return (
     <PlatformSettingsLayout
-      title="Community Governance"
-      description="Define the underlying frameworks and automated systems for your community network."
+      title={`${singularName} Governance`}
+      description={`Define the underlying frameworks and automated systems for your ${moduleName.toLowerCase()} network.`}
       headerIcon={Users}
       tabs={TABS}
       breadcrumb={BREADCRUMB}

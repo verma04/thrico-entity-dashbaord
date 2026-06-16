@@ -17,8 +17,11 @@ import { MomentCard } from "@/components/moments/moment-card";
 import { MomentPreviewDialog } from "@/components/moments/moment-preview-dialog";
 import { MomentsEmptyState } from "@/components/moments/moments-empty-state";
 import { MomentsLoadingState } from "@/components/moments/moments-loading-state";
+import { useModuleStore } from "@/store/useModuleStore";
 
 function MomentsListPage() {
+  const moduleName = useModuleStore((state) => state.momentModuleName);
+  const singularName = useModuleStore((state) => state.momentSingularName);
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get("q") || "";
   const [selectedMoment, setSelectedMoment] = useState<Moment | null>(null);
@@ -51,10 +54,10 @@ function MomentsListPage() {
         variables: { adminDeleteMomentId: id },
       });
       if (data?.adminDeleteMoment) {
-        toast.success("Moment deleted successfully");
+        toast.success(`${singularName} deleted successfully`);
         refetchMoments();
       } else {
-        toast.error("Failed to delete moment");
+        toast.error(`Failed to delete ${singularName.toLowerCase()}`);
       }
     } catch (err: any) {
       toast.error(err.message || "An error occurred while deleting");
@@ -64,7 +67,7 @@ function MomentsListPage() {
   if (momentsError) {
     return (
       <div className="p-8 bg-destructive/5 border border-destructive/20 rounded-3xl text-center">
-        <p className="text-destructive font-bold">Failed to load moments</p>
+        <p className="text-destructive font-bold">Failed to load {moduleName.toLowerCase()}</p>
         <p className="text-xs text-muted-foreground mt-1">
           {momentsError.message}
         </p>

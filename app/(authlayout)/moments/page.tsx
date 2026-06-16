@@ -55,8 +55,11 @@ import {
 } from "recharts";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { useModuleStore } from "@/store/useModuleStore";
 
 function MomentsDashboardPage() {
+  const moduleName = useModuleStore((state) => state.momentModuleName);
+  const singularName = useModuleStore((state) => state.momentSingularName);
   const [timeRange, setTimeRange] = React.useState<TimeRange>(
     TimeRange.LAST_30_DAYS,
   );
@@ -115,7 +118,7 @@ function MomentsDashboardPage() {
 
   const kpis = [
     {
-      title: "Total Moments",
+      title: `Total ${moduleName}`,
       value: stats?.totalMoments ?? 0,
       icon: Video,
       color: "text-indigo-500",
@@ -156,8 +159,8 @@ function MomentsDashboardPage() {
   return (
     <EcosystemWrapper>
       <EcosystemHeader
-        title="Moment Analytics"
-        badgeText="Moments"
+        title={`${singularName} Analytics`}
+        badgeText={moduleName}
         description="Monitor video performance, engagement trends, and content growth across the platform."
         icon={Video}
       />
@@ -195,7 +198,7 @@ function MomentsDashboardPage() {
             <Link href="/moments/create">
               <Button className="h-9 px-5 rounded-lg bg-zinc-900 border-none font-bold text-xs uppercase tracking-wide gap-2 shadow-sm hover:bg-black transition-all active:scale-95">
                 <Plus className="h-4 w-4" />
-                Create Moment
+                Create {singularName}
               </Button>
             </Link>
           </div>
@@ -359,7 +362,7 @@ function MomentsDashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div className="lg:col-span-12">
             <EcosystemCard
-              title="Most Viewed Moments"
+              title={`Most Viewed ${moduleName}`}
               description="Highest engagement nodes across the timeline"
               icon={Sparkles}
             >
@@ -368,7 +371,7 @@ function MomentsDashboardPage() {
                   <thead className="bg-zinc-50/50 border-b border-zinc-100">
                     <tr>
                       <th className="px-6 py-4 font-bold text-zinc-500 uppercase tracking-widest text-[10px]">
-                        Moment
+                        {singularName}
                       </th>
                       <th className="px-6 py-4 font-bold text-zinc-500 uppercase tracking-widest text-[10px]">
                         Creator
@@ -423,7 +426,7 @@ function MomentsDashboardPage() {
                                 )}
                               </div>
                               <span className="font-bold text-zinc-900 text-xs truncate max-w-[200px]">
-                                {moment.caption || "Untitled Moment"}{" "}
+                                {moment.caption || `Untitled ${singularName}`}{" "}
                               </span>
                             </div>
                           </td>
@@ -451,7 +454,7 @@ function MomentsDashboardPage() {
                           colSpan={4}
                           className="px-6 py-12 text-center text-zinc-400 text-xs font-medium italic"
                         >
-                          No moments found.
+                          No {moduleName.toLowerCase()} found.
                         </td>
                       </tr>
                     )}

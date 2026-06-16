@@ -25,8 +25,11 @@ import {
 import { AdminTable } from "@/components/shared/admin-table/admin-table";
 import { cn } from "@/lib/utils";
 import moment from "moment";
+import { useModuleStore } from "@/store/useModuleStore";
 
 export default function CommunityAuditLog() {
+  const moduleName = useModuleStore((state) => state.communityModuleName);
+  const singularName = useModuleStore((state) => state.communitySingularName);
   const params = useParams();
   const id = params?.id as string;
   const [page, setPage] = useState(1);
@@ -226,7 +229,7 @@ export default function CommunityAuditLog() {
           </h2>
           <p className="text-muted-foreground mt-1 text-sm">
             Track all activity and administrative changes made to this
-            community.
+            {singularName.toLowerCase()}.
           </p>
         </div>
         <Button variant="outline" onClick={() => refetch()} className="gap-2 rounded-xl h-10 shadow-sm">
@@ -243,7 +246,7 @@ export default function CommunityAuditLog() {
             loading={logLoading}
             keyExtractor={(log) => log.id}
             emptyTitle="No logs found"
-            emptyDescription="No activity has been recorded for this community yet."
+            emptyDescription={`No activity has been recorded for this ${singularName.toLowerCase()} yet.`}
             pagination={{
               pageIndex: page - 1,
               pageSize: 12,

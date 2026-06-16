@@ -26,8 +26,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import { AlertTriangle, Users, Eye, Loader2, Ban } from "lucide-react";
 import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { useModuleStore } from "@/store/useModuleStore";
 
 function JobDangerZonePage() {
+  const singularName = useModuleStore((state) => state.jobSingularName);
   const params = useParams();
   const id = params?.id as string;
   const router = useRouter();
@@ -41,15 +43,15 @@ function JobDangerZonePage() {
   const [changeStatus, { loading: disabling }] = useChangeJobStatus({
     onCompleted: () => {
       toast({
-        title: "Job Disabled",
-        description: "The job has been permanently disabled.",
+        title: `${singularName} Disabled`,
+        description: `The ${singularName.toLowerCase()} has been permanently disabled.`,
       });
       router.push("/jobs/all");
     },
     onError: (err: any) => {
       toast({
         title: "Error",
-        description: err.message || "Failed to disable job",
+        description: err.message || `Failed to disable ${singularName.toLowerCase()}`,
         variant: "destructive",
       });
     },
@@ -74,7 +76,7 @@ function JobDangerZonePage() {
       <div className="flex h-64 items-center justify-center">
         <div className="flex flex-col items-center gap-2 text-muted-foreground">
           <Loader2 className="h-6 w-6 animate-spin" />
-          <p className="text-sm">Loading job details...</p>
+          <p className="text-sm">Loading {singularName.toLowerCase()} details...</p>
         </div>
       </div>
     );
@@ -99,7 +101,7 @@ function JobDangerZonePage() {
       <Card className="border-none shadow-lg shadow-black/[0.03] ring-1 ring-red-200 overflow-hidden bg-gradient-to-br from-red-50/50 to-white dark:to-card">
         <CardHeader className="pb-6 border-b border-red-100">
           <CardTitle className="text-red-700 text-lg flex items-center gap-2">
-            Disable Job Listing
+            Disable {singularName} Listing
           </CardTitle>
           <CardDescription className="text-base text-foreground/80 mt-1">
             Permanently disable <strong className="font-semibold">&ldquo;{job?.title}&rdquo;</strong> and hide it from all listings.
@@ -108,7 +110,7 @@ function JobDangerZonePage() {
         <CardContent className="pt-6">
           <div className="space-y-5">
             <p className="text-sm text-muted-foreground font-medium">
-              Disabling this job will affect all associated data, including:
+              Disabling this {singularName.toLowerCase()} will affect all associated data, including:
             </p>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <div className="flex flex-col p-4 bg-card dark:bg-muted/50 rounded-xl border border-red-100 shadow-sm">
@@ -135,7 +137,7 @@ function JobDangerZonePage() {
             <AlertDialogTrigger asChild>
               <Button variant="destructive" className="font-semibold px-6 rounded-xl gap-2 shadow-sm">
                 <Ban className="h-4 w-4" />
-                Disable Job
+                Disable {singularName}
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent className="border-red-200 max-w-md rounded-2xl shadow-xl shadow-red-900/10">
@@ -149,7 +151,7 @@ function JobDangerZonePage() {
                   <strong className="font-semibold text-foreground">
                     &ldquo;{job?.title}&rdquo;
                   </strong>
-                  , removing it from all job listings. Applicant data will be
+                  , removing it from all {singularName.toLowerCase()} listings. Applicant data will be
                   retained but the listing will no longer be accessible.
                 </AlertDialogDescription>
               </AlertDialogHeader>
@@ -174,7 +176,7 @@ function JobDangerZonePage() {
                       Disabling...
                     </>
                   ) : (
-                    "Yes, Disable Job"
+                    `Yes, Disable ${singularName}`
                   )}
                 </AlertDialogAction>
               </AlertDialogFooter>

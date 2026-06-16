@@ -10,8 +10,10 @@ import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrappe
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { BadgeForm } from "@/components/gamification/badges/badge-form";
+import { useModuleStore } from "@/store/useModuleStore";
 
 export default function CreateBadgePage() {
+  const gamificationModuleName = useModuleStore((state) => state.gamificationModuleName);
   const router = useRouter();
   const { data: moduleData } = useGetEntityGamificationModules();
   const [createBadge, { loading: isCreating }] = useCreateBadge();
@@ -40,14 +42,14 @@ export default function CreateBadgePage() {
     <EcosystemWrapper>
       <EcosystemHeader
         title="Badge Studio"
-        badgeText="Gamification Studio"
+        badgeText={`${gamificationModuleName} Studio`}
         description="Design and deploy achievement nodes to incentivize community behaviors."
         icon={Award}
       />
 
       <div className="sticky top-0 z-30 bg-background/95 backdrop-blur border-b px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span>Gamification</span>
+          <span>{gamificationModuleName}</span>
           <ChevronRight className="h-3 w-3" />
           <span>Badges</span>
           <ChevronRight className="h-3 w-3" />

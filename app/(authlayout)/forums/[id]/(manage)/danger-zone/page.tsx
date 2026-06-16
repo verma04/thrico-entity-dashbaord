@@ -37,6 +37,7 @@ import {
 } from "@/graphql/actions/discussion-form";
 import { getModalTitle, getModalDescription } from "@/components/forums/utils";
 import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { useModuleStore } from "@/store/useModuleStore";
 
 type ActionType =
   | "APPROVE"
@@ -48,6 +49,7 @@ type ActionType =
   | "REAPPROVE";
 
 function ForumDangerZonePage() {
+  const singularName = useModuleStore((state) => state.forumSingularName);
   const params = useParams();
   const router = useRouter();
   const id = params?.id as string;
@@ -122,19 +124,19 @@ function ForumDangerZonePage() {
   const getActionButtonText = () => {
     switch (dialogAction) {
       case "APPROVE":
-        return "Approve Forum";
+        return `Approve ${singularName}`;
       case "DISABLE":
-        return "Disable Forum";
+        return `Disable ${singularName}`;
       case "ENABLE":
-        return "Enable Forum";
+        return `Enable ${singularName}`;
       case "REJECT":
-        return "Reject Forum";
+        return `Reject ${singularName}`;
       case "VERIFY":
-        return "Verify Forum";
+        return `Verify ${singularName}`;
       case "UNVERIFY":
         return "Remove Verification";
       case "REAPPROVE":
-        return "Re-approve Forum";
+        return `Re-approve ${singularName}`;
       default:
         return "Confirm";
     }
@@ -160,7 +162,7 @@ function ForumDangerZonePage() {
   }
 
   if (!forum) {
-    return <div>Forum not found.</div>;
+    return <div>{singularName} not found.</div>;
   }
 
   return (
@@ -172,7 +174,7 @@ function ForumDangerZonePage() {
         </h2>
         <p className="text-muted-foreground mt-1 text-sm">
           Administrative actions to manage the visibility and status of this
-          forum.
+          {singularName.toLowerCase()}.
         </p>
       </div>
 
@@ -187,7 +189,7 @@ function ForumDangerZonePage() {
                   Remove Verification
                 </CardTitle>
                 <CardDescription className="text-amber-700/80">
-                  Remove the verified badge from this forum.
+                  Remove the verified badge from this {singularName.toLowerCase()}.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -205,10 +207,10 @@ function ForumDangerZonePage() {
               <CardHeader>
                 <CardTitle className="text-blue-900 flex items-center gap-2">
                   <ShieldCheck className="h-5 w-5" />
-                  Verify Forum
+                  Verify {singularName}
                 </CardTitle>
                 <CardDescription className="text-blue-700/80">
-                  Mark this forum as officially verified by administrators.
+                  Mark this {singularName.toLowerCase()} as officially verified by administrators.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -217,7 +219,7 @@ function ForumDangerZonePage() {
                   className="bg-white border-blue-200 text-blue-700 hover:bg-blue-100 hover:text-blue-900"
                   onClick={() => handleAction("VERIFY")}
                 >
-                  Verify Forum
+                  Verify {singularName}
                 </Button>
               </CardContent>
             </Card>
@@ -230,10 +232,10 @@ function ForumDangerZonePage() {
               <CardHeader>
                 <CardTitle className="text-emerald-900 flex items-center gap-2">
                   <CheckCircle className="h-5 w-5" />
-                  Approve Forum
+                  Approve {singularName}
                 </CardTitle>
                 <CardDescription className="text-emerald-700/80">
-                  Approve this forum to be visible to the community.
+                  Approve this {singularName.toLowerCase()} to be visible to the community.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -242,7 +244,7 @@ function ForumDangerZonePage() {
                   className="bg-white border-emerald-200 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-900"
                   onClick={() => handleAction("APPROVE")}
                 >
-                  Approve Forum
+                  Approve {singularName}
                 </Button>
               </CardContent>
             </Card>
@@ -251,10 +253,10 @@ function ForumDangerZonePage() {
               <CardHeader>
                 <CardTitle className="text-destructive flex items-center gap-2">
                   <X className="h-5 w-5" />
-                  Reject Forum
+                  Reject {singularName}
                 </CardTitle>
                 <CardDescription>
-                  Reject this forum submission. It will not be visible to the
+                  Reject this {singularName.toLowerCase()} submission. It will not be visible to the
                   community.
                 </CardDescription>
               </CardHeader>
@@ -263,7 +265,7 @@ function ForumDangerZonePage() {
                   variant="destructive"
                   onClick={() => handleAction("REJECT")}
                 >
-                  Reject Forum
+                  Reject {singularName}
                 </Button>
               </CardContent>
             </Card>
@@ -275,10 +277,10 @@ function ForumDangerZonePage() {
             <CardHeader>
               <CardTitle className="text-emerald-900 flex items-center gap-2">
                 <Undo2 className="h-5 w-5" />
-                Re-approve Forum
+                Re-approve {singularName}
               </CardTitle>
               <CardDescription className="text-emerald-700/80">
-                Change the status of this forum from rejected to approved.
+                Change the status of this {singularName.toLowerCase()} from rejected to approved.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -287,7 +289,7 @@ function ForumDangerZonePage() {
                 className="bg-white border-emerald-200 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-900"
                 onClick={() => handleAction("REAPPROVE")}
               >
-                Re-approve Forum
+                Re-approve {singularName}
               </Button>
             </CardContent>
           </Card>
@@ -298,10 +300,10 @@ function ForumDangerZonePage() {
             <CardHeader>
               <CardTitle className="text-destructive flex items-center gap-2">
                 <UserX className="h-5 w-5" />
-                Disable Forum
+                Disable {singularName}
               </CardTitle>
               <CardDescription>
-                Disable this active forum. Users will no longer be able to
+                Disable this active {singularName.toLowerCase()}. Users will no longer be able to
                 interact with it.
               </CardDescription>
             </CardHeader>
@@ -310,7 +312,7 @@ function ForumDangerZonePage() {
                 variant="destructive"
                 onClick={() => handleAction("DISABLE")}
               >
-                Disable Forum
+                Disable {singularName}
               </Button>
             </CardContent>
           </Card>
@@ -321,10 +323,10 @@ function ForumDangerZonePage() {
             <CardHeader>
               <CardTitle className="text-emerald-900 flex items-center gap-2">
                 <CheckCircle className="h-5 w-5" />
-                Enable Forum
+                Enable {singularName}
               </CardTitle>
               <CardDescription className="text-emerald-700/80">
-                Re-enable this disabled forum, allowing users to interact with
+                Re-enable this disabled {singularName.toLowerCase()}, allowing users to interact with
                 it again.
               </CardDescription>
             </CardHeader>
@@ -334,7 +336,7 @@ function ForumDangerZonePage() {
                 className="bg-white border-emerald-200 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-900"
                 onClick={() => handleAction("ENABLE")}
               >
-                Enable Forum
+                Enable {singularName}
               </Button>
             </CardContent>
           </Card>

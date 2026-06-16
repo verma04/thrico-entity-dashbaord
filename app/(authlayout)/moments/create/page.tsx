@@ -9,8 +9,10 @@ import { useRouter } from "next/navigation";
 import { MomentCreationForm } from "@/components/moments/add/moment-creation-form";
 import { useToast } from "@/components/ui/use-toast";
 import { useAdminGenerateMomentUploadUrl, useAdminConfirmMomentUpload } from "@/graphql/actions/moments";
+import { useModuleStore } from "@/store/useModuleStore";
 
 const CreateMomentPage = () => {
+  const singularName = useModuleStore((state) => state.momentSingularName);
   const router = useRouter();
   const { toast } = useToast();
   
@@ -25,14 +27,14 @@ const CreateMomentPage = () => {
     onCompleted: () => {
       toast({
         title: "Success",
-        description: "Moment published successfully!",
+        description: `${singularName} published successfully!`,
       });
       router.push("/moments/all");
     },
     onError: (error: any) => {
       toast({
         title: "Error",
-        description: error.message || "Failed to publish moment",
+        description: error.message || `Failed to publish ${singularName.toLowerCase()}`,
         variant: "destructive",
       });
     }
@@ -94,7 +96,7 @@ const CreateMomentPage = () => {
       } = uploadData.adminGenerateMomentUploadUrl;
 
       // 2. Upload to S3
-      setUploadStatus("Uploading Moment...");
+      setUploadStatus(`Uploading ${singularName}...`);
       
       // Upload thumbnail first (smaller)
       if (thumbnailFile && thumbnailUploadUrl) {
@@ -129,7 +131,7 @@ const CreateMomentPage = () => {
 
   const onFinish = async (values: any) => {
     try {
-      setUploadStatus("Finalizing Moment...");
+      setUploadStatus(`Finalizing ${singularName}...`);
       setIsUploading(true);
       
       await confirmUpload({

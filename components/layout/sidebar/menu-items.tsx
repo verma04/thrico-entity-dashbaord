@@ -730,7 +730,11 @@ export const useFilteredExtendedItems = () => {
   const { data, loading: subLoading } = useCheckEntitySubscription();
   const user = useUserStore((state) => state.user);
 
-  const filterItems = (items: any[], isHome: boolean = false) => {
+  const filterItems = (
+    items: any[],
+    isHome: boolean = false,
+    isModules: boolean = false,
+  ) => {
     const modulesSub = data?.checkEntitySubscription?.modules || [];
     const modulePermissions = user?.modulePermissions || [];
     const isSuperAdmin = user?.isSuperAdmin;
@@ -809,17 +813,45 @@ export const useFilteredExtendedItems = () => {
 
       // Special cases for mapping keys to module names in subscription
       let subKey = moduleKey;
-      if (
-        item.key === "rewards" ||
-        item.key === "currency" ||
-        item.key === "engagement-games" ||
-        item.key === "engagement-activities"
-      ) {
-        subKey = "rewards";
+      if (item.key === "engagement-activities") {
+        subKey = "points & badges";
+      } else if (item.key === "engagement-games") {
+        subKey = "games center";
       }
 
+      const matchingModule =
+        modulesSub.find(
+          (m: any) =>
+            m.name?.toLowerCase().replace(/'/g, "_") === subKey &&
+            m.canRename !== false,
+        ) ||
+        modulesSub.find(
+          (m: any) => m.name?.toLowerCase().replace(/'/g, "_") === subKey,
+        );
       const isSubscribed = enabledModuleIds.has(subKey);
-      const mappedItem = { ...item, isLocked: !isSubscribed };
+      let mappedChildren = item.children;
+      if (isModules && matchingModule?.customName && mappedChildren) {
+        mappedChildren = mappedChildren.map((child: any) => {
+          if (child.label.includes(item.label)) {
+            return {
+              ...child,
+              label: child.label.replace(item.label, matchingModule.customName),
+            };
+          }
+          return child;
+        });
+      }
+
+      const mappedItem = {
+        ...item,
+        label:
+          isModules && matchingModule?.customName
+            ? matchingModule.customName
+            : item.label,
+        children: mappedChildren,
+        isLocked: !isSubscribed,
+        sortNumber: matchingModule?.showInWebNavigationSortNumber ?? 999,
+      };
 
       if (isSuperAdmin || isSystemRole) {
         acc.push(mappedItem);
@@ -837,10 +869,13 @@ export const useFilteredExtendedItems = () => {
       return acc;
     }, []);
 
-    return filteredList.sort((a, b) => {
-      if (a.isLocked === b.isLocked) return 0;
-      if (a.isLocked) return 1;
-      return -1;
+    return filteredList.sort((a: any, b: any) => {
+      if (a.isLocked !== b.isLocked) {
+        return a.isLocked ? 1 : -1;
+      }
+      const sortA = a.sortNumber ?? 999;
+      const sortB = b.sortNumber ?? 999;
+      return sortA - sortB;
     });
   };
 
@@ -857,10 +892,18 @@ export const useFilteredExtendedItems = () => {
     [data, user],
   );
   const filteredGamification = useMemo(
-    () => filterItems(gamificationEngine),
+    () => filterItems(gamificationEngine, false, true),
     [data, user],
   );
-  const filteredModules = useMemo(() => filterItems(modules), [data, user]);
+  const filteredModules = useMemo(
+    () => filterItems(modules, false, true),
+    [data, user],
+  );
+
+  const gamificationModule = data?.checkEntitySubscription?.modules?.find(
+    (m: any) => m.name === "Points & Badges" || m.name === "Gamification"
+  );
+  const gamificationLabel = gamificationModule?.customName || "Points & Badges";
 
   return {
     homeItems: filteredHome,
@@ -868,6 +911,7 @@ export const useFilteredExtendedItems = () => {
     contentModeration: filteredModeration as any[],
     gamificationEngine: filteredGamification as any[],
     modules: filteredModules as any[],
+    gamificationLabel,
     loading: subLoading,
   };
 };

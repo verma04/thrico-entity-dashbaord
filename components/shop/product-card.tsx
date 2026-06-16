@@ -36,21 +36,24 @@ import { Loader2 } from "lucide-react";
 import { useDeleteShopProduct } from "@/graphql/actions/shop";
 import { toast } from "sonner";
 
+import { useModuleStore } from "@/store/useModuleStore";
+
 interface ProductCardProps {
   product: any;
   refetch: () => void;
 }
 
 export function ProductCard({ product, refetch }: ProductCardProps) {
+  const singularName = useModuleStore((state) => state.shopSingularName);
   const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
   
   const [deleteProduct, { loading: isDeleting }] = useDeleteShopProduct({
     onCompleted: () => {
-      toast.success("Product deleted successfully");
+      toast.success(`${singularName} deleted successfully`);
       refetch();
     },
     onError: (err) => {
-      toast.error(err.message || "Failed to delete product");
+      toast.error(err.message || `Failed to delete ${singularName.toLowerCase()}`);
     },
   });
 
@@ -82,7 +85,7 @@ export function ProductCard({ product, refetch }: ProductCardProps) {
                   className="flex items-center w-full"
                 >
                   <Pencil className="h-4 w-4 text-slate-500" />
-                  Edit Product
+                  Edit {singularName}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem
@@ -97,7 +100,7 @@ export function ProductCard({ product, refetch }: ProductCardProps) {
                 onClick={() => setShowDeleteDialog(true)}
               >
                 <Trash2 className="h-4 w-4" />
-                Delete Product
+                Delete {singularName}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -219,7 +222,7 @@ export function ProductCard({ product, refetch }: ProductCardProps) {
               Are you absolutely sure?
             </AlertDialogTitle>
             <AlertDialogDescription className="text-sm font-medium text-slate-500">
-              This will permanently delete the product <strong>{product.title}</strong> and all its variants. This
+              This will permanently delete the {singularName.toLowerCase()} <strong>{product.title}</strong> and all its variants. This
               action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>

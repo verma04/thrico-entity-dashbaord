@@ -25,8 +25,10 @@ import {
 import { AdminTable } from "@/components/shared/admin-table/admin-table";
 import { cn } from "@/lib/utils";
 import moment from "moment";
+import { useModuleStore } from "@/store/useModuleStore";
 
 export default function ForumAuditLog() {
+  const singularName = useModuleStore((state) => state.forumSingularName);
   const params = useParams();
   const id = params?.id as string;
   const [page, setPage] = useState(1);
@@ -225,7 +227,7 @@ export default function ForumAuditLog() {
             Audit Log
           </h2>
           <p className="text-muted-foreground mt-1 text-sm">
-            Track all activity and administrative changes made to this forum.
+            Track all activity and administrative changes made to this {singularName.toLowerCase()}.
           </p>
         </div>
         <Button variant="outline" onClick={() => refetch()} className="gap-2 rounded-xl h-10 shadow-sm">
@@ -242,7 +244,7 @@ export default function ForumAuditLog() {
             loading={logLoading}
             keyExtractor={(log: any) => log.id}
             emptyTitle="No logs found"
-            emptyDescription="No activity has been recorded for this forum yet."
+            emptyDescription={`No activity has been recorded for this ${singularName.toLowerCase()} yet.`}
             pagination={{
               pageIndex: page - 1,
               pageSize: 12,

@@ -38,8 +38,10 @@ import {
   changeDiscussionCommunityStatus,
   changeDiscussionCommunityVerification,
 } from "../../graphql/actions/group";
+import { useModuleStore } from "@/store/useModuleStore";
 
 const Actions = (record: communityEntity) => {
+  const singularName = useModuleStore((state) => state.communitySingularName);
   const [isAuditModalOpen, setIsAuditModalOpen] = useState(false);
   const [isEdit, setEditOpen] = useState(false);
 
@@ -163,14 +165,14 @@ const Actions = (record: communityEntity) => {
                 className="cursor-pointer"
               >
                 <CheckCircle className="mr-2 h-4 w-4 text-green-600" />
-                Approve Community
+                Approve {singularName}
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => handleAction("REJECT", record)}
                 className="cursor-pointer"
               >
                 <ThumbsDown className="mr-2 h-4 w-4 text-purple-600" />
-                Reject Community
+                Reject {singularName}
               </DropdownMenuItem>
             </>
           )}
@@ -181,7 +183,7 @@ const Actions = (record: communityEntity) => {
               className="cursor-pointer"
             >
               <Undo className="mr-2 h-4 w-4" />
-              Re-approve Community
+              Re-approve {singularName}
             </DropdownMenuItem>
           )}
 
@@ -192,14 +194,14 @@ const Actions = (record: communityEntity) => {
                 className="cursor-pointer"
               >
                 <UserX className="mr-2 h-4 w-4 text-yellow-600" />
-                Disable Community
+                Disable {singularName}
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => handleAction("PAUSE", record)}
                 className="cursor-pointer"
               >
                 <StopCircle className="mr-2 h-4 w-4 text-yellow-600" />
-                Pause Community
+                Pause {singularName}
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link
@@ -219,7 +221,7 @@ const Actions = (record: communityEntity) => {
               className="cursor-pointer"
             >
               <CheckCircle className="mr-2 h-4 w-4 text-green-600" />
-              Enable Community
+              Enable {singularName}
             </DropdownMenuItem>
           )}
         </DropdownMenuContent>
@@ -228,9 +230,9 @@ const Actions = (record: communityEntity) => {
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{getModalTitle(dialogAction)}</DialogTitle>
+            <DialogTitle>{getModalTitle(dialogAction, singularName)}</DialogTitle>
             <DialogDescription>
-              {getModalDescription(dialogAction)}
+              {getModalDescription(dialogAction, singularName)}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -265,14 +267,14 @@ const Actions = (record: communityEntity) => {
               onClick={confirmAction}
               disabled={isReasonRequired && !actionReason.trim()}
             >
-              {dialogAction === "APPROVE" && "Approve Community"}
-              {dialogAction === "DISABLE" && "Disable Community"}
-              {dialogAction === "ENABLE" && "Enable Community"}
-              {dialogAction === "REJECT" && "Reject Community"}
-              {dialogAction === "VERIFY" && "Verify Community"}
+              {dialogAction === "APPROVE" && `Approve ${singularName}`}
+              {dialogAction === "DISABLE" && `Disable ${singularName}`}
+              {dialogAction === "ENABLE" && `Enable ${singularName}`}
+              {dialogAction === "REJECT" && `Reject ${singularName}`}
+              {dialogAction === "VERIFY" && `Verify ${singularName}`}
               {dialogAction === "UNVERIFY" && "Remove Verification"}
-              {dialogAction === "REAPPROVE" && "Re-approve Community"}
-              {dialogAction === "PAUSE" && "Pause Community"}
+              {dialogAction === "REAPPROVE" && `Re-approve ${singularName}`}
+              {dialogAction === "PAUSE" && `Pause ${singularName}`}
             </Button>
           </DialogFooter>
         </DialogContent>

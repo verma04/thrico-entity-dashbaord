@@ -130,7 +130,10 @@ const columns: AdminTableColumn<discussionForm>[] = [
 // Component
 // ─────────────────────────────────────────────────────────────────────────────
 
+import { useModuleStore } from "@/store/useModuleStore";
+
 export default function List({ data, loading }: { data: discussionForm[], loading?: boolean }) {
+  const singularName = useModuleStore((state) => state.forumSingularName);
   return (
     <AdminTable<discussionForm>
       columns={columns}
@@ -138,7 +141,7 @@ export default function List({ data, loading }: { data: discussionForm[], loadin
       loading={loading}
       keyExtractor={(c) => c.id}
       emptyIcon={MessageSquare}
-      emptyTitle="No forum posts found"
+      emptyTitle={`No ${singularName.toLowerCase()}s found`}
       emptyDescription="Try adjusting your search or filter criteria."
     />
   );

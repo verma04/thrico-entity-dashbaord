@@ -51,8 +51,11 @@ import {
   EcosystemCard,
 } from "@/components/layout/ecosystem/ecosystem-analytics";
 import { cn } from "@/lib/utils";
+import { useModuleStore } from "@/store/useModuleStore";
 
 export default function SurveyAnalytics() {
+  const moduleName = useModuleStore((state) => state.surveyModuleName);
+  const singularName = useModuleStore((state) => state.surveySingularName);
   const [timeRange, setTimeRange] = useState<TimeRange>(TimeRange.LAST_7_DAYS);
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: subDays(new Date(), 7),
@@ -85,7 +88,7 @@ export default function SurveyAnalytics() {
 
   const kpis = [
     {
-      title: "Total Surveys",
+      title: `Total ${moduleName}`,
       value: loading ? "..." : (stats?.totalSurveys?.toLocaleString() ?? "0"),
       trend: stats?.totalSurveysChange ?? 0,
       icon: ClipboardList,
@@ -93,7 +96,7 @@ export default function SurveyAnalytics() {
       bg: "bg-zinc-100",
     },
     {
-      title: "Active Surveys",
+      title: `Active ${moduleName}`,
       value: loading ? "..." : (stats?.activeSurveys?.toLocaleString() ?? "0"),
       trend: stats?.activeSurveysChange ?? 0,
       icon: Activity,
@@ -142,7 +145,7 @@ export default function SurveyAnalytics() {
     <EcosystemWrapper anonymized-1="surveys-analytics">
       <EcosystemHeader
         title="Feedback Analytics"
-        description="Monitor response rates, survey status distribution, and engagement trends."
+        description={`Monitor response rates, ${singularName.toLowerCase()} status distribution, and engagement trends.`}
         badgeText="Overview"
         icon={BarChart3}
       />
@@ -170,7 +173,7 @@ export default function SurveyAnalytics() {
                 variant="outline"
                 className="h-9 px-4 rounded-lg border-zinc-200 font-bold text-[10px] uppercase tracking-widest text-zinc-600 gap-2 hover:bg-zinc-50 transition-all shadow-sm"
               >
-                All Surveys
+                All {moduleName}
                 <ArrowRight className="h-3.5 w-3.5" />
               </Button>
             </Link>
@@ -258,7 +261,7 @@ export default function SurveyAnalytics() {
           <div className="lg:col-span-4">
             <EcosystemCard
               title="Status Distribution"
-              description="Survey lifecycle breakdown"
+              description={`${singularName} lifecycle breakdown`}
               icon={Sparkles}
             >
               <div className="h-[250px] w-full mb-6 relative flex items-center justify-center">

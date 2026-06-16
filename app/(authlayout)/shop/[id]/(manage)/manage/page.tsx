@@ -15,8 +15,10 @@ import { ProductFormValues } from "@/components/shop/product-form";
 import { useShopStore } from "@/store/useShopStore";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { useModuleStore } from "@/store/useModuleStore";
 
 export default function EditProductManagePage() {
+  const singularName = useModuleStore((state) => state.shopSingularName);
   const params = useParams();
   const router = useRouter();
   const id = params?.id as string;
@@ -32,7 +34,7 @@ export default function EditProductManagePage() {
       refetch();
     },
     onError: (err) => {
-      toast.error("Failed to update product: " + err.message);
+      toast.error(`Failed to update ${singularName.toLowerCase()}: ` + err.message);
     },
   });
 
@@ -200,7 +202,7 @@ export default function EditProductManagePage() {
   if (error || !product) {
     return (
       <div className="flex p-12 flex-col items-center justify-center gap-4">
-        <h1 className="text-xl font-bold">Product not found</h1>
+        <h1 className="text-xl font-bold">{singularName} not found</h1>
       </div>
     );
   }

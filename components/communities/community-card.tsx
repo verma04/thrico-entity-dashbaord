@@ -23,12 +23,15 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useModuleStore } from "@/store/useModuleStore";
 
 interface CommunityCardProps {
   record: communityEntity;
 }
 
 export default function CommunityCard({ record }: CommunityCardProps) {
+  const singularName = useModuleStore((state) => state.communitySingularName);
+
   return (
     <motion.div
       whileHover={{ y: -8 }}
@@ -74,7 +77,7 @@ export default function CommunityCard({ record }: CommunityCardProps) {
               {getVerificationTag(record.verification?.isVerified || false)}
             </div>
             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest line-clamp-1">
-              {record.tagline || "Visionary Community Ecosystem"}
+              {record.tagline || `Visionary ${singularName} Ecosystem`}
             </p>
           </div>
         </CardHeader>

@@ -62,7 +62,10 @@ function getRoleBadge(role: string) {
   return found ?? ROLES[3];
 }
 
+import { useModuleStore } from "@/store/useModuleStore";
+
 export default function MembersPage() {
+  const singularName = useModuleStore((state) => state.communitySingularName);
   const params = useParams();
   const communityId = params?.id as string;
   const { toast } = useToast();
@@ -174,7 +177,7 @@ export default function MembersPage() {
       <header>
         <h1 className="text-2xl font-bold tracking-tight">Members</h1>
         <p className="text-muted-foreground mt-1">
-          Manage community members and pending join requests.
+          Manage {singularName.toLowerCase()} members and pending join requests.
         </p>
       </header>
 
@@ -213,7 +216,7 @@ export default function MembersPage() {
                   <Users className="h-8 w-8 text-muted-foreground/40" />
                 </div>
                 <p className="text-base font-semibold">No members found</p>
-                <p className="text-sm text-muted-foreground">This community has no active members yet.</p>
+                <p className="text-sm text-muted-foreground">This {singularName.toLowerCase()} has no active members yet.</p>
               </CardContent>
             </Card>
           ) : (
@@ -346,7 +349,7 @@ export default function MembersPage() {
                 </div>
                 <p className="text-base font-semibold">No pending requests</p>
                 <p className="text-sm text-muted-foreground">
-                  No users are currently waiting to join this community.
+                  No users are currently waiting to join this {singularName.toLowerCase()}.
                 </p>
               </CardContent>
             </Card>
@@ -448,7 +451,7 @@ export default function MembersPage() {
             <AlertDialogDescription>
               Are you sure you want to remove{" "}
               <strong className="font-semibold text-foreground">{removingMember?.name}</strong> from this
-              community? They will lose all access immediately.
+              {singularName.toLowerCase()}? They will lose all access immediately.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -479,7 +482,7 @@ export default function MembersPage() {
               <strong className="font-semibold text-foreground">{pendingRoleChange?.name}</strong>'s role
               to{" "}
               <strong className="font-semibold text-foreground">{pendingRoleChange?.roleLabel}</strong>?
-              This will update their permissions in the community immediately.
+              This will update their permissions in the {singularName.toLowerCase()} immediately.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

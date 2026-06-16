@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Briefcase, MapPin, Calendar, Building2, Users2 } from "lucide-react";
 import moment from "moment";
 import Actions from "./action";
+import { useModuleStore } from "@/store/useModuleStore";
 import { Job } from "@/graphql/actions/jobs";
 import {
   AdminTable,
@@ -37,62 +38,41 @@ function JobTypeBadge({ type }: { type: string }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Column definitions
-// ─────────────────────────────────────────────────────────────────────────────
+export default function Jobs({ data }: { data: Job[] | undefined }) {
+  const moduleName = useModuleStore((state) => state.jobModuleName);
+  const singularName = useModuleStore((state) => state.jobSingularName);
 
-const columns: AdminTableColumn<Job>[] = [
-  {
-    key: "job",
-    header: "Job",
-    cell: (row) => (
-      <div className="flex items-center gap-3">
-        <Avatar className="h-9 w-9 rounded-lg border border-border/60 shrink-0">
-          <AvatarImage
-            src={
-              row.company?.logo
-                ? `https://cdn.thrico.network/${row.company.logo}`
-                : ""
-            }
-            alt={row.company?.name || row.title}
-            className="object-cover"
-          />
-          <AvatarFallback className="rounded-lg bg-muted text-muted-foreground text-xs font-semibold">
-            {row.title?.substring(0, 2).toUpperCase() || "JB"}
-          </AvatarFallback>
-        </Avatar>
-        <div className="flex flex-col min-w-0">
-          <div className="flex items-center gap-1.5 mb-0.5">
-            <p className="text-[13px] font-semibold text-foreground leading-tight truncate">
-              {row.title}
-            </p>
-            <JobTypeBadge type={row.jobType} />
+  const columns: AdminTableColumn<Job>[] = [
+    {
+      key: "title",
+      header: singularName,
+      cell: (row) => (
+        <div className="flex items-center gap-4">
+          <div className="h-10 w-10 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center shrink-0">
+            <Briefcase className="h-5 w-5 text-indigo-500" />
           </div>
-          <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-            <MapPin className="h-2.5 w-2.5 shrink-0" />
-            <span className="truncate max-w-[160px]">
-              {(typeof row.location === 'object' ? row.location?.name : row.location) || "—"} · {row.workplaceType}
+          <div className="flex flex-col min-w-0">
+            <span className="font-bold text-foreground leading-tight truncate max-w-[280px]">
+              {row.title}
             </span>
+            <div className="flex items-center gap-2 mt-0.5">
+              <JobTypeBadge type={row.jobType} />
+              {row.location && (
+                <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+                  <MapPin className="h-3 w-3" />
+                  {row.location}
+                </span>
+              )}
+            </div>
           </div>
         </div>
-      </div>
-    ),
-  },
-  {
-    key: "company",
-    header: "Company",
-    cell: (row) => (
-      <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
-        <Building2 className="h-3 w-3 shrink-0" />
-        <span className="truncate">{row.company?.name || "—"}</span>
-      </div>
-    ),
-  },
-  {
-    key: "status",
-    header: "Status",
-    cell: (row) => <AdminStatusBadge status={row.status} />,
-  },
+      ),
+    },
+    {
+      key: "status",
+      header: "Status",
+      cell: (row) => <AdminStatusBadge status={row.status} />,
+    },
   {
     key: "applicants",
     header: "People",
@@ -170,18 +150,13 @@ const columns: AdminTableColumn<Job>[] = [
   },
 ];
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Component
-// ─────────────────────────────────────────────────────────────────────────────
-
-export default function Jobs({ data }: { data: Job[] | undefined }) {
   return (
     <AdminTable<Job>
       columns={columns}
       data={data}
       keyExtractor={(j) => j.id}
       emptyIcon={Briefcase}
-      emptyTitle="No jobs here"
+      emptyTitle={`No ${moduleName.toLowerCase()} here`}
       emptyDescription="Try searching for something else."
     />
   );

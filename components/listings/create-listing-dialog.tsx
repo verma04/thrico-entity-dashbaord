@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button";
 import { ListingCreationForm } from "./listing-creation-form";
 import { useAddListing } from "@/graphql/actions/listing";
 import { AnimatePresence, motion } from "framer-motion";
+import { useModuleStore } from "@/store/useModuleStore";
 
 export function CreateListingDialog() {
+  const singularName = useModuleStore((state) => state.listingSingularName);
   const [open, setOpen] = useState(false);
 
   const onClose = () => {
@@ -42,7 +44,7 @@ export function CreateListingDialog() {
     <>
       <Button onClick={() => setOpen(true)}>
         <Plus className="w-4 h-4 mr-2" />
-        Create Listing
+        Create {singularName}
       </Button>
 
       <AnimatePresence>

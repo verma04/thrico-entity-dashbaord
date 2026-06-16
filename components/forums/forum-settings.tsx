@@ -20,6 +20,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useModuleStore } from "@/store/useModuleStore";
 
 type formType = {
   loading: boolean;
@@ -29,6 +30,8 @@ type formType = {
 
 const Settings = ({ loading, update, data }: formType) => {
   const [isChanged, setIsChanged] = useState(false);
+  const moduleName = useModuleStore((state) => state.forumModuleName);
+  const singularName = useModuleStore((state) => state.forumSingularName);
 
   const handleSubmit = (values: any) => {
     update({
@@ -57,9 +60,9 @@ const Settings = ({ loading, update, data }: formType) => {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle>Forum Settings</CardTitle>
+                    <CardTitle>{singularName} Settings</CardTitle>
                     <CardDescription>
-                      Configure discussion forum permissions and auto-approval
+                      Configure {singularName.toLowerCase()} permissions and auto-approval
                       settings
                     </CardDescription>
                   </div>
@@ -99,7 +102,7 @@ const Settings = ({ loading, update, data }: formType) => {
                         htmlFor="allowDiscussionForum"
                         className="text-base font-medium"
                       >
-                        Auto Approve Discussions
+                        Auto Approve {moduleName}
                       </Label>
                       <TooltipProvider>
                         <Tooltip>
@@ -108,7 +111,7 @@ const Settings = ({ loading, update, data }: formType) => {
                           </TooltipTrigger>
                           <TooltipContent>
                             <p className="max-w-xs">
-                              Automatically approve new discussions without
+                              Automatically approve new {moduleName.toLowerCase()} without
                               manual review
                             </p>
                           </TooltipContent>
@@ -116,7 +119,7 @@ const Settings = ({ loading, update, data }: formType) => {
                       </TooltipProvider>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      New discussions will be published immediately without
+                      New {moduleName.toLowerCase()} will be published immediately without
                       moderation
                     </p>
                   </div>
@@ -137,7 +140,7 @@ const Settings = ({ loading, update, data }: formType) => {
                         htmlFor="autoApproveDiscussionForum"
                         className="text-base font-medium"
                       >
-                        Enable Discussion Forum
+                        Enable {moduleName}
                       </Label>
                       <TooltipProvider>
                         <Tooltip>
@@ -147,14 +150,14 @@ const Settings = ({ loading, update, data }: formType) => {
                           <TooltipContent>
                             <p className="max-w-xs">
                               Turn off temporarily if you need to pause
-                              Discussion Forum
+                              {moduleName}
                             </p>
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      Allow users to create and participate in forum discussions
+                      Allow users to create and participate in {moduleName.toLowerCase()}
                     </p>
                   </div>
                   <Switch
@@ -173,11 +176,11 @@ const Settings = ({ loading, update, data }: formType) => {
                       <Info className="h-5 w-5 text-amber-600 dark:text-amber-500 flex-shrink-0 mt-0.5" />
                       <div className="text-sm text-amber-800 dark:text-amber-200">
                         <p className="font-medium mb-1">
-                          Discussion Forum Disabled
+                          {moduleName} Disabled
                         </p>
                         <p className="text-amber-700 dark:text-amber-300">
-                          The discussion forum is currently disabled. Users
-                          won't be able to create or view discussions.
+                          The {singularName.toLowerCase()} is currently disabled. Users
+                          won't be able to create or view {moduleName.toLowerCase()}.
                         </p>
                       </div>
                     </div>

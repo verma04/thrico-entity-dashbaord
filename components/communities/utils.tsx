@@ -7,28 +7,29 @@ export const getModalTitle = (
     | "VERIFY"
     | "UNVERIFY"
     | "REAPPROVE"
-    | "PAUSE"
+    | "PAUSE",
+  singularName: string = "Community"
 ) => {
   switch (dialogAction) {
     case "APPROVE":
-      return "Approve Community";
+      return `Approve ${singularName}`;
 
     case "DISABLE":
-      return "Disable Community";
+      return `Disable ${singularName}`;
     case "ENABLE":
-      return "Enable Community";
+      return `Enable ${singularName}`;
 
     case "REJECT":
-      return "Reject Community";
+      return `Reject ${singularName}`;
 
     case "VERIFY":
-      return "Verify Community";
+      return `Verify ${singularName}`;
     case "UNVERIFY":
-      return "Remove Community Verification";
+      return `Remove ${singularName} Verification`;
     case "REAPPROVE":
-      return "Re-approve Community";
+      return `Re-approve ${singularName}`;
     case "PAUSE":
-      return "Pause Community";
+      return `Pause ${singularName}`;
 
     default:
       return "Confirm Action";
@@ -44,28 +45,29 @@ export const getModalDescription = (
     | "VERIFY"
     | "UNVERIFY"
     | "REAPPROVE"
-    | "PAUSE"
+    | "PAUSE",
+  singularName: string = "community"
 ) => {
   switch (dialogAction) {
     case "APPROVE":
-      return "This will approve the community and make it visible to all users.";
+      return `This will approve the ${singularName.toLowerCase()} and make it visible to all users.`;
 
     case "DISABLE":
-      return "This will temporarily disable the community. It will not be visible until re-enabled.";
+      return `This will temporarily disable the ${singularName.toLowerCase()}. It will not be visible until re-enabled.`;
     case "ENABLE":
-      return "This will re-enable the community and make it visible again.";
+      return `This will re-enable the ${singularName.toLowerCase()} and make it visible again.`;
 
     case "REJECT":
-      return "This will reject the community. It will not be published on the platform.";
+      return `This will reject the ${singularName.toLowerCase()}. It will not be published on the platform.`;
 
     case "VERIFY":
-      return "This will mark the community as verified, indicating it meets platform guidelines.";
+      return `This will mark the ${singularName.toLowerCase()} as verified, indicating it meets platform guidelines.`;
     case "UNVERIFY":
-      return "This will remove the verified status from the community.";
+      return `This will remove the verified status from the ${singularName.toLowerCase()}.`;
     case "REAPPROVE":
-      return "This will change the community's status from rejected to approved, making it visible to users.";
+      return `This will change the ${singularName.toLowerCase()}'s status from rejected to approved, making it visible to users.`;
     case "PAUSE":
-      return "This will pause the community. It will not be accessible until resumed.";
+      return `This will pause the ${singularName.toLowerCase()}. It will not be accessible until resumed.`;
     default:
       return "";
   }

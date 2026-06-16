@@ -42,6 +42,7 @@ import {
 } from "@/graphql/actions/offers";
 import { GET_OFFERS } from "@/graphql/quries/offers";
 import { useRouter } from "next/navigation";
+import { useModuleStore } from "@/store/useModuleStore";
 
 interface OfferActionsProps {
   offer: Offer;
@@ -51,6 +52,7 @@ interface OfferActionsProps {
 
 export function OfferActions({ offer, onEdit, refetch }: OfferActionsProps) {
   const router = useRouter();
+  const singularName = useModuleStore((state) => state.offerSingularName);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [actionReason, setActionReason] = useState("");
   const [dialogAction, setDialogAction] = useState<
@@ -66,7 +68,7 @@ export function OfferActions({ offer, onEdit, refetch }: OfferActionsProps) {
 
   const [changeStatus, { loading: statusLoading }] = useChangeOfferStatus({
     onCompleted: () => {
-      toast.success("Offer status updated successfully");
+      toast.success(`${singularName} status updated successfully`);
       setIsModalOpen(false);
       setActionReason("");
       refetch();
@@ -76,7 +78,7 @@ export function OfferActions({ offer, onEdit, refetch }: OfferActionsProps) {
 
   const [verifyOffer, { loading: verifyLoading }] = useVerifyOffer({
     onCompleted: () => {
-      toast.success("Offer verification updated");
+      toast.success(`${singularName} verification updated`);
       setIsModalOpen(false);
       setActionReason("");
       refetch();
@@ -86,7 +88,7 @@ export function OfferActions({ offer, onEdit, refetch }: OfferActionsProps) {
 
   const [deleteOffer, { loading: deleteLoading }] = useDeleteOffer({
     onCompleted: () => {
-      toast.success("Offer deleted successfully");
+      toast.success(`${singularName} deleted successfully`);
       setIsModalOpen(false);
       refetch();
     },
@@ -127,21 +129,21 @@ export function OfferActions({ offer, onEdit, refetch }: OfferActionsProps) {
   const getModalTitle = (action?: string) => {
     switch (action) {
       case "APPROVE":
-        return "Approve Offer";
+        return `Approve ${singularName}`;
       case "REJECT":
-        return "Reject Offer";
+        return `Reject ${singularName}`;
       case "ACTIVATE":
-        return "Activate Offer";
+        return `Activate ${singularName}`;
       case "DEACTIVATE":
-        return "Deactivate Offer";
+        return `Deactivate ${singularName}`;
       case "EXPIRE":
-        return "Expire Offer";
+        return `Expire ${singularName}`;
       case "VERIFY":
-        return "Verify Offer";
+        return `Verify ${singularName}`;
       case "UNVERIFY":
         return "Remove Verification";
       case "DELETE":
-        return "Delete Offer";
+        return `Delete ${singularName}`;
       default:
         return "Confirm Action";
     }
@@ -150,11 +152,11 @@ export function OfferActions({ offer, onEdit, refetch }: OfferActionsProps) {
   const getModalDescription = (action?: string) => {
     switch (action) {
       case "DELETE":
-        return "Are you sure you want to permanently delete this offer? This action cannot be undone.";
+        return `Are you sure you want to permanently delete this ${singularName.toLowerCase()}? This action cannot be undone.`;
       case "VERIFY":
-        return "Confirm verification for this offer. Please provide a reason.";
+        return `Confirm verification for this ${singularName.toLowerCase()}. Please provide a reason.`;
       default:
-        return `Are you sure you want to ${action?.toLowerCase()} this offer?`;
+        return `Are you sure you want to ${action?.toLowerCase()} this ${singularName.toLowerCase()}?`;
     }
   };
 
@@ -190,7 +192,7 @@ export function OfferActions({ offer, onEdit, refetch }: OfferActionsProps) {
             className="cursor-pointer"
           >
             <Edit className="mr-2 h-4 w-4 text-blue-600" />
-            Edit Offer
+            Edit {singularName}
           </DropdownMenuItem>
 
           <DropdownMenuSeparator />
@@ -201,7 +203,7 @@ export function OfferActions({ offer, onEdit, refetch }: OfferActionsProps) {
             className="cursor-pointer"
           >
             <CheckCircle2 className="mr-2 h-4 w-4 text-emerald-600" />
-            Verify Offer
+            Verify {singularName}
           </DropdownMenuItem>
 
           <DropdownMenuItem
@@ -221,7 +223,7 @@ export function OfferActions({ offer, onEdit, refetch }: OfferActionsProps) {
             className="cursor-pointer text-rose-600 focus:text-rose-600"
           >
             <Trash2 className="mr-2 h-4 w-4" />
-            Delete Offer
+            Delete {singularName}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

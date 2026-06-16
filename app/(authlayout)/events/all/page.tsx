@@ -33,6 +33,7 @@ import AllEvents from "../../../../components/events/all-events";
 import { useAllEvents, EventStatus } from "../../../../graphql/actions/events";
 import Create from "@/components/events/create/create";
 import { cn } from "@/lib/utils";
+import { useModuleStore } from "@/store/useModuleStore";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Status options
@@ -58,6 +59,8 @@ const SORT_OPTIONS = [
 // ─────────────────────────────────────────────────────────────────────────────
 
 function AllEventsPage() {
+  const moduleName = useModuleStore((state) => state.eventModuleName);
+  const singularName = useModuleStore((state) => state.eventSingularName);
   const [activeStatus, setActiveStatus] = useState<EventStatus>(EventStatus.ALL);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [searchTerm, setSearchTerm] = useState("");
@@ -107,9 +110,9 @@ function AllEventsPage() {
     <EcosystemWrapper>
       {/* Header */}
       <EcosystemHeader
-        title="Events"
+        title={moduleName}
         badgeText="Community Hub"
-        description="Monitor, manage, and scale your community event programming."
+        description={`Monitor, manage, and scale your community ${singularName.toLowerCase()} programming.`}
         icon={Calendar}
         actions={
           <div className="flex items-center gap-2">
@@ -149,7 +152,7 @@ function AllEventsPage() {
             <EcosystemActionBar.Search
               value={searchTerm}
               onChange={setSearchTerm}
-              placeholder="Search events…"
+              placeholder={`Search ${moduleName.toLowerCase()}…`}
             />
           </EcosystemActionBar.Item>
         </EcosystemActionBar.Group>
@@ -214,7 +217,7 @@ function AllEventsPage() {
 
         <EcosystemActionBar.Group align="right">
           <EcosystemActionBar.Status active={filteredEvents.length > 0}>
-            {filteredEvents.length} Events
+            {filteredEvents.length} {moduleName}
           </EcosystemActionBar.Status>
         </EcosystemActionBar.Group>
       </EcosystemActionBar>

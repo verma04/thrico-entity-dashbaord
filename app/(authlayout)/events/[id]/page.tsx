@@ -10,8 +10,10 @@ import { useEventById, useUpdateEvent } from "@/graphql/actions/events";
 import { EventsCreationForm } from "@/components/events/create/events-creation-form";
 import moment from "moment";
 import { useToast } from "@/components/ui/use-toast";
+import { useModuleStore } from "@/store/useModuleStore";
 
 function EventGeneralInfo() {
+  const singularName = useModuleStore((state) => state.eventSingularName);
   const params = useParams();
   const eventId = params?.id as string;
   const router = useRouter();
@@ -26,7 +28,7 @@ function EventGeneralInfo() {
     onCompleted: () => {
       toast({
         title: "Success",
-        description: "Event updated successfully",
+        description: `${singularName} updated successfully`,
       });
     },
   });
@@ -36,7 +38,7 @@ function EventGeneralInfo() {
       <div className="flex h-64 items-center justify-center">
         <div className="flex flex-col items-center gap-2 text-muted-foreground">
           <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-sm">Loading event details...</p>
+          <p className="text-sm">Loading {singularName.toLowerCase()} details...</p>
         </div>
       </div>
     );
@@ -44,7 +46,7 @@ function EventGeneralInfo() {
 
   return (
     <EventsCreationForm
-      headerTitle="Edit Event"
+      headerTitle={`Edit ${singularName}`}
       buttonText="Save Changes"
       initialValues={{
         title: event?.title || "",

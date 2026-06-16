@@ -15,6 +15,7 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
 import { ProductFormValues } from "../product-form";
+import { useModuleStore } from "@/store/useModuleStore";
 
 export function BasicInfoSection() {
   const {
@@ -26,18 +27,19 @@ export function BasicInfoSection() {
     setFieldValue,
     submitCount,
   } = useFormikContext<ProductFormValues>();
+  const singularName = useModuleStore((state) => state.shopSingularName);
 
   return (
     <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden">
       <CardHeader className="bg-muted/30 pb-4">
         <CardTitle className="text-xl">Basic Information</CardTitle>
-        <CardDescription>Core details about your product</CardDescription>
+        <CardDescription>Core details about your {singularName.toLowerCase()}</CardDescription>
       </CardHeader>
       <CardContent className="pt-6 space-y-6">
         {/* Name Field */}
         <div className="space-y-2">
           <Label htmlFor="title" className="text-sm font-medium">
-            Product Name <span className="text-destructive">*</span>
+            {singularName} Name <span className="text-destructive">*</span>
           </Label>
           <Input
             id="title"
@@ -103,7 +105,7 @@ export function BasicInfoSection() {
           <Textarea
             id="description"
             name="description"
-            placeholder="Describe your product..."
+            placeholder={`Describe your ${singularName.toLowerCase()}...`}
             rows={4}
             className="resize-none"
             value={values.description}
@@ -117,7 +119,7 @@ export function BasicInfoSection() {
           <div className="space-y-0.5">
             <Label>Out of Stock</Label>
             <p className="text-xs text-muted-foreground">
-              Mark this product as unavailable
+              Mark this {singularName.toLowerCase()} as unavailable
             </p>
           </div>
           <Switch

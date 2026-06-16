@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/table";
 import { Search, Globe, Zap, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
+import { useModuleStore } from "@/store/useModuleStore";
 
 interface CommunityPerformanceData {
   key: string;
@@ -29,6 +30,8 @@ interface CommunityPerformanceTableProps {
 export const CommunityPerformanceTable: React.FC<
   CommunityPerformanceTableProps
 > = ({ data, getActivityColor }) => {
+  const singularName = useModuleStore((state) => state.communitySingularName);
+
   return (
     <div className="p-10 rounded-[3.5rem] bg-white border border-slate-100 shadow-2xl shadow-slate-200/50 flex flex-col h-full">
         <div className="rounded-3xl border border-slate-100 overflow-hidden bg-slate-50/30">
@@ -52,7 +55,7 @@ export const CommunityPerformanceTable: React.FC<
                         </div>
                         <div className="flex flex-col">
                            <span className="text-sm font-black text-slate-900 group-hover:text-indigo-600 transition-colors">{record.name}</span>
-                           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Community Instance</span>
+                           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{singularName} Instance</span>
                         </div>
                      </div>
                   </TableCell>

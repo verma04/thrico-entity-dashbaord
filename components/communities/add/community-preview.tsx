@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Globe, Lock } from "lucide-react";
+import { useModuleStore } from "@/store/useModuleStore";
 
 interface CommunityPreviewProps {
   formData: {
@@ -22,6 +23,8 @@ export function CommunityPreview({
   formData,
   imageUrl,
 }: CommunityPreviewProps) {
+  const singularName = useModuleStore((state) => state.communitySingularName);
+
   return (
     <Card className="overflow-hidden shadow-md">
       <CardContent className="p-0">
@@ -30,7 +33,7 @@ export function CommunityPreview({
             src={
               imageUrl || "https://cdn.thrico.network/default_communities.png"
             }
-            alt="Community cover"
+            alt={`${singularName} cover`}
             width={1536}
             height={1024}
             className="object-cover w-full h-full"
@@ -40,7 +43,7 @@ export function CommunityPreview({
         <div className="p-4">
           <div className="flex items-center gap-2 mb-1">
             <h3 className="font-semibold text-lg flex-1 truncate">
-              {formData?.name || formData?.title || "Community Name"}
+              {formData?.name || formData?.title || `${singularName} Name`}
             </h3>
             {formData?.privacy === "PUBLIC" ||
             formData?.privacy === "public" ? (
@@ -98,7 +101,7 @@ export function CommunityPreview({
               ) : (
                 <div className="flex items-center justify-center h-20 border-2 border-dashed rounded-md bg-muted/50">
                   <p className="text-sm text-muted-foreground">
-                    Community description will appear here
+                    {singularName} description will appear here
                   </p>
                 </div>
               )}

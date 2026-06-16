@@ -10,15 +10,18 @@ import {
 } from "lucide-react";
 import { StatCard } from "@/components/ui/stat-card";
 import { useJobStats } from "../../graphql/actions/jobs";
+import { useModuleStore } from "@/store/useModuleStore";
 
 const Stats = () => {
+  const moduleName = useModuleStore((state) => state.jobModuleName);
+  const singularName = useModuleStore((state) => state.jobSingularName);
   const { data } = useJobStats();
   const stats = data?.getJobStats;
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 mb-6">
       <StatCard
-        title="Total Jobs"
+        title={`Total ${moduleName}`}
         value={stats?.totalJobs || 0}
         icon={Briefcase}
         color="green"
@@ -31,14 +34,14 @@ const Stats = () => {
       />
 
       <StatCard
-        title="Active Jobs"
+        title={`Active ${moduleName}`}
         value={stats?.activeJobs || 0}
         icon={CheckCircle}
         color="amber"
         description={
           <>
             <TrendingUp className="h-3 w-3 mr-1" />
-            {stats?.totalJobs || 0}% of total jobs
+            {stats?.totalJobs || 0}% of total {moduleName.toLowerCase()}
           </>
         }
       />
@@ -77,7 +80,7 @@ const Stats = () => {
         description={
           <>
             <Star className="h-3 w-3 mr-1" />
-            per job posting
+            per {singularName.toLowerCase()} posting
           </>
         }
       />

@@ -13,6 +13,7 @@ import {
   AdminStatusBadge,
   AdminTableColumn,
 } from "@/components/shared/admin-table/admin-table";
+import { useModuleStore } from "@/store/useModuleStore";
 
 interface OffersTableProps {
   offers: Offer[];
@@ -27,6 +28,9 @@ export function OffersTable({
   onEdit,
   refetch,
 }: OffersTableProps) {
+  const moduleName = useModuleStore((state) => state.offerModuleName);
+  const singularName = useModuleStore((state) => state.offerSingularName);
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "ACTIVE":
@@ -44,7 +48,7 @@ export function OffersTable({
     () => [
       {
         key: "title",
-        header: "Offer",
+        header: singularName,
         cell: (row) => {
           const offer = row;
           return (
@@ -228,7 +232,7 @@ export function OffersTable({
       loading={isLoading}
       keyExtractor={(o) => o.id}
       emptyIcon={Tag}
-      emptyTitle="No offers found"
+      emptyTitle={`No ${moduleName.toLowerCase()} found`}
       emptyDescription="Try adjusting your search or filter criteria."
     />
   );

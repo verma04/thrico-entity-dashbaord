@@ -10,8 +10,10 @@ import { SurveyCreationForm } from "@/components/surveys/add/survey-creation-for
 import { useToast } from "@/components/ui/use-toast";
 
 import { useAddSurvey } from "@/graphql/surveys/survey-mutations";
+import { useModuleStore } from "@/store/useModuleStore";
 
 const AddSurveyPage = () => {
+  const singularName = useModuleStore((state) => state.surveySingularName);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -19,14 +21,14 @@ const AddSurveyPage = () => {
     onCompleted: (data: any) => {
       toast({
         title: "Success",
-        description: "Survey created successfully!",
+        description: `${singularName} created successfully!`,
       });
       router.push(`/surveys/${data.addSurvey.id}`); // or the actual surveys list route
     },
     onError: (error: any) => {
       toast({
         title: "Error",
-        description: error.message || "Failed to create survey",
+        description: error.message || `Failed to create ${singularName.toLowerCase()}`,
         variant: "destructive",
       });
     },

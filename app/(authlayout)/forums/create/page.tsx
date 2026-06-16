@@ -8,22 +8,25 @@ import { useToast } from "@/components/ui/use-toast";
 import { withModulePermission } from "@/components/hoc/with-module-permission";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 
+import { useModuleStore } from "@/store/useModuleStore";
+
 const CreateForumPage = () => {
   const router = useRouter();
   const { toast } = useToast();
+  const singularName = useModuleStore((state) => state.forumSingularName);
 
   const [add, { loading }] = addDiscussionForum({
     onCompleted: (data: any) => {
       toast({
         title: "Success",
-        description: "Discussion posted successfully!",
+        description: `${singularName} posted successfully!`,
       });
       router.push("/forums/all");
     },
     onError: (error: any) => {
       toast({
         title: "Error",
-        description: error.message || "Failed to post discussion",
+        description: error.message || `Failed to post ${singularName.toLowerCase()}`,
         variant: "destructive",
       });
     },

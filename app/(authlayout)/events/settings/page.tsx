@@ -8,25 +8,28 @@ import { useEntitySettings, useUpdateEntitySettings } from "@/graphql/actions";
 import { Calendar, ShieldCheck, Zap } from "lucide-react";
 import { PlatformSettingsPage, SettingsField } from "@/components/ui/platform/settings-page";
 import { toast } from "sonner";
+import { useModuleStore } from "@/store/useModuleStore";
 
-const FIELDS: SettingsField[] = [
+const getFields = (singularName: string, moduleName: string): SettingsField[] => [
   {
     key: "allowEvents",
-    label: "Allow Event Creation",
-    description: "Enable or disable the ability to instantiate new event nodes across the ecosystem.",
+    label: `Allow ${singularName} Creation`,
+    description: `Enable or disable the ability to instantiate new ${singularName.toLowerCase()} nodes across the ecosystem.`,
     icon: ShieldCheck,
     section: "Activation Protocol",
   },
   {
     key: "autoApproveEvents",
-    label: "Auto Approve Events",
-    description: "Automatically authorize new event creation requests in the registry without manual validation.",
+    label: `Auto Approve ${moduleName}`,
+    description: `Automatically authorize new ${singularName.toLowerCase()} creation requests in the registry without manual validation.`,
     icon: Zap,
     section: "Activation Protocol",
   },
 ];
 
 const EventsSettings = () => {
+  const moduleName = useModuleStore((state) => state.eventModuleName);
+  const singularName = useModuleStore((state) => state.eventSingularName);
   const { data, loading, refetch } = useEntitySettings();
   const [update, { loading: loadingBtn }] = useUpdateEntitySettings({});
 
@@ -37,7 +40,7 @@ const EventsSettings = () => {
           input: settings,
         },
       });
-      toast.success("Event protocols synchronized successfully.");
+      toast.success(`${singularName} protocols synchronized successfully.`);
       refetch();
     } catch (error) {
       toast.error("Failed to update registry parameters.");
@@ -47,11 +50,11 @@ const EventsSettings = () => {
 
   return (
     <PlatformSettingsPage
-      title="Event Protocols"
-      description="Configure institutional event instantiation rules, approval protocols, and foundational module parameters."
+      title={`${singularName} Protocols`}
+      description={`Configure institutional ${singularName.toLowerCase()} instantiation rules, approval protocols, and foundational module parameters.`}
       headerIcon={Calendar}
       badge="Registry"
-      fields={FIELDS}
+      fields={getFields(singularName, moduleName)}
       data={data?.getEntitySettings}
       loading={loading}
       onSave={handleSave}

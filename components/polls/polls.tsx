@@ -19,8 +19,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useModuleStore } from "@/store/useModuleStore";
 
 const Poll: React.FC<PollProps> = ({ by: initialBy }) => {
+  const moduleName = useModuleStore((state) => state.pollModuleName);
+  const singularName = useModuleStore((state) => state.pollSingularName);
   const [byFilter, setByFilter] = useState<By>(initialBy || By.ENTITY);
   
   const { data, loading, refetch } = getPolls({
@@ -37,15 +40,15 @@ const Poll: React.FC<PollProps> = ({ by: initialBy }) => {
   return (
     <EcosystemWrapper>
        <EcosystemHeader
-          title="Polls"
-          description="Manage and view administrative and community polls."
+          title={moduleName}
+          description={`Manage and view administrative and community ${moduleName.toLowerCase()}.`}
           badgeText={isAdmin ? "Admin" : "Community"}
           icon={BarChart3}
           actions={
             <Link href="/polls/create">
                <Button className="font-semibold text-xs px-6 h-10 rounded-lg shadow-sm gap-2">
                  <Plus className="h-4 w-4" />
-                 Create Poll
+                 Create {singularName}
                </Button>
             </Link>
           }
@@ -56,7 +59,7 @@ const Poll: React.FC<PollProps> = ({ by: initialBy }) => {
              <EcosystemActionBar.Item grow className="max-w-xs">
                 <div className="flex flex-col px-1 justify-center h-full">
                    <span className="text-[11px] font-semibold text-foreground uppercase tracking-tight leading-none">
-                      {isAdmin ? "Admin" : "Community"} Polls
+                      {isAdmin ? "Admin" : "Community"} {moduleName}
                    </span>
                    <span className="text-[9px] text-zinc-400 mt-1 uppercase tracking-widest">
                       Active Stream
@@ -75,12 +78,12 @@ const Poll: React.FC<PollProps> = ({ by: initialBy }) => {
                 >
                   <SelectTrigger className="w-[140px] h-9 border-none bg-muted/50 rounded-lg text-xs font-semibold focus:ring-0">
                     <Filter className="w-3.5 h-3.5 mr-2 text-muted-foreground" />
-                    <SelectValue placeholder="Filter Polls" />
+                    <SelectValue placeholder={`Filter ${moduleName}`} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value={By.ENTITY}>Admin Polls</SelectItem>
-                    <SelectItem value={By.USER}>User Polls</SelectItem>
-                    <SelectItem value={By.ALL}>All Polls</SelectItem>
+                    <SelectItem value={By.ENTITY}>Admin {moduleName}</SelectItem>
+                    <SelectItem value={By.USER}>User {moduleName}</SelectItem>
+                    <SelectItem value={By.ALL}>All {moduleName}</SelectItem>
                   </SelectContent>
                 </Select>
              </EcosystemActionBar.Item>
@@ -98,7 +101,7 @@ const Poll: React.FC<PollProps> = ({ by: initialBy }) => {
 
           <EcosystemActionBar.Group align="right">
              <EcosystemActionBar.Status active={polls.length > 0}>
-                {polls.length} Polls
+                {polls.length} {moduleName}
              </EcosystemActionBar.Status>
           </EcosystemActionBar.Group>
        </EcosystemActionBar>

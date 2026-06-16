@@ -26,6 +26,7 @@ import { getPollByIdForUser } from "@/graphql/actions/polls";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { useModuleStore } from "@/store/useModuleStore";
 
 const tabItems = [
   { key: "manage", label: "Overview", icon: MessageSquare },
@@ -37,6 +38,8 @@ const tabItems = [
 ];
 
 function PollManagementLayout({ children }: { children: React.ReactNode }) {
+  const moduleName = useModuleStore((state) => state.pollModuleName);
+  const singularName = useModuleStore((state) => state.pollSingularName);
   const router = useRouter();
   const pathname = usePathname();
   const id = pathname?.split("/")[2];
@@ -97,8 +100,8 @@ function PollManagementLayout({ children }: { children: React.ReactNode }) {
                   <div className="flex items-center gap-2.5">
                     <h1 className="text-lg font-semibold tracking-tight">
                       {loading
-                        ? "Loading Poll..."
-                        : poll?.title || "Poll Details"}
+                        ? `Loading ${singularName}...`
+                        : poll?.title || `${singularName} Details`}
                     </h1>
                     {loading && (
                       <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
@@ -195,13 +198,13 @@ function PollManagementLayout({ children }: { children: React.ReactNode }) {
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink href="/polls" className="text-xs font-medium">
-                  Polls
+                  {moduleName}
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbPage className="text-xs font-medium">
-                  {poll?.title || "Poll Details"}
+                  {poll?.title || `${singularName} Details`}
                 </BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>

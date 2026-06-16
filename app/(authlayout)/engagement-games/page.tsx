@@ -9,6 +9,7 @@ import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { subDays } from "date-fns";
 import { DateRange } from "react-day-picker";
 import React, { useState } from "react";
+import { useModuleStore } from "@/store/useModuleStore";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
@@ -110,6 +111,7 @@ function TodayCard({
 }
 
 export default function EngagementDashboardPage() {
+  const gamesCenterModuleName = useModuleStore((state) => state.gamesCenterModuleName);
   const [timeRange, setTimeRange] = React.useState<TimeRange>(TimeRange.LAST_7_DAYS);
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
     from: subDays(new Date(), 7),
@@ -180,8 +182,8 @@ export default function EngagementDashboardPage() {
   return (
     <EcosystemWrapper>
       <EcosystemHeader
-        title="Engagement Dashboard"
-        badgeText="Engagement"
+        title={`${gamesCenterModuleName} Dashboard`}
+        badgeText={gamesCenterModuleName}
         description="Platform-wide overview of all engagement games — spins, scratches, and match plays."
         icon={LayoutDashboard}
       />

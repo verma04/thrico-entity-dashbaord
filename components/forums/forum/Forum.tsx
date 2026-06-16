@@ -29,6 +29,7 @@ import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-cont
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import Post from "@/components/forums/post/forum-post";
+import { useModuleStore } from "@/store/useModuleStore";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Status & Filter options
@@ -59,6 +60,8 @@ export default function Forum({ status: initialStatus }: ForumProps) {
     initialStatus || "ALL",
   );
   const [verificationFilter, setVerificationFilter] = useState("ALL");
+  const moduleName = useModuleStore((state) => state.forumModuleName);
+  const singularName = useModuleStore((state) => state.forumSingularName);
 
   const { data, loading, refetch } = getDiscussionForum({
     variables: {
@@ -96,12 +99,12 @@ export default function Forum({ status: initialStatus }: ForumProps) {
   return (
     <EcosystemWrapper>
       <EcosystemHeader
-        title="Discussion Forums"
+        title={moduleName}
         badgeText="Community Dialogues"
         description={
           loading
-            ? "Loading forums…"
-            : `Monitor, moderate, and engage with ${forums.length} community conversations.`
+            ? `Loading ${moduleName.toLowerCase()}…`
+            : `Monitor, moderate, and engage with ${forums.length} ${moduleName.toLowerCase()}.`
         }
         icon={MessageSquare}
         actions={
@@ -223,7 +226,7 @@ export default function Forum({ status: initialStatus }: ForumProps) {
 
         <EcosystemActionBar.Group align="right">
           <EcosystemActionBar.Status active={filteredForums.length > 0}>
-            {filteredForums.length} Topics
+            {filteredForums.length} {moduleName}
           </EcosystemActionBar.Status>
         </EcosystemActionBar.Group>
       </EcosystemActionBar>

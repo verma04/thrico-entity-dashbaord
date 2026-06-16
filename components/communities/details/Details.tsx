@@ -5,20 +5,23 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Globe, Star, Users, Share2, MapPin } from "lucide-react";
 import { communityEntity } from "../ts-types";
+import { communityEntity } from "../ts-types";
 import Image from "next/image";
+import { useModuleStore } from "@/store/useModuleStore";
 
 export default function PhotographyCommunity({
   data,
 }: {
   data: communityEntity;
 }) {
+  const singularName = useModuleStore((state) => state.communitySingularName);
   return (
     <div>
       {/* Banner Image */}
       <div className="relative h-[300px] bg-muted flex justify-center items-center">
         <Image
           src={`https://cdn.thrico.network/${data?.cover}`}
-          alt="Community cover"
+          alt={`${singularName} cover`}
           fill
           className="object-cover"
         />

@@ -38,6 +38,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { ImageCropper } from "@/components/communities/add/image-cropper";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { EventPreview } from "./event-preview";
+import { useModuleStore } from "@/store/useModuleStore";
 
 interface EventsCreationFormProps {
   initialValues?: Record<string, any>;
@@ -71,6 +72,8 @@ export function EventsCreationForm({
   buttonText = "Create Event",
   headerTitle = "Create Event",
 }: EventsCreationFormProps) {
+  const moduleName = useModuleStore((state) => state.eventModuleName);
+  const singularName = useModuleStore((state) => state.eventSingularName);
   const { toast } = useToast();
   const [imageUrl, setImageUrl] = useState<string | null>(initialCoverUrl || null);
   const [cropModalVisible, setCropModalVisible] = useState(false);
@@ -146,9 +149,9 @@ export function EventsCreationForm({
                   </h1>
                 </div>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground ml-1">
-                  <span>Events</span>
+                  <span>{moduleName}</span>
                   <ChevronRight className="h-3 w-3" />
-                  <span>Create New Event</span>
+                  <span>Create New {singularName}</span>
                 </div>
               </div>
             </div>
@@ -165,7 +168,7 @@ export function EventsCreationForm({
                       <CardHeader className="bg-muted/30 pb-4">
                         <CardTitle className="text-xl">Basic Information</CardTitle>
                         <CardDescription>
-                          Essential details about your event
+                          Essential details about your {singularName.toLowerCase()}
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="pt-6 space-y-6">
@@ -184,7 +187,7 @@ export function EventsCreationForm({
                                 <div className="aspect-[21/9] w-full relative">
                                   <Image
                                     src={imageUrl}
-                                    alt="Event cover preview"
+                                    alt={`${singularName} cover preview`}
                                     fill
                                     className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
                                   />
@@ -232,7 +235,7 @@ export function EventsCreationForm({
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div className="space-y-2">
                             <Label htmlFor="title" className="text-sm font-medium">
-                              Event Title{" "}
+                              {singularName} Title{" "}
                               <span className="text-destructive">*</span>
                             </Label>
                             <Input
@@ -305,13 +308,13 @@ export function EventsCreationForm({
                             htmlFor="description"
                             className="text-sm font-medium"
                           >
-                            Event Description{" "}
+                            {singularName} Description{" "}
                             <span className="text-destructive">*</span>
                           </Label>
                           <Textarea
                             id="description"
                             name="description"
-                            placeholder="Describe the event, what attendees can expect, and what makes it exciting..."
+                            placeholder={`Describe the ${singularName.toLowerCase()}, what attendees can expect, and what makes it exciting...`}
                             className={cn(
                               "min-h-[160px] resize-none",
                               formik.touched.description &&
@@ -338,9 +341,9 @@ export function EventsCreationForm({
                     {/* Event Details */}
                     <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden">
                       <CardHeader className="bg-muted/30 pb-4">
-                        <CardTitle className="text-xl">Event Details</CardTitle>
+                        <CardTitle className="text-xl">{singularName} Details</CardTitle>
                         <CardDescription>
-                          Date, time, and type of event
+                          Date, time, and type of {singularName.toLowerCase()}
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="pt-6 space-y-6">
@@ -398,7 +401,7 @@ export function EventsCreationForm({
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div className="space-y-2">
                             <Label htmlFor="type" className="text-sm font-medium">
-                              Event Type <span className="text-destructive">*</span>
+                              {singularName} Type <span className="text-destructive">*</span>
                             </Label>
                             <Select
                               onValueChange={(value) =>
@@ -414,7 +417,7 @@ export function EventsCreationForm({
                                     "border-destructive",
                                 )}
                               >
-                                <SelectValue placeholder="Select event type" />
+                                <SelectValue placeholder={`Select ${singularName.toLowerCase()} type`} />
                               </SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="in_person">In Person</SelectItem>
@@ -458,7 +461,7 @@ export function EventsCreationForm({
                               onCheckedChange={(checked) => formik.setFieldValue("isActive", checked)}
                             />
                             <Label htmlFor="isActive" className="text-sm text-muted-foreground">
-                              {formik.values.isActive ? "Event is Active" : "Event is Inactive"}
+                              {formik.values.isActive ? `${singularName} is Active` : `${singularName} is Inactive`}
                             </Label>
                           </div>
                         </div>
@@ -471,7 +474,7 @@ export function EventsCreationForm({
                 <div className="lg:col-span-4">
                   <div className="sticky top-6 space-y-6">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-lg font-bold">Event Preview</h3>
+                      <h3 className="text-lg font-bold">{singularName} Preview</h3>
                       <Badge
                         variant="outline"
                         className="bg-green-500/5 text-green-600 border-green-500/20"
@@ -500,7 +503,7 @@ export function EventsCreationForm({
                           <li className="flex gap-2">
                             <span className="text-primary font-bold">•</span>
                             <span>
-                              Choose a clear, descriptive title for your event.
+                              Choose a clear, descriptive title for your {singularName.toLowerCase()}.
                             </span>
                           </li>
                           <li className="flex gap-2">
@@ -554,7 +557,7 @@ export function EventsCreationForm({
             if (onCancel) onCancel();
             else window.history.back();
           }}
-          title="Unsaved Event Data"
+          title={`Unsaved ${singularName} Data`}
           description="You have unfilled form data."
           buttonText={buttonText}
         />

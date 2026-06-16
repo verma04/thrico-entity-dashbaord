@@ -32,8 +32,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ImageUploadWithCrop } from "@/components/ui/image-upload-with-crop";
-import { Skeleton } from "@/components/ui/skeleton";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
+import { useModuleStore } from "@/store/useModuleStore";
 
 export function MomentCreationForm({
   loading,
@@ -45,6 +45,7 @@ export function MomentCreationForm({
   uploadProgress = 0,
   uploadStatus = null,
 }: any) {
+  const singularName = useModuleStore((state) => state.momentSingularName);
   const { toast } = useToast();
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(
     uploadedAssets?.thumbnailUrl || null,
@@ -74,7 +75,7 @@ export function MomentCreationForm({
         if (!videoFile) {
           toast({
             title: "Missing Video",
-            description: "Please upload a video file for your moment",
+            description: `Please upload a video file for your ${singularName.toLowerCase()}`,
             variant: "destructive",
           });
           return;
@@ -130,7 +131,7 @@ export function MomentCreationForm({
                     <Video className="h-5 w-5" />
                   </div>
                   <h1 className="text-xl font-bold tracking-tight text-slate-900">
-                    {step === 1 ? "Broadcast Moment" : "Finalize Manifest"}
+                    {step === 1 ? `Broadcast ${singularName}` : "Finalize Manifest"}
                   </h1>
                 </div>
                 <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">
@@ -288,7 +289,7 @@ export function MomentCreationForm({
                               Caption Content
                             </Label>
                             <Textarea
-                              placeholder="Describe your moment..."
+                              placeholder={`Describe your ${singularName.toLowerCase()}...`}
                               className="min-h-[120px] rounded-xl border-slate-200 focus:ring-1 focus:ring-slate-900/5 transition-all resize-none text-sm"
                               value={formik.values.caption}
                               onChange={formik.handleChange}
@@ -476,7 +477,7 @@ export function MomentCreationForm({
               </div>
 
               <h2 className="text-lg font-bold text-slate-900 tracking-tight">
-                {uploadStatus || "Broadcasting Moment"}
+                {uploadStatus || `Broadcasting ${singularName}`}
               </h2>
 
               {uploadProgress > 0 && uploadProgress <= 100 && (
@@ -528,9 +529,9 @@ export function MomentCreationForm({
             if (onCancel) onCancel();
             else window.history.back();
           }}
-          title="Unsaved Moment"
+          title={`Unsaved ${singularName}`}
           description="You have unfilled form data."
-          buttonText={step === 1 ? "Continue" : "Publish Moment"}
+          buttonText={step === 1 ? "Continue" : `Publish ${singularName}`}
         />
       </>
     </FormikProvider>

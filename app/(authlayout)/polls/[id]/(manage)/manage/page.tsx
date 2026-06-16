@@ -31,6 +31,7 @@ import { useFormik, FieldArray, FormikProvider } from "formik";
 import * as Yup from "yup";
 import { editPolls, getPollByIdForUser } from "@/graphql/actions/polls";
 import { useParams } from "next/navigation";
+import { useModuleStore } from "@/store/useModuleStore";
 
 const pollSchema = Yup.object().shape({
   title: Yup.string()
@@ -80,6 +81,7 @@ const visibilityOptions = [
 ];
 
 export default function EditPollPage() {
+  const singularName = useModuleStore((state) => state.pollSingularName);
   const params = useParams();
   const id = params?.id as string;
 
@@ -164,8 +166,8 @@ export default function EditPollPage() {
   return (
     <div className="bg-background rounded-xl border border-border shadow-sm p-6 max-w-3xl mx-auto">
       <div className="mb-6">
-        <h2 className="text-xl font-semibold tracking-tight">Edit Poll</h2>
-        <p className="text-sm text-muted-foreground">Modify your existing community poll</p>
+        <h2 className="text-xl font-semibold tracking-tight">Edit {singularName}</h2>
+        <p className="text-sm text-muted-foreground">Modify your existing community {singularName.toLowerCase()}</p>
       </div>
 
       <FormikProvider value={formik}>
@@ -174,12 +176,12 @@ export default function EditPollPage() {
             {/* Title */}
             <div className="space-y-2">
               <Label htmlFor="poll-title" className="text-sm font-medium">
-                Poll Title <span className="text-destructive">*</span>
+                {singularName} Title <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="poll-title"
                 name="title"
-                placeholder="Enter poll title"
+                placeholder={`Enter ${singularName.toLowerCase()} title`}
                 maxLength={100}
                 value={formik.values.title}
                 onChange={formik.handleChange}
@@ -203,7 +205,7 @@ export default function EditPollPage() {
                 name="question"
                 rows={4}
                 className="resize-none"
-                placeholder="Describe what your poll is asking"
+                placeholder={`Describe what your ${singularName.toLowerCase()} is asking`}
                 maxLength={200}
                 value={formik.values.question}
                 onChange={formik.handleChange}
@@ -366,7 +368,7 @@ export default function EditPollPage() {
                 </div>
                 <div>
                   <Label className="text-base font-semibold">Result Visibility</Label>
-                  <p className="text-sm text-muted-foreground">Choose when voters can see the poll outcomes</p>
+                  <p className="text-sm text-muted-foreground">Choose when voters can see the {singularName.toLowerCase()} outcomes</p>
                 </div>
               </div>
               <RadioGroup

@@ -17,6 +17,7 @@ import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEventById } from "@/graphql/actions/events";
 import { Loader2 } from "lucide-react";
+import { useModuleStore } from "@/store/useModuleStore";
 
 const tabItems = [
   { key: "general-info", label: "General Info" },
@@ -52,6 +53,9 @@ function EventsLayout({
 
   const { data, loading } = useEventById(eventId || "");
 
+  const moduleName = useModuleStore((state) => state.eventModuleName);
+  const singularName = useModuleStore((state) => state.eventSingularName);
+
   return (
     <AnimatePresence>
       <motion.div
@@ -73,7 +77,7 @@ function EventsLayout({
             <div className="flex flex-col">
               <div className="flex items-center gap-3">
                 <h1 className="text-xl font-bold">
-                  {loading ? "Loading Event..." : data?.getEventById?.title || "Event Management"}
+                  {loading ? `Loading ${singularName}...` : data?.getEventById?.title || `${singularName} Management`}
                 </h1>
                 {loading && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />}
                 {!loading && data?.getEventById?.status && (
@@ -119,11 +123,11 @@ function EventsLayout({
               <Breadcrumb className="mb-4">
                 <BreadcrumbList>
                   <BreadcrumbItem>
-                    <BreadcrumbLink href="/events">Events</BreadcrumbLink>
+                    <BreadcrumbLink href="/events">{moduleName}</BreadcrumbLink>
                   </BreadcrumbItem>
                   <BreadcrumbSeparator />
                   <BreadcrumbItem>
-                    <BreadcrumbPage>Event Management</BreadcrumbPage>
+                    <BreadcrumbPage>{singularName} Management</BreadcrumbPage>
                   </BreadcrumbItem>
                 </BreadcrumbList>
               </Breadcrumb>

@@ -25,6 +25,7 @@ import { useShopProduct } from "@/graphql/actions/shop";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { useModuleStore } from "@/store/useModuleStore";
 
 const tabItems = [
   { key: "manage", label: "Overview", icon: ShoppingBag },
@@ -35,6 +36,8 @@ const tabItems = [
 ];
 
 function ShopManagementLayout({ children }: { children: React.ReactNode }) {
+  const moduleName = useModuleStore((state) => state.shopModuleName);
+  const singularName = useModuleStore((state) => state.shopSingularName);
   const router = useRouter();
   const pathname = usePathname();
   const id = pathname?.split("/")[2];
@@ -88,8 +91,8 @@ function ShopManagementLayout({ children }: { children: React.ReactNode }) {
                   <div className="flex items-center gap-2.5">
                     <h1 className="text-lg font-semibold tracking-tight">
                       {loading
-                        ? "Loading Product..."
-                        : product?.title || "Product Details"}
+                        ? `Loading ${singularName}...`
+                        : product?.title || `${singularName} Details`}
                     </h1>
                     {loading && (
                       <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
@@ -192,13 +195,13 @@ function ShopManagementLayout({ children }: { children: React.ReactNode }) {
                   href="/shop/all"
                   className="text-xs font-medium"
                 >
-                  Shop
+                  {moduleName}
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbPage className="text-xs font-medium">
-                  {product?.title || "Product Details"}
+                  {product?.title || `${singularName} Details`}
                 </BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>

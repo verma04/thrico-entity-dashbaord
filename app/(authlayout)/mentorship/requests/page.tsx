@@ -19,7 +19,11 @@ import { useEntitySettings } from "@/graphql/actions";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import Link from "next/link";
 
+import { useModuleStore } from "@/store/useModuleStore";
+
 function MentorshipRequestPage() {
+  const moduleName = useModuleStore((state) => state.mentorshipModuleName);
+  const singularName = useModuleStore((state) => state.mentorshipSingularName);
   const [selectedMentor, setSelectedMentor] = useState<any | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const { data: settingsData } = useEntitySettings();
@@ -165,9 +169,9 @@ function MentorshipRequestPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold">Mentorship Request</h2>
+        <h2 className="text-2xl font-semibold">{singularName} Request</h2>
         <p className="text-sm text-muted-foreground mt-1">
-          {mentors.length} pending mentor application
+          {mentors.length} pending {singularName.toLowerCase()} application
           {mentors.length !== 1 ? "s" : ""}
         </p>
       </div>
@@ -177,8 +181,8 @@ function MentorshipRequestPage() {
           <Settings2 className="h-4 w-4 stroke-amber-600" />
           <AlertTitle className="font-semibold text-amber-900">Auto-Approval Enabled</AlertTitle>
           <AlertDescription className="text-amber-700">
-            Your system is configured to <strong>automatically approve</strong> all mentor applications. New requests will not appear in this list as they bypass the review process. 
-            To change this, visit <Link href="/mentorship/settings" className="underline font-medium hover:text-amber-900">Mentorship Settings</Link>.
+            Your system is configured to <strong>automatically approve</strong> all {singularName.toLowerCase()} applications. New requests will not appear in this list as they bypass the review process. 
+            To change this, visit <Link href="/mentorship/settings" className="underline font-medium hover:text-amber-900">{moduleName} Settings</Link>.
           </AlertDescription>
         </Alert>
       ) : (
@@ -186,7 +190,7 @@ function MentorshipRequestPage() {
           <Info className="h-4 w-4 stroke-blue-600" />
           <AlertTitle className="font-semibold text-blue-900">Manual Review Required</AlertTitle>
           <AlertDescription className="text-blue-700">
-            Auto-approval is <strong>disabled</strong>. All incoming mentor applications will appear here and remain pending until you manually review and approve them.
+            Auto-approval is <strong>disabled</strong>. All incoming {singularName.toLowerCase()} applications will appear here and remain pending until you manually review and approve them.
           </AlertDescription>
         </Alert>
       )}

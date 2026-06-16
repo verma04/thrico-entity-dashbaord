@@ -9,12 +9,15 @@ import { useParams, useRouter } from "next/navigation";
 import { useGetCustomForm } from "@/graphql/surveys/survey-queries";
 import { useEditSurvey } from "@/graphql/surveys/survey-mutations";
 import { useFormStore } from "@/store/useFormStore";
+import { useModuleStore } from "@/store/useModuleStore";
 import NewFormPage from "@/components/feedback-form/create";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 
 function EditSurveyPage() {
+  const moduleName = useModuleStore((state) => state.surveyModuleName);
+  const singularName = useModuleStore((state) => state.surveySingularName);
   const params = useParams();
   const router = useRouter();
   const id = params?.id as string;
@@ -36,11 +39,11 @@ function EditSurveyPage() {
 
   const [editSurvey, { loading: isUpdating }] = useEditSurvey({
     onCompleted: () => {
-      toast.success("Survey published successfully!");
+      toast.success(`${singularName} published successfully!`);
       router.push("/surveys/all");
     },
     onError: (err) => {
-      toast.error(err.message || "Failed to update survey");
+      toast.error(err.message || `Failed to update ${singularName.toLowerCase()}`);
     },
   });
 
@@ -81,12 +84,12 @@ function EditSurveyPage() {
   if (error) {
     return (
       <div className="h-screen flex flex-col items-center justify-center gap-4">
-        <p className="text-destructive font-medium">Failed to load survey</p>
+        <p className="text-destructive font-medium">Failed to load {singularName.toLowerCase()}</p>
         <button
           onClick={() => router.push("/surveys")}
           className="text-sm underline"
         >
-          Back to Surveys
+          Back to {moduleName}
         </button>
       </div>
     );

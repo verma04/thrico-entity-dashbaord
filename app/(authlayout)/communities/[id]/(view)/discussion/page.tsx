@@ -33,8 +33,10 @@ import { cn } from "@/lib/utils";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import CommunityFeed from "@/components/feed/community-feed";
+import { useModuleStore } from "@/store/useModuleStore";
 
 export default function CommunityDashboard() {
+  const singularName = useModuleStore((state) => state.communitySingularName);
   const { id } = useParams() as { id: string };
 
   const { data: communityData } = useQuery(GET_COMMUNITY_BY_ID, {
@@ -98,7 +100,7 @@ export default function CommunityDashboard() {
               <div className="p-2 bg-primary/10 rounded-xl">
                 <Activity className="h-4 w-4 text-primary" />
               </div>
-              <CardTitle className="text-base font-semibold">Community Activity</CardTitle>
+              <CardTitle className="text-base font-semibold">{singularName} Activity</CardTitle>
             </div>
           </CardHeader>
           <CardContent className="pt-6 space-y-5">
@@ -166,7 +168,7 @@ export default function CommunityDashboard() {
                 size="sm"
                 className="text-amber-600 hover:text-amber-700 hover:bg-amber-100/50 font-semibold -mr-2 text-xs"
               >
-                Rate Community
+                Rate {singularName}
               </Button>
             </div>
           </CardContent>
@@ -179,7 +181,7 @@ export default function CommunityDashboard() {
                 <ShieldCheck className="h-4 w-4 text-blue-600" />
               </div>
               <CardTitle className="text-base font-semibold text-foreground">
-                Community Admins
+                {singularName} Admins
               </CardTitle>
             </div>
           </CardHeader>

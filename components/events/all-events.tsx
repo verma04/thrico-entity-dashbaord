@@ -12,6 +12,7 @@ import {
   AdminVerifiedBadge,
   AdminTableColumn,
 } from "@/components/shared/admin-table/admin-table";
+import { useModuleStore } from "@/store/useModuleStore";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Type Badge
@@ -38,10 +39,10 @@ function EventTypeBadge({ type }: { type: string }) {
 // Column definitions
 // ─────────────────────────────────────────────────────────────────────────────
 
-const columns: AdminTableColumn<Event>[] = [
+const getColumns = (singularName: string): AdminTableColumn<Event>[] => [
   {
     key: "event",
-    header: "Event",
+    header: singularName,
     cell: (row) => (
       <div className="flex items-center gap-3">
         <Avatar className="h-9 w-9 rounded-lg border border-border/60 shrink-0">
@@ -138,12 +139,16 @@ export default function AllEvents({
   loading?: boolean;
   viewMode?: "grid" | "list";
 }) {
+  const moduleName = useModuleStore((state) => state.eventModuleName);
+  const singularName = useModuleStore((state) => state.eventSingularName);
+  const columns = React.useMemo(() => getColumns(singularName), [singularName]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-7 w-7 animate-spin text-muted-foreground/40" />
-          <p className="text-sm text-muted-foreground">Loading events…</p>
+          <p className="text-sm text-muted-foreground">Loading {moduleName.toLowerCase()}…</p>
         </div>
       </div>
     );
@@ -157,9 +162,9 @@ export default function AllEvents({
             <div className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center mb-4 text-muted-foreground/40">
               <Calendar className="h-6 w-6" />
             </div>
-            <p className="text-sm font-semibold text-foreground">No events found</p>
+            <p className="text-sm font-semibold text-foreground">No {moduleName.toLowerCase()} found</p>
             <p className="text-xs text-muted-foreground mt-1 text-center max-w-sm">
-              No events match your current filters. Try adjusting your search or create a new event.
+              No {moduleName.toLowerCase()} match your current filters. Try adjusting your search or create a new {singularName.toLowerCase()}.
             </p>
           </CardContent>
         </Card>
@@ -181,7 +186,7 @@ export default function AllEvents({
       data={data}
       keyExtractor={(e) => e.id}
       emptyIcon={Calendar}
-      emptyTitle="No events found"
+      emptyTitle={`No ${moduleName.toLowerCase()} found`}
       emptyDescription="Try adjusting your search or filter criteria."
     />
   );

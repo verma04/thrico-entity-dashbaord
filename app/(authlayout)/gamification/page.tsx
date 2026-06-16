@@ -40,8 +40,10 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useModuleStore } from "@/store/useModuleStore";
 
 export default function GamificationOverview() {
+  const gamificationModuleName = useModuleStore((state) => state.gamificationModuleName);
   const { reloginConfig, settings } = useGamificationStore();
 
   const [timeRange, setTimeRange] = React.useState<TimeRange>(TimeRange.LAST_7_DAYS);
@@ -155,7 +157,7 @@ export default function GamificationOverview() {
   return (
     <EcosystemWrapper anonymized-1="gamification-analytics">
       <EcosystemHeader
-        title="Rewards & Gamification"
+        title={`${gamificationModuleName} Dashboard`}
         description="Manage points, badges, and user rewards across your community."
         badgeText="Overview"
         icon={Trophy}

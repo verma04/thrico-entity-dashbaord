@@ -28,6 +28,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useModuleStore } from "@/store/useModuleStore";
 
 interface ListingDetailsDrawerProps {
   open: boolean;
@@ -40,6 +41,7 @@ export function ListingDetailsDrawer({
   onOpenChange,
   listing,
 }: ListingDetailsDrawerProps) {
+  const singularName = useModuleStore((state) => state.listingSingularName);
   if (!listing) return null;
 
   return (
@@ -91,10 +93,10 @@ export function ListingDetailsDrawer({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem>
-                      <Edit className="mr-2 h-4 w-4" /> Edit Listing
+                      <Edit className="mr-2 h-4 w-4" /> Edit {singularName}
                     </DropdownMenuItem>
                     <DropdownMenuItem className="text-destructive focus:text-destructive">
-                      <Trash2 className="mr-2 h-4 w-4" /> Delete Listing
+                      <Trash2 className="mr-2 h-4 w-4" /> Delete {singularName}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>

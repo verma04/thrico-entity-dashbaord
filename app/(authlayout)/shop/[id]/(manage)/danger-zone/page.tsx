@@ -28,8 +28,10 @@ import {
 import { useShopProduct, useDeleteShopProduct } from "@/graphql/actions/shop";
 import { toast } from "sonner";
 import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { useModuleStore } from "@/store/useModuleStore";
 
 function ShopDangerZonePage() {
+  const singularName = useModuleStore((state) => state.shopSingularName);
   const params = useParams();
   const router = useRouter();
   const id = params?.id as string;
@@ -41,11 +43,11 @@ function ShopDangerZonePage() {
 
   const [deleteProduct, { loading: isDeleting }] = useDeleteShopProduct({
     onCompleted: () => {
-      toast.success("Product deleted successfully");
+      toast.success(`${singularName} deleted successfully`);
       router.push("/shop/all");
     },
     onError: (err) => {
-      toast.error(err.message || "Failed to delete product");
+      toast.error(err.message || `Failed to delete ${singularName.toLowerCase()}`);
     },
   });
 
@@ -58,7 +60,7 @@ function ShopDangerZonePage() {
   }
 
   if (!product) {
-    return <div>Product not found.</div>;
+    return <div>{singularName} not found.</div>;
   }
 
   return (
@@ -69,7 +71,7 @@ function ShopDangerZonePage() {
           Danger Zone
         </h2>
         <p className="text-muted-foreground mt-1 text-sm">
-          Destructive actions to manage this product. Proceed with caution.
+          Destructive actions to manage this {singularName.toLowerCase()}. Proceed with caution.
         </p>
       </div>
 
@@ -78,10 +80,10 @@ function ShopDangerZonePage() {
           <CardHeader>
             <CardTitle className="text-destructive flex items-center gap-2">
               <Trash2 className="h-5 w-5" />
-              Delete Product
+              Delete {singularName}
             </CardTitle>
             <CardDescription>
-              Permanently delete this product and all its associated variants. This action cannot be undone.
+              Permanently delete this {singularName.toLowerCase()} and all its associated variants. This action cannot be undone.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -96,7 +98,7 @@ function ShopDangerZonePage() {
                   Deleting...
                 </>
               ) : (
-                "Delete Product"
+                `Delete ${singularName}`
               )}
             </Button>
           </CardContent>
@@ -113,7 +115,7 @@ function ShopDangerZonePage() {
               Are you absolutely sure?
             </AlertDialogTitle>
             <AlertDialogDescription className="text-sm font-medium text-slate-500">
-              This will permanently delete the product <strong>{product.title}</strong> and all its variants.
+              This will permanently delete the {singularName.toLowerCase()} <strong>{product.title}</strong> and all its variants.
               This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>

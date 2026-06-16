@@ -46,6 +46,7 @@ import {
   EcosystemCard,
 } from "@/components/layout/ecosystem/ecosystem-analytics";
 import { cn } from "@/lib/utils";
+import { useModuleStore } from "@/store/useModuleStore";
 
 const TOP_REWARDS = [
   { name: "Amazon ₹100", value: 124, pct: 100 },
@@ -58,6 +59,7 @@ const TOP_REWARDS = [
 const COLORS = ["#6366f1", "#8b5cf6", "#10b981", "#f43f5e", "#f97316"];
 
 export default function AnalyticsPage() {
+  const rewardsModuleName = useModuleStore((state) => state.rewardsModuleName);
   const [timeRange, setTimeRange] = React.useState<TimeRange>(TimeRange.LAST_7_DAYS);
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
     from: subDays(new Date(), 7),
@@ -147,9 +149,9 @@ export default function AnalyticsPage() {
   return (
     <EcosystemWrapper data-section="rewards-analytics">
       <EcosystemHeader
-        title="Rewards Analytics"
+        title={`${rewardsModuleName} Analytics`}
         badgeText="Analytics"
-        description="Track redemptions, points usage, and which rewards your members love most."
+        description={`Track redemptions, points usage, and which ${rewardsModuleName.toLowerCase()} your members love most.`}
         icon={BarChart3}
       />
 

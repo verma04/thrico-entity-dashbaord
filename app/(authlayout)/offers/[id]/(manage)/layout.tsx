@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { useGetOfferById } from "@/graphql/actions/offers";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useModuleStore } from "@/store/useModuleStore";
 
 const tabItems = [
   { key: "manage", label: "Overview", icon: Tag },
@@ -35,6 +36,8 @@ const tabItems = [
 ];
 
 function OfferManagementLayout({ children }: { children: React.ReactNode }) {
+  const moduleName = useModuleStore((state) => state.offerModuleName);
+  const singularName = useModuleStore((state) => state.offerSingularName);
   const router = useRouter();
   const pathname = usePathname();
   const id = pathname?.split("/")[2];
@@ -79,7 +82,7 @@ function OfferManagementLayout({ children }: { children: React.ReactNode }) {
                   <div className="relative">
                     <img
                       src={`https://cdn.thrico.network/${offer.image}`}
-                      alt={offer.title || "Offer Image"}
+                      alt={offer.title || `${singularName} Image`}
                       className="w-11 h-11 rounded-xl object-cover border border-border/60 shadow-sm"
                     />
                     <span
@@ -97,7 +100,7 @@ function OfferManagementLayout({ children }: { children: React.ReactNode }) {
                 <div className="flex flex-col gap-0.5">
                   <div className="flex items-center gap-2.5">
                     <h1 className="text-lg font-semibold tracking-tight">
-                      {loading ? "Loading Offer..." : offer?.title || "Offer Details"}
+                      {loading ? `Loading ${singularName}...` : offer?.title || `${singularName} Details`}
                     </h1>
                     {loading && (
                       <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
@@ -204,13 +207,13 @@ function OfferManagementLayout({ children }: { children: React.ReactNode }) {
                   href="/offers/all"
                   className="text-xs font-medium"
                 >
-                  Offers
+                  {moduleName}
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbPage className="text-xs font-medium">
-                  {offer?.title || "Offer Details"}
+                  {offer?.title || `${singularName} Details`}
                 </BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>

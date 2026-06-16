@@ -14,6 +14,7 @@ import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel"
 import { useShopStore } from "@/store/useShopStore";
 import { ProductFormValues } from "./product-form"; // Reuse types if possible
 import { CATEGORY_CONFIG } from "./category-config";
+import { useModuleStore } from "@/store/useModuleStore";
 
 import { BasicInfoSection } from "./form-sections/basic-info";
 import { MediaSection } from "./form-sections/media-section";
@@ -66,6 +67,8 @@ export function ProductCreationForm({
 }: ProductCreationFormProps) {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("general");
+  const moduleName = useModuleStore((state) => state.shopModuleName);
+  const singularName = useModuleStore((state) => state.shopSingularName);
 
   // Zustand Store
   const {
@@ -153,7 +156,7 @@ export function ProductCreationForm({
   };
 
   const getButtonLabel = () => {
-    if (mode === "create") return "Create Product";
+    if (mode === "create") return `Create ${singularName}`;
     switch (activeTab) {
       case "media":
         return "Save Media";
@@ -196,13 +199,13 @@ export function ProductCreationForm({
                     <ShoppingBag className="h-5 w-5 text-primary" />
                   </div>
                   <h1 className="text-2xl font-bold tracking-tight">
-                    {mode === "create" ? "Create Product" : "Edit Product"}
+                    {mode === "create" ? `Create ${singularName}` : `Edit ${singularName}`}
                   </h1>
                 </div>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground ml-1">
-                  <span>Shop</span>
+                  <span>{moduleName}</span>
                   <ChevronRight className="h-3 w-3" />
-                  <span>{mode === "create" ? "New" : "Edit"} Product</span>
+                  <span>{mode === "create" ? "New" : "Edit"} {singularName}</span>
                 </div>
               </div>
             </div>
@@ -246,7 +249,7 @@ export function ProductCreationForm({
                             value="options"
                             className="bg-transparent border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none px-0 pb-2 text-sm font-medium transition-all"
                           >
-                            Product Options
+                            {singularName} Options
                           </TabsTrigger>
                           <TabsTrigger
                             value="inventory"
@@ -301,7 +304,7 @@ export function ProductCreationForm({
               <div className="lg:col-span-4">
                 <div className="sticky top-6 space-y-6">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-bold">Product Preview</h3>
+                    <h3 className="text-lg font-bold">{singularName} Preview</h3>
                   </div>
                   <ProductPreview
                     formData={{
@@ -326,7 +329,7 @@ export function ProductCreationForm({
           if (onCancel) onCancel();
           else window.history.back();
         }}
-        title={`Unsaved ${mode === "create" ? "Product Data" : "Changes"}`}
+        title={`Unsaved ${mode === "create" ? `${singularName} Data` : "Changes"}`}
         description="You have unfilled form data."
         buttonText={getButtonLabel()}
       />

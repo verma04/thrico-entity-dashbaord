@@ -49,17 +49,21 @@ import {
 } from "@/components/ui/select";
 
 import { DateRangePicker } from "@/components/ui/date-range-picker";
-import { 
-  useEventStats, 
-  TimeRange, 
-  useEventRegistrationTrend, 
-  useEventTypeDistribution, 
-  useTopPerformingEvents 
-} from "@/graphql/actions/events";
+
 import { subDays } from "date-fns";
 import { DateRange } from "react-day-picker";
+import { useModuleStore } from "@/store/useModuleStore";
+import { TimeRange } from "@/graphql/actions";
+import {
+  useEventRegistrationTrend,
+  useEventStats,
+  useEventTypeDistribution,
+  useTopPerformingEvents,
+} from "@/graphql/actions/events";
 
 export default function EventsAnalytics() {
+  const moduleName = useModuleStore((state) => state.eventModuleName);
+  const singularName = useModuleStore((state) => state.eventSingularName);
   const [timeRange, setTimeRange] = useState<TimeRange>(TimeRange.LAST_7_DAYS);
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: subDays(new Date(), 7),
@@ -78,32 +82,34 @@ export default function EventsAnalytics() {
     else if (diffDays <= 90) setTimeRange(TimeRange.LAST_90_DAYS);
   };
 
-  const dateRangeParam = dateRange?.from && dateRange?.to
-    ? {
-        startDate: dateRange.from.toISOString(),
-        endDate: dateRange.to.toISOString(),
-      }
-    : undefined;
+  const dateRangeParam =
+    dateRange?.from && dateRange?.to
+      ? {
+          startDate: dateRange.from.toISOString(),
+          endDate: dateRange.to.toISOString(),
+        }
+      : undefined;
 
-  const { data, loading, refetch: refetchStats } = useEventStats(
-    timeRange,
-    dateRangeParam
-  );
+  const {
+    data,
+    loading,
+    refetch: refetchStats,
+  } = useEventStats(timeRange, dateRangeParam);
 
   const { data: trendData, refetch: refetchTrend } = useEventRegistrationTrend(
     timeRange,
-    dateRangeParam
+    dateRangeParam,
   );
 
   const { data: typeData, refetch: refetchType } = useEventTypeDistribution(
     timeRange,
-    dateRangeParam
+    dateRangeParam,
   );
 
   const { data: topData, refetch: refetchTop } = useTopPerformingEvents(
     5,
     timeRange,
-    dateRangeParam
+    dateRangeParam,
   );
 
   const handleRefetch = () => {
@@ -112,12 +118,12 @@ export default function EventsAnalytics() {
     refetchType();
     refetchTop();
   };
-  
+
   const stats = data?.getEventStats;
 
   const kpis = [
     {
-      title: "Total Events",
+      title: `Total ${moduleName}`,
       value: loading ? "..." : (stats?.totalEvents?.toLocaleString() ?? "0"),
       trend: stats?.attendeesWeeklyChange ?? 0, // Mapping to available trends
       icon: Calendar,
@@ -159,7 +165,7 @@ export default function EventsAnalytics() {
   return (
     <EcosystemWrapper anonymized-1="events-analytics">
       <EcosystemHeader
-        title="Events Dashboard"
+        title={`${moduleName} Dashboard`}
         description="Monitor community gathering metrics, registration velocity, and attendance trends."
         badgeText="Overview"
         icon={Calendar}
@@ -175,7 +181,7 @@ export default function EventsAnalytics() {
           </div>
 
           <div className="flex items-center gap-3">
-            <DateRangePicker 
+            <DateRangePicker
               date={dateRange}
               onDateChange={handleDateChange}
               defaultValue="LAST_7_DAYS"
@@ -212,22 +218,34 @@ export default function EventsAnalytics() {
                   <AreaChart data={registrationTrend}>
                     <defs>
                       <linearGradient id="colorReg" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#6366f1" stopOpacity={0.08} />
-                        <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                        <stop
+                          offset="5%"
+                          stopColor="#6366f1"
+                          stopOpacity={0.08}
+                        />
+                        <stop
+                          offset="95%"
+                          stopColor="#6366f1"
+                          stopOpacity={0}
+                        />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                    <XAxis 
-                      dataKey="name" 
-                      axisLine={false} 
-                      tickLine={false} 
-                      tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} 
-                      dy={10} 
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      vertical={false}
+                      stroke="#f1f5f9"
                     />
-                    <YAxis 
-                      axisLine={false} 
-                      tickLine={false} 
-                      tick={{ fontSize: 10, fontWeight: 600, fill: '#94a3b8' }} 
+                    <XAxis
+                      dataKey="name"
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 10, fontWeight: 600, fill: "#94a3b8" }}
+                      dy={10}
+                    />
+                    <YAxis
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 10, fontWeight: 600, fill: "#94a3b8" }}
                     />
                     <Tooltip
                       contentStyle={{
@@ -236,7 +254,11 @@ export default function EventsAnalytics() {
                         borderRadius: "12px",
                         boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
                       }}
-                      itemStyle={{ color: "#fff", fontWeight: 700, fontSize: '11px' }}
+                      itemStyle={{
+                        color: "#fff",
+                        fontWeight: 700,
+                        fontSize: "11px",
+                      }}
                       labelStyle={{ display: "none" }}
                     />
                     <Area
@@ -253,14 +275,18 @@ export default function EventsAnalytics() {
             </EcosystemCard>
 
             <EcosystemCard
-              title="Event Performance"
+              title={`${singularName} Performance`}
               description="Highest attendance per assembly"
               icon={BarChart3}
             >
               <div className="h-[300px] w-full mt-4">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={topPerformingEvents} layout="vertical">
-                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      horizontal={false}
+                      stroke="#f1f5f9"
+                    />
                     <XAxis type="number" hide />
                     <YAxis
                       dataKey="name"
@@ -268,12 +294,20 @@ export default function EventsAnalytics() {
                       axisLine={false}
                       tickLine={false}
                       width={120}
-                      tick={{ fontSize: 10, fontWeight: 600, fill: '#64748b' }}
+                      tick={{ fontSize: 10, fontWeight: 600, fill: "#64748b" }}
                     />
                     <Tooltip
-                      contentStyle={{ backgroundColor: "#18181b", border: "none", borderRadius: "12px" }}
-                      itemStyle={{ color: "#fff", fontWeight: 700, fontSize: '11px' }}
-                      cursor={{ fill: '#f8fafc' }}
+                      contentStyle={{
+                        backgroundColor: "#18181b",
+                        border: "none",
+                        borderRadius: "12px",
+                      }}
+                      itemStyle={{
+                        color: "#fff",
+                        fontWeight: 700,
+                        fontSize: "11px",
+                      }}
+                      cursor={{ fill: "#f8fafc" }}
                     />
                     <Bar
                       dataKey="attendees"
@@ -306,7 +340,11 @@ export default function EventsAnalytics() {
                       dataKey="value"
                     >
                       {eventTypeDistribution.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={entry.color}
+                          stroke="none"
+                        />
                       ))}
                     </Pie>
                     <Tooltip />
@@ -327,7 +365,10 @@ export default function EventsAnalytics() {
                     <div className="h-1.5 w-full bg-zinc-50 rounded-full overflow-hidden border border-zinc-100">
                       <div
                         className="h-full rounded-full transition-all duration-1000"
-                        style={{ width: `${item.value}%`, backgroundColor: item.color }}
+                        style={{
+                          width: `${item.value}%`,
+                          backgroundColor: item.color,
+                        }}
                       />
                     </div>
                   </div>
@@ -341,10 +382,13 @@ export default function EventsAnalytics() {
                   <div className="h-9 w-9 rounded-lg bg-white/10 backdrop-blur-md flex items-center justify-center text-indigo-400 border border-white/10">
                     <LayoutGrid size={18} />
                   </div>
-                  <h4 className="text-sm font-bold uppercase tracking-wider">Engagement Peak</h4>
+                  <h4 className="text-sm font-bold uppercase tracking-wider">
+                    Engagement Peak
+                  </h4>
                 </div>
                 <p className="text-xs font-medium text-zinc-400 leading-relaxed">
-                  Interactive assemblies showing 74.2% higher retention than passive streams.
+                  Interactive assemblies showing 74.2% higher retention than
+                  passive streams.
                 </p>
                 <Button
                   variant="link"

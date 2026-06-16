@@ -40,6 +40,7 @@ import { DateRange } from "react-day-picker";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import moment from "moment";
 import { AccessDeniedAlert } from "@/components/shared/access-denied-alert";
+import { useModuleStore } from "@/store/useModuleStore";
 
 const STATUS_COLORS = ["#18181b", "#3f3f46", "#71717a", "#a1a1aa", "#e4e4e7"];
 
@@ -64,6 +65,9 @@ const EmptyChart = ({ message }: { message: string }) => (
 );
 
 export default function CommunitiesAnalytics() {
+  const moduleName = useModuleStore((state) => state.communityModuleName);
+  const singularName = useModuleStore((state) => state.communitySingularName);
+
   const [timeRange, setTimeRange] = useState<TimeRange>(TimeRange.LAST_7_DAYS);
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: subDays(new Date(), 7),
@@ -97,7 +101,7 @@ export default function CommunitiesAnalytics() {
     return (
       <EcosystemWrapper anonymized-1="communities-analytics">
         <EcosystemHeader
-          title="Community Stats"
+          title={`${singularName} Stats`}
           description="Check your growth, members, and health."
           badgeText="Overview"
           icon={Users2}
@@ -140,7 +144,7 @@ export default function CommunitiesAnalytics() {
             >
               <div className="p-2">
                 <AccessDeniedAlert 
-                  message={error.message || "You do not have permission to view community analytics."} 
+                  message={error.message || `You do not have permission to view ${singularName.toLowerCase()} analytics.`} 
                 />
               </div>
             </EcosystemCard>
@@ -202,7 +206,7 @@ export default function CommunitiesAnalytics() {
   return (
     <EcosystemWrapper anonymized-1="communities-analytics">
       <EcosystemHeader
-        title="Community Stats"
+        title={`${singularName} Stats`}
         description="Check your growth, members, and health."
         badgeText="Overview"
         icon={Users2}
@@ -246,7 +250,7 @@ export default function CommunitiesAnalytics() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div className="lg:col-span-8 space-y-6">
             <EcosystemCard
-              title="Best Communities"
+              title={`Best ${moduleName}`}
               description="Most members and views"
               icon={BarChart3}
             >
@@ -308,7 +312,7 @@ export default function CommunitiesAnalytics() {
 
             <EcosystemCard
               title="Top Creators"
-              description="People who make the most communities"
+              description={`People who make the most ${moduleName.toLowerCase()}`}
               icon={Crown}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -336,7 +340,7 @@ export default function CommunitiesAnalytics() {
                             {creator.name}
                           </p>
                           <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
-                            {creator.communitiesCreated} Groups
+                            {creator.communitiesCreated} {moduleName}
                           </p>
                         </div>
                       </div>
@@ -351,8 +355,8 @@ export default function CommunitiesAnalytics() {
 
           <div className="lg:col-span-4 space-y-6">
             <EcosystemCard
-              title="Community Status"
-              description="Current state of all communities"
+              title={`${singularName} Status`}
+              description={`Current state of all ${moduleName.toLowerCase()}`}
               icon={Sparkles}
             >
               <div className="flex flex-col items-center gap-6">
@@ -444,7 +448,7 @@ export default function CommunitiesAnalytics() {
                 Growth
               </h4>
               <p className="text-xs text-muted-foreground leading-relaxed font-medium mb-6">
-                Communities are growing by 12.4% each year.
+                {moduleName} are growing by 12.4% each year.
               </p>
               <Button
                 size="sm"

@@ -31,6 +31,7 @@ import {
 import React, { useState } from "react";
 import moment from "moment";
 import { Job } from "../../graphql/actions/jobs";
+import { useModuleStore } from "@/store/useModuleStore";
 
 const getStatusBadge = (status: string) => {
   const statusConfig: Record<string, { variant: any; icon: any; className: string }> = {
@@ -115,6 +116,7 @@ const Details = ({
     listing: Job | null
   ) => void;
 }) => {
+  const singularName = useModuleStore((state) => state.jobSingularName);
   const [activeTab, setActiveTab] = useState("description");
 
   if (!job) return null;
@@ -130,7 +132,7 @@ const Details = ({
 
           <div className="relative pt-24 px-8 pb-8">
             <SheetHeader className="mb-6">
-              <SheetTitle className="sr-only">Job Details</SheetTitle>
+              <SheetTitle className="sr-only">{singularName} Details</SheetTitle>
               <div className="flex items-end gap-6">
                 <Avatar className="h-24 w-24 rounded-2xl border-4 border-background shadow-xl bg-background">
                   <AvatarImage
@@ -297,7 +299,7 @@ const Details = ({
                   </Button>
                   <Button className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-200 dark:shadow-none" onClick={() => handleAction("APPROVE", job)}>
                     <CheckCircle className="mr-2 h-4 w-4" />
-                    Approve Job
+                    Approve {singularName}
                   </Button>
                 </>
               )}
@@ -322,8 +324,8 @@ const Details = ({
                     </Button>
                   ) : (
                     <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-200 dark:shadow-none" onClick={() => handleAction("VERIFY", job)}>
-                      <Shield className="mr-2 h-4 w-4" />
-                      Verify Job
+                      <CheckCircle2 className="mr-2 h-4 w-4" />
+                      Verify {singularName}
                     </Button>
                   )}
                 </>
@@ -331,8 +333,8 @@ const Details = ({
 
               {job?.status === "DISABLED" && (
                 <Button className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-200 dark:shadow-none" onClick={() => handleAction("ENABLE", job)}>
-                  <CheckCircle className="mr-2 h-4 w-4" />
-                  Enable Job
+                  <CheckCircle2 className="mr-2 h-4 w-4" />
+                  Enable {singularName}
                 </Button>
               )}
             </div>

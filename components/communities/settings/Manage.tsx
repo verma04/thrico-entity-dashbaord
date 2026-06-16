@@ -9,14 +9,17 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Settings, Users, Shield, Bell } from "lucide-react";
+import { useModuleStore } from "@/store/useModuleStore";
 
 export default function Manage() {
+  const singularName = useModuleStore((state) => state.communitySingularName);
+
   return (
     <div className="p-6 space-y-6">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">Manage Community</h2>
+        <h2 className="text-3xl font-bold tracking-tight">Manage {singularName}</h2>
         <p className="text-muted-foreground">
-          Configure and manage your community settings
+          Configure and manage your {singularName.toLowerCase()} settings
         </p>
       </div>
 
@@ -45,7 +48,7 @@ export default function Manage() {
             <CardHeader>
               <CardTitle>General Settings</CardTitle>
               <CardDescription>
-                Manage your community's basic information
+                Manage your {singularName.toLowerCase()}'s basic information
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -61,7 +64,7 @@ export default function Manage() {
             <CardHeader>
               <CardTitle>Member Management</CardTitle>
               <CardDescription>
-                Manage community members and roles
+                Manage {singularName.toLowerCase()} members and roles
               </CardDescription>
             </CardHeader>
             <CardContent>

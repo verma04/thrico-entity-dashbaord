@@ -61,6 +61,7 @@ import Add from "./forum-category-add";
 
 import { discussionCategory } from "../ts-types";
 import Actions from "./forum-category-actions";
+import { useModuleStore } from "@/store/useModuleStore";
 
 export default function List({
   data,
@@ -69,6 +70,8 @@ export default function List({
   data: discussionCategory[];
   loading?: boolean;
 }) {
+  const moduleName = useModuleStore((state) => state.forumModuleName);
+  const singularName = useModuleStore((state) => state.forumSingularName);
   const router = useRouter();
   const pathname = usePathname();
   const activeStatus = pathname.replace("/forums/categories", "").replace("/", "") || "all";
@@ -185,9 +188,9 @@ export default function List({
   return (
     <EcosystemWrapper>
       <EcosystemHeader
-        title="Discussion Categories"
+        title={`${singularName} Categories`}
         badgeText="Organization"
-        description="Manage and organize your discussion forum categories."
+        description={`Manage and organize your ${moduleName.toLowerCase()} categories.`}
         icon={Tags}
         actions={
           <div className="flex items-center gap-3 relative ml-auto pr-2">

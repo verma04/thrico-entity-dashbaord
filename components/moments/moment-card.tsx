@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/popover";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
+import { useModuleStore } from "@/store/useModuleStore";
 
 interface MomentCardProps {
   moment: Moment;
@@ -25,6 +26,7 @@ export const MomentCard: React.FC<MomentCardProps> = ({
   onClick,
   onDelete,
 }) => {
+  const singularName = useModuleStore((state) => state.momentSingularName);
   const isPublished = moment?.status === "PUBLISHED";
   const creatorName =
     `${moment?.owner?.firstName ?? ""} ${moment?.owner?.lastName ?? ""}`.trim() ||
@@ -46,7 +48,7 @@ export const MomentCard: React.FC<MomentCardProps> = ({
         {moment?.thumbnailUrl ? (
           <img
             src={getPreferredMediaUrl(moment.thumbnailUrl)}
-            alt={moment?.caption ?? "Moment"}
+            alt={moment?.caption ?? singularName}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
           />
         ) : (
@@ -75,13 +77,13 @@ export const MomentCard: React.FC<MomentCardProps> = ({
               "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest border",
               isPublished
                 ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
-                : "bg-amber-500/20 text-amber-300 border-amber-500/30"
+                : "bg-amber-500/20 text-amber-300 border-amber-500/30",
             )}
           >
             <span
               className={cn(
                 "w-1.5 h-1.5 rounded-full",
-                isPublished ? "bg-emerald-400" : "bg-amber-400"
+                isPublished ? "bg-emerald-400" : "bg-amber-400",
               )}
             />
             {isPublished ? "Live" : "Draft"}
@@ -112,7 +114,7 @@ export const MomentCard: React.FC<MomentCardProps> = ({
                 onClick={() => onDelete(moment?.id)}
               >
                 <Trash2 className="h-3.5 w-3.5" />
-                Delete moment
+                Delete {singularName.toLowerCase()}
               </button>
             </PopoverContent>
           </Popover>

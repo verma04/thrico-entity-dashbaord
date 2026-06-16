@@ -36,6 +36,7 @@ import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-cont
 import { EcosystemCard } from "@/components/layout/ecosystem/ecosystem-analytics";
 import { cn } from "@/lib/utils";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
+import { useModuleStore } from "@/store/useModuleStore";
 
 interface ToggleRowProps {
   label: string;
@@ -82,6 +83,7 @@ function ToggleRow({ label, desc, checked, onChange, icon, badge }: ToggleRowPro
 }
 
 export default function FraudPage() {
+  const rewardsModuleName = useModuleStore((state) => state.rewardsModuleName);
   const { toast } = useToast();
   const { data, loading } = useGetRewardSecuritySettings();
   const [updateSettings, { loading: updating }] = useUpdateRewardSecuritySettings();
@@ -167,7 +169,7 @@ export default function FraudPage() {
       <EcosystemHeader
         title="Security Settings"
         badgeText="Fraud Prevention"
-        description="Set limits and verification rules to protect your rewards from misuse."
+        description={`Set limits and verification rules to protect your ${rewardsModuleName.toLowerCase()} from misuse.`}
         icon={ShieldCheck}
       />
 

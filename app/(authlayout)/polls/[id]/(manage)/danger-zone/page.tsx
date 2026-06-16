@@ -31,8 +31,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { changePollStatus, deletePoll, getPollByIdForUser } from "@/graphql/actions/polls";
 import { getModalTitle, getModalDescription } from "@/components/polls/utils";
 import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { useModuleStore } from "@/store/useModuleStore";
 
 function PollDangerZonePage() {
+  const singularName = useModuleStore((state) => state.pollSingularName);
   const params = useParams();
   const router = useRouter();
   const id = params?.id as string;
@@ -108,7 +110,7 @@ function PollDangerZonePage() {
   }
 
   if (!poll) {
-    return <div>Poll not found.</div>;
+    return <div>{singularName} not found.</div>;
   }
 
   return (
@@ -119,7 +121,7 @@ function PollDangerZonePage() {
           Danger Zone
         </h2>
         <p className="text-muted-foreground mt-1 text-sm">
-          Irreversible and destructive actions for this poll. Proceed with caution.
+          Irreversible and destructive actions for this {singularName.toLowerCase()}. Proceed with caution.
         </p>
       </div>
 
@@ -129,10 +131,10 @@ function PollDangerZonePage() {
             <CardHeader>
               <CardTitle className="text-amber-900 flex items-center gap-2">
                 <UserX className="h-5 w-5" />
-                Disable Poll
+                Disable {singularName}
               </CardTitle>
               <CardDescription className="text-amber-700/80">
-                Prevent users from seeing or interacting with this poll. You can re-enable it later.
+                Prevent users from seeing or interacting with this {singularName.toLowerCase()}. You can re-enable it later.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -141,7 +143,7 @@ function PollDangerZonePage() {
                 className="bg-white border-amber-200 text-amber-700 hover:bg-amber-100 hover:text-amber-900"
                 onClick={() => handleAction("DISABLE")}
               >
-                Disable Poll
+                Disable {singularName}
               </Button>
             </CardContent>
           </Card>
@@ -152,10 +154,10 @@ function PollDangerZonePage() {
             <CardHeader>
               <CardTitle className="text-emerald-900 flex items-center gap-2">
                 <CheckCircle className="h-5 w-5" />
-                Enable Poll
+                Enable {singularName}
               </CardTitle>
               <CardDescription className="text-emerald-700/80">
-                Make this poll visible and interactive again.
+                Make this {singularName.toLowerCase()} visible and interactive again.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -164,7 +166,7 @@ function PollDangerZonePage() {
                 className="bg-white border-emerald-200 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-900"
                 onClick={() => handleAction("ENABLE")}
               >
-                Enable Poll
+                Enable {singularName}
               </Button>
             </CardContent>
           </Card>
@@ -174,10 +176,10 @@ function PollDangerZonePage() {
           <CardHeader>
             <CardTitle className="text-destructive flex items-center gap-2">
               <ShieldAlert className="h-5 w-5" />
-              Delete Poll
+              Delete {singularName}
             </CardTitle>
             <CardDescription>
-              Permanently delete this poll and all associated data, including votes. This action cannot be undone.
+              Permanently delete this {singularName.toLowerCase()} and all associated data, including votes. This action cannot be undone.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -185,7 +187,7 @@ function PollDangerZonePage() {
               variant="destructive"
               onClick={() => handleAction("DELETE")}
             >
-              Delete Poll
+              Delete {singularName}
             </Button>
           </CardContent>
         </Card>
@@ -235,9 +237,9 @@ function PollDangerZonePage() {
                 </div>
               ) : (
                 <>
-                  {dialogAction === "DELETE" && "Delete Poll"}
-                  {dialogAction === "DISABLE" && "Disable Poll"}
-                  {dialogAction === "ENABLE" && "Enable Poll"}
+                  {dialogAction === "DELETE" && `Delete ${singularName}`}
+                  {dialogAction === "DISABLE" && `Disable ${singularName}`}
+                  {dialogAction === "ENABLE" && `Enable ${singularName}`}
                 </>
               )}
             </Button>

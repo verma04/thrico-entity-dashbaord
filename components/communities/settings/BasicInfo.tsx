@@ -20,10 +20,12 @@ import Cover from "../Cover";
 import { communityEntity } from "../ts-types";
 import { UploadProps } from "antd/lib";
 import { updateBasicInfo } from "../../../graphql/actions/group";
+import { useModuleStore } from "@/store/useModuleStore";
 type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
 const BasicInfo = ({ data }: { data: communityEntity }) => {
+  const singularName = useModuleStore((state) => state.communitySingularName);
   const onCompleted = () => {
-    message.success("Community basic info updated successfully.");
+    message.success(`${singularName} basic info updated successfully.`);
   };
   const [update, { loading }] = updateBasicInfo({
     onCompleted,
@@ -102,7 +104,7 @@ const BasicInfo = ({ data }: { data: communityEntity }) => {
                     <span style={{ fontWeight: 600 }}>Public</span>
                     <br />
                     <span style={{ color: "#888" }}>
-                      Anyone can see and join this community
+                      Anyone can see and join this {singularName.toLowerCase()}
                     </span>
                   </div>
                 </Space>
@@ -126,7 +128,7 @@ const BasicInfo = ({ data }: { data: communityEntity }) => {
 
           <Form.Item
             name="communityType"
-            label="Community Type"
+            label={`${singularName} Type`}
             hasFeedback
             rules={[{ required: true }]}
             style={{ width: "100%" }}
@@ -141,7 +143,7 @@ const BasicInfo = ({ data }: { data: communityEntity }) => {
                   <div>
                     <span style={{ fontWeight: 600 }}>Virtual</span>
                     <br />
-                    <span style={{ color: "#888" }}>Online-only community</span>
+                    <span style={{ color: "#888" }}>Online-only {singularName.toLowerCase()}</span>
                   </div>
                 </Space>
               </Radio>
@@ -175,7 +177,7 @@ const BasicInfo = ({ data }: { data: communityEntity }) => {
           </Form.Item>
           <Form.Item
             name="joiningTerms"
-            label="Community Joining Terms"
+            label={`${singularName} Joining Terms`}
             hasFeedback
             rules={[{ required: true }]}
             style={{ width: "100%" }}
@@ -194,7 +196,7 @@ const BasicInfo = ({ data }: { data: communityEntity }) => {
                     <span style={{ fontWeight: 600 }}>Anyone Can Join</span>
                     <br />
                     <span style={{ color: "#888" }}>
-                      Anyone can join this community directly
+                      Anyone can join this {singularName.toLowerCase()} directly
                     </span>
                   </div>
                 </Space>
@@ -211,7 +213,7 @@ const BasicInfo = ({ data }: { data: communityEntity }) => {
                     <span style={{ fontWeight: 600 }}>Admin Only Add</span>
                     <br />
                     <span style={{ color: "#888" }}>
-                      Only admins can add members to this community
+                      Only admins can add members to this {singularName.toLowerCase()}
                     </span>
                   </div>
                 </Space>

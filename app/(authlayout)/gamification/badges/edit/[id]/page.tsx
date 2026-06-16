@@ -13,8 +13,10 @@ import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrappe
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { BadgeForm } from "@/components/gamification/badges/badge-form";
+import { useModuleStore } from "@/store/useModuleStore";
 
 export default function EditBadgePage() {
+  const gamificationModuleName = useModuleStore((state) => state.gamificationModuleName);
   const params = useParams();
   const router = useRouter();
   const badgeId = params?.id as string;
@@ -71,14 +73,14 @@ export default function EditBadgePage() {
     <EcosystemWrapper>
       <EcosystemHeader
         title="Edit Badge"
-        badgeText="Gamification Studio"
+        badgeText={`${gamificationModuleName} Studio`}
         description="Modify the identity or award criteria for this achievement node."
         icon={Award}
       />
 
       <div className="sticky top-0 z-30 bg-background/95 backdrop-blur border-b px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span>Gamification</span>
+          <span>{gamificationModuleName}</span>
           <ChevronRight className="h-3 w-3" />
           <span>Badges</span>
           <ChevronRight className="h-3 w-3" />

@@ -1,7 +1,8 @@
 "use client"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Card } from "@/components/ui/card"
-import { Eye, TrendingUp, Users } from "lucide-react"
+import { TrendingUp, Users, Eye, MousePointerClick } from "lucide-react";
+import { useModuleStore } from "@/store/useModuleStore";
 
 interface AnalyticsDialogProps {
   open: boolean
@@ -10,6 +11,8 @@ interface AnalyticsDialogProps {
 }
 
 export function AnalyticsDialog({ open, onOpenChange, listing }: AnalyticsDialogProps) {
+  const singularName = useModuleStore((state) => state.listingSingularName);
+  
   const mockStats = {
     views: listing.views || 0,
     uniqueViews: Math.floor((listing.views || 0) * 0.8),
@@ -22,7 +25,7 @@ export function AnalyticsDialog({ open, onOpenChange, listing }: AnalyticsDialog
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>{listing.title}</DialogTitle>
-          <DialogDescription>Analytics for this listing</DialogDescription>
+          <DialogDescription>Analytics for this {singularName.toLowerCase()}</DialogDescription>
         </DialogHeader>
 
         <div className="grid grid-cols-2 gap-4">

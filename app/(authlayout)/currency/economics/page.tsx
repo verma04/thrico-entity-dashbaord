@@ -6,16 +6,18 @@ import { Coins } from "lucide-react";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { useModuleStore } from "@/store/useModuleStore";
 
 export default function EconomicsPage() {
+  const currencyModuleName = useModuleStore((state) => state.currencyModuleName);
   const { data, loading } = useGetEntityCurrencyConfig();
 
   return (
     <EcosystemWrapper>
       <EcosystemHeader
         title="Economics"
-        badgeText="Currency Config"
-        description="Configure your local currency branding and normalization factors."
+        badgeText={`${currencyModuleName} Config`}
+        description={`Configure your local ${currencyModuleName.toLowerCase()} branding and normalization factors.`}
         icon={Coins}
       />
       <EcosystemContainer className="p-6">

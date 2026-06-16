@@ -3,6 +3,7 @@
 import React from "react";
 import { Settings, MessageCircleQuestion, MessageSquare } from "lucide-react";
 import { PlatformSettingsLayout } from "@/components/ui/platform/layout";
+import { useModuleStore } from "@/store/useModuleStore";
 
 const TABS = [
   {
@@ -25,9 +26,10 @@ const BREADCRUMB = [
 ];
 
 function ForumsSettingsLayout({ children }: { children: React.ReactNode }) {
+  const singularName = useModuleStore((state) => state.forumSingularName);
   return (
     <PlatformSettingsLayout
-      title="Forum Governance"
+      title={`${singularName} Governance`}
       description="Moderate interactions and configure the discussion engine for your ecosystem."
       headerIcon={MessageSquare}
       tabs={TABS}

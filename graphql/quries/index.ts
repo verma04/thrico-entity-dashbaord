@@ -247,7 +247,11 @@ export const CHECK_ENTITY_SUBSCRIPTIONS = gql`
         showInWebNavigation
         enabled
         showInMobileNavigationSortNumber
+        showInWebNavigationSortNumber
+        customName
         isPopular
+        isPublicFacing
+        canRename
       }
     }
   }
@@ -390,5 +394,11 @@ export * from "./contacts";
 export const UPDATE_FEED_ORDER = gql`
   mutation UpdateFeedOrder($input: UpdateFeedOrderInput!) {
     updateFeedOrder(input: $input)
+  }
+`;
+
+export const GET_MODULE_CUSTOM_NAME = gql`
+  query GetModuleCustomName($id: String!) {
+    getModuleCustomName(id: $id)
   }
 `;

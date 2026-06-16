@@ -28,6 +28,7 @@ import Image from "next/image";
 import moment from "moment";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
+import { useModuleStore } from "@/store/useModuleStore";
 
 interface Listing {
   id: string;
@@ -56,6 +57,8 @@ interface Listing {
 }
 
 export function ListingsTable({ listings }: { listings: Listing[] }) {
+  const moduleName = useModuleStore((state) => state.listingModuleName);
+  const singularName = useModuleStore((state) => state.listingSingularName);
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [analyticsOpen, setAnalyticsOpen] = useState(false);
@@ -63,7 +66,7 @@ export function ListingsTable({ listings }: { listings: Listing[] }) {
   const columns = [
     {
       key: "title",
-      header: "Listing Info",
+      header: `${singularName} Info`,
       cell: (listing: Listing) => (
         <div className="flex items-center gap-3">
           <div className="relative w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 shadow-sm border border-border/10">
@@ -209,7 +212,7 @@ export function ListingsTable({ listings }: { listings: Listing[] }) {
                 }}
               >
                 <Settings className="w-3.5 h-3.5" />
-                Manage Listing
+                Manage {singularName}
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="rounded-lg mx-1 cursor-pointer gap-2"
@@ -232,7 +235,7 @@ export function ListingsTable({ listings }: { listings: Listing[] }) {
               </DropdownMenuItem>
               <DropdownMenuSeparator className="opacity-50" />
               <DropdownMenuItem className="rounded-lg mx-1 cursor-pointer gap-2 text-destructive focus:text-destructive focus:bg-destructive/5">
-                Remove Listing
+                Remove {singularName}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -247,7 +250,7 @@ export function ListingsTable({ listings }: { listings: Listing[] }) {
         columns={columns}
         data={listings || []}
         keyExtractor={(item) => item.id}
-        emptyTitle="No listings found"
+        emptyTitle={`No ${moduleName.toLowerCase()} found`}
         emptyDescription="Your marketplace is waiting for its first item."
       />
 

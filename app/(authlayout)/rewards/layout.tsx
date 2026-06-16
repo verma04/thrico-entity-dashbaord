@@ -13,8 +13,11 @@ import {
 } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+import { useModuleStore } from "@/store/useModuleStore";
 
 function RewardsLayout({ children }: { children: React.ReactNode }) {
+  const rewardsModuleName = useModuleStore((state) => state.rewardsModuleName);
+  const rewardsSingularName = useModuleStore((state) => state.rewardsSingularName);
   const items = [
     {
       key: "",
@@ -28,7 +31,7 @@ function RewardsLayout({ children }: { children: React.ReactNode }) {
     },
     {
       key: "coupons",
-      label: "Rewards & Vouchers",
+      label: `${rewardsModuleName} & Vouchers`,
       icon: <Ticket className="h-4 w-4" />,
       section: "Manage",
     },
@@ -53,7 +56,7 @@ function RewardsLayout({ children }: { children: React.ReactNode }) {
     },
     {
       key: "coupons/create",
-      label: "Create Reward",
+      label: `Create ${rewardsSingularName}`,
       icon: <Plus className="h-4 w-4" />,
       section: "Actions",
     },

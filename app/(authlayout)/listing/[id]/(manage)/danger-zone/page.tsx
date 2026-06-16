@@ -26,8 +26,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import { AlertTriangle, Eye, Loader2, Ban } from "lucide-react";
 import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { useModuleStore } from "@/store/useModuleStore";
 
 function ListingDangerZonePage() {
+  const singularName = useModuleStore((state) => state.listingSingularName);
   const params = useParams();
   const id = params?.id as string;
   const router = useRouter();
@@ -45,15 +47,15 @@ function ListingDangerZonePage() {
   const [changeStatus, { loading: disabling }] = useChangeListingStatus({
     onCompleted: () => {
       toast({
-        title: "Listing Disabled",
-        description: "The listing has been permanently disabled.",
+        title: `${singularName} Disabled`,
+        description: `The ${singularName.toLowerCase()} has been permanently disabled.`,
       });
       router.push("/listing/all");
     },
     onError: (err: any) => {
       toast({
         title: "Error",
-        description: err.message || "Failed to disable listing",
+        description: err.message || `Failed to disable ${singularName.toLowerCase()}`,
         variant: "destructive",
       });
     },
@@ -78,7 +80,7 @@ function ListingDangerZonePage() {
       <div className="flex h-64 items-center justify-center">
         <div className="flex flex-col items-center gap-2 text-muted-foreground">
           <Loader2 className="h-6 w-6 animate-spin" />
-          <p className="text-sm">Loading listing details...</p>
+          <p className="text-sm">Loading {singularName.toLowerCase()} details...</p>
         </div>
       </div>
     );
@@ -103,7 +105,7 @@ function ListingDangerZonePage() {
       <Card className="border-none shadow-lg shadow-black/[0.03] ring-1 ring-red-200 overflow-hidden bg-gradient-to-br from-red-50/50 to-white dark:to-card">
         <CardHeader className="pb-6 border-b border-red-100">
           <CardTitle className="text-red-700 text-lg flex items-center gap-2">
-            Disable Marketplace Listing
+            Disable Marketplace {singularName}
           </CardTitle>
           <CardDescription className="text-base text-foreground/80 mt-1">
             Permanently disable <strong className="font-semibold">&ldquo;{listing?.title}&rdquo;</strong> and hide it from the marketplace.
@@ -112,7 +114,7 @@ function ListingDangerZonePage() {
         <CardContent className="pt-6">
           <div className="space-y-5">
             <p className="text-sm text-muted-foreground font-medium">
-              Disabling this listing will affect its visibility:
+              Disabling this {singularName.toLowerCase()} will affect its visibility:
             </p>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <div className="flex flex-col p-4 bg-card dark:bg-muted/50 rounded-xl border border-red-100 shadow-sm">
@@ -131,7 +133,7 @@ function ListingDangerZonePage() {
             <AlertDialogTrigger asChild>
               <Button variant="destructive" className="font-semibold px-6 rounded-xl gap-2 shadow-sm">
                 <Ban className="h-4 w-4" />
-                Disable Listing
+                Disable {singularName}
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent className="border-red-200 max-w-md rounded-2xl shadow-xl shadow-red-900/10">
@@ -169,7 +171,7 @@ function ListingDangerZonePage() {
                       Disabling...
                     </>
                   ) : (
-                    "Yes, Disable Listing"
+                    `Yes, Disable ${singularName}`
                   )}
                 </AlertDialogAction>
               </AlertDialogFooter>

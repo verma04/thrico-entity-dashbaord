@@ -26,8 +26,11 @@ import { useParams } from "next/navigation";
 import Summary from "@/components/polls/result/poll-summary";
 import { getPollResult, getPollByIdForUser } from "@/graphql/actions/polls";
 import { Votes } from "@/components/polls/result/poll-votes";
+import { useModuleStore } from "@/store/useModuleStore";
 
 export default function PollResultsPage() {
+  const moduleName = useModuleStore((state) => state.pollModuleName);
+  const singularName = useModuleStore((state) => state.pollSingularName);
   const params = useParams();
   const id = params?.id as string;
   const [activeTab, setActiveTab] = useState("overview");
@@ -62,7 +65,7 @@ export default function PollResultsPage() {
     if (!selectedPoll) return;
     
     const csvContent = [
-      ["Poll Results Export"],
+      [`${singularName} Results Export`],
       ["Title", selectedPoll.title],
       ["Question", selectedPoll.question],
       ["Total Votes", totalVotes.toString()],
@@ -82,7 +85,7 @@ export default function PollResultsPage() {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `poll-results-${selectedPoll.id}-${moment().format(
+    a.download = `${singularName.toLowerCase()}-results-${selectedPoll.id}-${moment().format(
       "YYYY-MM-DD"
     )}.csv`;
     a.click();
@@ -101,7 +104,7 @@ export default function PollResultsPage() {
   }
 
   if (!selectedPoll) {
-    return <div>Poll not found</div>;
+    return <div>{singularName} not found</div>;
   }
 
   return (
@@ -236,7 +239,7 @@ export default function PollResultsPage() {
             <div className="pt-10 px-6 pb-4 bg-indigo-600 dark:bg-indigo-900 text-white space-y-3">
               <div className="inline-flex items-center gap-1 opacity-80 mb-2">
                 <PieChart className="h-3.5 w-3.5" />
-                <span className="text-[10px] font-bold uppercase tracking-widest">Community Poll</span>
+                <span className="text-[10px] font-bold uppercase tracking-widest">Community {singularName}</span>
               </div>
               <h3 className="text-lg font-bold leading-snug">
                 {selectedPoll.question}
@@ -300,7 +303,7 @@ export default function PollResultsPage() {
         </div>
         
         <p className="text-[10px] text-muted-foreground mt-6 max-w-[280px] text-center">
-          This preview simulates how community members interact with the poll after voting.
+          This preview simulates how community members interact with the {singularName.toLowerCase()} after voting.
         </p>
       </div>
     </div>

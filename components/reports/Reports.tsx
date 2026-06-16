@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select";
 import ReportsList from "./reports-list";
 import { cn } from "@/lib/utils";
+import { useModuleStore } from "@/store/useModuleStore";
 
 export default function Reports({
   preselectedModule,
@@ -25,6 +26,8 @@ export default function Reports({
   preselectedModule?: ReportModule;
   canEdit?: boolean;
 }) {
+  const moduleName = useModuleStore((state) => state.communityModuleName);
+
   const [selectedModule, setSelectedModule] = useState<ReportModule | "ALL">(
     preselectedModule || "ALL",
   );
@@ -94,7 +97,7 @@ export default function Reports({
                       value={mod}
                       className="rounded-lg text-xs py-2"
                     >
-                      {mod}
+                      {mod === "COMMUNITY" ? moduleName.toUpperCase() : mod}
                     </SelectItem>
                   ))}
                 </SelectContent>

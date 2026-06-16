@@ -12,15 +12,20 @@ import {
   AdminTableColumn,
 } from "@/components/shared/admin-table/admin-table";
 import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
+import { useModuleStore } from "@/store/useModuleStore";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Column definitions
+// Component
 // ─────────────────────────────────────────────────────────────────────────────
 
-const columns: AdminTableColumn<communityEntity>[] = [
-  {
-    key: "title",
-    header: "Community",
+export default function List({ data }: { data: communityEntity[] }) {
+  const moduleName = useModuleStore((state) => state.communityModuleName);
+  const singularName = useModuleStore((state) => state.communitySingularName);
+
+  const columns: AdminTableColumn<communityEntity>[] = [
+    {
+      key: "title",
+      header: singularName,
     cell: (row) => (
       <div className="flex items-center gap-3">
         <Avatar className="h-9 w-9 rounded-lg border border-border/60 shrink-0">
@@ -141,18 +146,13 @@ const columns: AdminTableColumn<communityEntity>[] = [
   },
 ];
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Component
-// ─────────────────────────────────────────────────────────────────────────────
-
-export default function List({ data }: { data: communityEntity[] }) {
   return (
     <AdminTable<communityEntity>
       columns={columns}
       data={data}
       keyExtractor={(c) => c.id}
       emptyIcon={Users}
-      emptyTitle="No communities found"
+      emptyTitle={`No ${moduleName.toLowerCase()} found`}
       emptyDescription="Try adjusting your search or filter criteria."
     />
   );

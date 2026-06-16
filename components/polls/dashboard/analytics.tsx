@@ -48,8 +48,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import Link from "next/link";
+import { useModuleStore } from "@/store/useModuleStore";
 
 export default function PollsAnalytics() {
+  const moduleName = useModuleStore((state) => state.pollModuleName);
+  const singularName = useModuleStore((state) => state.pollSingularName);
   const [timeRange, setTimeRange] = useState<TimeRange>(TimeRange.LAST_7_DAYS);
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: subDays(new Date(), 7),
@@ -82,7 +85,7 @@ export default function PollsAnalytics() {
 
   const kpis = [
     {
-      title: "Total Polls",
+      title: `Total ${moduleName}`,
       value: loading ? "..." : (stats?.totalPolls?.toLocaleString() ?? "0"),
       trend: stats?.totalPollsChange ?? 0,
       icon: Vote,
@@ -126,7 +129,7 @@ export default function PollsAnalytics() {
   return (
     <EcosystemWrapper anonymized-1="polls-analytics">
       <EcosystemHeader
-        title="Polls Analytics"
+        title={`${moduleName} Analytics`}
         description="Monitor community sentiment, voting velocity, and engagement metrics across the platform."
         badgeText="Sentiment Hub"
         icon={Vote}
@@ -145,7 +148,7 @@ export default function PollsAnalytics() {
             <Link href="/polls/create">
               <Button className="h-9 px-4 rounded-lg bg-zinc-900 font-bold text-[10px] uppercase tracking-widest gap-2 shadow-sm hover:bg-zinc-800 transition-all">
                 <PlusCircle size={14} className="text-white" />
-                Create Poll
+                Create {singularName}
               </Button>
             </Link>
 
@@ -249,14 +252,14 @@ export default function PollsAnalytics() {
 
           <div className="lg:col-span-4">
             <EcosystemCard
-              title="Poll Registry"
+              title={`${singularName} Registry`}
               description="Status and performance matrix"
               icon={BarChart3}
             >
               <div className="space-y-5 mt-4">
                 {[
-                  { label: "Closed Polls", value: registryStats.closedPolls, color: "bg-zinc-900" },
-                  { label: "Active Polls", value: registryStats.activePolls, color: "bg-zinc-500" },
+                  { label: `Closed ${moduleName}`, value: registryStats.closedPolls, color: "bg-zinc-900" },
+                  { label: `Active ${moduleName}`, value: registryStats.activePolls, color: "bg-zinc-500" },
                   { label: "Drafts", value: registryStats.drafts, color: "bg-zinc-300" },
                 ].map((item, i) => (
                   <div key={i} className="group/item">

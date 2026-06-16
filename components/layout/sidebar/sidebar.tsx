@@ -399,6 +399,7 @@ function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
     contentModeration,
     gamificationEngine,
     modules: modulesItems,
+    gamificationLabel,
   } = useFilteredExtendedItems();
   const { managementItems: managementFolders } = useFilteredManagementItems();
 
@@ -619,7 +620,7 @@ function SidebarLayoutInner({ children }: { children: React.ReactNode }) {
           {/* GAMIFICATION ENGINE */}
           <CollapsibleSection
             sectionKey="gamification"
-            label="Gamification"
+            label={gamificationLabel}
             items={filteredGamification}
             renderItems={renderItems}
             className="mb-1"

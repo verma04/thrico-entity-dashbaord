@@ -9,25 +9,29 @@ import { useEntitySettings, useUpdateEntitySettings } from "@/graphql/actions";
 import { GraduationCap, ShieldCheck, Zap } from "lucide-react";
 import { PlatformSettingsPage, SettingsField } from "@/components/ui/platform/settings-page";
 import { toast } from "sonner";
-
-const FIELDS: SettingsField[] = [
-  {
-    key: "allowMentorship",
-    label: "Allow Mentorship",
-    description: "Enable or disable the peer-to-peer learning network.",
-    icon: ShieldCheck,
-    section: "Network Governance",
-  },
-  {
-    key: "autoApproveMentorship",
-    label: "Auto Approve Mentors",
-    description: "Automatically validate mentor applications without manual review.",
-    icon: Zap,
-    section: "Automation Protocols",
-  },
-];
+import { useModuleStore } from "@/store/useModuleStore";
 
 const MentorshipSettings = () => {
+  const moduleName = useModuleStore((state) => state.mentorshipModuleName);
+  const singularName = useModuleStore((state) => state.mentorshipSingularName);
+
+  const FIELDS: SettingsField[] = [
+    {
+      key: "allowMentorship",
+      label: `Allow ${moduleName}`,
+      description: "Enable or disable the peer-to-peer learning network.",
+      icon: ShieldCheck,
+      section: "Network Governance",
+    },
+    {
+      key: "autoApproveMentorship",
+      label: `Auto Approve ${singularName}s`,
+      description: `Automatically validate ${singularName.toLowerCase()} applications without manual review.`,
+      icon: Zap,
+      section: "Automation Protocols",
+    },
+  ];
+
   const { data, loading } = useEntitySettings();
   const [update, { loading: loadingBtn }] = useUpdateEntitySettings({});
 
@@ -38,9 +42,9 @@ const MentorshipSettings = () => {
           input: settings,
         },
       });
-      toast.success("Mentorship settings updated successfully");
+      toast.success(`${moduleName} settings updated successfully`);
     } catch (error) {
-      toast.error("Failed to update mentorship configuration");
+      toast.error(`Failed to update ${moduleName.toLowerCase()} configuration`);
       throw error;
     }
   };

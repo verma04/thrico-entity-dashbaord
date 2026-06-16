@@ -34,6 +34,7 @@ import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header"
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { cn } from "@/lib/utils";
+import { useModuleStore } from "@/store/useModuleStore";
 
 const TYPE_CONFIG: Record<string, { label: string; variant: string; className: string }> = {
   POINTS_TO_EC: {
@@ -59,6 +60,7 @@ const TYPE_CONFIG: Record<string, { label: string; variant: string; className: s
 };
 
 export default function CurrencyAuditLogPage() {
+  const currencyModuleName = useModuleStore((state) => state.currencyModuleName);
   const { data: userData } = useGetUser();
   const userId = userData?.getUser?.id;
 
@@ -101,7 +103,7 @@ export default function CurrencyAuditLogPage() {
   if (error) {
     return (
       <EcosystemWrapper>
-        <EcosystemHeader title="Audit Log" badgeText="Currency" description="Full currency transaction history." icon={History} />
+        <EcosystemHeader title="Audit Log" badgeText={currencyModuleName} description={`Full ${currencyModuleName.toLowerCase()} transaction history.`} icon={History} />
         <EcosystemContainer className="p-12">
           <div className="flex flex-col items-center gap-3 text-center">
             <div className="h-12 w-12 rounded-xl bg-rose-50 flex items-center justify-center">
@@ -121,8 +123,8 @@ export default function CurrencyAuditLogPage() {
     <EcosystemWrapper>
       <EcosystemHeader
         title="Audit Log"
-        badgeText="Currency"
-        description="A complete record of all currency movements — earnings, conversions, and redemptions."
+        badgeText={currencyModuleName}
+        description={`A complete record of all ${currencyModuleName.toLowerCase()} movements — earnings, conversions, and redemptions.`}
         icon={History}
       />
 

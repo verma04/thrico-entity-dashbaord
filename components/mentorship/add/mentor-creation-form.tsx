@@ -63,7 +63,11 @@ import {
   CommandList,
 } from "@/components/ui/command";
 
+import { useModuleStore } from "@/store/useModuleStore";
+
 export function MentorCreationForm({ loading, onFinish, onCancel, submitError, onDismissError }: any) {
+  const moduleName = useModuleStore((state) => state.mentorshipModuleName);
+  const singularName = useModuleStore((state) => state.mentorshipSingularName);
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -159,13 +163,13 @@ export function MentorCreationForm({ loading, onFinish, onCancel, submitError, o
                   <GraduationCap className="h-5 w-5 text-indigo-600" />
                 </div>
                 <h1 className="text-2xl font-black tracking-tight text-slate-900">
-                  Onboard Mentor
+                  Onboard {singularName}
                 </h1>
               </div>
               <div className="flex items-center gap-2 text-xs font-medium text-slate-500 ml-1">
-                <span>Mentorship</span>
+                <span>{moduleName}</span>
                 <ChevronRight className="h-3 w-3" />
-                <span className="text-indigo-600">Add Mentor</span>
+                <span className="text-indigo-600">Add {singularName}</span>
               </div>
             </div>
           </div>
@@ -215,7 +219,7 @@ export function MentorCreationForm({ loading, onFinish, onCancel, submitError, o
                         </CardTitle>
                       </div>
                       <CardDescription className="text-slate-500 font-medium">
-                        Search and select a user to onboard as a mentor
+                        Search and select a user to onboard as a {singularName.toLowerCase()}
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="pt-8 space-y-6">
@@ -297,7 +301,7 @@ export function MentorCreationForm({ loading, onFinish, onCancel, submitError, o
                           <div className="text-center py-10">
                             <Sparkles className="h-10 w-10 text-indigo-100 mx-auto mb-3" />
                             <p className="text-slate-400 font-medium text-sm">
-                              Start typing a name to find a potential mentor
+                              Start typing a name to find a potential {singularName.toLowerCase()}
                             </p>
                           </div>
                         )}
@@ -384,11 +388,11 @@ export function MentorCreationForm({ loading, onFinish, onCancel, submitError, o
                         <div className="flex items-center gap-2 mb-1">
                           <GraduationCap className="h-4 w-4 text-indigo-600" />
                           <CardTitle className="text-lg font-bold text-slate-800">
-                            Mentorship Details
+                            {moduleName} Details
                           </CardTitle>
                         </div>
                         <CardDescription className="text-slate-500 font-medium">
-                          Define the mentor's profile and credentials
+                          Define the {singularName.toLowerCase()}'s profile and credentials
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="pt-8 space-y-8">
@@ -405,7 +409,7 @@ export function MentorCreationForm({ loading, onFinish, onCancel, submitError, o
                             <Input
                               id="displayName"
                               name="displayName"
-                              placeholder="e.g. Mentor John Doe"
+                              placeholder={`e.g. ${singularName} John Doe`}
                               className="h-11 rounded-xl border-slate-200 focus:ring-4 focus:ring-indigo-500/5 transition-all font-medium"
                               value={formik.values.displayName}
                               onChange={formik.handleChange}
@@ -425,7 +429,7 @@ export function MentorCreationForm({ loading, onFinish, onCancel, submitError, o
                               htmlFor="category"
                               className="text-sm font-bold text-slate-700 flex items-center gap-2"
                             >
-                              Mentor Category{" "}
+                              {singularName} Category{" "}
                               <span className="text-rose-500">*</span>
                             </Label>
                             <Select
@@ -466,10 +470,10 @@ export function MentorCreationForm({ loading, onFinish, onCancel, submitError, o
                               className="text-sm font-bold text-slate-700 flex items-center gap-2"
                             >
                               <Sparkles className="h-4 w-4 text-indigo-500" />
-                              Mark as Top Mentor
+                              Mark as Top {singularName}
                             </Label>
                             <p className="text-[10px] font-medium text-slate-500">
-                              Feature this mentor at the top of listings
+                              Feature this {singularName.toLowerCase()} at the top of listings
                             </p>
                           </div>
                           <Checkbox
@@ -693,12 +697,12 @@ export function MentorCreationForm({ loading, onFinish, onCancel, submitError, o
                               htmlFor="whyDoWantBecomeMentor"
                               className="text-sm font-bold text-slate-700"
                             >
-                              Motivation for Mentorship
+                              Motivation for {moduleName}
                             </Label>
                             <Textarea
                               id="whyDoWantBecomeMentor"
                               name="whyDoWantBecomeMentor"
-                              placeholder="Why do you want to become a mentor?"
+                              placeholder={`Why do you want to become a ${singularName.toLowerCase()}?`}
                               className="min-h-[120px] rounded-2xl border-slate-200 focus:ring-4 focus:ring-indigo-500/5 transition-all resize-none p-4 font-medium"
                               value={formik.values.whyDoWantBecomeMentor}
                               onChange={formik.handleChange}
@@ -796,8 +800,8 @@ export function MentorCreationForm({ loading, onFinish, onCancel, submitError, o
                             </Label>
                             <p className="text-xs font-medium text-slate-500 leading-relaxed">
                               By checking this box, you confirm that this user
-                              has agreed to be a mentor and the information
-                              provided is accurate. The mentor profile will be
+                              has agreed to be a {singularName.toLowerCase()} and the information
+                              provided is accurate. The {singularName.toLowerCase()} profile will be
                               automatically approved.
                             </p>
                           </div>

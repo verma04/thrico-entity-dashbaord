@@ -9,18 +9,20 @@ import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrappe
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { cn } from "@/lib/utils";
+import { useModuleStore } from "@/store/useModuleStore";
 
 export default function CouponsLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const rewardsModuleName = useModuleStore((state) => state.rewardsModuleName);
   const pathname = usePathname();
 
   const tabs = [
     {
       key: "Rewards",
-      label: "Rewards",
+      label: rewardsModuleName,
       icon: LayoutGrid,
       href: "/rewards/coupons",
     },
@@ -35,8 +37,8 @@ export default function CouponsLayout({
   return (
     <EcosystemWrapper>
       <EcosystemHeader
-        title="Rewards & Vouchers"
-        description="Monitor reward distribution lifecycle, manage voucher credentials and inventory stock levels from a unified interface."
+        title={`${rewardsModuleName} & Vouchers`}
+        description={`Monitor ${rewardsModuleName.toLowerCase()} distribution lifecycle, manage voucher credentials and inventory stock levels from a unified interface.`}
         badgeText="Economic Hub"
         icon={Ticket}
       />

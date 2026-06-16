@@ -64,7 +64,11 @@ import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { subDays } from "date-fns";
 import { DateRange } from "react-day-picker";
 
+import { useModuleStore } from "@/store/useModuleStore";
+
 export default function MentorshipAnalytics() {
+  const moduleName = useModuleStore((state) => state.mentorshipModuleName);
+  const singularName = useModuleStore((state) => state.mentorshipSingularName);
   const [timeRange, setTimeRange] = React.useState<TimeRange>(
     TimeRange.LAST_7_DAYS,
   );
@@ -122,7 +126,7 @@ export default function MentorshipAnalytics() {
 
   const kpis = [
     {
-      title: "Total Mentors",
+      title: `Total ${singularName}s`,
       value: loading ? "..." : (stats?.totalMentors?.toLocaleString() ?? "0"),
       icon: Users,
       color: "text-zinc-900",
@@ -174,9 +178,9 @@ export default function MentorshipAnalytics() {
   return (
     <EcosystemWrapper anonymized-1="mentorship-analytics">
       <EcosystemHeader
-        title="Mentorship Analytics"
-        description="Monitor expert application velocity, approval trajectories, and ecosystem expertise distribution."
-        badgeText="Mentorship Hub"
+        title={`${moduleName} Analytics`}
+        description={`Monitor expert application velocity, approval trajectories, and ecosystem expertise distribution.`}
+        badgeText={`${moduleName} Hub`}
         icon={GraduationCap}
       />
 
@@ -241,7 +245,7 @@ export default function MentorshipAnalytics() {
               </div>
               <div>
                 <h4 className="text-sm font-bold text-indigo-900">
-                  {stats.pendingMentors} Mentorship Applications Pending
+                  {stats.pendingMentors} {moduleName} Applications Pending
                 </h4>
                 <p className="text-xs text-indigo-600">
                   Review and verify new expert nodes to maintain ecosystem
@@ -264,7 +268,7 @@ export default function MentorshipAnalytics() {
           <div className="lg:col-span-8">
             <EcosystemCard
               title="Registry Health"
-              description="Application status distribution across the global mentorship graph"
+              description={`Application status distribution across the global ${moduleName.toLowerCase()} graph`}
               icon={Activity}
             >
               <div className="h-[350px] w-full mt-6">
@@ -416,7 +420,7 @@ export default function MentorshipAnalytics() {
           {/* Recent Applications */}
           <EcosystemCard
             title="Recent Applications"
-            description="Latest mentor nodes awaiting synchronization"
+            description={`Latest ${singularName.toLowerCase()} nodes awaiting synchronization`}
             icon={Clock}
           >
             <div className="mt-4 space-y-1">
@@ -500,7 +504,7 @@ export default function MentorshipAnalytics() {
           {/* Top Performing Mentors */}
           <EcosystemCard
             title="Verified Experts"
-            description="Elite mentor nodes with highest ecosystem impact"
+            description={`Elite ${singularName.toLowerCase()} nodes with highest ecosystem impact`}
             icon={Zap}
           >
             <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -532,7 +536,7 @@ export default function MentorshipAnalytics() {
                           {mentor.displayName}
                         </h6>
                         <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mt-0.5">
-                          Top Mentor
+                          Top {singularName}
                         </p>
                         <div className="flex items-center gap-1 mt-2">
                           <span className="h-1 w-1 rounded-full bg-emerald-500" />
@@ -547,7 +551,7 @@ export default function MentorshipAnalytics() {
               ) : (
                 <div className="col-span-2 py-12 text-center border-2 border-dashed border-zinc-100 rounded-2xl">
                   <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest">
-                    No top mentors designated
+                    No top {singularName.toLowerCase()}s designated
                   </p>
                 </div>
               )}
@@ -569,7 +573,7 @@ export default function MentorshipAnalytics() {
         <div className="pt-4">
           <EcosystemCard
             title="Registry Operations Log"
-            description="Immutable audit trail of administrative mentorship node modulations"
+            description={`Immutable audit trail of administrative ${singularName.toLowerCase()} node modulations`}
             icon={ShieldCheck}
           >
             <div className="mt-4 overflow-hidden rounded-xl border border-zinc-100 bg-white shadow-sm">

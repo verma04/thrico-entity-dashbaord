@@ -2,6 +2,7 @@
 
 import { Gamepad2, Settings2, MessageCircleQuestion } from "lucide-react";
 import { PlatformSettingsLayout } from "@/components/ui/platform/layout";
+import { useModuleStore } from "@/store/useModuleStore";
 
 export default function GamificationSettingsLayout({
   children,
@@ -23,15 +24,17 @@ export default function GamificationSettingsLayout({
     },
   ];
 
+  const gamificationName = useModuleStore((state) => state.gamificationModuleName);
+
   return (
     <PlatformSettingsLayout
-      title="Gamification Protocol"
+      title={`${gamificationName} Protocol`}
       description="Define the rules, rewards, and parameters for your ecosystem's engagement layer."
       headerIcon={Gamepad2}
       tabs={tabs}
       breadcrumb={[
         {
-          label: "Gamification",
+          label: gamificationName,
           href: "/gamification",
         },
       ]}

@@ -22,6 +22,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { useModuleStore } from "@/store/useModuleStore";
 
 const ITEMS_PER_PAGE = 5;
 
@@ -34,6 +35,7 @@ const ApplicantsDrawer = ({
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
 }) => {
+  const singularName = useModuleStore((state) => state.jobSingularName);
   const [page, setPage] = useState(1);
 
   useEffect(() => {
@@ -67,7 +69,7 @@ const ApplicantsDrawer = ({
             <TableLoading />
           ) : applicants.length === 0 ? (
             <div className="text-center py-10 text-muted-foreground border rounded-lg bg-muted/20">
-              <p>No applicants found for this job.</p>
+              <p>No applicants found for this {singularName.toLowerCase()}.</p>
             </div>
           ) : (
             <>

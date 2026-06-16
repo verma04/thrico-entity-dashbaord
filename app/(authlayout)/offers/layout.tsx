@@ -4,12 +4,16 @@ import * as React from "react";
 import { Tag, Settings, List, FolderTree, Plus } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+import { useModuleStore } from "@/store/useModuleStore";
 
 function OffersLayout({ children }: { children: React.ReactNode }) {
+  const moduleName = useModuleStore((state) => state.offerModuleName);
+  const singularName = useModuleStore((state) => state.offerSingularName);
+
   const items = [
     {
       key: "all",
-      label: "All Offers",
+      label: `All ${moduleName}`,
       icon: <List className="h-4 w-4" />,
     },
     {
@@ -19,7 +23,7 @@ function OffersLayout({ children }: { children: React.ReactNode }) {
     },
     {
       key: "create",
-      label: "Create Offer",
+      label: `Create ${singularName}`,
       icon: <Plus className="h-4 w-4" />,
     },
   ];

@@ -21,6 +21,7 @@ import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-acti
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { CategoryDialog } from "./category-dialog";
 import { toast } from "sonner";
+import { useModuleStore } from "@/store/useModuleStore";
 
 import {
   AlertDialog,
@@ -34,6 +35,8 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export function CategoriesManager() {
+  const moduleName = useModuleStore((state) => state.offerModuleName);
+  const singularName = useModuleStore((state) => state.offerSingularName);
   const { data, loading } = useGetOfferCategories();
   const [search, setSearch] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -154,7 +157,7 @@ export function CategoriesManager() {
     },
     {
       accessorKey: "offersCount",
-      header: "Offers",
+      header: moduleName,
       cell: ({ row }) => (
         <div className="flex items-center gap-1.5">
           <span className="text-sm font-semibold">
@@ -195,9 +198,9 @@ export function CategoriesManager() {
   return (
     <EcosystemWrapper>
       <EcosystemHeader
-        title="Offer Categories"
+        title={`${singularName} Categories`}
         badgeText="Organization"
-        description="Manage categories to organize your offers and improve discoverability."
+        description={`Manage categories to organize your ${moduleName.toLowerCase()} and improve discoverability.`}
         icon={FolderTree}
         actions={
           <Button

@@ -15,8 +15,11 @@ import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrappe
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus } from "lucide-react";
+import { useModuleStore } from "@/store/useModuleStore";
 
 export default function MomentsLayout({ children }: { children: React.ReactNode }) {
+  const moduleName = useModuleStore((state) => state.momentModuleName);
+  const singularName = useModuleStore((state) => state.momentSingularName);
   const router = useRouter();
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get("q") || "";
@@ -37,14 +40,14 @@ export default function MomentsLayout({ children }: { children: React.ReactNode 
     <EcosystemWrapper>
       {/* Premium Header */}
       <EcosystemHeader 
-        title="Moments"
+        title={moduleName}
         badgeText="Content Ecosystem"
         description="Curate and oversee immersive video content captured by your community members."
         icon={VideoIcon}
         actions={
           <Button className="font-semibold text-xs px-6 h-10 rounded-lg shadow-sm gap-2">
             <Plus className="h-4 w-4" />
-            Upload Moment
+            Upload {singularName}
           </Button>
         }
       />
@@ -67,7 +70,7 @@ export default function MomentsLayout({ children }: { children: React.ReactNode 
            </Button>
            <div className="flex items-center gap-2 px-4 py-2 bg-muted border border-border rounded-xl text-xs font-semibold text-muted-foreground uppercase tracking-wide whitespace-nowrap">
               <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              Live Moments
+              Live {moduleName}
            </div>
         </div>
       </EcosystemActionBar>

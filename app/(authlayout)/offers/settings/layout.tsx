@@ -3,6 +3,7 @@
 import React from "react";
 import { Settings, MessageCircleQuestion, Percent } from "lucide-react";
 import { PlatformSettingsLayout } from "@/components/ui/platform/layout";
+import { useModuleStore } from "@/store/useModuleStore";
 
 const TABS = [
   {
@@ -19,19 +20,21 @@ const TABS = [
   },
 ];
 
-const BREADCRUMB = [
-  { label: "Benefit Ecosystem", href: "/offers" },
-  { label: "Offers Configuration" },
+const BREADCRUMB = (moduleName: string) => [
+  { label: moduleName, href: "/offers" },
+  { label: `${moduleName} Configuration` },
 ];
 
 function OffersSettingsLayout({ children }: { children: React.ReactNode }) {
+  const moduleName = useModuleStore((state) => state.offerModuleName);
+
   return (
     <PlatformSettingsLayout
-      title="Benefit Ecosystem"
+      title={moduleName}
       description="Configure perks, discounts, and automated incentive delivery workflows."
       headerIcon={Percent}
       tabs={TABS}
-      breadcrumb={BREADCRUMB}
+      breadcrumb={BREADCRUMB(moduleName)}
       badge="Perks"
     >
       {children}

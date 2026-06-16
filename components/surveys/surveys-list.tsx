@@ -33,12 +33,14 @@ import { SurveysTable } from "./surveys-table";
 import { SurveySheet } from "./survey-sheet";
 import { SurveyDialogs } from "./survey-dialogs";
 import { SurveyAIAgentButton } from "./survey-ai-agent";
+import { useModuleStore } from "@/store/useModuleStore";
 
 export function SurveysList({
   shareSurveyAsFeed,
 }: {
   shareSurveyAsFeed?: boolean;
 }) {
+  const singularName = useModuleStore((state) => state.surveySingularName);
   const [surveyToDelete, setSurveyToDelete] = useState<string | null>(null);
   const [editingDetailsSurvey, setEditingDetailsSurvey] =
     useState<Survey | null>(null);
@@ -61,12 +63,12 @@ export function SurveysList({
 
   const [shareSurvey, { loading: isSharing }] = useShareSurveyAsFeed({
     onCompleted: () => {
-      toast.success("Survey shared to feed successfully");
+      toast.success(`${singularName} shared to feed successfully`);
       setSharingSurvey(null);
       setShareDescription("");
     },
     onError: (error) => {
-      toast.error(error.message || "Failed to share survey");
+      toast.error(error.message || `Failed to share ${singularName.toLowerCase()}`);
     },
   });
 
@@ -87,39 +89,39 @@ export function SurveysList({
 
   const [deleteSurvey, { loading: isDeleting }] = useDeleteSurvey({
     onCompleted: () => {
-      toast.success("Survey deleted successfully");
+      toast.success(`${singularName} deleted successfully`);
       setSurveyToDelete(null);
     },
     onError: (error) => {
-      toast.error(error.message || "Failed to delete survey");
+      toast.error(error.message || `Failed to delete ${singularName.toLowerCase()}`);
     },
   });
 
   const [editSurvey, { loading: isUpdating }] = useEditSurvey({
     onCompleted: () => {
-      toast.success("Survey updated successfully");
+      toast.success(`${singularName} updated successfully`);
       setEditingDetailsSurvey(null);
     },
     onError: (error) => {
-      toast.error(error.message || "Failed to update survey");
+      toast.error(error.message || `Failed to update ${singularName.toLowerCase()}`);
     },
   });
 
   const [publishSurvey] = usePublishSurvey({
     onCompleted: () => {
-      toast.success("Survey published successfully");
+      toast.success(`${singularName} published successfully`);
     },
     onError: (error) => {
-      toast.error(error.message || "Failed to publish survey");
+      toast.error(error.message || `Failed to publish ${singularName.toLowerCase()}`);
     },
   });
 
   const [draftSurvey] = useDraftSurvey({
     onCompleted: () => {
-      toast.success("Survey moved to draft successfully");
+      toast.success(`${singularName} moved to draft successfully`);
     },
     onError: (error) => {
-      toast.error(error.message || "Failed to move survey to draft");
+      toast.error(error.message || `Failed to move ${singularName.toLowerCase()} to draft`);
     },
   });
 

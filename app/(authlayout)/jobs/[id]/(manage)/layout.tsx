@@ -26,6 +26,7 @@ import { Button } from "@/components/ui/button";
 import { useGetJobById } from "@/graphql/actions/jobs";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useModuleStore } from "@/store/useModuleStore";
 
 const tabItems = [
   { key: "manage", label: "Overview", icon: Briefcase },
@@ -45,6 +46,9 @@ function JobManagementLayout({ children }: { children: React.ReactNode }) {
     pathname === basePath || pathname === `${basePath}/`
       ? "manage"
       : pathname?.replace(`${basePath}/`, "") || "manage";
+
+  const moduleName = useModuleStore((state) => state.jobModuleName);
+  const singularName = useModuleStore((state) => state.jobSingularName);
 
   const { data, loading } = useGetJobById({
     variables: {
@@ -102,7 +106,7 @@ function JobManagementLayout({ children }: { children: React.ReactNode }) {
                 <div className="flex flex-col gap-0.5">
                   <div className="flex items-center gap-2.5">
                     <h1 className="text-lg font-semibold tracking-tight">
-                      {loading ? "Loading Job..." : job?.title || "Job Details"}
+                      {loading ? `Loading ${singularName}...` : job?.title || `${singularName} Details`}
                     </h1>
                     {loading && (
                       <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
@@ -210,13 +214,13 @@ function JobManagementLayout({ children }: { children: React.ReactNode }) {
                   href="/jobs/all"
                   className="text-xs font-medium"
                 >
-                  Jobs
+                  {moduleName}
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbPage className="text-xs font-medium">
-                  {job?.title || "Job Details"}
+                  {job?.title || `${singularName} Details`}
                 </BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>

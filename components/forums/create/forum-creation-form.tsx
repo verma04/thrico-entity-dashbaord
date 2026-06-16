@@ -30,6 +30,7 @@ import { cn } from "@/lib/utils";
 
 // Assuming you have a query to get categories
 import { getDiscussionForumCategory } from "@/graphql/actions/discussion-form";
+import { useModuleStore } from "@/store/useModuleStore";
 
 interface ForumCreationFormProps {
   initialValues?: Record<string, any>;
@@ -55,6 +56,8 @@ export function ForumCreationForm({
   onFinish,
   onCancel,
 }: ForumCreationFormProps) {
+  const moduleName = useModuleStore((state) => state.forumModuleName);
+  const singularName = useModuleStore((state) => state.forumSingularName);
   const formik = useFormik({
     initialValues: {
       title: initialValues?.title || "",
@@ -90,14 +93,14 @@ export function ForumCreationForm({
                 <MessageSquare className="h-5 w-5 text-primary" />
               </div>
               <h1 className="text-2xl font-bold tracking-tight">
-                {initialValues?.title ? "Edit Discussion" : "Start a Discussion"}
+                {initialValues?.title ? `Edit ${singularName}` : `Start a ${singularName}`}
               </h1>
             </div>
             <div className="flex items-center gap-2 text-xs text-muted-foreground ml-1">
-              <span>Forums</span>
+              <span>{moduleName}</span>
               <ChevronRight className="h-3 w-3" />
               <span>
-                {initialValues?.title ? "Edit Topic" : "Create New Topic"}
+                {initialValues?.title ? `Edit ${singularName}` : `Create New ${singularName}`}
               </span>
             </div>
           </div>
@@ -113,15 +116,15 @@ export function ForumCreationForm({
                 {/* Basic Info */}
                 <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden">
                   <CardHeader className="bg-muted/30 pb-4">
-                    <CardTitle className="text-xl">Discussion Details</CardTitle>
+                    <CardTitle className="text-xl">{singularName} Details</CardTitle>
                     <CardDescription>
-                      Share your thoughts, ask questions, or start a conversation
+                      Share your thoughts, ask questions, or start a {singularName.toLowerCase()}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="pt-6 space-y-6">
                     <div className="space-y-2">
                       <Label htmlFor="title" className="text-sm font-medium">
-                        Topic Title <span className="text-destructive">*</span>
+                        {singularName} Title <span className="text-destructive">*</span>
                       </Label>
                       <Input
                         id="title"
@@ -192,7 +195,7 @@ export function ForumCreationForm({
                       <Textarea
                         id="content"
                         name="content"
-                        placeholder="Provide more details to start the discussion..."
+                        placeholder={`Provide more details to start the ${singularName.toLowerCase()}...`}
                         className={cn(
                           "min-h-[200px] resize-y",
                           formik.touched.content &&
@@ -217,7 +220,7 @@ export function ForumCreationForm({
                   <CardHeader className="bg-muted/30 pb-4">
                     <CardTitle className="text-xl">Settings</CardTitle>
                     <CardDescription>
-                      Configure how you want to post this discussion
+                      Configure how you want to post this {singularName.toLowerCase()}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="pt-6 space-y-4">
@@ -233,7 +236,7 @@ export function ForumCreationForm({
                           </Badge>
                         </Label>
                         <p className="text-sm text-muted-foreground">
-                          Hide your identity from other members when posting this discussion. Admins can still see your identity.
+                          Hide your identity from other members when posting this {singularName.toLowerCase()}. Admins can still see your identity.
                         </p>
                       </div>
                       <Switch
@@ -316,9 +319,9 @@ export function ForumCreationForm({
           if (onCancel) onCancel();
           else window.history.back();
         }}
-        title="Unsaved Discussion"
+        title={`Unsaved ${singularName}`}
         description="You have unfilled form data."
-        buttonText="Post Discussion"
+        buttonText={`Post ${singularName}`}
       />
     </div>
   );

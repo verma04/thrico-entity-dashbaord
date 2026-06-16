@@ -38,6 +38,7 @@ import { useFormik, FieldArray, FormikProvider } from "formik";
 import * as Yup from "yup";
 import { addPoll } from "../../graphql/actions/polls";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
+import { useModuleStore } from "@/store/useModuleStore";
 
 const pollSchema = Yup.object().shape({
   title: Yup.string()
@@ -90,6 +91,7 @@ export default function NewPoll({
   onCompletedAction?: (pollId: string | number) => void;
   onCancel?: () => void;
 }) {
+  const singularName = useModuleStore((state) => state.pollSingularName);
   const [open, setOpen] = useState(false);
   const [resultVisibility, setResultVisibility] = useState("ALWAYS");
 
@@ -139,12 +141,12 @@ export default function NewPoll({
       {/* Title */}
       <div className="space-y-2">
         <Label htmlFor="poll-title" className="text-sm font-medium">
-          Poll Title <span className="text-destructive">*</span>
+          {singularName} Title <span className="text-destructive">*</span>
         </Label>
         <Input
           id="poll-title"
           name="title"
-          placeholder="Enter poll title"
+          placeholder={`Enter ${singularName.toLowerCase()} title`}
           maxLength={100}
           value={formik.values.title}
           onChange={formik.handleChange}
@@ -168,7 +170,7 @@ export default function NewPoll({
           name="question"
           rows={4}
           className="resize-none"
-          placeholder="Describe what your poll is asking"
+          placeholder={`Describe what your ${singularName.toLowerCase()} is asking`}
           maxLength={200}
           value={formik.values.question}
           onChange={formik.handleChange}
@@ -277,7 +279,7 @@ export default function NewPoll({
           </div>
           <div>
             <Label className="text-base font-semibold">Result Visibility</Label>
-            <p className="text-sm text-muted-foreground">Choose when voters can see the poll outcomes</p>
+            <p className="text-sm text-muted-foreground">Choose when voters can see the {singularName.toLowerCase()} outcomes</p>
           </div>
         </div>
         <RadioGroup
@@ -313,7 +315,7 @@ export default function NewPoll({
       <CardContent className="pt-6 space-y-4">
         <div>
           <h3 className="text-lg font-bold tracking-tight text-zinc-900 leading-tight mb-1">
-            {formik.values.title || "Untitled Poll"}
+            {formik.values.title || `Untitled ${singularName}`}
           </h3>
           <p className="text-sm text-muted-foreground leading-relaxed">
             {formik.values.question || "Your question will appear here..."}
@@ -367,7 +369,7 @@ export default function NewPoll({
       ) : (
         <div className="flex items-center gap-2">
           {fullPage ? <Save className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />}
-          {fullPage ? "Create Poll" : standalone ? "Create Poll" : "Create and Attach Poll"}
+          {fullPage ? `Create ${singularName}` : standalone ? `Create ${singularName}` : `Create and Attach ${singularName}`}
         </div>
       )}
     </Button>
@@ -387,13 +389,13 @@ export default function NewPoll({
                     <BarChart3 className="h-5 w-5 text-primary" />
                   </div>
                   <h1 className="text-2xl font-bold tracking-tight">
-                    Create Poll
+                    Create {singularName}
                   </h1>
                 </div>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground ml-1">
-                  <span>Polls</span>
+                  <span>{singularName}s</span>
                   <ChevronRight className="h-3 w-3" />
-                  <span>Create New Poll</span>
+                  <span>Create New {singularName}</span>
                 </div>
               </div>
             </div>
@@ -408,10 +410,10 @@ export default function NewPoll({
                     <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden">
                       <CardHeader className="bg-muted/30 pb-4">
                         <CardTitle className="text-xl">
-                          Poll Details
+                          {singularName} Details
                         </CardTitle>
                         <p className="text-sm text-muted-foreground">
-                          Core details about your poll
+                          Core details about your {singularName.toLowerCase()}
                         </p>
                       </CardHeader>
                       <CardContent className="pt-6 space-y-6">
@@ -432,7 +434,7 @@ export default function NewPoll({
                         variant="outline"
                         className="bg-indigo-500/5 text-indigo-600 border-indigo-500/20"
                       >
-                        Poll Tips
+                        {singularName} Tips
                       </Badge>
                     </div>
 
@@ -477,9 +479,9 @@ export default function NewPoll({
               if (onCancel) onCancel();
               else window.history.back();
             }}
-            title="Unsaved Poll Data"
+            title={`Unsaved ${singularName} Data`}
             description="You have unfilled form data."
-            buttonText="Create Poll"
+            buttonText={`Create ${singularName}`}
           />
         </>
       </FormikProvider>
@@ -528,7 +530,7 @@ export default function NewPoll({
         className="shadow-sm"
       >
         <Plus className="h-4 w-4 mr-2" />
-        Create Poll
+        Create {singularName}
       </Button>
 
       <Sheet open={open} onOpenChange={setOpen}>
@@ -540,7 +542,7 @@ export default function NewPoll({
               </div>
               <div>
                 <SheetTitle className="text-lg font-semibold tracking-tight">
-                  Create Poll
+                  Create {singularName}
                 </SheetTitle>
                 <p className="text-xs text-muted-foreground">
                   Get feedback from your community

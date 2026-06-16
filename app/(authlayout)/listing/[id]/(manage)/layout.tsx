@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { useListingDetails } from "@/graphql/actions/listing";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useModuleStore } from "@/store/useModuleStore";
 
 const tabItems = [
   { key: "manage", label: "Overview", icon: ShoppingBag },
@@ -35,6 +36,8 @@ const tabItems = [
 ];
 
 function ListingManagementLayout({ children }: { children: React.ReactNode }) {
+  const moduleName = useModuleStore((state) => state.listingModuleName);
+  const singularName = useModuleStore((state) => state.listingSingularName);
   const router = useRouter();
   const pathname = usePathname();
   const id = pathname?.split("/")[2];
@@ -84,7 +87,7 @@ function ListingManagementLayout({ children }: { children: React.ReactNode }) {
                   <div className="relative">
                     <img
                       src={`https://cdn.thrico.network/${listing.media[0].url}`}
-                      alt={listing.title || "Listing Image"}
+                      alt={listing.title || `${singularName} Image`}
                       className="w-11 h-11 rounded-xl object-cover border border-border/60 shadow-sm"
                     />
                     <span
@@ -111,8 +114,8 @@ function ListingManagementLayout({ children }: { children: React.ReactNode }) {
                   <div className="flex items-center gap-2.5">
                     <h1 className="text-lg font-semibold tracking-tight">
                       {loading
-                        ? "Loading Listing..."
-                        : listing?.title || "Listing Details"}
+                        ? `Loading ${singularName}...`
+                        : listing?.title || `${singularName} Details`}
                     </h1>
                     {loading && (
                       <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
@@ -216,13 +219,13 @@ function ListingManagementLayout({ children }: { children: React.ReactNode }) {
                   href="/listing/all"
                   className="text-xs font-medium"
                 >
-                  Listings
+                  {moduleName}
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbPage className="text-xs font-medium">
-                  {listing?.title || "Listing Details"}
+                  {listing?.title || `${singularName} Details`}
                 </BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>

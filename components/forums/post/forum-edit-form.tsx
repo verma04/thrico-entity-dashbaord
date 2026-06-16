@@ -70,6 +70,7 @@ export function ForumEditForm({
   onSubmit,
   onCancel,
 }: ForumEditFormProps) {
+  const singularName = useModuleStore((state) => state.forumSingularName);
   const [activeTab, setActiveTab] = useState("edit");
 
   const formik = useFormik({
@@ -93,7 +94,7 @@ export function ForumEditForm({
         {/* Header */}
         <div className="px-6 pt-6 pb-4 border-b">
           <div className="flex items-center gap-2">
-            <h2 className="text-2xl font-semibold tracking-tight">Edit Discussion Post</h2>
+            <h2 className="text-2xl font-semibold tracking-tight">Edit {singularName} Post</h2>
             {hasChanges && (
               <Badge variant="secondary" className="animate-pulse">
                 Unsaved Changes
@@ -101,7 +102,7 @@ export function ForumEditForm({
             )}
           </div>
           <p className="text-sm text-muted-foreground mt-1">
-            Update your post content and customize visibility settings
+            Update your {singularName.toLowerCase()} content and customize visibility settings
           </p>
         </div>
 
@@ -129,7 +130,7 @@ export function ForumEditForm({
                 <CardHeader>
                   <CardTitle>Post Content</CardTitle>
                   <CardDescription>
-                    Update the title and content of your discussion post
+                    Update the title and content of your {singularName.toLowerCase()}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -194,7 +195,7 @@ export function ForumEditForm({
                 <CardHeader>
                   <CardTitle>Classification</CardTitle>
                   <CardDescription>
-                    Organize your post into the most relevant category
+                    Organize your {singularName.toLowerCase()} into the most relevant category
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -291,14 +292,14 @@ export function ForumEditForm({
                     </h3>
                     <div className="text-lg text-muted-foreground whitespace-pre-wrap">
                       {formik.values.content ||
-                        "Your post content preview will show up here..."}
+                        `Your ${singularName.toLowerCase()} content preview will show up here...`}
                     </div>
                   </div>
                 </CardContent>
               </Card>
               <div className="mt-6 p-4 rounded-lg bg-primary/5 border border-primary/10">
                 <p className="text-sm text-muted-foreground text-center">
-                  Review your changes. This is how the updated post will appear
+                  Review your changes. This is how the updated {singularName.toLowerCase()} will appear
                   to the community.
                 </p>
               </div>

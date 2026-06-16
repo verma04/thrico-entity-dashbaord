@@ -17,16 +17,25 @@ export default function TrialBanner() {
   const { data } = useCheckEntitySubscription();
   const subscription = data?.checkEntitySubscription;
 
-  const daysLeft =
-    subscription?.endDate && !isNaN(new Date(subscription?.endDate).getTime())
-      ? Math.max(
-          0,
-          Math.ceil(
-            (new Date(subscription?.endDate).getTime() - new Date().getTime()) /
-              (1000 * 60 * 60 * 24)
-          )
-        )
-      : "N/A";
+  const calculateRemainingTime = () => {
+    if (!subscription?.endDate || isNaN(new Date(subscription?.endDate).getTime())) {
+      return "N/A days remaining";
+    }
+
+    const diffMs = new Date(subscription.endDate).getTime() - new Date().getTime();
+    if (diffMs <= 0) return "0 hours remaining";
+
+    const diffHours = diffMs / (1000 * 60 * 60);
+    if (diffHours < 24) {
+      const hours = Math.ceil(diffHours);
+      return `${hours} hour${hours === 1 ? "" : "s"} remaining`;
+    }
+
+    const diffDays = Math.ceil(diffHours / 24);
+    return `${diffDays} day${diffDays === 1 ? "" : "s"} remaining`;
+  };
+
+  const remainingText = calculateRemainingTime();
 
   const items = [
     "Unlimited team members",
@@ -65,7 +74,7 @@ export default function TrialBanner() {
                 <div className="h-1 w-1 rounded-full bg-primary animate-pulse" />
               </div>
               <h3 className="text-[13.5px] font-semibold text-foreground tracking-tight leading-none mb-1">
-                {daysLeft} days remaining
+                {remainingText}
               </h3>
               <p className="text-[11.5px] text-muted-foreground line-clamp-1">
                 Ends {moment(subscription?.endDate).format("MMM DD, YYYY")}

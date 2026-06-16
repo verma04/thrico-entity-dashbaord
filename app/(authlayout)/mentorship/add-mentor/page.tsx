@@ -10,8 +10,10 @@ import { useRouter } from "next/navigation";
 import { MentorCreationForm } from "@/components/mentorship/add/mentor-creation-form";
 import { useAddMentor } from "@/graphql/actions/mentorship/mentorship-actions";
 import { notify } from "@/lib/notify";
+import { useModuleStore } from "@/store/useModuleStore";
 
 const AddMentorPage = () => {
+  const singularName = useModuleStore((state) => state.mentorshipSingularName);
   const router = useRouter();
 
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -19,11 +21,11 @@ const AddMentorPage = () => {
   const [addMentor, { loading }] = useAddMentor({
     onCompleted: () => {
       setSubmitError(null);
-      notify.success("Mentor onboarded successfully!");
+      notify.success(`${singularName} onboarded successfully!`);
       router.push("/mentorship/all");
     },
     onError: (error: any) => {
-      const message = error.message || "Failed to onboard mentor";
+      const message = error.message || `Failed to onboard ${singularName.toLowerCase()}`;
       setSubmitError(message);
       notify.error(message);
     },

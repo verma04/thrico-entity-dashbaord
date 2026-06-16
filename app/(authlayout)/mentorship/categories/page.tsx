@@ -83,6 +83,7 @@ function CategoryDialog({
   editingCategory: MentorCategory | null;
   isLoading: boolean;
   onSave: (values: { title: string }) => void;
+  singularName: string;
 }) {
   const [title, setTitle] = React.useState("");
 
@@ -102,12 +103,12 @@ function CategoryDialog({
       <DialogContent className="max-w-md rounded-2xl border-slate-200">
         <DialogHeader>
           <DialogTitle className="font-bold text-slate-800">
-            {editingCategory ? "Edit Category" : "Add Mentor Category"}
+            {editingCategory ? "Edit Category" : `Add ${singularName} Category`}
           </DialogTitle>
           <DialogDescription className="font-medium text-slate-500">
             {editingCategory
               ? "Update the category name"
-              : "Create a new category to organize your mentors"}
+              : `Create a new category to organize your ${singularName.toLowerCase()}s`}
           </DialogDescription>
         </DialogHeader>
 
@@ -163,6 +164,8 @@ function CategoriesGrid({
   isLoading: boolean;
   onEdit: (cat: MentorCategory) => void;
   onDelete: (cat: MentorCategory) => void;
+  moduleName: string;
+  singularName: string;
 }) {
   if (isLoading) {
     return (
@@ -235,7 +238,7 @@ function CategoriesGrid({
                       {category.title}
                     </h3>
                     <p className="text-xs font-semibold text-slate-500 mt-1 uppercase tracking-wider">
-                      Mentorship
+                      {moduleName}
                     </p>
                   </div>
                 </div>
@@ -267,7 +270,7 @@ function CategoriesGrid({
               </div>
 
               <p className="text-sm text-slate-600 font-medium mt-4 line-clamp-2 leading-relaxed">
-                Mentor expertise classification node
+                {singularName} expertise classification node
               </p>
             </CardContent>
           </Card>
@@ -277,8 +280,12 @@ function CategoriesGrid({
   );
 }
 
+import { useModuleStore } from "@/store/useModuleStore";
+
 // ── Main Page ──
 function MentorCategoriesPage() {
+  const moduleName = useModuleStore((state) => state.mentorshipModuleName);
+  const singularName = useModuleStore((state) => state.mentorshipSingularName);
   const { data, loading, refetch } = useGetMentorCategories();
   const [search, setSearch] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -346,9 +353,9 @@ function MentorCategoriesPage() {
   return (
     <EcosystemWrapper anonymized-1="mentorship-categories">
       <EcosystemHeader
-        title="Mentor Categories"
+        title={`${singularName} Categories`}
         badgeText="Organization"
-        description="Organize mentors by expertise for better discovery and matching."
+        description={`Organize ${singularName.toLowerCase()}s by expertise for better discovery and matching.`}
         icon={FolderTree}
         actions={
           <Button
@@ -403,6 +410,8 @@ function MentorCategoriesPage() {
             setIsDialogOpen(true);
           }}
           onDelete={(cat) => setCategoryToDelete(cat)}
+          moduleName={moduleName}
+          singularName={singularName}
         />
       </EcosystemContainer>
 
@@ -413,6 +422,7 @@ function MentorCategoriesPage() {
         editingCategory={editingCategory}
         isLoading={creating || updating}
         onSave={handleSave}
+        singularName={singularName}
       />
 
       {/* Delete Confirmation */}

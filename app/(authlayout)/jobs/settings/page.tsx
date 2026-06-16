@@ -6,25 +6,30 @@ import { Briefcase, ShieldCheck, Zap } from "lucide-react";
 import { PlatformSettingsPage, SettingsField } from "@/components/ui/platform/settings-page";
 import { toast } from "sonner";
 import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { useModuleStore } from "@/store/useModuleStore";
 
-const FIELDS: SettingsField[] = [
+const getFields = (singularName: string, moduleName: string): SettingsField[] => [
   {
     key: "allowJobs",
-    label: "Allow Job Posting",
-    description: "Enable or disable the ability for members to post new job opportunities.",
+    label: `Allow ${moduleName} Posting`,
+    description: `Enable or disable the ability for members to post new ${singularName.toLowerCase()} opportunities.`,
     icon: ShieldCheck,
     section: "Marketplace Governance",
   },
   {
     key: "autoApproveJobs",
-    label: "Auto Approve Jobs",
-    description: "Automatically validate and publish job listings without manual review.",
+    label: `Auto Approve ${moduleName}`,
+    description: `Automatically validate and publish ${singularName.toLowerCase()} listings without manual review.`,
     icon: Zap,
     section: "Automation Engines",
   },
 ];
 
 const JobsSettings = () => {
+  const moduleName = useModuleStore((state) => state.jobModuleName);
+  const singularName = useModuleStore((state) => state.jobSingularName);
+  const FIELDS = getFields(singularName, moduleName);
+
   const { data, loading } = useEntitySettings();
   const [update, { loading: loadingBtn }] = useUpdateEntitySettings({});
 
@@ -35,9 +40,9 @@ const JobsSettings = () => {
           input: settings,
         },
       });
-      toast.success("Jobs settings updated successfully");
+      toast.success(`${moduleName} settings updated successfully`);
     } catch (error) {
-      toast.error("Failed to update jobs configuration");
+      toast.error(`Failed to update ${moduleName.toLowerCase()} configuration`);
       throw error;
     }
   };

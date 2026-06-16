@@ -49,11 +49,13 @@ import {
 } from "@/components/layout/ecosystem/ecosystem-analytics";
 import { cn } from "@/lib/utils";
 import { useGetDiscussionAnalytics } from "@/graphql/actions/discussion-form";
+import { useModuleStore } from "@/store/useModuleStore";
 
 // Removing dummy data constants
 // Dummy data removed
 
 function DiscussionForum() {
+  const moduleName = useModuleStore((state) => state.forumModuleName);
   const [timeRangeStr, setTimeRangeStr] = useState("LAST_7_DAYS");
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
     from: subDays(new Date(), 7),
@@ -94,7 +96,7 @@ function DiscussionForum() {
 
   const kpis = [
     {
-      title: "Total Forums",
+      title: `Total ${moduleName}`,
       value: (stats?.totalForums || 0).toLocaleString(),
       trend: 3,
       icon: LayoutGrid,
@@ -130,7 +132,7 @@ function DiscussionForum() {
   return (
     <EcosystemWrapper anonymized-1="discussion-forums">
       <EcosystemHeader
-        title="Forum Analytics"
+        title={`${moduleName} Analytics`}
         description="Monitor community participation, thread velocity, and topic distribution."
         badgeText="Overview"
         icon={MessageSquare}
@@ -298,7 +300,7 @@ function DiscussionForum() {
         </div>
 
         <EcosystemCard
-          title="Top Performing Forums"
+          title={`Top Performing ${moduleName}`}
           description="High-velocity community nodes"
           icon={Activity}
         >
@@ -353,7 +355,7 @@ function DiscussionForum() {
             ))}
             {forumPerformanceData.length === 0 && (
               <div className="text-center py-8 text-sm text-zinc-500 font-medium">
-                No active forums found in this period.
+                No active {moduleName.toLowerCase()} found in this period.
               </div>
             )}
           </div>

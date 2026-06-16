@@ -23,6 +23,7 @@ import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header"
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { useModuleStore } from "@/store/useModuleStore";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Status options
@@ -47,6 +48,9 @@ export default function Communities({
   const [view, setView] = useState<"grid" | "table">("table");
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState(initialStatus || "ALL");
+
+  const moduleName = useModuleStore((state) => state.communityModuleName);
+  const singularName = useModuleStore((state) => state.communitySingularName);
 
   const { data, loading, refetch } = getCommunities({
     variables: {
@@ -73,12 +77,12 @@ export default function Communities({
   return (
     <EcosystemWrapper>
       <EcosystemHeader
-        title="Communities"
-        badgeText="Community List"
+        title={moduleName}
+        badgeText={`${singularName} List`}
         description={
           loading
-            ? "Loading communities…"
-            : `Manage and view all ${communities.length} communities.`
+            ? `Loading ${moduleName.toLowerCase()}…`
+            : `Manage and view all ${communities.length} ${moduleName.toLowerCase()}.`
         }
         icon={Users}
         actions={
@@ -177,7 +181,7 @@ export default function Communities({
 
         <EcosystemActionBar.Group align="right">
           <EcosystemActionBar.Status active={filteredCommunities.length > 0}>
-            {filteredCommunities.length} Communities
+            {filteredCommunities.length} {moduleName}
           </EcosystemActionBar.Status>
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
