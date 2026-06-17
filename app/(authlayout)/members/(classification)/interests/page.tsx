@@ -27,8 +27,7 @@ import { notify } from "@/lib/notify";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { InterestDialog } from "../../../../../components/classfications/interests/interest-dialog";
-import { InterestUsersSheet } from "../../../../../components/classfications/interests/interest-users-sheet";
-import { InterestsGrid } from "../../../../../components/classfications/interests/interests-grid";
+import { InterestsListView } from "../../../../../components/classfications/interests/interests-list-view";
 import { InterestsGraphView } from "../../../../../components/classfications/interests/interests-graph-view";
 import { RECOMMENDED_INTERESTS } from "../../../../../components/classfications/interests/recommended-interests";
 
@@ -40,7 +39,6 @@ export default function InterestsPage() {
   const [interestToDelete, setInterestToDelete] = useState<Interest | null>(
     null,
   );
-  const [viewingInterest, setViewingInterest] = useState<Interest | null>(null);
   const [activeTab, setActiveTab] = useState("list");
 
   const [addInterest, { loading: creating }] = useAddInterest({
@@ -205,7 +203,7 @@ export default function InterestsPage() {
 
       <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0 mt-4">
         {activeTab === "list" ? (
-          <InterestsGrid
+          <InterestsListView
             interests={filteredInterests}
             isLoading={loading}
             onEdit={(interest) => {
@@ -213,7 +211,6 @@ export default function InterestsPage() {
               setIsDialogOpen(true);
             }}
             onDelete={(interest) => setInterestToDelete(interest)}
-            onViewUsers={(interest) => setViewingInterest(interest)}
           />
         ) : (
           <InterestsGraphView />
@@ -268,13 +265,6 @@ export default function InterestsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      {/* View Users Sheet */}
-      <InterestUsersSheet
-        interest={viewingInterest}
-        open={!!viewingInterest}
-        onOpenChange={(open) => !open && setViewingInterest(null)}
-      />
     </>
   );
 }

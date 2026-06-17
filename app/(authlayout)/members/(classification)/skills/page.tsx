@@ -27,8 +27,7 @@ import { notify } from "@/lib/notify";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { SkillDialog } from "../../../../../components/classfications/skills/skill-dialog";
-import { SkillUsersSheet } from "../../../../../components/classfications/skills/skill-users-sheet";
-import { SkillsGrid } from "../../../../../components/classfications/skills/skills-grid";
+import { SkillsListView } from "../../../../../components/classfications/skills/skills-list-view";
 import { SkillsGraphView } from "../../../../../components/classfications/skills/skills-graph-view";
 import { RECOMMENDED_SKILLS } from "../../../../../components/classfications/skills/recommended-skills";
 
@@ -38,7 +37,6 @@ export default function SkillsPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingSkill, setEditingSkill] = useState<Skill | null>(null);
   const [skillToDelete, setSkillToDelete] = useState<Skill | null>(null);
-  const [viewingSkill, setViewingSkill] = useState<Skill | null>(null);
   const [activeTab, setActiveTab] = useState("list");
 
   const [addSkill, { loading: creating }] = useAddSkill({
@@ -200,7 +198,7 @@ export default function SkillsPage() {
 
       <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0 mt-4">
         {activeTab === "list" ? (
-          <SkillsGrid
+          <SkillsListView
             skills={filteredSkills}
             isLoading={loading}
             onEdit={(skill) => {
@@ -208,7 +206,6 @@ export default function SkillsPage() {
               setIsDialogOpen(true);
             }}
             onDelete={(skill) => setSkillToDelete(skill)}
-            onViewUsers={(skill) => setViewingSkill(skill)}
           />
         ) : (
           <SkillsGraphView />
@@ -263,13 +260,6 @@ export default function SkillsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      {/* View Users Sheet */}
-      <SkillUsersSheet
-        skill={viewingSkill}
-        open={!!viewingSkill}
-        onOpenChange={(open) => !open && setViewingSkill(null)}
-      />
     </>
   );
 }

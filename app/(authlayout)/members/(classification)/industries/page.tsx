@@ -27,8 +27,7 @@ import { notify } from "@/lib/notify";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { IndustryDialog } from "../../../../../components/classfications/industries/industry-dialog";
-import { IndustryUsersSheet } from "../../../../../components/classfications/industries/industry-users-sheet";
-import { IndustriesGrid } from "../../../../../components/classfications/industries/industries-grid";
+import { IndustriesListView } from "../../../../../components/classfications/industries/industries-list-view";
 import { IndustriesGraphView } from "../../../../../components/classfications/industries/industries-graph-view";
 import { RECOMMENDED_INDUSTRIES } from "../../../../../components/classfications/industries/recommended-industries";
 
@@ -40,7 +39,6 @@ export default function IndustriesPage() {
   const [industryToDelete, setIndustryToDelete] = useState<Industry | null>(
     null,
   );
-  const [viewingIndustry, setViewingIndustry] = useState<Industry | null>(null);
   const [activeTab, setActiveTab] = useState("list");
 
   const [addIndustry, { loading: creating }] = useAddIndustry({
@@ -205,7 +203,7 @@ export default function IndustriesPage() {
 
       <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0 mt-4">
         {activeTab === "list" ? (
-          <IndustriesGrid
+          <IndustriesListView
             industries={filteredIndustries}
             isLoading={loading}
             onEdit={(industry) => {
@@ -213,7 +211,6 @@ export default function IndustriesPage() {
               setIsDialogOpen(true);
             }}
             onDelete={(industry) => setIndustryToDelete(industry)}
-            onViewUsers={(industry) => setViewingIndustry(industry)}
           />
         ) : (
           <IndustriesGraphView />
@@ -268,13 +265,6 @@ export default function IndustriesPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      {/* View Users Sheet */}
-      <IndustryUsersSheet
-        industry={viewingIndustry}
-        open={!!viewingIndustry}
-        onOpenChange={(open) => !open && setViewingIndustry(null)}
-      />
     </>
   );
 }
