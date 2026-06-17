@@ -6,7 +6,11 @@ import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrappe
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { Building2, Briefcase, Award, Heart } from "lucide-react";
 
-export default function ClassificationLayout({ children }: { children: React.ReactNode }) {
+export default function ClassificationLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -14,26 +18,27 @@ export default function ClassificationLayout({ children }: { children: React.Rea
   const activeTab = pathname.includes("/members/industries")
     ? "industries"
     : pathname.includes("/members/functions")
-    ? "functions"
-    : pathname.includes("/members/skills")
-    ? "skills"
-    : pathname.includes("/members/interests")
-    ? "interests"
-    : "industries";
+      ? "functions"
+      : pathname.includes("/members/skills")
+        ? "skills"
+        : pathname.includes("/members/interests")
+          ? "interests"
+          : "industries";
 
   const tabs = [
+    {
+      id: "interests",
+      label: "Interests",
+      icon: <Heart className="h-4 w-4" />,
+      href: "/members/interests",
+    },
     {
       id: "industries",
       label: "Industries",
       icon: <Building2 className="h-4 w-4" />,
       href: "/members/industries",
     },
-    {
-      id: "functions",
-      label: "Job Functions",
-      icon: <Briefcase className="h-4 w-4" />,
-      href: "/members/functions",
-    },
+
     {
       id: "skills",
       label: "Skills",
@@ -41,10 +46,10 @@ export default function ClassificationLayout({ children }: { children: React.Rea
       href: "/members/skills",
     },
     {
-      id: "interests",
-      label: "Interests",
-      icon: <Heart className="h-4 w-4" />,
-      href: "/members/interests",
+      id: "functions",
+      label: "Job Functions",
+      icon: <Briefcase className="h-4 w-4" />,
+      href: "/members/functions",
     },
   ];
 
@@ -81,9 +86,7 @@ export default function ClassificationLayout({ children }: { children: React.Rea
           </div>
         </div>
 
-        <div className="w-full">
-          {children}
-        </div>
+        <div className="w-full">{children}</div>
       </div>
     </EcosystemWrapper>
   );

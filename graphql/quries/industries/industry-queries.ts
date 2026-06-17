@@ -211,3 +211,66 @@ export function useGetUsersByIndustryNeo4j(
     options,
   );
 }
+
+// ---------------------------------------------------------
+// GET USER INDUSTRIES GRAPH
+// ---------------------------------------------------------
+
+export interface IndustryGraphUser {
+  id: string;
+  globalUserId: string;
+  firstName: string | null;
+  lastName: string | null;
+  avatar: string | null;
+  headline: string | null;
+}
+
+export interface IndustryGraphIndustry {
+  id: string;
+  title: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface UserIndustryEdge {
+  user: IndustryGraphUser;
+  industry: IndustryGraphIndustry;
+}
+
+export interface GetUserIndustriesGraphData {
+  getUserIndustriesGraph: UserIndustryEdge[];
+}
+
+export interface GetUserIndustriesGraphVars {
+  limit?: number;
+}
+
+export const GET_USER_INDUSTRIES_GRAPH = gql`
+  query GetUserIndustriesGraph($limit: Int) {
+    getUserIndustriesGraph(limit: $limit) {
+      user {
+        id
+        globalUserId
+        firstName
+        lastName
+        avatar
+        headline
+      }
+      industry {
+        id
+        title
+        createdAt
+        updatedAt
+      }
+    }
+  }
+`;
+
+export function useGetUserIndustriesGraph(
+  options?: QueryHookOptions<GetUserIndustriesGraphData, GetUserIndustriesGraphVars>,
+) {
+  return useQuery<GetUserIndustriesGraphData, GetUserIndustriesGraphVars>(
+    GET_USER_INDUSTRIES_GRAPH,
+    options,
+  );
+}

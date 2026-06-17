@@ -8,30 +8,9 @@ import {
   useDeleteIndustry,
   Industry,
   useBulkAddIndustries,
-  useGetUsersByIndustryNeo4j,
 } from "@/graphql/quries/industries/industry-queries";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Plus,
-  Pencil,
-  Trash2,
-  Filter,
-  Briefcase,
-  Loader2,
-  Building2,
-  Users,
-} from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Plus, Filter, Loader2, LayoutGrid, Network } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -45,396 +24,14 @@ import {
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { notify } from "@/lib/notify";
-import { Input } from "@/components/ui/input";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// ── Color palette for industries ──
-const INDUSTRY_COLORS = [
-  "#6366f1",
-  "#0ea5e9",
-  "#10b981",
-  "#f59e0b",
-  "#ef4444",
-  "#8b5cf6",
-  "#f97316",
-  "#14b8a6",
-];
+import { IndustryDialog } from "../../../../../components/classfications/industries/industry-dialog";
+import { IndustryUsersSheet } from "../../../../../components/classfications/industries/industry-users-sheet";
+import { IndustriesGrid } from "../../../../../components/classfications/industries/industries-grid";
+import { IndustriesGraphView } from "../../../../../components/classfications/industries/industries-graph-view";
+import { RECOMMENDED_INDUSTRIES } from "../../../../../components/classfications/industries/recommended-industries";
 
-function getIndustryColor(index: number) {
-  return INDUSTRY_COLORS[index % INDUSTRY_COLORS.length];
-}
-
-// ── Add/Edit Dialog ──
-function IndustryDialog({
-  open,
-  onOpenChange,
-  editingIndustry,
-  isLoading,
-  onSave,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  editingIndustry: Industry | null;
-  isLoading: boolean;
-  onSave: (values: { title: string }) => void;
-}) {
-  const [title, setTitle] = React.useState("");
-
-  React.useEffect(() => {
-    if (open) {
-      setTitle(editingIndustry?.title || "");
-    }
-  }, [open, editingIndustry]);
-
-  const handleSubmit = () => {
-    if (!title.trim()) return;
-    onSave({ title: title.trim() });
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md rounded-2xl border-border">
-        <DialogHeader>
-          <DialogTitle className="font-bold text-foreground">
-            {editingIndustry ? "Edit Industry" : "Add Industry"}
-          </DialogTitle>
-          <DialogDescription className="font-medium text-muted-foreground">
-            {editingIndustry
-              ? "Update the industry name"
-              : "Create a new industry to classify your members"}
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-4 py-2">
-          <div className="space-y-2">
-            <Label
-              htmlFor="industry-title"
-              className="text-sm font-semibold text-foreground"
-            >
-              Industry Name <span className="text-rose-500">*</span>
-            </Label>
-            <Input
-              id="industry-title"
-              placeholder="e.g., Technology, Finance, Healthcare"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="rounded-xl border-border focus-visible:ring-indigo-500/20"
-              onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-            />
-          </div>
-        </div>
-
-        <DialogFooter className="pt-2">
-          <Button
-            variant="outline"
-            className="rounded-lg font-semibold border-border"
-            onClick={() => onOpenChange(false)}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={!title.trim() || isLoading}
-            className="rounded-lg font-semibold bg-indigo-600 hover:bg-indigo-700 text-white gap-2"
-          >
-            {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-            {editingIndustry ? "Update" : "Save Industry"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-// ── Industries Grid ──
-function IndustriesGrid({
-  industries,
-  isLoading,
-  onEdit,
-  onDelete,
-  onViewUsers,
-}: {
-  industries: Industry[];
-  isLoading: boolean;
-  onEdit: (industry: Industry) => void;
-  onDelete: (industry: Industry) => void;
-  onViewUsers: (industry: Industry) => void;
-}) {
-  if (isLoading) {
-    return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-4 md:p-6">
-        {Array(8)
-          .fill(0)
-          .map((_, i) => (
-            <Card
-              key={i}
-              className="border border-border rounded-xl overflow-hidden"
-            >
-              <Skeleton className="h-1.5 w-full" />
-              <CardContent className="p-6">
-                <div className="flex items-center gap-4">
-                  <Skeleton className="h-12 w-12 rounded-xl" />
-                  <div className="space-y-2 flex-1">
-                    <Skeleton className="h-5 w-3/4" />
-                    <Skeleton className="h-3 w-1/2" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-      </div>
-    );
-  }
-
-  if (industries.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 bg-muted/50 rounded-xl border border-border border-dashed m-4">
-        <Briefcase className="h-10 w-10 text-muted-foreground mb-4" />
-        <h3 className="text-xl font-semibold text-foreground tracking-tight">
-          No industries found
-        </h3>
-        <p className="text-sm text-muted-foreground text-center mt-2 max-w-sm">
-          Try adding a new industry or adjusting your search filters.
-        </p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-4 md:p-6">
-      {industries.map((industry, index) => {
-        const color = getIndustryColor(index);
-        return (
-          <Card
-            key={industry.id}
-            onClick={() => onViewUsers(industry)}
-            className="border border-border shadow-sm hover:shadow-md transition-all duration-300 group overflow-hidden rounded-xl hover:border-indigo-500/20 hover:-translate-y-1 bg-card cursor-pointer"
-          >
-            {/* Color bar */}
-            <div
-              className="h-1.5 w-full opacity-80 group-hover:opacity-100 transition-opacity"
-              style={{ backgroundColor: color }}
-            />
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-4">
-                  <div
-                    className="h-12 w-12 rounded-xl flex items-center justify-center shadow-sm"
-                    style={{
-                      backgroundColor: `${color}15`,
-                      color: color,
-                    }}
-                  >
-                    <Building2 className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-md w-full text-foreground group-hover:text-indigo-600 transition-colors">
-                      {industry.title}
-                    </h3>
-                    <p className="text-xs font-semibold text-muted-foreground mt-1 uppercase tracking-wider">
-                      Industry
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-muted-foreground hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 rounded-lg"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onEdit(industry);
-                    }}
-                  >
-                    <Pencil className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-muted-foreground hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-lg"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDelete(industry);
-                    }}
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        );
-      })}
-    </div>
-  );
-}
-
-// ── Recommended Industries ──
-const RECOMMENDED_INDUSTRIES = [
-  "Advertising & Media",
-  "Advisory & Consulting Services",
-  "Aerospace & Defence",
-  "Agribusiness & Farming",
-  "Airlines & Airport Services",
-  "Architecture & Interior Design",
-  "Automotive",
-  "Banking",
-  "Beauty",
-  "Chemicals",
-  "Construction",
-  "Consumer Internet",
-  "Consumer Products",
-  "Defence & Security",
-  "Ecology & Environment",
-  "Education & Research",
-  "Entertainment",
-  "Event Management",
-  "Facilities Management",
-  "Fashion & Apparel",
-  "Financial Services",
-  "Gaming",
-  "Government",
-  "Health & Wellness",
-  "High Tech",
-  "HORECA",
-  "Household Services",
-  "Incubation & Entrepreneurship",
-  "Industrial Manufacturing",
-  "Influencers, Creators & Celebrities",
-  "Information Technology",
-  "Insurance",
-  "Internet, D2C & E-commerce",
-  "Legal",
-  "Life Sciences & Healthcare",
-  "Media Production",
-  "Mill Products",
-  "Mining",
-  "Not For Profit",
-  "Oil, Gas & Energy",
-  "Performing Arts, Museums & Culture",
-  "Profesional Networks",
-  "Professional Association",
-  "Professional Services",
-  "Publishing & Printing",
-  "Real Estate",
-  "Real Estate - Commercial",
-  "Real Estate - Residential",
-  "Retail",
-  "Sports",
-  "Social Media & Networking",
-  "Telecommunications",
-  "Think Tanks",
-  "Tours & Travels",
-  "Trading",
-  "Transportation, Logistics & Distribution",
-  "Utilities",
-  "VC, Private Equity & Angel Networks",
-  "Veterinary Services",
-  "Volunteering",
-  "Zoos & Bootanical Gardens",
-];
-
-// ── Industry Users Sheet ──
-function IndustryUsersSheet({
-  industry,
-  open,
-  onOpenChange,
-}: {
-  industry: Industry | null;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}) {
-  const { data, loading } = useGetUsersByIndustryNeo4j({
-    variables: { industryId: industry?.id || "", limit: 50 },
-    skip: !industry,
-  });
-
-  const users = data?.getUsersByIndustryNeo4j?.data || [];
-  const totalCount = data?.getUsersByIndustryNeo4j?.totalCount || 0;
-
-  return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="sm:max-w-md w-full overflow-y-auto">
-        <SheetHeader className="mb-6">
-          <SheetTitle className="text-xl font-bold flex items-center gap-2">
-            <Users className="h-5 w-5 text-indigo-500" />
-            {industry?.title} Users
-          </SheetTitle>
-          <SheetDescription>
-            {loading
-              ? "Loading..."
-              : `Found ${totalCount} users in this industry`}
-          </SheetDescription>
-        </SheetHeader>
-
-        <div className="space-y-4">
-          {loading ? (
-            Array(5)
-              .fill(0)
-              .map((_, i) => (
-                <div key={i} className="flex items-center gap-4">
-                  <Skeleton className="h-10 w-10 rounded-full" />
-                  <div className="space-y-2 flex-1">
-                    <Skeleton className="h-4 w-3/4" />
-                    <Skeleton className="h-3 w-1/2" />
-                  </div>
-                </div>
-              ))
-          ) : users.length === 0 ? (
-            <div className="text-center py-10 text-muted-foreground">
-              <Users className="h-10 w-10 mx-auto text-muted-foreground/30 mb-3" />
-              <p>No users found for this industry.</p>
-            </div>
-          ) : (
-            users.map((user) => (
-              <UserProfileHoverCard
-                key={user.id}
-                user={{ ...user, id: user.id }}
-              >
-                <div className="flex items-start gap-4 p-3 rounded-xl hover:bg-muted/50 transition-colors border border-transparent hover:border-border cursor-pointer">
-                  <Avatar className="h-10 w-10 border border-border">
-                    <AvatarImage
-                      src={
-                        user.avatar
-                          ? `https://cdn.thrico.network/${user.avatar}`
-                          : ""
-                      }
-                      alt={user.firstName || ""}
-                    />
-                    <AvatarFallback className="bg-indigo-50 text-indigo-600 font-semibold">
-                      {user.firstName?.charAt(0) || "U"}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm text-foreground truncate">
-                      {user.firstName} {user.lastName}
-                    </p>
-                    {user.headline && (
-                      <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
-                        {user.headline}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </UserProfileHoverCard>
-            ))
-          )}
-        </div>
-      </SheetContent>
-    </Sheet>
-  );
-}
-
-// ── Main Page ──
 export default function IndustriesPage() {
   const { data, loading, refetch } = useGetIndustries();
   const [search, setSearch] = useState("");
@@ -444,6 +41,7 @@ export default function IndustriesPage() {
     null,
   );
   const [viewingIndustry, setViewingIndustry] = useState<Industry | null>(null);
+  const [activeTab, setActiveTab] = useState("list");
 
   const [addIndustry, { loading: creating }] = useAddIndustry({
     onCompleted: () => {
@@ -539,6 +137,28 @@ export default function IndustriesPage() {
         <EcosystemActionBar.Separator />
 
         <EcosystemActionBar.Group align="right">
+          {/* View toggle */}
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="h-9 p-0.5 bg-muted/60 rounded-lg">
+              <TabsTrigger
+                value="list"
+                className="h-8 px-3 text-xs font-semibold gap-1.5 rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm"
+              >
+                <LayoutGrid className="h-3.5 w-3.5" />
+                List
+              </TabsTrigger>
+              <TabsTrigger
+                value="graph"
+                className="h-8 px-3 text-xs font-semibold gap-1.5 rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm"
+              >
+                <Network className="h-3.5 w-3.5" />
+                Graph
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+
+          <EcosystemActionBar.Separator />
+
           <div className="flex gap-2">
             <Button
               variant="outline"
@@ -584,23 +204,21 @@ export default function IndustriesPage() {
       </EcosystemActionBar>
 
       <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0 mt-4">
-        <IndustriesGrid
-          industries={filteredIndustries}
-          isLoading={loading}
-          onEdit={(industry) => {
-            setEditingIndustry(industry);
-            setIsDialogOpen(true);
-          }}
-          onDelete={(industry) => setIndustryToDelete(industry)}
-          onViewUsers={(industry) => setViewingIndustry(industry)}
-        />
+        {activeTab === "list" ? (
+          <IndustriesGrid
+            industries={filteredIndustries}
+            isLoading={loading}
+            onEdit={(industry) => {
+              setEditingIndustry(industry);
+              setIsDialogOpen(true);
+            }}
+            onDelete={(industry) => setIndustryToDelete(industry)}
+            onViewUsers={(industry) => setViewingIndustry(industry)}
+          />
+        ) : (
+          <IndustriesGraphView />
+        )}
       </EcosystemContainer>
-
-      <IndustryUsersSheet
-        industry={viewingIndustry}
-        open={!!viewingIndustry}
-        onOpenChange={(open) => !open && setViewingIndustry(null)}
-      />
 
       {/* Add/Edit Dialog */}
       <IndustryDialog
@@ -650,6 +268,13 @@ export default function IndustriesPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* View Users Sheet */}
+      <IndustryUsersSheet
+        industry={viewingIndustry}
+        open={!!viewingIndustry}
+        onOpenChange={(open) => !open && setViewingIndustry(null)}
+      />
     </>
   );
 }

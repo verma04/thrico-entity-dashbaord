@@ -140,6 +140,9 @@ dependencies:
   cobe:
     specifier: ^0.6.5
     version: 0.6.5
+  cytoscape:
+    specifier: ^3.34.0
+    version: 3.34.0
   date-fns:
     specifier: ^4.1.0
     version: 4.1.0
@@ -188,6 +191,9 @@ dependencies:
   react:
     specifier: 19.2.0
     version: 19.2.0
+  react-cytoscapejs:
+    specifier: ^2.0.0
+    version: 2.0.0(cytoscape@3.34.0)(react@19.2.0)
   react-day-picker:
     specifier: ^9.11.3
     version: 9.13.0(react@19.2.0)
@@ -256,12 +262,18 @@ devDependencies:
   '@types/canvas-confetti':
     specifier: ^1.9.0
     version: 1.9.0
+  '@types/cytoscape':
+    specifier: ^3.31.0
+    version: 3.31.0
   '@types/node':
     specifier: ^20
     version: 20.19.27
   '@types/react':
     specifier: ^19
     version: 19.2.7
+  '@types/react-cytoscapejs':
+    specifier: ^1.2.6
+    version: 1.2.6
   '@types/react-dom':
     specifier: ^19
     version: 19.2.3(@types/react@19.2.7)
@@ -3555,6 +3567,13 @@ packages:
     resolution: {integrity: sha512-aBGj/dULrimR1XDZLtG9JwxX1b4HPRF6CX9Yfwh3NvstZEm1ZL7RBnel4keCPSqs1ANRu1u2Aoz9R+VmtjYuTg==}
     dev: true
 
+  /@types/cytoscape@3.31.0:
+    resolution: {integrity: sha512-EXHOHxqQjGxLDEh5cP4te6J0bi7LbCzmZkzsR6f703igUac8UGMdEohMyU3GHAayCTZrLQOMnaE/lqB2Ekh8Ww==}
+    deprecated: This is a stub types definition. cytoscape provides its own type definitions, so you do not need this installed.
+    dependencies:
+      cytoscape: 3.34.0
+    dev: true
+
   /@types/d3-array@3.2.2:
     resolution: {integrity: sha512-hOLWVbm7uRza0BYXpIIW5pxfrKe0W+D5lrFiAEYR+pb6w3N2SwSMaJbXdUfSEv+dT4MfHBLtn5js0LAWaO6otw==}
     dev: false
@@ -3657,6 +3676,13 @@ packages:
     resolution: {integrity: sha512-N2clP5pJhB2YnZJ3PIHFk5RkygRX5WO/5f0WC08tp0wd+sv0rsJk3MqWn3CbNmT2J505a5336jaQj4ph1AdMug==}
     dependencies:
       undici-types: 6.21.0
+    dev: true
+
+  /@types/react-cytoscapejs@1.2.6:
+    resolution: {integrity: sha512-Nivfky/kuzT4BtIXpv5hV79Kfn+DUiBiftQeCvFCLUhqxz2ADgUxMYdHtxAUpfHiYZYuU9CWM8tGBTaybTH5+A==}
+    dependencies:
+      '@types/react': 19.2.7
+      cytoscape: 3.34.0
     dev: true
 
   /@types/react-dom@19.2.3(@types/react@19.2.7):
@@ -4431,6 +4457,10 @@ packages:
 
   /csstype@3.2.3:
     resolution: {integrity: sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==}
+
+  /cytoscape@3.34.0:
+    resolution: {integrity: sha512-62rNSrioXw93uliKFBwjukeQyeWwH2PqDrTac31r2P6464u3AUvTk0xS4LVvT251g7IgkFunrI48ZEZGjywSOg==}
+    engines: {node: '>=0.10'}
 
   /d3-array@3.2.4:
     resolution: {integrity: sha512-tdQAmyA18i4J7wprpYq8ClcxZy3SC31QMeByyCFyRt7BVHdREQZ5lpzoe5mFEYZUWe+oq8HBvk9JjpibyEV4Jg==}
@@ -6930,6 +6960,17 @@ packages:
 
   /random-word-slugs@0.1.7:
     resolution: {integrity: sha512-8cyzxOIDeLFvwSPTgCItMXHGT5ZPkjhuFKUTww06Xg1dNMXuGxIKlARvS7upk6JXIm41ZKXmtlKR1iCRWklKmg==}
+    dev: false
+
+  /react-cytoscapejs@2.0.0(cytoscape@3.34.0)(react@19.2.0):
+    resolution: {integrity: sha512-t3SSl1DQy7+JQjN+8QHi1anEJlM3i3aAeydHTsJwmjo/isyKK7Rs7oCvU6kZsB9NwZidzZQR21Vm2PcBLG/Tjg==}
+    peerDependencies:
+      cytoscape: ^3.2.19
+      react: '>=15.0.0'
+    dependencies:
+      cytoscape: 3.34.0
+      prop-types: 15.8.1
+      react: 19.2.0
     dev: false
 
   /react-day-picker@9.13.0(react@19.2.0):

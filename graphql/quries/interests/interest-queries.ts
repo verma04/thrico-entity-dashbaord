@@ -211,3 +211,66 @@ export function useGetUsersByInterestNeo4j(
     options,
   );
 }
+
+// ---------------------------------------------------------
+// GET USER INTERESTS GRAPH
+// ---------------------------------------------------------
+
+export interface InterestGraphUser {
+  id: string;
+  globalUserId: string;
+  firstName: string | null;
+  lastName: string | null;
+  avatar: string | null;
+  headline: string | null;
+}
+
+export interface InterestGraphInterest {
+  id: string;
+  title: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface UserInterestEdge {
+  user: InterestGraphUser;
+  interest: InterestGraphInterest;
+}
+
+export interface GetUserInterestsGraphData {
+  getUserInterestsGraph: UserInterestEdge[];
+}
+
+export interface GetUserInterestsGraphVars {
+  limit?: number;
+}
+
+export const GET_USER_INTERESTS_GRAPH = gql`
+  query GetUserInterestsGraph($limit: Int) {
+    getUserInterestsGraph(limit: $limit) {
+      user {
+        id
+        globalUserId
+        firstName
+        lastName
+        avatar
+        headline
+      }
+      interest {
+        id
+        title
+        createdAt
+        updatedAt
+      }
+    }
+  }
+`;
+
+export function useGetUserInterestsGraph(
+  options?: QueryHookOptions<GetUserInterestsGraphData, GetUserInterestsGraphVars>,
+) {
+  return useQuery<GetUserInterestsGraphData, GetUserInterestsGraphVars>(
+    GET_USER_INTERESTS_GRAPH,
+    options,
+  );
+}

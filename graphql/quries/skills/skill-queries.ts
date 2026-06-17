@@ -211,3 +211,80 @@ export function useGetUsersBySkillNeo4j(
     options,
   );
 }
+
+// ---------------------------------------------------------
+// GET USER SKILLS GRAPH
+// ---------------------------------------------------------
+
+export interface SkillGraphUser {
+  id: string;
+  globalUserId: string;
+  firstName: string | null;
+  lastName: string | null;
+  avatar: string | null;
+  headline: string | null;
+}
+
+export interface SkillGraphSkill {
+  id: string;
+  skillId?: string;
+  title?: string;
+  name?: string;
+  category?: string;
+  level?: string;
+  tags?: string[];
+  yearsOfExperience?: number;
+  description?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface UserSkillEdge {
+  user: SkillGraphUser;
+  skill: SkillGraphSkill;
+}
+
+export interface GetUserSkillsGraphData {
+  getUserSkillsGraph: UserSkillEdge[];
+}
+
+export interface GetUserSkillsGraphVars {
+  limit?: number;
+}
+
+export const GET_USER_SKILLS_GRAPH = gql`
+  query GetUserSkillsGraph($limit: Int) {
+    getUserSkillsGraph(limit: $limit) {
+      user {
+        id
+        globalUserId
+        firstName
+        lastName
+        avatar
+        headline
+      }
+      skill {
+        id
+        skillId
+        title
+        name
+        category
+        level
+        tags
+        yearsOfExperience
+        description
+        createdAt
+        updatedAt
+      }
+    }
+  }
+`;
+
+export function useGetUserSkillsGraph(
+  options?: QueryHookOptions<GetUserSkillsGraphData, GetUserSkillsGraphVars>,
+) {
+  return useQuery<GetUserSkillsGraphData, GetUserSkillsGraphVars>(
+    GET_USER_SKILLS_GRAPH,
+    options,
+  );
+}
