@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { X, Award } from "lucide-react";
 import { EcosystemGraphView } from "@/components/shared/ecosystem-graph-view";
+import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
 
 const GRAPH_STYLESHEET: cytoscape.Stylesheet[] = [
   {
@@ -152,12 +153,16 @@ function NodeDetailPanel({
           </Button>
         </div>
         <div className="-mt-8 px-4">
-          <Avatar className="h-16 w-16 border-[3px] border-white shadow-sm bg-white">
-            <AvatarImage src={avatarUrl} alt={name} />
-            <AvatarFallback className="bg-slate-100 text-slate-600 text-lg font-medium">
-              {user.firstName?.charAt(0) || "U"}
-            </AvatarFallback>
-          </Avatar>
+          <UserProfileHoverCard
+            user={{ id: user.globalUserId, firstName: user.firstName, lastName: user.lastName, avatar: user.avatar, headline: user.headline }}
+          >
+            <Avatar className="h-16 w-16 border-[3px] border-white shadow-sm bg-white cursor-pointer">
+              <AvatarImage src={avatarUrl} alt={name} />
+              <AvatarFallback className="bg-slate-100 text-slate-600 text-lg font-medium">
+                {user.firstName?.charAt(0) || "U"}
+              </AvatarFallback>
+            </Avatar>
+          </UserProfileHoverCard>
         </div>
         <div className="px-4 pt-2 pb-4 space-y-4">
           <div>
@@ -230,27 +235,31 @@ function NodeDetailPanel({
                   [user.firstName, user.lastName].filter(Boolean).join(" ") ||
                   "User";
                 return (
-                  <div
+                  <UserProfileHoverCard
                     key={user.id}
-                    className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100"
+                    user={{ id: user.globalUserId, firstName: user.firstName, lastName: user.lastName, avatar: user.avatar, headline: user.headline }}
                   >
-                    <Avatar className="h-7 w-7 border border-slate-200 bg-white">
-                      <AvatarImage src={avatarUrl} alt={uname} />
-                      <AvatarFallback className="bg-slate-100 text-slate-600 text-[10px] font-medium">
-                        {user.firstName?.charAt(0) || "U"}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-slate-700 truncate">
-                        {uname}
-                      </p>
-                      {user.headline && (
-                        <p className="text-[10px] text-slate-500 truncate">
-                          {user.headline}
+                    <div
+                      className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100 cursor-pointer"
+                    >
+                      <Avatar className="h-7 w-7 border border-slate-200 bg-white">
+                        <AvatarImage src={avatarUrl} alt={uname} />
+                        <AvatarFallback className="bg-slate-100 text-slate-600 text-[10px] font-medium">
+                          {user.firstName?.charAt(0) || "U"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium text-slate-700 truncate">
+                          {uname}
                         </p>
-                      )}
+                        {user.headline && (
+                          <p className="text-[10px] text-slate-500 truncate">
+                            {user.headline}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  </UserProfileHoverCard>
                 );
               })}
             </div>

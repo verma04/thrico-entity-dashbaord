@@ -71,7 +71,7 @@ export function SkillUsersSheet({
             users.map((user) => (
               <UserProfileHoverCard
                 key={user.id}
-                user={{ ...user, id: user.id }}
+                user={{ ...user, id: user.globalUserId }}
               >
                 <div className="flex items-start gap-4 p-3 rounded-xl hover:bg-muted/50 transition-colors border border-transparent hover:border-border cursor-pointer">
                   <Avatar className="h-10 w-10 border border-border">

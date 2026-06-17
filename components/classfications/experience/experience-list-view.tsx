@@ -5,6 +5,7 @@ import { useGetUserExperienceGraph } from "@/graphql/quries/experience/experienc
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Building, Users } from "lucide-react";
+import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
 
 export function ExperienceListView() {
   const { data, loading } = useGetUserExperienceGraph({
@@ -119,16 +120,20 @@ export function ExperienceListView() {
                     : "";
 
                   return (
-                    <Avatar
+                    <UserProfileHoverCard
                       key={user.id}
-                      className="h-8 w-8 border-2 border-background shadow-sm hover:z-10 hover:scale-110 transition-transform cursor-pointer"
-                      title={`${name} ${user.headline ? `- ${user.headline}` : ""}`}
+                      user={{ id: user.globalUserId, firstName: user.firstName, lastName: user.lastName, avatar: user.avatar, headline: user.headline }}
                     >
-                      <AvatarImage src={avatarUrl} alt={name} />
-                      <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-medium">
-                        {user.firstName?.charAt(0) || "U"}
-                      </AvatarFallback>
-                    </Avatar>
+                      <Avatar
+                        className="h-8 w-8 border-2 border-background shadow-sm hover:z-10 hover:scale-110 transition-transform cursor-pointer"
+                        title={`${name} ${user.headline ? `- ${user.headline}` : ""}`}
+                      >
+                        <AvatarImage src={avatarUrl} alt={name} />
+                        <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-medium">
+                          {user.firstName?.charAt(0) || "U"}
+                        </AvatarFallback>
+                      </Avatar>
+                    </UserProfileHoverCard>
                   );
                 })}
                 {users.length > 8 && (

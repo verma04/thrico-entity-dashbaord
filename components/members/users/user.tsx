@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { UserList } from "./user-list";
 import { useGetAllUser, useSearchUserWithAI } from "@/graphql/actions/membership/membership-queries";
 import { MembersListCards } from "../dashboard/members-listcards";
@@ -19,6 +20,7 @@ import {
   Sparkles,
   Search,
   Loader2,
+  Network,
 } from "lucide-react";
 import {
   Select,
@@ -250,6 +252,7 @@ function ContentArea({
 import { useGetIndustries } from "@/graphql/quries/industries/industry-queries";
 
 const User = ({ status: initialStatus }: { status?: string }) => {
+  const router = useRouter();
   const [view, setView] = useState<"grid" | "table">("table");
   const [search, setSearch] = useState("");
   const [debouncedSearch] = useDebounce(search, 500);
@@ -339,6 +342,14 @@ const User = ({ status: initialStatus }: { status?: string }) => {
               />
             </Button>
             <ViewToggle value={view} onChange={setView} />
+            <Button
+              variant="default"
+              className="h-9 px-3 rounded-lg text-xs font-semibold gap-1.5 transition-all bg-indigo-600 hover:bg-indigo-700 text-white"
+              onClick={() => router.push("/members/classifications")}
+            >
+              <Network className="h-3.5 w-3.5" />
+              Entity Nodes
+            </Button>
           </div>
         }
       />
