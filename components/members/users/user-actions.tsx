@@ -36,7 +36,9 @@ import {
   RefreshCw,
   Shield,
   ExternalLink,
+  Network,
 } from "lucide-react";
+import { UserClassificationsSheet } from "./user-classifications-sheet";
 
 enum Action {
   APPROVE = "APPROVE",
@@ -54,6 +56,7 @@ enum Action {
 export default function UserActions({ user }: { user: UserDetail }) {
   const router = useRouter();
   const [isActionModalOpen, setIsActionModalOpen] = useState(false);
+  const [isClassificationsSheetOpen, setIsClassificationsSheetOpen] = useState(false);
   const [selectedAction, setSelectedAction] = useState<Action | null>(null);
   const [reason, setReason] = useState("");
 
@@ -129,6 +132,11 @@ export default function UserActions({ user }: { user: UserDetail }) {
       label: "View Profile",
       icon: ExternalLink,
       onClick: () => router.push(`/members/${user.id}`),
+    },
+    {
+      label: "View Nodes",
+      icon: Network,
+      onClick: () => setIsClassificationsSheetOpen(true),
     },
     { type: "separator" },
   ];
@@ -332,6 +340,11 @@ export default function UserActions({ user }: { user: UserDetail }) {
         </DialogContent>
       </Dialog>
 
+      <UserClassificationsSheet
+        user={user}
+        open={isClassificationsSheetOpen}
+        onOpenChange={setIsClassificationsSheetOpen}
+      />
     </>
   );
 }
