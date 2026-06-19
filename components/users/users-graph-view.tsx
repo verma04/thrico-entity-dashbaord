@@ -58,18 +58,15 @@ import { cn } from "@/lib/utils";
 
 // ─── Industry color palette ──────────────────────────────────────
 const INDUSTRY_COLORS = [
-  "#6366f1", // indigo
-  "#22d3ee", // cyan
-  "#f97316", // orange
-  "#ef4444", // red
-  "#a855f7", // purple
-  "#3b82f6", // blue
-  "#22c55e", // green
-  "#eab308", // yellow
-  "#ec4899", // pink
-  "#14b8a6", // teal
-  "#f43f5e", // rose
-  "#84cc16", // lime
+  "#d7d7e9ff", // indigo
+  "#cee4e7ff", // cyan
+  "#ecd3c4ff", // orange
+  "#edccccff", // red
+  "#d3c6e1ff", // purple
+  "#cfe6ffff", // blue
+  "#d6f1dfff", // green
+  "#f6efceb2", // yellow
+  "#f1d1e0ff", // pink
 ];
 
 function getIndustryColor(index: number) {
@@ -283,7 +280,7 @@ function FilterCombobox({
 }) {
   const [open, setOpen] = useState(false);
   const [localSearch, setLocalSearch] = useState("");
-  
+
   const search = searchValue !== undefined ? searchValue : localSearch;
   const handleSearchChange = (val: string) => {
     if (onSearchChange) onSearchChange(val);
@@ -673,7 +670,7 @@ export function UsersGraphView({
   const [educationSearch, setEducationSearch] = useState("");
   const [companySearch, setCompanySearch] = useState("");
   const [locationSearch, setLocationSearch] = useState("");
-  
+
   const [debouncedIndustrySearch] = useDebounce(industrySearch, 300);
   const [debouncedSkillSearch] = useDebounce(skillSearch, 300);
   const [debouncedInterestSearch] = useDebounce(interestSearch, 300);
@@ -714,16 +711,37 @@ export function UsersGraphView({
     [interestsData],
   );
   const educationOptions = useMemo(
-    () => Array.from(new Set(educationData?.getUserEducationGraph.map((e) => e.school.title).filter(Boolean))) || [],
-    [educationData]
+    () =>
+      Array.from(
+        new Set(
+          educationData?.getUserEducationGraph
+            .map((e) => e.school.title)
+            .filter(Boolean),
+        ),
+      ) || [],
+    [educationData],
   );
   const companyOptions = useMemo(
-    () => Array.from(new Set(experienceData?.getUserExperienceGraph.map((e) => e.company.title).filter(Boolean))) || [],
-    [experienceData]
+    () =>
+      Array.from(
+        new Set(
+          experienceData?.getUserExperienceGraph
+            .map((e) => e.company.title)
+            .filter(Boolean),
+        ),
+      ) || [],
+    [experienceData],
   );
   const locationOptions = useMemo(
-    () => Array.from(new Set(locationData?.getUserLocationGraph.map((l) => l.location.title).filter(Boolean))) || [],
-    [locationData]
+    () =>
+      Array.from(
+        new Set(
+          locationData?.getUserLocationGraph
+            .map((l) => l.location.title)
+            .filter(Boolean),
+        ),
+      ) || [],
+    [locationData],
   );
 
   // ── Build connection map ───────────────────────────────────────
@@ -959,9 +977,7 @@ export function UsersGraphView({
               onAdd={(v) =>
                 !industries.includes(v) && setIndustries([...industries, v])
               }
-              onRemove={(v) =>
-                setIndustries(industries.filter((i) => i !== v))
-              }
+              onRemove={(v) => setIndustries(industries.filter((i) => i !== v))}
               searchValue={industrySearch}
               onSearchChange={setIndustrySearch}
             />
