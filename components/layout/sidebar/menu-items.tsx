@@ -245,20 +245,7 @@ export const gamificationEngine = [
       },
     ],
   },
-  {
-    key: "impact-score",
-    label: "Impact Score",
-    path: "/impact-score",
-    isMobileOnly: true,
-    icon: <Trophy size={18} />,
-    children: [
-      { key: "imp-dash", label: "Dashboard", path: "/impact-score" },
-      { key: "imp-templates", label: "Templates", path: "/impact-score/templates" },
-      { key: "imp-rules", label: "Rules", path: "/impact-score/rules" },
-      { key: "imp-audit", label: "Activity Log", path: "/impact-score/activity-log" },
-      { key: "imp-members", label: "Members", path: "/impact-score/members" },
-    ],
-  },
+
   {
     key: "engagement-games",
     label: "Member Games",
@@ -334,6 +321,30 @@ export const gamificationEngine = [
         path: "rewards/redemptions ",
       },
       { key: "rew-fraud", label: "Fraud", path: "/rewards/fraud" },
+    ],
+  },
+
+  {
+    key: "impact-score",
+    label: "Impact Score",
+    path: "/impact-score",
+    isMobileOnly: true,
+    icon: <Trophy size={18} />,
+    badge: "Beta",
+    children: [
+      { key: "imp-dash", label: "Dashboard", path: "/impact-score" },
+      {
+        key: "imp-templates",
+        label: "Templates",
+        path: "/impact-score/templates",
+      },
+      { key: "imp-rules", label: "Rules", path: "/impact-score/rules" },
+      {
+        key: "imp-audit",
+        label: "Activity Log",
+        path: "/impact-score/activity-log",
+      },
+      { key: "imp-members", label: "Members", path: "/impact-score/members" },
     ],
   },
 ];
@@ -920,7 +931,7 @@ export const useFilteredExtendedItems = () => {
   );
 
   const gamificationModule = data?.checkEntitySubscription?.modules?.find(
-    (m: any) => m.name === "Points & Badges" || m.name === "Gamification"
+    (m: any) => m.name === "Points & Badges" || m.name === "Gamification",
   );
   const gamificationLabel = gamificationModule?.customName || "Points & Badges";
 
