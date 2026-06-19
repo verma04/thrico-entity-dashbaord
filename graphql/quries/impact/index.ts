@@ -41,7 +41,7 @@ export const GET_IMPACT_RULE_BY_ID = gql`
   query GetImpactRuleById($id: ID!) {
     getImpactRuleById(id: $id) {
       id
-      templateId
+
       module
       action
       category
