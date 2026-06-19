@@ -11,6 +11,7 @@ import {
 } from "@/graphql/quries/interests/interest-queries";
 import { Button } from "@/components/ui/button";
 import { Plus, Filter, Loader2, LayoutGrid, Network } from "lucide-react";
+import { useDebounce } from "use-debounce";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,8 +33,12 @@ import { InterestsGraphView } from "../../../../../components/classfications/int
 import { RECOMMENDED_INTERESTS } from "../../../../../components/classfications/interests/recommended-interests";
 
 export default function InterestsPage() {
-  const { data, loading, refetch } = useGetInterests();
   const [search, setSearch] = useState("");
+  const [debouncedSearch] = useDebounce(search, 300);
+
+  const { data, loading, refetch } = useGetInterests({
+    variables: { search: debouncedSearch, limit: 100 },
+  });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingInterest, setEditingInterest] = useState<Interest | null>(null);
   const [interestToDelete, setInterestToDelete] = useState<Interest | null>(
@@ -112,9 +117,6 @@ export default function InterestsPage() {
   };
 
   const interests = data?.getInterests || [];
-  const filteredInterests = interests.filter((i) =>
-    i.title.toLowerCase().includes(search.toLowerCase()),
-  );
 
   return (
     <>
@@ -195,8 +197,8 @@ export default function InterestsPage() {
             </Button>
           </EcosystemActionBar.Item>
 
-          <EcosystemActionBar.Status active={filteredInterests.length > 0}>
-            {filteredInterests.length} Interests
+          <EcosystemActionBar.Status active={interests.length > 0}>
+            {interests.length} Interests
           </EcosystemActionBar.Status>
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
@@ -204,7 +206,7 @@ export default function InterestsPage() {
       <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0 mt-4">
         {activeTab === "list" ? (
           <InterestsListView
-            interests={filteredInterests}
+            interests={interests}
             isLoading={loading}
             onEdit={(interest) => {
               setEditingInterest(interest);

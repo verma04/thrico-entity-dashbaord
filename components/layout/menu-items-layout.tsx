@@ -64,7 +64,7 @@ function TabButton({
       {/* Icon */}
       <span
         className={cn(
-          "relative z-10 shrink-0 transition-all duration-200",
+          "relative z-9 shrink-0 transition-all duration-200",
           item.locked
             ? "text-muted-foreground/60"
             : isActive
@@ -83,12 +83,14 @@ function TabButton({
       {/* Label */}
       <span
         className={cn(
-          "relative z-10 leading-none tracking-tight transition-all flex items-center gap-1",
+          "relative z-9 leading-none tracking-tight transition-all flex items-center gap-1",
           isActive && !item.locked ? "font-bold" : "font-medium",
         )}
       >
         {item.label}
-        {item.locked && <Lock className="h-3 w-3 ml-0.5 text-muted-foreground/50" />}
+        {item.locked && (
+          <Lock className="h-3 w-3 ml-0.5 text-muted-foreground/50" />
+        )}
       </span>
     </button>
   );
@@ -114,7 +116,7 @@ function MenuTabs({
   onClose: () => void;
 }) {
   return (
-    <nav className="sticky top-0 z-40 bg-background/60 backdrop-blur-xl border-b border-border/50">
+    <nav className="sticky top-0 z-10 bg-background/60 backdrop-blur-xl border-b border-border/50">
       <div className={cn("px-6 relative", !fullWidth && "max-w-7xl mx-auto")}>
         <div className="flex h-14 items-center gap-1 overflow-x-auto no-scrollbar">
           {sortedSectionNames.map((sectionName, sIdx) => (
@@ -151,7 +153,7 @@ function MenuTabs({
         {fixed && (
           <button
             onClick={onClose}
-            className="absolute right-4 top-1/2 -translate-y-1/2 h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-all z-50"
+            className="absolute right-4 top-1/2 -translate-y-1/2 h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-all z-12"
           >
             <X className="h-4 w-4" />
           </button>
@@ -309,7 +311,7 @@ const MenuItemsLayout = ({
       className={cn(
         "bg-background text-foreground flex flex-col w-full",
         fixed
-          ? "fixed inset-0 z-100 bg-background h-screen w-screen overflow-hidden"
+          ? "fixed inset-0 z-20 bg-background h-screen w-screen overflow-hidden"
           : fullHeight
             ? "h-screen overflow-hidden"
             : "min-h-screen",

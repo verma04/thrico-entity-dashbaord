@@ -3,7 +3,7 @@
 import * as React from "react";
 import { usePathname } from "next/navigation";
 import { CardContent } from "@/components/ui/card";
-import { Users, Plus, Building2 } from "lucide-react";
+import { Users, Plus, Building2, Network } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 import { useModulePermission } from "@/hooks/use-module-permission";
@@ -29,6 +29,12 @@ function MembersLayout({ children }: { children: React.ReactNode }) {
         key: "all",
         label: "Members",
         icon: <Users className="h-4 w-4" />,
+        locked: !canRead,
+      },
+      {
+        key: "graph",
+        label: `Netwrok Graph`,
+        icon: <Network className="h-4 w-4" />,
         locked: !canRead,
       },
       {

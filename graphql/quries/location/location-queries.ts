@@ -1,8 +1,8 @@
 import { gql, useQuery } from "@apollo/client";
 
 export const GET_USER_LOCATION_GRAPH = gql`
-  query GetUserLocationGraph($limit: Int) {
-    getUserLocationGraph(limit: $limit) {
+  query GetUserLocationGraph($search: String, $limit: Int, $offset: Int) {
+    getUserLocationGraph(search: $search, limit: $limit, offset: $offset) {
       user {
         id
         globalUserId

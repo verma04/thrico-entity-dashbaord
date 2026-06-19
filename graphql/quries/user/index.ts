@@ -570,3 +570,23 @@ export const LOGOUT_ALL_USER_SESSIONS = gql`
     logoutAllUserSessions(userId: $userId)
   }
 `;
+
+export const GET_USERS_GRAPH = gql`
+  query GetUsersGraph($filter: UsersGraphFilter, $limit: Int) {
+    getUsersGraph(filter: $filter, limit: $limit) {
+      nodes {
+        id
+        firstName
+        lastName
+        avatar
+        email
+        entityId
+      }
+      edges {
+        source
+        target
+        relationType
+      }
+    }
+  }
+`;

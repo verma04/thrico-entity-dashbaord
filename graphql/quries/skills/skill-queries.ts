@@ -19,9 +19,15 @@ export interface GetSkillsData {
   getSkills: Skill[];
 }
 
+export interface GetSkillsVars {
+  search?: string;
+  limit?: number;
+  offset?: number;
+}
+
 export const GET_SKILLS = gql`
-  query GetSkills {
-    getSkills {
+  query GetSkills($search: String, $limit: Int, $offset: Int) {
+    getSkills(search: $search, limit: $limit, offset: $offset) {
       id
       title
       createdAt
@@ -30,8 +36,8 @@ export const GET_SKILLS = gql`
   }
 `;
 
-export function useGetSkills(options?: QueryHookOptions<GetSkillsData>) {
-  return useQuery<GetSkillsData>(GET_SKILLS, options);
+export function useGetSkills(options?: QueryHookOptions<GetSkillsData, GetSkillsVars>) {
+  return useQuery<GetSkillsData, GetSkillsVars>(GET_SKILLS, options);
 }
 
 // ---------------------------------------------------------

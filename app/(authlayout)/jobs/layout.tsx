@@ -1,7 +1,7 @@
 "use client";
 import * as React from "react";
 
-import { List, Plus } from "lucide-react";
+import { List, Plus, Network } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 import { useModulePermission } from "@/hooks/use-module-permission";
@@ -36,6 +36,12 @@ function JobsLayout({ children }: { children: React.ReactNode }) {
         key: "all",
         label: `All ${moduleName}`,
         icon: <List size={18} />,
+        locked: !canRead,
+      },
+      {
+        key: "graph",
+        label: `${moduleName} Graph`,
+        icon: <Network size={18} />,
         locked: !canRead,
       },
       {

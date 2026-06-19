@@ -19,9 +19,15 @@ export interface GetIndustriesData {
   getIndustries: Industry[];
 }
 
+export interface GetIndustriesVars {
+  search?: string;
+  limit?: number;
+  offset?: number;
+}
+
 export const GET_INDUSTRIES = gql`
-  query GetIndustries {
-    getIndustries {
+  query GetIndustries($search: String, $limit: Int, $offset: Int) {
+    getIndustries(search: $search, limit: $limit, offset: $offset) {
       id
       title
       createdAt
@@ -30,8 +36,8 @@ export const GET_INDUSTRIES = gql`
   }
 `;
 
-export function useGetIndustries(options?: QueryHookOptions<GetIndustriesData>) {
-  return useQuery<GetIndustriesData>(GET_INDUSTRIES, options);
+export function useGetIndustries(options?: QueryHookOptions<GetIndustriesData, GetIndustriesVars>) {
+  return useQuery<GetIndustriesData, GetIndustriesVars>(GET_INDUSTRIES, options);
 }
 
 // ---------------------------------------------------------

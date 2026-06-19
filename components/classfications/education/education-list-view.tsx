@@ -7,9 +7,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { GraduationCap, Users } from "lucide-react";
 import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
 
-export function EducationListView() {
+export function EducationListView({ search }: { search?: string }) {
   const { data, loading } = useGetUserEducationGraph({
-    variables: { limit: 100 },
+    variables: { limit: 100, search: search || undefined },
   });
 
   const schoolsWithUsers = useMemo(() => {

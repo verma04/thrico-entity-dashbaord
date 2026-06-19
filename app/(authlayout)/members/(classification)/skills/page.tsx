@@ -11,6 +11,7 @@ import {
 } from "@/graphql/quries/skills/skill-queries";
 import { Button } from "@/components/ui/button";
 import { Plus, Filter, Loader2, LayoutGrid, Network } from "lucide-react";
+import { useDebounce } from "use-debounce";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,8 +33,12 @@ import { SkillsGraphView } from "../../../../../components/classfications/skills
 import { RECOMMENDED_SKILLS } from "../../../../../components/classfications/skills/recommended-skills";
 
 export default function SkillsPage() {
-  const { data, loading, refetch } = useGetSkills();
   const [search, setSearch] = useState("");
+  const [debouncedSearch] = useDebounce(search, 300);
+
+  const { data, loading, refetch } = useGetSkills({
+    variables: { search: debouncedSearch, limit: 100 },
+  });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingSkill, setEditingSkill] = useState<Skill | null>(null);
   const [skillToDelete, setSkillToDelete] = useState<Skill | null>(null);
@@ -107,9 +112,6 @@ export default function SkillsPage() {
   };
 
   const skills = data?.getSkills || [];
-  const filteredSkills = skills.filter((s) =>
-    s.title.toLowerCase().includes(search.toLowerCase()),
-  );
 
   return (
     <>
@@ -190,8 +192,8 @@ export default function SkillsPage() {
             </Button>
           </EcosystemActionBar.Item>
 
-          <EcosystemActionBar.Status active={filteredSkills.length > 0}>
-            {filteredSkills.length} Skills
+          <EcosystemActionBar.Status active={skills.length > 0}>
+            {skills.length} Skills
           </EcosystemActionBar.Status>
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
@@ -199,7 +201,7 @@ export default function SkillsPage() {
       <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0 mt-4">
         {activeTab === "list" ? (
           <SkillsListView
-            skills={filteredSkills}
+            skills={skills}
             isLoading={loading}
             onEdit={(skill) => {
               setEditingSkill(skill);

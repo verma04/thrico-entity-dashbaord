@@ -19,9 +19,15 @@ export interface GetInterestsData {
   getInterests: Interest[];
 }
 
+export interface GetInterestsVars {
+  search?: string;
+  limit?: number;
+  offset?: number;
+}
+
 export const GET_INTERESTS = gql`
-  query GetInterests {
-    getInterests {
+  query GetInterests($search: String, $limit: Int, $offset: Int) {
+    getInterests(search: $search, limit: $limit, offset: $offset) {
       id
       title
       createdAt
@@ -30,8 +36,8 @@ export const GET_INTERESTS = gql`
   }
 `;
 
-export function useGetInterests(options?: QueryHookOptions<GetInterestsData>) {
-  return useQuery<GetInterestsData>(GET_INTERESTS, options);
+export function useGetInterests(options?: QueryHookOptions<GetInterestsData, GetInterestsVars>) {
+  return useQuery<GetInterestsData, GetInterestsVars>(GET_INTERESTS, options);
 }
 
 // ---------------------------------------------------------

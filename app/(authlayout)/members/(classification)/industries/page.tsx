@@ -11,6 +11,7 @@ import {
 } from "@/graphql/quries/industries/industry-queries";
 import { Button } from "@/components/ui/button";
 import { Plus, Filter, Loader2, LayoutGrid, Network } from "lucide-react";
+import { useDebounce } from "use-debounce";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,8 +33,12 @@ import { IndustriesGraphView } from "../../../../../components/classfications/in
 import { RECOMMENDED_INDUSTRIES } from "../../../../../components/classfications/industries/recommended-industries";
 
 export default function IndustriesPage() {
-  const { data, loading, refetch } = useGetIndustries();
   const [search, setSearch] = useState("");
+  const [debouncedSearch] = useDebounce(search, 300);
+  
+  const { data, loading, refetch } = useGetIndustries({
+    variables: { search: debouncedSearch, limit: 100 },
+  });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingIndustry, setEditingIndustry] = useState<Industry | null>(null);
   const [industryToDelete, setIndustryToDelete] = useState<Industry | null>(
@@ -112,9 +117,6 @@ export default function IndustriesPage() {
   };
 
   const industries = data?.getIndustries || [];
-  const filteredIndustries = industries.filter((i) =>
-    i.title.toLowerCase().includes(search.toLowerCase()),
-  );
 
   return (
     <>
@@ -195,8 +197,8 @@ export default function IndustriesPage() {
             </Button>
           </EcosystemActionBar.Item>
 
-          <EcosystemActionBar.Status active={filteredIndustries.length > 0}>
-            {filteredIndustries.length} Industries
+          <EcosystemActionBar.Status active={industries.length > 0}>
+            {industries.length} Industries
           </EcosystemActionBar.Status>
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
@@ -204,7 +206,7 @@ export default function IndustriesPage() {
       <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0 mt-4">
         {activeTab === "list" ? (
           <IndustriesListView
-            industries={filteredIndustries}
+            industries={industries}
             isLoading={loading}
             onEdit={(industry) => {
               setEditingIndustry(industry);

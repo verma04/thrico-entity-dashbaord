@@ -8,7 +8,12 @@ import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-car
 import { safeFormat } from "@/lib/date-utils";
 import { Mail, MapPin, Smartphone, Users } from "lucide-react";
 import { UserDetail, useBulkChangeUserStatus } from "@/graphql/actions";
-import { AdminTable, AdminStatusBadge, AdminVerifiedBadge, AdminTableColumn } from "@/components/shared/admin-table/admin-table";
+import {
+  AdminTable,
+  AdminStatusBadge,
+  AdminVerifiedBadge,
+  AdminTableColumn,
+} from "@/components/shared/admin-table/admin-table";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Column definitions
@@ -45,7 +50,7 @@ const columns: AdminTableColumn<UserDetail>[] = [
                 {row.user.firstName} {row.user.lastName}
               </p>
               <p className="text-[11px] text-muted-foreground leading-tight mt-0.5 truncate">
-                {row.user.about?.currentPosition || "Community Member"}
+                {row.user.about?.headline || "Community Member"}
               </p>
             </div>
           </div>
@@ -64,7 +69,8 @@ const columns: AdminTableColumn<UserDetail>[] = [
         </div>
         {row.user?.profile?.phone?.phoneNumber && (
           <span className="text-[11px] text-muted-foreground pl-4">
-            +{row.user?.profile?.phone?.countryCode}-{row.user?.profile?.phone?.phoneNumber}
+            +{row.user?.profile?.phone?.countryCode}-
+            {row.user?.profile?.phone?.phoneNumber}
           </span>
         )}
       </div>
@@ -76,7 +82,9 @@ const columns: AdminTableColumn<UserDetail>[] = [
     cell: (row) => (
       <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
         <MapPin className="h-3 w-3 shrink-0" />
-        <span className="truncate max-w-[120px]">{row.user?.location?.name || "—"}</span>
+        <span className="truncate max-w-[120px]">
+          {row.user?.location?.name || "—"}
+        </span>
       </div>
     ),
   },
@@ -113,7 +121,9 @@ const columns: AdminTableColumn<UserDetail>[] = [
   {
     key: "verification",
     header: "Verification",
-    cell: (row) => <AdminVerifiedBadge verified={!!row.verification?.isVerified} />,
+    cell: (row) => (
+      <AdminVerifiedBadge verified={!!row.verification?.isVerified} />
+    ),
   },
   {
     key: "joined",
@@ -174,7 +184,10 @@ const columns: AdminTableColumn<UserDetail>[] = [
                 {row.lastSession.deviceName || "Unknown Device"}
               </span>
               {row.lastSession.isActive && (
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" title="Active now" />
+                <span
+                  className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"
+                  title="Active now"
+                />
               )}
             </div>
             <span className="text-[11px] text-muted-foreground">
@@ -201,7 +214,9 @@ const columns: AdminTableColumn<UserDetail>[] = [
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function UserList({ users }: { users: UserDetail[] }) {
-  const [rowSelection, setRowSelection] = React.useState<Record<string, boolean>>({});
+  const [rowSelection, setRowSelection] = React.useState<
+    Record<string, boolean>
+  >({});
 
   const [bulkChangeStatus, { loading: bulkLoading }] = useBulkChangeUserStatus({
     onCompleted: () => setRowSelection({}),

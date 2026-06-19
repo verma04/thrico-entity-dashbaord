@@ -7,9 +7,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { MapPin, Users } from "lucide-react";
 import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
 
-export function LocationListView() {
+export function LocationListView({ search }: { search?: string }) {
   const { data, loading } = useGetUserLocationGraph({
-    variables: { limit: 100 },
+    variables: { limit: 100, search: search || undefined },
   });
 
   const locationsWithUsers = useMemo(() => {

@@ -123,6 +123,11 @@ export const communityIntelligence = [
         path: "/members/create",
       },
       {
+        key: "members-graph",
+        label: "Network Graph",
+        path: "/members/graph",
+      },
+      {
         key: "members-classifications",
         label: "Classifications",
         path: "/members/classifications",

@@ -24,6 +24,12 @@ function CommunitiesLayout({ children }: { children: React.ReactNode }) {
         locked: !canRead,
       },
       {
+        key: "graph",
+        label: `${moduleName} Graph`,
+        icon: <Network className="h-4 w-4" />,
+        locked: !canRead,
+      },
+      {
         key: "create",
         label: `Create ${singularName}`,
         icon: <Plus className="h-4 w-4" />,
@@ -33,12 +39,6 @@ function CommunitiesLayout({ children }: { children: React.ReactNode }) {
         key: "audit-log",
         label: "Audit Log",
         icon: <History className="h-4 w-4" />,
-        locked: !canRead,
-      },
-      {
-        key: "graph",
-        label: `${moduleName} Graph`,
-        icon: <Network className="h-4 w-4" />,
         locked: !canRead,
       },
     ];

@@ -7,9 +7,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Building, Users } from "lucide-react";
 import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
 
-export function ExperienceListView() {
+export function ExperienceListView({ search }: { search?: string }) {
   const { data, loading } = useGetUserExperienceGraph({
-    variables: { limit: 100 },
+    variables: { limit: 100, search: search || undefined },
   });
 
   const companiesWithUsers = useMemo(() => {
