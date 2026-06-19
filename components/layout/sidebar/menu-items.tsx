@@ -246,6 +246,20 @@ export const gamificationEngine = [
     ],
   },
   {
+    key: "impact-score",
+    label: "Impact Score",
+    path: "/impact-score",
+    isMobileOnly: true,
+    icon: <Trophy size={18} />,
+    children: [
+      { key: "imp-dash", label: "Dashboard", path: "/impact-score" },
+      { key: "imp-templates", label: "Templates", path: "/impact-score/templates" },
+      { key: "imp-rules", label: "Rules", path: "/impact-score/rules" },
+      { key: "imp-audit", label: "Activity Log", path: "/impact-score/activity-log" },
+      { key: "imp-members", label: "Members", path: "/impact-score/members" },
+    ],
+  },
+  {
     key: "engagement-games",
     label: "Member Games",
     path: "/engagement-games",

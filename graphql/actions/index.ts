@@ -315,6 +315,7 @@ export * from "./email";
 export * from "./contacts";
 export * from "./theme";
 export * from "./mcp";
+export * from "./impact";
 
 export const useGetModuleCustomName = (id: string) =>
   useQuery(GET_MODULE_CUSTOM_NAME, {
