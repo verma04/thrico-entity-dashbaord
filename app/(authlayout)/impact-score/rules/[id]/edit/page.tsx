@@ -38,14 +38,17 @@ export default function EditImpactRulePage() {
   const { data: templatesData } = useGetImpactTemplates();
   const { data: ruleData, loading: ruleLoading } = useGetImpactRuleById(id);
 
-  const [updateRule, { loading: isUpdating }] = useMutation(UPDATE_IMPACT_RULE, {
-    refetchQueries: ["GetImpactRules", "GetImpactRuleById"],
-  });
+  const [updateRule, { loading: isUpdating }] = useMutation(
+    UPDATE_IMPACT_RULE,
+    {
+      refetchQueries: ["GetImpactRules", "GetImpactRuleById"],
+    },
+  );
 
   const modules = moduleData?.getEntityGamificationModules?.modules || [];
   const triggers = moduleData?.getEntityGamificationModules?.triggers || [];
   const templates = templatesData?.impactTemplates || [];
-  
+
   const rule = ruleData?.getImpactRuleById;
 
   const handleUpdate = async (values: any) => {
@@ -53,7 +56,6 @@ export default function EditImpactRulePage() {
       variables: {
         id,
         input: {
-          templateId: values.templateId, // The backend currently doesn't update templateId, but it's required in the input type
           module: values.module,
           action: values.action,
           category: values.category,
@@ -66,11 +68,19 @@ export default function EditImpactRulePage() {
   };
 
   if (ruleLoading) {
-    return <div className="p-8 text-center text-sm text-zinc-500">Loading rule details...</div>;
+    return (
+      <div className="p-8 text-center text-sm text-zinc-500">
+        Loading rule details...
+      </div>
+    );
   }
 
   if (!rule) {
-    return <div className="p-8 text-center text-sm text-zinc-500">Rule not found.</div>;
+    return (
+      <div className="p-8 text-center text-sm text-zinc-500">
+        Rule not found.
+      </div>
+    );
   }
 
   // Find the template ID for this rule, or default to the first template since backend drops templateId in update
