@@ -225,6 +225,14 @@ function MenuItemRow({
               {item.label}
             </span>
           </span>
+          {!item.isLocked && item.badge && (
+            <Badge
+              variant="outline"
+              className="ml-auto mr-1 text-[9px] h-[17px] px-1.5 bg-primary/8 text-primary border-primary/20 rounded font-semibold uppercase tracking-wider shrink-0 group-data-[collapsible=icon]:hidden"
+            >
+              {item.badge}
+            </Badge>
+          )}
           {item.isLocked ? (
             <Lock size={12} className="shrink-0 text-muted-foreground/40 group-data-[collapsible=icon]:hidden" />
           ) : (
