@@ -12,12 +12,6 @@ import {
   ShieldCheck,
   Zap,
   RotateCcw,
-  BarChart3,
-  Globe,
-  ArrowRight,
-  Timer,
-  Sparkles,
-  LayoutGrid,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -175,7 +169,10 @@ function MembersPage() {
               className="h-9 w-9 text-muted-foreground hover:text-indigo-600 rounded-lg transition-all"
               onClick={() => handleRefresh()}
             >
-              <RotateCcw size={14} className={cn((loading || growthLoading) && "animate-spin")} />
+              <RotateCcw
+                size={14}
+                className={cn((loading || growthLoading) && "animate-spin")}
+              />
             </Button>
           </div>
         </div>
