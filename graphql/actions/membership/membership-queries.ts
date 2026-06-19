@@ -13,6 +13,7 @@ import {
   GET_ALL_REFERRALS,
   SEARCH_USER_WITH_AI,
   GET_USER_NEO4J_RELATIONSHIPS,
+  GET_USER_SESSIONS,
 } from "../../quries/user";
 import { TimeRange, DateRangeInput } from "../dashbaord/dashboard-quries";
 
@@ -324,5 +325,26 @@ export const useGetUserNeo4jRelationships = (
   useQuery<GetUserNeo4jRelationshipsResponse>(GET_USER_NEO4J_RELATIONSHIPS, {
     variables: { userId },
     skip: !userId,
+    ...options,
+  });
+
+export interface UserSession {
+  id: string;
+  deviceId: string;
+  deviceName: string;
+  deviceToken: string;
+  lastUsed: string;
+  createdAt: string;
+  isActive: boolean;
+}
+
+export interface GetUserSessionsResponse {
+  getUserSessions: UserSession[];
+}
+
+export const useGetUserSessions = (userId: string, options?: any) =>
+  useLazyQuery<GetUserSessionsResponse>(GET_USER_SESSIONS, {
+    variables: { userId },
+    fetchPolicy: "network-only",
     ...options,
   });

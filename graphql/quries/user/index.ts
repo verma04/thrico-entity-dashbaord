@@ -544,3 +544,29 @@ export const GET_USER_NEO4J_RELATIONSHIPS = gql`
     }
   }
 `;
+
+export const GET_USER_SESSIONS = gql`
+  query GetUserSessions($userId: ID!) {
+    getUserSessions(userId: $userId) {
+      id
+      deviceId
+      deviceName
+      deviceToken
+      lastUsed
+      createdAt
+      isActive
+    }
+  }
+`;
+
+export const LOGOUT_USER_SESSION = gql`
+  mutation LogoutUserSession($sessionId: ID!) {
+    logoutUserSession(sessionId: $sessionId)
+  }
+`;
+
+export const LOGOUT_ALL_USER_SESSIONS = gql`
+  mutation LogoutAllUserSessions($userId: ID!) {
+    logoutAllUserSessions(userId: $userId)
+  }
+`;

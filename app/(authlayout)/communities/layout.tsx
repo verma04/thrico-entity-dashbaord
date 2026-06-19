@@ -1,11 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { List, Plus, History } from "lucide-react";
+import { List, Plus, History, Network } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 import { useModulePermission } from "@/hooks/use-module-permission";
-import { useGetModuleCustomName } from "@/graphql/actions";
+
 import { useModuleStore } from "@/store/useModuleStore";
 
 function CommunitiesLayout({ children }: { children: React.ReactNode }) {
@@ -33,6 +33,12 @@ function CommunitiesLayout({ children }: { children: React.ReactNode }) {
         key: "audit-log",
         label: "Audit Log",
         icon: <History className="h-4 w-4" />,
+        locked: !canRead,
+      },
+      {
+        key: "graph",
+        label: `${moduleName} Graph`,
+        icon: <Network className="h-4 w-4" />,
         locked: !canRead,
       },
     ];

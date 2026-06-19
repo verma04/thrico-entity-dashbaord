@@ -7,6 +7,8 @@ import {
   BULK_CHANGE_USER_STATUS,
   ADD_NEW_MEMBER,
   UPDATE_MEMBER,
+  LOGOUT_USER_SESSION,
+  LOGOUT_ALL_USER_SESSIONS,
 } from "../../quries/user";
 
 // ---------------------------------------------------------
@@ -73,3 +75,9 @@ export const useUpdateMember = (options?: any) =>
     ],
     awaitRefetchQueries: true,
   });
+
+export const useLogoutUserSession = (options?: any) =>
+  useMutation(LOGOUT_USER_SESSION, options);
+
+export const useLogoutAllUserSessions = (options?: any) =>
+  useMutation(LOGOUT_ALL_USER_SESSIONS, options);
