@@ -41,6 +41,7 @@ import { DateRangePicker } from "@/components/ui/date-range-picker";
 import moment from "moment";
 import { AccessDeniedAlert } from "@/components/shared/access-denied-alert";
 import { useModuleStore } from "@/store/useModuleStore";
+import { getPreferredMediaUrl } from "@/lib/media-utils";
 
 const STATUS_COLORS = ["#18181b", "#3f3f46", "#71717a", "#a1a1aa", "#e4e4e7"];
 
@@ -48,7 +49,9 @@ const ChartSkeleton = () => (
   <div className="h-full w-full flex items-center justify-center bg-muted/30 rounded-xl border border-dashed border-border">
     <div className="flex flex-col items-center gap-4 text-center px-6">
       <div className="h-6 w-6 border-2 border-border border-t-primary rounded-full animate-spin" />
-      <p className="text-xs font-medium text-muted-foreground">Getting info...</p>
+      <p className="text-xs font-medium text-muted-foreground">
+        Getting info...
+      </p>
     </div>
   </div>
 );
@@ -106,7 +109,7 @@ export default function CommunitiesAnalytics() {
           badgeText="Overview"
           icon={Users2}
         />
-        
+
         <EcosystemActionBar shadow="none">
           <div className="flex items-center justify-between w-full opacity-50 pointer-events-none">
             <div className="flex items-center gap-2 px-1">
@@ -137,14 +140,17 @@ export default function CommunitiesAnalytics() {
 
         <EcosystemContainer className="p-6 lg:p-8">
           <div className="max-w-3xl">
-            <EcosystemCard 
-              title="Access Restricted" 
+            <EcosystemCard
+              title="Access Restricted"
               description="You need additional permissions to view this dashboard."
               icon={ShieldCheck}
             >
               <div className="p-2">
-                <AccessDeniedAlert 
-                  message={error.message || `You do not have permission to view ${singularName.toLowerCase()} analytics.`} 
+                <AccessDeniedAlert
+                  message={
+                    error.message ||
+                    `You do not have permission to view ${singularName.toLowerCase()} analytics.`
+                  }
                 />
               </div>
             </EcosystemCard>
@@ -287,7 +293,10 @@ export default function CommunitiesAnalytics() {
                               </span>
                               <div className="flex items-center gap-4 text-muted-foreground">
                                 <span className="flex items-center gap-1.5 text-xs font-medium tabular-nums">
-                                  <Users size={12} className="text-muted-foreground" />
+                                  <Users
+                                    size={12}
+                                    className="text-muted-foreground"
+                                  />
                                   {community.members.toLocaleString()}
                                 </span>
                                 <span className="flex items-center gap-1.5 text-xs font-medium tabular-nums px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
@@ -327,7 +336,7 @@ export default function CommunitiesAnalytics() {
                         <div className="h-9 w-9 rounded-lg bg-muted/50 border border-border flex items-center justify-center text-xs font-bold text-muted-foreground overflow-hidden">
                           {creator.avatar ? (
                             <img
-                              src={`https://cdn.thrico.network${creator?.avatar}`}
+                              src={getPreferredMediaUrl(creator?.avatar)}
                               alt=""
                               className="w-full h-full object-cover"
                             />
