@@ -65,7 +65,7 @@ export default function ImpactActivityLogPage() {
   );
 
   return (
-    <EcosystemWrapper>
+    <>
       <EcosystemHeader
         title="Activity Log"
         description="Real-time stream of points awarded and deducted by the engine."
@@ -205,6 +205,6 @@ export default function ImpactActivityLogPage() {
           </EcosystemCard>
         </div>
       </EcosystemContainer>
-    </EcosystemWrapper>
+    </>
   );
 }
