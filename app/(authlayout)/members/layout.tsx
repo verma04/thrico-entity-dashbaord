@@ -33,7 +33,7 @@ function MembersLayout({ children }: { children: React.ReactNode }) {
       },
       {
         key: "graph",
-        label: `Netwrok Graph`,
+        label: `Network Graph`,
         icon: <Network className="h-4 w-4" />,
         locked: !canRead,
       },
