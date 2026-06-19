@@ -24,6 +24,8 @@ export const getMediaUrls = (path: string | null | undefined): string[] => {
     cleanPath = path.substring(CLOUDFRONT_URL.length);
   } else if (path.startsWith(CDN_URL)) {
     cleanPath = path.substring(CDN_URL.length);
+  } else if (path.startsWith("http")) {
+    return [path];
   }
 
   // Ensure cleanPath doesn't have a leading slash for consistency when joining

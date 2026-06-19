@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { useGetUserDetailsById } from "@/graphql/actions/membership/membership-queries";
 import { format } from "date-fns";
+import { getPreferredMediaUrl } from "@/lib/media-utils";
 
 export interface UserProfileHoverData {
   id?: string;
@@ -68,17 +69,9 @@ export function UserProfileHoverCard({
 
   // Determine which data to show (prefer fetched full data over initial basic data)
   const avatarToUse = userDetails?.avatar || user.avatar;
-  const avatarUrl = avatarToUse
-    ? avatarToUse.startsWith("http")
-      ? avatarToUse
-      : `https://cdn.thrico.network/${avatarToUse}`
-    : "";
+  const avatarUrl = getPreferredMediaUrl(avatarToUse);
 
-  const coverUrl = userDetails?.cover
-    ? userDetails.cover.startsWith("http")
-      ? userDetails.cover
-      : `https://cdn.thrico.network/${userDetails?.cover}`
-    : "";
+  const coverUrl = getPreferredMediaUrl(userDetails?.cover);
 
   const firstName = userDetails?.firstName || user.firstName || "";
   const lastName = userDetails?.lastName || user.lastName || "";
