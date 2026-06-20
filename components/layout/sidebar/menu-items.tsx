@@ -333,11 +333,7 @@ export const gamificationEngine = [
     badge: "Beta",
     children: [
       { key: "imp-dash", label: "Dashboard", path: "/impact-score" },
-      {
-        key: "imp-templates",
-        label: "Templates",
-        path: "/impact-score/templates",
-      },
+
       { key: "imp-rules", label: "Rules", path: "/impact-score/rules" },
       {
         key: "imp-audit",

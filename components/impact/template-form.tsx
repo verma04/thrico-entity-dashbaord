@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
@@ -217,9 +218,32 @@ export function TemplateForm() {
           />
         </div>
 
-        <Button type="submit" disabled={loading} className="w-full">
-          {loading ? "Saving..." : (templatesData?.impactTemplates?.length > 0 ? "Update Template" : "Save Template")}
-        </Button>
+        <FloatingSavePanel
+          hasChanged={form.formState.isDirty}
+          saved={false}
+          isSaving={loading}
+          onSave={form.handleSubmit(onSubmit)}
+          onReset={() => {
+            if (templatesData?.impactTemplates && templatesData.impactTemplates.length > 0) {
+              const existing = templatesData.impactTemplates[0];
+              form.reset({
+                name: existing.name,
+                minScore: existing.minScore,
+                maxScore: existing.maxScore,
+                defaultScore: existing.defaultScore,
+                activityWindowDays: existing.activityWindowDays,
+                refreshFrequency: existing.refreshFrequency,
+                decayEnabled: existing.decayEnabled,
+                decayPenalty: existing.decayPenalty,
+              });
+            } else {
+              form.reset();
+            }
+          }}
+          title={templatesData?.impactTemplates?.length > 0 ? "Unsaved Changes" : "Unsaved Configuration"}
+          description="You have unsaved form data."
+          buttonText={templatesData?.impactTemplates?.length > 0 ? "Update Template" : "Save Template"}
+        />
       </form>
     </Form>
   );
