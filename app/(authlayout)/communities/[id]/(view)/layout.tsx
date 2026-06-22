@@ -17,6 +17,7 @@ import {
   Loader2,
   Info,
   MessageCircle,
+  MessagesSquare,
   Users,
   Star,
   Settings,
@@ -33,6 +34,7 @@ import { cn } from "@/lib/utils";
 const tabItems = [
   { key: "about", label: "About", icon: Info },
   { key: "discussion", label: "Discussion", icon: MessageCircle },
+  { key: "chat", label: "Chat", icon: MessagesSquare },
   { key: "members", label: "Members", icon: Users },
   { key: "rating", label: "Rating", icon: Star },
   { key: "rules", label: "Rules", icon: ShieldAlert },

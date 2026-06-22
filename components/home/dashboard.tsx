@@ -62,6 +62,7 @@ import {
 import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDistanceToNow } from "date-fns";
+import { useGetImpactUsers } from "@/graphql/actions";
 
 // ---------------------------------------------------------------------------
 // KPI Card
@@ -407,6 +408,12 @@ export default function Dashboard() {
         input: { limit: 9, offset: 0 },
       },
     });
+
+  const { data: impactData, loading: loadingImpact } = useGetImpactUsers({
+    variables: {
+      input: { limit: 7, offset: 0 },
+    },
+  });
 
   const vitals = [
     {
@@ -955,8 +962,8 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {/* 4.5. Gamification Leaderboard + Activity Log */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mt-20">
+        {/* 4.5. Gamification Leaderboard + Activity Log + Impact Score */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mt-20">
           {/* Leaderboard */}
           <section className="space-y-3">
             <DashboardSectionHeading
@@ -1219,6 +1226,124 @@ export default function Dashboard() {
                             {log.points}
                           </span>
                         )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* Impact Score */}
+          <section className="space-y-3">
+            <DashboardSectionHeading
+              title="Impact Score"
+              icon={<Users className="h-3.5 w-3.5 text-rose-500" />}
+              rightElement={
+                <Link href="/impact-score/members">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-[10px] text-muted-foreground font-medium h-7 px-2.5 rounded-lg hover:bg-muted"
+                  >
+                    View all
+                  </Button>
+                </Link>
+              }
+            />
+            <div className="rounded-2xl border border-border/50 bg-card overflow-hidden shadow-sm h-full">
+              {loadingImpact ? (
+                <div className="divide-y divide-border/40">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <div
+                      key={i}
+                      className="flex items-center gap-4 px-5 py-3.5"
+                    >
+                      <div className="h-5 w-5 rounded bg-muted animate-pulse" />
+                      <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />
+                      <div className="flex-1 space-y-1.5">
+                        <div className="h-3.5 w-28 rounded bg-muted animate-pulse" />
+                        <div className="h-2.5 w-16 rounded bg-muted animate-pulse" />
+                      </div>
+                      <div className="h-3.5 w-12 rounded bg-muted animate-pulse" />
+                    </div>
+                  ))}
+                </div>
+              ) : (impactData?.getImpactUsers?.nodes?.length ?? 0) === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 text-muted-foreground/40">
+                  <Users className="h-8 w-8 mb-2 opacity-30" />
+                  <span className="text-[11px]">No impact data yet</span>
+                </div>
+              ) : (
+                <div className="divide-y divide-border/40">
+                  {impactData?.getImpactUsers?.nodes?.map((node: any, index: number) => {
+                    const user = node?.user;
+                    const rankColors: Record<number, string> = {
+                      1: "text-yellow-500",
+                      2: "text-slate-400",
+                      3: "text-amber-600",
+                    };
+                    const rank = index + 1;
+                    return (
+                      <div
+                        key={`${user?.id}-${rank}`}
+                        className={cn(
+                          "flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors",
+                          rank === 1 && "bg-yellow-500/[0.03]",
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            "text-sm font-bold tabular-nums w-6 text-center shrink-0",
+                            rankColors[rank] || "text-muted-foreground/50",
+                          )}
+                        >
+                          {rank <= 3
+                            ? ["🥇", "🥈", "🥉"][rank - 1]
+                            : `#${rank}`}
+                        </span>
+
+                        <UserProfileHoverCard
+                          user={{
+                            id: user?.id,
+                            firstName: user?.firstName,
+                            lastName: user?.lastName,
+                            avatar: user?.avatarUrl || user?.avatar,
+                          }}
+                        >
+                          <Link
+                            href={`/members/${user?.id}`}
+                            className="flex items-center gap-2.5 group min-w-0 flex-1"
+                          >
+                            <Avatar className="h-8 w-8 border border-border/50 shadow-sm shrink-0">
+                              <AvatarImage
+                                src={`https://cdn.thrico.network/${user?.avatarUrl || user?.avatar}`}
+                                alt={user?.firstName}
+                                className="object-cover"
+                              />
+                              <AvatarFallback className="bg-muted text-muted-foreground text-[10px] font-bold uppercase">
+                                {user?.firstName?.substring(0, 2)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="min-w-0 flex-1">
+                              <span className="text-[13px] font-semibold text-foreground truncate block group-hover:text-primary transition-colors">
+                                {user?.firstName} {user?.lastName}
+                              </span>
+                              <span
+                                className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground"
+                              >
+                                {node?.tier}
+                              </span>
+                            </div>
+                          </Link>
+                        </UserProfileHoverCard>
+
+                        <span className="text-[13px] font-bold text-foreground tabular-nums shrink-0">
+                          {node.score.toLocaleString()}
+                          <span className="text-[9px] text-muted-foreground/60 ml-0.5 font-semibold">
+                            pts
+                          </span>
+                        </span>
                       </div>
                     );
                   })}
