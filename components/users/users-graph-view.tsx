@@ -1131,7 +1131,7 @@ export function UsersGraphView({
               <div className="flex justify-between items-center mt-3 text-[10px] text-slate-500 font-medium">
                 <span>{impactScore[0]}</span>
                 <span>
-                  {impactScore[1] === 10000 ? "10000+" : impactScore[1]}
+                  {impactScore[1] === 1000 ? "1000+" : impactScore[1]}
                 </span>
               </div>
             </div>
