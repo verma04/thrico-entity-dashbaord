@@ -45,7 +45,7 @@ const columns: AdminTableColumn<UserDetail>[] = [
                 {row.user.lastName?.charAt(0)}
               </AvatarFallback>
             </Avatar>
-            <div className="flex flex-col min-w-0">
+            <div className="flex flex-col min-w-0 max-w-[160px] sm:max-w-[220px] md:max-w-[280px]">
               <p className="text-[13px] font-semibold text-foreground leading-tight truncate group-hover:text-primary transition-colors">
                 {row.user.firstName} {row.user.lastName}
               </p>
