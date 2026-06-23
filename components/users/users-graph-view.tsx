@@ -658,7 +658,7 @@ export function UsersGraphView({
         max: debouncedGamificationScore[1],
       };
     }
-    if (debouncedImpactScore[0] > 0 || debouncedImpactScore[1] < 10000) {
+    if (debouncedImpactScore[0] > 0 || debouncedImpactScore[1] < 1000) {
       f.impactScore = {
         min: debouncedImpactScore[0],
         max: debouncedImpactScore[1],
@@ -688,7 +688,7 @@ export function UsersGraphView({
     (debouncedGamificationScore[0] > 0 || debouncedGamificationScore[1] < 10000
       ? 1
       : 0) +
-    (debouncedImpactScore[0] > 0 || debouncedImpactScore[1] < 10000 ? 1 : 0);
+    (debouncedImpactScore[0] > 0 || debouncedImpactScore[1] < 1000 ? 1 : 0);
 
   const clearAllFilters = () => {
     setSearchInput("");
@@ -699,7 +699,7 @@ export function UsersGraphView({
     setCompany([]);
     setInterests([]);
     setGamificationScore([0, 10000]);
-    setImpactScore([0, 10000]);
+    setImpactScore([0, 1000]);
     setLimit(200);
   };
 
@@ -1122,7 +1122,7 @@ export function UsersGraphView({
             <div className="px-3 pt-4 pb-2">
               <Slider
                 min={0}
-                max={10000}
+                max={1000}
                 step={100}
                 value={[impactScore[0], impactScore[1]]}
                 onValueChange={(val) => setImpactScore([val[0], val[1]])}
@@ -1137,8 +1137,6 @@ export function UsersGraphView({
             </div>
           </FilterSection>
         </div>
-
-
       </div>
 
       {/* ─── CENTER: Graph (using EcosystemGraphView) ─────────── */}
