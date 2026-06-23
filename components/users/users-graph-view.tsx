@@ -17,7 +17,6 @@ import type {
   GetUsersGraphQueryVariables,
   UsersGraphFilter,
 } from "@/types/user-graph-types";
-import type cytoscape from "cytoscape";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
@@ -74,7 +73,7 @@ function getIndustryColor(index: number) {
 }
 
 // ─── Cytoscape Stylesheet (light theme) ──────────────────────────
-const GRAPH_STYLESHEET: cytoscape.Stylesheet[] = [
+const GRAPH_STYLESHEET: any[] = [
   {
     selector: "node",
     style: {
@@ -995,7 +994,7 @@ export function UsersGraphView({
               <Slider
                 value={[limit]}
                 min={50}
-                max={1000}
+                max={10000}
                 step={50}
                 onValueChange={(val) => setLimit(val[0])}
                 className="w-full"

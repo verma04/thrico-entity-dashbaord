@@ -1,8 +1,12 @@
 "use client";
 
-import React, { useCallback, useRef, useState, useEffect } from "react";
-import dynamic from "next/dynamic";
-import type cytoscape from "cytoscape";
+import React, {
+  useCallback,
+  useRef,
+  useState,
+  useEffect,
+  useMemo,
+} from "react";
 import { Button } from "@/components/ui/button";
 import {
   Network,
@@ -14,13 +18,27 @@ import {
   Shrink,
 } from "lucide-react";
 
-const CytoscapeComponent = dynamic(() => import("react-cytoscapejs"), {
-  ssr: false,
-});
+// We import cytoscape and fcose dynamically to avoid SSR issues
+let cytoscape: any = null;
+let fcose: any = null;
+let cytoscapeLoaded = false;
+
+function ensureCytoscape(): Promise<void> {
+  if (cytoscapeLoaded) return Promise.resolve();
+  return Promise.all([
+    import("cytoscape"),
+    import("cytoscape-fcose"),
+  ]).then(([cyModule, fcoseModule]) => {
+    cytoscape = cyModule.default || cyModule;
+    fcose = fcoseModule.default || fcoseModule;
+    cytoscape.use(fcose);
+    cytoscapeLoaded = true;
+  });
+}
 
 export interface EcosystemGraphViewProps {
-  elements: cytoscape.ElementDefinition[];
-  stylesheet: cytoscape.Stylesheet[];
+  elements: any[];
+  stylesheet: any[];
   loading?: boolean;
   loadingText?: string;
   emptyTitle?: string;
@@ -31,6 +49,12 @@ export interface EcosystemGraphViewProps {
   onNodeSelect?: (nodeData: any) => void;
   onNodeDeselect?: () => void;
 }
+
+// LOD threshold — below this zoom level, labels are hidden
+const LOD_ZOOM_THRESHOLD = 0.4;
+
+// Batch size for adding elements (prevents frame drops on huge graphs)
+const BATCH_SIZE = 5000;
 
 export function EcosystemGraphView({
   elements,
@@ -45,26 +69,56 @@ export function EcosystemGraphView({
   onNodeSelect,
   onNodeDeselect,
 }: EcosystemGraphViewProps) {
-  const cyRef = useRef<cytoscape.Core | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const cyRef = useRef<any>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [cyReady, setCyReady] = useState(false);
 
-  const handleCy = useCallback(
-    (cy: cytoscape.Core) => {
-      cyRef.current = cy;
+  // Track previous elements length to detect data changes
+  const prevElementsLenRef = useRef(0);
 
-      cy.on("layoutstop", () => {
-        cy.fit(undefined, 40);
+  // ── Initialize Cytoscape ──────────────────────────────────────
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    let cancelled = false;
+
+    ensureCytoscape().then(() => {
+      if (cancelled || !containerRef.current) return;
+
+      const cy = cytoscape({
+        container: containerRef.current,
+        elements: [],
+        style: stylesheet,
+
+        // ── Canvas renderer performance options ──
+        // Render to a texture when panning/zooming — huge perf win
+        textureOnViewport: true,
+        // Hide edges during pan/zoom for smoothness
+        hideEdgesOnViewport: true,
+        // Hide labels during pan/zoom
+        hideLabelsOnViewport: true,
+        // Use lower pixel ratio during interaction for speed
+        pixelRatio: "auto",
+        // Disable selection box (not needed)
+        selectionType: "single",
+        // Reduce motion blur quality for speed
+        motionBlur: false,
+
+        // Interaction
+        wheelSensitivity: 0.3,
+        minZoom: 0.02,
+        maxZoom: 5,
       });
 
-      // Click on node → notify parent + highlight connected
-      cy.on("tap", "node", (evt) => {
+      cyRef.current = cy;
+
+      // ── Node click → highlight neighborhood ──
+      cy.on("tap", "node", (evt: any) => {
         const node = evt.target;
         const nodeData = node.data();
 
-        // Clear previous highlight
         cy.elements().removeClass("highlighted faded");
-
-        // Highlight this node and connected edges/nodes
         const neighborhood = node.neighborhood().add(node);
         neighborhood.addClass("highlighted");
         cy.elements().not(neighborhood).addClass("faded");
@@ -72,24 +126,123 @@ export function EcosystemGraphView({
         onNodeSelect?.(nodeData);
       });
 
-      // Click on background → clear selection
-      cy.on("tap", (evt) => {
+      // ── Background click → clear selection ──
+      cy.on("tap", (evt: any) => {
         if (evt.target === cy) {
           cy.elements().removeClass("highlighted faded");
           onNodeDeselect?.();
         }
       });
-    },
-    [onNodeSelect, onNodeDeselect],
-  );
 
-  // If selection is cleared externally, remove classes
+      // ── LOD: hide labels when zoomed out ──
+      cy.on("zoom", () => {
+        const zoom = cy.zoom();
+        if (zoom < LOD_ZOOM_THRESHOLD) {
+          cy.style()
+            .selector("node")
+            .style({ "font-size": 0, "text-opacity": 0 })
+            .update();
+        } else {
+          // Restore from stylesheet
+          cy.style().fromJson(stylesheet).update();
+          // Re-apply highlight classes if any
+          const highlighted = cy.elements(".highlighted");
+          if (highlighted.length > 0) {
+            cy.elements().not(highlighted).addClass("faded");
+          }
+        }
+      });
+
+      setCyReady(true);
+    });
+
+    return () => {
+      cancelled = true;
+      if (cyRef.current) {
+        cyRef.current.destroy();
+        cyRef.current = null;
+      }
+      setCyReady(false);
+    };
+    // Only run on mount/unmount — stylesheet changes handled separately
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ── Update stylesheet when it changes ──────────────────────────
+  useEffect(() => {
+    const cy = cyRef.current;
+    if (!cy || !cyReady) return;
+    cy.style().fromJson(stylesheet).update();
+  }, [stylesheet, cyReady]);
+
+  // ── Sync onNodeSelect / onNodeDeselect callbacks ───────────────
+  const onNodeSelectRef = useRef(onNodeSelect);
+  const onNodeDeselectRef = useRef(onNodeDeselect);
+  useEffect(() => {
+    onNodeSelectRef.current = onNodeSelect;
+    onNodeDeselectRef.current = onNodeDeselect;
+  }, [onNodeSelect, onNodeDeselect]);
+
+  // ── Load elements in batches & run layout ──────────────────────
+  useEffect(() => {
+    const cy = cyRef.current;
+    if (!cy || !cyReady) return;
+
+    // Prevent re-running if elements haven't actually changed
+    if (elements.length === prevElementsLenRef.current && elements.length > 0) {
+      return;
+    }
+    prevElementsLenRef.current = elements.length;
+
+    // Clear existing
+    cy.elements().remove();
+
+    if (elements.length === 0) return;
+
+    // Batch add elements to prevent frame drops
+    const totalElements = elements.length;
+    let added = 0;
+
+    function addBatch() {
+      const batch = elements.slice(added, added + BATCH_SIZE);
+      if (batch.length === 0) {
+        // All elements added — run layout
+        runLayout(cy, totalElements);
+        return;
+      }
+      cy.add(batch);
+      added += batch.length;
+
+      if (added < totalElements) {
+        // Schedule next batch
+        requestAnimationFrame(addBatch);
+      } else {
+        runLayout(cy, totalElements);
+      }
+    }
+
+    addBatch();
+  }, [elements, cyReady]);
+
+  // ── Clear highlight when selection cleared externally ───────────
   useEffect(() => {
     if (!selectedNodeId && cyRef.current) {
       cyRef.current.elements().removeClass("highlighted faded");
     }
   }, [selectedNodeId]);
 
+  // ── Handle fullscreen resize ───────────────────────────────────
+  useEffect(() => {
+    const cy = cyRef.current;
+    if (!cy) return;
+    const timer = setTimeout(() => {
+      cy.resize();
+      cy.fit(undefined, 40);
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [isFullscreen]);
+
+  // ── Controls ───────────────────────────────────────────────────
   const handleZoomIn = () => {
     const cy = cyRef.current;
     if (cy)
@@ -115,20 +268,10 @@ export function EcosystemGraphView({
   const handleResetLayout = () => {
     const cy = cyRef.current;
     if (!cy) return;
-    cy.layout({
-      name: "cose",
-      animate: true,
-      animationDuration: 800,
-      randomize: true,
-      nodeRepulsion: () => 6000,
-      idealEdgeLength: () => 120,
-      edgeElasticity: () => 100,
-      gravity: 0.3,
-      numIter: 1000,
-      padding: 40,
-    } as any).run();
+    runLayout(cy, cy.elements().length);
   };
 
+  // ── Loading state ──────────────────────────────────────────────
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-20">
@@ -143,6 +286,7 @@ export function EcosystemGraphView({
     );
   }
 
+  // ── Empty state ────────────────────────────────────────────────
   if (elements.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 bg-muted/30 rounded-xl border border-border border-dashed m-4">
@@ -175,7 +319,6 @@ export function EcosystemGraphView({
           size="icon"
           onClick={() => {
             setIsFullscreen(!isFullscreen);
-            setTimeout(() => cyRef.current?.resize(), 100);
           }}
           className="h-8 w-8 rounded-lg bg-white/80 border-slate-200/50 text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 backdrop-blur-sm shadow-sm"
         >
@@ -238,27 +381,47 @@ export function EcosystemGraphView({
         </div>
       )}
 
-      <CytoscapeComponent
-        elements={elements}
-        stylesheet={stylesheet}
-        layout={
-          {
-            name: "cose",
-            animate: true,
-            animationDuration: 1000,
-            randomize: true,
-            nodeRepulsion: () => 6000,
-            idealEdgeLength: () => 120,
-            edgeElasticity: () => 100,
-            gravity: 0.3,
-            numIter: 1000,
-            padding: 40,
-          } as any
-        }
-        style={{ width: "100%", height: "100%" }}
-        cy={handleCy}
-        wheelSensitivity={0.3}
+      {/* Canvas container — Cytoscape renders directly into this div */}
+      <div
+        ref={containerRef}
+        className="w-full h-full"
+        style={{ position: "absolute", inset: 0 }}
       />
     </div>
   );
+}
+
+// ── Layout runner ──────────────────────────────────────────────────
+function runLayout(cy: any, totalElements: number) {
+  // For very large graphs, use a simpler/faster layout config
+  const isLarge = totalElements > 2000;
+  const isHuge = totalElements > 10000;
+
+  const layoutOptions: any = {
+    name: "fcose",
+    animate: !isHuge, // Skip animation for huge graphs
+    animationDuration: isLarge ? 500 : 1000,
+    randomize: true,
+    padding: 40,
+    // fcose-specific options
+    quality: isHuge ? "draft" : isLarge ? "default" : "proof",
+    nodeDimensionsIncludeLabels: !isHuge,
+    uniformNodeDimensions: isHuge, // Faster when true
+    nodeRepulsion: () => (isLarge ? 8000 : 6000),
+    idealEdgeLength: () => (isLarge ? 80 : 120),
+    edgeElasticity: () => (isLarge ? 50 : 100),
+    gravity: isLarge ? 0.5 : 0.3,
+    gravityRange: isLarge ? 2.0 : 3.8,
+    numIter: isHuge ? 1000 : isLarge ? 2000 : 2500,
+    tilingPaddingVertical: 10,
+    tilingPaddingHorizontal: 10,
+  };
+
+  const layout = cy.layout(layoutOptions);
+
+  layout.on("layoutstop", () => {
+    cy.fit(undefined, 40);
+  });
+
+  layout.run();
 }
