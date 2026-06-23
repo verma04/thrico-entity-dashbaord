@@ -271,36 +271,6 @@ export function EcosystemGraphView({
     runLayout(cy, cy.elements().length);
   };
 
-  // ── Loading state ──────────────────────────────────────────────
-  if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20">
-        <div className="relative">
-          <div className="h-16 w-16 rounded-full border-4 border-indigo-500/20 border-t-indigo-500 animate-spin" />
-          <Network className="h-6 w-6 text-indigo-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
-        </div>
-        <p className="mt-4 text-sm font-medium text-muted-foreground">
-          {loadingText}
-        </p>
-      </div>
-    );
-  }
-
-  // ── Empty state ────────────────────────────────────────────────
-  if (elements.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 bg-muted/30 rounded-xl border border-border border-dashed m-4">
-        <Network className="h-10 w-10 text-muted-foreground mb-4" />
-        <h3 className="text-xl font-semibold text-foreground tracking-tight">
-          {emptyTitle}
-        </h3>
-        <p className="text-sm text-muted-foreground text-center mt-2 max-w-sm">
-          {emptyDescription}
-        </p>
-      </div>
-    );
-  }
-
   return (
     <div
       className={`w-full bg-gradient-to-br from-white via-slate-50 to-indigo-50/50 border border-border overflow-hidden ${
@@ -309,6 +279,31 @@ export function EcosystemGraphView({
           : "relative h-[calc(100vh-320px)] min-h-[500px] rounded-xl m-4"
       }`}
     >
+      {/* ── Loading Overlay ── */}
+      {loading && (
+        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm">
+          <div className="relative">
+            <div className="h-16 w-16 rounded-full border-4 border-indigo-500/20 border-t-indigo-500 animate-spin" />
+            <Network className="h-6 w-6 text-indigo-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+          </div>
+          <p className="mt-4 text-sm font-medium text-slate-600">
+            {loadingText}
+          </p>
+        </div>
+      )}
+
+      {/* ── Empty Overlay ── */}
+      {!loading && elements.length === 0 && (
+        <div className="absolute inset-0 z-40 flex flex-col items-center justify-center bg-muted/30">
+          <Network className="h-10 w-10 text-muted-foreground mb-4" />
+          <h3 className="text-xl font-semibold text-foreground tracking-tight">
+            {emptyTitle}
+          </h3>
+          <p className="text-sm text-muted-foreground text-center mt-2 max-w-sm">
+            {emptyDescription}
+          </p>
+        </div>
+      )}
       {/* Detail Panel */}
       {detailPanel}
 
