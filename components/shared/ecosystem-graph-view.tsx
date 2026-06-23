@@ -400,16 +400,17 @@ function runLayout(cy: any, totalElements: number) {
     padding: 40,
     // fcose-specific options
     quality: isHuge ? "draft" : isLarge ? "default" : "proof",
-    nodeDimensionsIncludeLabels: !isHuge,
-    uniformNodeDimensions: isHuge, // Faster when true
-    nodeRepulsion: () => (isLarge ? 8000 : 6000),
-    idealEdgeLength: () => (isLarge ? 80 : 120),
-    edgeElasticity: () => (isLarge ? 50 : 100),
-    gravity: isLarge ? 0.5 : 0.3,
+    nodeDimensionsIncludeLabels: true, // Always include labels to prevent overlapping
+    uniformNodeDimensions: false, // Ensure actual sizes are considered
+    nodeSeparation: 75, // Add minimum separation between nodes
+    nodeRepulsion: () => (isLarge ? 25000 : 20000), // Greatly increase repulsion
+    idealEdgeLength: () => (isLarge ? 120 : 160), // Longer edges
+    edgeElasticity: () => (isLarge ? 40 : 80), // Less elastic so they spread more
+    gravity: isLarge ? 0.3 : 0.2, // Weaker gravity so they spread out
     gravityRange: isLarge ? 2.0 : 3.8,
-    numIter: isHuge ? 1000 : isLarge ? 2000 : 2500,
-    tilingPaddingVertical: 10,
-    tilingPaddingHorizontal: 10,
+    numIter: isHuge ? 1000 : isLarge ? 2000 : 3000,
+    tilingPaddingVertical: 20,
+    tilingPaddingHorizontal: 20,
   };
 
   const layout = cy.layout(layoutOptions);
