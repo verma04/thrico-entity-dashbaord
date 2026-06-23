@@ -336,7 +336,7 @@ function FilterCombobox({
                       } else {
                         onRemove(option);
                       }
-                      setSearch("");
+                      handleSearchChange("");
                     }}
                     className="text-xs py-1.5 cursor-pointer"
                   >
@@ -521,6 +521,20 @@ function UserDetailPanel({
               {user.email}
             </p>
           )}
+          <div className="flex items-center gap-4 mt-3">
+            <div className="flex flex-col bg-slate-50 px-3 py-1.5 rounded-md border border-slate-100 flex-1">
+              <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider flex items-center gap-1">
+                <Star className="h-3 w-3 text-amber-400" /> Points
+              </span>
+              <span className="text-sm font-semibold text-slate-700">{user.gamificationScore ?? 0}</span>
+            </div>
+            <div className="flex flex-col bg-slate-50 px-3 py-1.5 rounded-md border border-slate-100 flex-1">
+              <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider flex items-center gap-1">
+                <Heart className="h-3 w-3 text-rose-400" /> Impact
+              </span>
+              <span className="text-sm font-semibold text-slate-700">{user.impactScore ?? 0}</span>
+            </div>
+          </div>
         </div>
 
         {connected.length > 0 && (
@@ -612,6 +626,10 @@ export function UsersGraphView({
   const [education, setEducation] = useState<string[]>([]);
   const [company, setCompany] = useState<string[]>([]);
   const [interests, setInterests] = useState<string[]>([]);
+  const [gamificationScore, setGamificationScore] = useState<[number, number]>([0, 10000]);
+  const [debouncedGamificationScore] = useDebounce(gamificationScore, 500);
+  const [impactScore, setImpactScore] = useState<[number, number]>([0, 10000]);
+  const [debouncedImpactScore] = useDebounce(impactScore, 500);
   const [limit, setLimit] = useState<number>(200);
 
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
@@ -626,6 +644,12 @@ export function UsersGraphView({
     if (education.length > 0) f.education = education;
     if (company.length > 0) f.company = company;
     if (interests.length > 0) f.interests = interests;
+    if (debouncedGamificationScore[0] > 0 || debouncedGamificationScore[1] < 10000) {
+      f.gamificationScore = { min: debouncedGamificationScore[0], max: debouncedGamificationScore[1] };
+    }
+    if (debouncedImpactScore[0] > 0 || debouncedImpactScore[1] < 10000) {
+      f.impactScore = { min: debouncedImpactScore[0], max: debouncedImpactScore[1] };
+    }
     return Object.keys(f).length > 0 ? f : undefined;
   }, [
     debouncedSearch,
@@ -635,6 +659,8 @@ export function UsersGraphView({
     education,
     company,
     interests,
+    debouncedGamificationScore,
+    debouncedImpactScore,
   ]);
 
   const activeFilterCount =
@@ -644,7 +670,9 @@ export function UsersGraphView({
     skills.length +
     education.length +
     company.length +
-    interests.length;
+    interests.length +
+    (debouncedGamificationScore[0] > 0 || debouncedGamificationScore[1] < 10000 ? 1 : 0) +
+    (debouncedImpactScore[0] > 0 || debouncedImpactScore[1] < 10000 ? 1 : 0);
 
   const clearAllFilters = () => {
     setSearchInput("");
@@ -654,6 +682,8 @@ export function UsersGraphView({
     setEducation([]);
     setCompany([]);
     setInterests([]);
+    setGamificationScore([0, 10000]);
+    setImpactScore([0, 10000]);
     setLimit(200);
   };
 
@@ -1040,6 +1070,45 @@ export function UsersGraphView({
               searchValue={interestSearch}
               onSearchChange={setInterestSearch}
             />
+          </FilterSection>
+          <FilterSection
+            icon={<Star className="h-3.5 w-3.5 text-amber-500" />}
+            title="Gamification Points"
+          >
+            <div className="px-3 pt-4 pb-2">
+              <Slider
+                min={0}
+                max={10000}
+                step={100}
+                value={[gamificationScore[0], gamificationScore[1]]}
+                onValueChange={(val) => setGamificationScore([val[0], val[1]])}
+                className="mt-2"
+              />
+              <div className="flex justify-between items-center mt-3 text-[10px] text-slate-500 font-medium">
+                <span>{gamificationScore[0]}</span>
+                <span>{gamificationScore[1] === 10000 ? "10000+" : gamificationScore[1]}</span>
+              </div>
+            </div>
+          </FilterSection>
+
+          <FilterSection
+            icon={<Heart className="h-3.5 w-3.5 text-rose-500" />}
+            title="Impact Score"
+          >
+            <div className="px-3 pt-4 pb-2">
+              <Slider
+                min={0}
+                max={10000}
+                step={100}
+                value={[impactScore[0], impactScore[1]]}
+                onValueChange={(val) => setImpactScore([val[0], val[1]])}
+                className="mt-2"
+              />
+              <div className="flex justify-between items-center mt-3 text-[10px] text-slate-500 font-medium">
+                <span>{impactScore[0]}</span>
+                <span>{impactScore[1] === 10000 ? "10000+" : impactScore[1]}</span>
+              </div>
+            </div>
           </FilterSection>
         </div>
 

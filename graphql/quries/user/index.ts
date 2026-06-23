@@ -581,6 +581,8 @@ export const GET_USERS_GRAPH = gql`
         avatar
         email
         entityId
+        gamificationScore
+        impactScore
       }
       edges {
         source

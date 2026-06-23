@@ -6,6 +6,13 @@ export interface UsersGraphFilter {
   education?: string[];
   company?: string[];
   interests?: string[];
+  gamificationScore?: ScoreFilter;
+  impactScore?: ScoreFilter;
+}
+
+export interface ScoreFilter {
+  min?: number;
+  max?: number;
 }
 
 export interface GraphNode {
@@ -15,6 +22,8 @@ export interface GraphNode {
   avatar?: string;
   email?: string;
   entityId?: string;
+  gamificationScore?: number;
+  impactScore?: number;
 }
 
 export interface GraphEdge {
