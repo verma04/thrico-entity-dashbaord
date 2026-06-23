@@ -526,13 +526,17 @@ function UserDetailPanel({
               <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider flex items-center gap-1">
                 <Star className="h-3 w-3 text-amber-400" /> Points
               </span>
-              <span className="text-sm font-semibold text-slate-700">{user.gamificationScore ?? 0}</span>
+              <span className="text-sm font-semibold text-slate-700">
+                {user.gamificationScore ?? 0}
+              </span>
             </div>
             <div className="flex flex-col bg-slate-50 px-3 py-1.5 rounded-md border border-slate-100 flex-1">
               <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider flex items-center gap-1">
                 <Heart className="h-3 w-3 text-rose-400" /> Impact
               </span>
-              <span className="text-sm font-semibold text-slate-700">{user.impactScore ?? 0}</span>
+              <span className="text-sm font-semibold text-slate-700">
+                {user.impactScore ?? 0}
+              </span>
             </div>
           </div>
         </div>
@@ -626,9 +630,11 @@ export function UsersGraphView({
   const [education, setEducation] = useState<string[]>([]);
   const [company, setCompany] = useState<string[]>([]);
   const [interests, setInterests] = useState<string[]>([]);
-  const [gamificationScore, setGamificationScore] = useState<[number, number]>([0, 10000]);
+  const [gamificationScore, setGamificationScore] = useState<[number, number]>([
+    0, 10000,
+  ]);
   const [debouncedGamificationScore] = useDebounce(gamificationScore, 500);
-  const [impactScore, setImpactScore] = useState<[number, number]>([0, 10000]);
+  const [impactScore, setImpactScore] = useState<[number, number]>([0, 1000]);
   const [debouncedImpactScore] = useDebounce(impactScore, 500);
   const [limit, setLimit] = useState<number>(200);
 
@@ -644,11 +650,20 @@ export function UsersGraphView({
     if (education.length > 0) f.education = education;
     if (company.length > 0) f.company = company;
     if (interests.length > 0) f.interests = interests;
-    if (debouncedGamificationScore[0] > 0 || debouncedGamificationScore[1] < 10000) {
-      f.gamificationScore = { min: debouncedGamificationScore[0], max: debouncedGamificationScore[1] };
+    if (
+      debouncedGamificationScore[0] > 0 ||
+      debouncedGamificationScore[1] < 10000
+    ) {
+      f.gamificationScore = {
+        min: debouncedGamificationScore[0],
+        max: debouncedGamificationScore[1],
+      };
     }
     if (debouncedImpactScore[0] > 0 || debouncedImpactScore[1] < 10000) {
-      f.impactScore = { min: debouncedImpactScore[0], max: debouncedImpactScore[1] };
+      f.impactScore = {
+        min: debouncedImpactScore[0],
+        max: debouncedImpactScore[1],
+      };
     }
     return Object.keys(f).length > 0 ? f : undefined;
   }, [
@@ -671,7 +686,9 @@ export function UsersGraphView({
     education.length +
     company.length +
     interests.length +
-    (debouncedGamificationScore[0] > 0 || debouncedGamificationScore[1] < 10000 ? 1 : 0) +
+    (debouncedGamificationScore[0] > 0 || debouncedGamificationScore[1] < 10000
+      ? 1
+      : 0) +
     (debouncedImpactScore[0] > 0 || debouncedImpactScore[1] < 10000 ? 1 : 0);
 
   const clearAllFilters = () => {
@@ -923,23 +940,27 @@ export function UsersGraphView({
     >
       {/* ─── LEFT: Filters Panel ──────────────────────────────── */}
       <div className="w-64 min-w-[256px] border-r border-slate-200 flex flex-col bg-slate-50/50">
-        <div className="px-4 py-3 border-b border-slate-200 flex items-center justify-between">
-          <div>
+        <div className="px-4 py-3 border-b border-slate-200">
+          <div className="flex items-center justify-between">
             <h3 className="text-xs font-bold text-slate-700 uppercase tracking-widest">
               Filters
             </h3>
-            <p className="text-[10px] text-slate-500 mt-0.5">
-              <span className="text-indigo-600 font-semibold">
-                {stats.totalNodes}
-              </span>{" "}
-              people · {stats.totalEdges} relationships
-            </p>
+            {activeFilterCount > 0 && (
+              <button
+                onClick={clearAllFilters}
+                className="flex items-center gap-1.5 text-[10px] font-medium text-rose-500 hover:text-rose-600 bg-rose-50 hover:bg-rose-100 px-2 py-1 rounded-md border border-rose-200 transition-all duration-150 active:scale-95"
+              >
+                <X className="h-3 w-3" />
+                Clear all ({activeFilterCount})
+              </button>
+            )}
           </div>
-          {activeFilterCount > 0 && (
-            <span className="text-[10px] font-mono text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-200">
-              {activeFilterCount}
-            </span>
-          )}
+          <p className="text-[10px] text-slate-500 mt-1">
+            <span className="text-indigo-600 font-semibold">
+              {stats.totalNodes}
+            </span>{" "}
+            people · {stats.totalEdges} relationships
+          </p>
         </div>
 
         <div className="flex-1 overflow-y-auto">
@@ -1086,7 +1107,11 @@ export function UsersGraphView({
               />
               <div className="flex justify-between items-center mt-3 text-[10px] text-slate-500 font-medium">
                 <span>{gamificationScore[0]}</span>
-                <span>{gamificationScore[1] === 10000 ? "10000+" : gamificationScore[1]}</span>
+                <span>
+                  {gamificationScore[1] === 10000
+                    ? "10000+"
+                    : gamificationScore[1]}
+                </span>
               </div>
             </div>
           </FilterSection>
@@ -1106,22 +1131,15 @@ export function UsersGraphView({
               />
               <div className="flex justify-between items-center mt-3 text-[10px] text-slate-500 font-medium">
                 <span>{impactScore[0]}</span>
-                <span>{impactScore[1] === 10000 ? "10000+" : impactScore[1]}</span>
+                <span>
+                  {impactScore[1] === 10000 ? "10000+" : impactScore[1]}
+                </span>
               </div>
             </div>
           </FilterSection>
         </div>
 
-        {activeFilterCount > 0 && (
-          <div className="px-4 py-2 border-t border-slate-200">
-            <button
-              onClick={clearAllFilters}
-              className="text-[10px] text-slate-500 hover:text-indigo-600 transition-colors"
-            >
-              ✕ Clear all filters
-            </button>
-          </div>
-        )}
+
       </div>
 
       {/* ─── CENTER: Graph (using EcosystemGraphView) ─────────── */}
