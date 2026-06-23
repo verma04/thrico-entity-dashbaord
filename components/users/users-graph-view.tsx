@@ -84,8 +84,8 @@ const GRAPH_STYLESHEET: any[] = [
       "text-halign": "center",
       "font-size": "9px",
       "font-weight": "500",
-      width: "data(size)",
-      height: "data(size)",
+      width: 30,
+      height: 30,
       shape: "ellipse",
       "border-width": 1.5,
       "border-color": "#e2e8f0",
@@ -93,6 +93,7 @@ const GRAPH_STYLESHEET: any[] = [
       "text-outline-width": 0,
       "overlay-padding": 6,
       "background-image": "data(avatar)",
+      "background-image-crossorigin": "anonymous",
       "background-fit": "cover",
       "background-clip": "node",
     } as any,
@@ -472,7 +473,9 @@ function UserDetailPanel({
   onClose: () => void;
 }) {
   const avatarUrl = user.avatar
-    ? `https://cdn.thrico.network/${user.avatar}`
+    ? user.avatar.startsWith("http")
+      ? user.avatar
+      : `https://cdn.thrico.network/${user.avatar}`
     : "";
   const name =
     [user.firstName, user.lastName].filter(Boolean).join(" ") || "User";
@@ -841,7 +844,9 @@ export function UsersGraphView({
       const name =
         [user.firstName, user.lastName].filter(Boolean).join(" ") || "User";
       const avatarUrl = user.avatar
-        ? `https://cdn.thrico.network/${user.avatar}`
+        ? user.avatar.startsWith("http")
+          ? user.avatar
+          : `https://cdn.thrico.network/${user.avatar}`
         : "";
       const connCount = counts.get(user.id) || 0;
       const size = Math.max(20, Math.min(60, 18 + connCount * 5));
