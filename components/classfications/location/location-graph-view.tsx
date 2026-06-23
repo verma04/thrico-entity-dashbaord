@@ -6,14 +6,14 @@ import {
   LocationGraphUser,
   LocationGraphLocation,
 } from "@/graphql/quries/location/location-queries";
-import type cytoscape from "cytoscape";
+
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { X, MapPin } from "lucide-react";
 import { EcosystemGraphView } from "@/components/shared/ecosystem-graph-view";
 import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
 
-const GRAPH_STYLESHEET: cytoscape.Stylesheet[] = [
+const GRAPH_STYLESHEET: any[] = [
   {
     selector: "node[type='user']",
     style: {
