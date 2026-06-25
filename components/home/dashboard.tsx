@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Activity,
   TrendingUp,
@@ -27,6 +28,7 @@ import {
   Info,
   History,
   Award,
+  AlertTriangle,
 } from "lucide-react";
 import { ResponsiveContainer, AreaChart, Area } from "recharts";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
@@ -63,6 +65,7 @@ import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-car
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDistanceToNow } from "date-fns";
 import { useGetImpactUsers } from "@/graphql/actions";
+import { useCheckMemberSubscription } from "@/graphql/actions/membership/membership-queries";
 
 // ---------------------------------------------------------------------------
 // KPI Card
@@ -336,6 +339,7 @@ const timeRangeMap: Record<string, TimeRange> = {
 // Main Dashboard Component
 // ---------------------------------------------------------------------------
 export default function Dashboard() {
+  const router = useRouter();
   const [timeRange, setTimeRange] = React.useState("7d");
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
     from: subDays(new Date(), 7),
@@ -386,6 +390,9 @@ export default function Dashboard() {
     refetchKpis();
     refetchFeatures();
   };
+
+  const { data: subData, loading: subLoading } = useCheckMemberSubscription();
+  const subscriptionInfo = subData?.checkMemberSubscription;
 
   const { data: statsData, loading: statsLoading } = useGetStorageStats();
   const { data: summaryData, loading: summaryLoading } = useGetStorageSummary();
@@ -670,6 +677,44 @@ export default function Dashboard() {
       </EcosystemActionBar>
 
       <EcosystemContainer className="space-y-8 py-8 px-4 lg:px-6 border-none bg-transparent shadow-none ring-0">
+        {/* Subscription Limit Warning Banner */}
+        {subscriptionInfo && (
+          <div className="bg-amber-50 border border-amber-200 text-amber-800 rounded-lg p-4 text-sm font-medium flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="h-6 w-6 shrink-0 text-amber-600" />
+              <div>
+                <p className="font-bold text-amber-900 text-base">
+                  {subscriptionInfo.hasReachedLimit ? "Subscription Limit Reached" : "Subscription Usage"}
+                </p>
+                <p className="text-amber-700 text-xs mt-0.5">
+                  {subscriptionInfo.message || "You have reached the maximum number of users allowed by your subscription."}
+                </p>
+              </div>
+            </div>
+            
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
+            <div className="flex items-center gap-4 bg-amber-100/60 px-5 py-2.5 rounded-lg border border-amber-200/60 shrink-0">
+               <div className="text-center">
+                  <p className="text-[10px] uppercase font-bold text-amber-600/80 tracking-widest mb-0.5">Current</p>
+                  <p className="text-xl font-black text-amber-900 leading-none">{subscriptionInfo.currentCount?.toLocaleString()}</p>
+               </div>
+               <div className="w-px h-8 bg-amber-300/60"></div>
+               <div className="text-center">
+                  <p className="text-[10px] uppercase font-bold text-amber-600/80 tracking-widest mb-0.5">Max Allowed</p>
+                  <p className="text-xl font-black text-amber-900 leading-none">{subscriptionInfo.maxUsersAllowed ? subscriptionInfo.maxUsersAllowed.toLocaleString() : "∞"}</p>
+               </div>
+            </div>
+            <Button
+              variant="outline"
+              className="bg-white hover:bg-amber-100/50 text-amber-900 border-amber-300 hover:border-amber-400 transition-all shadow-sm h-[52px]"
+              onClick={() => router.push("/settings/subscription")}
+            >
+              Manage
+            </Button>
+          </div>
+          </div>
+        )}
+
         {/* 1. Core Stats */}
         <section className="space-y-3">
           <DashboardSectionHeading title="Core Community Stats" />

@@ -14,6 +14,7 @@ import {
   SEARCH_USER_WITH_AI,
   GET_USER_NEO4J_RELATIONSHIPS,
   GET_USER_SESSIONS,
+  CHECK_MEMBER_SUBSCRIPTION,
 } from "../../quries/user";
 import { TimeRange, DateRangeInput } from "../dashbaord/dashboard-quries";
 
@@ -125,6 +126,7 @@ export interface GetAllUserResponse {
     data: UserDetail[];
     totalCount: number;
     hasNextPage: boolean;
+    message?: string;
   };
 }
 
@@ -345,6 +347,21 @@ export interface GetUserSessionsResponse {
 export const useGetUserSessions = (userId: string, options?: any) =>
   useLazyQuery<GetUserSessionsResponse>(GET_USER_SESSIONS, {
     variables: { userId },
+    fetchPolicy: "network-only",
+    ...options,
+  });
+
+export interface CheckMemberSubscriptionResponse {
+  checkMemberSubscription: {
+    hasReachedLimit: boolean;
+    maxUsersAllowed: number | null;
+    currentCount: number;
+    message: string | null;
+  };
+}
+
+export const useCheckMemberSubscription = (options?: any) =>
+  useQuery<CheckMemberSubscriptionResponse>(CHECK_MEMBER_SUBSCRIPTION, {
     fetchPolicy: "network-only",
     ...options,
   });

@@ -10,6 +10,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { safeLocaleDateString } from "@/lib/date-utils";
 import { Badge } from "@/components/ui/badge";
 import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { useCheckMemberSubscription } from "@/graphql/actions/membership/membership-queries";
+import { AlertTriangle, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 function ReferralsPage() {
   const { data, loading } = useGetAllReferrals({ limit: 100, offset: 0 });
@@ -83,6 +86,41 @@ function ReferralsPage() {
       ),
     },
   ];
+
+  const router = useRouter();
+  const { data: subData, loading: subLoading } = useCheckMemberSubscription();
+  const hasReachedLimit = subData?.checkMemberSubscription?.hasReachedLimit;
+  const message = subData?.checkMemberSubscription?.message;
+
+  if (subLoading || loading) {
+    return (
+      <div className="flex h-full min-h-[400px] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (hasReachedLimit) {
+    return (
+      <div className="flex h-[400px] items-center justify-center bg-card rounded-xl border border-border p-6 mt-6">
+        <div className="max-w-md w-full bg-amber-50 border border-amber-200 text-amber-800 rounded-2xl p-8 text-center space-y-4 shadow-sm">
+          <AlertTriangle className="h-12 w-12 text-amber-600 mx-auto" />
+          <h2 className="text-xl font-bold text-amber-900">Feature Locked</h2>
+          <p className="text-amber-700 font-medium">
+            {message || "You have reached your subscription limit. Please upgrade your subscription to view referrals."}
+          </p>
+          <div className="pt-4">
+            <button
+              className="inline-flex items-center justify-center rounded-xl text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background bg-white border border-amber-200 text-amber-900 hover:bg-amber-100 h-10 py-2 px-4 w-full"
+              onClick={() => router.push("/settings/billing")}
+            >
+              Upgrade Subscription
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">

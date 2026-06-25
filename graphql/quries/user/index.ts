@@ -142,6 +142,7 @@ export const GET_ALL_USER = gql`
       }
       totalCount
       hasNextPage
+      message
     }
   }
 `;
@@ -589,6 +590,17 @@ export const GET_USERS_GRAPH = gql`
         target
         relationType
       }
+    }
+  }
+`;
+
+export const CHECK_MEMBER_SUBSCRIPTION = gql`
+  query CheckMemberSubscription {
+    checkMemberSubscription {
+      hasReachedLimit
+      maxUsersAllowed
+      currentCount
+      message
     }
   }
 `;
