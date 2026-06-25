@@ -187,13 +187,13 @@ function MembersPage() {
 
       <EcosystemContainer className="space-y-12 p-8 lg:p-12">
         {/* Subscription Limit Warning Banner */}
-        {subscriptionInfo && (
+        {subscriptionInfo?.hasReachedLimit && (
           <div className="bg-amber-50 border border-amber-200 text-amber-800 rounded-lg p-4 text-sm font-medium flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
             <div className="flex items-center gap-3">
               <AlertTriangle className="h-6 w-6 shrink-0 text-amber-600" />
               <div>
                 <p className="font-bold text-amber-900 text-base">
-                  {subscriptionInfo.hasReachedLimit ? "Subscription Limit Reached" : "Subscription Usage"}
+                  Subscription Limit Reached
                 </p>
                 <p className="text-amber-700 text-xs mt-0.5">
                   {subscriptionInfo.message || "You have reached the maximum number of users allowed by your subscription."}
