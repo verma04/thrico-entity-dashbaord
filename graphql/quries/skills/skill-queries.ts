@@ -245,9 +245,16 @@ export interface SkillGraphSkill {
   updatedAt?: string;
 }
 
+export interface SkillGraphOpportunity {
+  id: string;
+  title?: string;
+  description?: string;
+}
+
 export interface UserSkillEdge {
   user: SkillGraphUser;
   skill: SkillGraphSkill;
+  opportunities?: SkillGraphOpportunity[];
 }
 
 export interface GetUserSkillsGraphData {
@@ -281,6 +288,11 @@ export const GET_USER_SKILLS_GRAPH = gql`
         description
         createdAt
         updatedAt
+      }
+      opportunities {
+        id
+        title
+        description
       }
     }
   }

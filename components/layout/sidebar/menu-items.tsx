@@ -406,6 +406,18 @@ export const modules = [
     ],
   },
   {
+    key: "opportunities",
+    label: "Opportunities",
+    path: "/opportunities",
+    isMobileOnly: true,
+    icon: <Target size={18} />,
+    children: [
+      { key: "opp-dash", label: "Dashboard", path: "/opportunities" },
+      { key: "opp-manage", label: "Manage Opportunities", path: "/opportunities/all" },
+      { key: "opp-settings", label: "Settings", path: "/opportunities/settings" },
+    ],
+  },
+  {
     key: "listing",
     label: "Marketplace",
     path: "/listing",

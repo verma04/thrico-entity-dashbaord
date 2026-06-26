@@ -157,11 +157,14 @@ export const GET_ENTITY_SETTINGS = gql`
       autoApprovePolls
       allowStories
       autoApproveStories
+      allowOpportunities
+      autoApproveOpportunities
       allowEntityCommunityInFeed
       allowEntityDiscussionForumInFeed
       allowEntityPollsInFeed
       allowEntityFeedInFeed
       allowEntityMomentsInFeed
+      allowEntityOpportunitiesInFeed
       feedOrder
       feedEntityName
     }
@@ -198,11 +201,14 @@ export const UPDATE_ENTITY_SETTINGS = gql`
       autoApprovePolls
       allowStories
       autoApproveStories
+      allowOpportunities
+      autoApproveOpportunities
       allowEntityCommunityInFeed
       allowEntityDiscussionForumInFeed
       allowEntityPollsInFeed
       allowEntityFeedInFeed
       allowEntityMomentsInFeed
+      allowEntityOpportunitiesInFeed
       feedOrder
       feedEntityName
     }

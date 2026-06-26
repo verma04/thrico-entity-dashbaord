@@ -154,7 +154,13 @@ function NodeDetailPanel({
         </div>
         <div className="-mt-8 px-4">
           <UserProfileHoverCard
-            user={{ id: user.globalUserId, firstName: user.firstName, lastName: user.lastName, avatar: user.avatar, headline: user.headline }}
+            user={{
+              id: user.globalUserId,
+              firstName: user.firstName,
+              lastName: user.lastName,
+              avatar: user.avatar,
+              headline: user.headline,
+            }}
           >
             <Avatar className="h-16 w-16 border-[3px] border-white shadow-sm bg-white cursor-pointer">
               <AvatarImage src={avatarUrl} alt={name} />
@@ -166,7 +172,9 @@ function NodeDetailPanel({
         </div>
         <div className="px-4 pt-2 pb-4 space-y-4">
           <div>
-            <h3 className="text-sm font-semibold text-slate-900 truncate">{name}</h3>
+            <h3 className="text-sm font-semibold text-slate-900 truncate">
+              {name}
+            </h3>
             {user.headline && (
               <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">
                 {user.headline}
@@ -214,7 +222,9 @@ function NodeDetailPanel({
       </div>
 
       <div className="px-4 py-4 space-y-4">
-        <h3 className="text-sm font-semibold text-slate-900">{skill.title || skill.name}</h3>
+        <h3 className="text-sm font-semibold text-slate-900">
+          {skill.title || skill.name}
+        </h3>
         {skill.level && (
           <span className="inline-block px-2 py-0.5 text-[10px] font-medium rounded-md bg-slate-100 text-slate-700">
             {skill.level}
@@ -237,11 +247,15 @@ function NodeDetailPanel({
                 return (
                   <UserProfileHoverCard
                     key={user.id}
-                    user={{ id: user.globalUserId, firstName: user.firstName, lastName: user.lastName, avatar: user.avatar, headline: user.headline }}
+                    user={{
+                      id: user.globalUserId,
+                      firstName: user.firstName,
+                      lastName: user.lastName,
+                      avatar: user.avatar,
+                      headline: user.headline,
+                    }}
                   >
-                    <div
-                      className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100 cursor-pointer"
-                    >
+                    <div className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100 cursor-pointer">
                       <Avatar className="h-7 w-7 border border-slate-200 bg-white">
                         <AvatarImage src={avatarUrl} alt={uname} />
                         <AvatarFallback className="bg-slate-100 text-slate-600 text-[10px] font-medium">
@@ -273,6 +287,7 @@ function NodeDetailPanel({
 export function SkillsGraphView() {
   const { data, loading } = useGetUserSkillsGraph({
     variables: { limit: 100 },
+    fetchPolicy: "network-only",
   });
   const [selectedNode, setSelectedNode] = useState<SelectedNodeInfo | null>(
     null,
@@ -342,11 +357,7 @@ export function SkillsGraphView() {
       },
     );
 
-    return [
-      ...Array.from(userNodes.values()),
-      ...skillElements,
-      ...graphEdges,
-    ];
+    return [...Array.from(userNodes.values()), ...skillElements, ...graphEdges];
   }, [data]);
 
   const graphData = useMemo(() => {
@@ -389,11 +400,15 @@ export function SkillsGraphView() {
     <>
       <div className="flex items-center gap-2">
         <div className="h-3 w-3 rounded-full bg-blue-100 border border-blue-200" />
-        <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Users</span>
+        <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">
+          Users
+        </span>
       </div>
       <div className="flex items-center gap-2">
         <div className="h-3 w-3 rounded bg-purple-100 border border-purple-200" />
-        <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Skills</span>
+        <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">
+          Skills
+        </span>
       </div>
     </>
   );

@@ -112,40 +112,40 @@ export default function ClassificationLayout({
     );
   }
 
-  if (hasReachedLimit) {
-    return (
-      <EcosystemWrapper anonymized-1="member-classifications">
-        <div className="flex flex-col gap-6">
-          <EcosystemHeader
-            title="Member Classifications"
-            badgeText="Directory Settings"
-            description="Manage taxonomy classifications to catalog, segment, and filter community members."
-            icon={Building2}
-          />
-          <div className="flex h-[400px] items-center justify-center bg-card rounded-xl border border-border p-6">
-            <div className="max-w-md w-full bg-amber-50 border border-amber-200 text-amber-800 rounded-2xl p-8 text-center space-y-4 shadow-sm">
-              <AlertTriangle className="h-12 w-12 text-amber-600 mx-auto" />
-              <h2 className="text-xl font-bold text-amber-900">
-                Feature Locked
-              </h2>
-              <p className="text-amber-700 font-medium">
-                {message ||
-                  "You have reached your subscription limit. Please upgrade your subscription to access member classifications."}
-              </p>
-              <div className="pt-4">
-                <button
-                  className="inline-flex items-center justify-center rounded-xl text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background bg-white border border-amber-200 text-amber-900 hover:bg-amber-100 h-10 py-2 px-4 w-full"
-                  onClick={() => router.push("/settings/subscription")}
-                >
-                  Upgrade Subscription
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </EcosystemWrapper>
-    );
-  }
+  // if (hasReachedLimit) {
+  //   return (
+  //     <EcosystemWrapper anonymized-1="member-classifications">
+  //       <div className="flex flex-col gap-6">
+  //         <EcosystemHeader
+  //           title="Member Classifications"
+  //           badgeText="Directory Settings"
+  //           description="Manage taxonomy classifications to catalog, segment, and filter community members."
+  //           icon={Building2}
+  //         />
+  //         <div className="flex h-[400px] items-center justify-center bg-card rounded-xl border border-border p-6">
+  //           <div className="max-w-md w-full bg-amber-50 border border-amber-200 text-amber-800 rounded-2xl p-8 text-center space-y-4 shadow-sm">
+  //             <AlertTriangle className="h-12 w-12 text-amber-600 mx-auto" />
+  //             <h2 className="text-xl font-bold text-amber-900">
+  //               Feature Locked
+  //             </h2>
+  //             <p className="text-amber-700 font-medium">
+  //               {message ||
+  //                 "You have reached your subscription limit. Please upgrade your subscription to access member classifications."}
+  //             </p>
+  //             <div className="pt-4">
+  //               <button
+  //                 className="inline-flex items-center justify-center rounded-xl text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background bg-white border border-amber-200 text-amber-900 hover:bg-amber-100 h-10 py-2 px-4 w-full"
+  //                 onClick={() => router.push("/settings/subscription")}
+  //               >
+  //                 Upgrade Subscription
+  //               </button>
+  //             </div>
+  //           </div>
+  //         </div>
+  //       </div>
+  //     </EcosystemWrapper>
+  //   );
+  // }
 
   return (
     <EcosystemWrapper anonymized-1="member-classifications">
