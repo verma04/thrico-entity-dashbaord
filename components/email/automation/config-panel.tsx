@@ -92,7 +92,7 @@ export function ConfigPanel({ node, onUpdate, onClose, module }: ConfigPanelProp
               {module === "Communities" && communitiesData?.getCommunities?.map((c: any) => (
                 <option key={c.id} value={c.id}>{c.title}</option>
               ))}
-              {module === "Jobs" && jobsData?.getJob?.map((j: any) => (
+              {module === "Jobs" && jobsData?.getJob?.data?.map((j: any) => (
                 <option key={j.id} value={j.id}>{j.title}</option>
               ))}
               {module === "Users" && usersData?.getAllUser?.data?.map((u: any) => (

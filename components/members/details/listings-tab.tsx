@@ -38,7 +38,7 @@ export function ListingsTab({ userId }: { userId: string }) {
     );
   }
 
-  const listingsData = data?.getListing || [];
+  const listingsData = data?.getListing?.data || [];
 
   const handleLoadMore = async () => {
     if (isFetchingMore || !hasMore) return;
@@ -53,15 +53,18 @@ export function ListingsTab({ userId }: { userId: string }) {
           },
         },
         updateQuery(prev: any, { fetchMoreResult }: any) {
-          if (!fetchMoreResult || fetchMoreResult?.getListing?.length === 0) {
+          if (!fetchMoreResult || fetchMoreResult?.getListing?.data?.length === 0) {
             setHasMore(false);
             return prev;
           }
-          if (fetchMoreResult.getListing.length < limit) {
+          if (fetchMoreResult.getListing.data.length < limit) {
             setHasMore(false);
           }
           return {
-            getListing: [...prev.getListing, ...fetchMoreResult.getListing],
+            getListing: {
+              ...prev.getListing,
+              data: [...prev.getListing.data, ...fetchMoreResult.getListing.data],
+            }
           };
         },
       });

@@ -59,7 +59,12 @@ ${jobs}
 export const GET_JOBS = gql`
   query GetJob($input: GetJobInput) {
     getJob(input: $input) {
-      ${jobs}
+      data {
+        ${jobs}
+      }
+      total
+      offset
+      limit
     }
   }
 `;

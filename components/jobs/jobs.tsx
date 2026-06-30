@@ -60,7 +60,7 @@ export default function Jobs({ data }: { data: Job[] | undefined }) {
               {row.location && (
                 <span className="text-[11px] text-muted-foreground flex items-center gap-1">
                   <MapPin className="h-3 w-3" />
-                  {row.location}
+                  {typeof row.location === 'string' ? row.location : (row.location as any).name || ''}
                 </span>
               )}
             </div>

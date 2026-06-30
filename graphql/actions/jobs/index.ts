@@ -140,7 +140,11 @@ export function useAddJob(
           cache.writeQuery({
             query: GET_JOBS,
             data: {
-              getJob: [addJob, ...(approvedData?.getJob || [])],
+              getJob: {
+                ...approvedData?.getJob,
+                data: [addJob, ...(approvedData?.getJob?.data || [])],
+                total: (approvedData?.getJob?.total || 0) + 1,
+              },
             },
             variables: {
               input: {
@@ -162,7 +166,11 @@ export function useAddJob(
           cache.writeQuery({
             query: GET_JOBS,
             data: {
-              getJob: [addJob, ...(allData?.getJob || [])],
+              getJob: {
+                ...allData?.getJob,
+                data: [addJob, ...(allData?.getJob?.data || [])],
+                total: (allData?.getJob?.total || 0) + 1,
+              },
             },
             variables: {
               input: {
@@ -198,13 +206,23 @@ export enum JobStatus {
 // TypeScript interface for GetJobInput
 export interface GetJobInput {
   status?: JobStatus;
+  userId?: string;
+  offset?: number;
+  limit?: number;
 }
 
 // --- Apollo Client Hook ---
 
+export type GetJobResponse = {
+  data: Job[];
+  total: number;
+  offset: number;
+  limit: number;
+};
+
 export function useJobs(
-  options?: QueryHookOptions<{ getJob: Job[] }, { input?: GetJobInput }>,
-): QueryResult<{ getJob: Job[] }, { input?: GetJobInput }> {
+  options?: QueryHookOptions<{ getJob: GetJobResponse }, { input?: GetJobInput }>,
+): QueryResult<{ getJob: GetJobResponse }, { input?: GetJobInput }> {
   return useQuery(GET_JOBS, options);
 }
 

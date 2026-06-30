@@ -47,8 +47,12 @@ const list = `
 export const GET_LISTINGS = gql`
   query GetListings($input: GetListingInput!) {
     getListing(input: $input) {
-      ${list}
-      # Add other fields as needed
+      data {
+        ${list}
+      }
+      total
+      offset
+      limit
     }
   }
 `;

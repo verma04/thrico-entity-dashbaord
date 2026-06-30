@@ -99,7 +99,7 @@ const MarketplaceDashboard = () => {
     dateRangeParam
   );
 
-  const listingData = listingsData?.getListing || [];
+  const listingData = listingsData?.getListing?.data || [];
   const stats = statsData?.getListingStats;
   const weeklyListingsData = trendData?.getListingTrend || [];
   const categoryDistributionData = categoryData?.getListingCategoryDistribution || [];

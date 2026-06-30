@@ -25,10 +25,10 @@ const Page = () => {
   });
 
   // Client-side filtering for search query (if API doesn't support it yet)
-  const filteredData = data?.getJob?.filter(job => 
+  const filteredData = data?.getJob?.data?.filter(job => 
     job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     job.company?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    job.location.toLowerCase().includes(searchQuery.toLowerCase())
+    (typeof job.location === 'string' ? job.location : job.location?.name || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (

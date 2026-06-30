@@ -20,13 +20,14 @@ const ListingsAllPage = () => {
     fetchPolicy: "network-only",
   });
 
-  const listings = data?.getListing || [];
+  const listings = data?.getListing?.data || [];
 
   // Client-side filtering for search query
-  const filteredListings = listings.filter((item: any) => 
-    item.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.sku?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.id?.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredListings = listings.filter(
+    (item: any) =>
+      item.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.sku?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.id?.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   return (

@@ -38,7 +38,7 @@ export function JobsTab({ userId }: { userId: string }) {
     );
   }
 
-  const jobsData = data?.getJob || [];
+  const jobsData = data?.getJob?.data || [];
 
   const handleLoadMore = async () => {
     if (isFetchingMore || !hasMore) return;
@@ -53,15 +53,18 @@ export function JobsTab({ userId }: { userId: string }) {
           },
         },
         updateQuery(prev: any, { fetchMoreResult }: any) {
-          if (!fetchMoreResult || fetchMoreResult?.getJob?.length === 0) {
+          if (!fetchMoreResult || fetchMoreResult?.getJob?.data?.length === 0) {
             setHasMore(false);
             return prev;
           }
-          if (fetchMoreResult.getJob.length < limit) {
+          if (fetchMoreResult.getJob.data.length < limit) {
             setHasMore(false);
           }
           return {
-            getJob: [...prev.getJob, ...fetchMoreResult.getJob],
+            getJob: {
+              ...prev.getJob,
+              data: [...prev.getJob.data, ...fetchMoreResult.getJob.data],
+            }
           };
         },
       });

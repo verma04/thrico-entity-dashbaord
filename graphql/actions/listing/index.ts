@@ -58,7 +58,17 @@ export type MarketPlaceListing = {
 export type GetListingsVars = {
   input: {
     status?: string;
+    userId?: string;
+    offset?: number;
+    limit?: number;
   };
+};
+
+export type GetListingResponse = {
+  data: MarketPlaceListing[];
+  total: number;
+  offset: number;
+  limit: number;
 };
 
 export type GetListingDetailsVars = {
@@ -188,11 +198,11 @@ export function useListingCategoryDistribution(
 
 export function useListings(
   options?: QueryHookOptions<
-    { getListing: MarketPlaceListing[] },
+    { getListing: GetListingResponse },
     GetListingsVars
   >,
 ) {
-  return useQuery<{ getListing: MarketPlaceListing[] }, GetListingsVars>(
+  return useQuery<{ getListing: GetListingResponse }, GetListingsVars>(
     GET_LISTINGS,
     options,
   );
@@ -235,7 +245,11 @@ export function useAddListing(
           cache.writeQuery({
             query: GET_LISTINGS,
             data: {
-              getListing: [addListing, ...(approvedData?.getListing || [])],
+              getListing: {
+                ...approvedData?.getListing,
+                data: [addListing, ...(approvedData?.getListing?.data || [])],
+                total: (approvedData?.getListing?.total || 0) + 1,
+              },
             },
             variables: {
               input: {
@@ -257,7 +271,11 @@ export function useAddListing(
           cache.writeQuery({
             query: GET_LISTINGS,
             data: {
-              getListing: [addListing, ...(allData?.getListing || [])],
+              getListing: {
+                ...allData?.getListing,
+                data: [addListing, ...(allData?.getListing?.data || [])],
+                total: (allData?.getListing?.total || 0) + 1,
+              },
             },
             variables: {
               input: {
