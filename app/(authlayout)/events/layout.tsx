@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { List, Tag, Plus } from "lucide-react";
+import { List, Tag, Plus, Network } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 import { useGetModuleCustomName } from "@/graphql/actions";
@@ -24,6 +24,11 @@ function EventsLayout({ children }: { children: React.ReactNode }) {
       key: "categories",
       label: "Categories",
       icon: <Tag className="h-4 w-4" />,
+    },
+    {
+      key: "graph",
+      label: "Graph View",
+      icon: <Network className="h-4 w-4" />,
     },
     {
       key: "create",

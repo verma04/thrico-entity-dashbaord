@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Tag, Settings, List, FolderTree, Plus } from "lucide-react";
+import { Tag, Settings, List, FolderTree, Plus, Network } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 import { useModuleStore } from "@/store/useModuleStore";
@@ -20,6 +20,11 @@ function OffersLayout({ children }: { children: React.ReactNode }) {
       key: "categories",
       label: "Categories",
       icon: <FolderTree className="h-4 w-4" />,
+    },
+    {
+      key: "graph",
+      label: "Graph View",
+      icon: <Network className="h-4 w-4" />,
     },
     {
       key: "create",
