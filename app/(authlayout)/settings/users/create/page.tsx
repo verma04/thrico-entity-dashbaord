@@ -37,7 +37,6 @@ const CreateUserPage = () => {
           lastName: values.lastName,
           email: values.email,
           roleId: values.role,
-          avatar: values.avatar,
         },
       },
     });
