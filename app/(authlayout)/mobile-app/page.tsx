@@ -20,6 +20,18 @@ import Link from "next/link";
 import { PageHeader } from "@/components/ui/page-header";
 
 export default function MobileAppIndexPage() {
+  if (process.env.NODE_ENV === "production") {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
+        <Smartphone className="w-16 h-16 text-muted-foreground opacity-50" />
+        <h1 className="text-3xl font-bold">Coming Soon</h1>
+        <p className="text-muted-foreground text-center max-w-md">
+          We are currently working on bringing the custom mobile app experience to you. Stay tuned!
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-6 w-full">
       <PageHeader
