@@ -261,7 +261,10 @@ export interface GetGamificationStatsData {
 }
 
 const GET_GAMIFICATION_STATS = gql`
-  query GetGamificationStats($timeRange: TimeRange, $dateRange: DateRangeInput) {
+  query GetGamificationStats(
+    $timeRange: TimeRange
+    $dateRange: DateRangeInput
+  ) {
     getGamificationStats(timeRange: $timeRange, dateRange: $dateRange) {
       totalUsers
       totalPointsAwarded
@@ -284,11 +287,17 @@ const GET_GAMIFICATION_STATS = gql`
 export function useGetGamificationStats(
   timeRange?: TimeRange,
   dateRange?: DateRangeInput,
-  options?: QueryHookOptions<GetGamificationStatsData, { timeRange?: TimeRange; dateRange?: DateRangeInput }>,
+  options?: QueryHookOptions<
+    GetGamificationStatsData,
+    { timeRange?: TimeRange; dateRange?: DateRangeInput }
+  >,
 ) {
-  return useQuery<GetGamificationStatsData, { timeRange?: TimeRange; dateRange?: DateRangeInput }>(GET_GAMIFICATION_STATS, {
+  return useQuery<
+    GetGamificationStatsData,
+    { timeRange?: TimeRange; dateRange?: DateRangeInput }
+  >(GET_GAMIFICATION_STATS, {
     variables: { timeRange, dateRange },
-    ...options
+    ...options,
   });
 }
 
@@ -311,12 +320,24 @@ export interface LeaderboardEntry {
     color: string;
     icon: string;
   };
+  entityCurrencyWallet?: {
+    id: string;
+    userId: string;
+    entityId: string;
+    balance: number;
+    totalEarned: number;
+    totalSpent: number;
+    totalConvertedToTc: number;
+    createdAt: string;
+    updatedAt: string;
+  } | null;
 }
 
 export interface GetLeaderboardData {
   getLeaderboard: {
     totalUsers: number;
     userPosition?: number;
+    entityCurrent?: LeaderboardEntry | null;
     entries: LeaderboardEntry[];
   };
 }
@@ -344,8 +365,48 @@ const GET_LEADERBOARD = gql`
           icon
           name
         }
+        entityCurrencyWallet {
+          id
+          userId
+          entityId
+          balance
+          totalEarned
+          totalSpent
+          totalConvertedToTc
+          createdAt
+          updatedAt
+        }
       }
       totalUsers
+      entityCurrent {
+        rank
+        totalPoints
+        badgesCount
+        currentRank {
+          id
+          name
+          minPoints
+          maxPoints
+          color
+          icon
+          order
+          isActive
+          createdAt
+          updatedAt
+          userCount
+        }
+        entityCurrencyWallet {
+          id
+          userId
+          entityId
+          balance
+          totalEarned
+          totalSpent
+          totalConvertedToTc
+          createdAt
+          updatedAt
+        }
+      }
     }
   }
 `;

@@ -219,7 +219,7 @@ export const useUpdateAdminPassword = (options?: any) =>
   >(UPDATE_ADMIN_PASSWORD, options);
 
 export const useUpdateAdminUserRole = (options?: any) =>
-  useMutation<UpdateAdminUserRoleResponse, { adminId: string; roleId: string }>(
+  useMutation<UpdateAdminUserRoleResponse, { adminId: string; roleId?: string | null }>(
     UPDATE_ADMIN_USER_ROLE,
     {
       refetchQueries: [{ query: GET_ADMIN_USERS }],

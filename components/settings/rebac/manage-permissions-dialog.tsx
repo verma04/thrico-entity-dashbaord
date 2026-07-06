@@ -73,11 +73,11 @@ export default function ManagePermissionsDialog({
   const selectedRole = roles.find((r) => r.id === selectedRoleId);
 
   const handleSave = () => {
-    if (!selectedRoleId) return;
+    if (selectedRoleId === undefined) return;
     updateRole({
       variables: {
         adminId: user.id,
-        roleId: selectedRoleId,
+        roleId: selectedRoleId === "" ? null : selectedRoleId,
       },
     });
   };
@@ -130,7 +130,7 @@ export default function ManagePermissionsDialog({
                     filteredRoles.map((role) => (
                       <button
                         key={role.id}
-                        onClick={() => setSelectedRoleId(role.id)}
+                        onClick={() => setSelectedRoleId(selectedRoleId === role.id ? "" : role.id)}
                         className={cn(
                           "w-full text-left p-3 rounded-lg transition-all border border-transparent flex flex-col gap-0.5 group",
                           selectedRoleId === role.id 
@@ -270,11 +270,11 @@ export default function ManagePermissionsDialog({
                 type="button"
                 size="sm"
                 onClick={handleSave}
-                disabled={saving || !selectedRoleId || selectedRoleId === user?.role?.id}
+                disabled={saving || selectedRoleId === (user?.role?.id || "")}
                 className="h-9 px-6 font-medium gap-2"
               >
                 {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-                Apply policy
+                {selectedRoleId === "" ? "Remove policy" : "Apply policy"}
               </Button>
             </div>
           </div>

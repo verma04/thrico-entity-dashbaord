@@ -328,7 +328,7 @@ export const UPDATE_ADMIN_PASSWORD = gql`
 `;
 
 export const UPDATE_ADMIN_USER_ROLE = gql`
-  mutation UpdateAdminUserRole($adminId: ID!, $roleId: ID!) {
+  mutation UpdateAdminUserRole($adminId: ID!, $roleId: ID) {
     updateAdminUserRole(adminId: $adminId, roleId: $roleId) {
       id
       status

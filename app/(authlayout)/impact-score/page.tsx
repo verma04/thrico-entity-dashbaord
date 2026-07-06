@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import {
   Trophy,
   Activity,
@@ -24,34 +24,59 @@ import {
 } from "@/components/layout/ecosystem/ecosystem-analytics";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useGetImpactTemplates } from "@/graphql/actions/impact";
+import { 
+  useGetImpactTemplates,
+  useGetImpactUsers,
+  useGetImpactRules,
+  useGetImpactActivityLog
+} from "@/graphql/actions/impact";
 import { TemplateForm } from "@/components/impact/template-form";
 
 export default function ImpactScoreOverview() {
-  const { data, loading } = useGetImpactTemplates();
+  const { data, loading: templateLoading } = useGetImpactTemplates();
+  const { data: usersData, loading: usersLoading } = useGetImpactUsers();
+  const { data: rulesData, loading: rulesLoading } = useGetImpactRules();
+  const { data: activityData, loading: activityLoading } = useGetImpactActivityLog();
 
   const templates = data?.impactTemplates || [];
   const activeTemplate = templates.find((t: any) => t.isActive);
 
+  const users = usersData?.getImpactUsers?.nodes || [];
+  const totalUsersCount = usersData?.getImpactUsers?.totalCount || 0;
+  
+  const avgScore = useMemo(() => {
+    if (users.length === 0) return 0;
+    const sum = users.reduce((acc: number, user: any) => acc + (user.score || 0), 0);
+    return Math.round(sum / users.length);
+  }, [users]);
+  
+  const platinumMembersCount = useMemo(() => {
+    return users.filter((u: any) => u.tier?.toLowerCase() === 'platinum').length;
+  }, [users]);
+
+  const totalEventsCount = activityData?.getImpactActivityLog?.length || 0;
+  const totalRulesCount = rulesData?.impactRules?.length || 0;
+
+  const isLoading = templateLoading || usersLoading || rulesLoading || activityLoading;
+
   const kpis = [
     {
       title: "Avg Community Score",
-      value: loading ? "—" : "620", // Placeholder for actual calculation
+      value: isLoading ? "—" : avgScore.toString(),
       icon: TrendingUp,
       color: "text-emerald-600",
       bg: "bg-emerald-50",
     },
-
     {
       title: "Platinum Members",
-      value: loading ? "—" : "12", // Placeholder
+      value: isLoading ? "—" : platinumMembersCount.toString(),
       icon: Trophy,
       color: "text-amber-600",
       bg: "bg-amber-50",
     },
     {
       title: "Total Events",
-      value: loading ? "—" : "1.2k", // Placeholder
+      value: isLoading ? "—" : totalEventsCount >= 1000 ? (totalEventsCount/1000).toFixed(1) + 'k' : totalEventsCount.toString(),
       icon: Activity,
       color: "text-zinc-900",
       bg: "bg-zinc-100",
@@ -62,14 +87,14 @@ export default function ImpactScoreOverview() {
     {
       title: "Impact Templates",
       desc: "Configure scoring thresholds, decay rates, and category weights.",
-      count: templates.length,
+      count: templates.length.toString(),
       icon: Layers,
       link: "/impact-score/templates",
     },
     {
       title: "Scoring Rules",
       desc: "Set points and daily limits for actions across all modules.",
-      count: "12", // Would normally come from a rules query
+      count: totalRulesCount.toString(),
       icon: Activity,
       link: "/impact-score/rules",
     },
@@ -115,7 +140,7 @@ export default function ImpactScoreOverview() {
       </EcosystemActionBar>
 
       <EcosystemContainer className="p-6 lg:p-8 space-y-8">
-        {!activeTemplate && !loading ? (
+        {!activeTemplate && !isLoading ? (
           <div className="max-w-3xl mx-auto">
             <EcosystemCard
               title="Create Template"

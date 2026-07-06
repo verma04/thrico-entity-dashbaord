@@ -1,6 +1,7 @@
 import localFont from "next/font/local";
 import {
   Space_Grotesk,
+  Figtree,
   Inter,
   Playfair_Display,
   Outfit,
@@ -112,6 +113,12 @@ const avantGarde = localFont({
     },
   ],
   variable: "--font-avant-garde",
+});
+
+const figtree = Figtree({
+  subsets: ["latin"],
+  variable: "--font-figtree",
+  display: "swap",
 });
 
 const spaceGrotesk = Space_Grotesk({
@@ -308,7 +315,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${plusJakartaSans.variable} ${roobert.variable} ${avantGarde.variable} ${spaceGrotesk.className} ${inter.variable} ${playfair.variable} ${outfit.variable} ${firaCode.variable} ${roboto.variable} ${openSans.variable} ${montserrat.variable} ${lato.variable} ${poppins.variable} ${nunito.variable} ${sourceSans3.variable} ${workSans.variable} ${ubuntu.variable} ${merriweather.variable} ${lora.variable} ${cormorantGaramond.variable} ${bitter.variable} ${oswald.variable} ${raleway.variable} ${bebasNeue.variable} ${cinzel.variable} ${pacifico.variable} font-sans antialiased`}
+        className={`${plusJakartaSans.variable} ${figtree.variable} ${roobert.variable} ${avantGarde.variable} ${spaceGrotesk.className} ${inter.variable} ${playfair.variable} ${outfit.variable} ${firaCode.variable} ${roboto.variable} ${openSans.variable} ${montserrat.variable} ${lato.variable} ${poppins.variable} ${nunito.variable} ${sourceSans3.variable} ${workSans.variable} ${ubuntu.variable} ${merriweather.variable} ${lora.variable} ${cormorantGaramond.variable} ${bitter.variable} ${oswald.variable} ${raleway.variable} ${bebasNeue.variable} ${cinzel.variable} ${pacifico.variable} font-sans antialiased`}
       >
         <Toaster position="top-right" />
         <ThemeProvider
