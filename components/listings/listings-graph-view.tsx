@@ -148,7 +148,7 @@ function NodeDetailPanel({
   if (info.type === "user") {
     const user = info.data;
     const avatarUrl = user.avatar
-      ? \`https://cdn.thrico.network/\${user.avatar}\`
+      ? `https://cdn.thrico.network/${user.avatar}`
       : "";
     const name =
       [user.firstName, user.lastName].filter(Boolean).join(" ") || "User";
@@ -240,7 +240,9 @@ function NodeDetailPanel({
       </div>
 
       <div className="px-4 py-4 space-y-4">
-        <h3 className="text-sm font-semibold text-slate-900">{listing.title}</h3>
+        <h3 className="text-sm font-semibold text-slate-900">
+          {listing.title}
+        </h3>
         {info.connectedUsers.length > 0 && (
           <div>
             <p className="text-[10px] font-medium text-slate-400 uppercase tracking-wider mb-2">
@@ -249,7 +251,7 @@ function NodeDetailPanel({
             <div className="space-y-1 max-h-48 overflow-y-auto pr-1">
               {info.connectedUsers.map(({ user, relationType }, idx) => {
                 const avatarUrl = user.avatar
-                  ? \`https://cdn.thrico.network/\${user.avatar}\`
+                  ? `https://cdn.thrico.network/${user.avatar}`
                   : "";
                 const uname =
                   [user.firstName, user.lastName].filter(Boolean).join(" ") ||
@@ -310,16 +312,17 @@ export function ListingsGraphView() {
 
     edges.forEach((edge) => {
       if (!edge.creator || !edge.listing) return;
-      
-      const userId = \`user-\${edge.creator.id}\`;
-      const listingId = \`listing-\${edge.listing.id}\`;
+
+      const userId = `user-${edge.creator.id}`;
+      const listingId = `listing-${edge.listing.id}`;
 
       if (!userNodes.has(userId)) {
         const name =
-          [edge.creator.firstName, edge.creator.lastName].filter(Boolean).join(" ") ||
-          "User";
+          [edge.creator.firstName, edge.creator.lastName]
+            .filter(Boolean)
+            .join(" ") || "User";
         const avatarUrl = edge.creator.avatar
-          ? \`https://cdn.thrico.network/\${edge.creator.avatar}\`
+          ? `https://cdn.thrico.network/\${edge.creator.avatar}`
           : "";
         userNodes.set(userId, {
           data: {
@@ -343,7 +346,7 @@ export function ListingsGraphView() {
 
       graphEdges.push({
         data: {
-          id: \`edge-\${edge.creator.id}-\${edge.listing.id}\`,
+          id: `edge-${edge.creator.id}-${edge.listing.id}`,
           source: userId,
           target: listingId,
           label: "POSTED",
@@ -367,7 +370,11 @@ export function ListingsGraphView() {
       },
     );
 
-    return [...Array.from(userNodes.values()), ...listingElements, ...graphEdges];
+    return [
+      ...Array.from(userNodes.values()),
+      ...listingElements,
+      ...graphEdges,
+    ];
   }, [data]);
 
   const graphData = useMemo(() => {

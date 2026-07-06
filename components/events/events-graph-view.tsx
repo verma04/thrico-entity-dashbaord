@@ -148,7 +148,7 @@ function NodeDetailPanel({
   if (info.type === "user") {
     const user = info.data;
     const avatarUrl = user.avatar
-      ? \`https://cdn.thrico.network/\${user.avatar}\`
+      ? `https://cdn.thrico.network/${user.avatar}`
       : "";
     const name =
       [user.firstName, user.lastName].filter(Boolean).join(" ") || "User";
@@ -249,7 +249,7 @@ function NodeDetailPanel({
             <div className="space-y-1 max-h-48 overflow-y-auto pr-1">
               {info.connectedUsers.map(({ user, relationType }, idx) => {
                 const avatarUrl = user.avatar
-                  ? \`https://cdn.thrico.network/\${user.avatar}\`
+                  ? `https://cdn.thrico.network/${user.avatar}`
                   : "";
                 const uname =
                   [user.firstName, user.lastName].filter(Boolean).join(" ") ||
@@ -311,16 +311,17 @@ export function EventsGraphView() {
     edges.forEach((edge) => {
       // NOTE: backend returns { creator, event } for events
       if (!edge.creator || !edge.event) return;
-      
-      const userId = \`user-\${edge.creator.id}\`;
-      const eventId = \`event-\${edge.event.id}\`;
+
+      const userId = `user-${edge.creator.id}`;
+      const eventId = `event-${edge.event.id}`;
 
       if (!userNodes.has(userId)) {
         const name =
-          [edge.creator.firstName, edge.creator.lastName].filter(Boolean).join(" ") ||
-          "User";
+          [edge.creator.firstName, edge.creator.lastName]
+            .filter(Boolean)
+            .join(" ") || "User";
         const avatarUrl = edge.creator.avatar
-          ? \`https://cdn.thrico.network/\${edge.creator.avatar}\`
+          ? `https://cdn.thrico.network/${edge.creator.avatar}`
           : "";
         userNodes.set(userId, {
           data: {
@@ -344,7 +345,7 @@ export function EventsGraphView() {
 
       graphEdges.push({
         data: {
-          id: \`edge-\${edge.creator.id}-\${edge.event.id}\`,
+          id: `edge-${edge.creator.id}-${edge.event.id}`,
           source: userId,
           target: eventId,
           label: "CREATED",

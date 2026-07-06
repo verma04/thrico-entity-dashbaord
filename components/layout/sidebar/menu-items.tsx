@@ -68,6 +68,7 @@ import {
   Bell,
   Mail,
   Sparkles,
+  Smartphone,
 } from "lucide-react";
 import { useMemo } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -700,6 +701,15 @@ export const adminSettings = [
         path: "/settings/policies",
       },
       { key: "pol-taxes", label: "Taxes & Duties", path: "/settings/taxes" },
+    ],
+  },
+  {
+    key: "mobile-app",
+    label: "Mobile App",
+    icon: <Smartphone size={18} />,
+    children: [
+      { key: "ma-android", label: "Android", path: "/mobile-app/android" },
+      { key: "ma-ios", label: "iOS", path: "/mobile-app/ios" },
     ],
   },
   {

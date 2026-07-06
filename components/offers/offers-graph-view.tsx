@@ -148,7 +148,7 @@ function NodeDetailPanel({
   if (info.type === "user") {
     const user = info.data;
     const avatarUrl = user.avatar
-      ? \`https://cdn.thrico.network/\${user.avatar}\`
+      ? `https://cdn.thrico.network/${user.avatar}`
       : "";
     const name =
       [user.firstName, user.lastName].filter(Boolean).join(" ") || "User";
@@ -249,7 +249,7 @@ function NodeDetailPanel({
             <div className="space-y-1 max-h-48 overflow-y-auto pr-1">
               {info.connectedUsers.map(({ user, relationType }, idx) => {
                 const avatarUrl = user.avatar
-                  ? \`https://cdn.thrico.network/\${user.avatar}\`
+                  ? `https://cdn.thrico.network/${user.avatar}`
                   : "";
                 const uname =
                   [user.firstName, user.lastName].filter(Boolean).join(" ") ||
@@ -310,16 +310,17 @@ export function OffersGraphView() {
 
     edges.forEach((edge) => {
       if (!edge.creator || !edge.offer) return;
-      
-      const userId = \`user-\${edge.creator.id}\`;
-      const offerId = \`offer-\${edge.offer.id}\`;
+
+      const userId = `user-${edge.creator.id}`;
+      const offerId = `offer-${edge.offer.id}`;
 
       if (!userNodes.has(userId)) {
         const name =
-          [edge.creator.firstName, edge.creator.lastName].filter(Boolean).join(" ") ||
-          "User";
+          [edge.creator.firstName, edge.creator.lastName]
+            .filter(Boolean)
+            .join(" ") || "User";
         const avatarUrl = edge.creator.avatar
-          ? \`https://cdn.thrico.network/\${edge.creator.avatar}\`
+          ? `https://cdn.thrico.network/${edge.creator.avatar}`
           : "";
         userNodes.set(userId, {
           data: {
@@ -343,7 +344,7 @@ export function OffersGraphView() {
 
       graphEdges.push({
         data: {
-          id: \`edge-\${edge.creator.id}-\${edge.offer.id}\`,
+          id: `edge-${edge.creator.id}-${edge.offer.id}`,
           source: userId,
           target: offerId,
           label: "CREATED",
