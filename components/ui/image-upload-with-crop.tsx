@@ -103,6 +103,7 @@ interface ImageUploadWithCropProps {
   returnKeyOnly?: boolean;
   returnFileOnly?: boolean;
   onFileChange?: (file: File) => void;
+  enforceExactDimensions?: boolean;
   children?: React.ReactNode;
 }
 
@@ -179,6 +180,7 @@ export const ImageUploadWithCrop = ({
   returnKeyOnly = false,
   returnFileOnly = false,
   onFileChange,
+  enforceExactDimensions = false,
   children,
 }: ImageUploadWithCropProps) => {
   const [isEditorOpen, setIsEditorOpen] = useState(false);
@@ -364,8 +366,13 @@ export const ImageUploadWithCrop = ({
     const scaleX = image.naturalWidth / image.width;
     const scaleY = image.naturalHeight / image.height;
 
-    const finalWidth = Math.round(crop.width * scaleX * zoom);
-    const finalHeight = Math.round(crop.height * scaleY * zoom);
+    const finalWidth = enforceExactDimensions && recommendedWidth 
+      ? recommendedWidth 
+      : Math.round(crop.width * scaleX * zoom);
+      
+    const finalHeight = enforceExactDimensions && recommendedHeight 
+      ? recommendedHeight 
+      : Math.round(crop.height * scaleY * zoom);
 
     canvas.width = finalWidth;
     canvas.height = finalHeight;

@@ -12,6 +12,9 @@ export interface WizardStep {
   description: string;
   component: React.ReactNode;
   isValid?: boolean;
+  isOptional?: boolean;
+  onNext?: () => Promise<boolean | void>;
+  onSkip?: () => Promise<boolean | void>;
 }
 
 interface SetupWizardProps {
@@ -30,16 +33,32 @@ export function SetupWizard({
   onCancel,
 }: SetupWizardProps) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
   const currentStep = steps[currentStepIndex];
   const isFirstStep = currentStepIndex === 0;
   const isLastStep = currentStepIndex === steps.length - 1;
 
-  const handleNext = () => {
-    if (!isLastStep) {
-      setCurrentStepIndex((prev) => prev + 1);
-    } else {
-      onComplete();
+  const handleNext = async () => {
+    setIsLoading(true);
+    try {
+      if (currentStep.onNext) {
+        const success = await currentStep.onNext();
+        if (success === false) {
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      if (!isLastStep) {
+        setCurrentStepIndex((prev) => prev + 1);
+      } else {
+        onComplete();
+      }
+    } catch (error) {
+      console.error("Step onNext failed:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -48,6 +67,28 @@ export function SetupWizard({
       setCurrentStepIndex((prev) => prev - 1);
     } else if (onCancel) {
       onCancel();
+    }
+  };
+
+  const handleSkip = async () => {
+    setIsLoading(true);
+    try {
+      if (currentStep.onSkip) {
+        const success = await currentStep.onSkip();
+        if (success === false) {
+          setIsLoading(false);
+          return;
+        }
+      }
+      if (!isLastStep) {
+        setCurrentStepIndex((prev) => prev + 1);
+      } else {
+        onComplete();
+      }
+    } catch (error) {
+      console.error("Step onSkip failed:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -127,20 +168,33 @@ export function SetupWizard({
             </div>
 
             <div className="mt-8 pt-6 border-t flex justify-between items-center">
-              <Button
-                variant={isFirstStep ? "ghost" : "outline"}
-                onClick={handleBack}
-              >
-                {isFirstStep ? "Cancel" : "Back"}
-              </Button>
-              <Button
-                onClick={handleNext}
-                className={isLastStep ? "bg-green-600 hover:bg-green-700 text-white" : ""}
-                disabled={currentStep.isValid === false}
-              >
-                {isLastStep ? "Complete Setup" : "Continue"}
-                {!isLastStep && <ChevronRight className="w-4 h-4 ml-1" />}
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant={isFirstStep ? "ghost" : "outline"}
+                  onClick={handleBack}
+                >
+                  {isFirstStep ? "Cancel" : "Back"}
+                </Button>
+                {currentStep.isOptional && (
+                  <Button
+                    variant="outline"
+                    onClick={handleSkip}
+                    disabled={isLoading}
+                  >
+                    Skip for now
+                  </Button>
+                )}
+              </div>
+              {currentStep.isValid !== false && (
+                <Button
+                  onClick={handleNext}
+                  className={isLastStep ? "bg-green-600 hover:bg-green-700 text-white" : ""}
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Saving..." : (isLastStep ? "Complete Setup" : "Continue")}
+                  {!isLastStep && !isLoading && <ChevronRight className="w-4 h-4 ml-1" />}
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
