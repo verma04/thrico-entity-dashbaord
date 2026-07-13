@@ -60,7 +60,8 @@ export default function CommunitySettings() {
         privacy: community?.privacy || "PUBLIC",
         communityType: community?.communityType || "VIRTUAL",
         joiningTerms: community?.joiningTerms || "ANYONE_CAN_JOIN",
-        requireAdminApprovalForPosts: community?.requireAdminApprovalForPosts ?? false,
+        requireAdminApprovalForPosts:
+          community?.requireAdminApprovalForPosts ?? false,
         allowMemberInvites: community?.allowMemberInvites ?? false,
         enableEvents: community?.enableEvents ?? false,
         enableRatingsAndReviews: community?.enableRatingsAndReviews ?? false,

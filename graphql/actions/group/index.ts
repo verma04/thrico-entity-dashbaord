@@ -47,10 +47,12 @@ export const voteCommunityRatingHelpfulness = (options: any) =>
 
 export const addCommunity = (options: any) =>
   useMutation(ADD_COMMUNITY, {
+    refetchQueries: ["GetCommunities"],
+    awaitRefetchQueries: true,
     ...options,
     update(cache, { data: { addCommunity } }) {
       if (addCommunity) {
-        const statusesToUpdate = ["ALL", addCommunity.status];
+        const statusesToUpdate = ["ALL", undefined, addCommunity.status];
 
         statusesToUpdate.forEach((status) => {
           try {
