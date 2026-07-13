@@ -3,25 +3,13 @@
 import React from "react";
 import { useState } from "react";
 import type { DropResult } from "@hello-pangea/dnd";
-import { Search, Puzzle, AlertCircle, Save, Star, Smartphone, LayoutGrid, Loader2, Globe, Monitor, Lock, Info, Pencil } from "lucide-react";
-import * as LucideIcons from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Puzzle, AlertCircle, Smartphone, LayoutGrid, Monitor } from "lucide-react";
 import { cn } from "@/lib/utils";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import MobileNavigation from "./mobile-navigation";
 import WebNavigation from "./web-navigation";
+import ModuleRegistry from "./module-registry";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
-import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 
 import { gql, useMutation } from "@apollo/client";
@@ -30,9 +18,7 @@ import {
   useCheckEntitySubscription,
 } from "@/graphql/actions";
 
-interface UpdateEntityModuleResponse {
-  updateEntityModule: { success: boolean };
-}
+import type { ModuleItem, ActiveTab, UpdateEntityModuleResponse } from "./types";
 
 const UPDATE_ENTITY_MODULE = gql`
   mutation UpdateEntityModule($input: [inputUpdateEntityModule]) {
@@ -46,32 +32,6 @@ const moduleData = [
   { id: "1", name: "Directory", enabled: true, required: true, category: "Core", showInMobileNavigation: true, showInWebNavigation: true, icon: null, isPopular: false, isPublicFacing: false, canRename: true },
   { id: "2", name: "Communities", enabled: true, required: false, category: "Social", showInMobileNavigation: true, showInWebNavigation: true, icon: null, isPopular: true, isPublicFacing: false, canRename: true },
 ];
-
-interface ModuleItem {
-  id: string;
-  name: string;
-  icon: string | null;
-  enabled: boolean;
-  required?: boolean;
-  showInMobileNavigation: boolean;
-  showInWebNavigation: boolean;
-  isPopular: boolean;
-  showInMobileNavigationSortNumber?: number;
-  showInWebNavigationSortNumber?: number;
-  customName?: string | null;
-  isPublicFacing: boolean;
-  canRename: boolean;
-}
-
-const getNavIcon = (icon: string | null, enabled: boolean = true) => {
-  if (!icon || typeof icon !== "string" || !(icon in LucideIcons)) {
-    return <Puzzle className={cn("h-4 w-4", enabled ? "text-muted-foreground" : "text-muted-foreground/40")} />;
-  }
-  const IconComponent = (LucideIcons as any)[icon] as React.ElementType;
-  return <IconComponent className={cn("h-4 w-4", enabled ? "text-muted-foreground" : "text-muted-foreground/40")} />;
-};
-
-type ActiveTab = "management" | "navigation" | "webNavigation";
 
 export default function ModuleManagement() {
   const [updateEntityModule, { loading: updateLoading }] = useMutation<
@@ -165,6 +125,14 @@ export default function ModuleManagement() {
     );
   };
 
+  const togglePopular = (id: string) => {
+    setModules((prev) =>
+      prev.map((m) =>
+        m.id === id ? { ...m, isPopular: !m.isPopular } : m
+      )
+    );
+  };
+
   const toggleNavigation = (id: string) => {
     if (userRole === "directory") return;
     setModules((prev) => {
@@ -186,6 +154,14 @@ export default function ModuleManagement() {
         return { ...m, showInWebNavigation: !m.showInWebNavigation };
       });
     });
+  };
+
+  const changeCustomName = (id: string, value: string) => {
+    setModules((prev) =>
+      prev.map((m) =>
+        m.id === id ? { ...m, customName: value } : m
+      )
+    );
   };
 
   const saveChanges = async () => {
@@ -414,368 +390,20 @@ export default function ModuleManagement() {
 
         {/* Tab content */}
         {activeTab === "management" && (
-          <div className="p-5 space-y-4">
-            {/* Search + Info bar */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 justify-between">
-              <div className="relative max-w-sm w-full">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-                <Input
-                  placeholder="Search modules..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9 h-8 text-[13px] border-border bg-muted/50 focus:bg-card"
-                />
-              </div>
-              <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
-                <span className="flex items-center gap-1.5">
-                  <Globe className="h-3 w-3 text-emerald-500" />
-                  <span className="font-medium">{publicCount} Public</span>
-                </span>
-                <span className="text-border">•</span>
-                <span className="flex items-center gap-1.5">
-                  <Lock className="h-3 w-3 text-slate-400" />
-                  <span className="font-medium">{internalCount} Internal</span>
-                </span>
-              </div>
-            </div>
-
-            {/* Column headers */}
-            <div className="grid grid-cols-[2px_1.5fr_1.5fr_auto_auto_auto_auto] items-end gap-4 px-3 pb-2 border-b border-border">
-              <span></span>
-              <div>
-                <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Module</span>
-              </div>
-              <div>
-                <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Display Name</span>
-                <p className="text-[9px] text-muted-foreground/60 mt-0.5">Rename for your members</p>
-              </div>
-              <div className="w-16 text-center">
-                <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Popular</span>
-                <p className="text-[9px] text-muted-foreground/60 mt-0.5">Featured</p>
-              </div>
-              <div className="w-16 text-center">
-                <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Status</span>
-                <p className="text-[9px] text-muted-foreground/60 mt-0.5">On / Off</p>
-              </div>
-              <div className="w-16 text-center">
-                <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Mobile</span>
-                <p className="text-[9px] text-muted-foreground/60 mt-0.5">App nav bar</p>
-              </div>
-              <div className="w-16 text-center">
-                <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Web</span>
-                <p className="text-[9px] text-muted-foreground/60 mt-0.5">Sidebar nav</p>
-              </div>
-            </div>
-
-            {/* Module rows */}
-            <div className="space-y-0.5">
-              {filteredModules.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                  <Puzzle className="h-8 w-8 mb-2 opacity-30" />
-                  <p className="text-[13px]">No modules found</p>
-                </div>
-              ) : (
-                filteredModules.map((module) => (
-                  <div
-                    key={module.id}
-                    className={cn(
-                      "grid grid-cols-[2px_1.5fr_1.5fr_auto_auto_auto_auto] items-center gap-4 px-3 py-3 rounded-lg border transition-all duration-200 group",
-                      module.enabled
-                        ? "border-transparent hover:bg-muted/40 hover:border-border/60"
-                        : "border-transparent bg-muted/20 opacity-60 hover:opacity-80"
-                    )}
-                  >
-                    {/* Left accent bar */}
-                    <div className={cn(
-                      "w-0.5 h-8 rounded-full transition-colors",
-                      !module.enabled
-                        ? "bg-muted-foreground/20"
-                        : module.isPublicFacing
-                        ? "bg-emerald-400"
-                        : "bg-slate-300"
-                    )} />
-
-                    {/* Module info */}
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className={cn(
-                        "h-8 w-8 rounded-lg border flex items-center justify-center shrink-0 transition-colors",
-                        module.enabled
-                          ? module.isPublicFacing
-                            ? "bg-emerald-50 border-emerald-200/60"
-                            : "bg-muted border-border/60"
-                          : "bg-muted/50 border-border/30"
-                      )}>
-                        {getNavIcon(module.icon, module.enabled)}
-                      </div>
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className={cn(
-                            "text-[13px] font-medium truncate transition-colors",
-                            module.enabled ? "text-foreground" : "text-muted-foreground"
-                          )}>
-                            {module.customName || module.name}
-                          </span>
-                          {module.customName && module.customName !== module.name && (
-                            <span className="text-[10px] text-muted-foreground/50">
-                              ({module.name})
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-1.5 mt-0.5">
-                          {module.required && (
-                            <span className="text-[9px] font-semibold text-amber-600 bg-amber-50 border border-amber-200/60 px-1.5 py-px rounded uppercase tracking-wide">
-                              Required
-                            </span>
-                          )}
-                          {module.isPublicFacing ? (
-                            <span className="text-[9px] font-medium text-emerald-600 flex items-center gap-0.5">
-                              <Globe className="h-2.5 w-2.5" />
-                              Public
-                            </span>
-                          ) : (
-                            <span className="text-[9px] font-medium text-slate-400 flex items-center gap-0.5">
-                              <Lock className="h-2.5 w-2.5" />
-                              Internal
-                            </span>
-                          )}
-                          {!module.canRename && (
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger>
-                                  <Lock className="h-2.5 w-2.5 text-muted-foreground/30" />
-                                </TooltipTrigger>
-                                <TooltipContent>Cannot rename this module</TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Custom Name Input */}
-                    <div className="min-w-0 pr-4">
-                      {module.canRename && userRole !== "directory" ? (
-                        <div className="relative group/input">
-                          <Input
-                            value={module.customName ?? ""}
-                            placeholder={module.name}
-                            onChange={(e) => {
-                              setModules((prev) =>
-                                prev.map((m) =>
-                                  m.id === module.id ? { ...m, customName: e.target.value } : m
-                                )
-                              );
-                            }}
-                            disabled={!module.enabled}
-                            className={cn(
-                              "h-8 text-[13px] font-medium w-full transition-colors",
-                              !module.enabled && "opacity-50"
-                            )}
-                          />
-                          <Pencil className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground/30 opacity-0 group-hover/input:opacity-100 transition-opacity pointer-events-none" />
-                        </div>
-                      ) : (
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <div className="h-8 flex items-center px-3 rounded-md bg-muted/30 border border-border/30 cursor-not-allowed">
-                                <span className="text-[12px] text-muted-foreground/50 truncate">
-                                  {module.customName || module.name}
-                                </span>
-                                <Lock className="h-3 w-3 text-muted-foreground/30 ml-auto shrink-0" />
-                              </div>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              {userRole === "directory"
-                                ? "Insufficient permissions"
-                                : "Renaming is disabled for this module"}
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      )}
-                    </div>
-
-                    {/* Popular toggle */}
-                    <div className="w-16 flex justify-center">
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <button
-                              onClick={() => {
-                                if (module.isPublicFacing) return;
-                                setModules((prev) =>
-                                  prev.map((m) =>
-                                    m.id === module.id ? { ...m, isPopular: !m.isPopular } : m
-                                  )
-                                );
-                              }}
-                              disabled={module.isPublicFacing}
-                              className={cn(
-                                "h-7 w-7 rounded-md flex items-center justify-center transition-all",
-                                module.isPopular
-                                  ? "text-amber-500 bg-amber-50 border border-amber-200 shadow-sm shadow-amber-100"
-                                  : "text-muted-foreground/30 hover:text-amber-400 hover:bg-amber-50/50 border border-transparent hover:border-amber-100",
-                                module.isPublicFacing && "opacity-40 cursor-not-allowed"
-                              )}
-                            >
-                              <Star className="h-3.5 w-3.5" fill={module.isPopular ? "currentColor" : "none"} />
-                            </button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            {module.isPublicFacing
-                              ? "Public module — popularity managed automatically"
-                              : module.isPopular
-                              ? "Remove from popular"
-                              : "Mark as popular"}
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </div>
-
-                    {/* Enabled toggle */}
-                    <div className="w-16 flex justify-center">
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div className="flex flex-col items-center gap-0.5">
-                              <Switch
-                                checked={module.enabled}
-                                onCheckedChange={() => toggleModule(module.id)}
-                                disabled={module.required || userRole === "directory"}
-                                className="scale-90"
-                              />
-                              <span className={cn(
-                                "text-[9px] font-medium transition-colors",
-                                module.enabled ? "text-emerald-600" : "text-muted-foreground/40"
-                              )}>
-                                {module.enabled ? "On" : "Off"}
-                              </span>
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            {module.required
-                              ? "Required — cannot disable"
-                              : module.enabled
-                              ? "Click to disable this module"
-                              : "Click to enable this module"}
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </div>
-
-                    {/* Mobile nav toggle */}
-                    <div className="w-16 flex justify-center">
-                      {!module.isPublicFacing ? (
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger>
-                              <div className="h-7 w-10 rounded-md bg-muted/20 border border-dashed border-border/40 flex items-center justify-center">
-                                <span className="text-muted-foreground/30 text-[9px] font-semibold">N/A</span>
-                              </div>
-                            </TooltipTrigger>
-                            <TooltipContent className="max-w-[200px]">
-                              Internal module — only visible in the admin dashboard, not in member-facing navigation
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      ) : (
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <div className="flex flex-col items-center gap-0.5">
-                                <Switch
-                                  checked={module.showInMobileNavigation}
-                                  onCheckedChange={() => toggleNavigation(module.id)}
-                                  disabled={
-                                    userRole === "directory" ||
-                                    !module.enabled ||
-                                    (!module.showInMobileNavigation &&
-                                      modules.filter((m) => m.showInMobileNavigation).length >= 3)
-                                  }
-                                  className="scale-90"
-                                />
-                                {module.showInMobileNavigation && (
-                                  <span className="text-[9px] font-medium text-violet-500">Active</span>
-                                )}
-                              </div>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              {!module.enabled
-                                ? "Enable module first"
-                                : module.showInMobileNavigation
-                                ? "Remove from mobile navigation"
-                                : modules.filter((m) => m.showInMobileNavigation).length >= 3
-                                ? "Maximum 3 mobile nav slots reached"
-                                : "Add to mobile app navigation bar"}
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      )}
-                    </div>
-
-                    {/* Web nav toggle */}
-                    <div className="w-16 flex justify-center">
-                      {!module.isPublicFacing ? (
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger>
-                              <div className="h-7 w-10 rounded-md bg-muted/20 border border-dashed border-border/40 flex items-center justify-center">
-                                <span className="text-muted-foreground/30 text-[9px] font-semibold">N/A</span>
-                              </div>
-                            </TooltipTrigger>
-                            <TooltipContent className="max-w-[200px]">
-                              Internal module — only visible in the admin dashboard, not in member-facing navigation
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      ) : (
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <div className="flex flex-col items-center gap-0.5">
-                                <Switch
-                                  checked={module.showInWebNavigation}
-                                  onCheckedChange={() => toggleWebNavigation(module.id)}
-                                  disabled={userRole === "directory" || !module.enabled}
-                                  className="scale-90"
-                                />
-                                {module.showInWebNavigation && (
-                                  <span className="text-[9px] font-medium text-blue-500">Active</span>
-                                )}
-                              </div>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              {!module.enabled
-                                ? "Enable module first"
-                                : module.showInWebNavigation
-                                ? "Remove from website sidebar"
-                                : "Add to website sidebar navigation"}
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      )}
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            {/* Legend footer */}
-            <div className="flex items-center gap-4 pt-3 mt-2 border-t border-border/50">
-              <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-emerald-400" />
-                <span className="text-[10px] text-muted-foreground">Public — visible to members</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-slate-300" />
-                <span className="text-[10px] text-muted-foreground">Internal — admin dashboard only</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-muted-foreground/20" />
-                <span className="text-[10px] text-muted-foreground">Disabled</span>
-              </div>
-            </div>
-          </div>
+          <ModuleRegistry
+            modules={modules}
+            filteredModules={filteredModules}
+            searchTerm={searchTerm}
+            userRole={userRole}
+            publicCount={publicCount}
+            internalCount={internalCount}
+            onSearchChange={setSearchTerm}
+            onToggleModule={toggleModule}
+            onTogglePopular={togglePopular}
+            onToggleNavigation={toggleNavigation}
+            onToggleWebNavigation={toggleWebNavigation}
+            onChangeCustomName={changeCustomName}
+          />
         )}
 
         {activeTab === "navigation" && (
