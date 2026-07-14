@@ -183,8 +183,8 @@ function MenuItemRow({
     isActive && !item.isLocked
       ? "bg-accent text-foreground"
       : item.isLocked
-      ? "text-muted-foreground"
-      : "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
+        ? "text-muted-foreground"
+        : "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
   );
 
   /* Active indicator — clean 2px bar, no glow */
@@ -204,7 +204,9 @@ function MenuItemRow({
             rowBase,
             "justify-between h-auto! py-0 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-0! group-data-[collapsible=icon]:justify-center",
           )}
-          onClick={() => !item.isLocked && !isCollapsed && toggleGroup(item.key)}
+          onClick={() =>
+            !item.isLocked && !isCollapsed && toggleGroup(item.key)
+          }
         >
           <span
             className={cn(
@@ -234,7 +236,10 @@ function MenuItemRow({
             </Badge>
           )}
           {item.isLocked ? (
-            <Lock size={12} className="shrink-0 text-muted-foreground/40 group-data-[collapsible=icon]:hidden" />
+            <Lock
+              size={12}
+              className="shrink-0 text-muted-foreground/40 group-data-[collapsible=icon]:hidden"
+            />
           ) : (
             <ChevronRight
               size={11}
@@ -306,7 +311,7 @@ function MenuItemRow({
           href={item.isLocked ? "#" : item.path || "#"}
           className={cn(
             "flex items-center gap-2.5 flex-1 min-w-0 group-data-[collapsible=icon]:justify-center",
-            item.isLocked && "pointer-events-none"
+            item.isLocked && "pointer-events-none",
           )}
         >
           {activeBar}
@@ -322,7 +327,10 @@ function MenuItemRow({
             {item.label}
           </span>
           {item.isLocked && (
-            <Lock size={12} className="ml-auto text-muted-foreground/50 shrink-0 group-data-[collapsible=icon]:hidden" />
+            <Lock
+              size={12}
+              className="ml-auto text-muted-foreground/50 shrink-0 group-data-[collapsible=icon]:hidden"
+            />
           )}
           {!item.isLocked && item.badge && (
             <Badge

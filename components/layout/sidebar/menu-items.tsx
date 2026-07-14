@@ -414,8 +414,16 @@ export const modules = [
     icon: <Target size={18} />,
     children: [
       { key: "opp-dash", label: "Dashboard", path: "/opportunities" },
-      { key: "opp-manage", label: "Manage Opportunities", path: "/opportunities/all" },
-      { key: "opp-settings", label: "Settings", path: "/opportunities/settings" },
+      {
+        key: "opp-manage",
+        label: "Manage Opportunities",
+        path: "/opportunities/all",
+      },
+      {
+        key: "opp-settings",
+        label: "Settings",
+        path: "/opportunities/settings",
+      },
     ],
   },
   {
@@ -997,7 +1005,7 @@ export const useFilteredManagementItems = () => {
         const filteredSection = { ...section };
 
         // Top level section permission checks
-        if (section.key === "customisation") {
+        if (section.key === "SETTINGS") {
           const canSeeAny =
             hasModulePermission("APPEARANCE") ||
             hasModulePermission("DOMAIN") ||
@@ -1015,7 +1023,7 @@ export const useFilteredManagementItems = () => {
           if (!canSeeAny) return null;
         }
 
-        if (section.key === "account") {
+        if (section.key === "SETTINGS") {
           const canSeeAny =
             hasModulePermission("BILLING") ||
             hasModulePermission("SUBSCRIPTION") ||
