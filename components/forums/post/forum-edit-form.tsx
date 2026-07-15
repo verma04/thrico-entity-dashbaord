@@ -36,6 +36,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { discussionCategory } from "../ts-types";
+import { useModuleStore } from "@/store/useModuleStore";
 
 const postSchema = Yup.object().shape({
   title: Yup.string()

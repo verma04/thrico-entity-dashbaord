@@ -77,7 +77,9 @@ export default function EditForumPage() {
   return (
     <div className="bg-background rounded-xl border border-border shadow-sm p-6 max-w-3xl mx-auto">
       <div className="mb-6">
-        <h2 className="text-xl font-semibold tracking-tight">Edit {singularName}</h2>
+        <h2 className="text-xl font-semibold tracking-tight">
+          Edit {singularName}
+        </h2>
         <p className="text-sm text-muted-foreground">
           Modify this community {singularName.toLowerCase()}
         </p>
