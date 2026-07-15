@@ -593,6 +593,18 @@ export const modules = [
       { key: "off-settings", label: "Settings", path: "/offers/settings" },
     ],
   },
+  {
+    key: "sponsors",
+    label: "Sponsors",
+    path: "/sponsors",
+    isMobileOnly: true,
+    icon: <Users size={18} />,
+    children: [
+      { key: "sponsors-dash", label: "Dashboard", path: "/sponsors" },
+      { key: "sponsors-manage", label: "Manage Sponsors", path: "/sponsors/all" },
+      { key: "sponsors-create", label: "Create Sponsor", path: "/sponsors/create" },
+    ],
+  },
 ];
 
 // --- 5. ADMIN SETTINGS ---
