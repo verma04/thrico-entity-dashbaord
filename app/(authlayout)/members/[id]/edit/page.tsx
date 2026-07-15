@@ -53,6 +53,7 @@ const EditMemberPage = () => {
     skillIds: member.skills?.map((s: any) => s.id) || [],
     skills: member.skills?.filter((s: any) => s.category) || [],
     interestIds: member.interests?.map((i: any) => i.id) || [],
+    membershipTierId: member.membershipTier?.id || null,
     avatar: user.avatar || null,
   };
 
@@ -71,6 +72,7 @@ const EditMemberPage = () => {
       skillIds: values.skillIds,
       skills: values.skills,
       interestIds: values.interestIds,
+      membershipTierId: values.membershipTierId,
     };
 
     updateMember({ variables: { input } });

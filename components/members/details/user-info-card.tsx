@@ -182,6 +182,19 @@ export function UserInfoCard({ member }: { member: any }) {
 
               {/* Status badge */}
               <div className="flex items-center justify-center gap-1.5 pt-1">
+                {member.membershipTier && (
+                  <Badge
+                    variant="outline"
+                    className="text-[10px] font-semibold gap-1.5 px-2.5"
+                    style={{
+                      backgroundColor: `${member.membershipTier.badgeColor}15`,
+                      color: member.membershipTier.badgeColor,
+                      borderColor: `${member.membershipTier.badgeColor}40`,
+                    }}
+                  >
+                    {member.membershipTier.name}
+                  </Badge>
+                )}
                 <Badge
                   variant="outline"
                   className={cn(

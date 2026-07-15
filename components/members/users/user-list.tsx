@@ -114,6 +114,26 @@ const columns: AdminTableColumn<UserDetail>[] = [
     ),
   },
   {
+    key: "membershipTier",
+    header: "Tier",
+    cell: (row) => (
+      row.membershipTier ? (
+        <span
+          className="px-1.5 py-0.5 rounded text-[10px] font-bold"
+          style={{
+            backgroundColor: `${row.membershipTier.badgeColor}15`,
+            color: row.membershipTier.badgeColor,
+            border: `1px solid ${row.membershipTier.badgeColor}40`,
+          }}
+        >
+          {row.membershipTier.name}
+        </span>
+      ) : (
+        <span className="text-[11px] text-muted-foreground/50">—</span>
+      )
+    ),
+  },
+  {
     key: "status",
     header: "Status",
     cell: (row) => <AdminStatusBadge status={row.status} />,

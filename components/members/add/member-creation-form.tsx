@@ -66,6 +66,8 @@ import {
   DetailedSkillsSection,
   skillValidationSchema,
 } from "./detailed-skills-section";
+import { useQuery } from "@apollo/client";
+import { GET_MEMBERSHIP_TIERS } from "@/graphql/membership-tier";
 
 export function MemberCreationForm({
   initialValues,
@@ -91,6 +93,7 @@ export function MemberCreationForm({
     useState(false);
   const [isSkillPopoverOpen, setIsSkillPopoverOpen] = useState(false);
   const [isInterestPopoverOpen, setIsInterestPopoverOpen] = useState(false);
+  const [isTierPopoverOpen, setIsTierPopoverOpen] = useState(false);
 
   const { data: industryData, loading: loadingIndustries } = useGetIndustries();
   const industries = industryData?.getIndustries || [];
@@ -105,6 +108,9 @@ export function MemberCreationForm({
   const { data: interestData, loading: loadingInterests } =
     useGetInterests();
   const interests = interestData?.getInterests || [];
+
+  const { data: tiersData, loading: loadingTiers } = useQuery(GET_MEMBERSHIP_TIERS);
+  const membershipTiers = tiersData?.getMembershipTiers || [];
 
   const memberSchema = Yup.object({
     firstName: Yup.string()
@@ -122,6 +128,7 @@ export function MemberCreationForm({
     skillIds: Yup.array().of(Yup.string()),
     skills: Yup.array().of(skillValidationSchema),
     interestIds: Yup.array().of(Yup.string()),
+    membershipTierId: Yup.string().nullable(),
   });
 
   const formik = useFormik({
@@ -138,6 +145,7 @@ export function MemberCreationForm({
       skillIds: [],
       skills: [],
       interestIds: [],
+      membershipTierId: null,
       ...(initialValues || {}),
     },
     enableReinitialize: true,
@@ -486,6 +494,105 @@ export function MemberCreationForm({
                           Select one or more industries the member belongs to
                         </p>
                       </div>
+
+                      {/* Membership Tier */}
+                      {isEdit && (
+                        <div className="space-y-2">
+                          <Label className="text-sm font-bold text-foreground">
+                            Membership Tier
+                          </Label>
+                          <Popover
+                            open={isTierPopoverOpen}
+                            onOpenChange={setIsTierPopoverOpen}
+                          >
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="outline"
+                                role="combobox"
+                                aria-expanded={isTierPopoverOpen}
+                                className="w-full justify-between h-auto min-h-[44px] rounded-xl border-border hover:bg-muted/50 transition-all px-3 py-2 text-left font-normal"
+                              >
+                                <div className="flex flex-wrap gap-1.5">
+                                  {formik.values.membershipTierId ? (
+                                    <Badge
+                                      variant="secondary"
+                                      className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-100 py-0.5 px-2 rounded-lg text-[11px] font-bold flex items-center gap-1"
+                                    >
+                                      {membershipTiers.find((t: any) => t.id === formik.values.membershipTierId)?.name}
+                                    </Badge>
+                                  ) : (
+                                    <span className="text-muted-foreground">
+                                      Select membership tier...
+                                    </span>
+                                  )}
+                                </div>
+                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 rounded-2xl shadow-xl border-border overflow-hidden">
+                              <Command className="border-none">
+                                <CommandInput
+                                  placeholder="Search tiers..."
+                                  className="h-11 border-none focus:ring-0"
+                                />
+                                <CommandList className="max-h-[300px]">
+                                  <CommandEmpty>No tier found.</CommandEmpty>
+                                  <CommandGroup>
+                                    <CommandItem
+                                      key="none"
+                                      value="none"
+                                      onSelect={() => {
+                                        formik.setFieldValue("membershipTierId", null);
+                                        setIsTierPopoverOpen(false);
+                                      }}
+                                      className="flex items-center justify-between py-2.5 px-3 cursor-pointer hover:bg-muted/50 transition-colors"
+                                    >
+                                      <span className="text-sm font-semibold text-muted-foreground">
+                                        None
+                                      </span>
+                                    </CommandItem>
+                                    {membershipTiers.map((tier: any) => (
+                                      <CommandItem
+                                        key={tier.id}
+                                        value={tier.name}
+                                        onSelect={() => {
+                                          formik.setFieldValue(
+                                            "membershipTierId",
+                                            tier.id
+                                          );
+                                          setIsTierPopoverOpen(false);
+                                        }}
+                                        className="flex items-center justify-between py-2.5 px-3 cursor-pointer hover:bg-muted/50 transition-colors"
+                                      >
+                                        <div className="flex items-center gap-2">
+                                          <div
+                                            className={cn(
+                                              "h-4 w-4 rounded border border-border flex items-center justify-center transition-all",
+                                              formik.values.membershipTierId === tier.id
+                                                ? "bg-indigo-600 border-indigo-600"
+                                                : "bg-card"
+                                            )}
+                                          >
+                                            {formik.values.membershipTierId === tier.id && (
+                                              <Check className="h-3 w-3 text-white" />
+                                            )}
+                                          </div>
+                                          <span className="text-sm font-semibold text-foreground">
+                                            {tier.name}
+                                          </span>
+                                        </div>
+                                      </CommandItem>
+                                    ))}
+                                  </CommandGroup>
+                                </CommandList>
+                              </Command>
+                            </PopoverContent>
+                          </Popover>
+                          <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">
+                            Select the membership tier for this user
+                          </p>
+                        </div>
+                      )}
 
                       <div className="space-y-2">
                         <Label className="text-sm font-bold text-foreground">

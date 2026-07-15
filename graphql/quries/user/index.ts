@@ -133,6 +133,13 @@ const details = `
           avatar
         }
       }
+      membershipTierId
+      membershipTier {
+        id
+        name
+        badgeIcon
+        badgeColor
+      }
 `;
 export const GET_ALL_USER = gql`
   query GetAllUser($input: allStatusInput) {

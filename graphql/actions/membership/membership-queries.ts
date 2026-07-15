@@ -36,7 +36,6 @@ export interface GetGrowthStatsResponse {
 }
 
 export interface MembersStats {
-
   totalMembers: number;
   activeMembers: number;
   newMembersThisMonth: number;
@@ -86,6 +85,13 @@ export interface UserDetail {
   id: string;
   isApproved: boolean;
   status: string;
+  membershipTierId?: string;
+  membershipTier?: {
+    id: string;
+    name: string;
+    badgeIcon: string;
+    badgeColor: string;
+  };
   lastActive?: string;
   verification?: {
     isVerified: boolean;
@@ -226,6 +232,7 @@ export const useGetAllUser = (input?: {
   offset?: number | null;
   industryId?: string | null;
   search?: string | null;
+  membershipTierId?: string | null;
 }) =>
   useQuery<GetAllUserResponse>(GET_ALL_USER, {
     variables: {
@@ -235,8 +242,8 @@ export const useGetAllUser = (input?: {
         offset: input?.offset,
         industryId: input?.industryId ?? null,
         search: input?.search ?? null,
+        membershipTierId: input?.membershipTierId ?? null,
       },
-      
     },
 
     fetchPolicy: "network-only",
@@ -320,10 +327,7 @@ export interface GetUserNeo4jRelationshipsResponse {
   getUserNeo4jRelationships: Neo4jRelationship[];
 }
 
-export const useGetUserNeo4jRelationships = (
-  userId: string,
-  options?: any,
-) =>
+export const useGetUserNeo4jRelationships = (userId: string, options?: any) =>
   useQuery<GetUserNeo4jRelationshipsResponse>(GET_USER_NEO4J_RELATIONSHIPS, {
     variables: { userId },
     skip: !userId,

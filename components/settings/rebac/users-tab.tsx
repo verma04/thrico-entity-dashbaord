@@ -155,7 +155,8 @@ export default function UsersTab() {
             </div>
           );
         }
-        const perms = user.modulePermissions || user.role?.modulePermissions || [];
+        const perms =
+          user.modulePermissions || user.role?.modulePermissions || [];
         if (!perms.length)
           return (
             <span className="text-xs text-muted-foreground">No access</span>

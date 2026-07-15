@@ -22,9 +22,6 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  BarChart,
-  Bar,
-  Cell,
 } from "recharts";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
@@ -196,22 +193,33 @@ function MembersPage() {
                   Subscription Limit Reached
                 </p>
                 <p className="text-amber-700 text-xs mt-0.5">
-                  {subscriptionInfo.message || "You have reached the maximum number of users allowed by your subscription."}
+                  {subscriptionInfo.message ||
+                    "You have reached the maximum number of users allowed by your subscription."}
                 </p>
               </div>
             </div>
-            
+
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
               <div className="flex items-center gap-4 bg-amber-100/60 px-5 py-2.5 rounded-lg border border-amber-200/60 shrink-0">
-                 <div className="text-center">
-                    <p className="text-[10px] uppercase font-bold text-amber-600/80 tracking-widest mb-0.5">Current</p>
-                    <p className="text-xl font-black text-amber-900 leading-none">{subscriptionInfo.currentCount?.toLocaleString()}</p>
-                 </div>
-                 <div className="w-px h-8 bg-amber-300/60"></div>
-                 <div className="text-center">
-                    <p className="text-[10px] uppercase font-bold text-amber-600/80 tracking-widest mb-0.5">Max Allowed</p>
-                    <p className="text-xl font-black text-amber-900 leading-none">{subscriptionInfo.maxUsersAllowed ? subscriptionInfo.maxUsersAllowed.toLocaleString() : "∞"}</p>
-                 </div>
+                <div className="text-center">
+                  <p className="text-[10px] uppercase font-bold text-amber-600/80 tracking-widest mb-0.5">
+                    Current
+                  </p>
+                  <p className="text-xl font-black text-amber-900 leading-none">
+                    {subscriptionInfo.currentCount?.toLocaleString()}
+                  </p>
+                </div>
+                <div className="w-px h-8 bg-amber-300/60"></div>
+                <div className="text-center">
+                  <p className="text-[10px] uppercase font-bold text-amber-600/80 tracking-widest mb-0.5">
+                    Max Allowed
+                  </p>
+                  <p className="text-xl font-black text-amber-900 leading-none">
+                    {subscriptionInfo.maxUsersAllowed
+                      ? subscriptionInfo.maxUsersAllowed.toLocaleString()
+                      : "∞"}
+                  </p>
+                </div>
               </div>
               <Button
                 variant="outline"

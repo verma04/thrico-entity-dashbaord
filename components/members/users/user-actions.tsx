@@ -12,7 +12,15 @@ import {
   useLogoutUserSession,
   useLogoutAllUserSessions,
 } from "@/graphql/actions/membership/membership-mutations";
+import {
+  GET_MEMBERSHIP_TIERS,
+  ASSIGN_MEMBERS_TO_TIER,
+  REMOVE_MEMBER_FROM_TIER,
+} from "@/graphql/membership-tier";
+import { useQuery, useMutation } from "@apollo/client";
+import { toast } from "sonner";
 import { safeFormat } from "@/lib/date-utils";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -44,6 +52,7 @@ import {
   ExternalLink,
   Smartphone,
   LogOut,
+  Award,
 } from "lucide-react";
 
 enum Action {
@@ -67,6 +76,13 @@ export default function UserActions({ user }: { user: UserDetail }) {
   const [isSessionsModalOpen, setIsSessionsModalOpen] = useState(false);
   const [logoutAlertOpen, setLogoutAlertOpen] = useState(false);
   const [logoutTarget, setLogoutTarget] = useState<"ALL" | string | null>(null);
+
+  const [isTierModalOpen, setIsTierModalOpen] = useState(false);
+  const [selectedTierId, setSelectedTierId] = useState<string>("NONE");
+
+  const { data: tiersData } = useQuery(GET_MEMBERSHIP_TIERS, { skip: !isTierModalOpen });
+  const [assignTier, { loading: isAssigningTier }] = useMutation(ASSIGN_MEMBERS_TO_TIER);
+  const [removeTier, { loading: isRemovingTier }] = useMutation(REMOVE_MEMBER_FROM_TIER);
 
   const [fetchSessions, { data: sessionsData, loading: isSessionsLoading }] =
     useGetUserSessions(user?.user?.id);
@@ -178,6 +194,14 @@ export default function UserActions({ user }: { user: UserDetail }) {
       onClick: () => {
         setIsSessionsModalOpen(true);
         fetchSessions();
+      },
+    },
+    {
+      label: "Manage Tier",
+      icon: Award,
+      onClick: () => {
+        setSelectedTierId(user.membershipTierId || "NONE");
+        setIsTierModalOpen(true);
       },
     },
     { type: "separator" },
@@ -351,17 +375,21 @@ export default function UserActions({ user }: { user: UserDetail }) {
               onClick={() => {
                 setIsActionModalOpen(false);
                 setReason("");
+                setSelectedAction(null);
               }}
+              disabled={isLoading}
             >
               Cancel
             </Button>
             <Button
               onClick={confirmAction}
-              disabled={(isReasonRequired && !reason.trim()) || isLoading}
+              disabled={
+                isLoading || (isReasonRequired && reason.trim().length === 0)
+              }
               variant={
                 selectedAction === Action.BLOCK ||
-                selectedAction === Action.REJECT ||
-                selectedAction === Action.DISABLE
+                selectedAction === Action.DISABLE ||
+                selectedAction === Action.REJECT
                   ? "destructive"
                   : "default"
               }
@@ -377,6 +405,57 @@ export default function UserActions({ user }: { user: UserDetail }) {
               {selectedAction === Action.VERIFY && "Verify"}
               {selectedAction === Action.UNVERIFY && "Remove Verification"}
               {selectedAction === Action.REAPPROVE && "Re-approve"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isTierModalOpen} onOpenChange={setIsTierModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Manage Membership Tier</DialogTitle>
+            <DialogDescription>
+              Assign a new membership tier to {user.user?.firstName} {user.user?.lastName}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Label>Membership Tier</Label>
+            <Select value={selectedTierId} onValueChange={setSelectedTierId}>
+              <SelectTrigger className="mt-2">
+                <SelectValue placeholder="Select a tier" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="NONE">None</SelectItem>
+                {tiersData?.getMembershipTiers?.map((tier: any) => (
+                  <SelectItem key={tier.id} value={tier.id}>
+                    {tier.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsTierModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              disabled={isAssigningTier || isRemovingTier}
+              onClick={async () => {
+                try {
+                  if (selectedTierId === "NONE") {
+                    await removeTier({ variables: { memberId: user.id } });
+                  } else {
+                    await assignTier({ variables: { tierId: selectedTierId, memberIds: [user.id] } });
+                  }
+                  toast.success("Membership tier updated successfully");
+                  setIsTierModalOpen(false);
+                  window.location.reload();
+                } catch (e: any) {
+                  toast.error(e.message || "Failed to update membership tier");
+                }
+              }}
+            >
+              {(isAssigningTier || isRemovingTier) ? "Saving..." : "Save Changes"}
             </Button>
           </DialogFooter>
         </DialogContent>
