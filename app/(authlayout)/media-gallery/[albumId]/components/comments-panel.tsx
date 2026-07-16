@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { format } from "date-fns";
+import moment from "moment";
 import { MessageCircle, Trash2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -116,7 +116,7 @@ export function CommentsPanel({
                         </span>
                         <span className="text-xs text-gray-400">
                           {comment.createdAt
-                            ? format(new Date(comment.createdAt), "MMM d, yyyy")
+                            ? moment(comment.createdAt).fromNow()
                             : ""}
                         </span>
                       </div>

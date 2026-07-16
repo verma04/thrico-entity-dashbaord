@@ -77,7 +77,7 @@ export default function AlbumDetailPage() {
   // Bulk Selection State
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [selectedImageIds, setSelectedImageIds] = useState<Set<string>>(
-    new Set()
+    new Set(),
   );
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
   const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false);
@@ -143,8 +143,8 @@ export default function AlbumDetailPage() {
     try {
       await Promise.all(
         Array.from(selectedImageIds).map((id) =>
-          deleteImage({ variables: { id } })
-        )
+          deleteImage({ variables: { id } }),
+        ),
       );
       toast.success(`${selectedImageIds.size} images deleted`);
       setSelectedImageIds(new Set());
@@ -214,7 +214,9 @@ export default function AlbumDetailPage() {
                   ) : (
                     <CheckSquare className="w-4 h-4 mr-2" />
                   )}
-                  {selectedImageIds.size === images.length ? "Clear" : "Select All"}
+                  {selectedImageIds.size === images.length
+                    ? "Clear"
+                    : "Select All"}
                 </Button>
                 <Button
                   variant="destructive"
@@ -308,7 +310,9 @@ export default function AlbumDetailPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeletingSingle}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isDeletingSingle}>
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={(e) => {
                 e.preventDefault();
@@ -335,13 +339,18 @@ export default function AlbumDetailPage() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete {selectedImageIds.size} Images?</AlertDialogTitle>
+            <AlertDialogTitle>
+              Delete {selectedImageIds.size} Images?
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete {selectedImageIds.size} image(s) and all their comments. This action cannot be undone.
+              This will permanently delete {selectedImageIds.size} image(s) and
+              all their comments. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isBulkDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isBulkDeleting}>
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={(e) => {
                 e.preventDefault();
