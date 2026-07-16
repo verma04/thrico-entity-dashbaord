@@ -69,6 +69,7 @@ import {
   Mail,
   Sparkles,
   Smartphone,
+  Images,
 } from "lucide-react";
 import { useMemo } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -601,8 +602,35 @@ export const modules = [
     icon: <Users size={18} />,
     children: [
       { key: "sponsors-dash", label: "Dashboard", path: "/sponsors" },
-      { key: "sponsors-manage", label: "Manage Sponsors", path: "/sponsors/all" },
-      { key: "sponsors-create", label: "Create Sponsor", path: "/sponsors/create" },
+      {
+        key: "sponsors-manage",
+        label: "Manage Sponsors",
+        path: "/sponsors/all",
+      },
+      {
+        key: "sponsors-create",
+        label: "Create Sponsor",
+        path: "/sponsors/create",
+      },
+    ],
+  },
+  {
+    key: "Media Gallery",
+    label: "Media Gallery",
+    path: "/media-gallery",
+    isMobileOnly: true,
+    icon: <Images size={18} />,
+    children: [
+      {
+        key: "mg-albums",
+        label: "Albums",
+        path: "/media-gallery",
+      },
+      {
+        key: "mg-settings",
+        label: "Settings",
+        path: "/media-gallery/settings",
+      },
     ],
   },
 ];

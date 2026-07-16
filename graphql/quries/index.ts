@@ -167,6 +167,7 @@ export const GET_ENTITY_SETTINGS = gql`
       allowEntityOpportunitiesInFeed
       feedOrder
       feedEntityName
+      allowMediaGalleryComments
     }
   }
 `;
@@ -211,6 +212,7 @@ export const UPDATE_ENTITY_SETTINGS = gql`
       allowEntityOpportunitiesInFeed
       feedOrder
       feedEntityName
+      allowMediaGalleryComments
     }
   }
 `;

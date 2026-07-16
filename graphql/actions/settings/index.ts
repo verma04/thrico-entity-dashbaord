@@ -45,6 +45,9 @@ export interface EntitySettings {
   allowEntityMomentsInFeed: boolean;
   feedOrder: string[];
   feedEntityName: string;
+
+  // Media Gallery
+  allowMediaGalleryComments: boolean;
 }
 
 export interface GetEntitySettingsResponse {
@@ -103,6 +106,9 @@ export interface UpdateEntitySettingsInput {
   faqForums?: string | null;
   faqEvents?: string | null;
   faqCommunities?: string | null;
+
+  // Media Gallery
+  allowMediaGalleryComments?: boolean;
 }
 
 export interface UpdateEntitySettingsResponse {
