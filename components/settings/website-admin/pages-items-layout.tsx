@@ -1,6 +1,6 @@
 "use client";
 
-import type * as React from "react";
+import React from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutGrid,
@@ -9,97 +9,90 @@ import {
   Menu,
   Settings,
   PanelBottom,
+  Sparkles,
+  ChevronRight,
 } from "lucide-react";
-import { Tabs } from "@/components/ui/tabs";
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
+import MenuItemsLayout from "@/components/layout/menu-items-layout";
 
 interface Tab {
   key: string;
   label: string;
-  icon: React.ReactNode;
-  path: string;
+  icon: any;
+  href: string;
+  description?: string;
 }
+
+const menuItems: Tab[] = [
+  {
+    key: "navigation",
+    label: "Navigation",
+    icon: <Menu />,
+    href: "/app-layout/navigation",
+    description: "Personalize your site's architectural navigation mapping.",
+  },
+  {
+    key: "footer",
+    label: "Footer",
+    icon: <PanelBottom />,
+    href: "/app-layout/footer",
+    description: "Configure global site footer telemetry and links.",
+  },
+  {
+    key: "seo",
+    label: "SEO",
+    icon: <Globe />,
+    href: "/app-layout/seo",
+    description: "Optimize global search engine orchestration visibility.",
+  },
+  {
+    key: "settings",
+    label: "Settings",
+    icon: <Settings />,
+    href: "/app-layout/settings",
+    description: "Configure global site-wide definitions and protocols.",
+  },
+  {
+    key: "layouts",
+    label: "Layouts",
+    icon: <LayoutGrid />,
+    href: "/app-layout/layout",
+    description: "Customize and deploy architectural layouts across nodes.",
+  },
+];
 
 const PagesItemsLayout = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const pathname = usePathname();
-  const activeTab = pathname.replace("/app-layout/", "") || "layouts";
 
-  const menuItems: Tab[] = [
-    {
-      key: "pages",
-      label: "Pages",
-      icon: <FileText className="h-4 w-4" />,
-      path: "/app-layout/pages",
-    },
-    {
-      key: "navigation",
-      label: "Navigation",
-      icon: <Menu className="h-4 w-4" />,
-      path: "/app-layout/navigation",
-    },
-    {
-      key: "footer",
-      label: "Footer",
-      icon: <PanelBottom className="h-4 w-4" />,
-      path: "/app-layout/footer",
-    },
-    {
-      key: "seo",
-      label: "SEO",
-      icon: <Globe className="h-4 w-4" />,
-      path: "/app-layout/seo",
-    },
-    {
-      key: "settings",
-      label: "Settings",
-      icon: <Settings className="h-4 w-4" />,
-      path: "/app-layout/settings",
-    },
-
-    {
-      key: "layouts",
-      label: "Layouts",
-      icon: <LayoutGrid className="h-4 w-4" />,
-      path: "/app-layout/layout",
-    },
-  ];
-
-  const handleTabChange = (key: string) => {
-    const tab = menuItems.find((item) => item.key === key);
-    if (tab) router.push(tab.path);
-  };
+  const isTakeoverPage = pathname.includes("/app-layout/layout");
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="sticky top-0 z-30 border-b border-border bg-card/50 backdrop-blur-sm">
-        <div className="px-6">
-          <Tabs
-            value={activeTab}
-            onValueChange={handleTabChange}
-            className="w-full"
-          >
-            <div className="flex gap-0">
-              {menuItems.map((item) => (
-                <button
-                  key={item.key}
-                  onClick={() => handleTabChange(item.key)}
-                  className={`flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
-                    activeTab === item.key
-                      ? "border-primary text-primary"
-                      : "border-transparent text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {item.icon}
-                  {item.label}
-                </button>
-              ))}
-            </div>
-          </Tabs>
-        </div>
-      </div>
+    <EcosystemWrapper>
+      {/* Breadcrumb metadata */}
 
-      <main className="mx-auto max-w-7xl px-6 py-8">{children}</main>
-    </div>
+      <MenuItemsLayout
+        fixed={isTakeoverPage}
+        fullHeight={isTakeoverPage}
+        showAdminTabs={isTakeoverPage}
+        active={"app-layout"}
+        items={menuItems}
+      >
+        <div className="relative pt-2">
+          {/* Subtle layer background hint */}
+          <div className="absolute top-0 inset-x-0 h-px bg-linear-to-r from-transparent via-zinc-100 to-transparent" />
+
+          <div className="animate-in fade-in slide-in-from-bottom-6 duration-1000 delay-100 fill-mode-both">
+            {children}
+          </div>
+        </div>
+      </MenuItemsLayout>
+    </EcosystemWrapper>
   );
 };
 

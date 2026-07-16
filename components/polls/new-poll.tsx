@@ -2,66 +2,43 @@
 
 import { useState } from "react";
 import {
-  ArrowUp,
-  ArrowDown,
   Trash2,
   Plus,
-  Save,
-  GripVertical,
   Eye,
-  Settings2,
+  BarChart3,
+  ArrowUp,
+  ArrowDown,
+  Loader2,
+  Sparkles,
+  ChevronRight,
+  Info,
+  Save,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   Sheet,
   SheetContent,
-  SheetDescription,
   SheetHeader,
   SheetTitle,
-  SheetFooter,
 } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import { useFormik, FieldArray, FormikProvider } from "formik";
 import * as Yup from "yup";
 import { addPoll } from "../../graphql/actions/polls";
+import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
+import { useModuleStore } from "@/store/useModuleStore";
 
 const pollSchema = Yup.object().shape({
   title: Yup.string()
@@ -79,27 +56,55 @@ const pollSchema = Yup.object().shape({
           .required("Option is required")
           .min(1, "Option cannot be empty")
           .max(100, "Option must be less than 100 characters"),
-      })
+      }),
     )
     .min(2, "At least 2 options are required")
     .max(10, "Maximum 10 options allowed"),
 });
 
-export default function NewPoll() {
+const visibilityOptions = [
+  {
+    value: "ALWAYS",
+    label: "Everyone",
+    desc: "Results are always public",
+  },
+  {
+    value: "AFTER_VOTE",
+    label: "After voting",
+    desc: "People see results after they vote",
+  },
+  {
+    value: "ADMIN",
+    label: "Only Admin",
+    desc: "Only you can see the results",
+  },
+];
+
+export default function NewPoll({
+  standalone = true,
+  fullPage = false,
+  onCompletedAction,
+  onCancel,
+}: {
+  standalone?: boolean;
+  fullPage?: boolean;
+  onCompletedAction?: (pollId: string | number) => void;
+  onCancel?: () => void;
+}) {
+  const singularName = useModuleStore((state) => state.pollSingularName);
   const [open, setOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("edit");
   const [resultVisibility, setResultVisibility] = useState("ALWAYS");
 
-  const onCompleted = () => {
+  const onCompleted = (data: any) => {
     formik.resetForm();
     setResultVisibility("ALWAYS");
-    setActiveTab("edit");
     setOpen(false);
+    if (onCompletedAction && data?.addPoll?.id) {
+      onCompletedAction(data.addPoll.id);
+    }
   };
 
-  const [add, { loading }] = addPoll({
-    onCompleted,
-  });
+  const [add, { loading }] = addPoll({ onCompleted });
 
   const formik = useFormik({
     initialValues: {
@@ -124,499 +129,428 @@ export default function NewPoll() {
     formik.setFieldValue("options", options);
   };
 
-  const getVisibilityDescription = (value: string) => {
-    switch (value) {
-      case "ALWAYS":
-        return "Results are visible to everyone at all times";
-      case "AFTER_VOTE":
-        return "Results appear immediately after a user votes";
-      case "AFTER_END":
-        return "Results appear only after the poll ends";
-      case "ADMIN":
-        return "Results are only visible to administrators";
-      default:
-        return "";
-    }
+  const handleSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    formik.handleSubmit();
   };
 
   const canSubmit = formik.isValid && formik.dirty && !loading;
 
-  return (
+  const renderFormFields = () => (
     <>
-      <Button onClick={() => setOpen(true)} size="default">
-        <Plus className="h-4 w-4 mr-2" />
-        Create Poll
-      </Button>
+      {/* Title */}
+      <div className="space-y-2">
+        <Label htmlFor="poll-title" className="text-sm font-medium">
+          {singularName} Title <span className="text-destructive">*</span>
+        </Label>
+        <Input
+          id="poll-title"
+          name="title"
+          placeholder={`Enter ${singularName.toLowerCase()} title`}
+          maxLength={100}
+          value={formik.values.title}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+        />
+        {formik.touched.title && formik.errors.title && (
+          <p className="text-xs text-destructive">{formik.errors.title}</p>
+        )}
+        <p className="text-xs text-muted-foreground">
+          {formik.values.title.length}/100 characters
+        </p>
+      </div>
 
-      <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent className="w-full z-100 sm:max-w-[900px] overflow-y-auto p-0">
-          <SheetHeader className="px-6 pt-6 pb-4 border-b">
-            <SheetTitle className="text-2xl">Create New Poll</SheetTitle>
-            <SheetDescription>
-              Design your poll with multiple options and customize how results
-              are displayed
-            </SheetDescription>
-          </SheetHeader>
+      {/* Question */}
+      <div className="space-y-2">
+        <Label htmlFor="poll-question" className="text-sm font-medium">
+          Question <span className="text-destructive">*</span>
+        </Label>
+        <Textarea
+          id="poll-question"
+          name="question"
+          rows={4}
+          className="resize-none"
+          placeholder={`Describe what your ${singularName.toLowerCase()} is asking`}
+          maxLength={200}
+          value={formik.values.question}
+          onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
+        />
+        {formik.touched.question && formik.errors.question && (
+          <p className="text-xs text-destructive">{formik.errors.question}</p>
+        )}
+        <p className="text-xs text-muted-foreground">
+          {formik.values.question.length}/200 characters
+        </p>
+      </div>
 
-          <FormikProvider value={formik}>
-            <form
-              onSubmit={formik.handleSubmit}
-              className="flex flex-col h-[calc(100vh-140px)]"
-            >
-              <Tabs
-                value={activeTab}
-                onValueChange={setActiveTab}
-                className="flex-1"
-              >
-                <div className="px-6 pt-4 border-b">
-                  <TabsList className="grid w-full max-w-md grid-cols-3">
-                    <TabsTrigger value="edit" className="gap-2">
-                      <Settings2 className="h-4 w-4" />
-                      <span className="hidden sm:inline">Edit</span>
-                    </TabsTrigger>
-                    <TabsTrigger value="preview" className="gap-2">
-                      <Eye className="h-4 w-4" />
-                      <span className="hidden sm:inline">Preview</span>
-                    </TabsTrigger>
-                    <TabsTrigger value="settings" className="gap-2">
-                      <Settings2 className="h-4 w-4" />
-                      <span className="hidden sm:inline">Settings</span>
-                    </TabsTrigger>
-                  </TabsList>
-                </div>
+      {/* Answer Choices */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <Label className="text-sm font-medium">
+            Answer Choices <span className="text-destructive">*</span>
+          </Label>
+          <Badge variant="outline" className="text-xs text-muted-foreground">
+            {formik.values.options.length}/10
+          </Badge>
+        </div>
 
-                <div className="flex-1 overflow-y-auto px-6 py-6">
-                  <TabsContent value="edit" className="space-y-6 mt-0">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Basic Information</CardTitle>
-                        <CardDescription>
-                          Set the title and main question for your poll
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="title">
-                            Poll Title{" "}
-                            <span className="text-destructive">*</span>
-                          </Label>
-                          <Input
-                            id="title"
-                            name="title"
-                            className="text-lg font-semibold"
-                            placeholder="e.g., Community Feature Preference"
-                            value={formik.values.title}
-                            onChange={formik.handleChange}
-                            onBlur={formik.handleBlur}
-                          />
-                          {formik.touched.title && formik.errors.title && (
-                            <p className="text-sm text-destructive flex items-center gap-1">
-                              {formik.errors.title}
-                            </p>
-                          )}
-                          <p className="text-xs text-muted-foreground">
-                            {formik.values.title.length}/100 characters
-                          </p>
-                        </div>
+        <FieldArray
+          name="options"
+          render={(arrayHelpers) => (
+            <div className="space-y-2">
+              {formik.values.options.map((option, index) => (
+                <div
+                  key={index}
+                  className="group flex items-center gap-2 p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+                >
+                  <div className="h-7 w-7 rounded-md bg-muted border border-border flex items-center justify-center shrink-0">
+                    <span className="text-xs font-semibold text-muted-foreground">
+                      {String.fromCharCode(65 + index)}
+                    </span>
+                  </div>
 
-                        <div className="space-y-2">
-                          <Label htmlFor="question">
-                            Poll Question{" "}
-                            <span className="text-destructive">*</span>
-                          </Label>
-                          <Textarea
-                            id="question"
-                            name="question"
-                            rows={3}
-                            placeholder="e.g., Which feature would you like to see next?"
-                            value={formik.values.question}
-                            onChange={formik.handleChange}
-                            onBlur={formik.handleBlur}
-                          />
-                          {formik.touched.question &&
-                            formik.errors.question && (
-                              <p className="text-sm text-destructive">
-                                {formik.errors.question}
-                              </p>
-                            )}
-                          <p className="text-xs text-muted-foreground">
-                            {formik.values.question.length}/200 characters
-                          </p>
-                        </div>
-                      </CardContent>
-                    </Card>
+                  <Input
+                    name={`options.${index}.option`}
+                    placeholder={`Choice ${index + 1}`}
+                    value={option.option}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    className="flex-1 border-0 bg-transparent shadow-none focus-visible:ring-0 text-sm"
+                  />
 
-                    <Card>
-                      <CardHeader>
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <CardTitle>Poll Options</CardTitle>
-                            <CardDescription>
-                              Add at least 2 options (maximum 10)
-                            </CardDescription>
-                          </div>
-                          <Badge variant="outline">
-                            {formik.values.options.length}/10
-                          </Badge>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="space-y-3">
-                        <FieldArray
-                          name="options"
-                          render={(arrayHelpers) => (
-                            <>
-                              {formik.values.options.map((option, index) => (
-                                <div
-                                  key={index}
-                                  className="group flex items-start gap-2 p-3 rounded-lg border bg-muted/30 hover:bg-muted/50 transition-colors"
-                                >
-                                  <TooltipProvider>
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <div className="cursor-grab active:cursor-grabbing pt-2">
-                                          <GripVertical className="h-5 w-5 text-muted-foreground" />
-                                        </div>
-                                      </TooltipTrigger>
-                                      <TooltipContent>
-                                        Drag to reorder
-                                      </TooltipContent>
-                                    </Tooltip>
-                                  </TooltipProvider>
-
-                                  <div className="flex-1 space-y-2">
-                                    <div className="flex items-center gap-2">
-                                      <Badge
-                                        variant="secondary"
-                                        className="text-xs"
-                                      >
-                                        {index + 1}
-                                      </Badge>
-                                      <Input
-                                        name={`options.${index}.option`}
-                                        placeholder={`Option ${index + 1}`}
-                                        value={option.option}
-                                        onChange={formik.handleChange}
-                                        onBlur={formik.handleBlur}
-                                        className="flex-1"
-                                      />
-                                    </div>
-                                    {formik.touched.options?.[index]?.option &&
-                                      formik.errors.options?.[index] && (
-                                        <p className="text-xs text-destructive ml-12">
-                                          {typeof formik.errors.options[
-                                            index
-                                          ] === "string"
-                                            ? formik.errors.options[index]
-                                            : (
-                                                formik.errors.options[
-                                                  index
-                                                ] as any
-                                              )?.option}
-                                        </p>
-                                      )}
-                                  </div>
-
-                                  <div className="flex gap-1 pt-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <TooltipProvider>
-                                      <Tooltip>
-                                        <TooltipTrigger asChild>
-                                          <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="icon"
-                                            className="h-8 w-8"
-                                            onClick={() =>
-                                              moveOption(index, index - 1)
-                                            }
-                                            disabled={index === 0}
-                                          >
-                                            <ArrowUp className="h-4 w-4" />
-                                          </Button>
-                                        </TooltipTrigger>
-                                        <TooltipContent>Move up</TooltipContent>
-                                      </Tooltip>
-                                    </TooltipProvider>
-
-                                    <TooltipProvider>
-                                      <Tooltip>
-                                        <TooltipTrigger asChild>
-                                          <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="icon"
-                                            className="h-8 w-8"
-                                            onClick={() =>
-                                              moveOption(index, index + 1)
-                                            }
-                                            disabled={
-                                              index ===
-                                              formik.values.options.length - 1
-                                            }
-                                          >
-                                            <ArrowDown className="h-4 w-4" />
-                                          </Button>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                          Move down
-                                        </TooltipContent>
-                                      </Tooltip>
-                                    </TooltipProvider>
-
-                                    {formik.values.options.length > 2 && (
-                                      <AlertDialog>
-                                        <AlertDialogTrigger asChild>
-                                          <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="icon"
-                                            className="h-8 w-8 text-destructive hover:text-destructive"
-                                          >
-                                            <Trash2 className="h-4 w-4" />
-                                          </Button>
-                                        </AlertDialogTrigger>
-                                        <AlertDialogContent>
-                                          <AlertDialogHeader>
-                                            <AlertDialogTitle>
-                                              Delete option?
-                                            </AlertDialogTitle>
-                                            <AlertDialogDescription>
-                                              This will remove "
-                                              {option.option ||
-                                                `Option ${index + 1}`}
-                                              " from your poll.
-                                            </AlertDialogDescription>
-                                          </AlertDialogHeader>
-                                          <AlertDialogFooter>
-                                            <AlertDialogCancel>
-                                              Cancel
-                                            </AlertDialogCancel>
-                                            <AlertDialogAction
-                                              onClick={() =>
-                                                arrayHelpers.remove(index)
-                                              }
-                                              className="bg-destructive hover:bg-destructive/90"
-                                            >
-                                              Delete
-                                            </AlertDialogAction>
-                                          </AlertDialogFooter>
-                                        </AlertDialogContent>
-                                      </AlertDialog>
-                                    )}
-                                  </div>
-                                </div>
-                              ))}
-
-                              <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() =>
-                                  arrayHelpers.push({ option: "" })
-                                }
-                                className="w-full"
-                                disabled={formik.values.options.length >= 10}
-                              >
-                                <Plus className="h-4 w-4 mr-2" />
-                                Add Option
-                              </Button>
-
-                              {typeof formik.errors.options === "string" && (
-                                <p className="text-sm text-destructive text-center">
-                                  {formik.errors.options}
-                                </p>
-                              )}
-                            </>
-                          )}
-                        />
-                      </CardContent>
-                    </Card>
-                  </TabsContent>
-
-                  <TabsContent value="preview" className="mt-0">
-                    <Card>
-                      <CardHeader className="pb-4">
-                        <div className="flex items-center gap-2">
-                          <Eye className="h-5 w-5 text-muted-foreground" />
-                          <CardTitle>Preview</CardTitle>
-                        </div>
-                        <CardDescription>
-                          This is how your poll will appear to users
-                        </CardDescription>
-                      </CardHeader>
-                      <Separator />
-                      <CardContent className="pt-6 space-y-6">
-                        <div className="space-y-2">
-                          <h3 className="text-2xl font-bold">
-                            {formik.values.title || "Untitled Poll"}
-                          </h3>
-                          <p className="text-lg text-muted-foreground">
-                            {formik.values.question ||
-                              "Your poll question will appear here"}
-                          </p>
-                        </div>
-
-                        <Separator />
-
-                        <RadioGroup className="space-y-3">
-                          {formik.values.options?.map((option, index) => (
-                            <div
-                              key={index}
-                              className="flex items-center space-x-3 rounded-lg border p-4 hover:bg-muted/50 transition-colors cursor-pointer"
-                            >
-                              <RadioGroupItem
-                                value={option.option}
-                                id={`preview-${index}`}
-                              />
-                              <Label
-                                htmlFor={`preview-${index}`}
-                                className="flex-1 cursor-pointer font-medium"
-                              >
-                                {option.option || `Option ${index + 1}`}
-                              </Label>
-                            </div>
-                          ))}
-                        </RadioGroup>
-
-                        <div className="flex justify-end pt-4">
-                          <Button type="button" size="lg">
-                            Submit Vote
-                          </Button>
-                        </div>
-
-                        {resultVisibility === "ALWAYS" && (
-                          <div className="mt-6 space-y-4 p-4 rounded-lg bg-muted/30">
-                            <p className="text-sm font-medium">
-                              Results Preview
-                            </p>
-                            {formik.values.options?.map((option, index) => (
-                              <div key={index} className="space-y-2">
-                                <div className="flex justify-between text-sm">
-                                  <span>
-                                    {option.option || `Option ${index + 1}`}
-                                  </span>
-                                  <span className="text-muted-foreground">
-                                    0 votes (0%)
-                                  </span>
-                                </div>
-                                <Progress value={0} className="h-2" />
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  </TabsContent>
-
-                  <TabsContent value="settings" className="mt-0">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Poll Settings</CardTitle>
-                        <CardDescription>
-                          Configure how and when results are displayed
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-6">
-                        <div className="space-y-3">
-                          <Label className="text-base">
-                            Results Visibility
-                          </Label>
-                          <Select
-                            value={resultVisibility}
-                            onValueChange={setResultVisibility}
-                          >
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Select visibility" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="ALWAYS">
-                                <div className="flex flex-col items-start gap-1">
-                                  <span className="font-medium">
-                                    Always Visible
-                                  </span>
-                                  <span className="text-xs text-muted-foreground">
-                                    Results shown at all times
-                                  </span>
-                                </div>
-                              </SelectItem>
-                              <SelectItem value="AFTER_VOTE">
-                                <div className="flex flex-col items-start gap-1">
-                                  <span className="font-medium">
-                                    After Voting
-                                  </span>
-                                  <span className="text-xs text-muted-foreground">
-                                    Results shown after user votes
-                                  </span>
-                                </div>
-                              </SelectItem>
-                              <SelectItem value="AFTER_END">
-                                <div className="flex flex-col items-start gap-1">
-                                  <span className="font-medium">
-                                    After Poll Ends
-                                  </span>
-                                  <span className="text-xs text-muted-foreground">
-                                    Results shown when poll closes
-                                  </span>
-                                </div>
-                              </SelectItem>
-                              <SelectItem value="ADMIN">
-                                <div className="flex flex-col items-start gap-1">
-                                  <span className="font-medium">
-                                    Admin Only
-                                  </span>
-                                  <span className="text-xs text-muted-foreground">
-                                    Only admins can see results
-                                  </span>
-                                </div>
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <p className="text-sm text-muted-foreground">
-                            {getVisibilityDescription(resultVisibility)}
-                          </p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </TabsContent>
-                </div>
-              </Tabs>
-
-              <Separator />
-
-              <SheetFooter className="px-6 py-4 bg-muted/30">
-                <div className="flex items-center justify-between w-full">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() => setOpen(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <div className="flex gap-2">
+                  <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                     <Button
                       type="button"
-                      variant="outline"
-                      onClick={() => formik.resetForm()}
-                      disabled={!formik.dirty}
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 rounded-md text-muted-foreground hover:text-foreground"
+                      onClick={() => moveOption(index, index - 1)}
+                      disabled={index === 0}
                     >
-                      Reset
+                      <ArrowUp className="h-3.5 w-3.5" />
                     </Button>
-                    <Button type="submit" disabled={!canSubmit}>
-                      {loading ? (
-                        <>
-                          <span className="animate-spin mr-2">⏳</span>
-                          Creating...
-                        </>
-                      ) : (
-                        <>
-                          <Save className="h-4 w-4 mr-2" />
-                          Create Poll
-                        </>
-                      )}
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 rounded-md text-muted-foreground hover:text-foreground"
+                      onClick={() => moveOption(index, index + 1)}
+                      disabled={index === formik.values.options.length - 1}
+                    >
+                      <ArrowDown className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                      onClick={() => arrayHelpers.remove(index)}
+                      disabled={formik.values.options.length <= 2}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   </div>
                 </div>
-              </SheetFooter>
-            </form>
-          </FormikProvider>
+              ))}
+
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => arrayHelpers.push({ option: "" })}
+                className="w-full border-dashed text-muted-foreground hover:text-foreground"
+                disabled={formik.values.options.length >= 10}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Choice
+              </Button>
+            </div>
+          )}
+        />
+      </div>
+
+      <Separator />
+
+      {/* Result Visibility */}
+      <div className="space-y-4">
+        <div className="flex items-start space-x-3">
+          <div className="p-1.5 rounded-md bg-primary/10">
+            <BarChart3 className="h-4 w-4 text-primary" />
+          </div>
+          <div>
+            <Label className="text-base font-semibold">Result Visibility</Label>
+            <p className="text-sm text-muted-foreground">Choose when voters can see the {singularName.toLowerCase()} outcomes</p>
+          </div>
+        </div>
+        <RadioGroup
+          value={resultVisibility}
+          onValueChange={setResultVisibility}
+          className="space-y-3"
+        >
+          {visibilityOptions.map((opt) => (
+            <div
+              key={opt.value}
+              className="flex items-start space-x-3 space-y-0 p-4 rounded-lg border hover:bg-muted/50 transition-colors"
+            >
+              <RadioGroupItem value={opt.value} id={`vis-${opt.value}`} />
+              <Label htmlFor={`vis-${opt.value}`} className="font-normal cursor-pointer flex-1">
+                <div className="font-medium mb-0.5">{opt.label}</div>
+                <p className="text-sm text-muted-foreground">{opt.desc}</p>
+              </Label>
+            </div>
+          ))}
+        </RadioGroup>
+      </div>
+    </>
+  );
+
+  const renderPreview = () => (
+    <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden">
+      <CardHeader className="bg-muted/30 pb-4">
+        <CardTitle className="text-sm font-bold flex items-center gap-2">
+          <Eye className="h-4 w-4 text-primary" />
+          Live Preview
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="pt-6 space-y-4">
+        <div>
+          <h3 className="text-lg font-bold tracking-tight text-zinc-900 leading-tight mb-1">
+            {formik.values.title || `Untitled ${singularName}`}
+          </h3>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            {formik.values.question || "Your question will appear here..."}
+          </p>
+        </div>
+
+        <Separator />
+
+        <div className="space-y-2">
+          {formik.values.options.map((opt, i) => (
+            <div
+              key={i}
+              className="flex items-center gap-3 p-3 rounded-lg border bg-zinc-50/50"
+            >
+              <div className="h-6 w-6 rounded bg-white border border-border flex items-center justify-center shrink-0">
+                <span className="text-[10px] font-bold text-zinc-400">
+                  {String.fromCharCode(65 + i)}
+                </span>
+              </div>
+              <span className="text-sm font-medium text-zinc-700">
+                {opt.option || `Choice ${i + 1}`}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <div className="pt-2">
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-indigo-50/50 border border-indigo-100/50">
+            <BarChart3 className="h-3.5 w-3.5 text-indigo-400 shrink-0" />
+            <p className="text-[10px] font-bold text-indigo-500 uppercase tracking-wider">
+              Results: {visibilityOptions.find(v => v.value === resultVisibility)?.label}
+            </p>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  const renderSubmitButton = (size: "sm" | "default" = "sm") => (
+    <Button
+      onClick={() => handleSubmit()}
+      size={size}
+      disabled={!canSubmit}
+      className="shadow-sm border-primary/20"
+    >
+      {loading ? (
+        <div className="flex items-center gap-2">
+          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          {fullPage ? "Creating..." : "Creating..."}
+        </div>
+      ) : (
+        <div className="flex items-center gap-2">
+          {fullPage ? <Save className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />}
+          {fullPage ? `Create ${singularName}` : standalone ? `Create ${singularName}` : `Create and Attach ${singularName}`}
+        </div>
+      )}
+    </Button>
+  );
+
+  if (fullPage) {
+    return (
+      <FormikProvider value={formik}>
+        <>
+          <div className="flex flex-col h-full bg-background overflow-hidden rounded-t-[inherit]">
+          {/* Header section - Sticky */}
+          <div className="sticky top-0 z-30 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 border-b px-6 py-4">
+            <div className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-3 mb-1">
+                  <div className="p-2.5 rounded-xl bg-primary/10 ring-1 ring-primary/20">
+                    <BarChart3 className="h-5 w-5 text-primary" />
+                  </div>
+                  <h1 className="text-2xl font-bold tracking-tight">
+                    Create {singularName}
+                  </h1>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground ml-1">
+                  <span>{singularName}s</span>
+                  <ChevronRight className="h-3 w-3" />
+                  <span>Create New {singularName}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Main Content Area - Scrollable */}
+          <div className="flex-1 overflow-y-auto">
+            <div className="max-w-7xl mx-auto px-6 py-8">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <div className="lg:col-span-8 space-y-8">
+                  <form onSubmit={handleSubmit} className="space-y-8">
+                    <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden">
+                      <CardHeader className="bg-muted/30 pb-4">
+                        <CardTitle className="text-xl">
+                          {singularName} Details
+                        </CardTitle>
+                        <p className="text-sm text-muted-foreground">
+                          Core details about your {singularName.toLowerCase()}
+                        </p>
+                      </CardHeader>
+                      <CardContent className="pt-6 space-y-6">
+                        {renderFormFields()}
+                      </CardContent>
+                    </Card>
+                  </form>
+                </div>
+
+                {/* Sidebar */}
+                <div className="lg:col-span-4">
+                  <div className="sticky top-6 space-y-6">
+                    {renderPreview()}
+
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-bold">Quick Guide</h3>
+                      <Badge
+                        variant="outline"
+                        className="bg-indigo-500/5 text-indigo-600 border-indigo-500/20"
+                      >
+                        {singularName} Tips
+                      </Badge>
+                    </div>
+
+                    <Card className="border-none shadow-sm ring-1 ring-border/50">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-base">
+                          <Info className="h-5 w-5" />
+                          Tips for Success
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <ul className="space-y-3 text-sm">
+                          <li className="flex gap-2">
+                            <span className="text-primary font-bold">•</span>
+                            <span>Keep your question short and unambiguous.</span>
+                          </li>
+                          <li className="flex gap-2">
+                            <span className="text-primary font-bold">•</span>
+                            <span>Provide 3-5 balanced answer choices.</span>
+                          </li>
+                          <li className="flex gap-2">
+                            <span className="text-primary font-bold">•</span>
+                            <span>Use "After Voting" visibility to avoid bias.</span>
+                          </li>
+                        </ul>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+          <FloatingSavePanel
+            hasChanged={formik.dirty}
+            saved={false}
+            isSaving={loading}
+            onSave={handleSubmit}
+            onReset={() => {
+              formik.resetForm();
+              if (onCancel) onCancel();
+              else window.history.back();
+            }}
+            title={`Unsaved ${singularName} Data`}
+            description="You have unfilled form data."
+            buttonText={`Create ${singularName}`}
+          />
+        </>
+      </FormikProvider>
+    );
+  }
+
+  const renderForm = () => (
+    <FormikProvider value={formik}>
+      <form
+        onSubmit={handleSubmit}
+        className={standalone ? "flex flex-col h-[calc(100vh-90px)]" : "flex flex-col"}
+      >
+        <div className={cn("space-y-6", standalone ? "flex-1 overflow-y-auto px-6 py-5" : "px-6 py-5")}>
+          {renderFormFields()}
+        </div>
+
+        <div className={cn("border-t px-6 py-4", standalone ? "bg-muted/30" : "")}>
+          <div className="flex items-center gap-3">
+            {renderSubmitButton("sm")}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                if (standalone) setOpen(false);
+                else if (onCancel) onCancel();
+              }}
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
+      </form>
+    </FormikProvider>
+  );
+
+  if (!standalone) {
+    return renderForm();
+  }
+
+  return (
+    <>
+      <Button
+        onClick={() => setOpen(true)}
+        size="sm"
+        className="shadow-sm"
+      >
+        <Plus className="h-4 w-4 mr-2" />
+        Create {singularName}
+      </Button>
+
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetContent className="w-full z-100 sm:max-w-[560px] overflow-hidden p-0 border-l border-border bg-background">
+          <SheetHeader className="px-6 pt-6 pb-4 border-b bg-muted/30">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-primary/10 ring-1 ring-primary/20">
+                <BarChart3 className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <SheetTitle className="text-lg font-semibold tracking-tight">
+                  Create {singularName}
+                </SheetTitle>
+                <p className="text-xs text-muted-foreground">
+                  Get feedback from your community
+                </p>
+              </div>
+            </div>
+          </SheetHeader>
+          {renderForm()}
         </SheetContent>
       </Sheet>
     </>

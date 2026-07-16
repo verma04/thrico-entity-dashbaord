@@ -1,9 +1,5 @@
-import React from 'react'
+import { redirect } from "next/navigation";
 
-const page = () => {
-    return (
-        <div>page</div>
-    )
+export default function FeedSettingsPage() {
+  redirect("/feed/settings/visibility");
 }
-
-export default page

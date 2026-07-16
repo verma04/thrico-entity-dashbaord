@@ -13,6 +13,8 @@ import {
   GET_LISTINGS,
   GET_LISTINGS_STATS,
   GET_LISTINGS_STATS_BY_ID,
+  GET_LISTING_TREND,
+  GET_LISTING_CATEGORY_DISTRIBUTION,
 } from "../../quries/listing";
 
 export type ListingCategory = {
@@ -36,7 +38,7 @@ export type MarketPlaceListing = {
   updatedAt: string;
   currency: string;
   slug: string;
-  location: string;
+  location: LocationObject;
   description?: string;
   media: { id: string; url: string }[];
   verification?: {
@@ -44,12 +46,29 @@ export type MarketPlaceListing = {
     verificationReason?: string;
     isVerifiedAt?: string;
   };
+  addedBy?: string;
+  postedBy?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    avatar: string;
+  };
 };
 
 export type GetListingsVars = {
   input: {
     status?: string;
+    userId?: string;
+    offset?: number;
+    limit?: number;
   };
+};
+
+export type GetListingResponse = {
+  data: MarketPlaceListing[];
+  total: number;
+  offset: number;
+  limit: number;
 };
 
 export type GetListingDetailsVars = {
@@ -69,6 +88,8 @@ export type AddListingVars = {
     interests?: string[];
     categories?: string[];
     location: LocationObject;
+    media?: { url: string }[];
+    currency?: string;
   };
 };
 
@@ -85,6 +106,8 @@ export type EditListingVars = {
     categories?: string[];
     location: LocationObject;
     reason?: string;
+    media?: { url: string }[];
+    currency?: string;
   };
 };
 
@@ -126,7 +149,7 @@ export function useGetListingStatsById(
   options: QueryHookOptions<
     { getListingStatsById: ListingStatsById },
     { input: { listingId: string } }
-  >
+  >,
 ) {
   return useQuery<
     { getListingStatsById: ListingStatsById },
@@ -134,15 +157,54 @@ export function useGetListingStatsById(
   >(GET_LISTINGS_STATS_BY_ID, options);
 }
 
+export type ListingTrend = {
+  name: string;
+  listings: number;
+};
+
+export function useListingTrend(
+  timeRange?: string,
+  dateRange?: { startDate: string; endDate: string },
+  options?: QueryHookOptions<
+    { getListingTrend: ListingTrend[] },
+    { timeRange?: string; dateRange?: { startDate: string; endDate: string } }
+  >,
+) {
+  return useQuery(GET_LISTING_TREND, {
+    variables: { timeRange, dateRange },
+    ...options,
+  });
+}
+
+export type ListingCategoryDistribution = {
+  name: string;
+  value: number;
+  color: string;
+};
+
+export function useListingCategoryDistribution(
+  timeRange?: string,
+  dateRange?: { startDate: string; endDate: string },
+  options?: QueryHookOptions<
+    { getListingCategoryDistribution: ListingCategoryDistribution[] },
+    { timeRange?: string; dateRange?: { startDate: string; endDate: string } }
+  >,
+) {
+  return useQuery(GET_LISTING_CATEGORY_DISTRIBUTION, {
+    variables: { timeRange, dateRange },
+    ...options,
+  });
+}
+
 export function useListings(
   options?: QueryHookOptions<
-    { getListing: MarketPlaceListing[] },
+    { getListing: GetListingResponse },
     GetListingsVars
-  >
+  >,
 ) {
-  return useQuery<{ getListing: MarketPlaceListing[] }, GetListingsVars>(
+  return useQuery<{ getListing: GetListingResponse }, GetListingsVars>(
     GET_LISTINGS,
-    options
+    options,
   );
 }
 
@@ -150,7 +212,7 @@ export function useListingDetails(
   options: QueryHookOptions<
     { getListingDetailsByID: MarketPlaceListing },
     GetListingDetailsVars
-  >
+  >,
 ) {
   return useQuery<
     { getListingDetailsByID: MarketPlaceListing },
@@ -162,7 +224,7 @@ export function useAddListing(
   options?: MutationHookOptions<
     { addListing: MarketPlaceListing },
     AddListingVars
-  >
+  >,
 ) {
   return useMutation(ADD_LISTING, {
     ...options,
@@ -183,7 +245,11 @@ export function useAddListing(
           cache.writeQuery({
             query: GET_LISTINGS,
             data: {
-              getListing: [addListing, ...(approvedData?.getListing || [])],
+              getListing: {
+                ...approvedData?.getListing,
+                data: [addListing, ...(approvedData?.getListing?.data || [])],
+                total: (approvedData?.getListing?.total || 0) + 1,
+              },
             },
             variables: {
               input: {
@@ -205,7 +271,11 @@ export function useAddListing(
           cache.writeQuery({
             query: GET_LISTINGS,
             data: {
-              getListing: [addListing, ...(allData?.getListing || [])],
+              getListing: {
+                ...allData?.getListing,
+                data: [addListing, ...(allData?.getListing?.data || [])],
+                total: (allData?.getListing?.total || 0) + 1,
+              },
             },
             variables: {
               input: {
@@ -225,13 +295,13 @@ export function useEditListing(
   options?: MutationHookOptions<
     { editListing: MarketPlaceListing },
     EditListingVars
-  >
+  >,
 ) {
   return useMutation(EDIT_LISTING, options as MutationHookOptions<any, any>);
 }
 
 export function useChangeListingStatus(
-  options?: MutationHookOptions<any, any>
+  options?: MutationHookOptions<any, any>,
 ) {
   return useMutation(CHANGE_LISTING_STATUS, {
     ...options,
@@ -275,7 +345,7 @@ export function useChangeListingStatus(
 }
 
 export function useChangeListingVerification(
-  options?: MutationHookOptions<any, any>
+  options?: MutationHookOptions<any, any>,
 ) {
   return useMutation(CHANGE_LISTING_VERIFICATION, {
     ...options,

@@ -1,9 +1,16 @@
-import Poll from "@/components/polls/polls";
-import { By } from "@/components/polls/ts-types";
+"use client";
+
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
 import React from "react";
+import PollsAnalytics from "@/components/polls/dashboard/analytics";
 
-const page = () => {
-  return <Poll by={By.ALL} />;
-};
+function PollsAnalyticsPage() {
+  return <PollsAnalytics />;
+}
 
-export default page;
+export default withSubscriptionCheck(
+  withModulePermission(PollsAnalyticsPage, "POLLS", "canRead"),
+  "polls"
+);

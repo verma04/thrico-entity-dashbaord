@@ -12,6 +12,7 @@ import {
   DropResult,
 } from "@hello-pangea/dnd";
 import { cn } from "@/lib/utils";
+import { ImageUploadWithCrop } from "@/components/ui/image-upload-with-crop";
 
 interface MemberSpotlightSettingsProps {
   content: any;
@@ -32,10 +33,12 @@ export const MemberSpotlightSettings = ({
       {
         name: "",
         role: "",
-        bio: "",
+        quote: "",
         image: "",
-        achievements: "",
-        social: { linkedin: "", twitter: "", email: "" },
+        location: "",
+        memberSince: "",
+        title: "", // Professional title or achievement
+        link: "",
       },
     ];
     onChange({ members: newMembers });
@@ -43,15 +46,8 @@ export const MemberSpotlightSettings = ({
 
   const updateMember = (index: number, field: string, value: any) => {
     const newMembers = [...members];
-    if (field.includes(".")) {
-      const [parent, child] = field.split(".");
-      newMembers[index] = {
-        ...newMembers[index],
-        [parent]: { ...newMembers[index][parent], [child]: value },
-      };
-    } else {
-      newMembers[index] = { ...newMembers[index], [field]: value };
-    }
+    // Simple top-level update since we flattened the structure mostly
+    newMembers[index] = { ...newMembers[index], [field]: value };
     onChange({ members: newMembers });
   };
 
@@ -110,95 +106,145 @@ export const MemberSpotlightSettings = ({
                       ref={provided.innerRef}
                       {...provided.draggableProps}
                       className={cn(
-                        "space-y-3 p-3 bg-muted/10 rounded border transition-shadow",
-                        snapshot.isDragging && "shadow-lg ring-2 ring-primary/20"
+                        "space-y-4 p-4 bg-muted/10 rounded border transition-shadow",
+                        snapshot.isDragging &&
+                          "shadow-lg ring-2 ring-primary/20"
                       )}
                     >
-                      <div className="flex justify-between items-center">
+                      <div className="flex justify-between items-center bg-muted/20 -m-4 mb-4 p-2 px-4 rounded-t">
                         <div className="flex items-center gap-2">
                           <div {...provided.dragHandleProps}>
                             <GripVertical className="h-4 w-4 text-muted-foreground/50 cursor-grab active:cursor-grabbing" />
                           </div>
-                          <span className="text-xs font-bold">Member {index + 1}</span>
+                          <span className="text-xs font-bold">
+                            Member {index + 1}
+                          </span>
                         </div>
                         <button
                           onClick={() => deleteMember(index)}
-                          className="text-red-500 hover:bg-red-50 p-1 rounded"
+                          className="text-red-500 hover:bg-red-50 p-1 rounded transition-colors"
                         >
                           <Trash2 className="h-3 w-3" />
                         </button>
                       </div>
 
-                      <div className="space-y-2">
-                        <Label className="text-[10px] text-muted-foreground">Name</Label>
-                        <Input
-                          value={member.name || ""}
-                          onChange={(e) => updateMember(index, "name", e.target.value)}
-                          placeholder="John Doe"
-                          className="h-8 text-xs"
+                      <div className="space-y-4">
+                        <ImageUploadWithCrop
+                          label="Member Photo"
+                          currentImage={member.image}
+                          onImageUpdate={(url) =>
+                            updateMember(index, "image", url)
+                          }
+                          aspectRatio={1}
+                          circularCrop={true}
+                          recommendedWidth={400}
+                          recommendedHeight={400}
                         />
-                      </div>
 
-                      <div className="space-y-2">
-                        <Label className="text-[10px] text-muted-foreground">Role/Title</Label>
-                        <Input
-                          value={member.role || ""}
-                          onChange={(e) => updateMember(index, "role", e.target.value)}
-                          placeholder="Community Leader"
-                          className="h-8 text-xs"
-                        />
-                      </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className="space-y-2">
+                            <Label className="text-[10px] text-muted-foreground">
+                              Name
+                            </Label>
+                            <Input
+                              value={member.name || ""}
+                              onChange={(e) =>
+                                updateMember(index, "name", e.target.value)
+                              }
+                              placeholder="John Doe"
+                              className="h-8 text-xs"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-[10px] text-muted-foreground">
+                              Role
+                            </Label>
+                            <Input
+                              value={member.role || ""}
+                              onChange={(e) =>
+                                updateMember(index, "role", e.target.value)
+                              }
+                              placeholder="Community Leader"
+                              className="h-8 text-xs"
+                            />
+                          </div>
+                        </div>
 
-                      <div className="space-y-2">
-                        <Label className="text-[10px] text-muted-foreground">Bio</Label>
-                        <Textarea
-                          value={member.bio || ""}
-                          onChange={(e) => updateMember(index, "bio", e.target.value)}
-                          placeholder="Brief biography..."
-                          className="text-xs min-h-[60px]"
-                          rows={3}
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label className="text-[10px] text-muted-foreground">Achievements</Label>
-                        <Textarea
-                          value={member.achievements || ""}
-                          onChange={(e) => updateMember(index, "achievements", e.target.value)}
-                          placeholder="Key achievements..."
-                          className="text-xs min-h-[50px]"
-                          rows={2}
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label className="text-[10px] text-muted-foreground">Image URL</Label>
-                        <Input
-                          value={member.image || ""}
-                          onChange={(e) => updateMember(index, "image", e.target.value)}
-                          placeholder="https://..."
-                          className="h-8 text-xs"
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-2">
                         <div className="space-y-2">
-                          <Label className="text-[10px] text-muted-foreground">LinkedIn</Label>
-                          <Input
-                            value={member.social?.linkedin || ""}
-                            onChange={(e) => updateMember(index, "social.linkedin", e.target.value)}
-                            placeholder="linkedin.com/in/..."
-                            className="h-8 text-xs"
+                          <Label className="text-[10px] text-muted-foreground">
+                            Quote
+                          </Label>
+                          <Textarea
+                            value={member.quote || ""}
+                            onChange={(e) =>
+                              updateMember(index, "quote", e.target.value)
+                            }
+                            placeholder="The best place to be..."
+                            className="text-xs min-h-[60px]"
+                            rows={3}
                           />
                         </div>
-                        <div className="space-y-2">
-                          <Label className="text-[10px] text-muted-foreground">Twitter</Label>
-                          <Input
-                            value={member.social?.twitter || ""}
-                            onChange={(e) => updateMember(index, "social.twitter", e.target.value)}
-                            placeholder="@username"
-                            className="h-8 text-xs"
-                          />
+
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className="space-y-2">
+                            <Label className="text-[10px] text-muted-foreground">
+                              Location
+                            </Label>
+                            <Input
+                              value={member.location || ""}
+                              onChange={(e) =>
+                                updateMember(index, "location", e.target.value)
+                              }
+                              placeholder="New York, USA"
+                              className="h-8 text-xs"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-[10px] text-muted-foreground">
+                              Member Since
+                            </Label>
+                            <Input
+                              value={member.memberSince || ""}
+                              onChange={(e) =>
+                                updateMember(
+                                  index,
+                                  "memberSince",
+                                  e.target.value
+                                )
+                              }
+                              placeholder="2023"
+                              className="h-8 text-xs"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className="space-y-2">
+                            <Label className="text-[10px] text-muted-foreground">
+                              Extra Title / Badge
+                            </Label>
+                            <Input
+                              value={member.title || ""}
+                              onChange={(e) =>
+                                updateMember(index, "title", e.target.value)
+                              }
+                              placeholder="Top Contributor"
+                              className="h-8 text-xs"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-[10px] text-muted-foreground">
+                              Profile Link
+                            </Label>
+                            <Input
+                              value={member.link || ""}
+                              onChange={(e) =>
+                                updateMember(index, "link", e.target.value)
+                              }
+                              placeholder="https://..."
+                              className="h-8 text-xs"
+                            />
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -211,9 +257,15 @@ export const MemberSpotlightSettings = ({
         </Droppable>
 
         {members.length === 0 && (
-          <p className="text-xs text-muted-foreground text-center py-4">
-            No members yet. Click "Add Member" to create one.
-          </p>
+          <div className="text-center py-8 border-2 border-dashed rounded-xl bg-muted/50">
+            <p className="text-sm text-muted-foreground mb-2">
+              No members featured yet
+            </p>
+            <Button size="sm" variant="secondary" onClick={addMember}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Your First Member
+            </Button>
+          </div>
         )}
       </div>
     </DragDropContext>

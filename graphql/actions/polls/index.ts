@@ -1,3 +1,36 @@
+import { GET_POLL_STATS } from "@/graphql/quries/polls";
+import { DateRangeInput, TimeRange } from "../dashbaord/dashboard-quries";
+export { TimeRange };
+export type { DateRangeInput };
+
+export interface PollStats {
+  totalPolls: number;
+  activePolls: number;
+  votes: number;
+  engagementRate: number;
+  totalPollsChange: number;
+  activePollsChange: number;
+  votesChange: number;
+  engagementRateChange: number;
+}
+
+export interface GetPollStatsResponse {
+  getPollStats: PollStats;
+}
+
+export const useGetPollStats = (
+  timeRange?: TimeRange,
+  dateRange?: DateRangeInput,
+  options?: any,
+) =>
+  useQuery<
+    GetPollStatsResponse,
+    { timeRange?: TimeRange; dateRange?: DateRangeInput }
+  >(GET_POLL_STATS, {
+    variables: { timeRange, dateRange },
+    ...options,
+  });
+
 import { useMutation, useQuery } from "@apollo/client";
 import {
   ADD_POOL,

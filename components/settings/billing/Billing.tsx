@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -9,169 +8,257 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal } from "lucide-react";
-import { useGetAllEntityInvoice } from "../../../graphql/actions";
-import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import {
+  Receipt,
+  FileText,
+  Download,
+  MoreHorizontal,
+  Calendar,
+  CreditCard,
+  ExternalLink,
+  MapPin,
+} from "lucide-react";
+import { useGetAllEntityInvoice } from "../../../graphql/actions";
+import BillingDetailsForm from "../general/billing-details-form";
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import {
+  AdminTable,
+  AdminStatusBadge,
+} from "@/components/shared/admin-table/admin-table";
+import moment from "moment";
 
 interface BillingRecord {
-  key: string;
+  id: string;
   date: string;
-  description: string | React.ReactElement;
+  description: string;
   amount: string;
   status: string;
+  url?: string;
+  planName: string;
+  currency: string;
+  rawAmount: number;
 }
 
 export default function Billing() {
-  const { data, loading, error } = useGetAllEntityInvoice();
+  const { data, loading, error, refetch } = useGetAllEntityInvoice();
 
-  // Transform API data to table format
-  const invoiceData: BillingRecord[] =
-    data?.getAllEntityInvoice?.map((inv, idx) => ({
-      key: inv.billingId || idx.toString(),
-      date: new Date(inv.createdAt).toLocaleDateString(undefined, {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      }),
-      description: inv.invoiceUrl ? (
-        <a
-          href={inv.invoiceUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-primary underline"
-        >
-          Invoice for {inv.planName}
-        </a>
-      ) : (
-        inv.notes || inv.planName
+  const invoiceData: BillingRecord[] = React.useMemo(() => {
+    return (
+      data?.getAllEntityInvoice?.map((inv, idx) => ({
+        id: inv.billingId || idx.toString(),
+        date: inv.createdAt,
+        description: inv.notes || `Invoice for ${inv.planName}`,
+        amount: `${inv.currency} ${inv.amount.toFixed(2)}`,
+        status: inv.status,
+        url: inv.invoiceUrl || undefined,
+        planName: inv.planName,
+        currency: inv.currency,
+        rawAmount: inv.amount,
+      })) || []
+    );
+  }, [data]);
+
+  const columns = [
+    {
+      key: "date",
+      header: "Date",
+      cell: (record: BillingRecord) => (
+        <div className="flex items-center gap-3">
+          <div className="h-8 w-8 rounded-lg bg-muted border border-border flex items-center justify-center shrink-0">
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-sm font-medium text-foreground leading-none">
+              {moment(record.date).format("MMM D, YYYY")}
+            </span>
+            <span className="text-[10px] text-muted-foreground mt-1">Invoiced</span>
+          </div>
+        </div>
       ),
-      amount: `${inv.currency} ${inv.amount.toFixed(2)}`,
-      status: inv.status,
-    })) || [];
+    },
+    {
+      key: "detail",
+      header: "Description",
+      cell: (record: BillingRecord) => (
+        <div className="flex items-center gap-3">
+          <div className="h-6 w-6 rounded bg-muted flex items-center justify-center shrink-0">
+            <FileText className="h-3.5 w-3.5 text-muted-foreground" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-sm font-medium text-foreground leading-tight">
+              {record.description}
+            </span>
+            <span className="text-[10px] text-muted-foreground uppercase mt-0.5">
+              {record.planName}
+            </span>
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "amount",
+      header: "Amount",
+      cell: (record: BillingRecord) => (
+        <div className="flex flex-col">
+          <span className="text-sm font-semibold text-foreground tabular-nums">
+            {record.amount}
+          </span>
+          <span className="text-[10px] text-muted-foreground">Total</span>
+        </div>
+      ),
+    },
+    {
+      key: "status",
+      header: "Status",
+      cell: (record: BillingRecord) => {
+        const status = record.status.toUpperCase();
+        const badgeStatus =
+          status === "PAID"
+            ? "APPROVED"
+            : status === "PENDING"
+              ? "PENDING"
+              : "BLOCKED";
+        return (
+          <AdminStatusBadge status={badgeStatus}>
+            {record.status}
+          </AdminStatusBadge>
+        );
+      },
+    },
+    {
+      key: "actions",
+      header: "",
+      headerClassName: "w-[50px]",
+      cell: (record: BillingRecord) => (
+        <div className="flex justify-end pr-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-all"
+              >
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              className="w-48 p-1 rounded-xl border-border shadow-lg"
+            >
+              {record.url ? (
+                <DropdownMenuItem
+                  className="gap-2 px-3 py-2 text-sm font-medium rounded-lg cursor-pointer"
+                  onClick={() => window.open(record.url, "_blank")}
+                >
+                  <Download className="h-4 w-4 opacity-70" /> Download PDF
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem className="gap-2 px-3 py-2 text-sm font-medium rounded-lg cursor-pointer">
+                  <ExternalLink className="h-4 w-4 opacity-70" /> View Receipt
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      ),
+    },
+  ];
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>Billing</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {loading ? (
-          <div className="space-y-4">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="flex items-center gap-4">
-                <Skeleton className="h-6 w-1/6" />
-                <Skeleton className="h-6 w-1/3" />
-                <Skeleton className="h-6 w-1/6" />
-                <Skeleton className="h-6 w-1/6" />
-                <Skeleton className="h-6 w-8" />
+    <EcosystemWrapper>
+      <EcosystemHeader
+        title="Billing History"
+        description="View your recent invoices and transaction history."
+        badgeText="Billing"
+        icon={Receipt}
+      />
+
+      <EcosystemActionBar shadow="none">
+        <EcosystemActionBar.Group>
+          <div className="flex items-center gap-2.5 text-xs text-muted-foreground px-1">
+            <CreditCard className="h-3.5 w-3.5" />
+            <span>Active Subscription</span>
+          </div>
+        </EcosystemActionBar.Group>
+
+        <EcosystemActionBar.Group align="right">
+          <EcosystemActionBar.Status active={invoiceData.length > 0}>
+            {invoiceData.length} Records
+          </EcosystemActionBar.Status>
+        </EcosystemActionBar.Group>
+      </EcosystemActionBar>
+
+      <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">
+        <div className="px-6 py-4 space-y-8">
+          <div className="max-w-4xl">
+            <SectionCard
+              icon={MapPin}
+              title="Billing Details"
+              description="Manage account type, tax information, and billing address for invoicing."
+            >
+              <div className="p-2">
+                <BillingDetailsForm />
               </div>
-            ))}
-            <div className="text-center text-muted-foreground">
-              Loading invoices...
+            </SectionCard>
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex items-start gap-4 p-4 rounded-2xl bg-muted/50 border border-border">
+              <div className="h-8 w-8 rounded-full bg-card flex items-center justify-center shadow-sm shrink-0 border border-border">
+                <Receipt className="h-4 w-4 text-muted-foreground" />
+              </div>
+              <p className="text-[12px] text-muted-foreground leading-relaxed">
+                Invoices are generated automatically at the end of each cycle.
+                Contact support if you need help with your receipts.
+              </p>
             </div>
+
+            <AdminTable
+              columns={columns}
+              data={invoiceData}
+              loading={loading}
+              keyExtractor={(r) => r.id}
+              emptyTitle="No invoices found"
+              emptyDescription="Your billing history will appear here once your first cycle is processed."
+            />
           </div>
-        ) : error ? (
-          <div className="text-destructive text-center py-8">
-            Error loading invoices
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead>
-                <tr className="border-b">
-                  <th className="py-2 px-3 text-left font-semibold w-1/6">
-                    Date
-                  </th>
-                  <th className="py-2 px-3 text-left font-semibold w-1/3">
-                    Description
-                  </th>
-                  <th className="py-2 px-3 text-left font-semibold w-1/6">
-                    Amount
-                  </th>
-                  <th className="py-2 px-3 text-left font-semibold w-1/6">
-                    Status
-                  </th>
-                  <th className="py-2 px-3 w-8"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {invoiceData.map((record, idx) => (
-                  <tr
-                    key={record.key}
-                    className={cn(
-                      idx % 2 === 0 ? "bg-muted/40" : "",
-                      "border-b last:border-0"
-                    )}
-                  >
-                    <td className="py-2 px-3">{record.date}</td>
-                    <td className="py-2 px-3">{record.description}</td>
-                    <td className="py-2 px-3">{record.amount}</td>
-                    <td className="py-2 px-3">
-                      <span
-                        className={cn(
-                          "font-medium",
-                          record.status === "paid"
-                            ? "text-green-600"
-                            : record.status === "pending"
-                            ? "text-yellow-600"
-                            : "text-red-600"
-                        )}
-                      >
-                        {record.status?.toUpperCase()}
-                      </span>
-                    </td>
-                    <td className="py-2 px-3">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                          >
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          {typeof record.description === "object" ? (
-                            <DropdownMenuItem
-                              onClick={() => {
-                                if (
-                                  React.isValidElement(record.description) &&
-                                  record.description.props?.href
-                                ) {
-                                  window.open(
-                                    record.description.props.href,
-                                    "_blank"
-                                  );
-                                }
-                              }}
-                            >
-                              Download Invoice
-                            </DropdownMenuItem>
-                          ) : (
-                            <DropdownMenuItem>View Details</DropdownMenuItem>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </td>
-                  </tr>
-                ))}
-                {invoiceData.length === 0 && (
-                  <tr>
-                    <td
-                      colSpan={5}
-                      className="py-8 text-center text-muted-foreground"
-                    >
-                      No invoices found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+        </div>
+      </EcosystemContainer>
+    </EcosystemWrapper>
+  );
+}
+
+function SectionCard({
+  icon: Icon,
+  title,
+  description,
+  children,
+}: {
+  icon: any;
+  title: string;
+  description: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-xl border border-border bg-card overflow-hidden">
+      <div className="flex items-start gap-3 px-5 py-4 border-b border-border bg-muted/30">
+        <div className="w-7 h-7 rounded-lg bg-muted border border-border flex items-center justify-center text-muted-foreground shrink-0 mt-0.5">
+          <Icon size={13} strokeWidth={2} />
+        </div>
+        <div>
+          <p className="text-[13.5px] font-semibold text-foreground leading-none">
+            {title}
+          </p>
+          <p className="mt-1 text-[12px] text-muted-foreground leading-snug">
+            {description}
+          </p>
+        </div>
+      </div>
+      <div className="p-5">{children}</div>
+    </div>
   );
 }

@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { useState } from "react"
+import { useState } from "react";
 import {
   type ColumnDef,
   flexRender,
@@ -10,19 +10,22 @@ import {
   getPaginationRowModel,
   type SortingState,
   useReactTable,
-} from "@tanstack/react-table"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react"
+} from "@tanstack/react-table";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
 
 interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[]
-  data: TData[]
+  columns: ColumnDef<TData, TValue>[];
+  data: TData[];
 }
 
-export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = useState<SortingState>([])
-  const [globalFilter, setGlobalFilter] = useState("")
+export function DataTable<TData, TValue>({
+  columns,
+  data,
+}: DataTableProps<TData, TValue>) {
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [globalFilter, setGlobalFilter] = useState("");
 
   const table = useReactTable({
     data,
@@ -37,7 +40,7 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
     },
     onSortingChange: setSorting,
     onGlobalFilterChange: setGlobalFilter,
-  })
+  });
 
   return (
     <div className="space-y-4">
@@ -52,10 +55,16 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id} className="border-b border-border bg-muted/40">
+              {table?.getHeaderGroups().map((headerGroup) => (
+                <tr
+                  key={headerGroup.id}
+                  className="border-b border-border bg-muted/40"
+                >
                   {headerGroup.headers.map((header) => (
-                    <th key={header.id} className="px-6 py-4 text-left font-semibold text-foreground">
+                    <th
+                      key={header.id}
+                      className="px-6 py-4 text-left font-semibold text-foreground"
+                    >
                       {header.isPlaceholder ? null : (
                         <div
                           className={
@@ -65,7 +74,10 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
                           }
                           onClick={header.column.getToggleSortingHandler()}
                         >
-                          {flexRender(header.column.columnDef.header, header.getContext())}
+                          {flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
                           {header.column.getCanSort() && (
                             <>
                               {{
@@ -84,11 +96,17 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
               ))}
             </thead>
             <tbody>
-              {table.getRowModel().rows.map((row) => (
-                <tr key={row.id} className="border-b border-border hover:bg-muted/30 transition-colors">
+              {(table.getRowModel()?.rows ?? []).map((row) => (
+                <tr
+                  key={row.id}
+                  className="border-b border-border hover:bg-muted/30 transition-colors"
+                >
                   {row.getVisibleCells().map((cell) => (
                     <td key={cell.id} className="px-6 py-4">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
                     </td>
                   ))}
                 </tr>
@@ -100,7 +118,8 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
 
       <div className="flex items-center justify-between gap-2">
         <div className="text-xs text-muted-foreground">
-          Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+          Page {table.getState().pagination.pageIndex + 1} of{" "}
+          {table.getPageCount()}
         </div>
         <div className="flex gap-2">
           <Button
@@ -111,11 +130,16 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
           >
             Previous
           </Button>
-          <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
             Next
           </Button>
         </div>
       </div>
     </div>
-  )
+  );
 }

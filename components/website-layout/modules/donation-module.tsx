@@ -1,6 +1,7 @@
 import React from "react";
 import { ModuleData } from "@/store/useWebsiteBuilderStore";
 import { ModuleContainer } from "./module-container";
+import { ModuleHeader } from "./module-header";
 
 interface DonationModuleProps {
   module: ModuleData;
@@ -13,7 +14,11 @@ export function DonationModule({ module, previewDevice }: DonationModuleProps) {
   return (
     <ModuleContainer
       containerSettings={content.containerSettings}
-      className={layout === "urgent-appeal" ? "bg-gradient-to-r from-red-500 to-orange-600 text-white border-y" : "bg-gradient-to-r from-green-500 to-teal-600 text-white border-y"}
+      className={
+        layout === "urgent-appeal"
+          ? "bg-gradient-to-r from-red-500 to-orange-600 text-white border-y"
+          : "bg-gradient-to-r from-green-500 to-teal-600 text-white border-y"
+      }
     >
       <div className="text-center">
         {/* Campaign Style Layout */}
@@ -22,13 +27,20 @@ export function DonationModule({ module, previewDevice }: DonationModuleProps) {
             <div className="w-16 h-16 bg-white/20 rounded-full mx-auto mb-6 flex items-center justify-center text-2xl">
               💝
             </div>
-            <h2 className="text-2xl font-bold mb-4">
-              {content.title || "Support Our Mission"}
-            </h2>
-            <p className="mb-8 opacity-90 text-lg">
-              {content.description ||
-                "Your contribution helps us continue our work"}
-            </p>
+            <ModuleHeader
+              title={content.title || "Support Our Mission"}
+              description={
+                content.description ||
+                "Your contribution helps us continue our work"
+              }
+              alignment="center"
+              titleClassName="text-2xl font-bold mb-4 text-white"
+              descriptionClassName="mb-8 opacity-90 text-lg text-white"
+              titleColor={content.titleColor}
+              descriptionColor={content.descriptionColor}
+              hideTitle={content.hideTitle}
+              hideDescription={content.hideDescription}
+            />
             <div className="flex justify-center gap-4 mb-8">
               {["$10", "$25", "$50", "$100"].map((amount) => (
                 <button
@@ -51,9 +63,13 @@ export function DonationModule({ module, previewDevice }: DonationModuleProps) {
         {/* Progress Goal Layout */}
         {layout === "progress-goal" && (
           <>
-            <h2 className="text-2xl font-bold mb-4">
-              {content.title || "Help Us Reach Our Goal"}
-            </h2>
+            <ModuleHeader
+              title={content.title || "Help Us Reach Our Goal"}
+              alignment="center"
+              titleClassName="text-2xl font-bold mb-4 text-white"
+              titleColor={content.titleColor}
+              hideTitle={content.hideTitle}
+            />
             <div className="bg-white/20 rounded-xl p-6 mb-6">
               <div className="flex justify-between text-sm mb-2">
                 <span>Raised: $75,000</span>
@@ -102,9 +118,13 @@ export function DonationModule({ module, previewDevice }: DonationModuleProps) {
             <div className="w-20 h-20 bg-white/20 rounded-full mx-auto mb-6 flex items-center justify-center text-3xl">
               🌟
             </div>
-            <h2 className="text-2xl font-bold mb-6">
-              {content.title || "Your Impact Matters"}
-            </h2>
+            <ModuleHeader
+              title={content.title || "Your Impact Matters"}
+              alignment="center"
+              titleClassName="text-2xl font-bold mb-6 text-white"
+              titleColor={content.titleColor}
+              hideTitle={content.hideTitle}
+            />
             <div className="bg-white/10 rounded-xl p-6 mb-8">
               <div className="grid md:grid-cols-3 gap-6 text-center">
                 <div>
@@ -153,13 +173,20 @@ export function DonationModule({ module, previewDevice }: DonationModuleProps) {
             <span className="bg-red-700 text-white text-sm px-4 py-1 rounded-full font-bold mb-4 inline-block">
               URGENT APPEAL
             </span>
-            <h2 className="text-2xl font-bold mb-4">
-              {content.title || "Emergency Support Needed"}
-            </h2>
-            <p className="text-lg opacity-90 mb-6">
-              {content.description ||
-                "Time-sensitive situation requiring immediate community support."}
-            </p>
+            <ModuleHeader
+              title={content.title || "Emergency Support Needed"}
+              description={
+                content.description ||
+                "Time-sensitive situation requiring immediate community support."
+              }
+              alignment="center"
+              titleClassName="text-2xl font-bold mb-4 text-white"
+              descriptionClassName="text-lg opacity-90 mb-6 text-white"
+              titleColor={content.titleColor}
+              descriptionColor={content.descriptionColor}
+              hideTitle={content.hideTitle}
+              hideDescription={content.hideDescription}
+            />
             <div className="bg-white/20 rounded-xl p-6 mb-6">
               <div className="grid md:grid-cols-2 gap-6 text-center">
                 <div>

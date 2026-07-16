@@ -1,32 +1,39 @@
 "use client";
 import { AppearanceSettings } from "@/components/settings/appearance";
-import { getEntityTheme } from "@/graphql/actions/theme";
+import { useGetEntityTheme } from "@/graphql/actions";
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { PaintBucket, Loader2, AlertCircle } from "lucide-react";
 
-import { Loader2 } from "lucide-react";
-
-function AppearancePage() {
-  const { data, loading, error } = getEntityTheme();
+export default function AppearancePage() {
+  const { data, loading, error } = useGetEntityTheme();
 
   return (
-    <main className="min-h-screen bg-background p-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold">Appearance</h1>
-          <p className="text-muted-foreground mt-2">
-            Customize your community&#39;s look and feel
-          </p>
-        </div>
+    <EcosystemWrapper>
+      <EcosystemHeader
+        title="Visual Identity"
+        description="Configure your community's visual language, theme tokens, and brand assets across all platforms."
+        breadcrumb="Interface & Branding"
+        icon={PaintBucket}
+        badgeText="Appearance"
+        showLiveIndicator={false}
+      />
 
+      <div className="flex-1 w-full">
         {loading && (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="animate-spin mr-2" size={24} />
-            <span>Loading appearance settings...</span>
+          <div className="flex flex-col items-center justify-center py-20 bg-muted/50 rounded-xl border border-border shadow-sm space-y-4">
+            <Loader2 className="animate-spin text-muted-foreground" size={20} />
+            <span className="font-medium text-muted-foreground text-[12px]">Synchronizing Theme Engine...</span>
           </div>
         )}
 
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
-            Error loading settings: {error.message}
+          <div className="flex items-start gap-3 px-4 py-4 rounded-xl border bg-destructive/10 border-destructive/20 shadow-sm">
+            <AlertCircle className="h-5 w-5 text-destructive shrink-0" />
+            <div>
+              <p className="text-[13px] font-semibold text-destructive">Theme Initialization Failed</p>
+              <p className="text-[12px] text-destructive/80 mt-1 max-w-lg">{error.message}</p>
+            </div>
           </div>
         )}
 
@@ -34,8 +41,6 @@ function AppearancePage() {
           <AppearanceSettings theme={data?.getEntityTheme || null} />
         )}
       </div>
-    </main>
+    </EcosystemWrapper>
   );
 }
-
-export default AppearancePage;

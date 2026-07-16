@@ -7,13 +7,10 @@ import {
   Draggable,
   type DropResult,
 } from "@hello-pangea/dnd";
-import { Home, Menu, User, GripVertical, Trash2, Puzzle } from "lucide-react";
+import { Home, Menu, User, GripVertical, X, Puzzle, Info } from "lucide-react";
 import * as LucideIcons from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { AlertCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export interface ModuleItem {
   id: string;
@@ -25,11 +22,11 @@ export interface ModuleItem {
   showInWebNavigation: boolean;
   isPopular: boolean;
   showInMobileNavigationSortNumber?: number;
+  customName?: string | null;
 }
 
 interface MobileNavigationProps {
   modules: ModuleItem[];
-  navigationColumns: any[];
   navigationModules: ModuleItem[];
   userRole: string;
   saving: boolean;
@@ -40,183 +37,197 @@ interface MobileNavigationProps {
 
 const getNavIcon = (icon: string | null) => {
   if (!icon || typeof icon !== "string" || !(icon in LucideIcons)) {
-    return <Puzzle className="h-5 w-5 text-primary" />;
+    return <Puzzle className="h-4 w-4 text-muted-foreground" />;
   }
   const IconComponent = (LucideIcons as any)[icon] as React.ElementType;
-  return <IconComponent className="h-5 w-5 text-primary" />;
+  return <IconComponent className="h-4 w-4 text-muted-foreground" />;
 };
 
 const MobileNavigation: React.FC<MobileNavigationProps> = ({
   modules,
-  navigationColumns,
   navigationModules,
   userRole,
-  saving,
-  saveChanges,
   onDragEnd,
   toggleNavigation,
 }) => {
-  const remainingSlots =
-    3 - modules.filter((m) => m.showInMobileNavigation).length;
+  const navCount = modules.filter((m) => m.showInMobileNavigation).length;
+  const remainingSlots = 3 - navCount;
 
   return (
-    <div className="space-y-6">
-      <Alert className="border-blue-200 bg-blue-50 text-foreground">
-        <AlertCircle className="h-4 w-4 text-blue-600" />
-        <AlertTitle className="text-blue-900 font-semibold">
-          Mobile Navigation Configuration
-        </AlertTitle>
-        <AlertDescription className="text-blue-800">
-          <div className="space-y-2 mt-2">
-            <p className="text-sm">
-              Home and Profile are fixed navigation items. You can select up to
-              3 additional modules to show in the navigation.
+    <div className="space-y-5">
+      {/* Info bar */}
+      <div className="flex items-start gap-2.5 px-4 py-3 bg-muted/50 border border-border rounded-lg">
+        <Info className="h-3.5 w-3.5 text-muted-foreground mt-0.5 shrink-0" />
+        <div className="space-y-0.5">
+          <p className="text-[12px] font-semibold text-foreground">
+            Home and Profile are fixed nav items. Select up to 3 additional modules.
+          </p>
+          <p className={cn(
+            "text-[11px] font-semibold",
+            remainingSlots === 0 ? "text-amber-600" : "text-muted-foreground"
+          )}>
+            {remainingSlots === 0
+              ? "All 3 slots filled"
+              : `${remainingSlots} slot${remainingSlots !== 1 ? "s" : ""} remaining`}
+          </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        {/* Preview panel */}
+        <div className="rounded-xl border border-border/80 bg-card shadow-sm overflow-hidden">
+          <div className="px-4 py-3 border-b border-border">
+            <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">
+              Preview
             </p>
-            <p
-              className={`font-semibold text-sm ${
-                remainingSlots === 0 ? "text-blue-900" : "text-blue-700"
-              }`}
-            >
-              {remainingSlots} slot{remainingSlots !== 1 ? "s" : ""} remaining
+            <p className="text-[13px] font-semibold text-foreground mt-0.5 leading-none">
+              Mobile Navigation Bar
             </p>
           </div>
-        </AlertDescription>
-      </Alert>
 
-      <div className="space-y-6">
-        <Card className="border border-slate-200 shadow-sm">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-base font-semibold">
-              Navigation Preview
-            </CardTitle>
-            <p className="text-sm text-muted-foreground mt-1">
-              How your navigation will appear on mobile devices
-            </p>
-          </CardHeader>
-          <CardContent>
-            <div className="bg-gradient-to-b from-slate-50 to-slate-100 rounded-xl p-6 border border-slate-200">
-              <div className="flex justify-between items-end gap-4 bg-white rounded-xl p-4 border border-slate-200 shadow-sm">
-                {/* Home */}
-                <div className="flex flex-col items-center gap-2">
-                  <div className="w-12 h-12 flex items-center justify-center rounded-lg bg-primary/10">
-                    <Home className="h-5 w-5 text-primary" />
-                  </div>
-                  <span className="text-xs font-medium text-slate-700">
-                    Home
-                  </span>
-                </div>
-
-                {navigationModules.map((module) => (
-                  <div
-                    key={module.id}
-                    className="flex flex-col items-center gap-2"
-                  >
-                    <div className="w-12 h-12 flex items-center justify-center rounded-lg bg-slate-100 border border-slate-200">
-                      {getNavIcon(module.icon)}
-                    </div>
-                    <span className="text-xs font-medium text-slate-700 text-center line-clamp-1">
-                      {module.name}
-                    </span>
-                  </div>
-                ))}
-
-                {/* Menu */}
-                <div className="flex flex-col items-center gap-2">
-                  <div className="w-12 h-12 flex items-center justify-center rounded-lg bg-slate-100 border border-slate-200">
-                    <Menu className="h-5 w-5 text-slate-600" />
-                  </div>
-                  <span className="text-xs font-medium text-slate-700">
-                    Menu
-                  </span>
-                </div>
-
-                {/* Profile */}
-                <div className="flex flex-col items-center gap-2">
-                  <div className="w-12 h-12 flex items-center justify-center rounded-lg bg-emerald-100 border border-emerald-200">
-                    <User className="h-5 w-5 text-emerald-700" />
-                  </div>
-                  <span className="text-xs font-medium text-slate-700">
-                    Profile
-                  </span>
+          <div className="p-4">
+            {/* Phone frame */}
+            <div className="bg-muted/50 rounded-xl border border-border p-3">
+              {/* Status bar sim */}
+              <div className="flex items-center justify-between px-2 pb-2 border-b border-border/60 mb-3">
+                <span className="text-[9px] font-semibold text-muted-foreground">09:41</span>
+                <div className="flex items-center gap-1">
+                  <div className="h-1.5 w-4 bg-slate-300 rounded-full" />
+                  <div className="h-1.5 w-1.5 bg-slate-300 rounded-full" />
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
 
-        <Card className="border border-slate-200 shadow-sm">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-base font-semibold">
-              Customize Navigation Order
-            </CardTitle>
-            <p className="text-sm text-muted-foreground mt-1">
-              Drag to reorder items in your navigation
+              {/* Nav bar */}
+              <div className="bg-card rounded-lg border border-border shadow-sm px-3 py-2.5 flex items-end justify-between gap-2">
+                {/* Fixed: Home */}
+                <NavItem label="Home" isActive>
+                  <Home className="h-4 w-4 text-foreground" />
+                </NavItem>
+
+                {/* Dynamic slots */}
+                {navigationModules.map((module) => (
+                  <NavItem key={module.id} label={module.customName ? `${module.customName} (${module.name})` : module.name}>
+                    {getNavIcon(module.icon)}
+                  </NavItem>
+                ))}
+
+                {/* Empty slots */}
+                {Array.from({ length: Math.max(0, 3 - navigationModules.length) }).map((_, i) => (
+                  <NavItem key={`empty-${i}`} label="—" isEmpty>
+                    <div className="h-4 w-4 rounded border border-dashed border-border" />
+                  </NavItem>
+                ))}
+
+                {/* Fixed: Menu */}
+                <NavItem label="Menu">
+                  <Menu className="h-4 w-4 text-muted-foreground" />
+                </NavItem>
+
+                {/* Fixed: Profile */}
+                <NavItem label="Profile">
+                  <User className="h-4 w-4 text-muted-foreground" />
+                </NavItem>
+              </div>
+
+              <p className="text-center text-[9px] text-muted-foreground font-medium mt-2 uppercase tracking-widest">
+                Mobile Preview
+              </p>
+            </div>
+
+            {/* Legend */}
+            <div className="flex items-center gap-4 mt-3 px-1">
+              <div className="flex items-center gap-1.5">
+                <div className="h-2 w-2 rounded-full bg-primary" />
+                <span className="text-[10px] text-muted-foreground">Active / Fixed</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="h-2 w-2 rounded-sm border border-dashed border-border" />
+                <span className="text-[10px] text-muted-foreground">Empty slot</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Drag-to-reorder panel */}
+        <div className="rounded-xl border border-border/80 bg-card shadow-sm overflow-hidden">
+          <div className="px-4 py-3 border-b border-border">
+            <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-widest">
+              Order
             </p>
-          </CardHeader>
-          <CardContent>
+            <p className="text-[13px] font-semibold text-foreground mt-0.5 leading-none">
+              Drag to reorder
+            </p>
+          </div>
+
+          <div className="p-4">
             <DragDropContext onDragEnd={onDragEnd}>
               <Droppable droppableId="nav-table">
                 {(provided, snapshot) => (
                   <div
                     ref={provided.innerRef}
                     {...provided.droppableProps}
-                    className="space-y-2"
+                    className={cn(
+                      "space-y-2 min-h-[120px] rounded-lg transition-colors",
+                      snapshot.isDraggingOver && "bg-muted/50"
+                    )}
                   >
                     {navigationModules.length === 0 ? (
-                      <div className="text-center py-12 text-muted-foreground">
-                        <Puzzle className="h-8 w-8 mx-auto mb-2 opacity-30" />
-                        <p className="text-sm">
-                          No items selected for navigation
+                      <div className="flex flex-col items-center justify-center h-28 text-muted-foreground">
+                        <Puzzle className="h-6 w-6 mb-2 opacity-20" />
+                        <p className="text-[12px]">No modules selected</p>
+                        <p className="text-[11px] text-muted-foreground mt-0.5">
+                          Enable modules in the Registry tab
                         </p>
                       </div>
                     ) : (
                       navigationModules.map((module, idx) => (
-                        <Draggable
-                          key={module.id}
-                          draggableId={module.id}
-                          index={idx}
-                        >
+                        <Draggable key={module.id} draggableId={module.id} index={idx}>
                           {(dragProvided, dragSnapshot) => (
                             <div
                               ref={dragProvided.innerRef}
                               {...dragProvided.draggableProps}
-                              className={`flex items-center gap-3 p-3 rounded-lg border transition-all duration-200 ${
+                              className={cn(
+                                "flex items-center gap-3 px-3 py-2.5 rounded-lg border transition-all duration-200",
                                 dragSnapshot.isDragging
-                                  ? "bg-primary/5 border-primary shadow-lg scale-102"
-                                  : "bg-slate-50 border-slate-200 hover:bg-slate-100"
-                              }`}
+                                  ? "bg-card border-border shadow-md"
+                                  : "bg-muted/50/80 border-border hover:border-border hover:bg-card"
+                              )}
                             >
+                              {/* Drag handle */}
                               <div
                                 {...dragProvided.dragHandleProps}
-                                className="cursor-grab active:cursor-grabbing text-slate-400 hover:text-slate-600 transition-colors"
+                                className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-muted-foreground transition-colors shrink-0"
                               >
                                 <GripVertical className="h-4 w-4" />
                               </div>
 
-                              <Badge
-                                variant="outline"
-                                className="w-6 h-6 flex items-center justify-center p-0 text-xs font-semibold bg-slate-100 text-slate-700 border-slate-200"
-                              >
+                              {/* Position number */}
+                              <span className="text-[10px] font-semibold text-muted-foreground w-4 text-center tabular-nums shrink-0">
                                 {idx + 1}
-                              </Badge>
+                              </span>
 
-                              <div className="flex-1 flex items-center gap-3">
-                                <div className="w-8 h-8 flex items-center justify-center rounded bg-slate-100">
+                              {/* Icon + name */}
+                              <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                                <div className="h-6 w-6 rounded-md bg-card border border-border/80 flex items-center justify-center shrink-0">
                                   {getNavIcon(module.icon)}
                                 </div>
-                                <span className="font-medium text-slate-900">
-                                  {module.name}
+                                <span className="text-[13px] font-medium text-foreground truncate flex items-baseline gap-1.5">
+                                  <span>{module.customName || module.name}</span>
+                                  {module.customName && (
+                                    <span className="text-[11px] text-muted-foreground font-normal">({module.name})</span>
+                                  )}
                                 </span>
                               </div>
 
+                              {/* Remove */}
                               <Button
                                 variant="ghost"
-                                size="sm"
+                                size="icon"
                                 onClick={() => toggleNavigation(module.id)}
                                 disabled={userRole === "directory"}
-                                className="text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                                className="h-6 w-6 rounded-md text-muted-foreground hover:text-red-500 hover:bg-red-50 transition-colors shrink-0"
                               >
-                                <Trash2 className="h-4 w-4" />
+                                <X className="h-3.5 w-3.5" />
                               </Button>
                             </div>
                           )}
@@ -228,22 +239,66 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
                 )}
               </Droppable>
             </DragDropContext>
-          </CardContent>
-        </Card>
-      </div>
 
-      {/* <div className="flex justify-end pt-4 border-t border-slate-200">
-        <Button
-          onClick={saveChanges}
-          disabled={userRole === "directory" || saving}
-          size="lg"
-          className="gap-2"
-        >
-          {saving ? "Saving..." : "Save Changes"}
-        </Button>
-      </div> */}
+            {/* Slot usage meter */}
+            <div className="mt-4 pt-3 border-t border-border flex items-center justify-between">
+              <span className="text-[11px] text-muted-foreground">Navigation slots</span>
+              <div className="flex items-center gap-1.5">
+                {[0, 1, 2].map((i) => (
+                  <div
+                    key={i}
+                    className={cn(
+                      "h-2 w-8 rounded-full transition-colors",
+                      i < navCount ? "bg-primary/80" : "bg-muted border border-border"
+                    )}
+                  />
+                ))}
+                <span className="text-[11px] font-semibold text-muted-foreground ml-1 tabular-nums">
+                  {navCount} / 3
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
+
+// Small helper sub-component for nav preview items
+function NavItem({
+  label,
+  children,
+  isActive,
+  isEmpty,
+}: {
+  label: string;
+  children: React.ReactNode;
+  isActive?: boolean;
+  isEmpty?: boolean;
+}) {
+  return (
+    <div className="flex flex-col items-center gap-1 min-w-0">
+      <div
+        className={cn(
+          "h-8 w-8 flex items-center justify-center rounded-lg",
+          isActive && "bg-primary",
+          !isActive && !isEmpty && "bg-muted",
+          isEmpty && "bg-transparent"
+        )}
+      >
+        {children}
+      </div>
+      <span
+        className={cn(
+          "text-[8px] font-semibold text-center leading-none max-w-[36px] truncate",
+          isEmpty ? "text-muted-foreground" : "text-muted-foreground"
+        )}
+      >
+        {label}
+      </span>
+    </div>
+  );
+}
 
 export default MobileNavigation;

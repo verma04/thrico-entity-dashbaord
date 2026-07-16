@@ -12,6 +12,7 @@ import moment from "moment";
 import type { FeedProps } from "./types";
 import UserAvatar from "../layout/user-avatar";
 import { useGetEntity } from "@/graphql/actions";
+import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
 
 const FeedUserDetails: React.FC<FeedProps> = ({
   user,
@@ -19,39 +20,87 @@ const FeedUserDetails: React.FC<FeedProps> = ({
   privacy,
   addedBy,
 }) => {
-  const { data, loading } = useGetEntity();
+  const { data } = useGetEntity();
+
+  const isEntity = addedBy === "ENTITY";
+  const displayName = isEntity ? data?.getEntity?.name : `${user?.firstName} ${user?.lastName}`;
+  const displayAvatar = isEntity ? data?.getEntity?.logo : user?.avatar;
+  const displayRole = isEntity ? "Community Management" : (user?.about?.currentPosition || "Community Member");
+
+  const hoverData = {
+    id: user?.id,
+    firstName: user?.firstName,
+    lastName: user?.lastName,
+    avatar: user?.avatar,
+    headline: user?.about?.currentPosition,
+  };
 
   return (
-    <div className="flex items-start gap-3 w-full">
-      <UserAvatar
-        size={48}
-        src={addedBy === "USER" ? user?.avatar : data?.getEntity?.logo}
-      />
-      <div className="flex-1">
-        <div className="font-semibold">
-          {addedBy === "USER" && (
-            <span>
-              {user?.firstName} {user?.lastName}
+    <div className="flex items-center gap-3.5 w-full">
+      <div className="relative shrink-0">
+        {!isEntity && user ? (
+          <UserProfileHoverCard user={hoverData}>
+            <div className="cursor-pointer">
+              <UserAvatar
+                size={42}
+                src={displayAvatar}
+                className="rounded-xl border border-border shadow-sm bg-card"
+              />
+            </div>
+          </UserProfileHoverCard>
+        ) : (
+          <>
+            <UserAvatar
+              size={42}
+              src={displayAvatar}
+              className="rounded-xl border border-border shadow-sm bg-card"
+            />
+            {isEntity && (
+              <span className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full bg-primary border-2 border-background flex items-center justify-center">
+                 <div className="h-1.5 w-1.5 rounded-full bg-primary-foreground animate-pulse" />
+              </span>
+            )}
+          </>
+        )}
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-x-2 gap-y-0.5">
+          {!isEntity && user ? (
+            <UserProfileHoverCard user={hoverData}>
+              <span className="font-bold text-[15px] text-foreground tracking-tight leading-none truncate cursor-pointer hover:underline">
+                {displayName}
+              </span>
+            </UserProfileHoverCard>
+          ) : (
+            <span className="font-bold text-[15px] text-foreground tracking-tight leading-none truncate">
+              {displayName}
             </span>
           )}
-          {addedBy === "ENTITY" && <span>{data?.getEntity?.name}</span>}
+          <div className="flex items-center gap-1.5">
+            <span className="hidden sm:inline text-muted-foreground/30 font-light select-none text-xs">•</span>
+            <span className="text-[12px] font-bold text-muted-foreground/60 uppercase tracking-widest leading-none">
+              {moment(createdAt).fromNow(true)} ago
+            </span>
+          </div>
         </div>
-        <div className="text-sm text-muted-foreground">
-          {user?.about?.currentPosition}
-        </div>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-          <span>{moment(createdAt).fromNow()}</span>
-          <TooltipProvider>
+        <div className="flex items-center gap-2 mt-1">
+          <p className="text-[13px] text-muted-foreground font-medium truncate max-w-[180px]">
+            {displayRole}
+          </p>
+          <div className="h-1 w-1 rounded-full bg-muted-foreground/30 shrink-0" />
+          <TooltipProvider delayDuration={0}>
             <Tooltip>
               <TooltipTrigger asChild>
-                {privacy === "PUBLIC" ? (
-                  <Globe className="h-4 w-4" />
-                ) : (
-                  <Lock className="h-4 w-4" />
-                )}
+                <div className="cursor-help flex items-center">
+                  {privacy === "PUBLIC" ? (
+                    <Globe className="h-3 w-3 text-muted-foreground/50 transition-colors hover:text-primary" />
+                  ) : (
+                    <Lock className="h-3 w-3 text-muted-foreground/50 transition-colors hover:text-amber-500" />
+                  )}
+                </div>
               </TooltipTrigger>
-              <TooltipContent>
-                {privacy === "PUBLIC" ? "Public" : "Private"}
+              <TooltipContent side="top" className="text-[10px] bg-zinc-900 border-none font-bold text-white uppercase tracking-widest px-2.5 py-1.5">
+                {privacy === "PUBLIC" ? "Public Ecosystem Insight" : "Restricted Connection Data"}
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>

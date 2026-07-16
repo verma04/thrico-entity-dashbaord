@@ -3,6 +3,7 @@
 import { ModuleData } from "@/store/useWebsiteBuilderStore";
 import { cn } from "@/lib/utils";
 import { Code, AlertTriangle } from "lucide-react";
+import { ModuleHeader } from "./module-header";
 
 interface EmbedBlockModuleProps {
   module: ModuleData;
@@ -23,20 +24,17 @@ export const EmbedBlockModule = ({
     <div className="p-4 sm:p-8 md:p-12 bg-gray-50 border-y">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        {(content.title || content.description) && (
-          <div className="text-center mb-6 sm:mb-8 px-4">
-            {content.title && (
-              <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">
-                {content.title}
-              </h2>
-            )}
-            {content.description && (
-              <p className="text-muted-foreground text-sm sm:text-base max-w-2xl mx-auto">
-                {content.description}
-              </p>
-            )}
-          </div>
-        )}
+        <ModuleHeader
+          title={content.title}
+          description={content.description}
+          alignment="center"
+          titleClassName="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4"
+          descriptionClassName="text-muted-foreground text-sm sm:text-base max-w-2xl mx-auto"
+          titleColor={content.titleColor}
+          descriptionColor={content.descriptionColor}
+          hideTitle={content.hideTitle}
+          hideDescription={content.hideDescription}
+        />
 
         {/* Embed Content */}
         {hasEmbedCode ? (

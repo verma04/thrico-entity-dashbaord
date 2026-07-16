@@ -1,0 +1,17 @@
+{
+  "TableCraft": {
+    "search": "Search...",
+    "noResults": "No results found.",
+    "rowsPerPage": "Rows per page",
+    "of": "of",
+    "page": "Page",
+    "filter": "Filter",
+    "columns": "Columns",
+    "export": "Export",
+    "selectAll": "Select all",
+    "selected": "selected",
+    "clearFilters": "Clear filters",
+    "previous": "Previous",
+    "next": "Next"
+  }
+}

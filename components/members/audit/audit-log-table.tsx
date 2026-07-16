@@ -1,189 +1,166 @@
-"use client"
+"use client";
 
-import {
-  type ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  getFilteredRowModel,
-  useReactTable,
-  type SortingState,
-} from "@tanstack/react-table"
-import { useState } from "react"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Input } from "@/components/ui/input"
-import { Eye } from "lucide-react"
+import React from "react";
+import { 
+  Eye, 
+  Terminal, 
+  User, 
+  ShieldCheck, 
+  ShieldAlert, 
+  Activity, 
+  Clock,
+  ExternalLink
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { AdminTable, AdminStatusBadge } from "@/components/shared/admin-table/admin-table";
+import { cn } from "@/lib/utils";
+import moment from "moment";
 
 interface AuditLog {
-  id: string
-  entity: { name: string; type: string }
-  action: string
-  status: string
-  performedBy: { name: string; role: string }
-  reason: string | null
-  createdAt: string
-}
-
-const getActionColor = (action: string) => {
-  switch (action) {
-    case "ADD":
-      return "bg-green-100 text-green-800"
-    case "REMOVE":
-      return "bg-red-100 text-red-800"
-    case "UPDATE":
-      return "bg-blue-100 text-blue-800"
-    default:
-      return "bg-gray-100 text-gray-800"
-  }
-}
-
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case "APPROVED":
-      return "bg-green-100 text-green-800"
-    case "REJECTED":
-      return "bg-red-100 text-red-800"
-    case "REQUESTED":
-      return "bg-yellow-100 text-yellow-800"
-    case "STATUS":
-      return "bg-blue-100 text-blue-800"
-    default:
-      return "bg-gray-100 text-gray-800"
-  }
+  id: string;
+  entity: { name: string; type: string };
+  action: string;
+  status: string;
+  performedBy: { name: string; role: string };
+  reason: string | null;
+  createdAt: string;
 }
 
 export function AuditLogTable({
   data,
   onViewDetails,
+  isLoading = false,
 }: {
-  data: AuditLog[]
-  onViewDetails?: (log: AuditLog) => void
+  data: AuditLog[];
+  onViewDetails?: (log: AuditLog) => void;
+  isLoading?: boolean;
 }) {
-  const [sorting, setSorting] = useState<SortingState>([{ id: "createdAt", desc: true }])
-  const [search, setSearch] = useState("")
-
-  const columns: ColumnDef<AuditLog>[] = [
+  const columns = [
     {
-      accessorKey: "createdAt",
-      header: "Date & Time",
-      cell: ({ row }) => (
-        <span className="text-sm">
-          {new Date(row.original.createdAt).toLocaleDateString()}{" "}
-          {new Date(row.original.createdAt).toLocaleTimeString()}
-        </span>
-      ),
-    },
-    {
-      accessorKey: "entity.name",
-      header: "Entity",
-      cell: ({ row }) => (
-        <div className="flex items-center gap-2">
-          <Badge variant="outline">{row.original.entity.type}</Badge>
-          <span className="text-sm">{row.original.entity.name}</span>
+      key: "createdAt",
+      header: "Timestamp",
+      cell: (log: AuditLog) => (
+        <div className="flex flex-col">
+          <div className="flex items-center gap-2">
+            <Clock className="h-3 w-3 text-muted-foreground" />
+            <span className="text-sm font-bold text-foreground">
+              {moment(log.createdAt).format("MMM D, YYYY")}
+            </span>
+          </div>
+          <span className="text-[10px] text-muted-foreground font-medium ml-5">
+            {moment(log.createdAt).format("HH:mm:ss [UTC]")}
+          </span>
         </div>
       ),
     },
     {
-      accessorKey: "action",
-      header: "Action",
-      cell: ({ row }) => <Badge className={getActionColor(row.original.action)}>{row.original.action}</Badge>,
-    },
-    {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }) => <Badge className={getStatusColor(row.original.status)}>{row.original.status}</Badge>,
-    },
-    {
-      accessorKey: "performedBy.name",
-      header: "Performed By",
-      cell: ({ row }) => (
-        <div className="text-sm">
-          <p className="font-medium">{row.original.performedBy.name}</p>
-          <p className="text-xs text-muted-foreground">{row.original.performedBy.role}</p>
+      key: "entity",
+      header: "Target Entity",
+      cell: (log: AuditLog) => (
+        <div className="flex items-center gap-3">
+          <div className="h-8 w-8 rounded-lg bg-muted/50 border border-border flex items-center justify-center shrink-0">
+             <Terminal className="h-4 w-4 text-muted-foreground" />
+          </div>
+          <div className="flex flex-col">
+            <div className="flex items-center gap-1.5">
+               <span className="text-sm font-black text-foreground uppercase tracking-tight">
+                  {log.entity.name}
+               </span>
+               <span className="inline-flex h-4 items-center px-1.5 rounded-md text-[8px] font-black uppercase tracking-widest bg-muted text-muted-foreground border border-border/50">
+                  {log.entity.type}
+               </span>
+            </div>
+            {log.reason && (
+               <span className="text-[10px] text-muted-foreground font-medium truncate max-w-[200px] mt-0.5">
+                  {log.reason}
+               </span>
+            )}
+          </div>
         </div>
       ),
     },
     {
-      id: "actions",
-      cell: ({ row }) => (
-        <Button variant="ghost" size="sm" onClick={() => onViewDetails?.(row.original)}>
-          <Eye className="h-4 w-4" />
-        </Button>
+      key: "action",
+      header: "Action Logic",
+      cell: (log: AuditLog) => {
+        const action = log.action.toUpperCase();
+        const isDestructive = ["REMOVE", "DELETE", "REJECTED"].includes(action);
+        const isUpdate = ["UPDATE", "STATUS"].includes(action);
+        
+        return (
+          <div className="flex items-center gap-2">
+             <div className={cn(
+                "h-2 w-2 rounded-full",
+                isDestructive ? "bg-rose-500" : isUpdate ? "bg-amber-500" : "bg-emerald-500"
+             )} />
+             <span className="text-[11px] font-black uppercase tracking-widest text-foreground">
+                {log.action}
+             </span>
+          </div>
+        );
+      },
+    },
+    {
+      key: "status",
+      header: "Registry State",
+      cell: (log: AuditLog) => {
+        const status = log.status.toUpperCase();
+        const badgeStatus = status === "APPROVED" ? "APPROVED" : status === "REJECTED" ? "BLOCKED" : "PENDING";
+        return (
+          <AdminStatusBadge status={badgeStatus}>
+            {log.status}
+          </AdminStatusBadge>
+        );
+      },
+    },
+    {
+      key: "performedBy",
+      header: "Authority",
+      cell: (log: AuditLog) => (
+        <div className="flex items-center gap-3">
+          <div className="h-7 w-7 rounded-full bg-muted border border-border flex items-center justify-center shrink-0">
+             <User className="h-3.5 w-3.5 text-muted-foreground" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-xs font-bold text-foreground leading-none">
+              {log.performedBy.name}
+            </span>
+            <span className="text-[9px] text-muted-foreground font-black uppercase tracking-tighter mt-1">
+              {log.performedBy.role}
+            </span>
+          </div>
+        </div>
       ),
     },
-  ]
-
-  const table = useReactTable({
-    data,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onSortingChange: setSorting,
-    state: {
-      sorting,
-      globalFilter: search,
+    {
+      key: "actions",
+      header: "",
+      headerClassName: "w-[50px]",
+      cell: (log: AuditLog) => (
+        <div className="flex justify-end pr-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onViewDetails?.(log)}
+            className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted rounded-xl transition-all"
+          >
+            <ExternalLink className="h-4 w-4" />
+          </Button>
+        </div>
+      ),
     },
-    onGlobalFilterChange: setSearch,
-  })
+  ];
 
   return (
-    <div className="space-y-4">
-      <Input placeholder="Search logs..." value={search} onChange={(e) => setSearch(e.target.value)} />
-      <div className="rounded-lg border">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center text-muted-foreground">
-                  No logs found
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
-      <div className="flex items-center justify-between">
-        <div className="text-sm text-muted-foreground">
-          Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
-        </div>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            Previous
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
-            Next
-          </Button>
-        </div>
-      </div>
+    <div className="w-full">
+      <AdminTable
+        columns={columns}
+        data={data}
+        loading={isLoading}
+        keyExtractor={(l) => l.id}
+        emptyTitle="No Audit Signals"
+        emptyDescription="System tranquility detected. No activity logs have been recorded for this entity scope."
+      />
     </div>
-  )
+  );
 }

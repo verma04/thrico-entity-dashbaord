@@ -6,9 +6,9 @@ import PagesItemsLayout from "./pages-items-layout"
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-muted/50/30">
       <PagesItemsLayout>
-        <Card className="m-6 border-border/50">{children}</Card>
+        {children}
       </PagesItemsLayout>
     </div>
   )

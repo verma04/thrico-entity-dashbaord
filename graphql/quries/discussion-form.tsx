@@ -28,6 +28,7 @@ const forum = `
         firstName
         lastName
         id
+        avatar
       }
       verification {
         isVerifiedAt
@@ -161,10 +162,7 @@ export const GET_BY_ID_DISCUSSION_FORUM = gql`
     $input: inputGetDiscussionForumDetailsByID
   ) {
     getDiscussionForumDetailsByID(input: $input) {
-      upVotes
-      downVotes
-      isLikeByYou
-      voteType
+      ${forum}
       totalComments
     }
   }
@@ -187,3 +185,33 @@ mutation EditDiscussionForum($input: inputEditDiscussionForum) {
       ${forum}
   }
 }`;
+
+export const GET_DISCUSSION_ANALYTICS = gql`
+  query GetDiscussionAnalytics($timeRange: String, $dateRange: JSON) {
+    getDiscussionAnalytics(timeRange: $timeRange, dateRange: $dateRange) {
+      totalForums
+      activeThreads
+      dailyPosts
+      globalMembers
+      trend {
+        date
+        threads
+        posts
+      }
+      topicDistribution {
+        name
+        value
+        color
+      }
+      topForums {
+        id
+        name
+        slug
+        members
+        active
+        lastActivity
+        icon
+      }
+    }
+  }
+`;

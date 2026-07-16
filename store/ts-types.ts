@@ -1,6 +1,6 @@
 export type QuestionOption = string | { text: string; imageUrl: string };
 export interface Question {
-  id: string | number;
+  id: number | string;
   type:
     | "SHORT_TEXT"
     | "LONG_TEXT"
@@ -11,33 +11,43 @@ export interface Question {
     | "OPINION_SCALE"
     | "RATING"
     | "MULTIPLE_CHOICE"
-    | "ISOPTION"
     | "DROPDOWN"
+    | "ISOPTION"
     | "DATE"
     | "TIME"
-    | "YES-NO"
+    | "YES_NO"
     | "LEGAL";
+  question: string;
+  description?: string;
+  required: boolean;
 
-  question?: string;
-  required?: boolean;
-  options?: string[];
-  allowMultiple?: boolean;
+  // Specific properties
   maxLength?: number;
-  scale?: number;
-  ratingType?: string;
   min?: number;
   max?: number;
-  labels?: { start: string; end: string };
+  labels?: {
+    start: string;
+    end: string;
+  };
+  options?: string[];
+  allowMultiple?: boolean;
+  scale?: number;
+  ratingType?: "star" | "heart" | "thumb";
   text?: string;
-  statement?: string;
-  questions?: Question[];
-  fieldName?: string;
-  defaultValue?: string;
-  allowedTypes?: string[];
-  maxSize?: number;
 }
 
-export interface FormSettings {
+export interface ButtonTheme {
+  colorPrimary: string;
+  colorText: string;
+  colorBorder: string;
+  borderRadius: number;
+  defaultBg: string;
+  defaultColor: string;
+  defaultBorderColor: string;
+  fontSize: number;
+}
+
+export interface EntityTheme {
   primaryColor: string;
   secondaryColor: string;
   backgroundColor: string;
@@ -53,62 +63,31 @@ export interface FormSettings {
   fontWeight: string;
   boxShadow: string;
   hoverEffect: string;
-}
-
-export interface DuplicateQuestionFn {
-  (id: number): void;
-}
-
-export interface UpdateOptionFn {
-  (questionId: number | string, index: number, value: string): void;
-}
-
-export interface UpdateQuestionFn {
-  (id: string, field: string, value: any): void;
-}
-
-export interface UpdateFormSettingFn {
-  (key: keyof FormSettings, value: string | number): void;
-}
-
-export interface AddOptionFn {
-  (questionId: string | number): void;
-}
-
-export interface RemoveQuestionFn {
-  (id: string): void;
-}
-
-export interface AnswerMapFn {
-  (questionId: string | number, value: any): any;
-}
-
-export type ButtonTheme = {
-  colorPrimary?: string;
-  colorText?: string;
-  colorBorder?: string;
-  borderRadius?: number;
-  defaultBg?: string;
-  defaultColor?: string;
-  defaultBorderColor?: string;
-  fontSize?: number;
-};
-
-export type EntityTheme = {
-  primaryColor?: string;
-  secondaryColor?: string;
-  backgroundColor?: string;
-  textColor?: string;
-  buttonColor?: string;
-  borderRadius?: number;
-  borderWidth?: number;
-  borderStyle?: string;
-  borderColor?: string;
-  inputBackground?: string;
-  inputBorderColor?: string;
-  fontSize?: number;
-  fontWeight?: string;
-  boxShadow?: string;
-  hoverEffect?: string;
   Button?: ButtonTheme;
-};
+}
+
+export interface FormSettings extends EntityTheme {}
+
+export type DuplicateQuestionFn = (id: string | number) => void;
+export type RemoveQuestionFn = (id: string | number) => void;
+
+export type UpdateOptionFn = (
+  questionId: string | number,
+  index: number,
+  value: string,
+) => void;
+
+export type AddOptionFn = (questionId: string | number) => void;
+
+export type UpdateQuestionFn = (
+  id: string | number,
+  field: keyof Question,
+  value: any,
+) => void;
+
+export type UpdateFormSettingFn = (
+  key: keyof FormSettings,
+  value: string | number,
+) => void;
+
+export type AnswerMapFn = (questionId: string | number, value: any) => any;

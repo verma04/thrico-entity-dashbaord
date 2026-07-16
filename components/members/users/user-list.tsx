@@ -1,257 +1,317 @@
 "use client";
 
-import { useState } from "react";
-import {
-  type ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  getFilteredRowModel,
-  useReactTable,
-  type SortingState,
-  type ColumnFiltersState,
-} from "@tanstack/react-table";
+import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
 import UserActions from "./user-actions";
-import type { userStatus } from "@/types/user-types";
+import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
+import { safeFormat } from "@/lib/date-utils";
+import { Mail, MapPin, Smartphone, Users } from "lucide-react";
+import { UserDetail, useBulkChangeUserStatus } from "@/graphql/actions";
+import {
+  AdminTable,
+  AdminStatusBadge,
+  AdminVerifiedBadge,
+  AdminTableColumn,
+} from "@/components/shared/admin-table/admin-table";
 
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case "APPROVED":
-      return "bg-green-100 text-green-800";
-    case "PENDING":
-      return "bg-yellow-100 text-yellow-800";
-    case "BLOCKED":
-      return "bg-red-100 text-red-800";
-    case "REJECTED":
-      return "bg-purple-100 text-purple-800";
-    case "DISABLED":
-      return "bg-orange-100 text-orange-800";
-    default:
-      return "bg-gray-100 text-gray-800";
-  }
-};
+// ─────────────────────────────────────────────────────────────────────────────
+// Column definitions
+// ─────────────────────────────────────────────────────────────────────────────
 
-const getVerificationBadge = (verified: boolean) => {
-  return (
-    <Badge variant={verified ? "default" : "secondary"}>
-      {verified ? "Verified" : "Unverified"}
-    </Badge>
-  );
-};
+const columns: AdminTableColumn<UserDetail>[] = [
+  {
+    key: "member",
+    header: "Member",
+    cell: (row) => {
+      if (!row.user) return null;
 
-export function UserList({ users }: { users: userStatus[] }) {
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [searchValue, setSearchValue] = useState("");
-
-  const columns: ColumnDef<userStatus>[] = [
-    {
-      accessorKey: "verification",
-      header: "Verification",
-      cell: ({ row }) =>
-        getVerificationBadge(row.original.verification?.isVerified || false),
-    },
-    {
-      accessorKey: "user.firstName",
-      header: "User",
-      cell: ({ row }) => (
-        <div className="flex items-center gap-3">
-          <Avatar className="h-10 w-10">
-            <AvatarImage
-              src={`https://cdn.thrico.network/${row.original.user?.avatar}`}
-              alt={row.original.user?.firstName}
-            />
-            <AvatarFallback>
-              {row.original.user?.firstName?.[0]}
-              {row.original.user?.lastName?.[0]}
-            </AvatarFallback>
-          </Avatar>
-          <div>
-            <p className="font-medium">
-              {row.original.user?.firstName} {row.original.user?.lastName}
-            </p>
-            <p className="text-sm text-muted-foreground">
-              {row.original.user?.about?.currentPosition}
-            </p>
+      return (
+        <UserProfileHoverCard user={row.user}>
+          <div className="flex items-center gap-3 cursor-pointer group">
+            <Avatar className="h-9 w-9 rounded-lg border border-border/60 shrink-0">
+              <AvatarImage
+                src={
+                  row.user.avatar
+                    ? row.user.avatar.startsWith("http")
+                      ? row.user.avatar
+                      : `https://cdn.thrico.network/${row.user.avatar}`
+                    : ""
+                }
+                alt={`${row.user.firstName} ${row.user.lastName}`}
+              />
+              <AvatarFallback className="rounded-lg bg-muted text-muted-foreground text-xs font-semibold">
+                {row.user.firstName?.charAt(0)}
+                {row.user.lastName?.charAt(0)}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col min-w-0 max-w-[160px] sm:max-w-[220px] md:max-w-[280px]">
+              <p className="text-[13px] font-semibold text-foreground leading-tight truncate group-hover:text-primary transition-colors">
+                {row.user.firstName} {row.user.lastName}
+              </p>
+              <p className="text-[11px] text-muted-foreground leading-tight mt-0.5 truncate">
+                {row.user.about?.headline || "Community Member"}
+              </p>
+            </div>
           </div>
+        </UserProfileHoverCard>
+      );
+    },
+  },
+  {
+    key: "contact",
+    header: "Contact",
+    cell: (row) => (
+      <div className="flex flex-col gap-0.5">
+        <div className="flex items-center gap-1.5 text-[12px] text-foreground/80">
+          <Mail className="h-3 w-3 text-muted-foreground/50 shrink-0" />
+          <span className="truncate max-w-[180px]">{row.user?.email}</span>
         </div>
-      ),
-    },
-    {
-      accessorKey: "user.email",
-      header: "Contact",
-      cell: ({ row }) => (
-        <div className="space-y-1">
-          <p className="text-sm">{row.original.user?.email}</p>
-          <p className="text-xs text-muted-foreground">
-            +{row.original.user?.profile?.phone?.countryCode}-
-            {row.original.user?.profile?.phone?.phoneNumber}
-          </p>
-        </div>
-      ),
-    },
-    {
-      accessorKey: "user.location.name",
-      header: "Location",
-      cell: ({ row }) => (
-        <span className="text-sm text-muted-foreground">
-          {row.original.user?.location?.name}
+        {row.user?.profile?.phone?.phoneNumber && (
+          <span className="text-[11px] text-muted-foreground pl-4">
+            +{row.user?.profile?.phone?.countryCode}-
+            {row.user?.profile?.phone?.phoneNumber}
+          </span>
+        )}
+      </div>
+    ),
+  },
+  {
+    key: "location",
+    header: "Location",
+    cell: (row) => (
+      <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
+        <MapPin className="h-3 w-3 shrink-0" />
+        <span className="truncate max-w-[120px]">
+          {row.user?.location?.name || "—"}
         </span>
-      ),
-    },
-    {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }) => (
-        <Badge className={getStatusColor(row.original.status)}>
-          {row.original.status}
-        </Badge>
-      ),
-    },
-    {
-      accessorKey: "createdAt",
-      header: "Joined",
-      cell: ({ row }) => (
-        <span className="text-sm text-muted-foreground">
-          {row.original.user?.createdAt
-            ? new Date(row.original.user.createdAt).toLocaleDateString()
-            : "-"}
+      </div>
+    ),
+  },
+  {
+    key: "industries",
+    header: "Industries",
+    cell: (row) => (
+      <div className="flex flex-wrap gap-1 max-w-[200px]">
+        {row.industries && row.industries.length > 0 ? (
+          row.industries.slice(0, 2).map((ind: any) => (
+            <span
+              key={ind.id}
+              className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-tight bg-indigo-50 text-indigo-700 border border-indigo-100/50"
+            >
+              {ind.title}
+            </span>
+          ))
+        ) : (
+          <span className="text-[11px] text-muted-foreground/50">—</span>
+        )}
+        {row.industries && row.industries.length > 2 && (
+          <span className="text-[9px] font-bold text-muted-foreground bg-muted/50 px-1 rounded">
+            +{row.industries.length - 2}
+          </span>
+        )}
+      </div>
+    ),
+  },
+  {
+    key: "membershipTier",
+    header: "Tier",
+    cell: (row) => (
+      row.membershipTier ? (
+        <span
+          className="px-1.5 py-0.5 rounded text-[10px] font-bold"
+          style={{
+            backgroundColor: `${row.membershipTier.badgeColor}15`,
+            color: row.membershipTier.badgeColor,
+            border: `1px solid ${row.membershipTier.badgeColor}40`,
+          }}
+        >
+          {row.membershipTier.name}
         </span>
-      ),
-    },
-    {
-      accessorKey: "lastActive",
-      header: "Last Active",
-      cell: ({ row }) => (
-        <span className="text-sm text-muted-foreground">
-          {row.original.lastActive
-            ? new Date(row.original.lastActive).toLocaleDateString()
-            : "-"}
-        </span>
-      ),
-    },
-    {
-      id: "actions",
-      cell: ({ row }) => <UserActions user={row.original} />,
-    },
-  ];
+      ) : (
+        <span className="text-[11px] text-muted-foreground/50">—</span>
+      )
+    ),
+  },
+  {
+    key: "status",
+    header: "Status",
+    cell: (row) => <AdminStatusBadge status={row.status} />,
+  },
+  {
+    key: "verification",
+    header: "Verification",
+    cell: (row) => (
+      <AdminVerifiedBadge verified={!!row.verification?.isVerified} />
+    ),
+  },
+  {
+    key: "joined",
+    header: "Joined",
+    cell: (row) => (
+      <span className="text-[12px] text-muted-foreground whitespace-nowrap">
+        {safeFormat(row.user?.createdAt, "MMM d, yyyy", "—")}
+      </span>
+    ),
+  },
+  {
+    key: "referrer",
+    header: "Referrer",
+    cell: (row: any) => (
+      <div className="flex items-center gap-1.5 text-[12px] text-foreground/80">
+        {row.referrer?.user ? (
+          <UserProfileHoverCard user={row.referrer.user}>
+            <div className="flex items-center gap-2 cursor-pointer group">
+              <Avatar className="h-6 w-6 rounded-full border border-border/60 shrink-0">
+                <AvatarImage
+                  src={
+                    row.referrer.user.avatar
+                      ? row.referrer.user.avatar.startsWith("http")
+                        ? row.referrer.user.avatar
+                        : `https://cdn.thrico.network/${row.referrer.user.avatar}`
+                      : ""
+                  }
+                  alt={row.referrer.user.firstName}
+                />
+                <AvatarFallback className="rounded-full bg-muted text-muted-foreground text-[10px] font-semibold">
+                  {row.referrer.user.firstName?.charAt(0)}
+                  {row.referrer.user.lastName?.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
+              <span className="truncate max-w-[120px] group-hover:text-primary transition-colors">
+                {row.referrer.user.firstName} {row.referrer.user.lastName}
+              </span>
+            </div>
+          </UserProfileHoverCard>
+        ) : (
+          <span className="text-[11px] font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+            Direct Join
+          </span>
+        )}
+      </div>
+    ),
+  },
+  {
+    key: "lastSession",
+    header: "Last Session",
+    cell: (row) => (
+      <div className="flex flex-col gap-0.5">
+        {row.lastSession ? (
+          <>
+            <div className="flex items-center gap-1.5 text-[12px] text-foreground/80">
+              <Smartphone className="h-3 w-3 text-muted-foreground/50 shrink-0" />
+              <span className="truncate max-w-[150px] font-medium">
+                {row.lastSession.deviceName || "Unknown Device"}
+              </span>
+              {row.lastSession.isActive && (
+                <span
+                  className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"
+                  title="Active now"
+                />
+              )}
+            </div>
+            <span className="text-[11px] text-muted-foreground">
+              {safeFormat(row.lastSession.lastUsed, "MMM d, h:mm a", "Never")}
+            </span>
+          </>
+        ) : (
+          <span className="text-[11px] text-muted-foreground/50">—</span>
+        )}
+      </div>
+    ),
+  },
+  {
+    key: "actions",
+    header: "",
+    headerClassName: "w-12",
+    className: "text-right",
+    cell: (row) => <UserActions user={row} />,
+  },
+];
 
-  const table = useReactTable({
-    data: users,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    state: {
-      sorting,
-      columnFilters,
-      globalFilter: searchValue,
-    },
-    onGlobalFilterChange: setSearchValue,
+// ─────────────────────────────────────────────────────────────────────────────
+// Component
+// ─────────────────────────────────────────────────────────────────────────────
+
+export function UserList({ users }: { users: UserDetail[] }) {
+  const [rowSelection, setRowSelection] = React.useState<
+    Record<string, boolean>
+  >({});
+
+  const [bulkChangeStatus, { loading: bulkLoading }] = useBulkChangeUserStatus({
+    onCompleted: () => setRowSelection({}),
   });
 
+  const selectedRowsIds = Object.keys(rowSelection)
+    .filter((key) => rowSelection[key])
+    .map((key) => users[Number(key)]?.id)
+    .filter(Boolean);
+
+  const handleBulkAction = async (statusAction: string) => {
+    if (!selectedRowsIds.length) return;
+    try {
+      await bulkChangeStatus({
+        variables: {
+          input: {
+            action: statusAction,
+            reason: "Bulk action from dashboard",
+            userIds: selectedRowsIds,
+          },
+        },
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   return (
-    <div className="space-y-4">
-      <div className="flex gap-2">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search users..."
-            className="pl-10"
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-          />
-        </div>
-      </div>
-
-      <div className="rounded-lg border">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table?.getRowModel().rows &&
-            table.getRowModel().rows.length > 0 ? (
-              table?.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center text-muted-foreground"
-                >
-                  No users found
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
-
-      <div className="flex items-center justify-between">
-        <div className="text-sm text-muted-foreground">
-          Page {table.getState().pagination.pageIndex + 1} of{" "}
-          {table.getPageCount()}
-        </div>
-        <div className="flex gap-2">
+    <div className="space-y-3">
+      {/* Bulk Action Bar */}
+      {selectedRowsIds.length > 0 && (
+        <div className="flex items-center gap-2 p-2.5 bg-primary/5 border border-primary/10 rounded-xl animate-in fade-in slide-in-from-top-2">
+          <span className="text-xs font-semibold text-foreground px-2.5 py-1 bg-primary/10 rounded-lg">
+            {selectedRowsIds.length} selected
+          </span>
+          <div className="h-3.5 w-px bg-border mx-1" />
           <Button
-            variant="outline"
             size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
+            variant="outline"
+            className="h-7 text-xs font-medium border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+            onClick={() => handleBulkAction("APPROVE")}
+            disabled={bulkLoading}
           >
-            Previous
+            Approve
           </Button>
           <Button
-            variant="outline"
             size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
+            variant="outline"
+            className="h-7 text-xs font-medium border-rose-200 text-rose-700 hover:bg-rose-50"
+            onClick={() => handleBulkAction("BLOCK")}
+            disabled={bulkLoading}
           >
-            Next
+            Block
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-7 text-xs font-medium border-border text-muted-foreground hover:bg-muted"
+            onClick={() => handleBulkAction("REJECT")}
+            disabled={bulkLoading}
+          >
+            Reject
           </Button>
         </div>
-      </div>
+      )}
+
+      <AdminTable<UserDetail>
+        columns={columns}
+        data={users}
+        keyExtractor={(u) => u.id}
+        emptyIcon={Users}
+        emptyTitle="No members found"
+        emptyDescription="Try adjusting your search or filter criteria."
+        pageSize={100}
+      />
     </div>
   );
 }

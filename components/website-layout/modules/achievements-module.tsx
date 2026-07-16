@@ -4,167 +4,265 @@ import { ModuleData } from "@/store/useWebsiteBuilderStore";
 import { cn } from "@/lib/utils";
 import { ModuleHeader } from "./module-header";
 import { ModuleContainer } from "./module-container";
+import {
+  Trophy,
+  Award,
+  Medal,
+  Star,
+  Calendar,
+  ChevronRight,
+} from "lucide-react";
+import * as LucideIcons from "lucide-react";
 
 interface AchievementsModuleProps {
   module: ModuleData;
   previewDevice: string;
 }
 
+// Helper function to render icon from icon name or fallback
+const renderAchievementIcon = (
+  icon: string,
+  fallback: React.ReactNode,
+  className?: string
+) => {
+  if (!icon) return fallback;
+
+  // Check if it's a URL
+  if (
+    icon.startsWith("http") ||
+    icon.startsWith("/") ||
+    icon.startsWith("data:")
+  ) {
+    return (
+      <img
+        src={icon}
+        alt="Achievement"
+        className={cn("w-full h-full object-contain", className)}
+      />
+    );
+  }
+
+  // Otherwise assume it's a Lucide icon name
+  const IconComponent = (LucideIcons as any)[icon];
+  if (!IconComponent) return fallback;
+  return <IconComponent className={className} />;
+};
+
 export const AchievementsModule = ({
   module,
   previewDevice,
 }: AchievementsModuleProps) => {
   const { content, layout } = module;
+  const isMobile = previewDevice === "mobile";
   const achievements = content.achievements || [];
 
+  const title = content.title || "Our Achievements";
+  const description =
+    content.description || "Celebrating excellence and industry recognition.";
+
   return (
-    <ModuleContainer containerSettings={content.containerSettings} className="bg-white border-y">
+    <ModuleContainer
+      containerSettings={content.containerSettings}
+      className="bg-white"
+    >
       <ModuleHeader
-        title={content.title}
-        description={content.description}
+        title={title}
+        description={description}
         layoutSettings={content.layoutSettings}
         alignment="center"
+        titleColor={content.titleColor}
+        descriptionColor={content.descriptionColor}
+        hideTitle={content.hideTitle}
+        hideDescription={content.hideDescription}
       />
 
-        {achievements.length === 0 && (
-          <div className="text-center py-12 bg-gray-50 rounded-lg border">
-            <p className="text-muted-foreground">
-              No achievements added yet. Add achievements in the settings panel.
+      <div className="mt-16">
+        {achievements.length === 0 ? (
+          <div className="text-center py-20 bg-slate-50 rounded-4xl border border-dashed border-slate-200">
+            <Trophy className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+            <p className="text-slate-500 font-medium">
+              No achievements added yet.
             </p>
           </div>
-        )}
-
-        {/* Badge Grid Layout */}
-        {layout === "badge-grid" && achievements.length > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-            {achievements.map((achievement: any, idx: number) => (
+        ) : (
+          <>
+            {/* Badge Grid Layout */}
+            {layout === "badge-grid" && (
               <div
-                key={idx}
-                className="flex flex-col items-center p-6 bg-gray-50 rounded-lg border"
+                className={cn(
+                  "grid gap-8",
+                  isMobile ? "grid-cols-1" : "md:grid-cols-3 lg:grid-cols-4"
+                )}
               >
-                <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mb-3 overflow-hidden">
-                  {achievement.icon ? (
-                    <img src={achievement.icon} alt={achievement.title} className="w-full h-full object-contain" />
-                  ) : (
-                    "🏆"
-                  )}
-                </div>
-                <h3 className="font-semibold text-sm text-center">
-                  {achievement.title || `Award ${idx + 1}`}
-                </h3>
-                <p className="text-xs text-muted-foreground text-center mt-1">
-                  {achievement.date || achievement.category || "2024"}
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Award Wall Layout */}
-        {layout === "award-wall" && achievements.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {achievements.map((achievement: any, idx: number) => (
-              <div
-                key={idx}
-                className="bg-gradient-to-br from-yellow-50 to-amber-50 p-8 rounded-xl border border-yellow-200"
-              >
-                <div className="flex items-center gap-6">
-                  <div className="w-20 h-20 bg-yellow-200 rounded-xl flex items-center justify-center text-2xl overflow-hidden">
-                    {achievement.icon ? (
-                      <img src={achievement.icon} alt={achievement.title} className="w-full h-full object-contain p-2" />
-                    ) : (
-                      "🏅"
-                    )}
-                  </div>
-                  <div className="text-left">
-                    <h3 className="text-lg font-bold text-yellow-800">
-                      {achievement.title || `Excellence Award ${idx + 1}`}
+                {achievements.map((achievement: any, idx: number) => (
+                  <div
+                    key={idx}
+                    className="group relative p-8 rounded-4xl bg-slate-50 border border-slate-100 hover:bg-white hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 text-center"
+                  >
+                    <div className="mb-6 relative inline-block">
+                      <div className="w-20 h-20 rounded-3xl bg-white shadow-sm flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors duration-300 overflow-hidden p-4">
+                        {renderAchievementIcon(
+                          achievement.icon,
+                          <Award size={32} />
+                        )}
+                      </div>
+                      <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center text-[10px] font-black border-2 border-white shadow-lg">
+                        {idx + 1}
+                      </div>
+                    </div>
+                    <h3 className="text-lg font-bold text-slate-900 mb-2 truncate">
+                      {achievement.title || "Recognition Award"}
                     </h3>
-                    <p className="text-yellow-700 text-sm mb-2">
-                      {achievement.category || "Industry Recognition"} {achievement.date || "2024"}
+                    <p className="text-sm text-slate-500 font-medium">
+                      {achievement.date || achievement.category || "2024"}
                     </p>
-                    {achievement.description && (
-                      <p className="text-xs text-yellow-600">
-                        {achievement.description}
-                      </p>
-                    )}
                   </div>
-                </div>
+                ))}
               </div>
-            ))}
-          </div>
-        )}
+            )}
 
-        {/* Timeline Awards Layout */}
-        {layout === "timeline-awards" && achievements.length > 0 && (
-          <div className="relative">
-            <div className="absolute left-1/2 transform -translate-x-1/2 w-1 h-full bg-yellow-200" />
-            {achievements.map((achievement: any, idx: number) => (
+            {/* Award Wall Layout */}
+            {layout === "award-wall" && (
               <div
-                key={idx}
-                className="relative flex items-center mb-12 last:mb-0"
+                className={cn(
+                  "grid gap-8",
+                  isMobile ? "grid-cols-1" : "md:grid-cols-2"
+                )}
               >
-                <div className="w-1/2 pr-8 text-right">
-                  {idx % 2 === 0 && (
-                    <div className="bg-white p-4 rounded-lg border shadow-sm">
-                      <h3 className="font-semibold">{achievement.title || `Award ${idx + 1}`}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        {achievement.date || achievement.category || "2024"}
-                      </p>
-                      {achievement.description && (
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {achievement.description}
-                        </p>
-                      )}
+                {achievements.map((achievement: any, idx: number) => (
+                  <div
+                    key={idx}
+                    className="group flex gap-8 p-8 rounded-4xl bg-white border border-slate-100 hover:shadow-2xl transition-all duration-500 items-start overflow-hidden relative"
+                  >
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-500/5 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-700" />
+
+                    <div className="shrink-0">
+                      <div className="w-24 h-24 rounded-3xl bg-slate-900 flex items-center justify-center overflow-hidden p-4">
+                        {renderAchievementIcon(
+                          achievement.icon,
+                          <Medal size={40} className="text-yellow-400" />
+                        )}
+                      </div>
                     </div>
-                  )}
-                </div>
-                <div className="absolute left-1/2 transform -translate-x-1/2 w-6 h-6 bg-yellow-400 rounded-full border-4 border-white" />
-                <div className="w-1/2 pl-8">
-                  {idx % 2 === 1 && (
-                    <div className="bg-white p-4 rounded-lg border shadow-sm">
-                      <h3 className="font-semibold">{achievement.title || `Award ${idx + 1}`}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        {achievement.date || achievement.category || "2024"}
+                    <div className="relative z-10 flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                        <span className="text-xs font-bold uppercase tracking-widest text-slate-400">
+                          {achievement.category || "Achievement"}
+                        </span>
+                      </div>
+                      <h3 className="text-2xl font-black text-slate-900 mb-3 leading-tight">
+                        {achievement.title || "Industry Excellence Award"}
+                      </h3>
+                      <p className="text-slate-600 text-sm leading-relaxed mb-4">
+                        {achievement.description ||
+                          "For outstanding contribution and leadership in the industry."}
                       </p>
-                      {achievement.description && (
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {achievement.description}
-                        </p>
-                      )}
+                      <div className="flex items-center gap-2 text-slate-400 font-bold text-sm">
+                        <Calendar size={14} />
+                        <span>{achievement.date || "2024"}</span>
+                      </div>
                     </div>
-                  )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Timeline Awards Layout */}
+            {layout === "timeline-awards" && (
+              <div className="relative max-w-4xl mx-auto py-8">
+                {/* Center Line */}
+                <div className="absolute left-[23px] md:left-1/2 top-0 bottom-0 w-0.5 bg-slate-100 -translate-x-1/2" />
+
+                <div className="space-y-12">
+                  {achievements.map((achievement: any, idx: number) => {
+                    const isEven = idx % 2 === 0;
+                    return (
+                      <div
+                        key={idx}
+                        className={cn(
+                          "relative flex items-center w-full",
+                          isMobile
+                            ? "flex-row"
+                            : isEven
+                            ? "flex-row"
+                            : "flex-row-reverse"
+                        )}
+                      >
+                        {/* Content Card */}
+                        <div
+                          className={cn(
+                            "w-full md:w-[45%]",
+                            isMobile
+                              ? "pl-12"
+                              : isEven
+                              ? "text-right pr-12"
+                              : "text-left pl-12"
+                          )}
+                        >
+                          <div className="group p-6 rounded-3xl bg-white border border-slate-100 hover:shadow-xl transition-all duration-300">
+                            <span className="inline-block px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-wider mb-4">
+                              {achievement.date || "2024"}
+                            </span>
+                            <h3 className="text-lg font-bold text-slate-900 mb-2">
+                              {achievement.title || "Milestone Award"}
+                            </h3>
+                            <p className="text-sm text-slate-500 leading-relaxed">
+                              {achievement.description ||
+                                "Recognized for driving significant impact and growth."}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Timeline Pin */}
+                        <div className="absolute left-[23px] md:left-1/2 w-4 h-4 rounded-full bg-blue-600 border-4 border-white shadow-lg -translate-x-1/2 z-10" />
+
+                        {/* Spacer for desktop symmetry */}
+                        <div className="hidden md:block w-[45%]" />
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
-            ))}
-          </div>
-        )}
+            )}
 
-        {/* Carousel Badges Layout */}
-        {layout === "carousel-badges" && achievements.length > 0 && (
-          <div className="overflow-hidden">
-            <div className="flex gap-6 animate-pulse">
-              {achievements.map((achievement: any, idx: number) => (
-                <div
-                  key={idx}
-                  className="flex-shrink-0 w-32 h-40 bg-gradient-to-b from-yellow-100 to-yellow-200 rounded-xl border border-yellow-300 p-4 flex flex-col items-center justify-center"
-                >
-                  <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center mb-2 overflow-hidden">
-                    {achievement.icon ? (
-                      <img src={achievement.icon} alt={achievement.title} className="w-full h-full object-contain" />
-                    ) : (
-                      "🏆"
-                    )}
-                  </div>
-                  <h4 className="text-xs font-semibold text-center text-yellow-800">
-                    {achievement.title || `Award ${idx + 1}`}
-                  </h4>
-                  <p className="text-xs text-yellow-600">{achievement.date || "2024"}</p>
+            {/* Carousel Badges Layout */}
+            {layout === "carousel-badges" && (
+              <div className="relative group">
+                <div className="flex gap-6 overflow-x-auto pb-8 scrollbar-hide px-4 -mx-4">
+                  {achievements.map((achievement: any, idx: number) => (
+                    <div
+                      key={idx}
+                      className="shrink-0 w-64 p-6 rounded-[2.5rem] bg-slate-900 text-white hover:translate-y-[-8px] transition-all duration-500"
+                    >
+                      <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mb-6 overflow-hidden p-3">
+                        {renderAchievementIcon(
+                          achievement.icon,
+                          <Trophy size={32} className="text-blue-400" />
+                        )}
+                      </div>
+                      <div className="mb-4">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-blue-400">
+                          {achievement.category || "Winner"}
+                        </span>
+                        <h3 className="text-lg font-bold mt-1 line-clamp-2 leading-tight">
+                          {achievement.title || "Industry Leader"}
+                        </h3>
+                      </div>
+                      <div className="mt-8 flex items-center justify-between border-t border-white/10 pt-4">
+                        <span className="text-xs font-bold text-slate-400">
+                          {achievement.date || "2024"}
+                        </span>
+                        <ChevronRight className="w-4 h-4 text-blue-400" />
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </div>
+              </div>
+            )}
+          </>
         )}
+      </div>
     </ModuleContainer>
   );
 };

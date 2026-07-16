@@ -1,324 +1,241 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Card, Row, Col, Statistic, Select, Table, Divider, DatePicker } from "antd"
-import { ShopOutlined, UserOutlined, EyeOutlined, LikeOutlined } from "@ant-design/icons"
-import type { ColumnsType } from "antd/es/table"
-import { Line, Pie, Column } from "@ant-design/plots"
+import React, { useState, useEffect } from "react";
+import { Store, Users, Eye, ThumbsUp, Activity, Zap, ShieldCheck, RotateCcw, TrendingUp, BarChart3, Globe, ArrowRight, Timer, Sparkles, LayoutGrid } from "lucide-react";
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  Cell,
+  PieChart,
+  Pie,
+} from "recharts";
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { EcosystemKPI, EcosystemCard, EcosystemStatusIndicator } from "@/components/layout/ecosystem/ecosystem-analytics";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import Link from "next/link";
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { useModuleStore } from "@/store/useModuleStore";
 
-const { RangePicker } = DatePicker
+function ListingAnalytics() {
+  const moduleName = useModuleStore((state) => state.listingModuleName);
+  const singularName = useModuleStore((state) => state.listingSingularName);
+  const [timeRange, setTimeRange] = useState("month");
+  
+  // Prepare Mock Data
+  const kpis = [
+    { title: `Total ${moduleName}`, value: "1,024", trend: 12, icon: Store, color: "text-indigo-500", bg: "bg-indigo-500/10" },
+    { title: "Total Users", value: "256", trend: 8, icon: Users, color: "text-emerald-500", bg: "bg-emerald-500/10" },
+    { title: "Total Views", value: "125.4k", trend: 24, icon: Eye, color: "text-violet-500", bg: "bg-violet-500/10" },
+    { title: "Interactions", value: "8.4k", trend: 5, icon: ThumbsUp, color: "text-amber-500", bg: "bg-amber-500/10" },
+  ];
 
-interface CategoryData {
-  category: string
-  count: number
-  percentage: number
-}
+  const trendData = Array.from({ length: 15 }, (_, i) => ({
+    name: `D${i+1}`,
+    views: Math.floor(Math.random() * 1000) + 500,
+    listings: Math.floor(Math.random() * 20) + 10,
+  }));
 
-interface ConditionData {
-  condition: string
-  count: number
-  percentage: number
-}
-
-interface UserData {
-  username: string
-  listingsCount: number
-  viewsCount: number
-  likesCount: number
-}
-
-interface TrendData {
-  date: string
-  listings: number
-  views: number
-  likes: number
-}
-
-const Analytics = () => {
-  const [timeRange, setTimeRange] = useState("month")
-  const [categoryData, setCategoryData] = useState<CategoryData[]>([])
-  const [conditionData, setConditionData] = useState<ConditionData[]>([])
-  const [userData, setUserData] = useState<UserData[]>([])
-  const [trendData, setTrendData] = useState<TrendData[]>([])
-
-  // Mock data - in a real app, this would come from an API
-  useEffect(() => {
-    // Category data
-    const mockCategoryData: CategoryData[] = [
-      { category: "Vehicles", count: 245, percentage: 24.5 },
-      { category: "Electronics", count: 198, percentage: 19.8 },
-      { category: "Real Estate", count: 156, percentage: 15.6 },
-      { category: "Furniture", count: 132, percentage: 13.2 },
-      { category: "Clothing", count: 98, percentage: 9.8 },
-      { category: "Services", count: 87, percentage: 8.7 },
-      { category: "Other", count: 84, percentage: 8.4 },
-    ]
-
-    // Condition data
-    const mockConditionData: ConditionData[] = [
-      { condition: "New", count: 420, percentage: 42.0 },
-      { condition: "Used - Like New", count: 210, percentage: 21.0 },
-      { condition: "Used - Good", count: 180, percentage: 18.0 },
-      { condition: "Used - Fair", count: 110, percentage: 11.0 },
-      { condition: "Refurbished", count: 50, percentage: 5.0 },
-      { condition: "For parts", count: 30, percentage: 3.0 },
-    ]
-
-    // Top users data
-    const mockUserData: UserData[] = [
-      { username: "john_doe", listingsCount: 45, viewsCount: 12500, likesCount: 780 },
-      { username: "jane_smith", listingsCount: 38, viewsCount: 9800, likesCount: 620 },
-      { username: "robert_johnson", listingsCount: 32, viewsCount: 8200, likesCount: 540 },
-      { username: "emily_davis", listingsCount: 29, viewsCount: 7500, likesCount: 490 },
-      { username: "michael_wilson", listingsCount: 25, viewsCount: 6800, likesCount: 420 },
-      { username: "sarah_brown", listingsCount: 22, viewsCount: 5900, likesCount: 380 },
-      { username: "david_miller", listingsCount: 20, viewsCount: 5200, likesCount: 340 },
-      { username: "lisa_taylor", listingsCount: 18, viewsCount: 4800, likesCount: 310 },
-      { username: "james_anderson", listingsCount: 16, viewsCount: 4200, likesCount: 280 },
-      { username: "jennifer_thomas", listingsCount: 15, viewsCount: 3900, likesCount: 260 },
-    ]
-
-    // Trend data for the last 30 days
-    const mockTrendData: TrendData[] = Array.from({ length: 30 }, (_, i) => {
-      const date = new Date()
-      date.setDate(date.getDate() - (29 - i))
-
-      return {
-        date: date.toISOString().split("T")[0],
-        listings: Math.floor(Math.random() * 20) + 10,
-        views: Math.floor(Math.random() * 1000) + 500,
-        likes: Math.floor(Math.random() * 100) + 50,
-      }
-    })
-
-    setCategoryData(mockCategoryData)
-    setConditionData(mockConditionData)
-    setUserData(mockUserData)
-    setTrendData(mockTrendData)
-  }, [])
-
-  const categoryColumns: ColumnsType<CategoryData> = [
-    {
-      title: "Category",
-      dataIndex: "category",
-      key: "category",
-    },
-    {
-      title: "Listings",
-      dataIndex: "count",
-      key: "count",
-      sorter: (a, b) => a.count - b.count,
-      defaultSortOrder: "descend",
-    },
-    {
-      title: "Percentage",
-      dataIndex: "percentage",
-      key: "percentage",
-      render: (percentage) => `${percentage}%`,
-    },
-  ]
-
-  const conditionColumns: ColumnsType<ConditionData> = [
-    {
-      title: "Condition",
-      dataIndex: "condition",
-      key: "condition",
-    },
-    {
-      title: "Listings",
-      dataIndex: "count",
-      key: "count",
-      sorter: (a, b) => a.count - b.count,
-      defaultSortOrder: "descend",
-    },
-    {
-      title: "Percentage",
-      dataIndex: "percentage",
-      key: "percentage",
-      render: (percentage) => `${percentage}%`,
-    },
-  ]
-
-  const userColumns: ColumnsType<UserData> = [
-    {
-      title: "Username",
-      dataIndex: "username",
-      key: "username",
-    },
-    {
-      title: "Listings",
-      dataIndex: "listingsCount",
-      key: "listingsCount",
-      sorter: (a, b) => a.listingsCount - b.listingsCount,
-      defaultSortOrder: "descend",
-    },
-    {
-      title: "Views",
-      dataIndex: "viewsCount",
-      key: "viewsCount",
-      sorter: (a, b) => a.viewsCount - b.viewsCount,
-    },
-    {
-      title: "Likes",
-      dataIndex: "likesCount",
-      key: "likesCount",
-      sorter: (a, b) => a.likesCount - b.likesCount,
-    },
-  ]
-
-  // Calculate totals
-  const totalListings = categoryData.reduce((sum, item) => sum + item.count, 0)
-  const totalViews = userData.reduce((sum, item) => sum + item.viewsCount, 0)
-  const totalLikes = userData.reduce((sum, item) => sum + item.likesCount, 0)
-
-  // Prepare data for charts
-  const categoryPieData = categoryData.map((item) => ({
-    type: item.category,
-    value: item.count,
-  }))
-
-  const conditionPieData = conditionData.map((item) => ({
-    type: item.condition,
-    value: item.count,
-  }))
-
-  const lineConfig = {
-    data: trendData,
-    xField: "date",
-    yField: "views",
-    smooth: true,
-    point: {
-      size: 3,
-    },
-  }
-
-  const columnConfig = {
-    data: trendData,
-    xField: "date",
-    yField: "listings",
-    columnWidthRatio: 0.8,
-    label: {
-      position: "middle",
-    },
-  }
-
-  const categoryPieConfig = {
-    data: categoryPieData,
-    angleField: "value",
-    colorField: "type",
-    radius: 0.8,
-    label: {
-      type: "outer",
-    },
-    interactions: [{ type: "element-active" }],
-  }
-
-  const conditionPieConfig = {
-    data: conditionPieData,
-    angleField: "value",
-    colorField: "type",
-    radius: 0.8,
-    label: {
-      type: "outer",
-    },
-    interactions: [{ type: "element-active" }],
-  }
+  const categoryData = [
+    { name: "Vehicles", value: 45, color: "#6366f1" },
+    { name: "Electronics", value: 30, color: "#a78bfa" },
+    { name: "Real Estate", value: 15, color: "#10b981" },
+    { name: "Other", value: 10, color: "#f59e0b" }
+  ];
 
   return (
-    <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
-        <h1 style={{ margin: 0 }}>Analytics Dashboard</h1>
-        <div style={{ display: "flex", gap: 16 }}>
-          <Select
-            defaultValue="month"
-            style={{ width: 120 }}
-            onChange={setTimeRange}
-            options={[
-              { value: "week", label: "This Week" },
-              { value: "month", label: "This Month" },
-              { value: "quarter", label: "This Quarter" },
-              { value: "year", label: "This Year" },
-            ]}
-          />
-          <RangePicker />
+    <EcosystemWrapper anonymized-1="listing-analytics">
+      <EcosystemHeader
+        title={`${singularName} Analytics`}
+        badgeText="Overview"
+        description={`Monitor how your community is interacting with ${moduleName.toLowerCase()}. Track traffic, engagement, and category distribution.`}
+        icon={Store}
+      />
+
+      <EcosystemActionBar shadow="none">
+        <div className="flex items-center justify-between w-full">
+           <div className="flex items-center gap-6">
+              <EcosystemStatusIndicator status="active" label="Syncing live data..." />
+              <div className="h-4 w-px bg-muted" />
+              <div className="flex items-center gap-2 text-[10px] font-black text-muted-foreground uppercase tracking-widest italic">
+                 <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
+                 <span>Verified Secure</span>
+              </div>
+           </div>
+
+           <div className="flex items-center gap-3">
+              <Select value={timeRange} onValueChange={setTimeRange}>
+                <SelectTrigger className="h-10 w-[200px] rounded-xl border-border font-bold text-muted-foreground bg-card shadow-sm">
+                  <Timer className="h-4 w-4 mr-2 text-indigo-500" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="rounded-2xl border-border shadow-2xl">
+                  <SelectItem value="week" className="font-bold uppercase text-[10px]">Today</SelectItem>
+                  <SelectItem value="month" className="font-bold uppercase text-[10px]">Last 30 Days</SelectItem>
+                  <SelectItem value="quarter" className="font-bold uppercase text-[10px]">Last 3 Months</SelectItem>
+                </SelectContent>
+              </Select>
+              <div className="h-4 w-px bg-muted mx-1" />
+              <Button variant="outline" size="icon" className="h-10 w-10 text-muted-foreground hover:text-indigo-600 rounded-xl transition-all shadow-sm bg-card">
+                <RotateCcw className="h-4 w-4" />
+              </Button>
+           </div>
         </div>
-      </div>
+      </EcosystemActionBar>
 
-      <Row gutter={16}>
-        <Col span={6}>
-          <Card>
-            <Statistic title="Total Listings" value={totalListings} prefix={<ShopOutlined />} />
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card>
-            <Statistic title="Total Users" value={userData.length} prefix={<UserOutlined />} />
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card>
-            <Statistic title="Total Views" value={totalViews} prefix={<EyeOutlined />} />
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card>
-            <Statistic title="Total Likes" value={totalLikes} prefix={<LikeOutlined />} />
-          </Card>
-        </Col>
-      </Row>
+      <EcosystemContainer className="space-y-12 p-8 lg:p-12">
+        {/* KPI Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+           {kpis.map((kpi, i) => (
+             <EcosystemKPI key={i} {...kpi} trendLabel="Last Month" />
+           ))}
+        </div>
 
-      <Divider orientation="left">Listing Trends</Divider>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+           {/* Chart Section */}
+           <div className="lg:col-span-8">
+              <EcosystemCard 
+                title="Traffic Trends" 
+                description="Views and activity over time" 
+                icon={TrendingUp}
+                decorationIcon={Zap}
+              >
+                 <div className="h-[350px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={trendData}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 900, fill: '#94a3b8' }} dy={15} />
+                        <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 900, fill: '#94a3b8' }} />
+                        <Tooltip
+                          contentStyle={{ backgroundColor: "#0f172a", border: "none", borderRadius: "16px", boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)" }}
+                          itemStyle={{ color: "#fff", fontWeight: 900, textTransform: 'uppercase', fontSize: '10px' }}
+                          labelStyle={{ display: 'none' }}
+                        />
+                        <Bar dataKey="views" fill="#6366f1" radius={[8, 8, 0, 0]} barSize={40}>
+                           {trendData.map((entry, index) => (
+                             <Cell key={`cell-${index}`} fill={index % 2 === 0 ? '#6366f1' : '#a78bfa'} />
+                           ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                 </div>
+              </EcosystemCard>
+           </div>
 
-      <Row gutter={16}>
-        <Col span={12}>
-          <Card title="Daily Views">
-            <Line {...lineConfig} />
-          </Card>
-        </Col>
-        <Col span={12}>
-          <Card title="Daily New Listings">
-            <Column {...columnConfig} />
-          </Card>
-        </Col>
-      </Row>
+           {/* Distribution Section */}
+           <div className="lg:col-span-4">
+              <EcosystemCard 
+                title="Category Mix" 
+                description="Breakdown by type" 
+                icon={Sparkles}
+                decorationIcon={LayoutGrid}
+                className="min-h-fit"
+              >
+                 <div className="h-[250px] w-full mb-8 relative flex items-center justify-center">
+                    <ResponsiveContainer width="100%" height="100%">
+                       <PieChart>
+                         <Pie
+                           data={categoryData}
+                           cx="50%"
+                           cy="50%"
+                           innerRadius={70}
+                           outerRadius={100}
+                           paddingAngle={8}
+                           dataKey="value"
+                         >
+                           {categoryData.map((entry, index) => (
+                             <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
+                           ))}
+                         </Pie>
+                       </PieChart>
+                    </ResponsiveContainer>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                       <span className="text-3xl font-black text-foreground tracking-tighter">100%</span>
+                       <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest leading-none">Total</span>
+                    </div>
+                 </div>
+                 
+                 <div className="space-y-4">
+                    {categoryData.map((item, i) => (
+                      <div key={i} className="group/item flex items-center justify-between p-4 rounded-2xl bg-muted/50 border border-border hover:bg-card hover:shadow-lg transition-all duration-300">
+                         <div className="flex items-center gap-3">
+                            <div className="h-2.5 w-2.5 rounded-full shadow-lg" style={{ backgroundColor: item.color }} />
+                            <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">{item.name}</span>
+                         </div>
+                         <span className="text-sm font-black text-foreground">{item.value}%</span>
+                      </div>
+                    ))}
+                 </div>
+              </EcosystemCard>
+           </div>
+        </div>
 
-      <Divider orientation="left">Category & Condition Distribution</Divider>
+        {/* Master Registry Table */}
+        <div className="space-y-8">
+           <div className="flex items-center gap-3 px-1">
+              <div className="h-10 w-10 rounded-xl bg-primary text-primary-foreground flex items-center justify-center text-white">
+                 <LayoutGrid className="h-5 w-5" />
+              </div>
+              <div>
+                 <h2 className="text-xl font-black text-foreground tracking-tight italic uppercase">Top Creators</h2>
+                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.3em] leading-none mt-1">Activity by individual users</p>
+              </div>
+           </div>
 
-      <Row gutter={16}>
-        <Col span={12}>
-          <Card title="Listings by Category">
-            <Pie {...categoryPieConfig} />
-          </Card>
-        </Col>
-        <Col span={12}>
-          <Card title="Listings by Condition">
-            <Pie {...conditionPieConfig} />
-          </Card>
-        </Col>
-      </Row>
-
-      <Divider orientation="left">Top Categories</Divider>
-
-      <Row gutter={16}>
-        <Col span={12}>
-          <Card title="Top Categories">
-            <Table columns={categoryColumns} dataSource={categoryData} rowKey="category" pagination={false} />
-          </Card>
-        </Col>
-        <Col span={12}>
-          <Card title="Top Conditions">
-            <Table columns={conditionColumns} dataSource={conditionData} rowKey="condition" pagination={false} />
-          </Card>
-        </Col>
-      </Row>
-
-      <Divider orientation="left">Top Users</Divider>
-
-      <Card title="Top Users by Listings">
-        <Table columns={userColumns} dataSource={userData} rowKey="username" pagination={false} />
-      </Card>
-    </div>
-  )
+           <div className="p-1 rounded-[3.5rem] bg-muted/50 border border-border shadow-inner overflow-hidden">
+              <div className="bg-card rounded-[3.2rem] overflow-hidden">
+                <Table>
+                  <TableHeader className="bg-muted/30">
+                    <TableRow className="hover:bg-transparent border-border">
+                      <TableHead className="py-6 px-10 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">User</TableHead>
+                      <TableHead className="text-right py-6 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">{moduleName}</TableHead>
+                      <TableHead className="text-right py-6 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Views</TableHead>
+                      <TableHead className="text-right py-6 px-10 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">Likes</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {[
+                      { username: "john_doe", list: 45, views: "12.5k", likes: 780 },
+                      { username: "jane_smith", list: 38, views: "9.8k", likes: 620 },
+                      { username: "robert_v", list: 32, views: "8.2k", likes: 540 }
+                    ].map((user, i) => (
+                      <TableRow key={i} className="hover:bg-muted/50 transition-colors border-slate-50 group">
+                         <TableCell className="py-6 px-10">
+                            <div className="flex items-center gap-3">
+                               <div className="h-10 w-10 rounded-xl bg-muted flex items-center justify-center text-muted-foreground font-black text-xs group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                                  {user.username.charAt(0).toUpperCase()}
+                               </div>
+                               <span className="font-black text-foreground tracking-tighter uppercase">{user.username}</span>
+                            </div>
+                         </TableCell>
+                         <TableCell className="text-right font-black text-foreground">{user.list}</TableCell>
+                         <TableCell className="text-right font-black text-muted-foreground">{user.views}</TableCell>
+                         <TableCell className="text-right px-10">
+                            <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-tighter">{user.likes}</span>
+                         </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+           </div>
+        </div>
+      </EcosystemContainer>
+    </EcosystemWrapper>
+  );
 }
 
-export default Analytics
+export default withModulePermission(ListingAnalytics, "LISTING", "canRead");

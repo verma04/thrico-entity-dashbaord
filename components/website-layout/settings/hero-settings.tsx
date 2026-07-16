@@ -51,8 +51,8 @@ export const HeroSettings: React.FC<HeroSettingsProps> = ({
         </Label>
         <Textarea
           id="description "
-          value={content.description  || ""}
-          onChange={(e) => onChange({description : e.target.value })}
+          value={content.description || ""}
+          onChange={(e) => onChange({ description: e.target.value })}
           placeholder="Discover amazing opportunities and connect with like-minded people"
           className="text-xs min-h-[60px]"
           rows={3}
@@ -63,9 +63,7 @@ export const HeroSettings: React.FC<HeroSettingsProps> = ({
       <ImageUploadWithCrop
         label="Background Image"
         currentImage={content.image}
-        onImageUpdate={(imageUrl: string) =>
-          onChange({ image: imageUrl })
-        }
+        onImageUpdate={(imageUrl: string) => onChange({ image: imageUrl })}
         recommendedWidth={1920}
         recommendedHeight={1080}
         aspectRatio={16 / 9}
@@ -190,10 +188,10 @@ export const HeroSettings: React.FC<HeroSettingsProps> = ({
       </div>
 
       {/* Layout-specific fields */}
-      
+
       {/* CAROUSEL LAYOUT */}
       {layout === "carousel" && (
-        <div className="space-y-2 pt-2 border-t">
+        <div className="space-y-3 pt-2 border-t">
           <Label className="text-xs font-bold">Carousel Settings</Label>
           <div>
             <Label className="text-[10px] text-muted-foreground">
@@ -209,9 +207,162 @@ export const HeroSettings: React.FC<HeroSettingsProps> = ({
               max="10"
             />
           </div>
-          <p className="text-[9px] text-muted-foreground">
-            Carousel slides are managed in the carousel component
-          </p>
+
+          {/* Carousel Slides */}
+          <div className="space-y-2 pt-2">
+            <div className="flex justify-between items-center">
+              <Label className="text-xs font-bold">Carousel Slides</Label>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const slides = [...(content.slides || [])];
+                  slides.push({
+                    title: "",
+                    subtitle: "",
+                    image: "",
+                    ctaText: "",
+                    ctaLink: "",
+                  });
+                  onChange({ slides });
+                }}
+                className="h-7 text-xs"
+              >
+                <Plus className="h-3 w-3 mr-1" />
+                Add Slide
+              </Button>
+            </div>
+
+            <div className="space-y-3 max-h-[400px] overflow-y-auto">
+              {(content.slides || []).map((slide: any, index: number) => (
+                <div
+                  key={index}
+                  className="border rounded p-3 bg-muted/5 space-y-3"
+                >
+                  <div className="flex justify-between items-start">
+                    <Label className="text-xs font-bold">
+                      Slide {index + 1}
+                    </Label>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        const slides = [...(content.slides || [])];
+                        slides.splice(index, 1);
+                        onChange({ slides });
+                      }}
+                      className="h-6 w-6 p-0 hover:bg-destructive/10"
+                    >
+                      <Trash2 className="h-3 w-3 text-destructive" />
+                    </Button>
+                  </div>
+
+                  <div>
+                    <Label className="text-[10px] text-muted-foreground">
+                      Slide Title
+                    </Label>
+                    <Input
+                      value={slide.title || ""}
+                      onChange={(e) => {
+                        const slides = [...(content.slides || [])];
+                        slides[index] = {
+                          ...slides[index],
+                          title: e.target.value,
+                        };
+                        onChange({ slides });
+                      }}
+                      placeholder="Welcome to Our Community"
+                      className="h-8 text-xs"
+                    />
+                  </div>
+
+                  <div>
+                    <Label className="text-[10px] text-muted-foreground">
+                      Subtitle
+                    </Label>
+                    <Textarea
+                      value={slide.subtitle || ""}
+                      onChange={(e) => {
+                        const slides = [...(content.slides || [])];
+                        slides[index] = {
+                          ...slides[index],
+                          subtitle: e.target.value,
+                        };
+                        onChange({ slides });
+                      }}
+                      placeholder="Discover amazing opportunities..."
+                      className="text-xs min-h-[50px]"
+                      rows={2}
+                    />
+                  </div>
+
+                  <ImageUploadWithCrop
+                    label="Slide Background Image"
+                    currentImage={slide.image}
+                    onImageUpdate={(imageUrl: string) => {
+                      const slides = [...(content.slides || [])];
+                      slides[index] = {
+                        ...slides[index],
+                        image: imageUrl,
+                      };
+                      onChange({ slides });
+                    }}
+                    recommendedWidth={1920}
+                    recommendedHeight={1080}
+                    aspectRatio={16 / 9}
+                    maxFileSize={8}
+                  />
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <Label className="text-[10px] text-muted-foreground">
+                        CTA Button Text
+                      </Label>
+                      <Input
+                        value={slide.ctaText || ""}
+                        onChange={(e) => {
+                          const slides = [...(content.slides || [])];
+                          slides[index] = {
+                            ...slides[index],
+                            ctaText: e.target.value,
+                          };
+                          onChange({ slides });
+                        }}
+                        placeholder="Get Started"
+                        className="h-8 text-xs"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-[10px] text-muted-foreground">
+                        CTA Link
+                      </Label>
+                      <Input
+                        value={slide.ctaLink || ""}
+                        onChange={(e) => {
+                          const slides = [...(content.slides || [])];
+                          slides[index] = {
+                            ...slides[index],
+                            ctaLink: e.target.value,
+                          };
+                          onChange({ slides });
+                        }}
+                        placeholder="/signup"
+                        className="h-8 text-xs"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              {(content.slides || []).length === 0 && (
+                <p className="text-xs text-muted-foreground text-center py-4">
+                  No slides yet. Click "Add Slide" to create one.
+                </p>
+              )}
+            </div>
+          </div>
         </div>
       )}
 

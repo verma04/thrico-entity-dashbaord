@@ -32,3 +32,55 @@ export const ADD_PAGES = gql`
     }
   }
 `;
+
+export const GET_SEARCH_COMPANIES = gql`
+  query GetSearchCompanies($input: ClassificationSearchInput) {
+    getSearchCompanies(input: $input) {
+      edges {
+        node {
+          id
+          title
+        }
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+`;
+
+export const GET_SEARCH_JOB_TITLE = gql`
+  query GetSearchJobTitle($input: ClassificationSearchInput) {
+    getSearchJobTitle(input: $input) {
+      edges {
+        node {
+          id
+          title
+        }
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+`;
+
+export const GET_SEARCH_SKILLS = gql`
+  query GetSearchSkills($input: ClassificationSearchInput) {
+    getSearchSkills(input: $input) {
+      edges {
+        node {
+          id
+          title
+        }
+        cursor
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+`;

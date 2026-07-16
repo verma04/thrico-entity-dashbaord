@@ -11,7 +11,7 @@ const Logo = () => {
 
   if (src) {
     return (
-      <div className="relative w-[60px] h-[30px]">
+      <div className="relative w-[100px] h-[40px]">
         <Image
           alt={`Logo for ${name}`}
           src={src || "/placeholder.svg"}
@@ -23,7 +23,11 @@ const Logo = () => {
     );
   }
 
-  return <span className="text-lg font-bold text-foreground">{name}</span>;
+  return (
+    <span className="text-2xl font-black text-foreground tracking-tighter">
+      {name.toLowerCase()}
+    </span>
+  );
 };
 
 export default Logo;

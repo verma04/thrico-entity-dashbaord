@@ -25,10 +25,11 @@ import moment from "moment";
 
 import { useRazorpay } from "react-razorpay";
 
-import { useCheckEntitySubscription } from "@/graphql/actions";
+import { useCheckEntitySubscription, useGetUser } from "@/graphql/actions";
 import {
   useUpdateTrialToPackage,
   useVerifyRazorpayPayment,
+  useCountry,
 } from "@/graphql/actions/plan";
 import { useSubscriptionStore } from "@/store/subscriptionStore";
 
@@ -56,7 +57,7 @@ export default function BuyPlanPopUp({
   }
 
   const [billingCycle, setBillingCycle] = useState<BillingCycle>(
-    BillingCycle.Monthly
+    BillingCycle.Monthly,
   );
   const { showBuyPlanDialog, setShowBuyPlanDialog } = useSubscriptionStore();
 
@@ -64,6 +65,33 @@ export default function BuyPlanPopUp({
 
   const { Razorpay } = useRazorpay();
   const { refetch, loading: statusLoader } = useCheckEntitySubscription();
+  const { data: countryData } = useCountry();
+  const { data: userData } = useGetUser();
+  const user = userData?.getUser;
+
+  const country = countryData?.country;
+  const taxPercentage = country?.taxPercentage || 0;
+  const taxName = country?.taxName || "Tax";
+  const taxIncluded = country?.taxIncluded || false;
+
+  const basePrice =
+    billingCycle === "monthly"
+      ? activePackage?.monthlyPrice
+      : activePackage?.yearlyPrice;
+
+  // Tax calculation logic
+  let taxAmount = 0;
+  let subtotal = basePrice || 0;
+  let finalTotal = basePrice || 0;
+
+  if (taxIncluded) {
+    taxAmount = subtotal - subtotal / (1 + taxPercentage / 100);
+    subtotal = subtotal - taxAmount;
+    finalTotal = basePrice || 0;
+  } else {
+    taxAmount = subtotal * (taxPercentage / 100);
+    finalTotal = subtotal + taxAmount;
+  }
 
   // Inject global styles for Razorpay z-index
   useEffect(() => {
@@ -109,7 +137,7 @@ export default function BuyPlanPopUp({
       if (!order) return;
 
       const options = {
-        key: "rzp_test_AVIthfNy85rAR2",
+        key: "rzp_live_SiqzWXdijA6k6U",
         amount: order.amount,
         currency: order.currency,
         name: "Test Company",
@@ -128,9 +156,9 @@ export default function BuyPlanPopUp({
           setShowBuyPlanDialog(true);
         },
         prefill: {
-          name: "John Doe",
-          email: "john.doe@example.com",
-          contact: "9999999999",
+          name: `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim() || "User",
+          email: user?.email ?? "",
+          contact: user?.profile?.phone?.phoneNumber ?? "",
         },
         theme: { color: "#6C47FF" },
         modal: {
@@ -154,14 +182,14 @@ export default function BuyPlanPopUp({
         const razorpayContainer = document.querySelector(".razorpay-container");
         const razorpayBackdrop = document.querySelector(".razorpay-backdrop");
         const razorpayFrame = document.querySelector(
-          'iframe[src*="checkout.razorpay.com"]'
+          'iframe[src*="checkout.razorpay.com"]',
         );
 
         if (razorpayContainer) {
           (razorpayContainer as HTMLElement).style.setProperty(
             "z-index",
             "999999",
-            "important"
+            "important",
           );
           (razorpayContainer as HTMLElement).style.position = "fixed";
         }
@@ -169,7 +197,7 @@ export default function BuyPlanPopUp({
           (razorpayBackdrop as HTMLElement).style.setProperty(
             "z-index",
             "999998",
-            "important"
+            "important",
           );
           (razorpayBackdrop as HTMLElement).style.position = "fixed";
         }
@@ -177,13 +205,13 @@ export default function BuyPlanPopUp({
           (razorpayFrame as HTMLElement).style.setProperty(
             "z-index",
             "999999",
-            "important"
+            "important",
           );
         }
 
         // Also hide all dialog overlays temporarily
         const dialogOverlays = document.querySelectorAll(
-          "[data-radix-dialog-overlay]"
+          "[data-radix-dialog-overlay]",
         );
         dialogOverlays.forEach((overlay) => {
           (overlay as HTMLElement).style.display = "none";
@@ -374,9 +402,17 @@ export default function BuyPlanPopUp({
                   </span>
                   <span className="font-medium">
                     {activePackage?.currency}
-                    {billingCycle === "monthly"
-                      ? activePackage?.monthlyPrice
-                      : activePackage?.yearlyPrice}
+                    {subtotal.toFixed(2)}
+                  </span>
+                </div>
+
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">
+                    {taxName} ({taxPercentage}%{taxIncluded ? " Included" : ""})
+                  </span>
+                  <span className="font-medium text-primary">
+                    {activePackage?.currency}
+                    {taxAmount.toFixed(2)}
                   </span>
                 </div>
 
@@ -386,9 +422,7 @@ export default function BuyPlanPopUp({
                   <span className="font-medium">Total due today</span>
                   <span className="text-xl font-bold">
                     {activePackage?.currency}
-                    {billingCycle === "monthly"
-                      ? activePackage?.monthlyPrice
-                      : activePackage?.yearlyPrice}
+                    {finalTotal.toFixed(2)}
                   </span>
                 </div>
 
@@ -399,7 +433,7 @@ export default function BuyPlanPopUp({
                     {moment(
                       billingCycle === "monthly"
                         ? currentDate.clone().add(1, "month")
-                        : currentDate.clone().add(1, "year")
+                        : currentDate.clone().add(1, "year"),
                     ).format("MMM Do YYYY")}
                   </span>
                 </div>

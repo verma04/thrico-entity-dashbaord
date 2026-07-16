@@ -12,7 +12,7 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
 import React from "react";
-import { FormSettings, UpdateFormSettingFn } from "../../../store/ts-types";
+import { FormSettings, UpdateFormSettingFn } from "@/store/ts-types";
 
 type SettingsProps = {
   formSettings: FormSettings;
@@ -31,7 +31,7 @@ const Settings = ({ formSettings, updateFormSetting }: SettingsProps) => {
             <Label htmlFor="form-view-type">Form View Type</Label>
             <Select
               defaultValue="MULTI_STEP"
-              onValueChange={(value) => updateFormSetting("viewType", value)}
+              onValueChange={(value) => updateFormSetting("previewType", value)}
             >
               <SelectTrigger id="form-view-type">
                 <SelectValue />
@@ -47,14 +47,6 @@ const Settings = ({ formSettings, updateFormSetting }: SettingsProps) => {
             </Select>
             <p className="text-sm text-muted-foreground">
               Choose how respondents will view your form
-            </p>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="end-date">End Date (Optional)</Label>
-            <Input id="end-date" type="date" />
-            <p className="text-sm text-muted-foreground">
-              Set an end date for your form
             </p>
           </div>
         </CardContent>
@@ -330,7 +322,8 @@ const Settings = ({ formSettings, updateFormSetting }: SettingsProps) => {
                 }}
                 className="h-16"
                 style={{
-                  background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                  background:
+                    "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
                 }}
               >
                 Default
@@ -346,7 +339,8 @@ const Settings = ({ formSettings, updateFormSetting }: SettingsProps) => {
                 }}
                 className="h-16"
                 style={{
-                  background: "linear-gradient(135deg, #28a745 0%, #20c997 100%)",
+                  background:
+                    "linear-gradient(135deg, #28a745 0%, #20c997 100%)",
                 }}
               >
                 Nature
@@ -362,7 +356,8 @@ const Settings = ({ formSettings, updateFormSetting }: SettingsProps) => {
                 }}
                 className="h-16"
                 style={{
-                  background: "linear-gradient(135deg, #007bff 0%, #17a2b8 100%)",
+                  background:
+                    "linear-gradient(135deg, #007bff 0%, #17a2b8 100%)",
                 }}
               >
                 Ocean
@@ -378,7 +373,8 @@ const Settings = ({ formSettings, updateFormSetting }: SettingsProps) => {
                 }}
                 className="h-16"
                 style={{
-                  background: "linear-gradient(135deg, #e83e8c 0%, #fd7e14 100%)",
+                  background:
+                    "linear-gradient(135deg, #e83e8c 0%, #fd7e14 100%)",
                 }}
               >
                 Sunset
@@ -394,7 +390,8 @@ const Settings = ({ formSettings, updateFormSetting }: SettingsProps) => {
                 }}
                 className="h-16"
                 style={{
-                  background: "linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%)",
+                  background:
+                    "linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%)",
                 }}
               >
                 Purple
@@ -410,7 +407,8 @@ const Settings = ({ formSettings, updateFormSetting }: SettingsProps) => {
                 }}
                 className="h-16"
                 style={{
-                  background: "linear-gradient(135deg, #343a40 0%, #6c757d 100%)",
+                  background:
+                    "linear-gradient(135deg, #343a40 0%, #6c757d 100%)",
                 }}
               >
                 Dark

@@ -2,72 +2,37 @@
 
 import { useState, useEffect } from "react";
 import {
-  ArrowUp,
-  ArrowDown,
   Trash2,
   Plus,
-  Save,
+  BarChart3,
+  ArrowUp,
+  ArrowDown,
+  Loader2,
   CalendarIcon,
-  GripVertical,
-  Eye,
-  Settings2,
-  AlertCircle,
+  X,
+  Pencil,
+  Save,
 } from "lucide-react";
+import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
   SheetHeader,
   SheetTitle,
-  SheetFooter,
 } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { format } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { useFormik, FieldArray, FormikProvider } from "formik";
 import * as Yup from "yup";
@@ -98,6 +63,29 @@ const pollSchema = Yup.object().shape({
   endDate: Yup.date().nullable(),
 });
 
+const visibilityOptions = [
+  {
+    value: "ALWAYS",
+    label: "Everyone",
+    desc: "Results are always public",
+  },
+  {
+    value: "AFTER_VOTE",
+    label: "After voting",
+    desc: "People see results after they vote",
+  },
+  {
+    value: "AFTER_END",
+    label: "After Poll Ends",
+    desc: "Results shown when poll closes",
+  },
+  {
+    value: "ADMIN",
+    label: "Only Admin",
+    desc: "Only you can see the results",
+  },
+];
+
 export default function Edit({
   poll,
   open,
@@ -107,14 +95,12 @@ export default function Edit({
   open: boolean;
   onClose: () => void;
 }) {
-  const [activeTab, setActiveTab] = useState("edit");
   const [resultVisibility, setResultVisibility] = useState(
     poll?.resultVisibility || "ALWAYS"
   );
 
   const onCompleted = () => {
     formik.resetForm();
-    setActiveTab("edit");
     onClose();
   };
 
@@ -160,558 +146,288 @@ export default function Edit({
     formik.setFieldValue("options", options);
   };
 
-  const getVisibilityDescription = (value: string) => {
-    switch (value) {
-      case "ALWAYS":
-        return "Results are visible to everyone at all times";
-      case "AFTER_VOTE":
-        return "Results appear immediately after a user votes";
-      case "AFTER_END":
-        return "Results appear only after the poll ends";
-      case "ADMIN":
-        return "Results are only visible to administrators";
-      default:
-        return "";
-    }
+  const handleSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    formik.handleSubmit();
   };
 
   const canSubmit = formik.isValid && formik.dirty && !loading;
-  const hasChanges =
-    formik.dirty || resultVisibility !== poll?.resultVisibility;
 
   return (
     <Sheet open={open} onOpenChange={onClose}>
-      <SheetContent className="w-full sm:max-w-[900px] overflow-y-auto p-0">
-        <SheetHeader className="px-6 pt-6 pb-4 border-b">
-          <div className="flex items-center justify-between">
-            <div>
-              <SheetTitle className="text-2xl">Edit Poll</SheetTitle>
-              <SheetDescription>
-                Make changes to your poll and save when you're done
-              </SheetDescription>
+      <SheetContent className="w-full z-100 sm:max-w-[560px] overflow-hidden p-0 border-l border-border bg-background">
+        <SheetHeader className="px-6 pt-6 pb-4 border-b bg-muted/30">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-primary/10 ring-1 ring-primary/20">
+              <Pencil className="h-5 w-5 text-primary" />
             </div>
-            {hasChanges && (
-              <Badge variant="outline" className="gap-1">
-                <AlertCircle className="h-3 w-3" />
-                Unsaved changes
-              </Badge>
-            )}
+            <div>
+              <SheetTitle className="text-lg font-semibold tracking-tight">
+                Edit Poll
+              </SheetTitle>
+              <p className="text-xs text-muted-foreground">
+                Modify your existing community poll
+              </p>
+            </div>
           </div>
         </SheetHeader>
 
         <FormikProvider value={formik}>
           <form
-            onSubmit={formik.handleSubmit}
-            className="flex flex-col h-[calc(100vh-140px)]"
+            onSubmit={handleSubmit}
+            className="flex flex-col h-[calc(100vh-90px)]"
           >
-            <Tabs
-              value={activeTab}
-              onValueChange={setActiveTab}
-              className="flex-1"
-            >
-              <div className="px-6 pt-4 border-b">
-                <TabsList className="grid w-full max-w-md grid-cols-3">
-                  <TabsTrigger value="edit" className="gap-2">
-                    <Settings2 className="h-4 w-4" />
-                    <span className="hidden sm:inline">Edit</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="preview" className="gap-2">
-                    <Eye className="h-4 w-4" />
-                    <span className="hidden sm:inline">Preview</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="settings" className="gap-2">
-                    <Settings2 className="h-4 w-4" />
-                    <span className="hidden sm:inline">Settings</span>
-                  </TabsTrigger>
-                </TabsList>
+            <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
+              
+              {/* Title */}
+              <div className="space-y-2">
+                <Label htmlFor="poll-title" className="text-sm font-medium">
+                  Poll Title <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="poll-title"
+                  name="title"
+                  placeholder="Enter poll title"
+                  maxLength={100}
+                  value={formik.values.title}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                />
+                {formik.touched.title && formik.errors.title && (
+                  <p className="text-xs text-destructive">{formik.errors.title}</p>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  {formik.values.title.length}/100 characters
+                </p>
               </div>
 
-              <div className="flex-1 overflow-y-auto px-6 py-6">
-                <TabsContent value="edit" className="space-y-6 mt-0">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Basic Information</CardTitle>
-                      <CardDescription>
-                        Update the title and question for your poll
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="title">
-                          Poll Title <span className="text-destructive">*</span>
-                        </Label>
-                        <Input
-                          id="title"
-                          name="title"
-                          className="text-lg font-semibold"
-                          placeholder="e.g., Community Feature Preference"
-                          value={formik.values.title}
-                          onChange={formik.handleChange}
-                          onBlur={formik.handleBlur}
-                        />
-                        {formik.touched.title && formik.errors.title && (
-                          <p className="text-sm text-destructive">
-                            {formik.errors.title}
-                          </p>
+              {/* Question */}
+              <div className="space-y-2">
+                <Label htmlFor="poll-question" className="text-sm font-medium">
+                  Question <span className="text-destructive">*</span>
+                </Label>
+                <Textarea
+                  id="poll-question"
+                  name="question"
+                  rows={4}
+                  className="resize-none"
+                  placeholder="Describe what your poll is asking"
+                  maxLength={200}
+                  value={formik.values.question}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                />
+                {formik.touched.question && formik.errors.question && (
+                  <p className="text-xs text-destructive">{formik.errors.question}</p>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  {formik.values.question.length}/200 characters
+                </p>
+              </div>
+
+              {/* End Date */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">End Date (Optional)</Label>
+                <div className="flex items-center gap-3">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className={cn(
+                          "w-full h-10 justify-start text-left font-normal border-border bg-transparent",
+                          !formik.values.endDate && "text-muted-foreground"
                         )}
-                        <p className="text-xs text-muted-foreground">
-                          {formik.values.title.length}/100 characters
-                        </p>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="question">
-                          Poll Question{" "}
-                          <span className="text-destructive">*</span>
-                        </Label>
-                        <Textarea
-                          id="question"
-                          name="question"
-                          rows={3}
-                          placeholder="e.g., Which feature would you like to see next?"
-                          value={formik.values.question}
-                          onChange={formik.handleChange}
-                          onBlur={formik.handleBlur}
-                        />
-                        {formik.touched.question && formik.errors.question && (
-                          <p className="text-sm text-destructive">
-                            {formik.errors.question}
-                          </p>
-                        )}
-                        <p className="text-xs text-muted-foreground">
-                          {formik.values.question.length}/200 characters
-                        </p>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <CardTitle>Poll Options</CardTitle>
-                          <CardDescription>
-                            Edit existing options or add new ones (2-10 options)
-                          </CardDescription>
-                        </div>
-                        <Badge variant="outline">
-                          {formik.values.options.length}/10
-                        </Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <FieldArray
-                        name="options"
-                        render={(arrayHelpers) => (
-                          <>
-                            {formik.values.options.map((option, index) => (
-                              <div
-                                key={index}
-                                className="group flex items-start gap-2 p-3 rounded-lg border bg-muted/30 hover:bg-muted/50 transition-colors"
-                              >
-                                <TooltipProvider>
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <div className="cursor-grab active:cursor-grabbing pt-2">
-                                        <GripVertical className="h-5 w-5 text-muted-foreground" />
-                                      </div>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                      Drag to reorder
-                                    </TooltipContent>
-                                  </Tooltip>
-                                </TooltipProvider>
-
-                                <div className="flex-1 space-y-2">
-                                  <div className="flex items-center gap-2">
-                                    <Badge
-                                      variant="secondary"
-                                      className="text-xs"
-                                    >
-                                      {index + 1}
-                                    </Badge>
-                                    <Input
-                                      name={`options.${index}.option`}
-                                      placeholder={`Option ${index + 1}`}
-                                      value={option.option}
-                                      onChange={formik.handleChange}
-                                      onBlur={formik.handleBlur}
-                                      className="flex-1"
-                                    />
-                                    <Input
-                                      name={`options.${index}.id`}
-                                      type="hidden"
-                                      value={option.id}
-                                    />
-                                  </div>
-                                  {formik.touched.options?.[index]?.option &&
-                                    formik.errors.options?.[index] && (
-                                      <p className="text-xs text-destructive ml-12">
-                                        {typeof formik.errors.options[index] ===
-                                        "string"
-                                          ? formik.errors.options[index]
-                                          : (
-                                              formik.errors.options[
-                                                index
-                                              ] as any
-                                            )?.option}
-                                      </p>
-                                    )}
-                                </div>
-
-                                <div className="flex gap-1 pt-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                  <TooltipProvider>
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <Button
-                                          type="button"
-                                          variant="ghost"
-                                          size="icon"
-                                          className="h-8 w-8"
-                                          onClick={() =>
-                                            moveOption(index, index - 1)
-                                          }
-                                          disabled={index === 0}
-                                        >
-                                          <ArrowUp className="h-4 w-4" />
-                                        </Button>
-                                      </TooltipTrigger>
-                                      <TooltipContent>Move up</TooltipContent>
-                                    </Tooltip>
-                                  </TooltipProvider>
-
-                                  <TooltipProvider>
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <Button
-                                          type="button"
-                                          variant="ghost"
-                                          size="icon"
-                                          className="h-8 w-8"
-                                          onClick={() =>
-                                            moveOption(index, index + 1)
-                                          }
-                                          disabled={
-                                            index ===
-                                            formik.values.options.length - 1
-                                          }
-                                        >
-                                          <ArrowDown className="h-4 w-4" />
-                                        </Button>
-                                      </TooltipTrigger>
-                                      <TooltipContent>Move down</TooltipContent>
-                                    </Tooltip>
-                                  </TooltipProvider>
-
-                                  {formik.values.options.length > 2 && (
-                                    <AlertDialog>
-                                      <AlertDialogTrigger asChild>
-                                        <Button
-                                          type="button"
-                                          variant="ghost"
-                                          size="icon"
-                                          className="h-8 w-8 text-destructive hover:text-destructive"
-                                        >
-                                          <Trash2 className="h-4 w-4" />
-                                        </Button>
-                                      </AlertDialogTrigger>
-                                      <AlertDialogContent>
-                                        <AlertDialogHeader>
-                                          <AlertDialogTitle>
-                                            Delete option?
-                                          </AlertDialogTitle>
-                                          <AlertDialogDescription>
-                                            This will remove "
-                                            {option.option ||
-                                              `Option ${index + 1}`}
-                                            " from your poll.
-                                            {poll?.totalVotes &&
-                                              poll.totalVotes > 0 && (
-                                                <span className="block mt-2 text-destructive font-medium">
-                                                  Warning: This poll has
-                                                  existing votes. Deleting this
-                                                  option may affect vote counts.
-                                                </span>
-                                              )}
-                                          </AlertDialogDescription>
-                                        </AlertDialogHeader>
-                                        <AlertDialogFooter>
-                                          <AlertDialogCancel>
-                                            Cancel
-                                          </AlertDialogCancel>
-                                          <AlertDialogAction
-                                            onClick={() =>
-                                              arrayHelpers.remove(index)
-                                            }
-                                            className="bg-destructive hover:bg-destructive/90"
-                                          >
-                                            Delete
-                                          </AlertDialogAction>
-                                        </AlertDialogFooter>
-                                      </AlertDialogContent>
-                                    </AlertDialog>
-                                  )}
-                                </div>
-                              </div>
-                            ))}
-
-                            <Button
-                              type="button"
-                              variant="outline"
-                              onClick={() =>
-                                arrayHelpers.push({ option: "", id: "" })
-                              }
-                              className="w-full"
-                              disabled={formik.values.options.length >= 10}
-                            >
-                              <Plus className="h-4 w-4 mr-2" />
-                              Add Option
-                            </Button>
-
-                            {typeof formik.errors.options === "string" && (
-                              <p className="text-sm text-destructive text-center">
-                                {formik.errors.options}
-                              </p>
-                            )}
-                          </>
-                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {formik.values.endDate
+                          ? format(new Date(formik.values.endDate), "PPP")
+                          : "Pick an end date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={
+                          formik.values.endDate
+                            ? new Date(formik.values.endDate)
+                            : undefined
+                        }
+                        onSelect={(date) => formik.setFieldValue("endDate", date)}
+                        disabled={(date) => date < new Date()}
+                        initialFocus
                       />
-                    </CardContent>
-                  </Card>
-                </TabsContent>
+                    </PopoverContent>
+                  </Popover>
 
-                <TabsContent value="preview" className="mt-0">
-                  <Card>
-                    <CardHeader className="pb-4">
-                      <div className="flex items-center gap-2">
-                        <Eye className="h-5 w-5 text-muted-foreground" />
-                        <CardTitle>Preview</CardTitle>
-                      </div>
-                      <CardDescription>
-                        This is how your updated poll will appear to users
-                      </CardDescription>
-                    </CardHeader>
-                    <Separator />
-                    <CardContent className="pt-6 space-y-6">
-                      <div className="space-y-2">
-                        <h3 className="text-2xl font-bold">
-                          {formik.values.title}
-                        </h3>
-                        <p className="text-lg text-muted-foreground">
-                          {formik.values.question}
-                        </p>
-                      </div>
-
-                      <Separator />
-
-                      <RadioGroup className="space-y-3">
-                        {formik.values.options?.map((option, index) => (
-                          <div
-                            key={index}
-                            className="flex items-center space-x-3 rounded-lg border p-4 hover:bg-muted/50 transition-colors cursor-pointer"
-                          >
-                            <RadioGroupItem
-                              value={option.option}
-                              id={`preview-${index}`}
-                            />
-                            <Label
-                              htmlFor={`preview-${index}`}
-                              className="flex-1 cursor-pointer font-medium"
-                            >
-                              {option.option || `Option ${index + 1}`}
-                            </Label>
-                          </div>
-                        ))}
-                      </RadioGroup>
-
-                      <div className="flex justify-end pt-4">
-                        <Button type="button" size="lg">
-                          Submit Vote
-                        </Button>
-                      </div>
-
-                      {resultVisibility === "ALWAYS" && (
-                        <div className="mt-6 space-y-4 p-4 rounded-lg bg-muted/30">
-                          <p className="text-sm font-medium">Results Preview</p>
-                          {formik.values.options?.map((option, index) => (
-                            <div key={index} className="space-y-2">
-                              <div className="flex justify-between text-sm">
-                                <span>
-                                  {option.option || `Option ${index + 1}`}
-                                </span>
-                                <span className="text-muted-foreground">
-                                  {poll?.totalVotes || 0} votes
-                                </span>
-                              </div>
-                              <Progress value={0} className="h-2" />
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-
-                <TabsContent value="settings" className="mt-0">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Poll Settings</CardTitle>
-                      <CardDescription>
-                        Configure poll behavior and visibility options
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                      <div className="space-y-3">
-                        <Label>End Date (Optional)</Label>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant="outline"
-                              className={cn(
-                                "w-full justify-start text-left font-normal",
-                                !formik.values.endDate &&
-                                  "text-muted-foreground"
-                              )}
-                            >
-                              <CalendarIcon className="mr-2 h-4 w-4" />
-                              {formik.values.endDate ? (
-                                format(new Date(formik.values.endDate), "PPP")
-                              ) : (
-                                <span>Pick an end date</span>
-                              )}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={
-                                formik.values.endDate
-                                  ? new Date(formik.values.endDate)
-                                  : undefined
-                              }
-                              onSelect={(date) =>
-                                formik.setFieldValue("endDate", date)
-                              }
-                              disabled={(date) => date < new Date()}
-                              initialFocus
-                            />
-                          </PopoverContent>
-                        </Popover>
-                        <p className="text-sm text-muted-foreground">
-                          Set when this poll should automatically close
-                        </p>
-                        {formik.values.endDate && (
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() =>
-                              formik.setFieldValue("endDate", null)
-                            }
-                            className="h-8"
-                          >
-                            Clear date
-                          </Button>
-                        )}
-                      </div>
-
-                      <Separator />
-
-                      <div className="space-y-3">
-                        <Label className="text-base">Results Visibility</Label>
-                        <Select
-                          value={resultVisibility}
-                          onValueChange={setResultVisibility}
-                        >
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select visibility" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="ALWAYS">
-                              <div className="flex flex-col items-start gap-1">
-                                <span className="font-medium">
-                                  Always Visible
-                                </span>
-                                <span className="text-xs text-muted-foreground">
-                                  Results shown at all times
-                                </span>
-                              </div>
-                            </SelectItem>
-                            <SelectItem value="AFTER_VOTE">
-                              <div className="flex flex-col items-start gap-1">
-                                <span className="font-medium">
-                                  After Voting
-                                </span>
-                                <span className="text-xs text-muted-foreground">
-                                  Results shown after user votes
-                                </span>
-                              </div>
-                            </SelectItem>
-                            <SelectItem value="AFTER_END">
-                              <div className="flex flex-col items-start gap-1">
-                                <span className="font-medium">
-                                  After Poll Ends
-                                </span>
-                                <span className="text-xs text-muted-foreground">
-                                  Results shown when poll closes
-                                </span>
-                              </div>
-                            </SelectItem>
-                            <SelectItem value="ADMIN">
-                              <div className="flex flex-col items-start gap-1">
-                                <span className="font-medium">Admin Only</span>
-                                <span className="text-xs text-muted-foreground">
-                                  Only admins can see results
-                                </span>
-                              </div>
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <p className="text-sm text-muted-foreground">
-                          {getVisibilityDescription(resultVisibility)}
-                        </p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-              </div>
-            </Tabs>
-
-            <Separator />
-
-            <SheetFooter className="px-6 py-4 bg-muted/30">
-              <div className="flex items-center justify-between w-full">
-                <Button type="button" variant="ghost" onClick={onClose}>
-                  Cancel
-                </Button>
-                <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      formik.resetForm();
-                      setResultVisibility(poll?.resultVisibility || "ALWAYS");
-                    }}
-                    disabled={!hasChanges}
-                  >
-                    Reset Changes
-                  </Button>
-                  <Button type="submit" disabled={!canSubmit}>
-                    {loading ? (
-                      <>
-                        <span className="animate-spin mr-2">⏳</span>
-                        Saving...
-                      </>
-                    ) : (
-                      <>
-                        <Save className="h-4 w-4 mr-2" />
-                        Save Changes
-                      </>
-                    )}
-                  </Button>
+                  {formik.values.endDate && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-10 w-10 shrink-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                      onClick={() => formik.setFieldValue("endDate", null)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
                 </div>
               </div>
-            </SheetFooter>
+
+              {/* Answer Choices */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-medium">
+                    Answer Choices <span className="text-destructive">*</span>
+                  </Label>
+                  <Badge variant="outline" className="text-xs text-muted-foreground">
+                    {formik.values.options.length}/10
+                  </Badge>
+                </div>
+
+                <FieldArray
+                  name="options"
+                  render={(arrayHelpers) => (
+                    <div className="space-y-2">
+                      {formik.values.options.map((option, index) => (
+                        <div
+                          key={index}
+                          className="group flex items-center gap-2 p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+                        >
+                          <div className="h-7 w-7 rounded-md bg-muted border border-border flex items-center justify-center shrink-0">
+                            <span className="text-xs font-semibold text-muted-foreground">
+                              {String.fromCharCode(65 + index)}
+                            </span>
+                          </div>
+
+                          <Input
+                            name={`options.${index}.option`}
+                            placeholder={`Choice ${index + 1}`}
+                            value={option.option}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            className="flex-1 border-0 bg-transparent shadow-none focus-visible:ring-0 text-sm"
+                          />
+                          <Input
+                            name={`options.${index}.id`}
+                            type="hidden"
+                            value={option.id}
+                          />
+
+                          <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 rounded-md text-muted-foreground hover:text-foreground"
+                              onClick={() => moveOption(index, index - 1)}
+                              disabled={index === 0}
+                            >
+                              <ArrowUp className="h-3.5 w-3.5" />
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 rounded-md text-muted-foreground hover:text-foreground"
+                              onClick={() => moveOption(index, index + 1)}
+                              disabled={index === formik.values.options.length - 1}
+                            >
+                              <ArrowDown className="h-3.5 w-3.5" />
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                              onClick={() => arrayHelpers.remove(index)}
+                              disabled={formik.values.options.length <= 2}
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => arrayHelpers.push({ option: "", id: "" })}
+                        className="w-full border-dashed text-muted-foreground hover:text-foreground"
+                        disabled={formik.values.options.length >= 10}
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Choice
+                      </Button>
+                    </div>
+                  )}
+                />
+              </div>
+
+              <Separator />
+
+              {/* Result Visibility */}
+              <div className="space-y-4">
+                <div className="flex items-start space-x-3">
+                  <div className="p-1.5 rounded-md bg-primary/10">
+                    <BarChart3 className="h-4 w-4 text-primary" />
+                  </div>
+                  <div>
+                    <Label className="text-base font-semibold">Result Visibility</Label>
+                    <p className="text-sm text-muted-foreground">Choose when voters can see the poll outcomes</p>
+                  </div>
+                </div>
+                <RadioGroup
+                  value={resultVisibility}
+                  onValueChange={setResultVisibility}
+                  className="space-y-3"
+                >
+                  {visibilityOptions.map((opt) => (
+                    <div
+                      key={opt.value}
+                      className="flex items-start space-x-3 space-y-0 p-4 rounded-lg border hover:bg-muted/50 transition-colors"
+                    >
+                      <RadioGroupItem value={opt.value} id={`vis-${opt.value}`} />
+                      <Label htmlFor={`vis-${opt.value}`} className="font-normal cursor-pointer flex-1">
+                        <div className="font-medium mb-0.5">{opt.label}</div>
+                        <p className="text-sm text-muted-foreground">{opt.desc}</p>
+                      </Label>
+                    </div>
+                  ))}
+                </RadioGroup>
+              </div>
+            </div>
+
+            <div className="border-t bg-muted/30 px-6 py-4">
+              <div className="flex items-center gap-3">
+                <Button
+                  type="submit"
+                  disabled={!canSubmit}
+                  size="sm"
+                  className="shadow-sm border-primary/20"
+                >
+                  {loading ? (
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      Saving...
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <Save className="h-4 w-4" />
+                      Save Changes
+                    </div>
+                  )}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={onClose}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
           </form>
         </FormikProvider>
       </SheetContent>

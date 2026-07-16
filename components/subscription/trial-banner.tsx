@@ -1,119 +1,150 @@
 "use client";
 
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ChevronUp, ChevronDown, Check, Sparkles, Clock } from "lucide-react";
+import { ChevronUp, ChevronDown, Check, Sparkles, Clock, X, ArrowRight } from "lucide-react";
 import moment from "moment";
 import { useCheckEntitySubscription } from "@/graphql/actions";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 export default function TrialBanner() {
+  const [isDismissed, setIsDismissed] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-
-  const toggleExpand = () => setIsExpanded((prev) => !prev);
-
-  const items = [
-    "Unlimited team members",
-    "All features unlocked",
-    "Priority support",
-  ];
 
   const { data } = useCheckEntitySubscription();
   const subscription = data?.checkEntitySubscription;
 
-  const daysLeft =
-    subscription?.endDate && !isNaN(new Date(subscription?.endDate).getTime())
-      ? Math.max(
-          0,
-          Math.ceil(
-            (new Date(subscription?.endDate).getTime() - new Date().getTime()) /
-              (1000 * 60 * 60 * 24)
-          )
-        )
-      : "N/A";
+  const calculateRemainingTime = () => {
+    if (!subscription?.endDate || isNaN(new Date(subscription?.endDate).getTime())) {
+      return "N/A days remaining";
+    }
 
-  if (subscription?.subscriptionType !== "trial") return null;
+    const diffMs = new Date(subscription.endDate).getTime() - new Date().getTime();
+    if (diffMs <= 0) return "0 hours remaining";
+
+    const diffHours = diffMs / (1000 * 60 * 60);
+    if (diffHours < 24) {
+      const hours = Math.ceil(diffHours);
+      return `${hours} hour${hours === 1 ? "" : "s"} remaining`;
+    }
+
+    const diffDays = Math.ceil(diffHours / 24);
+    return `${diffDays} day${diffDays === 1 ? "" : "s"} remaining`;
+  };
+
+  const remainingText = calculateRemainingTime();
+
+  const items = [
+    "Unlimited team members",
+    "All features unlocked",
+    "Priority 24/7 support",
+  ];
+
+  if (subscription?.subscriptionType !== "trial" || isDismissed) return null;
 
   return (
-    <div className="fixed bottom-5 right-5 w-full max-w-sm z-[20]">
-      <Card
-        className={`overflow-hidden bg-white border border-gray-200 shadow-xl transition-all duration-300 ${
-          isExpanded ? "shadow-gray-300/50" : "shadow-gray-200/50"
-        }`}
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
+        className="fixed bottom-6 right-6 z-100 w-full max-w-[340px]"
       >
-        <div
-          className="relative bg-gradient-to-r from-sky-50 via-indigo-50 to-violet-50 border-b border-gray-100 p-4 cursor-pointer group"
-          onClick={toggleExpand}
+        <div 
+          className={cn(
+            "relative overflow-hidden rounded-2xl border border-border bg-background/80 backdrop-blur-xl shadow-2xl transition-all duration-300",
+            isExpanded ? "ring-1 ring-primary/20" : "hover:border-primary/30"
+          )}
         >
-          {/* Decorative hover effect */}
-          <div className="absolute inset-0 bg-gradient-to-r from-sky-100/50 to-violet-100/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          {/* Accent Line */}
+          <div className="absolute top-0 right-0 w-1 h-full bg-primary/80" />
 
-          <div className="relative flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-indigo-100 border border-indigo-200">
-                <Clock className="w-5 h-5 text-indigo-600" />
-              </div>
-              <div>
-                <p className="text-indigo-600/80 text-xs font-medium uppercase tracking-wide">
-                  Trial Period
-                </p>
-                <p className="text-gray-900 text-md font-semibold">
-                  {daysLeft} days remaining
-                </p>
-              </div>
+          {/* Header */}
+          <div className="p-4 flex items-start gap-3.5">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20">
+              <Clock className="h-5 w-5" />
             </div>
-            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors border border-gray-200">
-              {isExpanded ? (
-                <ChevronDown className="text-gray-600 w-5 h-5" />
-              ) : (
-                <ChevronUp className="text-gray-600 w-5 h-5" />
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Expandable Content */}
-        <div
-          className={`bg-white overflow-hidden transition-all duration-300 ease-out ${
-            isExpanded ? "max-h-[400px] opacity-100" : "max-h-0 opacity-0"
-          }`}
-        >
-          <div className="p-5">
-            {/* End Date Notice */}
-            <div className="flex items-center gap-2 mb-5 p-3 rounded-lg bg-amber-50 border border-amber-200">
-              <Sparkles className="w-4 h-4 text-amber-500 flex-shrink-0" />
-              <p className="text-sm text-amber-700">
-                Trial ends on{" "}
-                <span className="font-semibold">
-                  {moment(subscription?.endDate).format("MMMM DD, YYYY")}
-                </span>
+            
+            <div className="flex-1 min-w-0 pr-6">
+              <div className="flex items-center gap-1.5 mb-0.5">
+                <span className="text-[10px] font-bold text-primary uppercase tracking-widest">Free Trial</span>
+                <div className="h-1 w-1 rounded-full bg-primary animate-pulse" />
+              </div>
+              <h3 className="text-[13.5px] font-semibold text-foreground tracking-tight leading-none mb-1">
+                {remainingText}
+              </h3>
+              <p className="text-[11.5px] text-muted-foreground line-clamp-1">
+                Ends {moment(subscription?.endDate).format("MMM DD, YYYY")}
               </p>
             </div>
 
-            {/* Features List */}
-            <p className="text-gray-900 font-medium mb-3">
-              Upgrade and unlock:
-            </p>
-            <ul className="space-y-2.5 mb-5">
-              {items.map((content, idx) => (
-                <li key={idx} className="flex items-center gap-3">
-                  <div className="flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 border border-emerald-200">
-                    <Check className="w-3 h-3 text-emerald-600" />
-                  </div>
-                  <span className="text-gray-600 text-sm">{content}</span>
-                </li>
-              ))}
-            </ul>
+            <button 
+              onClick={() => setIsDismissed(true)}
+              className="absolute top-3 right-3 p-1.5 rounded-lg text-muted-foreground/40 hover:text-foreground hover:bg-accent transition-all"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
 
-            <Link href={"/settings/subscription"}>
-              <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-5 rounded-lg shadow-md shadow-indigo-200 transition-all duration-200 hover:shadow-lg hover:shadow-indigo-300">
-                Choose Your Plan
+          {/* Core Action */}
+          <div className="px-4 pb-4 flex items-center gap-2">
+            <Link href="/settings/subscription" className="flex-1">
+              <Button 
+                size="sm" 
+                className="w-full h-8 px-3 text-[12px] font-semibold bg-primary hover:bg-primary/90 text-primary-foreground border-none shadow-sm shadow-primary/20 rounded-lg group"
+              >
+                Upgrade Plan
+                <ArrowRight className="ml-1 h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
               </Button>
             </Link>
+            
+            <button 
+              onClick={() => setIsExpanded(!isExpanded)}
+              className={cn(
+                "h-8 px-3 text-[11px] font-medium rounded-lg border border-border hover:bg-accent transition-all shrink-0",
+                isExpanded && "bg-accent text-foreground"
+              )}
+            >
+              {isExpanded ? "Close" : "Features"}
+            </button>
           </div>
+
+          {/* Expanded Content */}
+          <AnimatePresence>
+            {isExpanded && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="overflow-hidden bg-muted/30 border-t border-border/50"
+              >
+                <div className="p-4 space-y-4">
+                  <div className="space-y-2.5">
+                    {items.map((item, idx) => (
+                      <div key={idx} className="flex items-center gap-2.5">
+                        <div className="flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/10">
+                          <Check className="h-3 w-3" />
+                        </div>
+                        <span className="text-[12px] text-foreground/80 font-medium">{item}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-amber-500/5 border border-amber-500/10 flex items-start gap-2.5">
+                    <Sparkles className="h-3.5 w-3.5 text-amber-600 shrink-0 mt-0.5" />
+                    <p className="text-[11px] text-amber-700/80 leading-relaxed font-medium">
+                      Lock in early-bird pricing before your trial expires. Your growth is our priority.
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-      </Card>
-    </div>
+      </motion.div>
+    </AnimatePresence>
   );
 }

@@ -4,10 +4,38 @@ export const GET_USER = gql`
   query GetUser {
     getUser {
       id
-      status
       email
+
       firstName
       lastName
+      status
+      memberStatus
+
+      permissions {
+        website
+        moderation
+        reports
+        settings
+        subscription
+        platformFeatures
+        appearance
+        auditLogs
+        domain
+        permissions
+        adminUsers
+      }
+      modulePermissions {
+        module
+        canRead
+        canEdit
+        canCreate
+        canDelete
+      }
+      role {
+        name
+        description
+        isSystem
+      }
     }
   }
 `;
@@ -18,6 +46,7 @@ export const GET_ORGANIZATION = gql`
       id
       name
       logo
+
       subscription {
         subscriptionId
         packageId
@@ -35,15 +64,23 @@ export const GET_ORGANIZATION = gql`
 `;
 
 export const CHECK_DOMAIN = gql`
-  query CheckDomain($input: domainQuery) {
+  query CheckDomain($input: DomainQuery) {
     checkDomain(input: $input) {
       success
     }
   }
 `;
 
+export const CHANGE_ENTITY_DOMAIN = gql`
+  mutation ChangeEntityDomain($input: ChangeEntityDomainInput!) {
+    changeEntityDomain(input: $input) {
+      success
+    }
+  }
+`;
+
 export const REGISTER_ORGANIZATION = gql`
-  mutation Mutation($input: registerEntityInput) {
+  mutation Mutation($input: RegisterEntityInput) {
     registerEntity(input: $input) {
       success
     }
@@ -93,14 +130,44 @@ export const GET_ENTITY_SETTINGS = gql`
   query GetEntitySettings {
     getEntitySettings {
       id
-      autoApproveUser
-      autoApproveGroup
-      autoApproveEvents
-      autoApproveJobs
-      autoApproveMarketPlace
+      entity
       allowNewUser
-      autoApproveDiscussionForum
+      autoApproveUser
+      allowCommunity
+      autoApproveCommunity
+      autoApproveGroup
       allowDiscussionForum
+      autoApproveDiscussionForum
+      allowEvents
+      autoApproveEvents
+      allowJobs
+      autoApproveJobs
+      allowMentorship
+      autoApproveMentorship
+      allowListing
+      autoApproveListing
+      autoApproveMarketPlace
+      allowShop
+      autoApproveShop
+      allowOffers
+      autoApproveOffers
+      allowSurveys
+      autoApproveSurveys
+      allowPolls
+      autoApprovePolls
+      allowStories
+      autoApproveStories
+      allowOpportunities
+      autoApproveOpportunities
+      allowEntityCommunityInFeed
+      allowEntityDiscussionForumInFeed
+      allowEntityPollsInFeed
+      allowEntityFeedInFeed
+      allowEntityMomentsInFeed
+      allowEntityOpportunitiesInFeed
+      feedOrder
+      feedEntityName
+      allowMediaGalleryComments
     }
   }
 `;
@@ -108,15 +175,52 @@ export const UPDATE_ENTITY_SETTINGS = gql`
   mutation UpdateEntitySettings($input: EntityAutoApprovalSettingsInput) {
     updateEntitySettings(input: $input) {
       id
-      autoApproveUser
-      autoApproveGroup
-      autoApproveEvents
-      autoApproveJobs
-      autoApproveMarketPlace
       entity
       allowNewUser
-      autoApproveDiscussionForum
+      autoApproveUser
+      allowCommunity
+      autoApproveCommunity
+      autoApproveGroup
       allowDiscussionForum
+      autoApproveDiscussionForum
+      allowEvents
+      autoApproveEvents
+      allowJobs
+      autoApproveJobs
+      allowMentorship
+      autoApproveMentorship
+      allowListing
+      autoApproveListing
+      autoApproveMarketPlace
+      allowShop
+      autoApproveShop
+      allowOffers
+      autoApproveOffers
+      allowSurveys
+      autoApproveSurveys
+      allowPolls
+      autoApprovePolls
+      allowStories
+      autoApproveStories
+      allowOpportunities
+      autoApproveOpportunities
+      allowEntityCommunityInFeed
+      allowEntityDiscussionForumInFeed
+      allowEntityPollsInFeed
+      allowEntityFeedInFeed
+      allowEntityMomentsInFeed
+      allowEntityOpportunitiesInFeed
+      feedOrder
+      feedEntityName
+      allowMediaGalleryComments
+    }
+  }
+`;
+
+export const UPDATE_FEED_ENTITY_NAME = gql`
+  mutation UpdateFeedEntityName($name: String!) {
+    updateFeedEntityName(name: $name) {
+      success
     }
   }
 `;
@@ -151,15 +255,13 @@ export const CHECK_ENTITY_SUBSCRIPTIONS = gql`
         showInWebNavigation
         enabled
         showInMobileNavigationSortNumber
+        showInWebNavigationSortNumber
+        customName
         isPopular
+        isPublicFacing
+        canRename
       }
     }
-  }
-`;
-
-export const GET_CURRENCY = gql`
-  query GetEntityCurrency {
-    getEntityCurrency
   }
 `;
 
@@ -187,7 +289,17 @@ export const UPDATE_ENTITY_PROFILE = gql`
   }
 `;
 
-// GetAllEntityInvoice Query
+// UPDATE_USER_PROFILE Mutation
+export const UPDATE_USER_PROFILE = gql`
+  mutation UpdateUserProfile($input: UserInput!) {
+    updateUserProfile(input: $input) {
+      id
+      firstName
+      lastName
+      email
+    }
+  }
+`;
 
 export const GET_ALL_ENTITY_INVOICE = gql`
   query GetAllEntityInvoice {
@@ -258,3 +370,43 @@ export interface EntityInvoice {
 export interface GetAllEntityInvoiceResponse {
   getAllEntityInvoice: EntityInvoice[];
 }
+
+export const GET_MY_OTHER_ACCOUNTS = gql`
+  query GetMyOtherAccounts {
+    getMyOtherAccounts {
+      id
+      entityId
+      name
+      logo
+      role
+    }
+  }
+`;
+
+export const SWITCH_TO_OTHER_ACCOUNT = gql`
+  mutation SwitchToOtherAccount($entityId: ID!) {
+    switchToOtherAccount(entityId: $entityId) {
+      token
+    }
+  }
+`;
+
+export * from "./dashboard";
+export * from "./currency/currency-queries";
+export * from "./rewards/rewards-queries";
+export * from "./reports";
+export * from "./audit";
+export * from "./email";
+export * from "./contacts";
+
+export const UPDATE_FEED_ORDER = gql`
+  mutation UpdateFeedOrder($input: UpdateFeedOrderInput!) {
+    updateFeedOrder(input: $input)
+  }
+`;
+
+export const GET_MODULE_CUSTOM_NAME = gql`
+  query GetModuleCustomName($id: String!) {
+    getModuleCustomName(id: $id)
+  }
+`;

@@ -17,36 +17,29 @@ interface Props {
   host?: string;
 }
 
-export function ApolloWrapper({ children, host }: Props) {
+export function ApolloWrapper({ children }: Props) {
   const token = useTokenStore((state) => state.token);
-
-  console.log(token);
 
   function makeClient() {
     const errorControl = onError(({ graphQLErrors, networkError }) => {
       if (graphQLErrors) {
         graphQLErrors.forEach(({ message, extensions }) => {
-          toast({
-            title: "Error",
-            description:
-              extensions?.code === "INTERNAL_SERVER_ERROR"
-                ? "Something went wrong"
-                : message,
-            variant: "destructive",
-          });
-        });
-      }
-      if (networkError) {
-        toast({
-          title: "Network Error",
-          description: networkError.message,
-          variant: "destructive",
+          if (extensions?.code === "FORBIDDEN") {
+            return;
+          } else {
+            toast.error("Error", {
+              description:
+                extensions?.code === "INTERNAL_SERVER_ERROR"
+                  ? "Something went wrong"
+                  : message,
+            });
+          }
         });
       }
     });
 
     const uploadLink = createUploadLink({
-      uri: host ?? "http://localhost:1111/graphql",
+      uri: process.env.NEXT_PUBLIC_GRAPHQL_URL,
     });
 
     const authMiddleware = new ApolloLink(
@@ -66,7 +59,7 @@ export function ApolloWrapper({ children, host }: Props) {
         });
 
         return forward(operation);
-      }
+      },
     );
     return new ApolloClient({
       link: ApolloLink.from([authMiddleware, errorControl, uploadLink]),

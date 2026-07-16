@@ -1,222 +1,376 @@
 "use client";
-import React, { useState } from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
+
+import React from "react";
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import {
-  CalendarDays,
-  Download,
-  AppWindow,
-  Users,
-  Repeat2,
-  User,
-  BarChart3,
-  PieChart,
-  ChevronDown,
+  EcosystemKPI,
+  EcosystemCard,
+  EcosystemStatusIndicator,
+} from "@/components/layout/ecosystem/ecosystem-analytics";
+import {
+  LayoutGrid,
+  Activity,
+  TrendingUp,
+  Zap,
+  ShieldCheck,
+  Sparkles,
+  MapPin,
+  Calendar,
+  Clock,
+  ArrowRight,
+  Share2,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   ResponsiveContainer,
-  AreaChart,
-  Area,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip as RechartsTooltip,
-  PieChart as RePieChart,
-  Pie,
+  Tooltip,
   Cell,
-  Legend,
+  PieChart,
+  Pie,
 } from "recharts";
-
-const weeklySignupsData = [
-  { day: "Mon", signups: 120 },
-  { day: "Tue", signups: 132 },
-  { day: "Wed", signups: 101 },
-  { day: "Thu", signups: 134 },
-  { day: "Fri", signups: 190 },
-  { day: "Sat", signups: 230 },
-  { day: "Sun", signups: 210 },
-];
-
-const membersByInterestData = [
-  { name: "Technology", value: 35 },
-  { name: "Arts", value: 25 },
-  { name: "Finance", value: 15 },
-  { name: "Health", value: 15 },
-  { name: "Other", value: 10 },
-];
-
-const COLORS = ["#1890ff", "#52c41a", "#faad14", "#eb2f96", "#722ed1"];
+import Link from "next/link";
+import {
+  useGetFeedIntelligenceKPI,
+  useGetFeedYieldVelocity,
+  useGetFeedInterestMatrix,
+  useGetPromotedNodeEvents,
+  TimeRange,
+} from "@/graphql/actions/feed";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
+import { subDays } from "date-fns";
+import { DateRange } from "react-day-picker";
 
 export default function FeedPage() {
-  const [dateRange, setDateRange] = useState<string>("7days");
+  const [timeRange, setTimeRange] = React.useState<TimeRange>(
+    TimeRange.LAST_7_DAYS,
+  );
+  const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
+    from: subDays(new Date(), 7),
+    to: new Date(),
+  });
+
+  const handleDateChange = (range: DateRange | undefined) => {
+    setDateRange(range);
+    if (!range?.from || !range?.to) return;
+    const diffDays = Math.round(
+      (range.to.getTime() - range.from.getTime()) / (1000 * 60 * 60 * 24),
+    );
+    if (diffDays <= 1) setTimeRange(TimeRange.LAST_24_HOURS);
+    else if (diffDays <= 7) setTimeRange(TimeRange.LAST_7_DAYS);
+    else if (diffDays <= 30) setTimeRange(TimeRange.LAST_30_DAYS);
+    else if (diffDays <= 90) setTimeRange(TimeRange.LAST_90_DAYS);
+  };
+
+  const formattedDateRange =
+    dateRange?.from && dateRange?.to
+      ? {
+          startDate: dateRange.from.toISOString(),
+          endDate: dateRange.to.toISOString(),
+        }
+      : undefined;
+
+  const { data: kpiData } = useGetFeedIntelligenceKPI(
+    timeRange,
+    formattedDateRange,
+  );
+  const { data: yieldData } = useGetFeedYieldVelocity(
+    timeRange,
+    formattedDateRange,
+  );
+  const { data: interestData } = useGetFeedInterestMatrix(
+    timeRange,
+    formattedDateRange,
+  );
+  const { data: eventsData } = useGetPromotedNodeEvents({
+    variables: { timeRange, dateRange: formattedDateRange },
+  });
+
+  const kpis = kpiData?.getFeedIntelligenceKPI;
+
+  const chartData = yieldData?.getFeedYieldVelocity;
+  const matrixData = interestData?.getFeedInterestMatrix;
+  const promotedEvents = eventsData?.getPromotedNodeEvents;
 
   return (
-    <div className="max-w-7xl mx-auto py-8 px-4">
-      {/* Top Navigation Bar */}
-      <Card className="mb-6">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-2xl">Feed Overview</CardTitle>
-          <div className="flex gap-2">
-            <Tabs value={dateRange} onValueChange={setDateRange}>
-              <TabsList>
-                <TabsTrigger value="today">
-                  <CalendarDays className="mr-2 h-4 w-4" />
-                  Today
-                </TabsTrigger>
-                <TabsTrigger value="7days">
-                  <CalendarDays className="mr-2 h-4 w-4" />
-                  Last 7 Days
-                </TabsTrigger>
-                <TabsTrigger value="30days">
-                  <CalendarDays className="mr-2 h-4 w-4" />
-                  Last 30 Days
-                </TabsTrigger>
-                <TabsTrigger value="custom">
-                  <CalendarDays className="mr-2 h-4 w-4" />
-                  Custom Range
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-            <Button variant="outline" size="sm" className="ml-2">
-              <Download className="mr-2 h-4 w-4" />
-              Download CSV
-            </Button>
+    <EcosystemWrapper anonymized-1="feed">
+      <EcosystemHeader
+        title="Feed Analytics"
+        badgeText="Overview"
+        description="Monitor feed engagement, content trends, and user activity."
+        icon={Share2}
+      />
+
+      <EcosystemActionBar shadow="none">
+        <EcosystemActionBar.Group>
+          <EcosystemActionBar.Item>
+            <div className="flex items-center gap-2.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1.5">
+              <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-[11px] font-medium text-emerald-700 dark:text-emerald-300">
+                Feed Status: Active
+              </span>
+            </div>
+          </EcosystemActionBar.Item>
+          <EcosystemActionBar.Separator />
+          <EcosystemActionBar.Item>
+            <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
+              <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
+              <span>Verified System</span>
+            </div>
+          </EcosystemActionBar.Item>
+        </EcosystemActionBar.Group>
+
+        <EcosystemActionBar.Group align="right">
+          <EcosystemActionBar.Item>
+            <DateRangePicker
+              date={dateRange}
+              onDateChange={handleDateChange}
+              defaultValue="LAST_7_DAYS"
+            />
+          </EcosystemActionBar.Item>
+          <EcosystemActionBar.Separator />
+          <EcosystemActionBar.Item>
+            <Link href="/feed/settings">
+              <Button className="h-9 px-4 rounded-xl bg-slate-900 border-slate-800 font-black text-[10px] uppercase tracking-widest gap-2 shadow-xl hover:bg-black transition-all active:scale-95 group">
+                Settings
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </Button>
+            </Link>
+          </EcosystemActionBar.Item>
+        </EcosystemActionBar.Group>
+      </EcosystemActionBar>
+
+      <EcosystemContainer className="space-y-12 p-8 lg:p-12">
+        {/* KPI Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {[
+            {
+              title: "Total Reach",
+              value: kpis?.aggregateReach ?? "0",
+              trend: kpis?.reachTrend ?? 0,
+              icon: LayoutGrid,
+              color: "text-indigo-500",
+              bg: "bg-indigo-500",
+              tooltip: "Estimated reach based on total posts, shares, and interactions",
+            },
+            {
+              title: "Active Posts",
+              value: kpis?.activeDialogue ?? "0",
+              trend: kpis?.dialogueTrend ?? 0,
+              icon: Activity,
+              color: "text-emerald-500",
+              bg: "bg-emerald-500",
+              tooltip: "Total number of interactions (likes + comments) in this period",
+            },
+            {
+              title: "Network Velocity",
+              value: kpis?.networkVelocity?.toFixed(2) ?? "0",
+              trend: kpis?.velocityTrend ?? 0,
+              icon: TrendingUp,
+              color: "text-violet-500",
+              bg: "bg-violet-500",
+              tooltip: "Average interactions per post",
+            },
+            {
+              title: "Engagement Yield",
+              value: kpis?.engagementYield?.toFixed(2) ?? "0",
+              trend: kpis?.yieldTrend ?? 0,
+              icon: Zap,
+              color: "text-amber-500",
+              bg: "bg-amber-500",
+              suffix: "%",
+              tooltip: "Percentage of reach that resulted in interaction",
+            },
+          ].map((kpi, i) => (
+            <EcosystemKPI key={i} {...kpi} trendLabel="vs last period" />
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+          {/* Chart Section */}
+          <div className="lg:col-span-8">
+            <EcosystemCard
+              title="Engagement Timeline"
+              description="Daily engagement and activity"
+              icon={TrendingUp}
+              decorationIcon={Zap}
+            >
+              <div className="h-[350px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={chartData}>
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      vertical={false}
+                      stroke="#f1f5f9"
+                    />
+                    <XAxis
+                      dataKey="day"
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 10, fontWeight: 900, fill: "#94a3b8" }}
+                      dy={15}
+                    />
+                    <YAxis
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 10, fontWeight: 900, fill: "#94a3b8" }}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "#0f172a",
+                        border: "none",
+                        borderRadius: "16px",
+                        boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)",
+                      }}
+                      itemStyle={{
+                        color: "#fff",
+                        fontWeight: 900,
+                        textTransform: "uppercase",
+                        fontSize: "10px",
+                      }}
+                      labelStyle={{ display: "none" }}
+                    />
+                    <Bar
+                      dataKey="signups"
+                      fill="#6366f1"
+                      radius={[8, 8, 0, 0]}
+                      barSize={40}
+                      animationDuration={1500}
+                    >
+                      {chartData?.map((entry: any, index: number) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={index % 2 === 0 ? "#6366f1" : "#10b981"}
+                        />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </EcosystemCard>
           </div>
-        </CardHeader>
-      </Card>
 
-      {/* Metric Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-        <Card>
-          <CardContent className="pt-6 pb-4">
-            <div className="flex items-center gap-3">
-              <AppWindow className="h-6 w-6 text-green-600" />
-              <div>
-                <div className="text-lg font-semibold">Total Feeds</div>
-                <div className="text-2xl font-bold text-green-600">128</div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  +5 new this week
+          {/* Interest Matrix Section */}
+          <div className="lg:col-span-4">
+            <EcosystemCard
+              title="Content Types"
+              description="Distribution of post categories"
+              icon={Sparkles}
+              decorationIcon={LayoutGrid}
+              className="min-h-fit"
+            >
+              <div className="h-[250px] w-full mb-8 relative flex items-center justify-center">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={matrixData as any[]}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={70}
+                      outerRadius={100}
+                      paddingAngle={8}
+                      dataKey="value"
+                      animationDuration={1500}
+                    >
+                      {matrixData?.map((entry: any, index: number) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={entry.color}
+                          stroke="none"
+                        />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                  <span className="text-3xl font-black text-slate-900 tracking-tighter">
+                    100%
+                  </span>
+                  <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none">
+                    Total
+                  </span>
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6 pb-4">
-            <div className="flex items-center gap-3">
-              <Users className="h-6 w-6 text-yellow-500" />
-              <div>
-                <div className="text-lg font-semibold">Total Comments</div>
-                <div className="text-2xl font-bold text-yellow-500">3,200</div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  12% increase
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6 pb-4">
-            <div className="flex items-center gap-3">
-              <Repeat2 className="h-6 w-6 text-blue-600" />
-              <div>
-                <div className="text-lg font-semibold">Total Reactions</div>
-                <div className="text-2xl font-bold text-blue-600">5,400</div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  +5,400 reactions
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6 pb-4">
-            <div className="flex items-center gap-3">
-              <User className="h-6 w-6 text-pink-600" />
-              <div>
-                <div className="text-lg font-semibold">Total ReShares</div>
-                <div className="text-2xl font-bold text-pink-600">1,240</div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  1,240 reshares this week
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
 
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Weekly Feed Posts</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-72 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
-                  data={weeklySignupsData}
-                  margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-                >
-                  <defs>
-                    <linearGradient id="colorFeed" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#1890ff" stopOpacity={0.8} />
-                      <stop offset="95%" stopColor="#1890ff" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <XAxis dataKey="day" />
-                  <YAxis />
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <RechartsTooltip />
-                  <Area
-                    type="monotone"
-                    dataKey="signups"
-                    stroke="#1890ff"
-                    fillOpacity={1}
-                    fill="url(#colorFeed)"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Feed Posts by Category</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-72 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <RePieChart>
-                  <Pie
-                    data={membersByInterestData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                    label={({ name, percent }) =>
-                      `${name}: ${(percent * 100).toFixed(0)}%`
-                    }
+              <div className="space-y-4">
+                {matrixData?.map((item: any, i: number) => (
+                  <div
+                    key={i}
+                    className="group/item flex items-center justify-between p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:bg-white hover:shadow-lg transition-all duration-300"
                   >
-                    {membersByInterestData.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS[index % COLORS.length]}
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="h-2.5 w-2.5 rounded-full shadow-lg transition-transform group-hover/item:scale-150"
+                        style={{ backgroundColor: item.color }}
                       />
-                    ))}
-                  </Pie>
-                  <RechartsTooltip />
-                  <Legend />
-                </RePieChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                        {item.name}
+                      </span>
+                    </div>
+                    <span className="text-sm font-black text-slate-900">
+                      {item.value}%
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </EcosystemCard>
+          </div>
+        </div>
+
+        {/* Promoted Events Section */}
+        {promotedEvents && promotedEvents.length > 0 && (
+          <div className="mt-4">
+            <EcosystemCard
+              title="Promoted Events"
+              description="Upcoming events actively promoted in the feed"
+              icon={Sparkles}
+            >
+              <div className="flex flex-col gap-2">
+                {promotedEvents.map((event: any, index: number) => (
+                  <div key={index} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-4 py-4 rounded-xl border border-border/40 bg-gradient-to-r from-muted/30 to-transparent hover:bg-muted/60 transition-colors group">
+                    <div className="flex items-start gap-4">
+                      <div className="h-10 w-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex flex-col items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                        <span className="text-[10px] font-bold uppercase leading-none mb-0.5">
+                          {event.date ? event.date.split(" ")[0] : "TBA"}
+                        </span>
+                        <span className="text-sm font-black leading-none">
+                          {event.date ? event.date.split(" ")[1]?.replace(",", "") : ""}
+                        </span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm font-semibold text-foreground truncate group-hover:text-indigo-600 transition-colors">
+                          {event.title}
+                        </h4>
+                        <p className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5">
+                          {event.description}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-6 sm:ml-auto shrink-0 pl-14 sm:pl-0">
+                      <div className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
+                        <MapPin className="h-3.5 w-3.5 text-amber-500" />
+                        <span className="max-w-[120px] truncate">{event.location}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
+                        <Clock className="h-3.5 w-3.5 text-emerald-500" />
+                        <span>{event.time}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </EcosystemCard>
+          </div>
+        )}
+      </EcosystemContainer>
+    </EcosystemWrapper>
   );
 }

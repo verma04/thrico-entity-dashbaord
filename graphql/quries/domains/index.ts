@@ -37,8 +37,8 @@ export const ADD_CUSTOM_DOMAIN = gql`
 `;
 
 export const GET_DOMAIN_DETAILS = gql`
-  query GetCustomDomainDetails($input: inputId!) {
-    getCustomDomainDetails(input: $input) {
+ query GetCustomDomainDetails($input: inputId!) {
+  getCustomDomainDetails(input: $input) {
       ${details}
     }
   }
@@ -77,8 +77,8 @@ export const DELETE_DOMAIN = gql`
 `;
 
 export const CHECK_SSL = gql`
-  query CheckSSL($input: inputId!) {
-    checkSSL(input: $input) {
+  query CheckSSL {
+    checkSSL {
       id
       ssl
     }

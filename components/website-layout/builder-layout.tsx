@@ -7,57 +7,44 @@ import ModuleSettings from "./module-settings";
 import LivePreview from "./live-preview";
 import { useWebsiteBuilderStore } from "@/store/useWebsiteBuilderStore";
 import { cn } from "@/lib/utils";
-import { Home, Mail, Users, Plus, Lock } from "lucide-react";
+import { Globe, Plus, Lock, ChevronDown } from "lucide-react";
 import ThemeSelector from "./theme-selector";
 import FontSelector from "./font-selector";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useIsPremium } from "@/hooks/useIsPremium";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Label } from "@/components/ui/label";
+import { CreatePageDialog } from "@/components/pages/create-page-dialog";
+import { useGetWebsite } from "@/graphql/actions/website";
 
 const BuilderLayout = () => {
-  const { selectedModuleId, pages, currentPageId, setCurrentPage, addPage } =
-    useWebsiteBuilderStore();
+  const {
+    selectedModuleId,
+    selectModule,
+    pages,
+    currentPageId,
+    setCurrentPage,
+    addPage,
+  } = useWebsiteBuilderStore();
   const [isMounted, setIsMounted] = React.useState(false);
   const [isAddPageOpen, setIsAddPageOpen] = React.useState(false);
-  const [newPageName, setNewPageName] = React.useState("");
-  const [newPageSlug, setNewPageSlug] = React.useState("");
   const { isPremium } = useIsPremium();
 
-  const handleAddPage = () => {
-    if (!newPageName || !newPageSlug) return;
-    addPage(newPageName, newPageSlug);
-    setNewPageName("");
-    setNewPageSlug("");
-    setIsAddPageOpen(false);
-  };
+  // Fetch website data for websiteId
+  const { data: websiteData, refetch } = useGetWebsite({});
+
+  // Set currentPageId to first page if not set
+  React.useEffect(() => {
+    if (!currentPageId && pages.length > 0) {
+      setCurrentPage(pages[0].id);
+    }
+  }, [currentPageId, pages, setCurrentPage]);
 
   React.useEffect(() => {
     setIsMounted(true);
   }, []);
-
-  const pageIcons = {
-    home: Home,
-    contact: Mail,
-    about: Users,
-  };
-
-  const CurrentIcon =
-    pageIcons[currentPageId as keyof typeof pageIcons] || Home;
 
   if (!isMounted) {
     return null; // Prevent hydration mismatch
@@ -65,141 +52,121 @@ const BuilderLayout = () => {
 
   return (
     <>
-      <div className="flex bg-background h-[calc(100vh-6rem)] overflow-hidden border rounded-xl w-full shadow-sm">
-        {/* --- LEFT PANEL: CONTROLS --- */}
-        <div className="w-[340px] flex flex-col border-r bg-card relative shrink-0">
-          {/* Page Selector Dropdown */}
-          <div className="border-b bg-muted/30 p-3">
-            <div className="flex items-center gap-2">
-              <div className="flex-1 flex items-center gap-2 bg-background border rounded-md px-3 py-2">
-                <CurrentIcon className="h-4 w-4 text-muted-foreground" />
-                <select
-                  value={currentPageId ?? ""}
-                  onChange={(e) => setCurrentPage(e.target.value)}
-                  className="flex-1 bg-transparent border-none outline-none text-sm font-medium cursor-pointer"
-                >
-                  {pages.map((page) => (
-                    <option key={page.id} value={page.id}>
-                      {page.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+      <div className="flex flex-col h-full w-full overflow-hidden bg-background">
+        {/* ─── Unified Top Toolbar ─── */}
+        <div className="h-10 border-b bg-card/90 backdrop-blur-sm flex items-center justify-between px-3 shrink-0 z-30">
+          {/* Left: Page Navigation */}
+          <div className="flex items-center gap-2">
+            <Globe className="h-3.5 w-3.5 text-primary/70" />
 
-              <Dialog open={isAddPageOpen} onOpenChange={setIsAddPageOpen}>
-                {isPremium ? (
-                  <DialogTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-10 w-10 shrink-0 bg-background"
-                      title="Add New Page"
-                    >
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </DialogTrigger>
-                ) : (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="h-10 w-10 shrink-0 bg-background opacity-60 cursor-not-allowed"
-                        disabled
-                      >
-                        <Lock className="h-4 w-4 text-muted-foreground" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p className="text-xs">Upgrade to create additional pages</p>
-                    </TooltipContent>
-                  </Tooltip>
-                )}
-                <DialogContent className="w-[400px] z-[1000]">
-                  <DialogHeader>
-                    <DialogTitle>Add New Page</DialogTitle>
-                    <DialogDescription>
-                      Create a new page for your website.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-4 py-4">
-                    <div className="space-y-2">
-                      <Label>Page Name</Label>
-                      <Input
-                        placeholder="e.g. Services"
-                        value={newPageName}
-                        onChange={(e) => {
-                          setNewPageName(e.target.value);
-                          // Auto-generate slug from name
-                          const slug = e.target.value
-                            .toLowerCase()
-                            .trim()
-                            .replace(/[^\w\s-]/g, "") // Remove special characters
-                            .replace(/\s+/g, "-") // Replace spaces with hyphens
-                            .replace(/-+/g, "-"); // Replace multiple hyphens with single hyphen
-                          setNewPageSlug(slug);
-                        }}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>URL Slug</Label>
-                      <div className="flex items-center gap-2">
-                        <span className="text-muted-foreground text-sm">/</span>
-                        <Input
-                          placeholder="services"
-                          value={newPageSlug}
-                          onChange={(e) =>
-                            setNewPageSlug(
-                              e.target.value.toLowerCase().replace(/\s+/g, "-")
-                            )
-                          }
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <Button
-                      variant="outline"
-                      onClick={() => setIsAddPageOpen(false)}
-                    >
-                      Cancel
-                    </Button>
-                    <Button onClick={handleAddPage} disabled={!newPageName || !newPageSlug}>
-                      Create Page
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
+            <div className="relative flex items-center">
+              <select
+                value={currentPageId ?? ""}
+                onChange={(e) => setCurrentPage(e.target.value)}
+                className="bg-transparent border-none outline-none text-xs font-semibold cursor-pointer text-foreground appearance-none pr-5"
+              >
+                {pages.map((page) => (
+                  <option key={page.id} value={page.id}>
+                    {page.name}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="h-3 w-3 text-muted-foreground absolute right-0 pointer-events-none" />
+            </div>
+
+            <div className="w-px h-4 bg-border/50 mx-0.5" />
+
+            {isPremium ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => setIsAddPageOpen(true)}
+                    className="p-1 rounded-md hover:bg-muted transition-colors"
+                  >
+                    <Plus className="h-3.5 w-3.5 text-muted-foreground" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="text-[10px]">
+                  Add new page
+                </TooltipContent>
+              </Tooltip>
+            ) : (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    className="p-1 rounded-md opacity-40 cursor-not-allowed"
+                    disabled
+                  >
+                    <Lock className="h-3 w-3 text-muted-foreground" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="text-[10px]">
+                  Upgrade to add pages
+                </TooltipContent>
+              </Tooltip>
+            )}
+          </div>
+
+          {/* Right: Builder badge */}
+          <span className="text-[10px] text-muted-foreground/50 tracking-wider uppercase font-medium select-none">
+            Builder
+          </span>
+        </div>
+
+        {/* ─── Main Content Area ─── */}
+        <div className="flex flex-1 overflow-hidden relative">
+          {/* ─── Left Panel: Design Controls ─── */}
+          <div className="w-[280px] flex flex-col border-r bg-card shrink-0">
+            {/* Scrollable Controls */}
+            <div className="flex-1 overflow-y-auto px-3 py-3 space-y-3">
+              <ThemeSelector />
+              <FontSelector />
+              <div className="h-px bg-border/40" />
+              <ModuleManager />
             </div>
           </div>
 
-          {/* Main Content of Left Panel (Controls) */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-5">
-            <ThemeSelector />
-            <FontSelector />
+          {/* ─── Module Settings Drawer (Overlay) ─── */}
+          {selectedModuleId && (
+            <div
+              className="absolute inset-0 z-40 flex"
+              style={{ pointerEvents: "none" }}
+            >
+              {/* Settings Panel */}
+              <div
+                className={cn(
+                  "bg-card shadow-2xl border-r transition-all duration-200 ease-out h-full",
+                )}
+                style={{ pointerEvents: "auto" }}
+              >
+                <ModuleSettings />
+              </div>
+              {/* Click-away backdrop */}
+              <div
+                className="flex-1 bg-black/5 dark:bg-black/20 cursor-pointer"
+                style={{ pointerEvents: "auto" }}
+                onClick={() => selectModule(null)}
+              />
+            </div>
+          )}
 
-            <hr className="border-border/50" />
-            <ModuleManager />
+          {/* ─── Right Panel: Live Preview ─── */}
+          <div className="flex-1 relative bg-muted/15 dark:bg-zinc-950/30">
+            <LivePreview />
           </div>
-
-          {/* --- MODULE SETTINGS DRAWER (Slide-over within Left Panel) --- */}
-          <div
-            className={cn(
-              "absolute inset-0 bg-card z-20 transition-transform duration-300 ease-in-out shadow-xl",
-              selectedModuleId
-                ? "translate-x-0"
-                : "-translate-x-full pointer-events-none"
-            )}
-          >
-            <ModuleSettings />
-          </div>
-        </div>
-
-        {/* --- RIGHT PANEL: LIVE PREVIEW --- */}
-        <div className="flex-1 relative bg-slate-50/50 dark:bg-slate-900/50">
-          <LivePreview />
         </div>
       </div>
+
+      {/* Create Page Dialog */}
+      <CreatePageDialog
+        open={isAddPageOpen}
+        onOpenChange={setIsAddPageOpen}
+        websiteId={websiteData?.getWebsite?.id}
+        onSuccess={(pageData) => {
+          addPage(pageData.name, pageData.slug);
+          refetch();
+        }}
+      />
     </>
   );
 };

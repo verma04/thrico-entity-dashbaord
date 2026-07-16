@@ -1,5 +1,30 @@
 import { gql } from "@apollo/client";
 
+export const GET_POLL_STATS = gql`
+  query GetPollStats($timeRange: TimeRange, $dateRange: DateRangeInput) {
+    getPollStats(timeRange: $timeRange, dateRange: $dateRange) {
+      totalPolls
+      activePolls
+      votes
+      engagementRate
+      totalPollsChange
+      activePollsChange
+      votesChange
+      engagementRateChange
+      trend {
+        date
+        votes
+      }
+      registry {
+        closedPolls
+        activePolls
+        drafts
+        responseRate
+      }
+    }
+  }
+`;
+
 const polls = `
       id
       title
@@ -15,6 +40,13 @@ const polls = `
       createdAt
       endDate
       status
+      addedBy
+      user {
+        id
+        firstName
+        lastName
+        avatar
+      }
 `;
 export const ADD_POOL = gql`
   mutation AddPolls($input: inputAddPolls) {

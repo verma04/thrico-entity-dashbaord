@@ -1,31 +1,37 @@
 "use client";
 
-import { useState } from "react";
+import { withModulePermission } from "@/components/hoc/with-module-permission";
+import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
+
+import React, { useState } from "react";
 import {
   Download,
   Calendar,
   LayoutGrid,
   Users,
   MessageSquare,
-  User,
   TrendingUp,
-  TrendingDown,
+  Activity,
+  Zap,
+  ShieldCheck,
+  RotateCcw,
+  Timer,
+  Hash,
+  BarChart3,
+  Globe,
+  ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
+import { DateRangePicker } from "@/components/ui/date-range-picker";
+import { subDays } from "date-fns";
+import { DateRange } from "react-day-picker";
 import {
   Area,
   AreaChart,
   CartesianGrid,
   Cell,
-  Legend,
   Pie,
   PieChart,
   ResponsiveContainer,
@@ -33,390 +39,338 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import {
+  EcosystemKPI,
+  EcosystemCard,
+} from "@/components/layout/ecosystem/ecosystem-analytics";
+import { cn } from "@/lib/utils";
+import { useGetDiscussionAnalytics } from "@/graphql/actions/discussion-form";
+import { useModuleStore } from "@/store/useModuleStore";
 
-// Sample data for charts
-const weeklySignupsData = [
-  { day: "Mon", signups: 120 },
-  { day: "Tue", signups: 132 },
-  { day: "Wed", signups: 101 },
-  { day: "Thu", signups: 134 },
-  { day: "Fri", signups: 190 },
-  { day: "Sat", signups: 230 },
-  { day: "Sun", signups: 210 },
-];
+// Removing dummy data constants
+// Dummy data removed
 
-const membersByInterestData = [
-  { name: "Technology", value: 35 },
-  { name: "Arts", value: 25 },
-  { name: "Finance", value: 15 },
-  { name: "Health", value: 15 },
-  { name: "Other", value: 10 },
-];
+function DiscussionForum() {
+  const moduleName = useModuleStore((state) => state.forumModuleName);
+  const [timeRangeStr, setTimeRangeStr] = useState("LAST_7_DAYS");
+  const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
+    from: subDays(new Date(), 7),
+    to: new Date(),
+  });
 
-const communityPerformanceData = [
-  {
-    key: "1",
-    name: "Photography Enthusiasts",
-    slug: "photography-enthusiasts",
-    members: 12500,
-    activePercentage: 78,
-    lastActivity: "2 hours ago",
-  },
-  {
-    key: "2",
-    name: "Tech Innovators",
-    slug: "tech-innovators",
-    members: 9800,
-    activePercentage: 82,
-    lastActivity: "1 hour ago",
-  },
-  {
-    key: "3",
-    name: "Fitness & Health",
-    slug: "fitness-health",
-    members: 8700,
-    activePercentage: 65,
-    lastActivity: "3 hours ago",
-  },
-  {
-    key: "4",
-    name: "Book Lovers",
-    slug: "book-lovers",
-    members: 7600,
-    activePercentage: 58,
-    lastActivity: "5 hours ago",
-  },
-  {
-    key: "5",
-    name: "Travel Adventures",
-    slug: "travel-adventures",
-    members: 6500,
-    activePercentage: 72,
-    lastActivity: "4 hours ago",
-  },
-  {
-    key: "6",
-    name: "Cooking Masters",
-    slug: "cooking-masters",
-    members: 5400,
-    activePercentage: 67,
-    lastActivity: "6 hours ago",
-  },
-  {
-    key: "7",
-    name: "Gaming Community",
-    slug: "gaming-community",
-    members: 11200,
-    activePercentage: 88,
-    lastActivity: "30 minutes ago",
-  },
-];
-
-// Helper function to get color based on activity percentage
-function getActivityColor(percentage: number) {
-  if (percentage >= 80) return "hsl(var(--chart-1))";
-  if (percentage >= 60) return "hsl(var(--chart-2))";
-  if (percentage >= 40) return "hsl(var(--chart-3))";
-  return "hsl(var(--chart-4))";
-}
-
-// Colors for pie chart
-const COLORS = [
-  "hsl(var(--chart-1))",
-  "hsl(var(--chart-2))",
-  "hsl(var(--chart-3))",
-  "hsl(var(--chart-4))",
-  "hsl(var(--chart-5))",
-];
-
-export default function DiscussionForum() {
-  const [dateRange, setDateRange] = useState<string>("7days");
-
-  const getDateRangeLabel = (value: string) => {
-    const labels: Record<string, string> = {
-      today: "Today",
-      "7days": "Last 7 Days",
-      "30days": "Last 30 Days",
-      custom: "Custom Range",
-    };
-    return labels[value] || "Last 7 Days";
+  const handleDateChange = (range: DateRange | undefined) => {
+    setDateRange(range);
+    if (!range?.from || !range?.to) return;
+    const diffDays = Math.round(
+      (range.to.getTime() - range.from.getTime()) / (1000 * 60 * 60 * 24),
+    );
+    if (diffDays <= 1) setTimeRangeStr("LAST_24_HOURS");
+    else if (diffDays <= 7) setTimeRangeStr("LAST_7_DAYS");
+    else if (diffDays <= 30) setTimeRangeStr("LAST_30_DAYS");
+    else if (diffDays <= 30) setTimeRangeStr("LAST_30_DAYS");
+    else setTimeRangeStr("LAST_90_DAYS");
   };
 
+  const dateRangeParam = dateRange?.from && dateRange?.to
+    ? {
+        startDate: dateRange.from.toISOString(),
+        endDate: dateRange.to.toISOString(),
+      }
+    : undefined;
+
+  const { data, loading } = useGetDiscussionAnalytics({
+    variables: {
+      timeRange: timeRangeStr,
+      dateRange: dateRangeParam,
+    },
+  });
+
+  const stats = data?.getDiscussionAnalytics;
+  const postingActivityData = stats?.trend || [];
+  const topicDistributionData = stats?.topicDistribution || [];
+  const forumPerformanceData = stats?.topForums || [];
+
+  const kpis = [
+    {
+      title: `Total ${moduleName}`,
+      value: (stats?.totalForums || 0).toLocaleString(),
+      trend: 3,
+      icon: LayoutGrid,
+      color: "text-zinc-900",
+      bg: "bg-zinc-100",
+    },
+    {
+      title: "Active Threads",
+      value: (stats?.activeThreads || 0).toLocaleString(),
+      trend: 18,
+      icon: Hash,
+      color: "text-indigo-600",
+      bg: "bg-indigo-50",
+    },
+    {
+      title: "New Posts",
+      value: (stats?.dailyPosts || 0).toLocaleString(),
+      trend: 24,
+      icon: MessageSquare,
+      color: "text-emerald-600",
+      bg: "bg-emerald-50",
+    },
+    {
+      title: "Global Members",
+      value: (stats?.globalMembers || 0).toLocaleString(),
+      trend: 5,
+      icon: Users,
+      color: "text-blue-600",
+      bg: "bg-blue-50",
+    },
+  ];
+
   return (
-    <div className="space-y-6">
-      {/* Top Navigation Bar */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">
-                Discussion Forums
-              </h1>
-              <p className="text-muted-foreground mt-1">
-                Manage and monitor your community discussions
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <Select value={dateRange} onValueChange={setDateRange}>
-                <SelectTrigger className="w-[180px]">
-                  <Calendar className="h-4 w-4 mr-2" />
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="today">Today</SelectItem>
-                  <SelectItem value="7days">Last 7 Days</SelectItem>
-                  <SelectItem value="30days">Last 30 Days</SelectItem>
-                  <SelectItem value="custom">Custom Range</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button className="gap-2">
-                <Download className="h-4 w-4" />
-                Download CSV
-              </Button>
-            </div>
+    <EcosystemWrapper anonymized-1="discussion-forums">
+      <EcosystemHeader
+        title={`${moduleName} Analytics`}
+        description="Monitor community participation, thread velocity, and topic distribution."
+        badgeText="Overview"
+        icon={MessageSquare}
+      />
+
+      <EcosystemActionBar shadow="none">
+        <div className="flex items-center justify-between w-full">
+          <div className="flex items-center gap-2 px-1">
+            <ShieldCheck className="h-4 w-4 text-emerald-500" />
+            <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground italic">
+              Verified Interaction Stream
+            </span>
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Metric Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Forums</CardTitle>
-            <div className="rounded-full p-2 bg-green-50 dark:bg-green-950">
-              <LayoutGrid className="h-4 w-4 text-green-600 dark:text-green-400" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-              128
-            </div>
-            <div className="flex items-center text-xs text-green-600 dark:text-green-400 mt-1">
-              <TrendingUp className="h-3 w-3 mr-1" />
-              +3 new this week
-            </div>
-          </CardContent>
-        </Card>
+          <div className="flex items-center gap-3">
+            <DateRangePicker 
+              date={dateRange}
+              onDateChange={handleDateChange}
+              defaultValue="LAST_7_DAYS"
+            />
+            <div className="h-4 w-px bg-zinc-200 mx-1" />
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 gap-2 text-xs font-bold border-zinc-200"
+            >
+              <Download className="h-3.5 w-3.5 text-zinc-400" />
+              Export
+            </Button>
+          </div>
+        </div>
+      </EcosystemActionBar>
 
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Active Threads
-            </CardTitle>
-            <div className="rounded-full p-2 bg-amber-50 dark:bg-amber-950">
-              <Users className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">
-              542
-            </div>
-            <div className="flex items-center text-xs text-amber-600 dark:text-amber-400 mt-1">
-              <TrendingUp className="h-3 w-3 mr-1" />
-              18% increase
-            </div>
-          </CardContent>
-        </Card>
+      <EcosystemContainer className="p-6 lg:p-8 space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {kpis.map((kpi, i) => (
+            <EcosystemKPI key={i} {...kpi} trendLabel="v. last period" />
+          ))}
+        </div>
 
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Posts This Week
-            </CardTitle>
-            <div className="rounded-full p-2 bg-blue-50 dark:bg-blue-950">
-              <MessageSquare className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-              3,200
-            </div>
-            <div className="flex items-center text-xs text-blue-600 dark:text-blue-400 mt-1">
-              <TrendingUp className="h-3 w-3 mr-1" />
-              +3200 posts
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Users</CardTitle>
-            <div className="rounded-full p-2 bg-pink-50 dark:bg-pink-950">
-              <User className="h-4 w-4 text-pink-600 dark:text-pink-400" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-pink-600 dark:text-pink-400">
-              1,240
-            </div>
-            <div className="flex items-center text-xs text-pink-600 dark:text-pink-400 mt-1">
-              <TrendingUp className="h-3 w-3 mr-1" />
-              1240 users this week
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Charts - Second Row */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Weekly New Threads</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
-                  data={weeklySignupsData}
-                  margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-                >
-                  <defs>
-                    <linearGradient
-                      id="colorThreads"
-                      x1="0"
-                      y1="0"
-                      x2="0"
-                      y2="1"
-                    >
-                      <stop
-                        offset="5%"
-                        stopColor="hsl(var(--primary))"
-                        stopOpacity={0.8}
-                      />
-                      <stop
-                        offset="95%"
-                        stopColor="hsl(var(--primary))"
-                        stopOpacity={0}
-                      />
-                    </linearGradient>
-                  </defs>
-                  <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" />
-                  <YAxis stroke="hsl(var(--muted-foreground))" />
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    stroke="hsl(var(--border))"
-                  />
-                  <RechartsTooltip
-                    contentStyle={{
-                      backgroundColor: "hsl(var(--background))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: "var(--radius)",
-                    }}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="signups"
-                    stroke="hsl(var(--primary))"
-                    fillOpacity={1}
-                    fill="url(#colorThreads)"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Posts by Category</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={membersByInterestData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                    label={({ name, percent }) =>
-                      `${name}: ${(percent * 100).toFixed(0)}%`
-                    }
-                  >
-                    {membersByInterestData.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS[index % COLORS.length]}
-                      />
-                    ))}
-                  </Pie>
-                  <RechartsTooltip
-                    contentStyle={{
-                      backgroundColor: "hsl(var(--background))",
-                      border: "1px solid hsl(var(--border))",
-                      borderRadius: "var(--radius)",
-                    }}
-                  />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Top Forums Performance Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Top Forums Performance</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {communityPerformanceData.map((forum) => (
-              <div
-                key={forum.key}
-                className="flex items-center justify-between p-4 rounded-lg border hover:bg-accent transition-colors"
-              >
-                <div className="flex-1">
-                  <a
-                    href="#"
-                    className="font-medium hover:underline text-primary"
-                  >
-                    {forum.name}
-                  </a>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {forum.slug}
-                  </p>
-                </div>
-                <div className="flex items-center gap-8">
-                  <div className="text-right">
-                    <p className="text-sm font-medium">
-                      {forum.members.toLocaleString()}
-                    </p>
-                    <p className="text-xs text-muted-foreground">members</p>
-                  </div>
-                  <div className="w-32">
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1 bg-muted rounded-full h-2">
-                        <div
-                          className="h-2 rounded-full transition-all"
-                          style={{
-                            width: `${forum.activePercentage}%`,
-                            backgroundColor: getActivityColor(
-                              forum.activePercentage
-                            ),
-                          }}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-8">
+            <EcosystemCard
+              title="Interaction Pulse"
+              description="New threads and replies trajectory"
+              icon={TrendingUp}
+            >
+              <div className="h-[350px] w-full mt-6">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={postingActivityData}>
+                    <defs>
+                      <linearGradient
+                        id="colorPosts"
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                      >
+                        <stop
+                          offset="5%"
+                          stopColor="#6366f1"
+                          stopOpacity={0.08}
                         />
-                      </div>
-                      <span className="text-sm font-medium w-10 text-right">
-                        {forum.activePercentage}%
+                        <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      vertical={false}
+                      stroke="#f1f5f9"
+                    />
+                    <XAxis
+                      dataKey="date"
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 10, fontWeight: 600, fill: "#94a3b8" }}
+                      dy={10}
+                      tickFormatter={(val) => {
+                        if (!val) return "";
+                        return new Date(val).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+                      }}
+                    />
+                    <YAxis
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 10, fontWeight: 600, fill: "#94a3b8" }}
+                    />
+                    <RechartsTooltip
+                      contentStyle={{
+                        backgroundColor: "#18181b",
+                        border: "none",
+                        borderRadius: "12px",
+                      }}
+                      itemStyle={{
+                        color: "#fff",
+                        fontWeight: 700,
+                        fontSize: "11px",
+                      }}
+                      labelStyle={{ display: "none" }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="posts"
+                      stroke="#6366f1"
+                      strokeWidth={3}
+                      fillOpacity={1}
+                      fill="url(#colorPosts)"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </EcosystemCard>
+          </div>
+
+          <div className="lg:col-span-4">
+            <EcosystemCard
+              title="Topic Mix"
+              description="Engagement distribution"
+              icon={BarChart3}
+            >
+              <div className="h-64 w-full mt-2">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={topicDistributionData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={85}
+                      paddingAngle={4}
+                      dataKey="value"
+                    >
+                      {topicDistributionData.map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={entry.color}
+                          stroke="none"
+                        />
+                      ))}
+                    </Pie>
+                    <RechartsTooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="space-y-3 px-2 mt-4">
+                {topicDistributionData.map((item, i) => (
+                  <div key={i} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="h-2 w-2 rounded-full"
+                        style={{ backgroundColor: item.color }}
+                      />
+                      <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
+                        {item.name}
                       </span>
                     </div>
+                    <span className="text-xs font-bold text-zinc-900">
+                      {item.value}%
+                    </span>
                   </div>
+                ))}
+              </div>
+            </EcosystemCard>
+          </div>
+        </div>
+
+        <EcosystemCard
+          title={`Top Performing ${moduleName}`}
+          description="High-velocity community nodes"
+          icon={Activity}
+        >
+          <div className="space-y-1 mt-6">
+            {forumPerformanceData.map((forum) => (
+              <div
+                key={forum.id}
+                className="flex items-center justify-between p-5 rounded-xl border border-zinc-100 hover:bg-zinc-50 transition-all group"
+              >
+                <div className="flex items-center gap-6 flex-1">
+                  <div className="h-12 w-12 bg-white rounded-lg flex items-center justify-center text-2xl shadow-sm border border-zinc-100 group-hover:scale-105 transition-transform">
+                    {forum.icon}
+                  </div>
+                  <div className="min-w-0">
+                    <h4 className="text-sm font-bold text-zinc-900 transition-colors group-hover:text-indigo-600 truncate">
+                      {forum.name}
+                    </h4>
+                    <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mt-0.5">
+                      {forum.members.toLocaleString()} members • id: {forum.slug}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-12">
+                  <div className="w-32">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest leading-none">
+                        Active
+                      </span>
+                      <span className="text-[10px] font-bold text-zinc-900 leading-none">
+                        {forum.active}%
+                      </span>
+                    </div>
+                    <div className="h-1 w-full bg-zinc-100 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-indigo-500 rounded-full transition-all duration-1000"
+                        style={{ width: `${forum.active}%` }}
+                      />
+                    </div>
+                  </div>
+
                   <div className="text-right w-24">
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs font-bold text-zinc-900 truncate">
                       {forum.lastActivity}
+                    </p>
+                    <p className="text-[8px] font-bold text-zinc-400 uppercase tracking-tighter">
+                      last activity
                     </p>
                   </div>
                 </div>
               </div>
             ))}
+            {forumPerformanceData.length === 0 && (
+              <div className="text-center py-8 text-sm text-zinc-500 font-medium">
+                No active {moduleName.toLowerCase()} found in this period.
+              </div>
+            )}
           </div>
-        </CardContent>
-      </Card>
-    </div>
+          <div className="mt-8 flex justify-center">
+             <Button variant="ghost" className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] hover:text-indigo-600">
+                View Extensive Audit <ArrowRight size={12} className="ml-2" />
+             </Button>
+          </div>
+        </EcosystemCard>
+      </EcosystemContainer>
+    </EcosystemWrapper>
   );
 }
+
+export default withSubscriptionCheck(
+  withModulePermission(DiscussionForum, "FORUMS", "canRead"),
+  "forums"
+);

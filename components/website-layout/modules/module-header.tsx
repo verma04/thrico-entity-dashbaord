@@ -9,27 +9,51 @@ interface LayoutSettings {
 interface ModuleHeaderProps {
   title?: string;
   description?: string;
+  label?: string;
   titleClassName?: string;
   descriptionClassName?: string;
+  labelClassName?: string;
   containerClassName?: string;
   alignment?: "left" | "center" | "right";
   showIcon?: boolean;
   icon?: React.ReactNode;
+  titleColor?: string;
+  descriptionColor?: string;
+  hideTitle?: boolean;
+  hideDescription?: boolean;
   layoutSettings?: LayoutSettings;
 }
 
 export const ModuleHeader = ({
   title,
   description,
+  label,
   titleClassName,
   descriptionClassName,
+  labelClassName,
   containerClassName,
   alignment = "left",
   showIcon = false,
   icon,
   layoutSettings,
+  titleColor,
+  descriptionColor,
+  hideTitle,
+  hideDescription,
 }: ModuleHeaderProps) => {
-  if (!title && !description) return null;
+  const hasVisibleTitle = title && !hideTitle;
+  const hasVisibleDescription = description && !hideDescription;
+  const hasVisibleLabel = label;
+  const hasVisibleIcon = showIcon && icon;
+
+  if (
+    !hasVisibleTitle &&
+    !hasVisibleDescription &&
+    !hasVisibleLabel &&
+    !hasVisibleIcon
+  ) {
+    return null;
+  }
 
   const alignmentClasses = {
     left: "text-left",
@@ -38,8 +62,9 @@ export const ModuleHeader = ({
   };
 
   // Map layout settings to Tailwind classes
-  const flexDirectionClass = layoutSettings?.flexDirection === "row" ? "flex-row" : "flex-col";
-  
+  const flexDirectionClass =
+    layoutSettings?.flexDirection === "row" ? "flex-row" : "flex-col";
+
   const justifyContentClasses = {
     start: "justify-start",
     center: "justify-center",
@@ -47,7 +72,7 @@ export const ModuleHeader = ({
     between: "justify-between",
     around: "justify-around",
   };
-  
+
   const alignItemsClasses = {
     start: "items-start",
     center: "items-center",
@@ -55,16 +80,16 @@ export const ModuleHeader = ({
     stretch: "items-stretch",
   };
 
-  const justifyClass = layoutSettings?.justifyContent 
+  const justifyClass = layoutSettings?.justifyContent
     ? justifyContentClasses[layoutSettings.justifyContent]
     : "";
-    
+
   const alignClass = layoutSettings?.alignItems
     ? alignItemsClasses[layoutSettings.alignItems]
     : "";
 
   return (
-    <div 
+    <div
       className={cn(
         "mb-12",
         layoutSettings ? "flex gap-4" : "",
@@ -76,22 +101,28 @@ export const ModuleHeader = ({
       )}
     >
       {showIcon && icon && <div className="mb-4">{icon}</div>}
-      {title && (
-        <h2
+      {label && (
+        <span
           className={cn(
-            "text-4xl font-bold mb-3",
-            titleClassName
+            "inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest mb-4",
+            labelClassName
           )}
+        >
+          {label}
+        </span>
+      )}
+      {!hideTitle && title && (
+        <h2
+          className={cn("text-4xl font-bold mb-3", titleClassName)}
+          style={{ color: titleColor ? titleColor : "#000000" }}
         >
           {title}
         </h2>
       )}
-      {description && (
+      {!hideDescription && description && (
         <p
-          className={cn(
-            "text-muted-foreground text-lg",
-            descriptionClassName
-          )}
+          className={cn("text-muted-foreground text-lg", descriptionClassName)}
+          style={{ color: descriptionColor ? descriptionColor : "#000000" }}
         >
           {description}
         </p>

@@ -1,4 +1,5 @@
 import { ModuleData } from "@/store/useWebsiteBuilderStore";
+import { ModuleContainer } from "../modules/module-container";
 import { cn } from "@/lib/utils";
 import { Building2 } from "lucide-react";
 
@@ -25,7 +26,7 @@ export const LogoCloudRenderer = ({
   // Logo Grid
   if (layout === "logo-grid") {
     return (
-      <section className="py-16 bg-background">
+      <ModuleContainer containerSettings={content.containerSettings} className="bg-background">
         <div
           className={cn("container mx-auto text-center", isMobile && "px-4")}
         >
@@ -59,14 +60,14 @@ export const LogoCloudRenderer = ({
             ))}
           </div>
         </div>
-      </section>
+      </ModuleContainer>
     );
   }
 
   // Logo Carousel
   if (layout === "logo-carousel") {
     return (
-      <section className="py-16 bg-slate-50 overflow-hidden">
+      <ModuleContainer containerSettings={content.containerSettings} className="bg-slate-50 overflow-hidden">
         <div className={cn("container mx-auto", isMobile && "px-4")}>
           <h3 className="text-lg font-semibold text-muted-foreground text-center mb-12">
             {title}
@@ -95,14 +96,14 @@ export const LogoCloudRenderer = ({
             </div>
           </div>
         </div>
-      </section>
+      </ModuleContainer>
     );
   }
 
   // Monochrome Logos
   if (layout === "monochrome-logos") {
     return (
-      <section className="py-16 bg-background">
+      <ModuleContainer containerSettings={content.containerSettings} className="bg-background">
         <div
           className={cn("container mx-auto text-center", isMobile && "px-4")}
         >
@@ -136,14 +137,14 @@ export const LogoCloudRenderer = ({
             ))}
           </div>
         </div>
-      </section>
+      </ModuleContainer>
     );
   }
 
   // Featured Logos
   if (layout === "featured-logos") {
     return (
-      <section className="py-16 bg-slate-50">
+      <ModuleContainer containerSettings={content.containerSettings} className="bg-slate-50">
         <div className={cn("container mx-auto", isMobile && "px-4")}>
           <h3 className="text-lg font-semibold text-center mb-12">{title}</h3>
           <div
@@ -196,14 +197,14 @@ export const LogoCloudRenderer = ({
             </div>
           </div>
         </div>
-      </section>
+      </ModuleContainer>
     );
   }
 
   // Minimal Strip
   if (layout === "minimal-strip") {
     return (
-      <section className="py-8 border-y">
+      <ModuleContainer containerSettings={content.containerSettings} className="py-8 border-y">
         <div className={cn("container mx-auto", isMobile && "px-4")}>
           <div className="flex items-center justify-between gap-4 md:gap-8 flex-wrap">
             <span className="text-sm text-muted-foreground">{title}</span>
@@ -227,7 +228,7 @@ export const LogoCloudRenderer = ({
             </div>
           </div>
         </div>
-      </section>
+      </ModuleContainer>
     );
   }
 

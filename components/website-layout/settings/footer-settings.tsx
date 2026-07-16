@@ -8,6 +8,7 @@ import {
 } from "@/store/useWebsiteBuilderStore";
 import { MenuEditor } from "./menu-editor";
 import { SocialLinksEditor } from "./social-links-editor";
+import { ContainerSettings } from "./container-settings";
 import { ImageUploadWithCrop } from "@/components/ui/image-upload-with-crop";
 
 interface FooterSettingsProps {
@@ -99,21 +100,19 @@ export const FooterSettings = ({
         />
       </div>
 
-      {/* Menu Editor */}
-      <div className="space-y-2">
-        <Label>Footer Navigation</Label>
-        <MenuEditor
-          menuItems={content.menuItems}
-          onChange={(items) => onContentUpdate({ menuItems: items })}
-        />
-      </div>
-
       {/* Social Links Editor */}
       <div className="space-y-2">
         <Label>Social Media Links</Label>
         <SocialLinksEditor
           links={content.socialLinks}
           onChange={(links) => onContentUpdate({ socialLinks: links })}
+        />
+      </div>
+
+      <div className="pt-4 border-t">
+        <ContainerSettings
+          selectedModule={{ id: moduleId, content }}
+          updateModuleContent={(_, updates) => onContentUpdate(updates)}
         />
       </div>
     </div>

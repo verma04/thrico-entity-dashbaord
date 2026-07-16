@@ -5,46 +5,49 @@ import { Settings, Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const NavigationManager = () => {
-  const { globalHeader, selectModule, selectedModuleId } = useWebsiteBuilderStore();
-  
+  const { globalHeader, selectModule, selectedModuleId } =
+    useWebsiteBuilderStore();
+
   const isSelected = selectedModuleId === globalHeader.id;
 
-
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-muted-foreground uppercase">
-          Global Navigation
-        </h3>
-      </div>
-      
+    <div className="space-y-1">
+      <h4 className="text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-wider">
+        Navigation
+      </h4>
+
       <div
         onClick={() => selectModule(globalHeader.id)}
         className={cn(
-          "cursor-pointer hover:bg-muted/50 p-3 rounded-lg border transition-all",
-          isSelected && "bg-primary/10 border-primary ring-2 ring-primary/20"
+          "cursor-pointer p-2 rounded-lg border transition-all",
+          isSelected
+            ? "bg-primary/5 border-primary/40 ring-1 ring-primary/20"
+            : "hover:bg-muted/40 border-transparent hover:border-border/50",
         )}
       >
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-primary/10 rounded-md">
-            <Menu className="h-4 w-4 text-primary" />
+        <div className="flex items-center gap-2.5">
+          <div
+            className={cn(
+              "p-1.5 rounded-md",
+              isSelected ? "bg-primary/10" : "bg-muted/60",
+            )}
+          >
+            <Menu className="h-3 w-3 text-primary/70" />
           </div>
-          <div className="flex-1">
-            <div className="font-medium text-sm">{globalHeader.name}</div>
-            <div className="text-xs text-muted-foreground">
-              Layout: {globalHeader.layout} • {globalHeader.visibility}
+          <div className="flex-1 min-w-0">
+            <div className="font-medium text-xs">Navbar</div>
+            <div className="text-[10px] text-muted-foreground/60 truncate">
+              {globalHeader.layout} · All pages
             </div>
           </div>
-          <Settings className={cn(
-            "h-4 w-4 transition-colors",
-            isSelected ? "text-primary" : "text-muted-foreground"
-          )} />
+          <Settings
+            className={cn(
+              "h-3 w-3 shrink-0 transition-colors",
+              isSelected ? "text-primary/70" : "text-muted-foreground/40",
+            )}
+          />
         </div>
       </div>
-
-      <p className="text-[10px] text-muted-foreground px-1">
-        This navigation appears on all pages
-      </p>
     </div>
   );
 };

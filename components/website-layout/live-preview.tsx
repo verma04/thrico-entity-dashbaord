@@ -7,6 +7,7 @@ import {
   useWebsiteBuilderStore,
 } from "@/store/useWebsiteBuilderStore";
 import { cn } from "@/lib/utils";
+import { ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
 import {
   DeviceSelector,
   PreviewTopBar,
@@ -28,14 +29,14 @@ import { ContactRenderer } from "./preview/contact-renderer";
 import { PrivacyPolicyRenderer } from "./preview/privacypolicy-renderer";
 import { TeamMembersRenderer } from "./preview/team-members-renderer";
 import { TermsRenderer } from "./preview/terms-renderer";
-import { FaqRenderer } from "./preview/FaqRenderer";
+import { FaqRenderer } from "./preview/faq-renderer";
 import { ContentSectionRenderer } from "./preview/content-section-renderer";
 import { CtaBannerRenderer } from "./preview/cta-banner-renderer";
 import { StatsRenderer } from "./preview/stats-renderer";
 import { LogoCloudRenderer } from "./preview/logo-cloud-renderer";
 import { TimelineRenderer } from "./preview/timeline-renderer";
 import { ProcessStepsRenderer } from "./preview/process-steps-renderer";
-import { PricingRenderer } from "./preview/pricing-renderer";
+
 import { EventsRenderer } from "./preview/events-renderer";
 import { FeatureHighlightsRenderer } from "./preview/feature-highlights-renderer";
 import { MediaGalleryRenderer } from "./preview/media-gallery-renderer";
@@ -44,6 +45,7 @@ import BlogRenderer from "./preview/blog-renderer";
 import { PartnersModule } from "./modules/partners-module";
 import { AchievementsModule } from "./modules/achievements-module";
 import { VideoSpotlightModule } from "./modules/video-spotlight-module";
+
 import { ResourcesModule } from "./modules/resources-module";
 import { SocialProofModule } from "./modules/social-proof-module";
 
@@ -56,6 +58,7 @@ import { CalloutModule } from "./modules/callout-module";
 
 // Information Modules
 import { AnnouncementModule } from "./modules/announcement-module";
+import { AnnouncementBarModule } from "./modules/announcement-bar-module";
 import { SitemapModule } from "./modules/sitemap-module";
 import { GuidelinesModule } from "./modules/guidelines-module";
 
@@ -87,13 +90,15 @@ import { HeroModule } from "./modules/hero-module";
 import { WallOfFameModule } from "./modules/wall-of-fame-module";
 import { MembersAroundWorldModule } from "./modules/members-around-world-module";
 import { LatestMembersModule } from "./modules/latest-members-module";
+import { PricingRenderer } from "./preview/pricing-renderer";
+import { MilestonesRenderer } from "./preview/milestones-renderer";
 
 // --- Enhanced Module Renderer Component ---
 
 interface ModuleRendererProps {
   module: ModuleData;
   theme: ThemeType;
-  previewDevice: string;
+  previewDevice: "desktop" | "tablet" | "mobile";
   isSelected?: boolean;
   onSelect?: () => void;
 }
@@ -148,10 +153,13 @@ const ModuleRenderer: React.FC<ModuleRendererProps> = ({
       <LocationMapModule module={module} previewDevice={previewDevice} />
     ),
     "contact-form": (
-       <ContactRenderer module={module} previewDevice={previewDevice as any} />
+      <ContactRenderer module={module} previewDevice={previewDevice as any} />
     ),
     "contact-info": (
-       <ContactRenderer module={module} previewDevice={previewDevice as any} />
+      <ContactRenderer module={module} previewDevice={previewDevice as any} />
+    ),
+    milestones: (
+      <MilestonesRenderer module={module} previewDevice={previewDevice} />
     ),
 
     // Community Components
@@ -185,6 +193,7 @@ const ModuleRenderer: React.FC<ModuleRendererProps> = ({
     "video-spotlight": (
       <VideoSpotlightModule module={module} previewDevice={previewDevice} />
     ),
+
     resources: (
       <ResourcesModule module={module} previewDevice={previewDevice} />
     ),
@@ -212,6 +221,9 @@ const ModuleRenderer: React.FC<ModuleRendererProps> = ({
     announcement: (
       <AnnouncementModule module={module} previewDevice={previewDevice} />
     ),
+    "announcement-bar": (
+      <AnnouncementBarModule module={module} previewDevice={previewDevice} />
+    ),
     sitemap: <SitemapModule module={module} previewDevice={previewDevice} />,
     guidelines: (
       <GuidelinesModule module={module} previewDevice={previewDevice} />
@@ -223,9 +235,6 @@ const ModuleRenderer: React.FC<ModuleRendererProps> = ({
     ),
     "event-countdown": (
       <EventCountdownModule module={module} previewDevice={previewDevice} />
-    ),
-    milestones: (
-      <MilestonesModule module={module} previewDevice={previewDevice} />
     ),
     roadmap: <RoadmapModule module={module} previewDevice={previewDevice} />,
 
@@ -329,6 +338,11 @@ const ModuleRenderer: React.FC<ModuleRendererProps> = ({
     timeline: (
       <TimelineRenderer module={module} previewDevice={previewDevice} />
     ),
+    "results-dashboard": (
+      <div className="p-12 bg-gray-100 border-2 border-dashed border-gray-300 text-center">
+        <p className="text-gray-500">Results Dashboard - Coming Soon</p>
+      </div>
+    ),
   };
 
   return (
@@ -371,6 +385,8 @@ const LivePreview = () => {
     globalHeader,
     globalFooter,
     font,
+    zoomLevel,
+    setZoomLevel,
   } = useWebsiteBuilderStore();
 
   // Get current page's modules (excluding old potential navbars/footers if data wasn't migrated)
@@ -384,17 +400,29 @@ const LivePreview = () => {
   );
 
   // Font family mapping
+  // Font family mapping
   const fontFamilyMap: Record<FontType, string> = {
-    inter: "'Inter', sans-serif",
-    roboto: "'Roboto', sans-serif",
-    poppins: "'Poppins', sans-serif",
-    playfair: "'Playfair Display', serif",
-    montserrat: "'Montserrat', sans-serif",
-    lato: "'Lato', sans-serif",
-    "open-sans": "'Open Sans', sans-serif",
-    raleway: "'Raleway', sans-serif",
-    merriweather: "'Merriweather', serif",
-    nunito: "'Nunito', sans-serif",
+    inter: "var(--font-inter), sans-serif",
+    roboto: "var(--font-roboto), sans-serif",
+    poppins: "var(--font-poppins), sans-serif",
+    playfair: "var(--font-playfair), serif",
+    montserrat: "var(--font-montserrat), sans-serif",
+    lato: "var(--font-lato), sans-serif",
+    "open-sans": "var(--font-open-sans), sans-serif",
+    raleway: "var(--font-raleway), sans-serif",
+    merriweather: "var(--font-merriweather), serif",
+    nunito: "var(--font-nunito), sans-serif",
+    "source-sans": "var(--font-source-sans-3), sans-serif",
+    "work-sans": "var(--font-work-sans), sans-serif",
+    ubuntu: "var(--font-ubuntu), sans-serif",
+    lora: "var(--font-lora), serif",
+    cormorant: "var(--font-cormorant-garamond), serif",
+    bitter: "var(--font-bitter), serif",
+    oswald: "var(--font-oswald), sans-serif",
+    "bebas-neue": "var(--font-bebas-neue), sans-serif",
+    cinzel: "var(--font-cinzel), serif",
+    pacifico: "var(--font-pacifico), cursive",
+    "fira-code": "var(--font-fira-code), monospace",
     "sans-serif": "sans-serif",
     verdana: "Verdana, Geneva, sans-serif",
     georgia: "Georgia, 'Times New Roman', serif",
@@ -403,27 +431,74 @@ const LivePreview = () => {
     impact: "Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif",
   };
 
+  const handleWheel = React.useCallback(
+    (e: React.WheelEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? -5 : 5;
+        setZoomLevel(Math.min(Math.max(25, zoomLevel + delta), 200));
+      }
+    },
+    [zoomLevel, setZoomLevel]
+  );
+
   return (
-    <div className="flex flex-col h-full bg-slate-100 dark:bg-slate-900 relative transition-colors">
+    <div
+      className="flex flex-col h-full bg-slate-100 dark:bg-slate-900 relative transition-colors overflow-hidden"
+      onWheel={handleWheel}
+    >
       {/* Simulation Bar */}
       <PreviewTopBar currentTheme={currentTheme}>
-        <DeviceSelector
-          previewDevice={previewDevice}
-          setPreviewDevice={setPreviewDevice}
-        />
+        <div className="flex items-center gap-4">
+          <DeviceSelector
+            previewDevice={previewDevice}
+            setPreviewDevice={setPreviewDevice}
+          />
+          <div className="h-4 w-px bg-border/50" />
+          <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-md border">
+            <button
+              onClick={() => setZoomLevel(Math.max(25, zoomLevel - 10))}
+              className="p-1 hover:bg-background rounded text-muted-foreground transition-colors"
+              title="Zoom Out"
+            >
+              <ZoomOut className="h-3.5 w-3.5" />
+            </button>
+            <span className="text-[10px] w-10 text-center font-medium">
+              {zoomLevel}%
+            </span>
+            <button
+              onClick={() => setZoomLevel(Math.min(200, zoomLevel + 10))}
+              className="p-1 hover:bg-background rounded text-muted-foreground transition-colors"
+              title="Zoom In"
+            >
+              <ZoomIn className="h-3.5 w-3.5" />
+            </button>
+            <button
+              onClick={() => setZoomLevel(100)}
+              className="p-1 hover:bg-background rounded text-muted-foreground transition-colors ml-1"
+              title="Reset Zoom"
+            >
+              <RotateCcw className="h-3 w-3" />
+            </button>
+          </div>
+        </div>
       </PreviewTopBar>
 
       {/* Preview Container */}
       <PreviewContainer
         previewDevice={previewDevice}
         fontFamily={fontFamilyMap[font]}
+        zoomLevel={zoomLevel}
         className=""
       >
         {/* 1. Global Header */}
         {globalHeader.isEnabled && (
           <ModuleRenderer
             key="global-header"
-            module={globalHeader}
+            module={{
+              ...globalHeader,
+              type: "navbar",
+            }}
             theme={currentTheme}
             previewDevice={previewDevice}
             isSelected={selectedModuleId === globalHeader.id}
@@ -447,7 +522,10 @@ const LivePreview = () => {
         {globalFooter.isEnabled && (
           <ModuleRenderer
             key="global-footer"
-            module={globalFooter}
+            module={{
+              ...globalFooter,
+              type: "footer",
+            }}
             theme={currentTheme}
             previewDevice={previewDevice}
             isSelected={selectedModuleId === globalFooter.id}

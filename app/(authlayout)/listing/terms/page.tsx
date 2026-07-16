@@ -1,17 +1,21 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Card, Form, Input, Button, Switch, Space, message, Tabs, Divider } from "antd"
-import { SaveOutlined, EyeOutlined } from "@ant-design/icons"
-
-const { TabPane } = Tabs
-const { TextArea } = Input
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Separator } from "@/components/ui/separator";
+import { Save, Eye } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const TermsAndConditions = () => {
-  const [form] = Form.useForm()
-  const [previewMode, setPreviewMode] = useState(false)
-  const [termsContent, setTermsContent] = useState(`
-# Marketplace Terms and Conditions
+  const { toast } = useToast();
+  const [previewMode, setPreviewMode] = useState(false);
+  const [termsEnabled, setTermsEnabled] = useState(true);
+  const [termsContent, setTermsContent] = useState(`# Marketplace Terms and Conditions
 
 ## 1. Introduction
 
@@ -66,89 +70,117 @@ We may update these terms from time to time. Users will be notified of significa
 
 ## 8. Contact Information
 
-For questions about these terms, please contact support@marketplace.com
-  `)
+For questions about these terms, please contact support@marketplace.com`);
 
-  const onFinish = (values: any) => {
+  const handleSave = () => {
     // In a real app, call API to save terms
-    console.log("Form values:", values)
-    setTermsContent(values.termsContent)
-    message.success("Terms & Conditions updated successfully")
-  }
+    console.log("Saving terms:", { termsEnabled, termsContent });
+    toast({
+      title: "Success",
+      description: "Terms & Conditions updated successfully",
+    });
+  };
 
   const togglePreview = () => {
-    setPreviewMode(!previewMode)
-  }
+    setPreviewMode(!previewMode);
+  };
 
   return (
-    <div>
-      <h1>Terms & Conditions Management</h1>
+    <div className="space-y-6">
+      <h1 className="text-3xl font-bold">Terms & Conditions Management</h1>
 
-      <Tabs defaultActiveKey="edit">
-        <TabPane tab="Edit Terms" key="edit">
+      <Tabs defaultValue="edit">
+        <TabsList>
+          <TabsTrigger value="edit">Edit Terms</TabsTrigger>
+          <TabsTrigger value="preview">Preview</TabsTrigger>
+          <TabsTrigger value="history">History</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="edit">
           <Card>
-            <Form
-              form={form}
-              layout="vertical"
-              onFinish={onFinish}
-              initialValues={{
-                termsEnabled: true,
-                termsContent: termsContent,
-              }}
-            >
-              <Form.Item name="termsEnabled" label="Enable Terms & Conditions" valuePropName="checked">
-                <Switch defaultChecked />
-              </Form.Item>
+            <CardContent className="pt-6 space-y-6">
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="terms-enabled"
+                  checked={termsEnabled}
+                  onCheckedChange={setTermsEnabled}
+                />
+                <Label htmlFor="terms-enabled">Enable Terms & Conditions</Label>
+              </div>
 
-              <Form.Item
-                name="termsContent"
-                label="Terms & Conditions Content"
-                rules={[{ required: true, message: "Please enter terms content" }]}
-              >
-                <TextArea rows={20} />
-              </Form.Item>
+              <div className="space-y-2">
+                <Label htmlFor="terms-content">Terms & Conditions Content</Label>
+                <Textarea
+                  id="terms-content"
+                  value={termsContent}
+                  onChange={(e) => setTermsContent(e.target.value)}
+                  rows={20}
+                  className="font-mono"
+                />
+              </div>
 
-              <Form.Item>
-                <Space>
-                  <Button type="primary" htmlType="submit" icon={<SaveOutlined />}>
-                    Save Terms
-                  </Button>
-                  <Button icon={<EyeOutlined />} onClick={togglePreview}>
-                    {previewMode ? "Edit Mode" : "Preview Mode"}
-                  </Button>
-                </Space>
-              </Form.Item>
-            </Form>
+              <div className="flex gap-2">
+                <Button onClick={handleSave}>
+                  <Save className="w-4 h-4 mr-2" />
+                  Save Terms
+                </Button>
+                <Button variant="outline" onClick={togglePreview}>
+                  <Eye className="w-4 h-4 mr-2" />
+                  {previewMode ? "Edit Mode" : "Preview Mode"}
+                </Button>
+              </div>
+            </CardContent>
           </Card>
-        </TabPane>
+        </TabsContent>
 
-        <TabPane tab="Preview" key="preview">
+        <TabsContent value="preview">
           <Card>
-            <div
-              style={{ padding: "20px" }}
-              dangerouslySetInnerHTML={{
-                __html: termsContent.replace(/\n/g, "<br>").replace(/#{1,6}\s?(.*)/g, "<h3>$1</h3>"),
-              }}
-            />
+            <CardContent className="pt-6">
+              <div
+                className="prose dark:prose-invert max-w-none"
+                dangerouslySetInnerHTML={{
+                  __html: termsContent
+                    .replace(/\n/g, "<br>")
+                    .replace(/#{1,6}\s?(.*)/g, "<h3>$1</h3>"),
+                }}
+              />
+            </CardContent>
           </Card>
-        </TabPane>
+        </TabsContent>
 
-        <TabPane tab="History" key="history">
+        <TabsContent value="history">
           <Card>
-            <p>Terms & Conditions revision history will be displayed here.</p>
-            <Divider />
-            <ul>
-              <li>Version 3.0 - Updated on May 15, 2023 by admin1</li>
-              <li>Version 2.5 - Updated on February 10, 2023 by admin2</li>
-              <li>Version 2.0 - Updated on November 5, 2022 by admin1</li>
-              <li>Version 1.5 - Updated on August 20, 2022 by admin3</li>
-              <li>Version 1.0 - Created on June 1, 2022 by admin1</li>
-            </ul>
+            <CardHeader>
+              <CardTitle>Revision History</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground mb-4">
+                Terms & Conditions revision history will be displayed here.
+              </p>
+              <Separator className="mb-4" />
+              <ul className="space-y-2">
+                <li className="text-sm">
+                  Version 3.0 - Updated on May 15, 2023 by admin1
+                </li>
+                <li className="text-sm">
+                  Version 2.5 - Updated on February 10, 2023 by admin2
+                </li>
+                <li className="text-sm">
+                  Version 2.0 - Updated on November 5, 2022 by admin1
+                </li>
+                <li className="text-sm">
+                  Version 1.5 - Updated on August 20, 2022 by admin3
+                </li>
+                <li className="text-sm">
+                  Version 1.0 - Created on June 1, 2022 by admin1
+                </li>
+              </ul>
+            </CardContent>
           </Card>
-        </TabPane>
+        </TabsContent>
       </Tabs>
     </div>
-  )
-}
+  );
+};
 
-export default TermsAndConditions
+export default TermsAndConditions;

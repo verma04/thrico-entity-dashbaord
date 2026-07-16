@@ -1,4 +1,15 @@
 import {
+  ADD_JOB,
+  UPDATE_JOB,
+  CHANGE_JOB_STATUS,
+  CHANGE_JOB_VERIFICATION,
+  GET_JOB_STATS,
+  GET_JOBS,
+  GET_JOB_BY_ID,
+  GET_JOB_APPLICATION_TREND,
+  GET_JOB_TYPE_DISTRIBUTION,
+} from "@/graphql/quries/jobs";
+import {
   gql,
   useMutation,
   MutationHookOptions,
@@ -7,13 +18,9 @@ import {
   QueryResult,
   useQuery,
 } from "@apollo/client";
-import {
-  ADD_JOB,
-  CHANGE_JOB_STATUS,
-  CHANGE_JOB_VERIFICATION,
-  GET_JOB_STATS,
-  GET_JOBS,
-} from "../../quries/jobs";
+import { DateRangeInput, TimeRange } from "../dashbaord/dashboard-quries";
+export { TimeRange };
+export type { DateRangeInput };
 
 // --- GraphQL Mutation Document ---
 
@@ -25,11 +32,18 @@ export type JobCompany = {
   logo: string;
 };
 
+export type JobLocation = {
+  name: string;
+  latitude: number;
+  longitude: number;
+  address: string;
+};
+
 export type Job = {
   id: string;
   title: string;
   description: string;
-  location: string;
+  location: JobLocation;
   jobType: string;
   salary: string;
   experienceLevel: string;
@@ -41,7 +55,13 @@ export type Job = {
   skills: string[];
   isFeatured: boolean;
   entity: string;
-  postedBy: string;
+  addedBy: string;
+  postedBy: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    avatar: string;
+  };
   company: JobCompany;
   numberOfApplicant: number;
   numberOfViews: number;
@@ -59,7 +79,7 @@ export type Job = {
 export type PostJobInput = {
   title: string;
   description: string;
-  location: string;
+  location: string | JobLocation;
   jobType: string;
   salary: string;
   experienceLevel: string;
@@ -71,12 +91,35 @@ export type PostJobInput = {
   skills: string[];
   isFeatured?: boolean;
   entity: string;
+  company: {
+    id: string;
+  };
+};
+
+export type UpdateJobInput = {
+  id: string;
+  title?: string;
+  description?: string;
+  location?: string | JobLocation;
+  jobType?: string;
+  salary?: string;
+  experienceLevel?: string;
+  workplaceType?: string;
+  applicationDeadline?: string;
+  requirements?: string[];
+  responsibilities?: string[];
+  benefits?: string[];
+  skills?: string[];
+  isFeatured?: boolean;
+  company?: {
+    id: string;
+  };
 };
 
 // --- Apollo Client Hook ---
 
 export function useAddJob(
-  options?: MutationHookOptions<{ addJob: Job }, { input: PostJobInput }>
+  options?: MutationHookOptions<{ addJob: Job }, { input: PostJobInput }>,
 ) {
   return useMutation(ADD_JOB, {
     ...options,
@@ -97,7 +140,11 @@ export function useAddJob(
           cache.writeQuery({
             query: GET_JOBS,
             data: {
-              getJob: [addJob, ...(approvedData?.getJob || [])],
+              getJob: {
+                ...approvedData?.getJob,
+                data: [addJob, ...(approvedData?.getJob?.data || [])],
+                total: (approvedData?.getJob?.total || 0) + 1,
+              },
             },
             variables: {
               input: {
@@ -119,7 +166,11 @@ export function useAddJob(
           cache.writeQuery({
             query: GET_JOBS,
             data: {
-              getJob: [addJob, ...(allData?.getJob || [])],
+              getJob: {
+                ...allData?.getJob,
+                data: [addJob, ...(allData?.getJob?.data || [])],
+                total: (allData?.getJob?.total || 0) + 1,
+              },
             },
             variables: {
               input: {
@@ -135,6 +186,14 @@ export function useAddJob(
   });
 }
 
+export function useUpdateJob(
+  options?: MutationHookOptions<{ updateJob: Job }, { input: UpdateJobInput }>,
+) {
+  return useMutation(UPDATE_JOB, {
+    ...options,
+  });
+}
+
 export enum JobStatus {
   ALL = "ALL",
   APPROVED = "APPROVED",
@@ -147,14 +206,30 @@ export enum JobStatus {
 // TypeScript interface for GetJobInput
 export interface GetJobInput {
   status?: JobStatus;
+  userId?: string;
+  offset?: number;
+  limit?: number;
 }
 
 // --- Apollo Client Hook ---
 
+export type GetJobResponse = {
+  data: Job[];
+  total: number;
+  offset: number;
+  limit: number;
+};
+
 export function useJobs(
-  options?: QueryHookOptions<{ getJob: Job[] }, { input?: GetJobInput }>
-): QueryResult<{ getJob: Job[] }, { input?: GetJobInput }> {
+  options?: QueryHookOptions<{ getJob: GetJobResponse }, { input?: GetJobInput }>,
+): QueryResult<{ getJob: GetJobResponse }, { input?: GetJobInput }> {
   return useQuery(GET_JOBS, options);
+}
+
+export function useGetJobById(
+  options?: QueryHookOptions<{ getJobById: Job }, { id: string }>,
+): QueryResult<{ getJobById: Job }, { id: string }> {
+  return useQuery(GET_JOB_BY_ID, options);
 }
 
 export type JobStats = {
@@ -162,21 +237,33 @@ export type JobStats = {
   activeJobs: number;
   totalApplications: number;
   totalViews: number;
-  avgApplications: number;
-  applicationsThisWeek: number;
-  applicationsLastWeek: number;
-  applicationsWeeklyChange: number;
-  viewsThisWeek: number;
-  viewsLastWeek: number;
-  viewsWeeklyChange: number;
+  totalJobsChange: number;
+  activeJobsChange: number;
+  applicationsChange: number;
+  viewsChange: number;
+};
+
+export type GetJobStatsResponse = {
+  getJobStats: JobStats;
 };
 
 // --- Apollo Client Hook ---
 
 export function useJobStats(
-  options?: QueryHookOptions<{ getJobStats: JobStats }>
-): QueryResult<{ getJobStats: JobStats }> {
-  return useQuery(GET_JOB_STATS, options);
+  timeRange?: TimeRange,
+  dateRange?: DateRangeInput,
+  options?: QueryHookOptions<
+    GetJobStatsResponse,
+    { timeRange?: TimeRange; dateRange?: DateRangeInput }
+  >,
+): QueryResult<
+  GetJobStatsResponse,
+  { timeRange?: TimeRange; dateRange?: DateRangeInput }
+> {
+  return useQuery(GET_JOB_STATS, {
+    variables: { timeRange, dateRange },
+    ...options,
+  });
 }
 
 export function useChangeJobStatus(options?: MutationHookOptions<any, any>) {
@@ -222,7 +309,7 @@ export function useChangeJobStatus(options?: MutationHookOptions<any, any>) {
 }
 
 export function useChangeJobVerification(
-  options?: MutationHookOptions<any, any>
+  options?: MutationHookOptions<any, any>,
 ) {
   return useMutation(CHANGE_JOB_VERIFICATION, {
     ...options,
@@ -248,3 +335,82 @@ export function useChangeJobVerification(
     awaitRefetchQueries: true,
   });
 }
+
+export type JobApplicationTrend = {
+  name: string;
+  applications: number;
+};
+
+export type GetJobApplicationTrendResponse = {
+  getJobApplicationTrend: JobApplicationTrend[];
+};
+
+export function useJobApplicationTrend(
+  timeRange?: TimeRange,
+  dateRange?: DateRangeInput,
+  options?: QueryHookOptions<
+    GetJobApplicationTrendResponse,
+    { timeRange?: TimeRange; dateRange?: DateRangeInput }
+  >,
+): QueryResult<
+  GetJobApplicationTrendResponse,
+  { timeRange?: TimeRange; dateRange?: DateRangeInput }
+> {
+  return useQuery(GET_JOB_APPLICATION_TREND, {
+    variables: { timeRange, dateRange },
+    ...options,
+  });
+}
+
+export type JobTypeDistribution = {
+  name: string;
+  value: number;
+  color: string;
+};
+
+export type GetJobTypeDistributionResponse = {
+  getJobTypeDistribution: JobTypeDistribution[];
+};
+
+export function useJobTypeDistribution(
+  timeRange?: TimeRange,
+  dateRange?: DateRangeInput,
+  options?: QueryHookOptions<
+    GetJobTypeDistributionResponse,
+    { timeRange?: TimeRange; dateRange?: DateRangeInput }
+  >,
+): QueryResult<
+  GetJobTypeDistributionResponse,
+  { timeRange?: TimeRange; dateRange?: DateRangeInput }
+> {
+  return useQuery(GET_JOB_TYPE_DISTRIBUTION, {
+    variables: { timeRange, dateRange },
+    ...options,
+  });
+}
+
+export type JobApplicant = {
+  id: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  resume: string;
+  createdAt: string;
+};
+
+export type JobApplicantsResponse = {
+  data: JobApplicant[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+};
+
+export function useJobApplicants(jobId: string, page: number = 1, limit: number = 5, options?: QueryHookOptions<{ getJobApplicants: JobApplicantsResponse }, { jobId: string, page: number, limit: number }>) {
+  // Import GET_JOB_APPLICANTS directly inside or rely on the updated import at the top of the file
+  return useQuery<{ getJobApplicants: JobApplicantsResponse }, { jobId: string, page: number, limit: number }>(require("@/graphql/quries/jobs").GET_JOB_APPLICANTS, {
+    variables: { jobId, page, limit },
+    ...options,
+  });
+}
+

@@ -1,29 +1,562 @@
 "use client";
 
+import React, { useState } from "react";
 import { ModuleData } from "@/store/useWebsiteBuilderStore";
 import { cn } from "@/lib/utils";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  Clock,
-  GraduationCap,
-  User,
-  ArrowRight,
-  Play,
-  Star,
-  Users,
-} from "lucide-react";
 import { ModuleHeader } from "./module-header";
 import { ModuleContainer } from "./module-container";
-import * as LucideIcons from "lucide-react";
+import {
+  Clock,
+  Users,
+  Star,
+  PlayCircle,
+  ArrowRight,
+  Filter,
+  Search,
+  BookOpen,
+  GraduationCap,
+  Laptop,
+  Sparkles,
+  CheckCircle2,
+  Circle,
+  Lock,
+  Unlock,
+  Layers,
+  Play,
+} from "lucide-react";
+
+// --- Interfaces ---
+
+interface Course {
+  title?: string;
+  description?: string;
+  thumbnail?: string;
+  duration?: string;
+  level?: "beginner" | "intermediate" | "advanced" | "expert";
+  studentsEnrolled?: number;
+  rating?: number;
+  instructor?: string;
+  enrollmentLink?: string;
+  price?: string;
+  icon?: string;
+  category?: string;
+  isLocked?: boolean;
+}
+
+interface CommonProps {
+  courses: Course[];
+  isMobile?: boolean;
+}
+
+// --- Course Cards Layout ---
+
+export const CourseCards: React.FC<CommonProps> = ({ courses, isMobile }) => {
+  const getLevelColor = (level?: string) => {
+    switch (level) {
+      case "beginner":
+        return "bg-green-100 text-green-700 border-green-200";
+      case "intermediate":
+        return "bg-blue-100 text-blue-700 border-blue-200";
+      case "advanced":
+        return "bg-purple-100 text-purple-700 border-purple-200";
+      case "expert":
+        return "bg-amber-100 text-amber-700 border-amber-200";
+      default:
+        return "bg-slate-100 text-slate-700 border-slate-200";
+    }
+  };
+
+  return (
+    <div
+      className={cn(
+        "grid gap-8",
+        isMobile ? "grid-cols-1" : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+      )}
+    >
+      {courses.map((course, idx) => (
+        <div
+          key={idx}
+          className="group flex flex-col bg-white rounded-[2.5rem] border border-slate-200 overflow-hidden hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-1 transition-all duration-500"
+        >
+          {/* Thumbnail */}
+          <div className="relative h-56 overflow-hidden bg-slate-900">
+            {course.thumbnail ? (
+              <img
+                src={course.thumbnail}
+                alt={course.title}
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-90 group-hover:opacity-100"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-linear-to-br from-indigo-600 to-blue-700 text-white">
+                <PlayCircle className="w-16 h-16 opacity-20" />
+              </div>
+            )}
+
+            {/* Badges */}
+            <div className="absolute top-4 left-4 flex gap-2">
+              <span
+                className={cn(
+                  "px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border backdrop-blur-md",
+                  getLevelColor(course.level)
+                )}
+              >
+                {course.level || "Beginner"}
+              </span>
+              {course.price && (
+                <span className="bg-slate-900/80 backdrop-blur-md text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-white/10">
+                  {course.price}
+                </span>
+              )}
+            </div>
+
+            {/* Play Overlay */}
+            <div className="absolute inset-0 bg-slate-900/20 group-hover:bg-transparent transition-colors flex items-center justify-center">
+              <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center text-blue-600 scale-0 group-hover:scale-100 transition-transform duration-300 shadow-xl">
+                <PlayCircle className="w-8 h-8 ml-1" />
+              </div>
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="p-8 flex-1 flex flex-col">
+            <h3 className="text-xl font-black mb-3 text-slate-900 tracking-tight line-clamp-2 min-h-14">
+              {course.title || "Mastering the Future"}
+            </h3>
+
+            <p className="text-slate-500 text-sm mb-6 line-clamp-2 leading-relaxed">
+              {course.description ||
+                "Deep dive into the core principles and advanced strategies of modern development."}
+            </p>
+
+            {/* Stats */}
+            <div className="flex items-center justify-between text-[11px] font-black text-slate-400 uppercase tracking-widest mb-8 border-t border-slate-50 pt-6">
+              <div className="flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5" />
+                {course.duration || "12h"}
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Users className="w-3.5 h-3.5" />
+                {course.studentsEnrolled || 0}
+              </div>
+              <div className="flex items-center gap-1.5 text-amber-500">
+                <Star className="w-3.5 h-3.5 fill-current" />
+                {course.rating || "5.0"}
+              </div>
+            </div>
+
+            {/* Instructor & CTA */}
+            <div className="mt-auto flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200" />
+                <span className="text-xs font-black text-slate-900">
+                  {course.instructor || "Expert Lead"}
+                </span>
+              </div>
+              <button
+                className="flex items-center justify-center w-10 h-10 rounded-xl bg-slate-900 text-white hover:bg-blue-600 transition-colors"
+                onClick={() =>
+                  course.enrollmentLink &&
+                  window.open(course.enrollmentLink, "_blank")
+                }
+              >
+                <ArrowRight className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// --- Course Grid Layout ---
+
+export const CourseGrid: React.FC<CommonProps> = ({ courses, isMobile }) => {
+  const [activeCategory, setActiveCategory] = useState("All");
+
+  const categories = [
+    "All",
+    ...Array.from(new Set(courses.map((c) => c.category || "General"))),
+  ];
+
+  const filteredCourses =
+    activeCategory === "All"
+      ? courses
+      : courses.filter((c) => (c.category || "General") === activeCategory);
+
+  return (
+    <div className="space-y-12">
+      {/* Category Pills & Search */}
+      <div className="flex flex-col md:flex-row items-center justify-between gap-6 pb-8 border-b border-slate-100">
+        <div className="flex flex-wrap justify-center md:justify-start gap-3">
+          {categories.map((category) => (
+            <button
+              key={category}
+              onClick={() => setActiveCategory(category)}
+              className={cn(
+                "px-6 py-2.5 rounded-2xl text-xs font-black uppercase tracking-widest transition-all duration-300 border",
+                activeCategory === category
+                  ? "bg-slate-900 text-white border-slate-900 shadow-xl shadow-slate-900/20"
+                  : "bg-white text-slate-400 border-slate-200 hover:border-slate-400"
+              )}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+
+        <div className="relative w-full md:w-80">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Search courses..."
+            className="w-full pl-12 pr-4 py-3 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm font-bold placeholder:text-slate-300"
+          />
+        </div>
+      </div>
+
+      {/* Grid */}
+      <div
+        className={cn(
+          "grid gap-6",
+          isMobile ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
+        )}
+      >
+        {filteredCourses.map((course, idx) => (
+          <div
+            key={idx}
+            className="group bg-slate-50 rounded-4xl p-6 border border-slate-100 hover:bg-white hover:border-blue-500/20 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 cursor-pointer"
+            onClick={() =>
+              course.enrollmentLink &&
+              window.open(course.enrollmentLink, "_blank")
+            }
+          >
+            <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center mb-6 shadow-sm border border-slate-100 group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white transition-all duration-500">
+              <GraduationCap className="w-7 h-7" />
+            </div>
+
+            <div className="mb-6">
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-500 mb-2 block">
+                {course.category || "General"}
+              </span>
+              <h3 className="text-lg font-black text-slate-900 leading-tight line-clamp-2">
+                {course.title}
+              </h3>
+            </div>
+
+            <div className="flex items-center justify-between mt-auto">
+              <div className="flex -space-x-2">
+                {[...Array(3)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="w-6 h-6 rounded-full border-2 border-white bg-slate-200"
+                  />
+                ))}
+              </div>
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                +{course.studentsEnrolled} Joined
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Stats Summary */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 bg-slate-900 rounded-[3rem] p-10 text-white">
+        <div className="text-center sm:text-left">
+          <Sparkles className="w-8 h-8 text-blue-400 mb-4 mx-auto sm:mx-0" />
+          <h4 className="text-3xl font-black mb-1">4.9/5</h4>
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+            Average Rating
+          </p>
+        </div>
+        <div className="text-center sm:text-left border-y sm:border-y-0 sm:border-x border-white/10 py-6 sm:py-0 sm:px-10">
+          <BookOpen className="w-8 h-8 text-purple-400 mb-4 mx-auto sm:mx-0" />
+          <h4 className="text-3xl font-black mb-1">{courses.length}</h4>
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+            Premium Courses
+          </p>
+        </div>
+        <div className="text-center sm:text-left">
+          <Laptop className="w-8 h-8 text-green-400 mb-4 mx-auto sm:mx-0" />
+          <h4 className="text-3xl font-black mb-1">Lifetime</h4>
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+            Course Access
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// --- Course List Layout ---
+
+export const CourseList: React.FC<CommonProps> = ({ courses, isMobile }) => {
+  return (
+    <div className="space-y-6 max-w-6xl mx-auto">
+      {courses.map((course, idx) => (
+        <div
+          key={idx}
+          className={cn(
+            "group relative bg-white rounded-[2.5rem] border border-slate-200 overflow-hidden hover:shadow-2xl hover:shadow-blue-500/5 transition-all duration-500 flex flex-col items-stretch",
+            !isMobile && "lg:flex-row"
+          )}
+        >
+          {/* Thumbnail / Media Section */}
+          <div
+            className={cn(
+              "h-64 relative overflow-hidden bg-slate-900 group-hover:bg-slate-800 transition-colors shrink-0",
+              !isMobile && "lg:w-80 lg:h-auto"
+            )}
+          >
+            {course.thumbnail ? (
+              <img
+                src={course.thumbnail}
+                alt={course.title}
+                className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <div className="w-20 h-20 bg-white/10 rounded-3xl flex items-center justify-center text-white backdrop-blur-md">
+                  <PlayCircle className="w-10 h-10" />
+                </div>
+              </div>
+            )}
+
+            <div
+              className={cn(
+                "absolute inset-0 bg-linear-to-t from-slate-900/60 via-transparent to-transparent",
+                !isMobile && "lg:hidden"
+              )}
+            />
+          </div>
+
+          {/* Content Section */}
+          <div
+            className={cn("p-8 flex-1 flex flex-col", !isMobile && "lg:p-10")}
+          >
+            <div className="flex flex-wrap items-center gap-4 mb-4">
+              <span className="bg-blue-50 text-blue-600 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-blue-100">
+                {course.level || "Beginner"}
+              </span>
+              <div className="flex items-center gap-1.5 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                <Clock className="w-3.5 h-3.5" />
+                {course.duration || "12 Hours"}
+              </div>
+              <div className="ml-auto flex items-center gap-1 text-amber-500 text-sm font-black">
+                <Star className="w-4 h-4 fill-current" />
+                {course.rating || "5.0"}
+              </div>
+            </div>
+
+            <h3 className="text-2xl font-black text-slate-900 tracking-tight mb-4 group-hover:text-blue-600 transition-colors">
+              {course.title}
+            </h3>
+
+            <p className="text-slate-500 text-sm leading-relaxed mb-8 max-w-2xl">
+              {course.description ||
+                "Master the latest technologies and methodologies with our comprehensive curriculum designed by industry experts for modern developers."}
+            </p>
+
+            <div className="mt-auto pt-8 border-t border-slate-50 flex flex-wrap items-center justify-between gap-6">
+              <div className="flex items-center gap-8">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-slate-100 border border-slate-200 overflow-hidden">
+                    <div className="w-full h-full bg-linear-to-br from-slate-200 to-slate-300" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-xs font-black text-slate-900">
+                      {course.instructor || "Lead Instructor"}
+                    </span>
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                      Instructor
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex flex-col">
+                  <span className="text-xs font-black text-slate-900">
+                    {course.studentsEnrolled || 0}
+                  </span>
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    Members
+                  </span>
+                </div>
+              </div>
+
+              <div
+                className={cn(
+                  "flex items-center gap-3 w-full sm:w-auto",
+                  isMobile && "flex-col"
+                )}
+              >
+                {!isMobile && (
+                  <div className="text-right hidden sm:block">
+                    <span className="block text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">
+                      Price
+                    </span>
+                    <span className="text-lg font-black text-slate-900">
+                      {course.price || "Free"}
+                    </span>
+                  </div>
+                )}
+                <button
+                  className="flex-1 sm:flex-none flex items-center justify-center gap-4 bg-slate-900 text-white px-10 py-5 rounded-4xl font-black text-xs uppercase tracking-[0.2em] hover:bg-blue-600 transition-all shadow-xl shadow-slate-900/10 hover:shadow-blue-500/20 active:scale-95"
+                  onClick={() =>
+                    course.enrollmentLink &&
+                    window.open(course.enrollmentLink, "_blank")
+                  }
+                >
+                  Launch Course
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Vertical Badge Divider for Large screens */}
+          {!isMobile && (
+            <div className="hidden lg:block absolute left-80 top-10 bottom-10 w-px bg-slate-50" />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// --- Learning Path Layout ---
+
+export const LearningPath: React.FC<CommonProps> = ({ courses, isMobile }) => {
+  return (
+    <div className="max-w-4xl mx-auto py-10 px-4">
+      <div className="relative">
+        {/* Connection Line */}
+        {!isMobile && (
+          <div className="absolute left-10 md:left-1/2 top-0 bottom-0 w-1 bg-slate-100 -translate-x-1/2 hidden sm:block" />
+        )}
+
+        <div className="space-y-24">
+          {courses.map((course, idx) => {
+            const isLeft = idx % 2 === 0;
+            const isFinished = idx === 0; // Mocking first as finished
+            const isInProgress = idx === 1; // Mocking second as progress
+
+            return (
+              <div
+                key={idx}
+                className={cn(
+                  "relative flex flex-col items-center group",
+                  !isMobile && "sm:flex-row"
+                )}
+              >
+                {/* Node Milestone */}
+                {!isMobile && (
+                  <div className="absolute left-10 md:left-1/2 -translate-x-1/2 z-10 hidden sm:block">
+                    <div
+                      className={cn(
+                        "w-20 h-20 rounded-full border-8 border-white shadow-xl flex items-center justify-center transition-all duration-500",
+                        isFinished
+                          ? "bg-green-500 text-white"
+                          : isInProgress
+                          ? "bg-blue-600 text-white animate-pulse"
+                          : "bg-slate-200 text-slate-400"
+                      )}
+                    >
+                      {isFinished ? (
+                        <CheckCircle2 className="w-8 h-8" />
+                      ) : (
+                        <span className="text-xl font-black italic">
+                          {idx + 1}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Content Card */}
+                <div
+                  className={cn(
+                    "w-full transition-all duration-700",
+                    isMobile
+                      ? "text-center"
+                      : isLeft
+                      ? "sm:w-[42%] sm:mr-auto sm:text-right"
+                      : "sm:w-[42%] sm:ml-auto sm:text-left"
+                  )}
+                >
+                  <div className="bg-white p-8 rounded-[3rem] border border-slate-200 shadow-lg hover:shadow-2xl transition-shadow group-hover:border-blue-500/20">
+                    <div
+                      className={cn(
+                        "inline-flex items-center gap-2 mb-4 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border",
+                        isFinished
+                          ? "bg-green-50 border-green-100 text-green-600"
+                          : isInProgress
+                          ? "bg-blue-50 border-blue-100 text-blue-600"
+                          : "bg-slate-50 border-slate-100 text-slate-400"
+                      )}
+                    >
+                      {isFinished
+                        ? "Completed"
+                        : isInProgress
+                        ? "Active Wave"
+                        : "Phase " + (idx + 1)}
+                    </div>
+
+                    <h3 className="text-2xl font-black text-slate-900 mb-3 tracking-tight">
+                      {course.title}
+                    </h3>
+
+                    <p className="text-slate-500 text-sm mb-6 leading-relaxed">
+                      {course.description ||
+                        "Master the foundational concepts required to progress to the next stage of this specialized curriculum."}
+                    </p>
+
+                    <div
+                      className={cn(
+                        "flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-slate-400",
+                        isMobile
+                          ? "justify-center"
+                          : isLeft
+                          ? "sm:justify-end"
+                          : "justify-center sm:justify-start"
+                      )}
+                    >
+                      <span className="flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5" /> {course.duration}
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <Layers className="w-3.5 h-3.5" /> 12 Modules
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Connection Dots for mobile */}
+                {isMobile && <div className="w-1 h-12 bg-slate-200 my-4" />}
+                {!isMobile && (
+                  <div className="sm:hidden w-1 h-12 bg-slate-200 my-4" />
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Completion node */}
+        <div className="mt-24 text-center relative z-10">
+          <div className="w-24 h-24 bg-linear-to-br from-indigo-600 to-purple-700 rounded-3xl mx-auto flex items-center justify-center text-white shadow-2xl shadow-indigo-500/30 rotate-12 scale-110 border-8 border-white">
+            <Unlock className="w-10 h-10" />
+          </div>
+          <h4 className="text-xl font-black mt-6 text-slate-900 tracking-tight">
+            Career Path Unlocked
+          </h4>
+          <p className="text-slate-400 text-sm font-bold uppercase tracking-widest mt-1">
+            Completion Reward
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 interface CoursesModuleProps {
   module: ModuleData;
@@ -36,451 +569,48 @@ export const CoursesModule = ({
 }: CoursesModuleProps) => {
   const { content, layout } = module;
   const courses = content.courses || [];
-
-  // Helper to render Lucide icon
-  const renderIcon = (iconName: string, className: string = "w-6 h-6") => {
-    if (!iconName) return null;
-    const Icon = (LucideIcons as any)[iconName];
-    return Icon ? <Icon className={className} /> : null;
-  };
-
-  // Get level badge info
-  const getLevelInfo = (level: string) => {
-    const levelMap: Record<string, { emoji: string; color: string }> = {
-      beginner: { emoji: "🌱", color: "bg-green-100 text-green-700" },
-      intermediate: { emoji: "📈", color: "bg-blue-100 text-blue-700" },
-      advanced: { emoji: "🚀", color: "bg-purple-100 text-purple-700" },
-      expert: { emoji: "💎", color: "bg-amber-100 text-amber-700" },
-    };
-    return levelMap[level] || levelMap.beginner;
-  };
-
-  const EmptyState = () => (
-    <Card className="w-full">
-      <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-        <GraduationCap className="h-16 w-16 text-muted-foreground mb-4" />
-        <CardTitle className="mb-2">No courses available</CardTitle>
-        <CardDescription className="max-w-md">
-          Add your first course to start building your educational platform.
-        </CardDescription>
-      </CardContent>
-    </Card>
-  );
-
-  const CourseCard = ({ course, index }: { course: any; index: number }) => {
-    const levelInfo = getLevelInfo(course.level);
-
-    return (
-      <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-        <div className="aspect-video relative overflow-hidden rounded-t-lg bg-gradient-to-br from-blue-400 to-purple-500">
-          {course.thumbnail ? (
-            <img
-              src={course.thumbnail}
-              alt={course.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            />
-          ) : (
-            <div className="flex items-center justify-center h-full">
-              {course.icon ? (
-                <div className="text-white">
-                  {renderIcon(course.icon, "h-16 w-16")}
-                </div>
-              ) : (
-                <Play className="h-12 w-12 text-white/80" />
-              )}
-            </div>
-          )}
-          {course.level && (
-            <div className="absolute top-3 left-3">
-              <Badge className={levelInfo.color}>
-                {levelInfo.emoji} {course.level}
-              </Badge>
-            </div>
-          )}
-          {course.price && (
-            <div className="absolute top-3 right-3">
-              <Badge variant="secondary" className="bg-white/90 font-bold">
-                {course.price}
-              </Badge>
-            </div>
-          )}
-        </div>
-        <CardHeader className="pb-2">
-          <div className="flex items-start gap-2">
-            {course.icon && course.thumbnail && (
-              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 flex-shrink-0">
-                {renderIcon(course.icon, "w-4 h-4")}
-              </div>
-            )}
-            <CardTitle className="text-lg line-clamp-2 flex-1">
-              {course.title || `Course ${index + 1}`}
-            </CardTitle>
-          </div>
-          <CardDescription className="line-clamp-2">
-            {course.description ||
-              "Learn essential skills in this comprehensive course."}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="pb-2">
-          <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap">
-            {course.duration && (
-              <div className="flex items-center gap-1">
-                <Clock className="h-4 w-4" />
-                {course.duration}
-              </div>
-            )}
-            {course.studentsEnrolled && (
-              <div className="flex items-center gap-1">
-                <Users className="h-4 w-4" />
-                {course.studentsEnrolled}
-              </div>
-            )}
-            {course.rating && (
-              <div className="flex items-center gap-1 ml-auto">
-                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                <span className="font-medium">{course.rating}</span>
-              </div>
-            )}
-          </div>
-        </CardContent>
-        <CardFooter className="pt-0">
-          <Button
-            className="w-full group"
-            onClick={() =>
-              course.enrollmentLink &&
-              window.open(course.enrollmentLink, "_blank")
-            }
-          >
-            Enroll Now
-            <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-          </Button>
-        </CardFooter>
-      </Card>
-    );
-  };
+  const isMobile = previewDevice === "mobile";
 
   return (
     <ModuleContainer
       containerSettings={content.containerSettings}
-      className="bg-gradient-to-b from-slate-50 to-white"
+      className="bg-slate-50 border-y"
     >
       <div className="mb-12">
-        <Badge variant="outline" className="mb-4 mx-auto block w-fit">
-          {content.badge || "Featured Courses"}
-        </Badge>
         <ModuleHeader
           title={content.title}
           description={content.description}
           layoutSettings={content.layoutSettings}
-          titleClassName="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"
-          descriptionClassName="text-lg max-w-2xl mx-auto"
+          alignment="center"
+          titleColor={content.titleColor}
+          descriptionColor={content.descriptionColor}
+          hideTitle={content.hideTitle}
+          hideDescription={content.hideDescription}
         />
       </div>
 
-      {courses.length === 0 && <EmptyState />}
+      {courses.length === 0 && (
+        <div className="text-center py-12 bg-white rounded-lg border">
+          <p className="text-muted-foreground">
+            No courses added yet. Add courses in the settings panel.
+          </p>
+        </div>
+      )}
 
-      {/* Grid Cards Layout */}
       {layout === "course-cards" && courses.length > 0 && (
-        <div
-          className={cn(
-            "grid gap-6",
-            previewDevice === "mobile"
-              ? "grid-cols-1"
-              : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
-          )}
-        >
-          {courses.map((course: any, idx: number) => (
-            <CourseCard key={idx} course={course} index={idx} />
-          ))}
-        </div>
+        <CourseCards courses={courses} isMobile={isMobile} />
       )}
 
-      {/* Detailed List Layout */}
-      {layout === "course-list" && courses.length > 0 && (
-        <div className="space-y-6">
-          {courses.map((course: any, idx: number) => {
-            const levelInfo = getLevelInfo(course.level);
-
-            return (
-              <Card key={idx} className="hover:shadow-lg transition-shadow">
-                <div className="flex flex-col md:flex-row">
-                  <div className="w-full md:w-80 h-48 md:h-auto relative overflow-hidden rounded-t-lg md:rounded-l-lg md:rounded-t-none bg-gradient-to-br from-blue-400 to-purple-500">
-                    {course.thumbnail ? (
-                      <img
-                        src={course.thumbnail}
-                        alt={course.title}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="flex items-center justify-center h-full">
-                        {course.icon ? (
-                          <div className="text-white">
-                            {renderIcon(course.icon, "h-16 w-16")}
-                          </div>
-                        ) : (
-                          <Play className="h-12 w-12 text-white/80" />
-                        )}
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1 p-6">
-                    <div className="flex flex-col h-full">
-                      <div className="flex-1">
-                        <div className="flex items-start justify-between mb-3">
-                          <CardTitle className="text-xl">
-                            {course.title || `Advanced Course ${idx + 1}`}
-                          </CardTitle>
-                          <div className="flex items-center gap-2 ml-4">
-                            {course.level && (
-                              <Badge className={levelInfo.color}>
-                                {levelInfo.emoji} {course.level}
-                              </Badge>
-                            )}
-                            {course.price && (
-                              <Badge variant="secondary" className="font-bold">
-                                {course.price}
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                        <CardDescription className="text-base mb-4">
-                          {course.description ||
-                            "Comprehensive curriculum covering advanced topics and practical applications."}
-                        </CardDescription>
-                        <div className="flex flex-wrap items-center gap-4 mb-4">
-                          {course.duration && (
-                            <div className="flex items-center text-sm text-muted-foreground">
-                              <Clock className="h-4 w-4 mr-2" />
-                              {course.duration}
-                            </div>
-                          )}
-                          {course.instructor && (
-                            <div className="flex items-center text-sm text-muted-foreground">
-                              <User className="h-4 w-4 mr-2" />
-                              {course.instructor}
-                            </div>
-                          )}
-                          {course.studentsEnrolled && (
-                            <div className="flex items-center text-sm text-muted-foreground">
-                              <Users className="h-4 w-4 mr-2" />
-                              {course.studentsEnrolled} students
-                            </div>
-                          )}
-                          {course.rating && (
-                            <div className="flex items-center text-sm text-muted-foreground ml-auto">
-                              <Star className="h-4 w-4 mr-1 fill-yellow-400 text-yellow-400" />
-                              <span className="font-medium">
-                                {course.rating}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      <Button
-                        className="w-full md:w-auto self-start"
-                        onClick={() =>
-                          course.enrollmentLink &&
-                          window.open(course.enrollmentLink, "_blank")
-                        }
-                      >
-                        Start Learning
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Learning Path Layout */}
-      {layout === "learning-path" && courses.length > 0 && (
-        <div className="max-w-4xl mx-auto">
-          <div className="relative">
-            <div className="absolute left-8 top-16 bottom-8 w-1 bg-gradient-to-b from-blue-400 to-purple-400 rounded-full"></div>
-            {courses.map((course: any, idx: number) => {
-              const levelInfo = getLevelInfo(course.level);
-
-              return (
-                <div
-                  key={idx}
-                  className="relative flex items-start gap-6 mb-12 last:mb-0"
-                >
-                  <div className="relative z-10 w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                    {course.icon ? (
-                      <div className="text-white">
-                        {renderIcon(course.icon, "w-8 h-8")}
-                      </div>
-                    ) : (
-                      idx + 1
-                    )}
-                  </div>
-                  <Card className="flex-1 hover:shadow-lg transition-shadow">
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <CardTitle className="text-xl">
-                          {course.title || `Learning Phase ${idx + 1}`}
-                        </CardTitle>
-                        <div className="flex items-center gap-2">
-                          {course.level && (
-                            <Badge className={levelInfo.color}>
-                              {levelInfo.emoji} {course.level}
-                            </Badge>
-                          )}
-                          <Badge variant={idx === 0 ? "default" : "secondary"}>
-                            {idx === 0 ? "Start Here" : `Step ${idx + 1}`}
-                          </Badge>
-                        </div>
-                      </div>
-                      <CardDescription className="text-base">
-                        {course.description ||
-                          "Build foundational knowledge and advance your skills through structured learning modules."}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex flex-wrap items-center gap-4">
-                        {course.duration && (
-                          <div className="flex items-center text-sm text-muted-foreground">
-                            <Clock className="h-4 w-4 mr-1" />
-                            {course.duration}
-                          </div>
-                        )}
-                        {course.studentsEnrolled && (
-                          <div className="flex items-center text-sm text-muted-foreground">
-                            <Users className="h-4 w-4 mr-1" />
-                            {course.studentsEnrolled}
-                          </div>
-                        )}
-                        {course.rating && (
-                          <div className="flex items-center text-sm text-muted-foreground ml-auto">
-                            <Star className="h-4 w-4 mr-1 fill-yellow-400 text-yellow-400" />
-                            <span className="font-medium">{course.rating}</span>
-                          </div>
-                        )}
-                      </div>
-                    </CardContent>
-
-                    <CardFooter>
-                      <a
-                        href={course.enrollmentLink || "#"}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <Button
-                          variant={idx === 0 ? "default" : "outline"}
-                          className="w-full"
-                        >
-                          {idx === 0 ? "Begin Journey" : "Continue Learning"}
-                        </Button>
-                      </a>
-                    </CardFooter>
-                  </Card>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Category Tabs Layout */}
       {layout === "course-grid" && courses.length > 0 && (
-        <div>
-          <div className="flex gap-2 mb-8 border-b overflow-x-auto">
-            {["Beginner", "Intermediate", "Advanced", "Expert"].map(
-              (category, idx) => (
-                <Button
-                  key={category}
-                  variant={idx === 0 ? "default" : "ghost"}
-                  className={cn(
-                    "rounded-none border-b-2 border-transparent whitespace-nowrap",
-                    idx === 0 && "border-b-primary"
-                  )}
-                >
-                  {category}
-                </Button>
-              )
-            )}
-          </div>
-          <div
-            className={cn(
-              "grid gap-6",
-              previewDevice === "mobile"
-                ? "grid-cols-1"
-                : "grid-cols-1 md:grid-cols-2"
-            )}
-          >
-            {courses.map((course: any, idx: number) => {
-              const levelInfo = getLevelInfo(course.level);
+        <CourseGrid courses={courses} isMobile={isMobile} />
+      )}
 
-              return (
-                <Card
-                  key={idx}
-                  className="group hover:shadow-lg transition-all duration-300"
-                >
-                  <CardHeader className="pb-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-2 flex-1">
-                        {course.icon && (
-                          <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600">
-                            {renderIcon(course.icon, "w-5 h-5")}
-                          </div>
-                        )}
-                        <CardTitle className="text-lg">
-                          {course.title || `Course ${idx + 1}`}
-                        </CardTitle>
-                      </div>
-                      {course.level && (
-                        <Badge className={`ml-2 ${levelInfo.color}`}>
-                          {levelInfo.emoji} {course.level}
-                        </Badge>
-                      )}
-                    </div>
-                    <CardDescription>
-                      {course.description ||
-                        "Perfect for beginners looking to get started."}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="pb-4">
-                    <div className="flex items-center justify-between text-sm flex-wrap gap-2">
-                      {course.duration && (
-                        <div className="flex items-center text-muted-foreground">
-                          <Clock className="h-4 w-4 mr-1" />
-                          {course.duration}
-                        </div>
-                      )}
-                      {course.studentsEnrolled && (
-                        <div className="flex items-center text-muted-foreground">
-                          <Users className="h-4 w-4 mr-1" />
-                          {course.studentsEnrolled}
-                        </div>
-                      )}
-                      {course.rating && (
-                        <div className="flex items-center text-muted-foreground ml-auto">
-                          <Star className="h-4 w-4 mr-1 fill-yellow-400 text-yellow-400" />
-                          <span className="font-medium">{course.rating}</span>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                  <CardFooter>
-                    <Button variant="outline" className="w-full group">
-                      <a
-                        href={course.enrollmentLink || "#"}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Start Course
-                        <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                      </a>
-                    </Button>
-                  </CardFooter>
-                </Card>
-              );
-            })}
-          </div>
-        </div>
+      {layout === "course-list" && courses.length > 0 && (
+        <CourseList courses={courses} isMobile={isMobile} />
+      )}
+
+      {layout === "learning-path" && courses.length > 0 && (
+        <LearningPath courses={courses} isMobile={isMobile} />
       )}
     </ModuleContainer>
   );

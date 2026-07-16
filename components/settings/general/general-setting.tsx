@@ -1,604 +1,399 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import {
-  useState,
-  useRef,
-  useEffect,
-  type ChangeEvent,
-  type MouseEvent as ReactMouseEvent,
-} from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
-import { useToast } from "@/hooks/use-toast";
+  Store,
+  Globe,
+  Image as ImageIcon,
+  CreditCard,
+  MapPin,
+  Fingerprint,
+  Layers,
+  RotateCcw,
+  ExternalLink,
+} from "lucide-react";
+import BillingDetailsForm from "./billing-details-form";
+import { useGetEntity } from "@/graphql/actions";
+import { EntityProfileCard } from "./entity-profile-card";
+import { EntityLogoUpload } from "./entity-logo-upload";
+import { FaviconUpload } from "./favicon-upload";
+import { Skeleton } from "@/components/ui/skeleton";
+import { PlatformContainer } from "@/components/ui/platform/container";
+import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
 
-import { Upload, Camera, Store, Loader2 } from "lucide-react";
-import BillingAddress from "./billing-address";
-import { useGetEntity, useUploadEntityLogo } from "@/graphql/actions";
+type Tab = "identity" | "branding" | "billing";
+
+const TABS: {
+  key: Tab;
+  label: string;
+  icon: React.ElementType;
+  description: string;
+}[] = [
+  {
+    key: "identity",
+    label: "Identity",
+    icon: Fingerprint,
+    description: "Entity name and profile",
+  },
+  {
+    key: "branding",
+    label: "Branding",
+    icon: Layers,
+    description: "Logo, favicon & visual assets",
+  },
+  {
+    key: "billing",
+    label: "Billing Details",
+    icon: CreditCard,
+    description: "Legal address & billing info",
+  },
+];
 
 export default function GeneralSettings() {
-  const { toast } = useToast();
-  const { data: entityData, loading: entityLoading } = useGetEntity();
+  const { data: entityData, loading: entityLoading, refetch } = useGetEntity();
+  const [activeTab, setActiveTab] = useState<Tab>("identity");
 
-  const [uploadLogo, { loading: uploadingLogo }] = useUploadEntityLogo({
-    onCompleted: (data: any) => {
-      if (data.uploadEntityLogo.success) {
-        toast({
-          title: "Success",
-          description:
-            data.uploadEntityLogo.message || "Logo uploaded successfully!",
-        });
-        setCommunityImage(data.uploadEntityLogo.logo);
-      } else {
-        toast({
-          title: "Error",
-          description: data.uploadEntityLogo.message || "Failed to upload logo",
-          variant: "destructive",
-        });
-      }
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to upload logo",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const [updateProfile, { loading: updatingProfile }] = useUploadEntityLogo({
-    onCompleted: (data: any) => {
-      if (data.updateEntityProfile.success) {
-        toast({
-          title: "Success",
-          description:
-            data.updateEntityProfile.message || "Profile updated successfully!",
-        });
-        setCommunityName(data.updateEntityProfile.name);
-      } else {
-        toast({
-          title: "Error",
-          description:
-            data.updateEntityProfile.message || "Failed to update profile",
-          variant: "destructive",
-        });
-      }
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update profile",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const [isEditingName, setIsEditingName] = useState(false);
   const [communityName, setCommunityName] = useState(
-    entityData?.getEntity?.name || "My Page"
+    entityData?.getEntity?.name || "My Page",
   );
-  const [tempName, setTempName] = useState(communityName);
-  const [communityImage, setCommunityImage] = useState<string | null>(
-    entityData?.getEntity?.logo || null
-  );
-  const [isImageModalVisible, setIsImageModalVisible] = useState(false);
-  const [isCropModalVisible, setIsCropModalVisible] = useState(false);
-  const [imageToProcess, setImageToProcess] = useState<string | null>(null);
-  const [originalImageSize, setOriginalImageSize] = useState({
-    width: 0,
-    height: 0,
-  });
-  const [cropArea, setCropArea] = useState({
-    x: 0,
-    y: 0,
-    width: 200,
-    height: 200,
-  });
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [displayImageSize, setDisplayImageSize] = useState({
-    width: 0,
-    height: 0,
-  });
-  const imageRef = useRef<HTMLImageElement>(null);
-  const cropContainerRef = useRef<HTMLDivElement>(null);
+  const [communityImage, setCommunityImage] = useState<string>("");
+  const [faviconImage, setFaviconImage] = useState<string>("");
 
   useEffect(() => {
     if (entityData?.getEntity) {
       setCommunityName(entityData.getEntity.name || "My Page");
-      setTempName(entityData.getEntity.name || "My Page");
       setCommunityImage(
-        `https://cdn.thrico.network/${entityData.getEntity.logo}` || null
+        entityData.getEntity.logo
+          ? `https://cdn.thrico.network/${entityData.getEntity.logo}`
+          : "",
       );
     }
   }, [entityData]);
 
-  const handleNameEdit = () => {
-    setTempName(communityName);
-    setIsEditingName(true);
-  };
+  const handleNameUpdate = (newName: string) => setCommunityName(newName);
+  const handleLogoUpdate = (newUrl: string) => setCommunityImage(newUrl);
+  const handleFaviconUpdate = (newUrl: string) => setFaviconImage(newUrl);
 
-  const handleNameSave = () => {
-    if (tempName.trim() && tempName !== communityName) {
-      updateProfile({
-        variables: {
-          input: {
-            name: tempName.trim(),
-          },
-        },
-      });
-    }
-    setIsEditingName(false);
-  };
-
-  const handleNameCancel = () => {
-    setTempName(communityName);
-    setIsEditingName(false);
-  };
-
-  const handleImageUpload = (info: ChangeEvent<HTMLInputElement>) => {
-    const file = info.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.crossOrigin = "anonymous";
-      img.onload = () => {
-        setOriginalImageSize({ width: img.width, height: img.height });
-        const size = Math.min(img.width, img.height) * 0.8;
-        setCropArea({
-          x: (img.width - size) / 2,
-          y: (img.height - size) / 2,
-          width: size,
-          height: size,
-        });
-      };
-      img.src = e.target?.result as string;
-      setImageToProcess(e.target?.result as string);
-      setIsImageModalVisible(false);
-      setIsCropModalVisible(true);
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const cropImageManually = (imageSrc: string): Promise<string> => {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.crossOrigin = "anonymous";
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d")!;
-        const size = Math.min(cropArea.width, cropArea.height);
-        canvas.width = size;
-        canvas.height = size;
-        ctx.drawImage(
-          img,
-          cropArea.x,
-          cropArea.y,
-          size,
-          size,
-          0,
-          0,
-          size,
-          size
-        );
-        resolve(canvas.toDataURL("image/jpeg", 0.9));
-      };
-      img.src = imageSrc;
-    });
-  };
-
-  const getMousePosition = (e: ReactMouseEvent | MouseEvent) => {
-    if (!imageRef.current) return { x: 0, y: 0 };
-    const imageRect = imageRef.current.getBoundingClientRect();
-    const scaleX = originalImageSize.width / imageRect.width;
-    const scaleY = originalImageSize.height / imageRect.height;
-    return {
-      x: Math.max(
-        0,
-        Math.min((e.clientX - imageRect.left) * scaleX, originalImageSize.width)
-      ),
-      y: Math.max(
-        0,
-        Math.min((e.clientY - imageRect.top) * scaleY, originalImageSize.height)
-      ),
-    };
-  };
-
-  const handleMouseDown = (e: ReactMouseEvent) => {
-    e.preventDefault();
-    const pos = getMousePosition(e);
-    setDragStart(pos);
-    setIsDragging(true);
-
-    const handleGlobalMouseMove = (e: MouseEvent) => {
-      if (!isDragging) return;
-      const currentPos = getMousePosition(e);
-      const width = Math.abs(currentPos.x - dragStart.x);
-      const height = Math.abs(currentPos.y - dragStart.y);
-      const size = Math.max(20, Math.min(width, height));
-      const x = Math.min(dragStart.x, currentPos.x);
-      const y = Math.min(dragStart.y, currentPos.y);
-      const maxX = Math.max(0, Math.min(x, originalImageSize.width - size));
-      const maxY = Math.max(0, Math.min(y, originalImageSize.height - size));
-      setCropArea({ x: maxX, y: maxY, width: size, height: size });
-    };
-
-    const handleGlobalMouseUp = () => {
-      setIsDragging(false);
-      document.removeEventListener("mousemove", handleGlobalMouseMove);
-      document.removeEventListener("mouseup", handleGlobalMouseUp);
-    };
-
-    document.addEventListener("mousemove", handleGlobalMouseMove);
-    document.addEventListener("mouseup", handleGlobalMouseUp);
-  };
-
-  const handleCropAreaMove = (e: ReactMouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const startPos = getMousePosition(e);
-    const startCropArea = { ...cropArea };
-
-    const handleGlobalMouseMove = (e: MouseEvent) => {
-      const currentPos = getMousePosition(e);
-      const deltaX = currentPos.x - startPos.x;
-      const deltaY = currentPos.y - startPos.y;
-      const newX = Math.max(
-        0,
-        Math.min(
-          startCropArea.x + deltaX,
-          originalImageSize.width - cropArea.width
-        )
-      );
-      const newY = Math.max(
-        0,
-        Math.min(
-          startCropArea.y + deltaY,
-          originalImageSize.height - cropArea.height
-        )
-      );
-      setCropArea((prev) => ({ ...prev, x: newX, y: newY }));
-    };
-
-    const handleGlobalMouseUp = () => {
-      document.removeEventListener("mousemove", handleGlobalMouseMove);
-      document.removeEventListener("mouseup", handleGlobalMouseUp);
-    };
-
-    document.addEventListener("mousemove", handleGlobalMouseMove);
-    document.addEventListener("mouseup", handleGlobalMouseUp);
-  };
-
-  const handleCropSave = async () => {
-    if (imageToProcess) {
-      try {
-        const croppedImageDataUrl = await cropImageManually(imageToProcess);
-        const response = await fetch(croppedImageDataUrl);
-        const blob = await response.blob();
-        const file = new File([blob], "community-logo.jpg", {
-          type: "image/jpeg",
-        });
-        uploadLogo({ variables: { file } });
-        setIsCropModalVisible(false);
-        setImageToProcess(null);
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: "Failed to process image. Please try again.",
-          variant: "destructive",
-        });
-      }
-    }
-  };
-
-  const handleCropCancel = () => {
-    setIsCropModalVisible(false);
-    setImageToProcess(null);
-    setIsImageModalVisible(true);
-  };
-
-  const beforeUpload = (file: File) => {
-    const isJpgOrPng = file.type === "image/jpeg" || file.type === "image/png";
-    if (!isJpgOrPng) {
-      toast({
-        title: "Invalid file type",
-        description: "You can only upload JPG/PNG files!",
-        variant: "destructive",
-      });
-      return false;
-    }
-    const isLt2M = file.size / 1024 / 1024 < 2;
-    if (!isLt2M) {
-      toast({
-        title: "File too large",
-        description: "Image must be smaller than 2MB!",
-        variant: "destructive",
-      });
-      return false;
-    }
-    return true;
-  };
+  if (entityLoading) {
+    return (
+      <PlatformContainer className="py-0">
+        <div className="flex flex-col gap-8">
+          {/* skeleton header */}
+          <div className="flex items-center gap-3 pb-6 border-b border-border">
+            <div className="w-9 h-9 rounded-xl bg-muted animate-pulse" />
+            <div className="space-y-2">
+              <div className="h-4 w-40 bg-muted rounded-md animate-pulse" />
+              <div className="h-3 w-64 bg-muted/50 rounded-md animate-pulse" />
+            </div>
+          </div>
+          {/* skeleton tabs */}
+          <div className="flex gap-2">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="h-10 w-28 bg-muted rounded-lg animate-pulse"
+              />
+            ))}
+          </div>
+          {/* skeleton content */}
+          <Skeleton className="h-[300px] w-full rounded-xl" />
+        </div>
+      </PlatformContainer>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Store className="w-5 h-5" />
-            Entity Details
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Profile Header */}
-          <Card className="border-0 bg-muted/30 p-4">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className="relative">
-                  <Avatar className="w-16 h-16">
-                    <AvatarImage src={communityImage || ""} alt="Entity" />
-                    <AvatarFallback>
-                      <Store className="w-6 h-6" />
-                    </AvatarFallback>
-                  </Avatar>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="absolute bottom-0 right-0 h-7 w-7 rounded-full p-0 bg-transparent"
-                    onClick={() => setIsImageModalVisible(true)}
-                    disabled={uploadingLogo}
-                  >
-                    <Camera className="w-3.5 h-3.5" />
-                  </Button>
-                </div>
-
-                {isEditingName ? (
-                  <div className="flex items-center gap-2 flex-1">
-                    <Input
-                      value={tempName}
-                      onChange={(e) => setTempName(e.target.value)}
-                      className="font-semibold"
-                      autoFocus
-                    />
-                    <Button
-                      size="sm"
-                      onClick={handleNameSave}
-                      disabled={updatingProfile}
-                    >
-                      {updatingProfile && (
-                        <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
-                      )}
-                      Save
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleNameCancel}
-                      disabled={updatingProfile}
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-lg">{communityName}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Entity name and image
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {!isEditingName && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleNameEdit}
-                  disabled={updatingProfile}
-                >
-                  Edit
-                </Button>
-              )}
+    <PlatformContainer className="py-0">
+      {/* ── Page Header ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-border">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-white shrink-0">
+            <Store size={16} strokeWidth={2} />
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <h1 className="text-[15px] font-semibold text-foreground tracking-tight leading-none">
+                General Settings
+              </h1>
+              <span className="px-1.5 py-0.5 rounded-md bg-muted text-[10px] font-medium text-muted-foreground uppercase tracking-wide border border-border/60">
+                Identity
+              </span>
             </div>
-          </Card>
-
-          <Separator />
-
-          {/* Billing Address */}
-          <BillingAddress />
-        </CardContent>
-      </Card>
-
-      {/* Image Upload Modal */}
-      <Dialog open={isImageModalVisible} onOpenChange={setIsImageModalVisible}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Update Entity Image</DialogTitle>
-            <DialogDescription>
-              Choose a square image for best results
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="flex flex-col items-center gap-4 py-6">
-            <Avatar className="w-24 h-24">
-              <AvatarImage src={communityImage || ""} alt="Entity" />
-              <AvatarFallback>
-                <Store className="w-8 h-8" />
-              </AvatarFallback>
-            </Avatar>
-
-            <div className="w-full">
-              <label htmlFor="image-upload" className="w-full">
-                <Button
-                  type="button"
-                  asChild
-                  className="w-full"
-                  disabled={uploadingLogo}
-                >
-                  <span>
-                    <Upload className="w-4 h-4 mr-2" />
-                    {uploadingLogo ? "Processing..." : "Upload New Image"}
-                  </span>
-                </Button>
-              </label>
-              <input
-                id="image-upload"
-                type="file"
-                accept="image/jpeg,image/png"
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file && beforeUpload(file)) {
-                    handleImageUpload(e as any);
-                  }
-                }}
-                disabled={uploadingLogo}
-              />
-            </div>
-
-            <p className="text-xs text-muted-foreground text-center">
-              Recommended: Square image, max 2MB (JPG, PNG)
+            <p className="mt-1 text-[12.5px] text-muted-foreground font-normal leading-snug">
+              Manage your entity's profile, visual identity, and billing
+              information.
             </p>
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+        <button
+          onClick={() => refetch()}
+          className="h-8 px-3 rounded-lg text-[12px] font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors flex items-center gap-1.5 shrink-0"
+        >
+          <RotateCcw size={12} />
+          Refresh
+        </button>
+      </div>
 
-      {/* Crop Modal */}
-      <Dialog open={isCropModalVisible} onOpenChange={setIsCropModalVisible}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle>Crop Image to Square</DialogTitle>
-            <DialogDescription>
-              Drag to select the area you want to keep
-            </DialogDescription>
-          </DialogHeader>
+      {/* ── Tab Bar ── */}
+      <div className="mt-5 flex gap-1.5 border-b border-border pb-0 -mb-px">
+        {TABS.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.key;
+          return (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={cn(
+                "relative flex items-center gap-2 px-3.5 py-2.5 rounded-t-lg text-[12.5px] font-medium transition-colors duration-150 border border-transparent",
+                isActive
+                  ? "text-foreground bg-card border-border border-b-card -mb-px z-10"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
+              )}
+            >
+              <Icon size={13} strokeWidth={isActive ? 2.2 : 1.8} />
+              {tab.label}
+            </button>
+          );
+        })}
+      </div>
 
-          {imageToProcess && (
-            <div className="space-y-4 py-4">
-              <div className="flex gap-2 justify-center">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    const size =
-                      Math.min(
-                        originalImageSize.width,
-                        originalImageSize.height
-                      ) * 0.8;
-                    setCropArea({
-                      x: (originalImageSize.width - size) / 2,
-                      y: (originalImageSize.height - size) / 2,
-                      width: size,
-                      height: size,
-                    });
-                  }}
-                >
-                  Center
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    const newSize = Math.max(50, cropArea.width * 0.8);
-                    setCropArea((prev) => ({
-                      ...prev,
-                      width: newSize,
-                      height: newSize,
-                    }));
-                  }}
-                >
-                  Smaller
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    const maxSize = Math.min(
-                      originalImageSize.width,
-                      originalImageSize.height
-                    );
-                    const newSize = Math.min(maxSize, cropArea.width * 1.2);
-                    setCropArea((prev) => ({
-                      ...prev,
-                      width: newSize,
-                      height: newSize,
-                    }));
-                  }}
-                >
-                  Larger
-                </Button>
-              </div>
-
-              <div
-                ref={cropContainerRef}
-                className="relative inline-block border-2 border-border rounded-lg overflow-hidden mx-auto cursor-crosshair select-none"
-                onMouseDown={handleMouseDown}
+      {/* ── Tab Content ── */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={activeTab}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -4 }}
+          transition={{ duration: 0.18, ease: "easeOut" }}
+          className="mt-6"
+        >
+          {/* ── Identity Tab ── */}
+          {activeTab === "identity" && (
+            <div className="max-w-2xl space-y-6">
+              <SectionCard
+                icon={Fingerprint}
+                title="Entity Profile"
+                description="Your entity's display name and primary identity across the platform."
               >
-                <img
-                  ref={imageRef}
-                  src={imageToProcess || "/placeholder.svg"}
-                  alt="Crop"
-                  className="max-w-md max-h-96 block select-none"
-                  draggable={false}
-                  onLoad={() => {
-                    if (imageRef.current) {
-                      const rect = imageRef.current.getBoundingClientRect();
-                      setDisplayImageSize({
-                        width: rect.width,
-                        height: rect.height,
-                      });
-                    }
-                  }}
+                <EntityProfileCard
+                  name={communityName}
+                  image={communityImage}
+                  onNameUpdate={handleNameUpdate}
                 />
+              </SectionCard>
 
-                {/* Crop Overlay */}
-                <div
-                  className="absolute border-2 border-primary bg-primary/10 cursor-move"
-                  style={{
-                    left: `${(cropArea.x / originalImageSize.width) * 100}%`,
-                    top: `${(cropArea.y / originalImageSize.height) * 100}%`,
-                    width: `${
-                      (cropArea.width / originalImageSize.width) * 100
-                    }%`,
-                    height: `${
-                      (cropArea.height / originalImageSize.height) * 100
-                    }%`,
-                    boxSizing: "border-box",
-                  }}
-                  onMouseDown={handleCropAreaMove}
-                />
+              {/* Entity metadata info rows */}
+              <SectionCard
+                icon={Globe}
+                title="Platform Metadata"
+                description="Heuristic signals and read-only descriptors for this entity node."
+              >
+                <div className="divide-y divide-zinc-100">
+                  <InfoRow label="Entity Type" value="Organizational Unit" />
+                  <InfoRow
+                    label="Protocol Status"
+                    value="Active / Synchronized"
+                    valueClass="text-emerald-600"
+                    dot="emerald"
+                  />
+                  <InfoRow
+                    label="Registry ID"
+                    value={entityData?.getEntity?.id || "—"}
+                    mono
+                  />
+                  <InfoRow label="Workspace" value={communityName} />
+                  <InfoRow label="Primary Language" value="English (Global)" />
+                  <InfoRow
+                    label="Subdomain"
+                    value={entityData?.getEntity?.subdomain || "—"}
+                    mono
+                  />
+                  <InfoRow
+                    label="Public URL"
+                    value={`https://${entityData?.getEntity?.subdomain}.thrico.network`}
+                    isLink
+                    href={`https://${entityData?.getEntity?.subdomain}.thrico.network`}
+                  />
+                </div>
+              </SectionCard>
+            </div>
+          )}
+
+          {/* ── Branding Tab ── */}
+          {activeTab === "branding" && (
+            <div className="max-w-2xl space-y-6">
+              <SectionCard
+                icon={ImageIcon}
+                title="Primary Logo"
+                description="Used in the header, email templates, and all public-facing surfaces. Use PNG or SVG with a transparent background."
+              >
+                <div className="p-4 rounded-lg border border-border bg-muted/50/40">
+                  <EntityLogoUpload
+                    currentImage={communityImage}
+                    onImageUpdate={handleLogoUpdate}
+                  />
+                </div>
+              </SectionCard>
+
+              <SectionCard
+                icon={Globe}
+                title="Browser Favicon"
+                description="Displayed in browser tabs and bookmarks. Recommend 32×32px or 64×64px ICO, PNG, or SVG."
+              >
+                <div className="p-4 rounded-lg border border-border bg-muted/50/40">
+                  <FaviconUpload
+                    currentImage={faviconImage}
+                    onImageUpdate={handleFaviconUpdate}
+                  />
+                </div>
+              </SectionCard>
+
+              {/* Asset guidelines */}
+              <div className="rounded-xl border border-border/60 bg-primary p-5 text-white">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-6 h-6 rounded-md bg-card/10 flex items-center justify-center">
+                    <ImageIcon size={12} className="text-muted-foreground" />
+                  </div>
+                  <p className="text-[12px] font-semibold text-zinc-100">
+                    Asset Guidelines
+                  </p>
+                </div>
+                <p className="text-[12px] text-muted-foreground leading-relaxed">
+                  Use high-quality assets with transparent backgrounds. PNG or
+                  SVG are preferred formats. Minimum recommended size is
+                  256×256px for the logo.
+                </p>
               </div>
             </div>
           )}
 
-          <DialogFooter className="flex gap-2 justify-end">
-            <Button
-              variant="outline"
-              onClick={handleCropCancel}
-              disabled={uploadingLogo}
-            >
-              Back
-            </Button>
-            <Button onClick={handleCropSave} disabled={uploadingLogo}>
-              {uploadingLogo && (
-                <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
-              )}
-              Save Cropped Image
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          {/* ── Billing Tab ── */}
+          {activeTab === "billing" && (
+            <div className="max-w-2xl space-y-6">
+              <SectionCard
+                icon={MapPin}
+                title="Billing Details"
+                description="Manage account type, tax information, card details, and billing address for invoicing."
+              >
+                <BillingDetailsForm />
+              </SectionCard>
+
+              <SectionCard
+                icon={CreditCard}
+                title="Billing Status"
+                description="Comprehensive overview of your financial standing and current protocol plan."
+              >
+                <div className="divide-y divide-zinc-100">
+                  <InfoRow label="Platform Plan" value="Enterprise Protocol" />
+                  <InfoRow
+                    label="Billing Frequency"
+                    value="Annual / Recurring"
+                  />
+                  <InfoRow label="Renewal Date" value="Jan 12, 2027" />
+                  <InfoRow
+                    label="Current Status"
+                    value="Settled"
+                    valueClass="text-emerald-600"
+                    dot="emerald"
+                  />
+                  <InfoRow label="Auto-Renewal" value="Enabled" />
+                </div>
+              </SectionCard>
+            </div>
+          )}
+        </motion.div>
+      </AnimatePresence>
+    </PlatformContainer>
+  );
+}
+
+// ── Internal sub-components ──────────────────────────────────────────────────
+
+function SectionCard({
+  icon: Icon,
+  title,
+  description,
+  children,
+}: {
+  icon: React.ElementType;
+  title: string;
+  description: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-xl border border-border/60 bg-card overflow-hidden">
+      {/* Card header */}
+      <div className="flex items-start gap-3 px-5 py-4 border-b border-border bg-muted/50/40">
+        <div className="w-7 h-7 rounded-lg bg-muted border border-border/60 flex items-center justify-center text-muted-foreground shrink-0 mt-0.5">
+          <Icon size={13} strokeWidth={2} />
+        </div>
+        <div>
+          <p className="text-[13.5px] font-semibold text-foreground leading-none">
+            {title}
+          </p>
+          <p className="mt-1 text-[12px] text-muted-foreground leading-snug">
+            {description}
+          </p>
+        </div>
+      </div>
+      {/* Card body */}
+      <div className="p-5">{children}</div>
+    </div>
+  );
+}
+
+function InfoRow({
+  label,
+  value,
+  mono = false,
+  valueClass,
+  dot,
+  isLink = false,
+  href,
+}: {
+  label: string;
+  value: string;
+  mono?: boolean;
+  valueClass?: string;
+  dot?: "emerald" | "zinc";
+  isLink?: boolean;
+  href?: string;
+}) {
+  return (
+    <div className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
+      <span className="text-[12px] text-muted-foreground font-medium">{label}</span>
+      <div className="flex items-center gap-1.5">
+        {dot && (
+          <div
+            className={cn(
+              "w-1.5 h-1.5 rounded-full",
+              dot === "emerald" ? "bg-emerald-500" : "bg-zinc-400",
+            )}
+          />
+        )}
+        {isLink ? (
+          <a
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[12.5px] font-medium text-emerald-600 hover:text-emerald-700 hover:underline flex items-center gap-1 transition-all"
+          >
+            {value}
+            <ExternalLink size={11} strokeWidth={2.5} />
+          </a>
+        ) : (
+          <span
+            className={cn(
+              "text-[12.5px] font-medium text-foreground",
+              mono && "font-mono text-[11px] text-muted-foreground",
+              valueClass,
+            )}
+          >
+            {value}
+          </span>
+        )}
+      </div>
     </div>
   );
 }

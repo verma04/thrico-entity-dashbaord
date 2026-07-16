@@ -1,217 +1,182 @@
 import {
-  MutationHookOptions,
-  QueryHookOptions,
-  useMutation,
   useQuery,
+  useMutation,
+  QueryHookOptions,
+  MutationHookOptions,
 } from "@apollo/client";
 import {
-  ADD_OFFER_MUTATION,
-  CHANGE_OFFER_STATUS_MUTATION,
-  EDIT_OFFER_MUTATION,
-  GET_ALL_OFFER,
   GET_OFFER_STATS,
-} from "../../quries/offers";
-
-interface LocationInput {
-  name: string;
-  latitude: number;
-  longitude: number;
-  address: string;
-}
-
-interface CompanyInput {
-  id: string;
-  name: string;
-  logo?: string;
-}
-
-export interface AddOfferInput {
-  title: string;
-  description?: string;
-  location: LocationInput;
-  company: CompanyInput;
-  timeline: string[];
-  termsAndConditions?: string;
-  website?: string;
-}
+  GET_OFFERS,
+  GET_OFFER_CATEGORIES,
+  CREATE_OFFER,
+  UPDATE_OFFER,
+  DELETE_OFFER,
+  VERIFY_OFFER,
+  CHANGE_OFFER_STATUS,
+  GET_OFFER_BY_ID,
+} from "@/graphql/quries/offers";
+export * from "./offer-quiries";
+export * from "./offers-mutation";
+import { DateRangeInput, TimeRange } from "../dashbaord/dashboard-quries";
+export { TimeRange };
+export type { DateRangeInput };
+import { OfferCategory } from "./offer-quiries";
 
 export interface Offer {
   id: string;
   title: string;
-  description?: string;
-  location: LocationInput;
-  company: CompanyInput;
-  timeline: string[];
-  termsAndConditions?: string;
-  website?: string;
-  createdAt: string;
-  updatedAt: string;
+  description: string;
+  image: string;
+  discount: string;
+  validityStart: string;
+  validityEnd: string;
+  status: "ACTIVE" | "INACTIVE" | "EXPIRED";
+  claimsCount: number;
+  viewsCount: number;
   isActive: boolean;
-  cover?: string;
-}
-
-export interface EditOfferInput {
-  id: string;
-  title?: string;
-  description?: string;
-
-  timeline?: string[];
+  category: OfferCategory;
+  company?: string;
+  location?: string;
   termsAndConditions?: string;
+  timeline?: string;
   website?: string;
+  verification?: {
+    isVerified: boolean;
+    verificationReason: string;
+  };
+  createdAt: string;
+  addedBy?: string;
+  creator?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    avatar: string;
+  };
 }
 
-export function useAddOffer(
-  options?: MutationHookOptions<{ addOffer: Offer }, { input: AddOfferInput }>
-) {
-  return useMutation<{ addOffer: Offer }, { input: AddOfferInput }>(
-    ADD_OFFER_MUTATION,
-    {
-      ...options,
-      refetchQueries: [
-        {
-          query: GET_ALL_OFFER,
-          variables: {
-            input: {
-              status: "ALL",
-            },
-          },
-        },
-        {
-          query: GET_ALL_OFFER,
-          variables: {
-            input: {
-              status: "ACTIVE",
-            },
-          },
-        },
-        {
-          query: GET_ALL_OFFER,
-          variables: {
-            input: {
-              status: "INACTIVE",
-            },
-          },
-        },
-      ],
-    }
-  );
+export interface GetOffersInput {
+  categoryId?: string;
+  status?: string;
+  search?: string;
+  pagination?: {
+    limit?: number | null;
+    offset?: number | null;
+    page?: number | null;
+  };
 }
 
-export enum OfferStatus {
-  ALL = "ALL",
-  ACTIVE = "ACTIVE",
-  INACTIVE = "INACTIVE",
-}
-
-export interface GetAllOfferInput {
-  status?: OfferStatus;
-}
-
-export function useGetAllOffer(
-  options?: QueryHookOptions<
-    { getAllOffer: Offer[] },
-    { input?: GetAllOfferInput }
-  >
-) {
-  return useQuery<{ getAllOffer: Offer[] }, { input?: GetAllOfferInput }>(
-    GET_ALL_OFFER,
-    options
-  );
-}
-
-export function useEditOffer(
-  options?: MutationHookOptions<{ editOffer: Offer }, { input: EditOfferInput }>
-) {
-  return useMutation<{ editOffer: Offer }, { input: EditOfferInput }>(
-    EDIT_OFFER_MUTATION,
-    {
-      ...options,
-      refetchQueries: [
-        {
-          query: GET_ALL_OFFER,
-          variables: {
-            input: {
-              status: "ALL",
-            },
-          },
-        },
-        {
-          query: GET_ALL_OFFER,
-          variables: {
-            input: {
-              status: "ACTIVE",
-            },
-          },
-        },
-        {
-          query: GET_ALL_OFFER,
-          variables: {
-            input: {
-              status: "INACTIVE",
-            },
-          },
-        },
-      ],
-    }
-  );
-}
-
-export interface ChangeStatusInput {
-  id?: string;
+export interface CreateOfferInput {
+  title: string;
+  description: string;
+  categoryId: string;
+  discount: string;
+  validityStart: string;
+  validityEnd: string;
+  image?: any;
+  status?: string;
+  company?: string;
+  location?: string;
+  termsAndConditions?: string;
+  timeline?: string;
+  website?: string;
   isActive?: boolean;
 }
 
-export function useChangeOfferStatus(
-  options?: MutationHookOptions<
-    { changeOfferStatus: Offer },
-    { input: ChangeStatusInput }
-  >
-) {
-  return useMutation<
-    { changeOfferStatus: Offer },
-    { input: ChangeStatusInput }
-  >(CHANGE_OFFER_STATUS_MUTATION, {
-    ...options,
-    refetchQueries: [
-      {
-        query: GET_ALL_OFFER,
-        variables: {
-          input: {
-            status: "ALL",
-          },
-        },
-      },
-      {
-        query: GET_ALL_OFFER,
-        variables: {
-          input: {
-            status: "ACTIVE",
-          },
-        },
-      },
-      {
-        query: GET_ALL_OFFER,
-        variables: {
-          input: {
-            status: "INACTIVE",
-          },
-        },
-      },
-    ],
-  });
+export interface VerifyOfferInput {
+  isVerified: boolean;
+  offerId: string;
+  verificationReason: string;
 }
+
+export interface VerifyOfferResponse {
+  id: string;
+  isVerified: boolean;
+  isVerifiedAt: string;
+  verifiedBy: string;
+  verificationReason: string;
+  offerId: string;
+}
+
+export interface ChangeOfferStatusInput {
+  action: "APPROVE" | "REJECT" | "EXPIRE" | "ACTIVATE" | "DEACTIVATE";
+  id: string;
+  reason?: string;
+}
+
+export interface UpdateOfferInput extends Partial<CreateOfferInput> {}
 
 export interface OfferStats {
-  total: number;
-  active: number;
-  inactive: number;
-  thisMonth: number;
-  activePercent: number;
-  inactivePercent: number;
+  totalOffers: number;
+  activeOffers: number;
+  claims: number;
+  views: number;
+  totalOffersChange: number;
+  activeOffersChange: number;
+  claimsChange: number;
+  viewsChange: number;
 }
 
-export function useGetOfferStats(
-  options?: QueryHookOptions<{ getOfferStats: OfferStats }>
-) {
-  return useQuery<{ getOfferStats: OfferStats }>(GET_OFFER_STATS, options);
+export interface GetOfferStatsResponse {
+  getOfferStats: OfferStats;
 }
+
+export const useGetOfferStats = (
+  timeRange?: TimeRange,
+  dateRange?: DateRangeInput,
+  options?: any,
+) =>
+  useQuery<
+    GetOfferStatsResponse,
+    { timeRange?: TimeRange; dateRange?: DateRangeInput }
+  >(GET_OFFER_STATS, {
+    variables: { timeRange, dateRange },
+    ...options,
+  });
+
+export const useGetOffers = (
+  input?: GetOffersInput,
+  options?: QueryHookOptions<
+    { getOffers: Offer[] },
+    { input?: GetOffersInput }
+  >,
+) =>
+  useQuery<{ getOffers: Offer[] }, { input?: GetOffersInput }>(GET_OFFERS, {
+    variables: { input },
+    ...options,
+  });
+
+export const useGetOfferById = (
+  id: string,
+  options?: QueryHookOptions<{ getOfferById: Offer }, { id: string }>,
+) =>
+  useQuery<{ getOfferById: Offer }, { id: string }>(GET_OFFER_BY_ID, {
+    variables: { id },
+    ...options,
+  });
+
+export const useCreateOffer = (
+  options?: MutationHookOptions<
+    { createOffer: Partial<Offer> },
+    { input: CreateOfferInput }
+  >,
+) =>
+  useMutation<{ createOffer: Partial<Offer> }, { input: CreateOfferInput }>(
+    CREATE_OFFER,
+    options,
+  );
+
+export const useUpdateOffer = (
+  options?: MutationHookOptions<
+    { updateOffer: Partial<Offer> },
+    { id: string; input: UpdateOfferInput }
+  >,
+) =>
+  useMutation<
+    { updateOffer: Partial<Offer> },
+    { id: string; input: UpdateOfferInput }
+  >(UPDATE_OFFER, options);
+
+export const useDeleteOffer = (
+  options?: MutationHookOptions<{ deleteOffer: boolean }, { id: string }>,
+) =>
+  useMutation<{ deleteOffer: boolean }, { id: string }>(DELETE_OFFER, options);

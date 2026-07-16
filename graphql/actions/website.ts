@@ -20,6 +20,11 @@ import {
   CREATE_MODULE,
   UPDATE_MODULE,
   REORDER_MODULES,
+  GET_ALL_PAGES_SEO,
+  UPDATE_PAGE_SEO,
+  DELETE_MODULE,
+  TOGGLE_MODULE,
+  UPDATE_WEBSITE_CUSTOM_COLORS,
   GetWebsiteResponse,
   GetWebsiteBySlugResponse,
   GetPageResponse,
@@ -47,6 +52,16 @@ import {
   UpdateModuleVariables,
   ReorderModulesResponse,
   ReorderModulesVariables,
+  GetAllPagesSeoResponse,
+  UpdatePageSeoResponse,
+  UpdatePageSeoVariables,
+  DeleteModuleResponse,
+  DeleteModuleVariables,
+  ToggleModuleResponse,
+  ToggleModuleVariables,
+  UpdateWebsiteCustomColorsResponse,
+  UpdateWebsiteCustomColorsVariables,
+  CustomThemeColorsInput,
 } from "../quries/website";
 
 // ============================================
@@ -59,7 +74,6 @@ import {
  * @param options - Apollo query options
  */
 export const useGetWebsite = (
- 
   options?: QueryHookOptions<GetWebsiteResponse>
 ) => {
   return useQuery<GetWebsiteResponse>(GET_WEBSITE, {
@@ -98,6 +112,24 @@ export const useGetPage = (
     variables: { pageId },
     ...options,
   });
+};
+
+/**
+ * Hook to fetch SEO settings for all pages in a website
+ * @param websiteId - The website ID
+ * @param options - Apollo query options
+ */
+export const useGetAllPagesSeo = (
+  websiteId: string,
+  options?: QueryHookOptions<GetAllPagesSeoResponse, { websiteId: string }>
+) => {
+  return useQuery<GetAllPagesSeoResponse, { websiteId: string }>(
+    GET_ALL_PAGES_SEO,
+    {
+      variables: { websiteId },
+      ...options,
+    }
+  );
 };
 
 // ============================================
@@ -147,6 +179,22 @@ export const usePublishWebsite = (
     PUBLISH_WEBSITE,
     options
   );
+};
+
+/**
+ * Hook to update website custom colors
+ * @param options - Apollo mutation options with refetch
+ */
+export const useUpdateWebsiteCustomColors = (
+  options?: MutationHookOptions<
+    UpdateWebsiteCustomColorsResponse,
+    UpdateWebsiteCustomColorsVariables
+  >
+) => {
+  return useMutation<
+    UpdateWebsiteCustomColorsResponse,
+    UpdateWebsiteCustomColorsVariables
+  >(UPDATE_WEBSITE_CUSTOM_COLORS, options);
 };
 
 // ============================================
@@ -205,6 +253,19 @@ export const useUpdatePage = (
 ) => {
   return useMutation<UpdatePageResponse, UpdatePageVariables>(
     UPDATE_PAGE,
+    options
+  );
+};
+
+/**
+ * Hook to update SEO settings for a page
+ * @param options - Apollo mutation options with refetch
+ */
+export const useUpdatePageSeo = (
+  options?: MutationHookOptions<UpdatePageSeoResponse, UpdatePageSeoVariables>
+) => {
+  return useMutation<UpdatePageSeoResponse, UpdatePageSeoVariables>(
+    UPDATE_PAGE_SEO,
     options
   );
 };
@@ -278,6 +339,32 @@ export const useReorderModules = (
   );
 };
 
+/**
+ * Hook to delete a module
+ * @param options - Apollo mutation options with refetch
+ */
+export const useDeleteModule = (
+  options?: MutationHookOptions<DeleteModuleResponse, DeleteModuleVariables>
+) => {
+  return useMutation<DeleteModuleResponse, DeleteModuleVariables>(
+    DELETE_MODULE,
+    options
+  );
+};
+
+/**
+ * Hook to toggle a module's enabled status
+ * @param options - Apollo mutation options with refetch
+ */
+export const useToggleModule = (
+  options?: MutationHookOptions<ToggleModuleResponse, ToggleModuleVariables>
+) => {
+  return useMutation<ToggleModuleResponse, ToggleModuleVariables>(
+    TOGGLE_MODULE,
+    options
+  );
+};
+
 // ============================================
 // EXPORT ALL TYPES FOR CONVENIENCE
 // ============================================
@@ -315,4 +402,8 @@ export type {
   UpdateModuleVariables,
   ReorderModulesResponse,
   ReorderModulesVariables,
+  SEO,
+  GetAllPagesSeoResponse,
+  UpdatePageSeoResponse,
+  UpdatePageSeoVariables,
 } from "../quries/website";

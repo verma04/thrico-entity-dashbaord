@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
+import { useFormikContext } from "formik";
 import {
   Select,
   SelectContent,
@@ -13,11 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  AnswerMapFn,
-  FormSettings,
-  Question,
-} from "../../../../store/ts-types";
+import { AnswerMapFn, FormSettings, Question } from "@/store/ts-types";
 
 interface MultiStepPreviewProps {
   formTitle: string;
@@ -35,9 +32,8 @@ export function MultiStepPreview({
   onClose,
 }: MultiStepPreviewProps) {
   const [currentStep, setCurrentStep] = useState(0);
-  const [answers, setAnswers] = useState<{
-    [key: string]: any;
-  }>({});
+  const { values, setFieldValue, errors, touched, handleSubmit } =
+    useFormikContext<any>();
   const [isCompleted, setIsCompleted] = useState(false);
 
   const totalSteps = questions.length;
@@ -48,9 +44,17 @@ export function MultiStepPreview({
     if (currentStep > questions.length) return true;
 
     const currentQuestion = questions[currentStep - 1];
+    // Formik validation handles required checks, but for multi-step navigation we need to check manually or trigger validation.
+    // simpler to check if value exists for required fields.
     if (!currentQuestion?.required) return true;
 
-    const answer = answers[currentQuestion?.id];
+    const answer = values[currentQuestion?.id];
+    if (
+      currentQuestion.type === "MULTIPLE_CHOICE" &&
+      currentQuestion.allowMultiple
+    ) {
+      return answer && answer.length > 0;
+    }
     return answer !== undefined && answer !== null && answer !== "";
   };
 
@@ -63,6 +67,7 @@ export function MultiStepPreview({
       setCurrentStep(currentStep + 1);
     } else {
       setIsCompleted(true);
+      handleSubmit();
     }
   };
 
@@ -73,7 +78,7 @@ export function MultiStepPreview({
   };
 
   const handleAnswer: AnswerMapFn = (questionId, value) => {
-    setAnswers({ ...answers, [questionId]: value });
+    setFieldValue(String(questionId), value);
   };
 
   const renderWelcomeScreen = () => (
@@ -145,13 +150,15 @@ export function MultiStepPreview({
                   <span className="text-destructive"> *</span>
                 )}
               </h2>
-              <Button
-                variant="link"
-                onClick={handleNext}
-                style={{ borderRadius: formSettings?.borderRadius }}
-              >
-                Skip
-              </Button>
+              {!question.required && (
+                <Button
+                  variant="link"
+                  onClick={handleNext}
+                  style={{ borderRadius: formSettings?.borderRadius }}
+                >
+                  Skip
+                </Button>
+              )}
             </div>
 
             {renderQuestionInput(question)}
@@ -231,7 +238,7 @@ export function MultiStepPreview({
             placeholder="Type your answer here..."
             className="text-lg p-5"
             style={inputStyle}
-            value={answers[Number(question?.id)] || ""}
+            value={values[Number(question?.id)] || ""}
             onChange={(e) => handleAnswer(question?.id, e.target.value)}
           />
         );
@@ -244,7 +251,7 @@ export function MultiStepPreview({
             rows={6}
             className="text-lg p-5"
             style={inputStyle}
-            value={answers[question?.id] || ""}
+            value={values[question?.id] || ""}
             onChange={(e) => handleAnswer(question?.id, e.target.value)}
           />
         );
@@ -256,7 +263,7 @@ export function MultiStepPreview({
             placeholder="email@example.com"
             className="text-lg p-5"
             style={inputStyle}
-            value={answers[question?.id] || ""}
+            value={values[question?.id] || ""}
             onChange={(e) => handleAnswer(question?.id, e.target.value)}
           />
         );
@@ -274,10 +281,10 @@ export function MultiStepPreview({
                   border: `${formSettings?.borderWidth}px ${formSettings?.borderStyle} ${formSettings?.borderColor}`,
                   borderRadius: formSettings?.borderRadius,
                   background:
-                    answers[question?.id] === option
+                    values[question?.id] === option
                       ? formSettings?.primaryColor
                       : "white",
-                  color: answers[question?.id] === option ? "white" : "#2c3e50",
+                  color: values[question?.id] === option ? "white" : "#2c3e50",
                   fontSize: `${formSettings?.fontSize}px`,
                 }}
               >
@@ -285,14 +292,14 @@ export function MultiStepPreview({
                   <div
                     className="w-5 h-5 rounded-full flex items-center justify-center"
                     style={{
-                      border: `2px solid ${answers[question?.id] === option ? "white" : formSettings?.primaryColor}`,
+                      border: `2px solid ${values[question?.id] === option ? "white" : formSettings?.primaryColor}`,
                       background:
-                        answers[question?.id] === option
+                        values[question?.id] === option
                           ? "white"
                           : "transparent",
                     }}
                   >
-                    {answers[question?.id] === option && (
+                    {values[question?.id] === option && (
                       <div
                         className="w-2 h-2 rounded-full"
                         style={{ background: formSettings?.primaryColor }}
@@ -316,11 +323,11 @@ export function MultiStepPreview({
                 className="w-15 h-15 rounded-full text-2xl"
                 style={{
                   background:
-                    answers[question?.id] === index + 1
+                    values[question?.id] === index + 1
                       ? formSettings?.primaryColor
                       : "white",
                   color:
-                    answers[question?.id] === index + 1
+                    values[question?.id] === index + 1
                       ? "white"
                       : formSettings?.primaryColor,
                   border: `${formSettings?.borderWidth}px ${formSettings?.borderStyle} ${formSettings?.primaryColor}`,
@@ -355,11 +362,11 @@ export function MultiStepPreview({
                     className="w-12 h-12 rounded-full text-xl"
                     style={{
                       background:
-                        answers[question?.id] === value
+                        values[question?.id] === value
                           ? formSettings?.primaryColor
                           : "white",
                       color:
-                        answers[question?.id] === value
+                        values[question?.id] === value
                           ? "white"
                           : formSettings?.primaryColor,
                       border: `${formSettings?.borderWidth}px ${formSettings?.borderStyle} ${formSettings?.primaryColor}`,
@@ -373,7 +380,7 @@ export function MultiStepPreview({
           </div>
         );
 
-      case "YES-NO":
+      case "YES_NO":
         return (
           <div className="flex gap-6 justify-center">
             <Button
@@ -381,8 +388,8 @@ export function MultiStepPreview({
               className="w-30 h-15 text-xl"
               style={{
                 background:
-                  answers[question?.id] === "Yes" ? "#52c41a" : "white",
-                color: answers[question?.id] === "Yes" ? "white" : "#52c41a",
+                  values[question?.id] === "Yes" ? "#52c41a" : "white",
+                color: values[question?.id] === "Yes" ? "white" : "#52c41a",
                 border: `${formSettings?.borderWidth}px ${formSettings?.borderStyle} #52c41a`,
                 borderRadius: formSettings?.borderRadius,
               }}
@@ -393,9 +400,8 @@ export function MultiStepPreview({
               onClick={() => handleAnswer(question?.id, "No")}
               className="w-30 h-15 text-xl"
               style={{
-                background:
-                  answers[question?.id] === "No" ? "#ff4d4f" : "white",
-                color: answers[question?.id] === "No" ? "white" : "#ff4d4f",
+                background: values[question?.id] === "No" ? "#ff4d4f" : "white",
+                color: values[question?.id] === "No" ? "white" : "#ff4d4f",
                 border: `${formSettings?.borderWidth}px ${formSettings?.borderStyle} #ff4d4f`,
                 borderRadius: formSettings?.borderRadius,
               }}
@@ -411,7 +417,7 @@ export function MultiStepPreview({
             type="date"
             className="text-lg p-5"
             style={inputStyle}
-            value={answers[question?.id] || ""}
+            value={values[question?.id] || ""}
             onChange={(e) => handleAnswer(question?.id, e.target.value)}
           />
         );
@@ -419,7 +425,7 @@ export function MultiStepPreview({
       case "DROPDOWN":
         return (
           <Select
-            value={answers[question?.id]}
+            value={values[question?.id]}
             onValueChange={(value) => handleAnswer(question?.id, value)}
           >
             <SelectTrigger
@@ -444,7 +450,7 @@ export function MultiStepPreview({
             type="time"
             className="text-lg p-5"
             style={inputStyle}
-            value={answers[question?.id] || ""}
+            value={values[question?.id] || ""}
             onChange={(e) => handleAnswer(question?.id, e.target.value)}
           />
         );
@@ -456,7 +462,7 @@ export function MultiStepPreview({
             placeholder="+1234567890"
             className="text-lg p-5"
             style={inputStyle}
-            value={answers[question?.id] || ""}
+            value={values[question?.id] || ""}
             onChange={(e) => handleAnswer(question?.id, e.target.value)}
           />
         );
@@ -468,7 +474,7 @@ export function MultiStepPreview({
             placeholder="https://example.com"
             className="text-lg p-5"
             style={inputStyle}
-            value={answers[question?.id] || ""}
+            value={values[question?.id] || ""}
             onChange={(e) => handleAnswer(question?.id, e.target.value)}
           />
         );
@@ -479,7 +485,7 @@ export function MultiStepPreview({
             placeholder="Type your answer here..."
             className="text-lg p-5"
             style={inputStyle}
-            value={answers[question?.id] || ""}
+            value={values[question?.id] || ""}
             onChange={(e) => handleAnswer(question?.id, e.target.value)}
           />
         );

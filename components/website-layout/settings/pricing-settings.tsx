@@ -21,6 +21,7 @@ interface PricingSettingsProps {
       features: string[];
       popular: boolean;
       buttonText: string;
+      buttonLink?: string;
     }>;
     title?: string;
     description?: string;
@@ -44,6 +45,7 @@ const PricingSettings: React.FC<PricingSettingsProps> = ({
         features: ["5 Projects", "10GB Storage", "Email Support"],
         popular: false,
         buttonText: "Get Started",
+        buttonLink: "",
       },
       {
         name: "Professional",
@@ -58,6 +60,7 @@ const PricingSettings: React.FC<PricingSettingsProps> = ({
         ],
         popular: true,
         buttonText: "Choose Professional",
+        buttonLink: "",
       },
       {
         name: "Enterprise",
@@ -72,6 +75,7 @@ const PricingSettings: React.FC<PricingSettingsProps> = ({
         ],
         popular: false,
         buttonText: "Contact Sales",
+        buttonLink: "",
       },
     ],
     title = "Choose Your Plan",
@@ -89,6 +93,7 @@ const PricingSettings: React.FC<PricingSettingsProps> = ({
         features: ["Feature 1", "Feature 2"],
         popular: false,
         buttonText: "Get Started",
+        buttonLink: "",
       },
     ];
     onChange({ plans: newPlans });
@@ -179,7 +184,7 @@ const PricingSettings: React.FC<PricingSettingsProps> = ({
                       <div
                         ref={provided.innerRef}
                         {...provided.draggableProps}
-                        className={`p-4 border rounded-lg space-y-3 bg-white ${
+                        className={`p-4 border rounded-lg space-y-3 bg-card ${
                           snapshot.isDragging ? "shadow-lg" : ""
                         }`}
                       >
@@ -304,6 +309,21 @@ const PricingSettings: React.FC<PricingSettingsProps> = ({
                                 })
                               }
                               placeholder="Get Started"
+                            />
+                          </div>
+
+                          <div>
+                            <Label className="text-xs text-gray-600">
+                              Button Link
+                            </Label>
+                            <Input
+                              value={plan.buttonLink || ""}
+                              onChange={(e) =>
+                                updatePlan(index, {
+                                  buttonLink: e.target.value,
+                                })
+                              }
+                              placeholder="/signup"
                             />
                           </div>
                         </div>

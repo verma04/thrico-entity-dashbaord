@@ -14,7 +14,75 @@ import {
   GET_EVENT_STATS,
   GET_EVENTS,
   GET_ALL_EVENTS,
+  GET_EVENT_BY_ID,
+  UPDATE_EVENT,
+  GET_EVENT_SPEAKERS,
+  ADD_EVENT_SPEAKER,
+  UPDATE_EVENT_SPEAKER,
+  DELETE_EVENT_SPEAKER,
+  TOGGLE_SPEAKER_FEATURED,
+  GET_EVENT_SPONSORSHIPS,
+  ADD_EVENT_SPONSORSHIP,
+  UPDATE_EVENT_SPONSORSHIP,
+  DELETE_EVENT_SPONSORSHIP,
+  ADD_EVENT_SPONSOR,
+  UPDATE_EVENT_SPONSOR,
+  DELETE_EVENT_SPONSOR,
+  GET_EVENT_VENUES,
+  ADD_EVENT_VENUE,
+  UPDATE_EVENT_VENUE,
+  DELETE_EVENT_VENUE,
+  GET_EVENT_AGENDAS,
+  ADD_EVENT_AGENDA,
+  UPDATE_EVENT_AGENDA,
+  DELETE_EVENT_AGENDA,
+  GET_EVENT_TICKETS,
+  ADD_EVENT_TICKET,
+  UPDATE_EVENT_TICKET,
+  DELETE_EVENT_TICKET,
+  GET_EVENT_PROMO_CODES,
+  ADD_EVENT_PROMO_CODE,
+  UPDATE_EVENT_PROMO_CODE,
+  DELETE_EVENT_PROMO_CODE,
+  GET_EVENT_REGISTRATION_SETTINGS,
+  UPSERT_EVENT_REGISTRATION_SETTINGS,
+  GET_EVENT_REGISTRATION_FIELDS,
+  ADD_EVENT_REGISTRATION_FIELD,
+  UPDATE_EVENT_REGISTRATION_FIELD,
+  DELETE_EVENT_REGISTRATION_FIELD,
+  GET_EVENT_MEDIA,
+  ADD_EVENT_MEDIA,
+  UPDATE_EVENT_MEDIA,
+  DELETE_EVENT_MEDIA,
+  UPDATE_EVENT_MEDIA_VISIBILITY,
+  GET_EVENT_SETTINGS,
+  UPSERT_EVENT_SETTINGS,
+  DELETE_EVENT,
+  GET_EVENT_ATTENDEES,
+  ADD_EVENT_ATTENDEE,
+  UPDATE_ATTENDEE_STATUS,
+  TOGGLE_ATTENDEE_CHECKIN,
+  GET_EVENT_DETAIL_STATS,
+  GET_EVENT_REGISTRATION_TREND,
+  GET_EVENT_TYPE_DISTRIBUTION,
+  GET_EVENT_ATTENDEE_ACTIVITY,
+  GET_TOP_PERFORMING_EVENTS,
+  GET_EVENT_TEAM,
+  ADD_EVENT_TEAM_MEMBER,
+  UPDATE_EVENT_TEAM_MEMBER,
+  DELETE_EVENT_TEAM_MEMBER,
+  GET_EVENT_SPECIAL_SPONSORSHIPS,
+  ADD_EVENT_SPECIAL_SPONSORSHIP,
+  UPDATE_EVENT_SPECIAL_SPONSORSHIP,
+  DELETE_EVENT_SPECIAL_SPONSORSHIP,
+  ADD_EVENT_SPECIAL_SPONSOR,
+  UPDATE_EVENT_SPECIAL_SPONSOR,
+  DELETE_EVENT_SPECIAL_SPONSOR,
 } from "../../quries/events";
+import { EventType } from "@/types/event-types";
+import { DateRangeInput, TimeRange } from "../dashbaord/dashboard-quries";
+export { TimeRange };
+export type { DateRangeInput };
 
 // --- TypeScript Types ---
 
@@ -23,6 +91,8 @@ export type EventLocation = {
   latitude?: number;
   longitude?: number;
   address?: string;
+  lat?: number;
+  lng?: number;
 };
 
 export type Event = {
@@ -57,16 +127,352 @@ export type PostEventInput = {
   startDate: string;
   endDate: string;
   startTime: string;
-  type: "IN_PERSON" | "ONLINE" | "HYBRID";
+  type: EventType;
   lastDateOfRegistration: string;
   coverImage?: string;
   entity: string;
 };
 
+export type EventSpeaker = {
+  id: string;
+  eventId: string;
+  name: string;
+  email?: string;
+  bio?: string;
+  title?: string;
+  company?: string;
+  avatar?: string;
+  socialLinks?: any;
+  isFeatured: boolean;
+  displayOrder: number;
+  createdAt: string;
+  status: boolean;
+};
+
+export type EventSpeakerInput = {
+  eventId: string;
+  name: string;
+  email?: string;
+  bio?: string;
+  title?: string;
+  company?: string;
+  avatar?: string;
+  socialLinks?: any;
+  isFeatured?: boolean;
+  displayOrder?: number;
+};
+
+export type EventSponsor = {
+  id: string;
+  eventId: string;
+  sponsorShipId: string;
+  sponsorName: string;
+  sponsorLogo: string;
+  sponsorUserName: string;
+  sponsorUserDesignation: string;
+  isApproved: boolean;
+  createdAt: string;
+};
+
+export type EventSponsorship = {
+  id: string;
+  eventId: string;
+  sponsorType: string;
+  price: number;
+  currency: string;
+  showPrice: boolean;
+  content: string;
+  createdAt: string;
+  sponsors: EventSponsor[];
+};
+
+export type EventSpecialSponsor = {
+  id: string;
+  eventId: string;
+  sponsorShipId: string;
+  sponsorName: string;
+  sponsorLogo: string;
+  sponsorUserName: string;
+  sponsorUserDesignation: string;
+  isApproved: boolean;
+  createdAt: string;
+};
+
+export type EventSpecialSponsorship = {
+  id: string;
+  eventId: string;
+  sponsorType: string;
+  price: number;
+  currency: string;
+  showPrice: boolean;
+  content: string;
+  createdAt: string;
+  sponsors: EventSpecialSponsor[];
+};
+
+export type EventSponsorshipInput = {
+  eventId: string;
+  sponsorType: string;
+  price: number;
+  currency: string;
+  showPrice?: boolean;
+  content?: any;
+};
+
+export type EventSponsorInput = {
+  eventId: string;
+  sponsorShipId: string;
+  sponsorName: string;
+  sponsorLogo: string;
+  sponsorUserName: string;
+  sponsorUserDesignation: string;
+  isApproved?: boolean;
+};
+
+export type EventVenue = {
+  id: string;
+  eventId: string;
+  name: string;
+  address: string;
+  city: string;
+  state?: string;
+  country: string;
+  zipCode?: string;
+  latitude?: number;
+  longitude?: number;
+  capacity?: number;
+  description?: string;
+  amenities?: string[];
+  contactInfo?: any;
+  images?: string[];
+  createdAt: string;
+  updatedAt: string;
+  status: boolean;
+};
+
+export type EventVenueInput = {
+  eventId: string;
+  name: string;
+  address: string;
+  city: string;
+  state?: string;
+  country: string;
+  zipCode?: string;
+  latitude?: number;
+  longitude?: number;
+  capacity?: number;
+  description?: string;
+  amenities?: string[];
+  contactInfo?: any;
+  images?: string[];
+  status?: boolean;
+};
+
+export type EventAgenda = {
+  id: string;
+  eventId: string;
+  title: string;
+  videoSteam?: string;
+  venueId?: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  isPublished?: boolean;
+  isPinned?: boolean;
+  isDraft?: boolean;
+  createdAt: string;
+  updatedAt: string;
+  venue?: EventVenue;
+  speakers?: EventSpeaker[];
+};
+
+export type EventAgendaInput = {
+  eventId: string;
+  title: string;
+  videoSteam?: string;
+  venueId?: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  isPublished?: boolean;
+  isPinned?: boolean;
+  isDraft?: boolean;
+  speakerIds?: string[];
+};
+
+export type EventRegistrationSettings = {
+  id: string;
+  eventId: string;
+  isRegistrationOpen: boolean;
+  enableWaitlist: boolean;
+  requireApproval: boolean;
+  confirmationSubject?: string;
+  confirmationBody?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type EventRegistrationSettingsInput = {
+  eventId: string;
+  isRegistrationOpen?: boolean;
+  enableWaitlist?: boolean;
+  requireApproval?: boolean;
+  confirmationSubject?: string;
+  confirmationBody?: string;
+};
+
+export type EventRegistrationField = {
+  id: string;
+  eventId: string;
+  label: string;
+  type: string;
+  required: boolean;
+  placeholder?: string;
+  options?: string[];
+  displayOrder: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type EventRegistrationFieldInput = {
+  eventId: string;
+  label: string;
+  type: string;
+  required: boolean;
+  placeholder?: string;
+  options?: string[];
+  displayOrder?: number;
+};
+
+export type EventMedia = {
+  id: string;
+  eventId: string;
+  url: string;
+  mediaType: "VIDEO" | "IMAGE";
+  title?: string;
+  tags?: string[];
+  isPublic?: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type EventMediaInput = {
+  eventId: string;
+  url?: string;
+  mediaFile?: any;
+  mediaType: "VIDEO" | "IMAGE";
+  title?: string;
+  tags?: string[];
+  isPublic?: boolean;
+};
+
+export type EventSettings = {
+  id: string;
+  eventId: string;
+  layout: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type EventSettingsInput = {
+  eventId: string;
+  layout?: string;
+};
+
+export type EventAttendee = {
+  id: string;
+  eventId: string;
+  user: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    avatar?: string;
+  };
+  ticketId?: string;
+  ticket?: {
+    id: string;
+    name: string;
+  };
+  status: "CONFIRMED" | "WAITLISTED" | "PENDING" | "CANCELLED";
+  checkedIn: boolean;
+  responses?: any;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AddEventAttendeeInput = {
+  eventId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  ticketId?: string;
+  status?: string;
+};
+
+export type EventDetailStats = {
+  totalTicketsSold: number;
+  totalRevenue: number;
+  totalAttendees: number;
+  checkInRate: number;
+  hourlyData: { name: string; value: number }[];
+  ticketDistribution: { name: string; value: number; color: string }[];
+};
+
+export type RegistrationTrend = {
+  name: string;
+  registrations: number;
+  views: number;
+};
+
+export type EventTypeDistribution = {
+  name: string;
+  value: number;
+  color: string;
+};
+
+export type AttendeeActivity = {
+  name: string;
+  registered: number;
+  checkedIn: number;
+};
+
+export type TopPerformingEvent = {
+  id: string;
+  title: string;
+  type: string;
+  attendees: number;
+  views: number;
+  status: string;
+  cover?: string;
+  date: string;
+};
+
+export type EventTeamMember = {
+  id: string;
+  eventId: string;
+  firstName: string;
+  lastName: string;
+  avatar?: string;
+  linkedin?: string;
+  createdAt: string;
+  updatedAt: string;
+  status: boolean;
+};
+
+export type EventTeamMemberInput = {
+  eventId: string;
+  firstName: string;
+  lastName: string;
+  avatar?: string;
+  avatarImage?: any;
+  linkedin?: string;
+};
+
 // --- Apollo Client Hook ---
 
 export function useAddEvent(
-  options?: MutationHookOptions<{ addEvent: Event }, { input: PostEventInput }>
+  options?: MutationHookOptions<{ addEvent: Event }, { input: PostEventInput }>,
 ) {
   return useMutation(ADD_EVENT, {
     ...options,
@@ -153,7 +559,7 @@ export interface GetAllEventsInput {
 // --- Apollo Client Hook ---
 
 export function useEvents(
-  options?: QueryHookOptions<{ getEvents: Event[] }, { input?: GetEventInput }>
+  options?: QueryHookOptions<{ getEvents: Event[] }, { input?: GetEventInput }>,
 ): QueryResult<{ getEvents: Event[] }, { input?: GetEventInput }> {
   return useQuery(GET_EVENTS, options);
 }
@@ -164,7 +570,7 @@ export function useAllEvents(
   options?: QueryHookOptions<
     { getAllEvents: Event[] },
     { input?: GetAllEventsInput }
-  >
+  >,
 ): QueryResult<{ getAllEvents: Event[] }, { input?: GetAllEventsInput }> {
   return useQuery(GET_ALL_EVENTS, options);
 }
@@ -186,9 +592,20 @@ export type EventStats = {
 // --- Apollo Client Hook ---
 
 export function useEventStats(
-  options?: QueryHookOptions<{ getEventStats: EventStats }>
-): QueryResult<{ getEventStats: EventStats }> {
-  return useQuery(GET_EVENT_STATS, options);
+  timeRange?: TimeRange,
+  dateRange?: DateRangeInput,
+  options?: QueryHookOptions<
+    { getEventStats: EventStats },
+    { timeRange?: TimeRange; dateRange?: DateRangeInput }
+  >,
+): QueryResult<
+  { getEventStats: EventStats },
+  { timeRange?: TimeRange; dateRange?: DateRangeInput }
+> {
+  return useQuery(GET_EVENT_STATS, {
+    variables: { timeRange, dateRange },
+    ...options,
+  });
 }
 
 export function useChangeEventStatus(options?: MutationHookOptions<any, any>) {
@@ -233,7 +650,7 @@ export function useChangeEventStatus(options?: MutationHookOptions<any, any>) {
 }
 
 export function useChangeEventVerification(
-  options?: MutationHookOptions<any, any>
+  options?: MutationHookOptions<any, any>,
 ) {
   return useMutation(CHANGE_EVENT_VERIFICATION, {
     ...options,
@@ -258,3 +675,714 @@ export function useChangeEventVerification(
     awaitRefetchQueries: true,
   });
 }
+
+export function useEventById(id: string) {
+  return useQuery(GET_EVENT_BY_ID, {
+    variables: { getEventByIdId: id },
+    skip: !id,
+  });
+}
+
+export function useUpdateEvent(options?: MutationHookOptions<any, any>) {
+  return useMutation(UPDATE_EVENT, {
+    ...options,
+    refetchQueries: (result) => {
+      const updatedId = result.data?.updateEvent?.id || options?.variables?.eventId;
+      if (updatedId) {
+        return [
+          {
+            query: GET_EVENT_BY_ID,
+            variables: { getEventByIdId: updatedId },
+          },
+        ];
+      }
+      return [];
+    },
+  });
+}
+
+export function useEventSpeakers(eventId: string) {
+  return useQuery(GET_EVENT_SPEAKERS, {
+    variables: { eventId },
+    skip: !eventId,
+    fetchPolicy: "cache-and-network",
+  });
+}
+
+export function useAddEventSpeaker(options?: MutationHookOptions<any, any>) {
+  return useMutation(ADD_EVENT_SPEAKER, {
+    ...options,
+    refetchQueries: (result) => {
+      const updatedId = result.data ? (Object.values(result.data)[0] as any)?.eventId : options?.variables?.input?.eventId;
+      if (updatedId) {
+        return [
+          {
+            query: GET_EVENT_SPEAKERS,
+            variables: { eventId: updatedId },
+          },
+        ];
+      }
+      return [];
+    },
+  });
+}
+
+export function useUpdateEventSpeaker(options?: MutationHookOptions<any, any>) {
+  return useMutation(UPDATE_EVENT_SPEAKER, {
+    ...options,
+  });
+}
+
+export function useDeleteEventSpeaker(options?: MutationHookOptions<any, any>) {
+  return useMutation(DELETE_EVENT_SPEAKER, {
+    ...options,
+  });
+}
+
+export function useToggleSpeakerFeatured(
+  options?: MutationHookOptions<any, any>,
+) {
+  return useMutation(TOGGLE_SPEAKER_FEATURED, {
+    ...options,
+  });
+}
+
+// --- Sponsorship Hooks ---
+export function useEventSponsorships(eventId: string) {
+  return useQuery(GET_EVENT_SPONSORSHIPS, {
+    variables: { eventId },
+    skip: !eventId,
+    fetchPolicy: "cache-and-network",
+  });
+}
+
+export function useAddEventSponsorship(
+  options?: MutationHookOptions<any, any>,
+) {
+  return useMutation(ADD_EVENT_SPONSORSHIP, {
+    ...options,
+    refetchQueries: (result) => {
+      const updatedId = result.data ? (Object.values(result.data)[0] as any)?.eventId : options?.variables?.input?.eventId;
+      if (updatedId) {
+        return [
+          {
+            query: GET_EVENT_SPONSORSHIPS,
+            variables: { eventId: updatedId },
+          },
+        ];
+      }
+      return [];
+    },
+  });
+}
+
+export function useUpdateEventSponsorship(
+  options?: MutationHookOptions<any, any>,
+) {
+  return useMutation(UPDATE_EVENT_SPONSORSHIP, { ...options });
+}
+
+export function useDeleteEventSponsorship(
+  options?: MutationHookOptions<any, any>,
+) {
+  return useMutation(DELETE_EVENT_SPONSORSHIP, { ...options });
+}
+
+export function useAddEventSponsor(options?: MutationHookOptions<any, any>) {
+  return useMutation(ADD_EVENT_SPONSOR, {
+    ...options,
+    refetchQueries: (result) => {
+      const updatedId = result.data ? (Object.values(result.data)[0] as any)?.eventId : options?.variables?.input?.eventId;
+      if (updatedId) {
+        return [
+          {
+            query: GET_EVENT_SPONSORSHIPS,
+            variables: { eventId: updatedId },
+          },
+        ];
+      }
+      return [];
+    },
+  });
+}
+
+export function useUpdateEventSponsor(options?: MutationHookOptions<any, any>) {
+  return useMutation(UPDATE_EVENT_SPONSOR, { ...options });
+}
+
+export function useDeleteEventSponsor(options?: MutationHookOptions<any, any>) {
+  return useMutation(DELETE_EVENT_SPONSOR, { ...options });
+}
+
+export type EventTicket = {
+  id: string;
+  eventId: string;
+  name: string;
+  type: "free" | "paid" | "donation";
+  price: number;
+  quantity: number;
+  sold: number;
+  description?: string;
+  earlyBirdPrice?: number;
+  earlyBirdDeadline?: string;
+  maxPerOrder: number;
+  isVisible: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  status?: boolean;
+};
+
+export type EventTicketInput = {
+  eventId: string;
+  name: string;
+  type: string;
+  price: number;
+  quantity: number;
+  description?: string;
+  earlyBirdPrice?: number;
+  earlyBirdDeadline?: string;
+  maxPerOrder: number;
+  isVisible: boolean;
+};
+
+export type EventPromoCode = {
+  id: string;
+  eventId: string;
+  code: string;
+  discountType: "percentage" | "fixed";
+  discountValue: number;
+  usageLimit: number;
+  used: number;
+  expiryDate: string;
+  applicableTickets?: string[];
+  createdAt?: string;
+  updatedAt?: string;
+  status?: boolean;
+};
+
+export type EventPromoCodeInput = {
+  eventId: string;
+  code: string;
+  discountType: string;
+  discountValue: number;
+  usageLimit: number;
+  expiryDate: string;
+  applicableTickets?: string[];
+};
+
+// --- Hooks ---
+export function useEventVenues(eventId: string) {
+  return useQuery(GET_EVENT_VENUES, {
+    variables: { eventId },
+    skip: !eventId,
+    fetchPolicy: "cache-and-network",
+  });
+}
+
+export function useAddEventVenue(options?: MutationHookOptions<any, any>) {
+  return useMutation(ADD_EVENT_VENUE, {
+    ...options,
+    refetchQueries: (result) => {
+      const updatedId = result.data ? (Object.values(result.data)[0] as any)?.eventId : options?.variables?.input?.eventId;
+      if (updatedId) {
+        return [
+          {
+            query: GET_EVENT_VENUES,
+            variables: { eventId: updatedId },
+          },
+        ];
+      }
+      return [];
+    },
+  });
+}
+
+export function useUpdateEventVenue(options?: MutationHookOptions<any, any>) {
+  return useMutation(UPDATE_EVENT_VENUE, { ...options });
+}
+
+export function useDeleteEventVenue(options?: MutationHookOptions<any, any>) {
+  return useMutation(DELETE_EVENT_VENUE, { ...options });
+}
+
+// --- Event Agenda Hooks ---
+
+export function useEventAgendas(eventId: string) {
+  return useQuery(GET_EVENT_AGENDAS, {
+    variables: { eventId },
+    skip: !eventId,
+    fetchPolicy: "cache-and-network",
+  });
+}
+
+export function useAddEventAgenda(options?: MutationHookOptions<any, any>) {
+  return useMutation(ADD_EVENT_AGENDA, {
+    ...options,
+    refetchQueries: (result) => {
+      const updatedId = result.data ? (Object.values(result.data)[0] as any)?.eventId : options?.variables?.input?.eventId;
+      if (updatedId) {
+        return [
+          {
+            query: GET_EVENT_AGENDAS,
+            variables: { eventId: updatedId },
+          },
+        ];
+      }
+      return [];
+    },
+  });
+}
+
+export function useUpdateEventAgenda(options?: MutationHookOptions<any, any>) {
+  return useMutation(UPDATE_EVENT_AGENDA, { ...options });
+}
+
+export function useDeleteEventAgenda(options?: MutationHookOptions<any, any>) {
+  return useMutation(DELETE_EVENT_AGENDA, { ...options });
+}
+
+// --- Event Ticketing & Promo Code Hooks ---
+
+export function useEventTickets(eventId: string) {
+  return useQuery(GET_EVENT_TICKETS, {
+    variables: { eventId },
+    skip: !eventId,
+    fetchPolicy: "cache-and-network",
+  });
+}
+
+export function useAddEventTicket(options?: MutationHookOptions<any, any>) {
+  return useMutation(ADD_EVENT_TICKET, {
+    ...options,
+    refetchQueries: (result) => {
+      const updatedId = result.data ? (Object.values(result.data)[0] as any)?.eventId : options?.variables?.input?.eventId;
+      if (updatedId) {
+        return [
+          {
+            query: GET_EVENT_TICKETS,
+            variables: { eventId: updatedId },
+          },
+        ];
+      }
+      return [];
+    },
+  });
+}
+
+export function useUpdateEventTicket(options?: MutationHookOptions<any, any>) {
+  return useMutation(UPDATE_EVENT_TICKET, { ...options });
+}
+
+export function useDeleteEventTicket(options?: MutationHookOptions<any, any>) {
+  return useMutation(DELETE_EVENT_TICKET, { ...options });
+}
+
+export function useEventPromoCodes(eventId: string) {
+  return useQuery(GET_EVENT_PROMO_CODES, {
+    variables: { eventId },
+    skip: !eventId,
+    fetchPolicy: "cache-and-network",
+  });
+}
+
+export function useAddEventPromoCode(options?: MutationHookOptions<any, any>) {
+  return useMutation(ADD_EVENT_PROMO_CODE, {
+    ...options,
+    refetchQueries: (result) => {
+      const updatedId = result.data ? (Object.values(result.data)[0] as any)?.eventId : options?.variables?.input?.eventId;
+      if (updatedId) {
+        return [
+          {
+            query: GET_EVENT_PROMO_CODES,
+            variables: { eventId: updatedId },
+          },
+        ];
+      }
+      return [];
+    },
+  });
+}
+
+export function useUpdateEventPromoCode(
+  options?: MutationHookOptions<any, any>,
+) {
+  return useMutation(UPDATE_EVENT_PROMO_CODE, { ...options });
+}
+
+export function useDeleteEventPromoCode(
+  options?: MutationHookOptions<any, any>,
+) {
+  return useMutation(DELETE_EVENT_PROMO_CODE, options);
+}
+
+// --- Registration Settings Hooks ---
+export function useEventRegistrationSettings(eventId: string) {
+  return useQuery<{ getEventRegistrationSettings: EventRegistrationSettings }>(
+    GET_EVENT_REGISTRATION_SETTINGS,
+    {
+      variables: { eventId },
+      skip: !eventId,
+      fetchPolicy: "network-only",
+    },
+  );
+}
+
+export function useUpsertEventRegistrationSettings(
+  options?: MutationHookOptions<
+    { upsertEventRegistrationSettings: EventRegistrationSettings },
+    { input: EventRegistrationSettingsInput }
+  >,
+) {
+  return useMutation<
+    { upsertEventRegistrationSettings: EventRegistrationSettings },
+    { input: EventRegistrationSettingsInput }
+  >(UPSERT_EVENT_REGISTRATION_SETTINGS, options);
+}
+
+// --- Registration Fields Hooks ---
+export function useEventRegistrationFields(eventId: string) {
+  return useQuery<{ getEventRegistrationFields: EventRegistrationField[] }>(
+    GET_EVENT_REGISTRATION_FIELDS,
+    {
+      variables: { eventId },
+      skip: !eventId,
+      fetchPolicy: "network-only",
+    },
+  );
+}
+
+export function useAddEventRegistrationField(
+  options?: MutationHookOptions<
+    { addEventRegistrationField: EventRegistrationField },
+    { input: EventRegistrationFieldInput }
+  >,
+) {
+  return useMutation<
+    { addEventRegistrationField: EventRegistrationField },
+    { input: EventRegistrationFieldInput }
+  >(ADD_EVENT_REGISTRATION_FIELD, options);
+}
+
+export function useUpdateEventRegistrationField(
+  options?: MutationHookOptions<
+    { updateEventRegistrationField: EventRegistrationField },
+    { fieldId: string; input: EventRegistrationFieldInput }
+  >,
+) {
+  return useMutation<
+    { updateEventRegistrationField: EventRegistrationField },
+    { fieldId: string; input: EventRegistrationFieldInput }
+  >(UPDATE_EVENT_REGISTRATION_FIELD, options);
+}
+
+export function useDeleteEventRegistrationField(
+  options?: MutationHookOptions<
+    { deleteEventRegistrationField: boolean },
+    { fieldId: string }
+  >,
+) {
+  return useMutation<
+    { deleteEventRegistrationField: boolean },
+    { fieldId: string }
+  >(DELETE_EVENT_REGISTRATION_FIELD, options);
+}
+
+// --- Media Hooks ---
+export function useEventMedia(eventId: string) {
+  return useQuery<{ getEventMedia: EventMedia[] }>(GET_EVENT_MEDIA, {
+    variables: { eventId },
+    skip: !eventId,
+    fetchPolicy: "network-only",
+  });
+}
+
+export function useAddEventMedia(
+  options?: MutationHookOptions<
+    { addEventMedia: EventMedia },
+    { input: EventMediaInput }
+  >,
+) {
+  return useMutation<{ addEventMedia: EventMedia }, { input: EventMediaInput }>(
+    ADD_EVENT_MEDIA,
+    options,
+  );
+}
+
+export function useUpdateEventMedia(
+  options?: MutationHookOptions<
+    { updateEventMedia: EventMedia },
+    { mediaId: string; input: EventMediaInput }
+  >,
+) {
+  return useMutation<
+    { updateEventMedia: EventMedia },
+    { mediaId: string; input: EventMediaInput }
+  >(UPDATE_EVENT_MEDIA, options);
+}
+
+export function useDeleteEventMedia(
+  options?: MutationHookOptions<
+    { deleteEventMedia: boolean },
+    { mediaId: string }
+  >,
+) {
+  return useMutation<{ deleteEventMedia: boolean }, { mediaId: string }>(
+    DELETE_EVENT_MEDIA,
+    {
+      ...options,
+      refetchQueries: ["GetEventMedia"],
+    }
+  );
+}
+
+export function useUpdateEventMediaVisibility(
+  options?: MutationHookOptions<
+    { updateEventMediaVisibility: EventMedia },
+    { mediaId: string; isPublic: boolean }
+  >,
+) {
+  return useMutation<
+    { updateEventMediaVisibility: EventMedia },
+    { mediaId: string; isPublic: boolean }
+  >(UPDATE_EVENT_MEDIA_VISIBILITY, options);
+}
+
+// --- Settings Hooks ---
+export function useEventSettings(eventId: string) {
+  return useQuery<{ getEventSettings: EventSettings }>(GET_EVENT_SETTINGS, {
+    variables: { eventId },
+    skip: !eventId,
+    fetchPolicy: "network-only",
+  });
+}
+
+export function useUpsertEventSettings(
+  options?: MutationHookOptions<
+    { upsertEventSettings: EventSettings },
+    { input: EventSettingsInput }
+  >,
+) {
+  return useMutation<
+    { upsertEventSettings: EventSettings },
+    { input: EventSettingsInput }
+  >(UPSERT_EVENT_SETTINGS, options);
+}
+
+export function useDeleteEvent(
+  options?: MutationHookOptions<{ deleteEvent: boolean }, { eventId: string }>,
+) {
+  return useMutation<{ deleteEvent: boolean }, { eventId: string }>(
+    DELETE_EVENT,
+    options,
+  );
+}
+
+// --- Attendee Hooks ---
+export function useEventAttendees(eventId: string) {
+  return useQuery<{ getEventAttendees: EventAttendee[] }>(GET_EVENT_ATTENDEES, {
+    variables: { eventId },
+    skip: !eventId,
+    fetchPolicy: "network-only",
+  });
+}
+
+export function useUpdateAttendeeStatus(
+  options?: MutationHookOptions<
+    { updateAttendeeStatus: EventAttendee },
+    { attendeeId: string; status: string }
+  >,
+) {
+  return useMutation<
+    { updateAttendeeStatus: EventAttendee },
+    { attendeeId: string; status: string }
+  >(UPDATE_ATTENDEE_STATUS, options);
+}
+
+export function useToggleAttendeeCheckIn(
+  options?: MutationHookOptions<
+    { toggleAttendeeCheckIn: EventAttendee },
+    { attendeeId: string }
+  >,
+) {
+  return useMutation<
+    { toggleAttendeeCheckIn: EventAttendee },
+    { attendeeId: string }
+  >(TOGGLE_ATTENDEE_CHECKIN, options);
+}
+
+export function useAddEventAttendee(
+  options?: MutationHookOptions<
+    { addEventAttendee: EventAttendee },
+    { input: AddEventAttendeeInput }
+  >,
+) {
+  return useMutation<
+    { addEventAttendee: EventAttendee },
+    { input: AddEventAttendeeInput }
+  >(ADD_EVENT_ATTENDEE, options);
+}
+
+// --- Analytics Hooks ---
+export function useEventDetailStats(eventId: string) {
+  return useQuery<{ getEventDetailStats: EventDetailStats }>(
+    GET_EVENT_DETAIL_STATS,
+    {
+      variables: { eventId },
+      skip: !eventId,
+      fetchPolicy: "network-only",
+      pollInterval: 5000,
+    },
+  );
+}
+
+export function useEventRegistrationTrend(
+  timeRange?: TimeRange,
+  dateRange?: DateRangeInput,
+  options?: QueryHookOptions<
+    { getEventRegistrationTrend: RegistrationTrend[] },
+    { timeRange?: TimeRange; dateRange?: DateRangeInput }
+  >,
+) {
+  return useQuery<
+    { getEventRegistrationTrend: RegistrationTrend[] },
+    { timeRange?: TimeRange; dateRange?: DateRangeInput }
+  >(GET_EVENT_REGISTRATION_TREND, {
+    variables: { timeRange, dateRange },
+    fetchPolicy: "network-only",
+    ...options,
+  });
+}
+
+export function useEventTypeDistribution(
+  timeRange?: TimeRange,
+  dateRange?: DateRangeInput,
+) {
+  return useQuery<{ getEventTypeDistribution: EventTypeDistribution[] }>(
+    GET_EVENT_TYPE_DISTRIBUTION,
+    {
+      variables: { timeRange, dateRange },
+      fetchPolicy: "network-only",
+    },
+  );
+}
+
+export function useEventAttendeeActivity(
+  timeRange?: TimeRange,
+  dateRange?: DateRangeInput,
+) {
+  return useQuery<{ getEventAttendeeActivity: AttendeeActivity[] }>(
+    GET_EVENT_ATTENDEE_ACTIVITY,
+    {
+      variables: { timeRange, dateRange },
+      fetchPolicy: "network-only",
+    },
+  );
+}
+
+export function useTopPerformingEvents(
+  limit: number = 5,
+  timeRange?: TimeRange,
+  dateRange?: DateRangeInput,
+) {
+  return useQuery<{ getTopPerformingEvents: TopPerformingEvent[] }>(
+    GET_TOP_PERFORMING_EVENTS,
+    {
+      variables: { limit, timeRange, dateRange },
+      fetchPolicy: "network-only",
+    },
+  );
+}
+
+// --- Team Hooks ---
+
+export function useEventTeam(eventId: string) {
+  return useQuery<{ getEventTeam: EventTeamMember[] }>(GET_EVENT_TEAM, {
+    variables: { eventId },
+    skip: !eventId,
+    fetchPolicy: "cache-and-network",
+  });
+}
+
+export function useAddEventTeamMember(options?: MutationHookOptions<any, any>) {
+  return useMutation(ADD_EVENT_TEAM_MEMBER, {
+    ...options,
+    refetchQueries: (result) => {
+      const updatedId = result.data ? (Object.values(result.data)[0] as any)?.eventId : options?.variables?.input?.eventId;
+      if (updatedId) {
+        return [
+          {
+            query: GET_EVENT_TEAM,
+            variables: { eventId: updatedId },
+          },
+        ];
+      }
+      return [];
+    },
+  });
+}
+
+export function useUpdateEventTeamMember(options?: MutationHookOptions<any, any>) {
+  return useMutation(UPDATE_EVENT_TEAM_MEMBER, { ...options });
+}
+
+export function useDeleteEventTeamMember(options?: MutationHookOptions<any, any>) {
+  return useMutation(DELETE_EVENT_TEAM_MEMBER, {
+    ...options,
+    refetchQueries: ["GetEventTeam"],
+  });
+}
+
+// --- Special Sponsorship Hooks ---
+
+export function useEventSpecialSponsorships(eventId: string) {
+  return useQuery<{ getEventSpecialSponsorships: EventSpecialSponsorship[] }>(GET_EVENT_SPECIAL_SPONSORSHIPS, {
+    variables: { eventId },
+    skip: !eventId,
+  });
+}
+
+export function useAddEventSpecialSponsorship(options?: MutationHookOptions<any, any>) {
+  return useMutation(ADD_EVENT_SPECIAL_SPONSORSHIP, {
+    ...options,
+    refetchQueries: ["GetEventSpecialSponsorships"],
+  });
+}
+
+export function useUpdateEventSpecialSponsorship(options?: MutationHookOptions<any, any>) {
+  return useMutation(UPDATE_EVENT_SPECIAL_SPONSORSHIP, {
+    ...options,
+    refetchQueries: ["GetEventSpecialSponsorships"],
+  });
+}
+
+export function useDeleteEventSpecialSponsorship(options?: MutationHookOptions<any, any>) {
+  return useMutation(DELETE_EVENT_SPECIAL_SPONSORSHIP, {
+    ...options,
+    refetchQueries: ["GetEventSpecialSponsorships"],
+  });
+}
+
+// --- Special Sponsor Hooks ---
+
+export function useAddEventSpecialSponsor(options?: MutationHookOptions<any, any>) {
+  return useMutation(ADD_EVENT_SPECIAL_SPONSOR, {
+    ...options,
+    refetchQueries: ["GetEventSpecialSponsorships"],
+  });
+}
+
+export function useUpdateEventSpecialSponsor(options?: MutationHookOptions<any, any>) {
+  return useMutation(UPDATE_EVENT_SPECIAL_SPONSOR, {
+    ...options,
+    refetchQueries: ["GetEventSpecialSponsorships"],
+  });
+}
+
+export function useDeleteEventSpecialSponsor(options?: MutationHookOptions<any, any>) {
+  return useMutation(DELETE_EVENT_SPECIAL_SPONSOR, {
+    ...options,
+    refetchQueries: ["GetEventSpecialSponsorships"],
+  });
+}
+
+

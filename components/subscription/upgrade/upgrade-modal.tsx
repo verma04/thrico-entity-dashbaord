@@ -34,7 +34,11 @@ import {
   useUpgradePlan,
   useVerifyRazorpayPayment,
 } from "@/graphql/actions/plan";
-import { useCheckEntitySubscription } from "@/graphql/actions";
+import {
+  useCheckEntitySubscription,
+  useGetUser,
+} from "@/graphql/actions";
+import { useRouter } from "next/navigation";
 
 enum BillingCycle {
   Monthly = "monthly",
@@ -75,13 +79,14 @@ export default function UpgradeModal({
   summary,
   activePackage,
 }: UpgradeModalProps) {
+  const router = useRouter();
   const [billingCycle, setBillingCycle] = useState<BillingCycle>(
-    BillingCycle.Monthly
+    BillingCycle.Monthly,
   );
 
   const savings = getYearlySavings(
     Number(summary?.monthlyPrice ?? 0),
-    Number(summary?.yearlyPrice ?? 0)
+    Number(summary?.yearlyPrice ?? 0),
   );
 
   const handleBillingChange = (value: BillingCycle) => {
@@ -91,12 +96,14 @@ export default function UpgradeModal({
   // GraphQL hooks
   const { Razorpay } = useRazorpay();
   const { refetch } = useCheckEntitySubscription();
+  const { data: userData } = useGetUser();
+  const user = userData?.getUser;
 
   const [verify] = useVerifyRazorpayPayment({
     onCompleted: (data: { verifyRazorpayPayment: boolean }) => {
       if (data?.verifyRazorpayPayment) {
-        refetch();
-        onClose();
+        router.push("/?firstLogin=true&intensity=high");
+        window.location.reload();
       } else {
         alert("Payment verification failed.");
       }
@@ -108,10 +115,10 @@ export default function UpgradeModal({
       if (!data?.upgradePlan) return;
 
       const options: RazorpayOrderOptions = {
-        key: "rzp_test_AVIthfNy85rAR2",
+        key: "rzp_live_SiqzWXdijA6k6U",
         amount: data.upgradePlan.amount,
         currency: data.upgradePlan.currency,
-        name: "Test Company",
+        name: "Thrico",
         description: "Subscription Upgrade",
         order_id: data.upgradePlan.id,
         handler: (response) => {
@@ -128,9 +135,9 @@ export default function UpgradeModal({
           onClose();
         },
         prefill: {
-          name: "Test User",
-          email: "test@gmail.com",
-          contact: "9999999999",
+          name: `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim() || "User",
+          email: user?.email ?? "",
+          contact: user?.profile?.phone?.phoneNumber ?? "",
         },
         theme: {
           color: "#6C47FF",
@@ -196,7 +203,7 @@ export default function UpgradeModal({
                     "flex justify-between cursor-pointer rounded-xl border p-4 transition-all",
                     billingCycle === BillingCycle.Monthly
                       ? "border-primary bg-primary/5 ring-1 ring-primary"
-                      : "border-border hover:border-primary/40"
+                      : "border-border hover:border-primary/40",
                   )}
                 >
                   <div className="flex items-center gap-3">
@@ -224,7 +231,7 @@ export default function UpgradeModal({
                     "relative flex justify-between cursor-pointer rounded-xl border p-4 transition-all",
                     billingCycle === BillingCycle.Yearly
                       ? "border-primary bg-primary/5 ring-1 ring-primary"
-                      : "border-border hover:border-primary/40"
+                      : "border-border hover:border-primary/40",
                   )}
                 >
                   {savings > 0 && (
@@ -313,7 +320,7 @@ export default function UpgradeModal({
                     {moment(
                       billingCycle === "monthly"
                         ? summary?.monthlyBillingDate
-                        : summary?.yearlyNextBillingDate
+                        : summary?.yearlyNextBillingDate,
                     ).format("MMM Do YYYY")}{" "}
                     for {activePackage?.currency}
                     {billingCycle === "monthly"

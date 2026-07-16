@@ -67,7 +67,7 @@ export const profileMenuItems = [
       {
         key: "profile",
         icon: <User2 size={18} />,
-        label: menuLink("/settings", "Your profile"),
+        label: menuLink("/settings/profile", "Your profile"),
       },
       {
         key: "notifications",
@@ -96,7 +96,7 @@ export const profileMenuItems = [
       {
         key: "logout",
         icon: <LogOutIcon size={18} />,
-        label: menuLink("/logout", "logout"),
+        label: menuLink("/logout", "Logout"),
       },
     ],
   },

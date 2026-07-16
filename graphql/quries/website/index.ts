@@ -15,13 +15,27 @@ export const GET_WEBSITE = gql`
       customDomain
       createdAt
       updatedAt
-
+      customColors {
+        primary
+        secondary
+        accent
+        background
+        muted
+        border
+        buttonColor
+        buttonTextColor
+        borderRadius
+        spacing
+        fontSize
+      }
       navbar {
         id
         layout
         isEnabled
         content
         updatedAt
+        name
+        type
       }
 
       footer {
@@ -30,6 +44,8 @@ export const GET_WEBSITE = gql`
         isEnabled
         content
         updatedAt
+        name
+        type
       }
 
       pages {
@@ -40,8 +56,21 @@ export const GET_WEBSITE = gql`
         order
         createdAt
         updatedAt
-
-
+        seo {
+          title
+          description
+          keywords
+          schemaMarkup
+        }
+        modules {
+          id
+          type
+          name
+          layout
+          content
+          isEnabled
+          order
+        }
       }
     }
   }
@@ -59,12 +88,16 @@ export const GET_WEBSITE_BY_SLUG = gql`
         layout
         isEnabled
         content
+        name
+        type
       }
 
       footer {
         layout
         isEnabled
         content
+        name
+        type
       }
 
       pages {
@@ -73,6 +106,12 @@ export const GET_WEBSITE_BY_SLUG = gql`
         slug
         isEnabled
         order
+        seo {
+          title
+          description
+          keywords
+          schemaMarkup
+        }
         modules {
           id
           type
@@ -95,6 +134,12 @@ export const GET_PAGE = gql`
       slug
       isEnabled
       order
+      seo {
+        title
+        description
+        keywords
+        schemaMarkup
+      }
       modules {
         id
         type
@@ -108,6 +153,22 @@ export const GET_PAGE = gql`
       }
       createdAt
       updatedAt
+    }
+  }
+`;
+
+export const GET_ALL_PAGES_SEO = gql`
+  query GetAllPagesSeo($websiteId: ID!) {
+    getAllPagesSeo(websiteId: $websiteId) {
+      id
+      name
+      slug
+      seo {
+        title
+        description
+        keywords
+        schemaMarkup
+      }
     }
   }
 `;
@@ -302,6 +363,71 @@ export const REORDER_MODULES = gql`
   }
 `;
 
+export const DELETE_MODULE = gql`
+  mutation DeleteModule($moduleId: ID!) {
+    deleteModule(moduleId: $moduleId)
+  }
+`;
+
+export const TOGGLE_MODULE = gql`
+  mutation ToggleModule($moduleId: ID!, $isEnabled: Boolean!) {
+    toggleModule(moduleId: $moduleId, isEnabled: $isEnabled) {
+      id
+    }
+  }
+`;
+
+export const UPDATE_PAGE_SEO = gql`
+  mutation UpdatePageSeo(
+    $pageId: ID!
+    $title: String
+    $description: String
+    $keywords: [String!]
+    $schemaMarkup: JSON
+  ) {
+    updatePageSeo(
+      pageId: $pageId
+      title: $title
+      description: $description
+      keywords: $keywords
+      schemaMarkup: $schemaMarkup
+    ) {
+      id
+      name
+      seo {
+        title
+        description
+        keywords
+        schemaMarkup
+      }
+    }
+  }
+`;
+
+export const UPDATE_WEBSITE_CUSTOM_COLORS = gql`
+  mutation UpdateWebsiteCustomColors(
+    $websiteId: ID!
+    $customColors: CustomThemeColorsInput!
+  ) {
+    updateWebsiteCustomColors(
+      websiteId: $websiteId
+      customColors: $customColors
+    ) {
+      primary
+      secondary
+      accent
+      background
+      muted
+      border
+      buttonColor
+      buttonTextColor
+      borderRadius
+      spacing
+      fontSize
+    }
+  }
+`;
+
 // ============================================
 // TYPESCRIPT TYPES
 // ============================================
@@ -318,6 +444,14 @@ export interface Module {
   updatedAt: string;
 }
 
+export interface SEO {
+  title?: string;
+  description?: string;
+  keywords?: string[];
+  schemaMarkup?: any;
+  includeInSitemap?: boolean;
+}
+
 export interface Page {
   id: string;
   name: string;
@@ -325,6 +459,7 @@ export interface Page {
   isEnabled: boolean;
   order: number;
   modules: Module[];
+  seo?: SEO;
   createdAt: string;
   updatedAt: string;
 }
@@ -349,6 +484,19 @@ export interface Website {
   pages: Page[];
   createdAt: string;
   updatedAt: string;
+  customColors: {
+    primary: string;
+    secondary: string;
+    accent: string;
+    background: string;
+    muted: string;
+    border: string;
+    buttonColor: string;
+    buttonTextColor: string;
+    borderRadius: string;
+    spacing: string;
+    fontSize: string;
+  };
 }
 
 export interface WebsiteBySlug {
@@ -376,6 +524,10 @@ export interface GetWebsiteBySlugResponse {
 
 export interface GetPageResponse {
   getPage: Page;
+}
+
+export interface GetAllPagesSeoResponse {
+  getAllPagesSeo: Page[];
 }
 
 // Mutation Response Types
@@ -432,6 +584,10 @@ export interface UpdatePageResponse {
   };
 }
 
+export interface UpdatePageSeoResponse {
+  updatePageSeo: Page;
+}
+
 export interface DeletePageResponse {
   deletePage: boolean;
 }
@@ -473,6 +629,16 @@ export interface ReorderModulesResponse {
     order: number;
     name: string;
   }>;
+}
+
+export interface DeleteModuleResponse {
+  deleteModule: boolean;
+}
+
+export interface ToggleModuleResponse {
+  toggleModule: {
+    id: string;
+  };
 }
 
 // Mutation Variables Types
@@ -545,4 +711,57 @@ export interface UpdateModuleVariables {
 export interface ReorderModulesVariables {
   pageId: string;
   moduleIds: string[];
+}
+
+export interface DeleteModuleVariables {
+  moduleId: string;
+}
+
+export interface ToggleModuleVariables {
+  moduleId: string;
+  isEnabled: boolean;
+}
+
+export interface UpdatePageSeoVariables {
+  pageId: string;
+  title?: string;
+  description?: string;
+  keywords?: string[];
+  schemaMarkup?: any;
+  includeInSitemap?: boolean;
+}
+
+export interface CustomThemeColorsInput {
+  primary?: string;
+  secondary?: string;
+  accent?: string;
+  background?: string;
+  muted?: string;
+  border?: string;
+  buttonColor?: string;
+  buttonTextColor?: string;
+  borderRadius?: number;
+  spacing?: number;
+  fontSize?: number;
+}
+
+export interface UpdateWebsiteCustomColorsResponse {
+  updateWebsiteCustomColors: {
+    primary?: string;
+    secondary?: string;
+    accent?: string;
+    background?: string;
+    muted?: string;
+    border?: string;
+    buttonColor?: string;
+    buttonTextColor?: string;
+    borderRadius?: number;
+    spacing?: number;
+    fontSize?: number;
+  };
+}
+
+export interface UpdateWebsiteCustomColorsVariables {
+  websiteId: string;
+  customColors: CustomThemeColorsInput;
 }

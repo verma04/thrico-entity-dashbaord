@@ -80,7 +80,7 @@ export const ServiceRenderer = ({
                 : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
             )}
           >
-            {services.map((service, idx) => (
+            {services.map((service: any, idx: number) => (
               <div
                 key={idx}
                 className="group relative bg-card rounded-2xl border p-8 hover:shadow-lg transition-all duration-300"
@@ -110,7 +110,7 @@ export const ServiceRenderer = ({
                     </p>
                   </div>
                   <ul className="space-y-2">
-                    {service.features?.map((feature, featureIdx) => (
+                    {service.features?.map((feature: any, featureIdx: number) => (
                       <li
                         key={featureIdx}
                         className="flex items-center gap-2 text-sm"
@@ -146,7 +146,7 @@ export const ServiceRenderer = ({
                 : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
             )}
           >
-            {services.map((service, idx) => (
+            {services.map((service: any, idx: number) => (
               <div key={idx} className="relative group">
                 {service.popular && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-4 py-1 rounded-full text-sm font-medium z-10">
@@ -189,7 +189,7 @@ export const ServiceRenderer = ({
                       {service.price}
                     </div>
                     <ul className="space-y-3 text-left">
-                      {service.features?.map((feature, featureIdx) => (
+                      {service.features?.map((feature: any, featureIdx: number) => (
                         <li
                           key={featureIdx}
                           className="flex items-center gap-3"
@@ -219,7 +219,7 @@ export const ServiceRenderer = ({
         {/* List Layout */}
         {layout === "list" && (
           <div className="space-y-6">
-            {services.map((service, idx) => (
+            {services.map((service: any, idx: number) => (
               <div
                 key={idx}
                 className="group bg-card rounded-2xl border p-8 hover:shadow-md transition-all"
@@ -261,7 +261,7 @@ export const ServiceRenderer = ({
                       </p>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      {service.features?.map((feature, featureIdx) => (
+                      {service.features?.map((feature: any, featureIdx: number) => (
                         <span
                           key={featureIdx}
                           className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full text-sm"
@@ -289,7 +289,7 @@ export const ServiceRenderer = ({
         {/* Featured Layout */}
         {layout === "featured" && (
           <div className="space-y-12">
-            {services.map((service, idx) => (
+            {services.map((service: any, idx: number) => (
               <div
                 key={idx}
                 className={cn(
@@ -313,7 +313,7 @@ export const ServiceRenderer = ({
                     {service.description}
                   </p>
                   <ul className="space-y-3">
-                    {service.features?.map((feature, featureIdx) => (
+                    {service.features?.map((feature: any, featureIdx: number) => (
                       <li key={featureIdx} className="flex items-center gap-3">
                         <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
                           <Check className="w-4 h-4 text-green-600" />

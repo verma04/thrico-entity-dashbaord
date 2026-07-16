@@ -159,7 +159,7 @@ const EventsSettings: React.FC<EventsSettingsProps> = ({
                       <div
                         ref={provided.innerRef}
                         {...provided.draggableProps}
-                        className={`p-4 border rounded-lg space-y-3 bg-white ${
+                        className={`p-4 border rounded-lg space-y-3 bg-card ${
                           snapshot.isDragging ? "shadow-lg" : ""
                         }`}
                       >

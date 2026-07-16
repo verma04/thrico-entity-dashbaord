@@ -11,8 +11,14 @@ interface FooterModuleProps {
 export const FooterModule = ({ content, layout }: FooterModuleProps) => {
   return (
     <div
+      style={{
+        color: content.containerSettings?.textColor,
+        background: content.containerSettings?.background,
+      }}
       className={cn(
-        "bg-slate-900 text-white w-full",
+        "w-full",
+        !content.containerSettings?.background && "bg-slate-900",
+        !content.containerSettings?.textColor && "text-white",
         layout === "columns" && "py-16 px-8",
         layout === "simple" && "py-8 px-8",
         layout === "minimal" && "py-6 px-8 border-t border-slate-800",
@@ -142,7 +148,7 @@ export const FooterModule = ({ content, layout }: FooterModuleProps) => {
             </div>
           </div>
           <div className="flex justify-between items-center text-xs opacity-40">
-            <p>© 2024 {content.logoText}. All rights reserved.</p>
+            <p>{content.copyrightText}</p>
             <div className="flex gap-4 items-center">
               {content.socialLinks?.map((link: any, i: number) => (
                 <a

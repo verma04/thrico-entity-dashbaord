@@ -1,13 +1,46 @@
+"use client";
+
 import React from "react";
 import Upgrade from "./upgrade/upgrade";
 import PlanOverview from "./plan-overview";
+import { StorageStats } from "./storage-stats";
+import AddonPricingSection from "./addon-pricing-section";
+import { Crown } from "lucide-react";
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 
-const PaidPlan = () => {
+interface PaidPlanProps {
+  storageStats?: any[];
+  storageSummary?: any;
+}
+
+const PaidPlan = ({ storageStats, storageSummary }: PaidPlanProps) => {
   return (
-    <div className="flex flex-col items-center justify-center p-6 gap-6">
-      <PlanOverview />
+    <EcosystemWrapper>
+      <EcosystemHeader
+        title="Subscription"
+        description="Manage your plan, add-ons, and billing preferences."
+        icon={Crown}
+        badgeText="Billing"
+        showLiveIndicator={false}
+      />
+
+      {/* Overview + Storage side by side */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div className="lg:col-span-2">
+          <PlanOverview />
+        </div>
+        <div>
+          <StorageStats stats={storageStats} summary={storageSummary} />
+        </div>
+      </div>
+
+      {/* Add-ons */}
+      <AddonPricingSection />
+
+      {/* Upgrade plans */}
       <Upgrade />
-    </div>
+    </EcosystemWrapper>
   );
 };
 

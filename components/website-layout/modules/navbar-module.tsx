@@ -31,6 +31,10 @@ export const NavbarModule = ({
               layout === "default" && "h-16 items-center justify-between",
             ]
       )}
+      style={{
+        backgroundColor: content.containerSettings?.background,
+        color: content.containerSettings?.textColor,
+      }}
     >
       {previewDevice === "mobile" ? (
         <>

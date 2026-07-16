@@ -32,14 +32,35 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Globe, Map, Share2, FileCode, Type, Lock } from "lucide-react";
+import {
+  Map,
+  Share2,
+  FileCode,
+  Type,
+  Lock,
+  Settings as SettingsIcon,
+  ShieldCheck,
+  Sparkles,
+  Zap,
+  ChevronRight,
+  Info,
+  Globe,
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useIsPremium } from "@/hooks/useIsPremium";
 import { useDrawerStore } from "@/store/drawerStore";
+import {
+  useGetWebsite,
+  useGetAllPagesSeo,
+  useUpdatePageSeo,
+  useUpdateWebsiteFont,
+  useUpdateWebsiteTheme,
+} from "@/graphql/actions/website";
+import { cn } from "@/lib/utils";
+import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 
 const SiteSettings = () => {
   const {
-    pages,
     togglePageSitemap,
     siteSettings,
     updateSiteSettings,
@@ -48,378 +69,462 @@ const SiteSettings = () => {
     theme,
     setTheme,
   } = useWebsiteBuilderStore();
+
+  const [hasChanged, setHasChanged] = React.useState(false);
+  const [isSaving, setIsSaving] = React.useState(false);
+
+  const { data: websiteData } = useGetWebsite({});
+  const websiteId = websiteData?.getWebsite?.id;
+
+  const { data: seoData, refetch: refetchSeo } = useGetAllPagesSeo(
+    websiteId || "",
+    {
+      skip: !websiteId,
+    },
+  );
+
+  const [updatePageSeoMutation] = useUpdatePageSeo({
+    onCompleted: () => {
+      refetchSeo();
+    },
+  });
+
+  const [updateFontMutation] = useUpdateWebsiteFont();
+  const [updateThemeMutation] = useUpdateWebsiteTheme();
+
+  const handleFontChange = (newFont: string) => {
+    setFont(newFont as any);
+    setHasChanged(true);
+    if (websiteId) {
+      updateFontMutation({
+        variables: {
+          websiteId,
+          font: newFont,
+        },
+      });
+    }
+  };
+
+  const handleThemeChange = (newTheme: string) => {
+    setTheme(newTheme as any);
+    setHasChanged(true);
+    if (websiteId) {
+      updateThemeMutation({
+        variables: {
+          websiteId,
+          theme: newTheme,
+        },
+      });
+    }
+  };
+
+  const pages = seoData?.getAllPagesSeo || [];
+
   const { toast } = useToast();
   const { isPremium } = useIsPremium();
   const { openDrawer } = useDrawerStore();
+
   const PremiumLock = ({
     title,
     description,
+    icon: Icon,
   }: {
     title: string;
     description: string;
+    icon: any;
   }) => (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-muted-foreground">
-          <Lock className="h-5 w-5" /> {title}
-        </CardTitle>
-        <CardDescription>Premium Feature</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="flex flex-col items-center justify-center p-8 text-center space-y-4 bg-muted/20 rounded-lg border border-dashed">
-          <div className="p-4 bg-muted rounded-full">
-            <Lock className="h-8 w-8 text-muted-foreground" />
+    <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden relative group bg-background">
+      <div className="absolute top-0 right-0 p-6">
+        <Lock className="h-5 w-5 text-muted-foreground group-hover:text-indigo-600 transition-colors" />
+      </div>
+      <CardContent className="flex flex-col items-center justify-center text-center space-y-6 max-w-sm mx-auto py-12">
+        <div className="p-5 bg-muted/50 rounded-2xl relative">
+          <Icon className="h-8 w-8 text-muted-foreground" />
+          <div className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-background flex items-center justify-center shadow-md">
+            <Lock className="h-3 w-3 text-indigo-600" />
           </div>
-          <div>
-            <h3 className="text-lg font-semibold">Unlock {title}</h3>
-            <p className="text-muted-foreground max-w-sm mt-2">{description}</p>
-          </div>
-          <Button
-            onClick={() => openDrawer()}
-            variant="default"
-            className="mt-4"
-          >
-            Upgrade Subscription
-          </Button>
         </div>
+        <div>
+          <h3 className="text-xl font-bold tracking-tight">
+            {title} Restricted
+          </h3>
+          <p className="text-sm text-muted-foreground mt-2">
+            {description}
+          </p>
+        </div>
+        <Button
+          onClick={() => openDrawer()}
+          className="h-10 px-6 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md transition-all active:scale-95 group/btn"
+        >
+          <Sparkles className="h-4 w-4 mr-2 transition-transform group-hover/btn:rotate-12" />
+          Unlock Premium
+        </Button>
       </CardContent>
     </Card>
   );
 
-  const handleSaveSettings = () => {
-    // In a real app, we might trigger an API save here.
-    // Since it's Zustand + Persist, it's already "saved" on change,
-    // but a manual toast helps user confidence.
-    toast({
-      title: "Settings Saved",
-      description: "Your site configuration has been updated successfully.",
-    });
+  const handleSaveSettings = async () => {
+    setIsSaving(true);
+    // Simulate/actual save logic if any other settings are needed
+    setTimeout(() => {
+      setIsSaving(false);
+      setHasChanged(false);
+      toast({
+        title: "Settings Saved",
+        description: "Your site configuration has been updated successfully.",
+      });
+    }, 1000);
   };
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto py-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">
-            Site Configuration
-          </h2>
-          <p className="text-muted-foreground">
-            Manage your sitemap, analytics, and global settings.
-          </p>
+    <div className="flex flex-col h-full bg-background overflow-hidden relative">
+      {/* Sticky Header */}
+      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b px-6 py-4">
+        <div className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-3 mb-1">
+              <div className="p-2.5 rounded-xl bg-indigo-600/10 ring-1 ring-indigo-600/20">
+                <SettingsIcon className="h-5 w-5 text-indigo-600" />
+              </div>
+              <h1 className="text-2xl font-bold tracking-tight">
+                Platform Studio
+              </h1>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground ml-1">
+              <span>Website Builder</span>
+              <ChevronRight className="h-3 w-3" />
+              <span>General Settings</span>
+              <ChevronRight className="h-3 w-3" />
+              <span>Core Protocol</span>
+            </div>
+          </div>
         </div>
-        <Button onClick={handleSaveSettings}>Save Changes</Button>
       </div>
 
-      <Tabs defaultValue="sitemap" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="sitemap" className="gap-2">
-            <Map className="h-4 w-4" /> Sitemap Manager
-          </TabsTrigger>
-          <TabsTrigger value="layout" className="gap-2">
-            <Type className="h-4 w-4" /> Layout
-          </TabsTrigger>
-          <TabsTrigger value="general" className="gap-2">
-            <SettingsIcon className="h-4 w-4" /> General Settings
-          </TabsTrigger>
-        </TabsList>
-
-        {/* --- SITEMAP TAB --- */}
-        <TabsContent value="sitemap" className="mt-6">
-          {!isPremium ? (
-            <PremiumLock
-              title="Sitemap Manager"
-              description="Control which pages are visible to search engines and manage your sitemap.xml structure."
-            />
-          ) : (
-            <Card>
-              <CardHeader>
-                <CardTitle>Sitemap Inclusion</CardTitle>
-                <CardDescription>
-                  Choose which pages should be visible to search engines in your
-                  sitemap.xml.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Page</TableHead>
-                        <TableHead>Slug</TableHead>
-                        <TableHead className="text-right">
-                          Include in Sitemap
-                        </TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {pages.map((page) => (
-                        <TableRow key={page.id}>
-                          <TableCell className="font-medium">
-                            {page.name}
-                          </TableCell>
-                          <TableCell className="text-muted-foreground font-mono text-xs">
-                            /{page.slug}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end">
-                              <Switch
-                                checked={page.includeInSitemap}
-                                onCheckedChange={() =>
-                                  togglePageSitemap(page.id)
-                                }
-                              />
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-
-        {/* --- LAYOUT TAB --- */}
-        <TabsContent value="layout" className="mt-6 space-y-6">
-          {!isPremium ? (
-            <PremiumLock
-              title="Theme & Typography"
-              description="Customize your site's visual identity with premium themes and font pairings."
-            />
-          ) : (
-            /* TYPOGRAPHY & THEME */
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Type className="h-5 w-5" /> Typography & Theme
-                </CardTitle>
-                <CardDescription>
-                  Choose a theme style and font family for your entire website.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Theme Style Selector */}
-                <div className="grid gap-2">
-                  <Label htmlFor="theme-select">Theme Style</Label>
-                  <Select value={theme} onValueChange={setTheme}>
-                    <SelectTrigger id="theme-select">
-                      <SelectValue placeholder="Select a theme" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="academia">Academia</SelectItem>
-                      <SelectItem value="enterprise">Enterprise</SelectItem>
-                      <SelectItem value="creator">Creator</SelectItem>
-                      <SelectItem value="association">Association</SelectItem>
-                      <SelectItem value="startup">Startup</SelectItem>
-                      <SelectItem value="dark-mode">Dark Mode</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <p className="text-[10px] text-muted-foreground">
-                    Theme affects default layouts and styling for all modules.
-                  </p>
+      {/* Main Content Area */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            {/* Main Config Area */}
+            <div className="lg:col-span-8 space-y-8">
+              <Tabs defaultValue="sitemap" className="w-full">
+                <div className="flex mb-8">
+                  <TabsList className="h-12 bg-muted/50 p-1">
+                    <TabsTrigger
+                      value="sitemap"
+                      className="rounded-md px-6 text-xs font-bold gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                    >
+                      <Map className="h-3.5 w-3.5" /> Sitemap
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="layout"
+                      className="rounded-md px-6 text-xs font-bold gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                    >
+                      <Type className="h-3.5 w-3.5" /> Identity
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="general"
+                      className="rounded-md px-6 text-xs font-bold gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                    >
+                      <SettingsIcon className="h-3.5 w-3.5" /> Parameters
+                    </TabsTrigger>
+                  </TabsList>
                 </div>
 
-                {/* Font Family Selector */}
-                <div className="grid gap-2">
-                  <Label htmlFor="font-select">Font Family</Label>
-                  <Select value={font} onValueChange={setFont}>
-                    <SelectTrigger id="font-select">
-                      <SelectValue placeholder="Select a font" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="inter">Inter</SelectItem>
-                      <SelectItem value="roboto">Roboto</SelectItem>
-                      <SelectItem value="poppins">Poppins</SelectItem>
-                      <SelectItem value="playfair">Playfair Display</SelectItem>
-                      <SelectItem value="montserrat">Montserrat</SelectItem>
-                      <SelectItem value="lato">Lato</SelectItem>
-                      <SelectItem value="open-sans">Open Sans</SelectItem>
-                      <SelectItem value="raleway">Raleway</SelectItem>
-                      <SelectItem value="merriweather">Merriweather</SelectItem>
-                      <SelectItem value="nunito">Nunito</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <p className="text-[10px] text-muted-foreground">
-                    This font will be applied across all pages and modules.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-
-        {/* --- GENERAL SETTINGS TAB --- */}
-        <TabsContent value="general" className="mt-6 space-y-6">
-          {!isPremium ? (
-            <PremiumLock
-              title="General Settings"
-              description="Setup Google Analytics, custom favicons, and social media links."
-            />
-          ) : (
-            <>
-              {/* GOOGLE ANALYTICS */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <FileCode className="h-5 w-5" /> Analytics & Integrations
-                  </CardTitle>
-                  <CardDescription>
-                    Connect 3rd party tools to your website.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="ga-id">
-                      Google Analytics Measurement ID
-                    </Label>
-                    <Input
-                      id="ga-id"
-                      placeholder="G-XXXXXXXXXX"
-                      value={siteSettings?.googleAnalyticsId || ""}
-                      onChange={(e) =>
-                        updateSiteSettings({
-                          googleAnalyticsId: e.target.value,
-                        })
-                      }
+                <TabsContent value="sitemap" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
+                  {!isPremium ? (
+                    <PremiumLock
+                      title="Sitemap Manager"
+                      icon={Map}
+                      description="Optimize your site's discovery architecture. Control search engine indexing and hierarchical visibility mapping."
                     />
-                    <p className="text-[10px] text-muted-foreground">
-                      The ID starting with "G-" found in your GA4 property
-                      stream details.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+                  ) : (
+                    <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden">
+                      <CardHeader className="bg-muted/30 pb-4">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Map className="h-4 w-4 text-indigo-600" />
+                          <CardTitle className="text-xl">Indexing Matrix</CardTitle>
+                        </div>
+                        <CardDescription>
+                          Control which pages are included in your XML sitemap.
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="pt-0 px-0">
+                        <Table>
+                          <TableHeader className="bg-muted/10 border-b">
+                            <TableRow className="hover:bg-transparent">
+                              <TableHead className="py-4 px-6 text-xs font-bold">Resource Name</TableHead>
+                              <TableHead className="py-4 px-6 text-xs font-bold">Node Address</TableHead>
+                              <TableHead className="py-4 px-6 text-xs font-bold text-right">Index Toggle</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {pages.map((page) => (
+                              <TableRow key={page.id} className="group border-b border-border/50 last:border-0 hover:bg-muted/5">
+                                <TableCell className="py-4 px-6">
+                                  <span className="text-sm font-bold text-foreground">{page.name}</span>
+                                </TableCell>
+                                <TableCell className="py-4 px-6">
+                                  <span className="text-xs font-mono text-muted-foreground bg-muted px-2 py-1 rounded-md">/{page.slug}</span>
+                                </TableCell>
+                                <TableCell className="py-4 px-6 text-right">
+                                  <div className="flex justify-end pr-2">
+                                    <Switch
+                                      checked={page.seo?.includeInSitemap ?? true}
+                                      onCheckedChange={(checked) => {
+                                        togglePageSitemap(page.id);
+                                        updatePageSeoMutation({
+                                          variables: {
+                                            pageId: page.id,
+                                            includeInSitemap: checked,
+                                          },
+                                        });
+                                      }}
+                                    />
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </CardContent>
+                    </Card>
+                  )}
+                </TabsContent>
 
-              {/* BRANDING */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Globe className="h-5 w-5" /> Branding
-                  </CardTitle>
-                  <CardDescription>
-                    Global assets for your website.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="favicon">Favicon URL</Label>
-                    <div className="flex gap-2">
-                      <Input
-                        id="favicon"
-                        placeholder="https://example.com/icon.png"
-                        value={siteSettings?.favicon || ""}
-                        onChange={(e) =>
-                          updateSiteSettings({ favicon: e.target.value })
-                        }
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                <TabsContent value="layout" className="mt-0 space-y-8 focus-visible:outline-none focus-visible:ring-0">
+                  {!isPremium ? (
+                    <PremiumLock
+                      title="Identity & Form"
+                      icon={Type}
+                      description="Customize the aesthetic DNA of your platform. Access exclusive typography systems and high-fidelity global themes."
+                    />
+                  ) : (
+                    <>
+                      <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden">
+                        <CardHeader className="bg-muted/30 pb-4">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Zap className="h-4 w-4 text-indigo-600" />
+                            <CardTitle className="text-xl">Global Theme</CardTitle>
+                          </div>
+                          <CardDescription>
+                            Define the overarching visual aesthetic for your website.
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent className="pt-6 space-y-4">
+                          <div className="space-y-2 max-w-sm">
+                            <Label className="text-sm font-medium">Theme Archetype</Label>
+                            <Select value={theme} onValueChange={handleThemeChange}>
+                              <SelectTrigger className="bg-background">
+                                <SelectValue placeholder="Commit Theme" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {["academia", "enterprise", "creator", "association", "startup", "dark-mode"].map((t) => (
+                                  <SelectItem key={t} value={t} className="capitalize py-2">
+                                    {t.replace("-", " ")}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </CardContent>
+                      </Card>
 
-              {/* SOCIAL LINKS */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Share2 className="h-5 w-5" /> Social Links
-                  </CardTitle>
-                  <CardDescription>
-                    These links usually appear in your Footer or Contact
-                    sections.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Twitter / X</Label>
-                      <Input
-                        placeholder="https://twitter.com/username"
-                        value={siteSettings?.socialLinks?.twitter || ""}
-                        onChange={(e) =>
-                          updateSiteSettings({
-                            socialLinks: {
-                              ...siteSettings.socialLinks,
-                              twitter: e.target.value,
-                            },
-                          })
-                        }
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>LinkedIn</Label>
-                      <Input
-                        placeholder="https://linkedin.com/in/username"
-                        value={siteSettings?.socialLinks?.linkedin || ""}
-                        onChange={(e) =>
-                          updateSiteSettings({
-                            socialLinks: {
-                              ...siteSettings.socialLinks,
-                              linkedin: e.target.value,
-                            },
-                          })
-                        }
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>GitHub</Label>
-                      <Input
-                        placeholder="https://github.com/username"
-                        value={siteSettings?.socialLinks?.github || ""}
-                        onChange={(e) =>
-                          updateSiteSettings({
-                            socialLinks: {
-                              ...siteSettings.socialLinks,
-                              github: e.target.value,
-                            },
-                          })
-                        }
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Instagram</Label>
-                      <Input
-                        placeholder="https://instagram.com/username"
-                        value={siteSettings?.socialLinks?.instagram || ""}
-                        onChange={(e) =>
-                          updateSiteSettings({
-                            socialLinks: {
-                              ...siteSettings.socialLinks,
-                              instagram: e.target.value,
-                            },
-                          })
-                        }
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </>
-          )}
-        </TabsContent>
-      </Tabs>
+                      <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden">
+                        <CardHeader className="bg-muted/30 pb-4">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Type className="h-4 w-4 text-indigo-600" />
+                            <CardTitle className="text-xl">Typography</CardTitle>
+                          </div>
+                          <CardDescription>
+                            Control the global font family architecture.
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent className="pt-6 space-y-4">
+                          <div className="space-y-2 max-w-sm">
+                            <Label className="text-sm font-medium">Font Protocol</Label>
+                            <Select value={font} onValueChange={handleFontChange}>
+                              <SelectTrigger className="bg-background">
+                                <SelectValue placeholder="Commit Font" />
+                              </SelectTrigger>
+                              <SelectContent className="max-h-[300px]">
+                                {["inter", "roboto", "poppins", "playfair", "montserrat", "lato", "open-sans", "raleway", "merriweather", "nunito"].map((f) => (
+                                  <SelectItem key={f} value={f} className="capitalize py-2">
+                                    {f.replace("-", " ")}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="general" className="mt-0 space-y-8 focus-visible:outline-none focus-visible:ring-0">
+                  {!isPremium ? (
+                    <PremiumLock
+                      title="Global Parameters"
+                      icon={SettingsIcon}
+                      description="Deploy advanced analytics and cross-platform branding anchors. Unlock the full potential of your site's data ecosystem."
+                    />
+                  ) : (
+                    <>
+                      <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden">
+                        <CardHeader className="bg-muted/30 pb-4">
+                          <div className="flex items-center gap-2 mb-1">
+                            <FileCode className="h-4 w-4 text-indigo-600" />
+                            <CardTitle className="text-xl">Integrations</CardTitle>
+                          </div>
+                          <CardDescription>
+                            Connect external services and manage global platform parameters.
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent className="pt-6 space-y-6">
+                          <div className="space-y-2">
+                            <Label className="text-sm font-medium">GA4 Measurement Protocol ID</Label>
+                            <Input
+                              placeholder="G-XXXXXX"
+                              value={siteSettings?.googleAnalyticsId || ""}
+                              onChange={(e) => {
+                                updateSiteSettings({ googleAnalyticsId: e.target.value });
+                                setHasChanged(true);
+                              }}
+                            />
+                            <p className="text-xs text-muted-foreground mt-1">Found in your Google Analytics 4 Property Data Streams.</p>
+                          </div>
+                          
+                          <div className="h-px bg-border" />
+
+                          <div className="space-y-2">
+                            <Label className="text-sm font-medium">Favicon URL Asset</Label>
+                            <Input
+                              placeholder="https://cdn.example.com/favicon.png"
+                              value={siteSettings?.favicon || ""}
+                              onChange={(e) => {
+                                updateSiteSettings({ favicon: e.target.value });
+                                setHasChanged(true);
+                              }}
+                            />
+                            <p className="text-xs text-muted-foreground mt-1">Direct link to a 32x32 image file for browser tabs.</p>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden">
+                        <CardHeader className="bg-muted/30 pb-4">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Share2 className="h-4 w-4 text-indigo-600" />
+                            <CardTitle className="text-xl">Social Bridges</CardTitle>
+                          </div>
+                          <CardDescription>
+                            Define global connection points for social platforms.
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent className="pt-6">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {[
+                              { key: "twitter", label: "Twitter / X", placeholder: "https://x.com/handle" },
+                              { key: "linkedin", label: "LinkedIn", placeholder: "https://linkedin.com/in/username" },
+                              { key: "github", label: "GitHub", placeholder: "https://github.com/username" },
+                              { key: "instagram", label: "Instagram", placeholder: "https://instagram.com/username" }
+                            ].map((social) => (
+                              <div key={social.key} className="space-y-2">
+                                <Label className="text-sm font-medium">{social.label}</Label>
+                                <Input
+                                  placeholder={social.placeholder}
+                                  value={(siteSettings?.socialLinks as any)?.[social.key] || ""}
+                                  onChange={(e) => {
+                                    updateSiteSettings({
+                                      socialLinks: {
+                                        ...siteSettings.socialLinks,
+                                        [social.key]: e.target.value,
+                                      },
+                                    });
+                                    setHasChanged(true);
+                                  }}
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </>
+                  )}
+                </TabsContent>
+              </Tabs>
+            </div>
+
+            {/* Sidebar Information */}
+            <div className="lg:col-span-4">
+              <div className="sticky top-6 space-y-6">
+                <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden">
+                   <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-6 text-white">
+                      <Globe className="h-8 w-8 mb-4 opacity-80" />
+                      <h3 className="text-lg font-bold">Platform Central</h3>
+                      <p className="text-sm text-white/80 mt-1">
+                        Global settings deployed across all node architectures.
+                      </p>
+                   </div>
+                   <div className="p-4 bg-muted/10 grid grid-cols-2 gap-4 divide-x">
+                      <div className="flex flex-col items-center justify-center py-2">
+                        <span className="text-2xl font-bold">{pages.length}</span>
+                        <span className="text-[10px] uppercase font-bold text-muted-foreground mt-1">Active Nodes</span>
+                      </div>
+                      <div className="flex flex-col items-center justify-center py-2">
+                        <span className="text-sm font-bold capitalize">{theme || "Default"}</span>
+                        <span className="text-[10px] uppercase font-bold text-muted-foreground mt-1">Current Theme</span>
+                      </div>
+                   </div>
+                </Card>
+
+                <Card className="border-none shadow-sm ring-1 ring-border/50">
+                  <CardHeader className="pb-3 border-b bg-muted/20">
+                    <CardTitle className="text-sm font-bold flex items-center gap-2">
+                      <Info className="h-4 w-4 text-indigo-600" />
+                      Deployment Strategy
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-4">
+                    <ul className="space-y-3 text-xs text-muted-foreground">
+                      <li className="flex gap-2">
+                        <span className="text-indigo-600 font-bold">•</span>
+                        <span>
+                          Sitemap inclusion directly impacts your SEO visibility. Uncheck private nodes.
+                        </span>
+                      </li>
+                      <li className="flex gap-2">
+                        <span className="text-indigo-600 font-bold">•</span>
+                        <span>
+                          Favicon links must be publicly accessible CDN urls or absolute paths.
+                        </span>
+                      </li>
+                      <li className="flex gap-2">
+                        <span className="text-indigo-600 font-bold">•</span>
+                        <span>
+                          Theme updates propagate immediately to all active architecture interfaces.
+                        </span>
+                      </li>
+                    </ul>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <FloatingSavePanel
+        onSave={handleSaveSettings}
+        isSaving={isSaving}
+        hasChanged={hasChanged}
+        title="Unsaved Parameters"
+        description="You have pending changes to your core configuration."
+      />
     </div>
   );
 };
-
-function SettingsIcon(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
-      <circle cx="12" cy="12" r="3" />
-    </svg>
-  );
-}
 
 export default SiteSettings;

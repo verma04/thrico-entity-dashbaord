@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { ModuleContainer } from "../modules/module-container";
 
 interface ContactRendererProps {
   module: ModuleData;
@@ -18,11 +19,10 @@ export const ContactRenderer = ({ module, previewDevice = "desktop" }: ContactRe
   const isMobile = previewDevice === "mobile";
 
   return (
-    <div className="py-16 px-4 sm:px-6 md:px-8">
-      <div className="max-w-7xl mx-auto">
-        
-        {/* 1. SIMPLE CONTACT */}
-        {layout === "simple-contact" && (
+    <>
+      {/* 1. SIMPLE CONTACT */}
+      {layout === "simple-contact" && (
+        <ModuleContainer containerSettings={content.containerSettings}>
           <div className={cn("grid gap-12 items-start", !isMobile && "md:grid-cols-2")}>
             <div className="space-y-8">
               <div className="space-y-4">
@@ -77,10 +77,12 @@ export const ContactRenderer = ({ module, previewDevice = "desktop" }: ContactRe
               </form>
             </div>
           </div>
-        )}
+        </ModuleContainer>
+      )}
 
-        {/* 2. SUPPORT FOCUSED */}
-        {layout === "support-focused" && (
+      {/* 2. SUPPORT FOCUSED */}
+      {layout === "support-focused" && (
+        <ModuleContainer containerSettings={content.containerSettings}>
           <div className="space-y-16">
             <div className="text-center max-w-3xl mx-auto space-y-4">
               <h1 className="text-4xl font-bold">{content.title || "Support Center"}</h1>
@@ -169,10 +171,12 @@ export const ContactRenderer = ({ module, previewDevice = "desktop" }: ContactRe
               </Accordion>
             </div>
           </div>
-        )}
+        </ModuleContainer>
+      )}
 
-        {/* 3. SALES & INQUIRY */}
-        {layout === "sales-inquiry" && (
+      {/* 3. SALES & INQUIRY */}
+      {layout === "sales-inquiry" && (
+        <ModuleContainer containerSettings={content.containerSettings}>
           <div className={cn("grid gap-16 items-center", !isMobile && "lg:grid-cols-2")}>
             <div className="space-y-8">
               <div className="space-y-4">
@@ -260,10 +264,12 @@ export const ContactRenderer = ({ module, previewDevice = "desktop" }: ContactRe
               </form>
             </div>
           </div>
-        )}
+        </ModuleContainer>
+      )}
 
-        {/* 4. COMMUNITY REACH */}
-        {layout === "community-reach" && (
+      {/* 4. COMMUNITY REACH */}
+      {layout === "community-reach" && (
+        <ModuleContainer containerSettings={content.containerSettings}>
           <div className="space-y-16">
             <div className="text-center max-w-3xl mx-auto space-y-6">
               <h1 className="text-4xl md:text-5xl font-bold">{content.title || "Join the Conversation"}</h1>
@@ -299,10 +305,12 @@ export const ContactRenderer = ({ module, previewDevice = "desktop" }: ContactRe
               <p className="text-xs text-muted-foreground mt-4">No spam, unsubscribe anytime.</p>
             </div>
           </div>
-        )}
+        </ModuleContainer>
+      )}
 
-        {/* 5. LOCATION & OFFICE */}
-        {layout === "location-office" && (
+      {/* 5. LOCATION & OFFICE */}
+      {layout === "location-office" && (
+        <ModuleContainer containerSettings={content.containerSettings}>
           <div className="space-y-12">
             <div className="text-center space-y-4">
               <h1 className="text-4xl font-bold">{content.title || "Visit Our Office"}</h1>
@@ -373,9 +381,8 @@ export const ContactRenderer = ({ module, previewDevice = "desktop" }: ContactRe
               </div>
             </div>
           </div>
-        )}
-
-      </div>
-    </div>
+        </ModuleContainer>
+      )}
+    </>
   );
 };

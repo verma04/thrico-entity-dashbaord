@@ -14,6 +14,8 @@ import {
   Columns,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ColorPicker } from "../color-picker";
+import { Switch } from "@/components/ui/switch";
 
 interface LayoutSettings {
   flexDirection?: "row" | "column";
@@ -34,6 +36,15 @@ interface CommonHeaderSettingsProps {
   showLayoutControls?: boolean;
   layoutSettings?: LayoutSettings;
   onLayoutChange?: (layout: LayoutSettings) => void;
+  // Style controls
+  titleColor?: string;
+  descriptionColor?: string;
+  hideTitle?: boolean;
+  hideDescription?: boolean;
+  onTitleColorChange?: (color: string) => void;
+  onDescriptionColorChange?: (color: string) => void;
+  onHideTitleChange?: (hide: boolean) => void;
+  onHideDescriptionChange?: (hide: boolean) => void;
 }
 
 export const CommonHeaderSettings = ({
@@ -52,6 +63,14 @@ export const CommonHeaderSettings = ({
     alignItems: "start",
   },
   onLayoutChange,
+  titleColor,
+  descriptionColor,
+  hideTitle = false,
+  hideDescription = false,
+  onTitleColorChange,
+  onDescriptionColorChange,
+  onHideTitleChange,
+  onHideDescriptionChange,
 }: CommonHeaderSettingsProps) => {
   const handleLayoutChange = (key: keyof LayoutSettings, value: any) => {
     if (onLayoutChange) {
@@ -66,170 +85,170 @@ export const CommonHeaderSettings = ({
     <div className="space-y-4">
       {/* Layout Controls */}
       {showLayoutControls && (
-        <div className="space-y-3 p-3 border rounded-lg bg-muted/10">
-          <Label className="text-xs uppercase font-bold text-muted-foreground">
+        <div className="space-y-3 pb-2 border-b border-border/40">
+          <Label className="text-[10px] uppercase font-semibold text-muted-foreground/60 tracking-wider">
             Layout Controls
           </Label>
 
           {/* Flex Direction */}
-          <div className="space-y-2">
-            <Label className="text-[10px] text-muted-foreground">
+          <div className="space-y-1.5">
+            <Label className="text-[9px] text-muted-foreground">
               Direction
             </Label>
-            <div className="flex gap-2">
+            <div className="flex gap-1.5">
               <button
                 type="button"
                 onClick={() => handleLayoutChange("flexDirection", "row")}
                 className={cn(
-                  "flex-1 h-9 flex items-center justify-center gap-2 rounded border transition-colors",
+                  "flex-1 h-7 flex items-center justify-center gap-1.5 rounded border transition-colors",
                   layoutSettings.flexDirection === "row"
                     ? "bg-primary text-primary-foreground border-primary"
                     : "bg-background hover:bg-muted"
                 )}
               >
-                <Rows className="h-4 w-4" />
-                <span className="text-xs">Row</span>
+                <Rows className="h-3.5 w-3.5" />
+                <span className="text-[10px]">Row</span>
               </button>
               <button
                 type="button"
                 onClick={() => handleLayoutChange("flexDirection", "column")}
                 className={cn(
-                  "flex-1 h-9 flex items-center justify-center gap-2 rounded border transition-colors",
+                  "flex-1 h-7 flex items-center justify-center gap-1.5 rounded border transition-colors",
                   layoutSettings.flexDirection === "column"
                     ? "bg-primary text-primary-foreground border-primary"
                     : "bg-background hover:bg-muted"
                 )}
               >
-                <Columns className="h-4 w-4" />
-                <span className="text-xs">Column</span>
+                <Columns className="h-3.5 w-3.5" />
+                <span className="text-[10px]">Column</span>
               </button>
             </div>
           </div>
 
           {/* Justify Content */}
-          <div className="space-y-2">
-            <Label className="text-[10px] text-muted-foreground">
+          <div className="space-y-1.5">
+            <Label className="text-[9px] text-muted-foreground">
               Justify Content
             </Label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-3 gap-1.5">
               <button
                 type="button"
                 onClick={() => handleLayoutChange("justifyContent", "start")}
                 className={cn(
-                  "h-9 flex items-center justify-center rounded border transition-colors",
+                  "h-7 flex items-center justify-center rounded border transition-colors",
                   layoutSettings.justifyContent === "start"
                     ? "bg-primary text-primary-foreground border-primary"
                     : "bg-background hover:bg-muted"
                 )}
                 title="Start"
               >
-                <AlignHorizontalJustifyStart className="h-4 w-4" />
+                <AlignHorizontalJustifyStart className="h-3.5 w-3.5" />
               </button>
               <button
                 type="button"
                 onClick={() => handleLayoutChange("justifyContent", "center")}
                 className={cn(
-                  "h-9 flex items-center justify-center rounded border transition-colors",
+                  "h-7 flex items-center justify-center rounded border transition-colors",
                   layoutSettings.justifyContent === "center"
                     ? "bg-primary text-primary-foreground border-primary"
                     : "bg-background hover:bg-muted"
                 )}
                 title="Center"
               >
-                <AlignHorizontalJustifyCenter className="h-4 w-4" />
+                <AlignHorizontalJustifyCenter className="h-3.5 w-3.5" />
               </button>
               <button
                 type="button"
                 onClick={() => handleLayoutChange("justifyContent", "end")}
                 className={cn(
-                  "h-9 flex items-center justify-center rounded border transition-colors",
+                  "h-7 flex items-center justify-center rounded border transition-colors",
                   layoutSettings.justifyContent === "end"
                     ? "bg-primary text-primary-foreground border-primary"
                     : "bg-background hover:bg-muted"
                 )}
                 title="End"
               >
-                <AlignHorizontalJustifyEnd className="h-4 w-4" />
+                <AlignHorizontalJustifyEnd className="h-3.5 w-3.5" />
               </button>
               <button
                 type="button"
                 onClick={() => handleLayoutChange("justifyContent", "between")}
                 className={cn(
-                  "h-9 flex items-center justify-center rounded border transition-colors",
+                  "h-7 flex items-center justify-center rounded border transition-colors",
                   layoutSettings.justifyContent === "between"
                     ? "bg-primary text-primary-foreground border-primary"
                     : "bg-background hover:bg-muted"
                 )}
                 title="Space Between"
               >
-                <AlignHorizontalSpaceBetween className="h-4 w-4" />
+                <AlignHorizontalSpaceBetween className="h-3.5 w-3.5" />
               </button>
               <button
                 type="button"
                 onClick={() => handleLayoutChange("justifyContent", "around")}
                 className={cn(
-                  "h-9 flex items-center justify-center rounded border transition-colors",
+                  "h-7 flex items-center justify-center rounded border transition-colors",
                   layoutSettings.justifyContent === "around"
                     ? "bg-primary text-primary-foreground border-primary"
                     : "bg-background hover:bg-muted"
                 )}
                 title="Space Around"
               >
-                <AlignHorizontalSpaceAround className="h-4 w-4" />
+                <AlignHorizontalSpaceAround className="h-3.5 w-3.5" />
               </button>
             </div>
           </div>
 
           {/* Align Items */}
-          <div className="space-y-2">
-            <Label className="text-[10px] text-muted-foreground">
+          <div className="space-y-1.5">
+            <Label className="text-[9px] text-muted-foreground">
               Align Items
             </Label>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-4 gap-1.5">
               <button
                 type="button"
                 onClick={() => handleLayoutChange("alignItems", "start")}
                 className={cn(
-                  "h-9 flex items-center justify-center rounded border transition-colors",
+                  "h-7 flex items-center justify-center rounded border transition-colors",
                   layoutSettings.alignItems === "start"
                     ? "bg-primary text-primary-foreground border-primary"
                     : "bg-background hover:bg-muted"
                 )}
                 title="Start"
               >
-                <AlignVerticalJustifyStart className="h-4 w-4" />
+                <AlignVerticalJustifyStart className="h-3.5 w-3.5" />
               </button>
               <button
                 type="button"
                 onClick={() => handleLayoutChange("alignItems", "center")}
                 className={cn(
-                  "h-9 flex items-center justify-center rounded border transition-colors",
+                  "h-7 flex items-center justify-center rounded border transition-colors",
                   layoutSettings.alignItems === "center"
                     ? "bg-primary text-primary-foreground border-primary"
                     : "bg-background hover:bg-muted"
                 )}
                 title="Center"
               >
-                <AlignVerticalJustifyCenter className="h-4 w-4" />
+                <AlignVerticalJustifyCenter className="h-3.5 w-3.5" />
               </button>
               <button
                 type="button"
                 onClick={() => handleLayoutChange("alignItems", "end")}
                 className={cn(
-                  "h-9 flex items-center justify-center rounded border transition-colors",
+                  "h-7 flex items-center justify-center rounded border transition-colors",
                   layoutSettings.alignItems === "end"
                     ? "bg-primary text-primary-foreground border-primary"
                     : "bg-background hover:bg-muted"
                 )}
                 title="End"
               >
-                <AlignVerticalJustifyEnd className="h-4 w-4" />
+                <AlignVerticalJustifyEnd className="h-3.5 w-3.5" />
               </button>
               <button
                 type="button"
                 onClick={() => handleLayoutChange("alignItems", "stretch")}
                 className={cn(
-                  "h-9 flex items-center justify-center rounded border transition-colors text-xs",
+                  "h-7 flex items-center justify-center rounded border transition-colors text-[10px]",
                   layoutSettings.alignItems === "stretch"
                     ? "bg-primary text-primary-foreground border-primary"
                     : "bg-background hover:bg-muted"
@@ -243,27 +262,100 @@ export const CommonHeaderSettings = ({
         </div>
       )}
 
-      {/* Title Input */}
+      {/* Title Settings */}
       <div className="space-y-2">
-        <Label htmlFor="title-input">{titleLabel}</Label>
-        <Input
-          id="title-input"
-          value={title}
-          onChange={(e) => onTitleChange(e.target.value)}
-          placeholder={titlePlaceholder}
-        />
+        <div className="flex items-center justify-between">
+          <Label
+            htmlFor="title-input"
+            className="font-semibold text-[10px] uppercase text-muted-foreground/60 tracking-wider"
+          >
+            {titleLabel}
+          </Label>
+          <div className="flex items-center gap-3">
+            <div className="scale-75 origin-right">
+              <ColorPicker
+                label=""
+                value={titleColor || ""}
+                onChange={onTitleColorChange || (() => {})}
+                compact
+              />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Label
+                htmlFor="hide-title"
+                className="text-[10px] text-muted-foreground font-normal"
+              >
+                {hideTitle ? "Hidden" : "Visible"}
+              </Label>
+              <Switch
+                id="hide-title"
+                checked={!hideTitle}
+                onCheckedChange={(checked) => onHideTitleChange?.(!checked)}
+                className="scale-75 origin-right"
+              />
+            </div>
+          </div>
+        </div>
+
+        {!hideTitle && (
+          <Input
+            id="title-input"
+            value={title}
+            onChange={(e) => onTitleChange(e.target.value)}
+            placeholder={titlePlaceholder}
+            className="h-8 text-xs"
+          />
+        )}
       </div>
 
-      {/* Description Input */}
-      <div className="space-y-2">
-        <Label htmlFor="desc-input">{descriptionLabel}</Label>
-        <Textarea
-          id="desc-input"
-          value={description}
-          onChange={(e) => onDescriptionChange(e.target.value)}
-          placeholder={descriptionPlaceholder}
-          rows={3}
-        />
+      {/* Description Settings */}
+      <div className="space-y-2 pb-2">
+        <div className="flex items-center justify-between">
+          <Label
+            htmlFor="desc-input"
+            className="font-semibold text-[10px] uppercase text-muted-foreground/60 tracking-wider"
+          >
+            {descriptionLabel}
+          </Label>
+          <div className="flex items-center gap-3">
+            <div className="scale-75 origin-right">
+              <ColorPicker
+                label=""
+                value={descriptionColor || ""}
+                onChange={onDescriptionColorChange || (() => {})}
+                compact
+              />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Label
+                htmlFor="hide-desc"
+                className="text-[10px] text-muted-foreground font-normal"
+              >
+                {hideDescription ? "Hidden" : "Visible"}
+              </Label>
+              <Switch
+                id="hide-desc"
+                checked={!hideDescription}
+                onCheckedChange={(checked) =>
+                  onHideDescriptionChange?.(!checked)
+                }
+                className="scale-75 origin-right"
+              />
+            </div>
+          </div>
+        </div>
+        {!hideDescription && (
+          <Textarea
+            id="desc-input"
+            value={description}
+            onChange={(e) => onDescriptionChange(e.target.value)}
+            placeholder={descriptionPlaceholder}
+            rows={2}
+            className="text-xs resize-none min-h-[60px]"
+          />
+        )}
       </div>
     </div>
   );

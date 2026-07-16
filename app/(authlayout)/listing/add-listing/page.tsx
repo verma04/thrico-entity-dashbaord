@@ -1,36 +1,63 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Form, Input, InputNumber, Select, Upload, Button, Card, message, Divider, Switch, Space } from "antd"
-import { SaveOutlined, CloseOutlined, PlusOutlined } from "@ant-design/icons"
-import { useRouter } from "next/navigation"
-
-const { Option } = Select
-const { TextArea } = Input
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Separator } from "@/components/ui/separator";
+import { Save, X, Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
+import { useModuleStore } from "@/store/useModuleStore";
 
 const AddListing = () => {
-  const [form] = Form.useForm()
-  const router = useRouter()
-  const [fileList, setFileList] = useState([])
-  const [isFeatured, setIsFeatured] = useState(false)
+  const singularName = useModuleStore((state) => state.listingSingularName);
+  const router = useRouter();
+  const { toast } = useToast();
+  const [fileList, setFileList] = useState<File[]>([]);
+  const [isFeatured, setIsFeatured] = useState(false);
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    category: "",
+    condition: "",
+    price: 0,
+    quantity: 1,
+    status: "pending",
+    featuredUntil: "",
+  });
 
-  const onFinish = (values: any) => {
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
     // In a real app, call API to add the listing
-    console.log("Form values:", values)
-    message.success("Listing added successfully")
-    router.push("/all-listings")
-  }
+    console.log("Form values:", formData);
+    toast({
+      title: "Success",
+      description: `${singularName} added successfully`,
+    });
+    router.push("/all-listings");
+  };
 
   const handleCancel = () => {
-    router.push("/all-listings")
-  }
+    router.push("/all-listings");
+  };
 
-  const normFile = (e: any) => {
-    if (Array.isArray(e)) {
-      return e
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setFileList(Array.from(e.target.files));
     }
-    return e?.fileList
-  }
+  };
 
   const categories = [
     "Vehicles",
@@ -43,148 +70,232 @@ const AddListing = () => {
     "Sports & Outdoors",
     "Toys & Games",
     "Home & Garden",
-  ]
+  ];
 
-  const conditions = ["New", "Used - Like New", "Used - Good", "Used - Fair", "Refurbished", "For parts"]
+  const conditions = [
+    "New",
+    "Used - Like New",
+    "Used - Good",
+    "Used - Fair",
+    "Refurbished",
+    "For parts",
+  ];
 
   return (
-    <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-        <h1 style={{ margin: 0 }}>Add New Listing</h1>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold">Add New {singularName}</h1>
       </div>
 
       <Card>
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={onFinish}
-          initialValues={{
-            status: "pending",
-            price: 0,
-            quantity: 1,
-          }}
-        >
-          <Divider orientation="left">Basic Information</Divider>
+        <CardContent className="pt-6">
+          <form onSubmit={onSubmit} className="space-y-6">
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Basic Information</h3>
+              <Separator className="mb-4" />
 
-          <Form.Item name="title" label="Listing Title" rules={[{ required: true, message: "Please enter a title" }]}>
-            <Input placeholder="Enter a descriptive title" />
-          </Form.Item>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="title">{singularName} Title *</Label>
+                  <Input
+                    id="title"
+                    placeholder="Enter a descriptive title"
+                    value={formData.title}
+                    onChange={(e) =>
+                      setFormData({ ...formData, title: e.target.value })
+                    }
+                    required
+                  />
+                </div>
 
-          <Form.Item
-            name="description"
-            label="Description"
-            rules={[{ required: true, message: "Please enter a description" }]}
-          >
-            <TextArea rows={4} placeholder="Describe your listing in detail" />
-          </Form.Item>
+                <div>
+                  <Label htmlFor="description">Description *</Label>
+                  <Textarea
+                    id="description"
+                    rows={4}
+                    placeholder={`Describe your ${singularName.toLowerCase()} in detail`}
+                    value={formData.description}
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
+                    required
+                  />
+                </div>
 
-          <div style={{ display: "flex", gap: 16 }}>
-            <Form.Item
-              name="category"
-              label="Category"
-              rules={[{ required: true, message: "Please select a category" }]}
-              style={{ flex: 1 }}
-            >
-              <Select placeholder="Select a category">
-                {categories.map((category) => (
-                  <Option key={category} value={category}>
-                    {category}
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="category">Category *</Label>
+                    <Select
+                      value={formData.category}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, category: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map((category) => (
+                          <SelectItem key={category} value={category}>
+                            {category}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-            <Form.Item
-              name="condition"
-              label="Condition"
-              rules={[{ required: true, message: "Please select a condition" }]}
-              style={{ flex: 1 }}
-            >
-              <Select placeholder="Select condition">
-                {conditions.map((condition) => (
-                  <Option key={condition} value={condition}>
-                    {condition}
-                  </Option>
-                ))}
-              </Select>
-            </Form.Item>
-          </div>
+                  <div>
+                    <Label htmlFor="condition">Condition *</Label>
+                    <Select
+                      value={formData.condition}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, condition: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select condition" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {conditions.map((condition) => (
+                          <SelectItem key={condition} value={condition}>
+                            {condition}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
 
-          <div style={{ display: "flex", gap: 16 }}>
-            <Form.Item
-              name="price"
-              label="Price"
-              rules={[{ required: true, message: "Please enter a price" }]}
-              style={{ flex: 1 }}
-            >
-              <InputNumber
-                formatter={(value) => `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-                parser={(value) => value.replace(/\$\s?|(,*)/g, "")}
-                style={{ width: "100%" }}
-                min={0}
-              />
-            </Form.Item>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="price">Price *</Label>
+                    <Input
+                      id="price"
+                      type="number"
+                      placeholder="0.00"
+                      value={formData.price}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          price: parseFloat(e.target.value),
+                        })
+                      }
+                      min={0}
+                      step="0.01"
+                      required
+                    />
+                  </div>
 
-            <Form.Item
-              name="quantity"
-              label="Quantity"
-              rules={[{ required: true, message: "Please enter quantity" }]}
-              style={{ flex: 1 }}
-            >
-              <InputNumber min={1} style={{ width: "100%" }} />
-            </Form.Item>
-          </div>
-
-          <Divider orientation="left">Images</Divider>
-
-          <Form.Item name="images" label="Upload Images" valuePropName="fileList" getValueFromEvent={normFile}>
-            <Upload
-              listType="picture-card"
-              fileList={fileList}
-              onChange={({ fileList }) => setFileList(fileList)}
-              beforeUpload={() => false}
-            >
-              <div>
-                <PlusOutlined />
-                <div style={{ marginTop: 8 }}>Upload</div>
+                  <div>
+                    <Label htmlFor="quantity">Quantity *</Label>
+                    <Input
+                      id="quantity"
+                      type="number"
+                      placeholder="1"
+                      value={formData.quantity}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          quantity: parseInt(e.target.value),
+                        })
+                      }
+                      min={1}
+                      required
+                    />
+                  </div>
+                </div>
               </div>
-            </Upload>
-          </Form.Item>
+            </div>
 
-          <Divider orientation="left">Listing Settings</Divider>
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Images</h3>
+              <Separator className="mb-4" />
 
-          <Form.Item name="status" label="Initial Status">
-            <Select>
-              <Option value="pending">Pending Approval</Option>
-              <Option value="approved">Approved</Option>
-              <Option value="inactive">Inactive</Option>
-            </Select>
-          </Form.Item>
+              <div>
+                <Label htmlFor="images">Upload Images</Label>
+                <Input
+                  id="images"
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="cursor-pointer"
+                />
+                {fileList.length > 0 && (
+                  <p className="text-sm text-muted-foreground mt-2">
+                    {fileList.length} file(s) selected
+                  </p>
+                )}
+              </div>
+            </div>
 
-          <Form.Item name="featured" label="Featured Listing" valuePropName="checked">
-            <Switch checked={isFeatured} onChange={setIsFeatured} />
-          </Form.Item>
+            <div>
+              <h3 className="text-lg font-semibold mb-4">{singularName} Settings</h3>
+              <Separator className="mb-4" />
 
-          {isFeatured && (
-            <Form.Item name="featuredUntil" label="Featured Until">
-              <Input type="date" />
-            </Form.Item>
-          )}
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="status">Initial Status</Label>
+                  <Select
+                    value={formData.status}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, status: value })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pending">Pending Approval</SelectItem>
+                      <SelectItem value="approved">Approved</SelectItem>
+                      <SelectItem value="inactive">Inactive</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-          <Form.Item>
-            <Space>
-              <Button type="primary" htmlType="submit" icon={<SaveOutlined />}>
-                Save Listing
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="featured"
+                    checked={isFeatured}
+                    onCheckedChange={setIsFeatured}
+                  />
+                  <Label htmlFor="featured">Featured {singularName}</Label>
+                </div>
+
+                {isFeatured && (
+                  <div>
+                    <Label htmlFor="featuredUntil">Featured Until</Label>
+                    <Input
+                      id="featuredUntil"
+                      type="date"
+                      value={formData.featuredUntil}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          featuredUntil: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <Button type="submit">
+                <Save className="w-4 h-4 mr-2" />
+                Save {singularName}
               </Button>
-              <Button icon={<CloseOutlined />} onClick={handleCancel}>
+              <Button type="button" variant="outline" onClick={handleCancel}>
+                <X className="w-4 h-4 mr-2" />
                 Cancel
               </Button>
-            </Space>
-          </Form.Item>
-        </Form>
+            </div>
+          </form>
+        </CardContent>
       </Card>
     </div>
-  )
-}
+  );
+};
 
-export default AddListing
+export default AddListing;

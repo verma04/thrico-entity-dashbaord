@@ -67,4 +67,4 @@ export const deleteDomain = (options: any) =>
     },
   });
 
-export const checkSSl = (options: any) => useQuery(CHECK_SSL);
+export const checkSSl = (options: any) => useQuery(CHECK_SSL, options);

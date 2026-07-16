@@ -4,14 +4,9 @@ import { X } from "lucide-react";
 import type React from "react";
 import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
+import { UploadFile } from "./types";
 
-type UploadFile = {
-  uid: string;
-  name?: string;
-  url?: string;
-  originFileObj?: File;
-  status?: "done" | "uploading" | "error";
-};
+
 
 function AllMedia({
   fileList,

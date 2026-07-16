@@ -17,9 +17,14 @@ interface ProcessStepsSettingsProps {
       title: string;
       description: string;
       icon?: string;
+      url?: string;
     }>;
     title?: string;
     description?: string;
+    helpTitle?: string;
+    helpDescription?: string;
+    helpButtonText?: string;
+    helpButtonUrl?: string;
   };
   onChange: (updates: any) => void;
 }
@@ -47,6 +52,10 @@ const ProcessStepsSettings: React.FC<ProcessStepsSettingsProps> = ({
     ],
     title = "How It Works",
     description = "Follow these simple steps to get started",
+    helpTitle = "Need help?",
+    helpDescription = "Our experts are available 24/7 to guide you through the process.",
+    helpButtonText = "Schedule a Call",
+    helpButtonUrl = "#",
   } = content;
 
   const addStep = () => {
@@ -104,6 +113,45 @@ const ProcessStepsSettings: React.FC<ProcessStepsSettingsProps> = ({
             rows={2}
           />
         </div>
+
+        <div className="pt-4 border-t space-y-4">
+          <Label className="text-sm font-semibold text-blue-600">
+            Help Card (Vertical Layout Only)
+          </Label>
+          <div>
+            <Label className="text-xs text-gray-600">Help Title</Label>
+            <Input
+              value={helpTitle}
+              onChange={(e) => onChange({ helpTitle: e.target.value })}
+              placeholder="Need help?"
+            />
+          </div>
+          <div>
+            <Label className="text-xs text-gray-600">Help Description</Label>
+            <Textarea
+              value={helpDescription}
+              onChange={(e) => onChange({ helpDescription: e.target.value })}
+              placeholder="Our experts are available 24/7..."
+              rows={2}
+            />
+          </div>
+          <div>
+            <Label className="text-xs text-gray-600">Button Text</Label>
+            <Input
+              value={helpButtonText}
+              onChange={(e) => onChange({ helpButtonText: e.target.value })}
+              placeholder="Schedule a Call"
+            />
+          </div>
+          <div>
+            <Label className="text-xs text-gray-600">Button URL</Label>
+            <Input
+              value={helpButtonUrl}
+              onChange={(e) => onChange({ helpButtonUrl: e.target.value })}
+              placeholder="https://..."
+            />
+          </div>
+        </div>
       </div>
 
       <div>
@@ -137,7 +185,7 @@ const ProcessStepsSettings: React.FC<ProcessStepsSettingsProps> = ({
                       <div
                         ref={provided.innerRef}
                         {...provided.draggableProps}
-                        className={`p-4 border rounded-lg space-y-3 bg-white ${
+                        className={`p-4 border rounded-lg space-y-3 bg-card ${
                           snapshot.isDragging ? "shadow-lg" : ""
                         }`}
                       >
@@ -245,6 +293,19 @@ const ProcessStepsSettings: React.FC<ProcessStepsSettingsProps> = ({
                               }
                               placeholder="Describe this step..."
                               rows={2}
+                            />
+                          </div>
+
+                          <div>
+                            <Label className="text-xs text-gray-600">
+                              Step URL (Link)
+                            </Label>
+                            <Input
+                              value={step.url || ""}
+                              onChange={(e) =>
+                                updateStep(index, { url: e.target.value })
+                              }
+                              placeholder="https://..."
                             />
                           </div>
                         </div>

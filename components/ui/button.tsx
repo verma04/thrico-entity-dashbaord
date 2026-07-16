@@ -79,6 +79,17 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const Comp = asChild ? Slot : "button";
+    
+    // When asChild is true, we must provide only a single child to the Slot component.
+    // If we're loading and asChild is true, we prioritize rendering the original children 
+    // but the spinner logic should probably be handled by the consumer's child element.
+    const content = asChild ? children : (
+      <>
+        {loading && <Spinner />}
+        {children}
+      </>
+    );
+
     return (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
@@ -87,8 +98,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         aria-busy={loading}
         {...props}
       >
-        {loading && <Spinner />}
-        {children}
+        {content}
       </Comp>
     );
   }

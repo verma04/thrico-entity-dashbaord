@@ -1,218 +1,175 @@
 "use client";
 
-import { useState } from "react";
+import React, { useMemo } from "react";
 import {
-  useReactTable,
-  getCoreRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  getFilteredRowModel,
-  flexRender,
-  ColumnDef,
-  SortingState,
-  ColumnFiltersState,
-} from "@tanstack/react-table";
+  AdminTable,
+  AdminStatusBadge,
+  AdminTableColumn,
+} from "@/components/shared/admin-table/admin-table";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
-import { ChevronLeft, ChevronRight, Search } from "lucide-react";
+  BarChart3,
+  MessageSquare,
+  Clock,
+  LayoutGrid,
+  Calendar,
+} from "lucide-react";
 import moment from "moment";
-
 import { poll } from "./ts-types";
 import Actions from "./poll-actions";
-import { getStatusTag } from "./utils";
+import { cn } from "@/lib/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
+import { useModuleStore } from "@/store/useModuleStore";
 
-export default function List({ data }: { data: poll[] }) {
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [globalFilter, setGlobalFilter] = useState("");
+export default function List({
+  data,
+  isLoading = false,
+}: {
+  data: poll[];
+  isLoading?: boolean;
+}) {
+  const moduleName = useModuleStore((state) => state.pollModuleName);
+  const singularName = useModuleStore((state) => state.pollSingularName);
 
-  const columns: ColumnDef<poll>[] = [
-    {
-      accessorKey: "title",
-      header: "Title",
-      cell: ({ row }) => (
-        <div className="font-medium">{row.getValue("title")}</div>
-      ),
-    },
-    {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }) => getStatusTag(row.original.status),
-    },
-    {
-      accessorKey: "question",
-      header: "Question",
-      cell: ({ row }) => (
-        <div className="max-w-md truncate">{row.getValue("question")}</div>
-      ),
-    },
-    {
-      id: "options",
-      header: "Options",
-      cell: ({ row }) => (
-        <div className="max-w-xs truncate">
-          {row.original.options?.map((option) => option.text).join(", ")}
-        </div>
-      ),
-    },
-    {
-      accessorKey: "createdAt",
-      header: "Created At",
-      cell: ({ row }) => (
-        <span className="text-muted-foreground">
-          {moment(row.getValue("createdAt")).format("MMMM Do YYYY")}
-        </span>
-      ),
-    },
-    {
-      accessorKey: "updatedAt",
-      header: "Last Update",
-      cell: ({ row }) => (
-        <span className="text-muted-foreground">
-          {moment(row.getValue("updatedAt")).fromNow()}
-        </span>
-      ),
-    },
-    {
-      id: "actions",
-      header: () => <div className="text-right">Actions</div>,
-      cell: ({ row }) => (
-        <div className="text-right">
-          <Actions {...row.original} />
-        </div>
-      ),
-    },
-  ];
-
-  const table = useReactTable({
-    data: data || [],
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    onGlobalFilterChange: setGlobalFilter,
-    state: {
-      sorting,
-      columnFilters,
-      globalFilter,
-    },
-    initialState: {
-      pagination: {
-        pageSize: 10,
+  const columns = useMemo<AdminTableColumn<poll>[]>(
+    () => [
+      {
+        key: "title",
+        header: singularName,
+        cell: (row) => {
+          const poll = row;
+          return (
+            <div className="flex items-center gap-4">
+              <div className="h-10 w-10 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center shrink-0">
+                <MessageSquare className="h-5 w-5 text-indigo-500" />
+              </div>
+              <div className="flex flex-col min-w-0">
+                <span className="font-bold text-foreground leading-tight truncate max-w-[280px]">
+                  {poll.title}
+                </span>
+                <span className="text-[11px] text-muted-foreground line-clamp-1 max-w-[320px] mt-0.5">
+                  {poll.question}
+                </span>
+              </div>
+            </div>
+          );
+        },
       },
-    },
-  });
+      {
+        key: "options",
+        header: "Options",
+        cell: (row) => {
+          const poll = row;
+          return (
+            <div className="flex items-center gap-1.5 flex-wrap max-w-[200px]">
+              {poll.options?.slice(0, 3).map((opt, i) => (
+                <div
+                  key={i}
+                  className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-muted text-muted-foreground border border-border"
+                >
+                  {opt.text}
+                </div>
+              ))}
+              {(poll.options?.length || 0) > 3 && (
+                <span className="text-[10px] font-bold text-muted-foreground ml-0.5">
+                  +{(poll.options?.length || 0) - 3} more
+                </span>
+              )}
+            </div>
+          );
+        },
+      },
+      {
+        key: "creator",
+        header: "Creator",
+        cell: (row) => {
+          const poll = row;
+          if (!poll.user) {
+            return (
+              <div className="flex items-center gap-2">
+                <Avatar className="h-6 w-6 rounded-full border border-border/60">
+                  <AvatarFallback className="text-[10px] bg-primary/10 text-primary font-bold">
+                    EN
+                  </AvatarFallback>
+                </Avatar>
+                <span className="text-[12px] font-semibold text-muted-foreground">
+                  Entity
+                </span>
+              </div>
+            );
+          }
+
+          return (
+            <UserProfileHoverCard user={poll.user}>
+              <div className="flex items-center gap-2 cursor-pointer group">
+                <Avatar className="h-6 w-6 rounded-full border border-border/60">
+                  <AvatarImage
+                    src={
+                      poll.user.avatar
+                        ? poll.user.avatar.startsWith("http")
+                          ? poll.user.avatar
+                          : `https://cdn.thrico.network/${poll.user.avatar}`
+                        : ""
+                    }
+                    alt={`${poll.user.firstName} ${poll.user.lastName}`}
+                  />
+                  <AvatarFallback className="text-[10px] bg-muted font-bold">
+                    {poll.user.firstName?.charAt(0)}
+                    {poll.user.lastName?.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="text-[12px] font-medium group-hover:text-primary transition-colors truncate max-w-[100px]">
+                  {poll.user.firstName} {poll.user.lastName}
+                </span>
+              </div>
+            </UserProfileHoverCard>
+          );
+        },
+      },
+      {
+        key: "dates",
+        header: "Date",
+        cell: (row) => {
+          const poll = row;
+          return (
+            <div className="flex flex-col">
+              <div className="flex items-center gap-1.5">
+                <Calendar className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                <span className="text-[12px] font-bold text-foreground">
+                  {moment(poll.createdAt).format("MMM D, YYYY")}
+                </span>
+              </div>
+              <span className="text-[10px] text-muted-foreground ml-5 mt-0.5">
+                Updated {moment(poll.updatedAt).fromNow()}
+              </span>
+            </div>
+          );
+        },
+      },
+      {
+        key: "actions",
+        header: "",
+        headerClassName: "w-12 text-right",
+        className: "text-right",
+        cell: (row) => (
+          <div className="flex justify-end">
+            <Actions {...row} />
+          </div>
+        ),
+      },
+    ],
+    []
+  );
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search polls..."
-            value={globalFilter ?? ""}
-            onChange={(e) => setGlobalFilter(e.target.value)}
-            className="pl-8"
-          />
-        </div>
-      </div>
-
-      <Card>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows &&
-              table.getRowModel().rows.length > 0 ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id}>
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center text-muted-foreground"
-                  >
-                    No polls found matching your criteria
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-
-      <div className="flex items-center justify-between">
-        <div className="text-sm text-muted-foreground">
-          Showing{" "}
-          {table.getState().pagination.pageIndex *
-            table.getState().pagination.pageSize +
-            1}{" "}
-          to{" "}
-          {Math.min(
-            (table.getState().pagination.pageIndex + 1) *
-              table.getState().pagination.pageSize,
-            table.getFilteredRowModel().rows.length
-          )}{" "}
-          of {table.getFilteredRowModel().rows.length} results
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            <ChevronLeft className="h-4 w-4 mr-1" />
-            Previous
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            Next
-            <ChevronRight className="h-4 w-4 ml-1" />
-          </Button>
-        </div>
-      </div>
-    </div>
+    <AdminTable<poll>
+      columns={columns}
+      data={data || []}
+      loading={isLoading}
+      keyExtractor={(poll) => poll.id}
+      emptyIcon={BarChart3}
+      emptyTitle={`No ${moduleName.toLowerCase()} found`}
+      emptyDescription={`Create a new ${singularName.toLowerCase()} to start gathering feedback.`}
+    />
   );
 }

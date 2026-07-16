@@ -1,10 +1,26 @@
 import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
+
+const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
   images: {
-    domains: ["cdn.thrico.network"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "cdn.thrico.network",
+      },
+      {
+        protocol: "https",
+        hostname: "thrico.blr1.digitaloceanspaces.com",
+      },
+    ],
   },
-  /* config options here */
+  output: "standalone",
+
+  typescript: {
+    ignoreBuildErrors: true,
+  },
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);

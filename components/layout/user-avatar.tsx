@@ -6,18 +6,23 @@ interface UserAvatarProps {
   size?: number;
   style?: React.CSSProperties;
   onPress?: () => void;
+  className?: string;
 }
+
+import { cn } from "@/lib/utils";
 
 const UserAvatar: React.FC<UserAvatarProps> = ({
   src,
   size = 20,
   style,
   onPress,
+  className,
 }) => {
   const avatarSrc = src ? `https://cdn.thrico.network/${src}` : undefined;
 
   return (
     <Avatar
+      className={cn(className)}
       style={{
         ...style,
         cursor: onPress ? "pointer" : "default",

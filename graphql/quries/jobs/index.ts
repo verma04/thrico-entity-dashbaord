@@ -23,6 +23,13 @@ const jobs = `
         isVerified
         verificationReason
       }
+      addedBy
+      postedBy {
+        id
+        firstName
+        lastName
+        avatar
+      }
 
       company {
         id
@@ -41,9 +48,30 @@ ${jobs}
   }
 `;
 
+export const UPDATE_JOB = gql`
+  mutation UpdateJob($input: UpdateJobInput!) {
+    updateJob(input: $input) {
+${jobs}
+    }
+  }
+`;
+
 export const GET_JOBS = gql`
   query GetJob($input: GetJobInput) {
     getJob(input: $input) {
+      data {
+        ${jobs}
+      }
+      total
+      offset
+      limit
+    }
+  }
+`;
+
+export const GET_JOB_BY_ID = gql`
+  query GetJobById($id: ID!) {
+    getJobById(id: $id) {
       ${jobs}
     }
   }
@@ -64,19 +92,54 @@ mutation ChangeJobVerification($input: ChangeJobStatusInput!) {
 }`;
 
 export const GET_JOB_STATS = gql`
-  query GetJobStats {
-    getJobStats {
+  query GetJobStats($timeRange: TimeRange, $dateRange: DateRangeInput) {
+    getJobStats(timeRange: $timeRange, dateRange: $dateRange) {
       totalJobs
       activeJobs
       totalApplications
       totalViews
-      avgApplications
-      applicationsThisWeek
-      applicationsLastWeek
-      applicationsWeeklyChange
-      viewsThisWeek
-      viewsLastWeek
-      viewsWeeklyChange
+      totalJobsChange
+      activeJobsChange
+      applicationsChange
+      viewsChange
+    }
+  }
+`;
+
+export const GET_JOB_APPLICATION_TREND = gql`
+  query GetJobApplicationTrend($timeRange: TimeRange, $dateRange: DateRangeInput) {
+    getJobApplicationTrend(timeRange: $timeRange, dateRange: $dateRange) {
+      name
+      applications
+    }
+  }
+`;
+
+export const GET_JOB_TYPE_DISTRIBUTION = gql`
+  query GetJobTypeDistribution($timeRange: TimeRange, $dateRange: DateRangeInput) {
+    getJobTypeDistribution(timeRange: $timeRange, dateRange: $dateRange) {
+      name
+      value
+      color
+    }
+  }
+`;
+
+export const GET_JOB_APPLICANTS = gql`
+  query GetJobApplicants($jobId: ID!, $page: Int, $limit: Int) {
+    getJobApplicants(jobId: $jobId, page: $page, limit: $limit) {
+      data {
+        id
+        fullName
+        email
+        phone
+        resume
+        createdAt
+      }
+      total
+      page
+      limit
+      totalPages
     }
   }
 `;

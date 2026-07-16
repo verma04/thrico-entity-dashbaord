@@ -33,6 +33,13 @@ export interface poll {
   totalVotes: number;
   isVoted: boolean;
   votedOptionId: string;
+  addedBy?: string;
+  user?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    avatar?: string;
+  };
 }
 export interface userVoted {
   firstName: string;
