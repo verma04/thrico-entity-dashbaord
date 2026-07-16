@@ -13,6 +13,11 @@ function SponsorsLayout({ children }: { children: React.ReactNode }) {
         icon: <List size={18} />,
       },
       {
+        key: "categories",
+        label: `Categories`,
+        icon: <List size={18} />,
+      },
+      {
         key: "create",
         label: `Create Sponsor`,
         icon: <Plus size={18} />,

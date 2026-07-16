@@ -20,7 +20,15 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ImageUploadWithCrop } from "@/components/ui/image-upload-with-crop";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useCreateSponsor, useUpdateSponsor } from "@/graphql/actions/sponsors";
+import { useGetSponsorCategories } from "@/graphql/actions/sponsorCategories";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import {
   ChevronRight,
@@ -51,6 +59,7 @@ const validationSchema = Yup.object().shape({
     })
     .nullable(),
   isActive: Yup.boolean().required("Status is required"),
+  categoryId: Yup.string().nullable(),
 });
 
 export default function SponsorForm({ initialData, isEdit }: SponsorFormProps) {
@@ -59,11 +68,14 @@ export default function SponsorForm({ initialData, isEdit }: SponsorFormProps) {
   const [updateSponsor, { loading: updating }] = useUpdateSponsor();
   const [imageFile, setImageFile] = useState<File | null>(null);
 
+  const { data: categoriesData } = useGetSponsorCategories();
+
   const initialValues = {
     title: initialData?.title || "",
     description: initialData?.description || "",
     externalUrl: initialData?.externalUrl || "",
     isActive: initialData?.isActive ?? true,
+    categoryId: initialData?.categoryId || "",
   };
 
   const handleSubmit = async (values: typeof initialValues) => {
@@ -78,6 +90,7 @@ export default function SponsorForm({ initialData, isEdit }: SponsorFormProps) {
         description: values.description,
         externalUrl: values.externalUrl,
         isActive: values.isActive,
+        categoryId: values.categoryId || null,
       };
 
       if (imageFile) {
@@ -252,6 +265,31 @@ export default function SponsorForm({ initialData, isEdit }: SponsorFormProps) {
                               {errors.externalUrl}
                             </div>
                           )}
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium">Category</Label>
+                          <Select
+                            value={values.categoryId}
+                            onValueChange={(val) =>
+                              setFieldValue("categoryId", val === "none" ? "" : val)
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a category" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="none">None</SelectItem>
+                              {categoriesData?.getSponsorCategories?.map((cat: any) => (
+                                <SelectItem key={cat.id} value={cat.id}>
+                                  {cat.title}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <p className="text-xs text-muted-foreground">
+                            Assign this sponsor to a specific category.
+                          </p>
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border">

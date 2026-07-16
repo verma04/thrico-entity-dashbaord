@@ -10,6 +10,11 @@ export const GET_SPONSORS = gql`
       externalUrl
       displayOrder
       entityId
+      categoryId
+      category {
+        id
+        title
+      }
       isActive
       createdAt
       updatedAt
@@ -27,6 +32,11 @@ export const GET_SPONSOR = gql`
       externalUrl
       displayOrder
       entityId
+      categoryId
+      category {
+        id
+        title
+      }
       isActive
       createdAt
       updatedAt

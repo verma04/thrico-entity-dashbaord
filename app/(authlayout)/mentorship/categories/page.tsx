@@ -3,7 +3,6 @@
 import { withModulePermission } from "@/components/hoc/with-module-permission";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 
-
 import React, { useState } from "react";
 import {
   useGetMentorCategories,
@@ -77,6 +76,7 @@ function CategoryDialog({
   editingCategory,
   isLoading,
   onSave,
+  singularName,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -470,5 +470,5 @@ function MentorCategoriesPage() {
 
 export default withSubscriptionCheck(
   withModulePermission(MentorCategoriesPage, "MENTORSHIP", "canRead"),
-  "mentorship"
+  "mentorship",
 );
