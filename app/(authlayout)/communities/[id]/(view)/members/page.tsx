@@ -40,7 +40,16 @@ import {
 } from "lucide-react";
 import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
 import { useToast } from "@/components/ui/use-toast";
-import { format } from "date-fns";
+import moment from "moment";
+
+/** Safely format a createdAt value (Unix-ms timestamp or ISO string) using moment. */
+function safeParseMemberDate(value: any): string {
+  if (!value) return "Unknown";
+  const m = /^\d+$/.test(String(value))
+    ? moment(Number(value))
+    : moment(value);
+  return m.isValid() ? m.format("MMM D, YYYY") : "Unknown";
+}
 import {
   getCommunityMembers,
   getCommunityMemberRequests,
@@ -243,10 +252,7 @@ export default function MembersPage() {
                             </span>
                           </UserProfileHoverCard>
                           <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mt-0.5">
-                            Joined{" "}
-                            {member.createdAt
-                              ? format(new Date(Number(member.createdAt)), "MMM d, yyyy")
-                              : "Unknown"}
+                            Joined {safeParseMemberDate(member.createdAt)}
                           </p>
                         </div>
 
@@ -375,10 +381,7 @@ export default function MembersPage() {
                           </span>
                         </UserProfileHoverCard>
                         <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mt-0.5">
-                          Requested{" "}
-                          {request.createdAt
-                            ? format(new Date(Number(request.createdAt)), "MMM d, yyyy")
-                            : "Unknown"}
+                          Requested {safeParseMemberDate(request.createdAt)}
                         </p>
                       </div>
 
