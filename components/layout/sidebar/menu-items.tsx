@@ -614,25 +614,25 @@ export const modules = [
       },
     ],
   },
-  {
-    key: "Media Gallery",
-    label: "Media Gallery",
-    path: "/media-gallery",
-    isMobileOnly: true,
-    icon: <Images size={18} />,
-    children: [
-      {
-        key: "mg-albums",
-        label: "Albums",
-        path: "/media-gallery",
-      },
-      {
-        key: "mg-settings",
-        label: "Settings",
-        path: "/media-gallery/settings",
-      },
-    ],
-  },
+  // {
+  //   key: "Media Gallery",
+  //   label: "Media Gallery",
+  //   path: "/media-gallery",
+  //   isMobileOnly: true,
+  //   icon: <Images size={18} />,
+  //   children: [
+  //     {
+  //       key: "mg-albums",
+  //       label: "Albums",
+  //       path: "/media-gallery",
+  //     },
+  //     {
+  //       key: "mg-settings",
+  //       label: "Settings",
+  //       path: "/media-gallery/settings",
+  //     },
+  //   ],
+  // },
 ];
 
 // --- 5. ADMIN SETTINGS ---

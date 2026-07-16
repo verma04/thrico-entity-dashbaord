@@ -75,9 +75,11 @@ function SkillDialog({
   editingSkill,
   isLoading,
   onSave,
+  singularName,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  editingSkill: MentorSkill | null;
   isLoading: boolean;
   onSave: (values: { title: string }) => void;
   singularName: string;
@@ -156,6 +158,7 @@ function SkillsGrid({
   isLoading,
   onEdit,
   onDelete,
+  singularName,
 }: {
   skills: MentorSkill[];
   isLoading: boolean;

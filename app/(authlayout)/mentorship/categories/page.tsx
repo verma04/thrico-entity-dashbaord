@@ -159,6 +159,8 @@ function CategoriesGrid({
   isLoading,
   onEdit,
   onDelete,
+  moduleName,
+  singularName,
 }: {
   categories: MentorCategory[];
   isLoading: boolean;
