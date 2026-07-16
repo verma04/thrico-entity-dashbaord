@@ -270,7 +270,7 @@ export default function SponsorForm({ initialData, isEdit }: SponsorFormProps) {
                         <div className="space-y-2">
                           <Label className="text-sm font-medium">Category</Label>
                           <Select
-                            value={values.categoryId}
+                            value={values.categoryId || "none"}
                             onValueChange={(val) =>
                               setFieldValue("categoryId", val === "none" ? "" : val)
                             }
