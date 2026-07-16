@@ -103,8 +103,13 @@ export function UserProfileHoverCard({
   const currentEdu = educations[0];
 
   // Format joined date
-  const joinedDate = userDetails?.createdAt
-    ? format(new Date(parseInt(userDetails.createdAt)), "MMMM yyyy")
+  let parsedDate = null;
+  if (userDetails?.createdAt) {
+    const rawDate = String(userDetails.createdAt);
+    parsedDate = /^\d+$/.test(rawDate) ? new Date(parseInt(rawDate, 10)) : new Date(rawDate);
+  }
+  const joinedDate = parsedDate && !isNaN(parsedDate.getTime())
+    ? format(parsedDate, "MMMM yyyy")
     : null;
 
   return (
