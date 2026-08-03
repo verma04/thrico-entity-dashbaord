@@ -107,6 +107,7 @@ export default function ModuleManagement() {
         m.showInWebNavigationSortNumber !==
           orig.showInWebNavigationSortNumber ||
         m.customName !== orig.customName ||
+        m.customIcon !== orig.customIcon ||
         m.subtitle !== orig.subtitle
       ) {
         return true;
@@ -121,11 +122,7 @@ export default function ModuleManagement() {
   };
 
   React.useEffect(() => {
-    if (
-      !modulesInitialized &&
-      subscription &&
-      Array.isArray(subscription.modules)
-    ) {
+    if (subscription && Array.isArray(subscription.modules)) {
       const parsedModules = subscription.modules.map((m: any) => ({
         id: m.id,
         name: m.name,
@@ -133,7 +130,8 @@ export default function ModuleManagement() {
         required: m.required ?? false,
         showInMobileNavigation: m.showInMobileNavigation ?? false,
         showInWebNavigation: m.showInWebNavigation ?? false,
-        icon: m.icon ?? null,
+        icon: m.customIcon || m.icon || null,
+        customIcon: m.customIcon ?? null,
         showInMobileNavigationSortNumber:
           typeof m.showInMobileNavigationSortNumber === "number"
             ? m.showInMobileNavigationSortNumber
@@ -152,7 +150,7 @@ export default function ModuleManagement() {
       setOriginalModules(parsedModules);
       setModulesInitialized(true);
     }
-  }, [subscription, modulesInitialized]);
+  }, [subscription]);
 
   const toggleModule = (id: string) => {
     if (userRole === "directory") return;
@@ -204,6 +202,12 @@ export default function ModuleManagement() {
     );
   };
 
+  const changeCustomIcon = (id: string, value: string) => {
+    setModules((prev) =>
+      prev.map((m) => (m.id === id ? { ...m, customIcon: value, icon: value } : m)),
+    );
+  };
+
   const changeSubtitle = (id: string, value: string) => {
     setModules((prev) =>
       prev.map((m) => (m.id === id ? { ...m, subtitle: value } : m)),
@@ -226,10 +230,12 @@ export default function ModuleManagement() {
         m.showInWebNavigationSortNumber ?? undefined,
       isPopular: m.isPopular ?? null,
       customName: m.customName ?? null,
+      customIcon: m.customIcon ?? m.icon ?? null,
       subtitle: m.subtitle ?? null,
+      isPublicFacing: m.isPublicFacing ?? false,
     }));
     try {
-      const response = await updateEntityModule({ 
+      const response = await updateEntityModule({
         variables: { input },
         refetchQueries: ["CheckEntitySubscription"],
       });
@@ -482,6 +488,7 @@ export default function ModuleManagement() {
             onToggleNavigation={toggleNavigation}
             onToggleWebNavigation={toggleWebNavigation}
             onChangeCustomName={changeCustomName}
+            onChangeCustomIcon={changeCustomIcon}
             onChangeSubtitle={changeSubtitle}
           />
         )}

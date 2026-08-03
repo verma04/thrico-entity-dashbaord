@@ -10,6 +10,7 @@ export interface ModuleItem {
   showInMobileNavigationSortNumber?: number;
   showInWebNavigationSortNumber?: number;
   customName?: string | null;
+  customIcon?: string | null;
   subtitle?: string | null;
   isPublicFacing: boolean;
   canRename: boolean;

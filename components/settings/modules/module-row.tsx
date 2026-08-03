@@ -1,5 +1,5 @@
 import React from "react";
-import { Star, Globe, Lock, Pencil, Eye, ChevronLeft } from "lucide-react";
+import { Star, Globe, Lock, Pencil, Eye, ChevronLeft, Smartphone, Monitor } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
@@ -14,7 +14,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { getNavIcon } from "./utils";
+import { getNavIcon, POPULAR_LUCIDE_ICONS, ALL_LUCIDE_ICONS } from "./utils";
 import type { ModuleItem } from "./types";
 
 interface ModuleRowProps {
@@ -26,6 +26,7 @@ interface ModuleRowProps {
   onToggleNavigation: (id: string) => void;
   onToggleWebNavigation: (id: string) => void;
   onChangeCustomName: (id: string, value: string) => void;
+  onChangeCustomIcon?: (id: string, value: string) => void;
   onChangeSubtitle: (id: string, value: string) => void;
 }
 
@@ -38,21 +39,50 @@ export default function ModuleRow({
   onToggleNavigation,
   onToggleWebNavigation,
   onChangeCustomName,
+  onChangeCustomIcon,
   onChangeSubtitle,
 }: ModuleRowProps) {
+  const [iconSearch, setIconSearch] = React.useState("");
+  const [displayCount, setDisplayCount] = React.useState(60);
+
+  React.useEffect(() => {
+    setDisplayCount(60);
+  }, [iconSearch]);
+
+  const allFilteredIcons = React.useMemo(() => {
+    if (!iconSearch.trim()) return ALL_LUCIDE_ICONS;
+    const query = iconSearch.toLowerCase();
+    return ALL_LUCIDE_ICONS.filter((name) =>
+      name.toLowerCase().includes(query)
+    );
+  }, [iconSearch]);
+
+  const visibleIcons = React.useMemo(() => {
+    return allFilteredIcons.slice(0, displayCount);
+  }, [allFilteredIcons, displayCount]);
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+    if (scrollHeight - scrollTop <= clientHeight + 40) {
+      if (displayCount < allFilteredIcons.length) {
+        setDisplayCount((prev) => Math.min(prev + 60, allFilteredIcons.length));
+      }
+    }
+  };
+
   return (
     <div
       className={cn(
-        "grid grid-cols-[2px_1.25fr_1.25fr_1.25fr_auto_auto_auto_auto] items-center gap-4 px-3 py-3 rounded-lg border transition-all duration-200 group",
+        "flex flex-col lg:flex-row lg:items-center gap-5 px-5 py-4 rounded-xl border bg-card transition-all duration-200 group relative",
         module.enabled
-          ? "border-transparent hover:bg-muted/40 hover:border-border/60"
-          : "border-transparent bg-muted/20 opacity-60 hover:opacity-80",
+          ? "border-border/60 hover:bg-muted/30 hover:border-border hover:shadow-sm"
+          : "border-border/30 bg-muted/10 opacity-70 hover:opacity-100",
       )}
     >
       {/* Left accent bar */}
       <div
         className={cn(
-          "w-0.5 h-8 rounded-full transition-colors",
+          "absolute left-0 top-3 bottom-3 w-1 rounded-r-full transition-colors",
           !module.enabled
             ? "bg-muted-foreground/20"
             : module.isPublicFacing
@@ -61,42 +91,125 @@ export default function ModuleRow({
         )}
       />
 
-      {/* Module info */}
-      <div className="flex items-center gap-3 min-w-0 group/info">
-        <div
-          className={cn(
-            "h-8 w-8 rounded-lg border flex items-center justify-center shrink-0 transition-colors",
-            module.enabled
-              ? module.isPublicFacing
-                ? "bg-emerald-50 border-emerald-200/60"
-                : "bg-muted border-border/60"
-              : "bg-muted/50 border-border/30",
-          )}
-        >
-          {getNavIcon(module.icon, module.enabled)}
-        </div>
-        <div className="min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
+      {/* Left Section: Identity */}
+      <div className="flex items-center gap-4 min-w-[240px] pl-2">
+        <Popover>
+          <PopoverTrigger asChild>
+            <button
+              disabled={!module.enabled || userRole === "directory"}
+              className={cn(
+                "h-11 w-11 rounded-xl border flex items-center justify-center shrink-0 transition-colors relative group/icon cursor-pointer",
+                module.enabled
+                  ? module.isPublicFacing
+                    ? "bg-emerald-50 border-emerald-200 hover:border-emerald-400 shadow-sm"
+                    : "bg-muted border-border hover:border-foreground/30 shadow-sm"
+                  : "bg-muted/50 border-border/30 cursor-not-allowed",
+              )}
+              title="Click to customize icon"
+            >
+              <div className="scale-125">
+                {getNavIcon(module.customIcon || module.icon, module.enabled)}
+              </div>
+              {module.enabled && userRole !== "directory" && (
+                <div className="absolute inset-0 bg-background/80 rounded-xl flex items-center justify-center opacity-0 group-hover/icon:opacity-100 transition-opacity">
+                  <Pencil className="h-4 w-4 text-foreground" />
+                </div>
+              )}
+            </button>
+          </PopoverTrigger>
+          <PopoverContent className="w-80 p-3 space-y-3" align="start">
+            <div className="flex items-center justify-between">
+              <span className="text-[12px] font-semibold text-foreground">
+                Select Icon ({ALL_LUCIDE_ICONS.length}+ available)
+              </span>
+              {module.customIcon && (
+                <button
+                  onClick={() => onChangeCustomIcon?.(module.id, "")}
+                  className="text-[11px] text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Reset
+                </button>
+              )}
+            </div>
+
+            {/* Custom Icon Search / Name Input */}
+            <div className="relative">
+              <Input
+                placeholder={`Search ${ALL_LUCIDE_ICONS.length} icons (e.g. Sparkles, Users)...`}
+                value={iconSearch}
+                onChange={(e) => setIconSearch(e.target.value)}
+                className="h-8 text-[12px]"
+              />
+            </div>
+
+            {/* Apply custom typed icon name */}
+            {iconSearch.trim() && (
+              <div className="flex items-center justify-between p-2 rounded-md bg-muted/40 border">
+                <div className="flex items-center gap-2">
+                  <div className="h-6 w-6 rounded bg-card border flex items-center justify-center">
+                    {getNavIcon(iconSearch.trim(), true)}
+                  </div>
+                  <span className="text-[12px] font-mono truncate max-w-[140px]">{iconSearch.trim()}</span>
+                </div>
+                <button
+                  onClick={() => {
+                    onChangeCustomIcon?.(module.id, iconSearch.trim());
+                  }}
+                  className="text-[11px] font-medium bg-primary text-primary-foreground px-2 py-1 rounded hover:bg-primary/90 transition-colors"
+                >
+                  Use Icon
+                </button>
+              </div>
+            )}
+
+            {/* Icons Grid with Optimized Infinite Scroll */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+                <span>{iconSearch ? `Matching (${allFilteredIcons.length})` : "All Icons"}</span>
+                <span>{visibleIcons.length} / {allFilteredIcons.length}</span>
+              </div>
+              <div
+                onScroll={handleScroll}
+                className="grid grid-cols-6 gap-1 max-h-48 overflow-y-auto p-1 border rounded-md bg-muted/20"
+              >
+                {visibleIcons.map((iconName) => (
+                  <button
+                    key={iconName}
+                    onClick={() => {
+                      onChangeCustomIcon?.(module.id, iconName);
+                    }}
+                    className={cn(
+                      "h-8 w-8 rounded flex flex-col items-center justify-center transition-all hover:bg-card hover:shadow-sm border border-transparent",
+                      (module.customIcon || module.icon) === iconName &&
+                        "bg-primary/10 border-primary/40 text-primary shadow-sm"
+                    )}
+                    title={iconName}
+                  >
+                    {getNavIcon(iconName, true)}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
+
+        <div className="flex flex-col min-w-0">
+          <div className="flex items-center gap-2">
             <span
               className={cn(
-                "text-[13px] font-medium truncate transition-colors",
+                "text-[14px] font-bold tracking-tight truncate transition-colors",
                 module.enabled ? "text-foreground" : "text-muted-foreground",
               )}
             >
-              {module.customName || module.name}
+              {module.name}
             </span>
-            {module.customName && module.customName !== module.name && (
-              <span className="text-[10px] text-muted-foreground/50">
-                ({module.name})
-              </span>
-            )}
             <Popover>
               <PopoverTrigger asChild>
                 <button
-                  className="h-5 w-5 rounded-md flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground transition-colors opacity-0 group-hover/info:opacity-100"
+                  className="h-5 w-5 rounded-md flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground transition-colors opacity-0 group-hover:opacity-100"
                   title="Preview header"
                 >
-                  <Eye className="h-3 w-3" />
+                  <Eye className="h-3.5 w-3.5" />
                 </button>
               </PopoverTrigger>
               <PopoverContent
@@ -130,20 +243,21 @@ export default function ModuleRow({
               </PopoverContent>
             </Popover>
           </div>
-          <div className="flex items-center gap-1.5 mt-0.5">
+          
+          <div className="flex items-center gap-1.5 mt-1">
             {module.required && (
-              <span className="text-[9px] font-semibold text-amber-600 bg-amber-50 border border-amber-200/60 px-1.5 py-px rounded uppercase tracking-wide">
+              <span className="text-[9px] font-semibold text-amber-700 bg-amber-50 border border-amber-200/60 px-1.5 py-px rounded uppercase tracking-wide">
                 Required
               </span>
             )}
             {module.isPublicFacing ? (
-              <span className="text-[9px] font-medium text-emerald-600 flex items-center gap-0.5">
-                <Globe className="h-2.5 w-2.5" />
+              <span className="text-[10px] font-medium text-emerald-600 flex items-center gap-1">
+                <Globe className="h-3 w-3" />
                 Public
               </span>
             ) : (
-              <span className="text-[9px] font-medium text-slate-400 flex items-center gap-0.5">
-                <Lock className="h-2.5 w-2.5" />
+              <span className="text-[10px] font-medium text-slate-500 flex items-center gap-1">
+                <Lock className="h-3 w-3" />
                 Internal
               </span>
             )}
@@ -151,7 +265,7 @@ export default function ModuleRow({
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
-                    <Lock className="h-2.5 w-2.5 text-muted-foreground/30" />
+                    <Lock className="h-3 w-3 text-muted-foreground/40 ml-1" />
                   </TooltipTrigger>
                   <TooltipContent>Cannot rename this module</TooltipContent>
                 </Tooltip>
@@ -161,82 +275,66 @@ export default function ModuleRow({
         </div>
       </div>
 
-      {/* Custom Name Input */}
-      <div className="min-w-0 pr-4">
-        {module.canRename && userRole !== "directory" ? (
-          <div className="relative group/input">
+      {/* Middle Section: Configuration Inputs */}
+      <div className="flex-1 min-w-0 grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+        {/* Custom Name */}
+        <div className="relative group/input flex flex-col gap-1.5">
+          <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest pl-2 flex items-center gap-1.5">
+            Display Name
+            <Pencil className="h-2.5 w-2.5 text-muted-foreground/30 opacity-0 group-hover/input:opacity-100 transition-opacity" />
+          </label>
+          {module.canRename && userRole !== "directory" ? (
             <Input
               value={module.customName ?? ""}
-              placeholder={module.name}
+              placeholder={`e.g. ${module.name}`}
               onChange={(e) => onChangeCustomName(module.id, e.target.value)}
               disabled={!module.enabled}
               className={cn(
-                "h-8 text-[13px] font-medium w-full transition-colors",
-                !module.enabled && "opacity-50",
+                "h-9 text-[13px] font-medium transition-all shadow-none",
+                "bg-transparent border-transparent hover:border-border/80 focus:bg-background focus:border-ring",
+                !module.enabled && "opacity-50 pointer-events-none",
               )}
             />
-            <Pencil className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground/30 opacity-0 group-hover/input:opacity-100 transition-opacity pointer-events-none" />
-          </div>
-        ) : (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="h-8 flex items-center px-3 rounded-md bg-muted/30 border border-border/30 cursor-not-allowed">
-                  <span className="text-[12px] text-muted-foreground/50 truncate">
-                    {module.customName || module.name}
-                  </span>
-                  <Lock className="h-3 w-3 text-muted-foreground/30 ml-auto shrink-0" />
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                {userRole === "directory"
-                  ? "Insufficient permissions"
-                  : "Renaming is disabled for this module"}
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        )}
-      </div>
+          ) : (
+            <div className="h-9 flex items-center px-3 rounded-md bg-muted/20 border border-dashed border-border/40 cursor-not-allowed">
+              <span className="text-[12px] text-muted-foreground/50 truncate">
+                {module.customName || module.name}
+              </span>
+            </div>
+          )}
+        </div>
 
-      {/* Subtitle Input */}
-      <div className="min-w-0 pr-4">
-        {module.canRename && userRole !== "directory" ? (
-          <div className="relative group/input">
+        {/* Subtitle */}
+        <div className="relative group/input flex flex-col gap-1.5">
+          <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest pl-2 flex items-center gap-1.5">
+            Subtitle
+            <Pencil className="h-2.5 w-2.5 text-muted-foreground/30 opacity-0 group-hover/input:opacity-100 transition-opacity" />
+          </label>
+          {module.canRename && userRole !== "directory" ? (
             <Input
               value={module.subtitle ?? ""}
-              placeholder="Module subtitle"
+              placeholder="Add description..."
               onChange={(e) => onChangeSubtitle(module.id, e.target.value)}
               disabled={!module.enabled}
               className={cn(
-                "h-8 text-[13px] font-medium w-full transition-colors",
-                !module.enabled && "opacity-50",
+                "h-9 text-[13px] font-medium transition-all shadow-none",
+                "bg-transparent border-transparent hover:border-border/80 focus:bg-background focus:border-ring",
+                !module.enabled && "opacity-50 pointer-events-none",
               )}
             />
-            <Pencil className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground/30 opacity-0 group-hover/input:opacity-100 transition-opacity pointer-events-none" />
-          </div>
-        ) : (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="h-8 flex items-center px-3 rounded-md bg-muted/30 border border-border/30 cursor-not-allowed">
-                  <span className="text-[12px] text-muted-foreground/50 truncate">
-                    {module.subtitle || "No subtitle"}
-                  </span>
-                  <Lock className="h-3 w-3 text-muted-foreground/30 ml-auto shrink-0" />
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                {userRole === "directory"
-                  ? "Insufficient permissions"
-                  : "Renaming is disabled for this module"}
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        )}
+          ) : (
+            <div className="h-9 flex items-center px-3 rounded-md bg-muted/20 border border-dashed border-border/40 cursor-not-allowed">
+              <span className="text-[12px] text-muted-foreground/50 truncate">
+                {module.subtitle || "No subtitle"}
+              </span>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Popular toggle */}
-      <div className="w-16 flex justify-center">
+      {/* Right Section: Actions Box */}
+      <div className="flex items-center gap-1.5 bg-muted/30 p-1.5 rounded-xl border border-border/50 shrink-0 w-full sm:w-auto overflow-x-auto">
+        {/* Popular Toggle */}
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -247,168 +345,132 @@ export default function ModuleRow({
                 }}
                 disabled={!module.enabled}
                 className={cn(
-                  "h-7 w-7 rounded-md flex items-center justify-center transition-all",
+                  "flex flex-col items-center justify-center gap-1 h-[42px] w-[52px] rounded-lg transition-all border",
                   module.isPopular
-                    ? "text-amber-500 bg-amber-50 border border-amber-200 shadow-sm shadow-amber-100"
-                    : "text-muted-foreground/30 hover:text-amber-400 hover:bg-amber-50/50 border border-transparent hover:border-amber-100",
+                    ? "bg-amber-50 border-amber-200 text-amber-500 shadow-sm"
+                    : "bg-transparent border-transparent text-muted-foreground/50 hover:bg-muted hover:text-foreground",
                   !module.enabled && "opacity-40 cursor-not-allowed",
                 )}
               >
-                <Star
-                  className="h-3.5 w-3.5"
-                  fill={module.isPopular ? "currentColor" : "none"}
-                />
+                <Star className="h-4 w-4" fill={module.isPopular ? "currentColor" : "none"} />
+                <span className="text-[9px] font-medium leading-none">Featured</span>
               </button>
             </TooltipTrigger>
-            <TooltipContent>
-              {!module.enabled
-                ? "Enable module first"
-                : module.isPopular
-                  ? "Remove from popular"
-                  : "Mark as popular"}
-            </TooltipContent>
+            <TooltipContent>{!module.enabled ? "Enable module first" : module.isPopular ? "Remove from featured" : "Feature this module"}</TooltipContent>
           </Tooltip>
         </TooltipProvider>
-      </div>
 
-      {/* Enabled toggle */}
-      <div className="w-16 flex justify-center">
+        <div className="w-px h-6 bg-border mx-1"></div>
+
+        {/* Mobile Nav Toggle */}
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className="flex flex-col items-center gap-0.5">
-                <Switch
-                  checked={module.enabled}
-                  onCheckedChange={() => onToggleModule(module.id)}
-                  disabled={module.required || userRole === "directory"}
-                  className="scale-90"
-                />
-                <span
-                  className={cn(
-                    "text-[9px] font-medium transition-colors",
-                    module.enabled
-                      ? "text-emerald-600"
-                      : "text-muted-foreground/40",
-                  )}
-                >
-                  {module.enabled ? "On" : "Off"}
-                </span>
-              </div>
+              <button
+                onClick={() => {
+                  if (!module.enabled || !module.isPublicFacing || userRole === "directory") return;
+                  if (!module.showInMobileNavigation && modules.filter((m) => m.showInMobileNavigation).length >= 3) return;
+                  onToggleNavigation(module.id);
+                }}
+                disabled={!module.enabled || !module.isPublicFacing || userRole === "directory" || (!module.showInMobileNavigation && modules.filter((m) => m.showInMobileNavigation).length >= 3)}
+                className={cn(
+                  "flex flex-col items-center justify-center gap-1 h-[42px] w-[52px] rounded-lg transition-all border",
+                  !module.isPublicFacing
+                    ? "opacity-30 cursor-not-allowed bg-transparent border-transparent"
+                    : module.showInMobileNavigation
+                      ? "bg-violet-50 border-violet-200 text-violet-600 shadow-sm"
+                      : "bg-transparent border-transparent text-muted-foreground/50 hover:bg-muted hover:text-foreground",
+                  (!module.enabled || userRole === "directory") && "opacity-40 cursor-not-allowed",
+                )}
+              >
+                <Smartphone className="h-4 w-4" />
+                <span className="text-[9px] font-medium leading-none">App</span>
+              </button>
             </TooltipTrigger>
             <TooltipContent>
-              {module.required
-                ? "Required — cannot disable"
-                : module.enabled
-                  ? "Click to disable this module"
-                  : "Click to enable this module"}
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </div>
-
-      {/* Mobile nav toggle */}
-      <div className="w-16 flex justify-center">
-        {!module.isPublicFacing ? (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <div className="h-7 w-10 rounded-md bg-muted/20 border border-dashed border-border/40 flex items-center justify-center">
-                  <span className="text-muted-foreground/30 text-[9px] font-semibold">
-                    N/A
-                  </span>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent className="max-w-[200px]">
-                Internal module — only visible in the admin dashboard, not in
-                member-facing navigation
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        ) : (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="flex flex-col items-center gap-0.5">
-                  <Switch
-                    checked={module.showInMobileNavigation}
-                    onCheckedChange={() => onToggleNavigation(module.id)}
-                    disabled={
-                      userRole === "directory" ||
-                      !module.enabled ||
-                      (!module.showInMobileNavigation &&
-                        modules.filter((m) => m.showInMobileNavigation)
-                          .length >= 3)
-                    }
-                    className="scale-90"
-                  />
-                  {module.showInMobileNavigation && (
-                    <span className="text-[9px] font-medium text-violet-500">
-                      Active
-                    </span>
-                  )}
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                {!module.enabled
+              {!module.isPublicFacing
+                ? "Internal modules cannot be added to mobile navigation"
+                : !module.enabled
                   ? "Enable module first"
                   : module.showInMobileNavigation
                     ? "Remove from mobile navigation"
-                    : modules.filter((m) => m.showInMobileNavigation).length >=
-                        3
+                    : modules.filter((m) => m.showInMobileNavigation).length >= 3
                       ? "Maximum 3 mobile nav slots reached"
-                      : "Add to mobile app navigation bar"}
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        )}
-      </div>
+                      : "Add to mobile app navigation"}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
 
-      {/* Web nav toggle */}
-      <div className="w-16 flex justify-center">
-        {!module.isPublicFacing ? (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <div className="h-7 w-10 rounded-md bg-muted/20 border border-dashed border-border/40 flex items-center justify-center">
-                  <span className="text-muted-foreground/30 text-[9px] font-semibold">
-                    N/A
-                  </span>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent className="max-w-[200px]">
-                Internal module — only visible in the admin dashboard, not in
-                member-facing navigation
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        ) : (
+        {/* Web Nav Toggle */}
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => {
+                  if (!module.enabled || !module.isPublicFacing || userRole === "directory") return;
+                  onToggleWebNavigation(module.id);
+                }}
+                disabled={!module.enabled || !module.isPublicFacing || userRole === "directory"}
+                className={cn(
+                  "flex flex-col items-center justify-center gap-1 h-[42px] w-[52px] rounded-lg transition-all border",
+                  !module.isPublicFacing
+                    ? "opacity-30 cursor-not-allowed bg-transparent border-transparent"
+                    : module.showInWebNavigation
+                      ? "bg-blue-50 border-blue-200 text-blue-600 shadow-sm"
+                      : "bg-transparent border-transparent text-muted-foreground/50 hover:bg-muted hover:text-foreground",
+                  (!module.enabled || userRole === "directory") && "opacity-40 cursor-not-allowed",
+                )}
+              >
+                <Monitor className="h-4 w-4" />
+                <span className="text-[9px] font-medium leading-none">Web</span>
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>
+              {!module.isPublicFacing
+                ? "Internal modules cannot be added to web navigation"
+                : !module.enabled
+                  ? "Enable module first"
+                  : module.showInWebNavigation
+                    ? "Remove from web sidebar"
+                    : "Add to website sidebar navigation"}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+
+        <div className="w-px h-6 bg-border mx-1"></div>
+
+        {/* Main Status Switch */}
+        <div className="flex items-center px-2 py-1">
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="flex flex-col items-center gap-0.5">
+                <div className="flex flex-col items-center gap-1">
                   <Switch
-                    checked={module.showInWebNavigation}
-                    onCheckedChange={() => onToggleWebNavigation(module.id)}
-                    disabled={userRole === "directory" || !module.enabled}
-                    className="scale-90"
+                    checked={module.enabled}
+                    onCheckedChange={() => onToggleModule(module.id)}
+                    disabled={module.required || userRole === "directory"}
+                    className="data-[state=checked]:bg-emerald-500"
                   />
-                  {module.showInWebNavigation && (
-                    <span className="text-[9px] font-medium text-blue-500">
-                      Active
-                    </span>
-                  )}
+                  <span
+                    className={cn(
+                      "text-[9px] font-bold uppercase tracking-wide transition-colors",
+                      module.enabled ? "text-emerald-600" : "text-muted-foreground",
+                    )}
+                  >
+                    {module.enabled ? "Enabled" : "Disabled"}
+                  </span>
                 </div>
               </TooltipTrigger>
               <TooltipContent>
-                {!module.enabled
-                  ? "Enable module first"
-                  : module.showInWebNavigation
-                    ? "Remove from website sidebar"
-                    : "Add to website sidebar navigation"}
+                {module.required
+                  ? "Required — cannot disable"
+                  : module.enabled
+                    ? "Click to disable this module"
+                    : "Click to enable this module"}
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
-        )}
+        </div>
       </div>
     </div>
   );

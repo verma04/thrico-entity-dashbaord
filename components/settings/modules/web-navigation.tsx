@@ -94,7 +94,7 @@ const WebNavigation: React.FC<WebNavigationProps> = ({
                   {navigationModules.map((module) => (
                     <div key={module.id} className="flex items-start gap-3 px-3 py-2 rounded-md text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors">
                       <div className="mt-0.5">
-                        {getNavIcon(module.icon)}
+                        {getNavIcon(module.customIcon || module.icon)}
                       </div>
                       <div className="flex flex-col min-w-0">
                         <span className="text-[13px] font-medium flex items-baseline gap-1.5">
@@ -184,7 +184,7 @@ const WebNavigation: React.FC<WebNavigationProps> = ({
                               {/* Icon + name */}
                               <div className="flex items-center gap-2.5 flex-1 min-w-0">
                                 <div className="h-6 w-6 rounded-md bg-card border border-border/80 flex items-center justify-center shrink-0">
-                                  {getNavIcon(module.icon)}
+                                  {getNavIcon(module.customIcon || module.icon)}
                                 </div>
                                 <div className="flex flex-col min-w-0">
                                   <span className="text-[13px] font-medium text-foreground truncate flex items-baseline gap-1.5">

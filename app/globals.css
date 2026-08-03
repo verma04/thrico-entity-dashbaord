@@ -39,7 +39,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-mona-sans), var(--font-geist-sans), sans-serif;
+  --font-sans: Figtree, "Figtree Fallback", var(--font-figtree), sans-serif;
   --font-mono: var(--font-geist-mono);
   --font-avant-garde: var(--font-avant-garde), sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
@@ -177,10 +177,10 @@
 }
 
 div {
-  font-family: var(--font-mona-sans), var(--font-avant-garde), sans-serif;
+  font-family: Figtree, "Figtree Fallback", var(--font-figtree), sans-serif;
 }
 body {
-  font-family: var(--font-mona-sans), var(--font-avant-garde), sans-serif;
+  font-family: Figtree, "Figtree Fallback", var(--font-figtree), sans-serif;
   letter-spacing: -0.02em;
 }
 @layer base {

@@ -182,6 +182,7 @@ export interface SubscriptionDetails {
     enabled: boolean;
     isPopular: boolean;
     customName?: string | null;
+    customIcon?: string | null;
     isPublicFacing?: boolean;
     canRename?: boolean;
   }[];
@@ -223,7 +224,9 @@ export interface InputUpdateEntityModule {
   showInWebNavigationSortNumber?: number;
   isPopular: boolean;
   customName?: string | null;
+  customIcon?: string | null;
   subtitle?: string | null;
+  isPublicFacing?: boolean;
 }
 
 export interface UpdateEntityModuleResponse {

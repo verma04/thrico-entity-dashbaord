@@ -257,6 +257,7 @@ export const CHECK_ENTITY_SUBSCRIPTIONS = gql`
         showInMobileNavigationSortNumber
         showInWebNavigationSortNumber
         customName
+        customIcon
         isPopular
         isPublicFacing
         canRename

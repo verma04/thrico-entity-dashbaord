@@ -1,9 +1,16 @@
+import { Figtree } from "next/font/google";
 import "./globals.css";
 import { ApolloWrapper } from "@/graphql/hoc/ApolloWrapper";
 import type { Metadata } from "next";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { BrandStyles } from "@/components/layout/brand-styles";
+
+const figtree = Figtree({
+  subsets: ["latin"],
+  variable: "--font-figtree",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: {
@@ -70,9 +77,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className="font-sans antialiased"
-      >
+      <body className={`${figtree.className} ${figtree.variable} antialiased`}>
         <Toaster position="top-right" />
         <ThemeProvider
           attribute="class"

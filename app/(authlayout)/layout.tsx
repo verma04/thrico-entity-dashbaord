@@ -19,7 +19,6 @@ import { useSearchParams } from "next/navigation";
 import { useDrawerStore } from "@/store/drawerStore";
 import { WelcomeCelebration } from "@/components/layout/welcome-celebration";
 import DomainStatusAlert from "@/components/layout/domain-status-alert";
-import "./auth-typography.css";
 
 function RootLayout({ children }: { children: React.ReactNode }) {
   const { data, loading } = useGetEntity();

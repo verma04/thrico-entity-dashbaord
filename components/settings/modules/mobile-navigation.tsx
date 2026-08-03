@@ -108,7 +108,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
                 {/* Dynamic slots */}
                 {navigationModules.map((module) => (
                   <NavItem key={module.id} label={module.customName ? `${module.customName} (${module.name})` : module.name}>
-                    {getNavIcon(module.icon)}
+                    {getNavIcon(module.customIcon || module.icon)}
                   </NavItem>
                 ))}
 
@@ -210,7 +210,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
                               {/* Icon + name */}
                               <div className="flex items-center gap-2.5 flex-1 min-w-0">
                                 <div className="h-6 w-6 rounded-md bg-card border border-border/80 flex items-center justify-center shrink-0">
-                                  {getNavIcon(module.icon)}
+                                  {getNavIcon(module.customIcon || module.icon)}
                                 </div>
                                 <div className="flex flex-col min-w-0">
                                   <span className="text-[13px] font-medium text-foreground truncate flex items-baseline gap-1.5">
