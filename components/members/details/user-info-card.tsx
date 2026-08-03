@@ -135,7 +135,7 @@ export function UserInfoCard({ member }: { member: any }) {
         <div className="h-32 relative">
           {user.cover ? (
             <img
-              src={`https://cdn.thrico.network/${user.cover}`}
+              src={`${process.env.NEXT_PUBLIC_CDN_URL}/${user.cover}`}
               alt="Cover"
               className="w-full h-full object-cover"
             />
@@ -154,7 +154,7 @@ export function UserInfoCard({ member }: { member: any }) {
                 className="h-24 w-24 border-4 border-background shadow-lg rounded-full"
               >
                 <AvatarImage
-                  src={`https://cdn.thrico.network/${user.avatar}`}
+                  src={`${process.env.NEXT_PUBLIC_CDN_URL}/${user.avatar}`}
                   alt={user.firstName}
                 />
                 <AvatarFallback className="text-xl font-bold bg-muted text-muted-foreground">

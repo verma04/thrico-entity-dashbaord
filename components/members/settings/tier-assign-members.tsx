@@ -111,7 +111,7 @@ export default function TierAssignMembers({ tierId, onAssigned }: TierAssignMemb
                     >
                       <div className="flex items-center gap-3">
                         <Avatar className="h-8 w-8">
-                          <AvatarImage src={user?.avatar ? `https://cdn.thrico.network/${user.avatar}` : ""} />
+                          <AvatarImage src={user?.avatar ? `${process.env.NEXT_PUBLIC_CDN_URL}/${user.avatar}` : ""} />
                           <AvatarFallback>{user?.firstName?.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <div className="flex flex-col">

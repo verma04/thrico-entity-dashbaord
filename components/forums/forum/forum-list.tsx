@@ -73,7 +73,7 @@ const columns: AdminTableColumn<discussionForm>[] = [
                   row.user.avatar
                     ? row.user.avatar.startsWith("http")
                       ? row.user.avatar
-                      : `https://cdn.thrico.network/${row.user.avatar}`
+                      : `${process.env.NEXT_PUBLIC_CDN_URL}/${row.user.avatar}`
                     : ""
                 }
                 alt={`${row.user.firstName} ${row.user.lastName}`}

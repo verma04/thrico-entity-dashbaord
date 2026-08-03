@@ -180,7 +180,7 @@ export function CommunityCreationForm({
                             <Image
                               src={
                                 imageUrl ||
-                                "https://cdn.thrico.network/default_communities.png"
+                                `${process.env.NEXT_PUBLIC_CDN_URL}/default_communities.png`
                               }
                               alt={`${singularName} cover`}
                               width={1536}

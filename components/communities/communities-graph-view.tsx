@@ -137,7 +137,7 @@ function NodeDetailPanel({
   if (info.type === "user") {
     const user = info.data;
     const avatarUrl = user.avatar
-      ? `https://cdn.thrico.network/${user.avatar}`
+      ? `${process.env.NEXT_PUBLIC_CDN_URL}/${user.avatar}`
       : "";
     const name =
       [user.firstName, user.lastName].filter(Boolean).join(" ") || "User";
@@ -235,7 +235,7 @@ function NodeDetailPanel({
             <div className="space-y-1 max-h-48 overflow-y-auto pr-1">
               {info.connectedUsers.map((user) => {
                 const avatarUrl = user.avatar
-                  ? `https://cdn.thrico.network/${user.avatar}`
+                  ? `${process.env.NEXT_PUBLIC_CDN_URL}/${user.avatar}`
                   : "";
                 const uname =
                   [user.firstName, user.lastName].filter(Boolean).join(" ") ||
@@ -308,7 +308,7 @@ export function CommunitiesGraphView() {
           [edge.user.firstName, edge.user.lastName].filter(Boolean).join(" ") ||
           "User";
         const avatarUrl = edge.user.avatar
-          ? `https://cdn.thrico.network/${edge.user.avatar}`
+          ? `${process.env.NEXT_PUBLIC_CDN_URL}/${edge.user.avatar}`
           : "";
         userNodes.set(userId, {
           data: {

@@ -88,7 +88,7 @@ function SortableSponsorRow({
       <div className="w-16 h-16 relative rounded-md overflow-hidden bg-gray-100 flex-shrink-0 border">
         {sponsor.image ? (
           <Image
-            src={sponsor.image.startsWith("http") ? sponsor.image : `https://cdn.thrico.network/${sponsor.image}`}
+            src={sponsor.image.startsWith("http") ? sponsor.image : `${process.env.NEXT_PUBLIC_CDN_URL}/${sponsor.image}`}
             alt={sponsor.title}
             fill
             className="object-contain"

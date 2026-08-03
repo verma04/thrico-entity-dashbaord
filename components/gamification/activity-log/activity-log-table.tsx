@@ -34,7 +34,7 @@ export function ActivityLogTable({ logs, isLoading }: ActivityLogTableProps) {
             <div className="flex items-center gap-3 cursor-pointer">
               <Avatar className="h-8 w-8 border border-border shrink-0">
                 <AvatarImage
-                  src={`https://cdn.thrico.network/${user.avatar}`}
+                  src={`${process.env.NEXT_PUBLIC_CDN_URL}/${user.avatar}`}
                   alt={user.firstName}
                   className="object-cover"
                 />
@@ -74,7 +74,7 @@ export function ActivityLogTable({ logs, isLoading }: ActivityLogTableProps) {
               <div className="flex items-center gap-1.5">
                 {log.badgeIcon && (
                   <img
-                    src={`https://cdn.thrico.network/${log.badgeIcon}`}
+                    src={`${process.env.NEXT_PUBLIC_CDN_URL}/${log.badgeIcon}`}
                     alt={log.badgeName}
                     className="h-4 w-4"
                   />

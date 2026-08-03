@@ -16,7 +16,7 @@ const BrandingPage = () => {
     if (entityData?.getEntity) {
       setCommunityImage(
         entityData.getEntity.logo
-          ? `https://cdn.thrico.network/${entityData.getEntity.logo}`
+          ? `${process.env.NEXT_PUBLIC_CDN_URL}/${entityData.getEntity.logo}`
           : "",
       );
     }

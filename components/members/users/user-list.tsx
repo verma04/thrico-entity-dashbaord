@@ -35,7 +35,7 @@ const columns: AdminTableColumn<UserDetail>[] = [
                   row.user.avatar
                     ? row.user.avatar.startsWith("http")
                       ? row.user.avatar
-                      : `https://cdn.thrico.network/${row.user.avatar}`
+                      : `${process.env.NEXT_PUBLIC_CDN_URL}/${row.user.avatar}`
                     : ""
                 }
                 alt={`${row.user.firstName} ${row.user.lastName}`}
@@ -168,7 +168,7 @@ const columns: AdminTableColumn<UserDetail>[] = [
                     row.referrer.user.avatar
                       ? row.referrer.user.avatar.startsWith("http")
                         ? row.referrer.user.avatar
-                        : `https://cdn.thrico.network/${row.referrer.user.avatar}`
+                        : `${process.env.NEXT_PUBLIC_CDN_URL}/${row.referrer.user.avatar}`
                       : ""
                   }
                   alt={row.referrer.user.firstName}

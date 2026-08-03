@@ -114,7 +114,7 @@ export default function TierMembersList({ tierId }: TierMembersListProps) {
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <Avatar className="h-8 w-8">
-                        <AvatarImage src={row.user?.avatar ? `https://cdn.thrico.network/${row.user.avatar}` : ""} />
+                        <AvatarImage src={row.user?.avatar ? `${process.env.NEXT_PUBLIC_CDN_URL}/${row.user.avatar}` : ""} />
                         <AvatarFallback>{row.user?.firstName?.charAt(0)}</AvatarFallback>
                       </Avatar>
                       <span className="text-sm font-medium">

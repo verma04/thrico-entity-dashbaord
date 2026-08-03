@@ -72,7 +72,7 @@ export const LogoImageEditor = ({
   const [uploadImage, { loading: uploading }] = useUploadImage({
     onCompleted: (data: any) => {
       if (data?.uploadImage) {
-        const cdnUrl = `https://cdn.thrico.network/${data.uploadImage}`;
+        const cdnUrl = `${process.env.NEXT_PUBLIC_CDN_URL}/${data.uploadImage}`;
         onImageUpdate(cdnUrl);
         toast({
           title: "Success",

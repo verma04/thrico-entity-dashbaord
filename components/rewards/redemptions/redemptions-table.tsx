@@ -74,7 +74,7 @@ export function RedemptionsTable({
         return (
           <div className="flex items-center gap-3">
             <Avatar className="h-8 w-8 ring-1 ring-border">
-              <AvatarImage src={`https://cdn.thrico.network/${user.avatar}`} />
+              <AvatarImage src={`${process.env.NEXT_PUBLIC_CDN_URL}/${user.avatar}`} />
               <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-bold">
                 {user.firstName[0]}
                 {user.lastName[0]}

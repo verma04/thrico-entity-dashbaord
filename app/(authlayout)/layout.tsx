@@ -2,7 +2,11 @@
 
 import React, { useEffect } from "react";
 
-import { useGetEntity, useGetUser, useCheckEntitySubscription } from "@/graphql/actions";
+import {
+  useGetEntity,
+  useGetUser,
+  useCheckEntitySubscription,
+} from "@/graphql/actions";
 import { useModuleStore } from "@/store/useModuleStore";
 import withAuth from "@/lib/withAuth";
 import NoSubscription from "@/components/subscription/no-subscription";
@@ -15,6 +19,7 @@ import { useSearchParams } from "next/navigation";
 import { useDrawerStore } from "@/store/drawerStore";
 import { WelcomeCelebration } from "@/components/layout/welcome-celebration";
 import DomainStatusAlert from "@/components/layout/domain-status-alert";
+import "./auth-typography.css";
 
 function RootLayout({ children }: { children: React.ReactNode }) {
   const { data, loading } = useGetEntity();
@@ -24,27 +29,51 @@ function RootLayout({ children }: { children: React.ReactNode }) {
   } = useGetUser();
 
   const { data: subData } = useCheckEntitySubscription();
-  const setCommunityModuleName = useModuleStore((state) => state.setCommunityModuleName);
+  const setCommunityModuleName = useModuleStore(
+    (state) => state.setCommunityModuleName,
+  );
   const setJobModuleName = useModuleStore((state) => state.setJobModuleName);
-  const setListingModuleName = useModuleStore((state) => state.setListingModuleName);
-  const setMomentModuleName = useModuleStore((state) => state.setMomentModuleName);
+  const setListingModuleName = useModuleStore(
+    (state) => state.setListingModuleName,
+  );
+  const setMomentModuleName = useModuleStore(
+    (state) => state.setMomentModuleName,
+  );
   const setShopModuleName = useModuleStore((state) => state.setShopModuleName);
-  const setForumModuleName = useModuleStore((state) => state.setForumModuleName);
+  const setForumModuleName = useModuleStore(
+    (state) => state.setForumModuleName,
+  );
   const setPollModuleName = useModuleStore((state) => state.setPollModuleName);
-  const setSurveyModuleName = useModuleStore((state) => state.setSurveyModuleName);
-  const setOfferModuleName = useModuleStore((state) => state.setOfferModuleName);
-  const setMentorshipModuleName = useModuleStore((state) => state.setMentorshipModuleName);
-  const setEventModuleName = useModuleStore((state) => state.setEventModuleName);
-  const setGamificationModuleName = useModuleStore((state) => state.setGamificationModuleName);
-  const setGamesCenterModuleName = useModuleStore((state) => state.setGamesCenterModuleName);
-  const setCurrencyModuleName = useModuleStore((state) => state.setCurrencyModuleName);
-  const setRewardsModuleName = useModuleStore((state) => state.setRewardsModuleName);
+  const setSurveyModuleName = useModuleStore(
+    (state) => state.setSurveyModuleName,
+  );
+  const setOfferModuleName = useModuleStore(
+    (state) => state.setOfferModuleName,
+  );
+  const setMentorshipModuleName = useModuleStore(
+    (state) => state.setMentorshipModuleName,
+  );
+  const setEventModuleName = useModuleStore(
+    (state) => state.setEventModuleName,
+  );
+  const setGamificationModuleName = useModuleStore(
+    (state) => state.setGamificationModuleName,
+  );
+  const setGamesCenterModuleName = useModuleStore(
+    (state) => state.setGamesCenterModuleName,
+  );
+  const setCurrencyModuleName = useModuleStore(
+    (state) => state.setCurrencyModuleName,
+  );
+  const setRewardsModuleName = useModuleStore(
+    (state) => state.setRewardsModuleName,
+  );
 
   useEffect(() => {
     if (subData?.checkEntitySubscription?.modules) {
       subData.checkEntitySubscription.modules.forEach((module: any) => {
         if (!module.customName) return;
-        
+
         switch (module.name?.toUpperCase()) {
           case "COMMUNITIES":
             setCommunityModuleName(module.customName);
@@ -113,7 +142,7 @@ function RootLayout({ children }: { children: React.ReactNode }) {
             <TrialBanner />
             <WelcomeCelebration />
             {/* <Toaster /> */}
-            <>
+            <div className="auth-typography-theme">
               {!data?.getEntity?.subscription?.status && <NoSubscription />}
               <SidebarLayout>
                 {data?.getEntity?.subscription?.status && <>{children}</>}
@@ -122,7 +151,7 @@ function RootLayout({ children }: { children: React.ReactNode }) {
               {/* Plan Drawer Component */}
               <PlanDrawer />
               <DomainStatusAlert />
-            </>
+            </div>
           </>
         </>
       )}

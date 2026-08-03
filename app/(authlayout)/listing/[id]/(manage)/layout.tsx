@@ -86,7 +86,7 @@ function ListingManagementLayout({ children }: { children: React.ReactNode }) {
                 {listing?.media && listing.media.length > 0 ? (
                   <div className="relative">
                     <img
-                      src={`https://cdn.thrico.network/${listing.media[0].url}`}
+                      src={`${process.env.NEXT_PUBLIC_CDN_URL}/${listing.media[0].url}`}
                       alt={listing.title || `${singularName} Image`}
                       className="w-11 h-11 rounded-xl object-cover border border-border/60 shadow-sm"
                     />

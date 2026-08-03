@@ -32,7 +32,7 @@ export function RewardPreviewSidebar({ formik, showStrategy = false }: RewardPre
               <div className="h-[200px] w-full bg-muted relative">
                 {formik.values.image ? (
                   <img
-                    src={formik.values.image.startsWith("http") ? formik.values.image : `https://cdn.thrico.network/${formik?.values?.image}`}
+                    src={formik.values.image.startsWith("http") ? formik.values.image : `${process.env.NEXT_PUBLIC_CDN_URL}/${formik?.values?.image}`}
                     alt="Preview"
                     className="h-full w-full object-cover"
                   />

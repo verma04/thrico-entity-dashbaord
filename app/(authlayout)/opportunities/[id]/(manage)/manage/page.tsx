@@ -84,7 +84,7 @@ const OpportunityManagePage = ({ params }: { params: Promise<{ id: string }> }) 
                 {opportunity.creator ? (
                   <div className="flex items-center gap-3">
                     <img 
-                      src={opportunity.creator.avatar?.startsWith("http") ? opportunity.creator.avatar : `https://cdn.thrico.network/${opportunity.creator.avatar}`} 
+                      src={opportunity.creator.avatar?.startsWith("http") ? opportunity.creator.avatar : `${process.env.NEXT_PUBLIC_CDN_URL}/${opportunity.creator.avatar}`} 
                       className="h-8 w-8 rounded-full bg-muted object-cover" 
                       alt=""
                     />

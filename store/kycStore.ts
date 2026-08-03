@@ -63,6 +63,6 @@ export const useKycFormStore = create<KycFormStore>((set) => ({
   setDomain: (domain) => set({ domain }),
   logo: null,
   setLogo: (logo) => set({ logo }),
-  logoPreview: "https://cdn.thrico.network/thricoLogo.png",
+  logoPreview: `${process.env.NEXT_PUBLIC_CDN_URL}/thricoLogo.png`,
   setLogoPreview: (logoPreview) => set({ logoPreview }),
 }));

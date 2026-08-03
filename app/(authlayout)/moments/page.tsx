@@ -415,7 +415,7 @@ function MomentsDashboardPage() {
                               <div className="h-10 w-8 bg-zinc-100 rounded overflow-hidden shrink-0">
                                 {moment.thumbnailUrl ? (
                                   <img
-                                    src={`https://cdn.thrico.network${moment.thumbnailUrl}`}
+                                    src={`${process.env.NEXT_PUBLIC_CDN_URL}${moment.thumbnailUrl}`}
                                     alt="Thumbnail"
                                     className="h-full w-full object-cover"
                                   />

@@ -885,7 +885,7 @@ export function MemberCreationForm({
                         <div className="h-24 w-24 rounded-2xl bg-muted flex items-center justify-center overflow-hidden">
                           {imageUrl ? (
                             <Image
-                              src={`https://cdn.thrico.network/${imageUrl}`}
+                              src={`${process.env.NEXT_PUBLIC_CDN_URL}/${imageUrl}`}
                               alt="Avatar"
                               width={96}
                               height={96}

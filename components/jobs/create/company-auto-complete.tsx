@@ -153,7 +153,7 @@ export function CompanyAutocompleteSelect({
                   <AvatarImage
                     src={
                       selectedValue.logo
-                        ? `https://cdn.thrico.network/${selectedValue.logo}`
+                        ? `${process.env.NEXT_PUBLIC_CDN_URL}/${selectedValue.logo}`
                         : "/placeholder.svg"
                     }
                   />
@@ -228,7 +228,7 @@ export function CompanyAutocompleteSelect({
                         <AvatarImage
                           src={
                             page.logo
-                              ? `https://cdn.thrico.network/${page.logo}`
+                              ? `${process.env.NEXT_PUBLIC_CDN_URL}/${page.logo}`
                               : "/placeholder.svg"
                           }
                         />

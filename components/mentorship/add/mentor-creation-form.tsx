@@ -249,7 +249,7 @@ export function MentorCreationForm({ loading, onFinish, onCancel, submitError, o
                               <div className="h-14 w-14 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0">
                                 {user?.user?.avatar ? (
                                   <Image
-                                    src={`https://cdn.thrico.network/${user?.user?.avatar}`}
+                                    src={`${process.env.NEXT_PUBLIC_CDN_URL}/${user?.user?.avatar}`}
                                     alt="Avatar"
                                     width={56}
                                     height={56}
@@ -321,7 +321,7 @@ export function MentorCreationForm({ loading, onFinish, onCancel, submitError, o
                           <div className="h-20 w-20 rounded-2xl overflow-hidden bg-slate-100 border-2 border-white shadow-xl rotate-[-2deg] group-hover:rotate-0 transition-transform">
                             {selectedUser?.user?.avatar ? (
                               <Image
-                                src={`https://cdn.thrico.network/${selectedUser?.user?.avatar}`}
+                                src={`${process.env.NEXT_PUBLIC_CDN_URL}/${selectedUser?.user?.avatar}`}
                                 alt="Avatar"
                                 width={80}
                                 height={80}
@@ -842,7 +842,7 @@ export function MentorCreationForm({ loading, onFinish, onCancel, submitError, o
                           <div className="h-28 w-28 rounded-[1.75rem] bg-indigo-50 flex items-center justify-center overflow-hidden border-2 border-slate-50 relative group-hover/avatar:shadow-inner transition-all">
                             {selectedUser?.user?.avatar ? (
                               <Image
-                                src={`https://cdn.thrico.network/${selectedUser?.user?.avatar}`}
+                                src={`${process.env.NEXT_PUBLIC_CDN_URL}/${selectedUser?.user?.avatar}`}
                                 alt="Avatar"
                                 width={112}
                                 height={112}

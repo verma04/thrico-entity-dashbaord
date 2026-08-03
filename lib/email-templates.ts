@@ -63,7 +63,7 @@ export const defaultBlock = (type: BlockType, id: string): BuilderBlock => ({
   href: "",
   spacerSize: "md",
   imageAlt: "",
-  logoUrl: type === "header" ? "https://cdn.thrico.network/thrico.png" : "",
+  logoUrl: type === "header" ? `${process.env.NEXT_PUBLIC_CDN_URL}/thrico.png` : "",
   secondaryContent: type === "header" ? "Premium Ecosystem Dashboard" : "",
 });
 

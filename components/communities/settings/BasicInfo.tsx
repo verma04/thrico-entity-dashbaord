@@ -46,7 +46,7 @@ const BasicInfo = ({ data }: { data: communityEntity }) => {
 
   const [cover, setCover] = useState<string>();
   const [imageUrl, setImageUrl] = useState<string>(
-    `https://cdn.thrico.network/${data?.cover}`
+    `${process.env.NEXT_PUBLIC_CDN_URL}/${data?.cover}`
   );
   return (
     <Form

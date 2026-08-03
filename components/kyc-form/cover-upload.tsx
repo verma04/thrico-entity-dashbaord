@@ -70,7 +70,7 @@ const CoverUpload: React.FC<CoverUploadProps> = ({ imageUrl, setImageUrl, setCov
                 <Image src={imageUrl || "/placeholder.svg"} alt="cover" fill className="object-contain" />
               ) : (
                 <Image
-                  src="https://cdn.thrico.network/defaultEventCover.png"
+                  src={`${process.env.NEXT_PUBLIC_CDN_URL}/defaultEventCover.png`}
                   alt="default cover"
                   fill
                   className="object-contain"

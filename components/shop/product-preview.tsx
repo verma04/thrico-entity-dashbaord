@@ -39,7 +39,7 @@ export function ProductPreview({ formData, imageUrl }: ProductPreviewProps) {
         ? [formData.image]
         : imageUrl
           ? [imageUrl]
-          : ["https://cdn.thrico.network/shop_product_clothing.png"];
+          : [`${process.env.NEXT_PUBLIC_CDN_URL}/shop_product_clothing.png`];
 
   const displayImage = resolveCdnUrl(images[currentImageIndex]);
   const currencySymbol = CURRENCY_SYMBOLS[formData.currency] || "$";

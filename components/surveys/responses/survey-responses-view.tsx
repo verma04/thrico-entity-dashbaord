@@ -89,7 +89,7 @@ export const SurveyResponsesView: React.FC<SurveyResponsesViewProps> = ({
         const avatarUrl = respondent?.avatar 
           ? respondent.avatar.startsWith("http") 
             ? respondent.avatar 
-            : `https://cdn.thrico.network/${respondent.avatar}`
+            : `${process.env.NEXT_PUBLIC_CDN_URL}/${respondent.avatar}`
           : "";
 
         return (
@@ -248,7 +248,7 @@ export const SurveyResponsesView: React.FC<SurveyResponsesViewProps> = ({
                     selectedResponse?.respondent?.avatar
                       ? selectedResponse.respondent.avatar.startsWith("http")
                         ? selectedResponse.respondent.avatar
-                        : `https://cdn.thrico.network/${selectedResponse.respondent.avatar}`
+                        : `${process.env.NEXT_PUBLIC_CDN_URL}/${selectedResponse.respondent.avatar}`
                       : ""
                   } 
                 />

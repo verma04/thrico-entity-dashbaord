@@ -111,9 +111,9 @@ export function RewardsGalleryTab({
                   {reward.image ? (
                     <img
                       src={
-                        reward.image?.startsWith("https://cdn.thrico.network/")
+                        reward.image?.startsWith(process.env.NEXT_PUBLIC_CDN_URL)
                           ? reward.image
-                          : `https://cdn.thrico.network/${reward.image}`
+                          : `${process.env.NEXT_PUBLIC_CDN_URL}/${reward.image}`
                       }
                       alt={reward.title}
                       className={cn(
@@ -268,7 +268,7 @@ export function RewardsGalleryTab({
                 <div className="h-14 w-14 rounded-xl bg-zinc-50 border border-border/60 overflow-hidden shrink-0 shadow-sm ring-1 ring-black/[0.03]">
                   {reward.image ? (
                     <img
-                      src={`https://cdn.thrico.network/${reward?.image}`}
+                      src={`${process.env.NEXT_PUBLIC_CDN_URL}/${reward?.image}`}
                       alt={reward.title}
                       className={cn(
                         "h-full w-full object-cover",

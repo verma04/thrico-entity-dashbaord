@@ -11,7 +11,7 @@ const PhonePreview = () => {
   return (
     <div className="w-[full] flex items-center justify-center ">
       <div className="w-[250px] mt-20 flex justify-center align-middle">
-        <Iphone src="https://cdn.thrico.network/mobile-preview.png"></Iphone>
+        <Iphone src={`${process.env.NEXT_PUBLIC_CDN_URL}/mobile-preview.png`}></Iphone>
       </div>
     </div>
   );

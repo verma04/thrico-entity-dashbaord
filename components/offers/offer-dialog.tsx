@@ -269,7 +269,7 @@ export function OfferDialog({
                     <Image
                       src={
                         imageUrl ||
-                        "https://cdn.thrico.network/defaultEventCover.png"
+                        `${process.env.NEXT_PUBLIC_CDN_URL}/defaultEventCover.png`
                       }
                       alt={`${singularName} cover`}
                       width={600}

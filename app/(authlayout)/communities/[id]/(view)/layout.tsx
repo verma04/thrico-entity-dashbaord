@@ -95,7 +95,7 @@ function CommunitiesLayout({
                 {community?.cover ? (
                   <div className="relative">
                     <img
-                      src={`https://cdn.thrico.network/${community.cover}`}
+                      src={`${process.env.NEXT_PUBLIC_CDN_URL}/${community.cover}`}
                       alt={community.title || "Community Cover"}
                       className="w-11 h-11 rounded-xl object-cover border border-border/60 shadow-sm"
                     />

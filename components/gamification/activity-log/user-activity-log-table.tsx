@@ -26,7 +26,7 @@ export function UserActivityLogTable({
           <div className="flex items-center gap-3">
             <Avatar className="h-8 w-8 border border-white shadow-sm shrink-0">
               <AvatarImage
-                src={`https://cdn.thrico.network/${user.avatar}`}
+                src={`${process.env.NEXT_PUBLIC_CDN_URL}/${user.avatar}`}
                 alt={user.firstName}
               />
               <AvatarFallback className="text-[10px] bg-primary/5 text-primary">
@@ -68,7 +68,7 @@ export function UserActivityLogTable({
               <div className="flex items-center gap-2">
                 {badgeIcon && (
                   <img
-                    src={`https://cdn.thrico.network/${badgeIcon}`}
+                    src={`${process.env.NEXT_PUBLIC_CDN_URL}/${badgeIcon}`}
                     alt={badgeName}
                     className="h-4 w-4"
                   />

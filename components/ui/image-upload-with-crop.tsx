@@ -211,7 +211,7 @@ export const ImageUploadWithCrop = ({
       if (data?.uploadImage) {
         const result = returnKeyOnly
           ? data.uploadImage
-          : `https://cdn.thrico.network/${data.uploadImage}`;
+          : `${process.env.NEXT_PUBLIC_CDN_URL}/${data.uploadImage}`;
         handleUploadSuccess(result, data.uploadImage);
       }
     },
@@ -523,7 +523,7 @@ export const ImageUploadWithCrop = ({
                 src={
                   currentImage?.startsWith("http") || currentImage?.startsWith("blob:") || currentImage?.startsWith("data:")
                     ? currentImage
-                    : `https://cdn.thrico.network/${currentImage}`
+                    : `${process.env.NEXT_PUBLIC_CDN_URL}/${currentImage}`
                 }
                 alt={label}
                 className={cn(

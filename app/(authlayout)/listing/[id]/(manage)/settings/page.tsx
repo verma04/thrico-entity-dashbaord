@@ -194,7 +194,7 @@ export default function ListingSettingsPage() {
                  uid: `media-${i}`,
                  name: "image",
                  url: m.url,
-                 thumbUrl: `https://cdn.thrico.network/${m.url}`
+                 thumbUrl: `${process.env.NEXT_PUBLIC_CDN_URL}/${m.url}`
               })),
             }}
             loading={updating}

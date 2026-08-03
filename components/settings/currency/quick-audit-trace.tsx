@@ -81,7 +81,7 @@ export function QuickAuditTrace() {
             const userInfo = tx.userBasicInfo || {};
             const initials = userInfo.firstName ? userInfo.firstName.charAt(0) : "U";
             const fullName = `${userInfo.firstName || ""} ${userInfo.lastName || ""}`.trim() || "Unknown User";
-            const avatarUrl = userInfo.avatar ? (userInfo.avatar.startsWith("http") ? userInfo.avatar : `https://cdn.thrico.network/${userInfo.avatar}`) : "";
+            const avatarUrl = userInfo.avatar ? (userInfo.avatar.startsWith("http") ? userInfo.avatar : `${process.env.NEXT_PUBLIC_CDN_URL}/${userInfo.avatar}`) : "";
 
             return (
               <div

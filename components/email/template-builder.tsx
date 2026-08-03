@@ -124,7 +124,7 @@ const defaultBlock = (type: BlockType, id: string): BuilderBlock => ({
   href: "",
   spacerSize: "md",
   imageAlt: "",
-  logoUrl: type === "header" ? "https://cdn.thrico.network/thrico.png" : "",
+  logoUrl: type === "header" ? `${process.env.NEXT_PUBLIC_CDN_URL}/thrico.png` : "",
   secondaryContent: type === "header" ? "Premium Ecosystem Dashboard" : "",
   iosUrl: type === "app_links" ? "" : undefined,
   androidUrl: type === "app_links" ? "" : undefined,
@@ -1106,14 +1106,14 @@ export default function TemplateBuilder({
   // ── Fetch entity logo and auto-populate header blocks ─────────────────────
   const { data: entityData } = useGetEntity();
   const entityLogoUrl = entityData?.getEntity?.logo
-    ? `https://cdn.thrico.network/${entityData.getEntity.logo}`
+    ? `${process.env.NEXT_PUBLIC_CDN_URL}/${entityData.getEntity.logo}`
     : undefined;
 
   useEffect(() => {
     if (!entityLogoUrl) return;
     setBlocks((prev) =>
       prev.map((b) =>
-        b.type === "header" && (!b.logoUrl || b.logoUrl === "https://cdn.thrico.network/thrico.png")
+        b.type === "header" && (!b.logoUrl || b.logoUrl === `${process.env.NEXT_PUBLIC_CDN_URL}/thrico.png`)
           ? { ...b, logoUrl: entityLogoUrl }
           : b
       )
@@ -1215,7 +1215,7 @@ export default function TemplateBuilder({
         switch (b.type) {
           case "header":
             blockHtml = `<div style="text-align:${b.align};padding:32px 0">
-              <img src="${b.logoUrl || "https://cdn.thrico.network/thrico.png"}" alt="Logo" style="height:40px;display:inline-block;margin-bottom:8px" />
+              <img src="${b.logoUrl || `${process.env.NEXT_PUBLIC_CDN_URL}/thrico.png`}" alt="Logo" style="height:40px;display:inline-block;margin-bottom:8px" />
               ${b.secondaryContent ? `<p style="margin:0;font-size:12px;color:#64748b;font-family:ui-sans-serif,system-ui,sans-serif">${b.secondaryContent}</p>` : ""}
             </div>`;
             break;

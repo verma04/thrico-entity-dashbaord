@@ -41,7 +41,7 @@ export function MentorsTable({
             <div className="flex items-center gap-4">
               <Avatar className="h-10 w-10 border border-border shadow-sm group-hover:scale-105 transition-transform shrink-0">
                 <AvatarImage
-                  src={`https://cdn.thrico.network/${mentor.avatar}`}
+                  src={`${process.env.NEXT_PUBLIC_CDN_URL}/${mentor.avatar}`}
                   alt={mentor.name}
                 />
                 <AvatarFallback className="bg-indigo-50 text-indigo-200">

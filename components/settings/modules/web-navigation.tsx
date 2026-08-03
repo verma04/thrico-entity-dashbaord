@@ -24,6 +24,7 @@ export interface ModuleItem {
   showInMobileNavigationSortNumber?: number;
   showInWebNavigationSortNumber?: number;
   customName?: string | null;
+  subtitle?: string | null;
 }
 
 interface WebNavigationProps {
@@ -91,14 +92,23 @@ const WebNavigation: React.FC<WebNavigationProps> = ({
                 </p>
                 <div className="space-y-0.5">
                   {navigationModules.map((module) => (
-                    <div key={module.id} className="flex items-center gap-3 px-3 py-2 rounded-md text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors">
-                      {getNavIcon(module.icon)}
-                      <span className="text-[13px] font-medium flex items-baseline gap-1.5">
-                        <span>{module.customName || module.name}</span>
-                        {module.customName && (
-                          <span className="text-[11px] text-muted-foreground font-normal">({module.name})</span>
+                    <div key={module.id} className="flex items-start gap-3 px-3 py-2 rounded-md text-muted-foreground hover:bg-muted/50 hover:text-foreground transition-colors">
+                      <div className="mt-0.5">
+                        {getNavIcon(module.icon)}
+                      </div>
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-[13px] font-medium flex items-baseline gap-1.5">
+                          <span>{module.customName || module.name}</span>
+                          {module.customName && (
+                            <span className="text-[11px] text-muted-foreground font-normal">({module.name})</span>
+                          )}
+                        </span>
+                        {module.subtitle && (
+                          <span className="text-[11px] text-muted-foreground truncate mt-0.5 leading-snug">
+                            {module.subtitle}
+                          </span>
                         )}
-                      </span>
+                      </div>
                     </div>
                   ))}
                   {navigationModules.length === 0 && (
@@ -176,12 +186,19 @@ const WebNavigation: React.FC<WebNavigationProps> = ({
                                 <div className="h-6 w-6 rounded-md bg-card border border-border/80 flex items-center justify-center shrink-0">
                                   {getNavIcon(module.icon)}
                                 </div>
-                                <span className="text-[13px] font-medium text-foreground truncate flex items-baseline gap-1.5">
-                                  <span>{module.customName || module.name}</span>
-                                  {module.customName && (
-                                    <span className="text-[11px] text-muted-foreground font-normal">({module.name})</span>
+                                <div className="flex flex-col min-w-0">
+                                  <span className="text-[13px] font-medium text-foreground truncate flex items-baseline gap-1.5">
+                                    <span>{module.customName || module.name}</span>
+                                    {module.customName && (
+                                      <span className="text-[11px] text-muted-foreground font-normal">({module.name})</span>
+                                    )}
+                                  </span>
+                                  {module.subtitle && (
+                                    <span className="text-[11px] text-muted-foreground truncate leading-none mt-0.5">
+                                      {module.subtitle}
+                                    </span>
                                   )}
-                                </span>
+                                </div>
                               </div>
 
                               {/* Remove */}

@@ -48,7 +48,7 @@ export function SortableBannerRow({ banner, onRemove, onEdit }: BannerRowProps) 
         <div className="h-10 w-15 relative rounded overflow-hidden bg-muted/20 border group">
           {banner.image ? (
             <img
-              src={`https://cdn.thrico.network/${banner?.image}`}
+              src={`${process.env.NEXT_PUBLIC_CDN_URL}/${banner?.image}`}
               alt={banner?.title}
               className="w-full h-full object-cover transition-transform group-hover:scale-110"
             />

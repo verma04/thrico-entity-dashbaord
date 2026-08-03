@@ -136,7 +136,7 @@ const Details = ({
               <div className="flex items-end gap-6">
                 <Avatar className="h-24 w-24 rounded-2xl border-4 border-background shadow-xl bg-background">
                   <AvatarImage
-                    src={`https://cdn.thrico.network/${job.company?.logo}`}
+                    src={`${process.env.NEXT_PUBLIC_CDN_URL}/${job.company?.logo}`}
                     alt={job.company?.name}
                     className="object-cover"
                   />

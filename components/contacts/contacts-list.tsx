@@ -68,7 +68,7 @@ export function ContactsList({ contacts }: { contacts: Contact[] }) {
         <div className="flex items-center gap-3">
           <Avatar className="h-10 w-10 border border-border/50 shadow-sm">
             <AvatarImage
-              src={`https://cdn.thrico.network/${row.original.user?.user?.avatar}`}
+              src={`${process.env.NEXT_PUBLIC_CDN_URL}/${row.original.user?.user?.avatar}`}
               alt={row.original.user?.user?.firstName}
             />
             <AvatarFallback className="bg-indigo-50 text-indigo-600 text-xs font-bold font-mono tracking-tighter italic">
@@ -215,7 +215,7 @@ function ContactAction({ contact }: { contact: Contact }) {
               <div className="flex items-center gap-4 bg-slate-50/50 p-4 rounded-3xl border border-slate-100 italic">
                 <Avatar className="h-12 w-12 border-2 border-white shadow-md">
                   <AvatarImage
-                    src={`https://cdn.thrico.network/${contact.user?.user?.avatar}`}
+                    src={`${process.env.NEXT_PUBLIC_CDN_URL}/${contact.user?.user?.avatar}`}
                   />
                   <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-black text-lg italic">
                     {contact.user?.user?.firstName?.[0]}

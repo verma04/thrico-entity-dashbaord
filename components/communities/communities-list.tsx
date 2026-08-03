@@ -30,7 +30,7 @@ export default function List({ data }: { data: communityEntity[] }) {
       <div className="flex items-center gap-3">
         <Avatar className="h-9 w-9 rounded-lg border border-border/60 shrink-0">
           <AvatarImage
-            src={`https://cdn.thrico.network/${row.cover}`}
+            src={`${process.env.NEXT_PUBLIC_CDN_URL}/${row.cover}`}
             alt={row.title}
             className="object-cover"
           />
@@ -119,7 +119,7 @@ export default function List({ data }: { data: communityEntity[] }) {
                   row.creator.avatar
                     ? row.creator.avatar.startsWith("http")
                       ? row.creator.avatar
-                      : `https://cdn.thrico.network/${row.creator.avatar}`
+                      : `${process.env.NEXT_PUBLIC_CDN_URL}/${row.creator.avatar}`
                     : ""
                 }
                 alt={`${row.creator.firstName} ${row.creator.lastName}`}

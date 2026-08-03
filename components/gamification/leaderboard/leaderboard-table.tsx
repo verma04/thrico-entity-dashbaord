@@ -64,7 +64,7 @@ export function LeaderboardTable({
           >
             <Avatar className="h-10 w-10 border border-border shadow-sm group-hover:border-primary/50 transition-all">
               <AvatarImage
-                src={`https://cdn.thrico.network/${user?.avatar}`}
+                src={`${process.env.NEXT_PUBLIC_CDN_URL}/${user?.avatar}`}
                 alt={user?.firstName}
                 className="object-cover"
               />

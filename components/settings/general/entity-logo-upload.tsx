@@ -56,7 +56,7 @@ export const EntityLogoUpload = ({
                 description:
                   data.uploadEntityLogo.message || "Logo updated successfully!",
               });
-              return `https://cdn.thrico.network/${data.uploadEntityLogo.logo}`;
+              return `${process.env.NEXT_PUBLIC_CDN_URL}/${data.uploadEntityLogo.logo}`;
             } else {
               throw new Error(
                 data?.uploadEntityLogo?.message || "Failed to upload logo"

@@ -75,7 +75,7 @@ export default function ForumCard({ record }: ForumCardProps) {
                             record.user.avatar
                               ? record.user.avatar.startsWith("http")
                                 ? record.user.avatar
-                                : `https://cdn.thrico.network/${record.user.avatar}`
+                                : `${process.env.NEXT_PUBLIC_CDN_URL}/${record.user.avatar}`
                               : ""
                           }
                           alt={`${record.user.firstName} ${record.user.lastName}`}

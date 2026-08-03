@@ -614,7 +614,7 @@ export function JobCreationForm({
                         {formik.values.company?.logo ? (
                           <Avatar className="h-full w-full rounded-none">
                             <AvatarImage
-                              src={`https://cdn.thrico.network/${formik.values.company.logo}`}
+                              src={`${process.env.NEXT_PUBLIC_CDN_URL}/${formik.values.company.logo}`}
                               alt={formik.values.company.name}
                             />
                             <AvatarFallback className="bg-transparent">

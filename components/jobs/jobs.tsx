@@ -123,7 +123,7 @@ export default function Jobs({ data }: { data: Job[] | undefined }) {
                   row.postedBy.avatar
                     ? row.postedBy.avatar.startsWith("http")
                       ? row.postedBy.avatar
-                      : `https://cdn.thrico.network/${row.postedBy.avatar}`
+                      : `${process.env.NEXT_PUBLIC_CDN_URL}/${row.postedBy.avatar}`
                     : ""
                 }
                 alt={`${row.postedBy.firstName} ${row.postedBy.lastName}`}

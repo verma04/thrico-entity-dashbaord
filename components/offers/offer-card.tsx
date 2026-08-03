@@ -49,7 +49,7 @@ export function OfferCard({ offer, onEdit, refetch }: OfferCardProps) {
         <div className="relative h-44 w-full overflow-hidden bg-slate-100 shrink-0">
           {offer.image ? (
             <img
-              src={`https://cdn.thrico.network/${offer.image}`}
+              src={`${process.env.NEXT_PUBLIC_CDN_URL}/${offer.image}`}
               alt={offer.title}
               className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
             />
@@ -123,7 +123,7 @@ export function OfferCard({ offer, onEdit, refetch }: OfferCardProps) {
                             offer.creator.avatar
                               ? offer.creator.avatar.startsWith("http")
                                 ? offer.creator.avatar
-                                : `https://cdn.thrico.network/${offer.creator.avatar}`
+                                : `${process.env.NEXT_PUBLIC_CDN_URL}/${offer.creator.avatar}`
                               : ""
                           }
                           alt={`${offer.creator.firstName} ${offer.creator.lastName}`}

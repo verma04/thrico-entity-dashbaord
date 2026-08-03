@@ -81,7 +81,7 @@ function OfferManagementLayout({ children }: { children: React.ReactNode }) {
                 {offer?.image ? (
                   <div className="relative">
                     <img
-                      src={`https://cdn.thrico.network/${offer.image}`}
+                      src={`${process.env.NEXT_PUBLIC_CDN_URL}/${offer.image}`}
                       alt={offer.title || `${singularName} Image`}
                       className="w-11 h-11 rounded-xl object-cover border border-border/60 shadow-sm"
                     />

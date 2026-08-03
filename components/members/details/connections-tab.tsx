@@ -110,7 +110,7 @@ function ConnectionCard({ rel }: { rel: Neo4jRelationship }) {
             <Avatar className="h-11 w-11 border-2 border-background shadow-sm">
               {rel.otherAvatar && (
                 <AvatarImage
-                  src={`https://cdn.thrico.network/${rel.otherAvatar}`}
+                  src={`${process.env.NEXT_PUBLIC_CDN_URL}/${rel.otherAvatar}`}
                   alt={`${rel.otherFirstName} ${rel.otherLastName}`}
                 />
               )}

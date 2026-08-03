@@ -72,7 +72,7 @@ export function ListingsTable({ listings }: { listings: Listing[] }) {
           <div className="relative w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 shadow-sm border border-border/10">
             {listing.media?.length > 0 ? (
               <Image
-                src={`https://cdn.thrico.network/${listing?.media[0]?.url}`}
+                src={`${process.env.NEXT_PUBLIC_CDN_URL}/${listing?.media[0]?.url}`}
                 alt={listing.title}
                 fill
                 className="object-cover"
@@ -143,7 +143,7 @@ export function ListingsTable({ listings }: { listings: Listing[] }) {
                     listing.postedBy.avatar
                       ? listing.postedBy.avatar.startsWith("http")
                         ? listing.postedBy.avatar
-                        : `https://cdn.thrico.network/${listing.postedBy.avatar}`
+                        : `${process.env.NEXT_PUBLIC_CDN_URL}/${listing.postedBy.avatar}`
                       : ""
                   }
                   alt={`${listing.postedBy.firstName} ${listing.postedBy.lastName}`}

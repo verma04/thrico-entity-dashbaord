@@ -20,7 +20,7 @@ export default function PhotographyCommunity({
       {/* Banner Image */}
       <div className="relative h-[300px] bg-muted flex justify-center items-center">
         <Image
-          src={`https://cdn.thrico.network/${data?.cover}`}
+          src={`${process.env.NEXT_PUBLIC_CDN_URL}/${data?.cover}`}
           alt={`${singularName} cover`}
           fill
           className="object-cover"

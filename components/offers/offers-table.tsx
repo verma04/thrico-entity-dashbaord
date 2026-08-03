@@ -56,7 +56,7 @@ export function OffersTable({
               <div className="h-10 w-10 rounded-lg bg-primary/5 border border-primary/10 flex items-center justify-center shrink-0 overflow-hidden">
                 {offer.image ? (
                   <img
-                    src={`https://cdn.thrico.network/${offer.image}`}
+                    src={`${process.env.NEXT_PUBLIC_CDN_URL}/${offer.image}`}
                     alt={offer.title}
                     className="h-full w-full object-cover"
                   />
@@ -144,7 +144,7 @@ export function OffersTable({
                       offer.creator.avatar
                         ? offer.creator.avatar.startsWith("http")
                           ? offer.creator.avatar
-                          : `https://cdn.thrico.network/${offer.creator.avatar}`
+                          : `${process.env.NEXT_PUBLIC_CDN_URL}/${offer.creator.avatar}`
                         : ""
                     }
                     alt={`${offer.creator.firstName} ${offer.creator.lastName}`}

@@ -134,7 +134,7 @@ export default function OfferSettingsPage() {
   // Sync image URL when offer data loads
   React.useEffect(() => {
     if (offer?.image && !imageUrl) {
-      setImageUrl(`https://cdn.thrico.network/${offer.image}`);
+      setImageUrl(`${process.env.NEXT_PUBLIC_CDN_URL}/${offer.image}`);
     }
   }, [offer, imageUrl]);
 
@@ -534,7 +534,7 @@ export default function OfferSettingsPage() {
                     <Image
                       src={
                         imageUrl ||
-                        "https://cdn.thrico.network/defaultEventCover.png"
+                        `${process.env.NEXT_PUBLIC_CDN_URL}/defaultEventCover.png`
                       }
                       alt="Offer cover"
                       width={600}

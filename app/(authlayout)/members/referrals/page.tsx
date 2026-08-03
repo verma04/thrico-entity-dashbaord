@@ -29,7 +29,7 @@ function ReferralsPage() {
           <div className="flex items-center gap-4 py-1">
             <div className="flex items-center gap-2.5 min-w-[180px]">
               <Avatar className="h-8 w-8">
-                <AvatarImage src={`https://cdn.thrico.network/${referrer?.avatar}`} />
+                <AvatarImage src={`${process.env.NEXT_PUBLIC_CDN_URL}/${referrer?.avatar}`} />
                 <AvatarFallback className="text-[10px]">{referrer?.firstName?.[0]}{referrer?.lastName?.[0]}</AvatarFallback>
               </Avatar>
               <div className="flex flex-col min-w-0">
@@ -46,7 +46,7 @@ function ReferralsPage() {
 
             <div className="flex items-center gap-2.5 min-w-[180px]">
               <Avatar className="h-8 w-8 border border-primary/10">
-                <AvatarImage src={`https://cdn.thrico.network/${referee?.avatar}`} />
+                <AvatarImage src={`${process.env.NEXT_PUBLIC_CDN_URL}/${referee?.avatar}`} />
                 <AvatarFallback className="text-[10px]">{referee?.firstName?.[0]}{referee?.lastName?.[0]}</AvatarFallback>
               </Avatar>
               <div className="flex flex-col min-w-0">

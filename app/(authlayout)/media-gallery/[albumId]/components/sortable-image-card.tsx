@@ -61,7 +61,7 @@ export function SortableImageCard({
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={`https://cdn.thrico.network/${image.url}`}
+        src={`${process.env.NEXT_PUBLIC_CDN_URL}/${image.url}`}
         alt={image.caption ?? "Gallery image"}
         className={`w-full h-full object-cover transition-transform ${
           isSelected ? "scale-95" : ""

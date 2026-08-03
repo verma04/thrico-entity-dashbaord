@@ -18,7 +18,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({
   onPress,
   className,
 }) => {
-  const avatarSrc = src ? `https://cdn.thrico.network/${src}` : undefined;
+  const avatarSrc = src ? `${process.env.NEXT_PUBLIC_CDN_URL}/${src}` : undefined;
 
   return (
     <Avatar

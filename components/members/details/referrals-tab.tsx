@@ -107,7 +107,7 @@ export function ReferralsTab({ userId }: { userId: string }) {
                     <Avatar className="h-12 w-12 border-2 border-primary/10">
                       {user?.avatar && (
                         <AvatarImage
-                          src={`https://cdn.thrico.network/${user?.avatar}`}
+                          src={`${process.env.NEXT_PUBLIC_CDN_URL}/${user?.avatar}`}
                           alt={`${firstName} ${lastName}`}
                         />
                       )}

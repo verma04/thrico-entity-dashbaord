@@ -3,7 +3,13 @@
 import React from "react";
 import { useState } from "react";
 import type { DropResult } from "@hello-pangea/dnd";
-import { Puzzle, AlertCircle, Smartphone, LayoutGrid, Monitor } from "lucide-react";
+import {
+  Puzzle,
+  AlertCircle,
+  Smartphone,
+  LayoutGrid,
+  Monitor,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import MobileNavigation from "./mobile-navigation";
 import WebNavigation from "./web-navigation";
@@ -18,7 +24,11 @@ import {
   useCheckEntitySubscription,
 } from "@/graphql/actions";
 
-import type { ModuleItem, ActiveTab, UpdateEntityModuleResponse } from "./types";
+import type {
+  ModuleItem,
+  ActiveTab,
+  UpdateEntityModuleResponse,
+} from "./types";
 
 const UPDATE_ENTITY_MODULE = gql`
   mutation UpdateEntityModule($input: [inputUpdateEntityModule]) {
@@ -29,8 +39,32 @@ const UPDATE_ENTITY_MODULE = gql`
 `;
 
 const moduleData = [
-  { id: "1", name: "Directory", enabled: true, required: true, category: "Core", showInMobileNavigation: true, showInWebNavigation: true, icon: null, isPopular: false, isPublicFacing: false, canRename: true },
-  { id: "2", name: "Communities", enabled: true, required: false, category: "Social", showInMobileNavigation: true, showInWebNavigation: true, icon: null, isPopular: true, isPublicFacing: false, canRename: true },
+  {
+    id: "1",
+    name: "Directory",
+    enabled: true,
+    required: true,
+    category: "Core",
+    showInMobileNavigation: true,
+    showInWebNavigation: true,
+    icon: null,
+    isPopular: false,
+    isPublicFacing: false,
+    canRename: true,
+  },
+  {
+    id: "2",
+    name: "Communities",
+    enabled: true,
+    required: false,
+    category: "Social",
+    showInMobileNavigation: true,
+    showInWebNavigation: true,
+    icon: null,
+    isPopular: true,
+    isPublicFacing: false,
+    canRename: true,
+  },
 ];
 
 export default function ModuleManagement() {
@@ -43,7 +77,8 @@ export default function ModuleManagement() {
   const subscription = data?.checkEntitySubscription;
 
   const [modules, setModules] = useState<ModuleItem[]>(moduleData);
-  const [originalModules, setOriginalModules] = useState<ModuleItem[]>(moduleData);
+  const [originalModules, setOriginalModules] =
+    useState<ModuleItem[]>(moduleData);
   const [modulesInitialized, setModulesInitialized] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -67,9 +102,12 @@ export default function ModuleManagement() {
         m.showInMobileNavigation !== orig.showInMobileNavigation ||
         m.showInWebNavigation !== orig.showInWebNavigation ||
         m.isPopular !== orig.isPopular ||
-        m.showInMobileNavigationSortNumber !== orig.showInMobileNavigationSortNumber ||
-        m.showInWebNavigationSortNumber !== orig.showInWebNavigationSortNumber ||
-        m.customName !== orig.customName
+        m.showInMobileNavigationSortNumber !==
+          orig.showInMobileNavigationSortNumber ||
+        m.showInWebNavigationSortNumber !==
+          orig.showInWebNavigationSortNumber ||
+        m.customName !== orig.customName ||
+        m.subtitle !== orig.subtitle
       ) {
         return true;
       }
@@ -83,7 +121,11 @@ export default function ModuleManagement() {
   };
 
   React.useEffect(() => {
-    if (!modulesInitialized && subscription && Array.isArray(subscription.modules)) {
+    if (
+      !modulesInitialized &&
+      subscription &&
+      Array.isArray(subscription.modules)
+    ) {
       const parsedModules = subscription.modules.map((m: any) => ({
         id: m.id,
         name: m.name,
@@ -102,6 +144,7 @@ export default function ModuleManagement() {
             : undefined,
         isPopular: m.isPopular ?? false,
         customName: m.customName ?? null,
+        subtitle: m.subtitle ?? null,
         isPublicFacing: m.isPublicFacing ?? false,
         canRename: m.canRename ?? true,
       }));
@@ -121,15 +164,13 @@ export default function ModuleManagement() {
             : { ...m, enabled: true };
         }
         return m;
-      })
+      }),
     );
   };
 
   const togglePopular = (id: string) => {
     setModules((prev) =>
-      prev.map((m) =>
-        m.id === id ? { ...m, isPopular: !m.isPopular } : m
-      )
+      prev.map((m) => (m.id === id ? { ...m, isPopular: !m.isPopular } : m)),
     );
   };
 
@@ -139,7 +180,8 @@ export default function ModuleManagement() {
       const currentCount = prev.filter((m) => m.showInMobileNavigation).length;
       return prev.map((m) => {
         if (m.id !== id) return m;
-        if (m.showInMobileNavigation) return { ...m, showInMobileNavigation: false };
+        if (m.showInMobileNavigation)
+          return { ...m, showInMobileNavigation: false };
         if (currentCount < 3) return { ...m, showInMobileNavigation: true };
         return m;
       });
@@ -158,9 +200,13 @@ export default function ModuleManagement() {
 
   const changeCustomName = (id: string, value: string) => {
     setModules((prev) =>
-      prev.map((m) =>
-        m.id === id ? { ...m, customName: value } : m
-      )
+      prev.map((m) => (m.id === id ? { ...m, customName: value } : m)),
+    );
+  };
+
+  const changeSubtitle = (id: string, value: string) => {
+    setModules((prev) =>
+      prev.map((m) => (m.id === id ? { ...m, subtitle: value } : m)),
     );
   };
 
@@ -172,22 +218,36 @@ export default function ModuleManagement() {
       name: m.name ?? null,
       isEnabled: m.enabled ?? null,
       showInMobileNavigation: m.showInMobileNavigation ?? null,
-      showInMobileNavigationSortNumber: m.showInMobileNavigation ? idx : undefined,
+      showInMobileNavigationSortNumber: m.showInMobileNavigation
+        ? idx
+        : undefined,
       showInWebNavigation: m.showInWebNavigation ?? null,
-      showInWebNavigationSortNumber: m.showInWebNavigationSortNumber ?? undefined,
+      showInWebNavigationSortNumber:
+        m.showInWebNavigationSortNumber ?? undefined,
       isPopular: m.isPopular ?? null,
       customName: m.customName ?? null,
+      subtitle: m.subtitle ?? null,
     }));
     try {
-      const response = await updateEntityModule({ variables: { input } });
+      const response = await updateEntityModule({ 
+        variables: { input },
+        refetchQueries: ["CheckEntitySubscription"],
+      });
       if (response.data?.updateEntityModule.success) {
         setOriginalModules(modules);
         setSaved(true);
         setTimeout(() => setSaved(false), 3000);
-        setNotification({ type: "success", message: "Changes saved successfully" });
+        setNotification({
+          type: "success",
+          message: "Changes saved successfully",
+        });
         setTimeout(() => setNotification(null), 3000);
       } else {
-        setNotification({ type: "error", message: "Save failed", description: "Mutation did not succeed" });
+        setNotification({
+          type: "error",
+          message: "Save failed",
+          description: "Mutation did not succeed",
+        });
       }
     } catch (err: unknown) {
       setNotification({
@@ -205,7 +265,11 @@ export default function ModuleManagement() {
 
   const navigationModules = modules
     .filter((m) => m.showInMobileNavigation)
-    .sort((a, b) => (a.showInMobileNavigationSortNumber ?? 0) - (b.showInMobileNavigationSortNumber ?? 0));
+    .sort(
+      (a, b) =>
+        (a.showInMobileNavigationSortNumber ?? 0) -
+        (b.showInMobileNavigationSortNumber ?? 0),
+    );
 
   const onDragEnd = (result: DropResult) => {
     if (!result.destination) return;
@@ -216,13 +280,17 @@ export default function ModuleManagement() {
       prev.map((m) => {
         const idx = navModules.findIndex((nm) => nm.id === m.id);
         return idx !== -1 ? { ...m, showInMobileNavigationSortNumber: idx } : m;
-      })
+      }),
     );
   };
 
   const webNavigationModules = modules
     .filter((m) => m.showInWebNavigation)
-    .sort((a, b) => (a.showInWebNavigationSortNumber ?? 0) - (b.showInWebNavigationSortNumber ?? 0));
+    .sort(
+      (a, b) =>
+        (a.showInWebNavigationSortNumber ?? 0) -
+        (b.showInWebNavigationSortNumber ?? 0),
+    );
 
   const onDragEndWeb = (result: DropResult) => {
     if (!result.destination) return;
@@ -233,19 +301,24 @@ export default function ModuleManagement() {
       prev.map((m) => {
         const idx = navModules.findIndex((nm) => nm.id === m.id);
         return idx !== -1 ? { ...m, showInWebNavigationSortNumber: idx } : m;
-      })
+      }),
     );
   };
 
   const filteredModules = modules
     .filter((m) => m.name.toLowerCase().includes(searchTerm.toLowerCase()))
     .sort((a, b) => {
-      const webNavDiff = (a.showInWebNavigationSortNumber ?? 999) - (b.showInWebNavigationSortNumber ?? 999);
+      const webNavDiff =
+        (a.showInWebNavigationSortNumber ?? 999) -
+        (b.showInWebNavigationSortNumber ?? 999);
       if (webNavDiff !== 0) return webNavDiff;
 
       if (a.isPopular !== b.isPopular) return a.isPopular ? -1 : 1;
 
-      return (a.showInMobileNavigationSortNumber ?? 999) - (b.showInMobileNavigationSortNumber ?? 999);
+      return (
+        (a.showInMobileNavigationSortNumber ?? 999) -
+        (b.showInMobileNavigationSortNumber ?? 999)
+      );
     });
 
   const enabledCount = modules.filter((m) => m.enabled).length;
@@ -281,7 +354,9 @@ export default function ModuleManagement() {
         <div className="flex items-start gap-3 px-4 py-3.5 rounded-xl border bg-red-50 border-red-200">
           <AlertCircle className="h-4 w-4 text-red-600 mt-0.5 shrink-0" />
           <div>
-            <p className="text-[13px] font-semibold text-red-800">Failed to load modules</p>
+            <p className="text-[13px] font-semibold text-red-800">
+              Failed to load modules
+            </p>
             <p className="text-[12px] text-red-600 mt-0.5">{error.message}</p>
           </div>
         </div>
@@ -307,26 +382,30 @@ export default function ModuleManagement() {
             "flex items-start gap-3 px-4 py-3 rounded-xl border",
             notification.type === "error"
               ? "bg-red-50 border-red-200"
-              : "bg-emerald-50 border-emerald-200"
+              : "bg-emerald-50 border-emerald-200",
           )}
         >
           <div
             className={cn(
               "w-1.5 h-4 rounded-full shrink-0 mt-0.5",
-              notification.type === "error" ? "bg-red-500" : "bg-emerald-500"
+              notification.type === "error" ? "bg-red-500" : "bg-emerald-500",
             )}
           />
           <div>
             <p
               className={cn(
                 "text-[12px] font-semibold leading-none",
-                notification.type === "error" ? "text-red-700" : "text-emerald-700"
+                notification.type === "error"
+                  ? "text-red-700"
+                  : "text-emerald-700",
               )}
             >
               {notification.message}
             </p>
             {notification.description && (
-              <p className="text-[11px] text-muted-foreground mt-1">{notification.description}</p>
+              <p className="text-[11px] text-muted-foreground mt-1">
+                {notification.description}
+              </p>
             )}
           </div>
         </div>
@@ -343,7 +422,7 @@ export default function ModuleManagement() {
                 "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-semibold transition-all duration-150",
                 activeTab === "management"
                   ? "bg-card text-foreground shadow-sm border border-border"
-                  : "text-muted-foreground hover:text-foreground"
+                  : "text-muted-foreground hover:text-foreground",
               )}
             >
               <LayoutGrid className="h-3.5 w-3.5" />
@@ -355,7 +434,7 @@ export default function ModuleManagement() {
                 "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-semibold transition-all duration-150",
                 activeTab === "navigation"
                   ? "bg-card text-foreground shadow-sm border border-border"
-                  : "text-muted-foreground hover:text-foreground"
+                  : "text-muted-foreground hover:text-foreground",
               )}
             >
               <Smartphone className="h-3.5 w-3.5" />
@@ -367,7 +446,7 @@ export default function ModuleManagement() {
                 "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-semibold transition-all duration-150",
                 activeTab === "webNavigation"
                   ? "bg-card text-foreground shadow-sm border border-border"
-                  : "text-muted-foreground hover:text-foreground"
+                  : "text-muted-foreground hover:text-foreground",
               )}
             >
               <Monitor className="h-3.5 w-3.5" />
@@ -403,6 +482,7 @@ export default function ModuleManagement() {
             onToggleNavigation={toggleNavigation}
             onToggleWebNavigation={toggleWebNavigation}
             onChangeCustomName={changeCustomName}
+            onChangeSubtitle={changeSubtitle}
           />
         )}
 

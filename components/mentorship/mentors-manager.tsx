@@ -80,7 +80,7 @@ export function MentorsManager() {
   const mentors = mentorsRaw.map((m: any) => ({
     ...m,
     name: m.displayName || `${m.mentorUser?.user?.firstName || ""} ${m.mentorUser?.user?.lastName || ""}`.trim() || "Anonymous",
-    image: m.mentorUser?.user?.avatar ? `https://cdn.thrico.network/${m.mentorUser?.user?.avatar}` : undefined,
+    image: m.mentorUser?.user?.avatar ? `${process.env.NEXT_PUBLIC_CDN_URL}/${m.mentorUser?.user?.avatar}` : undefined,
     title: m.intro || "Mentor",
     categoryName: m.category?.title || "Uncategorized",
     status: m.isApproved ? "approved" : m.isRequested ? "pending" : "inactive",

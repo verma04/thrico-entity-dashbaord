@@ -459,7 +459,7 @@ export default function ManageVoucherPage() {
                               <div className="h-6 w-6 rounded-full bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-center text-[9px] font-bold text-indigo-600 dark:text-indigo-400 overflow-hidden shrink-0">
                                 {v.assignedTo.avatar ? (
                                   <img
-                                    src={`https://cdn.thrico.network/${v.assignedTo.avatar}`}
+                                    src={`${process.env.NEXT_PUBLIC_CDN_URL}/${v.assignedTo.avatar}`}
                                     alt=""
                                     className="h-full w-full object-cover"
                                   />

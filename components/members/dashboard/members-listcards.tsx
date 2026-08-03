@@ -103,7 +103,7 @@ export const MembersListCards = ({
                 >
                   <Avatar className="h-24 w-24 rounded-2xl border-4 border-background shadow-lg group-hover/avatar:scale-105 transition-transform duration-300 cursor-pointer">
                     <AvatarImage
-                      src={`https://cdn.thrico.network/${member.user.avatar}`}
+                      src={`${process.env.NEXT_PUBLIC_CDN_URL}/${member.user.avatar}`}
                       alt={member.user.firstName}
                     />
                     <AvatarFallback className="text-2xl bg-primary/10 text-primary">

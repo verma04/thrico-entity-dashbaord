@@ -589,7 +589,7 @@ export default function RewardsDashboard() {
                               <AvatarImage
                                 src={
                                   act.user?.avatar
-                                    ? `https://cdn.thrico.network/${act.user.avatar}`
+                                    ? `${process.env.NEXT_PUBLIC_CDN_URL}/${act.user.avatar}`
                                     : ""
                                 }
                                 alt={act.user?.firstName}

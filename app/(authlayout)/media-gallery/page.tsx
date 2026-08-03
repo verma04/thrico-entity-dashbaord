@@ -106,7 +106,7 @@ function SortableAlbumCard({
           {album?.coverImage ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={`https://cdn.thrico.network/${album?.coverImage}`}
+              src={`${process.env.NEXT_PUBLIC_CDN_URL}/${album?.coverImage}`}
               alt={album?.title}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
@@ -217,7 +217,7 @@ function AlbumFormDialog({
       setCoverFile(null);
       setCoverPreview(
         editingAlbum?.coverImage
-          ? `https://cdn.thrico.network/${editingAlbum.coverImage}`
+          ? `${process.env.NEXT_PUBLIC_CDN_URL}/${editingAlbum.coverImage}`
           : null,
       );
     }

@@ -87,7 +87,7 @@ function JobManagementLayout({ children }: { children: React.ReactNode }) {
                 {job?.company?.logo ? (
                   <div className="relative">
                     <img
-                      src={`https://cdn.thrico.network/${job.company.logo}`}
+                      src={`${process.env.NEXT_PUBLIC_CDN_URL}/${job.company.logo}`}
                       alt={job.company.name || "Company Logo"}
                       className="w-11 h-11 rounded-xl object-cover border border-border/60 shadow-sm"
                     />

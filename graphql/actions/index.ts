@@ -223,6 +223,7 @@ export interface InputUpdateEntityModule {
   showInWebNavigationSortNumber?: number;
   isPopular: boolean;
   customName?: string | null;
+  subtitle?: string | null;
 }
 
 export interface UpdateEntityModuleResponse {

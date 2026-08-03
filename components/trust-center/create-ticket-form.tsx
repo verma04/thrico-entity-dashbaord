@@ -208,7 +208,7 @@ export function CreateTicketForm({
                             <div className="h-4 w-4 rounded-full overflow-hidden bg-muted shrink-0">
                               {u.user?.avatar ? (
                                 <Image
-                                  src={`https://cdn.thrico.network/${u.user.avatar}`}
+                                  src={`${process.env.NEXT_PUBLIC_CDN_URL}/${u.user.avatar}`}
                                   alt="Avatar"
                                   width={16}
                                   height={16}
@@ -272,7 +272,7 @@ export function CreateTicketForm({
                                   <div className="h-6 w-6 rounded-full overflow-hidden bg-muted shrink-0">
                                     {u.user?.avatar ? (
                                       <Image
-                                        src={`https://cdn.thrico.network/${u.user.avatar}`}
+                                        src={`${process.env.NEXT_PUBLIC_CDN_URL}/${u.user.avatar}`}
                                         alt="Avatar"
                                         width={24}
                                         height={24}
@@ -335,7 +335,7 @@ export function CreateTicketForm({
                                   <div className="h-8 w-8 rounded-full overflow-hidden bg-muted shrink-0">
                                     {u.user?.avatar ? (
                                       <Image
-                                        src={`https://cdn.thrico.network/${u.user.avatar}`}
+                                        src={`${process.env.NEXT_PUBLIC_CDN_URL}/${u.user.avatar}`}
                                         alt="Avatar"
                                         width={32}
                                         height={32}
@@ -365,7 +365,7 @@ export function CreateTicketForm({
                           <div className="h-8 w-8 rounded-full overflow-hidden bg-background shrink-0">
                             {values.selectedUser.user?.avatar ? (
                               <Image
-                                src={`https://cdn.thrico.network/${values.selectedUser.user.avatar}`}
+                                src={`${process.env.NEXT_PUBLIC_CDN_URL}/${values.selectedUser.user.avatar}`}
                                 alt="Avatar"
                                 width={32}
                                 height={32}

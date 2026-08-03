@@ -17,6 +17,7 @@ interface ModuleRegistryProps {
   onToggleNavigation: (id: string) => void;
   onToggleWebNavigation: (id: string) => void;
   onChangeCustomName: (id: string, value: string) => void;
+  onChangeSubtitle: (id: string, value: string) => void;
 }
 
 export default function ModuleRegistry({
@@ -32,6 +33,7 @@ export default function ModuleRegistry({
   onToggleNavigation,
   onToggleWebNavigation,
   onChangeCustomName,
+  onChangeSubtitle,
 }: ModuleRegistryProps) {
   return (
     <div className="p-5 space-y-4">
@@ -71,7 +73,7 @@ export default function ModuleRegistry({
       </div>
 
       {/* Column headers */}
-      <div className="grid grid-cols-[2px_1.5fr_1.5fr_auto_auto_auto_auto] items-end gap-4 px-3 pb-2 border-b border-border">
+      <div className="grid grid-cols-[2px_1.25fr_1.25fr_1.25fr_auto_auto_auto_auto] items-end gap-4 px-3 pb-2 border-b border-border">
         <span></span>
         <div>
           <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Module</span>
@@ -79,6 +81,10 @@ export default function ModuleRegistry({
         <div>
           <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Display Name</span>
           <p className="text-[9px] text-muted-foreground/60 mt-0.5">Rename for your members</p>
+        </div>
+        <div>
+          <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Subtitle</span>
+          <p className="text-[9px] text-muted-foreground/60 mt-0.5">Module description</p>
         </div>
         <div className="w-16 text-center">
           <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Popular</span>
@@ -117,6 +123,7 @@ export default function ModuleRegistry({
               onToggleNavigation={onToggleNavigation}
               onToggleWebNavigation={onToggleWebNavigation}
               onChangeCustomName={onChangeCustomName}
+              onChangeSubtitle={onChangeSubtitle}
             />
           ))
         )}

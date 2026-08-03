@@ -260,6 +260,7 @@ export const CHECK_ENTITY_SUBSCRIPTIONS = gql`
         isPopular
         isPublicFacing
         canRename
+        subtitle
       }
     }
   }

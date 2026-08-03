@@ -687,31 +687,42 @@ export default function Dashboard() {
                   Subscription Limit Reached
                 </p>
                 <p className="text-amber-700 text-xs mt-0.5">
-                  {subscriptionInfo.message || "You have reached the maximum number of users allowed by your subscription."}
+                  {subscriptionInfo.message ||
+                    "You have reached the maximum number of users allowed by your subscription."}
                 </p>
               </div>
             </div>
-            
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
-            <div className="flex items-center gap-4 bg-amber-100/60 px-5 py-2.5 rounded-lg border border-amber-200/60 shrink-0">
-               <div className="text-center">
-                  <p className="text-[10px] uppercase font-bold text-amber-600/80 tracking-widest mb-0.5">Current</p>
-                  <p className="text-xl font-black text-amber-900 leading-none">{subscriptionInfo.currentCount?.toLocaleString()}</p>
-               </div>
-               <div className="w-px h-8 bg-amber-300/60"></div>
-               <div className="text-center">
-                  <p className="text-[10px] uppercase font-bold text-amber-600/80 tracking-widest mb-0.5">Max Allowed</p>
-                  <p className="text-xl font-black text-amber-900 leading-none">{subscriptionInfo.maxUsersAllowed ? subscriptionInfo.maxUsersAllowed.toLocaleString() : "∞"}</p>
-               </div>
+
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
+              <div className="flex items-center gap-4 bg-amber-100/60 px-5 py-2.5 rounded-lg border border-amber-200/60 shrink-0">
+                <div className="text-center">
+                  <p className="text-[10px] uppercase font-bold text-amber-600/80 tracking-widest mb-0.5">
+                    Current
+                  </p>
+                  <p className="text-xl font-black text-amber-900 leading-none">
+                    {subscriptionInfo.currentCount?.toLocaleString()}
+                  </p>
+                </div>
+                <div className="w-px h-8 bg-amber-300/60"></div>
+                <div className="text-center">
+                  <p className="text-[10px] uppercase font-bold text-amber-600/80 tracking-widest mb-0.5">
+                    Max Allowed
+                  </p>
+                  <p className="text-xl font-black text-amber-900 leading-none">
+                    {subscriptionInfo.maxUsersAllowed
+                      ? subscriptionInfo.maxUsersAllowed.toLocaleString()
+                      : "∞"}
+                  </p>
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                className="bg-white hover:bg-amber-100/50 text-amber-900 border-amber-300 hover:border-amber-400 transition-all shadow-sm h-[52px]"
+                onClick={() => router.push("/settings/subscription")}
+              >
+                Manage
+              </Button>
             </div>
-            <Button
-              variant="outline"
-              className="bg-white hover:bg-amber-100/50 text-amber-900 border-amber-300 hover:border-amber-400 transition-all shadow-sm h-[52px]"
-              onClick={() => router.push("/settings/subscription")}
-            >
-              Manage
-            </Button>
-          </div>
           </div>
         )}
 
@@ -1093,7 +1104,7 @@ export default function Dashboard() {
                           >
                             <Avatar className="h-8 w-8 border border-border/50 shadow-sm shrink-0">
                               <AvatarImage
-                                src={`https://cdn.thrico.network/${user?.avatar}`}
+                                src={`${process.env.NEXT_PUBLIC_CDN_URL}/${user?.avatar}`}
                                 alt={user?.firstName}
                                 className="object-cover"
                               />
@@ -1193,7 +1204,7 @@ export default function Dashboard() {
                           >
                             <Avatar className="h-7 w-7 border border-border/50 shadow-sm">
                               <AvatarImage
-                                src={`https://cdn.thrico.network/${user?.avatar}`}
+                                src={`${process.env.NEXT_PUBLIC_CDN_URL}/${user?.avatar}`}
                                 alt={user?.firstName}
                                 className="object-cover"
                               />
@@ -1363,7 +1374,7 @@ export default function Dashboard() {
                             >
                               <Avatar className="h-8 w-8 border border-border/50 shadow-sm shrink-0">
                                 <AvatarImage
-                                  src={`https://cdn.thrico.network/${user?.avatarUrl || user?.avatar}`}
+                                  src={`${process.env.NEXT_PUBLIC_CDN_URL}/${user?.avatarUrl || user?.avatar}`}
                                   alt={user?.firstName}
                                   className="object-cover"
                                 />

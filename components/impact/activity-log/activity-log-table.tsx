@@ -49,7 +49,7 @@ export function ActivityLogTable({ logs, isLoading }: ActivityLogTableProps) {
             <div className="flex items-center gap-3 cursor-pointer">
               <Avatar className="h-8 w-8 border border-border shrink-0">
                 <AvatarImage
-                  src={`https://cdn.thrico.network/${user.avatarUrl}`}
+                  src={`${process.env.NEXT_PUBLIC_CDN_URL}/${user.avatarUrl}`}
                   alt={user.firstName}
                   className="object-cover"
                 />

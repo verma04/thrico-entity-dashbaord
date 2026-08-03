@@ -183,7 +183,8 @@ const Visit = () => {
                 Live Deployments
               </h3>
               <p className="text-[11.5px] text-muted-foreground/60 mt-1 leading-snug">
-                {domainCount} active endpoint{domainCount !== 1 ? "s" : ""} · publicly reachable
+                {domainCount} active endpoint{domainCount !== 1 ? "s" : ""} ·
+                publicly reachable
               </p>
             </div>
             <div className="flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2 py-1">

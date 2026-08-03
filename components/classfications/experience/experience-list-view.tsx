@@ -116,7 +116,7 @@ export function ExperienceListView({ search }: { search?: string }) {
                     [user.firstName, user.lastName].filter(Boolean).join(" ") ||
                     "User";
                   const avatarUrl = user.avatar
-                    ? `https://cdn.thrico.network/${user.avatar}`
+                    ? `${process.env.NEXT_PUBLIC_CDN_URL}/${user.avatar}`
                     : "";
 
                   return (

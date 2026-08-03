@@ -23,6 +23,7 @@ export interface ModuleItem {
   isPopular: boolean;
   showInMobileNavigationSortNumber?: number;
   customName?: string | null;
+  subtitle?: string | null;
 }
 
 interface MobileNavigationProps {
@@ -211,12 +212,19 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
                                 <div className="h-6 w-6 rounded-md bg-card border border-border/80 flex items-center justify-center shrink-0">
                                   {getNavIcon(module.icon)}
                                 </div>
-                                <span className="text-[13px] font-medium text-foreground truncate flex items-baseline gap-1.5">
-                                  <span>{module.customName || module.name}</span>
-                                  {module.customName && (
-                                    <span className="text-[11px] text-muted-foreground font-normal">({module.name})</span>
+                                <div className="flex flex-col min-w-0">
+                                  <span className="text-[13px] font-medium text-foreground truncate flex items-baseline gap-1.5">
+                                    <span>{module.customName || module.name}</span>
+                                    {module.customName && (
+                                      <span className="text-[11px] text-muted-foreground font-normal">({module.name})</span>
+                                    )}
+                                  </span>
+                                  {module.subtitle && (
+                                    <span className="text-[11px] text-muted-foreground truncate leading-none mt-0.5">
+                                      {module.subtitle}
+                                    </span>
                                   )}
-                                </span>
+                                </div>
                               </div>
 
                               {/* Remove */}

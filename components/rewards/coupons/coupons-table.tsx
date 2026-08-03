@@ -66,7 +66,7 @@ export function CouponsTable({ coupons, isLoading }: CouponsTableProps) {
             <div className="h-10 w-10 rounded-lg bg-primary/5 border border-primary/10 flex items-center justify-center shrink-0 overflow-hidden">
               {coupon.image ? (
                 <img
-                  src={`https://cdn.thrico.network/${coupon.image}`}
+                  src={`${process.env.NEXT_PUBLIC_CDN_URL}/${coupon.image}`}
                   alt={coupon.title}
                   className="h-full w-full object-cover"
                 />

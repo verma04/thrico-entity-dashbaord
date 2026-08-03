@@ -199,7 +199,7 @@ export function BannerCreationForm({
                             typeof formik.values.image === "string"
                               ? formik.values.image.startsWith("http") || formik.values.image.startsWith("blob:") || formik.values.image.startsWith("data:")
                                 ? formik.values.image
-                                : `https://cdn.thrico.network/${formik.values.image}`
+                                : `${process.env.NEXT_PUBLIC_CDN_URL}/${formik.values.image}`
                               : formik.values.image instanceof File
                               ? URL.createObjectURL(formik.values.image)
                               : ""
