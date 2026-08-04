@@ -309,7 +309,7 @@ const MenuItemsLayout = ({
   return (
     <div
       className={cn(
-        "bg-background text-foreground flex flex-col w-full mt-2  bg-[#f9f9f9] dark:border-neutral-800",
+        "bg-background border-t-1 text-foreground flex flex-col w-full mt-2  bg-[#f9f9f9] dark:border-neutral-800",
         fixed
           ? "fixed inset-0 z-20 bg-background h-screen w-screen overflow-hidden"
           : fullHeight
