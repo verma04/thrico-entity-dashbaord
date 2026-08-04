@@ -11,7 +11,7 @@ function UsersGraphPage() {
   const router = useRouter();
 
   return (
-    <div className="fixed inset-0 z-[15] bg-slate-50 flex flex-col">
+    <div className="fixed inset-0 z-[41] bg-slate-50 flex flex-col">
       {/* ── Header ── */}
       <div className="h-14 bg-white border-b border-slate-200 flex items-center justify-between px-4 shadow-sm shrink-0">
         <Button
