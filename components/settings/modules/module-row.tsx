@@ -108,7 +108,7 @@ export default function ModuleRow({
               title="Click to customize icon"
             >
               <div className="scale-125">
-                {getNavIcon(module.customIcon || module.icon, module.enabled)}
+                {getNavIcon(module.customIcon || module.icon, module.enabled, module.name)}
               </div>
               {module.enabled && userRole !== "directory" && (
                 <div className="absolute inset-0 bg-background/80 rounded-xl flex items-center justify-center opacity-0 group-hover/icon:opacity-100 transition-opacity">

@@ -13,6 +13,7 @@ import {
   Users2,
   Mail,
   Smartphone,
+  Blocks,
 } from "lucide-react";
 import { NavRailItem } from "./sidebar-components";
 
@@ -54,7 +55,7 @@ export function ParentSidebar() {
           active={activeTab === "gamification"}
         />
         <NavRailItem
-          icon={<Grid size={20} />}
+          icon={<Blocks size={20} />}
           label="Modules"
           href="/communities"
           active={activeTab === "modules"}
