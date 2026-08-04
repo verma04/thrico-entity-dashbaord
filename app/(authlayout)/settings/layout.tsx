@@ -17,6 +17,7 @@ import {
   Terminal,
 } from "lucide-react";
 import SettingsMenuLayout from "@/components/settings/settings-menu-layout";
+import MenuItemsLayout from "@/components/layout/menu-items-layout";
 
 function SettingsLayout({ children }: { children: React.ReactNode }) {
   const items = [
@@ -96,7 +97,7 @@ function SettingsLayout({ children }: { children: React.ReactNode }) {
     },
   ];
 
-  return children;
+  return <MenuItemsLayout hideTabs={true}>{children}</MenuItemsLayout>;
 }
 
 export default SettingsLayout;

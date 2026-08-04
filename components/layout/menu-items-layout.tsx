@@ -17,10 +17,11 @@ type MenuItem = {
 
 type MenuItemsLayoutProps = {
   children: React.ReactNode;
-  items: MenuItem[];
-  active: string;
+  items?: MenuItem[];
+  active?: string;
   hideDefaultTabs?: boolean;
   showAdminTabs?: boolean;
+  hideTabs?: boolean;
   fullWidth?: boolean;
   fullHeight?: boolean;
   fixed?: boolean;
@@ -194,10 +195,11 @@ function MenuPage({
 /* ─── Main Component ────────────────────────────────────────────────────── */
 const MenuItemsLayout = ({
   children,
-  items,
-  active,
+  items = [],
+  active = "",
   hideDefaultTabs = false,
   showAdminTabs = true,
+  hideTabs = false,
   fullWidth = false,
   fullHeight = false,
   fixed = false,
@@ -318,16 +320,18 @@ const MenuItemsLayout = ({
         className,
       )}
     >
-      <MenuTabs
-        fullWidth={fullWidth}
-        fixed={fixed}
-        sections={sections}
-        sortedSectionNames={sortedSectionNames}
-        activeTab={activeTab}
-        fullKey={fullKey}
-        onChange={onChange}
-        onClose={() => router.back()}
-      />
+      {!hideTabs && (
+        <MenuTabs
+          fullWidth={fullWidth}
+          fixed={fixed}
+          sections={sections}
+          sortedSectionNames={sortedSectionNames}
+          activeTab={activeTab}
+          fullKey={fullKey}
+          onChange={onChange}
+          onClose={() => router.back()}
+        />
+      )}
 
       <MenuPage fullWidth={fullWidth} fullHeight={fullHeight}>
         {children}
