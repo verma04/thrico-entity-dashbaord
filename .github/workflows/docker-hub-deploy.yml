@@ -45,7 +45,7 @@ jobs:
         env:
           NEXT_PUBLIC_GRAPHQL_URL: ${{ secrets.NEXT_PUBLIC_GRAPHQL_URL }}
           NEXT_PUBLIC_MEDIA_BASE_URL: ${{ secrets.NEXT_PUBLIC_MEDIA_BASE_URL }}
-          NEXT_PUBLIC_CDN_URL: ${{ secrets.NEXT_PUBLIC_CDN_URL }}
+          NEXT_PUBLIC_CDN_URL: "https://cdn.thrico.network"
         run: |
           pnpm install --frozen-lockfile
           docker-compose build thrico-entity-admin
