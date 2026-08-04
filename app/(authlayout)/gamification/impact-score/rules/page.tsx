@@ -9,28 +9,45 @@ import {
   Activity,
   Search,
   Settings2,
-  Pencil
+  Pencil,
 } from "lucide-react";
-import { useGetImpactRules, useToggleImpactRule } from "@/graphql/actions/impact";
+import {
+  useGetImpactRules,
+  useToggleImpactRule,
+} from "@/graphql/actions/impact";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { Button } from "@/components/ui/button";
-
+import { CtaButton } from "@/components/ui/cta-button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { AdminTable, AdminStatusBadge } from "@/components/shared/admin-table/admin-table";
+import {
+  AdminTable,
+  AdminStatusBadge,
+} from "@/components/shared/admin-table/admin-table";
 import { renderModuleIcon } from "@/components/subscription/utils";
 
-const CATEGORY_STYLES: Record<string, { bg: string; text: string; dot: string }> = {
+const CATEGORY_STYLES: Record<
+  string,
+  { bg: string; text: string; dot: string }
+> = {
   ENGAGEMENT: { bg: "bg-blue-50", text: "text-blue-700", dot: "bg-blue-500" },
-  CONTRIBUTION: { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500" },
+  CONTRIBUTION: {
+    bg: "bg-emerald-50",
+    text: "text-emerald-700",
+    dot: "bg-emerald-500",
+  },
   TRUST: { bg: "bg-amber-50", text: "text-amber-700", dot: "bg-amber-500" },
-  NETWORK: { bg: "bg-violet-50", text: "text-violet-700", dot: "bg-violet-500" },
+  NETWORK: {
+    bg: "bg-violet-50",
+    text: "text-violet-700",
+    dot: "bg-violet-500",
+  },
   CONSISTENCY: { bg: "bg-rose-50", text: "text-rose-700", dot: "bg-rose-500" },
 };
 
@@ -114,7 +131,7 @@ export default function ImpactRulesPage() {
             className={cn(
               "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider",
               catStyle.bg,
-              catStyle.text
+              catStyle.text,
             )}
           >
             <span className={cn("h-1.5 w-1.5 rounded-full", catStyle.dot)} />
@@ -134,11 +151,13 @@ export default function ImpactRulesPage() {
               rule.points > 0
                 ? "text-emerald-600 bg-emerald-50 border-emerald-100"
                 : rule.points < 0
-                ? "text-rose-600 bg-rose-50 border-rose-100"
-                : "text-zinc-600 bg-zinc-50 border-zinc-100"
+                  ? "text-rose-600 bg-rose-50 border-rose-100"
+                  : "text-zinc-600 bg-zinc-50 border-zinc-100",
             )}
           >
-            {rule.points > 0 ? `+${rule.points.toLocaleString()}` : rule.points.toLocaleString()}
+            {rule.points > 0
+              ? `+${rule.points.toLocaleString()}`
+              : rule.points.toLocaleString()}
           </span>
         </div>
       ),
@@ -151,7 +170,9 @@ export default function ImpactRulesPage() {
           <span className="text-[12px] font-bold text-foreground">
             {rule.dailyLimit ? `${rule.dailyLimit}x` : "∞"}
           </span>
-          <span className="text-[9px] text-muted-foreground uppercase tracking-widest font-bold">Limit</span>
+          <span className="text-[9px] text-muted-foreground uppercase tracking-widest font-bold">
+            Limit
+          </span>
         </div>
       ),
     },
@@ -162,12 +183,16 @@ export default function ImpactRulesPage() {
         <div className="flex items-center gap-3">
           <Switch
             checked={rule.enabled !== false}
-            onCheckedChange={() => handleToggle(rule.id, rule.enabled !== false)}
+            onCheckedChange={() =>
+              handleToggle(rule.id, rule.enabled !== false)
+            }
             disabled={toggling}
             className="scale-90 data-[state=checked]:bg-emerald-500"
           />
-          <AdminStatusBadge status={rule.enabled !== false ? "APPROVED" : "PENDING"}>
-             {rule.enabled !== false ? "Active" : "Disabled"}
+          <AdminStatusBadge
+            status={rule.enabled !== false ? "APPROVED" : "PENDING"}
+          >
+            {rule.enabled !== false ? "Active" : "Disabled"}
           </AdminStatusBadge>
         </div>
       ),
@@ -199,15 +224,22 @@ export default function ImpactRulesPage() {
         description="Define how member actions affect their reputation score across all modules."
         badgeText="Impact Engine"
         icon={Trophy}
-        breadcrumbs={[{ label: "Gamification", href: "/gamification" }, { label: "Impact Score", href: "/gamification/impact-score" }, { label: "Rules" }]}
+        breadcrumbs={[
+          { label: "Gamification", href: "/gamification" },
+          { label: "Impact Score", href: "/gamification/impact-score" },
+          { label: "Rules" },
+        ]}
         actions={
-          <EcosystemActionBar shadow="none" className="p-0 border-none bg-transparent gap-2">
+          <EcosystemActionBar
+            shadow="none"
+            className="p-0 border-none bg-transparent gap-2"
+          >
             <EcosystemActionBar.Group align="right">
               <Link href="/gamification/impact-score/rules/create">
-                <EcosystemActionBar.CtaButton>
+                <CtaButton>
                   <Plus className="h-3 w-3" />
                   Create Rule
-                </EcosystemActionBar.CtaButton>
+                </CtaButton>
               </Link>
             </EcosystemActionBar.Group>
           </EcosystemActionBar>
@@ -232,7 +264,9 @@ export default function ImpactRulesPage() {
             data={filteredRules}
             loading={loading}
             keyExtractor={(rule) => rule.id}
-            emptyTitle={search ? "No rules match your search" : "No rules configured yet"}
+            emptyTitle={
+              search ? "No rules match your search" : "No rules configured yet"
+            }
             emptyDescription={
               search
                 ? "Try adjusting your search query to find what you're looking for."
