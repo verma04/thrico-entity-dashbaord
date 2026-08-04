@@ -11,7 +11,7 @@ function EmailLayout({ children }: { children: React.ReactNode }) {
 
   const items = [
     {
-      key: "email",
+      key: "",
       label: "Overview",
       icon: <Mail className="h-4 w-4" />,
       section: "General",
