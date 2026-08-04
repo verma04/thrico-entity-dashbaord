@@ -108,7 +108,7 @@ export default function List({
                       poll.user.avatar
                         ? poll.user.avatar.startsWith("http")
                           ? poll.user.avatar
-                          : `${process.env.NEXT_PUBLIC_CDN_URL}/${poll.user.avatar}`
+                          : `https://cdn.thrico.network/${poll.user.avatar}`
                         : ""
                     }
                     alt={`${poll.user.firstName} ${poll.user.lastName}`}
@@ -158,7 +158,7 @@ export default function List({
         ),
       },
     ],
-    []
+    [],
   );
 
   return (

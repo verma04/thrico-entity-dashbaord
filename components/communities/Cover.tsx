@@ -98,7 +98,7 @@ const Cover = ({ imageUrl, setImageUrl, setCover, buttonText }: CoverProps) => {
             src={
               imageUrl
                 ? imageUrl
-                : `${process.env.NEXT_PUBLIC_CDN_URL}/defaultEventCover.png`
+                : `https://cdn.thrico.network/defaultEventCover.png`
             }
             alt="alt"
             width={"100%"}

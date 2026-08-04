@@ -31,7 +31,7 @@ export function CommunityPreview({
         <div className="aspect-3/2 overflow-hidden bg-muted rounded-t-lg">
           <Image
             src={
-              imageUrl || `${process.env.NEXT_PUBLIC_CDN_URL}/default_communities.png`
+              imageUrl || `https://cdn.thrico.network/default_communities.png`
             }
             alt={`${singularName} cover`}
             width={1536}

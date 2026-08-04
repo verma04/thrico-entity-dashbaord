@@ -355,7 +355,7 @@ export default function MemberInboxPortal({
                               <div className="h-6 w-6 shrink-0 rounded-full bg-muted border border-border overflow-hidden flex items-center justify-center">
                                 {displayAvatar ? (
                                   <Image
-                                    src={`${process.env.NEXT_PUBLIC_CDN_URL}/${displayAvatar}`}
+                                    src={`https://cdn.thrico.network/${displayAvatar}`}
                                     alt="Avatar"
                                     width={24}
                                     height={24}
@@ -522,7 +522,7 @@ export default function MemberInboxPortal({
                         <div className="h-8 w-8 rounded-full bg-muted overflow-hidden flex items-center justify-center">
                           {selectedTicket.creatorAvatar ? (
                             <Image
-                              src={`${process.env.NEXT_PUBLIC_CDN_URL}/${selectedTicket.creatorAvatar}`}
+                              src={`https://cdn.thrico.network/${selectedTicket.creatorAvatar}`}
                               alt="Avatar"
                               width={32}
                               height={32}
@@ -547,7 +547,7 @@ export default function MemberInboxPortal({
                       <div className="h-8 w-8 rounded-full bg-muted overflow-hidden flex items-center justify-center">
                         {selectedTicket.creatorAvatar ? (
                           <Image
-                            src={`${process.env.NEXT_PUBLIC_CDN_URL}/${selectedTicket.creatorAvatar}`}
+                            src={`https://cdn.thrico.network/${selectedTicket.creatorAvatar}`}
                             alt="Avatar"
                             width={32}
                             height={32}
@@ -788,8 +788,12 @@ export default function MemberInboxPortal({
                               height={28}
                               className="h-full w-full object-cover"
                             />
+                          ) : isUser ? (
+                            "U"
+                          ) : isSystem ? (
+                            "S"
                           ) : (
-                            isUser ? "U" : isSystem ? "S" : "M"
+                            "M"
                           )}
                         </div>
                         <div className="space-y-1">

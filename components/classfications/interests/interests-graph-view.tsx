@@ -135,7 +135,7 @@ function NodeDetailPanel({
   if (info.type === "user") {
     const user = info.data;
     const avatarUrl = user.avatar
-      ? `${process.env.NEXT_PUBLIC_CDN_URL}/${user.avatar}`
+      ? `https://cdn.thrico.network/${user.avatar}`
       : "";
     const name =
       [user.firstName, user.lastName].filter(Boolean).join(" ") || "User";
@@ -154,7 +154,13 @@ function NodeDetailPanel({
         </div>
         <div className="-mt-8 px-4">
           <UserProfileHoverCard
-            user={{ id: user.globalUserId, firstName: user.firstName, lastName: user.lastName, avatar: user.avatar, headline: user.headline }}
+            user={{
+              id: user.globalUserId,
+              firstName: user.firstName,
+              lastName: user.lastName,
+              avatar: user.avatar,
+              headline: user.headline,
+            }}
           >
             <Avatar className="h-16 w-16 border-[3px] border-white shadow-sm bg-white cursor-pointer">
               <AvatarImage src={avatarUrl} alt={name} />
@@ -166,7 +172,9 @@ function NodeDetailPanel({
         </div>
         <div className="px-4 pt-2 pb-4 space-y-4">
           <div>
-            <h3 className="text-sm font-semibold text-slate-900 truncate">{name}</h3>
+            <h3 className="text-sm font-semibold text-slate-900 truncate">
+              {name}
+            </h3>
             {user.headline && (
               <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">
                 {user.headline}
@@ -214,7 +222,9 @@ function NodeDetailPanel({
       </div>
 
       <div className="px-4 py-4 space-y-4">
-        <h3 className="text-sm font-semibold text-slate-900">{interest.title}</h3>
+        <h3 className="text-sm font-semibold text-slate-900">
+          {interest.title}
+        </h3>
         {info.connectedUsers.length > 0 && (
           <div>
             <p className="text-[10px] font-medium text-slate-400 uppercase tracking-wider mb-2">
@@ -223,7 +233,7 @@ function NodeDetailPanel({
             <div className="space-y-1 max-h-48 overflow-y-auto pr-1">
               {info.connectedUsers.map((user) => {
                 const avatarUrl = user.avatar
-                  ? `${process.env.NEXT_PUBLIC_CDN_URL}/${user.avatar}`
+                  ? `https://cdn.thrico.network/${user.avatar}`
                   : "";
                 const uname =
                   [user.firstName, user.lastName].filter(Boolean).join(" ") ||
@@ -231,11 +241,15 @@ function NodeDetailPanel({
                 return (
                   <UserProfileHoverCard
                     key={user.id}
-                    user={{ id: user.globalUserId, firstName: user.firstName, lastName: user.lastName, avatar: user.avatar, headline: user.headline }}
+                    user={{
+                      id: user.globalUserId,
+                      firstName: user.firstName,
+                      lastName: user.lastName,
+                      avatar: user.avatar,
+                      headline: user.headline,
+                    }}
                   >
-                    <div
-                      className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100 cursor-pointer"
-                    >
+                    <div className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-100 cursor-pointer">
                       <Avatar className="h-7 w-7 border border-slate-200 bg-white">
                         <AvatarImage src={avatarUrl} alt={uname} />
                         <AvatarFallback className="bg-slate-100 text-slate-600 text-[10px] font-medium">
@@ -289,7 +303,7 @@ export function InterestsGraphView() {
           [edge.user.firstName, edge.user.lastName].filter(Boolean).join(" ") ||
           "User";
         const avatarUrl = edge.user.avatar
-          ? `${process.env.NEXT_PUBLIC_CDN_URL}/${edge.user.avatar}`
+          ? `https://cdn.thrico.network/${edge.user.avatar}`
           : "";
         userNodes.set(userId, {
           data: {
@@ -382,11 +396,15 @@ export function InterestsGraphView() {
     <>
       <div className="flex items-center gap-2">
         <div className="h-3 w-3 rounded-full bg-indigo-100 border border-indigo-200" />
-        <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Users</span>
+        <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">
+          Users
+        </span>
       </div>
       <div className="flex items-center gap-2">
         <div className="h-3 w-3 rounded bg-pink-100 border border-pink-200" />
-        <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Interests</span>
+        <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">
+          Interests
+        </span>
       </div>
     </>
   );

@@ -104,21 +104,23 @@ export function RewardsGalleryTab({
                   "group relative bg-card rounded-2xl border transition-all duration-500 overflow-hidden",
                   reward.isActive
                     ? "border-border hover:border-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/[0.03]"
-                    : "border-destructive/20 bg-destructive/[0.01] dark:bg-destructive/[0.02] opacity-75"
+                    : "border-destructive/20 bg-destructive/[0.01] dark:bg-destructive/[0.02] opacity-75",
                 )}
               >
                 <div className="relative aspect-[4/3] overflow-hidden bg-zinc-50 border-b border-border/50">
                   {reward.image ? (
                     <img
                       src={
-                        reward.image?.startsWith(process.env.NEXT_PUBLIC_CDN_URL)
+                        reward.image?.startsWith(
+                          process.env.NEXT_PUBLIC_CDN_URL,
+                        )
                           ? reward.image
-                          : `${process.env.NEXT_PUBLIC_CDN_URL}/${reward.image}`
+                          : `https://cdn.thrico.network/${reward.image}`
                       }
                       alt={reward.title}
                       className={cn(
                         "h-full w-full object-cover transition-transform duration-700 group-hover:scale-110",
-                        !reward.isActive && "grayscale"
+                        !reward.isActive && "grayscale",
                       )}
                     />
                   ) : (
@@ -262,17 +264,17 @@ export function RewardsGalleryTab({
                   "group relative flex items-center gap-4 p-4 bg-card rounded-2xl border transition-all duration-300 overflow-hidden",
                   reward.isActive
                     ? "border-border hover:border-indigo-500/20 hover:shadow-lg hover:shadow-indigo-500/[0.02]"
-                    : "border-destructive/20 bg-destructive/[0.01] dark:bg-destructive/[0.02] opacity-75"
+                    : "border-destructive/20 bg-destructive/[0.01] dark:bg-destructive/[0.02] opacity-75",
                 )}
               >
                 <div className="h-14 w-14 rounded-xl bg-zinc-50 border border-border/60 overflow-hidden shrink-0 shadow-sm ring-1 ring-black/[0.03]">
                   {reward.image ? (
                     <img
-                      src={`${process.env.NEXT_PUBLIC_CDN_URL}/${reward?.image}`}
+                      src={`https://cdn.thrico.network/${reward?.image}`}
                       alt={reward.title}
                       className={cn(
                         "h-full w-full object-cover",
-                        !reward.isActive && "grayscale"
+                        !reward.isActive && "grayscale",
                       )}
                     />
                   ) : (

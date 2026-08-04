@@ -12,7 +12,7 @@ export default function Identity() {
   const { data: entityData, loading: entityLoading, refetch } = useGetEntity();
 
   const [communityName, setCommunityName] = useState(
-    entityData?.getEntity?.name || "My Page"
+    entityData?.getEntity?.name || "My Page",
   );
   const [communityImage, setCommunityImage] = useState<string>("");
 
@@ -21,8 +21,8 @@ export default function Identity() {
       setCommunityName(entityData.getEntity.name || "My Page");
       setCommunityImage(
         entityData.getEntity.logo
-          ? `${process.env.NEXT_PUBLIC_CDN_URL}/${entityData.getEntity.logo}`
-          : ""
+          ? `https://cdn.thrico.network/${entityData.getEntity.logo}`
+          : "",
       );
     }
   }, [entityData]);
@@ -142,13 +142,15 @@ function InfoRow({
 }) {
   return (
     <div className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
-      <span className="text-[12px] text-muted-foreground font-medium">{label}</span>
+      <span className="text-[12px] text-muted-foreground font-medium">
+        {label}
+      </span>
       <div className="flex items-center gap-1.5">
         {dot && (
           <div
             className={cn(
               "w-1.5 h-1.5 rounded-full",
-              dot === "emerald" ? "bg-emerald-500" : "bg-zinc-400"
+              dot === "emerald" ? "bg-emerald-500" : "bg-zinc-400",
             )}
           />
         )}
@@ -167,7 +169,7 @@ function InfoRow({
             className={cn(
               "text-[12.5px] font-medium text-foreground",
               mono && "font-mono text-[11px] text-muted-foreground",
-              valueClass
+              valueClass,
             )}
           >
             {value}

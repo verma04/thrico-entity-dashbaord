@@ -19,7 +19,7 @@ const BrandingPage = () => {
     if (entityData?.getEntity) {
       setCommunityImage(
         entityData.getEntity.logo
-          ? `${process.env.NEXT_PUBLIC_CDN_URL}/${entityData.getEntity.logo}`
+          ? `https://cdn.thrico.network/${entityData.getEntity.logo}`
           : "",
       );
     }
@@ -65,7 +65,10 @@ const BrandingPage = () => {
             { label: "Branding" },
           ]}
           actions={
-            <EcosystemActionBar shadow="none" className="p-0 border-none bg-transparent gap-2">
+            <EcosystemActionBar
+              shadow="none"
+              className="p-0 border-none bg-transparent gap-2"
+            >
               <EcosystemActionBar.Group align="right">
                 <button
                   onClick={() => refetch()}
@@ -94,4 +97,3 @@ const BrandingPage = () => {
 };
 
 export default BrandingPage;
-

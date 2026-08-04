@@ -65,7 +65,7 @@ export default function GeneralSettings() {
       setCommunityName(entityData.getEntity.name || "My Page");
       setCommunityImage(
         entityData.getEntity.logo
-          ? `${process.env.NEXT_PUBLIC_CDN_URL}/${entityData.getEntity.logo}`
+          ? `https://cdn.thrico.network/${entityData.getEntity.logo}`
           : "",
       );
     }
@@ -362,7 +362,9 @@ function InfoRow({
 }) {
   return (
     <div className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
-      <span className="text-[12px] text-muted-foreground font-medium">{label}</span>
+      <span className="text-[12px] text-muted-foreground font-medium">
+        {label}
+      </span>
       <div className="flex items-center gap-1.5">
         {dot && (
           <div

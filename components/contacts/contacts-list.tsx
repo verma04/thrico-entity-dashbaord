@@ -68,7 +68,7 @@ export function ContactsList({ contacts }: { contacts: Contact[] }) {
         <div className="flex items-center gap-3">
           <Avatar className="h-10 w-10 border border-border/50 shadow-sm">
             <AvatarImage
-              src={`${process.env.NEXT_PUBLIC_CDN_URL}/${row.original.user?.user?.avatar}`}
+              src={`https://cdn.thrico.network/${row.original.user?.user?.avatar}`}
               alt={row.original.user?.user?.firstName}
             />
             <AvatarFallback className="bg-indigo-50 text-indigo-600 text-xs font-bold font-mono tracking-tighter italic">
@@ -78,7 +78,8 @@ export function ContactsList({ contacts }: { contacts: Contact[] }) {
           </Avatar>
           <div className="flex flex-col gap-0.5">
             <p className="font-extrabold text-slate-900 leading-tight tracking-tight text-sm uppercase italic">
-              {row.original.user?.user?.firstName} {row.original.user?.user?.lastName}
+              {row.original.user?.user?.firstName}{" "}
+              {row.original.user?.user?.lastName}
             </p>
             <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 leading-tight mt-0.5 uppercase tracking-widest italic">
               <UserIcon className="h-3 w-3 text-emerald-500" />
@@ -215,7 +216,7 @@ function ContactAction({ contact }: { contact: Contact }) {
               <div className="flex items-center gap-4 bg-slate-50/50 p-4 rounded-3xl border border-slate-100 italic">
                 <Avatar className="h-12 w-12 border-2 border-white shadow-md">
                   <AvatarImage
-                    src={`${process.env.NEXT_PUBLIC_CDN_URL}/${contact.user?.user?.avatar}`}
+                    src={`https://cdn.thrico.network/${contact.user?.user?.avatar}`}
                   />
                   <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-black text-lg italic">
                     {contact.user?.user?.firstName?.[0]}
@@ -223,7 +224,8 @@ function ContactAction({ contact }: { contact: Contact }) {
                 </Avatar>
                 <div>
                   <p className="font-black text-base text-slate-900 uppercase leading-none mb-1.5 tracking-tight">
-                    {contact.user?.user?.firstName} {contact.user?.user?.lastName}
+                    {contact.user?.user?.firstName}{" "}
+                    {contact.user?.user?.lastName}
                   </p>
                   <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                     <Mail className="h-3 w-3 text-blue-500" />
@@ -292,8 +294,8 @@ function ContactAction({ contact }: { contact: Contact }) {
                     className="rounded-xl font-black text-[10px] uppercase tracking-widest py-3 gap-2"
                   >
                     <div className="flex items-center gap-2">
-                    <RotateCcw className="h-3.5 w-3.5 text-amber-500" />
-                    Processing Log
+                      <RotateCcw className="h-3.5 w-3.5 text-amber-500" />
+                      Processing Log
                     </div>
                   </SelectItem>
                   <SelectItem
@@ -301,8 +303,8 @@ function ContactAction({ contact }: { contact: Contact }) {
                     className="rounded-xl font-black text-[10px] uppercase tracking-widest py-3 gap-2"
                   >
                     <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
-                    Resolved Protocol
+                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                      Resolved Protocol
                     </div>
                   </SelectItem>
                 </SelectContent>

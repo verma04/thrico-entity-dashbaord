@@ -14,7 +14,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { ChevronRight, ImageIcon, Link as LinkIcon, Save, Image as LucideImage } from "lucide-react";
+import {
+  ChevronRight,
+  ImageIcon,
+  Link as LinkIcon,
+  Save,
+  Image as LucideImage,
+} from "lucide-react";
 import { ImageUploadWithCrop } from "@/components/ui/image-upload-with-crop";
 import { ProductPicker } from "@/components/shop/product-picker";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
@@ -23,7 +29,11 @@ import { cn } from "@/lib/utils";
 interface BannerCreationFormProps {
   initialValues?: Record<string, any>;
   loading?: boolean;
-  onFinish: (values: { title: string; image: string; linkedProductId?: string | null }) => void;
+  onFinish: (values: {
+    title: string;
+    image: string;
+    linkedProductId?: string | null;
+  }) => void;
   onCancel?: () => void;
 }
 
@@ -102,8 +112,8 @@ export function BannerCreationForm({
                           typeof formik.values.image === "string"
                             ? formik.values.image
                             : formik.values.image instanceof File
-                            ? URL.createObjectURL(formik.values.image)
-                            : ""
+                              ? URL.createObjectURL(formik.values.image)
+                              : ""
                         }
                         onImageUpdate={(cdnUrl, url) => {
                           if (!url) {
@@ -129,7 +139,10 @@ export function BannerCreationForm({
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="title" className="text-sm font-medium flex items-center gap-1.5">
+                      <Label
+                        htmlFor="title"
+                        className="text-sm font-medium flex items-center gap-1.5"
+                      >
                         Headline <span className="text-destructive">*</span>
                       </Label>
                       <Input
@@ -141,7 +154,9 @@ export function BannerCreationForm({
                         onBlur={formik.handleBlur}
                         className={cn(
                           "h-10",
-                          formik.touched.title && formik.errors.title && "border-destructive"
+                          formik.touched.title &&
+                            formik.errors.title &&
+                            "border-destructive",
                         )}
                       />
                       {formik.touched.title && formik.errors.title && (
@@ -155,9 +170,12 @@ export function BannerCreationForm({
 
                 <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden">
                   <CardHeader className="bg-muted/30 pb-4">
-                    <CardTitle className="text-xl">Action &amp; Linking</CardTitle>
+                    <CardTitle className="text-xl">
+                      Action &amp; Linking
+                    </CardTitle>
                     <CardDescription>
-                      Link this banner to a specific product to drive conversions.
+                      Link this banner to a specific product to drive
+                      conversions.
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="pt-6">
@@ -197,12 +215,14 @@ export function BannerCreationForm({
                         <img
                           src={
                             typeof formik.values.image === "string"
-                              ? formik.values.image.startsWith("http") || formik.values.image.startsWith("blob:") || formik.values.image.startsWith("data:")
+                              ? formik.values.image.startsWith("http") ||
+                                formik.values.image.startsWith("blob:") ||
+                                formik.values.image.startsWith("data:")
                                 ? formik.values.image
-                                : `${process.env.NEXT_PUBLIC_CDN_URL}/${formik.values.image}`
+                                : `https://cdn.thrico.network/${formik.values.image}`
                               : formik.values.image instanceof File
-                              ? URL.createObjectURL(formik.values.image)
-                              : ""
+                                ? URL.createObjectURL(formik.values.image)
+                                : ""
                           }
                           alt="Banner Preview"
                           className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -210,19 +230,21 @@ export function BannerCreationForm({
                       ) : (
                         <div className="flex flex-col items-center gap-3 text-muted-foreground/60">
                           <LucideImage className="w-12 h-12" />
-                          <span className="text-sm font-medium">No Image Selected</span>
+                          <span className="text-sm font-medium">
+                            No Image Selected
+                          </span>
                         </div>
                       )}
-                      
+
                       {/* Gradient Overlay for text readability */}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-90" />
-                      
+
                       <div className="absolute inset-x-0 bottom-0 p-6 flex flex-col items-start gap-4 transform transition-all duration-300">
                         <h4 className="text-white font-bold text-2xl sm:text-3xl leading-tight line-clamp-2 drop-shadow-md">
                           {formik.values.title || "Your Engaging Headline Here"}
                         </h4>
-                        <Button 
-                          variant="secondary" 
+                        <Button
+                          variant="secondary"
                           className="bg-white/90 hover:bg-white text-black font-semibold rounded-full px-6 shadow-lg backdrop-blur-sm transition-transform hover:scale-105"
                         >
                           Shop Now
@@ -243,7 +265,9 @@ export function BannerCreationForm({
                     <ImageIcon className="h-3 w-3 text-primary" />
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Make sure your banner has a strong, clear headline. The image should be high quality and relevant to the promotion. Linked products will direct users directly to the item.
+                    Make sure your banner has a strong, clear headline. The
+                    image should be high quality and relevant to the promotion.
+                    Linked products will direct users directly to the item.
                   </p>
                 </div>
               </div>
@@ -263,7 +287,11 @@ export function BannerCreationForm({
           else window.history.back();
         }}
         title={isEditMode ? "Unsaved Changes" : "Unsaved Banner"}
-        description={isEditMode ? "You have unsaved changes." : "You have unfilled form data."}
+        description={
+          isEditMode
+            ? "You have unsaved changes."
+            : "You have unfilled form data."
+        }
         buttonText={isEditMode ? "Update Banner" : "Publish Banner"}
       />
     </div>

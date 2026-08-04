@@ -63,7 +63,7 @@ export const defaultBlock = (type: BlockType, id: string): BuilderBlock => ({
   href: "",
   spacerSize: "md",
   imageAlt: "",
-  logoUrl: type === "header" ? `${process.env.NEXT_PUBLIC_CDN_URL}/thrico.png` : "",
+  logoUrl: type === "header" ? `https://cdn.thrico.network/thrico.png` : "",
   secondaryContent: type === "header" ? "Premium Ecosystem Dashboard" : "",
 });
 
@@ -84,7 +84,8 @@ export const STARTER_TEMPLATES = {
       },
       {
         ...defaultBlock("text", "t1"),
-        content: "Welcome to Thrico! We're excited to have you join our growing community of innovators. Your journey starts today, and we're here to support you every step of the way.",
+        content:
+          "Welcome to Thrico! We're excited to have you join our growing community of innovators. Your journey starts today, and we're here to support you every step of the way.",
         align: "center" as TextAlign,
       },
       {
@@ -120,7 +121,8 @@ export const STARTER_TEMPLATES = {
       },
       {
         ...defaultBlock("text", "t1"),
-        content: "It's been a busy month for the team! We've launched several new features including gRPC integration, advanced usage tracking, and a brand new email builder.",
+        content:
+          "It's been a busy month for the team! We've launched several new features including gRPC integration, advanced usage tracking, and a brand new email builder.",
       },
       {
         ...defaultBlock("button", "b1"),
@@ -135,7 +137,8 @@ export const STARTER_TEMPLATES = {
       },
       {
         ...defaultBlock("text", "t2"),
-        content: "Meet our user of the month, Alex, who has used Thrico to scale their local business by 300% in just 60 days.",
+        content:
+          "Meet our user of the month, Alex, who has used Thrico to scale their local business by 300% in just 60 days.",
       },
       { ...defaultBlock("footer", "f1") },
     ],
@@ -153,7 +156,8 @@ export const STARTER_TEMPLATES = {
       },
       {
         ...defaultBlock("text", "t1"),
-        content: "Join us for an exclusive evening of networking, innovation, and insights into the future of digital ecosystems.",
+        content:
+          "Join us for an exclusive evening of networking, innovation, and insights into the future of digital ecosystems.",
         align: "center" as TextAlign,
         bold: true,
       },
@@ -185,7 +189,8 @@ export const STARTER_TEMPLATES = {
       },
       {
         ...defaultBlock("text", "t1"),
-        content: "We're excited to announce that we've completely overhauled our backend infrastructure to provide 10x faster response times and improved reliability across the board.",
+        content:
+          "We're excited to announce that we've completely overhauled our backend infrastructure to provide 10x faster response times and improved reliability across the board.",
         align: "center" as TextAlign,
       },
       {

@@ -110,7 +110,7 @@ function SortableAlbumCard({
           {album?.coverImage ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={`${process.env.NEXT_PUBLIC_CDN_URL}/${album?.coverImage}`}
+              src={`https://cdn.thrico.network/${album?.coverImage}`}
               alt={album?.title}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
@@ -221,7 +221,7 @@ function AlbumFormDialog({
       setCoverFile(null);
       setCoverPreview(
         editingAlbum?.coverImage
-          ? `${process.env.NEXT_PUBLIC_CDN_URL}/${editingAlbum.coverImage}`
+          ? `https://cdn.thrico.network/${editingAlbum.coverImage}`
           : null,
       );
     }
@@ -457,7 +457,10 @@ export default function MediaGalleryPage() {
         icon={Images}
         breadcrumbs={[{ label: "Media Gallery", href: "/media-gallery" }]}
         actions={
-          <EcosystemActionBar shadow="none" className="p-0 border-none bg-transparent gap-2">
+          <EcosystemActionBar
+            shadow="none"
+            className="p-0 border-none bg-transparent gap-2"
+          >
             <EcosystemActionBar.Group align="right">
               <CtaButton
                 onClick={() => {
@@ -476,90 +479,93 @@ export default function MediaGalleryPage() {
       <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0 space-y-6">
         <div className="px-6 py-4 space-y-6">
           {/* Content */}
-      {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} className="h-64 w-full rounded-xl" />
-          ))}
-        </div>
-      ) : albums.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50/50 py-20 text-center">
-          <Images className="w-12 h-12 text-gray-300 mb-4" />
-          <h3 className="text-lg font-semibold text-gray-700">No albums yet</h3>
-          <p className="mt-1 text-sm text-gray-400 max-w-xs">
-            Create your first photo album to start building your media gallery.
-          </p>
-          <Button
-            variant="outline"
-            className="mt-6"
-            onClick={() => {
-              setEditingAlbum(null);
-              setIsFormOpen(true);
-            }}
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Create Album
-          </Button>
-        </div>
-      ) : (
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext
-            items={albums.map((a) => a.id)}
-            strategy={rectSortingStrategy}
-          >
+          {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {albums.map((album) => (
-                <SortableAlbumCard
-                  key={album?.id}
-                  album={album}
-                  onClick={(id) => router.push(`/media-gallery/${id}`)}
-                  onEdit={(a) => {
-                    setEditingAlbum(a);
-                    setIsFormOpen(true);
-                  }}
-                  onDelete={(id) => setDeleteId(id)}
-                />
+              {[1, 2, 3, 4].map((i) => (
+                <Skeleton key={i} className="h-64 w-full rounded-xl" />
               ))}
             </div>
-          </SortableContext>
-        </DndContext>
-      )}
-
-      {/* Create / Edit Form */}
-      <AlbumFormDialog
-        open={isFormOpen}
-        onClose={() => setIsFormOpen(false)}
-        editingAlbum={editingAlbum}
-        albumCount={albums.length}
-        onCreate={handleCreate}
-        onUpdate={handleUpdate}
-      />
-
-      {/* Delete Confirmation */}
-      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Album?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete the album and all its images and
-              comments. This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              className="bg-red-600 hover:bg-red-700"
+          ) : albums.length === 0 ? (
+            <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50/50 py-20 text-center">
+              <Images className="w-12 h-12 text-gray-300 mb-4" />
+              <h3 className="text-lg font-semibold text-gray-700">
+                No albums yet
+              </h3>
+              <p className="mt-1 text-sm text-gray-400 max-w-xs">
+                Create your first photo album to start building your media
+                gallery.
+              </p>
+              <Button
+                variant="outline"
+                className="mt-6"
+                onClick={() => {
+                  setEditingAlbum(null);
+                  setIsFormOpen(true);
+                }}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Create Album
+              </Button>
+            </div>
+          ) : (
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
             >
-              Delete Album
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+              <SortableContext
+                items={albums.map((a) => a.id)}
+                strategy={rectSortingStrategy}
+              >
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {albums.map((album) => (
+                    <SortableAlbumCard
+                      key={album?.id}
+                      album={album}
+                      onClick={(id) => router.push(`/media-gallery/${id}`)}
+                      onEdit={(a) => {
+                        setEditingAlbum(a);
+                        setIsFormOpen(true);
+                      }}
+                      onDelete={(id) => setDeleteId(id)}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
+          )}
+
+          {/* Create / Edit Form */}
+          <AlbumFormDialog
+            open={isFormOpen}
+            onClose={() => setIsFormOpen(false)}
+            editingAlbum={editingAlbum}
+            albumCount={albums.length}
+            onCreate={handleCreate}
+            onUpdate={handleUpdate}
+          />
+
+          {/* Delete Confirmation */}
+          <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete Album?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will permanently delete the album and all its images and
+                  comments. This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDelete}
+                  className="bg-red-600 hover:bg-red-700"
+                >
+                  Delete Album
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </EcosystemContainer>
     </EcosystemWrapper>

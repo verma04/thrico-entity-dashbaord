@@ -30,7 +30,10 @@ interface TierAssignMembersProps {
   onAssigned: () => void;
 }
 
-export default function TierAssignMembers({ tierId, onAssigned }: TierAssignMembersProps) {
+export default function TierAssignMembers({
+  tierId,
+  onAssigned,
+}: TierAssignMembersProps) {
   const [open, setOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [search, setSearch] = useState("");
@@ -41,15 +44,19 @@ export default function TierAssignMembers({ tierId, onAssigned }: TierAssignMemb
     search: search.length > 2 ? search : null,
   });
 
-  const [assignMembers, { loading: isAssigning }] = useMutation(ASSIGN_MEMBERS_TO_TIER);
+  const [assignMembers, { loading: isAssigning }] = useMutation(
+    ASSIGN_MEMBERS_TO_TIER,
+  );
 
   const users = data?.getAllUser?.data || [];
   // Filter out members that are already in this tier
-  const availableUsers = users.filter((u: any) => u.membershipTierId !== tierId);
+  const availableUsers = users.filter(
+    (u: any) => u.membershipTierId !== tierId,
+  );
 
   const handleAssign = async () => {
     if (selectedIds.length === 0) return;
-    
+
     try {
       await assignMembers({
         variables: {
@@ -68,7 +75,7 @@ export default function TierAssignMembers({ tierId, onAssigned }: TierAssignMemb
 
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
     );
   };
 
@@ -89,8 +96,8 @@ export default function TierAssignMembers({ tierId, onAssigned }: TierAssignMemb
             className="border rounded-md overflow-hidden"
             shouldFilter={false}
           >
-            <CommandInput 
-              placeholder="Search members by name or email..." 
+            <CommandInput
+              placeholder="Search members by name or email..."
               value={search}
               onValueChange={setSearch}
             />
@@ -111,8 +118,16 @@ export default function TierAssignMembers({ tierId, onAssigned }: TierAssignMemb
                     >
                       <div className="flex items-center gap-3">
                         <Avatar className="h-8 w-8">
-                          <AvatarImage src={user?.avatar ? `${process.env.NEXT_PUBLIC_CDN_URL}/${user.avatar}` : ""} />
-                          <AvatarFallback>{user?.firstName?.charAt(0)}</AvatarFallback>
+                          <AvatarImage
+                            src={
+                              user?.avatar
+                                ? `https://cdn.thrico.network/${user.avatar}`
+                                : ""
+                            }
+                          />
+                          <AvatarFallback>
+                            {user?.firstName?.charAt(0)}
+                          </AvatarFallback>
                         </Avatar>
                         <div className="flex flex-col">
                           <span className="text-sm font-medium">
@@ -128,7 +143,7 @@ export default function TierAssignMembers({ tierId, onAssigned }: TierAssignMemb
                           "flex h-5 w-5 items-center justify-center rounded border",
                           isSelected
                             ? "bg-primary border-primary text-primary-foreground"
-                            : "border-input"
+                            : "border-input",
                         )}
                       >
                         {isSelected && <Check className="h-3.5 w-3.5" />}
@@ -139,13 +154,18 @@ export default function TierAssignMembers({ tierId, onAssigned }: TierAssignMemb
               </CommandGroup>
             </CommandList>
           </Command>
-          
+
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleAssign} disabled={selectedIds.length === 0 || isAssigning}>
-              {isAssigning ? "Assigning..." : `Assign ${selectedIds.length > 0 ? `(${selectedIds.length})` : ""}`}
+            <Button
+              onClick={handleAssign}
+              disabled={selectedIds.length === 0 || isAssigning}
+            >
+              {isAssigning
+                ? "Assigning..."
+                : `Assign ${selectedIds.length > 0 ? `(${selectedIds.length})` : ""}`}
             </Button>
           </div>
         </div>

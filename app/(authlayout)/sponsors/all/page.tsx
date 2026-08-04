@@ -92,7 +92,11 @@ function SortableSponsorRow({
       <div className="w-16 h-16 relative rounded-md overflow-hidden bg-gray-100 flex-shrink-0 border">
         {sponsor.image ? (
           <Image
-            src={sponsor.image.startsWith("http") ? sponsor.image : `${process.env.NEXT_PUBLIC_CDN_URL}/${sponsor.image}`}
+            src={
+              sponsor.image.startsWith("http")
+                ? sponsor.image
+                : `https://cdn.thrico.network/${sponsor.image}`
+            }
             alt={sponsor.title}
             fill
             className="object-contain"
@@ -250,7 +254,7 @@ export default function ManageSponsorsPage() {
           badgeText="Sponsors"
           breadcrumbs={[
             { label: "Sponsors", href: "/sponsors/all" },
-            { label: "Manage" }
+            { label: "Manage" },
           ]}
         />
         <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">
@@ -277,10 +281,13 @@ export default function ManageSponsorsPage() {
         badgeText="Sponsors"
         breadcrumbs={[
           { label: "Sponsors", href: "/sponsors/all" },
-          { label: "Manage" }
+          { label: "Manage" },
         ]}
         actions={
-          <EcosystemActionBar shadow="none" className="p-0 border-none bg-transparent gap-2">
+          <EcosystemActionBar
+            shadow="none"
+            className="p-0 border-none bg-transparent gap-2"
+          >
             <EcosystemActionBar.Group align="right">
               <Link href="/sponsors/create">
                 <CtaButton>
@@ -295,58 +302,58 @@ export default function ManageSponsorsPage() {
       <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">
         <div className="px-6 py-4">
           <Card className="p-4 bg-gray-50/50">
-        {sponsors.length === 0 ? (
-          <div className="text-center py-12 text-gray-500">
-            No sponsors added yet. Click "Add Sponsor" to create one.
-          </div>
-        ) : (
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
-          >
-            <SortableContext
-              items={sponsors.map((s) => s.id)}
-              strategy={verticalListSortingStrategy}
-            >
-              <div className="space-y-2">
-                {sponsors.map((sponsor) => (
-                  <SortableSponsorRow
-                    key={sponsor.id}
-                    sponsor={sponsor}
-                    onToggleStatus={handleToggleStatus}
-                    onDelete={setDeleteConfirmId}
-                  />
-                ))}
+            {sponsors.length === 0 ? (
+              <div className="text-center py-12 text-gray-500">
+                No sponsors added yet. Click "Add Sponsor" to create one.
               </div>
-            </SortableContext>
-          </DndContext>
-        )}
-      </Card>
+            ) : (
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext
+                  items={sponsors.map((s) => s.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <div className="space-y-2">
+                    {sponsors.map((sponsor) => (
+                      <SortableSponsorRow
+                        key={sponsor.id}
+                        sponsor={sponsor}
+                        onToggleStatus={handleToggleStatus}
+                        onDelete={setDeleteConfirmId}
+                      />
+                    ))}
+                  </div>
+                </SortableContext>
+              </DndContext>
+            )}
+          </Card>
 
-      <AlertDialog
-        open={!!deleteConfirmId}
-        onOpenChange={(open) => !open && setDeleteConfirmId(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the
-              sponsor.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+          <AlertDialog
+            open={!!deleteConfirmId}
+            onOpenChange={(open) => !open && setDeleteConfirmId(null)}
+          >
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete the
+                  sponsor.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDelete}
+                  className="bg-red-600 hover:bg-red-700"
+                >
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </EcosystemContainer>
     </EcosystemWrapper>

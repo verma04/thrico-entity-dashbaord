@@ -76,7 +76,9 @@ export function EducationListView({ search }: { search?: string }) {
       <div className="flex flex-col items-center justify-center h-64 text-slate-500">
         <GraduationCap className="h-12 w-12 mb-4 text-slate-300" />
         <p className="text-lg font-medium">No education data found</p>
-        <p className="text-sm">There are no school relationships recorded yet.</p>
+        <p className="text-sm">
+          There are no school relationships recorded yet.
+        </p>
       </div>
     );
   }
@@ -93,7 +95,10 @@ export function EducationListView({ search }: { search?: string }) {
               <GraduationCap className="h-5 w-5" />
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-foreground truncate" title={school.title}>
+              <h3
+                className="font-semibold text-foreground truncate"
+                title={school.title}
+              >
                 {school.title}
               </h3>
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-1">
@@ -116,13 +121,19 @@ export function EducationListView({ search }: { search?: string }) {
                     [user.firstName, user.lastName].filter(Boolean).join(" ") ||
                     "User";
                   const avatarUrl = user.avatar
-                    ? `${process.env.NEXT_PUBLIC_CDN_URL}/${user.avatar}`
+                    ? `https://cdn.thrico.network/${user.avatar}`
                     : "";
 
                   return (
                     <UserProfileHoverCard
                       key={user.id}
-                      user={{ id: user.globalUserId, firstName: user.firstName, lastName: user.lastName, avatar: user.avatar, headline: user.headline }}
+                      user={{
+                        id: user.globalUserId,
+                        firstName: user.firstName,
+                        lastName: user.lastName,
+                        avatar: user.avatar,
+                        headline: user.headline,
+                      }}
                     >
                       <Avatar
                         className="h-8 w-8 border-2 border-background shadow-sm hover:z-10 hover:scale-110 transition-transform cursor-pointer"

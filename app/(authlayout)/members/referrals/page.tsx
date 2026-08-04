@@ -32,12 +32,21 @@ function ReferralsPage() {
           <div className="flex items-center gap-4 py-1">
             <div className="flex items-center gap-2.5 min-w-[180px]">
               <Avatar className="h-8 w-8">
-                <AvatarImage src={`${process.env.NEXT_PUBLIC_CDN_URL}/${referrer?.avatar}`} />
-                <AvatarFallback className="text-[10px]">{referrer?.firstName?.[0]}{referrer?.lastName?.[0]}</AvatarFallback>
+                <AvatarImage
+                  src={`https://cdn.thrico.network/${referrer?.avatar}`}
+                />
+                <AvatarFallback className="text-[10px]">
+                  {referrer?.firstName?.[0]}
+                  {referrer?.lastName?.[0]}
+                </AvatarFallback>
               </Avatar>
               <div className="flex flex-col min-w-0">
-                <span className="text-sm font-medium truncate">{referrer?.firstName} {referrer?.lastName}</span>
-                <span className="text-[10px] text-muted-foreground">Referrer</span>
+                <span className="text-sm font-medium truncate">
+                  {referrer?.firstName} {referrer?.lastName}
+                </span>
+                <span className="text-[10px] text-muted-foreground">
+                  Referrer
+                </span>
               </div>
             </div>
 
@@ -49,12 +58,21 @@ function ReferralsPage() {
 
             <div className="flex items-center gap-2.5 min-w-[180px]">
               <Avatar className="h-8 w-8 border border-primary/10">
-                <AvatarImage src={`${process.env.NEXT_PUBLIC_CDN_URL}/${referee?.avatar}`} />
-                <AvatarFallback className="text-[10px]">{referee?.firstName?.[0]}{referee?.lastName?.[0]}</AvatarFallback>
+                <AvatarImage
+                  src={`https://cdn.thrico.network/${referee?.avatar}`}
+                />
+                <AvatarFallback className="text-[10px]">
+                  {referee?.firstName?.[0]}
+                  {referee?.lastName?.[0]}
+                </AvatarFallback>
               </Avatar>
               <div className="flex flex-col min-w-0">
-                <span className="text-sm font-medium truncate">{referee?.firstName} {referee?.lastName}</span>
-                <span className="text-[10px] text-muted-foreground">Referee</span>
+                <span className="text-sm font-medium truncate">
+                  {referee?.firstName} {referee?.lastName}
+                </span>
+                <span className="text-[10px] text-muted-foreground">
+                  Referee
+                </span>
               </div>
             </div>
           </div>
@@ -66,11 +84,17 @@ function ReferralsPage() {
       header: "Details",
       cell: (row) => (
         <div className="flex flex-col gap-1">
-          <span className="text-xs text-muted-foreground">Joined {safeLocaleDateString(row.referee?.user?.createdAt)}</span>
+          <span className="text-xs text-muted-foreground">
+            Joined {safeLocaleDateString(row.referee?.user?.createdAt)}
+          </span>
           <div className="flex items-center gap-2">
-            <Badge 
-              variant="outline" 
-              className={row.referee?.isApproved ? "bg-emerald-50 text-emerald-700 border-emerald-100 text-[10px] py-0" : "bg-amber-50 text-amber-700 border-amber-100 text-[10px] py-0"}
+            <Badge
+              variant="outline"
+              className={
+                row.referee?.isApproved
+                  ? "bg-emerald-50 text-emerald-700 border-emerald-100 text-[10px] py-0"
+                  : "bg-amber-50 text-amber-700 border-amber-100 text-[10px] py-0"
+              }
             >
               {row.referee?.isApproved ? "Approved" : "Pending"}
             </Badge>
@@ -84,7 +108,9 @@ function ReferralsPage() {
       cell: (row) => (
         <div className="flex items-center gap-2">
           <span className="text-xs text-muted-foreground">Total:</span>
-          <Badge variant="secondary" className="text-[10px] font-mono">{row.referrer?.referralsCount || 0}</Badge>
+          <Badge variant="secondary" className="text-[10px] font-mono">
+            {row.referrer?.referralsCount || 0}
+          </Badge>
         </div>
       ),
     },
@@ -120,9 +146,12 @@ function ReferralsPage() {
           <div className="flex h-[400px] items-center justify-center bg-card rounded-xl border border-border p-6 mt-6">
             <div className="max-w-md w-full bg-amber-50 border border-amber-200 text-amber-800 rounded-2xl p-8 text-center space-y-4 shadow-sm">
               <AlertTriangle className="h-12 w-12 text-amber-600 mx-auto" />
-              <h2 className="text-xl font-bold text-amber-900">Feature Locked</h2>
+              <h2 className="text-xl font-bold text-amber-900">
+                Feature Locked
+              </h2>
               <p className="text-amber-700 font-medium">
-                {message || "You have reached your subscription limit. Please upgrade your subscription to view referrals."}
+                {message ||
+                  "You have reached your subscription limit. Please upgrade your subscription to view referrals."}
               </p>
               <div className="pt-4">
                 <button

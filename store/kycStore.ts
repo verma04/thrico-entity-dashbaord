@@ -22,7 +22,7 @@ interface KycFormStore {
     logo: any;
   };
   setOrganization: (
-    organization: Partial<KycFormStore["organization"]>
+    organization: Partial<KycFormStore["organization"]>,
   ) => void;
   domain: string;
   setDomain: (domain: string) => void;
@@ -63,6 +63,6 @@ export const useKycFormStore = create<KycFormStore>((set) => ({
   setDomain: (domain) => set({ domain }),
   logo: null,
   setLogo: (logo) => set({ logo }),
-  logoPreview: `${process.env.NEXT_PUBLIC_CDN_URL}/thricoLogo.png`,
+  logoPreview: `https://cdn.thrico.network/thricoLogo.png`,
   setLogoPreview: (logoPreview) => set({ logoPreview }),
 }));

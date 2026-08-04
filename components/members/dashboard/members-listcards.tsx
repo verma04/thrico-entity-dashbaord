@@ -97,13 +97,13 @@ export const MembersListCards = ({
 
             <div className="px-6 pb-6 -mt-12">
               <div className="flex items-end justify-between mb-4">
-                <button 
+                <button
                   onClick={() => router.push(`/members/${member.id}`)}
                   className="relative group/avatar"
                 >
                   <Avatar className="h-24 w-24 rounded-2xl border-4 border-background shadow-lg group-hover/avatar:scale-105 transition-transform duration-300 cursor-pointer">
                     <AvatarImage
-                      src={`${process.env.NEXT_PUBLIC_CDN_URL}/${member.user.avatar}`}
+                      src={`https://cdn.thrico.network/${member.user.avatar}`}
                       alt={member.user.firstName}
                     />
                     <AvatarFallback className="text-2xl bg-primary/10 text-primary">
@@ -127,7 +127,7 @@ export const MembersListCards = ({
               </div>
 
               <div className="space-y-1">
-                <button 
+                <button
                   onClick={() => router.push(`/members/${member.id}`)}
                   className="text-xl font-bold tracking-tight hover:text-primary transition-colors text-left"
                 >
@@ -152,8 +152,8 @@ export const MembersListCards = ({
               {member.industries && member.industries.length > 0 && (
                 <div className="mt-3 flex flex-wrap gap-1.5">
                   {member.industries.slice(0, 3).map((ind: any) => (
-                    <span 
-                      key={ind.id} 
+                    <span
+                      key={ind.id}
                       className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-tight bg-indigo-50 text-indigo-700 border border-indigo-100/50"
                     >
                       {ind.title}
@@ -166,7 +166,7 @@ export const MembersListCards = ({
                   )}
                 </div>
               )}
-              
+
               {/* Last Session */}
               {member.lastSession && (
                 <div className="mt-4 flex items-center gap-2 text-[11px] text-muted-foreground px-1">
@@ -177,7 +177,11 @@ export const MembersListCards = ({
                     )}
                   </div>
                   <span className="truncate">
-                    Last active {safeFormatDistanceToNow(member.lastSession.lastUsed, { addSuffix: true })} on {member.lastSession.deviceName}
+                    Last active{" "}
+                    {safeFormatDistanceToNow(member.lastSession.lastUsed, {
+                      addSuffix: true,
+                    })}{" "}
+                    on {member.lastSession.deviceName}
                   </span>
                 </div>
               )}

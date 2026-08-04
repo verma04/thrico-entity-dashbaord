@@ -10,7 +10,16 @@ import {
 import { MentorsTable } from "./mentors-table";
 import { MentorEditor } from "./mentor-editor";
 import { Button } from "@/components/ui/button";
-import { Plus, Search, LayoutGrid, GraduationCap, X, CheckCircle2, Clock, Ban } from "lucide-react";
+import {
+  Plus,
+  Search,
+  LayoutGrid,
+  GraduationCap,
+  X,
+  CheckCircle2,
+  Clock,
+  Ban,
+} from "lucide-react";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
@@ -27,10 +36,15 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 
 const STATUS_OPTIONS = [
-  { value: "ALL",      label: "All Status", icon: LayoutGrid, dot: "" },
-  { value: "APPROVED", label: "Approved",  icon: CheckCircle2,   dot: "bg-emerald-500" },
-  { value: "PENDING",  label: "Pending",   icon: Clock,         dot: "bg-amber-500" },
-  { value: "REJECTED", label: "Rejected",  icon: Ban,           dot: "bg-rose-500" },
+  { value: "ALL", label: "All Status", icon: LayoutGrid, dot: "" },
+  {
+    value: "APPROVED",
+    label: "Approved",
+    icon: CheckCircle2,
+    dot: "bg-emerald-500",
+  },
+  { value: "PENDING", label: "Pending", icon: Clock, dot: "bg-amber-500" },
+  { value: "REJECTED", label: "Rejected", icon: Ban, dot: "bg-rose-500" },
 ];
 
 import { useModuleStore } from "@/store/useModuleStore";
@@ -76,11 +90,16 @@ export function MentorsManager() {
   };
 
   const mentorsRaw = mentorsData?.getAllMentor || [];
-  
+
   const mentors = mentorsRaw.map((m: any) => ({
     ...m,
-    name: m.displayName || `${m.mentorUser?.user?.firstName || ""} ${m.mentorUser?.user?.lastName || ""}`.trim() || "Anonymous",
-    image: m.mentorUser?.user?.avatar ? `${process.env.NEXT_PUBLIC_CDN_URL}/${m.mentorUser?.user?.avatar}` : undefined,
+    name:
+      m.displayName ||
+      `${m.mentorUser?.user?.firstName || ""} ${m.mentorUser?.user?.lastName || ""}`.trim() ||
+      "Anonymous",
+    image: m.mentorUser?.user?.avatar
+      ? `https://cdn.thrico.network/${m.mentorUser?.user?.avatar}`
+      : undefined,
     title: m.intro || "Mentor",
     categoryName: m.category?.title || "Uncategorized",
     status: m.isApproved ? "approved" : m.isRequested ? "pending" : "inactive",
@@ -88,7 +107,9 @@ export function MentorsManager() {
   }));
 
   const categories = categoriesData?.getMentorCategories || [];
-  const currentStatus = STATUS_OPTIONS.find(opt => opt.value === selectedStatus) || STATUS_OPTIONS[0];
+  const currentStatus =
+    STATUS_OPTIONS.find((opt) => opt.value === selectedStatus) ||
+    STATUS_OPTIONS[0];
 
   return (
     <EcosystemWrapper>
@@ -122,7 +143,10 @@ export function MentorsManager() {
 
         <EcosystemActionBar.Group>
           <EcosystemActionBar.Item>
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <Select
+              value={selectedCategory}
+              onValueChange={setSelectedCategory}
+            >
               <SelectTrigger className="w-[180px] h-9 rounded-lg border-border bg-card text-sm font-medium text-foreground shadow-none focus:ring-2 focus:ring-ring/20">
                 <div className="flex items-center gap-2">
                   <LayoutGrid className="h-3.5 w-3.5 text-muted-foreground" />
@@ -130,9 +154,18 @@ export function MentorsManager() {
                 </div>
               </SelectTrigger>
               <SelectContent className="rounded-xl border-border shadow-lg p-1">
-                <SelectItem value="all" className="rounded-lg text-sm font-medium py-2">All Categories</SelectItem>
+                <SelectItem
+                  value="all"
+                  className="rounded-lg text-sm font-medium py-2"
+                >
+                  All Categories
+                </SelectItem>
                 {categories.map((cat) => (
-                  <SelectItem key={cat.id} value={cat.id} className="rounded-lg text-sm font-medium py-2">
+                  <SelectItem
+                    key={cat.id}
+                    value={cat.id}
+                    className="rounded-lg text-sm font-medium py-2"
+                  >
                     {cat.title}
                   </SelectItem>
                 ))}
@@ -145,7 +178,12 @@ export function MentorsManager() {
               <SelectTrigger className="w-[160px] h-9 rounded-lg border-border bg-card text-sm font-medium text-foreground focus:ring-2 focus:ring-ring/20 shadow-none">
                 <div className="flex items-center gap-2">
                   {currentStatus.dot && (
-                    <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", currentStatus.dot)} />
+                    <span
+                      className={cn(
+                        "h-1.5 w-1.5 rounded-full shrink-0",
+                        currentStatus.dot,
+                      )}
+                    />
                   )}
                   <SelectValue placeholder="Status" />
                 </div>
@@ -159,7 +197,12 @@ export function MentorsManager() {
                   >
                     <div className="flex items-center gap-2">
                       {opt.dot && (
-                        <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", opt.dot)} />
+                        <span
+                          className={cn(
+                            "h-1.5 w-1.5 rounded-full shrink-0",
+                            opt.dot,
+                          )}
+                        />
                       )}
                       {opt.label}
                     </div>
@@ -172,7 +215,7 @@ export function MentorsManager() {
 
         <EcosystemActionBar.Group align="right">
           <EcosystemActionBar.Status active={mentors.length > 0}>
-             {mentors.length} Active {singularName}s
+            {mentors.length} Active {singularName}s
           </EcosystemActionBar.Status>
         </EcosystemActionBar.Group>
       </EcosystemActionBar>

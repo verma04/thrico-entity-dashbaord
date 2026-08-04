@@ -3,7 +3,6 @@
 import { withModulePermission } from "@/components/hoc/with-module-permission";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 
-
 import React from "react";
 import {
   Video,
@@ -193,8 +192,6 @@ function MomentsDashboardPage() {
           </div>
         }
       />
-
-      
 
       <EcosystemContainer className="space-y-10 p-8 lg:p-10">
         {/* KPI Grid */}
@@ -406,7 +403,7 @@ function MomentsDashboardPage() {
                               <div className="h-10 w-8 bg-zinc-100 rounded overflow-hidden shrink-0">
                                 {moment.thumbnailUrl ? (
                                   <img
-                                    src={`${process.env.NEXT_PUBLIC_CDN_URL}${moment.thumbnailUrl}`}
+                                    src={`https://cdn.thrico.network${moment.thumbnailUrl}`}
                                     alt="Thumbnail"
                                     className="h-full w-full object-cover"
                                   />
@@ -417,7 +414,8 @@ function MomentsDashboardPage() {
                                 )}
                               </div>
                               <span className="font-bold text-zinc-900 text-xs truncate max-w-[200px]">
-                                {moment.caption || `Untitled ${singularName}`}{" "}
+                                {moment.caption ||
+                                  `Untitled ${singularName}`}{" "}
                               </span>
                             </div>
                           </td>
@@ -502,5 +500,5 @@ function MomentsDashboardPage() {
 
 export default withSubscriptionCheck(
   withModulePermission(MomentsDashboardPage, "MOMENTS", "canRead"),
-  "moments"
+  "moments",
 );

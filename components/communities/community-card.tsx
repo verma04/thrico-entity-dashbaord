@@ -41,7 +41,7 @@ export default function CommunityCard({ record }: CommunityCardProps) {
         <div className="relative h-44 w-full overflow-hidden bg-slate-100">
           {record.cover ? (
             <img
-              src={`${process.env.NEXT_PUBLIC_CDN_URL}/${record.cover}`}
+              src={`https://cdn.thrico.network/${record.cover}`}
               alt={record.title}
               className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
             />
@@ -111,7 +111,7 @@ export default function CommunityCard({ record }: CommunityCardProps) {
                         record.creator.avatar
                           ? record.creator.avatar.startsWith("http")
                             ? record.creator.avatar
-                            : `${process.env.NEXT_PUBLIC_CDN_URL}/${record.creator.avatar}`
+                            : `https://cdn.thrico.network/${record.creator.avatar}`
                           : ""
                       }
                       alt={`${record.creator.firstName} ${record.creator.lastName}`}

@@ -10,7 +10,11 @@ import moment from "moment";
 import { AdminStatusBadge } from "@/components/shared/admin-table/admin-table";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const OpportunityManagePage = ({ params }: { params: Promise<{ id: string }> }) => {
+const OpportunityManagePage = ({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) => {
   const router = useRouter();
   const { id } = use(params);
 
@@ -30,7 +34,11 @@ const OpportunityManagePage = ({ params }: { params: Promise<{ id: string }> }) 
   }
 
   if (!opportunity) {
-    return <div className="p-6 text-center text-muted-foreground">Opportunity not found.</div>;
+    return (
+      <div className="p-6 text-center text-muted-foreground">
+        Opportunity not found.
+      </div>
+    );
   }
 
   return (
@@ -76,20 +84,29 @@ const OpportunityManagePage = ({ params }: { params: Promise<{ id: string }> }) 
             <CardContent className="space-y-4">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Calendar className="h-4 w-4" />
-                <span>Posted {moment(opportunity.createdAt).format("MMM DD, YYYY")}</span>
+                <span>
+                  Posted {moment(opportunity.createdAt).format("MMM DD, YYYY")}
+                </span>
               </div>
-              
+
               <div className="pt-4 border-t border-border">
                 <h4 className="text-sm font-semibold mb-2">Creator</h4>
                 {opportunity.creator ? (
                   <div className="flex items-center gap-3">
-                    <img 
-                      src={opportunity.creator.avatar?.startsWith("http") ? opportunity.creator.avatar : `${process.env.NEXT_PUBLIC_CDN_URL}/${opportunity.creator.avatar}`} 
-                      className="h-8 w-8 rounded-full bg-muted object-cover" 
+                    <img
+                      src={
+                        opportunity.creator.avatar?.startsWith("http")
+                          ? opportunity.creator.avatar
+                          : `https://cdn.thrico.network/${opportunity.creator.avatar}`
+                      }
+                      className="h-8 w-8 rounded-full bg-muted object-cover"
                       alt=""
                     />
                     <div className="text-sm">
-                      <p className="font-medium">{opportunity.creator.firstName} {opportunity.creator.lastName}</p>
+                      <p className="font-medium">
+                        {opportunity.creator.firstName}{" "}
+                        {opportunity.creator.lastName}
+                      </p>
                     </div>
                   </div>
                 ) : (

@@ -241,7 +241,9 @@ export function JobCreationForm({
                 <Briefcase className="h-5 w-5 text-primary" />
               </div>
               <h1 className="text-2xl font-bold tracking-tight">
-                {initialValues?.title ? `Edit ${singularName} Posting` : `Create ${singularName} Posting`}
+                {initialValues?.title
+                  ? `Edit ${singularName} Posting`
+                  : `Create ${singularName} Posting`}
               </h1>
             </div>
             <div className="flex items-center gap-2 text-xs text-muted-foreground ml-1">
@@ -273,7 +275,8 @@ export function JobCreationForm({
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <Label htmlFor="title" className="text-sm font-medium">
-                          {singularName} Title <span className="text-destructive">*</span>
+                          {singularName} Title{" "}
+                          <span className="text-destructive">*</span>
                         </Label>
                         <JobTitleAutocomplete
                           value={formik.values.title}
@@ -392,7 +395,8 @@ export function JobCreationForm({
                           htmlFor="jobType"
                           className="text-sm font-medium"
                         >
-                          {singularName} Type <span className="text-destructive">*</span>
+                          {singularName} Type{" "}
+                          <span className="text-destructive">*</span>
                         </Label>
                         <Select
                           onValueChange={(value) =>
@@ -570,14 +574,22 @@ export function JobCreationForm({
                           <div className="p-1.5 rounded-md bg-primary/10">
                             <Briefcase className="h-4 w-4 text-primary" />
                           </div>
-                          <Label className="text-base font-semibold">Required Skills</Label>
+                          <Label className="text-base font-semibold">
+                            Required Skills
+                          </Label>
                           <Badge variant="secondary" className="ml-1">
-                            {formik.values.skills.filter((s: string) => s.trim() !== "").length}
+                            {
+                              formik.values.skills.filter(
+                                (s: string) => s.trim() !== "",
+                              ).length
+                            }
                           </Badge>
                         </div>
                         <SkillsAutocomplete
                           value={formik.values.skills}
-                          onChange={(val) => formik.setFieldValue("skills", val)}
+                          onChange={(val) =>
+                            formik.setFieldValue("skills", val)
+                          }
                         />
                       </div>
                       <Separator />
@@ -614,7 +626,7 @@ export function JobCreationForm({
                         {formik.values.company?.logo ? (
                           <Avatar className="h-full w-full rounded-none">
                             <AvatarImage
-                              src={`${process.env.NEXT_PUBLIC_CDN_URL}/${formik.values.company.logo}`}
+                              src={`https://cdn.thrico.network/${formik.values.company.logo}`}
                               alt={formik.values.company.name}
                             />
                             <AvatarFallback className="bg-transparent">
@@ -627,7 +639,8 @@ export function JobCreationForm({
                       </div>
                       <div>
                         <h4 className="font-bold text-lg leading-tight">
-                          {formik.values.title || `${singularName} Position Title`}
+                          {formik.values.title ||
+                            `${singularName} Position Title`}
                         </h4>
                         <p className="text-muted-foreground text-sm flex items-center gap-1 mt-1">
                           {formik.values.company?.name || "Company Name"}
@@ -713,9 +726,9 @@ export function JobCreationForm({
                     <Plus className="h-3 w-3 text-primary" />
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Make sure your {singularName.toLowerCase()} description includes key performance
-                    indicators and growth opportunities to attract the best
-                    talent.
+                    Make sure your {singularName.toLowerCase()} description
+                    includes key performance indicators and growth opportunities
+                    to attract the best talent.
                   </p>
                 </div>
               </div>

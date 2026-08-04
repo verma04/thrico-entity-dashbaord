@@ -37,7 +37,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Settings2, CheckCircle, PauseCircle, Ban, Calendar, Tag, Percent, Camera, CheckCircle2, ShieldAlert } from "lucide-react";
+import {
+  Loader2,
+  Settings2,
+  CheckCircle,
+  PauseCircle,
+  Ban,
+  Calendar,
+  Tag,
+  Percent,
+  Camera,
+  CheckCircle2,
+  ShieldAlert,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -76,7 +88,10 @@ export default function OfferSettingsPage() {
 
   const [changeStatus, { loading: updatingStatus }] = useChangeOfferStatus({
     onCompleted: () => {
-      toast({ title: "Success", description: `${singularName} status updated.` });
+      toast({
+        title: "Success",
+        description: `${singularName} status updated.`,
+      });
     },
     onError: (err: any) => {
       toast({
@@ -97,7 +112,8 @@ export default function OfferSettingsPage() {
     onError: (error: any) => {
       toast({
         title: "Error",
-        description: error.message || `Failed to update ${singularName.toLowerCase()}`,
+        description:
+          error.message || `Failed to update ${singularName.toLowerCase()}`,
         variant: "destructive",
       });
     },
@@ -129,12 +145,14 @@ export default function OfferSettingsPage() {
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
   const [verifyReason, setVerifyReason] = useState("");
-  const [verifyAction, setVerifyAction] = useState<"VERIFY" | "UNVERIFY">("VERIFY");
+  const [verifyAction, setVerifyAction] = useState<"VERIFY" | "UNVERIFY">(
+    "VERIFY",
+  );
 
   // Sync image URL when offer data loads
   React.useEffect(() => {
     if (offer?.image && !imageUrl) {
-      setImageUrl(`${process.env.NEXT_PUBLIC_CDN_URL}/${offer.image}`);
+      setImageUrl(`https://cdn.thrico.network/${offer.image}`);
     }
   }, [offer, imageUrl]);
 
@@ -152,10 +170,10 @@ export default function OfferSettingsPage() {
         : "",
       status: offer?.status || "ACTIVE",
       image: offer?.image || "",
-      company: typeof offer?.company === 'string' ? offer.company : "",
-      location: typeof offer?.location === 'string' ? offer.location : "",
+      company: typeof offer?.company === "string" ? offer.company : "",
+      location: typeof offer?.location === "string" ? offer.location : "",
       termsAndConditions: offer?.termsAndConditions || "",
-      timeline: typeof offer?.timeline === 'string' ? offer.timeline : "",
+      timeline: typeof offer?.timeline === "string" ? offer.timeline : "",
       website: offer?.website || "",
     },
     enableReinitialize: true,
@@ -201,7 +219,9 @@ export default function OfferSettingsPage() {
       <div className="flex h-64 items-center justify-center">
         <div className="flex flex-col items-center gap-2 text-muted-foreground">
           <Loader2 className="h-6 w-6 animate-spin" />
-          <p className="text-sm">Loading {singularName.toLowerCase()} details...</p>
+          <p className="text-sm">
+            Loading {singularName.toLowerCase()} details...
+          </p>
         </div>
       </div>
     );
@@ -294,7 +314,11 @@ export default function OfferSettingsPage() {
                 Current Status
               </span>
               <Badge
-                variant={offer?.status === "APPROVED" || offer?.status === "ACTIVE" ? "default" : "secondary"}
+                variant={
+                  offer?.status === "APPROVED" || offer?.status === "ACTIVE"
+                    ? "default"
+                    : "secondary"
+                }
                 className="rounded-md px-2.5 py-0.5 text-xs font-semibold uppercase"
               >
                 {offer?.status}
@@ -315,7 +339,7 @@ export default function OfferSettingsPage() {
                     onClick={() => handleAction(action.action)}
                     className={cn(
                       "inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed",
-                      getVariantStyles(action.variant)
+                      getVariantStyles(action.variant),
                     )}
                   >
                     {updatingStatus ? (
@@ -343,7 +367,8 @@ export default function OfferSettingsPage() {
                 Verification
               </CardTitle>
               <CardDescription className="mt-1">
-                Manage the verification status of this {singularName.toLowerCase()}.
+                Manage the verification status of this{" "}
+                {singularName.toLowerCase()}.
               </CardDescription>
             </div>
             <div className="flex items-center gap-2">
@@ -351,10 +376,14 @@ export default function OfferSettingsPage() {
                 Current Status
               </span>
               <Badge
-                variant={offer?.verification?.isVerified ? "default" : "secondary"}
+                variant={
+                  offer?.verification?.isVerified ? "default" : "secondary"
+                }
                 className={cn(
                   "rounded-md px-2.5 py-0.5 text-xs font-semibold uppercase",
-                  offer?.verification?.isVerified ? "bg-emerald-500 hover:bg-emerald-600" : ""
+                  offer?.verification?.isVerified
+                    ? "bg-emerald-500 hover:bg-emerald-600"
+                    : "",
                 )}
               >
                 {offer?.verification?.isVerified ? "Verified" : "Unverified"}
@@ -370,7 +399,7 @@ export default function OfferSettingsPage() {
                 onClick={() => handleVerifyClick("VERIFY")}
                 className={cn(
                   "inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed",
-                  getVariantStyles("success")
+                  getVariantStyles("success"),
                 )}
               >
                 {verifyLoading ? (
@@ -386,7 +415,7 @@ export default function OfferSettingsPage() {
                 onClick={() => handleVerifyClick("UNVERIFY")}
                 className={cn(
                   "inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed",
-                  getVariantStyles("destructive")
+                  getVariantStyles("destructive"),
                 )}
               >
                 {verifyLoading ? (
@@ -410,12 +439,16 @@ export default function OfferSettingsPage() {
           )}
         </CardContent>
       </Card>
-      
+
       {/* Edit Form Container */}
       <div className="rounded-2xl border-none shadow-lg shadow-black/[0.03] ring-1 ring-border/40 bg-card overflow-hidden relative">
         <div className="bg-muted/30 px-6 py-4 border-b border-border/40">
-          <h3 className="font-semibold text-foreground">Edit {singularName} Details</h3>
-          <p className="text-sm text-muted-foreground">Update the information for this {singularName.toLowerCase()}.</p>
+          <h3 className="font-semibold text-foreground">
+            Edit {singularName} Details
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            Update the information for this {singularName.toLowerCase()}.
+          </p>
         </div>
         <div className="p-6">
           <form onSubmit={formik.handleSubmit} className="space-y-8">
@@ -496,7 +529,10 @@ export default function OfferSettingsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="validityStart" className="flex items-center gap-2">
+                <Label
+                  htmlFor="validityStart"
+                  className="flex items-center gap-2"
+                >
                   <Calendar className="h-3 w-3" /> Validity Start
                 </Label>
                 <Input
@@ -504,15 +540,19 @@ export default function OfferSettingsPage() {
                   type="date"
                   {...formik.getFieldProps("validityStart")}
                 />
-                {formik.touched.validityStart && formik.errors.validityStart && (
-                  <p className="text-xs font-medium text-destructive">
-                    {formik.errors.validityStart as string}
-                  </p>
-                )}
+                {formik.touched.validityStart &&
+                  formik.errors.validityStart && (
+                    <p className="text-xs font-medium text-destructive">
+                      {formik.errors.validityStart as string}
+                    </p>
+                  )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="validityEnd" className="flex items-center gap-2">
+                <Label
+                  htmlFor="validityEnd"
+                  className="flex items-center gap-2"
+                >
                   <Calendar className="h-3 w-3" /> Validity End
                 </Label>
                 <Input
@@ -534,7 +574,7 @@ export default function OfferSettingsPage() {
                     <Image
                       src={
                         imageUrl ||
-                        `${process.env.NEXT_PUBLIC_CDN_URL}/defaultEventCover.png`
+                        `https://cdn.thrico.network/defaultEventCover.png`
                       }
                       alt="Offer cover"
                       width={600}
@@ -620,7 +660,7 @@ export default function OfferSettingsPage() {
                 />
               </div>
             </div>
-            
+
             <div className="flex justify-end pt-6 border-t mt-8">
               <Button
                 type="button"
@@ -667,7 +707,9 @@ export default function OfferSettingsPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {verifyAction === "VERIFY" ? `Verify ${singularName}` : "Remove Verification"}
+              {verifyAction === "VERIFY"
+                ? `Verify ${singularName}`
+                : "Remove Verification"}
             </DialogTitle>
             <DialogDescription>
               {verifyAction === "VERIFY"
@@ -704,7 +746,8 @@ export default function OfferSettingsPage() {
               variant={verifyAction === "VERIFY" ? "default" : "destructive"}
               onClick={confirmVerify}
               disabled={
-                verifyLoading || (verifyAction === "VERIFY" && !verifyReason.trim())
+                verifyLoading ||
+                (verifyAction === "VERIFY" && !verifyReason.trim())
               }
             >
               {verifyLoading ? "Processing..." : "Confirm Action"}

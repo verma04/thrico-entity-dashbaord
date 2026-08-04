@@ -142,7 +142,9 @@ export function OfferDialog({
               <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
                 <Tag className="h-4 w-4 text-primary" />
               </div>
-              {editingOffer ? `Edit ${singularName}` : `Create New ${singularName}`}
+              {editingOffer
+                ? `Edit ${singularName}`
+                : `Create New ${singularName}`}
             </DialogTitle>
           </DialogHeader>
 
@@ -269,7 +271,7 @@ export function OfferDialog({
                     <Image
                       src={
                         imageUrl ||
-                        `${process.env.NEXT_PUBLIC_CDN_URL}/defaultEventCover.png`
+                        `https://cdn.thrico.network/defaultEventCover.png`
                       }
                       alt={`${singularName} cover`}
                       width={600}

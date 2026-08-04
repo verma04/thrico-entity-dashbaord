@@ -86,10 +86,10 @@ export const SurveyResponsesView: React.FC<SurveyResponsesViewProps> = ({
           );
         }
 
-        const avatarUrl = respondent?.avatar 
-          ? respondent.avatar.startsWith("http") 
-            ? respondent.avatar 
-            : `${process.env.NEXT_PUBLIC_CDN_URL}/${respondent.avatar}`
+        const avatarUrl = respondent?.avatar
+          ? respondent.avatar.startsWith("http")
+            ? respondent.avatar
+            : `https://cdn.thrico.network/${respondent.avatar}`
           : "";
 
         return (
@@ -243,14 +243,14 @@ export const SurveyResponsesView: React.FC<SurveyResponsesViewProps> = ({
           <SheetHeader className="px-8 pt-8 pb-6 bg-linear-to-br from-primary/5 to-transparent border-b sticky top-0 z-10 backdrop-blur-md">
             <div className="flex items-center gap-4 mb-4">
               <Avatar className="h-14 w-14 ring-4 ring-background shadow-lg">
-                <AvatarImage 
+                <AvatarImage
                   src={
                     selectedResponse?.respondent?.avatar
                       ? selectedResponse.respondent.avatar.startsWith("http")
                         ? selectedResponse.respondent.avatar
-                        : `${process.env.NEXT_PUBLIC_CDN_URL}/${selectedResponse.respondent.avatar}`
+                        : `https://cdn.thrico.network/${selectedResponse.respondent.avatar}`
                       : ""
-                  } 
+                  }
                 />
                 <AvatarFallback className="bg-primary/10 text-primary text-xl font-bold">
                   {selectedResponse?.respondent?.firstName?.[0] || "?"}

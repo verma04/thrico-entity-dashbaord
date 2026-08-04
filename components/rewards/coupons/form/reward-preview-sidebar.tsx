@@ -1,5 +1,13 @@
 import React from "react";
-import { Eye, Ticket, Zap, Sparkles, ArrowRight, Sparkle, Info } from "lucide-react";
+import {
+  Eye,
+  Ticket,
+  Zap,
+  Sparkles,
+  ArrowRight,
+  Sparkle,
+  Info,
+} from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -8,7 +16,10 @@ interface RewardPreviewSidebarProps {
   showStrategy?: boolean;
 }
 
-export function RewardPreviewSidebar({ formik, showStrategy = false }: RewardPreviewSidebarProps) {
+export function RewardPreviewSidebar({
+  formik,
+  showStrategy = false,
+}: RewardPreviewSidebarProps) {
   return (
     <div className="relative">
       <div className="sticky top-28 space-y-6">
@@ -32,7 +43,11 @@ export function RewardPreviewSidebar({ formik, showStrategy = false }: RewardPre
               <div className="h-[200px] w-full bg-muted relative">
                 {formik.values.image ? (
                   <img
-                    src={formik.values.image.startsWith("http") ? formik.values.image : `${process.env.NEXT_PUBLIC_CDN_URL}/${formik?.values?.image}`}
+                    src={
+                      formik.values.image.startsWith("http")
+                        ? formik.values.image
+                        : `https://cdn.thrico.network/${formik?.values?.image}`
+                    }
                     alt="Preview"
                     className="h-full w-full object-cover"
                   />
@@ -61,7 +76,10 @@ export function RewardPreviewSidebar({ formik, showStrategy = false }: RewardPre
                     <div className="flex items-center gap-2">
                       <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-indigo-500">
                         {formik.values.rewardMechanism
-                          ? String(formik.values.rewardMechanism).replace(/_/g, " ")
+                          ? String(formik.values.rewardMechanism).replace(
+                              /_/g,
+                              " ",
+                            )
                           : "COUPON"}
                       </span>
                       {["SCRATCH_CARD", "SPIN_WHEEL", "MATCH_AND_WIN"].includes(
@@ -79,7 +97,8 @@ export function RewardPreviewSidebar({ formik, showStrategy = false }: RewardPre
                   </div>
 
                   <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-3">
-                    {formik.values.description || "Description will appear here."}
+                    {formik.values.description ||
+                      "Description will appear here."}
                   </p>
 
                   <div className="flex items-center gap-4 py-2">
@@ -104,7 +123,10 @@ export function RewardPreviewSidebar({ formik, showStrategy = false }: RewardPre
                 </div>
 
                 <div className="mt-auto">
-                  <Button disabled className="w-full h-11 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs gap-2 group/btn shadow-lg shadow-indigo-500/20">
+                  <Button
+                    disabled
+                    className="w-full h-11 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs gap-2 group/btn shadow-lg shadow-indigo-500/20"
+                  >
                     Redeem Now
                     <ArrowRight className="h-3.5 w-3.5 group-hover/btn:translate-x-1 transition-transform" />
                   </Button>

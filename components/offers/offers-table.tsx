@@ -56,7 +56,7 @@ export function OffersTable({
               <div className="h-10 w-10 rounded-lg bg-primary/5 border border-primary/10 flex items-center justify-center shrink-0 overflow-hidden">
                 {offer.image ? (
                   <img
-                    src={`${process.env.NEXT_PUBLIC_CDN_URL}/${offer.image}`}
+                    src={`https://cdn.thrico.network/${offer.image}`}
                     alt={offer.title}
                     className="h-full w-full object-cover"
                   />
@@ -87,7 +87,9 @@ export function OffersTable({
                 className="h-2 w-2 rounded-full shrink-0"
                 style={{ backgroundColor: category?.color || "#cbd5e1" }}
               />
-              <span className="truncate max-w-[120px]">{category?.name || "—"}</span>
+              <span className="truncate max-w-[120px]">
+                {category?.name || "—"}
+              </span>
             </div>
           );
         },
@@ -108,7 +110,7 @@ export function OffersTable({
           <span
             className={cn(
               "inline-flex items-center px-2 py-0.5 rounded-md border text-[10px] uppercase tracking-wide font-bold",
-              getStatusColor(row.status)
+              getStatusColor(row.status),
             )}
           >
             {row.status}
@@ -134,7 +136,7 @@ export function OffersTable({
               </div>
             );
           }
-          
+
           return (
             <UserProfileHoverCard user={offer.creator}>
               <div className="flex items-center gap-2 cursor-pointer group">
@@ -144,7 +146,7 @@ export function OffersTable({
                       offer.creator.avatar
                         ? offer.creator.avatar.startsWith("http")
                           ? offer.creator.avatar
-                          : `${process.env.NEXT_PUBLIC_CDN_URL}/${offer.creator.avatar}`
+                          : `https://cdn.thrico.network/${offer.creator.avatar}`
                         : ""
                     }
                     alt={`${offer.creator.firstName} ${offer.creator.lastName}`}
@@ -174,7 +176,9 @@ export function OffersTable({
                 {format(new Date(offer.validityStart), "MMM d, yyyy")}
               </div>
               <div className="flex items-center gap-1.5 opacity-70">
-                <span className="pl-4">to {format(new Date(offer.validityEnd), "MMM d, yyyy")}</span>
+                <span className="pl-4">
+                  to {format(new Date(offer.validityEnd), "MMM d, yyyy")}
+                </span>
               </div>
             </div>
           );
@@ -214,11 +218,7 @@ export function OffersTable({
         headerClassName: "w-12 text-right",
         className: "text-right",
         cell: (row) => (
-          <OfferActions
-            offer={row}
-            onEdit={onEdit}
-            refetch={refetch}
-          />
+          <OfferActions offer={row} onEdit={onEdit} refetch={refetch} />
         ),
       },
     ],

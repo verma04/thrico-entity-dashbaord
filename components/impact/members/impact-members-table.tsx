@@ -9,8 +9,20 @@ import {
   UserProfileHoverCard,
   UserProfileHoverData,
 } from "@/components/shared/user-profile-hover-card";
-import { Trophy, Activity, MessageSquare, Handshake, Network, CalendarCheck } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Trophy,
+  Activity,
+  MessageSquare,
+  Handshake,
+  Network,
+  CalendarCheck,
+} from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export type ImpactUserNode = {
   id: string;
@@ -35,14 +47,22 @@ interface ImpactMembersTableProps {
   isLoading: boolean;
 }
 
-export function ImpactMembersTable({ users, isLoading }: ImpactMembersTableProps) {
+export function ImpactMembersTable({
+  users,
+  isLoading,
+}: ImpactMembersTableProps) {
   const getTierColor = (tier: string) => {
     switch (tier.toUpperCase()) {
-      case "LEGENDARY": return "bg-purple-100 text-purple-700 border-purple-200";
-      case "MASTER": return "bg-blue-100 text-blue-700 border-blue-200";
-      case "EXPERT": return "bg-emerald-100 text-emerald-700 border-emerald-200";
-      case "CONTRIBUTOR": return "bg-amber-100 text-amber-700 border-amber-200";
-      default: return "bg-zinc-100 text-zinc-700 border-zinc-200";
+      case "LEGENDARY":
+        return "bg-purple-100 text-purple-700 border-purple-200";
+      case "MASTER":
+        return "bg-blue-100 text-blue-700 border-blue-200";
+      case "EXPERT":
+        return "bg-emerald-100 text-emerald-700 border-emerald-200";
+      case "CONTRIBUTOR":
+        return "bg-amber-100 text-amber-700 border-amber-200";
+      default:
+        return "bg-zinc-100 text-zinc-700 border-zinc-200";
     }
   };
 
@@ -72,7 +92,7 @@ export function ImpactMembersTable({ users, isLoading }: ImpactMembersTableProps
             <div className="flex items-center gap-3 cursor-pointer">
               <Avatar className="h-8 w-8 border border-border shrink-0">
                 <AvatarImage
-                  src={`${process.env.NEXT_PUBLIC_CDN_URL}/${user.avatarUrl}`}
+                  src={`https://cdn.thrico.network/${user.avatarUrl}`}
                   alt={user.firstName}
                   className="object-cover"
                 />
@@ -97,7 +117,10 @@ export function ImpactMembersTable({ users, isLoading }: ImpactMembersTableProps
       key: "tier",
       header: "Tier",
       cell: (node: ImpactUserNode) => (
-        <Badge variant="outline" className={`font-medium text-[10px] capitalize ${getTierColor(node.tier)}`}>
+        <Badge
+          variant="outline"
+          className={`font-medium text-[10px] capitalize ${getTierColor(node.tier)}`}
+        >
           {node.tier.toLowerCase()}
         </Badge>
       ),
@@ -111,31 +134,39 @@ export function ImpactMembersTable({ users, isLoading }: ImpactMembersTableProps
             <Tooltip>
               <TooltipTrigger className="flex items-center gap-1">
                 <Activity size={12} className="text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">{node.engagementScore}</span>
+                <span className="text-xs text-muted-foreground">
+                  {node.engagementScore}
+                </span>
               </TooltipTrigger>
               <TooltipContent>Engagement Score</TooltipContent>
             </Tooltip>
-            
+
             <Tooltip>
               <TooltipTrigger className="flex items-center gap-1">
                 <MessageSquare size={12} className="text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">{node.contributionScore}</span>
+                <span className="text-xs text-muted-foreground">
+                  {node.contributionScore}
+                </span>
               </TooltipTrigger>
               <TooltipContent>Contribution Score</TooltipContent>
             </Tooltip>
-            
+
             <Tooltip>
               <TooltipTrigger className="flex items-center gap-1">
                 <Handshake size={12} className="text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">{node.trustScore}</span>
+                <span className="text-xs text-muted-foreground">
+                  {node.trustScore}
+                </span>
               </TooltipTrigger>
               <TooltipContent>Trust Score</TooltipContent>
             </Tooltip>
-            
+
             <Tooltip>
               <TooltipTrigger className="flex items-center gap-1">
                 <Network size={12} className="text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">{node.networkScore}</span>
+                <span className="text-xs text-muted-foreground">
+                  {node.networkScore}
+                </span>
               </TooltipTrigger>
               <TooltipContent>Network Score</TooltipContent>
             </Tooltip>
@@ -143,7 +174,9 @@ export function ImpactMembersTable({ users, isLoading }: ImpactMembersTableProps
             <Tooltip>
               <TooltipTrigger className="flex items-center gap-1">
                 <CalendarCheck size={12} className="text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">{node.consistencyScore}</span>
+                <span className="text-xs text-muted-foreground">
+                  {node.consistencyScore}
+                </span>
               </TooltipTrigger>
               <TooltipContent>Consistency Score</TooltipContent>
             </Tooltip>

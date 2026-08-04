@@ -211,7 +211,7 @@ export const ImageUploadWithCrop = ({
       if (data?.uploadImage) {
         const result = returnKeyOnly
           ? data.uploadImage
-          : `${process.env.NEXT_PUBLIC_CDN_URL}/${data.uploadImage}`;
+          : `https://cdn.thrico.network/${data.uploadImage}`;
         handleUploadSuccess(result, data.uploadImage);
       }
     },
@@ -366,13 +366,15 @@ export const ImageUploadWithCrop = ({
     const scaleX = image.naturalWidth / image.width;
     const scaleY = image.naturalHeight / image.height;
 
-    const finalWidth = enforceExactDimensions && recommendedWidth 
-      ? recommendedWidth 
-      : Math.round(crop.width * scaleX * zoom);
-      
-    const finalHeight = enforceExactDimensions && recommendedHeight 
-      ? recommendedHeight 
-      : Math.round(crop.height * scaleY * zoom);
+    const finalWidth =
+      enforceExactDimensions && recommendedWidth
+        ? recommendedWidth
+        : Math.round(crop.width * scaleX * zoom);
+
+    const finalHeight =
+      enforceExactDimensions && recommendedHeight
+        ? recommendedHeight
+        : Math.round(crop.height * scaleY * zoom);
 
     canvas.width = finalWidth;
     canvas.height = finalHeight;
@@ -521,9 +523,11 @@ export const ImageUploadWithCrop = ({
             >
               <img
                 src={
-                  currentImage?.startsWith("http") || currentImage?.startsWith("blob:") || currentImage?.startsWith("data:")
+                  currentImage?.startsWith("http") ||
+                  currentImage?.startsWith("blob:") ||
+                  currentImage?.startsWith("data:")
                     ? currentImage
-                    : `${process.env.NEXT_PUBLIC_CDN_URL}/${currentImage}`
+                    : `https://cdn.thrico.network/${currentImage}`
                 }
                 alt={label}
                 className={cn(
@@ -582,9 +586,7 @@ export const ImageUploadWithCrop = ({
               "relative flex flex-col items-center justify-center min-h-[160px] p-6 border border-dashed border-border rounded-xl transition-all duration-200",
               "bg-muted/20 hover:bg-muted/40",
               enableDragDrop && "cursor-pointer",
-              !uploading &&
-                enableDragDrop &&
-                "hover:border-primary/40",
+              !uploading && enableDragDrop && "hover:border-primary/40",
               uploading && "opacity-60 cursor-not-allowed",
               isDragging && "border-primary bg-primary/5 scale-[1.005]",
               dropzoneClassName,
@@ -617,9 +619,7 @@ export const ImageUploadWithCrop = ({
                   <Upload
                     className={cn(
                       "h-5 w-5 transition-colors duration-200",
-                      isDragging
-                        ? "text-primary"
-                        : "text-muted-foreground",
+                      isDragging ? "text-primary" : "text-muted-foreground",
                     )}
                   />
                 )}
@@ -630,9 +630,7 @@ export const ImageUploadWithCrop = ({
               <p
                 className={cn(
                   "text-sm font-medium transition-colors duration-200",
-                  isDragging
-                    ? "text-primary"
-                    : "text-foreground",
+                  isDragging ? "text-primary" : "text-foreground",
                 )}
               >
                 {isDragging
@@ -643,9 +641,7 @@ export const ImageUploadWithCrop = ({
                 {customDescription || (
                   <>
                     Drag & drop or{" "}
-                    <span className="text-primary font-medium">
-                      browse
-                    </span>
+                    <span className="text-primary font-medium">browse</span>
                   </>
                 )}
               </p>

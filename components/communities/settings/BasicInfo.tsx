@@ -46,7 +46,7 @@ const BasicInfo = ({ data }: { data: communityEntity }) => {
 
   const [cover, setCover] = useState<string>();
   const [imageUrl, setImageUrl] = useState<string>(
-    `${process.env.NEXT_PUBLIC_CDN_URL}/${data?.cover}`
+    `https://cdn.thrico.network/${data?.cover}`,
   );
   return (
     <Form
@@ -143,7 +143,9 @@ const BasicInfo = ({ data }: { data: communityEntity }) => {
                   <div>
                     <span style={{ fontWeight: 600 }}>Virtual</span>
                     <br />
-                    <span style={{ color: "#888" }}>Online-only {singularName.toLowerCase()}</span>
+                    <span style={{ color: "#888" }}>
+                      Online-only {singularName.toLowerCase()}
+                    </span>
                   </div>
                 </Space>
               </Radio>
@@ -213,7 +215,8 @@ const BasicInfo = ({ data }: { data: communityEntity }) => {
                     <span style={{ fontWeight: 600 }}>Admin Only Add</span>
                     <br />
                     <span style={{ color: "#888" }}>
-                      Only admins can add members to this {singularName.toLowerCase()}
+                      Only admins can add members to this{" "}
+                      {singularName.toLowerCase()}
                     </span>
                   </div>
                 </Space>

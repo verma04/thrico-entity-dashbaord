@@ -81,7 +81,7 @@ function OfferManagementLayout({ children }: { children: React.ReactNode }) {
                 {offer?.image ? (
                   <div className="relative">
                     <img
-                      src={`${process.env.NEXT_PUBLIC_CDN_URL}/${offer.image}`}
+                      src={`https://cdn.thrico.network/${offer.image}`}
                       alt={offer.title || `${singularName} Image`}
                       className="w-11 h-11 rounded-xl object-cover border border-border/60 shadow-sm"
                     />
@@ -100,7 +100,9 @@ function OfferManagementLayout({ children }: { children: React.ReactNode }) {
                 <div className="flex flex-col gap-0.5">
                   <div className="flex items-center gap-2.5">
                     <h1 className="text-lg font-semibold tracking-tight">
-                      {loading ? `Loading ${singularName}...` : offer?.title || `${singularName} Details`}
+                      {loading
+                        ? `Loading ${singularName}...`
+                        : offer?.title || `${singularName} Details`}
                     </h1>
                     {loading && (
                       <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />

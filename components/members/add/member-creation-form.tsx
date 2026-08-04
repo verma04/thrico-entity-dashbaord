@@ -105,11 +105,11 @@ export function MemberCreationForm({
   const { data: skillData, loading: loadingSkills } = useGetSkills();
   const skills = skillData?.getSkills || [];
 
-  const { data: interestData, loading: loadingInterests } =
-    useGetInterests();
+  const { data: interestData, loading: loadingInterests } = useGetInterests();
   const interests = interestData?.getInterests || [];
 
-  const { data: tiersData, loading: loadingTiers } = useQuery(GET_MEMBERSHIP_TIERS);
+  const { data: tiersData, loading: loadingTiers } =
+    useQuery(GET_MEMBERSHIP_TIERS);
   const membershipTiers = tiersData?.getMembershipTiers || [];
 
   const memberSchema = Yup.object({
@@ -518,7 +518,13 @@ export function MemberCreationForm({
                                       variant="secondary"
                                       className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-100 py-0.5 px-2 rounded-lg text-[11px] font-bold flex items-center gap-1"
                                     >
-                                      {membershipTiers.find((t: any) => t.id === formik.values.membershipTierId)?.name}
+                                      {
+                                        membershipTiers.find(
+                                          (t: any) =>
+                                            t.id ===
+                                            formik.values.membershipTierId,
+                                        )?.name
+                                      }
                                     </Badge>
                                   ) : (
                                     <span className="text-muted-foreground">
@@ -542,7 +548,10 @@ export function MemberCreationForm({
                                       key="none"
                                       value="none"
                                       onSelect={() => {
-                                        formik.setFieldValue("membershipTierId", null);
+                                        formik.setFieldValue(
+                                          "membershipTierId",
+                                          null,
+                                        );
                                         setIsTierPopoverOpen(false);
                                       }}
                                       className="flex items-center justify-between py-2.5 px-3 cursor-pointer hover:bg-muted/50 transition-colors"
@@ -558,7 +567,7 @@ export function MemberCreationForm({
                                         onSelect={() => {
                                           formik.setFieldValue(
                                             "membershipTierId",
-                                            tier.id
+                                            tier.id,
                                           );
                                           setIsTierPopoverOpen(false);
                                         }}
@@ -568,12 +577,14 @@ export function MemberCreationForm({
                                           <div
                                             className={cn(
                                               "h-4 w-4 rounded border border-border flex items-center justify-center transition-all",
-                                              formik.values.membershipTierId === tier.id
+                                              formik.values.membershipTierId ===
+                                                tier.id
                                                 ? "bg-indigo-600 border-indigo-600"
-                                                : "bg-card"
+                                                : "bg-card",
                                             )}
                                           >
-                                            {formik.values.membershipTierId === tier.id && (
+                                            {formik.values.membershipTierId ===
+                                              tier.id && (
                                               <Check className="h-3 w-3 text-white" />
                                             )}
                                           </div>
@@ -772,9 +783,7 @@ export function MemberCreationForm({
                                 className="h-11 border-none focus:ring-0"
                               />
                               <CommandList className="max-h-[300px]">
-                                <CommandEmpty>
-                                  No interests found.
-                                </CommandEmpty>
+                                <CommandEmpty>No interests found.</CommandEmpty>
                                 <CommandGroup>
                                   {interests.map((interest) => (
                                     <CommandItem
@@ -783,9 +792,12 @@ export function MemberCreationForm({
                                       onSelect={() => {
                                         const current =
                                           formik.values.interestIds;
-                                        const next = current.includes(interest.id)
+                                        const next = current.includes(
+                                          interest.id,
+                                        )
                                           ? current.filter(
-                                              (id: string) => id !== interest.id,
+                                              (id: string) =>
+                                                id !== interest.id,
                                             )
                                           : [...current, interest.id];
                                         formik.setFieldValue(
@@ -885,7 +897,7 @@ export function MemberCreationForm({
                         <div className="h-24 w-24 rounded-2xl bg-muted flex items-center justify-center overflow-hidden">
                           {imageUrl ? (
                             <Image
-                              src={`${process.env.NEXT_PUBLIC_CDN_URL}/${imageUrl}`}
+                              src={`https://cdn.thrico.network/${imageUrl}`}
                               alt="Avatar"
                               width={96}
                               height={96}

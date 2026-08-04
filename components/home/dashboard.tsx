@@ -454,7 +454,12 @@ export default function Dashboard() {
       color: "text-rose-600",
       href: "/offers",
     },
-    { title: "Stories", icon: Sparkles, color: "text-violet-600", href: "/stories/settings" },
+    {
+      title: "Stories",
+      icon: Sparkles,
+      color: "text-violet-600",
+      href: "/stories/settings",
+    },
     {
       title: "Mentorship",
       icon: Users,
@@ -938,7 +943,7 @@ export default function Dashboard() {
                           >
                             <Avatar className="h-8 w-8 border border-border/50 shadow-sm shrink-0">
                               <AvatarImage
-                                src={`${process.env.NEXT_PUBLIC_CDN_URL}/${user?.avatar}`}
+                                src={`https://cdn.thrico.network/${user?.avatar}`}
                                 alt={user?.firstName}
                                 className="object-cover"
                               />
@@ -1038,7 +1043,7 @@ export default function Dashboard() {
                           >
                             <Avatar className="h-7 w-7 border border-border/50 shadow-sm">
                               <AvatarImage
-                                src={`${process.env.NEXT_PUBLIC_CDN_URL}/${user?.avatar}`}
+                                src={`https://cdn.thrico.network/${user?.avatar}`}
                                 alt={user?.firstName}
                                 className="object-cover"
                               />
@@ -1208,7 +1213,7 @@ export default function Dashboard() {
                             >
                               <Avatar className="h-8 w-8 border border-border/50 shadow-sm shrink-0">
                                 <AvatarImage
-                                  src={`${process.env.NEXT_PUBLIC_CDN_URL}/${user?.avatarUrl || user?.avatar}`}
+                                  src={`https://cdn.thrico.network/${user?.avatarUrl || user?.avatar}`}
                                   alt={user?.firstName}
                                   className="object-cover"
                                 />

@@ -42,11 +42,7 @@ const tabItems = [
   { key: "reported-items", label: "Reported Items", icon: ShieldAlert },
 ];
 
-function CommunitiesLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+function CommunitiesLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const id = pathname?.split("/")[2];
@@ -70,9 +66,7 @@ function CommunitiesLayout({
   const community = data?.getCommunityById;
 
   const privacyColor =
-    community?.privacy === "PUBLIC"
-      ? "bg-emerald-500"
-      : "bg-amber-500";
+    community?.privacy === "PUBLIC" ? "bg-emerald-500" : "bg-amber-500";
 
   return (
     <AnimatePresence>
@@ -95,14 +89,14 @@ function CommunitiesLayout({
                 {community?.cover ? (
                   <div className="relative">
                     <img
-                      src={`${process.env.NEXT_PUBLIC_CDN_URL}/${community.cover}`}
+                      src={`https://cdn.thrico.network/${community.cover}`}
                       alt={community.title || "Community Cover"}
                       className="w-11 h-11 rounded-xl object-cover border border-border/60 shadow-sm"
                     />
                     <span
                       className={cn(
                         "absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-background",
-                        privacyColor
+                        privacyColor,
                       )}
                     />
                   </div>
@@ -170,7 +164,7 @@ function CommunitiesLayout({
                           : "text-muted-foreground hover:text-foreground/80",
                         tab.key === "danger-zone" &&
                           isActive &&
-                          "text-destructive"
+                          "text-destructive",
                       )}
                     >
                       <Icon
@@ -178,7 +172,7 @@ function CommunitiesLayout({
                           "h-3.5 w-3.5",
                           tab.key === "danger-zone" &&
                             isActive &&
-                            "text-destructive"
+                            "text-destructive",
                         )}
                       />
                       {tab.label}
@@ -189,7 +183,7 @@ function CommunitiesLayout({
                             "absolute bottom-0 left-0 right-0 h-[2px]",
                             tab.key === "danger-zone"
                               ? "bg-destructive"
-                              : "bg-primary"
+                              : "bg-primary",
                           )}
                           transition={{
                             type: "spring",
@@ -236,4 +230,8 @@ function CommunitiesLayout({
   );
 }
 
-export default withModulePermission(CommunitiesLayout, "COMMUNITIES", "canRead");
+export default withModulePermission(
+  CommunitiesLayout,
+  "COMMUNITIES",
+  "canRead",
+);

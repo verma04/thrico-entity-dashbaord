@@ -183,7 +183,7 @@ export function TopNavbar({
                           <div className="h-6 w-6 rounded-md overflow-hidden bg-muted flex items-center justify-center border border-border/40">
                             {account?.logo ? (
                               <img
-                                src={`${process.env.NEXT_PUBLIC_CDN_URL}/${account?.logo}`}
+                                src={`https://cdn.thrico.network/${account?.logo}`}
                                 alt={account?.name}
                                 className="h-full w-full object-cover"
                               />

@@ -5,7 +5,7 @@ import Image from "next/image";
 const Logo = () => {
   const { data } = useGetEntity();
   const src = data?.getEntity?.logo
-    ? `${process.env.NEXT_PUBLIC_CDN_URL}/${data.getEntity.logo}`
+    ? `https://cdn.thrico.network/${data.getEntity.logo}`
     : undefined;
   const name = data?.getEntity?.name || "Thrico";
 

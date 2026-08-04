@@ -53,7 +53,7 @@ export const FaviconUpload = ({
                 title: "Success",
                 description: "Favicon uploaded successfully!",
               });
-              return `${process.env.NEXT_PUBLIC_CDN_URL}/${data.uploadImage}`;
+              return `https://cdn.thrico.network/${data.uploadImage}`;
             } else {
               throw new Error("Failed to upload favicon");
             }

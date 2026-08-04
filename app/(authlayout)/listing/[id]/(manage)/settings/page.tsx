@@ -2,7 +2,11 @@
 
 import React from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useListingDetails, useChangeListingStatus, useEditListing } from "@/graphql/actions/listing";
+import {
+  useListingDetails,
+  useChangeListingStatus,
+  useEditListing,
+} from "@/graphql/actions/listing";
 import { useToast } from "@/components/ui/use-toast";
 import {
   Card,
@@ -12,7 +16,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Settings2, CheckCircle, PauseCircle, Ban } from "lucide-react";
+import {
+  Loader2,
+  Settings2,
+  CheckCircle,
+  PauseCircle,
+  Ban,
+} from "lucide-react";
 import { ListingCreationForm } from "@/components/listings/listing-creation-form";
 import { cn } from "@/lib/utils";
 import { useModuleStore } from "@/store/useModuleStore";
@@ -35,7 +45,10 @@ export default function ListingSettingsPage() {
 
   const [changeStatus, { loading: updatingStatus }] = useChangeListingStatus({
     onCompleted: () => {
-      toast({ title: "Success", description: `${singularName} status updated.` });
+      toast({
+        title: "Success",
+        description: `${singularName} status updated.`,
+      });
     },
     onError: (err: any) => {
       toast({
@@ -56,7 +69,8 @@ export default function ListingSettingsPage() {
     onError: (error: any) => {
       toast({
         title: "Error",
-        description: error.message || `Failed to update ${singularName.toLowerCase()}`,
+        description:
+          error.message || `Failed to update ${singularName.toLowerCase()}`,
         variant: "destructive",
       });
     },
@@ -69,7 +83,9 @@ export default function ListingSettingsPage() {
       <div className="flex h-64 items-center justify-center">
         <div className="flex flex-col items-center gap-2 text-muted-foreground">
           <Loader2 className="h-6 w-6 animate-spin" />
-          <p className="text-sm">Loading {singularName.toLowerCase()} details...</p>
+          <p className="text-sm">
+            Loading {singularName.toLowerCase()} details...
+          </p>
         </div>
       </div>
     );
@@ -130,7 +146,8 @@ export default function ListingSettingsPage() {
                 Status Management
               </CardTitle>
               <CardDescription className="mt-1">
-                Change the current publication status of this {singularName.toLowerCase()}.
+                Change the current publication status of this{" "}
+                {singularName.toLowerCase()}.
               </CardDescription>
             </div>
             <div className="flex items-center gap-2">
@@ -138,7 +155,9 @@ export default function ListingSettingsPage() {
                 Current Status
               </span>
               <Badge
-                variant={listing?.status === "APPROVED" ? "default" : "secondary"}
+                variant={
+                  listing?.status === "APPROVED" ? "default" : "secondary"
+                }
                 className="rounded-md px-2.5 py-0.5 text-xs font-semibold uppercase"
               >
                 {listing?.status}
@@ -159,7 +178,7 @@ export default function ListingSettingsPage() {
                     onClick={() => handleAction(action.action)}
                     className={cn(
                       "inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold border transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed",
-                      getVariantStyles(action.variant)
+                      getVariantStyles(action.variant),
                     )}
                   >
                     {updatingStatus ? (
@@ -174,12 +193,17 @@ export default function ListingSettingsPage() {
           </div>
         </CardContent>
       </Card>
-      
+
       {/* Edit Form Container */}
       <div className="rounded-2xl border-none shadow-lg shadow-black/[0.03] ring-1 ring-border/40 bg-card overflow-hidden relative">
         <div className="bg-muted/30 px-6 py-4 border-b border-border/40">
-          <h3 className="font-semibold text-foreground">Edit {singularName} Details</h3>
-          <p className="text-sm text-muted-foreground">Update the information for this marketplace {singularName.toLowerCase()}.</p>
+          <h3 className="font-semibold text-foreground">
+            Edit {singularName} Details
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            Update the information for this marketplace{" "}
+            {singularName.toLowerCase()}.
+          </p>
         </div>
         <div className="p-6">
           <ListingCreationForm
@@ -189,12 +213,13 @@ export default function ListingSettingsPage() {
               price: listing?.price || "",
               category: listing?.category || "",
               condition: listing?.condition || "NEW",
-              location: listing?.location?.name || listing?.location?.address || "",
+              location:
+                listing?.location?.name || listing?.location?.address || "",
               media: (listing?.media || []).map((m: any, i: number) => ({
-                 uid: `media-${i}`,
-                 name: "image",
-                 url: m.url,
-                 thumbUrl: `${process.env.NEXT_PUBLIC_CDN_URL}/${m.url}`
+                uid: `media-${i}`,
+                name: "image",
+                url: m.url,
+                thumbUrl: `https://cdn.thrico.network/${m.url}`,
               })),
             }}
             loading={updating}
@@ -211,9 +236,11 @@ export default function ListingSettingsPage() {
                       latitude: 0,
                       longitude: 0,
                     },
-                    // for edit, the backend might just expect media objects with url or upload again. 
+                    // for edit, the backend might just expect media objects with url or upload again.
                     // To keep it simple, we format media here properly.
-                    media: values.media.map((m: any) => m.file || { url: m.url }),
+                    media: values.media.map(
+                      (m: any) => m.file || { url: m.url },
+                    ),
                   },
                 },
               });

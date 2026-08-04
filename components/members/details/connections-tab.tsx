@@ -28,7 +28,13 @@ import Link from "next/link";
 
 const RELATIONSHIP_CONFIG: Record<
   string,
-  { label: string; color: string; bg: string; border: string; icon: React.ElementType }
+  {
+    label: string;
+    color: string;
+    bg: string;
+    border: string;
+    icon: React.ElementType;
+  }
 > = {
   CONNECTED: {
     label: "Connected",
@@ -110,7 +116,7 @@ function ConnectionCard({ rel }: { rel: Neo4jRelationship }) {
             <Avatar className="h-11 w-11 border-2 border-background shadow-sm">
               {rel.otherAvatar && (
                 <AvatarImage
-                  src={`${process.env.NEXT_PUBLIC_CDN_URL}/${rel.otherAvatar}`}
+                  src={`https://cdn.thrico.network/${rel.otherAvatar}`}
                   alt={`${rel.otherFirstName} ${rel.otherLastName}`}
                 />
               )}
@@ -329,7 +335,10 @@ export function ConnectionsTab({ userId }: { userId: string }) {
       {/* Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {filtered.map((rel, idx) => (
-          <ConnectionCard key={`${rel.otherUserId}-${rel.type}-${idx}`} rel={rel} />
+          <ConnectionCard
+            key={`${rel.otherUserId}-${rel.type}-${idx}`}
+            rel={rel}
+          />
         ))}
       </div>
 

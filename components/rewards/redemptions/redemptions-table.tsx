@@ -56,7 +56,8 @@ export function RedemptionsTable({
 
   const getStatusType = (status: string) => {
     const s = status?.toUpperCase();
-    if (s === "SUCCESS" || s === "COMPLETED" || s === "FULFILLED") return "APPROVED";
+    if (s === "SUCCESS" || s === "COMPLETED" || s === "FULFILLED")
+      return "APPROVED";
     if (s === "PENDING") return "PENDING";
     if (s === "FAILED" || s === "REJECTED") return "REJECTED";
     return "DISABLED";
@@ -74,7 +75,7 @@ export function RedemptionsTable({
         return (
           <div className="flex items-center gap-3">
             <Avatar className="h-8 w-8 ring-1 ring-border">
-              <AvatarImage src={`${process.env.NEXT_PUBLIC_CDN_URL}/${user.avatar}`} />
+              <AvatarImage src={`https://cdn.thrico.network/${user.avatar}`} />
               <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-bold">
                 {user.firstName[0]}
                 {user.lastName[0]}

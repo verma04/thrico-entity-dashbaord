@@ -65,7 +65,13 @@ import {
 
 import { useModuleStore } from "@/store/useModuleStore";
 
-export function MentorCreationForm({ loading, onFinish, onCancel, submitError, onDismissError }: any) {
+export function MentorCreationForm({
+  loading,
+  onFinish,
+  onCancel,
+  submitError,
+  onDismissError,
+}: any) {
   const moduleName = useModuleStore((state) => state.mentorshipModuleName);
   const singularName = useModuleStore((state) => state.mentorshipSingularName);
   const [selectedUser, setSelectedUser] = useState<any>(null);
@@ -83,8 +89,12 @@ export function MentorCreationForm({ loading, onFinish, onCancel, submitError, o
       .max(100, "Max 100 characters"),
     category: Yup.string().required("Category is required"),
     description: Yup.string().max(1000, "Max 1000 characters"),
-    intro: Yup.string().required("Intro is required").max(100, "Max 100 characters"),
-    about: Yup.string().required("About is required").max(500, "Max 500 characters"),
+    intro: Yup.string()
+      .required("Intro is required")
+      .max(100, "Max 100 characters"),
+    about: Yup.string()
+      .required("About is required")
+      .max(500, "Max 500 characters"),
     featuredArticle: Yup.string().url("Must be a valid URL"),
     introVideo: Yup.string().url("Must be a valid URL"),
     whyDoWantBecomeMentor: Yup.string().max(1000, "Max 1000 characters"),
@@ -219,7 +229,8 @@ export function MentorCreationForm({ loading, onFinish, onCancel, submitError, o
                         </CardTitle>
                       </div>
                       <CardDescription className="text-slate-500 font-medium">
-                        Search and select a user to onboard as a {singularName.toLowerCase()}
+                        Search and select a user to onboard as a{" "}
+                        {singularName.toLowerCase()}
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="pt-8 space-y-6">
@@ -249,7 +260,7 @@ export function MentorCreationForm({ loading, onFinish, onCancel, submitError, o
                               <div className="h-14 w-14 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0">
                                 {user?.user?.avatar ? (
                                   <Image
-                                    src={`${process.env.NEXT_PUBLIC_CDN_URL}/${user?.user?.avatar}`}
+                                    src={`https://cdn.thrico.network/${user?.user?.avatar}`}
                                     alt="Avatar"
                                     width={56}
                                     height={56}
@@ -301,7 +312,8 @@ export function MentorCreationForm({ loading, onFinish, onCancel, submitError, o
                           <div className="text-center py-10">
                             <Sparkles className="h-10 w-10 text-indigo-100 mx-auto mb-3" />
                             <p className="text-slate-400 font-medium text-sm">
-                              Start typing a name to find a potential {singularName.toLowerCase()}
+                              Start typing a name to find a potential{" "}
+                              {singularName.toLowerCase()}
                             </p>
                           </div>
                         )}
@@ -321,7 +333,7 @@ export function MentorCreationForm({ loading, onFinish, onCancel, submitError, o
                           <div className="h-20 w-20 rounded-2xl overflow-hidden bg-slate-100 border-2 border-white shadow-xl rotate-[-2deg] group-hover:rotate-0 transition-transform">
                             {selectedUser?.user?.avatar ? (
                               <Image
-                                src={`${process.env.NEXT_PUBLIC_CDN_URL}/${selectedUser?.user?.avatar}`}
+                                src={`https://cdn.thrico.network/${selectedUser?.user?.avatar}`}
                                 alt="Avatar"
                                 width={80}
                                 height={80}
@@ -392,7 +404,8 @@ export function MentorCreationForm({ loading, onFinish, onCancel, submitError, o
                           </CardTitle>
                         </div>
                         <CardDescription className="text-slate-500 font-medium">
-                          Define the {singularName.toLowerCase()}'s profile and credentials
+                          Define the {singularName.toLowerCase()}'s profile and
+                          credentials
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="pt-8 space-y-8">
@@ -473,7 +486,8 @@ export function MentorCreationForm({ loading, onFinish, onCancel, submitError, o
                               Mark as Top {singularName}
                             </Label>
                             <p className="text-[10px] font-medium text-slate-500">
-                              Feature this {singularName.toLowerCase()} at the top of listings
+                              Feature this {singularName.toLowerCase()} at the
+                              top of listings
                             </p>
                           </div>
                           <Checkbox
@@ -625,7 +639,8 @@ export function MentorCreationForm({ loading, onFinish, onCancel, submitError, o
                               htmlFor="intro"
                               className="text-sm font-bold text-slate-700 flex items-center gap-2"
                             >
-                              One-liner Intro <span className="text-rose-500">*</span>
+                              One-liner Intro{" "}
+                              <span className="text-rose-500">*</span>
                             </Label>
                             <Input
                               id="intro"
@@ -648,7 +663,8 @@ export function MentorCreationForm({ loading, onFinish, onCancel, submitError, o
                               htmlFor="greatestAchievement"
                               className="text-sm font-bold text-slate-700 flex items-center gap-2"
                             >
-                              Greatest Achievement <span className="text-rose-500">*</span>
+                              Greatest Achievement{" "}
+                              <span className="text-rose-500">*</span>
                             </Label>
                             <Input
                               id="greatestAchievement"
@@ -659,11 +675,12 @@ export function MentorCreationForm({ loading, onFinish, onCancel, submitError, o
                               onChange={formik.handleChange}
                               onBlur={formik.handleBlur}
                             />
-                            {formik.touched.greatestAchievement && formik.errors.greatestAchievement && (
-                              <p className="text-xs font-semibold text-rose-500 ml-1">
-                                {formik.errors.greatestAchievement as string}
-                              </p>
-                            )}
+                            {formik.touched.greatestAchievement &&
+                              formik.errors.greatestAchievement && (
+                                <p className="text-xs font-semibold text-rose-500 ml-1">
+                                  {formik.errors.greatestAchievement as string}
+                                </p>
+                              )}
                           </div>
                         </div>
 
@@ -749,11 +766,12 @@ export function MentorCreationForm({ loading, onFinish, onCancel, submitError, o
                               onChange={formik.handleChange}
                               onBlur={formik.handleBlur}
                             />
-                            {formik.touched.featuredArticle && formik.errors.featuredArticle && (
-                              <p className="text-xs font-semibold text-rose-500 ml-1">
-                                {formik.errors.featuredArticle as string}
-                              </p>
-                            )}
+                            {formik.touched.featuredArticle &&
+                              formik.errors.featuredArticle && (
+                                <p className="text-xs font-semibold text-rose-500 ml-1">
+                                  {formik.errors.featuredArticle as string}
+                                </p>
+                              )}
                           </div>
 
                           <div className="space-y-2.5">
@@ -773,11 +791,12 @@ export function MentorCreationForm({ loading, onFinish, onCancel, submitError, o
                               onChange={formik.handleChange}
                               onBlur={formik.handleBlur}
                             />
-                            {formik.touched.introVideo && formik.errors.introVideo && (
-                              <p className="text-xs font-semibold text-rose-500 ml-1">
-                                {formik.errors.introVideo as string}
-                              </p>
-                            )}
+                            {formik.touched.introVideo &&
+                              formik.errors.introVideo && (
+                                <p className="text-xs font-semibold text-rose-500 ml-1">
+                                  {formik.errors.introVideo as string}
+                                </p>
+                              )}
                           </div>
                         </div>
 
@@ -800,8 +819,9 @@ export function MentorCreationForm({ loading, onFinish, onCancel, submitError, o
                             </Label>
                             <p className="text-xs font-medium text-slate-500 leading-relaxed">
                               By checking this box, you confirm that this user
-                              has agreed to be a {singularName.toLowerCase()} and the information
-                              provided is accurate. The {singularName.toLowerCase()} profile will be
+                              has agreed to be a {singularName.toLowerCase()}{" "}
+                              and the information provided is accurate. The{" "}
+                              {singularName.toLowerCase()} profile will be
                               automatically approved.
                             </p>
                           </div>
@@ -842,7 +862,7 @@ export function MentorCreationForm({ loading, onFinish, onCancel, submitError, o
                           <div className="h-28 w-28 rounded-[1.75rem] bg-indigo-50 flex items-center justify-center overflow-hidden border-2 border-slate-50 relative group-hover/avatar:shadow-inner transition-all">
                             {selectedUser?.user?.avatar ? (
                               <Image
-                                src={`${process.env.NEXT_PUBLIC_CDN_URL}/${selectedUser?.user?.avatar}`}
+                                src={`https://cdn.thrico.network/${selectedUser?.user?.avatar}`}
                                 alt="Avatar"
                                 width={112}
                                 height={112}

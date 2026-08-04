@@ -111,7 +111,10 @@ const defaultBlock = (type: BlockType, id: string): BuilderBlock => ({
               ? "© 2026 Thrico. All rights reserved. 123 Innovation Way, San Francisco, CA"
               : "",
   align:
-    type === "header" || type === "navbar" || type === "footer" || type === "app_links"
+    type === "header" ||
+    type === "navbar" ||
+    type === "footer" ||
+    type === "app_links"
       ? "center"
       : "left",
   bold: type === "heading" || type === "button",
@@ -124,7 +127,7 @@ const defaultBlock = (type: BlockType, id: string): BuilderBlock => ({
   href: "",
   spacerSize: "md",
   imageAlt: "",
-  logoUrl: type === "header" ? `${process.env.NEXT_PUBLIC_CDN_URL}/thrico.png` : "",
+  logoUrl: type === "header" ? `https://cdn.thrico.network/thrico.png` : "",
   secondaryContent: type === "header" ? "Premium Ecosystem Dashboard" : "",
   iosUrl: type === "app_links" ? "" : undefined,
   androidUrl: type === "app_links" ? "" : undefined,
@@ -487,27 +490,49 @@ function BlockCanvas({
       {/* App Download Links */}
       {block.type === "app_links" && (
         <div className="p-5 flex flex-col items-center gap-3">
-          <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest">Get the App</p>
+          <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest">
+            Get the App
+          </p>
           <div className="flex items-center gap-3 flex-wrap justify-center">
             {/* App Store badge */}
             <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 text-white min-w-[130px]">
-              <svg viewBox="0 0 24 24" className="h-5 w-5 shrink-0 fill-white" aria-hidden><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98l-.09.06c-.22.14-2.19 1.28-2.17 3.83.03 3.02 2.65 4.03 2.68 4.04l-.06.25zM13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+              <svg
+                viewBox="0 0 24 24"
+                className="h-5 w-5 shrink-0 fill-white"
+                aria-hidden
+              >
+                <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98l-.09.06c-.22.14-2.19 1.28-2.17 3.83.03 3.02 2.65 4.03 2.68 4.04l-.06.25zM13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
+              </svg>
               <div>
-                <p className="text-[8px] text-slate-400 leading-none">Download on the</p>
+                <p className="text-[8px] text-slate-400 leading-none">
+                  Download on the
+                </p>
                 <p className="text-[13px] font-bold leading-tight">App Store</p>
               </div>
             </div>
             {/* Play Store badge */}
             <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 text-white min-w-[130px]">
-              <svg viewBox="0 0 24 24" className="h-5 w-5 shrink-0 fill-white" aria-hidden><path d="M3 20.5v-17c0-.83.94-1.3 1.6-.8l14 8.5c.6.37.6 1.23 0 1.6l-14 8.5c-.66.5-1.6.03-1.6-.8z"/></svg>
+              <svg
+                viewBox="0 0 24 24"
+                className="h-5 w-5 shrink-0 fill-white"
+                aria-hidden
+              >
+                <path d="M3 20.5v-17c0-.83.94-1.3 1.6-.8l14 8.5c.6.37.6 1.23 0 1.6l-14 8.5c-.66.5-1.6.03-1.6-.8z" />
+              </svg>
               <div>
-                <p className="text-[8px] text-slate-400 leading-none">Get it on</p>
-                <p className="text-[13px] font-bold leading-tight">Google Play</p>
+                <p className="text-[8px] text-slate-400 leading-none">
+                  Get it on
+                </p>
+                <p className="text-[13px] font-bold leading-tight">
+                  Google Play
+                </p>
               </div>
             </div>
           </div>
-          {(!block.iosUrl && !block.androidUrl) && (
-            <p className="text-[10px] text-slate-400 mt-1">Set iOS & Android URLs in the properties panel →</p>
+          {!block.iosUrl && !block.androidUrl && (
+            <p className="text-[10px] text-slate-400 mt-1">
+              Set iOS & Android URLs in the properties panel →
+            </p>
           )}
         </div>
       )}
@@ -583,7 +608,9 @@ function PropertiesPanel({
           <p className="text-[14px] font-black text-slate-900 leading-none">
             {def.label}
           </p>
-          <p className="text-[10px] font-medium text-slate-400 mt-1">{def.description}</p>
+          <p className="text-[10px] font-medium text-slate-400 mt-1">
+            {def.description}
+          </p>
         </div>
       </div>
 
@@ -658,7 +685,7 @@ function PropertiesPanel({
         block.type === "image") && (
         <div className="pt-6 border-t border-slate-200">
           <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 leading-none">
-            Target Destination 
+            Target Destination
           </label>
           <div className="relative group">
             <Link className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-300 group-focus-within:text-slate-900 transition-colors" />
@@ -1024,7 +1051,13 @@ function PropertiesPanel({
         <div className="space-y-4">
           <div>
             <label className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 leading-none">
-              <svg viewBox="0 0 24 24" className="h-3 w-3 fill-slate-400" aria-hidden><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98l-.09.06c-.22.14-2.19 1.28-2.17 3.83.03 3.02 2.65 4.03 2.68 4.04l-.06.25zM13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+              <svg
+                viewBox="0 0 24 24"
+                className="h-3 w-3 fill-slate-400"
+                aria-hidden
+              >
+                <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98l-.09.06c-.22.14-2.19 1.28-2.17 3.83.03 3.02 2.65 4.03 2.68 4.04l-.06.25zM13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
+              </svg>
               iOS App Store URL
             </label>
             <input
@@ -1037,7 +1070,13 @@ function PropertiesPanel({
           </div>
           <div>
             <label className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 leading-none">
-              <svg viewBox="0 0 24 24" className="h-3 w-3 fill-slate-400" aria-hidden><path d="M3 20.5v-17c0-.83.94-1.3 1.6-.8l14 8.5c.6.37.6 1.23 0 1.6l-14 8.5c-.66.5-1.6.03-1.6-.8z"/></svg>
+              <svg
+                viewBox="0 0 24 24"
+                className="h-3 w-3 fill-slate-400"
+                aria-hidden
+              >
+                <path d="M3 20.5v-17c0-.83.94-1.3 1.6-.8l14 8.5c.6.37.6 1.23 0 1.6l-14 8.5c-.66.5-1.6.03-1.6-.8z" />
+              </svg>
               Android Play Store URL
             </label>
             <input
@@ -1106,19 +1145,20 @@ export default function TemplateBuilder({
   // ── Fetch entity logo and auto-populate header blocks ─────────────────────
   const { data: entityData } = useGetEntity();
   const entityLogoUrl = entityData?.getEntity?.logo
-    ? `${process.env.NEXT_PUBLIC_CDN_URL}/${entityData.getEntity.logo}`
+    ? `https://cdn.thrico.network/${entityData.getEntity.logo}`
     : undefined;
 
   useEffect(() => {
     if (!entityLogoUrl) return;
     setBlocks((prev) =>
       prev.map((b) =>
-        b.type === "header" && (!b.logoUrl || b.logoUrl === `${process.env.NEXT_PUBLIC_CDN_URL}/thrico.png`)
+        b.type === "header" &&
+        (!b.logoUrl || b.logoUrl === `https://cdn.thrico.network/thrico.png`)
           ? { ...b, logoUrl: entityLogoUrl }
-          : b
-      )
+          : b,
+      ),
     );
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entityLogoUrl]);
 
   const getInitialBlocks = useCallback((): BuilderBlock[] => {
@@ -1215,7 +1255,7 @@ export default function TemplateBuilder({
         switch (b.type) {
           case "header":
             blockHtml = `<div style="text-align:${b.align};padding:32px 0">
-              <img src="${b.logoUrl || `${process.env.NEXT_PUBLIC_CDN_URL}/thrico.png`}" alt="Logo" style="height:40px;display:inline-block;margin-bottom:8px" />
+              <img src="${b.logoUrl || `https://cdn.thrico.network/thrico.png`}" alt="Logo" style="height:40px;display:inline-block;margin-bottom:8px" />
               ${b.secondaryContent ? `<p style="margin:0;font-size:12px;color:#64748b;font-family:ui-sans-serif,system-ui,sans-serif">${b.secondaryContent}</p>` : ""}
             </div>`;
             break;
@@ -1495,9 +1535,15 @@ export default function TemplateBuilder({
                       : "text-slate-400 hover:text-slate-600",
                   )}
                 >
-                  {tab === "blocks" && <Layout className="h-3 w-3 text-indigo-600" />}
-                  {tab === "templates" && <Sparkles className="h-3 w-3 text-indigo-600" />}
-                  {tab === "settings" && <Settings2 className="h-3 w-3 text-indigo-600" />}
+                  {tab === "blocks" && (
+                    <Layout className="h-3 w-3 text-indigo-600" />
+                  )}
+                  {tab === "templates" && (
+                    <Sparkles className="h-3 w-3 text-indigo-600" />
+                  )}
+                  {tab === "settings" && (
+                    <Settings2 className="h-3 w-3 text-indigo-600" />
+                  )}
                   <span className="hidden min-[1100px]:inline">{tab}</span>
                 </button>
               ))}
@@ -1547,10 +1593,22 @@ export default function TemplateBuilder({
                   </p>
                   <div className="grid gap-3">
                     {[
-                      { key: "NEWSLETTER", label: "Newsletter", color: "indigo" },
-                      { key: "WELCOME", label: "Welcome Series", color: "emerald" },
+                      {
+                        key: "NEWSLETTER",
+                        label: "Newsletter",
+                        color: "indigo",
+                      },
+                      {
+                        key: "WELCOME",
+                        label: "Welcome Series",
+                        color: "emerald",
+                      },
                       { key: "EVENT", label: "Event Invite", color: "amber" },
-                      { key: "ANNOUNCEMENT", label: "Announcement", color: "rose" },
+                      {
+                        key: "ANNOUNCEMENT",
+                        label: "Announcement",
+                        color: "rose",
+                      },
                     ].map((t) => (
                       <button
                         key={t.key}
@@ -1564,7 +1622,12 @@ export default function TemplateBuilder({
                           `hover:border-${t.color}-200 hover:bg-${t.color}-50/30`,
                         )}
                       >
-                        <div className={cn("absolute top-0 left-0 w-1 h-full opacity-0 group-hover:opacity-100 transition-opacity", `bg-${t.color}-500`)} />
+                        <div
+                          className={cn(
+                            "absolute top-0 left-0 w-1 h-full opacity-0 group-hover:opacity-100 transition-opacity",
+                            `bg-${t.color}-500`,
+                          )}
+                        />
                         <p className="text-[13px] font-black text-slate-900">
                           {t.label}
                         </p>

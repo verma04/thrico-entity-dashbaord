@@ -36,8 +36,12 @@ export function QuickAuditTrace() {
             <ReceiptText className="h-4 w-4 text-blue-600" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-foreground">Quick Audit Trace</p>
-            <p className="text-xs text-muted-foreground">Recent currency movements</p>
+            <p className="text-sm font-semibold text-foreground">
+              Quick Audit Trace
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Recent currency movements
+            </p>
           </div>
         </div>
         <Button
@@ -55,7 +59,10 @@ export function QuickAuditTrace() {
       <div className="divide-y divide-border">
         {loading ? (
           [...Array(3)].map((_, i) => (
-            <div key={i} className="flex items-center justify-between px-5 py-3.5">
+            <div
+              key={i}
+              className="flex items-center justify-between px-5 py-3.5"
+            >
               <div className="flex items-center gap-3">
                 <Skeleton className="h-6 w-6 rounded-full" />
                 <Skeleton className="h-4 w-24" />
@@ -79,9 +86,17 @@ export function QuickAuditTrace() {
           transactions.map((tx: any, idx: number) => {
             const isDebit = tx.type.includes("DEBIT");
             const userInfo = tx.userBasicInfo || {};
-            const initials = userInfo.firstName ? userInfo.firstName.charAt(0) : "U";
-            const fullName = `${userInfo.firstName || ""} ${userInfo.lastName || ""}`.trim() || "Unknown User";
-            const avatarUrl = userInfo.avatar ? (userInfo.avatar.startsWith("http") ? userInfo.avatar : `${process.env.NEXT_PUBLIC_CDN_URL}/${userInfo.avatar}`) : "";
+            const initials = userInfo.firstName
+              ? userInfo.firstName.charAt(0)
+              : "U";
+            const fullName =
+              `${userInfo.firstName || ""} ${userInfo.lastName || ""}`.trim() ||
+              "Unknown User";
+            const avatarUrl = userInfo.avatar
+              ? userInfo.avatar.startsWith("http")
+                ? userInfo.avatar
+                : `https://cdn.thrico.network/${userInfo.avatar}`
+              : "";
 
             return (
               <div
@@ -109,17 +124,20 @@ export function QuickAuditTrace() {
                       </span>
                     </div>
                   </UserProfileHoverCard>
-                  
+
                   <span className="text-[11px] text-muted-foreground bg-muted px-2 py-0.5 rounded-md font-medium">
                     {typeLabels[tx.type] || tx.type}
                   </span>
                 </div>
                 <div className="text-right">
-                  <p className={cn(
-                    "text-sm font-bold font-mono",
-                    isDebit ? "text-rose-600" : "text-emerald-600"
-                  )}>
-                    {isDebit ? "-" : "+"}{tx.amount}
+                  <p
+                    className={cn(
+                      "text-sm font-bold font-mono",
+                      isDebit ? "text-rose-600" : "text-emerald-600",
+                    )}
+                  >
+                    {isDebit ? "-" : "+"}
+                    {tx.amount}
                   </p>
                   <p className="text-[10px] text-muted-foreground">
                     {safeFormat(tx.timestamp, "MMM dd, HH:mm")}

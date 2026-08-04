@@ -8,7 +8,14 @@ import ReactCrop, {
   makeAspectCrop,
 } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
-import { Upload, X, Crop as CropIcon, Check, Image as ImageIcon, Loader2 } from "lucide-react";
+import {
+  Upload,
+  X,
+  Crop as CropIcon,
+  Check,
+  Image as ImageIcon,
+  Loader2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -35,7 +42,7 @@ interface LogoImageEditorProps {
 function centerAspectCrop(
   mediaWidth: number,
   mediaHeight: number,
-  aspect: number
+  aspect: number,
 ) {
   return centerCrop(
     makeAspectCrop(
@@ -45,10 +52,10 @@ function centerAspectCrop(
       },
       aspect,
       mediaWidth,
-      mediaHeight
+      mediaHeight,
     ),
     mediaWidth,
-    mediaHeight
+    mediaHeight,
   );
 }
 
@@ -72,7 +79,7 @@ export const LogoImageEditor = ({
   const [uploadImage, { loading: uploading }] = useUploadImage({
     onCompleted: (data: any) => {
       if (data?.uploadImage) {
-        const cdnUrl = `${process.env.NEXT_PUBLIC_CDN_URL}/${data.uploadImage}`;
+        const cdnUrl = `https://cdn.thrico.network/${data.uploadImage}`;
         onImageUpdate(cdnUrl);
         toast({
           title: "Success",
@@ -138,7 +145,7 @@ export const LogoImageEditor = ({
       0,
       0,
       customWidth,
-      customHeight
+      customHeight,
     );
 
     return new Promise((resolve) => {
@@ -177,7 +184,7 @@ export const LogoImageEditor = ({
     <>
       <div className="space-y-2">
         <Label>Logo Image</Label>
-        
+
         {currentImage ? (
           <div className="space-y-3">
             <div className="border rounded-lg p-4 bg-muted/30 flex items-center justify-center">
@@ -213,7 +220,7 @@ export const LogoImageEditor = ({
           <div
             className={cn(
               "border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors",
-              "hover:border-primary/50 hover:bg-primary/5"
+              "hover:border-primary/50 hover:bg-primary/5",
             )}
             onClick={() => fileInputRef.current?.click()}
           >
@@ -318,4 +325,3 @@ export const LogoImageEditor = ({
     </>
   );
 };
-

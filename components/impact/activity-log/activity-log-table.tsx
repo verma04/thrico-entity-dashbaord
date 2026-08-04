@@ -49,7 +49,7 @@ export function ActivityLogTable({ logs, isLoading }: ActivityLogTableProps) {
             <div className="flex items-center gap-3 cursor-pointer">
               <Avatar className="h-8 w-8 border border-border shrink-0">
                 <AvatarImage
-                  src={`${process.env.NEXT_PUBLIC_CDN_URL}/${user.avatarUrl}`}
+                  src={`https://cdn.thrico.network/${user.avatarUrl}`}
                   alt={user.firstName}
                   className="object-cover"
                 />
@@ -76,7 +76,10 @@ export function ActivityLogTable({ logs, isLoading }: ActivityLogTableProps) {
       cell: (log: ImpactActivityEntry) => {
         const isDecay = log.changeReason.toLowerCase().includes("decay");
         return (
-          <Badge variant={isDecay ? "destructive" : "secondary"} className="font-medium text-[11px] capitalize">
+          <Badge
+            variant={isDecay ? "destructive" : "secondary"}
+            className="font-medium text-[11px] capitalize"
+          >
             {log.changeReason.replace(/_/g, " ").toLowerCase()}
           </Badge>
         );
@@ -88,9 +91,13 @@ export function ActivityLogTable({ logs, isLoading }: ActivityLogTableProps) {
       cell: (log: ImpactActivityEntry) => {
         return (
           <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground line-through decoration-muted-foreground/30">{log.oldScore}</span>
+            <span className="text-xs text-muted-foreground line-through decoration-muted-foreground/30">
+              {log.oldScore}
+            </span>
             <span className="text-muted-foreground text-xs">→</span>
-            <span className="text-xs font-semibold text-foreground">{log.newScore}</span>
+            <span className="text-xs font-semibold text-foreground">
+              {log.newScore}
+            </span>
           </div>
         );
       },
@@ -104,7 +111,11 @@ export function ActivityLogTable({ logs, isLoading }: ActivityLogTableProps) {
         return (
           <span
             className={`font-mono text-sm font-semibold ${
-              isPositive ? "text-emerald-600" : isZero ? "text-muted-foreground" : "text-rose-600"
+              isPositive
+                ? "text-emerald-600"
+                : isZero
+                  ? "text-muted-foreground"
+                  : "text-rose-600"
             }`}
           >
             {isPositive ? "+" : ""}

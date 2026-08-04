@@ -41,7 +41,7 @@ export function SwitchingLoader({
               <div className="size-20 rounded-2xl bg-zinc-50 dark:bg-zinc-800 border border-zinc-200/50 dark:border-zinc-700/50 flex items-center justify-center p-3 relative z-10 shadow-sm">
                 {currentEntity?.logo ? (
                   <img
-                    src={`${process.env.NEXT_PUBLIC_CDN_URL}/${currentEntity.logo}`}
+                    src={`https://cdn.thrico.network/${currentEntity.logo}`}
                     alt="Current"
                     className="size-full object-contain filter grayscale opacity-80"
                   />

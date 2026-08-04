@@ -104,7 +104,10 @@ export default function TierMembersList({ tierId }: TierMembersListProps) {
               ))
             ) : users.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={3} className="text-center py-4 text-muted-foreground">
+                <TableCell
+                  colSpan={3}
+                  className="text-center py-4 text-muted-foreground"
+                >
                   No members in this tier.
                 </TableCell>
               </TableRow>
@@ -114,8 +117,16 @@ export default function TierMembersList({ tierId }: TierMembersListProps) {
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <Avatar className="h-8 w-8">
-                        <AvatarImage src={row.user?.avatar ? `${process.env.NEXT_PUBLIC_CDN_URL}/${row.user.avatar}` : ""} />
-                        <AvatarFallback>{row.user?.firstName?.charAt(0)}</AvatarFallback>
+                        <AvatarImage
+                          src={
+                            row.user?.avatar
+                              ? `https://cdn.thrico.network/${row.user.avatar}`
+                              : ""
+                          }
+                        />
+                        <AvatarFallback>
+                          {row.user?.firstName?.charAt(0)}
+                        </AvatarFallback>
                       </Avatar>
                       <span className="text-sm font-medium">
                         {row.user?.firstName} {row.user?.lastName}
@@ -177,7 +188,8 @@ export default function TierMembersList({ tierId }: TierMembersListProps) {
             <DialogDescription>
               Are you sure you want to remove{" "}
               <span className="font-semibold text-foreground">
-                {memberToRemove?.user?.firstName} {memberToRemove?.user?.lastName}
+                {memberToRemove?.user?.firstName}{" "}
+                {memberToRemove?.user?.lastName}
               </span>{" "}
               from this membership tier? They will lose all associated benefits.
             </DialogDescription>

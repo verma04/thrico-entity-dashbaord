@@ -60,7 +60,9 @@ export default function Jobs({ data }: { data: Job[] | undefined }) {
               {row.location && (
                 <span className="text-[11px] text-muted-foreground flex items-center gap-1">
                   <MapPin className="h-3 w-3" />
-                  {typeof row.location === 'string' ? row.location : (row.location as any).name || ''}
+                  {typeof row.location === "string"
+                    ? row.location
+                    : (row.location as any).name || ""}
                 </span>
               )}
             </div>
@@ -73,82 +75,82 @@ export default function Jobs({ data }: { data: Job[] | undefined }) {
       header: "Status",
       cell: (row) => <AdminStatusBadge status={row.status} />,
     },
-  {
-    key: "applicants",
-    header: "People",
-    headerClassName: "text-center",
-    className: "text-center",
-    cell: (row) => (
-      <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-muted/60 border border-border/50 text-[12px] font-semibold text-foreground">
-        <Users2 className="h-3 w-3 text-muted-foreground/60" />
-        {row.numberOfApplicant || 0}
-      </div>
-    ),
-  },
-  {
-    key: "posted",
-    header: "Date",
-    cell: (row) => (
-      <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground whitespace-nowrap">
-        <Calendar className="h-3 w-3 shrink-0" />
-        <span>{moment(row.createdAt).format("MMM DD, YYYY")}</span>
-      </div>
-    ),
-  },
-  {
-    key: "creator",
-    header: "Creator",
-    cell: (row) => {
-      if (!row.postedBy) {
-        return (
-          <div className="flex items-center gap-2">
-            <Avatar className="h-6 w-6 rounded-full border border-border/60">
-              <AvatarFallback className="text-[10px] bg-primary/10 text-primary font-bold">
-                EN
-              </AvatarFallback>
-            </Avatar>
-            <span className="text-[12px] font-semibold text-muted-foreground">
-              Entity
-            </span>
-          </div>
-        );
-      }
-      
-      return (
-        <UserProfileHoverCard user={row.postedBy}>
-          <div className="flex items-center gap-2 cursor-pointer group">
-            <Avatar className="h-6 w-6 rounded-full border border-border/60">
-              <AvatarImage
-                src={
-                  row.postedBy.avatar
-                    ? row.postedBy.avatar.startsWith("http")
-                      ? row.postedBy.avatar
-                      : `${process.env.NEXT_PUBLIC_CDN_URL}/${row.postedBy.avatar}`
-                    : ""
-                }
-                alt={`${row.postedBy.firstName} ${row.postedBy.lastName}`}
-              />
-              <AvatarFallback className="text-[10px] bg-muted">
-                {row.postedBy.firstName?.charAt(0)}
-                {row.postedBy.lastName?.charAt(0)}
-              </AvatarFallback>
-            </Avatar>
-            <span className="text-[12px] font-medium group-hover:text-primary transition-colors truncate max-w-[100px]">
-              {row.postedBy.firstName} {row.postedBy.lastName}
-            </span>
-          </div>
-        </UserProfileHoverCard>
-      );
+    {
+      key: "applicants",
+      header: "People",
+      headerClassName: "text-center",
+      className: "text-center",
+      cell: (row) => (
+        <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-muted/60 border border-border/50 text-[12px] font-semibold text-foreground">
+          <Users2 className="h-3 w-3 text-muted-foreground/60" />
+          {row.numberOfApplicant || 0}
+        </div>
+      ),
     },
-  },
-  {
-    key: "actions",
-    header: "",
-    headerClassName: "w-12",
-    className: "text-right",
-    cell: (row) => <Actions {...row} />,
-  },
-];
+    {
+      key: "posted",
+      header: "Date",
+      cell: (row) => (
+        <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground whitespace-nowrap">
+          <Calendar className="h-3 w-3 shrink-0" />
+          <span>{moment(row.createdAt).format("MMM DD, YYYY")}</span>
+        </div>
+      ),
+    },
+    {
+      key: "creator",
+      header: "Creator",
+      cell: (row) => {
+        if (!row.postedBy) {
+          return (
+            <div className="flex items-center gap-2">
+              <Avatar className="h-6 w-6 rounded-full border border-border/60">
+                <AvatarFallback className="text-[10px] bg-primary/10 text-primary font-bold">
+                  EN
+                </AvatarFallback>
+              </Avatar>
+              <span className="text-[12px] font-semibold text-muted-foreground">
+                Entity
+              </span>
+            </div>
+          );
+        }
+
+        return (
+          <UserProfileHoverCard user={row.postedBy}>
+            <div className="flex items-center gap-2 cursor-pointer group">
+              <Avatar className="h-6 w-6 rounded-full border border-border/60">
+                <AvatarImage
+                  src={
+                    row.postedBy.avatar
+                      ? row.postedBy.avatar.startsWith("http")
+                        ? row.postedBy.avatar
+                        : `https://cdn.thrico.network/${row.postedBy.avatar}`
+                      : ""
+                  }
+                  alt={`${row.postedBy.firstName} ${row.postedBy.lastName}`}
+                />
+                <AvatarFallback className="text-[10px] bg-muted">
+                  {row.postedBy.firstName?.charAt(0)}
+                  {row.postedBy.lastName?.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
+              <span className="text-[12px] font-medium group-hover:text-primary transition-colors truncate max-w-[100px]">
+                {row.postedBy.firstName} {row.postedBy.lastName}
+              </span>
+            </div>
+          </UserProfileHoverCard>
+        );
+      },
+    },
+    {
+      key: "actions",
+      header: "",
+      headerClassName: "w-12",
+      className: "text-right",
+      cell: (row) => <Actions {...row} />,
+    },
+  ];
 
   return (
     <AdminTable<Job>

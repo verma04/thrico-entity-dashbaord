@@ -56,7 +56,7 @@ export function ListingDetailsDrawer({
             <div className="relative w-full aspect-[4/3] bg-muted group">
               {listing.media?.length > 0 ? (
                 <img
-                  src={`${process.env.NEXT_PUBLIC_CDN_URL}/${listing.media[0].url}`}
+                  src={`https://cdn.thrico.network/${listing.media[0].url}`}
                   alt={listing.title}
                   className="w-full h-full object-cover"
                 />

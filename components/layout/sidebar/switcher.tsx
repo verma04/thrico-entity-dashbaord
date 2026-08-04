@@ -122,7 +122,7 @@ export function WorkspaceSwitcher() {
                       <div className="size-7 rounded-md bg-background border border-border/60 flex items-center justify-center p-1">
                         {currentEntity?.logo ? (
                           <img
-                            src={`${process.env.NEXT_PUBLIC_CDN_URL}/${currentEntity.logo}`}
+                            src={`https://cdn.thrico.network/${currentEntity.logo}`}
                             alt={currentEntity?.name}
                             className="size-full object-contain"
                           />
@@ -157,7 +157,7 @@ export function WorkspaceSwitcher() {
                         <div className="size-7 rounded-md bg-muted border border-border/50 flex items-center justify-center p-1">
                           {team?.logo ? (
                             <img
-                              src={`${process.env.NEXT_PUBLIC_CDN_URL}/${team?.logo}`}
+                              src={`https://cdn.thrico.network/${team?.logo}`}
                               alt={team?.name}
                               className="size-full object-contain"
                             />

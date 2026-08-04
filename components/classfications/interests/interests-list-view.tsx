@@ -1,7 +1,10 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { Interest, useGetUserInterestsGraph } from "@/graphql/quries/interests/interest-queries";
+import {
+  Interest,
+  useGetUserInterestsGraph,
+} from "@/graphql/quries/interests/interest-queries";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Heart, Users, Pencil, Trash2 } from "lucide-react";
@@ -41,7 +44,7 @@ export function InterestsListView({
 
   const interestsWithUsers = useMemo(() => {
     const edges = graphData?.getUserInterestsGraph || [];
-    
+
     // Create a map to quickly look up users for an interest by title
     const interestsMap = new Map<string, { users: any[]; count: number }>();
 
@@ -62,14 +65,19 @@ export function InterestsListView({
     });
 
     // Map the global interests list to include the graph users
-    return interests.map(interest => {
-      const graphInfo = interestsMap.get(interest.title) || { users: [], count: 0 };
-      return {
-        interest,
-        users: graphInfo.users,
-        count: graphInfo.count
-      };
-    }).sort((a, b) => b.count - a.count); // Sort by popularity
+    return interests
+      .map((interest) => {
+        const graphInfo = interestsMap.get(interest.title) || {
+          users: [],
+          count: 0,
+        };
+        return {
+          interest,
+          users: graphInfo.users,
+          count: graphInfo.count,
+        };
+      })
+      .sort((a, b) => b.count - a.count); // Sort by popularity
   }, [interests, graphData]);
 
   if (isLoading || graphLoading) {
@@ -109,7 +117,9 @@ export function InterestsListView({
       <div className="flex flex-col items-center justify-center h-64 text-slate-500">
         <Heart className="h-12 w-12 mb-4 text-slate-300" />
         <p className="text-lg font-medium">No interest data found</p>
-        <p className="text-sm">There are no interest relationships recorded yet.</p>
+        <p className="text-sm">
+          There are no interest relationships recorded yet.
+        </p>
       </div>
     );
   }
@@ -118,7 +128,7 @@ export function InterestsListView({
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
       {interestsWithUsers.map(({ interest, users, count }, index) => {
         const color = getInterestColor(index);
-        
+
         return (
           <div
             key={interest.id}
@@ -129,17 +139,20 @@ export function InterestsListView({
               className="absolute top-0 left-0 h-1.5 w-full opacity-80 group-hover:opacity-100 transition-opacity"
               style={{ backgroundColor: color }}
             />
-            
+
             <div className="flex items-start justify-between border-b border-border/50 pb-4 mb-4 mt-2">
               <div className="flex gap-3">
-                <div 
+                <div
                   className="p-2.5 rounded-lg flex items-center justify-center"
                   style={{ backgroundColor: `${color}15`, color: color }}
                 >
                   <Heart className="h-5 w-5" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-foreground truncate group-hover:text-rose-600 transition-colors" title={interest.title}>
+                  <h3
+                    className="font-semibold text-foreground truncate group-hover:text-rose-600 transition-colors"
+                    title={interest.title}
+                  >
                     {interest.title}
                   </h3>
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-1">
@@ -185,20 +198,29 @@ export function InterestsListView({
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {users.length === 0 && (
-                    <p className="text-xs text-muted-foreground/70 italic">No users yet.</p>
+                    <p className="text-xs text-muted-foreground/70 italic">
+                      No users yet.
+                    </p>
                   )}
                   {users.slice(0, 8).map((user) => {
                     const name =
-                      [user.firstName, user.lastName].filter(Boolean).join(" ") ||
-                      "User";
+                      [user.firstName, user.lastName]
+                        .filter(Boolean)
+                        .join(" ") || "User";
                     const avatarUrl = user.avatar
-                      ? `${process.env.NEXT_PUBLIC_CDN_URL}/${user.avatar}`
+                      ? `https://cdn.thrico.network/${user.avatar}`
                       : "";
 
                     return (
                       <UserProfileHoverCard
                         key={user.id}
-                        user={{ id: user.globalUserId, firstName: user.firstName, lastName: user.lastName, avatar: user.avatar, headline: user.headline }}
+                        user={{
+                          id: user.globalUserId,
+                          firstName: user.firstName,
+                          lastName: user.lastName,
+                          avatar: user.avatar,
+                          headline: user.headline,
+                        }}
                       >
                         <Avatar
                           className="h-8 w-8 border-2 border-background shadow-sm hover:z-10 hover:scale-110 transition-transform cursor-pointer"

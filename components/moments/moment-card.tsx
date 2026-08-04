@@ -148,7 +148,7 @@ export const MomentCard: React.FC<MomentCardProps> = ({
                       moment.owner.avatar
                         ? moment.owner.avatar.startsWith("http")
                           ? moment.owner.avatar
-                          : `${process.env.NEXT_PUBLIC_CDN_URL}/${moment.owner.avatar}`
+                          : `https://cdn.thrico.network/${moment.owner.avatar}`
                         : ""
                     }
                     alt={`${moment.owner.firstName} ${moment.owner.lastName}`}

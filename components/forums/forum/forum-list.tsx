@@ -63,7 +63,7 @@ const columns: AdminTableColumn<discussionForm>[] = [
           </div>
         );
       }
-      
+
       return (
         <UserProfileHoverCard user={row.user}>
           <div className="flex items-center gap-2 cursor-pointer group">
@@ -73,7 +73,7 @@ const columns: AdminTableColumn<discussionForm>[] = [
                   row.user.avatar
                     ? row.user.avatar.startsWith("http")
                       ? row.user.avatar
-                      : `${process.env.NEXT_PUBLIC_CDN_URL}/${row.user.avatar}`
+                      : `https://cdn.thrico.network/${row.user.avatar}`
                     : ""
                 }
                 alt={`${row.user.firstName} ${row.user.lastName}`}
@@ -95,7 +95,9 @@ const columns: AdminTableColumn<discussionForm>[] = [
     key: "category",
     header: "Category",
     cell: (row) => (
-      <div className="text-[12px] text-muted-foreground">{row.category?.name || "—"}</div>
+      <div className="text-[12px] text-muted-foreground">
+        {row.category?.name || "—"}
+      </div>
     ),
   },
   {
@@ -132,7 +134,13 @@ const columns: AdminTableColumn<discussionForm>[] = [
 
 import { useModuleStore } from "@/store/useModuleStore";
 
-export default function List({ data, loading }: { data: discussionForm[], loading?: boolean }) {
+export default function List({
+  data,
+  loading,
+}: {
+  data: discussionForm[];
+  loading?: boolean;
+}) {
   const singularName = useModuleStore((state) => state.forumSingularName);
   return (
     <AdminTable<discussionForm>

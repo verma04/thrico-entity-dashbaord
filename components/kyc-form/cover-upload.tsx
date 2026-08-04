@@ -1,57 +1,67 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState } from "react"
-import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { AlertTriangle, Upload, Loader2 } from "lucide-react"
-import Image from "next/image"
+import type React from "react";
+import { useState } from "react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertTriangle, Upload, Loader2 } from "lucide-react";
+import Image from "next/image";
 
 interface CoverUploadProps {
-  imageUrl?: string
-  setImageUrl: (url: string) => void
-  setCover: (file: File) => void
-  buttonText?: string
+  imageUrl?: string;
+  setImageUrl: (url: string) => void;
+  setCover: (file: File) => void;
+  buttonText?: string;
 }
 
 const getBase64 = (file: File): Promise<string> => {
   return new Promise((resolve) => {
-    const reader = new FileReader()
-    reader.addEventListener("load", () => resolve(reader.result as string))
-    reader.readAsDataURL(file)
-  })
-}
+    const reader = new FileReader();
+    reader.addEventListener("load", () => resolve(reader.result as string));
+    reader.readAsDataURL(file);
+  });
+};
 
-const CoverUpload: React.FC<CoverUploadProps> = ({ imageUrl, setImageUrl, setCover, buttonText = "Update Cover" }) => {
-  const [loading, setLoading] = useState(false)
+const CoverUpload: React.FC<CoverUploadProps> = ({
+  imageUrl,
+  setImageUrl,
+  setCover,
+  buttonText = "Update Cover",
+}) => {
+  const [loading, setLoading] = useState(false);
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (!file) return
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
 
-    const isValidType = file.type === "image/jpeg" || file.type === "image/png" || file.type === "image/webp"
+    const isValidType =
+      file.type === "image/jpeg" ||
+      file.type === "image/png" ||
+      file.type === "image/webp";
 
     if (!isValidType) {
-      alert("You can only upload JPG/PNG/WEBP file!")
-      return
+      alert("You can only upload JPG/PNG/WEBP file!");
+      return;
     }
 
-    const isLt2M = file.size / 1024 / 1024 < 2
+    const isLt2M = file.size / 1024 / 1024 < 2;
     if (!isLt2M) {
-      alert("Image must be smaller than 2MB!")
-      return
+      alert("Image must be smaller than 2MB!");
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
     try {
-      setCover(file)
-      const url = await getBase64(file)
-      setImageUrl(url)
+      setCover(file);
+      const url = await getBase64(file);
+      setImageUrl(url);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <Card className="w-full mb-6">
@@ -59,7 +69,8 @@ const CoverUpload: React.FC<CoverUploadProps> = ({ imageUrl, setImageUrl, setCov
         <Alert className="mb-6">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
-            No custom cover image selected. The default image will be displayed until you upload a new one.
+            No custom cover image selected. The default image will be displayed
+            until you upload a new one.
           </AlertDescription>
         </Alert>
 
@@ -67,10 +78,15 @@ const CoverUpload: React.FC<CoverUploadProps> = ({ imageUrl, setImageUrl, setCov
           <div className="flex items-center justify-center w-full">
             <div className="relative w-full h-48 bg-muted rounded-lg overflow-hidden">
               {imageUrl ? (
-                <Image src={imageUrl || "/placeholder.svg"} alt="cover" fill className="object-contain" />
+                <Image
+                  src={imageUrl || "/placeholder.svg"}
+                  alt="cover"
+                  fill
+                  className="object-contain"
+                />
               ) : (
                 <Image
-                  src={`${process.env.NEXT_PUBLIC_CDN_URL}/defaultEventCover.png`}
+                  src={`https://cdn.thrico.network/defaultEventCover.png`}
                   alt="default cover"
                   fill
                   className="object-contain"
@@ -89,7 +105,11 @@ const CoverUpload: React.FC<CoverUploadProps> = ({ imageUrl, setImageUrl, setCov
               disabled={loading}
             />
             <label htmlFor="cover-upload">
-              <Button variant="outline" className="w-full bg-transparent" asChild>
+              <Button
+                variant="outline"
+                className="w-full bg-transparent"
+                asChild
+              >
                 <span role="button">
                   {loading ? (
                     <>
@@ -109,7 +129,7 @@ const CoverUpload: React.FC<CoverUploadProps> = ({ imageUrl, setImageUrl, setCov
         </div>
       </div>
     </Card>
-  )
-}
+  );
+};
 
-export default CoverUpload
+export default CoverUpload;

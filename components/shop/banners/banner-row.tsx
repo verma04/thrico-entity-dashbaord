@@ -24,7 +24,11 @@ interface BannerRowProps {
   onEdit: (id: string) => void;
 }
 
-export function SortableBannerRow({ banner, onRemove, onEdit }: BannerRowProps) {
+export function SortableBannerRow({
+  banner,
+  onRemove,
+  onEdit,
+}: BannerRowProps) {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: banner.id });
 
@@ -48,7 +52,7 @@ export function SortableBannerRow({ banner, onRemove, onEdit }: BannerRowProps) 
         <div className="h-10 w-15 relative rounded overflow-hidden bg-muted/20 border group">
           {banner.image ? (
             <img
-              src={`${process.env.NEXT_PUBLIC_CDN_URL}/${banner?.image}`}
+              src={`https://cdn.thrico.network/${banner?.image}`}
               alt={banner?.title}
               className="w-full h-full object-cover transition-transform group-hover:scale-110"
             />

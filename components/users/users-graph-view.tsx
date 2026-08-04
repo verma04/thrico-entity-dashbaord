@@ -475,7 +475,7 @@ function UserDetailPanel({
   const avatarUrl = user.avatar
     ? user.avatar.startsWith("http")
       ? user.avatar
-      : `${process.env.NEXT_PUBLIC_CDN_URL}/${user.avatar}`
+      : `https://cdn.thrico.network/${user.avatar}`
     : "";
   const name =
     [user.firstName, user.lastName].filter(Boolean).join(" ") || "User";
@@ -552,7 +552,7 @@ function UserDetailPanel({
             <div className="space-y-1 max-h-32 overflow-y-auto pr-1">
               {connected.slice(0, 8).map(({ user: u }, idx) => {
                 const uAvatar = u.avatar
-                  ? `${process.env.NEXT_PUBLIC_CDN_URL}/${u.avatar}`
+                  ? `https://cdn.thrico.network/${u.avatar}`
                   : "";
                 const uName =
                   [u.firstName, u.lastName].filter(Boolean).join(" ") || "User";
@@ -586,7 +586,7 @@ function UserDetailPanel({
             <div className="space-y-1 max-h-32 overflow-y-auto pr-1">
               {follows.slice(0, 8).map(({ user: u }, idx) => {
                 const uAvatar = u.avatar
-                  ? `${process.env.NEXT_PUBLIC_CDN_URL}/${u.avatar}`
+                  ? `https://cdn.thrico.network/${u.avatar}`
                   : "";
                 const uName =
                   [u.firstName, u.lastName].filter(Boolean).join(" ") || "User";
@@ -846,7 +846,7 @@ export function UsersGraphView({
       const avatarUrl = user.avatar
         ? user.avatar.startsWith("http")
           ? user.avatar
-          : `${process.env.NEXT_PUBLIC_CDN_URL}/${user.avatar}`
+          : `https://cdn.thrico.network/${user.avatar}`
         : "";
       const connCount = counts.get(user.id) || 0;
       const size = Math.max(20, Math.min(60, 18 + connCount * 5));

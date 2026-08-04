@@ -31,16 +31,51 @@ import { cn } from "@/lib/utils";
 
 /* ── Helpers ─────────────────────────────────────────────────────────────── */
 
-const STATUS_STYLE: Record<string, { bg: string; text: string; border: string; dot: string }> = {
-  APPROVED: { bg: "bg-emerald-50", text: "text-emerald-700", border: "border-emerald-200", dot: "bg-emerald-500" },
-  PENDING: { bg: "bg-amber-50", text: "text-amber-700", border: "border-amber-200", dot: "bg-amber-500" },
-  BLOCKED: { bg: "bg-red-50", text: "text-red-600", border: "border-red-200", dot: "bg-red-500" },
-  REJECTED: { bg: "bg-muted", text: "text-muted-foreground", border: "border-border", dot: "bg-muted-foreground" },
-  DISABLED: { bg: "bg-orange-50", text: "text-orange-600", border: "border-orange-200", dot: "bg-orange-500" },
+const STATUS_STYLE: Record<
+  string,
+  { bg: string; text: string; border: string; dot: string }
+> = {
+  APPROVED: {
+    bg: "bg-emerald-50",
+    text: "text-emerald-700",
+    border: "border-emerald-200",
+    dot: "bg-emerald-500",
+  },
+  PENDING: {
+    bg: "bg-amber-50",
+    text: "text-amber-700",
+    border: "border-amber-200",
+    dot: "bg-amber-500",
+  },
+  BLOCKED: {
+    bg: "bg-red-50",
+    text: "text-red-600",
+    border: "border-red-200",
+    dot: "bg-red-500",
+  },
+  REJECTED: {
+    bg: "bg-muted",
+    text: "text-muted-foreground",
+    border: "border-border",
+    dot: "bg-muted-foreground",
+  },
+  DISABLED: {
+    bg: "bg-orange-50",
+    text: "text-orange-600",
+    border: "border-orange-200",
+    dot: "bg-orange-500",
+  },
 };
 
 function getStatusStyle(status: string) {
-  return STATUS_STYLE[status] ?? { bg: "bg-muted/50", text: "text-muted-foreground", border: "border-border", dot: "bg-muted-foreground" };
+  return (
+    STATUS_STYLE[status] ?? {
+      bg: "bg-muted/50",
+      text: "text-muted-foreground",
+      border: "border-border",
+      dot: "bg-muted-foreground",
+    }
+  );
 }
 
 const SOCIAL_ICONS: Record<string, React.ElementType> = {
@@ -135,7 +170,7 @@ export function UserInfoCard({ member }: { member: any }) {
         <div className="h-32 relative">
           {user.cover ? (
             <img
-              src={`${process.env.NEXT_PUBLIC_CDN_URL}/${user.cover}`}
+              src={`https://cdn.thrico.network/${user.cover}`}
               alt="Cover"
               className="w-full h-full object-cover"
             />
@@ -150,11 +185,9 @@ export function UserInfoCard({ member }: { member: any }) {
           {/* Avatar + Online ring */}
           <div className="flex flex-col items-center -mt-14 space-y-3">
             <div className="relative">
-              <Avatar
-                className="h-24 w-24 border-4 border-background shadow-lg rounded-full"
-              >
+              <Avatar className="h-24 w-24 border-4 border-background shadow-lg rounded-full">
                 <AvatarImage
-                  src={`${process.env.NEXT_PUBLIC_CDN_URL}/${user.avatar}`}
+                  src={`https://cdn.thrico.network/${user.avatar}`}
                   alt={user.firstName}
                 />
                 <AvatarFallback className="text-xl font-bold bg-muted text-muted-foreground">
@@ -205,10 +238,7 @@ export function UserInfoCard({ member }: { member: any }) {
                   )}
                 >
                   <span
-                    className={cn(
-                      "h-1.5 w-1.5 rounded-full",
-                      statusStyle.dot,
-                    )}
+                    className={cn("h-1.5 w-1.5 rounded-full", statusStyle.dot)}
                   />
                   {member.status}
                 </Badge>

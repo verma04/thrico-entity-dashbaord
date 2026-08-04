@@ -4,11 +4,11 @@
  */
 
 export const CATEGORY_DEFAULT_IMAGES: Record<string, string> = {
-  clothing: `${process.env.NEXT_PUBLIC_CDN_URL}/shop_product_clothing.png`,
-  electronics: `${process.env.NEXT_PUBLIC_CDN_URL}/shop_product_electronics.png`,
-  digital: `${process.env.NEXT_PUBLIC_CDN_URL}/shop_product_digital_goods.png`,
-  services: `${process.env.NEXT_PUBLIC_CDN_URL}/shop_product_services.png`,
-  merch: `${process.env.NEXT_PUBLIC_CDN_URL}/shop_product_merchandise.png`,
+  clothing: `https://cdn.thrico.network/shop_product_clothing.png`,
+  electronics: `https://cdn.thrico.network/shop_product_electronics.png`,
+  digital: `https://cdn.thrico.network/shop_product_digital_goods.png`,
+  services: `https://cdn.thrico.network/shop_product_services.png`,
+  merch: `https://cdn.thrico.network/shop_product_merchandise.png`,
 };
 
 /**
@@ -31,5 +31,5 @@ export const getCategoryDefaultImage = (category: string): string => {
 export const resolveCdnUrl = (urlOrKey?: string | null): string => {
   if (!urlOrKey) return "";
   if (urlOrKey.startsWith("http")) return urlOrKey;
-  return `${process.env.NEXT_PUBLIC_CDN_URL}/${urlOrKey}`;
+  return `https://cdn.thrico.network/${urlOrKey}`;
 };
