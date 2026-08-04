@@ -65,7 +65,7 @@ export function WorkspaceSwitcher() {
               <div className="flex aspect-square size-6 items-center justify-center rounded bg-teal-600 text-white font-bold text-xs shrink-0 overflow-hidden">
                 {currentEntity?.logo ? (
                   <img
-                    src={`${process.env.NEXT_PUBLIC_CDN_URL}/${currentEntity.logo}`}
+                    src={`https://cdn.thrico.network/${currentEntity.logo}`}
                     alt={currentEntity.name}
                     className="size-full object-cover"
                   />
