@@ -301,7 +301,7 @@ export const gamificationEngine = [
       {
         key: "cur-abuse",
         label: "Anti-Abuse",
-        path: "/gamification/currency/anti-abuse",
+        path: "/gamification/currency/risk",
       },
       {
         key: "cur-redemption",
