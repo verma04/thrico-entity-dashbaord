@@ -61,12 +61,15 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
         <Info className="h-3.5 w-3.5 text-muted-foreground mt-0.5 shrink-0" />
         <div className="space-y-0.5">
           <p className="text-[12px] font-semibold text-foreground">
-            Home and Profile are fixed nav items. Select up to 3 additional modules.
+            Home and Profile are fixed nav items. Select up to 3 additional
+            modules.
           </p>
-          <p className={cn(
-            "text-[11px] font-semibold",
-            remainingSlots === 0 ? "text-amber-600" : "text-muted-foreground"
-          )}>
+          <p
+            className={cn(
+              "text-[11px] font-semibold",
+              remainingSlots === 0 ? "text-amber-600" : "text-muted-foreground",
+            )}
+          >
             {remainingSlots === 0
               ? "All 3 slots filled"
               : `${remainingSlots} slot${remainingSlots !== 1 ? "s" : ""} remaining`}
@@ -91,7 +94,9 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
             <div className="bg-muted/50 rounded-xl border border-border p-3">
               {/* Status bar sim */}
               <div className="flex items-center justify-between px-2 pb-2 border-b border-border/60 mb-3">
-                <span className="text-[9px] font-semibold text-muted-foreground">09:41</span>
+                <span className="text-[9px] font-semibold text-muted-foreground">
+                  09:41
+                </span>
                 <div className="flex items-center gap-1">
                   <div className="h-1.5 w-4 bg-slate-300 rounded-full" />
                   <div className="h-1.5 w-1.5 bg-slate-300 rounded-full" />
@@ -107,13 +112,22 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
 
                 {/* Dynamic slots */}
                 {navigationModules.map((module) => (
-                  <NavItem key={module.id} label={module.customName ? `${module.customName} (${module.name})` : module.name}>
+                  <NavItem
+                    key={module.id}
+                    label={
+                      module.customName
+                        ? `${module.customName} (${module.name})`
+                        : module.name
+                    }
+                  >
                     {getNavIcon(module.customIcon || module.icon)}
                   </NavItem>
                 ))}
 
                 {/* Empty slots */}
-                {Array.from({ length: Math.max(0, 3 - navigationModules.length) }).map((_, i) => (
+                {Array.from({
+                  length: Math.max(0, 3 - navigationModules.length),
+                }).map((_, i) => (
                   <NavItem key={`empty-${i}`} label="—" isEmpty>
                     <div className="h-4 w-4 rounded border border-dashed border-border" />
                   </NavItem>
@@ -139,11 +153,15 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
             <div className="flex items-center gap-4 mt-3 px-1">
               <div className="flex items-center gap-1.5">
                 <div className="h-2 w-2 rounded-full bg-primary" />
-                <span className="text-[10px] text-muted-foreground">Active / Fixed</span>
+                <span className="text-[10px] text-muted-foreground">
+                  Active / Fixed
+                </span>
               </div>
               <div className="flex items-center gap-1.5">
                 <div className="h-2 w-2 rounded-sm border border-dashed border-border" />
-                <span className="text-[10px] text-muted-foreground">Empty slot</span>
+                <span className="text-[10px] text-muted-foreground">
+                  Empty slot
+                </span>
               </div>
             </div>
           </div>
@@ -169,7 +187,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
                     {...provided.droppableProps}
                     className={cn(
                       "space-y-2 min-h-[120px] rounded-lg transition-colors",
-                      snapshot.isDraggingOver && "bg-muted/50"
+                      snapshot.isDraggingOver && "bg-muted/50",
                     )}
                   >
                     {navigationModules.length === 0 ? (
@@ -182,7 +200,11 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
                       </div>
                     ) : (
                       navigationModules.map((module, idx) => (
-                        <Draggable key={module.id} draggableId={module.id} index={idx}>
+                        <Draggable
+                          key={module.id}
+                          draggableId={module.id}
+                          index={idx}
+                        >
                           {(dragProvided, dragSnapshot) => (
                             <div
                               ref={dragProvided.innerRef}
@@ -191,7 +213,7 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
                                 "flex items-center gap-3 px-3 py-2.5 rounded-lg border transition-all duration-200",
                                 dragSnapshot.isDragging
                                   ? "bg-card border-border shadow-md"
-                                  : "bg-muted/50/80 border-border hover:border-border hover:bg-card"
+                                  : "bg-muted/50/80 border-border hover:border-border hover:bg-card",
                               )}
                             >
                               {/* Drag handle */}
@@ -214,9 +236,13 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
                                 </div>
                                 <div className="flex flex-col min-w-0">
                                   <span className="text-[13px] font-medium text-foreground truncate flex items-baseline gap-1.5">
-                                    <span>{module.customName || module.name}</span>
+                                    <span>
+                                      {module.customName || module.name}
+                                    </span>
                                     {module.customName && (
-                                      <span className="text-[11px] text-muted-foreground font-normal">({module.name})</span>
+                                      <span className="text-[11px] text-muted-foreground font-normal">
+                                        ({module.name})
+                                      </span>
                                     )}
                                   </span>
                                   {module.subtitle && (
@@ -250,14 +276,18 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
 
             {/* Slot usage meter */}
             <div className="mt-4 pt-3 border-t border-border flex items-center justify-between">
-              <span className="text-[11px] text-muted-foreground">Navigation slots</span>
+              <span className="text-[11px] text-muted-foreground">
+                Navigation slots
+              </span>
               <div className="flex items-center gap-1.5">
                 {[0, 1, 2].map((i) => (
                   <div
                     key={i}
                     className={cn(
                       "h-2 w-8 rounded-full transition-colors",
-                      i < navCount ? "bg-primary/80" : "bg-muted border border-border"
+                      i < navCount
+                        ? "bg-primary/80"
+                        : "bg-muted border border-border",
                     )}
                   />
                 ))}
@@ -292,7 +322,7 @@ function NavItem({
           "h-8 w-8 flex items-center justify-center rounded-lg",
           isActive && "bg-primary",
           !isActive && !isEmpty && "bg-muted",
-          isEmpty && "bg-transparent"
+          isEmpty && "bg-transparent",
         )}
       >
         {children}
@@ -300,7 +330,7 @@ function NavItem({
       <span
         className={cn(
           "text-[8px] font-semibold text-center leading-none max-w-[36px] truncate",
-          isEmpty ? "text-muted-foreground" : "text-muted-foreground"
+          isEmpty ? "text-muted-foreground" : "text-muted-foreground",
         )}
       >
         {label}
