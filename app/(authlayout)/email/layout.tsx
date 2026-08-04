@@ -38,13 +38,13 @@ function EmailLayout({ children }: { children: React.ReactNode }) {
       section: "General",
       href: "/email/usage",
     },
-    {
-      key: "automation",
-      label: "Campaigns",
-      icon: <GitBranch className="h-4 w-4" />,
-      section: "General",
-      href: "/email/automation",
-    },
+    // {
+    //   key: "automation",
+    //   label: "Campaigns",
+    //   icon: <GitBranch className="h-4 w-4" />,
+    //   section: "General",
+    //   href: "/email/automation",
+    // },
   ];
 
   const isTakeoverPage =
