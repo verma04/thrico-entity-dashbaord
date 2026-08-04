@@ -696,7 +696,7 @@ export const adminSettings = [
       {
         key: "cust-mod",
         label: "Setup Modules",
-        path: "/settings/modules#setup",
+        path: "/settings/modules",
       },
       {
         key: "cust-lang",

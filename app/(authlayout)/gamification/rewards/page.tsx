@@ -26,7 +26,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { CtaButton } from "@/components/ui/cta-button";
+
 import Link from "next/link";
 import {
   ResponsiveContainer,
@@ -307,10 +307,10 @@ export default function RewardsDashboard() {
                 />
               </Button>
               <Link href="/gamification/rewards/coupons/create">
-                <CtaButton>
+                <EcosystemActionBar.CtaButton>
                   <Plus className="h-3 w-3" />
                   Create Reward
-                </CtaButton>
+                </EcosystemActionBar.CtaButton>
               </Link>
             </div>
           </EcosystemActionBar>

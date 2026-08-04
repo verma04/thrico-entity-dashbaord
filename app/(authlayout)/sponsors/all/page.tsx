@@ -23,7 +23,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 
 import { Button } from "@/components/ui/button";
-import { CtaButton } from "@/components/ui/cta-button";
+
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -290,10 +290,10 @@ export default function ManageSponsorsPage() {
           >
             <EcosystemActionBar.Group align="right">
               <Link href="/sponsors/create">
-                <CtaButton>
+                <EcosystemActionBar.CtaButton>
                   <Plus className="w-4 h-4 mr-2" />
                   Add Sponsor
-                </CtaButton>
+                </EcosystemActionBar.CtaButton>
               </Link>
             </EcosystemActionBar.Group>
           </EcosystemActionBar>

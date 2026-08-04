@@ -10,7 +10,7 @@ import {
   Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { CtaButton } from "@/components/ui/cta-button";
+
 
 import { useGetRedemptions } from "@/graphql/actions/rewards";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
@@ -119,10 +119,10 @@ export default function RedemptionsPage() {
             </EcosystemActionBar.Group>
 
             <EcosystemActionBar.Group align="right">
-              <CtaButton onClick={handleExport} disabled={redemptions.length === 0}>
+              <EcosystemActionBar.CtaButton onClick={handleExport} disabled={redemptions.length === 0}>
                 <Download className="h-3 w-3" />
                 Export Dataset
-              </CtaButton>
+              </EcosystemActionBar.CtaButton>
             </EcosystemActionBar.Group>
           </EcosystemActionBar>
         }

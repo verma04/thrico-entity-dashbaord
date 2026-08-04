@@ -21,7 +21,7 @@ import { MomentsEmptyState } from "@/components/moments/moments-empty-state";
 import { MomentsLoadingState } from "@/components/moments/moments-loading-state";
 import { useModuleStore } from "@/store/useModuleStore";
 import { PlaySquare, Plus } from "lucide-react";
-import { CtaButton } from "@/components/ui/cta-button";
+
 import Link from "next/link";
 
 function MomentsListPage() {
@@ -96,10 +96,10 @@ function MomentsListPage() {
         <EcosystemActionBar.Group align="right">
           <EcosystemActionBar.Item>
             <Link href="/moments/create">
-              <CtaButton className="gap-2 px-4 h-9">
+              <EcosystemActionBar.CtaButton className="gap-2 px-4 h-9">
                 <Plus className="h-4 w-4" />
                 Create
-              </CtaButton>
+              </EcosystemActionBar.CtaButton>
             </Link>
           </EcosystemActionBar.Item>
           <EcosystemActionBar.Status active={filteredMoments.length > 0}>

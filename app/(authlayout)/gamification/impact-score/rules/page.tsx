@@ -17,7 +17,7 @@ import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header"
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { Button } from "@/components/ui/button";
-import { CtaButton } from "@/components/ui/cta-button";
+
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
@@ -204,10 +204,10 @@ export default function ImpactRulesPage() {
           <EcosystemActionBar shadow="none" className="p-0 border-none bg-transparent gap-2">
             <EcosystemActionBar.Group align="right">
               <Link href="/gamification/impact-score/rules/create">
-                <CtaButton>
+                <EcosystemActionBar.CtaButton>
                   <Plus className="h-3 w-3" />
                   Create Rule
-                </CtaButton>
+                </EcosystemActionBar.CtaButton>
               </Link>
             </EcosystemActionBar.Group>
           </EcosystemActionBar>
