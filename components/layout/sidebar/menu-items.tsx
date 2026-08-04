@@ -213,13 +213,6 @@ export const contentModeration = [
       },
     ],
   },
-  {
-    key: "trust-center",
-    label: "Trust Center",
-    path: "/trust-center",
-    icon: <ShieldCheck size={18} />,
-    badge: "Active",
-  },
 ];
 
 // --- 3. REWARDS & GAMES ---
@@ -825,16 +818,51 @@ export const extendedItems = modules;
 export const gamification = gamificationEngine;
 
 export const emailItems = [
-  { key: "email-dash", label: "Usage Dashboard", path: "/email/usage", icon: <BarChart3 size={18} /> },
-  { key: "email-templates", label: "Manage Templates", path: "/email/templates", icon: <FileText size={18} /> },
-  { key: "email-campaigns", label: "Automation Campaigns", path: "/email/automation", icon: <Zap size={18} /> },
-  { key: "email-settings", label: "Email Settings", path: "/email/settings", icon: <Settings size={18} /> },
+  {
+    key: "email-dash",
+    label: "Usage Dashboard",
+    path: "/email/usage",
+    icon: <BarChart3 size={18} />,
+  },
+  {
+    key: "email-templates",
+    label: "Manage Templates",
+    path: "/email/templates",
+    icon: <FileText size={18} />,
+  },
+  {
+    key: "email-campaigns",
+    label: "Automation Campaigns",
+    path: "/email/automation",
+    icon: <Zap size={18} />,
+  },
+  {
+    key: "email-settings",
+    label: "Email Settings",
+    path: "/email/settings",
+    icon: <Settings size={18} />,
+  },
 ];
 
 export const mobileAppItems = [
-  { key: "ma-android", label: "Android App", path: "/mobile-app/android", icon: <Smartphone size={18} /> },
-  { key: "ma-ios", label: "iOS App", path: "/mobile-app/ios", icon: <Smartphone size={18} /> },
-  { key: "ma-settings", label: "App Settings", path: "/mobile-app/settings", icon: <Settings size={18} /> },
+  {
+    key: "ma-android",
+    label: "Android App",
+    path: "/mobile-app/android",
+    icon: <Smartphone size={18} />,
+  },
+  {
+    key: "ma-ios",
+    label: "iOS App",
+    path: "/mobile-app/ios",
+    icon: <Smartphone size={18} />,
+  },
+  {
+    key: "ma-settings",
+    label: "App Settings",
+    path: "/mobile-app/settings",
+    icon: <Settings size={18} />,
+  },
 ];
 
 /**
