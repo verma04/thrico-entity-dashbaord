@@ -39,7 +39,14 @@ import { ParentSidebar } from "./parent-sidebar";
 import LogoutModal from "./logout";
 import { SwitchingLoader } from "./switching-loader";
 
-type ActiveTab = "home" | "community" | "gamification" | "modules" | "settings" | "email" | "mobile-app";
+type ActiveTab =
+  | "home"
+  | "community"
+  | "gamification"
+  | "modules"
+  | "settings"
+  | "email"
+  | "mobile-app";
 
 function getActiveTab(pathName: string): ActiveTab {
   if (pathName.startsWith("/settings/modules")) return "modules";
@@ -56,10 +63,7 @@ function getActiveTab(pathName: string): ActiveTab {
   )
     return "community";
 
-  if (
-    pathName.startsWith("/gamification")
-  )
-    return "gamification";
+  if (pathName.startsWith("/gamification")) return "gamification";
 
   if (
     pathName === "/" ||
@@ -276,7 +280,7 @@ export function ChildSidebarContainer({
         {/* ── SIDEBAR ── */}
         <Sidebar
           collapsible="icon"
-          className="border border-neutral-200 dark:border-neutral-800 bg-[#f9f9f9] dark:bg-background transition-[width] duration-150 ease-in-out !left-[80px] !top-[64px] !h-[calc(100vh-72px)]  my-2 mx-2 mt-0 shadow-sm"
+          className="border bg-[#f9f9f9] dark:bg-background transition-[width] duration-150 ease-in-out !left-[80px] !top-[64px] !h-[calc(100vh-72px)] my-2 mx-2 mt-0 shadow-sm !rounded-2xl !rounded-r-none !rounded-br-none"
           style={{ "--sidebar-width": "248px" } as React.CSSProperties}
         >
           <SidebarHeader className="h-10 flex items-center justify-between flex-row px-4 pb-0 pt-0 group-data-[collapsible=icon]:px-1 group-data-[collapsible=icon]:justify-center">
