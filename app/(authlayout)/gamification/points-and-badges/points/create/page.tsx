@@ -13,7 +13,9 @@ import { PointRuleForm } from "@/components/gamification/points-manager/point-ru
 import { useModuleStore } from "@/store/useModuleStore";
 
 export default function CreatePointRulePage() {
-  const gamificationModuleName = useModuleStore((state) => state.gamificationModuleName);
+  const gamificationModuleName = useModuleStore(
+    (state) => state.gamificationModuleName,
+  );
   const router = useRouter();
   const { data: moduleData } = useGetEntityGamificationModules();
   const [createPointRule, { loading: isCreating }] = useCreatePointRule();
@@ -45,27 +47,21 @@ export default function CreatePointRulePage() {
         badgeText={`${gamificationModuleName} Studio`}
         description="Define new rules for how members earn points across your community."
         icon={Zap}
+        breadcrumbs={[
+          { label: "Gamification", href: "/gamification" },
+          { label: "Points", href: "/gamification/points-and-badges" },
+          { label: "Add Rule" },
+        ]}
       />
 
-      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur border-b px-6 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span>{gamificationModuleName}</span>
-          <ChevronRight className="h-3 w-3" />
-          <span>Points</span>
-          <ChevronRight className="h-3 w-3" />
-          <span className="text-foreground font-medium">Create Rule</span>
-        </div>
-        <Button variant="outline" size="sm" onClick={() => router.back()}>
-          Cancel
-        </Button>
-      </div>
-
-      <PointRuleForm
-        onSubmit={handleCreate}
-        loading={isCreating}
-        modules={modules}
-        triggers={triggers}
-      />
+      <EcosystemContainer className="p-0 bg-transparent border-none shadow-none ring-0">
+        <PointRuleForm
+          onSubmit={handleCreate}
+          loading={isCreating}
+          modules={modules}
+          triggers={triggers}
+        />
+      </EcosystemContainer>
     </EcosystemWrapper>
   );
 }

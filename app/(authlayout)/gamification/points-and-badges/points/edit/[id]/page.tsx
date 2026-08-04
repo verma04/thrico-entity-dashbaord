@@ -16,7 +16,9 @@ import { PointRuleForm } from "@/components/gamification/points-manager/point-ru
 import { useModuleStore } from "@/store/useModuleStore";
 
 export default function EditPointRulePage() {
-  const gamificationModuleName = useModuleStore((state) => state.gamificationModuleName);
+  const gamificationModuleName = useModuleStore(
+    (state) => state.gamificationModuleName,
+  );
   const params = useParams();
   const router = useRouter();
   const ruleId = params?.id as string;
@@ -80,15 +82,16 @@ export default function EditPointRulePage() {
           { label: "Edit Rule" },
         ]}
       />
-
-      <PointRuleForm
-        initialValues={rule}
-        onSubmit={handleUpdate}
-        loading={isUpdating}
-        isEdit={true}
-        modules={modules}
-        triggers={triggers}
-      />
+      <EcosystemContainer className="p-0 bg-transparent border-none shadow-none ring-0">
+        <PointRuleForm
+          initialValues={rule}
+          onSubmit={handleUpdate}
+          loading={isUpdating}
+          isEdit={true}
+          modules={modules}
+          triggers={triggers}
+        />
+      </EcosystemContainer>
     </EcosystemWrapper>
   );
 }

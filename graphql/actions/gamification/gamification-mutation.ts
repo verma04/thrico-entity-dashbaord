@@ -6,13 +6,13 @@ import { gql, useMutation, MutationHookOptions } from "@apollo/client";
 
 export interface BadgeInput {
   name: string;
-  description: string;
-  icon: string;
+  description?: string;
+  icon?: string;
   type: string;
-  module: string;
-  action: string;
-  targetValue: number;
-  isActive?: boolean;
+  module?: string;
+  action?: string;
+  count?: number;
+  points?: number;
 }
 
 export interface BadgeUpdateInput {

@@ -74,7 +74,7 @@ export function PointRuleForm({
         await onSubmit(values);
         setSaved(true);
         setTimeout(() => {
-          router.push("/gamification/points");
+          router.push("/gamification/points-and-badges/points");
         }, 1500);
       } catch (error: any) {
         toast({
@@ -224,7 +224,7 @@ export function PointRuleForm({
                     <Clock className="h-4 w-4 text-muted-foreground" />
                     Frequency Limitations (Anti-Abuse)
                   </h4>
-                  
+
                   <div className="flex items-start gap-3 mb-6 bg-indigo-50/50 border border-indigo-100/50 p-4 rounded-xl">
                     <Info className="h-4 w-4 text-indigo-500 mt-0.5 shrink-0" />
                     <div className="space-y-1.5">
@@ -232,10 +232,14 @@ export function PointRuleForm({
                         Frequency-Based Buckets
                       </p>
                       <p className="text-[11px] text-indigo-900/60 leading-relaxed">
-                        These limits represent the <strong>maximum number of times</strong> an action can be performed within each period per user.
+                        These limits represent the{" "}
+                        <strong>maximum number of times</strong> an action can
+                        be performed within each period per user.
                       </p>
                       <p className="text-[10px] text-indigo-900/40 italic leading-relaxed">
-                        Example: If the daily limit for this action is set to 5, the user can earn points for the first 5 times they perform it each day.
+                        Example: If the daily limit for this action is set to 5,
+                        the user can earn points for the first 5 times they
+                        perform it each day.
                       </p>
                     </div>
                   </div>
@@ -334,19 +338,29 @@ export function PointRuleForm({
                 <div className="flex justify-between text-xs border-b pb-2">
                   <span className="text-muted-foreground">Daily Frequency</span>
                   <span className="font-bold">
-                    {formik.values.dailyCap ? `${formik.values.dailyCap} times` : "∞"}
+                    {formik.values.dailyCap
+                      ? `${formik.values.dailyCap} times`
+                      : "∞"}
                   </span>
                 </div>
                 <div className="flex justify-between text-xs border-b pb-2">
-                  <span className="text-muted-foreground">Weekly Frequency</span>
+                  <span className="text-muted-foreground">
+                    Weekly Frequency
+                  </span>
                   <span className="font-bold">
-                    {formik.values.weeklyCap ? `${formik.values.weeklyCap} times` : "∞"}
+                    {formik.values.weeklyCap
+                      ? `${formik.values.weeklyCap} times`
+                      : "∞"}
                   </span>
                 </div>
                 <div className="flex justify-between text-xs border-b pb-2">
-                  <span className="text-muted-foreground">Monthly Frequency</span>
+                  <span className="text-muted-foreground">
+                    Monthly Frequency
+                  </span>
                   <span className="font-bold">
-                    {formik.values.monthlyCap ? `${formik.values.monthlyCap} times` : "∞"}
+                    {formik.values.monthlyCap
+                      ? `${formik.values.monthlyCap} times`
+                      : "∞"}
                   </span>
                 </div>
               </div>

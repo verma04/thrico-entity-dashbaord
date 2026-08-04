@@ -10,6 +10,7 @@ import { RewardFormSections } from "@/components/rewards/coupons/form/reward-for
 import { RewardPreviewSidebar } from "@/components/rewards/coupons/form/reward-preview-sidebar";
 import { RewardStudioHeader } from "@/components/rewards/coupons/form/reward-form-header";
 import { couponSchema } from "@/components/rewards/coupons/types";
+import { EcosystemContainer } from "@/components/layout/ecosystem";
 
 export default function CreateCouponPage() {
   const { toast } = useToast();
@@ -84,7 +85,7 @@ export default function CreateCouponPage() {
         });
         setSaved(true);
         setTimeout(() => {
-          router.push("/rewards/coupons");
+          router.push("/gamification/rewards/coupons");
         }, 1500);
       } catch (err: any) {
         toast({
@@ -96,41 +97,36 @@ export default function CreateCouponPage() {
     },
   });
 
-  console.log(formik?.errors);
   return (
-    <div className="flex flex-col h-full bg-[#fafafa] dark:bg-black/5 overflow-hidden relative">
-      <RewardStudioHeader
-        title="Reward Studio"
-        breadcrumbs={["Rewards", "Coupons", "Create New Reward"]}
-        onCancel={() => router.back()}
-      />
+    <EcosystemContainer className="p-0 bg-transparent border-none shadow-none ring-0">
+      <div className="flex flex-col h-full bg-[#fafafa] dark:bg-black/5 overflow-hidden relative">
+        {/* Main Content Area */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="max-w-[1400px] mx-auto px-6 py-10">
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-12">
+              <div className="space-y-12">
+                <form onSubmit={formik.handleSubmit}>
+                  <RewardFormSections formik={formik} />
+                </form>
+              </div>
 
-      {/* Main Content Area */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-[1400px] mx-auto px-6 py-10">
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-12">
-            <div className="space-y-12">
-              <form onSubmit={formik.handleSubmit}>
-                <RewardFormSections formik={formik} />
-              </form>
+              {/* Sidebar / Preview */}
+              <RewardPreviewSidebar formik={formik} showStrategy />
             </div>
-
-            {/* Sidebar / Preview */}
-            <RewardPreviewSidebar formik={formik} showStrategy />
           </div>
         </div>
-      </div>
 
-      <FloatingSavePanel
-        hasChanged={formik.dirty}
-        saved={saved}
-        isSaving={loading}
-        onSave={() => formik.submitForm()}
-        onReset={() => formik.resetForm()}
-        title="Unsaved Changes"
-        description="You have pending changes to this reward."
-        buttonText="Publish Reward"
-      />
-    </div>
+        <FloatingSavePanel
+          hasChanged={formik.dirty}
+          saved={saved}
+          isSaving={loading}
+          onSave={() => formik.submitForm()}
+          onReset={() => formik.resetForm()}
+          title="Unsaved Changes"
+          description="You have pending changes to this reward."
+          buttonText="Publish Reward"
+        />
+      </div>
+    </EcosystemContainer>
   );
 }

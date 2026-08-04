@@ -6,6 +6,8 @@ import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
+import { CtaButton } from "@/components/ui/cta-button";
 
 interface EcosystemActionBarProps {
   children: React.ReactNode;
@@ -281,6 +283,7 @@ export function EcosystemActionBarSelect({
 // ---------------------------------------------------------------------------
 // Action Bar Sub-components Attachment
 // ---------------------------------------------------------------------------
+
 EcosystemActionBar.Group = EcosystemActionBarGroup;
 EcosystemActionBar.Separator = EcosystemActionBarSeparator;
 EcosystemActionBar.Item = EcosystemActionBarItem;
@@ -288,3 +291,5 @@ EcosystemActionBar.Status = EcosystemActionBarStatus;
 EcosystemActionBar.Search = EcosystemActionBarSearch;
 EcosystemActionBar.ViewToggle = EcosystemActionBarViewToggle;
 EcosystemActionBar.Select = EcosystemActionBarSelect;
+EcosystemActionBar.ThemeToggle = ThemeToggle;
+EcosystemActionBar.CtaButton = CtaButton;

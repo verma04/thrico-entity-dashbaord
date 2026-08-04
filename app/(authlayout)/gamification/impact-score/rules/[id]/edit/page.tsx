@@ -13,6 +13,7 @@ import { useGetEntityGamificationModules } from "@/graphql/actions/gamification/
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { ImpactRuleForm } from "@/components/impact/rule-form";
+import { EcosystemContainer } from "@/components/layout/ecosystem";
 
 const UPDATE_IMPACT_RULE = gql`
   mutation UpdateImpactRule($id: ID!, $input: CreateImpactRuleInput!) {
@@ -93,40 +94,33 @@ export default function EditImpactRulePage() {
         badgeText="Impact Studio"
         description="Modify how member actions affect their reputation score."
         icon={Trophy}
-        breadcrumbs={[{ label: "Gamification", href: "/gamification" }, { label: "Impact Score", href: "/impact-score" }, { label: "Rules", href: "/impact-score/rules" }, { label: "Edit" }]}
+        breadcrumbs={[
+          { label: "Gamification", href: "/gamification" },
+          { label: "Impact Score", href: "/impact-score" },
+          { label: "Rules", href: "/impact-score/rules" },
+          { label: "Edit" },
+        ]}
       />
-
-      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur border-b px-6 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span>Impact Score</span>
-          <ChevronRight className="h-3 w-3" />
-          <span>Rules</span>
-          <ChevronRight className="h-3 w-3" />
-          <span className="text-foreground font-medium">Edit Rule</span>
-        </div>
-        <Button variant="outline" size="sm" onClick={() => router.back()}>
-          Cancel
-        </Button>
-      </div>
-
-      <ImpactRuleForm
-        initialValues={{
-          templateId,
-          module: rule.module,
-          action: rule.action,
-          category: rule.category,
-          points: rule.points,
-          dailyLimit: rule.dailyLimit,
-          formula: rule.formula || "",
-          description: "", // Rules don't have description in backend yet
-        }}
-        isEdit
-        onSubmit={handleUpdate}
-        loading={isUpdating}
-        modules={modules}
-        triggers={triggers}
-        templates={templates}
-      />
+      <EcosystemContainer className="p-0 bg-transparent border-none shadow-none ring-0">
+        <ImpactRuleForm
+          initialValues={{
+            templateId,
+            module: rule.module,
+            action: rule.action,
+            category: rule.category,
+            points: rule.points,
+            dailyLimit: rule.dailyLimit,
+            formula: rule.formula || "",
+            description: "", // Rules don't have description in backend yet
+          }}
+          isEdit
+          onSubmit={handleUpdate}
+          loading={isUpdating}
+          modules={modules}
+          triggers={triggers}
+          templates={templates}
+        />
+      </EcosystemContainer>
     </EcosystemWrapper>
   );
 }

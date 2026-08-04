@@ -210,11 +210,14 @@ export default function RewardsGalleryPage() {
           </EcosystemActionBar.Item>
           <EcosystemActionBar.Item>
             <Link href="/gamification/rewards/coupons/create">
-              <Button className="h-9 px-5 rounded-xl gap-2 font-bold shadow-sm">
+              <EcosystemActionBar.CtaButton className="h-9 px-5 rounded-xl gap-2 font-bold shadow-sm">
                 <Plus className="h-4 w-4" />
                 New Reward
-              </Button>
+              </EcosystemActionBar.CtaButton>
             </Link>
+          </EcosystemActionBar.Item>
+          <EcosystemActionBar.Item>
+            <EcosystemActionBar.ThemeToggle />
           </EcosystemActionBar.Item>
         </EcosystemActionBar.Group>
       </EcosystemActionBar>

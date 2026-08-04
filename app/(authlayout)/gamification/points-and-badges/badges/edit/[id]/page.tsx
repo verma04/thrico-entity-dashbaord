@@ -12,11 +12,14 @@ import { useUpdateBadge } from "@/graphql/actions/gamification/gamification-muta
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
-import { BadgeForm } from "@/components/gamification/badges/badge-form";
+
 import { useModuleStore } from "@/store/useModuleStore";
+import { BadgeForm } from "@/components/gamification/badges/badge-form";
 
 export default function EditBadgePage() {
-  const gamificationModuleName = useModuleStore((state) => state.gamificationModuleName);
+  const gamificationModuleName = useModuleStore(
+    (state) => state.gamificationModuleName,
+  );
   const params = useParams();
   const router = useRouter();
   const badgeId = params?.id as string;
@@ -62,7 +65,7 @@ export default function EditBadgePage() {
     return (
       <div className="h-screen w-full flex flex-col items-center justify-center space-y-4">
         <h2 className="text-xl font-bold">Badge Not Found</h2>
-        <Button onClick={() => router.push("/gamification/badges")}>
+        <Button onClick={() => router.push("/gamification/points-and-badges/")}>
           Back to List
         </Button>
       </div>
@@ -82,15 +85,16 @@ export default function EditBadgePage() {
           { label: "Edit Badge" },
         ]}
       />
-
-      <BadgeForm
-        initialValues={badge}
-        onSubmit={handleUpdate}
-        loading={isUpdating}
-        isEdit={true}
-        modules={modules}
-        triggers={triggers}
-      />
+      <EcosystemContainer className="p-0 bg-transparent border-none shadow-none ring-0">
+        <BadgeForm
+          initialValues={badge}
+          onSubmit={handleUpdate}
+          loading={isUpdating}
+          isEdit={true}
+          modules={modules}
+          triggers={triggers}
+        />
+      </EcosystemContainer>
     </EcosystemWrapper>
   );
 }

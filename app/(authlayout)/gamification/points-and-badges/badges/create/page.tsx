@@ -9,28 +9,37 @@ import { useGetEntityGamificationModules } from "@/graphql/actions/gamification/
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
-import { BadgeForm } from "@/components/gamification/badges/badge-form";
+
 import { useModuleStore } from "@/store/useModuleStore";
+import { BadgeForm } from "@/components/gamification/badges/badge-form";
 
 export default function CreateBadgePage() {
-  const gamificationModuleName = useModuleStore((state) => state.gamificationModuleName);
+  const gamificationModuleName = useModuleStore(
+    (state) => state.gamificationModuleName,
+  );
   const router = useRouter();
   const { data: moduleData } = useGetEntityGamificationModules();
   const [createBadge, { loading: isCreating }] = useCreateBadge();
 
   const handleCreate = async (values: any) => {
+    const input: any = {
+      name: values.name,
+      description: values.description,
+      icon: values.icon,
+      type: values.type,
+      module: values.type === "ACTION" ? values.module : undefined,
+      action: values.type === "ACTION" ? values.action : undefined,
+    };
+
+    if (values.type === "ACTION") {
+      input.count = Number(values.targetValue);
+    } else {
+      input.points = Number(values.targetValue);
+    }
+
     await createBadge({
       variables: {
-        input: {
-          name: values.name,
-          description: values.description,
-          icon: values.icon,
-          type: values.type,
-          module: values.type === "ACTION" ? values.module : "SYSTEM",
-          action: values.type === "ACTION" ? values.action : "POINTS_THRESHOLD",
-          targetValue: Number(values.targetValue),
-          isActive: values.isActive,
-        },
+        input,
       },
     });
   };
@@ -45,29 +54,21 @@ export default function CreateBadgePage() {
         badgeText={`${gamificationModuleName} Studio`}
         description="Design and deploy achievement nodes to incentivize community behaviors."
         icon={Award}
+        breadcrumbs={[
+          { label: "Gamification", href: "/gamification" },
+          { label: "Badges", href: "/gamification/points-and-badges/badges" },
+          { label: "Add Badge" },
+        ]}
       />
 
-      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur border-b px-6 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span>{gamificationModuleName}</span>
-          <ChevronRight className="h-3 w-3" />
-          <span>Badges</span>
-          <ChevronRight className="h-3 w-3" />
-          <span className="text-foreground font-medium">
-            Create Achievement
-          </span>
-        </div>
-        <Button variant="outline" size="sm" onClick={() => router.back()}>
-          Cancel
-        </Button>
-      </div>
-
-      <BadgeForm
-        onSubmit={handleCreate}
-        loading={isCreating}
-        modules={modules}
-        triggers={triggers}
-      />
+      <EcosystemContainer className="p-0 bg-transparent border-none shadow-none ring-0">
+        <BadgeForm
+          onSubmit={handleCreate}
+          loading={isCreating}
+          modules={modules}
+          triggers={triggers}
+        />
+      </EcosystemContainer>
     </EcosystemWrapper>
   );
 }

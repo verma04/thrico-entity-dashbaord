@@ -240,15 +240,14 @@ function VouchersContent() {
 
         <EcosystemActionBar.Group align="right">
           <EcosystemActionBar.Item>
-            <Button
+            <EcosystemActionBar.CtaButton
               variant="outline"
-              size="sm"
               onClick={handleExport}
-              className="h-9 rounded-xl gap-2 text-xs font-bold border-border bg-card shadow-sm"
+              className="h-9 rounded-xl gap-2 text-xs font-bold shadow-sm"
             >
               <Download className="h-3.5 w-3.5" />
               Data Export
-            </Button>
+            </EcosystemActionBar.CtaButton>
           </EcosystemActionBar.Item>
           <EcosystemActionBar.Item>
             <Button
@@ -262,6 +261,9 @@ function VouchersContent() {
                 className={cn(vouchersLoading ? "animate-spin" : "")}
               />
             </Button>
+          </EcosystemActionBar.Item>
+          <EcosystemActionBar.Item>
+            <EcosystemActionBar.ThemeToggle />
           </EcosystemActionBar.Item>
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
