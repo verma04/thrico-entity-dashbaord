@@ -62,7 +62,7 @@ export function WorkspaceSwitcher() {
               role="button"
               className="data-[state=open]:bg-neutral-200 dark:data-[state=open]:bg-neutral-700 flex items-center gap-2 px-2 py-1.5 rounded-md bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 transition-colors duration-150 cursor-pointer"
             >
-              <div className="flex aspect-square size-6 items-center justify-center rounded  text-white font-bold text-xs shrink-0 overflow-hidden">
+              <div className="flex aspect-square size-6 items-center justify-center rounded text-white font-bold text-xs shrink-0 overflow-hidden">
                 {currentEntity?.logo ? (
                   <img
                     src={`https://cdn.thrico.network/${currentEntity.logo}`}
