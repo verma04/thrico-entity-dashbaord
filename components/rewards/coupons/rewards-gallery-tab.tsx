@@ -111,9 +111,7 @@ export function RewardsGalleryTab({
                   {reward.image ? (
                     <img
                       src={
-                        reward.image?.startsWith(
-                          process.env.NEXT_PUBLIC_CDN_URL,
-                        )
+                        reward.image?.startsWith("https://cdn.thrico.network")
                           ? reward.image
                           : `https://cdn.thrico.network/${reward.image}`
                       }

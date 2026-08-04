@@ -229,7 +229,9 @@ export default function RewardsGalleryPage() {
           filteredRewards={filteredRewards}
           searchQuery={searchQuery}
           onManageVouchers={(rewardId) => {
-            router.push(`/rewards/coupons/${rewardId}/manage-voucher`);
+            router.push(
+              `/gamification/rewards/coupons/${rewardId}/manage-voucher`,
+            );
           }}
           onOpenUploadForReward={openUploadForReward}
         />
