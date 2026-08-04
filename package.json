@@ -102,6 +102,7 @@
     "@types/react-cytoscapejs": "^1.2.6",
     "@types/react-dom": "^19",
     "@types/react-window": "^2.0.0",
+    "baseline-browser-mapping": "^2.11.12",
     "eslint": "^9",
     "eslint-config-next": "16.0.7",
     "tailwindcss": "^4",
