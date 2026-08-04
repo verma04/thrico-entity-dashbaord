@@ -3,7 +3,6 @@
 import { withModulePermission } from "@/components/hoc/with-module-permission";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 
-
 import React, { useState, useMemo } from "react";
 import {
   useGetAllMoments,
@@ -22,7 +21,7 @@ import { MomentsEmptyState } from "@/components/moments/moments-empty-state";
 import { MomentsLoadingState } from "@/components/moments/moments-loading-state";
 import { useModuleStore } from "@/store/useModuleStore";
 import { PlaySquare, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { CtaButton } from "@/components/ui/cta-button";
 import Link from "next/link";
 
 function MomentsListPage() {
@@ -79,7 +78,7 @@ function MomentsListPage() {
         icon={PlaySquare}
         breadcrumbs={[
           { label: moduleName, href: "/moments" },
-          { label: "All" }
+          { label: "All" },
         ]}
       />
 
@@ -97,10 +96,10 @@ function MomentsListPage() {
         <EcosystemActionBar.Group align="right">
           <EcosystemActionBar.Item>
             <Link href="/moments/create">
-              <Button className="font-semibold text-xs px-4 h-9 rounded-lg shadow-sm gap-2 bg-indigo-600 hover:bg-indigo-700 text-white">
+              <CtaButton className="gap-2 px-4 h-9">
                 <Plus className="h-4 w-4" />
-                Create {singularName}
-              </Button>
+                Create
+              </CtaButton>
             </Link>
           </EcosystemActionBar.Item>
           <EcosystemActionBar.Status active={filteredMoments.length > 0}>
@@ -112,7 +111,9 @@ function MomentsListPage() {
       <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">
         {momentsError ? (
           <div className="p-8 bg-destructive/5 border border-destructive/20 rounded-3xl text-center">
-            <p className="text-destructive font-bold">Failed to load {moduleName.toLowerCase()}</p>
+            <p className="text-destructive font-bold">
+              Failed to load {moduleName.toLowerCase()}
+            </p>
             <p className="text-xs text-muted-foreground mt-1">
               {momentsError.message}
             </p>
@@ -145,5 +146,5 @@ function MomentsListPage() {
 
 export default withSubscriptionCheck(
   withModulePermission(MomentsListPage, "MOMENTS", "canRead"),
-  "moments"
+  "moments",
 );
