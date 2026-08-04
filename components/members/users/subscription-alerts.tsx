@@ -1,9 +1,10 @@
 "use client";
 
-import React from "react";
-import { AlertTriangle, Lock } from "lucide-react";
+import React, { useState } from "react";
+import { AlertTriangle, Lock, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export interface SubscriptionInfo {
   hasReachedLimit?: boolean;
@@ -17,59 +18,35 @@ export function SubscriptionLimitBanner({
   isAiMode,
 }: {
   subscriptionInfo?: SubscriptionInfo | any;
-  isAiMode: boolean;
+  isAiMode?: boolean;
 }) {
-  const router = useRouter();
+  const [isVisible, setIsVisible] = useState(true);
 
-  if (!subscriptionInfo?.hasReachedLimit || isAiMode) {
+  if (!subscriptionInfo?.hasReachedLimit || isAiMode || !isVisible) {
     return null;
   }
 
   return (
-    <div className="bg-amber-50   border-amber-200 text-amber-800  p-4 text-sm font-medium flex flex-col sm:flex-row sm:items-center justify-between gap-4  shadow-sm">
-      <div className="flex items-center gap-3">
-        <AlertTriangle className="h-6 w-6 shrink-0 text-amber-600" />
-        <div>
-          <p className="font-bold text-amber-900 text-base">
-            Subscription Limit Reached
-          </p>
-          <p className="text-amber-700 text-xs mt-0.5">
-            {subscriptionInfo.message ||
-              "You have reached the maximum number of users allowed by your subscription."}
-          </p>
-        </div>
+    <div className="relative flex items-start gap-3 rounded-[3px] border border-[#584824] bg-[#221f15] p-4 text-[13px] leading-5 text-[#dcd1b3] shadow-sm mb-6">
+      <div className="mt-0.5 shrink-0">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M7.11116 1.77778C7.50658 1.0927 8.4934 1.0927 8.88882 1.77778L15.698 13.5654C16.0827 14.2312 15.6022 15.1111 14.8091 15.1111H1.19082C0.397732 15.1111 -0.0827563 14.2312 0.301931 13.5654L7.11116 1.77778Z" fill="#F5A623"/>
+          <path d="M8 5.77777V10.2222" stroke="#221f15" strokeWidth="1.5" strokeLinecap="round"/>
+          <circle cx="8" cy="12.4444" r="0.888889" fill="#221f15"/>
+        </svg>
       </div>
-
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
-        <div className="flex items-center gap-4 bg-amber-100/60 px-5 py-2.5 rounded-lg border border-amber-200/60 shrink-0">
-          <div className="text-center">
-            <p className="text-[10px] uppercase font-bold text-amber-600/80 tracking-widest mb-0.5">
-              Current
-            </p>
-            <p className="text-xl font-black text-amber-900 leading-none">
-              {subscriptionInfo.currentCount?.toLocaleString() || "0"}
-            </p>
-          </div>
-          <div className="w-px h-8 bg-amber-300/60"></div>
-          <div className="text-center">
-            <p className="text-[10px] uppercase font-bold text-amber-600/80 tracking-widest mb-0.5">
-              Max Allowed
-            </p>
-            <p className="text-xl font-black text-amber-900 leading-none">
-              {subscriptionInfo.maxUsersAllowed
-                ? subscriptionInfo.maxUsersAllowed.toLocaleString()
-                : "∞"}
-            </p>
-          </div>
-        </div>
-        <Button
-          variant="outline"
-          className="bg-white hover:bg-amber-100/50 text-amber-900 border-amber-300 hover:border-amber-400 transition-all shadow-sm h-[52px]"
-          onClick={() => router.push("/settings/subscription")}
-        >
-          Manage
-        </Button>
+      <div className="pr-6">
+        <span className="font-bold text-white">Subscription Limit Reached:</span> After you reach your subscription limit, your community becomes restricted for new members. If you have not upgraded your subscription plan, adding members ({subscriptionInfo.currentCount?.toLocaleString() || "0"} / {subscriptionInfo.maxUsersAllowed ? subscriptionInfo.maxUsersAllowed.toLocaleString() : "∞"}) may stop working until your limit is restored. Upgrade your subscription plan before adding new members.{" "}
+        <Link href="/settings/subscription" className="text-[#38bdf8] hover:text-[#7dd3fc] underline underline-offset-2 transition-colors">
+          Learn about managing your subscription. ↗
+        </Link>
       </div>
+      <button 
+        onClick={() => setIsVisible(false)}
+        className="absolute right-4 top-4 text-[#71717a] hover:text-[#a1a1aa] transition-colors"
+      >
+        <X className="h-4 w-4" />
+      </button>
     </div>
   );
 }
