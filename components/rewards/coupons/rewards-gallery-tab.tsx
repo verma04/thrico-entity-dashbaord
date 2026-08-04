@@ -172,7 +172,9 @@ export function RewardsGalleryTab({
                     Unit
                   </div>
                   <div className="absolute inset-0 bg-indigo-900/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center gap-3 backdrop-blur-[2px]">
-                    <Link href={`/rewards/coupons/${reward.id}/edit`}>
+                    <Link
+                      href={`/gamification/rewards/coupons/${reward.id}/edit`}
+                    >
                       <Button
                         size="icon"
                         variant="secondary"
@@ -183,7 +185,7 @@ export function RewardsGalleryTab({
                     </Link>
                     {reward.couponType === "ONE_TO_ONE" && (
                       <Link
-                        href={`/rewards/coupons/${reward.id}/manage-voucher`}
+                        href={`/gamification/rewards/coupons/${reward.id}/manage-voucher`}
                       >
                         <Button
                           size="icon"
@@ -220,7 +222,7 @@ export function RewardsGalleryTab({
                       <div className="h-4 w-px bg-border/50" />
                       {reward.couponType === "ONE_TO_ONE" && (
                         <Link
-                          href={`/rewards/coupons/${reward.id}/manage-voucher`}
+                          href={`/gamification/rewards/coupons/${reward.id}/manage-voucher`}
                         >
                           <button className="text-[9px] font-black text-indigo-600 uppercase tracking-widest hover:underline underline-offset-4">
                             Manage
@@ -365,7 +367,9 @@ export function RewardsGalleryTab({
                   >
                     <Ticket className="h-3.5 w-3.5" /> Vouchers
                   </Button>
-                  <Link href={`/rewards/coupons/${reward.id}/edit`}>
+                  <Link
+                    href={`/gamification/rewards/coupons/${reward.id}/edit`}
+                  >
                     <Button
                       size="sm"
                       className="h-8 px-4 gap-2 text-[10px] font-black uppercase tracking-widest rounded-xl shadow-md"
