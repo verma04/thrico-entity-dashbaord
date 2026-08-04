@@ -34,6 +34,7 @@ import {
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { PlatformContainer } from "@/components/ui/platform/container";
 import { cn } from "@/lib/utils";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 
 export function ModerationSettingsPanel() {
   const { data, loading, error, refetch } = useGetModerationSettings();
@@ -116,38 +117,30 @@ export function ModerationSettingsPanel() {
   return (
     <PlatformContainer className="py-0">
       {/* ── Page Header ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-zinc-100">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-9 h-9 rounded-xl bg-zinc-900 flex items-center justify-center text-white shrink-0">
-            <Settings size={16} strokeWidth={2} />
+      <EcosystemHeader
+        title="Moderation Engine"
+        description="Global parameters for content filtering, reporting thresholds, and automated safety protocols."
+        badgeText="Safety"
+        icon={Settings}
+        breadcrumbs={[
+          { label: "Moderation", href: "/moderation" },
+          { label: "Settings" }
+        ]}
+        actions={
+          <div className={cn(
+            "flex items-center gap-1.5 px-2.5 py-1 rounded-full border bg-background/50 backdrop-blur shadow-sm",
+            settings.autoModerationEnabled ? "text-emerald-600 border-emerald-100" : "text-muted-foreground border-border"
+          )}>
+            <div className={cn(
+              "w-1.5 h-1.5 rounded-full",
+              settings.autoModerationEnabled ? "bg-emerald-500 animate-pulse" : "bg-muted-foreground"
+            )} />
+            <span className="text-[10px] font-bold uppercase tracking-wider">
+              {settings.autoModerationEnabled ? "Active" : "Disabled"}
+            </span>
           </div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <h1 className="text-[15px] font-semibold text-zinc-900 tracking-tight leading-none">
-                Moderation Engine
-              </h1>
-              <span className="px-1.5 py-0.5 rounded-md bg-zinc-100 text-[10px] font-medium text-zinc-500 uppercase tracking-wide border border-zinc-200/60">
-                Safety
-              </span>
-              <div className={cn(
-                "flex items-center gap-1.5 ml-1",
-                settings.autoModerationEnabled ? "text-emerald-600" : "text-zinc-400"
-              )}>
-                <div className={cn(
-                  "w-1.5 h-1.5 rounded-full",
-                  settings.autoModerationEnabled ? "bg-emerald-500" : "bg-zinc-300"
-                )} />
-                <span className="text-[11px] font-medium">
-                  {settings.autoModerationEnabled ? "Active" : "Disabled"}
-                </span>
-              </div>
-            </div>
-            <p className="mt-1 text-[12.5px] text-zinc-400 font-normal leading-snug max-w-md">
-              Global parameters for content filtering, reporting thresholds, and automated safety protocols.
-            </p>
-          </div>
-        </div>
-      </div>
+        }
+      />
 
       <div className="grid gap-6 max-w-4xl mt-2">
           {/* Master Toggle */}

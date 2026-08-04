@@ -210,6 +210,10 @@ export function BannedWordsManager() {
         description="Configure automated text filters to detect and block inappropriate content in real-time."
         badgeText="Auto-Mod"
         icon={Ban}
+        breadcrumbs={[
+          { label: "Moderation", href: "/moderation" },
+          { label: "Banned Words" }
+        ]}
       />
 
       <EcosystemActionBar shadow="none">

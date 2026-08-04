@@ -38,6 +38,9 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 
 interface SponsorFormProps {
   initialData?: any;
@@ -116,29 +119,19 @@ export default function SponsorForm({ initialData, isEdit }: SponsorFormProps) {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)] bg-background overflow-hidden rounded-t-[inherit]">
-      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 border-b px-6 py-4">
-        <div className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-3 mb-1">
-              <div className="p-2.5 rounded-xl bg-primary/10 ring-1 ring-primary/20">
-                <HeartHandshake className="h-5 w-5 text-primary" />
-              </div>
-              <h1 className="text-2xl font-bold tracking-tight">
-                {isEdit ? "Edit Sponsor" : "Create Sponsor"}
-              </h1>
-            </div>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground ml-1">
-              <span>Sponsors</span>
-              <ChevronRight className="h-3 w-3" />
-              <span>{isEdit ? "Edit" : "Create New"}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-7xl mx-auto px-6 py-8">
+    <EcosystemWrapper>
+      <EcosystemHeader
+        title={isEdit ? "Edit Sponsor" : "Create Sponsor"}
+        description={isEdit ? "Update sponsor details and manage their visibility." : "Add a new sponsor to feature on your platform."}
+        badgeText="Sponsors"
+        icon={HeartHandshake}
+        breadcrumbs={[
+          { label: "Sponsors", href: "/sponsors/all" },
+          { label: isEdit ? "Edit Sponsor" : "Create Sponsor" }
+        ]}
+      />
+      <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">
+        <div className="px-6 py-8">
           <Formik
             initialValues={initialValues}
             validationSchema={validationSchema}
@@ -409,7 +402,7 @@ export default function SponsorForm({ initialData, isEdit }: SponsorFormProps) {
             )}
           </Formik>
         </div>
-      </div>
-    </div>
+      </EcosystemContainer>
+    </EcosystemWrapper>
   );
 }

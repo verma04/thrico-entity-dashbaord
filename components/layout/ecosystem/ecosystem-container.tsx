@@ -8,15 +8,9 @@ interface EcosystemContainerProps {
   className?: string;
 }
 
-export function EcosystemContainer({ children, className }: EcosystemContainerProps) {
-  return (
-    <div
-      className={cn(
-        "rounded-xl border border-border bg-card shadow-sm",
-        className
-      )}
-    >
-      {children}
-    </div>
-  );
+export function EcosystemContainer({
+  children,
+  className,
+}: EcosystemContainerProps) {
+  return <div className={cn("mx-3", className)}>{children}</div>;
 }

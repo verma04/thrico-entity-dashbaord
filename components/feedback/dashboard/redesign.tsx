@@ -42,7 +42,6 @@ import { DateRange } from "react-day-picker";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
-import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import {
   EcosystemKPI,
@@ -187,17 +186,7 @@ export default function FeedbackDashboard() {
         description="Monitor member feedback velocity, sentiment distribution, and resolution performance."
         badgeText="Sentiment Hub"
         icon={Smile}
-      />
-
-      <EcosystemActionBar shadow="none">
-        <div className="flex items-center justify-between w-full">
-          <div className="flex items-center gap-2 px-1">
-            <ShieldCheck className="h-4 w-4 text-emerald-500" />
-            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest italic">
-              Verified Sentiment Stream
-            </span>
-          </div>
-
+        actions={
           <div className="flex items-center gap-3">
             <DateRangePicker 
               date={dateRange}
@@ -216,8 +205,10 @@ export default function FeedbackDashboard() {
               <RotateCcw size={14} className={cn(loading && "animate-spin")} />
             </Button>
           </div>
-        </div>
-      </EcosystemActionBar>
+        }
+      />
+
+      
 
       <EcosystemContainer className="p-6 lg:p-8 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

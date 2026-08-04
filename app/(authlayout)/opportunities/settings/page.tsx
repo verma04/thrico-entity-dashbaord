@@ -9,6 +9,10 @@ import { PlatformSettingsPage, SettingsField } from "@/components/ui/platform/se
 import { toast } from "sonner";
 import { useEntitySettings, useUpdateEntitySettings } from "@/graphql/actions";
 
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+
 const Page = () => {
   const { data, loading } = useEntitySettings();
   const [update, { loading: loadingBtn }] = useUpdateEntitySettings({});
@@ -47,17 +51,32 @@ const Page = () => {
   };
 
   return (
-    <PlatformSettingsPage
-      title={`${moduleName} Framework`}
-      description={`Moderate interactions and configure the ${singularName.toLowerCase()} engine for your ecosystem.`}
-      headerIcon={Briefcase}
-      fields={FIELDS}
-      data={data?.getEntitySettings}
-      loading={loading}
-      onSave={handleSave}
-      isSaving={loadingBtn}
-      badge="Global Engine"
-    />
+    <EcosystemWrapper>
+      <EcosystemHeader
+        title={`${moduleName} Framework`}
+        description={`Moderate interactions and configure the ${singularName.toLowerCase()} engine for your ecosystem.`}
+        badgeText="Global Engine"
+        icon={Briefcase}
+        breadcrumbs={[
+          { label: "Opportunities", href: "/opportunities/all" },
+          { label: "Settings" }
+        ]}
+      />
+      <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">
+        <PlatformSettingsPage
+          title={`${moduleName} Framework`}
+          description={`Moderate interactions and configure the ${singularName.toLowerCase()} engine for your ecosystem.`}
+          headerIcon={Briefcase}
+          fields={FIELDS}
+          data={data?.getEntitySettings}
+          loading={loading}
+          onSave={handleSave}
+          isSaving={loadingBtn}
+          badge="Global Engine"
+          hideHeader={true}
+        />
+      </EcosystemContainer>
+    </EcosystemWrapper>
   );
 };
 

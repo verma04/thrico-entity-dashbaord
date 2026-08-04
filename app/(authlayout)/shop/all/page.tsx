@@ -141,36 +141,10 @@ function ShopPage() {
         badgeText="Shop Directory"
         description={`Manage your ${moduleName.toLowerCase()}, inventory, and variants.`}
         icon={ShoppingBag}
-        actions={
-          <div className="flex items-center gap-2">
-            <Tabs
-              value={view}
-              onValueChange={(val: string) => setView(val as "grid" | "table")}
-              className="bg-muted p-0.5 rounded-lg border border-border mr-2"
-            >
-              <TabsList className="bg-transparent border-none h-auto p-0 gap-0.5">
-                <TabsTrigger
-                  value="grid"
-                  className="h-8 px-3 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground transition-all text-xs font-medium"
-                >
-                  <LayoutGrid className="h-3.5 w-3.5 mr-1.5" />
-                  Grid
-                </TabsTrigger>
-                <TabsTrigger
-                  value="table"
-                  className="h-8 px-3 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground transition-all text-xs font-medium"
-                >
-                  <ListIcon className="h-3.5 w-3.5 mr-1.5" />
-                  Table
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-            <Button onClick={handleCreate} className="font-semibold text-xs px-6 h-10 rounded-lg shadow-sm gap-2">
-              <Plus className="h-4 w-4" />
-              Add {singularName}
-            </Button>
-          </div>
-        }
+        breadcrumbs={[
+          { label: moduleName, href: "/shop" },
+          { label: "All" }
+        ]}
       />
 
       <EcosystemActionBar shadow="none">
@@ -195,6 +169,36 @@ function ShopPage() {
         </EcosystemActionBar.Group>
 
         <EcosystemActionBar.Group align="right">
+          <EcosystemActionBar.Item>
+            <Tabs
+              value={view}
+              onValueChange={(val: string) => setView(val as "grid" | "table")}
+              className="bg-muted p-0.5 rounded-lg border border-border mr-2"
+            >
+              <TabsList className="bg-transparent border-none h-auto p-0 gap-0.5">
+                <TabsTrigger
+                  value="grid"
+                  className="h-8 px-3 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground transition-all text-xs font-medium"
+                >
+                  <LayoutGrid className="h-3.5 w-3.5 mr-1.5" />
+                  Grid
+                </TabsTrigger>
+                <TabsTrigger
+                  value="table"
+                  className="h-8 px-3 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground transition-all text-xs font-medium"
+                >
+                  <ListIcon className="h-3.5 w-3.5 mr-1.5" />
+                  Table
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </EcosystemActionBar.Item>
+          <EcosystemActionBar.Item>
+            <Button onClick={handleCreate} className="font-semibold text-xs px-4 h-9 rounded-lg shadow-sm gap-2 bg-indigo-600 hover:bg-indigo-700 text-white">
+              <Plus className="h-4 w-4" />
+              Add {singularName}
+            </Button>
+          </EcosystemActionBar.Item>
           <EcosystemActionBar.Status active={filteredProducts.length > 0}>
              {filteredProducts.length} {moduleName}
           </EcosystemActionBar.Status>

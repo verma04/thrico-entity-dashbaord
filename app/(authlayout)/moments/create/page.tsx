@@ -11,6 +11,10 @@ import { useToast } from "@/components/ui/use-toast";
 import { useAdminGenerateMomentUploadUrl, useAdminConfirmMomentUpload } from "@/graphql/actions/moments";
 import { useModuleStore } from "@/store/useModuleStore";
 
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { PlaySquare } from "lucide-react";
+
 const CreateMomentPage = () => {
   const singularName = useModuleStore((state) => state.momentSingularName);
   const router = useRouter();
@@ -168,18 +172,30 @@ const CreateMomentPage = () => {
   };
 
   return (
-    <div className="h-full overflow-hidden bg-white">
-      <MomentCreationForm
-        loading={isUploading || confirming}
-        onUploadAssets={handleUploadAssets}
-        onFinish={onFinish}
-        onCancel={onCancel}
-        step={step}
-        uploadedAssets={uploadedAssets}
-        uploadProgress={uploadProgress}
-        uploadStatus={uploadStatus}
+    <EcosystemWrapper>
+      <EcosystemHeader
+        title={`Create ${singularName}`}
+        badgeText="New"
+        description={`Add a new ${singularName.toLowerCase()} to the feed.`}
+        icon={PlaySquare}
+        breadcrumbs={[
+          { label: "Media", href: "/moments/all" },
+          { label: "Create" }
+        ]}
       />
-    </div>
+      <div className="flex-1 overflow-auto bg-background/50 p-6">
+        <MomentCreationForm
+          loading={isUploading || confirming}
+          onUploadAssets={handleUploadAssets}
+          onFinish={onFinish}
+          onCancel={onCancel}
+          step={step}
+          uploadedAssets={uploadedAssets}
+          uploadProgress={uploadProgress}
+          uploadStatus={uploadStatus}
+        />
+      </div>
+    </EcosystemWrapper>
   );
 };
 

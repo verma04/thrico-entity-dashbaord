@@ -12,14 +12,8 @@ const ALL_SECTIONS = [
 
 type SectionKey = (typeof ALL_SECTIONS)[number] | string;
 
-/** Default: Home open, everything else collapsed */
-const DEFAULT_COLLAPSED: SectionKey[] = [
-  "community",
-  "moderation",
-  "gamification",
-  "modules",
-  "settings",
-];
+/** Default: all sections open */
+const DEFAULT_COLLAPSED: SectionKey[] = [];
 
 interface SidebarSectionState {
   collapsedSections: SectionKey[];
@@ -52,7 +46,7 @@ export const useSidebarSectionStore = create<SidebarSectionState>()(
         collapseAll: () => set({ collapsedSections: [...ALL_SECTIONS] }),
       }),
       {
-        name: "sidebar-sections-v3", // bumped to v3 → clears ALL stale localStorage entries
+        name: "sidebar-sections-v4", // bumped to v4 → all sections open by default
         storage: createJSONStorage(() => localStorage),
         partialize: (state) => ({ collapsedSections: state.collapsedSections }),
         version: 1,

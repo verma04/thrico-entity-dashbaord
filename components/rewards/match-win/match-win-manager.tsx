@@ -3,7 +3,20 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { RefreshCw, Trophy, Settings, History, Loader2, Plus, Users, Activity, LayoutGrid, Coins, Clock, Sparkles } from "lucide-react";
+import {
+  RefreshCw,
+  Trophy,
+  Settings,
+  History,
+  Loader2,
+  Plus,
+  Users,
+  Activity,
+  LayoutGrid,
+  Coins,
+  Clock,
+  Sparkles,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
@@ -42,6 +55,7 @@ import { EconomySidebar } from "./economy-sidebar";
 import { SymbolDialog } from "./symbol-dialog";
 import { CombinationDialog } from "./combination-dialog";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
+import { EcosystemHeader } from "@/components/layout/ecosystem";
 
 export function MatchWinManager() {
   const {
@@ -62,7 +76,8 @@ export function MatchWinManager() {
     pagination: { page: 1, limit: 100 },
   });
   const { data: currencyConfig } = useGetEntityCurrencyConfig();
-  const currencyName = currencyConfig?.getEntityCurrencyConfig?.currencyName || "Tokens";
+  const currencyName =
+    currencyConfig?.getEntityCurrencyConfig?.currencyName || "Tokens";
 
   const [updateConfig, { loading: savingConfig }] = useUpdateMatchWinConfig();
   const [updateSymbol, { loading: updatingSymbol }] = useUpdateMatchWinSymbol();
@@ -93,7 +108,9 @@ export function MatchWinManager() {
   const [isCombinationDialogOpen, setIsCombinationDialogOpen] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [deletingCombinationId, setDeletingCombinationId] = useState<string | null>(null);
+  const [deletingCombinationId, setDeletingCombinationId] = useState<
+    string | null
+  >(null);
 
   const hasChanged = React.useMemo(() => {
     if (!config) return false;
@@ -218,14 +235,16 @@ export function MatchWinManager() {
       return;
     }
     const isNoRewards = editingCombination.type === "NO_REWARDS";
-    
+
     // Client-side validation: if it is a winning combination, make sure all 3 symbols are selected!
     if (!isNoRewards) {
       const s1 = editingCombination.symbol1Id || editingCombination.symbol1?.id;
       const s2 = editingCombination.symbol2Id || editingCombination.symbol2?.id;
       const s3 = editingCombination.symbol3Id || editingCombination.symbol3?.id;
       if (!s1 || !s2 || !s3) {
-        toast.error("All 3 symbol slots are required for a winning combination.");
+        toast.error(
+          "All 3 symbol slots are required for a winning combination.",
+        );
         return;
       }
     }
@@ -240,10 +259,22 @@ export function MatchWinManager() {
             value: isNoRewards ? 0 : Number(editingCombination.value),
             probability: Number(editingCombination.probability),
             maxWins: Number(editingCombination.maxWins),
-            rewardId: isNoRewards ? null : (editingCombination.rewardId || null),
-            symbol1Id: isNoRewards ? null : (editingCombination.symbol1Id || editingCombination.symbol1?.id || null),
-            symbol2Id: isNoRewards ? null : (editingCombination.symbol2Id || editingCombination.symbol2?.id || null),
-            symbol3Id: isNoRewards ? null : (editingCombination.symbol3Id || editingCombination.symbol3?.id || null),
+            rewardId: isNoRewards ? null : editingCombination.rewardId || null,
+            symbol1Id: isNoRewards
+              ? null
+              : editingCombination.symbol1Id ||
+                editingCombination.symbol1?.id ||
+                null,
+            symbol2Id: isNoRewards
+              ? null
+              : editingCombination.symbol2Id ||
+                editingCombination.symbol2?.id ||
+                null,
+            symbol3Id: isNoRewards
+              ? null
+              : editingCombination.symbol3Id ||
+                editingCombination.symbol3?.id ||
+                null,
           },
         },
       });
@@ -293,9 +324,12 @@ export function MatchWinManager() {
           <Trophy className="h-7 w-7 text-indigo-500" />
         </div>
         <div className="max-w-sm space-y-1.5">
-          <h3 className="text-base font-semibold text-foreground">Initialize Match & Win</h3>
+          <h3 className="text-base font-semibold text-foreground">
+            Initialize Match & Win
+          </h3>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Match & Win hasn&apos;t been set up yet. Initialize the system to configure symbols and reward combinations.
+            Match & Win hasn&apos;t been set up yet. Initialize the system to
+            configure symbols and reward combinations.
           </p>
         </div>
         <Button
@@ -311,33 +345,40 @@ export function MatchWinManager() {
 
   return (
     <>
-      <EcosystemActionBar shadow="none">
-        <EcosystemActionBar.Group>
-          <div
-            className={cn(
-              "h-2 w-2 rounded-full animate-pulse",
-              isActive ? "bg-emerald-500" : "bg-amber-500",
-            )}
-          />
-          <span className="text-xs font-medium text-muted-foreground">
-            {isActive ? "Live" : "Paused"}
-          </span>
-          <EcosystemActionBar.Separator />
-          <Users className="h-3.5 w-3.5 text-muted-foreground" />
-          <span className="text-xs text-muted-foreground">
-            {playsData?.getMatchWinPlays?.length ?? 0} recent plays
-          </span>
-        </EcosystemActionBar.Group>
-        <EcosystemActionBar.Group align="right">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => { refetchData(); refetchPlays(); refetchStats(); }}
+      <EcosystemHeader
+        title="Match & Win"
+        badgeText="Engagement"
+        description={`Configure the 3-column symbol matching game — set ${currencyName || "tokens"} costs, probabilities, rewards, and campaign windows.`}
+        icon={Trophy}
+        breadcrumbs={[
+          { label: "Gamification", href: "/gamification" },
+          { label: "Engagement Games", href: "/gamification/engagement-games" },
+          { label: "Match & Win" },
+        ]}
+        actions={
+          <EcosystemActionBar
+            shadow="none"
+            className="p-0 border-none bg-transparent"
           >
-            Refresh Data
-          </Button>
-        </EcosystemActionBar.Group>
-      </EcosystemActionBar>
+            <EcosystemActionBar.Group>
+              <div
+                className={cn(
+                  "h-2 w-2 rounded-full animate-pulse",
+                  isActive ? "bg-emerald-500" : "bg-amber-500",
+                )}
+              />
+              <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">
+                {isActive ? "Live" : "Paused"}
+              </span>
+              <EcosystemActionBar.Separator />
+              <Users className="h-3.5 w-3.5 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground whitespace-nowrap">
+                {playsData?.getMatchWinPlays?.length ?? 0} recent plays
+              </span>
+            </EcosystemActionBar.Group>
+          </EcosystemActionBar>
+        }
+      />
 
       <EcosystemContainer className="p-6 space-y-5">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
@@ -514,16 +555,24 @@ export function MatchWinManager() {
       />
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={!!deletingCombinationId} onOpenChange={(open) => !open && setDeletingCombinationId(null)}>
+      <Dialog
+        open={!!deletingCombinationId}
+        onOpenChange={(open) => !open && setDeletingCombinationId(null)}
+      >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Confirm Delete</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete this combination? This action cannot be undone.
+              Are you sure you want to delete this combination? This action
+              cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="sm:justify-end gap-2">
-            <Button variant="outline" size="sm" onClick={() => setDeletingCombinationId(null)}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setDeletingCombinationId(null)}
+            >
               Cancel
             </Button>
             <Button

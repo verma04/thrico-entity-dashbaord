@@ -22,9 +22,13 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 
 import { Button } from "@/components/ui/button";
+import { CtaButton } from "@/components/ui/cta-button";
 import { Card } from "@/components/ui/card";
-import { PageHeader } from "@/components/ui/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import {
   useGetSponsorCategories,
   useUpdateSponsorCategory,
@@ -243,20 +247,30 @@ export default function SponsorCategoriesPage() {
   }
 
   return (
-    <div className="w-full h-full p-4 md:p-8 space-y-6 max-w-5xl mx-auto">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <PageHeader
-          icon={List}
-          title="Sponsor Categories"
-          description="Manage and organize your sponsors into categories"
-        />
-        <Button onClick={handleOpenCreateModal} className="w-full sm:w-auto">
-          <Plus className="w-4 h-4 mr-2" />
-          Add Category
-        </Button>
-      </div>
-
-      <Card className="p-1 sm:p-6 bg-transparent border-0 shadow-none">
+    <EcosystemWrapper>
+      <EcosystemHeader
+        icon={List}
+        title="Sponsor Categories"
+        description="Manage and organize your sponsors into categories"
+        badgeText="Categories"
+        breadcrumbs={[
+          { label: "Sponsors", href: "/sponsors/all" },
+          { label: "Categories", href: "/sponsors/categories" }
+        ]}
+        actions={
+          <EcosystemActionBar shadow="none" className="p-0 border-none bg-transparent gap-2">
+            <EcosystemActionBar.Group align="right">
+              <CtaButton onClick={handleOpenCreateModal}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Category
+              </CtaButton>
+            </EcosystemActionBar.Group>
+          </EcosystemActionBar>
+        }
+      />
+      <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">
+        <div className="px-6 py-4">
+          <Card className="p-1 sm:p-6 bg-transparent border-0 shadow-none">
         {loading ? (
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
@@ -356,6 +370,8 @@ export default function SponsorCategoriesPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+        </div>
+      </EcosystemContainer>
+    </EcosystemWrapper>
   );
 }

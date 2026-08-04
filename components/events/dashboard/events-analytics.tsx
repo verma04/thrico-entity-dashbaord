@@ -32,12 +32,8 @@ import {
 } from "recharts";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
-import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
-import {
-  EcosystemKPI,
-  EcosystemCard,
-} from "@/components/layout/ecosystem/ecosystem-analytics";
+import { EcosystemKPI } from "@/components/layout/ecosystem/ecosystem-analytics";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -60,6 +56,7 @@ import {
   useEventTypeDistribution,
   useTopPerformingEvents,
 } from "@/graphql/actions/events";
+import { EcosystemCard } from "@/components/layout/ecosystem/ecosystem-card";
 
 export default function EventsAnalytics() {
   const moduleName = useModuleStore((state) => state.eventModuleName);
@@ -169,17 +166,7 @@ export default function EventsAnalytics() {
         description="Monitor community gathering metrics, registration velocity, and attendance trends."
         badgeText="Overview"
         icon={Calendar}
-      />
-
-      <EcosystemActionBar shadow="none">
-        <div className="flex items-center justify-between w-full">
-          <div className="flex items-center gap-2 px-1">
-            <ShieldCheck className="h-4 w-4 text-emerald-500" />
-            <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground italic">
-              Verified Node
-            </span>
-          </div>
-
+        actions={
           <div className="flex items-center gap-3">
             <DateRangePicker
               date={dateRange}
@@ -196,8 +183,8 @@ export default function EventsAnalytics() {
               <RotateCcw size={14} className={cn(loading && "animate-spin")} />
             </Button>
           </div>
-        </div>
-      </EcosystemActionBar>
+        }
+      />
 
       <EcosystemContainer className="p-6 lg:p-8 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -207,11 +194,13 @@ export default function EventsAnalytics() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <div className="lg:col-span-8 space-y-6">
+          <div className="lg:col-span-8 ">
             <EcosystemCard
               title="Registration Velocity"
               description="Daily enrollment trajectory"
               icon={TrendingUp}
+              variant="skill"
+              colorScheme="indigo"
             >
               <div className="h-[320px] w-full mt-4">
                 <ResponsiveContainer width="100%" height="100%">

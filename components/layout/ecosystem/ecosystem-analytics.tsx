@@ -8,6 +8,7 @@ import {
   TrendingDown,
   Activity,
   Info,
+  Plus,
 } from "lucide-react";
 import { formatNumber } from "@/lib/formatNumber";
 import { ResponsiveContainer, AreaChart, Area } from "recharts";
@@ -21,155 +22,8 @@ import {
 // ---------------------------------------------------------------------------
 // KPI Stat Card
 // ---------------------------------------------------------------------------
-interface EcosystemKPIProps {
-  title: string;
-  value: string | number | React.ReactNode;
-  trend?: number;
-  trendData?: number[];
-  icon?: LucideIcon;
-  color?: string;
-  bg?: string;
-  trendLabel?: string;
-  tooltip?: string;
-  suffix?: string;
-}
-
-export function EcosystemKPI({
-  title,
-  value,
-  trend,
-  trendData,
-  icon: Icon,
-  color = "text-foreground",
-  bg = "bg-primary",
-  trendLabel = "vs last period",
-  tooltip,
-  suffix = "",
-}: EcosystemKPIProps) {
-  const isPositive = trend !== undefined && trend >= 0;
-  const isNegative = trend !== undefined && trend < 0;
-  
-  // Create dummy flat trend if none provided but we want the aesthetic
-  const chartData = (trendData ?? [0, 0, 0, 0, 0, 0, 0]).map((val, i) => ({ value: val, id: i }));
-
-  const formattedValue = typeof value === "number" ? formatNumber(value) : value;
-
-  return (
-    <div className="group relative overflow-hidden rounded-xl border border-border/50 bg-card shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-border hover:shadow-md flex flex-col justify-between">
-      {/* Colored top accent strip */}
-      <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-primary/60 to-primary/20 opacity-80" />
-      <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-[radial-gradient(circle_at_90%_10%,hsl(var(--primary)/0.06),transparent_50%)]" />
-
-      {/* Top Header */}
-      <div className="relative p-4 flex flex-col flex-1">
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex items-center gap-1.5">
-            <span className="text-[9px] font-bold text-muted-foreground/70 uppercase tracking-[0.22em] leading-none">
-              {title}
-            </span>
-            {tooltip && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Info className="h-3 w-3 text-muted-foreground/40 cursor-help hover:text-muted-foreground/70 transition-colors" />
-                  </TooltipTrigger>
-                  <TooltipContent className="max-w-[200px] bg-background border border-border/60 text-foreground shadow-xl">
-                    <p className="font-mono text-[10px] text-muted-foreground">{tooltip}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            )}
-          </div>
-          {Icon ? (
-            <div className="h-7 w-7 rounded-lg border border-border/50 bg-muted/60 flex items-center justify-center group-hover:bg-muted transition-colors">
-              <Icon className={cn("h-3 w-3", color)} />
-            </div>
-          ) : (
-            <div className="h-7 w-7 rounded-lg border border-border/50 bg-muted/60 flex items-center justify-center">
-              <div className={cn("h-2 w-2 rounded-full", bg)} />
-            </div>
-          )}
-        </div>
-
-        {/* Main Value & Change */}
-        <div className="mb-3">
-          <h3 className="text-[1.4rem] font-bold text-foreground tracking-tight leading-none mb-1.5 tabular-nums">
-            {formattedValue}{suffix}
-          </h3>
-
-          <div className="flex items-center gap-1.5">
-            {trend !== undefined && trend !== 0 ? (
-              <div
-                className={cn(
-                  "flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-semibold",
-                  isPositive
-                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                    : "bg-rose-500/10 text-rose-600 dark:text-rose-400",
-                )}
-              >
-                {isPositive ? (
-                  <TrendingUp className="h-2 w-2" />
-                ) : (
-                  <TrendingDown className="h-2 w-2" />
-                )}
-                {isPositive ? "+" : ""}
-                {typeof trend === "number" ? trend.toFixed(1) : trend}%
-              </div>
-            ) : (
-              <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-semibold bg-muted text-muted-foreground">
-                <Activity className="h-2 w-2" />
-                0%
-              </div>
-            )}
-            {trendLabel && (
-              <span className="text-[9px] font-medium text-muted-foreground/50 uppercase tracking-wider">
-                {trendLabel}
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Sparkline — flush to bottom */}
-      <div className="relative h-9 mt-auto pointer-events-none">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={chartData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
-            <defs>
-              <linearGradient
-                id={`gradient-${title.replace(/\s+/g, "")}`}
-                x1="0"
-                y1="0"
-                x2="0"
-                y2="1"
-              >
-                <stop
-                  offset="5%"
-                  stopColor={isPositive ? "#10b981" : isNegative ? "#f43f5e" : "#8b5cf6"}
-                  stopOpacity={0.15}
-                />
-                <stop
-                  offset="95%"
-                  stopColor={isPositive ? "#10b981" : isNegative ? "#f43f5e" : "#8b5cf6"}
-                  stopOpacity={0}
-                />
-              </linearGradient>
-            </defs>
-            <Area
-              type="monotone"
-              dataKey="value"
-              stroke={isPositive ? "#10b981" : isNegative ? "#f43f5e" : "#8b5cf6"}
-              strokeWidth={1.5}
-              fillOpacity={1}
-              fill={`url(#gradient-${title.replace(/\s+/g, "")})`}
-              isAnimationActive={true}
-              dot={false}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
-  );
-}
+export { EcosystemKPI } from "./ecosystem-kpi";
+export type { EcosystemKPIProps } from "./ecosystem-kpi";
 
 // ---------------------------------------------------------------------------
 // Section Header
@@ -219,59 +73,8 @@ export function EcosystemSectionHeader({
 // ---------------------------------------------------------------------------
 // Card
 // ---------------------------------------------------------------------------
-interface EcosystemCardProps {
-  children: React.ReactNode;
-  title?: string;
-  description?: string;
-  icon?: LucideIcon;
-  decorationIcon?: LucideIcon;
-  decorationColor?: string;
-  className?: string;
-  innerClassName?: string;
-}
-
-export function EcosystemCard({
-  children,
-  title,
-  description,
-  icon: Icon = Activity,
-  decorationIcon: _DecoIcon,
-  decorationColor,
-  className,
-  innerClassName,
-}: EcosystemCardProps) {
-  return (
-    <div
-      className={cn(
-        "rounded-xl border border-border bg-card shadow-sm overflow-hidden",
-        className,
-      )}
-    >
-      {title && (
-        <div className="px-5 py-4 border-b border-border bg-muted/30">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center shrink-0">
-                <Icon className="h-4 w-4" />
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold text-foreground leading-none tracking-tight">
-                  {title}
-                </h3>
-                {description && (
-                  <p className="text-[11px] text-muted-foreground mt-1">
-                    {description}
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-      <div className={cn("p-5", innerClassName)}>{children}</div>
-    </div>
-  );
-}
+export { EcosystemCard } from "./ecosystem-card";
+export type { EcosystemCardProps } from "./ecosystem-card";
 
 // ---------------------------------------------------------------------------
 // Grid utility
@@ -456,6 +259,91 @@ export function EcosystemSummaryItem({
           </p>
         )}
       </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Skill Card
+// ---------------------------------------------------------------------------
+interface EcosystemSkillCardProps {
+  title: string;
+  description: string;
+  icon: LucideIcon;
+  colorScheme?: "indigo" | "sky" | "lime" | "rose" | "purple" | "orange";
+  onClick?: () => void;
+  className?: string;
+}
+
+export function EcosystemSkillCard({
+  title,
+  description,
+  icon: Icon,
+  colorScheme = "indigo",
+  onClick,
+  className,
+}: EcosystemSkillCardProps) {
+  const colorStyles = {
+    indigo: {
+      bg: "bg-gradient-to-b from-[#f3f5ff] to-[#f9faff] dark:from-indigo-950/20 dark:to-indigo-950/5 border-transparent dark:border-indigo-900/30",
+      iconBg: "bg-gradient-to-br from-indigo-500 to-indigo-600",
+    },
+    sky: {
+      bg: "bg-gradient-to-b from-[#f0fafe] to-[#f7fcff] dark:from-sky-950/20 dark:to-sky-950/5 border-transparent dark:border-sky-900/30",
+      iconBg: "bg-gradient-to-br from-sky-400 to-sky-500",
+    },
+    lime: {
+      bg: "bg-gradient-to-b from-[#f4fdf4] to-[#f9fef9] dark:from-lime-950/20 dark:to-lime-950/5 border-transparent dark:border-lime-900/30",
+      iconBg: "bg-gradient-to-br from-lime-400 to-lime-500",
+    },
+    rose: {
+      bg: "bg-gradient-to-b from-[#fff4f5] to-[#fff9f9] dark:from-rose-950/20 dark:to-rose-950/5 border-transparent dark:border-rose-900/30",
+      iconBg: "bg-gradient-to-br from-rose-400 to-rose-500",
+    },
+    purple: {
+      bg: "bg-gradient-to-b from-[#fbf4ff] to-[#fdf9ff] dark:from-purple-950/20 dark:to-purple-950/5 border-transparent dark:border-purple-900/30",
+      iconBg: "bg-gradient-to-br from-purple-400 to-purple-500",
+    },
+    orange: {
+      bg: "bg-gradient-to-b from-[#fff5f0] to-[#fffaf7] dark:from-orange-950/20 dark:to-orange-950/5 border-transparent dark:border-orange-900/30",
+      iconBg: "bg-gradient-to-br from-orange-400 to-orange-500",
+    },
+  };
+
+  const currentStyle = colorStyles[colorScheme] || colorStyles.indigo;
+
+  return (
+    <div
+      className={cn(
+        "relative flex flex-col p-5 rounded-[20px] border transition-all duration-300 min-h-[230px] hover:shadow-md hover:-translate-y-0.5",
+        currentStyle.bg,
+        className,
+      )}
+    >
+      <div
+        className={cn(
+          "h-8 w-8 rounded-[10px] flex items-center justify-center mb-auto shadow-sm",
+          currentStyle.iconBg,
+        )}
+      >
+        <Icon className="h-4 w-4 text-white" />
+      </div>
+
+      <div className="mt-8">
+        <h3 className="text-[14px] font-semibold text-foreground mb-1.5 leading-tight">
+          {title}
+        </h3>
+        <p className="text-[12px] text-muted-foreground leading-snug">
+          {description}
+        </p>
+      </div>
+
+      <button
+        onClick={onClick}
+        className="mt-5 flex items-center justify-center gap-1.5 w-full py-2 px-4 rounded-[10px] bg-background border border-border/60 text-[13px] font-medium text-foreground hover:bg-muted/50 transition-colors shadow-sm"
+      >
+        <Plus className="h-3.5 w-3.5 text-muted-foreground" /> Create skill
+      </button>
     </div>
   );
 }

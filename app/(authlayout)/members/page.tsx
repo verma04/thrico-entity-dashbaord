@@ -25,7 +25,6 @@ import {
 } from "recharts";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
-import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import {
   EcosystemKPI,
@@ -149,38 +148,31 @@ function MembersPage() {
         badgeText="Directory"
         description="View and manage all members in your community, track growth, and see activity levels."
         icon={Users}
-      />
-
-      <EcosystemActionBar shadow="none">
-        <div className="flex items-center justify-between w-full">
-          <div className="flex items-center gap-2 px-1">
-            <ShieldCheck className="h-4 w-4 text-emerald-500" />
-            <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground italic">
-              Verified Node
-            </span>
-          </div>
-
+        breadcrumbs={[
+          { label: "Members", href: "/members/all" },
+          { label: "Dashboard" },
+        ]}
+        actions={
           <div className="flex items-center gap-3">
             <DateRangePicker
               date={dateRange}
               onDateChange={handleDateChange}
               defaultValue="LAST_7_DAYS"
             />
-            <div className="h-4 w-px bg-muted mx-1" />
+            <div className="h-4 w-px bg-border mx-1" />
+
             <Button
               variant="outline"
               size="icon"
-              className="h-9 w-9 text-muted-foreground hover:text-indigo-600 rounded-lg transition-all"
-              onClick={() => handleRefresh()}
+              className="h-9 w-9 text-muted-foreground hover:text-indigo-600 rounded-lg transition-all border-border shadow-sm bg-background"
+              onClick={handleRefresh}
+              disabled={loading}
             >
-              <RotateCcw
-                size={14}
-                className={cn((loading || growthLoading) && "animate-spin")}
-              />
+              <RotateCcw size={14} className={cn(loading && "animate-spin")} />
             </Button>
           </div>
-        </div>
-      </EcosystemActionBar>
+        }
+      />
 
       <EcosystemContainer className="space-y-12 p-8 lg:p-12">
         {/* Subscription Limit Warning Banner */}

@@ -3,7 +3,7 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import { ClipboardList, Sparkles, Filter } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { CtaButton as Button } from "@/components/ui/cta-button";
 
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
@@ -16,7 +16,8 @@ import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { useState } from "react";
 import { DateRange } from "react-day-picker";
 import { subDays } from "date-fns";
-import NewForm from "@/components/feedback-form/new-feed-back-form";
+import { useModuleStore } from "@/store/useModuleStore";
+import { PlusCircle } from "lucide-react";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Layout
@@ -27,6 +28,8 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const singularName = useModuleStore((state) => state.surveySingularName);
+  const moduleName = useModuleStore((state) => state.surveyModuleName);
   const router = useRouter();
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get("q") || "";
@@ -55,19 +58,19 @@ export default function RootLayout({
         badgeText="Community Insights"
         description="Review interaction datasets, sentiment tracking, and global response protocols."
         icon={ClipboardList}
+        breadcrumbs={[{ label: "Surveys", href: "/surveys" }, { label: "All" }]}
         actions={
           <div className="flex items-center gap-3 relative ml-auto">
             <Link href="/surveys/templates">
               <Button
                 variant="outline"
-                className="font-bold text-[10px] uppercase tracking-widest px-6 h-9 rounded-lg shadow-sm gap-2 border-border text-muted-foreground"
+                className="gap-1.5 uppercase tracking-widest text-[9px] font-bold"
               >
                 <Sparkles className="h-3.5 w-3.5 text-indigo-500" />
                 Templates
               </Button>
             </Link>
             <SurveyAIAgentButton />
-            <NewForm />
           </div>
         }
       />
@@ -93,15 +96,22 @@ export default function RootLayout({
           <EcosystemActionBar.Item>
             <Button
               variant="outline"
-              size="icon"
-              className="h-9 w-9 rounded-lg border border-border text-muted-foreground hover:text-foreground"
+              className="h-6 w-6 p-0 rounded-md border-border text-muted-foreground hover:text-foreground transition-all"
             >
-              <Filter className="h-4 w-4" />
+              <Filter className="h-3 w-3" />
             </Button>
           </EcosystemActionBar.Item>
         </EcosystemActionBar.Group>
 
         <EcosystemActionBar.Group align="right">
+          <EcosystemActionBar.Item>
+            <Link href="/surveys/create">
+              <Button className="gap-1.5">
+                <PlusCircle className="h-3.5 w-3.5" />
+                Create {singularName}
+              </Button>
+            </Link>
+          </EcosystemActionBar.Item>
           <EcosystemActionBar.Status active>
             Active Datasets
           </EcosystemActionBar.Status>

@@ -44,7 +44,6 @@ import { subDays } from "date-fns";
 import { DateRange } from "react-day-picker";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
-import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import {
   EcosystemKPI,
@@ -81,7 +80,7 @@ export default function SurveyAnalytics() {
           startDate: dateRange.from.toISOString(),
           endDate: dateRange.to.toISOString(),
         }
-      : undefined
+      : undefined,
   );
 
   const stats = data?.getSurveyStats;
@@ -148,19 +147,9 @@ export default function SurveyAnalytics() {
         description={`Monitor response rates, ${singularName.toLowerCase()} status distribution, and engagement trends.`}
         badgeText="Overview"
         icon={BarChart3}
-      />
-
-      <EcosystemActionBar shadow="none">
-        <div className="flex items-center justify-between w-full">
-          <div className="flex items-center gap-2 px-1">
-            <ShieldCheck className="h-4 w-4 text-emerald-500" />
-            <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground italic">
-              Verified Node
-            </span>
-          </div>
-
+        actions={
           <div className="flex items-center gap-3">
-            <DateRangePicker 
+            <DateRangePicker
               date={dateRange}
               onDateChange={handleDateChange}
               defaultValue="LAST_7_DAYS"
@@ -187,8 +176,8 @@ export default function SurveyAnalytics() {
               <RotateCcw size={14} className={cn(loading && "animate-spin")} />
             </Button>
           </div>
-        </div>
-      </EcosystemActionBar>
+        }
+      />
 
       <EcosystemContainer className="p-6 lg:p-8 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -221,13 +210,21 @@ export default function SurveyAnalytics() {
                         dataKey="name"
                         axisLine={false}
                         tickLine={false}
-                        tick={{ fontSize: 10, fontWeight: 600, fill: "#94a3b8" }}
+                        tick={{
+                          fontSize: 10,
+                          fontWeight: 600,
+                          fill: "#94a3b8",
+                        }}
                         dy={10}
                       />
                       <YAxis
                         axisLine={false}
                         tickLine={false}
-                        tick={{ fontSize: 10, fontWeight: 600, fill: "#94a3b8" }}
+                        tick={{
+                          fontSize: 10,
+                          fontWeight: 600,
+                          fill: "#94a3b8",
+                        }}
                       />
                       <Tooltip
                         contentStyle={{
@@ -247,7 +244,12 @@ export default function SurveyAnalytics() {
                         dataKey="responses"
                         stroke="#6366f1"
                         strokeWidth={3}
-                        dot={{ r: 4, fill: "#fff", strokeWidth: 2, stroke: "#6366f1" }}
+                        dot={{
+                          r: 4,
+                          fill: "#fff",
+                          strokeWidth: 2,
+                          stroke: "#6366f1",
+                        }}
                         activeDot={{ r: 6, strokeWidth: 0, fill: "#6366f1" }}
                         animationDuration={1500}
                       />
@@ -278,7 +280,11 @@ export default function SurveyAnalytics() {
                       animationDuration={1500}
                     >
                       {surveyStatusData.map((entry: any, index: number) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={entry.color}
+                          stroke="none"
+                        />
                       ))}
                     </Pie>
                     <Tooltip />

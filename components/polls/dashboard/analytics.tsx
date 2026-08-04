@@ -32,7 +32,6 @@ import {
 } from "recharts";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
-import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import {
   EcosystemKPI,
@@ -78,7 +77,7 @@ export default function PollsAnalytics() {
           startDate: dateRange.from.toISOString(),
           endDate: dateRange.to.toISOString(),
         }
-      : undefined
+      : undefined,
   );
 
   const stats = data?.getPollStats;
@@ -133,32 +132,15 @@ export default function PollsAnalytics() {
         description="Monitor community sentiment, voting velocity, and engagement metrics across the platform."
         badgeText="Sentiment Hub"
         icon={Vote}
-      />
-
-      <EcosystemActionBar shadow="none">
-        <div className="flex items-center justify-between w-full">
-          <div className="flex items-center gap-2 px-1">
-            <ShieldCheck className="h-4 w-4 text-emerald-500" />
-            <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground italic">
-              Verified Node
-            </span>
-          </div>
-
+        actions={
           <div className="flex items-center gap-3">
-            <Link href="/polls/create">
-              <Button className="h-9 px-4 rounded-lg bg-zinc-900 font-bold text-[10px] uppercase tracking-widest gap-2 shadow-sm hover:bg-zinc-800 transition-all">
-                <PlusCircle size={14} className="text-white" />
-                Create {singularName}
-              </Button>
-            </Link>
-
-            <div className="h-4 w-px bg-zinc-200 mx-1" />
-
-            <DateRangePicker 
+            <DateRangePicker
               date={dateRange}
               onDateChange={handleDateChange}
               defaultValue="LAST_7_DAYS"
             />
+
+            <div className="h-4 w-px bg-zinc-200 mx-1" />
 
             <Button
               variant="outline"
@@ -169,8 +151,8 @@ export default function PollsAnalytics() {
               <RotateCcw size={14} className={cn(loading && "animate-spin")} />
             </Button>
           </div>
-        </div>
-      </EcosystemActionBar>
+        }
+      />
 
       <EcosystemContainer className="p-6 lg:p-8 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -203,17 +185,28 @@ export default function PollsAnalytics() {
                         dataKey="date"
                         axisLine={false}
                         tickLine={false}
-                        tick={{ fontSize: 10, fontWeight: 600, fill: "#94a3b8" }}
+                        tick={{
+                          fontSize: 10,
+                          fontWeight: 600,
+                          fill: "#94a3b8",
+                        }}
                         dy={10}
                         tickFormatter={(val) => {
                           if (!val) return "";
-                          return new Date(val).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+                          return new Date(val).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                          });
                         }}
                       />
                       <YAxis
                         axisLine={false}
                         tickLine={false}
-                        tick={{ fontSize: 10, fontWeight: 600, fill: "#94a3b8" }}
+                        tick={{
+                          fontSize: 10,
+                          fontWeight: 600,
+                          fill: "#94a3b8",
+                        }}
                       />
                       <Tooltip
                         contentStyle={{
@@ -239,7 +232,11 @@ export default function PollsAnalytics() {
                         {pollVotesData.map((entry, index) => (
                           <Cell
                             key={`cell-${index}`}
-                            fill={index === pollVotesData.length - 1 ? "#6366f1" : "#18181b"}
+                            fill={
+                              index === pollVotesData.length - 1
+                                ? "#6366f1"
+                                : "#18181b"
+                            }
                           />
                         ))}
                       </Bar>
@@ -258,9 +255,21 @@ export default function PollsAnalytics() {
             >
               <div className="space-y-5 mt-4">
                 {[
-                  { label: `Closed ${moduleName}`, value: registryStats.closedPolls, color: "bg-zinc-900" },
-                  { label: `Active ${moduleName}`, value: registryStats.activePolls, color: "bg-zinc-500" },
-                  { label: "Drafts", value: registryStats.drafts, color: "bg-zinc-300" },
+                  {
+                    label: `Closed ${moduleName}`,
+                    value: registryStats.closedPolls,
+                    color: "bg-zinc-900",
+                  },
+                  {
+                    label: `Active ${moduleName}`,
+                    value: registryStats.activePolls,
+                    color: "bg-zinc-500",
+                  },
+                  {
+                    label: "Drafts",
+                    value: registryStats.drafts,
+                    color: "bg-zinc-300",
+                  },
                 ].map((item, i) => (
                   <div key={i} className="group/item">
                     <div className="flex items-center justify-between mb-1.5">
@@ -273,7 +282,10 @@ export default function PollsAnalytics() {
                     </div>
                     <div className="h-1.5 w-full bg-zinc-50 rounded-full overflow-hidden border border-zinc-100">
                       <div
-                        className={cn("h-full rounded-full transition-all duration-1000", item.color)}
+                        className={cn(
+                          "h-full rounded-full transition-all duration-1000",
+                          item.color,
+                        )}
                         style={{ width: `${item.value}%` }}
                       />
                     </div>

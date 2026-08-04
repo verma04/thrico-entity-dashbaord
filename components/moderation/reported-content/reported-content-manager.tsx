@@ -293,6 +293,10 @@ export function ReportedContentManager() {
         description="Manual review center for posts, comments, and users flagged for policy violations."
         badgeText="Moderation"
         icon={Flag}
+        breadcrumbs={[
+          { label: "Moderation", href: "/moderation" },
+          { label: "Reports" }
+        ]}
       />
 
       <EcosystemActionBar shadow="none">

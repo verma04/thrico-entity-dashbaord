@@ -474,7 +474,7 @@ export function DateRangePicker({
             variant="outline"
             disabled={disabled}
             className={cn(
-              "h-9 w-fit min-w-[240px] justify-start text-left font-medium bg-card border-border rounded-xl text-xs gap-2 group relative overflow-hidden pr-2",
+              "h-8 w-fit min-w-[200px] justify-start text-left font-medium bg-card border-border rounded-lg text-[11px] gap-1.5 group relative overflow-hidden pr-2 pl-2",
               !date && "text-muted-foreground",
               isOpen && "border-foreground/20 shadow-sm ring-1 ring-foreground/5"
             )}

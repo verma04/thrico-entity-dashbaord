@@ -291,36 +291,33 @@ export function ScratchCardManager() {
 
   return (
     <>
-      <EcosystemActionBar shadow="none">
-        <EcosystemActionBar.Group>
-          <div
-            className={cn(
-              "h-2 w-2 rounded-full animate-pulse",
-              isEnabled ? "bg-emerald-500" : "bg-amber-500",
-            )}
-          />
-          <span className="text-xs font-medium text-muted-foreground">
-            {isEnabled ? "Active" : "Paused"}
-          </span>
-          <EcosystemActionBar.Separator />
-          <span className="text-xs text-muted-foreground">
-            {tiers.length} reward tiers
-          </span>
-        </EcosystemActionBar.Group>
-        <EcosystemActionBar.Group align="right">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              refetchConfig();
-              refetchPrizes();
-            }}
-            className="gap-2"
-          >
-            Refresh Data
-          </Button>
-        </EcosystemActionBar.Group>
-      </EcosystemActionBar>
+      <EcosystemHeader
+        title="Scratch Card"
+        badgeText="Engagement"
+        description={`Configure scratch card reward tiers, ${currencyName} costs, probability weights, and campaign windows.`}
+        icon={RectangleHorizontal}
+        breadcrumbs={[{ label: "Gamification", href: "/gamification" }, { label: "Engagement Games", href: "/gamification/engagement-games" }, { label: "Scratch Card" }]}
+        actions={
+          <EcosystemActionBar shadow="none" className="p-0 border-none bg-transparent">
+            <EcosystemActionBar.Group>
+              <div
+                className={cn(
+                  "h-2 w-2 rounded-full animate-pulse",
+                  isEnabled ? "bg-emerald-500" : "bg-amber-500",
+                )}
+              />
+              <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">
+                {isEnabled ? "Active" : "Paused"}
+              </span>
+              <EcosystemActionBar.Separator />
+              <span className="text-xs text-muted-foreground whitespace-nowrap">
+                {tiers.length} reward tiers
+              </span>
+            </EcosystemActionBar.Group>
+
+          </EcosystemActionBar>
+        }
+      />
 
       <EcosystemContainer className="p-6 space-y-5">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">

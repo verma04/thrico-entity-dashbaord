@@ -35,9 +35,10 @@ export interface ModuleAuditLogProps {
   moduleKey: string;
   title: string;
   description: string;
+  breadcrumbs?: { label: string; href?: string }[];
 }
 
-export function ModuleAuditLog({ moduleKey, title, description }: ModuleAuditLogProps) {
+export function ModuleAuditLog({ moduleKey, title, description, breadcrumbs }: ModuleAuditLogProps) {
   const [page, setPage] = useState(1);
   const [selectedLogId, setSelectedLogId] = useState<string | null>(null);
 
@@ -231,6 +232,7 @@ export function ModuleAuditLog({ moduleKey, title, description }: ModuleAuditLog
         badgeText="History"
         description={description}
         icon={History}
+        breadcrumbs={breadcrumbs}
       />
 
       <EcosystemActionBar shadow="none">

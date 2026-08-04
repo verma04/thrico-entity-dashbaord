@@ -44,7 +44,6 @@ import {
 } from "recharts";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
-import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import {
   EcosystemKPI,
@@ -182,17 +181,7 @@ export default function MentorshipAnalytics() {
         description={`Monitor expert application velocity, approval trajectories, and ecosystem expertise distribution.`}
         badgeText={`${moduleName} Hub`}
         icon={GraduationCap}
-      />
-
-      <EcosystemActionBar shadow="none">
-        <div className="flex items-center justify-between w-full">
-          <div className="flex items-center gap-2 px-1">
-            <ShieldCheck className="h-4 w-4 text-emerald-500" />
-            <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground italic">
-              Verified Node
-            </span>
-          </div>
-
+        actions={
           <div className="flex items-center gap-3">
             <DateRangePicker
               date={dateRange}
@@ -226,8 +215,10 @@ export default function MentorshipAnalytics() {
               />
             </Button>
           </div>
-        </div>
-      </EcosystemActionBar>
+        }
+      />
+
+      
 
       <EcosystemContainer className="p-6 lg:p-8 space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

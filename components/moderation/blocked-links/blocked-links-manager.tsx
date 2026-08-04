@@ -226,6 +226,10 @@ export function BlockedLinksManager() {
         description="Restrict malicious domains or enforce whitelist-only URL patterns across the platform."
         badgeText="Safety Center"
         icon={LinkIcon}
+        breadcrumbs={[
+          { label: "Moderation", href: "/moderation" },
+          { label: "Blocked Links" }
+        ]}
       />
 
       <EcosystemActionBar shadow="none">

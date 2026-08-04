@@ -3,7 +3,6 @@
 import React from "react";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
-import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import {
   EcosystemKPI,
@@ -106,46 +105,15 @@ export default function FeedPage() {
         badgeText="Overview"
         description="Monitor feed engagement, content trends, and user activity."
         icon={Share2}
-      />
-
-      <EcosystemActionBar shadow="none">
-        <EcosystemActionBar.Group>
-          <EcosystemActionBar.Item>
-            <div className="flex items-center gap-2.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-3 py-1.5">
-              <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[11px] font-medium text-emerald-700 dark:text-emerald-300">
-                Feed Status: Active
-              </span>
-            </div>
-          </EcosystemActionBar.Item>
-          <EcosystemActionBar.Separator />
-          <EcosystemActionBar.Item>
-            <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
+        actions={
+          <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
               <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
               <span>Verified System</span>
             </div>
-          </EcosystemActionBar.Item>
-        </EcosystemActionBar.Group>
+        }
+      />
 
-        <EcosystemActionBar.Group align="right">
-          <EcosystemActionBar.Item>
-            <DateRangePicker
-              date={dateRange}
-              onDateChange={handleDateChange}
-              defaultValue="LAST_7_DAYS"
-            />
-          </EcosystemActionBar.Item>
-          <EcosystemActionBar.Separator />
-          <EcosystemActionBar.Item>
-            <Link href="/feed/settings">
-              <Button className="h-9 px-4 rounded-xl bg-slate-900 border-slate-800 font-black text-[10px] uppercase tracking-widest gap-2 shadow-xl hover:bg-black transition-all active:scale-95 group">
-                Settings
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </Button>
-            </Link>
-          </EcosystemActionBar.Item>
-        </EcosystemActionBar.Group>
-      </EcosystemActionBar>
+      
 
       <EcosystemContainer className="space-y-12 p-8 lg:p-12">
         {/* KPI Grid */}

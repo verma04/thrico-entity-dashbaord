@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { getPolls } from "../../graphql/actions/polls";
 import { BarChart3, Plus, RotateCw, Filter, LayoutGrid, Terminal } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { CtaButton } from "@/components/ui/cta-button";
 import List from "./poll-list";
 import { PollProps, By } from "./ts-types";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
@@ -12,13 +12,6 @@ import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-acti
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useModuleStore } from "@/store/useModuleStore";
 
 const Poll: React.FC<PollProps> = ({ by: initialBy }) => {
@@ -44,14 +37,10 @@ const Poll: React.FC<PollProps> = ({ by: initialBy }) => {
           description={`Manage and view administrative and community ${moduleName.toLowerCase()}.`}
           badgeText={isAdmin ? "Admin" : "Community"}
           icon={BarChart3}
-          actions={
-            <Link href="/polls/create">
-               <Button className="font-semibold text-xs px-6 h-10 rounded-lg shadow-sm gap-2">
-                 <Plus className="h-4 w-4" />
-                 Create {singularName}
-               </Button>
-            </Link>
-          }
+          breadcrumbs={[
+            { label: moduleName, href: "/polls" },
+            { label: "All" }
+          ]}
        />
 
        <EcosystemActionBar shadow="none">
@@ -72,34 +61,37 @@ const Poll: React.FC<PollProps> = ({ by: initialBy }) => {
 
           <EcosystemActionBar.Group>
              <EcosystemActionBar.Item>
-                <Select
+                <EcosystemActionBar.Select
                   value={byFilter}
-                  onValueChange={(value) => setByFilter(value as By)}
-                >
-                  <SelectTrigger className="w-[140px] h-9 border-none bg-muted/50 rounded-lg text-xs font-semibold focus:ring-0">
-                    <Filter className="w-3.5 h-3.5 mr-2 text-muted-foreground" />
-                    <SelectValue placeholder={`Filter ${moduleName}`} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={By.ENTITY}>Admin {moduleName}</SelectItem>
-                    <SelectItem value={By.USER}>User {moduleName}</SelectItem>
-                    <SelectItem value={By.ALL}>All {moduleName}</SelectItem>
-                  </SelectContent>
-                </Select>
+                  onValueChange={(value: any) => setByFilter(value as By)}
+                  options={[
+                    { value: By.ENTITY, label: `Admin ${moduleName}` },
+                    { value: By.USER, label: `User ${moduleName}` },
+                    { value: By.ALL, label: `All ${moduleName}` },
+                  ]}
+                  placeholder={`Filter ${moduleName}`}
+                />
              </EcosystemActionBar.Item>
              <EcosystemActionBar.Item>
-                <Button
+                <CtaButton
                   variant="outline"
-                  size="icon"
-                  className="h-9 w-9 rounded-lg border border-border text-muted-foreground hover:text-foreground"
                   onClick={() => refetch()}
+                  className="h-6 w-6 p-0 rounded-md border-border text-muted-foreground hover:text-foreground transition-all"
                 >
-                  <RotateCw className={cn("h-4 w-4", loading && "animate-spin")} />
-                </Button>
+                  <RotateCw className={cn("h-3 w-3", loading && "animate-spin")} />
+                </CtaButton>
              </EcosystemActionBar.Item>
           </EcosystemActionBar.Group>
 
           <EcosystemActionBar.Group align="right">
+             <EcosystemActionBar.Item>
+                <Link href="/polls/create">
+                   <CtaButton className="gap-1.5">
+                     <Plus className="h-3.5 w-3.5" />
+                     Create {singularName}
+                   </CtaButton>
+                </Link>
+             </EcosystemActionBar.Item>
              <EcosystemActionBar.Status active={polls.length > 0}>
                 {polls.length} {moduleName}
              </EcosystemActionBar.Status>

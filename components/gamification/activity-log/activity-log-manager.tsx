@@ -73,6 +73,10 @@ export function ActivityLogManager() {
           badgeText="Audit"
           description="Track all point emissions, badge awards, and rank changes."
           icon={History}
+          breadcrumbs={[
+            { label: "Gamification", href: "/gamification" },
+            { label: "Activity Log" },
+          ]}
         />
         <EcosystemContainer className="p-12">
           <div className="flex flex-col items-center justify-center text-center gap-4">
@@ -103,6 +107,10 @@ export function ActivityLogManager() {
         badgeText="Gamification"
         description="Track all point awards, badge grants, and rank changes across members."
         icon={History}
+        breadcrumbs={[
+          { label: "Gamification", href: "/gamification" },
+          { label: "Activity Log" },
+        ]}
       />
 
       <EcosystemActionBar shadow="none">

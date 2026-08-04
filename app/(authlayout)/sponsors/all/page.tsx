@@ -23,10 +23,14 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 
 import { Button } from "@/components/ui/button";
+import { CtaButton } from "@/components/ui/cta-button";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { PageHeader } from "@/components/ui/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import {
   useGetSponsors,
   useUpdateSponsor,
@@ -238,14 +242,25 @@ export default function ManageSponsorsPage() {
 
   if (loading) {
     return (
-      <div className="p-6">
-        <PageHeader icon={Globe} title="Manage Sponsors" description="Loading sponsors..." />
-        <div className="space-y-4 mt-6">
-          {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-24 w-full" />
-          ))}
-        </div>
-      </div>
+      <EcosystemWrapper>
+        <EcosystemHeader
+          icon={Globe}
+          title="Manage Sponsors"
+          description="Loading sponsors..."
+          badgeText="Sponsors"
+          breadcrumbs={[
+            { label: "Sponsors", href: "/sponsors/all" },
+            { label: "Manage" }
+          ]}
+        />
+        <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">
+          <div className="space-y-4 px-6 py-4">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-24 w-full" />
+            ))}
+          </div>
+        </EcosystemContainer>
+      </EcosystemWrapper>
     );
   }
 
@@ -254,22 +269,32 @@ export default function ManageSponsorsPage() {
   }
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
-        <PageHeader 
-          icon={Globe}
-          title="Manage Sponsors" 
-          description="Drag and drop to reorder how sponsors appear on your entity portal."
-        />
-        <Link href="/sponsors/create">
-          <Button className="flex items-center gap-2">
-            <Plus className="w-4 h-4" />
-            Add Sponsor
-          </Button>
-        </Link>
-      </div>
-
-      <Card className="p-4 bg-gray-50/50">
+    <EcosystemWrapper>
+      <EcosystemHeader
+        icon={Globe}
+        title="Manage Sponsors"
+        description="Drag and drop to reorder how sponsors appear on your entity portal."
+        badgeText="Sponsors"
+        breadcrumbs={[
+          { label: "Sponsors", href: "/sponsors/all" },
+          { label: "Manage" }
+        ]}
+        actions={
+          <EcosystemActionBar shadow="none" className="p-0 border-none bg-transparent gap-2">
+            <EcosystemActionBar.Group align="right">
+              <Link href="/sponsors/create">
+                <CtaButton>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Sponsor
+                </CtaButton>
+              </Link>
+            </EcosystemActionBar.Group>
+          </EcosystemActionBar>
+        }
+      />
+      <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">
+        <div className="px-6 py-4">
+          <Card className="p-4 bg-gray-50/50">
         {sponsors.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
             No sponsors added yet. Click "Add Sponsor" to create one.
@@ -322,6 +347,8 @@ export default function ManageSponsorsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+        </div>
+      </EcosystemContainer>
+    </EcosystemWrapper>
   );
 }

@@ -5,7 +5,6 @@ import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check"
 
 
 import { useState, useMemo } from "react";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -114,34 +113,10 @@ function AllEventsPage() {
         badgeText="Community Hub"
         description={`Monitor, manage, and scale your community ${singularName.toLowerCase()} programming.`}
         icon={Calendar}
-        actions={
-          <div className="flex items-center gap-2">
-            <Create />
-            {/* View toggle */}
-            <Tabs
-              value={viewMode}
-              onValueChange={(val: any) => setViewMode(val)}
-              className="bg-muted p-0.5 rounded-lg border border-border"
-            >
-              <TabsList className="bg-transparent border-none h-auto p-0 gap-0.5">
-                <TabsTrigger
-                  value="grid"
-                  className="h-8 px-3 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground transition-all text-xs font-medium"
-                >
-                  <LayoutGrid className="h-3.5 w-3.5 mr-1.5" />
-                  Grid
-                </TabsTrigger>
-                <TabsTrigger
-                  value="list"
-                  className="h-8 px-3 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground transition-all text-xs font-medium"
-                >
-                  <ListIcon className="h-3.5 w-3.5 mr-1.5" />
-                  List
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
-        }
+        breadcrumbs={[
+          { label: moduleName, href: "/events" },
+          { label: "All" }
+        ]}
       />
 
       {/* Action Bar */}
@@ -216,6 +191,19 @@ function AllEventsPage() {
         </EcosystemActionBar.Group>
 
         <EcosystemActionBar.Group align="right">
+          <EcosystemActionBar.Item>
+            <EcosystemActionBar.ViewToggle
+              value={viewMode}
+              onChange={(val) => setViewMode(val as "grid" | "list")}
+              options={[
+                { id: "grid", label: "Grid", icon: LayoutGrid },
+                { id: "list", label: "List", icon: ListIcon },
+              ]}
+            />
+          </EcosystemActionBar.Item>
+          <EcosystemActionBar.Item>
+            <Create />
+          </EcosystemActionBar.Item>
           <EcosystemActionBar.Status active={filteredEvents.length > 0}>
             {filteredEvents.length} {moduleName}
           </EcosystemActionBar.Status>

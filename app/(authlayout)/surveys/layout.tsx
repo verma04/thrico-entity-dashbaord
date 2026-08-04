@@ -9,7 +9,9 @@ import { useGetModuleCustomName } from "@/graphql/actions";
 import { useModuleStore } from "@/store/useModuleStore";
 
 function SurveysLayout({ children }: { children: React.ReactNode }) {
-  const setSurveyModuleName = useModuleStore((state) => state.setSurveyModuleName);
+  const setSurveyModuleName = useModuleStore(
+    (state) => state.setSurveyModuleName,
+  );
   const moduleName = useModuleStore((state) => state.surveyModuleName);
   const singularName = useModuleStore((state) => state.surveySingularName);
 
@@ -32,11 +34,6 @@ function SurveysLayout({ children }: { children: React.ReactNode }) {
       key: "create",
       label: `Create ${singularName}`,
       icon: <Plus className="h-4 w-4" />,
-    },
-    {
-      key: "settings",
-      label: "Settings",
-      icon: <Settings className="h-4 w-4" />,
     },
   ];
 

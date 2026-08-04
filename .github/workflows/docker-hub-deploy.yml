@@ -2,7 +2,7 @@ name: Build & Deploy from /web-app to Docker Hub and DO Droplet
 
 on:
   push:
-    branches: [test]
+    branches: [develop]
 
 jobs:
   build-push-deploy:
@@ -51,10 +51,15 @@ jobs:
       - name: List Docker images (for debug)
         run: docker images
 
+      - name: Get version from package.json
+        run: echo "VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+
       - name: Tag the image for Docker Hub
         run: |
-
           docker tag thrico-entity-admin:latest ${{ secrets.DOCKERHUB_USERNAME }}/thrico-entity-admin:latest
+          docker tag thrico-entity-admin:latest ${{ secrets.DOCKERHUB_USERNAME }}/thrico-entity-admin:${{ env.VERSION }}
+
       - name: Push Docker image to Docker Hub
         run: |
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/thrico-entity-admin:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/thrico-entity-admin:${{ env.VERSION }}

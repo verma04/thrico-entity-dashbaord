@@ -18,7 +18,6 @@ import {
 } from "recharts";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
-import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { EcosystemKPI, EcosystemCard, EcosystemStatusIndicator } from "@/components/layout/ecosystem/ecosystem-analytics";
 import { cn } from "@/lib/utils";
@@ -103,17 +102,7 @@ export default function FeedbackAnalytics() {
         badgeText="Sentiment Registry"
         description="Monitor user feedback velocity, resolution protocols, and architectural satisfaction yield across the global registry."
         icon={MessageCircle}
-      />
-
-      <EcosystemActionBar shadow="none">
-        <div className="flex items-center justify-between w-full">
-          <div className="flex items-center gap-2 px-1">
-            <ShieldCheck className="h-4 w-4 text-emerald-500" />
-            <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground italic">
-              Verified Node
-            </span>
-          </div>
-
+        actions={
           <div className="flex items-center gap-3">
             <DateRangePicker
               date={dateRange}
@@ -131,7 +120,10 @@ export default function FeedbackAnalytics() {
             </Button>
           </div>
         </div>
-      </EcosystemActionBar>
+        }
+      />
+
+      
 
       <EcosystemContainer className="space-y-12 p-8 lg:p-12">
         {/* KPI Grid */}

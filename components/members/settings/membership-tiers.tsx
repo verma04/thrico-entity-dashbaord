@@ -8,7 +8,16 @@ import {
   UPDATE_MEMBERSHIP_TIER,
   DELETE_MEMBERSHIP_TIER,
 } from "@/graphql/membership-tier";
-import { Plus, Edit2, Trash2, Award, MoreHorizontal, Users, ChevronDown, ChevronUp } from "lucide-react";
+import {
+  Plus,
+  Edit2,
+  Trash2,
+  Award,
+  MoreHorizontal,
+  Users,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -38,6 +47,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
+import { CtaButton } from "@/components/ui/cta-button";
+
 export default function MembershipTiers() {
   const { data, loading, refetch } = useQuery(GET_MEMBERSHIP_TIERS);
   const [createTier] = useMutation(CREATE_MEMBERSHIP_TIER);
@@ -122,228 +137,287 @@ export default function MembershipTiers() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-semibold tracking-tight">Membership Tiers</h2>
-          <p className="text-sm text-muted-foreground mt-2">
-            Create and manage membership tiers and their associated benefits.
-          </p>
-        </div>
-        <Button onClick={() => handleOpenModal()} className="gap-2">
-          <Plus className="h-4 w-4" />
-          Create Tier
-        </Button>
-      </div>
+    <EcosystemWrapper className="gap-6">
+      <EcosystemHeader
+        title="Membership Tiers"
+        description="Create and manage membership tiers and their associated benefits."
+        badgeText="Tiers"
+        icon={Award}
+        breadcrumbs={[
+          { label: "Members", href: "/members/all" },
+          { label: "Tiers" },
+        ]}
+        actions={
+          <EcosystemActionBar
+            shadow="none"
+            className="p-0 border-none bg-transparent gap-2"
+          >
+            <EcosystemActionBar.Group align="right">
+              <CtaButton onClick={() => handleOpenModal()}>
+                <Plus className="h-3 w-3" />
+                Create Tier
+              </CtaButton>
+            </EcosystemActionBar.Group>
+          </EcosystemActionBar>
+        }
+      />
 
-      <div className="border rounded-lg bg-card">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Tier</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>Benefits</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              Array.from({ length: 3 }).map((_, index) => (
-                <TableRow key={`skeleton-${index}`}>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Skeleton className="w-8 h-8 rounded-full" />
-                      <Skeleton className="h-4 w-[100px]" />
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-4 w-[150px]" />
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-1">
-                      <Skeleton className="h-5 w-[60px] rounded-full" />
-                      <Skeleton className="h-5 w-[60px] rounded-full" />
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Skeleton className="h-8 w-8 rounded-md" />
-                      <Skeleton className="h-8 w-8 rounded-md" />
-                      <Skeleton className="h-8 w-[100px] rounded-md" />
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : tiers.length === 0 ? (
+      <EcosystemContainer className="p-0 border-none  bg-transparent shadow-none ring-0 space-y-6">
+        <div className="border rounded-xl shadow-sm bg-card">
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
-                  No membership tiers created yet.
-                </TableCell>
+                <TableHead>Tier</TableHead>
+                <TableHead>Description</TableHead>
+                <TableHead>Benefits</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
-            ) : (
-              tiers.map((tier: any) => (
-                <React.Fragment key={tier.id}>
-                  <TableRow>
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                Array.from({ length: 3 }).map((_, index) => (
+                  <TableRow key={`skeleton-${index}`}>
                     <TableCell>
-                    <div className="flex items-center gap-2 font-medium">
-                      <div
-                        className="w-8 h-8 rounded-full flex items-center justify-center bg-opacity-20"
-                        style={{ backgroundColor: `${tier.badgeColor}20` }}
-                      >
-                        <Award
-                          className="h-4 w-4"
-                          style={{ color: tier.badgeColor }}
-                        />
+                      <div className="flex items-center gap-2">
+                        <Skeleton className="w-8 h-8 rounded-full" />
+                        <Skeleton className="h-4 w-[100px]" />
                       </div>
-                      <span style={{ color: tier.badgeColor }}>{tier.name}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="max-w-[200px] truncate text-muted-foreground">
-                    {tier.description || "-"}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {tier.benefits?.length === 1 && tier.benefits[0].includes("<") ? (
-                        <Badge variant="secondary" className="text-xs">
-                          Custom Benefits
-                        </Badge>
-                      ) : (
-                        <>
-                          {tier.benefits?.slice(0, 2).map((b: string, i: number) => (
-                            <Badge key={i} variant="secondary" className="text-xs">
-                              {b}
-                            </Badge>
-                          ))}
-                          {tier.benefits?.length > 2 && (
-                            <Badge variant="secondary" className="text-xs">
-                              +{tier.benefits.length - 2} more
-                            </Badge>
-                          )}
-                        </>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setExpandedTierId(expandedTierId === tier.id ? null : tier.id)}
-                        className="h-8"
-                      >
-                        {expandedTierId === tier.id ? (
-                          <>
-                            <ChevronUp className="h-4 w-4 mr-1" /> Hide Members
-                          </>
-                        ) : (
-                          <>
-                            <ChevronDown className="h-4 w-4 mr-1" /> View Members
-                          </>
-                        )}
-                      </Button>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleOpenModal(tier)}>
-                            <Edit2 className="h-4 w-4 mr-2" /> Edit Tier
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem 
-                            onClick={() => handleDelete(tier.id)}
-                            className="text-red-600 focus:text-red-600 focus:bg-red-50"
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" /> Delete Tier
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </TableCell>
-                </TableRow>
-                {expandedTierId === tier.id && (
-                  <TableRow key={`${tier.id}-members`} className="bg-muted/30">
-                    <TableCell colSpan={4} className="p-0 border-b">
-                      <div className="p-4 px-6 border-l-4" style={{ borderLeftColor: tier.badgeColor }}>
-                        <TierMembersList tierId={tier.id} />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4 w-[150px]" />
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-1">
+                        <Skeleton className="h-5 w-[60px] rounded-full" />
+                        <Skeleton className="h-5 w-[60px] rounded-full" />
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Skeleton className="h-8 w-8 rounded-md" />
+                        <Skeleton className="h-8 w-8 rounded-md" />
+                        <Skeleton className="h-8 w-[100px] rounded-md" />
                       </div>
                     </TableCell>
                   </TableRow>
-                )}
-              </React.Fragment>
-            ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+                ))
+              ) : tiers.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={4}
+                    className="text-center py-8 text-muted-foreground"
+                  >
+                    No membership tiers created yet.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                tiers.map((tier: any) => (
+                  <React.Fragment key={tier.id}>
+                    <TableRow>
+                      <TableCell>
+                        <div className="flex items-center gap-2 font-medium">
+                          <div
+                            className="w-8 h-8 rounded-full flex items-center justify-center bg-opacity-20"
+                            style={{ backgroundColor: `${tier.badgeColor}20` }}
+                          >
+                            <Award
+                              className="h-4 w-4"
+                              style={{ color: tier.badgeColor }}
+                            />
+                          </div>
+                          <span style={{ color: tier.badgeColor }}>
+                            {tier.name}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="max-w-[200px] truncate text-muted-foreground">
+                        {tier.description || "-"}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1">
+                          {tier.benefits?.length === 1 &&
+                          tier.benefits[0].includes("<") ? (
+                            <Badge variant="secondary" className="text-xs">
+                              Custom Benefits
+                            </Badge>
+                          ) : (
+                            <>
+                              {tier.benefits
+                                ?.slice(0, 2)
+                                .map((b: string, i: number) => (
+                                  <Badge
+                                    key={i}
+                                    variant="secondary"
+                                    className="text-xs"
+                                  >
+                                    {b}
+                                  </Badge>
+                                ))}
+                              {tier.benefits?.length > 2 && (
+                                <Badge variant="secondary" className="text-xs">
+                                  +{tier.benefits.length - 2} more
+                                </Badge>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              setExpandedTierId(
+                                expandedTierId === tier.id ? null : tier.id,
+                              )
+                            }
+                            className="h-8"
+                          >
+                            {expandedTierId === tier.id ? (
+                              <>
+                                <ChevronUp className="h-4 w-4 mr-1" /> Hide
+                                Members
+                              </>
+                            ) : (
+                              <>
+                                <ChevronDown className="h-4 w-4 mr-1" /> View
+                                Members
+                              </>
+                            )}
+                          </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                              >
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={() => handleOpenModal(tier)}
+                              >
+                                <Edit2 className="h-4 w-4 mr-2" /> Edit Tier
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() => handleDelete(tier.id)}
+                                className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" /> Delete Tier
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                    {expandedTierId === tier.id && (
+                      <TableRow
+                        key={`${tier.id}-members`}
+                        className="bg-muted/30"
+                      >
+                        <TableCell colSpan={4} className="p-0 border-b">
+                          <div
+                            className="p-4 px-6 border-l-4"
+                            style={{ borderLeftColor: tier.badgeColor }}
+                          >
+                            <TierMembersList tierId={tier.id} />
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </React.Fragment>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
 
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>
-              {editingTier ? "Edit Membership Tier" : "Create Membership Tier"}
-            </DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4 pt-4">
-            <div className="space-y-2">
-              <Label>Tier Name</Label>
-              <Input
-                required
-                placeholder="e.g. Platinum Member"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label>Description</Label>
-              <Input
-                placeholder="Short description of this tier"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Badge Color (Hex)</Label>
-              <div className="flex gap-2">
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle>
+                {editingTier
+                  ? "Edit Membership Tier"
+                  : "Create Membership Tier"}
+              </DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4 pt-4">
+              <div className="space-y-2">
+                <Label>Tier Name</Label>
                 <Input
-                  type="color"
-                  className="w-12 p-1 h-10"
-                  value={formData.badgeColor}
-                  onChange={(e) => setFormData({ ...formData, badgeColor: e.target.value })}
-                />
-                <Input
-                  placeholder="#fbbf24"
-                  value={formData.badgeColor}
-                  onChange={(e) => setFormData({ ...formData, badgeColor: e.target.value })}
-                  className="flex-1"
+                  required
+                  placeholder="e.g. Platinum Member"
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
                 />
               </div>
-            </div>
 
-            <div className="space-y-2">
-              <Label>Benefits</Label>
-              <RichTextEditor
-                value={formData.benefits}
-                onChange={(content) => setFormData({ ...formData, benefits: content })}
-                placeholder="List the benefits of this tier..."
-              />
-            </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Input
+                  placeholder="Short description of this tier"
+                  value={formData.description}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
+                />
+              </div>
 
-            <div className="flex justify-end gap-2 pt-4 border-t">
-              <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)}>
-                Cancel
-              </Button>
-              <Button type="submit">
-                {editingTier ? "Save Changes" : "Create Tier"}
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
-    </div>
+              <div className="space-y-2">
+                <Label>Badge Color (Hex)</Label>
+                <div className="flex gap-2">
+                  <Input
+                    type="color"
+                    className="w-12 p-1 h-10"
+                    value={formData.badgeColor}
+                    onChange={(e) =>
+                      setFormData({ ...formData, badgeColor: e.target.value })
+                    }
+                  />
+                  <Input
+                    placeholder="#fbbf24"
+                    value={formData.badgeColor}
+                    onChange={(e) =>
+                      setFormData({ ...formData, badgeColor: e.target.value })
+                    }
+                    className="flex-1"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Benefits</Label>
+                <RichTextEditor
+                  value={formData.benefits}
+                  onChange={(content) =>
+                    setFormData({ ...formData, benefits: content })
+                  }
+                  placeholder="List the benefits of this tier..."
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-4 border-t">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsModalOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit">
+                  {editingTier ? "Save Changes" : "Create Tier"}
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </EcosystemContainer>
+    </EcosystemWrapper>
   );
 }

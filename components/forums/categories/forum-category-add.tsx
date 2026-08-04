@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Plus, FolderPlus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { CtaButton as Button } from "@/components/ui/cta-button";
 import {
   Dialog,
   DialogContent,
@@ -65,8 +65,8 @@ const Add = () => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="gap-2">
-          <Plus className="h-4 w-4" />
+        <Button className="gap-1.5">
+          <Plus className="h-3.5 w-3.5" />
           Add Category
         </Button>
       </DialogTrigger>

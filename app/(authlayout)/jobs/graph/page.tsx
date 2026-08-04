@@ -7,9 +7,26 @@ import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-cont
 import { JobsGraphView } from "@/components/jobs/jobs-graph-view";
 import { withModulePermission } from "@/components/hoc/with-module-permission";
 
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { useModuleStore } from "@/store/useModuleStore";
+
 function JobsGraphPage() {
+  const moduleName = useModuleStore((state) => state.jobModuleName);
+
   return (
-    <>
+    <EcosystemWrapper>
+      <EcosystemHeader
+        title={`${moduleName} Graph`}
+        badgeText="Visualization"
+        description={`Interactive graph visualization of your ${moduleName.toLowerCase()}.`}
+        icon={Network}
+        breadcrumbs={[
+          { label: moduleName, href: "/jobs" },
+          { label: "Graph" }
+        ]}
+      />
+
       <EcosystemActionBar
         shadow="none"
         className="rounded-xl border border-border"
@@ -35,7 +52,7 @@ function JobsGraphPage() {
       <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0 mt-4">
         <JobsGraphView />
       </EcosystemContainer>
-    </>
+    </EcosystemWrapper>
   );
 }
 

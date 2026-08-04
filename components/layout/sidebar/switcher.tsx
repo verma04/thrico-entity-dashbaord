@@ -58,31 +58,39 @@ export function WorkspaceSwitcher() {
       <SidebarMenuItem>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <SidebarMenuButton
-              size="lg"
-              className="data-[state=open]:bg-accent group h-10 rounded-lg transition-colors duration-150 hover:bg-accent/80"
+            <div
+              role="button"
+              className="data-[state=open]:bg-neutral-200 dark:data-[state=open]:bg-neutral-700 flex items-center gap-2 px-2 py-1.5 rounded-md bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 transition-colors duration-150 cursor-pointer"
             >
-              <div className="flex aspect-square size-7 items-center justify-center rounded-md bg-muted border border-border/50">
+              <div className="flex aspect-square size-6 items-center justify-center rounded bg-teal-600 text-white font-bold text-xs shrink-0 overflow-hidden">
                 {currentEntity?.logo ? (
                   <img
                     src={`${process.env.NEXT_PUBLIC_CDN_URL}/${currentEntity.logo}`}
                     alt={currentEntity.name}
-                    className="size-full object-contain p-1"
+                    className="size-full object-cover"
                   />
                 ) : (
-                  <LayoutDashboard className="size-4 text-muted-foreground/60" />
+                  currentEntity?.name?.charAt(0)?.toUpperCase() || "W"
                 )}
               </div>
-              <div className="grid flex-1 text-left text-sm leading-tight ml-1.5 truncate group-data-[collapsible=icon]:hidden">
-                <span className="truncate font-semibold text-[13px] text-foreground tracking-[-0.01em]">
-                  {currentEntity?.name || "Loading..."}
-                </span>
-                <span className="truncate text-[11px] text-muted-foreground/60">
-                  Workspace
-                </span>
-              </div>
-              <ChevronsUpDown className="ml-auto size-3.5 text-muted-foreground/40 group-data-[collapsible=icon]:hidden" />
-            </SidebarMenuButton>
+              <span className="truncate font-medium text-[13px] text-neutral-800 dark:text-neutral-200 leading-none">
+                {currentEntity?.name || "Loading..."}
+              </span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="size-3.5 text-neutral-400 shrink-0 ml-1"
+              >
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </div>
           </DialogTrigger>
 
           <DialogContent className="sm:max-w-[440px] p-0 overflow-hidden bg-background border-border shadow-lg rounded-xl">

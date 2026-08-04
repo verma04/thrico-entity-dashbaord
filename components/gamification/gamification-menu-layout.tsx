@@ -155,7 +155,10 @@ const GamificationMenuLayout = ({
                     <TabButton
                       key={item.key}
                       item={item}
-                      isActive={activeTab === item.key}
+                      isActive={
+                        activeTab === item.key ||
+                        (item.key !== "dashboard" && activeTab.startsWith(item.key + "/"))
+                      }
                       onClick={() => onChange(item.key)}
                     />
                   ))}

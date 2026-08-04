@@ -1,7 +1,9 @@
 import React from "react";
+import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2, Tag, Mic, Users, Globe, BookOpen, PartyPopper, Briefcase, GraduationCap, Calendar } from "lucide-react";
+import { CtaButton } from "@/components/ui/cta-button";
+import { Pencil, Trash2, Tag, Mic, Users, Globe, BookOpen, PartyPopper, Briefcase, GraduationCap, Calendar, Plus } from "lucide-react";
 import { useModuleStore } from "@/store/useModuleStore";
 
 export const CATEGORY_ICONS: Record<string, React.ReactNode> = {
@@ -49,6 +51,12 @@ export function CategoriesGrid({ categories, onDeleteCategory }: CategoriesGridP
         <Tag className="h-10 w-10 text-slate-300 mb-4" />
         <h3 className="text-xl font-semibold text-slate-800 tracking-tight">No categories found</h3>
         <p className="text-sm text-slate-500 text-center mt-2 max-w-sm">Try adding a new category or adjusting your search filters.</p>
+        <Link href="/events/categories/create" className="mt-6">
+          <CtaButton>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Category
+          </CtaButton>
+        </Link>
       </div>
     );
   }

@@ -173,6 +173,10 @@ export default function Billing() {
       <EcosystemHeader
         title="Billing History"
         description="View your recent invoices and transaction history."
+        breadcrumbs={[
+          { label: "Settings", href: "/settings" },
+          { label: "Billing" },
+        ]}
         badgeText="Billing"
         icon={Receipt}
       />

@@ -8,6 +8,9 @@ import {
 } from "@/components/ui/platform/settings-page";
 import { toast } from "sonner";
 import { useEntitySettings, useUpdateEntitySettings } from "@/graphql/actions";
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 
 const FIELDS: SettingsField[] = [
   {
@@ -34,17 +37,32 @@ const MediaGallerySettings = () => {
   };
 
   return (
-    <PlatformSettingsPage
-      title="Media Gallery"
-      description="Control the media gallery experience for your community members."
-      headerIcon={Images}
-      badge="Gallery"
-      fields={FIELDS}
-      data={data?.getEntitySettings}
-      loading={loading}
-      onSave={handleSave}
-      isSaving={loadingBtn}
-    />
+    <EcosystemWrapper>
+      <EcosystemHeader
+        title="Settings"
+        description="Control the media gallery experience for your community members."
+        badgeText="Gallery"
+        icon={Images}
+        breadcrumbs={[
+          { label: "Media Gallery", href: "/media-gallery" },
+          { label: "Settings" }
+        ]}
+      />
+      <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">
+        <PlatformSettingsPage
+          title="Media Gallery"
+          description="Control the media gallery experience for your community members."
+          headerIcon={Images}
+          badge="Gallery"
+          fields={FIELDS}
+          data={data?.getEntitySettings}
+          loading={loading}
+          onSave={handleSave}
+          isSaving={loadingBtn}
+          hideHeader={true}
+        />
+      </EcosystemContainer>
+    </EcosystemWrapper>
   );
 };
 

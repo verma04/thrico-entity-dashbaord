@@ -227,122 +227,160 @@ export const gamificationEngine = [
   {
     key: "engagement-activities",
     label: "Points & Badges",
-    path: "/gamification",
+    path: "/gamification/points-and-badges",
     isMobileOnly: true,
     icon: <Target size={18} />,
     children: [
-      { key: "eng-dash", label: "Dashboard", path: "/gamification" },
-      { key: "eng-points", label: "Points", path: "/gamification/points" },
-      { key: "eng-badges", label: "Badges", path: "/gamification/badges" },
-      { key: "eng-ranks", label: "Ranks", path: "/gamification/ranks" },
+      {
+        key: "eng-dash",
+        label: "Dashboard",
+        path: "/gamification/points-and-badges",
+      },
+      {
+        key: "eng-points",
+        label: "Points",
+        path: "/gamification/points-and-badges/points",
+      },
+      {
+        key: "eng-badges",
+        label: "Badges",
+        path: "/gamification/points-and-badges/badges",
+      },
+      {
+        key: "eng-ranks",
+        label: "Ranks",
+        path: "/gamification/points-and-badges/ranks",
+      },
       {
         key: "eng-leaderboard",
         label: "Leaderboard",
-        path: "/gamification/leaderboard",
+        path: "/gamification/points-and-badges/leaderboard",
       },
       {
         key: "eng-log",
         label: "Activity Log",
-        path: "/gamification/activity-log",
+        path: "/gamification/points-and-badges/activity-log",
       },
     ],
   },
-
   {
     key: "engagement-games",
     label: "Member Games",
-    path: "/engagement-games",
+    path: "/gamification/engagement-games",
     isMobileOnly: true,
     icon: <Gamepad2 size={18} />,
     children: [
       {
         key: "game-dash",
         label: "Dashboard",
-        path: "/engagement-games",
+        path: "/gamification/engagement-games",
       },
       {
         key: "game-spin",
         label: "Spin Wheel",
-        path: "/engagement-games/spin-wheel",
+        path: "/gamification/engagement-games/spin-wheel",
       },
       {
         key: "game-scratch",
         label: "Scratch Card",
-        path: "/engagement-games/scratch-card",
+        path: "/gamification/engagement-games/scratch-card",
       },
       {
         key: "game-match",
         label: "Match & Win",
-        path: "/engagement-games/match-win",
+        path: "/gamification/engagement-games/match-win",
       },
     ],
   },
   {
     key: "currency",
     label: "Currency",
-    path: "/currency",
+    path: "/gamification/currency",
     isMobileOnly: true,
     icon: <Coins size={18} />,
     children: [
-      { key: "cur-dash", label: "Dashboard", path: "/currency" },
-      { key: "cur-economics", label: "Economics", path: "/currency/economics" },
-      { key: "cur-abuse", label: "Anti-Abuse", path: "/currency/anti-abuse" },
+      { key: "cur-dash", label: "Dashboard", path: "/gamification/currency" },
+      {
+        key: "cur-economics",
+        label: "Economics",
+        path: "/gamification/currency/economics",
+      },
+      {
+        key: "cur-abuse",
+        label: "Anti-Abuse",
+        path: "/gamification/currency/anti-abuse",
+      },
       {
         key: "cur-redemption",
         label: "Redeem Rules",
-        path: "/currency/redemption",
+        path: "/gamification/currency/redemption",
       },
-      { key: "cur-trace", label: "Quick Trace", path: "/currency/trace" },
-      { key: "cur-audit", label: "Audit Log", path: "/currency/audit-log" },
+      {
+        key: "cur-trace",
+        label: "Quick Trace",
+        path: "/gamification/currency/trace",
+      },
+      {
+        key: "cur-audit",
+        label: "Audit Log",
+        path: "/gamification/currency/audit-log",
+      },
     ],
   },
   {
     key: "rewards",
     label: "Rewards",
-    path: "/rewards",
+    path: "/gamification/rewards",
     isMobileOnly: true,
     icon: <Gift size={18} />,
     children: [
-      { key: "rew-dash", label: "Dashboard", path: "/rewards" },
-
+      { key: "rew-dash", label: "Dashboard", path: "/gamification/rewards" },
       {
         key: "rcoupons",
         label: "Rewards & Vouchers",
-        path: "/rewards/coupons",
+        path: "/gamification/rewards/coupons",
       },
-      ,
       {
         key: "rew-coupons",
         label: "Create Reward",
-        path: "/rewards/coupons/create",
+        path: "/gamification/rewards/coupons/create",
       },
-
       {
         key: "redemptions",
         label: "Redemption",
-        path: "rewards/redemptions ",
+        path: "/gamification/rewards/redemptions",
       },
-      { key: "rew-fraud", label: "Fraud", path: "/rewards/fraud" },
+      { key: "rew-fraud", label: "Fraud", path: "/gamification/rewards/fraud" },
     ],
   },
-
   {
     key: "impact-score",
     label: "Impact Score",
-    path: "/impact-score",
+    path: "/gamification/impact-score",
     isMobileOnly: true,
     icon: <Trophy size={18} />,
     badge: "Beta",
     children: [
-      { key: "imp-dash", label: "Dashboard", path: "/impact-score" },
-
-      { key: "imp-rules", label: "Rules", path: "/impact-score/rules" },
+      {
+        key: "imp-dash",
+        label: "Dashboard",
+        path: "/gamification/impact-score",
+      },
+      {
+        key: "imp-rules",
+        label: "Rules",
+        path: "/gamification/impact-score/rules",
+      },
       {
         key: "imp-audit",
         label: "Activity Log",
-        path: "/impact-score/activity-log",
+        path: "/gamification/impact-score/activity-log",
       },
-      { key: "imp-members", label: "Members", path: "/impact-score/members" },
+      {
+        key: "imp-members",
+        label: "Members",
+        path: "/gamification/impact-score/members",
+      },
     ],
   },
 ];
@@ -681,31 +719,6 @@ export const adminSettings = [
   },
 
   {
-    key: "branded-email",
-    label: "Email",
-    path: "/email/usage",
-    icon: <Mail size={18} />,
-    children: [
-      { key: "email-dash", label: "Usage Dashboard", path: "/email/usage" },
-      {
-        key: "email-templates",
-        label: "Manage Templates",
-        path: "/email/templates",
-      },
-      {
-        key: "email-campaigns",
-        label: "Automation Campaigns",
-        path: "/email/automation",
-      },
-      {
-        key: "email-settings",
-        label: "Email Settings",
-        path: "/email/settings",
-      },
-    ],
-  },
-
-  {
     key: "team",
     label: "Team",
     icon: <UserCog size={18} />,
@@ -751,15 +764,7 @@ export const adminSettings = [
       { key: "pol-taxes", label: "Taxes & Duties", path: "/settings/taxes" },
     ],
   },
-  {
-    key: "mobile-app",
-    label: "Mobile App",
-    icon: <Smartphone size={18} />,
-    children: [
-      { key: "ma-android", label: "Android", path: "/mobile-app/android" },
-      { key: "ma-ios", label: "iOS", path: "/mobile-app/ios" },
-    ],
-  },
+
   {
     key: "learnings",
     label: "Help Guides",
@@ -818,6 +823,19 @@ export const main = homeItems;
 export const settings = adminSettings;
 export const extendedItems = modules;
 export const gamification = gamificationEngine;
+
+export const emailItems = [
+  { key: "email-dash", label: "Usage Dashboard", path: "/email/usage", icon: <BarChart3 size={18} /> },
+  { key: "email-templates", label: "Manage Templates", path: "/email/templates", icon: <FileText size={18} /> },
+  { key: "email-campaigns", label: "Automation Campaigns", path: "/email/automation", icon: <Zap size={18} /> },
+  { key: "email-settings", label: "Email Settings", path: "/email/settings", icon: <Settings size={18} /> },
+];
+
+export const mobileAppItems = [
+  { key: "ma-android", label: "Android App", path: "/mobile-app/android", icon: <Smartphone size={18} /> },
+  { key: "ma-ios", label: "iOS App", path: "/mobile-app/ios", icon: <Smartphone size={18} /> },
+  { key: "ma-settings", label: "App Settings", path: "/mobile-app/settings", icon: <Settings size={18} /> },
+];
 
 /**
  * Hook to filter menu items based on subscription AND user module permissions.
@@ -999,7 +1017,7 @@ export const useFilteredExtendedItems = () => {
   const gamificationModule = data?.checkEntitySubscription?.modules?.find(
     (m: any) => m.name === "Points & Badges" || m.name === "Gamification",
   );
-  const gamificationLabel = gamificationModule?.customName || "Points & Badges";
+  const gamificationLabel = gamificationModule?.customName || "Gamification";
 
   return {
     homeItems: filteredHome,

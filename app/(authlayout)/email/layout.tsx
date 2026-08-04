@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
-import { PaintBucket, Send, BarChart3, GitBranch } from "lucide-react";
+import { Mail, PaintBucket, Send, BarChart3, GitBranch } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { EmailDomainGate } from "@/components/email/domain-gate";
 
@@ -10,6 +10,13 @@ function EmailLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   const items = [
+    {
+      key: "email",
+      label: "Overview",
+      icon: <Mail className="h-4 w-4" />,
+      section: "General",
+      href: "/",
+    },
     {
       key: "templates",
       label: "Templates",
@@ -49,7 +56,7 @@ function EmailLayout({ children }: { children: React.ReactNode }) {
     <MenuItemsLayout
       fixed={isTakeoverPage}
       fullHeight={isTakeoverPage}
-      showAdminTabs={false}
+      hideDefaultTabs={true}
       active={"email"}
       items={items}
     >

@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
-import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import {
   EcosystemKPI,
@@ -56,7 +55,7 @@ function OpportunitiesDashboard() {
           limit: 100,
           offset: 0,
         },
-      }
+      },
     },
     fetchPolicy: "network-only",
   });
@@ -64,9 +63,18 @@ function OpportunitiesDashboard() {
   const opportunities = data?.adminGetOpportunities.data || [];
   const totalOpportunities = data?.adminGetOpportunities.meta.totalItems || 0;
 
-  const totalViews = opportunities.reduce((acc, curr) => acc + (curr.viewsCount || 0), 0);
-  const totalSaved = opportunities.reduce((acc, curr) => acc + (curr.savedCount || 0), 0);
-  const totalInterested = opportunities.reduce((acc, curr) => acc + (curr.interestedCount || 0), 0);
+  const totalViews = opportunities.reduce(
+    (acc, curr) => acc + (curr.viewsCount || 0),
+    0,
+  );
+  const totalSaved = opportunities.reduce(
+    (acc, curr) => acc + (curr.savedCount || 0),
+    0,
+  );
+  const totalInterested = opportunities.reduce(
+    (acc, curr) => acc + (curr.interestedCount || 0),
+    0,
+  );
 
   const kpis = [
     {
@@ -95,7 +103,10 @@ function OpportunitiesDashboard() {
     },
     {
       title: "Total Views",
-      value: (totalViews > 1000 ? (totalViews / 1000).toFixed(1) + "K" : totalViews.toString()),
+      value:
+        totalViews > 1000
+          ? (totalViews / 1000).toFixed(1) + "K"
+          : totalViews.toString(),
       trend: 18,
       icon: Target,
       color: "text-violet-600",
@@ -106,19 +117,19 @@ function OpportunitiesDashboard() {
   // Group by date for the last 7 days
   const trendDataMap = new Map();
   for (let i = 6; i >= 0; i--) {
-    const d = subDays(new Date(), i).toISOString().split('T')[0];
+    const d = subDays(new Date(), i).toISOString().split("T")[0];
     trendDataMap.set(d, { date: d, posts: 0 });
   }
 
   opportunities.forEach((opp) => {
     if (opp.createdAt) {
       try {
-        const d = new Date(Number(opp.createdAt)).toISOString().split('T')[0];
+        const d = new Date(Number(opp.createdAt)).toISOString().split("T")[0];
         if (trendDataMap.has(d)) {
           trendDataMap.get(d).posts += 1;
         }
       } catch (e) {
-        const d = new Date(opp.createdAt).toISOString().split('T')[0];
+        const d = new Date(opp.createdAt).toISOString().split("T")[0];
         if (trendDataMap.has(d)) {
           trendDataMap.get(d).posts += 1;
         }
@@ -132,13 +143,23 @@ function OpportunitiesDashboard() {
     acc[cat] = (acc[cat] || 0) + 1;
     return acc;
   }, {});
-  
-  const COLORS = ["#6366f1", "#8b5cf6", "#10b981", "#f59e0b", "#ec4899", "#14b8a6"];
-  const categoryData = Object.keys(categoryCount).length > 0 ? Object.keys(categoryCount).map((key, i) => ({
-    name: key.replace(/_/g, " "),
-    value: categoryCount[key],
-    color: COLORS[i % COLORS.length],
-  })) : [{ name: "No Data", value: 100, color: "#cbd5e1" }];
+
+  const COLORS = [
+    "#6366f1",
+    "#8b5cf6",
+    "#10b981",
+    "#f59e0b",
+    "#ec4899",
+    "#14b8a6",
+  ];
+  const categoryData =
+    Object.keys(categoryCount).length > 0
+      ? Object.keys(categoryCount).map((key, i) => ({
+          name: key.replace(/_/g, " "),
+          value: categoryCount[key],
+          color: COLORS[i % COLORS.length],
+        }))
+      : [{ name: "No Data", value: 100, color: "#cbd5e1" }];
 
   return (
     <EcosystemWrapper anonymized-1="opportunities">
@@ -147,19 +168,9 @@ function OpportunitiesDashboard() {
         description="Monitor opportunity trends, application velocity, and engagement."
         badgeText="Overview"
         icon={Briefcase}
-      />
-
-      <EcosystemActionBar shadow="none">
-        <div className="flex items-center justify-between w-full">
-          <div className="flex items-center gap-2 px-1">
-            <ShieldCheck className="h-4 w-4 text-emerald-500" />
-            <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground italic">
-              Verified Stream
-            </span>
-          </div>
-
+        actions={
           <div className="flex items-center gap-3">
-            <DateRangePicker 
+            <DateRangePicker
               date={dateRange}
               onDateChange={handleDateChange}
               defaultValue="LAST_7_DAYS"
@@ -176,8 +187,8 @@ function OpportunitiesDashboard() {
               </Button>
             </Link>
           </div>
-        </div>
-      </EcosystemActionBar>
+        }
+      />
 
       <EcosystemContainer className="p-6 lg:p-8 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -204,11 +215,23 @@ function OpportunitiesDashboard() {
                         x2="0"
                         y2="1"
                       >
-                        <stop offset="5%" stopColor="#6366f1" stopOpacity={0.08} />
-                        <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                        <stop
+                          offset="5%"
+                          stopColor="#6366f1"
+                          stopOpacity={0.08}
+                        />
+                        <stop
+                          offset="95%"
+                          stopColor="#6366f1"
+                          stopOpacity={0}
+                        />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      vertical={false}
+                      stroke="#f1f5f9"
+                    />
                     <XAxis
                       dataKey="date"
                       axisLine={false}
@@ -217,17 +240,28 @@ function OpportunitiesDashboard() {
                       dy={10}
                       tickFormatter={(val) => {
                         if (!val) return "";
-                        return new Date(val).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+                        return new Date(val).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                        });
                       }}
                     />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 600, fill: "#94a3b8" }} />
+                    <YAxis
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 10, fontWeight: 600, fill: "#94a3b8" }}
+                    />
                     <RechartsTooltip
                       contentStyle={{
                         backgroundColor: "#18181b",
                         border: "none",
                         borderRadius: "12px",
                       }}
-                      itemStyle={{ color: "#fff", fontWeight: 700, fontSize: "11px" }}
+                      itemStyle={{
+                        color: "#fff",
+                        fontWeight: 700,
+                        fontSize: "11px",
+                      }}
                       labelStyle={{ display: "none" }}
                     />
                     <Area
@@ -263,7 +297,11 @@ function OpportunitiesDashboard() {
                       dataKey="value"
                     >
                       {categoryData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={entry.color}
+                          stroke="none"
+                        />
                       ))}
                     </Pie>
                     <RechartsTooltip />
@@ -274,12 +312,17 @@ function OpportunitiesDashboard() {
                 {categoryData.map((item, i) => (
                   <div key={i} className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className="h-2 w-2 rounded-full" style={{ backgroundColor: item.color }} />
+                      <div
+                        className="h-2 w-2 rounded-full"
+                        style={{ backgroundColor: item.color }}
+                      />
                       <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
                         {item.name}
                       </span>
                     </div>
-                    <span className="text-xs font-bold text-zinc-900">{item.value}%</span>
+                    <span className="text-xs font-bold text-zinc-900">
+                      {item.value}%
+                    </span>
                   </div>
                 ))}
               </div>
@@ -293,5 +336,5 @@ function OpportunitiesDashboard() {
 
 export default withSubscriptionCheck(
   withModulePermission(OpportunitiesDashboard, "OPPORTUNITIES", "canRead"),
-  "opportunities"
+  "opportunities",
 );

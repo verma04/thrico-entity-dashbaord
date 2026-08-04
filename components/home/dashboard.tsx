@@ -33,8 +33,8 @@ import {
 import { ResponsiveContainer, AreaChart, Area } from "recharts";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
-import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { EcosystemKPI } from "@/components/layout/ecosystem/ecosystem-kpi";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
@@ -68,20 +68,8 @@ import { useGetImpactUsers } from "@/graphql/actions";
 import { useCheckMemberSubscription } from "@/graphql/actions/membership/membership-queries";
 
 // ---------------------------------------------------------------------------
-// KPI Card
+// KPI Helpers
 // ---------------------------------------------------------------------------
-interface CommunityKPICardProps {
-  title: string;
-  value: string | number;
-  change: number;
-  trend: number[];
-  icon?: LucideIcon;
-  statusColor?: string;
-  subtext?: string;
-  suffix?: string;
-  tooltip?: string;
-}
-
 interface DashboardMetricValue {
   value?: string | number;
   change?: number;
@@ -94,164 +82,6 @@ const isDashboardMetricValue = (
   typeof value === "object" &&
   value !== null &&
   ("value" in value || "change" in value || "trend" in value);
-
-const CommunityKPICard = ({
-  title,
-  value,
-  change,
-  trend,
-  icon: Icon,
-  statusColor = "bg-emerald-500",
-  subtext = "vs last period",
-  suffix = "",
-  tooltip,
-}: CommunityKPICardProps) => {
-  const isPositive = change >= 0;
-  const chartData = trend.map((val, i) => ({ value: val, id: i }));
-  const isLoading = value === "...";
-
-  // Derive accent color from statusColor for the top strip
-  const accentColorMap: Record<string, string> = {
-    "bg-emerald-500": "from-emerald-400 to-emerald-600",
-    "bg-blue-500": "from-blue-400 to-blue-600",
-    "bg-amber-400": "from-amber-300 to-amber-500",
-    "bg-indigo-500": "from-indigo-400 to-indigo-600",
-    "bg-cyan-500": "from-cyan-400 to-cyan-600",
-    "bg-rose-500": "from-rose-400 to-rose-600",
-    "bg-red-500": "from-red-400 to-red-600",
-    "bg-yellow-400": "from-yellow-300 to-yellow-500",
-  };
-  const accentGradient =
-    accentColorMap[statusColor] ?? "from-primary to-primary/60";
-
-  return (
-    <div className="group relative overflow-hidden rounded-xl border border-border/50 bg-card shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-border hover:shadow-md flex flex-col justify-between">
-      {/* Colored top accent strip */}
-      <div
-        className={cn(
-          "absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r",
-          accentGradient,
-          "opacity-80",
-        )}
-      />
-      {/* Subtle hover glow */}
-      <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100 bg-[radial-gradient(ellipse_at_80%_0%,hsl(var(--primary)/0.06),transparent_60%)]" />
-
-      <div className="relative p-4 flex flex-col flex-1">
-        {/* Top Header */}
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex items-center gap-1.5">
-            <span className="text-[9px] font-bold text-muted-foreground/70 uppercase tracking-[0.22em] leading-none">
-              {title}
-            </span>
-            {tooltip && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Info className="h-3 w-3 text-muted-foreground/40 cursor-help hover:text-muted-foreground/70 transition-colors" />
-                  </TooltipTrigger>
-                  <TooltipContent className="max-w-[200px] bg-popover border border-border/60 text-foreground shadow-xl">
-                    <p className="font-mono text-[10px] text-muted-foreground leading-relaxed">
-                      {tooltip}
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            )}
-          </div>
-          {Icon ? (
-            <div className="h-7 w-7 rounded-lg border border-border/50 bg-muted/60 flex items-center justify-center group-hover:bg-muted transition-colors">
-              <Icon className="h-3 w-3 text-muted-foreground/70" />
-            </div>
-          ) : (
-            <div className="h-7 w-7 rounded-lg border border-border/50 bg-muted/60 flex items-center justify-center">
-              <div className={cn("h-2 w-2 rounded-full", statusColor)} />
-            </div>
-          )}
-        </div>
-
-        {/* Main Value & Change */}
-        {isLoading ? (
-          <div className="mb-3 space-y-1.5">
-            <div className="h-6 w-20 rounded-md bg-muted animate-pulse" />
-            <div className="h-4 w-14 rounded-full bg-muted animate-pulse" />
-          </div>
-        ) : (
-          <div className="mb-3">
-            <h3 className="text-[1.4rem] font-bold text-foreground tracking-tight leading-none mb-1.5 tabular-nums">
-              {typeof value === "number"
-                ? Math.round(value).toLocaleString()
-                : value}
-              {suffix}
-            </h3>
-            <div className="flex items-center gap-1.5">
-              <div
-                className={cn(
-                  "flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-semibold",
-                  isPositive
-                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                    : "bg-rose-500/10 text-rose-600 dark:text-rose-400",
-                )}
-              >
-                {isPositive ? (
-                  <TrendingUp className="h-2 w-2" />
-                ) : (
-                  <TrendingDown className="h-2 w-2" />
-                )}
-                {isPositive ? "+" : ""}
-                {typeof change === "number" ? Math.round(change) : change}%
-              </div>
-              <span className="text-[9px] font-medium text-muted-foreground/50 uppercase tracking-wider">
-                {subtext}
-              </span>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Sparkline — flush to bottom */}
-      <div className="relative h-9 -mx-0 mt-auto">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart
-            data={chartData}
-            margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
-          >
-            <defs>
-              <linearGradient
-                id={`gradient-${title.replace(/\s+/g, "")}`}
-                x1="0"
-                y1="0"
-                x2="0"
-                y2="1"
-              >
-                <stop
-                  offset="5%"
-                  stopColor={isPositive ? "#10b981" : "#f43f5e"}
-                  stopOpacity={0.15}
-                />
-                <stop
-                  offset="95%"
-                  stopColor={isPositive ? "#10b981" : "#f43f5e"}
-                  stopOpacity={0}
-                />
-              </linearGradient>
-            </defs>
-            <Area
-              type="monotone"
-              dataKey="value"
-              stroke={isPositive ? "#10b981" : "#f43f5e"}
-              strokeWidth={1.5}
-              fillOpacity={1}
-              fill={`url(#gradient-${title.replace(/\s+/g, "")})`}
-              isAnimationActive={true}
-              dot={false}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
-  );
-};
 
 // ---------------------------------------------------------------------------
 // Module Performance Card
@@ -427,18 +257,21 @@ export default function Dashboard() {
       title: "New Members",
       key: "newMembers",
       color: "bg-cyan-500",
+      icon: Users,
       tooltip: "Members who joined during the selected period",
     },
     {
       title: "Active Members",
       key: "activeUsers",
       color: "bg-emerald-500",
+      icon: Activity,
       tooltip: "Count of unique members active within the selected date range",
     },
     {
       title: "Blocked Members",
       key: "blockMembers",
       color: "bg-blue-500",
+      icon: Shield,
       tooltip: "Total blocked members across the platform",
     },
     {
@@ -446,6 +279,7 @@ export default function Dashboard() {
       key: "engagementRate",
       color: "bg-amber-400",
       suffix: "%",
+      icon: Target,
       tooltip: "(DAU / Total Members) × 100",
     },
     {
@@ -453,6 +287,7 @@ export default function Dashboard() {
       key: "retentionRate",
       color: "bg-indigo-500",
       suffix: "%",
+      icon: Heart,
       tooltip: "(MAU / Total Members) × 100",
     },
 
@@ -461,12 +296,14 @@ export default function Dashboard() {
       key: "churnRate",
       color: "bg-rose-500",
       suffix: "%",
+      icon: TrendingDown,
       tooltip: "((Total Members - DAU) / Total Members) × 100",
     },
     {
       title: "Community Health",
       key: "healthIndex",
       color: "bg-red-500",
+      icon: Award,
       tooltip:
         "Weighted Avg: Engagement (40%) + Retention (40%) + Content Activity (20%)",
     },
@@ -474,6 +311,7 @@ export default function Dashboard() {
       title: "Member Happiness",
       key: "communityNPS",
       color: "bg-yellow-400",
+      icon: Star,
       tooltip: "Engagement Rate × 1.2 - Churn Rate × 0.5",
     },
   ];
@@ -578,40 +416,45 @@ export default function Dashboard() {
       title: "Listings",
       icon: ShoppingBag,
       color: "text-violet-600",
-      href: "/marketplace",
+      href: "/listing",
     },
     {
       title: "Polls",
       icon: FileText,
       color: "text-yellow-600",
-      href: "/polls/page",
+      href: "/polls",
     },
     {
       title: "Surveys",
       icon: FileText,
       color: "text-amber-600",
-      href: "/polls/page",
+      href: "/surveys",
     },
     {
       title: "Discussions",
       icon: MessageSquare,
       color: "text-pink-600",
-      href: "/forums/page",
+      href: "/forums",
     },
-    { title: "Gamification", icon: Trophy, color: "text-amber-600" },
+    {
+      title: "Gamification",
+      icon: Trophy,
+      color: "text-amber-600",
+      href: "/gamification/points-and-badges",
+    },
     {
       title: "Leaderboard",
       icon: Trophy,
       color: "text-yellow-600",
-      href: "/leaderboard",
+      href: "/gamification/points-and-badges",
     },
     {
       title: "Offers",
       icon: Target,
       color: "text-rose-600",
-      href: "/offers/page",
+      href: "/offers",
     },
-    { title: "Stories", icon: Sparkles, color: "text-violet-600" },
+    { title: "Stories", icon: Sparkles, color: "text-violet-600", href: "/stories/settings" },
     {
       title: "Mentorship",
       icon: Users,
@@ -640,23 +483,13 @@ export default function Dashboard() {
     : modulePerformanceList.slice(0, 9);
 
   return (
-    <EcosystemWrapper>
+    <EcosystemWrapper className="m-2">
       <EcosystemHeader
         title="Community Overview"
         badgeText="Live Stats"
         description="Track how your community is growing, engaging, and interacting in real-time."
         icon={Activity}
-      />
-
-      <EcosystemActionBar shadow="none">
-        <div className="flex items-center justify-between w-full">
-          <div className="flex items-center gap-2 px-1">
-            <ShieldCheck className="h-4 w-4 text-emerald-500" />
-            <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground italic">
-              Verified Node
-            </span>
-          </div>
-
+        actions={
           <div className="flex items-center gap-3">
             <DateRangePicker
               date={dateRange}
@@ -673,10 +506,10 @@ export default function Dashboard() {
               <RotateCcw size={14} className={cn(loading && "animate-spin")} />
             </Button>
           </div>
-        </div>
-      </EcosystemActionBar>
+        }
+      />
 
-      <EcosystemContainer className="space-y-8 py-8 px-4 lg:px-6 border-none bg-transparent shadow-none ring-0">
+      <EcosystemContainer className="p-6 lg:p-8 space-y-8">
         {/* Subscription Limit Warning Banner */}
         {subscriptionInfo?.hasReachedLimit && (
           <div className="bg-amber-50 border border-amber-200 text-amber-800 rounded-lg p-4 text-sm font-medium flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
@@ -729,17 +562,18 @@ export default function Dashboard() {
         {/* 1. Core Stats */}
         <section className="space-y-3">
           <DashboardSectionHeading title="Core Community Stats" />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {vitals.map((v) => {
               const item = getMetric(v.key);
               return (
-                <CommunityKPICard
+                <EcosystemKPI
                   key={v.key}
                   title={v.title}
                   value={loading ? "..." : (item?.value ?? "0")}
-                  change={item?.change ?? 0}
-                  trend={item?.trend ?? [0, 0, 0, 0, 0, 0, 0]}
-                  statusColor={v.color}
+                  trend={item?.change ?? 0}
+                  trendData={item?.trend ?? [0, 0, 0, 0, 0, 0, 0]}
+                  icon={v.icon}
+                  color={v.color}
                   suffix={(v as any).suffix}
                   tooltip={(v as any).tooltip}
                 />
@@ -763,16 +597,16 @@ export default function Dashboard() {
         <section className="space-y-3 mt-20">
           <DashboardSectionHeading title="Content & Feed" />
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-            <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-3">
+            <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6">
               {contentFeed.map((v) => {
                 const item = getMetric(v.key);
                 return (
-                  <CommunityKPICard
+                  <EcosystemKPI
                     key={v.key}
                     title={v.title}
                     value={loading ? "..." : (item?.value ?? "0")}
-                    change={item?.change ?? 0}
-                    trend={item?.trend ?? [0, 0, 0, 0, 0, 0, 0]}
+                    trend={item?.change ?? 0}
+                    trendData={item?.trend ?? [0, 0, 0, 0, 0, 0, 0]}
                     icon={v.icon}
                     suffix={(v as any).suffix}
                     tooltip={(v as any).tooltip}
@@ -999,16 +833,16 @@ export default function Dashboard() {
         {/* 4. Growing & Keeping Members */}
         <section className="space-y-3 mt-20">
           <DashboardSectionHeading title="Growing & Keeping Members" />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {acquisitionRet.map((v) => {
               const item = getMetric(v.key);
               return (
-                <CommunityKPICard
+                <EcosystemKPI
                   key={v.key}
                   title={v.title}
                   value={loading ? "..." : (item?.value ?? "0")}
-                  change={item?.change ?? 0}
-                  trend={item?.trend ?? [0, 0, 0, 0, 0, 0, 0]}
+                  trend={item?.change ?? 0}
+                  trendData={item?.trend ?? [0, 0, 0, 0, 0, 0, 0]}
                   icon={v.icon}
                   suffix={(v as any).suffix}
                   tooltip={(v as any).tooltip}

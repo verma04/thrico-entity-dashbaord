@@ -78,6 +78,7 @@ import { SectionCard } from "./section-card";
 import { EconomyMonitor } from "./economy-monitor";
 import { GamePreviewMockup } from "./game-preview-mockup";
 import { SegmentDialog } from "./segment-dialog";
+import { EcosystemHeader } from "@/components/layout/ecosystem";
 
 export function SpinWheelManager() {
   const {
@@ -94,7 +95,8 @@ export function SpinWheelManager() {
     pagination: { page: 1, limit: 100 },
   });
   const { data: currencyConfig } = useGetEntityCurrencyConfig();
-  const currencyName = currencyConfig?.getEntityCurrencyConfig?.currencyName || "Tokens";
+  const currencyName =
+    currencyConfig?.getEntityCurrencyConfig?.currencyName || "Tokens";
 
   const config = configData?.getSpinWheelConfig;
   const [isActive, setIsActive] = useState(false);
@@ -111,7 +113,9 @@ export function SpinWheelManager() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [deletingSegmentId, setDeletingSegmentId] = useState<string | null>(null);
+  const [deletingSegmentId, setDeletingSegmentId] = useState<string | null>(
+    null,
+  );
 
   const [getVouchers, { data: vouchersData, loading: vouchersLoading }] =
     useLazyGetVouchersByRewardMechanism();
@@ -295,36 +299,41 @@ export function SpinWheelManager() {
 
   return (
     <>
-      <EcosystemActionBar shadow="none">
-        <EcosystemActionBar.Group>
-          <div
-            className={cn(
-              "h-2 w-2 rounded-full animate-pulse",
-              isActive ? "bg-emerald-500" : "bg-amber-500",
-            )}
-          />
-          <span className="text-xs font-medium text-muted-foreground">
-            {isActive ? "Live" : "Paused"}
-          </span>
-          <EcosystemActionBar.Separator />
-          <Users className="h-3.5 w-3.5 text-muted-foreground" />
-          <span className="text-xs text-muted-foreground">
-            {activities.length} recent spins
-          </span>
-        </EcosystemActionBar.Group>
-        <EcosystemActionBar.Group align="right">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              refetchConfig();
-              refetchPrizes();
-            }}
+      <EcosystemHeader
+        title="Spin Wheel"
+        badgeText="Engagement"
+        description={`Configure spin wheel segments, ${currencyName} costs, and winning probabilities.`}
+        icon={Dices}
+        breadcrumbs={[
+          { label: "Gamification", href: "/gamification" },
+          { label: "Engagement Games", href: "/gamification/engagement-games" },
+          { label: "Spin Wheel" },
+        ]}
+        actions={
+          <EcosystemActionBar
+            shadow="none"
+            className="p-0 border-none bg-transparent"
           >
-            Refresh Data
-          </Button>
-        </EcosystemActionBar.Group>
-      </EcosystemActionBar>
+            <EcosystemActionBar.Group>
+              <div
+                className={cn(
+                  "h-2 w-2 rounded-full animate-pulse",
+                  isActive ? "bg-emerald-500" : "bg-amber-500",
+                )}
+              />
+              <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">
+                {isActive ? "Live" : "Paused"}
+              </span>
+              <EcosystemActionBar.Separator />
+              <Users className="h-3.5 w-3.5 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground whitespace-nowrap">
+                {activities.length} recent spins
+              </span>
+            </EcosystemActionBar.Group>
+
+          </EcosystemActionBar>
+        }
+      />
 
       <EcosystemContainer className="p-6 space-y-5">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
@@ -488,7 +497,10 @@ export function SpinWheelManager() {
                                     <Ticket className="h-3 w-3 text-muted-foreground" />
                                   </div>
                                 )}
-                                <span className="text-xs font-medium text-foreground truncate max-w-[100px]" title={seg.reward?.title}>
+                                <span
+                                  className="text-xs font-medium text-foreground truncate max-w-[100px]"
+                                  title={seg.reward?.title}
+                                >
                                   {seg.reward?.title || `₹${seg.rewardValue}`}
                                 </span>
                               </div>
@@ -611,16 +623,24 @@ export function SpinWheelManager() {
       />
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={!!deletingSegmentId} onOpenChange={(open) => !open && setDeletingSegmentId(null)}>
+      <Dialog
+        open={!!deletingSegmentId}
+        onOpenChange={(open) => !open && setDeletingSegmentId(null)}
+      >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Confirm Delete</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete this segment? This action cannot be undone.
+              Are you sure you want to delete this segment? This action cannot
+              be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="sm:justify-end gap-2">
-            <Button variant="outline" size="sm" onClick={() => setDeletingSegmentId(null)}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setDeletingSegmentId(null)}
+            >
               Cancel
             </Button>
             <Button

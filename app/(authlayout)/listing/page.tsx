@@ -37,7 +37,6 @@ import {
 import Link from "next/link";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
-import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import {
   EcosystemKPI,
@@ -162,17 +161,7 @@ const MarketplaceDashboard = () => {
         description="Monitor catalog expansion, inventory health, and engagement performance."
         badgeText="Dashboard"
         icon={Store}
-      />
-
-      <EcosystemActionBar shadow="none">
-        <div className="flex items-center justify-between w-full">
-          <div className="flex items-center gap-2 px-1">
-            <Clock className="h-4 w-4 text-muted-foreground" />
-            <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-              Last Sync: Just now
-            </span>
-          </div>
-
+        actions={
           <div className="flex items-center gap-3">
             <Select value={timeRange} onValueChange={setTimeRange}>
               <SelectTrigger className="h-9 w-[160px] rounded-lg border-border bg-card text-xs font-semibold">
@@ -194,8 +183,8 @@ const MarketplaceDashboard = () => {
               Export
             </Button>
           </div>
-        </div>
-      </EcosystemActionBar>
+        }
+      />
 
       <EcosystemContainer className="p-6 lg:p-8 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -241,6 +230,7 @@ const MarketplaceDashboard = () => {
               title={`${singularName} Velocity`}
               description="New entries published over time"
               icon={TrendingUp}
+              colorScheme="indigo"
             >
               <div className="h-[320px] w-full mt-6">
                 <ResponsiveContainer width="100%" height="100%">
@@ -288,6 +278,7 @@ const MarketplaceDashboard = () => {
               title="Category Mix"
               description="Inventory distribution"
               icon={Package}
+              colorScheme="sky"
             >
               <div className="h-56 w-full mt-2">
                 <ResponsiveContainer width="100%" height="100%">

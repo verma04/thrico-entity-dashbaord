@@ -27,18 +27,16 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { useFormik, FieldArray, FormikProvider } from "formik";
 import * as Yup from "yup";
 import { addPoll } from "../../graphql/actions/polls";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { useModuleStore } from "@/store/useModuleStore";
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 
 const pollSchema = Yup.object().shape({
   title: Yup.string()
@@ -92,6 +90,7 @@ export default function NewPoll({
   onCancel?: () => void;
 }) {
   const singularName = useModuleStore((state) => state.pollSingularName);
+  const moduleName = useModuleStore((state) => state.pollModuleName);
   const [open, setOpen] = useState(false);
   const [resultVisibility, setResultVisibility] = useState("ALWAYS");
 
@@ -279,7 +278,10 @@ export default function NewPoll({
           </div>
           <div>
             <Label className="text-base font-semibold">Result Visibility</Label>
-            <p className="text-sm text-muted-foreground">Choose when voters can see the {singularName.toLowerCase()} outcomes</p>
+            <p className="text-sm text-muted-foreground">
+              Choose when voters can see the {singularName.toLowerCase()}{" "}
+              outcomes
+            </p>
           </div>
         </div>
         <RadioGroup
@@ -293,7 +295,10 @@ export default function NewPoll({
               className="flex items-start space-x-3 space-y-0 p-4 rounded-lg border hover:bg-muted/50 transition-colors"
             >
               <RadioGroupItem value={opt.value} id={`vis-${opt.value}`} />
-              <Label htmlFor={`vis-${opt.value}`} className="font-normal cursor-pointer flex-1">
+              <Label
+                htmlFor={`vis-${opt.value}`}
+                className="font-normal cursor-pointer flex-1"
+              >
                 <div className="font-medium mb-0.5">{opt.label}</div>
                 <p className="text-sm text-muted-foreground">{opt.desc}</p>
               </Label>
@@ -346,7 +351,11 @@ export default function NewPoll({
           <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-indigo-50/50 border border-indigo-100/50">
             <BarChart3 className="h-3.5 w-3.5 text-indigo-400 shrink-0" />
             <p className="text-[10px] font-bold text-indigo-500 uppercase tracking-wider">
-              Results: {visibilityOptions.find(v => v.value === resultVisibility)?.label}
+              Results:{" "}
+              {
+                visibilityOptions.find((v) => v.value === resultVisibility)
+                  ?.label
+              }
             </p>
           </div>
         </div>
@@ -368,8 +377,16 @@ export default function NewPoll({
         </div>
       ) : (
         <div className="flex items-center gap-2">
-          {fullPage ? <Save className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />}
-          {fullPage ? `Create ${singularName}` : standalone ? `Create ${singularName}` : `Create and Attach ${singularName}`}
+          {fullPage ? (
+            <Save className="h-4 w-4" />
+          ) : (
+            <Sparkles className="h-4 w-4" />
+          )}
+          {fullPage
+            ? `Create ${singularName}`
+            : standalone
+              ? `Create ${singularName}`
+              : `Create and Attach ${singularName}`}
         </div>
       )}
     </Button>
@@ -378,31 +395,18 @@ export default function NewPoll({
   if (fullPage) {
     return (
       <FormikProvider value={formik}>
-        <>
-          <div className="flex flex-col h-full bg-background overflow-hidden rounded-t-[inherit]">
-          {/* Header section - Sticky */}
-          <div className="sticky top-0 z-30 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 border-b px-6 py-4">
-            <div className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div>
-                <div className="flex items-center gap-3 mb-1">
-                  <div className="p-2.5 rounded-xl bg-primary/10 ring-1 ring-primary/20">
-                    <BarChart3 className="h-5 w-5 text-primary" />
-                  </div>
-                  <h1 className="text-2xl font-bold tracking-tight">
-                    Create {singularName}
-                  </h1>
-                </div>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground ml-1">
-                  <span>{singularName}s</span>
-                  <ChevronRight className="h-3 w-3" />
-                  <span>Create New {singularName}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Main Content Area - Scrollable */}
-          <div className="flex-1 overflow-y-auto">
+        <EcosystemWrapper>
+          <EcosystemHeader
+            title={`Create ${singularName}`}
+            badgeText="New"
+            description={`Get feedback from your community with a new ${singularName.toLowerCase()}.`}
+            icon={BarChart3}
+            breadcrumbs={[
+              { label: moduleName, href: "/polls/all" },
+              { label: "Create" },
+            ]}
+          />
+          <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0 overflow-y-auto">
             <div className="max-w-7xl mx-auto px-6 py-8">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 <div className="lg:col-span-8 space-y-8">
@@ -449,7 +453,9 @@ export default function NewPoll({
                         <ul className="space-y-3 text-sm">
                           <li className="flex gap-2">
                             <span className="text-primary font-bold">•</span>
-                            <span>Keep your question short and unambiguous.</span>
+                            <span>
+                              Keep your question short and unambiguous.
+                            </span>
                           </li>
                           <li className="flex gap-2">
                             <span className="text-primary font-bold">•</span>
@@ -457,7 +463,9 @@ export default function NewPoll({
                           </li>
                           <li className="flex gap-2">
                             <span className="text-primary font-bold">•</span>
-                            <span>Use "After Voting" visibility to avoid bias.</span>
+                            <span>
+                              Use "After Voting" visibility to avoid bias.
+                            </span>
                           </li>
                         </ul>
                       </CardContent>
@@ -466,24 +474,23 @@ export default function NewPoll({
                 </div>
               </div>
             </div>
-          </div>
-        </div>
+          </EcosystemContainer>
+        </EcosystemWrapper>
 
-          <FloatingSavePanel
-            hasChanged={formik.dirty}
-            saved={false}
-            isSaving={loading}
-            onSave={handleSubmit}
-            onReset={() => {
-              formik.resetForm();
-              if (onCancel) onCancel();
-              else window.history.back();
-            }}
-            title={`Unsaved ${singularName} Data`}
-            description="You have unfilled form data."
-            buttonText={`Create ${singularName}`}
-          />
-        </>
+        <FloatingSavePanel
+          hasChanged={formik.dirty}
+          saved={false}
+          isSaving={loading}
+          onSave={handleSubmit}
+          onReset={() => {
+            formik.resetForm();
+            if (onCancel) onCancel();
+            else window.history.back();
+          }}
+          title={`Unsaved ${singularName} Data`}
+          description="You have unfilled form data."
+          buttonText={`Create ${singularName}`}
+        />
       </FormikProvider>
     );
   }
@@ -492,13 +499,22 @@ export default function NewPoll({
     <FormikProvider value={formik}>
       <form
         onSubmit={handleSubmit}
-        className={standalone ? "flex flex-col h-[calc(100vh-90px)]" : "flex flex-col"}
+        className={
+          standalone ? "flex flex-col h-[calc(100vh-90px)]" : "flex flex-col"
+        }
       >
-        <div className={cn("space-y-6", standalone ? "flex-1 overflow-y-auto px-6 py-5" : "px-6 py-5")}>
+        <div
+          className={cn(
+            "space-y-6",
+            standalone ? "flex-1 overflow-y-auto px-6 py-5" : "px-6 py-5",
+          )}
+        >
           {renderFormFields()}
         </div>
 
-        <div className={cn("border-t px-6 py-4", standalone ? "bg-muted/30" : "")}>
+        <div
+          className={cn("border-t px-6 py-4", standalone ? "bg-muted/30" : "")}
+        >
           <div className="flex items-center gap-3">
             {renderSubmitButton("sm")}
             <Button
@@ -524,11 +540,7 @@ export default function NewPoll({
 
   return (
     <>
-      <Button
-        onClick={() => setOpen(true)}
-        size="sm"
-        className="shadow-sm"
-      >
+      <Button onClick={() => setOpen(true)} size="sm" className="shadow-sm">
         <Plus className="h-4 w-4 mr-2" />
         Create {singularName}
       </Button>

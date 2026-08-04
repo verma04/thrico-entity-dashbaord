@@ -1,5 +1,5 @@
 "use client";
- 
+
 import React from "react";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -27,7 +27,7 @@ import {
   useGetContentReports,
   useGetAiModerationDashboard,
   TimeRange,
-  DateRangeInput
+  DateRangeInput,
 } from "@/graphql/moderation/hooks";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { subDays } from "date-fns";
@@ -37,7 +37,6 @@ import { HistorySection } from "./history-section";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
-import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import {
   EcosystemKPI,
   EcosystemCard,
@@ -60,7 +59,12 @@ const PremiumSectionCard = ({
   action?: React.ReactNode;
   className?: string;
 }) => (
-  <div className={cn("rounded-xl border border-border bg-card overflow-hidden flex flex-col shadow-sm transition-all duration-300 hover:shadow-md hover:border-border/80", className)}>
+  <div
+    className={cn(
+      "rounded-xl border border-border bg-card overflow-hidden flex flex-col shadow-sm transition-all duration-300 hover:shadow-md hover:border-border/80",
+      className,
+    )}
+  >
     <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-muted/20">
       <div className="flex items-center gap-3">
         <div className="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/10">
@@ -84,7 +88,9 @@ const PremiumSectionCard = ({
 );
 
 export function ModerationDashboard() {
-  const [timeRangeStr, setTimeRangeStr] = React.useState<TimeRange>(TimeRange.LAST_7_DAYS);
+  const [timeRangeStr, setTimeRangeStr] = React.useState<TimeRange>(
+    TimeRange.LAST_7_DAYS,
+  );
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
     from: subDays(new Date(), 7),
     to: new Date(),
@@ -102,16 +108,29 @@ export function ModerationDashboard() {
     else if (diffDays <= 90) setTimeRangeStr(TimeRange.LAST_90_DAYS);
   };
 
-  const formattedDateRange = dateRange?.from && dateRange?.to
-    ? {
-        startDate: dateRange.from.toISOString(),
-        endDate: dateRange.to.toISOString(),
-      }
-    : undefined;
+  const formattedDateRange =
+    dateRange?.from && dateRange?.to
+      ? {
+          startDate: dateRange.from.toISOString(),
+          endDate: dateRange.to.toISOString(),
+        }
+      : undefined;
 
-  const { data: statsData, loading: statsLoading, refetch: refetchStats } = useGetModerationStats(timeRangeStr, formattedDateRange);
-  const { data: aiData, loading: aiLoading, refetch: refetchAi } = useGetAiModerationDashboard(timeRangeStr, formattedDateRange);
-  const { data: reportsData, loading: reportsLoading, refetch: refetchReports } = useGetContentReports({
+  const {
+    data: statsData,
+    loading: statsLoading,
+    refetch: refetchStats,
+  } = useGetModerationStats(timeRangeStr, formattedDateRange);
+  const {
+    data: aiData,
+    loading: aiLoading,
+    refetch: refetchAi,
+  } = useGetAiModerationDashboard(timeRangeStr, formattedDateRange);
+  const {
+    data: reportsData,
+    loading: reportsLoading,
+    refetch: refetchReports,
+  } = useGetContentReports({
     status: "PENDING",
     limit: 5,
   });
@@ -121,11 +140,7 @@ export function ModerationDashboard() {
   const recentReports = reportsData?.getContentReports.items || [];
 
   const handleRefresh = async () => {
-    await Promise.all([
-      refetchStats(),
-      refetchAi(),
-      refetchReports(),
-    ]);
+    await Promise.all([refetchStats(), refetchAi(), refetchReports()]);
   };
 
   const totalPosts = aiStats?.totalPosts || 0;
@@ -134,7 +149,8 @@ export function ModerationDashboard() {
   const rejected = aiStats?.rejectedPosts || 0;
   const totalTokens = aiStats?.totalTokens || 0;
   const cleanPosts = Math.max(0, totalPosts - flagged - pending - rejected);
-  const approvalRate = totalPosts > 0 ? Math.round((cleanPosts / totalPosts) * 100) : 100;
+  const approvalRate =
+    totalPosts > 0 ? Math.round((cleanPosts / totalPosts) * 100) : 100;
 
   const kpis = [
     {
@@ -145,7 +161,8 @@ export function ModerationDashboard() {
       trendData: [15, 12, 14, 10, 8, 5, stats?.pendingReports ?? 0],
       color: "text-amber-500",
       bg: "bg-amber-500/10",
-      tooltip: "Flags and reports requiring manual human moderation and final protocol decisions.",
+      tooltip:
+        "Flags and reports requiring manual human moderation and final protocol decisions.",
     },
     {
       title: "Scanned Content",
@@ -155,7 +172,8 @@ export function ModerationDashboard() {
       trendData: [120, 140, 135, 160, 180, 195, totalPosts],
       color: "text-indigo-500",
       bg: "bg-indigo-500/10",
-      tooltip: "Total user-generated interaction nodes (posts, comments) analyzed by auto-moderation.",
+      tooltip:
+        "Total user-generated interaction nodes (posts, comments) analyzed by auto-moderation.",
     },
     {
       title: "Auto-Flagged",
@@ -165,7 +183,8 @@ export function ModerationDashboard() {
       trendData: [18, 15, 16, 12, 14, 10, flagged],
       color: "text-rose-500",
       bg: "bg-rose-500/10",
-      tooltip: "Total nodes flagged for containing violations, safety breaches, or policy leaks.",
+      tooltip:
+        "Total nodes flagged for containing violations, safety breaches, or policy leaks.",
     },
     {
       title: "Auto-Approval Trust",
@@ -176,7 +195,8 @@ export function ModerationDashboard() {
       trendData: [95, 96, 96, 97, 97, 98, approvalRate],
       color: "text-emerald-500",
       bg: "bg-emerald-500/10",
-      tooltip: "The percentage of content cleared and auto-approved automatically without flagging.",
+      tooltip:
+        "The percentage of content cleared and auto-approved automatically without flagging.",
     },
   ];
 
@@ -189,25 +209,19 @@ export function ModerationDashboard() {
         description="Monitor automated filtering velocity, pending review queues, and architectural safety protocols."
         badgeText="Safety Engine"
         icon={ShieldCheck}
-      />
-
-      <EcosystemActionBar shadow="none">
-        <div className="flex items-center justify-between w-full">
-          <div className="flex items-center gap-2 px-1">
-            <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)] animate-pulse" />
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest italic">
-              Automated Protection Active
-            </span>
-          </div>
-
+        breadcrumbs={[
+          { label: "Moderation", href: "/moderation" },
+          { label: "Dashboard" }
+        ]}
+        actions={
           <div className="flex items-center gap-3">
-            <DateRangePicker 
+            <DateRangePicker
               date={dateRange}
               onDateChange={handleDateChange}
               defaultValue="LAST_7_DAYS"
             />
             <div className="h-4 w-px bg-border mx-1" />
-            
+
             <Button
               variant="outline"
               size="icon"
@@ -215,22 +229,14 @@ export function ModerationDashboard() {
               onClick={handleRefresh}
               disabled={isRefreshing}
             >
-              <RotateCcw size={14} className={cn(isRefreshing && "animate-spin")} />
+              <RotateCcw
+                size={14}
+                className={cn(isRefreshing && "animate-spin")}
+              />
             </Button>
-
-            <div className="h-4 w-px bg-border mx-1" />
-            <Link href="/moderation/reports">
-              <Button
-                variant="outline"
-                className="h-9 px-4 rounded-lg border-border font-bold text-[10px] uppercase tracking-widest text-muted-foreground gap-2 hover:bg-muted transition-all shadow-sm bg-background"
-              >
-                <Flag className="h-3.5 w-3.5 text-indigo-500" />
-                Review Queue
-              </Button>
-            </Link>
           </div>
-        </div>
-      </EcosystemActionBar>
+        }
+      />
 
       <EcosystemContainer className="p-6 lg:p-8 space-y-6">
         {/* KPI Grid */}
@@ -325,10 +331,7 @@ export function ModerationDashboard() {
               )}
             </PremiumSectionCard>
 
-            <AiModerationDashboardWidget 
-              aiData={aiData} 
-              loading={aiLoading} 
-            />
+            <AiModerationDashboardWidget aiData={aiData} loading={aiLoading} />
           </div>
 
           {/* Action Center / Quick Settings */}
@@ -394,7 +397,10 @@ export function ModerationDashboard() {
                       </div>
                       <div className="flex items-center gap-2">
                         {item.count !== undefined && (
-                          <Badge variant="secondary" className="h-5 px-1.5 text-[9px] font-bold font-mono bg-muted text-muted-foreground group-hover:bg-indigo-100 group-hover:text-indigo-700 dark:group-hover:bg-indigo-900 dark:group-hover:text-indigo-300">
+                          <Badge
+                            variant="secondary"
+                            className="h-5 px-1.5 text-[9px] font-bold font-mono bg-muted text-muted-foreground group-hover:bg-indigo-100 group-hover:text-indigo-700 dark:group-hover:bg-indigo-900 dark:group-hover:text-indigo-300"
+                          >
                             {statsLoading ? "..." : item.count}
                           </Badge>
                         )}
@@ -414,10 +420,13 @@ export function ModerationDashboard() {
                   <div className="h-9 w-9 rounded-lg bg-indigo-500/20 flex items-center justify-center text-indigo-400 border border-indigo-500/20">
                     <Zap size={16} />
                   </div>
-                  <h4 className="text-[11px] font-bold uppercase tracking-widest text-zinc-100">AI Core Status</h4>
+                  <h4 className="text-[11px] font-bold uppercase tracking-widest text-zinc-100">
+                    AI Core Status
+                  </h4>
                 </div>
                 <p className="text-xs font-medium text-zinc-400 leading-relaxed">
-                  Automated content filtration is running on Gemini 1.5 Flash models with zero-latency classification active.
+                  Automated content filtration is running on Gemini 1.5 Flash
+                  models with zero-latency classification active.
                 </p>
                 <div className="flex items-center gap-1.5">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
@@ -432,7 +441,6 @@ export function ModerationDashboard() {
 
         {/* Audit Trail Section */}
         <HistorySection />
-
       </EcosystemContainer>
     </EcosystemWrapper>
   );

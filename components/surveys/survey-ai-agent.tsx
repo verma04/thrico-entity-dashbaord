@@ -8,6 +8,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { CtaButton } from "@/components/ui/cta-button";
 import { Badge } from "@/components/ui/badge";
 import {
   Bot,
@@ -192,10 +193,10 @@ export function SurveyAIAgentButton() {
 
   return (
     <>
-      <Button
+      <CtaButton
         onClick={() => setOpen(true)}
         id="survey-ai-agent-btn"
-        className="relative gap-2 overflow-hidden font-bold text-[10px] uppercase tracking-widest px-5 h-9 rounded-lg shadow-md transition-all duration-200 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] border-0 text-white"
+        className="relative overflow-hidden border-0 text-white gap-1.5 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
         style={{
           background:
             "linear-gradient(135deg, #4f46e5 0%, #7c3aed 60%, #a855f7 100%)",
@@ -211,7 +212,7 @@ export function SurveyAIAgentButton() {
         />
         <Sparkles className="h-3.5 w-3.5 shrink-0" />
         Create with AI
-      </Button>
+      </CtaButton>
 
       <SurveyAIAgentSheet open={open} onOpenChange={setOpen} />
     </>

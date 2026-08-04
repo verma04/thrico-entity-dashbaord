@@ -13,7 +13,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Settings, Shield, Zap, TrendingDown, CheckCircle2 } from "lucide-react";
+import {
+  Settings,
+  Shield,
+  Zap,
+  TrendingDown,
+  CheckCircle2,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function SettingsPanel() {
@@ -26,29 +32,39 @@ export function SettingsPanel() {
         <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-0.5">
           Engine Control
         </h3>
-        <Card className={cn(
-          "rounded-xl border transition-all duration-300",
-          settings.isEnabled
-            ? "border-emerald-200 bg-emerald-50/20 shadow-sm"
-            : "border-border bg-card opacity-90",
-        )}>
+        <Card
+          className={cn(
+            "rounded-xl border transition-all duration-300",
+            settings.isEnabled
+              ? "border-emerald-200 bg-emerald-50/20 shadow-sm"
+              : "border-border bg-card opacity-90",
+          )}
+        >
           <CardContent className="p-5">
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-4">
-                <div className={cn(
-                  "h-11 w-11 rounded-xl flex items-center justify-center transition-all duration-300",
-                  settings.isEnabled
-                    ? "bg-emerald-500 shadow-sm"
-                    : "bg-muted",
-                )}>
-                  <Settings className={cn(
-                    "h-5 w-5 transition-all",
-                    settings.isEnabled ? "text-white rotate-45" : "text-muted-foreground",
-                  )} />
+                <div
+                  className={cn(
+                    "h-11 w-11 rounded-xl flex items-center justify-center transition-all duration-300",
+                    settings.isEnabled
+                      ? "bg-emerald-500 shadow-sm"
+                      : "bg-muted",
+                  )}
+                >
+                  <Settings
+                    className={cn(
+                      "h-5 w-5 transition-all",
+                      settings.isEnabled
+                        ? "text-white rotate-45"
+                        : "text-muted-foreground",
+                    )}
+                  />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-semibold text-foreground">Gamification Engine</h3>
+                    <h3 className="text-sm font-semibold text-foreground">
+                      Gamification Engine
+                    </h3>
                     {settings.isEnabled && (
                       <Badge className="bg-emerald-500 text-white border-none text-[10px] font-semibold h-4 px-1.5">
                         Active
@@ -72,11 +88,12 @@ export function SettingsPanel() {
         </Card>
       </section>
 
-      <div className={cn(
-        "space-y-8 transition-all duration-500",
-        !settings.isEnabled && "opacity-40 pointer-events-none",
-      )}>
-
+      <div
+        className={cn(
+          "space-y-8 transition-all duration-500",
+          !settings.isEnabled && "opacity-40 pointer-events-none",
+        )}
+      >
         {/* Point Caps */}
         <section className="space-y-3">
           <div className="px-0.5 space-y-0.5">
@@ -85,17 +102,33 @@ export function SettingsPanel() {
               Point Caps
             </h2>
             <p className="text-xs text-muted-foreground">
-              Limit points per user to prevent farming and maintain a fair economy.
+              Limit points per user to prevent farming and maintain a fair
+              economy.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {[
-              { label: "Daily Cap", key: "dailyPointsCap", desc: "Resets every 24h" },
-              { label: "Weekly Cap", key: "weeklyPointsCap", desc: "Resets every Monday" },
-              { label: "Monthly Cap", key: "monthlyPointsCap", desc: "Resets on the 1st" },
+              {
+                label: "Daily Cap",
+                key: "dailyPointsCap",
+                desc: "Resets every 24h",
+              },
+              {
+                label: "Weekly Cap",
+                key: "weeklyPointsCap",
+                desc: "Resets every Monday",
+              },
+              {
+                label: "Monthly Cap",
+                key: "monthlyPointsCap",
+                desc: "Resets on the 1st",
+              },
             ].map((cap) => (
-              <Card key={cap.key} className="rounded-xl border border-border bg-card shadow-none">
+              <Card
+                key={cap.key}
+                className="rounded-xl border border-border bg-card shadow-none"
+              >
                 <CardContent className="p-4 space-y-3">
                   <div className="flex items-center justify-between">
                     <Label className="text-xs font-semibold text-foreground">
@@ -117,7 +150,9 @@ export function SettingsPanel() {
                       pts
                     </span>
                   </div>
-                  <p className="text-[11px] text-muted-foreground">{cap.desc} · 0 = unlimited</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {cap.desc} · 0 = unlimited
+                  </p>
                 </CardContent>
               </Card>
             ))}
@@ -126,12 +161,14 @@ export function SettingsPanel() {
 
         {/* Point Decay */}
         <section className="space-y-3">
-          <Card className={cn(
-            "rounded-xl border shadow-none transition-all duration-300",
-            settings.pointDecayEnabled
-              ? "border-orange-200 bg-orange-50/20"
-              : "border-border bg-card",
-          )}>
+          <Card
+            className={cn(
+              "rounded-xl border shadow-none transition-all duration-300",
+              settings.pointDecayEnabled
+                ? "border-orange-200 bg-orange-50/20"
+                : "border-border bg-card",
+            )}
+          >
             <CardHeader className="p-5 pb-0">
               <div className="flex items-start justify-between gap-4">
                 <div className="space-y-0.5">
@@ -142,12 +179,15 @@ export function SettingsPanel() {
                     Point Decay
                   </CardTitle>
                   <CardDescription className="text-xs text-muted-foreground">
-                    Gradually reduce points for inactive members to control inflation.
+                    Gradually reduce points for inactive members to control
+                    inflation.
                   </CardDescription>
                 </div>
                 <Switch
                   checked={settings.pointDecayEnabled}
-                  onCheckedChange={(v) => updateSettings({ pointDecayEnabled: v })}
+                  onCheckedChange={(v) =>
+                    updateSettings({ pointDecayEnabled: v })
+                  }
                   className="shrink-0 data-[state=checked]:bg-orange-500"
                 />
               </div>
@@ -161,7 +201,10 @@ export function SettingsPanel() {
                       <Label className="text-xs font-semibold text-foreground">
                         Reduction %
                       </Label>
-                      <Badge variant="secondary" className="text-[10px] font-medium">
+                      <Badge
+                        variant="secondary"
+                        className="text-[10px] font-medium"
+                      >
                         Inactive only
                       </Badge>
                     </div>
@@ -173,7 +216,9 @@ export function SettingsPanel() {
                         className="h-10 pr-8 font-semibold"
                         value={settings.pointDecayPercentage}
                         onChange={(e) =>
-                          updateSettings({ pointDecayPercentage: Number(e.target.value) })
+                          updateSettings({
+                            pointDecayPercentage: Number(e.target.value),
+                          })
                         }
                       />
                       <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-semibold text-muted-foreground">
@@ -181,7 +226,8 @@ export function SettingsPanel() {
                       </span>
                     </div>
                     <p className="text-[11px] text-muted-foreground">
-                      % deducted per cycle after the inactivity threshold is reached.
+                      % deducted per cycle after the inactivity threshold is
+                      reached.
                     </p>
                   </div>
 
@@ -196,7 +242,9 @@ export function SettingsPanel() {
                         className="h-10 pr-12 font-semibold"
                         value={settings.pointDecayPeriodDays}
                         onChange={(e) =>
-                          updateSettings({ pointDecayPeriodDays: Number(e.target.value) })
+                          updateSettings({
+                            pointDecayPeriodDays: Number(e.target.value),
+                          })
                         }
                       />
                       <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">
@@ -218,13 +266,27 @@ export function SettingsPanel() {
           <div className="rounded-xl border border-border bg-muted/30 p-5">
             <div className="flex items-center gap-2 mb-4">
               <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-              <p className="text-xs font-semibold text-foreground">Current Configuration</p>
+              <p className="text-xs font-semibold text-foreground">
+                Current Configuration
+              </p>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
-                { label: "Daily Cap", value: settings.dailyPointsCap || "∞", unit: "pts" },
-                { label: "Weekly Cap", value: settings.weeklyPointsCap || "∞", unit: "pts" },
-                { label: "Monthly Cap", value: settings.monthlyPointsCap || "∞", unit: "pts" },
+                {
+                  label: "Daily Cap",
+                  value: settings.dailyPointsCap || "∞",
+                  unit: "pts",
+                },
+                {
+                  label: "Weekly Cap",
+                  value: settings.weeklyPointsCap || "∞",
+                  unit: "pts",
+                },
+                {
+                  label: "Monthly Cap",
+                  value: settings.monthlyPointsCap || "∞",
+                  unit: "pts",
+                },
                 {
                   label: "Decay",
                   value: settings.pointDecayEnabled
@@ -236,11 +298,17 @@ export function SettingsPanel() {
                 },
               ].map((item) => (
                 <div key={item.label} className="space-y-0.5">
-                  <p className="text-[11px] font-medium text-muted-foreground">{item.label}</p>
+                  <p className="text-[11px] font-medium text-muted-foreground">
+                    {item.label}
+                  </p>
                   <div className="flex items-baseline gap-1">
-                    <p className="text-lg font-bold text-foreground tracking-tight">{item.value}</p>
+                    <p className="text-lg font-bold text-foreground tracking-tight">
+                      {item.value}
+                    </p>
                     {item.unit && (
-                      <span className="text-[11px] text-muted-foreground">{item.unit}</span>
+                      <span className="text-[11px] text-muted-foreground">
+                        {item.unit}
+                      </span>
                     )}
                   </div>
                 </div>

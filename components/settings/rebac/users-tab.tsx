@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import Link from "next/link";
+
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -22,6 +22,7 @@ import {
   PowerOff,
   Power,
   RotateCw,
+  Users,
 } from "lucide-react";
 import AddUserDialog from "./add-user-dialog";
 import ManagePermissionsDialog from "./manage-permissions-dialog";
@@ -38,6 +39,10 @@ import {
 } from "@/components/shared/admin-table/admin-table";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { CtaButton } from "@/components/ui/cta-button";
+import { useRouter } from "next/navigation";
 
 export default function UsersTab() {
   const { toast } = useToast();
@@ -251,76 +256,88 @@ export default function UsersTab() {
     },
   ];
 
+  const router = useRouter();
+
   return (
-    <div className="space-y-0">
-      <EcosystemActionBar
-        shadow="none"
-        className="bg-transparent border-none py-2"
-      >
-        <EcosystemActionBar.Group grow>
-          <EcosystemActionBar.Item grow className="max-w-sm">
-            <EcosystemActionBar.Search
-              value={searchQuery}
-              onChange={setSearchQuery}
-              placeholder="Search members..."
-            />
-          </EcosystemActionBar.Item>
-        </EcosystemActionBar.Group>
-        <EcosystemActionBar.Group align="right">
-          <EcosystemActionBar.Item>
-            <Link href="/settings/users/create">
-              <Button
-                size="sm"
-                className="h-9 px-5 rounded-xl gap-2 font-medium"
-              >
-                <UserPlus className="h-4 w-4" />
-                Add Member
-              </Button>
-            </Link>
-          </EcosystemActionBar.Item>
-          <EcosystemActionBar.Item>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => refetch()}
-              className="h-9 w-9 rounded-xl text-muted-foreground border-border hover:text-foreground hover:bg-muted"
-            >
-              <RotateCw
-                className={cn("h-4 w-4", loading ? "animate-spin" : "")}
-              />
-            </Button>
-          </EcosystemActionBar.Item>
-        </EcosystemActionBar.Group>
-      </EcosystemActionBar>
-
-      <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">
-        <div className="px-5">
-          <AdminTable
-            columns={columns}
-            data={filteredUsers}
-            loading={loading}
-            keyExtractor={(u) => u.id}
-            emptyTitle="No members found"
-            emptyDescription="No team members have been added yet."
-          />
-        </div>
-      </EcosystemContainer>
-
-      <AddUserDialog
-        open={showAddDialog}
-        onOpenChange={(open) => {
-          setShowAddDialog(open);
-          if (!open) setSelectedUser(null);
-        }}
-        user={selectedUser}
+    <EcosystemWrapper>
+      <EcosystemHeader
+        title="Members"
+        description="Manage team members and their status."
+        breadcrumbs={[
+          { label: "Settings", href: "/settings" },
+          { label: "Members" },
+        ]}
+        icon={Users}
+        badgeText="Access & RBAC"
+        showLiveIndicator={false}
+        actions={
+          <div className="flex items-center gap-2">
+            <CtaButton onClick={() => router.push("/settings/users/create")}>
+              <UserPlus className="h-3 w-3" />
+              Add Member
+            </CtaButton>
+          </div>
+        }
       />
-      {selectedUser && (
-        <ManagePermissionsDialog
-          open={showPermissionsDialog}
-          onOpenChange={setShowPermissionsDialog}
+      <div className="space-y-0">
+        <EcosystemActionBar
+          shadow="none"
+          className="bg-transparent border-none py-2"
+        >
+          <EcosystemActionBar.Group grow>
+            <EcosystemActionBar.Item grow className="max-w-sm">
+              <EcosystemActionBar.Search
+                value={searchQuery}
+                onChange={setSearchQuery}
+                placeholder="Search members..."
+              />
+            </EcosystemActionBar.Item>
+          </EcosystemActionBar.Group>
+          <EcosystemActionBar.Group align="right">
+            <EcosystemActionBar.Item>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => refetch()}
+                className="h-9 w-9 rounded-xl text-muted-foreground border-border hover:text-foreground hover:bg-muted"
+              >
+                <RotateCw
+                  className={cn("h-4 w-4", loading ? "animate-spin" : "")}
+                />
+              </Button>
+            </EcosystemActionBar.Item>
+          </EcosystemActionBar.Group>
+        </EcosystemActionBar>
+
+        <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">
+          <div className="px-5">
+            <AdminTable
+              columns={columns}
+              data={filteredUsers}
+              loading={loading}
+              keyExtractor={(u) => u.id}
+              emptyTitle="No members found"
+              emptyDescription="No team members have been added yet."
+            />
+          </div>
+        </EcosystemContainer>
+
+        <AddUserDialog
+          open={showAddDialog}
+          onOpenChange={(open) => {
+            setShowAddDialog(open);
+            if (!open) setSelectedUser(null);
+          }}
           user={selectedUser}
         />
-      )}
-    </div>
+        {selectedUser && (
+          <ManagePermissionsDialog
+            open={showPermissionsDialog}
+            onOpenChange={setShowPermissionsDialog}
+            user={selectedUser}
+          />
+        )}
+      </div>
+    </EcosystemWrapper>
   );
 }

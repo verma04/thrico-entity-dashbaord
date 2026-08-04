@@ -29,6 +29,7 @@ import type {
   ActiveTab,
   UpdateEntityModuleResponse,
 } from "./types";
+import { EcosystemContainer } from "@/components/layout/ecosystem";
 
 const UPDATE_ENTITY_MODULE = gql`
   mutation UpdateEntityModule($input: [inputUpdateEntityModule]) {
@@ -204,7 +205,9 @@ export default function ModuleManagement() {
 
   const changeCustomIcon = (id: string, value: string) => {
     setModules((prev) =>
-      prev.map((m) => (m.id === id ? { ...m, customIcon: value, icon: value } : m)),
+      prev.map((m) =>
+        m.id === id ? { ...m, customIcon: value, icon: value } : m,
+      ),
     );
   };
 
@@ -376,151 +379,161 @@ export default function ModuleManagement() {
       <EcosystemHeader
         title="Modules"
         description="Activate, configure and sequence modular capabilities across your entity."
+        breadcrumbs={[
+          { label: "Settings", href: "/settings" },
+          { label: "Modules" },
+        ]}
         icon={Puzzle}
         badgeText="Platform"
         showLiveIndicator={false}
       />
 
-      {/* Notification toast */}
-      {notification && (
-        <div
-          className={cn(
-            "flex items-start gap-3 px-4 py-3 rounded-xl border",
-            notification.type === "error"
-              ? "bg-red-50 border-red-200"
-              : "bg-emerald-50 border-emerald-200",
-          )}
-        >
-          <div
-            className={cn(
-              "w-1.5 h-4 rounded-full shrink-0 mt-0.5",
-              notification.type === "error" ? "bg-red-500" : "bg-emerald-500",
-            )}
-          />
-          <div>
-            <p
+      <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">
+        <div className="px-6 py-8 space-y-6">
+          {/* Notification toast */}
+          {notification && (
+            <div
               className={cn(
-                "text-[12px] font-semibold leading-none",
+                "flex items-start gap-3 px-4 py-3 rounded-xl border",
                 notification.type === "error"
-                  ? "text-red-700"
-                  : "text-emerald-700",
+                  ? "bg-red-50 border-red-200"
+                  : "bg-emerald-50 border-emerald-200",
               )}
             >
-              {notification.message}
-            </p>
-            {notification.description && (
-              <p className="text-[11px] text-muted-foreground mt-1">
-                {notification.description}
-              </p>
+              <div
+                className={cn(
+                  "w-1.5 h-4 rounded-full shrink-0 mt-0.5",
+                  notification.type === "error"
+                    ? "bg-red-500"
+                    : "bg-emerald-500",
+                )}
+              />
+              <div>
+                <p
+                  className={cn(
+                    "text-[12px] font-semibold leading-none",
+                    notification.type === "error"
+                      ? "text-red-700"
+                      : "text-emerald-700",
+                  )}
+                >
+                  {notification.message}
+                </p>
+                {notification.description && (
+                  <p className="text-[11px] text-muted-foreground mt-1">
+                    {notification.description}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Main card */}
+          <div className="rounded-xl border border-border/80 bg-card shadow-sm overflow-hidden">
+            {/* Card header with tabs + stats */}
+            <div className="px-5 py-4 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-1 bg-muted p-0.5 rounded-lg">
+                <button
+                  onClick={() => setActiveTab("management")}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-semibold transition-all duration-150",
+                    activeTab === "management"
+                      ? "bg-card text-foreground shadow-sm border border-border"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  <LayoutGrid className="h-3.5 w-3.5" />
+                  Module Registry
+                </button>
+                <button
+                  onClick={() => setActiveTab("navigation")}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-semibold transition-all duration-150",
+                    activeTab === "navigation"
+                      ? "bg-card text-foreground shadow-sm border border-border"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  <Smartphone className="h-3.5 w-3.5" />
+                  Mobile Navigation
+                </button>
+                <button
+                  onClick={() => setActiveTab("webNavigation")}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-semibold transition-all duration-150",
+                    activeTab === "webNavigation"
+                      ? "bg-card text-foreground shadow-sm border border-border"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  <Monitor className="h-3.5 w-3.5" />
+                  Web Navigation
+                </button>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-md">
+                  {enabledCount} / {modules.length} active
+                </span>
+                <span className="text-[11px] font-semibold text-blue-700 bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-md">
+                  {webNavCount} in web nav
+                </span>
+                <span className="text-[11px] font-semibold text-violet-700 bg-violet-50 border border-violet-200 px-2.5 py-1 rounded-md">
+                  {navCount} / 3 mobile nav
+                </span>
+              </div>
+            </div>
+
+            {/* Tab content */}
+            {activeTab === "management" && (
+              <ModuleRegistry
+                modules={modules}
+                filteredModules={filteredModules}
+                searchTerm={searchTerm}
+                userRole={userRole}
+                publicCount={publicCount}
+                internalCount={internalCount}
+                onSearchChange={setSearchTerm}
+                onToggleModule={toggleModule}
+                onTogglePopular={togglePopular}
+                onToggleNavigation={toggleNavigation}
+                onToggleWebNavigation={toggleWebNavigation}
+                onChangeCustomName={changeCustomName}
+                onChangeCustomIcon={changeCustomIcon}
+                onChangeSubtitle={changeSubtitle}
+              />
+            )}
+
+            {activeTab === "navigation" && (
+              <div className="p-5">
+                <MobileNavigation
+                  modules={modules}
+                  navigationModules={navigationModules}
+                  userRole={userRole}
+                  saving={saving}
+                  saveChanges={saveChanges}
+                  onDragEnd={onDragEnd}
+                  toggleNavigation={toggleNavigation}
+                />
+              </div>
+            )}
+
+            {activeTab === "webNavigation" && (
+              <div className="p-5">
+                <WebNavigation
+                  modules={modules}
+                  navigationModules={webNavigationModules}
+                  userRole={userRole}
+                  saving={saving}
+                  saveChanges={saveChanges}
+                  onDragEnd={onDragEndWeb}
+                  toggleNavigation={toggleWebNavigation}
+                />
+              </div>
             )}
           </div>
         </div>
-      )}
-
-      {/* Main card */}
-      <div className="rounded-xl border border-border/80 bg-card shadow-sm overflow-hidden">
-        {/* Card header with tabs + stats */}
-        <div className="px-5 py-4 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-1 bg-muted p-0.5 rounded-lg">
-            <button
-              onClick={() => setActiveTab("management")}
-              className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-semibold transition-all duration-150",
-                activeTab === "management"
-                  ? "bg-card text-foreground shadow-sm border border-border"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              <LayoutGrid className="h-3.5 w-3.5" />
-              Module Registry
-            </button>
-            <button
-              onClick={() => setActiveTab("navigation")}
-              className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-semibold transition-all duration-150",
-                activeTab === "navigation"
-                  ? "bg-card text-foreground shadow-sm border border-border"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              <Smartphone className="h-3.5 w-3.5" />
-              Mobile Navigation
-            </button>
-            <button
-              onClick={() => setActiveTab("webNavigation")}
-              className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-semibold transition-all duration-150",
-                activeTab === "webNavigation"
-                  ? "bg-card text-foreground shadow-sm border border-border"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              <Monitor className="h-3.5 w-3.5" />
-              Web Navigation
-            </button>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-md">
-              {enabledCount} / {modules.length} active
-            </span>
-            <span className="text-[11px] font-semibold text-blue-700 bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-md">
-              {webNavCount} in web nav
-            </span>
-            <span className="text-[11px] font-semibold text-violet-700 bg-violet-50 border border-violet-200 px-2.5 py-1 rounded-md">
-              {navCount} / 3 mobile nav
-            </span>
-          </div>
-        </div>
-
-        {/* Tab content */}
-        {activeTab === "management" && (
-          <ModuleRegistry
-            modules={modules}
-            filteredModules={filteredModules}
-            searchTerm={searchTerm}
-            userRole={userRole}
-            publicCount={publicCount}
-            internalCount={internalCount}
-            onSearchChange={setSearchTerm}
-            onToggleModule={toggleModule}
-            onTogglePopular={togglePopular}
-            onToggleNavigation={toggleNavigation}
-            onToggleWebNavigation={toggleWebNavigation}
-            onChangeCustomName={changeCustomName}
-            onChangeCustomIcon={changeCustomIcon}
-            onChangeSubtitle={changeSubtitle}
-          />
-        )}
-
-        {activeTab === "navigation" && (
-          <div className="p-5">
-            <MobileNavigation
-              modules={modules}
-              navigationModules={navigationModules}
-              userRole={userRole}
-              saving={saving}
-              saveChanges={saveChanges}
-              onDragEnd={onDragEnd}
-              toggleNavigation={toggleNavigation}
-            />
-          </div>
-        )}
-
-        {activeTab === "webNavigation" && (
-          <div className="p-5">
-            <WebNavigation
-              modules={modules}
-              navigationModules={webNavigationModules}
-              userRole={userRole}
-              saving={saving}
-              saveChanges={saveChanges}
-              onDragEnd={onDragEndWeb}
-              toggleNavigation={toggleWebNavigation}
-            />
-          </div>
-        )}
-      </div>
+      </EcosystemContainer>
 
       <FloatingSavePanel
         hasChanged={hasChanged}

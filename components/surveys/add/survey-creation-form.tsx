@@ -21,7 +21,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ChevronRight, FileText, Calendar as CalendarIcon, Info } from "lucide-react";
+import {
+  ChevronRight,
+  FileText,
+  Calendar as CalendarIcon,
+  Info,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Popover,
@@ -47,7 +52,9 @@ export function SurveyCreationForm({
       .max(100, "Max 100 characters"),
     description: Yup.string().max(500, "Max 500 characters"),
     startDate: Yup.date().nullable(),
-    endDate: Yup.date().nullable().min(Yup.ref('startDate'), 'End date cannot be before start date'),
+    endDate: Yup.date()
+      .nullable()
+      .min(Yup.ref("startDate"), "End date cannot be before start date"),
   });
 
   const formik = useFormik({
@@ -75,31 +82,6 @@ export function SurveyCreationForm({
   return (
     <FormikProvider value={formik}>
       <>
-        <div className="flex flex-col h-full bg-slate-50/50 overflow-hidden rounded-t-[inherit]">
-          {/* Header section - Sticky */}
-          <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200 px-6 py-4">
-            <div className="max-w-5xl mx-auto w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div>
-                <div className="flex items-center gap-3 mb-1">
-                  <div className="p-2.5 rounded-xl bg-indigo-600/10 ring-1 ring-indigo-600/20">
-                    <FileText className="h-5 w-5 text-indigo-600" />
-                  </div>
-                  <h1 className="text-2xl font-black tracking-tight text-slate-900">
-                    Create New Survey
-                  </h1>
-                </div>
-                <div className="flex items-center gap-2 text-xs font-medium text-slate-500 ml-1">
-                  <span>Community</span>
-                  <ChevronRight className="h-3 w-3" />
-                  <span>Surveys</span>
-                  <ChevronRight className="h-3 w-3" />
-                  <span className="text-indigo-600">Create New</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Main Content Area - Scrollable */}
         <div className="flex-1 overflow-y-auto">
           <div className="max-w-5xl mx-auto px-6 py-10">
@@ -174,7 +156,7 @@ export function SurveyCreationForm({
                                 variant="outline"
                                 className={cn(
                                   "w-full h-11 justify-start text-left font-normal rounded-xl border-slate-200 hover:bg-slate-50 transition-all",
-                                  !formik.values.startDate && "text-slate-400"
+                                  !formik.values.startDate && "text-slate-400",
                                 )}
                               >
                                 <CalendarIcon className="mr-2 h-4 w-4 text-slate-400" />
@@ -216,7 +198,7 @@ export function SurveyCreationForm({
                                 variant="outline"
                                 className={cn(
                                   "w-full h-11 justify-start text-left font-normal rounded-xl border-slate-200 hover:bg-slate-50 transition-all",
-                                  !formik.values.endDate && "text-slate-400"
+                                  !formik.values.endDate && "text-slate-400",
                                 )}
                               >
                                 <CalendarIcon className="mr-2 h-4 w-4 text-slate-400" />
@@ -239,8 +221,10 @@ export function SurveyCreationForm({
                                   setIsEndDateOpen(false);
                                 }}
                                 initialFocus
-                                disabled={(date) => 
-                                  formik.values.startDate ? date < formik.values.startDate : false
+                                disabled={(date) =>
+                                  formik.values.startDate
+                                    ? date < formik.values.startDate
+                                    : false
                                 }
                               />
                             </PopoverContent>
@@ -281,7 +265,9 @@ export function SurveyCreationForm({
                             <CalendarIcon className="h-3.5 w-3.5 text-slate-400" />
                           </div>
                           <div className="flex flex-col">
-                            <span className="text-[10px] text-slate-400 font-bold uppercase">Duration</span>
+                            <span className="text-[10px] text-slate-400 font-bold uppercase">
+                              Duration
+                            </span>
                             <span className="text-xs font-semibold text-slate-700 truncate">
                               {formik.values.startDate
                                 ? format(formik.values.startDate, "MMM d, yyyy")
@@ -307,7 +293,10 @@ export function SurveyCreationForm({
                           Next Steps
                         </h4>
                         <p className="text-[12px] text-slate-500 font-medium leading-relaxed">
-                          Creating a survey generates an empty draft. Once created, you can access the survey editor to start adding questions, configure advanced limits, and adjust the theme and branding. 
+                          Creating a survey generates an empty draft. Once
+                          created, you can access the survey editor to start
+                          adding questions, configure advanced limits, and
+                          adjust the theme and branding.
                         </p>
                       </div>
                     </CardContent>

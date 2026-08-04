@@ -13,16 +13,6 @@ function MembersLayout({ children }: { children: React.ReactNode }) {
   const canRead = useModulePermission("NETWORK", "canRead");
   const canCreate = useModulePermission("NETWORK", "canCreate");
 
-  // Determine active classification tab key dynamically based on current route
-  let classificationKey = "classifications";
-  if (pathname.includes("/members/industries")) {
-    classificationKey = "industries";
-  } else if (pathname.includes("/members/functions")) {
-    classificationKey = "functions";
-  } else if (pathname.includes("/members/skills")) {
-    classificationKey = "skills";
-  }
-
   const items = React.useMemo(() => {
     return [
       {
@@ -44,7 +34,7 @@ function MembersLayout({ children }: { children: React.ReactNode }) {
         locked: !canCreate,
       },
       {
-        key: classificationKey,
+        key: "classification",
         label: "Classifications",
         icon: <Building2 className="h-4 w-4" />,
         locked: !canRead,
@@ -62,11 +52,11 @@ function MembersLayout({ children }: { children: React.ReactNode }) {
         locked: !canRead,
       },
     ];
-  }, [classificationKey, canRead, canCreate]);
+  }, [canRead, canCreate]);
 
   return (
     <MenuItemsLayout active="members" items={items}>
-      <CardContent className="">{children}</CardContent>
+      {children}
     </MenuItemsLayout>
   );
 }

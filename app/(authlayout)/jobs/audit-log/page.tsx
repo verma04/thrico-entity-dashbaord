@@ -12,6 +12,10 @@ function JobsAuditLogPage() {
       moduleKey="JOBS"
       title={`${moduleName} Audit Log`}
       description={`Track all administrative activity for the ${moduleName} module.`}
+      breadcrumbs={[
+        { label: moduleName, href: "/jobs" },
+        { label: "Audit Log" }
+      ]}
     />
   );
 }

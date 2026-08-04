@@ -33,10 +33,14 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 
 import { Button } from "@/components/ui/button";
+import { CtaButton } from "@/components/ui/cta-button";
 import { Card, CardContent } from "@/components/ui/card";
-import { PageHeader } from "@/components/ui/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -445,27 +449,33 @@ export default function MediaGalleryPage() {
   };
 
   return (
-    <div className="w-full h-full p-4 md:p-8 space-y-6 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <PageHeader
-          icon={Images}
-          title="Media Gallery"
-          description="Manage photo albums, upload images, and control the gallery experience"
-        />
-        <Button
-          onClick={() => {
-            setEditingAlbum(null);
-            setIsFormOpen(true);
-          }}
-          className="w-full sm:w-auto"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          New Album
-        </Button>
-      </div>
+    <EcosystemWrapper>
+      <EcosystemHeader
+        title="Media Gallery"
+        description="Manage photo albums, upload images, and control the gallery experience"
+        badgeText="Gallery"
+        icon={Images}
+        breadcrumbs={[{ label: "Media Gallery", href: "/media-gallery" }]}
+        actions={
+          <EcosystemActionBar shadow="none" className="p-0 border-none bg-transparent gap-2">
+            <EcosystemActionBar.Group align="right">
+              <CtaButton
+                onClick={() => {
+                  setEditingAlbum(null);
+                  setIsFormOpen(true);
+                }}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                New Album
+              </CtaButton>
+            </EcosystemActionBar.Group>
+          </EcosystemActionBar>
+        }
+      />
 
-      {/* Content */}
+      <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0 space-y-6">
+        <div className="px-6 py-4 space-y-6">
+          {/* Content */}
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((i) => (
@@ -550,6 +560,8 @@ export default function MediaGalleryPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+        </div>
+      </EcosystemContainer>
+    </EcosystemWrapper>
   );
 }

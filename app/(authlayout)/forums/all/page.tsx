@@ -3,8 +3,7 @@
 import { withModulePermission } from "@/components/hoc/with-module-permission";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 
-import Forum from "@/components/forums/forum/Forum";
-import React from "react";
+import Forum from "@/components/forums/forum/forum";
 
 const ForumsAllPage = () => {
   return <Forum status={"ALL"} />;

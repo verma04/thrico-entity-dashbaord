@@ -25,7 +25,11 @@ import { useGetRoles, AdminUser } from "@/graphql/actions";
 import { cn } from "@/lib/utils";
 import { UserPreview } from "./user-preview";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
-
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
+import { CtaButton } from "@/components/ui/cta-button";
 interface UserCreationFormProps {
   initialValues?: Partial<AdminUser>;
   loading?: boolean;
@@ -67,37 +71,56 @@ export function UserCreationForm({
   const isEditing = !!initialValues?.id;
 
   return (
-    <div className="flex flex-col h-full bg-background overflow-hidden rounded-t-[inherit]">
-      {/* Header section - Sticky */}
-      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 border-b px-6 py-4">
-        <div className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-3 mb-1">
-              <div className="p-2.5 rounded-xl bg-primary/10 ring-1 ring-primary/20">
-                {isEditing ? (
-                  <UserCog className="h-5 w-5 text-primary" />
-                ) : (
-                  <UserPlus className="h-5 w-5 text-primary" />
-                )}
-              </div>
-              <h1 className="text-2xl font-bold tracking-tight">
-                {isEditing ? "Edit Team Member" : "Add Team Member"}
-              </h1>
-            </div>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground ml-1">
-              <span>Settings</span>
-              <ChevronRight className="h-3 w-3" />
-              <span>Users</span>
-              <ChevronRight className="h-3 w-3" />
-              <span>{isEditing ? "Edit Member" : "Add Member"}</span>
-            </div>
-          </div>
-        </div>
-      </div>
+    <EcosystemWrapper>
+      <EcosystemHeader
+        title={isEditing ? "Edit Team Member" : "Add Team Member"}
+        description={
+          isEditing
+            ? "Update member details and permissions."
+            : "Invite a new member to your workspace."
+        }
+        breadcrumbs={[
+          { label: "Settings", href: "/settings" },
+          { label: "Members", href: "/settings/users/all" },
+          { label: isEditing ? "Edit" : "Create" },
+        ]}
+        icon={isEditing ? UserCog : UserPlus}
+        badgeText="Access & RBAC"
+        showLiveIndicator={false}
+        actions={
+          <EcosystemActionBar
+            shadow="none"
+            className="p-0 border-none bg-transparent gap-2"
+          >
+            <EcosystemActionBar.Group align="right">
+              <CtaButton
+                variant="outline"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (onCancel) onCancel();
+                  else window.history.back();
+                }}
+                disabled={loading}
+              >
+                Cancel
+              </CtaButton>
+              <CtaButton
+                onClick={(e) => {
+                  e.preventDefault();
+                  formik.handleSubmit();
+                }}
+                disabled={loading || (!formik.dirty && !isEditing)}
+              >
+                {loading && <Loader2 className="mr-1 h-3 w-3 animate-spin" />}
+                {isEditing ? "Save Changes" : "Add Member"}
+              </CtaButton>
+            </EcosystemActionBar.Group>
+          </EcosystemActionBar>
+        }
+      />
 
-      {/* Main Content Area - Scrollable */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-7xl mx-auto px-6 py-8">
+      <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">
+        <div className="px-6 py-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <div className="lg:col-span-8">
               <form className="space-y-8" onSubmit={formik.handleSubmit}>
@@ -322,26 +345,7 @@ export function UserCreationForm({
             </div>
           </div>
         </div>
-      </div>
-
-      <FloatingSavePanel
-        hasChanged={formik.dirty}
-        saved={false}
-        isSaving={loading}
-        onSave={() => formik.handleSubmit()}
-        onReset={() => {
-          formik.resetForm();
-          if (onCancel) onCancel();
-          else window.history.back();
-        }}
-        title={isEditing ? "Unsaved Changes" : "Unsaved Member"}
-        description={
-          isEditing
-            ? "You have modified member details."
-            : "You have unfilled form data."
-        }
-        buttonText={isEditing ? "Save Changes" : "Add Member"}
-      />
-    </div>
+      </EcosystemContainer>
+    </EcosystemWrapper>
   );
 }

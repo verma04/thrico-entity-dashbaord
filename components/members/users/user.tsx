@@ -3,7 +3,10 @@
 import React, { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { UserList } from "./user-list";
-import { useGetAllUser, useSearchUserWithAI } from "@/graphql/actions/membership/membership-queries";
+import {
+  useGetAllUser,
+  useSearchUserWithAI,
+} from "@/graphql/actions/membership/membership-queries";
 import { MembersListCards } from "../dashboard/members-listcards";
 import { useDebounce } from "use-debounce";
 import { motion, AnimatePresence } from "framer-motion";
@@ -35,12 +38,18 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CtaButton } from "@/components/ui/cta-button";
 
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { Pagination } from "@/components/shared/admin-table/admin-table";
+import {
+  SubscriptionLimitBanner,
+  SubscriptionFallbackMessage,
+  SubscriptionUpgradeBlock,
+} from "./subscription-alerts";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Constants
@@ -253,7 +262,13 @@ function ContentArea({
 
 import { useGetIndustries } from "@/graphql/quries/industries/industry-queries";
 
-const User = ({ status: initialStatus, subscriptionInfo }: { status?: string; subscriptionInfo?: any }) => {
+const User = ({
+  status: initialStatus,
+  subscriptionInfo,
+}: {
+  status?: string;
+  subscriptionInfo?: any;
+}) => {
   const router = useRouter();
   const [view, setView] = useState<"grid" | "table">("table");
   const [search, setSearch] = useState("");
@@ -312,7 +327,7 @@ const User = ({ status: initialStatus, subscriptionInfo }: { status?: string; su
     : data?.getAllUser?.hasNextPage || false;
   const isLoading = isAiMode ? aiLoading : loading;
 
-  const effectiveTotalCount = subscriptionInfo?.maxUsersAllowed 
+  const effectiveTotalCount = subscriptionInfo?.maxUsersAllowed
     ? Math.min(totalCount, subscriptionInfo.maxUsersAllowed)
     : totalCount;
 
@@ -322,7 +337,7 @@ const User = ({ status: initialStatus, subscriptionInfo }: { status?: string; su
       : `${status.charAt(0) + status.slice(1).toLowerCase()} Members`;
 
   return (
-    <EcosystemWrapper>
+    <EcosystemWrapper className="gap-6">
       {/* ── Header ────────────────────────────────────────────────────────── */}
       <EcosystemHeader
         title={pageTitle}
@@ -335,27 +350,16 @@ const User = ({ status: initialStatus, subscriptionInfo }: { status?: string; su
               : `${totalCount} total members in your community.`
         }
         icon={isAiMode ? Sparkles : Users}
+        breadcrumbs={[
+          { label: "Members", href: "/members/all" },
+          { label: pageTitle },
+        ]}
         actions={
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => refetch()}
-              className="h-9 w-9 rounded-lg border-border text-muted-foreground hover:text-foreground transition-all"
-            >
-              <RefreshCw
-                className={cn("h-3.5 w-3.5", isLoading && "animate-spin")}
-              />
-            </Button>
-            <ViewToggle value={view} onChange={setView} />
-            <Button
-              variant="default"
-              className="h-9 px-3 rounded-lg text-xs font-semibold gap-1.5 transition-all bg-indigo-600 hover:bg-indigo-700 text-white"
-              onClick={() => router.push("/members/classifications")}
-            >
-              <Network className="h-3.5 w-3.5" />
+            <CtaButton onClick={() => router.push("/members/classifications")}>
+              <Network className="h-3 w-3" />
               Entity Nodes
-            </Button>
+            </CtaButton>
           </div>
         }
       />
@@ -367,21 +371,21 @@ const User = ({ status: initialStatus, subscriptionInfo }: { status?: string; su
             {isAiMode ? (
               <div className="flex items-center gap-2 w-full">
                 <div className="relative flex-1">
-                  <Sparkles className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-violet-500" />
+                  <Sparkles className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-violet-500" />
                   <input
                     type="text"
                     value={aiSearch}
                     onChange={(e) => setAiSearch(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleAiSearch()}
                     placeholder="e.g. Software engineers in India with AI skills…"
-                    className="w-full h-9 pl-8 pr-3 rounded-lg border border-violet-200 bg-violet-50/50 text-xs font-medium text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-300 transition-all"
+                    className="w-full h-6 pl-7 pr-2 rounded-md border border-violet-200 bg-violet-50/50 text-[11px] font-medium text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-300 transition-all"
                   />
                 </div>
                 <Button
                   size="sm"
                   onClick={handleAiSearch}
                   disabled={aiLoading || !aiSearch.trim()}
-                  className="h-9 px-3 rounded-lg bg-violet-600 hover:bg-violet-700 text-white text-xs font-semibold gap-1.5 transition-all"
+                  className="h-6 px-2.5 rounded-md bg-violet-600 hover:bg-violet-700 text-white text-[11px] font-semibold gap-1.5 transition-all"
                 >
                   {aiLoading ? (
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -394,7 +398,7 @@ const User = ({ status: initialStatus, subscriptionInfo }: { status?: string; su
                   variant="ghost"
                   size="sm"
                   onClick={handleClearAiSearch}
-                  className="h-9 px-3 rounded-lg text-xs font-semibold text-muted-foreground hover:text-foreground transition-all"
+                  className="h-6 px-2.5 rounded-md text-[11px] font-semibold text-muted-foreground hover:text-foreground transition-all"
                 >
                   Clear
                 </Button>
@@ -419,7 +423,7 @@ const User = ({ status: initialStatus, subscriptionInfo }: { status?: string; su
                 }
               }}
               className={cn(
-                "h-9 px-3 rounded-lg text-xs font-semibold gap-1.5 transition-all",
+                "h-6 px-2.5 rounded-md text-[11px] font-semibold gap-1.5 transition-all",
                 isAiMode
                   ? "bg-violet-600 hover:bg-violet-700 text-white"
                   : "border-border hover:border-violet-300 hover:bg-violet-50 hover:text-violet-700",
@@ -441,7 +445,7 @@ const User = ({ status: initialStatus, subscriptionInfo }: { status?: string; su
                 value={status}
                 onValueChange={(v) => setStatus(v as StatusValue)}
               >
-                <SelectTrigger className="w-[130px] h-9 rounded-lg border-border bg-card text-xs font-semibold text-foreground shadow-none focus:ring-2 focus:ring-ring/20">
+                <SelectTrigger className="w-[120px] h-6 rounded-md border-border bg-card text-[11px] font-semibold text-foreground shadow-none focus:ring-2 focus:ring-ring/20">
                   <div className="flex items-center gap-2">
                     {STATUS_TABS.find((t) => t.value === status)?.dot && (
                       <span
@@ -459,7 +463,7 @@ const User = ({ status: initialStatus, subscriptionInfo }: { status?: string; su
                     <SelectItem
                       key={opt.value}
                       value={opt.value}
-                      className="rounded-lg text-xs font-semibold py-2"
+                      className="rounded-md text-[11px] font-semibold py-1"
                     >
                       <div className="flex items-center gap-2">
                         {opt.dot && (
@@ -485,13 +489,13 @@ const User = ({ status: initialStatus, subscriptionInfo }: { status?: string; su
                 value={selectedIndustry}
                 onValueChange={(v) => setSelectedIndustry(v)}
               >
-                <SelectTrigger className="w-[160px] h-9 rounded-lg border-border bg-card text-xs font-semibold text-foreground shadow-none focus:ring-2 focus:ring-ring/20">
+                <SelectTrigger className="w-[140px] h-6 rounded-md border-border bg-card text-[11px] font-semibold text-foreground shadow-none focus:ring-2 focus:ring-ring/20">
                   <SelectValue placeholder="Industry" />
                 </SelectTrigger>
                 <SelectContent className="rounded-xl border-border shadow-lg p-1">
                   <SelectItem
                     value="ALL"
-                    className="rounded-lg text-xs font-semibold py-2"
+                    className="rounded-md text-[11px] font-semibold py-1"
                   >
                     All Industries
                   </SelectItem>
@@ -499,7 +503,7 @@ const User = ({ status: initialStatus, subscriptionInfo }: { status?: string; su
                     <SelectItem
                       key={ind.id}
                       value={ind.id}
-                      className="rounded-lg text-xs font-semibold py-2"
+                      className="rounded-md text-[11px] font-semibold py-1"
                     >
                       {ind.title}
                     </SelectItem>
@@ -511,6 +515,15 @@ const User = ({ status: initialStatus, subscriptionInfo }: { status?: string; su
         </EcosystemActionBar.Group>
 
         <EcosystemActionBar.Group align="right">
+          <EcosystemActionBar.ViewToggle
+            value={view}
+            onChange={setView}
+            options={[
+              { id: "grid", label: "Grid", icon: LayoutGrid },
+              { id: "table", label: "Table", icon: ListIcon },
+            ]}
+          />
+          <EcosystemActionBar.Separator />
           <EcosystemActionBar.Status active={usersList.length > 0}>
             Showing {usersList.length} of {totalCount} Members
           </EcosystemActionBar.Status>
@@ -518,62 +531,25 @@ const User = ({ status: initialStatus, subscriptionInfo }: { status?: string; su
       </EcosystemActionBar>
 
       {/* Subscription Limit Warning Banner */}
-      {subscriptionInfo?.hasReachedLimit && !isAiMode && (
-        <div className="bg-amber-50 border border-amber-200 text-amber-800 rounded-lg p-4 text-sm font-medium flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 shadow-sm">
-          <div className="flex items-center gap-3">
-            <AlertTriangle className="h-6 w-6 shrink-0 text-amber-600" />
-            <div>
-              <p className="font-bold text-amber-900 text-base">
-                Subscription Limit Reached
-              </p>
-              <p className="text-amber-700 text-xs mt-0.5">
-                {subscriptionInfo.message || "You have reached the maximum number of users allowed by your subscription."}
-              </p>
-            </div>
-          </div>
-          
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0">
-            <div className="flex items-center gap-4 bg-amber-100/60 px-5 py-2.5 rounded-lg border border-amber-200/60 shrink-0">
-               <div className="text-center">
-                  <p className="text-[10px] uppercase font-bold text-amber-600/80 tracking-widest mb-0.5">Current</p>
-                  <p className="text-xl font-black text-amber-900 leading-none">{subscriptionInfo.currentCount?.toLocaleString()}</p>
-               </div>
-               <div className="w-px h-8 bg-amber-300/60"></div>
-               <div className="text-center">
-                  <p className="text-[10px] uppercase font-bold text-amber-600/80 tracking-widest mb-0.5">Max Allowed</p>
-                  <p className="text-xl font-black text-amber-900 leading-none">{subscriptionInfo.maxUsersAllowed ? subscriptionInfo.maxUsersAllowed.toLocaleString() : "∞"}</p>
-               </div>
-            </div>
-            <Button
-              variant="outline"
-              className="bg-white hover:bg-amber-100/50 text-amber-900 border-amber-300 hover:border-amber-400 transition-all shadow-sm h-[52px]"
-              onClick={() => router.push("/settings/subscription")}
-            >
-              Manage
-            </Button>
-          </div>
-        </div>
-      )}
+      <SubscriptionLimitBanner
+        subscriptionInfo={subscriptionInfo}
+        isAiMode={isAiMode}
+      />
 
       {/* Fallback to getAllUser message if no subscriptionInfo */}
-      {!subscriptionInfo && data?.getAllUser?.message && !isAiMode && (
-        <div className="bg-amber-50 border border-amber-200 text-amber-800 rounded-lg p-3 text-sm font-medium flex items-center gap-2 mb-4 shadow-sm">
-          <AlertTriangle className="h-4 w-4 shrink-0 text-amber-600" />
-          <span>{data.getAllUser.message}</span>
-        </div>
-      )}
+      <SubscriptionFallbackMessage
+        subscriptionInfo={subscriptionInfo}
+        message={data?.getAllUser?.message}
+        isAiMode={isAiMode}
+      />
 
       {/* ── Content ───────────────────────────────────────────────────────── */}
-      <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0 space-y-3">
+      <EcosystemContainer className="p-0 m-3 mt-0 border-none bg-transparent shadow-none ring-0 space-y-3">
         {/* Section heading (non-ALL statuses only) */}
-        <SectionHeader
-          status={status}
-          count={totalCount}
-          loading={loading}
-        />
+        <SectionHeader status={status} count={totalCount} loading={loading} />
 
         <ContentArea view={view} loading={isLoading} users={usersList} />
-        
+
         {/* Pagination Controls */}
         {!isLoading && effectiveTotalCount > 0 && (
           <div className="mt-4 overflow-hidden rounded-xl border border-border bg-card shadow-sm">
@@ -588,27 +564,11 @@ const User = ({ status: initialStatus, subscriptionInfo }: { status?: string; su
         )}
 
         {/* Upgrade Block Bar */}
-        {!isLoading && subscriptionInfo?.hasReachedLimit && totalCount > (subscriptionInfo.maxUsersAllowed || 0) && (
-          <div className="mt-6 p-8 rounded-xl border border-dashed border-amber-300 bg-gradient-to-b from-amber-50/50 to-amber-100/50 flex flex-col items-center justify-center text-center space-y-4 shadow-sm relative overflow-hidden">
-             <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03] mix-blend-overlay"></div>
-             <div className="h-12 w-12 rounded-full bg-white shadow-sm border border-amber-200 flex items-center justify-center relative z-10">
-                <Lock className="h-5 w-5 text-amber-600" />
-             </div>
-             <div className="relative z-10">
-               <h3 className="text-base font-bold text-amber-900">Unlock {totalCount - (subscriptionInfo.maxUsersAllowed || 0)} More Records</h3>
-               <p className="text-sm text-amber-700 max-w-md mt-1.5 leading-relaxed">
-                 Your current plan limits visibility to the first {subscriptionInfo.maxUsersAllowed} members. Upgrade your subscription to access your entire directory.
-               </p>
-             </div>
-             <Button
-               variant="default"
-               className="bg-amber-600 hover:bg-amber-700 text-white font-semibold shadow-sm transition-all relative z-10"
-               onClick={() => router.push("/settings/subscription")}
-             >
-               Upgrade Subscription
-             </Button>
-          </div>
-        )}
+        <SubscriptionUpgradeBlock
+          subscriptionInfo={subscriptionInfo}
+          totalCount={totalCount}
+          isLoading={isLoading}
+        />
       </EcosystemContainer>
 
       <style>{`

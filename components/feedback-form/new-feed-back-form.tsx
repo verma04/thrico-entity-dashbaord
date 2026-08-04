@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { CtaButton as Button } from "@/components/ui/cta-button";
 import {
   Sheet,
   SheetContent,
@@ -80,8 +80,8 @@ export default function NewForm() {
         }}
       >
         <SheetTrigger asChild>
-          <Button>
-            <Plus className="h-4 w-4 mr-2" />
+          <Button className="gap-1.5">
+            <Plus className="h-3.5 w-3.5" />
             Create New Form
           </Button>
         </SheetTrigger>

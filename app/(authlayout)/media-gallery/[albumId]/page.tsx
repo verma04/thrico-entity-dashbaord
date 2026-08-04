@@ -41,7 +41,10 @@ import {
   useDeleteMediaGalleryImage,
   useReorderMediaGalleryImages,
 } from "@/graphql/actions/mediaGallery";
-import { PageHeader } from "@/components/ui/page-header";
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -56,10 +59,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import { CheckSquare, XSquare } from "lucide-react";
 
-import { CommentsPanel } from "./components/comments-panel";
-import { SortableImageCard } from "./components/sortable-image-card";
-import { UploadZone } from "./components/upload-zone";
-import { CaptionDialog } from "./components/caption-dialog";
+import { CommentsPanel } from "@/components/media-gallery/comments-panel";
+import { SortableImageCard } from "@/components/media-gallery/sortable-image-card";
+import { UploadZone } from "@/components/media-gallery/upload-zone";
+import { CaptionDialog } from "@/components/media-gallery/caption-dialog";
 
 export default function AlbumDetailPage() {
   const params = useParams();
@@ -176,83 +179,83 @@ export default function AlbumDetailPage() {
   };
 
   return (
-    <div className="w-full h-full p-4 md:p-8 space-y-6 max-w-7xl mx-auto">
-      {/* Back + Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <Link href="/media-gallery">
-            <Button variant="ghost" size="icon" className="h-9 w-9">
-              <ArrowLeft className="w-4 h-4" />
-            </Button>
-          </Link>
-          <PageHeader
-            icon={ImageIcon}
-            title={loading ? "Loading…" : (album?.title ?? "Album")}
-            description={album?.description ?? `${images.length} images`}
-          />
-        </div>
-
-        {/* Action Buttons */}
-        {!loading && images.length > 0 && (
-          <div className="flex items-center gap-2">
-            {isSelectionMode ? (
-              <>
-                <span className="text-sm font-medium text-gray-600 mr-2">
-                  {selectedImageIds.size} selected
-                </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={
-                    selectedImageIds.size === images.length
-                      ? clearSelection
-                      : selectAll
-                  }
-                >
-                  {selectedImageIds.size === images.length ? (
-                    <XSquare className="w-4 h-4 mr-2" />
+    <EcosystemWrapper>
+      <EcosystemHeader
+        title={loading ? "Loading…" : (album?.title ?? "Album")}
+        description={album?.description ?? `${images.length} images`}
+        badgeText="Album"
+        icon={ImageIcon}
+        breadcrumbs={[
+          { label: "Media Gallery", href: "/media-gallery" },
+          { label: loading ? "Loading..." : (album?.title ?? "Album") }
+        ]}
+        actions={
+          <EcosystemActionBar shadow="none" className="p-0 border-none bg-transparent gap-2">
+            <EcosystemActionBar.Group align="right">
+              {!loading && images.length > 0 && (
+                <>
+                  {isSelectionMode ? (
+                    <>
+                      <span className="text-sm font-medium text-gray-600 mr-2">
+                        {selectedImageIds.size} selected
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={
+                          selectedImageIds.size === images.length
+                            ? clearSelection
+                            : selectAll
+                        }
+                      >
+                        {selectedImageIds.size === images.length ? (
+                          <XSquare className="w-4 h-4 mr-2" />
+                        ) : (
+                          <CheckSquare className="w-4 h-4 mr-2" />
+                        )}
+                        {selectedImageIds.size === images.length
+                          ? "Clear"
+                          : "Select All"}
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => setShowBulkDeleteDialog(true)}
+                        disabled={selectedImageIds.size === 0}
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Delete Selected
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setIsSelectionMode(false);
+                          clearSelection();
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    </>
                   ) : (
-                    <CheckSquare className="w-4 h-4 mr-2" />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsSelectionMode(true)}
+                    >
+                      <CheckSquare className="w-4 h-4 mr-2" />
+                      Select
+                    </Button>
                   )}
-                  {selectedImageIds.size === images.length
-                    ? "Clear"
-                    : "Select All"}
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => setShowBulkDeleteDialog(true)}
-                  disabled={selectedImageIds.size === 0}
-                >
-                  <Trash2 className="w-4 h-4 mr-2" />
-                  Delete Selected
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setIsSelectionMode(false);
-                    clearSelection();
-                  }}
-                >
-                  Cancel
-                </Button>
-              </>
-            ) : (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsSelectionMode(true)}
-              >
-                <CheckSquare className="w-4 h-4 mr-2" />
-                Select
-              </Button>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Image Grid */}
+                </>
+              )}
+            </EcosystemActionBar.Group>
+          </EcosystemActionBar>
+        }
+      />
+      <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0 space-y-6">
+        <div className="px-6 py-4 space-y-6">
+          {/* Image Grid */}
       {loading ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
           {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -385,6 +388,8 @@ export default function AlbumDetailPage() {
         open={!!commentImageId}
         onClose={() => setCommentImageId(null)}
       />
-    </div>
+        </div>
+      </EcosystemContainer>
+    </EcosystemWrapper>
   );
 }

@@ -1,7 +1,10 @@
 "use client";
 
 import React from "react";
-import { AdminTable, AdminStatusBadge } from "@/components/shared/admin-table/admin-table";
+import {
+  AdminTable,
+  AdminStatusBadge,
+} from "@/components/shared/admin-table/admin-table";
 import { Pencil, Award, Zap, Coins } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -26,8 +29,8 @@ export function BadgeList({
 }: BadgeListProps) {
   const [toggleBadge, { loading: toggling }] = useToggleBadge({
     onCompleted: () => {
-       refetchBadges();
-       toast.success("Badge status updated");
+      refetchBadges();
+      toast.success("Badge status updated");
     },
     onError: (err) => toast.error(err.message),
   });
@@ -68,12 +71,15 @@ export function BadgeList({
         const moduleInfo = getModuleInfo(badge.module);
         return moduleInfo ? (
           <div className="flex items-center gap-2 group">
-             <div className="h-6 w-6 rounded flex items-center justify-center bg-muted/60 border border-border/50 group-hover:bg-indigo-50 group-hover:border-indigo-100 transition-colors">
-               {renderModuleIcon(moduleInfo.icon, "h-3 w-3 text-muted-foreground group-hover:text-indigo-600")}
-             </div>
-             <span className="text-[11px] font-bold text-foreground">
-               {moduleInfo.name}
-             </span>
+            <div className="h-6 w-6 rounded flex items-center justify-center bg-muted/60 border border-border/50 group-hover:bg-indigo-50 group-hover:border-indigo-100 transition-colors">
+              {renderModuleIcon(
+                moduleInfo.icon,
+                "h-3 w-3 text-muted-foreground group-hover:text-indigo-600",
+              )}
+            </div>
+            <span className="text-[11px] font-bold text-foreground">
+              {moduleInfo.name}
+            </span>
           </div>
         ) : (
           <div className="flex items-center gap-1.5 px-2 py-0.5 bg-blue-50 border border-blue-100 rounded text-[10px] font-black text-blue-700 uppercase tracking-widest">
@@ -89,26 +95,32 @@ export function BadgeList({
         const isAction = badge.type === "ACTION";
         return (
           <div className="flex items-center gap-2">
-             <div className={isAction ? "text-amber-500" : "text-emerald-500"}>
-                {isAction ? <Zap className="h-3.5 w-3.5" /> : <Coins className="h-3.5 w-3.5" />}
-             </div>
-             <div className="flex flex-col">
-               <span className="text-[11px] font-black text-foreground uppercase tracking-tight">
-                 {isAction ? 
-                   (badge.condition?.action || badge.action || "").replace(/_/g, " ") : 
-                   "Threshold Points"
-                 }
-               </span>
-               <span className="text-[9px] text-muted-foreground font-bold font-mono">
-                 REQUIREMENT: {isAction ? 
-                   (badge.condition?.count || badge.targetValue) : 
-                   `${(badge.condition?.pointsRequired || badge.targetValue)?.toLocaleString()} PTS`
-                 }
-               </span>
-             </div>
+            <div className={isAction ? "text-amber-500" : "text-emerald-500"}>
+              {isAction ? (
+                <Zap className="h-3.5 w-3.5" />
+              ) : (
+                <Coins className="h-3.5 w-3.5" />
+              )}
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[11px] font-black text-foreground uppercase tracking-tight">
+                {isAction
+                  ? (badge.condition?.action || badge.action || "").replace(
+                      /_/g,
+                      " ",
+                    )
+                  : "Threshold Points"}
+              </span>
+              <span className="text-[9px] text-muted-foreground font-bold font-mono">
+                REQUIREMENT:{" "}
+                {isAction
+                  ? badge.condition?.count || badge.targetValue
+                  : `${(badge.condition?.pointsRequired || badge.targetValue)?.toLocaleString()} PTS`}
+              </span>
+            </div>
           </div>
         );
-      }
+      },
     },
     {
       key: "status",
@@ -122,7 +134,7 @@ export function BadgeList({
             className="scale-90 data-[state=checked]:bg-emerald-500"
           />
           <AdminStatusBadge status={badge.isActive ? "APPROVED" : "PENDING"}>
-             {badge.isActive ? "Active" : "Disabled"}
+            {badge.isActive ? "Active" : "Disabled"}
           </AdminStatusBadge>
         </div>
       ),
@@ -148,12 +160,12 @@ export function BadgeList({
 
   return (
     <AdminTable
-       columns={columns}
-       data={badges || []}
-       loading={isLoading}
-       keyExtractor={(badge) => badge.id}
-       emptyTitle="No badges defined"
-       emptyDescription="Badges motivate community participation. Create your first credential to reward member loyalty."
+      columns={columns}
+      data={badges || []}
+      loading={isLoading}
+      keyExtractor={(badge) => badge.id}
+      emptyTitle="No badges defined"
+      emptyDescription="Badges motivate community participation. Create your first credential to reward member loyalty."
     />
   );
 }

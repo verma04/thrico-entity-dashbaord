@@ -24,13 +24,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import {
-  Camera,
-  Calendar,
-  MapPin,
-  ChevronRight,
-  Info,
-} from "lucide-react";
+import { Camera, Calendar, MapPin, ChevronRight, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import GooglePlacesInput from "@/components/layout/google-place-input";
 
@@ -75,7 +69,9 @@ export function EventsCreationForm({
   const moduleName = useModuleStore((state) => state.eventModuleName);
   const singularName = useModuleStore((state) => state.eventSingularName);
   const { toast } = useToast();
-  const [imageUrl, setImageUrl] = useState<string | null>(initialCoverUrl || null);
+  const [imageUrl, setImageUrl] = useState<string | null>(
+    initialCoverUrl || null,
+  );
   const [cropModalVisible, setCropModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
@@ -136,27 +132,6 @@ export function EventsCreationForm({
     <FormikProvider value={formik}>
       <>
         <div className="flex flex-col h-full bg-background overflow-hidden rounded-t-[inherit]">
-          {/* Header section - Sticky */}
-          <div className="sticky top-0 z-30 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 border-b px-6 py-4">
-            <div className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div>
-                <div className="flex items-center gap-3 mb-1">
-                  <div className="p-2.5 rounded-xl bg-primary/10 ring-1 ring-primary/20">
-                    <Calendar className="h-5 w-5 text-primary" />
-                  </div>
-                  <h1 className="text-2xl font-bold tracking-tight">
-                    {headerTitle}
-                  </h1>
-                </div>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground ml-1">
-                  <span>{moduleName}</span>
-                  <ChevronRight className="h-3 w-3" />
-                  <span>Create New {singularName}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
           {/* Main Content Area - Scrollable */}
           <div className="flex-1 overflow-y-auto">
             <div className="max-w-7xl mx-auto px-6 py-8">
@@ -166,21 +141,31 @@ export function EventsCreationForm({
                     {/* Basic Info */}
                     <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden">
                       <CardHeader className="bg-muted/30 pb-4">
-                        <CardTitle className="text-xl">Basic Information</CardTitle>
+                        <CardTitle className="text-xl">
+                          Basic Information
+                        </CardTitle>
                         <CardDescription>
-                          Essential details about your {singularName.toLowerCase()}
+                          Essential details about your{" "}
+                          {singularName.toLowerCase()}
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="pt-6 space-y-6">
                         {/* Cover Image Section */}
                         <div className="space-y-3">
-                          <Label className="text-sm font-medium">Cover Image</Label>
+                          <Label className="text-sm font-medium">
+                            Cover Image
+                          </Label>
                           <div
                             className={cn(
                               "relative group rounded-xl overflow-hidden border-2 border-dashed transition-all cursor-pointer",
-                              imageUrl ? "border-transparent" : "border-muted-foreground/25 hover:border-primary/50 bg-muted/30"
+                              imageUrl
+                                ? "border-transparent"
+                                : "border-muted-foreground/25 hover:border-primary/50 bg-muted/30",
                             )}
-                            onClick={() => !imageUrl && document.getElementById("cover-upload")?.click()}
+                            onClick={() =>
+                              !imageUrl &&
+                              document.getElementById("cover-upload")?.click()
+                            }
                           >
                             {imageUrl ? (
                               <>
@@ -199,7 +184,9 @@ export function EventsCreationForm({
                                     className="gap-2 shadow-lg"
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      document.getElementById("cover-upload")?.click();
+                                      document
+                                        .getElementById("cover-upload")
+                                        ?.click();
                                     }}
                                   >
                                     <Camera className="h-4 w-4" />
@@ -234,7 +221,10 @@ export function EventsCreationForm({
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div className="space-y-2">
-                            <Label htmlFor="title" className="text-sm font-medium">
+                            <Label
+                              htmlFor="title"
+                              className="text-sm font-medium"
+                            >
                               {singularName} Title{" "}
                               <span className="text-destructive">*</span>
                             </Label>
@@ -262,7 +252,8 @@ export function EventsCreationForm({
                               htmlFor="location"
                               className="text-sm font-medium"
                             >
-                              Location <span className="text-destructive">*</span>
+                              Location{" "}
+                              <span className="text-destructive">*</span>
                             </Label>
                             <div className="relative">
                               <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground z-10" />
@@ -295,11 +286,12 @@ export function EventsCreationForm({
                                 }
                               />
                             </div>
-                            {formik.touched.location && formik.errors.location && (
-                              <p className="text-xs text-destructive">
-                                {String(formik.errors.location)}
-                              </p>
-                            )}
+                            {formik.touched.location &&
+                              formik.errors.location && (
+                                <p className="text-xs text-destructive">
+                                  {String(formik.errors.location)}
+                                </p>
+                              )}
                           </div>
                         </div>
 
@@ -332,7 +324,8 @@ export function EventsCreationForm({
                               </p>
                             )}
                           <p className="text-[11px] text-muted-foreground text-right italic">
-                            {formik.values.description.length} characters (min 50)
+                            {formik.values.description.length} characters (min
+                            50)
                           </p>
                         </div>
                       </CardContent>
@@ -341,7 +334,9 @@ export function EventsCreationForm({
                     {/* Event Details */}
                     <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden">
                       <CardHeader className="bg-muted/30 pb-4">
-                        <CardTitle className="text-xl">{singularName} Details</CardTitle>
+                        <CardTitle className="text-xl">
+                          {singularName} Details
+                        </CardTitle>
                         <CardDescription>
                           Date, time, and type of {singularName.toLowerCase()}
                         </CardDescription>
@@ -353,7 +348,8 @@ export function EventsCreationForm({
                               htmlFor="startDate"
                               className="text-sm font-medium"
                             >
-                              Start Date <span className="text-destructive">*</span>
+                              Start Date{" "}
+                              <span className="text-destructive">*</span>
                             </Label>
                             <Input
                               id="startDate"
@@ -369,7 +365,8 @@ export function EventsCreationForm({
                               htmlFor="endDate"
                               className="text-sm font-medium"
                             >
-                              End Date <span className="text-destructive">*</span>
+                              End Date{" "}
+                              <span className="text-destructive">*</span>
                             </Label>
                             <Input
                               id="endDate"
@@ -385,7 +382,8 @@ export function EventsCreationForm({
                               htmlFor="startTime"
                               className="text-sm font-medium"
                             >
-                              Start Time <span className="text-destructive">*</span>
+                              Start Time{" "}
+                              <span className="text-destructive">*</span>
                             </Label>
                             <Input
                               id="startTime"
@@ -400,8 +398,12 @@ export function EventsCreationForm({
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div className="space-y-2">
-                            <Label htmlFor="type" className="text-sm font-medium">
-                              {singularName} Type <span className="text-destructive">*</span>
+                            <Label
+                              htmlFor="type"
+                              className="text-sm font-medium"
+                            >
+                              {singularName} Type{" "}
+                              <span className="text-destructive">*</span>
                             </Label>
                             <Select
                               onValueChange={(value) =>
@@ -417,10 +419,14 @@ export function EventsCreationForm({
                                     "border-destructive",
                                 )}
                               >
-                                <SelectValue placeholder={`Select ${singularName.toLowerCase()} type`} />
+                                <SelectValue
+                                  placeholder={`Select ${singularName.toLowerCase()} type`}
+                                />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="in_person">In Person</SelectItem>
+                                <SelectItem value="in_person">
+                                  In Person
+                                </SelectItem>
                                 <SelectItem value="virtual">Virtual</SelectItem>
                                 <SelectItem value="hybrid">Hybrid</SelectItem>
                               </SelectContent>
@@ -451,17 +457,27 @@ export function EventsCreationForm({
                         </div>
 
                         <div className="space-y-2">
-                          <Label htmlFor="isActive" className="text-sm font-medium">
+                          <Label
+                            htmlFor="isActive"
+                            className="text-sm font-medium"
+                          >
                             Active Status
                           </Label>
                           <div className="flex items-center space-x-2 mt-2">
                             <Switch
                               id="isActive"
                               checked={formik.values.isActive}
-                              onCheckedChange={(checked) => formik.setFieldValue("isActive", checked)}
+                              onCheckedChange={(checked) =>
+                                formik.setFieldValue("isActive", checked)
+                              }
                             />
-                            <Label htmlFor="isActive" className="text-sm text-muted-foreground">
-                              {formik.values.isActive ? `${singularName} is Active` : `${singularName} is Inactive`}
+                            <Label
+                              htmlFor="isActive"
+                              className="text-sm text-muted-foreground"
+                            >
+                              {formik.values.isActive
+                                ? `${singularName} is Active`
+                                : `${singularName} is Inactive`}
                             </Label>
                           </div>
                         </div>
@@ -474,7 +490,9 @@ export function EventsCreationForm({
                 <div className="lg:col-span-4">
                   <div className="sticky top-6 space-y-6">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-lg font-bold">{singularName} Preview</h3>
+                      <h3 className="text-lg font-bold">
+                        {singularName} Preview
+                      </h3>
                       <Badge
                         variant="outline"
                         className="bg-green-500/5 text-green-600 border-green-500/20"
@@ -486,7 +504,9 @@ export function EventsCreationForm({
                     <EventPreview
                       eventData={{
                         ...formik.values,
-                        location: formik.values.location ? { name: formik.values.location } : undefined,
+                        location: formik.values.location
+                          ? { name: formik.values.location }
+                          : undefined,
                       }}
                       coverImage={imageUrl || undefined}
                     />
@@ -503,25 +523,29 @@ export function EventsCreationForm({
                           <li className="flex gap-2">
                             <span className="text-primary font-bold">•</span>
                             <span>
-                              Choose a clear, descriptive title for your {singularName.toLowerCase()}.
+                              Choose a clear, descriptive title for your{" "}
+                              {singularName.toLowerCase()}.
                             </span>
                           </li>
                           <li className="flex gap-2">
                             <span className="text-primary font-bold">•</span>
                             <span>
-                              Upload a high-quality cover image to attract attendees.
+                              Upload a high-quality cover image to attract
+                              attendees.
                             </span>
                           </li>
                           <li className="flex gap-2">
                             <span className="text-primary font-bold">•</span>
                             <span>
-                              Provide a detailed description of what attendees can expect.
+                              Provide a detailed description of what attendees
+                              can expect.
                             </span>
                           </li>
                           <li className="flex gap-2">
                             <span className="text-primary font-bold">•</span>
                             <span>
-                              Double-check your date, time, and location settings.
+                              Double-check your date, time, and location
+                              settings.
                             </span>
                           </li>
                         </ul>
@@ -546,7 +570,7 @@ export function EventsCreationForm({
             />
           )}
         </div>
-        
+
         <FloatingSavePanel
           hasChanged={formik.dirty}
           saved={false}

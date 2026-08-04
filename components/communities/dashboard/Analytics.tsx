@@ -27,12 +27,8 @@ import {
 import { ResponsiveContainer, Tooltip, Cell, PieChart, Pie } from "recharts";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
-import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
-import {
-  EcosystemKPI,
-  EcosystemCard,
-} from "@/components/layout/ecosystem/ecosystem-analytics";
+import { EcosystemKPI } from "@/components/layout/ecosystem/ecosystem-analytics";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { subDays } from "date-fns";
@@ -42,6 +38,7 @@ import moment from "moment";
 import { AccessDeniedAlert } from "@/components/shared/access-denied-alert";
 import { useModuleStore } from "@/store/useModuleStore";
 import { getPreferredMediaUrl } from "@/lib/media-utils";
+import { EcosystemCard } from "@/components/layout/ecosystem/ecosystem-card";
 
 const STATUS_COLORS = ["#18181b", "#3f3f46", "#71717a", "#a1a1aa", "#e4e4e7"];
 
@@ -108,22 +105,33 @@ export default function CommunitiesAnalytics() {
           description="Check your growth, members, and health."
           badgeText="Overview"
           icon={Users2}
-        />
-
-        <EcosystemActionBar shadow="none">
-          <div className="flex items-center justify-between w-full opacity-50 pointer-events-none">
-            <div className="flex items-center gap-2 px-1">
-              <ShieldCheck className="h-4 w-4 text-emerald-500" />
-              <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground italic">
-                Verified Node
-              </span>
-            </div>
-
+          actions={
             <div className="flex items-center gap-3">
               <DateRangePicker
                 date={dateRange}
                 onDateChange={() => {}}
                 defaultValue="LAST_7_DAYS"
+                actions={
+                  <div className="flex items-center gap-3">
+                    <DateRangePicker
+                      date={dateRange}
+                      onDateChange={handleDateChange}
+                      defaultValue="LAST_7_DAYS"
+                    />
+                    <div className="h-4 w-px bg-muted mx-1" />
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-9 w-9 text-muted-foreground hover:text-indigo-600 rounded-lg transition-all"
+                      onClick={() => refetch()}
+                    >
+                      <RotateCcw
+                        size={14}
+                        className={cn(loading && "animate-spin")}
+                      />
+                    </Button>
+                  </div>
+                }
               />
               <div className="h-4 w-px bg-muted mx-1" />
               <Button
@@ -135,10 +143,10 @@ export default function CommunitiesAnalytics() {
                 <RotateCcw size={14} />
               </Button>
             </div>
-          </div>
-        </EcosystemActionBar>
+          }
+        />
 
-        <EcosystemContainer className="p-6 lg:p-8">
+        <EcosystemContainer className="">
           <div className="max-w-3xl">
             <EcosystemCard
               title="Access Restricted"
@@ -217,34 +225,6 @@ export default function CommunitiesAnalytics() {
         badgeText="Overview"
         icon={Users2}
       />
-
-      <EcosystemActionBar shadow="none">
-        <div className="flex items-center justify-between w-full">
-          <div className="flex items-center gap-2 px-1">
-            <ShieldCheck className="h-4 w-4 text-emerald-500" />
-            <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground italic">
-              Verified Node
-            </span>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <DateRangePicker
-              date={dateRange}
-              onDateChange={handleDateChange}
-              defaultValue="LAST_7_DAYS"
-            />
-            <div className="h-4 w-px bg-muted mx-1" />
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-9 w-9 text-muted-foreground hover:text-indigo-600 rounded-lg transition-all"
-              onClick={() => refetch()}
-            >
-              <RotateCcw size={14} className={cn(loading && "animate-spin")} />
-            </Button>
-          </div>
-        </div>
-      </EcosystemActionBar>
 
       <EcosystemContainer className="p-6 lg:p-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

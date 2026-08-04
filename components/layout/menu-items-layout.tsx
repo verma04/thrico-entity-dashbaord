@@ -43,11 +43,11 @@ function TabButton({
     <button
       onClick={item.locked ? undefined : onClick}
       className={cn(
-        "group/tab relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12.5px] font-medium transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/50 whitespace-nowrap",
+        "group/tab relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12.5px] font-medium transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-primary/50 whitespace-nowrap",
         item.locked
           ? "cursor-not-allowed opacity-50 text-muted-foreground bg-transparent"
           : isActive
-            ? "text-indigo-700 bg-primary/5"
+            ? "text-primary bg-primary/5"
             : "text-muted-foreground hover:text-foreground hover:bg-muted/30",
         fullWidth && "w-full justify-center",
       )}
@@ -68,7 +68,7 @@ function TabButton({
           item.locked
             ? "text-muted-foreground/60"
             : isActive
-              ? "text-indigo-700"
+              ? "text-primary"
               : "text-muted-foreground group-hover/tab:text-foreground",
         )}
       >
@@ -116,7 +116,7 @@ function MenuTabs({
   onClose: () => void;
 }) {
   return (
-    <nav className="sticky top-0 z-10 bg-background/60 backdrop-blur-xl border-b border-border/50">
+    <nav className="sticky top-0 z-10 bg-white backdrop-blur-xl   border-b border-border/50">
       <div className={cn("px-6 relative", !fullWidth && "max-w-7xl mx-auto")}>
         <div className="flex h-14 items-center gap-1 overflow-x-auto no-scrollbar">
           {sortedSectionNames.map((sectionName, sIdx) => (
@@ -178,8 +178,8 @@ function MenuPage({
     <main
       className={cn(
         "flex-1 min-w-0 min-h-0 flex flex-col w-full",
-        !fullWidth && "max-w-7xl mx-auto px-6",
-        !fullHeight && "py-4 lg:py-6",
+        !fullWidth && "max-w-7xl mx-auto ",
+        !fullHeight && "",
       )}
     >
       <div
@@ -309,7 +309,7 @@ const MenuItemsLayout = ({
   return (
     <div
       className={cn(
-        "bg-background text-foreground flex flex-col w-full",
+        "bg-background text-foreground flex flex-col w-full mt-2  bg-[#f9f9f9] dark:border-neutral-800",
         fixed
           ? "fixed inset-0 z-20 bg-background h-screen w-screen overflow-hidden"
           : fullHeight

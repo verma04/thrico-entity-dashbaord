@@ -152,21 +152,6 @@ export default function EmailDashboard() {
         </div>
       )}
 
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-semibold tracking-tight text-foreground">Email Campaigns</h1>
-          <p className="text-xs text-muted-foreground mt-0.5">Overview of your email communications.</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => router.push("/email/usage")} className="h-9 rounded-lg text-xs">
-            Usage Analytics
-          </Button>
-          <Button size="sm" onClick={() => router.push("/email/send")} className="h-9 rounded-lg gap-2 text-xs">
-            <Send className="h-3.5 w-3.5" /> New Campaign
-          </Button>
-        </div>
-      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Main Content */}

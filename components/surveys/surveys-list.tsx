@@ -4,23 +4,10 @@ import { useEffect, useState } from "react";
 import moment from "moment";
 import { useGetSurveys, Survey } from "@/graphql/surveys/survey-queries";
 import { toast } from "sonner";
-import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
-import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
-import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
-import {
-  ClipboardList,
-  Sparkles,
-  Filter,
-  Search,
-  PlusCircle,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { subDays } from "date-fns";
 import { DateRange } from "react-day-picker";
-import Link from "next/link";
 import NewForm from "../feedback-form/new-feed-back-form";
 import {
   useDeleteSurvey,
@@ -40,6 +27,7 @@ export function SurveysList({
 }: {
   shareSurveyAsFeed?: boolean;
 }) {
+  const moduleName = useModuleStore((state) => state.surveyModuleName);
   const singularName = useModuleStore((state) => state.surveySingularName);
   const [surveyToDelete, setSurveyToDelete] = useState<string | null>(null);
   const [editingDetailsSurvey, setEditingDetailsSurvey] =
@@ -68,7 +56,9 @@ export function SurveysList({
       setShareDescription("");
     },
     onError: (error) => {
-      toast.error(error.message || `Failed to share ${singularName.toLowerCase()}`);
+      toast.error(
+        error.message || `Failed to share ${singularName.toLowerCase()}`,
+      );
     },
   });
 
@@ -93,7 +83,9 @@ export function SurveysList({
       setSurveyToDelete(null);
     },
     onError: (error) => {
-      toast.error(error.message || `Failed to delete ${singularName.toLowerCase()}`);
+      toast.error(
+        error.message || `Failed to delete ${singularName.toLowerCase()}`,
+      );
     },
   });
 
@@ -103,7 +95,9 @@ export function SurveysList({
       setEditingDetailsSurvey(null);
     },
     onError: (error) => {
-      toast.error(error.message || `Failed to update ${singularName.toLowerCase()}`);
+      toast.error(
+        error.message || `Failed to update ${singularName.toLowerCase()}`,
+      );
     },
   });
 
@@ -112,7 +106,9 @@ export function SurveysList({
       toast.success(`${singularName} published successfully`);
     },
     onError: (error) => {
-      toast.error(error.message || `Failed to publish ${singularName.toLowerCase()}`);
+      toast.error(
+        error.message || `Failed to publish ${singularName.toLowerCase()}`,
+      );
     },
   });
 
@@ -121,7 +117,10 @@ export function SurveysList({
       toast.success(`${singularName} moved to draft successfully`);
     },
     onError: (error) => {
-      toast.error(error.message || `Failed to move ${singularName.toLowerCase()} to draft`);
+      toast.error(
+        error.message ||
+          `Failed to move ${singularName.toLowerCase()} to draft`,
+      );
     },
   });
 
@@ -167,7 +166,7 @@ export function SurveysList({
 
   return (
     <>
-      <div className="">
+      <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0 mt-4">
         <SurveysTable
           surveys={surveys}
           loading={loading}
@@ -180,12 +179,12 @@ export function SurveysList({
           onShare={setSharingSurvey}
           shareSurveyAsFeed={shareSurveyAsFeed}
         />
-      </div>
-      {error && (
-        <div className="p-4 rounded-lg bg-rose-50 text-rose-600 text-xs font-bold uppercase tracking-tight border border-rose-100 shadow-sm mt-4">
-          Synchronization error: Failed to retrieve interaction registry.
-        </div>
-      )}
+        {error && (
+          <div className="p-4 rounded-lg bg-rose-50 text-rose-600 text-xs font-bold uppercase tracking-tight border border-rose-100 shadow-sm mt-4">
+            Synchronization error: Failed to retrieve interaction registry.
+          </div>
+        )}
+      </EcosystemContainer>
 
       <SurveySheet
         survey={editingDetailsSurvey}

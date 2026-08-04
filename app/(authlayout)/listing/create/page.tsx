@@ -8,6 +8,10 @@ import { useToast } from "@/components/ui/use-toast";
 import { withModulePermission } from "@/components/hoc/with-module-permission";
 import { useModuleStore } from "@/store/useModuleStore";
 
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { Store } from "lucide-react";
+
 const CreateListingPage = () => {
   const singularName = useModuleStore((state) => state.listingSingularName);
   const router = useRouter();
@@ -53,14 +57,26 @@ const CreateListingPage = () => {
   };
 
   return (
-    <div className="h-full overflow-hidden">
-      <ListingCreationForm
-        initialValues={{}}
-        loading={loading}
-        onFinish={onFinish}
-        onCancel={onCancel}
+    <EcosystemWrapper>
+      <EcosystemHeader
+        title={`Create ${singularName}`}
+        badgeText="New"
+        description={`Add a new ${singularName.toLowerCase()} to the marketplace.`}
+        icon={Store}
+        breadcrumbs={[
+          { label: "Marketplace", href: "/listing/all" },
+          { label: "Create" }
+        ]}
       />
-    </div>
+      <div className="flex-1 overflow-auto bg-background/50 p-6">
+        <ListingCreationForm
+          initialValues={{}}
+          loading={loading}
+          onFinish={onFinish}
+          onCancel={onCancel}
+        />
+      </div>
+    </EcosystemWrapper>
   );
 };
 

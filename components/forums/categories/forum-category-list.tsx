@@ -29,13 +29,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import {
   ChevronLeft,
@@ -192,43 +185,49 @@ export default function List({
         badgeText="Organization"
         description={`Manage and organize your ${moduleName.toLowerCase()} categories.`}
         icon={Tags}
-        actions={
-          <div className="flex items-center gap-3 relative ml-auto pr-2">
-            <Add />
-            <div className="flex items-center gap-2.5 px-4 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs font-semibold text-slate-600 uppercase tracking-wide whitespace-nowrap shadow-inner">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              {data?.length || 0} Categories
-            </div>
-          </div>
-        }
+        breadcrumbs={[
+          { label: moduleName, href: "/forums" },
+          { label: "Categories" }
+        ]}
       />
 
       <EcosystemActionBar>
-        <div className="relative w-full md:max-w-[400px] group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
-          <Input
-            placeholder="Search categories..."
-            value={globalFilter ?? ""}
-            onChange={(e) => setGlobalFilter(e.target.value)}
-            className="pl-12 h-12 bg-slate-50 border-slate-200 rounded-xl focus-visible:ring-4 focus-visible:ring-indigo-500/5 transition-all font-medium text-slate-700 placeholder:text-slate-400 border shadow-sm"
-          />
-        </div>
+        <EcosystemActionBar.Group>
+          <EcosystemActionBar.Item grow className="max-w-xs">
+            <EcosystemActionBar.Search
+              value={globalFilter ?? ""}
+              onChange={setGlobalFilter}
+              placeholder="Search categories..."
+            />
+          </EcosystemActionBar.Item>
+        </EcosystemActionBar.Group>
 
-        <div className="flex items-center gap-4 pr-4 ml-auto">
-          <Select
-            value={activeStatus}
-            onValueChange={handleStatusChange}
-          >
-            <SelectTrigger className="w-[180px] h-12 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition-colors shadow-sm font-semibold text-slate-600 focus:ring-4 focus:ring-indigo-500/5 hidden md:flex">
-              <SelectValue placeholder="Status Filter" />
-            </SelectTrigger>
-            <SelectContent className="rounded-xl border-slate-200 shadow-xl p-1">
-              <SelectItem value="all" className="font-semibold rounded-lg py-2.5"><div className="flex items-center gap-2"><ListIcon className="h-4 w-4"/>All</div></SelectItem>
-              <SelectItem value="active" className="font-semibold rounded-lg py-2.5"><div className="flex items-center gap-2"><CheckCircle className="h-4 w-4"/>Active</div></SelectItem>
-              <SelectItem value="in-active" className="font-semibold rounded-lg py-2.5"><div className="flex items-center gap-2"><StopCircle className="h-4 w-4"/>Inactive</div></SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        <EcosystemActionBar.Separator />
+
+        <EcosystemActionBar.Group>
+          <EcosystemActionBar.Item>
+            <EcosystemActionBar.Select
+              value={activeStatus}
+              onValueChange={handleStatusChange}
+              options={[
+                { value: "all", label: "All", icon: ListIcon },
+                { value: "active", label: "Active", icon: CheckCircle },
+                { value: "in-active", label: "Inactive", icon: StopCircle },
+              ]}
+              placeholder="Status Filter"
+              className="hidden md:flex"
+            />
+          </EcosystemActionBar.Item>
+        </EcosystemActionBar.Group>
+
+        <EcosystemActionBar.Group align="right">
+          <EcosystemActionBar.Item>
+            <Add />
+          </EcosystemActionBar.Item>
+          <EcosystemActionBar.Status active={(data || []).length > 0}>
+            {data?.length || 0} Categories
+          </EcosystemActionBar.Status>
+        </EcosystemActionBar.Group>
       </EcosystemActionBar>
 
       <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">

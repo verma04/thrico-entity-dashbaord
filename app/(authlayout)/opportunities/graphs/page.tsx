@@ -16,6 +16,10 @@ const OpportunitiesGraphsPage = () => {
         description="Visualize the connections between opportunities, creators, and required skills."
         badgeText="Graph View"
         icon={Network}
+        breadcrumbs={[
+          { label: "Opportunities", href: "/opportunities/all" },
+          { label: "Graph View" }
+        ]}
       />
       <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0 mt-4">
         <OpportunitiesGraphView />

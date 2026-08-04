@@ -7,6 +7,10 @@ import { CommunityCreationForm } from "@/components/communities/add/community-cr
 import { useToast } from "@/components/ui/use-toast";
 import { useModuleStore } from "@/store/useModuleStore";
 
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { Users } from "lucide-react";
+
 const CreateCommunityPage = () => {
   const router = useRouter();
   const { toast } = useToast();
@@ -45,21 +49,33 @@ const CreateCommunityPage = () => {
   };
 
   return (
-    <div className="h-full overflow-hidden">
-      <CommunityCreationForm
-        initialValues={{
-          requireAdminApprovalForPosts: false,
-          allowMemberInvites: false,
-          enableEvents: false,
-          enableRatingsAndReviews: false,
-        }}
-        loading={loading}
-        onFinish={onFinish}
-        onCancel={onCancel}
-        cover={cover}
-        setCover={setCover}
+    <EcosystemWrapper>
+      <EcosystemHeader
+        title={`Create ${singularName}`}
+        badgeText="New"
+        description={`Add a new ${singularName.toLowerCase()} to your ecosystem.`}
+        icon={Users}
+        breadcrumbs={[
+          { label: moduleName, href: "/communities/all" },
+          { label: "Create" }
+        ]}
       />
-    </div>
+      <div className="flex-1 overflow-auto bg-background/50 p-6">
+        <CommunityCreationForm
+          initialValues={{
+            requireAdminApprovalForPosts: false,
+            allowMemberInvites: false,
+            enableEvents: false,
+            enableRatingsAndReviews: false,
+          }}
+          loading={loading}
+          onFinish={onFinish}
+          onCancel={onCancel}
+          cover={cover}
+          setCover={setCover}
+        />
+      </div>
+    </EcosystemWrapper>
   );
 };
 

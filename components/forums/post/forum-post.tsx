@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { CtaButton as Button } from "@/components/ui/cta-button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { MessageSquare } from "lucide-react";
 import { ForumPostForm } from "./forum-post-form";
@@ -31,8 +31,8 @@ export default function Post() {
 
   return (
     <>
-      <Button onClick={() => setOpen(true)} className="gap-2">
-        <MessageSquare className="h-4 w-4" />
+      <Button onClick={() => setOpen(true)} className="gap-1.5">
+        <MessageSquare className="h-3.5 w-3.5" />
         Create Post
       </Button>
 

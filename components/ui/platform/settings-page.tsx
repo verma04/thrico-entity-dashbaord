@@ -122,32 +122,6 @@ export function PlatformSettingsPage<T extends Record<string, any>>({
   return (
     <PlatformContainer className="py-0">
       {/* ── Page Header ── */}
-      {!hideHeader && (
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-border ">
-          <div className="flex items-center gap-3 min-w-0">
-            {HeaderIcon && (
-              <div className="w-9 h-9 rounded-xl bg-primary  flex items-center justify-center text-white  shrink-0">
-                <HeaderIcon size={16} strokeWidth={2} />
-              </div>
-            )}
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <h1 className="text-[15px] font-semibold text-foreground  tracking-tight leading-none">
-                  {title}
-                </h1>
-                {badge && (
-                  <span className="px-1.5 py-0.5 rounded-md bg-muted  text-[10px] font-medium text-muted-foreground  uppercase tracking-wide border border-border/60 ">
-                    {badge}
-                  </span>
-                )}
-              </div>
-              <p className="mt-1 text-[12.5px] text-muted-foreground  font-normal leading-snug max-w-md truncate">
-                {description}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
 
       <FloatingSavePanel
         hasChanged={hasChanged}
@@ -158,37 +132,35 @@ export function PlatformSettingsPage<T extends Record<string, any>>({
       />
 
       {/* ── Settings Sections ── */}
-      <div className={cn("max-w-2xl space-y-10", !hideHeader ? "mt-2" : "mt-0")}>
-        {Object.entries(groupedFields).map(([sectionName, sectionFields], si) => (
-          <motion.div
-            key={sectionName}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.25, delay: si * 0.06 }}
-            className="space-y-3"
-          >
-            {/* Section label */}
-            <div className="flex items-center gap-2.5">
-              <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.12em] select-none">
-                {sectionName}
-              </span>
-              <div className="flex-1 h-px bg-muted " />
-            </div>
-
-            {/* Rows */}
-            <div className="rounded-xl border border-border/60  bg-card  overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-800/50">
-              {sectionFields.map((field) => (
-                <SettingRow
-                  key={field.key}
-                  field={field}
-                  value={settings[field.key]}
-                  onChange={(v) => handleChange(field.key, v)}
-                  isDirty={data ? settings[field.key] !== data[field.key] : false}
-                />
-              ))}
-            </div>
-          </motion.div>
-        ))}
+      <div
+        className={cn("max-w-2xl space-y-10", !hideHeader ? "mt-2" : "mt-0")}
+      >
+        {Object.entries(groupedFields).map(
+          ([sectionName, sectionFields], si) => (
+            <motion.div
+              key={sectionName}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.25, delay: si * 0.06 }}
+              className="space-y-3"
+            >
+              {/* Rows */}
+              <div className="rounded-xl border border-border/60  bg-card  overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-800/50">
+                {sectionFields.map((field) => (
+                  <SettingRow
+                    key={field.key}
+                    field={field}
+                    value={settings[field.key]}
+                    onChange={(v) => handleChange(field.key, v)}
+                    isDirty={
+                      data ? settings[field.key] !== data[field.key] : false
+                    }
+                  />
+                ))}
+              </div>
+            </motion.div>
+          ),
+        )}
       </div>
     </PlatformContainer>
   );
@@ -214,7 +186,9 @@ function SettingRow({
     <div
       className={cn(
         "group flex items-center justify-between gap-6 px-5 py-4 transition-colors duration-150",
-        isDirty ? "bg-amber-50/40 dark:bg-amber-900/20" : "hover:bg-muted/50/60 "
+        isDirty
+          ? "bg-amber-50/40 dark:bg-amber-900/20"
+          : "hover:bg-muted/50/60 ",
       )}
     >
       {/* Left: icon + label + description */}
@@ -229,7 +203,9 @@ function SettingRow({
             htmlFor={id}
             className={cn(
               "text-[13.5px] font-medium leading-none cursor-pointer",
-              isDirty ? "text-amber-700 dark:text-amber-500" : "text-foreground "
+              isDirty
+                ? "text-amber-700 dark:text-amber-500"
+                : "text-foreground ",
             )}
           >
             {label}
@@ -259,7 +235,9 @@ function SettingRow({
             type={type}
             value={value ?? ""}
             onChange={(e) =>
-              onChange(type === "number" ? Number(e.target.value) : e.target.value)
+              onChange(
+                type === "number" ? Number(e.target.value) : e.target.value,
+              )
             }
             className="h-8 w-40 text-[13px] rounded-lg border-border  bg-card  focus-visible:ring-1 focus-visible:ring-zinc-300 dark:focus-visible:ring-zinc-700 focus-visible:ring-offset-0 font-medium shadow-none "
             placeholder={`Enter value…`}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import Link from "next/link";
+
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -31,8 +31,13 @@ import {
 } from "@/components/shared/admin-table/admin-table";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { CtaButton } from "@/components/ui/cta-button";
+import { useRouter } from "next/navigation";
 
 export default function RolesTab() {
+  const router = useRouter();
   const { toast } = useToast();
   const { data, loading, refetch } = useGetRoles();
   const [showAddDialog, setShowAddDialog] = useState(false);
@@ -202,11 +207,31 @@ export default function RolesTab() {
   ];
 
   return (
-    <div className="space-y-0">
-      <EcosystemActionBar
-        shadow="none"
-        className="bg-transparent border-none py-2"
-      >
+    <EcosystemWrapper>
+      <EcosystemHeader
+        title="Roles & Permissions"
+        description="Manage workspace roles and their access levels."
+        breadcrumbs={[
+          { label: "Settings", href: "/settings" },
+          { label: "Roles & Permissions" },
+        ]}
+        icon={ShieldCheck}
+        badgeText="Access & RBAC"
+        showLiveIndicator={false}
+        actions={
+          <div className="flex items-center gap-2">
+            <CtaButton onClick={() => router.push("/settings/users/roles/create")}>
+              <Plus className="h-3 w-3" />
+              Add Role
+            </CtaButton>
+          </div>
+        }
+      />
+      <div className="space-y-0">
+        <EcosystemActionBar
+          shadow="none"
+          className="bg-transparent border-none py-2"
+        >
         <EcosystemActionBar.Group grow>
           <EcosystemActionBar.Item grow className="max-w-sm">
             <EcosystemActionBar.Search
@@ -217,17 +242,6 @@ export default function RolesTab() {
           </EcosystemActionBar.Item>
         </EcosystemActionBar.Group>
         <EcosystemActionBar.Group align="right">
-          <EcosystemActionBar.Item>
-            <Link href="/settings/users/roles/create">
-              <Button
-                size="sm"
-                className="h-9 px-5 rounded-xl gap-2 font-medium"
-              >
-                <Plus className="h-4 w-4" />
-                Add Role
-              </Button>
-            </Link>
-          </EcosystemActionBar.Item>
           <EcosystemActionBar.Item>
             <Button
               variant="outline"
@@ -261,6 +275,7 @@ export default function RolesTab() {
         onOpenChange={setShowAddDialog}
         role={selectedRole}
       />
-    </div>
+      </div>
+    </EcosystemWrapper>
   );
 }

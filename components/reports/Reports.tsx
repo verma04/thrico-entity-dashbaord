@@ -22,9 +22,11 @@ import { useModuleStore } from "@/store/useModuleStore";
 export default function Reports({
   preselectedModule,
   canEdit = true,
+  breadcrumbs,
 }: {
   preselectedModule?: ReportModule;
   canEdit?: boolean;
+  breadcrumbs?: { label: string; href?: string }[];
 }) {
   const moduleName = useModuleStore((state) => state.communityModuleName);
 
@@ -61,6 +63,7 @@ export default function Reports({
         badgeText="Safety"
         description="View and manage reported content and users."
         icon={ShieldAlert}
+        breadcrumbs={breadcrumbs}
       />
 
       <EcosystemActionBar shadow="none">

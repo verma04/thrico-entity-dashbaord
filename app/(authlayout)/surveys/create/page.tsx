@@ -11,9 +11,13 @@ import { useToast } from "@/components/ui/use-toast";
 
 import { useAddSurvey } from "@/graphql/surveys/survey-mutations";
 import { useModuleStore } from "@/store/useModuleStore";
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { ClipboardList } from "lucide-react";
 
 const AddSurveyPage = () => {
   const singularName = useModuleStore((state) => state.surveySingularName);
+  const moduleName = useModuleStore((state) => state.surveyModuleName);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -55,13 +59,25 @@ const AddSurveyPage = () => {
   };
 
   return (
-    <div className="h-full overflow-hidden bg-white">
-      <SurveyCreationForm
-        loading={loading}
-        onFinish={onFinish}
-        onCancel={onCancel}
+    <EcosystemWrapper>
+      <EcosystemHeader
+        title={`Create ${singularName}`}
+        badgeText="New"
+        description={`Add a new ${singularName.toLowerCase()} to gather community insights.`}
+        icon={ClipboardList}
+        breadcrumbs={[
+          { label: moduleName, href: "/surveys/all" },
+          { label: "Create" }
+        ]}
       />
-    </div>
+      <div className="flex-1 overflow-auto bg-background/50 p-6">
+        <SurveyCreationForm
+          loading={loading}
+          onFinish={onFinish}
+          onCancel={onCancel}
+        />
+      </div>
+    </EcosystemWrapper>
   );
 };
 

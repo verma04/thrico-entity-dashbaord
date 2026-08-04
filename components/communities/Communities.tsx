@@ -6,7 +6,6 @@ import { getCommunities } from "@/graphql/actions/group";
 import TableLoading from "../layout/table-loading";
 import { motion, AnimatePresence } from "framer-motion";
 import { LayoutGrid, List as ListIcon, Users, RefreshCw } from "lucide-react";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import CommunityCard from "./community-card";
 
@@ -85,6 +84,10 @@ export default function Communities({
             : `Manage and view all ${communities.length} ${moduleName.toLowerCase()}.`
         }
         icon={Users}
+        breadcrumbs={[
+          { label: moduleName, href: "/communities/all" },
+          { label: "All" },
+        ]}
         actions={
           <div className="flex items-center gap-2">
             <Button
@@ -97,30 +100,6 @@ export default function Communities({
                 className={cn("h-3.5 w-3.5", loading && "animate-spin")}
               />
             </Button>
-
-            {/* View toggle */}
-            <Tabs
-              value={view}
-              onValueChange={(val: string) => setView(val as "grid" | "table")}
-              className="bg-muted p-0.5 rounded-lg border border-border"
-            >
-              <TabsList className="bg-transparent border-none h-auto p-0 gap-0.5">
-                <TabsTrigger
-                  value="grid"
-                  className="h-8 px-3 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground transition-all text-xs font-medium"
-                >
-                  <LayoutGrid className="h-3.5 w-3.5 mr-1.5" />
-                  Grid
-                </TabsTrigger>
-                <TabsTrigger
-                  value="table"
-                  className="h-8 px-3 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground transition-all text-xs font-medium"
-                >
-                  <ListIcon className="h-3.5 w-3.5 mr-1.5" />
-                  Table
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
           </div>
         }
       />
@@ -180,6 +159,16 @@ export default function Communities({
         </EcosystemActionBar.Group>
 
         <EcosystemActionBar.Group align="right">
+          <EcosystemActionBar.Item>
+            <EcosystemActionBar.ViewToggle
+              value={view}
+              onChange={(val) => setView(val as "grid" | "table")}
+              options={[
+                { id: "grid", label: "Grid", icon: LayoutGrid },
+                { id: "table", label: "Table", icon: ListIcon },
+              ]}
+            />
+          </EcosystemActionBar.Item>
           <EcosystemActionBar.Status active={filteredCommunities.length > 0}>
             {filteredCommunities.length} {moduleName}
           </EcosystemActionBar.Status>

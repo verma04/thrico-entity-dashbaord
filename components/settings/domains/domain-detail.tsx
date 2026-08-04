@@ -44,6 +44,11 @@ import { DNSProviderGuide } from "./dns-provider-guide";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
+
 // ---------------------------------------------------------------------------
 // Design Tokens
 // ---------------------------------------------------------------------------
@@ -90,26 +95,30 @@ export const DomainDetail = ({ id }: DomainDetailProps) => {
 
   if (error) {
     return (
-      <div className="flex items-start gap-4 p-5 rounded-lg border border-red-200/50 bg-red-50/30">
-        <AlertCircle className="h-4.5 w-4.5 text-red-500 shrink-0 mt-0.5" />
-        <div>
-          <p className="text-[13px] font-bold text-red-900 uppercase tracking-wide">
-            Endpoint error
-          </p>
-          <p className="text-[12px] text-red-600 mt-1 font-medium">{error.message}</p>
+      <EcosystemWrapper>
+        <div className="flex items-start gap-4 p-5 rounded-lg border border-red-200/50 bg-red-50/30">
+          <AlertCircle className="h-4.5 w-4.5 text-red-500 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-[13px] font-bold text-red-900 uppercase tracking-wide">
+              Endpoint error
+            </p>
+            <p className="text-[12px] text-red-600 mt-1 font-medium">{error.message}</p>
+          </div>
         </div>
-      </div>
+      </EcosystemWrapper>
     );
   }
 
   if (loading) {
     return (
-      <div className="max-w-5xl mx-auto py-8 px-6 space-y-8 animate-pulse">
-        <div className="h-12 w-full bg-muted border border-border/50 rounded-lg" />
-        <div className="grid grid-cols-1 gap-6">
-          <div className="h-64 w-full bg-muted border border-border/50 rounded-lg" />
+      <EcosystemWrapper>
+        <div className="max-w-5xl mx-auto py-8 px-6 space-y-8 animate-pulse">
+          <div className="h-12 w-full bg-muted border border-border/50 rounded-lg" />
+          <div className="grid grid-cols-1 gap-6">
+            <div className="h-64 w-full bg-muted border border-border/50 rounded-lg" />
+          </div>
         </div>
-      </div>
+      </EcosystemWrapper>
     );
   }
 
@@ -137,79 +146,62 @@ export const DomainDetail = ({ id }: DomainDetailProps) => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto py-8 px-6 space-y-8 pb-20">
-      {/* Header Section */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 pb-6 border-b border-border/50">
-        <div className="flex items-start gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => router.back()}
-            className="h-9 w-9 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted border border-transparent hover:border-border/50 transition-all"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div className="pt-0.5">
-            <div className="flex items-center gap-3">
-              <h1 className={STYLES.heading}>
-                {domainDetails.domain}
-              </h1>
-              {domainDetails.isVerified ? (
-                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20 text-[10px] font-bold uppercase tracking-widest">
-                  <span className="h-1 w-1 rounded-full bg-emerald-500" />
-                  Active
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20 text-[10px] font-bold uppercase tracking-widest">
-                  <span className="h-1 w-1 rounded-full bg-amber-500 animate-pulse" />
-                  Propagation
-                </span>
+    <EcosystemWrapper>
+      <EcosystemHeader
+        title={domainDetails.domain}
+        description="Manage infrastructure settings for your custom domain."
+        breadcrumbs={[
+          { label: "Settings", href: "/settings" },
+          { label: "Domains", href: "/settings/domains" },
+          { label: domainDetails.domain },
+        ]}
+        icon={Globe}
+        badgeText={domainDetails.isVerified ? "Active" : "Propagation"}
+        showLiveIndicator={false}
+        actions={
+          <EcosystemActionBar shadow="none" className="p-0 border-none bg-transparent gap-2">
+            <EcosystemActionBar.Group align="right">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => refetch()}
+                disabled={loading || checking}
+                className="h-8 w-8 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted border border-transparent hover:border-border/50 transition-all"
+                title="Refresh status"
+              >
+                <RefreshCw className={cn("h-4 w-4", (loading || checking) && "animate-spin")} />
+              </Button>
+
+              {domainDetails?.isVerified && (
+                <>
+                  {domainDetails?.ssl ? (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-background border border-border/50 text-[11px] font-bold text-muted-foreground uppercase tracking-wider h-8">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                      Mutual TLS Managed
+                    </span>
+                  ) : (
+                    <CheckSsl ssl={domainDetails.ssl} />
+                  )}
+                </>
               )}
-            </div>
-            <p className="text-[13px] text-muted-foreground mt-2 font-medium leading-none">
-              Manage infrastructure settings for your custom domain.
-            </p>
-          </div>
-        </div>
 
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => refetch()}
-            disabled={loading || checking}
-            className="h-9 w-9 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted border border-transparent hover:border-border/50 transition-all"
-            title="Refresh status"
-          >
-            <RefreshCw className={cn("h-4 w-4", (loading || checking) && "animate-spin")} />
-          </Button>
+              <Button
+                variant="ghost"
+                onClick={() => setShowDeleteConfirm(true)}
+                disabled={deleting}
+                className="h-8 px-3 text-[11px] font-bold uppercase tracking-wider text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 border border-border/50 shadow-none transition-all"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                Detach Entity
+              </Button>
+            </EcosystemActionBar.Group>
+          </EcosystemActionBar>
+        }
+      />
 
-          {domainDetails?.isVerified && (
-            <>
-              {domainDetails?.ssl ? (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-background border border-border/50 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
-                  Mutual TLS Managed
-                </span>
-              ) : (
-                <CheckSsl ssl={domainDetails.ssl} />
-              )}
-            </>
-          )}
-
-          <Button
-            variant="ghost"
-            onClick={() => setShowDeleteConfirm(true)}
-            disabled={deleting}
-            className="h-9 px-4 text-[11px] font-bold uppercase tracking-wider text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 border border-border/50 shadow-none transition-all"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-            Detach Entity
-          </Button>
-        </div>
-      </div>
-
-      {/* Main Configuration Card */}
+      <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">
+        <div className="px-6 py-8 pb-20">
+          {/* Main Configuration Card */}
       <div className={STYLES.card}>
         {domainDetails.isVerified ? (
           // Verified Infrastructure State
@@ -389,6 +381,8 @@ export const DomainDetail = ({ id }: DomainDetailProps) => {
           </div>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+        </div>
+      </EcosystemContainer>
+    </EcosystemWrapper>
   );
 };

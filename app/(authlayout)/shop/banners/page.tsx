@@ -69,23 +69,26 @@ function BannerManagerPage() {
         badgeText="Marketing Assets"
         description="Manage your store's featured images and marketing carousel."
         icon={ImageIcon}
-        actions={
-          <Button
-            onClick={() => router.push("/shop/banners/create")}
-            className="font-semibold text-xs px-6 h-10 rounded-lg shadow-sm gap-2"
-          >
-            <Plus className="h-4 w-4" /> Add New Banner
-          </Button>
-        }
+        breadcrumbs={[
+          { label: "Marketplace", href: "/shop/all" },
+          { label: "Banners" }
+        ]}
       />
 
       <EcosystemActionBar>
-        <div className="flex items-center gap-2 relative z-10 ml-auto pr-4">
-          <div className="flex items-center gap-2.5 px-4 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs font-semibold text-slate-600 uppercase tracking-wide whitespace-nowrap">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+        <EcosystemActionBar.Group align="right">
+          <EcosystemActionBar.Item>
+            <Button
+              onClick={() => router.push("/shop/banners/create")}
+              className="font-semibold text-xs px-4 h-9 rounded-lg shadow-sm gap-2 bg-indigo-600 hover:bg-indigo-700 text-white"
+            >
+              <Plus className="h-4 w-4" /> Add New Banner
+            </Button>
+          </EcosystemActionBar.Item>
+          <EcosystemActionBar.Status active={banners.length > 0}>
             {banners.length} Banners
-          </div>
-        </div>
+          </EcosystemActionBar.Status>
+        </EcosystemActionBar.Group>
       </EcosystemActionBar>
 
       <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">

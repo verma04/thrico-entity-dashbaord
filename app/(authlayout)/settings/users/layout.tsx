@@ -1,6 +1,6 @@
 "use client";
 import * as React from "react";
-import { Users, UserPlus, ShieldCheck, Plus } from "lucide-react";
+import { Users, UserPlus, ShieldCheck, Plus, Mail } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
 import { useModulePermission } from "@/hooks/use-module-permission";
 import { withModulePermission } from "@/components/hoc/with-module-permission";
@@ -42,4 +42,8 @@ function UsersLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default withModulePermission(UsersLayout, "USERS_AND_PERMISSIONS", "canRead");
+export default withModulePermission(
+  UsersLayout,
+  "USERS_AND_PERMISSIONS",
+  "canRead",
+);

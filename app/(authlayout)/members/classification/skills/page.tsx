@@ -1,0 +1,256 @@
+"use client";
+
+import React, { useState } from "react";
+import {
+  useGetSkills,
+  useAddSkill,
+  useUpdateSkill,
+  useDeleteSkill,
+  Skill,
+  useBulkAddSkills,
+} from "@/graphql/quries/skills/skill-queries";
+import { Button } from "@/components/ui/button";
+import { Plus, Filter, Loader2, LayoutGrid, Network } from "lucide-react";
+import { useDebounce } from "use-debounce";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { notify } from "@/lib/notify";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CtaButton } from "@/components/ui/cta-button";
+
+import { SkillDialog } from "../../../../../components/classfications/skills/skill-dialog";
+import { SkillsListView } from "../../../../../components/classfications/skills/skills-list-view";
+import { SkillsGraphView } from "../../../../../components/classfications/skills/skills-graph-view";
+import { RECOMMENDED_SKILLS } from "../../../../../components/classfications/skills/recommended-skills";
+
+export default function SkillsPage() {
+  const [search, setSearch] = useState("");
+  const [debouncedSearch] = useDebounce(search, 300);
+
+  const { data, loading, refetch } = useGetSkills({
+    variables: { search: debouncedSearch, limit: 100 },
+  });
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingSkill, setEditingSkill] = useState<Skill | null>(null);
+  const [skillToDelete, setSkillToDelete] = useState<Skill | null>(null);
+  const [activeTab, setActiveTab] = useState("list");
+
+  const [addSkill, { loading: creating }] = useAddSkill({
+    onCompleted: () => {
+      notify.success("Skill created successfully");
+      setIsDialogOpen(false);
+      refetch();
+    },
+    onError: (error) => notify.error(error.message || "Failed to create skill"),
+  });
+
+  const [updateSkill, { loading: updating }] = useUpdateSkill({
+    onCompleted: () => {
+      notify.success("Skill updated successfully");
+      setIsDialogOpen(false);
+      setEditingSkill(null);
+      refetch();
+    },
+    onError: (error) => notify.error(error.message || "Failed to update skill"),
+  });
+
+  const [deleteSkill, { loading: deleting }] = useDeleteSkill({
+    onCompleted: () => {
+      notify.success("Skill deleted successfully");
+      setSkillToDelete(null);
+      refetch();
+    },
+    onError: (error) => notify.error(error.message || "Failed to delete skill"),
+  });
+
+  const [bulkAddSkills, { loading: bulkAdding }] = useBulkAddSkills({
+    onCompleted: (res) => {
+      const addedCount = res.bulkAddSkills?.length || 0;
+      if (addedCount > 0) {
+        notify.success(`Successfully added ${addedCount} skills`);
+      } else {
+        notify.info("All recommended skills already exist");
+      }
+      refetch();
+    },
+    onError: (error) =>
+      notify.error(error.message || "Failed to bulk add skills"),
+  });
+
+  const handleSave = async (values: { title: string }) => {
+    if (editingSkill) {
+      await updateSkill({
+        variables: { input: { id: editingSkill.id, title: values.title } },
+      });
+    } else {
+      await addSkill({
+        variables: { input: values },
+      });
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!skillToDelete) return;
+    await deleteSkill({
+      variables: { input: { id: skillToDelete.id } },
+    });
+  };
+
+  const handleBulkAdd = async () => {
+    await bulkAddSkills({
+      variables: { input: { titles: RECOMMENDED_SKILLS } },
+    });
+  };
+
+  const skills = data?.getSkills || [];
+
+  return (
+    <>
+      <EcosystemActionBar
+        shadow="none"
+        className="rounded-xl border border-border"
+      >
+        <EcosystemActionBar.Group>
+          <EcosystemActionBar.Item grow className="max-w-[360px]">
+            <EcosystemActionBar.Search
+              value={search}
+              onChange={setSearch}
+              placeholder="Search skills..."
+            />
+          </EcosystemActionBar.Item>
+        </EcosystemActionBar.Group>
+
+        <EcosystemActionBar.Separator />
+
+        <EcosystemActionBar.Group align="right">
+          {/* View toggle */}
+          <EcosystemActionBar.ViewToggle
+            value={activeTab}
+            onChange={setActiveTab}
+            options={[
+              { id: "list", label: "List", icon: LayoutGrid },
+              { id: "graph", label: "Graph", icon: Network },
+            ]}
+          />
+
+          <EcosystemActionBar.Separator />
+
+          <div className="flex gap-2">
+            <CtaButton
+              variant="outline"
+              onClick={handleBulkAdd}
+              disabled={bulkAdding}
+            >
+              {bulkAdding ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Plus className="h-3.5 w-3.5" />
+              )}
+              Add Recommended
+            </CtaButton>
+            <CtaButton
+              onClick={() => {
+                setEditingSkill(null);
+                setIsDialogOpen(true);
+              }}
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Add Skill
+            </CtaButton>
+          </div>
+
+          <EcosystemActionBar.Separator />
+
+          <EcosystemActionBar.Item>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-6 w-6 rounded-md border-border bg-card text-muted-foreground hover:text-foreground shadow-sm"
+            >
+              <Filter className="h-3.5 w-3.5" />
+            </Button>
+          </EcosystemActionBar.Item>
+
+          <EcosystemActionBar.Status active={skills.length > 0}>
+            {skills.length} Skills
+          </EcosystemActionBar.Status>
+        </EcosystemActionBar.Group>
+      </EcosystemActionBar>
+
+      <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0 mt-4">
+        {activeTab === "list" ? (
+          <SkillsListView
+            skills={skills}
+            isLoading={loading}
+            onEdit={(skill) => {
+              setEditingSkill(skill);
+              setIsDialogOpen(true);
+            }}
+            onDelete={(skill) => setSkillToDelete(skill)}
+          />
+        ) : (
+          <SkillsGraphView />
+        )}
+      </EcosystemContainer>
+
+      {/* Add/Edit Dialog */}
+      <SkillDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        editingSkill={editingSkill}
+        isLoading={creating || updating}
+        onSave={handleSave}
+      />
+
+      {/* Delete Confirmation */}
+      <AlertDialog
+        open={!!skillToDelete}
+        onOpenChange={(open) => !open && setSkillToDelete(null)}
+      >
+        <AlertDialogContent className="rounded-2xl border-border">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-bold text-foreground">
+              Are you absolutely sure?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground font-medium">
+              This will permanently delete the skill{" "}
+              <span className="font-bold text-foreground">
+                "{skillToDelete?.title}"
+              </span>
+              . This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              disabled={deleting}
+              className="rounded-lg font-semibold border-border"
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-semibold gap-2"
+              onClick={(e) => {
+                e.preventDefault();
+                handleDelete();
+              }}
+              disabled={deleting}
+            >
+              {deleting && <Loader2 className="h-4 w-4 animate-spin" />}
+              {deleting ? "Deleting..." : "Delete Skill"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+}

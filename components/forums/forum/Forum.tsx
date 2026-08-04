@@ -12,16 +12,8 @@ import {
   MessageSquare,
   RefreshCw,
 } from "lucide-react";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
+import { CtaButton } from "@/components/ui/cta-button";
 import ForumCard from "./forum-card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
@@ -107,45 +99,7 @@ export default function Forum({ status: initialStatus }: ForumProps) {
             : `Monitor, moderate, and engage with ${forums.length} ${moduleName.toLowerCase()}.`
         }
         icon={MessageSquare}
-        actions={
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => refetch?.()}
-              className="h-9 w-9 rounded-lg border-border text-muted-foreground hover:text-foreground transition-all"
-            >
-              <RefreshCw
-                className={cn("h-3.5 w-3.5", loading && "animate-spin")}
-              />
-            </Button>
-
-            {/* View toggle */}
-            <Tabs
-              value={view}
-              onValueChange={(val: string) => setView(val as "grid" | "table")}
-              className="bg-muted p-0.5 rounded-lg border border-border"
-            >
-              <TabsList className="bg-transparent border-none h-auto p-0 gap-0.5">
-                <TabsTrigger
-                  value="grid"
-                  className="h-8 px-3 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground transition-all text-xs font-medium"
-                >
-                  <LayoutGrid className="h-3.5 w-3.5 mr-1.5" />
-                  Grid
-                </TabsTrigger>
-                <TabsTrigger
-                  value="table"
-                  className="h-8 px-3 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground transition-all text-xs font-medium"
-                >
-                  <ListIcon className="h-3.5 w-3.5 mr-1.5" />
-                  Table
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-            <Post />
-          </div>
-        }
+        breadcrumbs={[{ label: moduleName, href: "/forums" }, { label: "All" }]}
       />
 
       <EcosystemActionBar>
@@ -163,68 +117,47 @@ export default function Forum({ status: initialStatus }: ForumProps) {
 
         <EcosystemActionBar.Group>
           <EcosystemActionBar.Item>
-            <Select value={status} onValueChange={(val: any) => setStatus(val)}>
-              <SelectTrigger className="w-[160px] h-9 rounded-lg border-border bg-card text-sm font-medium text-foreground shadow-none focus:ring-2 focus:ring-ring/20">
-                <div className="flex items-center gap-2">
-                  {currentStatus.dot && (
-                    <span
-                      className={cn(
-                        "h-1.5 w-1.5 rounded-full shrink-0",
-                        currentStatus.dot,
-                      )}
-                    />
-                  )}
-                  <SelectValue placeholder="Status" />
-                </div>
-              </SelectTrigger>
-              <SelectContent className="rounded-xl border-border shadow-lg p-1">
-                {STATUS_OPTIONS.map((opt) => (
-                  <SelectItem
-                    key={opt.value}
-                    value={opt.value}
-                    className="rounded-lg text-sm font-medium py-2"
-                  >
-                    <div className="flex items-center gap-2">
-                      {opt.dot && (
-                        <span
-                          className={cn(
-                            "h-1.5 w-1.5 rounded-full shrink-0",
-                            opt.dot,
-                          )}
-                        />
-                      )}
-                      {opt.label}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <EcosystemActionBar.Select
+              value={status}
+              onValueChange={(val: any) => setStatus(val)}
+              options={STATUS_OPTIONS}
+              placeholder="Status"
+            />
           </EcosystemActionBar.Item>
 
           <EcosystemActionBar.Item>
-            <Select
+            <EcosystemActionBar.Select
               value={verificationFilter}
               onValueChange={setVerificationFilter}
-            >
-              <SelectTrigger className="w-[160px] h-9 rounded-lg border-border bg-card text-sm font-medium text-foreground shadow-none focus:ring-2 focus:ring-ring/20">
-                <SelectValue placeholder="Verification" />
-              </SelectTrigger>
-              <SelectContent className="rounded-xl border-border shadow-lg p-1">
-                {VERIFICATION_OPTIONS.map((opt) => (
-                  <SelectItem
-                    key={opt.value}
-                    value={opt.value}
-                    className="rounded-lg text-sm font-medium py-2"
-                  >
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              options={VERIFICATION_OPTIONS}
+              placeholder="Verification"
+            />
           </EcosystemActionBar.Item>
         </EcosystemActionBar.Group>
 
         <EcosystemActionBar.Group align="right">
+          <EcosystemActionBar.Item>
+            <div className="flex items-center gap-2">
+              <CtaButton
+                variant="outline"
+                onClick={() => refetch?.()}
+                className="h-6 w-6 p-0 rounded-md border-border text-muted-foreground hover:text-foreground transition-all"
+              >
+                <RefreshCw
+                  className={cn("h-3 w-3", loading && "animate-spin")}
+                />
+              </CtaButton>
+              <EcosystemActionBar.ViewToggle
+                value={view}
+                onChange={(val: string) => setView(val as "grid" | "table")}
+                options={[
+                  { id: "grid", label: "Grid", icon: LayoutGrid },
+                  { id: "table", label: "Table", icon: ListIcon },
+                ]}
+              />
+              <Post />
+            </div>
+          </EcosystemActionBar.Item>
           <EcosystemActionBar.Status active={filteredForums.length > 0}>
             {filteredForums.length} {moduleName}
           </EcosystemActionBar.Status>
