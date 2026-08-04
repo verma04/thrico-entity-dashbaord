@@ -21,7 +21,41 @@ import { NavRailItem } from "./sidebar-components";
 function getActiveTab(pathName: string) {
   if (pathName.startsWith("/gamification")) return "gamification";
   if (pathName.startsWith("/members")) return "community";
-  if (pathName.startsWith("/settings/modules")) return "modules";
+
+  const moduleRoutes = [
+    "/communities",
+    "/events",
+    "/forums",
+    "/moments",
+    "/jobs",
+    "/news",
+    "/opportunities",
+    "/polls",
+    "/shop",
+    "/sponsors",
+    "/surveys",
+    "/stories",
+    "/learnings",
+    "/mentorship",
+    "/offers",
+    "/media-gallery",
+    "/feed",
+    "/celebrations",
+    "/faq",
+    "/chat",
+    "/contacts",
+    "/feedback",
+    "/listing",
+    "/moderation",
+    "/reports",
+    "/support",
+    "/trust-center",
+    "/wall-of-fame",
+    "/ai-agent",
+  ];
+  if (moduleRoutes.some((route) => pathName.startsWith(route)))
+    return "modules";
+
   if (pathName.startsWith("/settings")) return "settings";
   if (pathName.startsWith("/email")) return "email";
   if (pathName.startsWith("/mobile-app")) return "mobile-app";
@@ -85,6 +119,7 @@ export function ParentSidebar() {
           icon={<Users2 size={20} />}
           label="Team"
           href="/settings/users/all"
+          active={pathName === "/settings/users/all"}
         />
         <NavRailItem
           icon={<ArrowUpCircle size={20} className="text-purple-400" />}
