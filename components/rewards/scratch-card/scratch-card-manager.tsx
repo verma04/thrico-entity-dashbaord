@@ -38,6 +38,7 @@ import { ScratchCardPreview } from "./scratch-card-preview";
 import { EconomyMonitor } from "./economy-monitor";
 import { TiersTable } from "./tiers-table";
 import { TierDialog } from "./tier-dialog";
+import { EcosystemHeader } from "@/components/layout/ecosystem";
 
 const SectionCard = ({
   title,
@@ -296,9 +297,16 @@ export function ScratchCardManager() {
         badgeText="Engagement"
         description={`Configure scratch card reward tiers, ${currencyName} costs, probability weights, and campaign windows.`}
         icon={RectangleHorizontal}
-        breadcrumbs={[{ label: "Gamification", href: "/gamification" }, { label: "Engagement Games", href: "/gamification/engagement-games" }, { label: "Scratch Card" }]}
+        breadcrumbs={[
+          { label: "Gamification", href: "/gamification" },
+          { label: "Engagement Games", href: "/gamification/engagement-games" },
+          { label: "Scratch Card" },
+        ]}
         actions={
-          <EcosystemActionBar shadow="none" className="p-0 border-none bg-transparent">
+          <EcosystemActionBar
+            shadow="none"
+            className="p-0 border-none bg-transparent"
+          >
             <EcosystemActionBar.Group>
               <div
                 className={cn(
@@ -314,7 +322,6 @@ export function ScratchCardManager() {
                 {tiers.length} reward tiers
               </span>
             </EcosystemActionBar.Group>
-
           </EcosystemActionBar>
         }
       />

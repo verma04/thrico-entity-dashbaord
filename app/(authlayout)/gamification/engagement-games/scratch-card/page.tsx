@@ -9,7 +9,8 @@ import { useGetEntityCurrencyConfig } from "@/graphql/actions/currency";
 
 export default function ScratchCardPage() {
   const { data: currencyConfig } = useGetEntityCurrencyConfig();
-  const currencyName = currencyConfig?.getEntityCurrencyConfig?.currencyName || "tokens";
+  const currencyName =
+    currencyConfig?.getEntityCurrencyConfig?.currencyName || "tokens";
 
   return (
     <EcosystemWrapper className="flex-col gap-4 flex">
