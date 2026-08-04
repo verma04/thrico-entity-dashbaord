@@ -56,7 +56,7 @@ export function ParentSidebar() {
         <NavRailItem
           icon={<Grid size={20} />}
           label="Modules"
-          href="/settings/modules"
+          href="/communities"
           active={activeTab === "modules"}
         />
         <NavRailItem
