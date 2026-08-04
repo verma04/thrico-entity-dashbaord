@@ -68,7 +68,7 @@ export default function CommunitySettings() {
       }}
       initialCoverUrl={
         community?.cover
-          ? `${process.env.NEXT_PUBLIC_CDN_URL}/${community.cover}`
+          ? `https://cdn.thrico.network/${community.cover}`
           : null
       }
       loading={updating}
