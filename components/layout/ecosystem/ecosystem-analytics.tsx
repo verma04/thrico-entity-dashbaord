@@ -26,6 +26,18 @@ export { EcosystemKPI } from "./ecosystem-kpi";
 export type { EcosystemKPIProps } from "./ecosystem-kpi";
 
 // ---------------------------------------------------------------------------
+// Today Card
+// ---------------------------------------------------------------------------
+export { EcosystemTodayCard } from "./ecosystem-today-card";
+export type { EcosystemTodayCardProps } from "./ecosystem-today-card";
+
+// ---------------------------------------------------------------------------
+// Health Bar
+// ---------------------------------------------------------------------------
+export { EcosystemHealthBar } from "./ecosystem-health-bar";
+export type { EcosystemHealthBarProps } from "./ecosystem-health-bar";
+
+// ---------------------------------------------------------------------------
 // Section Header
 // ---------------------------------------------------------------------------
 interface EcosystemSectionHeaderProps {

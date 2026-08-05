@@ -4,11 +4,11 @@ import React, { useState } from "react";
 import {
   CheckCircle,
   ThumbsDown,
-  Edit,
+  Edit as EditIcon,
   MoreHorizontal,
   List,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { CtaButton as Button } from "@/components/ui/cta-button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,6 +25,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import Edit from "./forum-category-edit";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 
@@ -35,7 +36,7 @@ import {
   editDiscussionForumCategory,
 } from "../../../graphql/actions/discussion-form";
 
-const Actions = (record: discussionCategory) => {
+const Actions = ({ record }: { record: discussionCategory }) => {
   const [isAuditModalOpen, setIsAuditModalOpen] = useState(false);
   const [open, setOpen] = useState(false);
   const [dialogAction, setDialogAction] = useState<
@@ -105,7 +106,7 @@ const Actions = (record: discussionCategory) => {
           <DropdownMenuSeparator />
 
           <DropdownMenuItem onClick={() => setOpen(true)}>
-            <Edit className="mr-2 h-4 w-4" />
+            <EditIcon className="mr-2 h-4 w-4" />
             Edit Category
           </DropdownMenuItem>
         </DropdownMenuContent>

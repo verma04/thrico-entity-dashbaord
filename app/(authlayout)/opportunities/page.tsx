@@ -4,10 +4,8 @@ import React, { useState } from "react";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
-import {
-  EcosystemKPI,
-  EcosystemCard,
-} from "@/components/layout/ecosystem/ecosystem-analytics";
+import { EcosystemKPI } from "@/components/layout/ecosystem/ecosystem-analytics";
+import { DashboardSectionHeading } from "@/components/home/dashboard-section-heading";
 import {
   Briefcase,
   TrendingUp,
@@ -26,7 +24,6 @@ import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check"
 import { useAdminOpportunities } from "@/graphql/actions/opportunities";
 import Link from "next/link";
 import {
-  ResponsiveContainer,
   AreaChart,
   Area,
   XAxis,
@@ -37,6 +34,7 @@ import {
   Pie,
   Cell,
 } from "recharts";
+import { ResponsiveContainer } from "@/components/ui/responsive-container";
 
 function OpportunitiesDashboard() {
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
@@ -191,6 +189,10 @@ function OpportunitiesDashboard() {
       />
 
       <EcosystemContainer className="p-6 lg:p-8 space-y-6">
+        <DashboardSectionHeading
+          title="Overview"
+          titleClassName="normal-case tracking-normal text-sm text-foreground"
+        />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {kpis.map((kpi, i) => (
             <EcosystemKPI key={i} {...kpi} trendLabel="v. last period" />
@@ -199,12 +201,13 @@ function OpportunitiesDashboard() {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div className="lg:col-span-8">
-            <EcosystemCard
-              title="Growth Pulse"
-              description="New opportunities trajectory"
-              icon={TrendingUp}
-            >
-              <div className="h-[350px] w-full mt-6">
+            <section className="space-y-4">
+              <DashboardSectionHeading
+                title="Growth Pulse"
+                titleClassName="normal-case tracking-normal text-sm text-foreground"
+              />
+              <div className="rounded-[20px] border border-transparent bg-muted/30 p-5">
+                <div className="h-[350px] w-full mt-6">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={trendData}>
                     <defs>
@@ -275,16 +278,18 @@ function OpportunitiesDashboard() {
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
-            </EcosystemCard>
+            </div>
+            </section>
           </div>
 
-          <div className="lg:col-span-4">
-            <EcosystemCard
-              title="Category Mix"
-              description="Opportunity distribution"
-              icon={Target}
-            >
-              <div className="h-64 w-full mt-2">
+          <div className="lg:col-span-4 space-y-6">
+            <section className="space-y-4">
+              <DashboardSectionHeading
+                title="Category Mix"
+                titleClassName="normal-case tracking-normal text-sm text-foreground"
+              />
+              <div className="rounded-[20px] border border-transparent bg-muted/30 p-5">
+                <div className="h-64 w-full mt-2">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
@@ -326,7 +331,8 @@ function OpportunitiesDashboard() {
                   </div>
                 ))}
               </div>
-            </EcosystemCard>
+            </div>
+            </section>
           </div>
         </div>
       </EcosystemContainer>

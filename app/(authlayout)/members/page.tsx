@@ -14,8 +14,8 @@ import {
   RotateCcw,
   AlertTriangle,
 } from "lucide-react";
+import { ResponsiveContainer } from "@/components/ui/responsive-container";
 import {
-  ResponsiveContainer,
   AreaChart,
   Area,
   XAxis,
@@ -45,7 +45,7 @@ import { withModulePermission } from "@/components/hoc/with-module-permission";
 import { useRouter } from "next/navigation";
 import { useCheckMemberSubscription } from "@/graphql/actions/membership/membership-queries";
 import { SubscriptionLimitBanner } from "@/components/members/users/subscription-alerts";
-
+import { DashboardSectionHeading } from "@/components/home/dashboard-section-heading";
 function MembersPage() {
   const router = useRouter();
   const [timeRange, setTimeRange] = React.useState<TimeRange>(
@@ -179,22 +179,27 @@ function MembersPage() {
         {/* Subscription Limit Warning Banner */}
         <SubscriptionLimitBanner subscriptionInfo={subscriptionInfo} />
 
-        {/* KPI Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {kpis.map((kpi, i) => (
-            <EcosystemKPI key={i} {...kpi} trendLabel="Registry" />
-          ))}
-        </div>
+        <section className="space-y-4">
+          <DashboardSectionHeading
+            title="Platform Traffic"
+            titleClassName="normal-case tracking-normal text-sm text-foreground"
+          />
+          {/* KPI Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {kpis.map((kpi, i) => (
+              <EcosystemKPI key={i} {...kpi} trendLabel="Registry" />
+            ))}
+          </div>
+        </section>
 
-        <div className="grid grid-cols-1 lg:grid-cols-1 gap-10">
-          <div className="lg:col-span-1">
-            <EcosystemCard
-              title="Growth Over Time"
-              description="New members joining the community"
-              icon={TrendingUp}
-              decorationIcon={Zap}
-            >
-              <div className="h-[350px] w-full">
+        <section className="space-y-4 mt-8">
+          <DashboardSectionHeading
+            title="Growth Over Time"
+            titleClassName="normal-case tracking-normal text-sm text-foreground"
+          />
+          <div className="grid grid-cols-1 lg:grid-cols-1 gap-10">
+            <div className="lg:col-span-1">
+              <div className="h-[350px] w-full p-5 rounded-[20px] bg-muted/30 border border-transparent">
                 {growthLoading ? (
                   <div className="flex items-center justify-center h-full">
                     <Skeleton className="h-[300px] w-full rounded-xl" />
@@ -204,7 +209,7 @@ function MembersPage() {
                     No growth data available for this period
                   </div>
                 ) : (
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer>
                     <AreaChart data={growthData}>
                       <defs>
                         <linearGradient
@@ -276,9 +281,9 @@ function MembersPage() {
                   </ResponsiveContainer>
                 )}
               </div>
-            </EcosystemCard>
+            </div>
           </div>
-        </div>
+        </section>
       </EcosystemContainer>
     </EcosystemWrapper>
   );

@@ -579,12 +579,7 @@ export const modules = [
     icon: <MessageSquare size={18} />,
     children: [
       { key: "for-dash", label: "Dashboard", path: "/forums" },
-      {
-        key: "for-topics",
-        label: "Create Topics",
-        path: "/forums/topics/create",
-      },
-      { key: "for-posts", label: "Create Posts", path: "/forums/posts/create" },
+
       { key: "for-manage", label: "Manage Forums", path: "/forums/all" },
       {
         key: "for-cats",

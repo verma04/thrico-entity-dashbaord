@@ -3,6 +3,7 @@
 import React from "react";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { DashboardSectionHeading } from "@/components/home/dashboard-section-heading";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import {
   EcosystemKPI,
@@ -23,9 +24,8 @@ import {
   Share2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ResponsiveContainer } from "@/components/ui/responsive-container";
 import {
-  ResponsiveContainer,
-  BarChart,
   Bar,
   XAxis,
   YAxis,
@@ -34,6 +34,7 @@ import {
   Cell,
   PieChart,
   Pie,
+  BarChart,
 } from "recharts";
 import Link from "next/link";
 import {
@@ -106,131 +107,141 @@ export default function FeedPage() {
         description="Monitor feed engagement, content trends, and user activity."
         icon={Share2}
         breadcrumbs={[{ label: "Feed", href: "/feed" }, { label: "Analytics" }]}
+        actions={
+          <div className="flex items-center gap-3">
+            <DateRangePicker
+              date={dateRange}
+              onDateChange={handleDateChange}
+              defaultValue="LAST_7_DAYS"
+            />
+          </div>
+        }
       />
 
       <EcosystemContainer className="space-y-12 p-8 lg:p-12">
         {/* KPI Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {[
-            {
-              title: "Total Reach",
-              value: kpis?.aggregateReach ?? "0",
-              trend: kpis?.reachTrend ?? 0,
-              icon: LayoutGrid,
-              color: "text-indigo-500",
-              bg: "bg-indigo-500",
-              tooltip:
-                "Estimated reach based on total posts, shares, and interactions",
-            },
-            {
-              title: "Active Posts",
-              value: kpis?.activeDialogue ?? "0",
-              trend: kpis?.dialogueTrend ?? 0,
-              icon: Activity,
-              color: "text-emerald-500",
-              bg: "bg-emerald-500",
-              tooltip:
-                "Total number of interactions (likes + comments) in this period",
-            },
-            {
-              title: "Network Velocity",
-              value: kpis?.networkVelocity?.toFixed(2) ?? "0",
-              trend: kpis?.velocityTrend ?? 0,
-              icon: TrendingUp,
-              color: "text-violet-500",
-              bg: "bg-violet-500",
-              tooltip: "Average interactions per post",
-            },
-            {
-              title: "Engagement Yield",
-              value: kpis?.engagementYield?.toFixed(2) ?? "0",
-              trend: kpis?.yieldTrend ?? 0,
-              icon: Zap,
-              color: "text-amber-500",
-              bg: "bg-amber-500",
-              suffix: "%",
-              tooltip: "Percentage of reach that resulted in interaction",
-            },
-          ].map((kpi, i) => (
-            <EcosystemKPI key={i} {...kpi} trendLabel="vs last period" />
-          ))}
-        </div>
+        <section className="space-y-4">
+          <DashboardSectionHeading
+            title="Core Feed Stats"
+            titleClassName="normal-case tracking-normal text-sm text-foreground"
+          />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {[
+              {
+                title: "Total Reach",
+                value: kpis?.aggregateReach ?? "0",
+                trend: kpis?.reachTrend ?? 0,
+                icon: LayoutGrid,
+                color: "text-indigo-500",
+                bg: "bg-indigo-500",
+                tooltip:
+                  "Estimated reach based on total posts, shares, and interactions",
+              },
+              {
+                title: "Active Posts",
+                value: kpis?.activeDialogue ?? "0",
+                trend: kpis?.dialogueTrend ?? 0,
+                icon: Activity,
+                color: "text-emerald-500",
+                bg: "bg-emerald-500",
+                tooltip:
+                  "Total number of interactions (likes + comments) in this period",
+              },
+              {
+                title: "Network Velocity",
+                value: kpis?.networkVelocity?.toFixed(2) ?? "0",
+                trend: kpis?.velocityTrend ?? 0,
+                icon: TrendingUp,
+                color: "text-violet-500",
+                bg: "bg-violet-500",
+                tooltip: "Average interactions per post",
+              },
+              {
+                title: "Engagement Yield",
+                value: kpis?.engagementYield?.toFixed(2) ?? "0",
+                trend: kpis?.yieldTrend ?? 0,
+                icon: Zap,
+                color: "text-amber-500",
+                bg: "bg-amber-500",
+                suffix: "%",
+                tooltip: "Percentage of reach that resulted in interaction",
+              },
+            ].map((kpi, i) => (
+              <EcosystemKPI key={i} {...kpi} trendLabel="vs last period" />
+            ))}
+          </div>
+        </section>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           {/* Chart Section */}
-          <div className="lg:col-span-8">
-            <EcosystemCard
+          <section className="lg:col-span-8 space-y-4">
+            <DashboardSectionHeading
               title="Engagement Timeline"
-              description="Daily engagement and activity"
-              icon={TrendingUp}
-              decorationIcon={Zap}
-            >
-              <div className="h-[350px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartData}>
-                    <CartesianGrid
-                      strokeDasharray="3 3"
-                      vertical={false}
-                      stroke="#f1f5f9"
-                    />
-                    <XAxis
-                      dataKey="day"
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fontSize: 10, fontWeight: 900, fill: "#94a3b8" }}
-                      dy={15}
-                    />
-                    <YAxis
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fontSize: 10, fontWeight: 900, fill: "#94a3b8" }}
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "#0f172a",
-                        border: "none",
-                        borderRadius: "16px",
-                        boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)",
-                      }}
-                      itemStyle={{
-                        color: "#fff",
-                        fontWeight: 900,
-                        textTransform: "uppercase",
-                        fontSize: "10px",
-                      }}
-                      labelStyle={{ display: "none" }}
-                    />
-                    <Bar
-                      dataKey="signups"
-                      fill="#6366f1"
-                      radius={[8, 8, 0, 0]}
-                      barSize={40}
-                      animationDuration={1500}
-                    >
-                      {chartData?.map((entry: any, index: number) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={index % 2 === 0 ? "#6366f1" : "#10b981"}
-                        />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </EcosystemCard>
-          </div>
+              titleClassName="normal-case tracking-normal text-sm text-foreground"
+            />
+            <div className="h-[350px] w-full p-5 rounded-[20px] bg-muted/30 border border-transparent">
+              <ResponsiveContainer>
+                <BarChart data={chartData}>
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    vertical={false}
+                    stroke="#f1f5f9"
+                  />
+                  <XAxis
+                    dataKey="day"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 10, fontWeight: 900, fill: "#94a3b8" }}
+                    dy={15}
+                  />
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fontSize: 10, fontWeight: 900, fill: "#94a3b8" }}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#0f172a",
+                      border: "none",
+                      borderRadius: "16px",
+                      boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)",
+                    }}
+                    itemStyle={{
+                      color: "#fff",
+                      fontWeight: 900,
+                      textTransform: "uppercase",
+                      fontSize: "10px",
+                    }}
+                    labelStyle={{ display: "none" }}
+                  />
+                  <Bar
+                    dataKey="signups"
+                    fill="#6366f1"
+                    radius={[8, 8, 0, 0]}
+                    barSize={40}
+                    animationDuration={1500}
+                  >
+                    {chartData?.map((entry: any, index: number) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={index % 2 === 0 ? "#6366f1" : "#10b981"}
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </section>
 
           {/* Interest Matrix Section */}
-          <div className="lg:col-span-4">
-            <EcosystemCard
+          <section className="lg:col-span-4 space-y-4">
+            <DashboardSectionHeading
               title="Content Types"
-              description="Distribution of post categories"
-              icon={Sparkles}
-              decorationIcon={LayoutGrid}
-              className="min-h-fit"
-            >
+              titleClassName="normal-case tracking-normal text-sm text-foreground"
+            />
+            <div className="min-h-fit p-5 rounded-[20px] bg-muted/30 border border-transparent">
               <div className="h-[250px] w-full mb-8 relative flex items-center justify-center">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer>
                   <PieChart>
                     <Pie
                       data={matrixData as any[]}
@@ -283,18 +294,18 @@ export default function FeedPage() {
                   </div>
                 ))}
               </div>
-            </EcosystemCard>
-          </div>
+            </div>
+          </section>
         </div>
 
         {/* Promoted Events Section */}
         {promotedEvents && promotedEvents.length > 0 && (
-          <div className="mt-4">
-            <EcosystemCard
+          <section className="mt-4 space-y-4">
+            <DashboardSectionHeading
               title="Promoted Events"
-              description="Upcoming events actively promoted in the feed"
-              icon={Sparkles}
-            >
+              titleClassName="normal-case tracking-normal text-sm text-foreground"
+            />
+            <div className="p-5 rounded-[20px] bg-muted/30 border border-transparent">
               <div className="flex flex-col gap-2">
                 {promotedEvents.map((event: any, index: number) => (
                   <div
@@ -337,8 +348,8 @@ export default function FeedPage() {
                   </div>
                 ))}
               </div>
-            </EcosystemCard>
-          </div>
+            </div>
+          </section>
         )}
       </EcosystemContainer>
     </EcosystemWrapper>

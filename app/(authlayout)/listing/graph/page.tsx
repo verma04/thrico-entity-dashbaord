@@ -23,7 +23,7 @@ function ListingsGraphPage() {
         icon={Network}
         breadcrumbs={[
           { label: moduleName, href: "/listing" },
-          { label: "Graph" }
+          { label: "Graph" },
         ]}
       />
 
@@ -56,8 +56,4 @@ function ListingsGraphPage() {
   );
 }
 
-export default withModulePermission(
-  ListingsGraphPage,
-  "LISTING",
-  "canRead"
-);
+export default withModulePermission(ListingsGraphPage, "LISTING", "canRead");

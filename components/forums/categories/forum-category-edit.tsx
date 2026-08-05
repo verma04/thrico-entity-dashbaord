@@ -50,9 +50,9 @@ const Edit: React.FC<EditProps> = ({
 }) => {
   const formik = useFormik({
     initialValues: {
-      name: record.name || "",
-      description: record.description || "",
-      isActive: record.isActive ?? true,
+      name: record?.name || "",
+      description: record?.description || "",
+      isActive: record?.isActive ?? true,
     },
     validationSchema: categorySchema,
     enableReinitialize: true,

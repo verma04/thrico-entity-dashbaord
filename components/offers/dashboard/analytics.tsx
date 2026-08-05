@@ -38,6 +38,7 @@ import {
   EcosystemKPI,
   EcosystemCard,
 } from "@/components/layout/ecosystem/ecosystem-analytics";
+import { DashboardSectionHeading } from "@/components/home/dashboard-section-heading";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -153,7 +154,11 @@ export default function OffersAnalytics() {
 
       
 
-      <EcosystemContainer className="p-6 lg:p-8 space-y-6">
+      <EcosystemContainer className="space-y-10 p-8 lg:p-10">
+        <DashboardSectionHeading
+          title="Overview"
+          titleClassName="normal-case tracking-normal text-sm text-foreground"
+        />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {kpis.map((kpi, i) => (
             <EcosystemKPI key={i} {...kpi} trendLabel="Period stats" />
@@ -162,11 +167,12 @@ export default function OffersAnalytics() {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div className="lg:col-span-8">
-            <EcosystemCard
-              title="Claim Velocity"
-              description="Temporal conversion cycles"
-              icon={TrendingUp}
-            >
+            <section className="space-y-4">
+              <DashboardSectionHeading
+                title="Claim Velocity"
+                titleClassName="normal-case tracking-normal text-sm text-foreground"
+              />
+              <div className="rounded-[20px] border border-transparent bg-muted/30 p-5">
               <div className="h-[350px] w-full mt-6">
                 {loading ? (
                   <div className="h-full w-full flex items-center justify-center bg-zinc-50/50 rounded-2xl border border-zinc-100">
@@ -228,15 +234,17 @@ export default function OffersAnalytics() {
                   </ResponsiveContainer>
                 )}
               </div>
-            </EcosystemCard>
+              </div>
+            </section>
           </div>
 
           <div className="lg:col-span-4">
-            <EcosystemCard
-              title="Commerce Matrix"
-              description="Category yield allocation"
-              icon={BarChart3}
-            >
+            <section className="space-y-4">
+              <DashboardSectionHeading
+                title="Commerce Matrix"
+                titleClassName="normal-case tracking-normal text-sm text-foreground"
+              />
+              <div className="rounded-[20px] border border-transparent bg-muted/30 p-5">
               <div className="space-y-5 mt-4">
                 {matrixData.map((item: any, i: number) => (
                   <div key={i} className="group/item">
@@ -277,7 +285,8 @@ export default function OffersAnalytics() {
                   </Button>
                 </Link>
               </div>
-            </EcosystemCard>
+              </div>
+            </section>
           </div>
         </div>
       </EcosystemContainer>

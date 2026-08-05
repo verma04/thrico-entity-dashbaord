@@ -12,5 +12,5 @@ function EventsPage() {
 
 export default withSubscriptionCheck(
   withModulePermission(EventsPage, "EVENTS", "canRead"),
-  "events"
+  "events",
 );

@@ -27,7 +27,14 @@ export interface EcosystemKPIProps {
   trendLabel?: string;
   tooltip?: string;
   suffix?: string;
-  colorScheme?: "indigo" | "sky" | "lime" | "rose" | "purple" | "orange" | "slate";
+  colorScheme?:
+    | "indigo"
+    | "sky"
+    | "lime"
+    | "rose"
+    | "purple"
+    | "orange"
+    | "slate";
 }
 
 const colorStyles = {
@@ -69,11 +76,15 @@ const colorStyles = {
 };
 
 // Helper to map old raw color classes to our new color schemes
-function inferColorScheme(colorClass?: string, bgClass?: string): keyof typeof colorStyles {
+function inferColorScheme(
+  colorClass?: string,
+  bgClass?: string,
+): keyof typeof colorStyles {
   const str = `${colorClass || ""} ${bgClass || ""}`.toLowerCase();
   if (str.includes("amber") || str.includes("orange")) return "orange";
   if (str.includes("indigo") || str.includes("blue")) return "indigo";
-  if (str.includes("emerald") || str.includes("green") || str.includes("lime")) return "lime";
+  if (str.includes("emerald") || str.includes("green") || str.includes("lime"))
+    return "lime";
   if (str.includes("rose") || str.includes("red")) return "rose";
   if (str.includes("purple") || str.includes("violet")) return "purple";
   if (str.includes("sky") || str.includes("cyan")) return "sky";
@@ -112,7 +123,7 @@ export function EcosystemKPI({
   return (
     <div
       className={cn(
-        "relative flex flex-col p-3.5 rounded-[16px] border transition-all duration-300 hover:shadow-sm overflow-hidden",
+        "relative flex flex-col p-3 rounded-[12px] border transition-all duration-300 hover:shadow-sm overflow-hidden",
         currentStyle.bg,
       )}
     >
@@ -120,14 +131,19 @@ export function EcosystemKPI({
         {Icon ? (
           <div
             className={cn(
-              "h-7 w-7 rounded-[8px] flex items-center justify-center shadow-none",
-              currentStyle.iconBg
+              "h-6 w-6 rounded-[6px] flex items-center justify-center shadow-none",
+              currentStyle.iconBg,
             )}
           >
-            <Icon className={cn("h-3.5 w-3.5", (currentStyle as any).iconColor ?? "text-white")} />
+            <Icon
+              className={cn(
+                "h-3 w-3",
+                (currentStyle as any).iconColor ?? "text-white",
+              )}
+            />
           </div>
         ) : (
-          <div className="h-7 w-7 rounded-[8px] bg-muted/50" />
+          <div className="h-6 w-6 rounded-[6px] bg-muted/50" />
         )}
 
         {tooltip && (
@@ -146,20 +162,20 @@ export function EcosystemKPI({
         )}
       </div>
 
-      <div className="mt-3 relative z-10">
-        <h3 className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-[0.15em] mb-1 leading-tight">
+      <div className="mt-2 relative z-10">
+        <h3 className="text-[8px] font-bold text-muted-foreground/60 uppercase tracking-[0.1em] mb-0.5 leading-tight">
           {title}
         </h3>
-        
-        <div className="flex items-end gap-2">
-          <span className="text-xl font-bold text-foreground tracking-tight leading-none tabular-nums">
+
+        <div className="flex items-end gap-1.5">
+          <span className="text-base font-bold text-foreground tracking-tight leading-none tabular-nums">
             {formattedValue}
             {suffix}
           </span>
           {trend !== undefined && trend !== 0 && (
             <div
               className={cn(
-                "flex items-center gap-0.5 text-[10px] font-bold mb-0.5",
+                "flex items-center gap-0.5 text-[9px] font-bold mb-px",
                 isPositive
                   ? "text-emerald-600 dark:text-emerald-400"
                   : "text-rose-600 dark:text-rose-400",
@@ -178,7 +194,7 @@ export function EcosystemKPI({
       </div>
 
       {/* Subtle sparkline in the background at bottom */}
-      <div className="absolute bottom-0 left-0 right-0 h-10 pointer-events-none opacity-30 mix-blend-multiply dark:mix-blend-lighten">
+      <div className="absolute bottom-0 left-0 right-0 h-8 pointer-events-none opacity-30 mix-blend-multiply dark:mix-blend-lighten">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
             data={chartData}

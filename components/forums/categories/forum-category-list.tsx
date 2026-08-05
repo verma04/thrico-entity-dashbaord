@@ -150,7 +150,7 @@ export default function List({
       header: () => <div className="text-right">Actions</div>,
       cell: ({ row }) => (
         <div className="text-right">
-          <Actions {...row.original} />
+          <Actions record={row.original} />
         </div>
       ),
     },
@@ -189,6 +189,18 @@ export default function List({
           { label: moduleName, href: "/forums" },
           { label: "Categories" }
         ]}
+        actions={
+          <EcosystemActionBar
+            shadow="none"
+            className="p-0 border-none bg-transparent gap-2"
+          >
+            <EcosystemActionBar.Group align="right">
+              <EcosystemActionBar.Item>
+                <Add />
+              </EcosystemActionBar.Item>
+            </EcosystemActionBar.Group>
+          </EcosystemActionBar>
+        }
       />
 
       <EcosystemActionBar>
@@ -221,9 +233,6 @@ export default function List({
         </EcosystemActionBar.Group>
 
         <EcosystemActionBar.Group align="right">
-          <EcosystemActionBar.Item>
-            <Add />
-          </EcosystemActionBar.Item>
           <EcosystemActionBar.Status active={(data || []).length > 0}>
             {data?.length || 0} Categories
           </EcosystemActionBar.Status>

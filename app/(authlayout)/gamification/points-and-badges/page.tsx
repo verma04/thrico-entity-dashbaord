@@ -17,7 +17,9 @@ import {
   Crown,
   ShieldCheck,
   LayoutGrid,
+  ChevronRight,
 } from "lucide-react";
+import { formatNumber } from "@/lib/formatNumber";
 import Link from "next/link";
 import {
   useGetGamificationStats,
@@ -34,6 +36,7 @@ import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header"
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { EcosystemKPI } from "@/components/layout/ecosystem/ecosystem-analytics";
 import { EcosystemCard } from "@/components/layout/ecosystem/ecosystem-card";
+import { DashboardSectionHeading } from "@/components/home/dashboard-section-heading";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -183,15 +186,25 @@ export default function GamificationOverview() {
 
       <EcosystemContainer className="p-6 lg:p-8 space-y-8">
         {/* KPI Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {kpis.map((kpi, i) => (
-            <EcosystemKPI key={i} {...kpi} trendLabel="Last 7 days" />
-          ))}
-        </div>
+        <section className="space-y-4">
+          <DashboardSectionHeading
+            title="Core Gamification Stats"
+            titleClassName="normal-case tracking-normal text-sm text-foreground"
+          />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {kpis.map((kpi, i) => (
+              <EcosystemKPI key={i} {...kpi} trendLabel="Last 7 days" />
+            ))}
+          </div>
+        </section>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Modules Grid */}
-          <div className="lg:col-span-8">
+          <section className="lg:col-span-8 space-y-4">
+            <DashboardSectionHeading
+              title="Gamification Modules"
+              titleClassName="normal-case tracking-normal text-sm text-foreground"
+            />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {modules.map((mod, i) => (
                 <Link key={i} href={mod.link}>
@@ -229,18 +242,16 @@ export default function GamificationOverview() {
                 </Link>
               ))}
             </div>
-          </div>
+          </section>
 
           {/* Sidebar / Settings */}
-          <div className="lg:col-span-4 space-y-6">
-            <EcosystemCard
+          <section className="lg:col-span-4 space-y-4">
+            <DashboardSectionHeading
               title="System Summary"
-              description="Current rules and limits"
-              icon={Activity}
-              variant="skill"
-              colorScheme="purple"
-            >
-              <div className="space-y-1.5 mt-4 overflow-hidden rounded-xl border border-zinc-100">
+              titleClassName="normal-case tracking-normal text-sm text-foreground"
+            />
+            <div className="p-5 rounded-[20px] bg-muted/30 border border-transparent">
+              <div className="space-y-1.5 overflow-hidden rounded-xl border border-zinc-100">
                 {[
                   {
                     label: "Engine Status",
@@ -320,13 +331,10 @@ export default function GamificationOverview() {
                   </Link>
                 ))}
               </div>
-            </EcosystemCard>
-          </div>
+            </div>
+          </section>
         </div>
       </EcosystemContainer>
     </EcosystemWrapper>
   );
 }
-
-import { ChevronRight } from "lucide-react";
-import { formatNumber } from "@/lib/formatNumber";

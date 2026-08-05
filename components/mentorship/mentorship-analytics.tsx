@@ -49,6 +49,7 @@ import {
   EcosystemKPI,
   EcosystemCard,
 } from "@/components/layout/ecosystem/ecosystem-analytics";
+import { DashboardSectionHeading } from "@/components/home/dashboard-section-heading";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -220,7 +221,11 @@ export default function MentorshipAnalytics() {
 
       
 
-      <EcosystemContainer className="p-6 lg:p-8 space-y-8">
+      <EcosystemContainer className="space-y-10 p-8 lg:p-10">
+        <DashboardSectionHeading
+          title="Overview"
+          titleClassName="normal-case tracking-normal text-sm text-foreground"
+        />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {kpis.map((kpi, i) => (
             <EcosystemKPI key={i} {...kpi} trendLabel="Registry Hub" />
@@ -257,11 +262,12 @@ export default function MentorshipAnalytics() {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <div className="lg:col-span-8">
-            <EcosystemCard
-              title="Registry Health"
-              description={`Application status distribution across the global ${moduleName.toLowerCase()} graph`}
-              icon={Activity}
-            >
+            <section className="space-y-4">
+              <DashboardSectionHeading
+                title="Registry Health"
+                titleClassName="normal-case tracking-normal text-sm text-foreground"
+              />
+              <div className="rounded-[20px] border border-transparent bg-muted/30 p-5">
               <div className="h-[350px] w-full mt-6">
                 {loading ? (
                   <div className="h-full w-full flex items-center justify-center bg-zinc-50/50 rounded-2xl border border-zinc-100">
@@ -329,15 +335,17 @@ export default function MentorshipAnalytics() {
                   </ResponsiveContainer>
                 )}
               </div>
-            </EcosystemCard>
+              </div>
+            </section>
           </div>
 
           <div className="lg:col-span-4">
-            <EcosystemCard
-              title="Expertise Registry"
-              description="System categorization distribution"
-              icon={Sparkles}
-            >
+            <section className="space-y-4">
+              <DashboardSectionHeading
+                title="Expertise Registry"
+                titleClassName="normal-case tracking-normal text-sm text-foreground"
+              />
+              <div className="rounded-[20px] border border-transparent bg-muted/30 p-5">
               <div className="space-y-6 mt-6">
                 {categoriesLoading ? (
                   Array(4)
@@ -403,17 +411,19 @@ export default function MentorshipAnalytics() {
                   </Button>
                 </Link>
               </div>
-            </EcosystemCard>
+              </div>
+            </section>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Recent Applications */}
-          <EcosystemCard
-            title="Recent Applications"
-            description={`Latest ${singularName.toLowerCase()} nodes awaiting synchronization`}
-            icon={Clock}
-          >
+          <section className="space-y-4">
+            <DashboardSectionHeading
+              title="Recent Applications"
+              titleClassName="normal-case tracking-normal text-sm text-foreground"
+            />
+            <div className="rounded-[20px] border border-transparent bg-muted/30 p-5">
             <div className="mt-4 space-y-1">
               {requestsLoading ? (
                 Array(3)
@@ -490,14 +500,16 @@ export default function MentorshipAnalytics() {
                 </Button>
               </Link>
             </div>
-          </EcosystemCard>
+            </div>
+          </section>
 
           {/* Top Performing Mentors */}
-          <EcosystemCard
-            title="Verified Experts"
-            description={`Elite ${singularName.toLowerCase()} nodes with highest ecosystem impact`}
-            icon={Zap}
-          >
+          <section className="space-y-4">
+            <DashboardSectionHeading
+              title="Verified Experts"
+              titleClassName="normal-case tracking-normal text-sm text-foreground"
+            />
+            <div className="rounded-[20px] border border-transparent bg-muted/30 p-5">
             <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
               {topMentorsLoading ? (
                 Array(4)
@@ -557,16 +569,18 @@ export default function MentorshipAnalytics() {
                 </Button>
               </Link>
             </div>
-          </EcosystemCard>
+            </div>
+          </section>
         </div>
 
         {/* Audit Logs Section */}
         <div className="pt-4">
-          <EcosystemCard
-            title="Registry Operations Log"
-            description={`Immutable audit trail of administrative ${singularName.toLowerCase()} node modulations`}
-            icon={ShieldCheck}
-          >
+          <section className="space-y-4">
+            <DashboardSectionHeading
+              title="Registry Operations Log"
+              titleClassName="normal-case tracking-normal text-sm text-foreground"
+            />
+            <div className="rounded-[20px] border border-transparent bg-muted/30 p-5">
             <div className="mt-4 overflow-hidden rounded-xl border border-zinc-100 bg-white shadow-sm">
               <table className="w-full text-left border-collapse">
                 <thead>
@@ -681,7 +695,8 @@ export default function MentorshipAnalytics() {
                 </Button>
               </Link>
             </div>
-          </EcosystemCard>
+            </div>
+          </section>
         </div>
       </EcosystemContainer>
     </EcosystemWrapper>

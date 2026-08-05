@@ -49,6 +49,7 @@ import {
   EcosystemKPI,
   EcosystemCard,
 } from "@/components/layout/ecosystem/ecosystem-analytics";
+import { DashboardSectionHeading } from "@/components/home/dashboard-section-heading";
 import { cn } from "@/lib/utils";
 import { useModuleStore } from "@/store/useModuleStore";
 
@@ -179,7 +180,11 @@ export default function SurveyAnalytics() {
         }
       />
 
-      <EcosystemContainer className="p-6 lg:p-8 space-y-6">
+      <EcosystemContainer className="space-y-10 p-8 lg:p-10">
+        <DashboardSectionHeading
+          title="Overview"
+          titleClassName="normal-case tracking-normal text-sm text-foreground"
+        />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {kpis.map((kpi, i) => (
             <EcosystemKPI key={i} {...kpi} trendLabel="v. last period" />
@@ -188,11 +193,12 @@ export default function SurveyAnalytics() {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div className="lg:col-span-8">
-            <EcosystemCard
-              title="Response Activity"
-              description="Real-time feedback velocity"
-              icon={TrendingUp}
-            >
+            <section className="space-y-4">
+              <DashboardSectionHeading
+                title="Response Activity"
+                titleClassName="normal-case tracking-normal text-sm text-foreground"
+              />
+              <div className="rounded-[20px] border border-transparent bg-muted/30 p-5">
               <div className="h-[350px] w-full mt-6">
                 {loading ? (
                   <div className="h-full w-full flex items-center justify-center bg-zinc-50/50 rounded-2xl border border-zinc-100">
@@ -257,15 +263,17 @@ export default function SurveyAnalytics() {
                   </ResponsiveContainer>
                 )}
               </div>
-            </EcosystemCard>
+              </div>
+            </section>
           </div>
 
           <div className="lg:col-span-4">
-            <EcosystemCard
-              title="Status Distribution"
-              description={`${singularName} lifecycle breakdown`}
-              icon={Sparkles}
-            >
+            <section className="space-y-4">
+              <DashboardSectionHeading
+                title="Status Distribution"
+                titleClassName="normal-case tracking-normal text-sm text-foreground"
+              />
+              <div className="rounded-[20px] border border-transparent bg-muted/30 p-5">
               <div className="h-[250px] w-full mb-6 relative flex items-center justify-center">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
@@ -321,7 +329,8 @@ export default function SurveyAnalytics() {
                   </div>
                 ))}
               </div>
-            </EcosystemCard>
+              </div>
+            </section>
           </div>
         </div>
       </EcosystemContainer>

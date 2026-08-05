@@ -6,19 +6,10 @@ import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check"
 import React, { useState } from "react";
 import {
   Download,
-  Calendar,
   LayoutGrid,
   Users,
   MessageSquare,
-  TrendingUp,
-  Activity,
-  Zap,
-  ShieldCheck,
-  RotateCcw,
-  Timer,
   Hash,
-  BarChart3,
-  Globe,
   ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -33,7 +24,6 @@ import {
   Cell,
   Pie,
   PieChart,
-  ResponsiveContainer,
   Tooltip as RechartsTooltip,
   XAxis,
   YAxis,
@@ -45,10 +35,12 @@ import {
   EcosystemKPI,
   EcosystemCard,
 } from "@/components/layout/ecosystem/ecosystem-analytics";
+import { DashboardSectionHeading } from "@/components/home/dashboard-section-heading";
 import { cn } from "@/lib/utils";
 import { useGetDiscussionAnalytics } from "@/graphql/actions/discussion-form";
 import { useModuleStore } from "@/store/useModuleStore";
 import { EcosystemActionBar } from "@/components/layout/ecosystem";
+import { ResponsiveContainer } from "@/components/ui/responsive-container";
 
 // Removing dummy data constants
 // Dummy data removed
@@ -140,32 +132,31 @@ function DiscussionForum() {
           { label: moduleName, href: "/forums" },
           { label: "Overview" },
         ]}
+        actions={
+          <EcosystemActionBar
+            shadow="none"
+            className="p-0 border-none bg-transparent gap-2"
+          >
+            <EcosystemActionBar.Group align="right">
+              <EcosystemActionBar.Item>
+                <div className="flex items-center gap-3">
+                  <DateRangePicker
+                    date={dateRange}
+                    onDateChange={handleDateChange}
+                    defaultValue="LAST_7_DAYS"
+                  />
+                </div>
+              </EcosystemActionBar.Item>
+            </EcosystemActionBar.Group>
+          </EcosystemActionBar>
+        }
       />
 
-      <EcosystemActionBar shadow="none">
-        <EcosystemActionBar.Group align="right">
-          <EcosystemActionBar.Item>
-            <div className="flex items-center gap-3">
-              <DateRangePicker
-                date={dateRange}
-                onDateChange={handleDateChange}
-                defaultValue="LAST_7_DAYS"
-              />
-              <div className="h-4 w-px bg-zinc-200 mx-1" />
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-9 gap-2 text-xs font-bold border-zinc-200"
-              >
-                <Download className="h-3.5 w-3.5 text-zinc-400" />
-                Export
-              </Button>
-            </div>
-          </EcosystemActionBar.Item>
-        </EcosystemActionBar.Group>
-      </EcosystemActionBar>
-
-      <EcosystemContainer className="p-6 lg:p-8 space-y-6">
+      <EcosystemContainer className="space-y-10 p-8 lg:p-10">
+        <DashboardSectionHeading
+          title="Overview"
+          titleClassName="normal-case tracking-normal text-sm text-foreground"
+        />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {kpis.map((kpi, i) => (
             <EcosystemKPI key={i} {...kpi} trendLabel="v. last period" />
@@ -174,207 +165,221 @@ function DiscussionForum() {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div className="lg:col-span-8">
-            <EcosystemCard
-              title="Interaction Pulse"
-              description="New threads and replies trajectory"
-              icon={TrendingUp}
-            >
-              <div className="h-[350px] w-full mt-6">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={postingActivityData}>
-                    <defs>
-                      <linearGradient
-                        id="colorPosts"
-                        x1="0"
-                        y1="0"
-                        x2="0"
-                        y2="1"
-                      >
-                        <stop
-                          offset="5%"
-                          stopColor="#6366f1"
-                          stopOpacity={0.08}
-                        />
-                        <stop
-                          offset="95%"
-                          stopColor="#6366f1"
-                          stopOpacity={0}
-                        />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid
-                      strokeDasharray="3 3"
-                      vertical={false}
-                      stroke="#f1f5f9"
-                    />
-                    <XAxis
-                      dataKey="date"
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fontSize: 10, fontWeight: 600, fill: "#94a3b8" }}
-                      dy={10}
-                      tickFormatter={(val) => {
-                        if (!val) return "";
-                        return new Date(val).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                        });
-                      }}
-                    />
-                    <YAxis
-                      axisLine={false}
-                      tickLine={false}
-                      tick={{ fontSize: 10, fontWeight: 600, fill: "#94a3b8" }}
-                    />
-                    <RechartsTooltip
-                      contentStyle={{
-                        backgroundColor: "#18181b",
-                        border: "none",
-                        borderRadius: "12px",
-                      }}
-                      itemStyle={{
-                        color: "#fff",
-                        fontWeight: 700,
-                        fontSize: "11px",
-                      }}
-                      labelStyle={{ display: "none" }}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="posts"
-                      stroke="#6366f1"
-                      strokeWidth={3}
-                      fillOpacity={1}
-                      fill="url(#colorPosts)"
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
+            <section className="space-y-4">
+              <DashboardSectionHeading
+                title="Interaction Pulse"
+                titleClassName="normal-case tracking-normal text-sm text-foreground"
+              />
+              <div className="rounded-[20px] border border-transparent bg-muted/30 p-5">
+                <div className="h-[350px] w-full mt-6">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={postingActivityData}>
+                      <defs>
+                        <linearGradient
+                          id="colorPosts"
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop
+                            offset="5%"
+                            stopColor="#6366f1"
+                            stopOpacity={0.08}
+                          />
+                          <stop
+                            offset="95%"
+                            stopColor="#6366f1"
+                            stopOpacity={0}
+                          />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        vertical={false}
+                        stroke="#f1f5f9"
+                      />
+                      <XAxis
+                        dataKey="date"
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{
+                          fontSize: 10,
+                          fontWeight: 600,
+                          fill: "#94a3b8",
+                        }}
+                        dy={10}
+                        tickFormatter={(val) => {
+                          if (!val) return "";
+                          return new Date(val).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                          });
+                        }}
+                      />
+                      <YAxis
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{
+                          fontSize: 10,
+                          fontWeight: 600,
+                          fill: "#94a3b8",
+                        }}
+                      />
+                      <RechartsTooltip
+                        contentStyle={{
+                          backgroundColor: "#18181b",
+                          border: "none",
+                          borderRadius: "12px",
+                        }}
+                        itemStyle={{
+                          color: "#fff",
+                          fontWeight: 700,
+                          fontSize: "11px",
+                        }}
+                        labelStyle={{ display: "none" }}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="posts"
+                        stroke="#6366f1"
+                        strokeWidth={3}
+                        fillOpacity={1}
+                        fill="url(#colorPosts)"
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
-            </EcosystemCard>
+            </section>
           </div>
 
           <div className="lg:col-span-4">
-            <EcosystemCard
-              title="Topic Mix"
-              description="Engagement distribution"
-              icon={BarChart3}
-            >
-              <div className="h-64 w-full mt-2">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={topicDistributionData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={85}
-                      paddingAngle={4}
-                      dataKey="value"
-                    >
-                      {topicDistributionData.map((entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={entry.color}
-                          stroke="none"
+            <section className="space-y-4">
+              <DashboardSectionHeading
+                title="Topic Mix"
+                titleClassName="normal-case tracking-normal text-sm text-foreground"
+              />
+              <div className="rounded-[20px] border border-transparent bg-muted/30 p-5">
+                <div className="h-64 w-full mt-2">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={topicDistributionData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={85}
+                        paddingAngle={4}
+                        dataKey="value"
+                      >
+                        {topicDistributionData.map((entry, index) => (
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={entry.color}
+                            stroke="none"
+                          />
+                        ))}
+                      </Pie>
+                      <RechartsTooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="space-y-3 px-2 mt-4">
+                  {topicDistributionData.map((item, i) => (
+                    <div key={i} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="h-2 w-2 rounded-full"
+                          style={{ backgroundColor: item.color }}
                         />
-                      ))}
-                    </Pie>
-                    <RechartsTooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="space-y-3 px-2 mt-4">
-                {topicDistributionData.map((item, i) => (
-                  <div key={i} className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div
-                        className="h-2 w-2 rounded-full"
-                        style={{ backgroundColor: item.color }}
-                      />
-                      <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
-                        {item.name}
+                        <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
+                          {item.name}
+                        </span>
+                      </div>
+                      <span className="text-xs font-bold text-zinc-900">
+                        {item.value}%
                       </span>
                     </div>
-                    <span className="text-xs font-bold text-zinc-900">
-                      {item.value}%
-                    </span>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </EcosystemCard>
+            </section>
           </div>
         </div>
 
-        <EcosystemCard
-          title={`Top Performing ${moduleName}`}
-          description="High-velocity community nodes"
-          icon={Activity}
-        >
-          <div className="space-y-1 mt-6">
-            {forumPerformanceData.map((forum) => (
-              <div
-                key={forum.id}
-                className="flex items-center justify-between p-5 rounded-xl border border-zinc-100 hover:bg-zinc-50 transition-all group"
+        <section className="space-y-4">
+          <DashboardSectionHeading
+            title={`Top Performing ${moduleName}`}
+            titleClassName="normal-case tracking-normal text-sm text-foreground"
+          />
+          <div className="rounded-[20px] border border-transparent bg-muted/30 p-5">
+            <div className="space-y-1 mt-6">
+              {forumPerformanceData.map((forum) => (
+                <div
+                  key={forum.id}
+                  className="flex items-center justify-between p-5 rounded-xl border border-zinc-100 hover:bg-zinc-50 transition-all group"
+                >
+                  <div className="flex items-center gap-6 flex-1">
+                    <div className="h-12 w-12 bg-white rounded-lg flex items-center justify-center text-2xl shadow-sm border border-zinc-100 group-hover:scale-105 transition-transform">
+                      {forum.icon}
+                    </div>
+                    <div className="min-w-0">
+                      <h4 className="text-sm font-bold text-zinc-900 transition-colors group-hover:text-indigo-600 truncate">
+                        {forum.name}
+                      </h4>
+                      <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mt-0.5">
+                        {forum.members.toLocaleString()} members • id:{" "}
+                        {forum.slug}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-12">
+                    <div className="w-32">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest leading-none">
+                          Active
+                        </span>
+                        <span className="text-[10px] font-bold text-zinc-900 leading-none">
+                          {forum.active}%
+                        </span>
+                      </div>
+                      <div className="h-1 w-full bg-zinc-100 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-indigo-500 rounded-full transition-all duration-1000"
+                          style={{ width: `${forum.active}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="text-right w-24">
+                      <p className="text-xs font-bold text-zinc-900 truncate">
+                        {forum.lastActivity}
+                      </p>
+                      <p className="text-[8px] font-bold text-zinc-400 uppercase tracking-tighter">
+                        last activity
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {forumPerformanceData.length === 0 && (
+                <div className="text-center py-8 text-sm text-zinc-500 font-medium">
+                  No active {moduleName.toLowerCase()} found in this period.
+                </div>
+              )}
+            </div>
+            <div className="mt-8 flex justify-center">
+              <Button
+                variant="ghost"
+                className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] hover:text-indigo-600"
               >
-                <div className="flex items-center gap-6 flex-1">
-                  <div className="h-12 w-12 bg-white rounded-lg flex items-center justify-center text-2xl shadow-sm border border-zinc-100 group-hover:scale-105 transition-transform">
-                    {forum.icon}
-                  </div>
-                  <div className="min-w-0">
-                    <h4 className="text-sm font-bold text-zinc-900 transition-colors group-hover:text-indigo-600 truncate">
-                      {forum.name}
-                    </h4>
-                    <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mt-0.5">
-                      {forum.members.toLocaleString()} members • id:{" "}
-                      {forum.slug}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-12">
-                  <div className="w-32">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest leading-none">
-                        Active
-                      </span>
-                      <span className="text-[10px] font-bold text-zinc-900 leading-none">
-                        {forum.active}%
-                      </span>
-                    </div>
-                    <div className="h-1 w-full bg-zinc-100 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-indigo-500 rounded-full transition-all duration-1000"
-                        style={{ width: `${forum.active}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="text-right w-24">
-                    <p className="text-xs font-bold text-zinc-900 truncate">
-                      {forum.lastActivity}
-                    </p>
-                    <p className="text-[8px] font-bold text-zinc-400 uppercase tracking-tighter">
-                      last activity
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
-            {forumPerformanceData.length === 0 && (
-              <div className="text-center py-8 text-sm text-zinc-500 font-medium">
-                No active {moduleName.toLowerCase()} found in this period.
-              </div>
-            )}
+                View Extensive Audit <ArrowRight size={12} className="ml-2" />
+              </Button>
+            </div>
           </div>
-          <div className="mt-8 flex justify-center">
-            <Button
-              variant="ghost"
-              className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em] hover:text-indigo-600"
-            >
-              View Extensive Audit <ArrowRight size={12} className="ml-2" />
-            </Button>
-          </div>
-        </EcosystemCard>
+        </section>
       </EcosystemContainer>
     </EcosystemWrapper>
   );

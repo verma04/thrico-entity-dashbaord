@@ -29,7 +29,6 @@ import { Button } from "@/components/ui/button";
 
 import Link from "next/link";
 import {
-  ResponsiveContainer,
   XAxis,
   YAxis,
   Tooltip,
@@ -37,6 +36,7 @@ import {
   Area,
   AreaChart,
 } from "recharts";
+import { ResponsiveContainer } from "@/components/ui/responsive-container";
 import {
   useGetRewardStats,
   useGetRedemptions,
@@ -50,6 +50,7 @@ import {
 } from "@/components/shared/user-profile-hover-card";
 import moment from "moment";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { DashboardSectionHeading } from "@/components/home/dashboard-section-heading";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
@@ -407,22 +408,28 @@ export default function RewardsDashboard() {
         </div>
 
         {/* KPI Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {kpis.map((kpi, i) => (
-            <EcosystemKPI key={i} {...kpi} />
-          ))}
-        </div>
+        <section className="space-y-4">
+          <DashboardSectionHeading
+            title="Rewards Overview"
+            titleClassName="normal-case tracking-normal text-sm text-foreground"
+          />
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {kpis.map((kpi, i) => (
+              <EcosystemKPI key={i} {...kpi} />
+            ))}
+          </div>
+        </section>
 
         {/* Chart + Recent Activity */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Area Chart */}
-          <div className="lg:col-span-8">
-            <EcosystemCard
+          <section className="lg:col-span-8 space-y-4">
+            <DashboardSectionHeading
               title="Redemption Activity"
-              description="Daily reward claims across your community"
-              icon={TrendingUp}
-            >
-              <div className="h-[300px] w-full mt-4">
+              titleClassName="normal-case tracking-normal text-sm text-foreground"
+            />
+            <div className="p-5 rounded-[20px] bg-muted/30 border border-transparent">
+              <div className="h-[300px] w-full">
                 {statsLoading ? (
                   <div className="h-full w-full flex items-center justify-center bg-muted/30 rounded-xl border border-border">
                     <div className="h-8 w-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -453,7 +460,7 @@ export default function RewardsDashboard() {
                     </Link>
                   </div>
                 ) : (
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer>
                     <AreaChart
                       data={chartData}
                       margin={{ top: 8, right: 0, left: -16, bottom: 0 }}
@@ -537,17 +544,17 @@ export default function RewardsDashboard() {
                   </ResponsiveContainer>
                 )}
               </div>
-            </EcosystemCard>
-          </div>
+            </div>
+          </section>
 
           {/* Recent Redemptions */}
-          <div className="lg:col-span-4">
-            <EcosystemCard
+          <section className="lg:col-span-4 space-y-4">
+            <DashboardSectionHeading
               title="Recent Activity"
-              description="Latest rewards claimed"
-              icon={Users}
-            >
-              <div className="space-y-1 mt-3">
+              titleClassName="normal-case tracking-normal text-sm text-foreground"
+            />
+            <div className="p-5 rounded-[20px] bg-muted/30 border border-transparent">
+              <div className="space-y-1">
                 {redemptionsLoading ? (
                   [1, 2, 3, 4, 5].map((i) => (
                     <div
@@ -636,208 +643,211 @@ export default function RewardsDashboard() {
                   </Button>
                 </Link>
               </div>
-            </EcosystemCard>
-          </div>
+            </div>
+          </section>
         </div>
 
         {/* ── Inventory Snapshot ────────────────────────────────────── */}
-        <EcosystemCard
-          title="Inventory at a Glance"
-          description="Stock levels for rewards with inventory tracking"
-          icon={Package}
-        >
-          {rewardsLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-4">
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="p-4 rounded-xl border border-border animate-pulse"
-                >
-                  <div className="flex gap-3">
-                    <Skeleton className="h-10 w-10 rounded-lg shrink-0" />
-                    <div className="space-y-2 flex-1">
-                      <Skeleton className="h-3 w-2/3" />
-                      <Skeleton className="h-2 w-full" />
-                      <Skeleton className="h-2 w-1/3" />
+        <section className="space-y-4">
+          <DashboardSectionHeading
+            title="Inventory at a Glance"
+            titleClassName="normal-case tracking-normal text-sm text-foreground"
+          />
+          <div className="p-5 rounded-[20px] bg-muted/30 border border-transparent">
+            {rewardsLoading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-4">
+                {[1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className="p-4 rounded-xl border border-border animate-pulse"
+                  >
+                    <div className="flex gap-3">
+                      <Skeleton className="h-10 w-10 rounded-lg shrink-0" />
+                      <div className="space-y-2 flex-1">
+                        <Skeleton className="h-3 w-2/3" />
+                        <Skeleton className="h-2 w-full" />
+                        <Skeleton className="h-2 w-1/3" />
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          ) : inventoryRewards.length === 0 ? (
-            <div className="py-12 flex flex-col items-center justify-center gap-3 text-center mt-2">
-              <div className="h-12 w-12 bg-muted rounded-2xl flex items-center justify-center border border-border">
-                <Package className="h-5 w-5 text-muted-foreground/30" />
+                ))}
               </div>
-              <div className="space-y-1">
-                <p className="text-sm font-semibold text-foreground">
-                  No inventory-tracked rewards
-                </p>
-                <p className="text-xs text-muted-foreground max-w-[220px] leading-relaxed">
-                  Enable inventory tracking on a reward to monitor stock levels
-                  here
-                </p>
-              </div>
-              <Link href="/gamification/rewards/coupons/create">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-2 rounded-full text-xs mt-1"
-                >
-                  <Plus className="h-3 w-3" />
-                  Create reward
-                </Button>
-              </Link>
-            </div>
-          ) : (
-            <>
-              {/* Summary bar */}
-              <div className="flex items-center gap-4 mt-4 mb-3 flex-wrap">
-                <div className="flex items-center gap-1.5 text-xs font-medium">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
-                  <span className="text-foreground font-bold tabular-nums">
-                    {healthyRewards.length}
-                  </span>
-                  <span className="text-muted-foreground">healthy</span>
+            ) : inventoryRewards.length === 0 ? (
+              <div className="py-12 flex flex-col items-center justify-center gap-3 text-center mt-2">
+                <div className="h-12 w-12 bg-muted rounded-2xl flex items-center justify-center border border-border">
+                  <Package className="h-5 w-5 text-muted-foreground/30" />
                 </div>
-                {lowStockRewards.length > 0 && (
+                <div className="space-y-1">
+                  <p className="text-sm font-semibold text-foreground">
+                    No inventory-tracked rewards
+                  </p>
+                  <p className="text-xs text-muted-foreground max-w-[220px] leading-relaxed">
+                    Enable inventory tracking on a reward to monitor stock
+                    levels here
+                  </p>
+                </div>
+                <Link href="/gamification/rewards/coupons/create">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2 rounded-full text-xs mt-1"
+                  >
+                    <Plus className="h-3 w-3" />
+                    Create reward
+                  </Button>
+                </Link>
+              </div>
+            ) : (
+              <>
+                {/* Summary bar */}
+                <div className="flex items-center gap-4 mt-4 mb-3 flex-wrap">
                   <div className="flex items-center gap-1.5 text-xs font-medium">
-                    <AlertTriangle className="h-3.5 w-3.5 text-rose-500" />
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
                     <span className="text-foreground font-bold tabular-nums">
-                      {lowStockRewards.length}
+                      {healthyRewards.length}
                     </span>
-                    <span className="text-muted-foreground">low stock</span>
+                    <span className="text-muted-foreground">healthy</span>
                   </div>
-                )}
-                <div className="flex items-center gap-1.5 text-xs font-medium">
-                  <Package className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span className="text-foreground font-bold tabular-nums">
-                    {inventoryRewards.length}
-                  </span>
-                  <span className="text-muted-foreground">tracked</span>
+                  {lowStockRewards.length > 0 && (
+                    <div className="flex items-center gap-1.5 text-xs font-medium">
+                      <AlertTriangle className="h-3.5 w-3.5 text-rose-500" />
+                      <span className="text-foreground font-bold tabular-nums">
+                        {lowStockRewards.length}
+                      </span>
+                      <span className="text-muted-foreground">low stock</span>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-1.5 text-xs font-medium">
+                    <Package className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span className="text-foreground font-bold tabular-nums">
+                      {inventoryRewards.length}
+                    </span>
+                    <span className="text-muted-foreground">tracked</span>
+                  </div>
                 </div>
-              </div>
 
-              {/* Reward inventory cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {/* Show low stock first, then healthy */}
-                {[...lowStockRewards, ...healthyRewards]
-                  .slice(0, 9)
-                  .map((reward: any) => {
-                    const remaining = reward.remainingVouchers;
-                    const total = reward.totalVouchers || 0;
-                    const pct =
-                      total > 0
-                        ? Math.round((remaining / total) * 100)
-                        : remaining > 0
-                          ? 100
-                          : 0;
-                    const colors = getStockColor(remaining);
+                {/* Reward inventory cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {/* Show low stock first, then healthy */}
+                  {[...lowStockRewards, ...healthyRewards]
+                    .slice(0, 9)
+                    .map((reward: any) => {
+                      const remaining = reward.remainingVouchers;
+                      const total = reward.totalVouchers || 0;
+                      const pct =
+                        total > 0
+                          ? Math.round((remaining / total) * 100)
+                          : remaining > 0
+                            ? 100
+                            : 0;
+                      const colors = getStockColor(remaining);
 
-                    return (
-                      <div
-                        key={reward.id}
-                        className="group flex items-start gap-3.5 p-4 rounded-xl border border-border bg-card hover:border-indigo-200/60 hover:shadow-sm transition-all"
-                      >
-                        {/* Thumbnail */}
-                        <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-slate-50 to-slate-100 dark:from-zinc-800 dark:to-zinc-900 border border-border/50 overflow-hidden shrink-0 flex items-center justify-center">
-                          {reward.image ? (
-                            <img
-                              src={reward.image}
-                              alt={reward.title}
-                              className="h-full w-full object-cover"
-                            />
-                          ) : (
-                            <Ticket className="h-4 w-4 text-muted-foreground/30" />
-                          )}
-                        </div>
-
-                        {/* Info */}
-                        <div className="flex-1 min-w-0 space-y-2">
-                          <div className="flex items-start justify-between gap-2">
-                            <h4 className="text-xs font-semibold text-foreground truncate leading-tight">
-                              {reward.title}
-                            </h4>
-                            <span
-                              className={cn(
-                                "inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-bold shrink-0",
-                                remaining !== undefined && remaining <= 10
-                                  ? "bg-rose-50 text-rose-600 border border-rose-100"
-                                  : "bg-emerald-50 text-emerald-600 border border-emerald-100",
-                              )}
-                            >
-                              {remaining !== undefined && remaining <= 5 ? (
-                                <>
-                                  <AlertTriangle className="h-2.5 w-2.5" />
-                                  Critical
-                                </>
-                              ) : remaining !== undefined && remaining <= 10 ? (
-                                <>
-                                  <AlertTriangle className="h-2.5 w-2.5" />
-                                  Low
-                                </>
-                              ) : (
-                                <>
-                                  <CheckCircle2 className="h-2.5 w-2.5" />
-                                  OK
-                                </>
-                              )}
-                            </span>
+                      return (
+                        <div
+                          key={reward.id}
+                          className="group flex items-start gap-3.5 p-4 rounded-xl border border-border bg-card hover:border-indigo-200/60 hover:shadow-sm transition-all"
+                        >
+                          {/* Thumbnail */}
+                          <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-slate-50 to-slate-100 dark:from-zinc-800 dark:to-zinc-900 border border-border/50 overflow-hidden shrink-0 flex items-center justify-center">
+                            {reward.image ? (
+                              <img
+                                src={reward.image}
+                                alt={reward.title}
+                                className="h-full w-full object-cover"
+                              />
+                            ) : (
+                              <Ticket className="h-4 w-4 text-muted-foreground/30" />
+                            )}
                           </div>
 
-                          {/* Stock bar */}
-                          <div className="space-y-1">
-                            <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
-                              <div
-                                className={cn(
-                                  "h-full rounded-full transition-all duration-700",
-                                  colors.bar,
-                                )}
-                                style={{
-                                  width: `${Math.max(pct, 2)}%`,
-                                }}
-                              />
-                            </div>
-                            <div className="flex items-center justify-between text-[10px]">
+                          {/* Info */}
+                          <div className="flex-1 min-w-0 space-y-2">
+                            <div className="flex items-start justify-between gap-2">
+                              <h4 className="text-xs font-semibold text-foreground truncate leading-tight">
+                                {reward.title}
+                              </h4>
                               <span
                                 className={cn(
-                                  "font-bold tabular-nums",
-                                  colors.text,
+                                  "inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-bold shrink-0",
+                                  remaining !== undefined && remaining <= 10
+                                    ? "bg-rose-50 text-rose-600 border border-rose-100"
+                                    : "bg-emerald-50 text-emerald-600 border border-emerald-100",
                                 )}
                               >
-                                {remaining ?? "∞"} remaining
+                                {remaining !== undefined && remaining <= 5 ? (
+                                  <>
+                                    <AlertTriangle className="h-2.5 w-2.5" />
+                                    Critical
+                                  </>
+                                ) : remaining !== undefined &&
+                                  remaining <= 10 ? (
+                                  <>
+                                    <AlertTriangle className="h-2.5 w-2.5" />
+                                    Low
+                                  </>
+                                ) : (
+                                  <>
+                                    <CheckCircle2 className="h-2.5 w-2.5" />
+                                    OK
+                                  </>
+                                )}
                               </span>
-                              {total > 0 && (
-                                <span className="text-muted-foreground/60 tabular-nums">
-                                  of {total}
+                            </div>
+
+                            {/* Stock bar */}
+                            <div className="space-y-1">
+                              <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                                <div
+                                  className={cn(
+                                    "h-full rounded-full transition-all duration-700",
+                                    colors.bar,
+                                  )}
+                                  style={{
+                                    width: `${Math.max(pct, 2)}%`,
+                                  }}
+                                />
+                              </div>
+                              <div className="flex items-center justify-between text-[10px]">
+                                <span
+                                  className={cn(
+                                    "font-bold tabular-nums",
+                                    colors.text,
+                                  )}
+                                >
+                                  {remaining ?? "∞"} remaining
                                 </span>
-                              )}
+                                {total > 0 && (
+                                  <span className="text-muted-foreground/60 tabular-nums">
+                                    of {total}
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    );
-                  })}
-              </div>
-
-              {/* View all link */}
-              {inventoryRewards.length > 9 && (
-                <div className="mt-4 pt-4 border-t border-border">
-                  <Link href="/gamification/rewards/coupons">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full gap-2 rounded-lg"
-                    >
-                      View all {inventoryRewards.length} tracked rewards
-                      <ArrowRight className="h-3.5 w-3.5" />
-                    </Button>
-                  </Link>
+                      );
+                    })}
                 </div>
-              )}
-            </>
-          )}
-        </EcosystemCard>
+
+                {/* View all link */}
+                {inventoryRewards.length > 9 && (
+                  <div className="mt-4 pt-4 border-t border-border">
+                    <Link href="/gamification/rewards/coupons">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full gap-2 rounded-lg"
+                      >
+                        View all {inventoryRewards.length} tracked rewards
+                        <ArrowRight className="h-3.5 w-3.5" />
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </section>
 
         {/* Navigation Cards */}
         <div className="space-y-4">

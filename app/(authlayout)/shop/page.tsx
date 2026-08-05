@@ -3,7 +3,6 @@
 import { withModulePermission } from "@/components/hoc/with-module-permission";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 
-
 import React, { useState } from "react";
 import Link from "next/link";
 import {
@@ -29,6 +28,7 @@ import {
   EcosystemKPI,
   EcosystemCard,
 } from "@/components/layout/ecosystem/ecosystem-analytics";
+import { DashboardSectionHeading } from "@/components/home/dashboard-section-heading";
 import { Button } from "@/components/ui/button";
 import { useGetShopStats, TimeRange } from "@/graphql/actions/shop/shop-hooks";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -56,12 +56,13 @@ function ShopDashboardPage() {
     else if (diffDays <= 90) setTimeRange(TimeRange.LAST_90_DAYS);
   };
 
-  const formattedDateRange = dateRange?.from && dateRange?.to
-    ? {
-        startDate: dateRange.from.toISOString(),
-        endDate: dateRange.to.toISOString(),
-      }
-    : undefined;
+  const formattedDateRange =
+    dateRange?.from && dateRange?.to
+      ? {
+          startDate: dateRange.from.toISOString(),
+          endDate: dateRange.to.toISOString(),
+        }
+      : undefined;
 
   const { data, loading } = useGetShopStats(timeRange, formattedDateRange);
   const stats = data?.getShopStats;
@@ -110,7 +111,7 @@ function ShopDashboardPage() {
         icon={ShoppingBag}
         actions={
           <div className="flex items-center gap-3">
-            <DateRangePicker 
+            <DateRangePicker
               date={dateRange}
               onDateChange={handleDateChange}
               defaultValue="LAST_7_DAYS"
@@ -118,7 +119,6 @@ function ShopDashboardPage() {
             <div className="h-4 w-px bg-zinc-200 mx-1" />
             <Link href="/shop/all">
               <Button
-
                 variant="outline"
                 className="h-9 px-4 rounded-lg border-zinc-200 font-bold text-[10px] uppercase tracking-widest text-zinc-600 gap-2 hover:bg-zinc-50 transition-all shadow-sm"
               >
@@ -137,9 +137,11 @@ function ShopDashboardPage() {
         }
       />
 
-      
-
-      <EcosystemContainer className="p-6 lg:p-8 space-y-6">
+      <EcosystemContainer className="space-y-10 p-8 lg:p-10">
+        <DashboardSectionHeading
+          title="Overview"
+          titleClassName="normal-case tracking-normal text-sm text-foreground"
+        />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {kpis.map((kpi, i) => (
             <EcosystemKPI key={i} {...kpi} trendLabel="Period stats" />
@@ -152,5 +154,5 @@ function ShopDashboardPage() {
 
 export default withSubscriptionCheck(
   withModulePermission(ShopDashboardPage, "SHOP", "canRead"),
-  "shop"
+  "shop",
 );

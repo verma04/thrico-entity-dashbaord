@@ -29,19 +29,17 @@ import {
   Cell,
   Pie,
   PieChart,
-  ResponsiveContainer,
   Tooltip as RechartsTooltip,
   XAxis,
   YAxis,
 } from "recharts";
+import { ResponsiveContainer } from "@/components/ui/responsive-container";
+import { DashboardSectionHeading } from "@/components/home/dashboard-section-heading";
 import Link from "next/link";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
-import {
-  EcosystemKPI,
-  EcosystemCard,
-} from "@/components/layout/ecosystem/ecosystem-analytics";
+import { EcosystemKPI } from "@/components/layout/ecosystem/ecosystem-analytics";
 import { 
   useListings, 
   useGetListingStats, 
@@ -187,6 +185,10 @@ const MarketplaceDashboard = () => {
       />
 
       <EcosystemContainer className="p-6 lg:p-8 space-y-6">
+        <DashboardSectionHeading
+          title="Overview"
+          titleClassName="normal-case tracking-normal text-sm text-foreground"
+        />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <EcosystemKPI
             title={`Total ${moduleName}`}
@@ -226,13 +228,13 @@ const MarketplaceDashboard = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div className="lg:col-span-8">
-            <EcosystemCard
-              title={`${singularName} Velocity`}
-              description="New entries published over time"
-              icon={TrendingUp}
-              colorScheme="indigo"
-            >
-              <div className="h-[320px] w-full mt-6">
+            <section className="space-y-4">
+              <DashboardSectionHeading
+                title={`${singularName} Velocity`}
+                titleClassName="normal-case tracking-normal text-sm text-foreground"
+              />
+              <div className="rounded-[20px] border border-transparent bg-muted/30 p-5">
+                <div className="h-[320px] w-full mt-6">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={weeklyListingsData}>
                     <defs>
@@ -270,17 +272,18 @@ const MarketplaceDashboard = () => {
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
-            </EcosystemCard>
+            </div>
+            </section>
           </div>
 
-          <div className="lg:col-span-4">
-            <EcosystemCard
-              title="Category Mix"
-              description="Inventory distribution"
-              icon={Package}
-              colorScheme="sky"
-            >
-              <div className="h-56 w-full mt-2">
+          <div className="lg:col-span-4 space-y-6">
+            <section className="space-y-4">
+              <DashboardSectionHeading
+                title="Category Mix"
+                titleClassName="normal-case tracking-normal text-sm text-foreground"
+              />
+              <div className="rounded-[20px] border border-transparent bg-muted/30 p-5">
+                <div className="h-56 w-full mt-2">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
@@ -311,17 +314,19 @@ const MarketplaceDashboard = () => {
                   </div>
                 ))}
               </div>
-            </EcosystemCard>
+            </div>
+            </section>
           </div>
         </div>
 
-        <EcosystemCard
-          title="Recent Catalog Performance"
-          description={`Detailed metrics for latest active ${moduleName.toLowerCase()}`}
-          icon={Clock}
-        >
-          <div className="space-y-1 mt-4">
-            {listingData.map((listing) => (
+        <section className="space-y-4">
+          <DashboardSectionHeading
+            title="Recent Catalog Performance"
+            titleClassName="normal-case tracking-normal text-sm text-foreground"
+          />
+          <div className="rounded-[20px] border border-transparent bg-muted/30 p-5">
+            <div className="space-y-1 mt-4">
+              {listingData.map((listing) => (
               <div
                 key={listing.id}
                 className="flex items-center justify-between p-4 rounded-xl border border-border hover:bg-muted/50 transition-all group"
@@ -353,7 +358,8 @@ const MarketplaceDashboard = () => {
               </div>
             ))}
           </div>
-        </EcosystemCard>
+        </div>
+        </section>
       </EcosystemContainer>
     </EcosystemWrapper>
   );

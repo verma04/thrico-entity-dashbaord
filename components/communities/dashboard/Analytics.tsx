@@ -24,7 +24,8 @@ import {
   Search,
   Users2,
 } from "lucide-react";
-import { ResponsiveContainer, Tooltip, Cell, PieChart, Pie } from "recharts";
+import { Tooltip, Cell, PieChart, Pie } from "recharts";
+import { ResponsiveContainer } from "@/components/ui/responsive-container";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
@@ -38,7 +39,7 @@ import moment from "moment";
 import { AccessDeniedAlert } from "@/components/shared/access-denied-alert";
 import { useModuleStore } from "@/store/useModuleStore";
 import { getPreferredMediaUrl } from "@/lib/media-utils";
-import { EcosystemCard } from "@/components/layout/ecosystem/ecosystem-card";
+import { DashboardSectionHeading } from "@/components/home/dashboard-section-heading";
 
 const STATUS_COLORS = ["#18181b", "#3f3f46", "#71717a", "#a1a1aa", "#e4e4e7"];
 
@@ -147,12 +148,12 @@ export default function CommunitiesAnalytics() {
         />
 
         <EcosystemContainer className="">
-          <div className="max-w-3xl">
-            <EcosystemCard
+          <div className="max-w-3xl space-y-4">
+            <DashboardSectionHeading
               title="Access Restricted"
-              description="You need additional permissions to view this dashboard."
-              icon={ShieldCheck}
-            >
+              titleClassName="normal-case tracking-normal text-sm text-foreground"
+            />
+            <div className="rounded-[20px] border border-transparent bg-muted/30 p-5">
               <div className="p-2">
                 <AccessDeniedAlert
                   message={
@@ -161,7 +162,7 @@ export default function CommunitiesAnalytics() {
                   }
                 />
               </div>
-            </EcosystemCard>
+            </div>
           </div>
         </EcosystemContainer>
       </EcosystemWrapper>
@@ -226,33 +227,40 @@ export default function CommunitiesAnalytics() {
         icon={Users2}
       />
 
-      <EcosystemContainer className="p-6 lg:p-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {kpis.map((kpi, i) => (
-            <EcosystemKPI key={i} {...kpi} trendLabel="vs before" />
-          ))}
-        </div>
+      <EcosystemContainer className="p-6 lg:p-8 space-y-8">
+        <section className="space-y-4">
+          <DashboardSectionHeading
+            title="Metrics Overview"
+            titleClassName="normal-case tracking-normal text-sm text-foreground"
+          />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {kpis.map((kpi, i) => (
+              <EcosystemKPI key={i} {...kpi} trendLabel="vs before" />
+            ))}
+          </div>
+        </section>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div className="lg:col-span-8 space-y-6">
-            <EcosystemCard
-              title={`Best ${moduleName}`}
-              description="Most members and views"
-              icon={BarChart3}
-            >
-              {loading ? (
-                <div className="h-72">
-                  <ChartSkeleton />
-                </div>
-              ) : topCommunities.length === 0 ? (
-                <div className="h-72">
-                  <EmptyChart message="No info to show for this time." />
-                </div>
-              ) : (
-                <div className="space-y-1">
-                  {topCommunities
-                    .slice(0, 6)
-                    .map((community: TopCommunity, idx: number) => {
+            <section className="space-y-4">
+              <DashboardSectionHeading
+                title={`Best ${moduleName}`}
+                titleClassName="normal-case tracking-normal text-sm text-foreground"
+              />
+              <div className="rounded-[20px] border border-transparent bg-muted/30 p-5">
+                {loading ? (
+                  <div className="h-72">
+                    <ChartSkeleton />
+                  </div>
+                ) : topCommunities.length === 0 ? (
+                  <div className="h-72">
+                    <EmptyChart message="No info to show for this time." />
+                  </div>
+                ) : (
+                  <div className="space-y-1">
+                    {topCommunities
+                      .slice(0, 6)
+                      .map((community: TopCommunity, idx: number) => {
                       const maxMembers = topCommunities[0]?.members || 1;
                       const barWidth = Math.round(
                         (community.members / maxMembers) * 100,
@@ -295,16 +303,18 @@ export default function CommunitiesAnalytics() {
                         </div>
                       );
                     })}
-                </div>
-              )}
-            </EcosystemCard>
+                  </div>
+                )}
+              </div>
+            </section>
 
-            <EcosystemCard
-              title="Top Creators"
-              description={`People who make the most ${moduleName.toLowerCase()}`}
-              icon={Crown}
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <section className="space-y-4">
+              <DashboardSectionHeading
+                title="Top Creators"
+                titleClassName="normal-case tracking-normal text-sm text-foreground"
+              />
+              <div className="rounded-[20px] border border-transparent bg-muted/30 p-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {topCreators
                   .slice(0, 6)
                   .map((creator: TopCreator, idx: number) => (
@@ -338,18 +348,19 @@ export default function CommunitiesAnalytics() {
                       </div>
                     </div>
                   ))}
+                </div>
               </div>
-            </EcosystemCard>
+            </section>
           </div>
 
           <div className="lg:col-span-4 space-y-6">
-            <EcosystemCard
-              title={`${singularName} Status`}
-              description={`Current state of all ${moduleName.toLowerCase()}`}
-              icon={Sparkles}
-            >
-              <div className="flex flex-col items-center gap-6">
-                <div className="relative h-48 w-full flex items-center justify-center">
+            <section className="space-y-4">
+              <DashboardSectionHeading
+                title={`${singularName} Status`}
+                titleClassName="normal-case tracking-normal text-sm text-foreground"
+              />
+              <div className="flex flex-col gap-6">
+                <div className="relative h-64 w-full flex items-center justify-center">
                   {loading ? (
                     <ChartSkeleton />
                   ) : (
@@ -360,8 +371,8 @@ export default function CommunitiesAnalytics() {
                             data={statusDistribution}
                             cx="50%"
                             cy="50%"
-                            innerRadius={60}
-                            outerRadius={85}
+                            innerRadius={70}
+                            outerRadius={95}
                             paddingAngle={4}
                             dataKey="value"
                             stroke="none"
@@ -405,7 +416,7 @@ export default function CommunitiesAnalytics() {
                     (item: StatusDistributionPoint, i: number) => (
                       <div
                         key={item.name}
-                        className="flex items-center justify-between p-2.5 rounded-lg bg-muted/30 border border-border"
+                        className="flex items-center justify-between p-3 rounded-[20px] bg-muted/30 border border-transparent"
                       >
                         <div className="flex items-center gap-2.5">
                           <div
@@ -427,7 +438,7 @@ export default function CommunitiesAnalytics() {
                   )}
                 </div>
               </div>
-            </EcosystemCard>
+            </section>
 
             <div className="bg-primary text-primary-foreground rounded-2xl p-6 text-white shadow-lg relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">

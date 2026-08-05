@@ -5,9 +5,17 @@ import {
   useGetEntityCurrencyConfig,
   useGetCurrencyStats,
 } from "@/graphql/actions";
-import { Coins, CreditCard, Activity, Settings2, TrendingUp, BarChart3 } from "lucide-react";
 import {
-  ResponsiveContainer,
+  Coins,
+  CreditCard,
+  Activity,
+  Settings2,
+  TrendingUp,
+  BarChart3,
+} from "lucide-react";
+import { DashboardSectionHeading } from "@/components/home/dashboard-section-heading";
+import { ResponsiveContainer } from "@/components/ui/responsive-container";
+import {
   AreaChart,
   Area,
   XAxis,
@@ -16,16 +24,26 @@ import {
   Tooltip,
 } from "recharts";
 import { formatNumber } from "@/lib/formatNumber";
-import { EcosystemKPI, EcosystemCard } from "@/components/layout/ecosystem/ecosystem-analytics";
+import { EcosystemKPI } from "@/components/layout/ecosystem/ecosystem-analytics";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export function CurrencyDashboard({ timeRange, dateRange }: { timeRange?: any, dateRange?: any }) {
-  const { data: configData, loading: configLoading } = useGetEntityCurrencyConfig();
+export function CurrencyDashboard({
+  timeRange,
+  dateRange,
+}: {
+  timeRange?: any;
+  dateRange?: any;
+}) {
+  const { data: configData, loading: configLoading } =
+    useGetEntityCurrencyConfig();
   const config = configData?.getEntityCurrencyConfig;
   const currencyName = config?.currencyName || "EC";
 
-  const { data: statsData, loading: statsLoading } = useGetCurrencyStats(timeRange, dateRange);
+  const { data: statsData, loading: statsLoading } = useGetCurrencyStats(
+    timeRange,
+    dateRange,
+  );
   const stats = statsData?.getCurrencyStats;
 
   const isLoading = configLoading || statsLoading;
@@ -62,31 +80,51 @@ export function CurrencyDashboard({ timeRange, dateRange }: { timeRange?: any, d
   return (
     <div className="space-y-6">
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {kpis.map((kpi, i) => (
-          <EcosystemKPI key={i} {...kpi} trendLabel="v. last month" />
-        ))}
-      </div>
+      <section className="space-y-4">
+        <DashboardSectionHeading
+          title="Currency Overview"
+          titleClassName="normal-case tracking-normal text-sm text-foreground"
+        />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {kpis.map((kpi, i) => (
+            <EcosystemKPI key={i} {...kpi} trendLabel="v. last month" />
+          ))}
+        </div>
+      </section>
 
       {/* Chart + Config */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Chart */}
-        <div className="lg:col-span-8">
-          <EcosystemCard
+        <section className="lg:col-span-8 space-y-4">
+          <DashboardSectionHeading
             title="Currency Flow"
-            description="Monthly circulation trajectory"
-            icon={TrendingUp}
-          >
-            <div className="h-[300px] w-full mt-6">
-              <ResponsiveContainer width="100%" height="100%">
+            titleClassName="normal-case tracking-normal text-sm text-foreground"
+          />
+          <div className="p-5 rounded-[20px] bg-muted/30 border border-transparent">
+            <div className="h-[300px] w-full">
+              <ResponsiveContainer>
                 <AreaChart data={chartData}>
                   <defs>
-                    <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#6366f1" stopOpacity={0.08} />
+                    <linearGradient
+                      id="colorAmount"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop
+                        offset="5%"
+                        stopColor="#6366f1"
+                        stopOpacity={0.08}
+                      />
                       <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    vertical={false}
+                    stroke="#f1f5f9"
+                  />
                   <XAxis
                     dataKey="name"
                     axisLine={false}
@@ -106,7 +144,11 @@ export function CurrencyDashboard({ timeRange, dateRange }: { timeRange?: any, d
                       border: "none",
                       borderRadius: "12px",
                     }}
-                    itemStyle={{ color: "#fff", fontWeight: 700, fontSize: "11px" }}
+                    itemStyle={{
+                      color: "#fff",
+                      fontWeight: 700,
+                      fontSize: "11px",
+                    }}
                     formatter={(value: any) => [
                       value ? formatNumber(Number(value)) : "0",
                       "Amount",
@@ -123,16 +165,16 @@ export function CurrencyDashboard({ timeRange, dateRange }: { timeRange?: any, d
                 </AreaChart>
               </ResponsiveContainer>
             </div>
-          </EcosystemCard>
-        </div>
+          </div>
+        </section>
 
         {/* Config Summary */}
-        <div className="lg:col-span-4">
-          <EcosystemCard
+        <section className="lg:col-span-4 space-y-4">
+          <DashboardSectionHeading
             title="Registry Parameters"
-            description="Active economic variables"
-            icon={Settings2}
-          >
+            titleClassName="normal-case tracking-normal text-sm text-foreground"
+          />
+          <div className="p-5 rounded-[20px] bg-muted/30 border border-transparent">
             <div className="space-y-1 mt-4 overflow-hidden rounded-lg border border-border">
               <div className="flex items-center justify-between px-4 py-3 bg-muted/50">
                 <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-none">
@@ -180,12 +222,14 @@ export function CurrencyDashboard({ timeRange, dateRange }: { timeRange?: any, d
             )}
 
             <div className="mt-8 pt-6 border-t border-border italic">
-               <p className="text-[9px] font-medium text-muted-foreground leading-relaxed">
-                  Registry integrity verified at {new Date().toLocaleTimeString()}. Economic parameters are automatically synchronized across all system nodes.
-               </p>
+              <p className="text-[9px] font-medium text-muted-foreground leading-relaxed">
+                Registry integrity verified at {new Date().toLocaleTimeString()}
+                . Economic parameters are automatically synchronized across all
+                system nodes.
+              </p>
             </div>
-          </EcosystemCard>
-        </div>
+          </div>
+        </section>
       </div>
     </div>
   );
