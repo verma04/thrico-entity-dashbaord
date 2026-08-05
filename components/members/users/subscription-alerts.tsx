@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
-import { AlertTriangle, Lock, X } from "lucide-react";
+import React from "react";
+import { Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { InlineAlert } from "@/components/ui/inline-alert";
 
 export interface SubscriptionInfo {
   hasReachedLimit?: boolean;
@@ -20,34 +21,36 @@ export function SubscriptionLimitBanner({
   subscriptionInfo?: SubscriptionInfo | any;
   isAiMode?: boolean;
 }) {
-  const [isVisible, setIsVisible] = useState(true);
-
-  if (!subscriptionInfo?.hasReachedLimit || isAiMode || !isVisible) {
+  if (!subscriptionInfo?.hasReachedLimit || isAiMode) {
     return null;
   }
 
   return (
-    <div className="relative flex items-start gap-3 rounded-[3px] border border-[#584824] bg-[#221f15] p-4 text-[13px] leading-5 text-[#dcd1b3] shadow-sm mb-6">
-      <div className="mt-0.5 shrink-0">
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M7.11116 1.77778C7.50658 1.0927 8.4934 1.0927 8.88882 1.77778L15.698 13.5654C16.0827 14.2312 15.6022 15.1111 14.8091 15.1111H1.19082C0.397732 15.1111 -0.0827563 14.2312 0.301931 13.5654L7.11116 1.77778Z" fill="#F5A623"/>
-          <path d="M8 5.77777V10.2222" stroke="#221f15" strokeWidth="1.5" strokeLinecap="round"/>
-          <circle cx="8" cy="12.4444" r="0.888889" fill="#221f15"/>
-        </svg>
-      </div>
-      <div className="pr-6">
-        <span className="font-bold text-white">Subscription Limit Reached:</span> After you reach your subscription limit, your community becomes restricted for new members. If you have not upgraded your subscription plan, adding members ({subscriptionInfo.currentCount?.toLocaleString() || "0"} / {subscriptionInfo.maxUsersAllowed ? subscriptionInfo.maxUsersAllowed.toLocaleString() : "∞"}) may stop working until your limit is restored. Upgrade your subscription plan before adding new members.{" "}
-        <Link href="/settings/subscription" className="text-[#38bdf8] hover:text-[#7dd3fc] underline underline-offset-2 transition-colors">
-          Learn about managing your subscription. ↗
-        </Link>
-      </div>
-      <button 
-        onClick={() => setIsVisible(false)}
-        className="absolute right-4 top-4 text-[#71717a] hover:text-[#a1a1aa] transition-colors"
-      >
-        <X className="h-4 w-4" />
-      </button>
-    </div>
+    <InlineAlert
+      variant="alert"
+      title="Subscription Limit Reached:"
+      dismissible
+      className="mb-6"
+      message={
+        <>
+          After you reach your subscription limit, your community becomes
+          restricted for new members. If you have not upgraded your subscription
+          plan, adding members (
+          {subscriptionInfo.currentCount?.toLocaleString() || "0"} /{" "}
+          {subscriptionInfo.maxUsersAllowed
+            ? subscriptionInfo.maxUsersAllowed.toLocaleString()
+            : "∞"}
+          ) may stop working until your limit is restored. Upgrade your
+          subscription plan before adding new members.{" "}
+          <Link
+            href="/settings/subscription"
+            className="text-[#38bdf8] hover:text-[#7dd3fc] underline underline-offset-2 transition-colors"
+          >
+            Learn about managing your subscription. ↗
+          </Link>
+        </>
+      }
+    />
   );
 }
 
@@ -65,10 +68,11 @@ export function SubscriptionFallbackMessage({
   }
 
   return (
-    <div className="bg-amber-50 border border-amber-200 text-amber-800 rounded-lg p-3 text-sm font-medium flex items-center gap-2 mb-4 shadow-sm">
-      <AlertTriangle className="h-4 w-4 shrink-0 text-amber-600" />
-      <span>{message}</span>
-    </div>
+    <InlineAlert
+      variant="alert"
+      message={message}
+      className="mb-4"
+    />
   );
 }
 

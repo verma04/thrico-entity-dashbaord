@@ -669,45 +669,25 @@ export const modules = [
 // --- 5. ADMIN SETTINGS ---
 export const adminSettings = [
   {
-    key: "customisation",
-    label: "Design & Style",
-    icon: <PaintBucketIcon size={18} />,
+    key: "acc-plan",
+    label: "Subscription & Plan",
+    path: "/settings/subscription",
+    icon: <Wallet size={18} />,
+  },
+
+  {
+    key: "account",
+    label: "Account",
+    icon: <CreditCard size={18} />,
     children: [
+      { key: "acc-bill", label: "Billing History", path: "/settings/billing" },
       {
-        key: "cust-logo",
-        label: "Setup Logo",
-        path: "/settings/branding",
+        key: "acc-bill-details",
+        label: "Billing Details",
+        path: "/settings/billing/details",
       },
-      {
-        key: "cust-brand",
-        label: "Brand Look",
-        path: "/settings/appearance",
-      },
-      {
-        key: "cust-dom",
-        label: "Setup Domain",
-        path: "/settings/domains",
-      },
-      {
-        key: "cust-web",
-        label: "Website Layout",
-        path: "/app-layout",
-      },
-      {
-        key: "cust-mod",
-        label: "Setup Modules",
-        path: "/settings/modules",
-      },
-      {
-        key: "cust-lang",
-        label: "Setup Languages",
-        path: "/settings/languages#setup",
-      },
-      {
-        key: "cust-int",
-        label: "Setup Integrations",
-        path: "/settings/integrations#setup",
-      },
+      // { key: "acc-inv", label: "Invoices", path: "/settings/invoices" },
+      // { key: "acc-export", label: "Export Data", path: "/settings/export" },
     ],
   },
 
@@ -724,21 +704,41 @@ export const adminSettings = [
     ],
   },
   {
-    key: "account",
-    label: "Account",
-    icon: <CreditCard size={18} />,
+    key: "customisation",
+    label: "Design & Style",
+    icon: <PaintBucketIcon size={18} />,
     children: [
-      { key: "acc-bill", label: "Billing Info", path: "/settings/billing" },
       {
-        key: "acc-plan",
-        label: "Subscription & Plan",
-        path: "/settings/subscription",
+        key: "cust-logo",
+        label: "Setup Logo",
+        path: "/settings/branding",
       },
-      // { key: "acc-inv", label: "Invoices", path: "/settings/invoices" },
-      { key: "acc-audit", label: "Audit Log", path: "/audit-log" },
-      // { key: "acc-export", label: "Export Data", path: "/settings/export" },
+      {
+        key: "cust-brand",
+        label: "Brand Look",
+        path: "/settings/appearance",
+      },
     ],
   },
+  {
+    key: "cust-dom",
+    label: "Setup Domain",
+    path: "/settings/domains",
+    icon: <Globe size={18} />,
+  },
+  {
+    key: "cust-mod",
+    label: "Setup Modules",
+    path: "/settings/modules",
+    icon: <Blocks size={18} />,
+  },
+  {
+    key: "cust-int",
+    label: "Setup Integrations",
+    path: "/settings/integrations#setup",
+    icon: <Zap size={18} />,
+  },
+
   {
     key: "policies",
     label: "Policies & Terms",
@@ -765,17 +765,17 @@ export const adminSettings = [
     icon: <BookOpen size={18} />,
   },
   {
-    key: "support",
+    key: "cust-int",
     label: "Contact Support",
+    path: "/settings/contact",
     icon: <LifeBuoy size={18} />,
-    children: [
-      { key: "sup-feed", label: "Feedback", path: "/feedback" },
-      {
-        key: "sup-manager",
-        label: "Dedicated Account Manager",
-        path: "/settings/contact",
-      },
-    ],
+  },
+
+  {
+    key: "acc-audit",
+    label: "Audit Log",
+    path: "/audit-log",
+    icon: <ClipboardList size={18} />,
   },
 ];
 

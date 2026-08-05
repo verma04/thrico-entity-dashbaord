@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { CtaButton } from "@/components/ui/cta-button";
 import {
   Dialog,
   DialogContent,
@@ -432,19 +433,17 @@ export default function SeoManager() {
     },
     {
       key: "actions",
-      header: "Matrix Actions",
+      header: "Actions",
       headerClassName: "text-right",
       className: "text-right",
       cell: (row) => (
-        <Button
-          size="sm"
+        <CtaButton
           variant="outline"
           onClick={() => handleEdit(row.id)}
-          className="h-8 px-4 rounded-xl font-bold bg-background gap-2 transition-all active:scale-95"
         >
           <Edit2Icon className="h-3.5 w-3.5" />
           Optimize
-        </Button>
+        </CtaButton>
       ),
     },
   ];

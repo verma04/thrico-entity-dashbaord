@@ -1,7 +1,16 @@
 "use client";
 
 import React, { useState } from "react";
-import { PlayCircle, Clock, BookOpen, ExternalLink, ArrowRight, Play, ShieldCheck, Timer } from "lucide-react";
+import {
+  PlayCircle,
+  Clock,
+  BookOpen,
+  ExternalLink,
+  ArrowRight,
+  Play,
+  ShieldCheck,
+  Timer,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
@@ -69,7 +78,15 @@ const VIDEOS = [
   },
 ];
 
-const CATEGORIES = ["All", "Community", "Engagement", "Content", "Moderation", "Gamification", "Analytics"];
+const CATEGORIES = [
+  "All",
+  "Community",
+  "Engagement",
+  "Content",
+  "Moderation",
+  "Gamification",
+  "Analytics",
+];
 
 // ---------------------------------------------------------------------------
 // Video Card
@@ -98,7 +115,7 @@ function VideoCard({ video }: { video: (typeof VIDEOS)[0] }) {
             />
             {/* Overlay */}
             <div className="absolute inset-0 bg-zinc-950/20 group-hover:bg-zinc-950/10 transition-colors" />
-            
+
             {/* Play button */}
             <button
               onClick={() => setPlaying(true)}
@@ -109,7 +126,7 @@ function VideoCard({ video }: { video: (typeof VIDEOS)[0] }) {
                 <Play className="h-5 w-5 text-zinc-900 fill-zinc-900 ml-1" />
               </div>
             </button>
-            
+
             {/* Duration badge */}
             <div className="absolute bottom-2.5 right-2.5 bg-zinc-900/90 text-[10px] font-bold text-white px-2 py-0.5 rounded uppercase tracking-widest backdrop-blur-sm flex items-center gap-1.5">
               <Clock size={10} />
@@ -122,12 +139,12 @@ function VideoCard({ video }: { video: (typeof VIDEOS)[0] }) {
       {/* Content */}
       <div className="p-5 space-y-3">
         <div className="flex items-center justify-between">
-           <span className="text-[9px] font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded uppercase tracking-widest">
-              {video.category}
-           </span>
-           <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest italic">
-              {video.author}
-           </span>
+          <span className="text-[9px] font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded uppercase tracking-widest">
+            {video.category}
+          </span>
+          <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest italic">
+            {video.author}
+          </span>
         </div>
         <h2 className="text-sm font-bold text-zinc-900 leading-tight line-clamp-1 group-hover:text-indigo-600 transition-colors uppercase tracking-tight">
           {video.title}
@@ -136,8 +153,12 @@ function VideoCard({ video }: { video: (typeof VIDEOS)[0] }) {
           {video.description}
         </p>
         <div className="pt-3 border-t border-zinc-50 flex items-center justify-between">
-          <Button variant="ghost" className="h-7 px-0 text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-zinc-900 gap-2" onClick={() => setPlaying(true)}>
-             Initialize Stream <ArrowRight size={12} />
+          <Button
+            variant="ghost"
+            className="h-7 px-0 text-[10px] font-bold uppercase tracking-widest text-zinc-400 hover:text-zinc-900 gap-2"
+            onClick={() => setPlaying(true)}
+          >
+            Initialize Stream <ArrowRight size={12} />
           </Button>
           <a
             href={`https://www.youtube.com/watch?v=${video.id}`}
@@ -169,6 +190,10 @@ export default function LearningsDashboard() {
       <EcosystemHeader
         title="Knowledge Registry"
         description="Curated technical and community analytics resources focused on exponential scale."
+        breadcrumbs={[
+          { label: "Learnings", href: "/learnings" },
+          { label: "Dashboard" },
+        ]}
         badgeText="Learnings"
         icon={BookOpen}
       />
@@ -183,8 +208,8 @@ export default function LearningsDashboard() {
           </div>
 
           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
-             <div className="h-4 w-px bg-zinc-200 mx-2 shrink-0" />
-             {CATEGORIES.map((cat) => (
+            <div className="h-4 w-px bg-zinc-200 mx-2 shrink-0" />
+            {CATEGORIES.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
@@ -192,7 +217,7 @@ export default function LearningsDashboard() {
                   "h-8 px-3 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all whitespace-nowrap",
                   activeCategory === cat
                     ? "bg-zinc-900 text-white shadow-sm"
-                    : "bg-zinc-50 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 border border-zinc-100"
+                    : "bg-zinc-50 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 border border-zinc-100",
                 )}
               >
                 {cat}
@@ -211,17 +236,24 @@ export default function LearningsDashboard() {
 
         {filtered.length === 0 && (
           <div className="py-32 text-center space-y-4">
-             <div className="h-12 w-12 rounded-xl bg-zinc-50 border border-zinc-100 flex items-center justify-center mx-auto opacity-50">
-                <Timer size={24} className="text-zinc-300" />
-             </div>
-            <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em]">No registry entries available in this segment.</p>
+            <div className="h-12 w-12 rounded-xl bg-zinc-50 border border-zinc-100 flex items-center justify-center mx-auto opacity-50">
+              <Timer size={24} className="text-zinc-300" />
+            </div>
+            <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em]">
+              No registry entries available in this segment.
+            </p>
           </div>
         )}
       </EcosystemContainer>
 
       <style jsx global>{`
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .no-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
       `}</style>
     </EcosystemWrapper>
   );

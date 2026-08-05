@@ -16,6 +16,7 @@ import { Mail, Phone, MapPin, Send, Headset, Loader2, Info } from "lucide-react"
 import { toast } from "sonner";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 
 export default function ContactPage() {
   const [loading, setLoading] = useState(false);
@@ -45,13 +46,17 @@ export default function ContactPage() {
       <EcosystemHeader
         title="Contact Support"
         description="Get in touch with your dedicated account manager or send us a priority message."
-        breadcrumb="Help & Support"
+        breadcrumbs={[
+          { label: "Settings", href: "/settings" },
+          { label: "Contact Support" },
+        ]}
         icon={Headset}
         badgeText="Priority Routing"
         showLiveIndicator={false}
       />
 
-      <div className="flex flex-col lg:flex-row gap-6 items-start">
+      <EcosystemContainer className="p-4 md:p-6 bg-transparent border-none shadow-none">
+        <div className="flex flex-col lg:flex-row gap-6 items-start">
         {/* Contact Form - Main Area */}
         <div className="flex-1 w-full rounded-xl border border-border bg-card shadow-sm overflow-hidden">
           <div className="px-5 py-4 border-b border-border bg-muted/50">
@@ -196,7 +201,8 @@ export default function ContactPage() {
             </div>
           </div>
         </div>
-      </div>
+        </div>
+      </EcosystemContainer>
     </EcosystemWrapper>
   );
 }

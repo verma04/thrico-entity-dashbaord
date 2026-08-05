@@ -51,7 +51,6 @@ type ActiveTab =
   | "website";
 
 function getActiveTab(pathName: string): ActiveTab {
-  if (pathName.startsWith("/settings/modules")) return "modules";
   if (pathName.startsWith("/app-layout")) return "website";
   if (pathName.startsWith("/settings")) return "settings";
   if (pathName.startsWith("/email")) return "email";

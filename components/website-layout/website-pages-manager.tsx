@@ -33,12 +33,7 @@ import {
   EcosystemHeader,
   EcosystemContainer,
 } from "@/components/layout/ecosystem";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { CtaButton } from "@/components/ui/cta-button";
 
 export function WebsitePagesManager() {
@@ -210,24 +205,18 @@ export function WebsitePagesManager() {
       className: "text-right",
       cell: (row) => (
         <div className="flex items-center justify-end gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            className="h-8 rounded-lg font-bold text-[11px] uppercase tracking-wide gap-2 bg-background hover:bg-muted"
-            onClick={() => handleEditPage(row.id)}
-          >
+          <CtaButton variant="outline" onClick={() => handleEditPage(row.id)}>
             <Layers className="h-3.5 w-3.5" />
             Design
-          </Button>
+          </CtaButton>
           {row.slug !== "home" && (
-            <Button
-              size="sm"
-              variant="ghost"
-              className="h-8 w-8 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+            <CtaButton
+              variant="outline"
+              className="w-6 px-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 hover:border-destructive/20"
               onClick={() => handleDeletePage(row.id)}
             >
               <Trash2 className="h-3.5 w-3.5" />
-            </Button>
+            </CtaButton>
           )}
         </div>
       ),
@@ -267,7 +256,8 @@ export function WebsitePagesManager() {
                   Unlock Advanced Features
                 </h3>
                 <p className="text-sm font-medium text-indigo-100/90 max-w-xl leading-relaxed">
-                  Create unlimited pages, nested menus, and get access to premium modules.
+                  Create unlimited pages, nested menus, and get access to
+                  premium modules.
                 </p>
               </div>
               <Button
@@ -337,20 +327,17 @@ export function WebsitePagesManager() {
                     <li className="flex gap-2">
                       <span className="text-indigo-600 font-bold">•</span>
                       <span>
-                        The 'home' page is required and serves as the main page of your website.
+                        The 'home' page is required and serves as the main page
+                        of your website.
                       </span>
                     </li>
                     <li className="flex gap-2">
                       <span className="text-indigo-600 font-bold">•</span>
-                      <span>
-                        Unpublishing a page hides it from visitors.
-                      </span>
+                      <span>Unpublishing a page hides it from visitors.</span>
                     </li>
                     <li className="flex gap-2">
                       <span className="text-indigo-600 font-bold">•</span>
-                      <span>
-                        Click "Design" to edit the page content.
-                      </span>
+                      <span>Click "Design" to edit the page content.</span>
                     </li>
                   </ul>
                 </CardContent>
