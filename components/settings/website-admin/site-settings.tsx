@@ -58,6 +58,7 @@ import {
 } from "@/graphql/actions/website";
 import { cn } from "@/lib/utils";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
+import { EcosystemWrapper, EcosystemHeader, EcosystemContainer } from "@/components/layout/ecosystem";
 
 const SiteSettings = () => {
   const {
@@ -177,33 +178,21 @@ const SiteSettings = () => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-background overflow-hidden relative">
-      {/* Sticky Header */}
-      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b px-6 py-4">
-        <div className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-3 mb-1">
-              <div className="p-2.5 rounded-xl bg-indigo-600/10 ring-1 ring-indigo-600/20">
-                <SettingsIcon className="h-5 w-5 text-indigo-600" />
-              </div>
-              <h1 className="text-2xl font-bold tracking-tight">
-                Platform Studio
-              </h1>
-            </div>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground ml-1">
-              <span>Website Builder</span>
-              <ChevronRight className="h-3 w-3" />
-              <span>General Settings</span>
-              <ChevronRight className="h-3 w-3" />
-              <span>Core Protocol</span>
-            </div>
-          </div>
-        </div>
-      </div>
+    <EcosystemWrapper>
+      <EcosystemHeader
+        title="Website Settings"
+        description="Manage global settings for your website."
+        icon={SettingsIcon}
+        badgeText="Website Builder"
+        breadcrumbs={[
+          { label: "Website Builder" },
+          { label: "General Settings" },
+          { label: "Website Settings" }
+        ]}
+      />
 
-      {/* Main Content Area */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-7xl mx-auto px-6 py-8">
+      <EcosystemContainer>
+        <div className="pt-4">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             {/* Main Config Area */}
             <div className="lg:col-span-8 space-y-8">
@@ -462,15 +451,15 @@ const SiteSettings = () => {
                 <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden">
                    <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-6 text-white">
                       <Globe className="h-8 w-8 mb-4 opacity-80" />
-                      <h3 className="text-lg font-bold">Platform Central</h3>
+                      <h3 className="text-lg font-bold">Platform Overview</h3>
                       <p className="text-sm text-white/80 mt-1">
-                        Global settings deployed across all node architectures.
+                        Global settings applied across your entire website.
                       </p>
                    </div>
                    <div className="p-4 bg-muted/10 grid grid-cols-2 gap-4 divide-x">
                       <div className="flex flex-col items-center justify-center py-2">
                         <span className="text-2xl font-bold">{pages.length}</span>
-                        <span className="text-[10px] uppercase font-bold text-muted-foreground mt-1">Active Nodes</span>
+                        <span className="text-[10px] uppercase font-bold text-muted-foreground mt-1">Total Pages</span>
                       </div>
                       <div className="flex flex-col items-center justify-center py-2">
                         <span className="text-sm font-bold capitalize">{theme || "Default"}</span>
@@ -483,7 +472,7 @@ const SiteSettings = () => {
                   <CardHeader className="pb-3 border-b bg-muted/20">
                     <CardTitle className="text-sm font-bold flex items-center gap-2">
                       <Info className="h-4 w-4 text-indigo-600" />
-                      Deployment Strategy
+                      Settings Tips
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="pt-4">
@@ -514,16 +503,16 @@ const SiteSettings = () => {
 
           </div>
         </div>
-      </div>
+      </EcosystemContainer>
 
       <FloatingSavePanel
         onSave={handleSaveSettings}
         isSaving={isSaving}
         hasChanged={hasChanged}
-        title="Unsaved Parameters"
-        description="You have pending changes to your core configuration."
+        title="Unsaved Changes"
+        description="You have pending changes to your settings."
       />
-    </div>
+    </EcosystemWrapper>
   );
 };
 
