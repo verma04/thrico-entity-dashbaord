@@ -4,6 +4,7 @@ import React from "react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
 import { Smartphone, Apple } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { MobileAppLanding } from "@/components/mobile-app/mobile-app-landing";
 
 export default function MobileAppLayout({
   children,
@@ -31,9 +32,5 @@ export default function MobileAppLayout({
   }
 
   // Otherwise, show the child sidebar for Android/iOS management pages
-  return (
-    <MenuItemsLayout active="mobile-app" items={items} showAdminTabs={false}>
-      {children}
-    </MenuItemsLayout>
-  );
+  return <MobileAppLanding />;
 }

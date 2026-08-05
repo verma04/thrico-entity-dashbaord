@@ -14,18 +14,44 @@ import {
   BarChart3,
   RefreshCw,
   Blocks,
+  MessageSquare,
 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useEntitySettings, useGetEntity } from "@/graphql/actions";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Marquee } from "@/components/ui/marquee";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 export function MobileAppLanding() {
   const { data } = useGetEntity();
 
   console.log(data);
   const entityName = data?.getEntity?.name || "Your Community";
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    toast.success("Inquiry submitted successfully!");
+    setIsModalOpen(false);
+  };
 
   const features = [
     {
@@ -121,28 +147,67 @@ export function MobileAppLanding() {
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center xl:justify-start gap-4 pt-4">
-          <Link href="/mobile-app/android" className="w-full sm:w-auto">
-            <Button
-              size="lg"
-              className="h-14 px-8 text-base w-full rounded-xl shadow-xl shadow-primary/20 group"
-            >
-              <Smartphone className="w-5 h-5 mr-2" />
-              Build Android App
-              <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-            </Button>
-          </Link>
-          <Link href="/mobile-app/ios" className="w-full sm:w-auto">
-            <Button
-              size="lg"
-              variant="outline"
-              className="h-14 px-8 text-base w-full rounded-xl bg-background hover:bg-muted/50 group"
-            >
-              <Apple className="w-5 h-5 mr-2" />
-              Build iOS App
-              <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-            </Button>
-          </Link>
+        <div className="flex flex-col sm:flex-row items-center justify-center xl:justify-start gap-4 pt-4 flex-wrap">
+          <Button
+            size="lg"
+            onClick={() => setIsModalOpen(true)}
+            className="h-14 px-8 text-base w-full sm:w-auto rounded-xl shadow-xl shadow-primary/20 group"
+          >
+            <Smartphone className="w-5 h-5 mr-2" />
+            Build Android App
+            <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+          </Button>
+          <Button
+            size="lg"
+            variant="outline"
+            onClick={() => setIsModalOpen(true)}
+            className="h-14 px-8 text-base w-full sm:w-auto rounded-xl bg-background hover:bg-muted/50 group"
+          >
+            <Apple className="w-5 h-5 mr-2" />
+            Build iOS App
+            <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+          </Button>
+          
+          <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Mobile App Inquiry</DialogTitle>
+                <DialogDescription>
+                  Interested in launching your own mobile app? Fill out the form below and our team will get in touch with you.
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleSubmit}>
+                <div className="grid gap-4 py-4">
+                  <div className="grid gap-2">
+                    <Label>Platform Needed</Label>
+                    <Select required>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select platform..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="android">Android Only</SelectItem>
+                        <SelectItem value="ios">iOS Only</SelectItem>
+                        <SelectItem value="both">Both Android & iOS</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="message">Message</Label>
+                    <Textarea
+                      id="message"
+                      placeholder="Tell us about your requirements..."
+                      className="resize-none"
+                      rows={4}
+                      required
+                    />
+                  </div>
+                </div>
+                <Button type="submit" className="w-full h-12 text-base">
+                  Submit Inquiry
+                </Button>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
 
         <div className="flex items-center justify-center xl:justify-start gap-6 pt-4 text-sm font-medium text-muted-foreground">
