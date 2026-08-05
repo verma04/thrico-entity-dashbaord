@@ -139,7 +139,7 @@ export const membersIntelligence = [
   {
     key: "members-classifications",
     label: "Classifications",
-    path: "/members/classifications",
+    path: "/members/classification",
     icon: <Tag size={18} />,
   },
   {

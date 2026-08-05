@@ -8,13 +8,18 @@ import { withModulePermission } from "@/components/hoc/with-module-permission";
 
 import { useAddNewMember } from "@/graphql/actions/membership/membership-mutations";
 import { useCheckMemberSubscription } from "@/graphql/actions/membership/membership-queries";
-import { AlertTriangle, Loader2 } from "lucide-react";
+import { AlertTriangle, Loader2, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { InlineAlert } from "@/components/ui/inline-alert";
 
 const AddMemberPage = () => {
   const router = useRouter();
   const { toast } = useToast();
-  
+
   const [addMember, { loading }] = useAddNewMember({
     onCompleted: () => {
       toast({
@@ -29,7 +34,7 @@ const AddMemberPage = () => {
         description: error.message || "Failed to add member",
         variant: "destructive",
       });
-    }
+    },
   });
 
   const onFinish = (values: any) => {
@@ -70,44 +75,57 @@ const AddMemberPage = () => {
 
   if (hasReachedLimit) {
     return (
-      <div className="flex h-full items-center justify-center bg-background p-6">
-        <div className="max-w-md w-full bg-amber-50 border border-amber-200 text-amber-800 rounded-2xl p-8 text-center space-y-4 shadow-sm">
-          <AlertTriangle className="h-12 w-12 text-amber-600 mx-auto" />
-          <h2 className="text-xl font-bold text-amber-900">Member Limit Reached</h2>
-          <p className="text-amber-700 font-medium">
-            {message || "You have reached your subscription limit. Please upgrade your subscription to add more members."}
-          </p>
-          <div className="pt-4">
+      <EcosystemWrapper>
+        <EcosystemHeader
+          title="Add Member"
+          badgeText="Community"
+          description="Add a new member to your community."
+          icon={UserPlus}
+        />
+        <EcosystemContainer className="p-6">
+          <InlineAlert
+            variant="alert"
+            title="Member Limit Reached"
+            message={
+              message ||
+              "You have reached your subscription limit. Please upgrade your subscription to add more members."
+            }
+          />
+          <div className="mt-6 flex gap-3">
             <Button
-              variant="outline"
-              className="bg-white border-amber-200 text-amber-900 hover:bg-amber-100 w-full rounded-xl"
+              variant="default"
               onClick={() => router.push("/settings/billing")}
             >
               Upgrade Subscription
             </Button>
-          </div>
-          <div className="pt-2">
             <Button
-              variant="ghost"
-              className="text-amber-700 hover:bg-amber-100 w-full rounded-xl"
+              variant="outline"
               onClick={() => router.back()}
             >
               Go Back
             </Button>
           </div>
-        </div>
-      </div>
+        </EcosystemContainer>
+      </EcosystemWrapper>
     );
   }
 
   return (
-    <div className="h-full overflow-hidden bg-background">
-      <MemberCreationForm
-        loading={loading}
-        onFinish={onFinish}
-        onCancel={onCancel}
+    <EcosystemWrapper>
+      <EcosystemHeader
+        title="Add Member"
+        badgeText="Community"
+        description="Add a new member to your community."
+        icon={UserPlus}
       />
-    </div>
+      <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0">
+        <MemberCreationForm
+          loading={loading}
+          onFinish={onFinish}
+          onCancel={onCancel}
+        />
+      </EcosystemContainer>
+    </EcosystemWrapper>
   );
 };
 
