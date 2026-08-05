@@ -15,13 +15,23 @@ import {
   Smartphone,
   Blocks,
   Globe,
+  FileText,
 } from "lucide-react";
 import { NavRailItem } from "./sidebar-components";
 
 // Helper to determine the active tab for the parent sidebar
 function getActiveTab(pathName: string) {
   if (pathName.startsWith("/gamification")) return "gamification";
-  if (pathName.startsWith("/members")) return "community";
+  if (pathName.startsWith("/members")) return "members";
+
+  if (
+    pathName.startsWith("/moderation") ||
+    pathName.startsWith("/feed") ||
+    pathName.startsWith("/reports") ||
+    pathName.startsWith("/trust-center")
+  )
+    return "content";
+
 
   const moduleRoutes = [
     "/communities",
@@ -80,9 +90,15 @@ export function ParentSidebar() {
         />
         <NavRailItem
           icon={<Users size={20} />}
-          label="Community"
+          label="Members"
           href="/members"
-          active={activeTab === "community"}
+          active={activeTab === "members"}
+        />
+        <NavRailItem
+          icon={<FileText size={20} />}
+          label="Content"
+          href="/feed"
+          active={activeTab === "content"}
         />
         <NavRailItem
           icon={<Trophy size={20} />}

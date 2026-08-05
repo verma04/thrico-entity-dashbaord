@@ -70,6 +70,8 @@ import {
   Sparkles,
   Smartphone,
   Images,
+  UserPlus,
+  Network,
 } from "lucide-react";
 import { useMemo } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -108,111 +110,60 @@ export const homeItems = [
   // },
 ];
 
-// --- 2. COMMUNITY ---
-export const communityIntelligence = [
+// --- 2. MEMBERS ---
+export const membersIntelligence = [
+  { key: "members-dash", label: "Dashboard", path: "/members", icon: <LayoutDashboard size={18} /> },
+  { key: "members-manage", label: "Manage Members", path: "/members/all", icon: <Users size={18} /> },
   {
-    key: "members",
-    label: "Members",
-    path: "/members",
-    isMobileOnly: true,
-    icon: <Users size={18} />,
-    children: [
-      { key: "members-dash", label: "Dashboard", path: "/members" },
-      { key: "members-manage", label: "Manage Members", path: "/members/all" },
-      {
-        key: "members-create",
-        label: "Add New Member",
-        path: "/members/create",
-      },
-      {
-        key: "members-graph",
-        label: "Network Graph",
-        path: "/members/graph",
-      },
-      {
-        key: "members-classifications",
-        label: "Classifications",
-        path: "/members/classifications",
-      },
-      {
-        key: "members-reported",
-        label: "Reported Items",
-        path: "/members/reports",
-      },
-      { key: "members-settings", label: "Settings", path: "/members/settings" },
-      { key: "members-audit", label: "Audit Log", path: "/members/audit-log" },
-    ],
+    key: "members-create",
+    label: "Add New Member",
+    path: "/members/create",
+    icon: <UserPlus size={18} />,
   },
+  {
+    key: "members-graph",
+    label: "Network Graph",
+    path: "/members/graph",
+    icon: <Network size={18} />,
+  },
+  {
+    key: "members-classifications",
+    label: "Classifications",
+    path: "/members/classifications",
+    icon: <Tag size={18} />,
+  },
+  {
+    key: "members-reported",
+    label: "Reported Items",
+    path: "/members/reports",
+    icon: <ShieldAlert size={18} />,
+  },
+  { key: "members-settings", label: "Settings", path: "/members/settings", icon: <Settings size={18} /> },
+  { key: "members-audit", label: "Audit Log", path: "/members/audit-log", icon: <History size={18} /> },
 ];
 
 // --- 2. MODERATION ---
-export const contentModeration = [
-  {
-    key: "mod-dashboard",
-    label: "Dashboard",
-    path: "/moderation",
-    icon: <LayoutDashboard size={18} />,
-  },
-  {
-    key: "feed",
-    label: "Feed (Posts, Photos, Videos)",
-    path: "/feed",
-    icon: <Rss size={18} />,
-    children: [
-      { key: "feed-dash", label: "Dashboard", path: "/feed" },
-      { key: "feed-overall", label: "Overall Posts", path: "/feed/all" },
-      { key: "feed-pinned", label: "Pinned Post", path: "/feed/pinned" },
-      { key: "feed-admin", label: "Admin Posts", path: "/feed/admin" },
-      {
-        key: "feed-moments",
-        label: "Moments (Videos)",
-        path: "/feed/moments",
-        isMobileOnly: true,
-      },
-      {
-        key: "feed-jobs",
-        label: "Jobs",
-        path: "/feed/jobs",
-        isMobileOnly: true,
-      },
-      {
-        key: "feed-listings",
-        label: "Listings",
-        path: "/feed/listing",
-        isMobileOnly: true,
-      },
-      { key: "feed-reported", label: "Reported Items", path: "/feed/reports" },
-      { key: "feed-settings", label: "Settings", path: "/feed/settings" },
-    ],
-  },
-  {
-    key: "mod-reported",
-    label: "Reported Items",
-    path: "/reports",
-    icon: <ShieldAlert size={18} />,
-  },
-  {
-    key: "mod-manual",
-    label: "Moderation Settings",
-    icon: <Settings size={18} />,
-    children: [
-      {
-        key: "mod-moderation",
-        label: "Ai Moderation",
-        path: "/moderation/settings",
-      },
-      {
-        key: "mod-banned",
-        label: "Banned words",
-        path: "/moderation/banned-words",
-      },
-      {
-        key: "mod-links",
-        label: "Blocked Links",
-        path: "/moderation/blocked-links",
-      },
-    ],
-  },
+export const feedItems = [
+  { key: "feed-dash", label: "Dashboard", path: "/feed", icon: <LayoutDashboard size={18} /> },
+  { key: "feed-overall", label: "Overall Posts", path: "/feed/all", icon: <Rss size={18} /> },
+  { key: "feed-pinned", label: "Pinned Post", path: "/feed/pinned", icon: <CheckSquare size={18} /> },
+  { key: "feed-admin", label: "Admin Posts", path: "/feed/admin", icon: <UserCog size={18} /> },
+  { key: "feed-moments", label: "Moments (Videos)", path: "/feed/moments", isMobileOnly: true, icon: <Video size={18} /> },
+  { key: "feed-jobs", label: "Jobs", path: "/feed/jobs", isMobileOnly: true, icon: <Briefcase size={18} /> },
+  { key: "feed-listings", label: "Listings", path: "/feed/listing", isMobileOnly: true, icon: <ClipboardList size={18} /> },
+  { key: "feed-reported", label: "Reported Items", path: "/feed/reports", icon: <ShieldAlert size={18} /> },
+  { key: "feed-settings", label: "Settings", path: "/feed/settings", icon: <Settings size={18} /> },
+];
+
+export const moderationItems = [
+  { key: "mod-dashboard", label: "Dashboard", path: "/moderation", icon: <LayoutDashboard size={18} /> },
+  { key: "mod-moderation", label: "AI Moderation", path: "/moderation/settings", icon: <ShieldCheck size={18} /> },
+  { key: "mod-banned", label: "Banned words", path: "/moderation/banned-words", icon: <Undo2 size={18} /> },
+  { key: "mod-links", label: "Blocked Links", path: "/moderation/blocked-links", icon: <Globe size={18} /> },
+];
+
+export const reportedItems = [
+  { key: "mod-reported", label: "Reported Items", path: "/reports", icon: <ShieldAlert size={18} /> },
 ];
 
 // --- 3. REWARDS & GAMES ---
@@ -960,7 +911,6 @@ export const useFilteredExtendedItems = () => {
         isHome ||
         item.key === "home-dashboard" ||
         item.key === "trust-center" ||
-        item.key === "community-intelligence" ||
         item.key === "mod-dashboard" ||
         item.key === "mod-reported" ||
         item.key === "mod-manual" ||
@@ -1059,12 +1009,20 @@ export const useFilteredExtendedItems = () => {
     () => filterItems(homeItems, true),
     [data, user],
   );
-  const filteredCommunity = useMemo(
-    () => filterItems(communityIntelligence, true),
+  const filteredMembers = useMemo(
+    () => filterItems(membersIntelligence, true),
+    [data, user],
+  );
+  const filteredFeed = useMemo(
+    () => filterItems(feedItems, true),
     [data, user],
   );
   const filteredModeration = useMemo(
-    () => filterItems(contentModeration),
+    () => filterItems(moderationItems, true),
+    [data, user],
+  );
+  const filteredReported = useMemo(
+    () => filterItems(reportedItems, true),
     [data, user],
   );
   const filteredGamification = useMemo(
@@ -1083,8 +1041,10 @@ export const useFilteredExtendedItems = () => {
 
   return {
     homeItems: filteredHome,
-    communityIntelligence: filteredCommunity,
-    contentModeration: filteredModeration as any[],
+    membersIntelligence: filteredMembers,
+    feedItems: filteredFeed as any[],
+    moderationItems: filteredModeration as any[],
+    reportedItems: filteredReported as any[],
     gamificationEngine: filteredGamification as any[],
     modules: filteredModules as any[],
     gamificationLabel,

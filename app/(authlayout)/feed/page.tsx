@@ -105,15 +105,7 @@ export default function FeedPage() {
         badgeText="Overview"
         description="Monitor feed engagement, content trends, and user activity."
         icon={Share2}
-        actions={
-          <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest italic">
-              <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" />
-              <span>Verified System</span>
-            </div>
-        }
       />
-
-      
 
       <EcosystemContainer className="space-y-12 p-8 lg:p-12">
         {/* KPI Grid */}
@@ -126,7 +118,8 @@ export default function FeedPage() {
               icon: LayoutGrid,
               color: "text-indigo-500",
               bg: "bg-indigo-500",
-              tooltip: "Estimated reach based on total posts, shares, and interactions",
+              tooltip:
+                "Estimated reach based on total posts, shares, and interactions",
             },
             {
               title: "Active Posts",
@@ -135,7 +128,8 @@ export default function FeedPage() {
               icon: Activity,
               color: "text-emerald-500",
               bg: "bg-emerald-500",
-              tooltip: "Total number of interactions (likes + comments) in this period",
+              tooltip:
+                "Total number of interactions (likes + comments) in this period",
             },
             {
               title: "Network Velocity",
@@ -302,14 +296,19 @@ export default function FeedPage() {
             >
               <div className="flex flex-col gap-2">
                 {promotedEvents.map((event: any, index: number) => (
-                  <div key={index} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-4 py-4 rounded-xl border border-border/40 bg-gradient-to-r from-muted/30 to-transparent hover:bg-muted/60 transition-colors group">
+                  <div
+                    key={index}
+                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-4 py-4 rounded-xl border border-border/40 bg-gradient-to-r from-muted/30 to-transparent hover:bg-muted/60 transition-colors group"
+                  >
                     <div className="flex items-start gap-4">
                       <div className="h-10 w-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex flex-col items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
                         <span className="text-[10px] font-bold uppercase leading-none mb-0.5">
                           {event.date ? event.date.split(" ")[0] : "TBA"}
                         </span>
                         <span className="text-sm font-black leading-none">
-                          {event.date ? event.date.split(" ")[1]?.replace(",", "") : ""}
+                          {event.date
+                            ? event.date.split(" ")[1]?.replace(",", "")
+                            : ""}
                         </span>
                       </div>
                       <div className="flex-1 min-w-0">
@@ -321,11 +320,13 @@ export default function FeedPage() {
                         </p>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center gap-6 sm:ml-auto shrink-0 pl-14 sm:pl-0">
                       <div className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
                         <MapPin className="h-3.5 w-3.5 text-amber-500" />
-                        <span className="max-w-[120px] truncate">{event.location}</span>
+                        <span className="max-w-[120px] truncate">
+                          {event.location}
+                        </span>
                       </div>
                       <div className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
                         <Clock className="h-3.5 w-3.5 text-emerald-500" />

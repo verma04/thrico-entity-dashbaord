@@ -42,7 +42,8 @@ import { SwitchingLoader } from "./switching-loader";
 
 type ActiveTab =
   | "home"
-  | "community"
+  | "members"
+  | "content"
   | "gamification"
   | "modules"
   | "settings"
@@ -56,14 +57,15 @@ function getActiveTab(pathName: string): ActiveTab {
   if (pathName.startsWith("/email")) return "email";
   if (pathName.startsWith("/mobile-app")) return "mobile-app";
 
+  if (pathName.startsWith("/members")) return "members";
+
   if (
-    pathName.startsWith("/members") ||
     pathName.startsWith("/moderation") ||
     pathName.startsWith("/feed") ||
     pathName.startsWith("/reports") ||
     pathName.startsWith("/trust-center")
   )
-    return "community";
+    return "content";
 
   if (pathName.startsWith("/gamification")) return "gamification";
 
@@ -107,8 +109,10 @@ export function ChildSidebarContainer({
 
   const {
     homeItems,
-    communityIntelligence,
-    contentModeration,
+    membersIntelligence,
+    feedItems,
+    moderationItems,
+    reportedItems,
     gamificationEngine,
     modules: modulesItems,
     gamificationLabel,
@@ -120,7 +124,8 @@ export function ChildSidebarContainer({
   };
 
   const filterList = useCallback(
-    (list: MenuItem[], query: string): MenuItem[] => {
+    (list: MenuItem[] = [], query: string): MenuItem[] => {
+      if (!list) return [];
       if (!query.trim()) return list;
       const q = query.toLowerCase();
 
@@ -151,13 +156,21 @@ export function ChildSidebarContainer({
     () => filterList(homeItems as MenuItem[], searchQuery),
     [searchQuery, homeItems, filterList],
   );
-  const filteredCommunity = useMemo(
-    () => filterList(communityIntelligence as MenuItem[], searchQuery),
-    [searchQuery, communityIntelligence, filterList],
+  const filteredMembers = useMemo(
+    () => filterList(membersIntelligence as MenuItem[], searchQuery),
+    [searchQuery, membersIntelligence, filterList],
+  );
+  const filteredFeed = useMemo(
+    () => filterList(feedItems as MenuItem[], searchQuery),
+    [searchQuery, feedItems, filterList],
   );
   const filteredModeration = useMemo(
-    () => filterList(contentModeration as MenuItem[], searchQuery),
-    [searchQuery, contentModeration, filterList],
+    () => filterList(moderationItems as MenuItem[], searchQuery),
+    [searchQuery, moderationItems, filterList],
+  );
+  const filteredReported = useMemo(
+    () => filterList(reportedItems as MenuItem[], searchQuery),
+    [searchQuery, reportedItems, filterList],
   );
   const filteredGamification = useMemo(
     () => filterList(gamificationEngine as MenuItem[], searchQuery),
@@ -203,10 +216,11 @@ export function ChildSidebarContainer({
 
   const flattenItems = useCallback(
     (
-      items: MenuItem[],
+      items: MenuItem[] = [],
       section: string,
       parentIcon?: React.ReactNode,
     ): any[] => {
+      if (!items) return [];
       return items.reduce((acc: any[], item) => {
         const icon = item.icon || parentIcon;
         if (item.children && item.children.length > 0) {
@@ -230,8 +244,10 @@ export function ChildSidebarContainer({
   const allSearchItems = useMemo(() => {
     return [
       ...flattenItems(homeItems as MenuItem[], "Home"),
-      ...flattenItems(communityIntelligence as MenuItem[], "Community"),
-      ...flattenItems(contentModeration as MenuItem[], "Moderation"),
+      ...flattenItems(membersIntelligence as MenuItem[], "Members"),
+      ...flattenItems(feedItems as MenuItem[], "Content"),
+      ...flattenItems(moderationItems as MenuItem[], "Content"),
+      ...flattenItems(reportedItems as MenuItem[], "Content"),
       ...flattenItems(gamificationEngine as MenuItem[], "Gamification"),
       ...flattenItems(modulesItems as MenuItem[], "Modules"),
       ...flattenItems(websiteItems as MenuItem[], "Website"),
@@ -240,8 +256,10 @@ export function ChildSidebarContainer({
     ];
   }, [
     homeItems,
-    communityIntelligence,
-    contentModeration,
+    membersIntelligence,
+    feedItems,
+    moderationItems,
+    reportedItems,
     gamificationEngine,
     modulesItems,
     managementFolders,
@@ -336,12 +354,22 @@ export function ChildSidebarContainer({
               />
             )}
 
-            {activeTab === "community" && (
+            {activeTab === "members" && (
+              <CollapsibleSection
+                sectionKey="members"
+                label="Members"
+                items={filteredMembers}
+                renderItems={renderItems}
+                className="mb-1"
+              />
+            )}
+
+            {activeTab === "content" && (
               <>
                 <CollapsibleSection
-                  sectionKey="community"
-                  label="Community"
-                  items={filteredCommunity}
+                  sectionKey="feed"
+                  label="Feed"
+                  items={filteredFeed}
                   renderItems={renderItems}
                   className="mb-1"
                 />
@@ -349,6 +377,13 @@ export function ChildSidebarContainer({
                   sectionKey="moderation"
                   label="Moderation"
                   items={filteredModeration}
+                  renderItems={renderItems}
+                  className="mb-1"
+                />
+                <CollapsibleSection
+                  sectionKey="reported"
+                  label="Reported Items"
+                  items={filteredReported}
                   renderItems={renderItems}
                   className="mb-1"
                 />
@@ -416,7 +451,9 @@ export function ChildSidebarContainer({
 
             {searchQuery.trim() &&
               filteredHome.length === 0 &&
+              filteredFeed.length === 0 &&
               filteredModeration.length === 0 &&
+              filteredReported.length === 0 &&
               filteredGamification.length === 0 &&
               filteredModules.length === 0 &&
               filteredSettings.length === 0 &&
@@ -467,8 +504,8 @@ export function ChildSidebarContainer({
 
           {[
             "Home",
-            "Community",
-            "Moderation",
+            "Members",
+            "Content",
             "Gamification",
             "Modules",
             "Website",

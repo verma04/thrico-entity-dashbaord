@@ -48,6 +48,10 @@ function RootLayout({ children }: { children: React.ReactNode }) {
         description="Share updates, stay connected, and explore activities across your community ecosystem."
         icon={Activity}
         badgeText="Real-time Feed"
+        breadcrumbs={[
+          { label: "Feed", href: "/feed" },
+          { label: "Content Feed" }
+        ]}
         actions={<PostModal />}
       />
 
