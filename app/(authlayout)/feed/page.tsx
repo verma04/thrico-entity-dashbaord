@@ -105,6 +105,7 @@ export default function FeedPage() {
         badgeText="Overview"
         description="Monitor feed engagement, content trends, and user activity."
         icon={Share2}
+        breadcrumbs={[{ label: "Feed", href: "/feed" }, { label: "Analytics" }]}
       />
 
       <EcosystemContainer className="space-y-12 p-8 lg:p-12">

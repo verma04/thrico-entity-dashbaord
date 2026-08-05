@@ -42,7 +42,7 @@ export function EcosystemHeader({
   return (
     <div
       className={cn(
-        "flex flex-col sm:flex-row sm:items-start justify-between gap-4 py-1 m-3 mb-0 pb-0",
+        "flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-1 m-3 mb-0 pb-0",
         className,
       )}
     >
@@ -147,7 +147,7 @@ export function EcosystemHeader({
 
       {/* Right: Children + Actions */}
       {(children || actions) && (
-        <div className="flex items-center gap-2 shrink-0 pt-1">
+        <div className="flex items-center gap-2 shrink-0">
           {children}
           {actions && <div className="flex items-center gap-2">{actions}</div>}
         </div>

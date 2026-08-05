@@ -48,11 +48,24 @@ function TabButton({
         item.locked
           ? "cursor-not-allowed opacity-50 text-muted-foreground bg-transparent"
           : isActive
-            ? "text-primary bg-primary/5"
+            ? "bg-primary/5"
             : "text-muted-foreground hover:text-foreground hover:bg-muted/30",
         fullWidth && "w-full justify-center",
       )}
     >
+      {/* SVG Defs for Icon Gradient */}
+      {isActive && !item.locked && (
+        <svg width="0" height="0" className="absolute">
+          <defs>
+            <linearGradient id="tab-active-gradient" x1="0%" y1="100%" x2="100%" y2="0%">
+              <stop stopColor="#ff5733" offset="0%" />
+              <stop stopColor="#0967ff" offset="50%" />
+              <stop stopColor="#0967ff" offset="100%" />
+            </linearGradient>
+          </defs>
+        </svg>
+      )}
+
       {/* Animated pill background */}
       {isActive && !item.locked && (
         <motion.span
@@ -69,7 +82,7 @@ function TabButton({
           item.locked
             ? "text-muted-foreground/60"
             : isActive
-              ? "text-primary"
+              ? "[&_svg]:stroke-[url(#tab-active-gradient)] drop-shadow-sm"
               : "text-muted-foreground group-hover/tab:text-foreground",
         )}
       >
@@ -85,7 +98,9 @@ function TabButton({
       <span
         className={cn(
           "relative z-9 leading-none tracking-tight transition-all flex items-center gap-1",
-          isActive && !item.locked ? "font-bold" : "font-medium",
+          isActive && !item.locked
+            ? "font-bold text-transparent bg-clip-text bg-gradient-to-tr from-[#ff5733] via-[#0967ff] to-[#0967ff]"
+            : "font-medium",
         )}
       >
         {item.label}

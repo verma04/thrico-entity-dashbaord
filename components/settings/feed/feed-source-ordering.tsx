@@ -115,25 +115,6 @@ const FeedSourceOrdering: React.FC<FeedSourceOrderingProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Header / Info Area */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <h3 className="text-[14px] font-semibold text-foreground tracking-tight">
-              Feed Order
-            </h3>
-            <span className="px-1.5 py-0.5 rounded bg-emerald-50 text-[9px] font-bold text-emerald-600 uppercase tracking-wider border border-emerald-100">
-              Live Order
-            </span>
-          </div>
-          <p className="text-[12px] text-muted-foreground max-w-md">
-            Drag and drop to change the order of content in your feed.
-          </p>
-        </div>
-
-        {/* Floating Action Bar (logic moved to bottom of component) */}
-      </div>
-
       {/* Drag & Drop List */}
       <DragDropContext onDragEnd={handleDragEnd}>
         <Droppable droppableId="feed-sources">

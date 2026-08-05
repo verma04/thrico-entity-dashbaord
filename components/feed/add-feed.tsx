@@ -87,34 +87,34 @@ export default function PostModal() {
     <>
       {/* Entry Button View / Action Bar Style */}
       <TooltipProvider delayDuration={0}>
-        <div className="flex items-center gap-4 p-2.5 bg-card border border-border rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 group">
+        <div className="flex items-center gap-2 p-1.5 bg-card border border-border rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 group">
           <div
             onClick={showModal}
-            className="flex-1 flex items-center gap-3 px-4 py-2 bg-muted/50 border border-border/40 rounded-xl cursor-pointer hover:bg-muted transition-all lg:min-w-[420px]"
+            className="flex-1 flex items-center gap-2.5 px-3 py-1.5 bg-muted/50 border border-border/40 rounded-xl cursor-pointer hover:bg-muted transition-all max-w-[240px]"
           >
             <UserAvatar
-              size={32}
+              size={24}
               src={data?.getEntity?.logo}
-              className="rounded-lg shadow-sm border border-border bg-white"
+              className="rounded-lg shadow-sm border border-border bg-white shrink-0"
             />
-            <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
-              Share an update or create a poll...
+            <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors truncate">
+              Share an update...
             </span>
           </div>
 
-          <div className="flex items-center gap-1.5 shrink-0 pr-1">
+          <div className="flex items-center gap-1 shrink-0 pr-1">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-9 w-9 rounded-xl text-indigo-500 hover:bg-indigo-50 hover:text-indigo-600 transition-all active:scale-95"
+                  className="h-8 w-8 rounded-xl text-indigo-500 hover:bg-indigo-50 hover:text-indigo-600 transition-all active:scale-95"
                   onClick={() => {
                     showModal();
                     setShowPoll(false);
                   }}
                 >
-                  <ImageIcon className="h-4.5 w-4.5" strokeWidth={2} />
+                  <ImageIcon className="h-4 w-4" strokeWidth={2} />
                 </Button>
               </TooltipTrigger>
               <TooltipContent
@@ -130,13 +130,13 @@ export default function PostModal() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-9 w-9 rounded-xl text-emerald-500 hover:bg-emerald-50 hover:text-emerald-600 transition-all active:scale-95"
+                  className="h-8 w-8 rounded-xl text-emerald-500 hover:bg-emerald-50 hover:text-emerald-600 transition-all active:scale-95"
                   onClick={() => {
                     showModal();
                     setShowPoll(true);
                   }}
                 >
-                  <BarChart2 className="h-4.5 w-4.5" strokeWidth={2} />
+                  <BarChart2 className="h-4 w-4" strokeWidth={2} />
                 </Button>
               </TooltipTrigger>
               <TooltipContent

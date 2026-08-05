@@ -18,6 +18,8 @@ import {
 } from "lucide-react";
 import SettingsMenuLayout from "@/components/settings/settings-menu-layout";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 
 function SettingsLayout({ children }: { children: React.ReactNode }) {
   const items = [
@@ -97,7 +99,15 @@ function SettingsLayout({ children }: { children: React.ReactNode }) {
     },
   ];
 
-  return <MenuItemsLayout hideTabs={true}>{children}</MenuItemsLayout>;
+  return (
+    <MenuItemsLayout hideTabs={true}>
+      <EcosystemWrapper anonymized-1="settings">
+        <EcosystemContainer className="bg-transparent border-none shadow-none ring-0 p-0 sm:p-0">
+          {children}
+        </EcosystemContainer>
+      </EcosystemWrapper>
+    </MenuItemsLayout>
+  );
 }
 
 export default SettingsLayout;
