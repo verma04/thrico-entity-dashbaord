@@ -43,6 +43,8 @@ export interface Survey {
   appearance?: any;
   questions?: Question[];
   fields?: Question[];
+  sharedAsFeed?: boolean;
+  responses?: any[];
 }
 
 export interface Pagination {
@@ -74,9 +76,10 @@ export interface GetSurveyData {
 }
 
 export const GET_SURVEY = gql`
-  query GetSurvey($id: ID!) {
-    getSurvey(id: $id) {
+  query GetSurvey($getSurveyId: ID!) {
+    getSurvey(id: $getSurveyId) {
       id
+      formId
       title
       description
       status
@@ -84,6 +87,7 @@ export const GET_SURVEY = gql`
       endDate
       createdAt
       updatedAt
+      sharedAsFeed
       form {
         appearance
         previewType
@@ -105,13 +109,16 @@ export const GET_SURVEY = gql`
           legalText
         }
       }
+      responses {
+        id
+      }
     }
   }
 `;
 export function useGetSurvey(
-  options?: QueryHookOptions<GetSurveyData, { id: string }>,
+  options?: QueryHookOptions<GetSurveyData, { getSurveyId: string }>,
 ) {
-  return useQuery<GetSurveyData, { id: string }>(GET_SURVEY, options);
+  return useQuery<GetSurveyData, { getSurveyId: string }>(GET_SURVEY, options);
 }
 export interface Question {
   id: string;

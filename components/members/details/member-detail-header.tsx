@@ -12,6 +12,7 @@ import {
   BadgeCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { CtaButton } from "@/components/ui/cta-button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
@@ -115,14 +116,10 @@ export function MemberDetailHeader({
         {/* Right: Actions */}
         <div className="flex items-center gap-2">
           <Link href={`/members/${memberId}/edit`}>
-            <Button
-              size="sm"
-              variant="outline"
-              className="gap-2 h-8 rounded-lg text-xs font-semibold border-border/60 hover:bg-muted/80"
-            >
+            <CtaButton variant="outline">
               <Edit3 className="h-3.5 w-3.5" />
               Edit
-            </Button>
+            </CtaButton>
           </Link>
         </div>
       </div>

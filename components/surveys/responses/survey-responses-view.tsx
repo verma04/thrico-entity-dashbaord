@@ -44,7 +44,7 @@ export const SurveyResponsesView: React.FC<SurveyResponsesViewProps> = ({
   const [selectedResponse, setSelectedResponse] =
     useState<SurveyResponse | null>(null);
 
-  const { data: surveyData } = useGetSurvey({ variables: { id: surveyId } });
+  const { data: surveyData } = useGetSurvey({ variables: { getSurveyId: surveyId } });
   const {
     data: responsesData,
     loading,

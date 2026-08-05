@@ -5,5 +5,10 @@ import Reports from "../../../../components/reports/Reports";
 import { ReportModule } from "@/graphql/actions";
 
 export default function CommunityReportsPage() {
-  return <Reports preselectedModule={ReportModule.USER} />;
+  return (
+    <Reports
+      preselectedModule={ReportModule.USER}
+      breadcrumbs={[{ label: "Members", href: "/members" }, { label: "Reports" }]}
+    />
+  );
 }

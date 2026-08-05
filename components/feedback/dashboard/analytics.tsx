@@ -119,7 +119,6 @@ export default function FeedbackAnalytics() {
               <RotateCcw size={14} className={cn(loading && "animate-spin")} />
             </Button>
           </div>
-        </div>
         }
       />
 

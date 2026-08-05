@@ -264,15 +264,13 @@ export default function MembershipTiers() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
-                          <Button
+                          <CtaButton
                             variant="outline"
-                            size="sm"
                             onClick={() =>
                               setExpandedTierId(
                                 expandedTierId === tier.id ? null : tier.id,
                               )
                             }
-                            className="h-8"
                           >
                             {expandedTierId === tier.id ? (
                               <>
@@ -285,7 +283,7 @@ export default function MembershipTiers() {
                                 Members
                               </>
                             )}
-                          </Button>
+                          </CtaButton>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button

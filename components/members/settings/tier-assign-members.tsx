@@ -5,6 +5,7 @@ import { useMutation, useQuery } from "@apollo/client";
 import { ASSIGN_MEMBERS_TO_TIER } from "@/graphql/membership-tier";
 import { useGetAllUser } from "@/graphql/actions/membership/membership-queries";
 import { Button } from "@/components/ui/button";
+import { CtaButton } from "@/components/ui/cta-button";
 import {
   Dialog,
   DialogContent,
@@ -82,10 +83,10 @@ export default function TierAssignMembers({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="outline" className="gap-2">
+        <CtaButton variant="outline" className="gap-2">
           <UserPlus className="h-4 w-4" />
           Assign Members
-        </Button>
+        </CtaButton>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>

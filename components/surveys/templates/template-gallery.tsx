@@ -16,6 +16,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { CtaButton } from "@/components/ui/cta-button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Plus,
@@ -90,41 +91,6 @@ export const TemplateGallery = () => {
 
   return (
     <div className="space-y-8 pb-12">
-      {/* Gallery Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div className="space-y-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="pl-0 gap-2 mb-2 text-muted-foreground hover:text-foreground"
-            onClick={() => router.push("/surveys/all")}
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Surveys
-          </Button>
-          <h1 className="text-4xl font-black tracking-tight flex items-center gap-3">
-            <Sparkles className="h-8 w-8 text-primary" />
-            Template Gallery
-          </h1>
-          <p className="text-muted-foreground text-lg max-w-2xl">
-            Jumpstart your research with pre-built survey templates designed for
-            high engagement and quality insights.
-          </p>
-        </div>
-
-        <div className="relative w-full md:w-80">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search templates..."
-            className="pl-10 h-12 rounded-2xl border-none shadow-sm bg-card/50 backdrop-blur-sm focus-visible:ring-primary/20"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-      </div>
-
-      <Separator className="opacity-50" />
-
       {/* Templates Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {loading ? (
@@ -140,11 +106,11 @@ export const TemplateGallery = () => {
               transition={{ delay: index * 0.05 }}
               whileHover={{ y: -4 }}
             >
-              <Card className="group h-full flex flex-col border-none shadow-sm hover:shadow-xl transition-all duration-300 bg-card/50 backdrop-blur-sm overflow-hidden border-t-4 border-t-primary/10 hover:border-t-primary/40">
-                <CardHeader>
+              <Card className="group h-full flex flex-col border-none shadow-sm hover:shadow-xl transition-all duration-300 bg-card/50 backdrop-blur-sm overflow-hidden border-t-4 border-t-primary/10 hover:border-t-primary/40 p-4">
+                <CardHeader className="p-0 pb-3">
                   <div className="flex justify-between items-start mb-2">
-                    <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
-                      <Layout className="h-5 w-5" />
+                    <div className="p-2 rounded-xl bg-primary/10 text-primary">
+                      <Layout className="h-4 w-4" />
                     </div>
                     <Badge
                       variant="secondary"
@@ -153,41 +119,37 @@ export const TemplateGallery = () => {
                       {template.questions.length} questions
                     </Badge>
                   </div>
-                  <CardTitle className="text-xl font-bold leading-tight group-hover:text-primary transition-colors">
+                  <CardTitle className="text-base font-bold leading-tight group-hover:text-primary transition-colors">
                     {template.title}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="flex-1">
-                  <CardDescription className="text-sm leading-relaxed line-clamp-3">
+                <CardContent className="flex-1 p-0">
+                  <CardDescription className="text-xs leading-relaxed line-clamp-3">
                     {template.description ||
                       "Start with a clean structure designed for modern data collection."}
                   </CardDescription>
                 </CardContent>
-                <CardFooter className="pt-2 grid grid-cols-2 gap-3">
-                  <Button
+                <CardFooter className="p-0 pt-4 grid grid-cols-2 gap-2">
+                  <CtaButton
                     variant="outline"
-                    size="sm"
-                    className="rounded-xl border-border/60 hover:bg-accent/50 group/btn"
                     onClick={() => setSelectedTemplate(template)}
                   >
-                    <Eye className="h-4 w-4 mr-2 group-hover/btn:scale-110 transition-transform" />
+                    <Eye className="h-3 w-3 mr-1.5" />
                     Preview
-                  </Button>
-                  <Button
-                    size="sm"
-                    className="rounded-xl shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90 transition-all font-semibold"
+                  </CtaButton>
+                  <CtaButton
                     onClick={() => handleUseTemplate(template.id)}
                     disabled={isCloning}
                   >
                     {isCloning ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <Loader2 className="h-3 w-3 animate-spin" />
                     ) : (
                       <>
-                        <Plus className="h-4 w-4 mr-1.5" />
+                        <Plus className="h-3 w-3 mr-1.5" />
                         Use
                       </>
                     )}
-                  </Button>
+                  </CtaButton>
                 </CardFooter>
               </Card>
             </motion.div>

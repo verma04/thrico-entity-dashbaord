@@ -3,10 +3,9 @@
 import { withModulePermission } from "@/components/hoc/with-module-permission";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 
-
 import { useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useGetCustomForm } from "@/graphql/surveys/survey-queries";
+import { useGetSurvey } from "@/graphql/surveys/survey-queries";
 import { useEditSurvey } from "@/graphql/surveys/survey-mutations";
 import { useFormStore } from "@/store/useFormStore";
 import { useModuleStore } from "@/store/useModuleStore";
@@ -32,9 +31,10 @@ function EditSurveyPage() {
     endDate,
   } = useFormStore();
 
-  const { data, loading, error } = useGetCustomForm({
-    variables: { id },
+  const { data, loading, error } = useGetSurvey({
+    variables: { getSurveyId: id },
     skip: !id,
+    pollInterval: 4000,
   });
 
   const [editSurvey, { loading: isUpdating }] = useEditSurvey({
@@ -43,13 +43,23 @@ function EditSurveyPage() {
       router.push("/surveys/all");
     },
     onError: (err) => {
-      toast.error(err.message || `Failed to update ${singularName.toLowerCase()}`);
+      toast.error(
+        err.message || `Failed to update ${singularName.toLowerCase()}`,
+      );
     },
   });
 
   useEffect(() => {
-    if (data?.getCustomForm) {
-      loadForm(data.getCustomForm);
+    if (data?.getSurvey) {
+      loadForm({
+        title: data.getSurvey.title,
+        description: data.getSurvey.description,
+        startDate: data.getSurvey.startDate,
+        endDate: data.getSurvey.endDate,
+        previewType: data.getSurvey.form?.previewType,
+        appearance: data.getSurvey.form?.appearance,
+        questions: data.getSurvey.form?.questions,
+      });
     }
   }, [data, loadForm]);
 
@@ -84,7 +94,9 @@ function EditSurveyPage() {
   if (error) {
     return (
       <div className="h-screen flex flex-col items-center justify-center gap-4">
-        <p className="text-destructive font-medium">Failed to load {singularName.toLowerCase()}</p>
+        <p className="text-destructive font-medium">
+          Failed to load {singularName.toLowerCase()}
+        </p>
         <button
           onClick={() => router.push("/surveys")}
           className="text-sm underline"
@@ -111,5 +123,5 @@ function EditSurveyPage() {
 
 export default withSubscriptionCheck(
   withModulePermission(EditSurveyPage, "SURVEYS", "canRead"),
-  "surveys"
+  "surveys",
 );

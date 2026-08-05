@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import TierAssignMembers from "./tier-assign-members";
+import { CtaButton } from "@/components/ui/cta-button";
 
 interface TierMembersListProps {
   tierId: string;
@@ -137,18 +138,17 @@ export default function TierMembersList({ tierId }: TierMembersListProps) {
                     {row.user?.email}
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
+                    <CtaButton
+                      variant="outline"
                       onClick={() => {
                         setMemberToRemove(row);
                         setIsRemoveModalOpen(true);
                       }}
-                      className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                      className="text-red-500 hover:text-red-600 hover:bg-red-50 border-red-200"
                     >
                       <UserX className="h-4 w-4 mr-1" />
                       Remove
-                    </Button>
+                    </CtaButton>
                   </TableCell>
                 </TableRow>
               ))

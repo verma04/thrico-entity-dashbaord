@@ -26,7 +26,9 @@ function aalsoe({ children }: { children: React.ReactNode }) {
       description="Manage your profile, preferences, and subscription settings to customize your community experience."
       headerIcon={Users}
       tabs={TABS}
-      breadcrumb={[]}
+      breadcrumb={[
+        { label: "Members", href: "/members" }
+      ]}
       badge="Active"
     >
       {children}
