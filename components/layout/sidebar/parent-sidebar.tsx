@@ -14,6 +14,7 @@ import {
   Mail,
   Smartphone,
   Blocks,
+  Globe,
 } from "lucide-react";
 import { NavRailItem } from "./sidebar-components";
 
@@ -56,6 +57,7 @@ function getActiveTab(pathName: string) {
   if (moduleRoutes.some((route) => pathName.startsWith(route)))
     return "modules";
 
+  if (pathName.startsWith("/app-layout")) return "website";
   if (pathName.startsWith("/settings")) return "settings";
   if (pathName.startsWith("/email")) return "email";
   if (pathName.startsWith("/mobile-app")) return "mobile-app";
@@ -99,6 +101,13 @@ export function ParentSidebar() {
           label="Email"
           href="/email"
           active={activeTab === "email"}
+        />
+
+        <NavRailItem
+          icon={<Globe size={20} />}
+          label="Website"
+          href="/app-layout"
+          active={activeTab === "website"}
         />
         <NavRailItem
           icon={<Smartphone size={20} />}

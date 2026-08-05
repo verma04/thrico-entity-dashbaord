@@ -50,6 +50,7 @@ import {
   AdminTableColumn,
 } from "@/components/shared/admin-table/admin-table";
 import { cn } from "@/lib/utils";
+import { EcosystemWrapper, EcosystemHeader, EcosystemContainer } from "@/components/layout/ecosystem";
 
 interface SeoFormValues {
   title: string;
@@ -397,7 +398,7 @@ export default function SeoManager() {
   const columns: AdminTableColumn<any>[] = [
     {
       key: "page",
-      header: "Page Entity",
+      header: "Page",
       cell: (row) => (
         <div className="flex flex-col">
           <span className="font-bold text-foreground">{row.name}</span>
@@ -449,26 +450,17 @@ export default function SeoManager() {
   ];
 
   return (
-    <div className="flex flex-col h-full bg-background overflow-hidden relative">
-      {/* Header section - Sticky */}
-      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b px-6 py-4">
-        <div className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-3 mb-1">
-              <div className="p-2.5 rounded-xl bg-indigo-600/10 ring-1 ring-indigo-600/20">
-                <Globe className="h-5 w-5 text-indigo-600" />
-              </div>
-              <h1 className="text-2xl font-bold tracking-tight">
-                SEO Architecture
-              </h1>
-            </div>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground ml-1">
-              <span>Website Builder</span>
-              <ChevronRight className="h-3 w-3" />
-              <span>Search Orchestration</span>
-            </div>
-          </div>
-
+    <EcosystemWrapper>
+      <EcosystemHeader
+        title="SEO Settings"
+        description="Manage search engine metadata for your website."
+        icon={Globe}
+        badgeText="Website Builder"
+        breadcrumbs={[
+          { label: "Website Builder" },
+          { label: "SEO Settings" }
+        ]}
+        actions={
           <div className="flex items-center gap-4">
             <div className="hidden md:flex flex-col items-end mr-4">
               <div className="flex items-center gap-2">
@@ -493,11 +485,11 @@ export default function SeoManager() {
               Refetch
             </Button>
           </div>
-        </div>
-      </div>
+        }
+      />
 
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-7xl mx-auto px-6 py-8">
+      <EcosystemContainer>
+        <div className="pt-4">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <div className="lg:col-span-8 space-y-8">
               <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden">
@@ -505,11 +497,11 @@ export default function SeoManager() {
                   <div className="flex items-center gap-2 mb-1">
                     <Globe className="h-4 w-4 text-indigo-600" />
                     <CardTitle className="text-xl">
-                      SEO Manifest
+                      Page SEO
                     </CardTitle>
                   </div>
                   <CardDescription>
-                    Manage search engine metadata and protocols for each architectural node.
+                    Manage search engine metadata for each page.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="p-0">
@@ -519,8 +511,8 @@ export default function SeoManager() {
                     loading={websiteLoading}
                     keyExtractor={(p) => p.id}
                     emptyIcon={Globe}
-                    emptyTitle="No Nodes Found"
-                    emptyDescription="Connect nodes to manage their SEO metadata and optimize discoverability."
+                    emptyTitle="No Pages Found"
+                    emptyDescription="Manage SEO metadata to optimize discoverability."
                     className="border-0 shadow-none border-t-0 rounded-none bg-transparent"
                   />
                 </CardContent>
@@ -530,17 +522,17 @@ export default function SeoManager() {
             <div className="lg:col-span-4">
               <div className="sticky top-6 space-y-6">
                 <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden bg-muted/20">
-                   <div className="p-6">
+                    <div className="p-6">
                       <Globe className="h-8 w-8 mb-4 text-emerald-500 opacity-80" />
-                      <h3 className="text-lg font-bold">SEO Pulse</h3>
+                      <h3 className="text-lg font-bold">SEO Overview</h3>
                       <p className="text-sm text-muted-foreground mt-1">
-                        Global metrics of metadata readiness.
+                        Overview of your pages' SEO status.
                       </p>
                    </div>
                    <div className="p-4 bg-background grid grid-cols-2 gap-4 divide-x border-t">
                       <div className="flex flex-col items-center justify-center py-2">
                         <span className="text-2xl font-bold">{pages.length}</span>
-                        <span className="text-[10px] uppercase font-bold text-muted-foreground mt-1">Routable Links</span>
+                        <span className="text-[10px] uppercase font-bold text-muted-foreground mt-1">Total Pages</span>
                       </div>
                       <div className="flex flex-col items-center justify-center py-2 text-indigo-600">
                         <span className="text-2xl font-bold">{pages.filter((p:any) => p.seo?.title).length}</span>
@@ -553,7 +545,7 @@ export default function SeoManager() {
                   <CardHeader className="pb-3 border-b bg-muted/20">
                     <CardTitle className="text-sm font-bold flex items-center gap-2">
                       <Info className="h-4 w-4 text-indigo-600" />
-                      Optimization Strategy
+                      SEO Tips
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="pt-4">
@@ -583,7 +575,7 @@ export default function SeoManager() {
             </div>
           </div>
         </div>
-      </div>
+      </EcosystemContainer>
 
       <Dialog open={isModalVisible} onOpenChange={setIsModalVisible}>
         <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto rounded-[40px] border-none shadow-2xl p-0 overflow-hidden text-foreground">
@@ -773,6 +765,6 @@ export default function SeoManager() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </EcosystemWrapper>
   );
 }

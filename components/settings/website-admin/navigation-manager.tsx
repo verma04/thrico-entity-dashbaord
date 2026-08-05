@@ -46,6 +46,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { EcosystemWrapper, EcosystemHeader, EcosystemContainer } from "@/components/layout/ecosystem";
 
 // ------------------------------------------------
 // TYPES
@@ -178,33 +179,21 @@ export default function NavigationManager() {
   });
 
   return (
-    <div className="flex flex-col h-full bg-background overflow-hidden relative">
-      {/* Sticky Header */}
-      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b px-6 py-4">
-        <div className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-3 mb-1">
-              <div className="p-2.5 rounded-xl bg-indigo-600/10 ring-1 ring-indigo-600/20">
-                <Globe className="h-5 w-5 text-indigo-600" />
-              </div>
-              <h1 className="text-2xl font-bold tracking-tight">
-                Navigation Studio
-              </h1>
-            </div>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground ml-1">
-              <span>Website Builder</span>
-              <ChevronRight className="h-3 w-3" />
-              <span>General Settings</span>
-              <ChevronRight className="h-3 w-3" />
-              <span>Global Navigation</span>
-            </div>
-          </div>
-        </div>
-      </div>
+    <EcosystemWrapper>
+      <EcosystemHeader
+        title="Navigation Settings"
+        description="Configure your website's global navigation layout and structure."
+        icon={Globe}
+        badgeText="Website Builder"
+        breadcrumbs={[
+          { label: "Website Builder" },
+          { label: "General Settings" },
+          { label: "Global Navigation" }
+        ]}
+      />
 
-      {/* Main Content Area */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-7xl mx-auto px-6 py-8">
+      <EcosystemContainer>
+        <div className="pt-4">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             {/* Form Section */}
             <div className="lg:col-span-8 space-y-8">
@@ -334,7 +323,7 @@ export default function NavigationManager() {
                       </CardTitle>
                     </div>
                     <CardDescription>
-                      Orchestrate links and hierarchical navigation nodes.
+                      Configure the links and hierarchical navigation menu.
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="pt-8">
@@ -411,7 +400,7 @@ export default function NavigationManager() {
                   <CardHeader className="pb-3 border-b bg-muted/20">
                     <CardTitle className="text-sm font-bold flex items-center gap-2">
                       <Info className="h-4 w-4 text-indigo-600" />
-                      Platform Strategy
+                      Navigation Tips
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="pt-4">
@@ -441,7 +430,7 @@ export default function NavigationManager() {
             </div>
           </div>
         </div>
-      </div>
+      </EcosystemContainer>
 
       <FloatingSavePanel
         onSave={() => formik.submitForm()}
@@ -452,6 +441,6 @@ export default function NavigationManager() {
         title="Unsaved Changes"
         description="You have modified the navigation configuration."
       />
-    </div>
+    </EcosystemWrapper>
   );
 }

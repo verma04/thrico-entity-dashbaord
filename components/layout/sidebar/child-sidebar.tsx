@@ -29,6 +29,7 @@ import {
   profile,
   emailItems,
   mobileAppItems,
+  websiteItems,
 } from "./menu-items";
 import { useWorkspaceSwitch } from "@/hooks/use-workspace-switch";
 
@@ -46,10 +47,12 @@ type ActiveTab =
   | "modules"
   | "settings"
   | "email"
-  | "mobile-app";
+  | "mobile-app"
+  | "website";
 
 function getActiveTab(pathName: string): ActiveTab {
   if (pathName.startsWith("/settings/modules")) return "modules";
+  if (pathName.startsWith("/app-layout")) return "website";
   if (pathName.startsWith("/settings")) return "settings";
   if (pathName.startsWith("/email")) return "email";
   if (pathName.startsWith("/mobile-app")) return "mobile-app";
@@ -177,6 +180,10 @@ export function ChildSidebarContainer({
     () => filterList(mobileAppItems as MenuItem[], searchQuery),
     [searchQuery, filterList],
   );
+  const filteredWebsite = useMemo(
+    () => filterList(websiteItems as MenuItem[], searchQuery),
+    [searchQuery, filterList],
+  );
 
   const { data: userData } = useGetUser();
   const { data: otherAccountsData } = useGetMyOtherAccounts();
@@ -228,6 +235,7 @@ export function ChildSidebarContainer({
       ...flattenItems(contentModeration as MenuItem[], "Moderation"),
       ...flattenItems(gamificationEngine as MenuItem[], "Gamification"),
       ...flattenItems(modulesItems as MenuItem[], "Modules"),
+      ...flattenItems(websiteItems as MenuItem[], "Website"),
       ...flattenItems(managementFolders as MenuItem[], "Settings"),
       ...flattenItems(profileItems, "Account"),
     ];
@@ -368,6 +376,16 @@ export function ChildSidebarContainer({
               />
             )}
 
+            {activeTab === "website" && (
+              <CollapsibleSection
+                sectionKey="website"
+                label="Website Builder"
+                items={filteredWebsite}
+                renderItems={renderItems}
+                className="mb-1"
+              />
+            )}
+
             {activeTab === "settings" && (
               <CollapsibleSection
                 sectionKey="settings"
@@ -403,6 +421,7 @@ export function ChildSidebarContainer({
               filteredGamification.length === 0 &&
               filteredModules.length === 0 &&
               filteredSettings.length === 0 &&
+              filteredWebsite.length === 0 &&
               filteredProfile.length === 0 && (
                 <div className="py-8 text-center group-data-[collapsible=icon]:hidden">
                   <p className="text-[11.5px] text-muted-foreground/50">
@@ -453,6 +472,7 @@ export function ChildSidebarContainer({
             "Moderation",
             "Gamification",
             "Modules",
+            "Website",
             "Settings",
             "Account",
           ].map((section) => {

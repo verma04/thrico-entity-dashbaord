@@ -811,6 +811,40 @@ export const profile = (userName: string = "Deepak Rai") => [
   },
 ];
 
+// --- 7. WEBSITE BUILDER ---
+export const websiteItems = [
+  {
+    key: "web-pages",
+    label: "Pages",
+    path: "/app-layout",
+    icon: <FileText size={18} />,
+  },
+  {
+    key: "web-create-page",
+    label: "Create Page",
+    path: "/app-layout/create",
+    icon: <PaintbrushVerticalIcon size={18} />,
+  },
+  {
+    key: "web-navigation",
+    label: "Navigation",
+    path: "/app-layout/navigation",
+    icon: <Globe size={18} />,
+  },
+  {
+    key: "web-footer",
+    label: "Footer",
+    path: "/app-layout/footer",
+    icon: <Box size={18} />,
+  },
+  {
+    key: "web-settings",
+    label: "Settings",
+    path: "/app-layout/settings",
+    icon: <Settings size={18} />,
+  },
+];
+
 // --- Legacy exports for compatibility while refactoring sidebar.tsx ---
 export const main = homeItems;
 export const settings = adminSettings;
