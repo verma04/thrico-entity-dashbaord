@@ -32,7 +32,6 @@ function getActiveTab(pathName: string) {
   )
     return "content";
 
-
   const moduleRoutes = [
     "/communities",
     "/events",
@@ -128,7 +127,7 @@ export function ParentSidebar() {
         <NavRailItem
           icon={<Smartphone size={20} />}
           label="Mobile App"
-          href="/mobile-app/android"
+          href="/mobile-app"
           active={activeTab === "mobile-app"}
         />
         <NavRailItem

@@ -112,8 +112,18 @@ export const homeItems = [
 
 // --- 2. MEMBERS ---
 export const membersIntelligence = [
-  { key: "members-dash", label: "Dashboard", path: "/members", icon: <LayoutDashboard size={18} /> },
-  { key: "members-manage", label: "Manage Members", path: "/members/all", icon: <Users size={18} /> },
+  {
+    key: "members-dash",
+    label: "Dashboard",
+    path: "/members",
+    icon: <LayoutDashboard size={18} />,
+  },
+  {
+    key: "members-manage",
+    label: "Manage Members",
+    path: "/members/all",
+    icon: <Users size={18} />,
+  },
   {
     key: "members-create",
     label: "Add New Member",
@@ -138,32 +148,115 @@ export const membersIntelligence = [
     path: "/members/reports",
     icon: <ShieldAlert size={18} />,
   },
-  { key: "members-settings", label: "Settings", path: "/members/settings", icon: <Settings size={18} /> },
-  { key: "members-audit", label: "Audit Log", path: "/members/audit-log", icon: <History size={18} /> },
+  {
+    key: "members-settings",
+    label: "Settings",
+    path: "/members/settings",
+    icon: <Settings size={18} />,
+  },
+  {
+    key: "members-audit",
+    label: "Audit Log",
+    path: "/members/audit-log",
+    icon: <History size={18} />,
+  },
 ];
 
 // --- 2. MODERATION ---
 export const feedItems = [
-  { key: "feed-dash", label: "Dashboard", path: "/feed", icon: <LayoutDashboard size={18} /> },
-  { key: "feed-overall", label: "Overall Posts", path: "/feed/all", icon: <Rss size={18} /> },
-  { key: "feed-pinned", label: "Pinned Post", path: "/feed/pinned", icon: <CheckSquare size={18} /> },
-  { key: "feed-admin", label: "Admin Posts", path: "/feed/admin", icon: <UserCog size={18} /> },
-  { key: "feed-moments", label: "Moments (Videos)", path: "/feed/moments", isMobileOnly: true, icon: <Video size={18} /> },
-  { key: "feed-jobs", label: "Jobs", path: "/feed/jobs", isMobileOnly: true, icon: <Briefcase size={18} /> },
-  { key: "feed-listings", label: "Listings", path: "/feed/listing", isMobileOnly: true, icon: <ClipboardList size={18} /> },
-  { key: "feed-reported", label: "Reported Items", path: "/feed/reports", icon: <ShieldAlert size={18} /> },
-  { key: "feed-settings", label: "Settings", path: "/feed/settings", icon: <Settings size={18} /> },
+  {
+    key: "feed-dash",
+    label: "Dashboard",
+    path: "/feed",
+    icon: <LayoutDashboard size={18} />,
+  },
+  {
+    key: "feed-overall",
+    label: "Overall Posts",
+    path: "/feed/all",
+    icon: <Rss size={18} />,
+  },
+  {
+    key: "feed-pinned",
+    label: "Pinned Post",
+    path: "/feed/pinned",
+    icon: <CheckSquare size={18} />,
+  },
+  {
+    key: "feed-admin",
+    label: "Admin Posts",
+    path: "/feed/admin",
+    icon: <UserCog size={18} />,
+  },
+  {
+    key: "feed-moments",
+    label: "Moments (Videos)",
+    path: "/feed/moments",
+    isMobileOnly: true,
+    icon: <Video size={18} />,
+  },
+  {
+    key: "feed-jobs",
+    label: "Jobs",
+    path: "/feed/jobs",
+    isMobileOnly: true,
+    icon: <Briefcase size={18} />,
+  },
+  {
+    key: "feed-listings",
+    label: "Listings",
+    path: "/feed/listing",
+    isMobileOnly: true,
+    icon: <ClipboardList size={18} />,
+  },
+  {
+    key: "feed-reported",
+    label: "Reported Items",
+    path: "/feed/reports",
+    icon: <ShieldAlert size={18} />,
+  },
+  {
+    key: "feed-settings",
+    label: "Settings",
+    path: "/feed/settings",
+    icon: <Settings size={18} />,
+  },
 ];
 
 export const moderationItems = [
-  { key: "mod-dashboard", label: "Dashboard", path: "/moderation", icon: <LayoutDashboard size={18} /> },
-  { key: "mod-moderation", label: "AI Moderation", path: "/moderation/settings", icon: <ShieldCheck size={18} /> },
-  { key: "mod-banned", label: "Banned words", path: "/moderation/banned-words", icon: <Undo2 size={18} /> },
-  { key: "mod-links", label: "Blocked Links", path: "/moderation/blocked-links", icon: <Globe size={18} /> },
+  {
+    key: "mod-dashboard",
+    label: "Dashboard",
+    path: "/moderation",
+    icon: <LayoutDashboard size={18} />,
+  },
+  {
+    key: "mod-moderation",
+    label: "AI Moderation",
+    path: "/moderation/settings",
+    icon: <ShieldCheck size={18} />,
+  },
+  {
+    key: "mod-banned",
+    label: "Banned words",
+    path: "/moderation/banned-words",
+    icon: <Undo2 size={18} />,
+  },
+  {
+    key: "mod-links",
+    label: "Blocked Links",
+    path: "/moderation/blocked-links",
+    icon: <Globe size={18} />,
+  },
 ];
 
 export const reportedItems = [
-  { key: "mod-reported", label: "Reported Items", path: "/reports", icon: <ShieldAlert size={18} /> },
+  {
+    key: "mod-reported",
+    label: "Reported Items",
+    path: "/reports",
+    icon: <ShieldAlert size={18} />,
+  },
 ];
 
 // --- 3. REWARDS & GAMES ---
@@ -841,12 +934,6 @@ export const mobileAppItems = [
     label: "iOS App",
     path: "/mobile-app/ios",
     icon: <Smartphone size={18} />,
-  },
-  {
-    key: "ma-settings",
-    label: "App Settings",
-    path: "/mobile-app/settings",
-    icon: <Settings size={18} />,
   },
 ];
 

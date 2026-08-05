@@ -303,11 +303,12 @@ export function ChildSidebarContainer({
       <div className="flex flex-1 relative w-full bg-white group/sidebar-wrapper">
         <ParentSidebar />
         {/* ── SIDEBAR ── */}
-        <Sidebar
-          collapsible="icon"
-          className="border bg-[#f9f9f9] dark:bg-background transition-[width] duration-150 ease-in-out !left-[80px] !top-[64px] !h-[calc(100vh-72px)] my-2 mx-2 mt-0 shadow-sm !rounded-2xl !rounded-r-none !rounded-br-none"
-          style={{ "--sidebar-width": "248px" } as React.CSSProperties}
-        >
+        {activeTab !== "mobile-app" && (
+          <Sidebar
+            collapsible="icon"
+            className="border bg-[#f9f9f9] dark:bg-background transition-[width] duration-150 ease-in-out !left-[80px] !top-[64px] !h-[calc(100vh-72px)] my-2 mx-2 mt-0 shadow-sm !rounded-2xl !rounded-r-none !rounded-br-none"
+            style={{ "--sidebar-width": "248px" } as React.CSSProperties}
+          >
           <SidebarHeader className="h-10 flex items-center justify-between flex-row px-4 pb-0 pt-0 group-data-[collapsible=icon]:px-1 group-data-[collapsible=icon]:justify-center">
             {!isCollapsed && (
               <span className="text-lg font-bold text-neutral-900 dark:text-neutral-100 capitalize tracking-tight w-full">
@@ -439,16 +440,6 @@ export function ChildSidebarContainer({
               />
             )}
 
-            {activeTab === "mobile-app" && (
-              <CollapsibleSection
-                sectionKey="mobile-app"
-                label="Mobile App"
-                items={filteredMobileApp}
-                renderItems={renderItems}
-                className="mb-1"
-              />
-            )}
-
             {searchQuery.trim() &&
               filteredHome.length === 0 &&
               filteredFeed.length === 0 &&
@@ -486,6 +477,7 @@ export function ChildSidebarContainer({
             </SidebarFooter>
           )}
         </Sidebar>
+        )}
 
         {/* ── MAIN CONTENT ── */}
         <SidebarInset className="bg-transparent overflow-hidden flex flex-col h-[calc(100vh-56px)]">
