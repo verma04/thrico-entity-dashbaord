@@ -94,14 +94,11 @@ const AddMemberPage = () => {
           <div className="mt-6 flex gap-3">
             <Button
               variant="default"
-              onClick={() => router.push("/settings/billing")}
+              onClick={() => router.push("/settings/subscription")}
             >
               Upgrade Subscription
             </Button>
-            <Button
-              variant="outline"
-              onClick={() => router.back()}
-            >
+            <Button variant="outline" onClick={() => router.back()}>
               Go Back
             </Button>
           </div>
