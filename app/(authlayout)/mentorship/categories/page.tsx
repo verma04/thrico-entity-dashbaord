@@ -14,6 +14,7 @@ import {
   useDeleteMentorshipCategory,
 } from "@/graphql/mentorship/mentoship-muation";
 import { Button } from "@/components/ui/button";
+import { CtaButton } from "@/components/ui/cta-button";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -359,17 +360,20 @@ function MentorCategoriesPage() {
         badgeText="Organization"
         description={`Organize ${singularName.toLowerCase()}s by expertise for better discovery and matching.`}
         icon={FolderTree}
+        breadcrumbs={[
+          { label: "Mentorship", href: "/mentorship/all" },
+          { label: "Categories" },
+        ]}
         actions={
-          <Button
-            className="font-semibold text-xs px-6 h-10 rounded-lg shadow-sm gap-2"
+          <CtaButton
             onClick={() => {
               setEditingCategory(null);
               setIsDialogOpen(true);
             }}
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-4 w-4 mr-1.5" />
             Add Category
-          </Button>
+          </CtaButton>
         }
       />
 

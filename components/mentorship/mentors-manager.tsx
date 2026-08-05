@@ -10,6 +10,7 @@ import {
 import { MentorsTable } from "./mentors-table";
 import { MentorEditor } from "./mentor-editor";
 import { Button } from "@/components/ui/button";
+import { CtaButton } from "@/components/ui/cta-button";
 import {
   Plus,
   Search,
@@ -118,12 +119,16 @@ export function MentorsManager() {
         badgeText="Expert Network"
         description={`Oversee and manage the ${singularName.toLowerCase()}s in your ecosystem, approve applications, and feature top performers.`}
         icon={GraduationCap}
+        breadcrumbs={[
+          { label: "Mentorship", href: "/mentorship/all" },
+          { label: "Mentors" },
+        ]}
         actions={
           <Link href="/mentorship/add-mentor">
-            <Button className="font-semibold text-xs px-6 h-10 rounded-lg shadow-sm gap-2">
-              <Plus className="h-4 w-4" />
+            <CtaButton>
+              <Plus className="h-4 w-4 mr-1.5" />
               Onboard {singularName}
-            </Button>
+            </CtaButton>
           </Link>
         }
       />

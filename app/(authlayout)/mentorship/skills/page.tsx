@@ -15,6 +15,7 @@ import {
   useDeleteMentorshipSkills,
 } from "@/graphql/mentorship/mentoship-muation";
 import { Button } from "@/components/ui/button";
+import { CtaButton } from "@/components/ui/cta-button";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -349,17 +350,20 @@ function MentorSkillsPage() {
         badgeText="Competency"
         description={`Manage the set of skills that ${singularName.toLowerCase()}s can claim and mentees can search for.`}
         icon={Wrench}
+        breadcrumbs={[
+          { label: "Mentorship", href: "/mentorship/all" },
+          { label: "Skills" },
+        ]}
         actions={
-          <Button
-            className="font-semibold text-xs px-6 h-10 rounded-lg shadow-sm gap-2"
+          <CtaButton
             onClick={() => {
               setEditingSkill(null);
               setIsDialogOpen(true);
             }}
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-4 w-4 mr-1.5" />
             Add Skill
-          </Button>
+          </CtaButton>
         }
       />
 

@@ -72,6 +72,7 @@ import {
   Images,
   UserPlus,
   Network,
+  Share2,
 } from "lucide-react";
 import { useMemo } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -135,6 +136,12 @@ export const membersIntelligence = [
     label: "Network Graph",
     path: "/members/graph",
     icon: <Network size={18} />,
+  },
+  {
+    key: "members-referrals",
+    label: "Referrals",
+    path: "/members/referrals",
+    icon: <Share2 size={18} />,
   },
   {
     key: "members-classifications",
