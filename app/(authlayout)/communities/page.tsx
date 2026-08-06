@@ -1,4 +1,4 @@
-import Analytics from "@/components/communities/dashboard/Analytics";
+import Analytics from "@/components/communities/dashboard/analytics";
 
 const page = () => {
   return <Analytics />;

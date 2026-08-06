@@ -27,6 +27,7 @@ const BuilderLayout = () => {
     currentPageId,
     setCurrentPage,
     addPage,
+    initializeWebsiteData, // added this
   } = useWebsiteBuilderStore();
   const [isMounted, setIsMounted] = React.useState(false);
   const [isAddPageOpen, setIsAddPageOpen] = React.useState(false);
@@ -34,6 +35,28 @@ const BuilderLayout = () => {
 
   // Fetch website data for websiteId
   const { data: websiteData, refetch } = useGetWebsite({});
+
+  // Initialize store with fetched data
+  React.useEffect(() => {
+    if (websiteData?.getWebsite) {
+      const website = websiteData.getWebsite;
+      initializeWebsiteData({
+        ...website,
+        globalFooter: {
+          ...website?.footer,
+          id: "footer",
+          type: "footer",
+          name: "Footer",
+        },
+        globalHeader: {
+          ...website?.navbar,
+          id: "navbar",
+          type: "navbar",
+          name: "Navbar",
+        },
+      });
+    }
+  }, [websiteData, initializeWebsiteData]);
 
   // Set currentPageId to first page if not set
   React.useEffect(() => {

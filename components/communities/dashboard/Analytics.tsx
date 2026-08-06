@@ -426,8 +426,8 @@ export default function CommunitiesAnalytics() {
                                 STATUS_COLORS[i % STATUS_COLORS.length],
                             }}
                           />
-                          <span className="text-xs font-semibold text-muted-foreground">
-                            {item.name}
+                          <span className="text-xs font-semibold text-muted-foreground capitalize">
+                            {item.name.toLowerCase()}
                           </span>
                         </div>
                         <span className="text-xs font-bold text-foreground tabular-nums">

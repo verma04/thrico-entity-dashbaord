@@ -3,20 +3,23 @@
 import { withModulePermission } from "@/components/hoc/with-module-permission";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 
-
 import React from "react";
 import { useRouter } from "next/navigation";
 import { MomentCreationForm } from "@/components/moments/add/moment-creation-form";
 import { useToast } from "@/components/ui/use-toast";
-import { useAdminGenerateMomentUploadUrl, useAdminConfirmMomentUpload } from "@/graphql/actions/moments";
+import {
+  useAdminGenerateMomentUploadUrl,
+  useAdminConfirmMomentUpload,
+} from "@/graphql/actions/moments";
 import { useModuleStore } from "@/store/useModuleStore";
 import { EcosystemWrapper } from "@/components/layout/ecosystem";
-
+import { EcosystemHeader } from "@/components/layout/ecosystem";
+import { PlaySquare } from "lucide-react";
 const CreateMomentPage = () => {
   const singularName = useModuleStore((state) => state.momentSingularName);
   const router = useRouter();
   const { toast } = useToast();
-  
+
   const [step, setStep] = React.useState(1);
   const [uploadedAssets, setUploadedAssets] = React.useState<any>(null);
   const [isUploading, setIsUploading] = React.useState(false);
@@ -35,13 +38,18 @@ const CreateMomentPage = () => {
     onError: (error: any) => {
       toast({
         title: "Error",
-        description: error.message || `Failed to publish ${singularName.toLowerCase()}`,
+        description:
+          error.message || `Failed to publish ${singularName.toLowerCase()}`,
         variant: "destructive",
       });
-    }
+    },
   });
 
-  const uploadFileWithProgress = (url: string, file: File, onProgress: (pct: number) => void) => {
+  const uploadFileWithProgress = (
+    url: string,
+    file: File,
+    onProgress: (pct: number) => void,
+  ) => {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
       xhr.open("PUT", url);
@@ -49,7 +57,9 @@ const CreateMomentPage = () => {
 
       xhr.upload.onprogress = (event) => {
         if (event.lengthComputable) {
-          const percentComplete = Math.round((event.loaded / event.total) * 100);
+          const percentComplete = Math.round(
+            (event.loaded / event.total) * 100,
+          );
           onProgress(percentComplete);
         }
       };
@@ -58,7 +68,11 @@ const CreateMomentPage = () => {
         if (xhr.status >= 200 && xhr.status < 300) {
           resolve(xhr.response);
         } else {
-          reject(new Error(`Upload failed with status ${xhr.status} ${xhr.responseText}`));
+          reject(
+            new Error(
+              `Upload failed with status ${xhr.status} ${xhr.responseText}`,
+            ),
+          );
         }
       };
 
@@ -75,7 +89,7 @@ const CreateMomentPage = () => {
 
       // 1. Generate Pre-signed URLs
       setUploadStatus("Initializing upload channels...");
-      
+
       const { data: uploadData } = await generateUploadUrl({
         variables: {
           input: {
@@ -85,23 +99,27 @@ const CreateMomentPage = () => {
             thumbnailFileName: thumbnailFile?.name || "thumbnail.jpg",
             thumbnailFileType: thumbnailFile?.type || "image/jpeg",
             thumbnailFileSize: thumbnailFile?.size || 0,
-          }
-        }
+          },
+        },
       });
 
-      const { 
-        videoUploadUrl, 
-        thumbnailUploadUrl, 
-        videoFileUrl, 
-        thumbnailFileUrl 
+      const {
+        videoUploadUrl,
+        thumbnailUploadUrl,
+        videoFileUrl,
+        thumbnailFileUrl,
       } = uploadData.adminGenerateMomentUploadUrl;
 
       // 2. Upload to S3
       setUploadStatus(`Uploading ${singularName}...`);
-      
+
       // Upload thumbnail first (smaller)
       if (thumbnailFile && thumbnailUploadUrl) {
-        await uploadFileWithProgress(thumbnailUploadUrl, thumbnailFile, () => {});
+        await uploadFileWithProgress(
+          thumbnailUploadUrl,
+          thumbnailFile,
+          () => {},
+        );
       }
 
       // Upload video with progress tracking
@@ -115,13 +133,16 @@ const CreateMomentPage = () => {
         thumbnailUrl: thumbnailFileUrl,
       });
       setStep(2);
-      toast({ title: "Assets Staged", description: "Media transmission successful." });
-
+      toast({
+        title: "Assets Staged",
+        description: "Media transmission successful.",
+      });
     } catch (error: any) {
       console.error("Upload flow error:", error);
       toast({
         title: "Upload Failed",
-        description: error.message || "An error occurred during the upload process",
+        description:
+          error.message || "An error occurred during the upload process",
         variant: "destructive",
       });
     } finally {
@@ -134,7 +155,7 @@ const CreateMomentPage = () => {
     try {
       setUploadStatus(`Finalizing ${singularName}...`);
       setIsUploading(true);
-      
+
       await confirmUpload({
         variables: {
           input: {
@@ -142,11 +163,10 @@ const CreateMomentPage = () => {
             thumbnailUrl: values.thumbnailUrl,
             caption: values.caption,
             shareInFeed: values.shareInFeed,
-            isAiContent: values.isAiContent
-          }
-        }
+            isAiContent: values.isAiContent,
+          },
+        },
       });
-
     } catch (error: any) {
       console.error("Finalization error:", error);
       toast({
@@ -169,15 +189,15 @@ const CreateMomentPage = () => {
   };
 
   return (
-    <EcosystemWrapper
-     
+    <EcosystemWrapper anonymized-1="media-create">
+      <EcosystemHeader
         title={`Create ${singularName}`}
         badgeText="New"
         description={`Add a new ${singularName.toLowerCase()} to the feed.`}
         icon={PlaySquare}
         breadcrumbs={[
           { label: "Media", href: "/moments/all" },
-          { label: "Create" }
+          { label: "Create" },
         ]}
       />
       <div className="flex-1 overflow-auto bg-background/50 p-6">
@@ -196,9 +216,7 @@ const CreateMomentPage = () => {
   );
 };
 
-
-
 export default withSubscriptionCheck(
   withModulePermission(CreateMomentPage, "MOMENTS", "canCreate"),
-  "moments"
+  "moments",
 );
