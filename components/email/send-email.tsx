@@ -2,7 +2,13 @@
 
 import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, ChevronRight, ChevronLeft, AlertTriangle, RefreshCw } from "lucide-react";
+import {
+  Send,
+  ChevronRight,
+  ChevronLeft,
+  AlertTriangle,
+  RefreshCw,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -26,23 +32,30 @@ export default function SendEmail() {
   const router = useRouter();
 
   const { data: overviewData } = useGetEmailOverview();
-  const { data: templatesData, loading: templatesLoading } = useGetEmailTemplates();
+  const { data: templatesData, loading: templatesLoading } =
+    useGetEmailTemplates();
   const { data: domainData } = useGetEmailDomain();
   const [sendEmail, { loading: isSending }] = useSendEmail();
-  const { data: userGroupsData, loading: userGroupsLoading } = useGetEmailUserGroups();
+  const { data: userGroupsData, loading: userGroupsLoading } =
+    useGetEmailUserGroups();
 
   const [step, setStep] = useState(0);
   const [recipients, setRecipients] = useState<string[]>([]);
   const [emailInput, setEmailInput] = useState("");
   const [recipientMode, setRecipientMode] = useState<RecipientMode>("manual");
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(
+    null,
+  );
   const [subject, setSubject] = useState("");
   const [showConfirm, setShowConfirm] = useState(false);
 
-  const templates = useMemo(() => templatesData?.getEmailTemplates || [], [templatesData]);
+  const templates = useMemo(
+    () => templatesData?.getEmailTemplates || [],
+    [templatesData],
+  );
   const selectedTemplate = useMemo(
     () => templates.find((t) => t.id === selectedTemplateId),
-    [templates, selectedTemplateId]
+    [templates, selectedTemplateId],
   );
   const domain = domainData?.getEmailDomain;
   const isDomainVerified = domain?.status === "verified";
@@ -70,22 +83,32 @@ export default function SendEmail() {
     {
       label: "Sender Domain",
       ok: isDomainVerified,
-      message: isDomainVerified ? `Verified — noreply@${domain?.domain}` : "Domain not verified",
+      message: isDomainVerified
+        ? `Verified — noreply@${domain?.domain}`
+        : "Domain not verified",
     },
     {
       label: "Email Credits",
       ok: remainingQuota >= totalRecipientCount && totalRecipientCount > 0,
-      message: remainingQuota >= totalRecipientCount ? `${totalRecipientCount} recipients within quota` : "Exceeds your remaining quota",
+      message:
+        remainingQuota >= totalRecipientCount
+          ? `${totalRecipientCount} recipients within quota`
+          : "Exceeds your remaining quota",
     },
     {
       label: "Template",
       ok: !!selectedTemplateId,
-      message: !!selectedTemplateId ? "Template selected" : "No template chosen",
+      message: !!selectedTemplateId
+        ? "Template selected"
+        : "No template chosen",
     },
     {
       label: "Recipients",
       ok: totalRecipientCount > 0,
-      message: totalRecipientCount > 0 ? `${totalRecipientCount} recipients added` : "No recipients added",
+      message:
+        totalRecipientCount > 0
+          ? `${totalRecipientCount} recipients added`
+          : "No recipients added",
     },
   ];
 
@@ -130,7 +153,8 @@ export default function SendEmail() {
 
   const canProceed = () => {
     if (step === 0) return !!selectedTemplateId;
-    if (step === 1) return totalRecipientCount > 0 && totalRecipientCount <= remainingQuota;
+    if (step === 1)
+      return totalRecipientCount > 0 && totalRecipientCount <= remainingQuota;
     if (step === 2) return !!subject;
     return true;
   };
@@ -139,17 +163,6 @@ export default function SendEmail() {
 
   return (
     <div className="w-full flex flex-col gap-10 p-8 lg:p-10 animate-in fade-in duration-500">
-      {/* Header */}
-      <div className="flex items-center gap-4 pb-8 border-b border-border/50">
-        <div className="h-12 w-12 rounded-2xl bg-slate-900 dark:bg-slate-100 flex items-center justify-center text-white dark:text-slate-900 shrink-0">
-          <Send className="h-5 w-5" />
-        </div>
-        <div>
-          <h1 className="text-xl font-bold tracking-tight text-foreground">Send Campaign</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Select a template, add recipients, and send your email.</p>
-        </div>
-      </div>
-
       {/* Main Content */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-10 items-start">
         <div className="lg:col-span-3 flex flex-col gap-8">
@@ -162,12 +175,32 @@ export default function SendEmail() {
           <div className="min-h-[420px]">
             <AnimatePresence mode="wait">
               {step === 0 && (
-                <motion.div key="template" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }}>
-                  <TemplateSelector templates={templates} selectedTemplateId={selectedTemplateId} onSelect={(id, sub) => { setSelectedTemplateId(id); setSubject(sub); }} loading={templatesLoading} />
+                <motion.div
+                  key="template"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  <TemplateSelector
+                    templates={templates}
+                    selectedTemplateId={selectedTemplateId}
+                    onSelect={(id, sub) => {
+                      setSelectedTemplateId(id);
+                      setSubject(sub);
+                    }}
+                    loading={templatesLoading}
+                  />
                 </motion.div>
               )}
               {step === 1 && (
-                <motion.div key="recipients" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }}>
+                <motion.div
+                  key="recipients"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.25 }}
+                >
                   <RecipientManager
                     recipients={recipients}
                     setRecipients={setRecipients}
@@ -184,13 +217,35 @@ export default function SendEmail() {
                 </motion.div>
               )}
               {step === 2 && (
-                <motion.div key="subject" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }}>
-                  <ContentRefinement subject={subject} setSubject={setSubject} selectedTemplate={selectedTemplate || null} />
+                <motion.div
+                  key="subject"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  <ContentRefinement
+                    subject={subject}
+                    setSubject={setSubject}
+                    selectedTemplate={selectedTemplate || null}
+                  />
                 </motion.div>
               )}
               {step === 3 && (
-                <motion.div key="review" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.25 }}>
-                  <FinalDeployment checks={checks} selectedTemplate={selectedTemplate || null} recipientsCount={totalRecipientCount} isDomainVerified={isDomainVerified} domain={domain || null} />
+                <motion.div
+                  key="review"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  <FinalDeployment
+                    checks={checks}
+                    selectedTemplate={selectedTemplate || null}
+                    recipientsCount={totalRecipientCount}
+                    isDomainVerified={isDomainVerified}
+                    domain={domain || null}
+                  />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -205,7 +260,7 @@ export default function SendEmail() {
                 "flex items-center gap-2 h-11 px-6 rounded-xl text-sm font-semibold transition-all border",
                 step === 0
                   ? "opacity-30 cursor-not-allowed border-border/50 bg-card text-muted-foreground/80"
-                  : "border-border/50 bg-card text-foreground/90 hover:bg-muted"
+                  : "border-border/50 bg-card text-foreground/90 hover:bg-muted",
               )}
             >
               <ChevronLeft className="h-4 w-4" />
@@ -220,7 +275,7 @@ export default function SendEmail() {
                   "flex items-center gap-2 h-11 px-8 rounded-xl text-sm font-semibold transition-all",
                   canProceed()
                     ? "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 hover:bg-black dark:hover:bg-white shadow-sm"
-                    : "bg-muted/50 text-muted-foreground/80 border border-border/50 cursor-not-allowed"
+                    : "bg-muted/50 text-muted-foreground/80 border border-border/50 cursor-not-allowed",
                 )}
               >
                 Continue
@@ -229,12 +284,18 @@ export default function SendEmail() {
             ) : (
               <button
                 onClick={() => setShowConfirm(true)}
-                disabled={!isDomainVerified || totalRecipientCount === 0 || totalRecipientCount > remainingQuota}
+                disabled={
+                  !isDomainVerified ||
+                  totalRecipientCount === 0 ||
+                  totalRecipientCount > remainingQuota
+                }
                 className={cn(
                   "flex items-center gap-2 h-11 px-8 rounded-xl text-sm font-semibold transition-all",
-                  (!isDomainVerified || totalRecipientCount === 0 || totalRecipientCount > remainingQuota)
+                  !isDomainVerified ||
+                    totalRecipientCount === 0 ||
+                    totalRecipientCount > remainingQuota
                     ? "bg-muted/50 text-muted-foreground/80 border border-border/50 cursor-not-allowed"
-                    : "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 hover:bg-black dark:hover:bg-white shadow-sm"
+                    : "bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 hover:bg-black dark:hover:bg-white shadow-sm",
                 )}
               >
                 Send Campaign
@@ -246,7 +307,10 @@ export default function SendEmail() {
 
         {/* Sidebar */}
         <div className="lg:col-span-1 hidden lg:block">
-          <InfrastructureSidebar usage={usage || null} remainingQuota={remainingQuota} />
+          <InfrastructureSidebar
+            usage={usage || null}
+            remainingQuota={remainingQuota}
+          />
         </div>
       </div>
 
@@ -272,9 +336,15 @@ export default function SendEmail() {
                   <AlertTriangle className="h-8 w-8" />
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-lg font-bold text-foreground">Send this campaign?</h3>
+                  <h3 className="text-lg font-bold text-foreground">
+                    Send this campaign?
+                  </h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    This will send to <span className="font-semibold text-foreground">{totalRecipientCount.toLocaleString()} recipients</span>. This cannot be undone once sent.
+                    This will send to{" "}
+                    <span className="font-semibold text-foreground">
+                      {totalRecipientCount.toLocaleString()} recipients
+                    </span>
+                    . This cannot be undone once sent.
                   </p>
                 </div>
               </div>
@@ -291,10 +361,18 @@ export default function SendEmail() {
                   disabled={isSending}
                   className={cn(
                     "flex-1 h-11 rounded-xl text-sm font-semibold text-white dark:text-slate-900 transition-all flex items-center justify-center gap-2 shadow-sm",
-                    isSending ? "bg-slate-400" : "bg-emerald-600 hover:bg-emerald-700"
+                    isSending
+                      ? "bg-slate-400"
+                      : "bg-emerald-600 hover:bg-emerald-700",
                   )}
                 >
-                  {isSending ? <RefreshCw className="h-4 w-4 animate-spin" /> : <><Send className="h-4 w-4" /> Confirm & Send</>}
+                  {isSending ? (
+                    <RefreshCw className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <>
+                      <Send className="h-4 w-4" /> Confirm & Send
+                    </>
+                  )}
                 </button>
               </div>
             </motion.div>

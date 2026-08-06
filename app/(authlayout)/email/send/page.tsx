@@ -13,7 +13,10 @@ export default function SendEmailPage() {
         description="Compose and send email campaigns to your community members."
         icon={Send}
         badgeText="Compose"
-        breadcrumbs={[{ label: "Email", href: "/email" }, { label: "Send Email" }]}
+        breadcrumbs={[
+          { label: "Email", href: "/email" },
+          { label: "Send Email" },
+        ]}
       />
       <SendEmail />
     </EcosystemWrapper>
