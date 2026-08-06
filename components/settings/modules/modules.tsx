@@ -432,42 +432,42 @@ export default function ModuleManagement() {
           <div className="rounded-xl border border-border/80 bg-card shadow-sm overflow-hidden">
             {/* Card header with tabs + stats */}
             <div className="px-5 py-4 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-1 bg-muted p-0.5 rounded-lg">
+              <div className="flex items-center gap-0.5 bg-muted p-0.5 rounded-md border border-border mr-2">
                 <button
                   onClick={() => setActiveTab("management")}
                   className={cn(
-                    "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-semibold transition-all duration-150",
+                    "flex items-center gap-1 h-6 px-2 rounded-sm text-[11px] font-medium transition-all",
                     activeTab === "management"
-                      ? "bg-card text-foreground shadow-sm border border-border"
+                      ? "bg-card text-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground",
                   )}
                 >
-                  <LayoutGrid className="h-3.5 w-3.5" />
-                  Module Registry
+                  <LayoutGrid className="h-3 w-3" />
+                  Registry
                 </button>
                 <button
                   onClick={() => setActiveTab("navigation")}
                   className={cn(
-                    "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-semibold transition-all duration-150",
+                    "flex items-center gap-1 h-6 px-2 rounded-sm text-[11px] font-medium transition-all",
                     activeTab === "navigation"
-                      ? "bg-card text-foreground shadow-sm border border-border"
+                      ? "bg-card text-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground",
                   )}
                 >
-                  <Smartphone className="h-3.5 w-3.5" />
-                  Mobile Navigation
+                  <Smartphone className="h-3 w-3" />
+                  Mobile Nav
                 </button>
                 <button
                   onClick={() => setActiveTab("webNavigation")}
                   className={cn(
-                    "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-semibold transition-all duration-150",
+                    "flex items-center gap-1 h-6 px-2 rounded-sm text-[11px] font-medium transition-all",
                     activeTab === "webNavigation"
-                      ? "bg-card text-foreground shadow-sm border border-border"
+                      ? "bg-card text-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground",
                   )}
                 >
-                  <Monitor className="h-3.5 w-3.5" />
-                  Web Navigation
+                  <Monitor className="h-3 w-3" />
+                  Web Nav
                 </button>
               </div>
 

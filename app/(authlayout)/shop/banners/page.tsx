@@ -5,13 +5,12 @@ import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check"
 
 
 import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { CtaButton } from "@/components/ui/cta-button";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { ImageIcon } from "lucide-react";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
-import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { arrayMove } from "@dnd-kit/sortable";
 import {
@@ -73,23 +72,13 @@ function BannerManagerPage() {
           { label: "Marketplace", href: "/shop/all" },
           { label: "Banners" }
         ]}
+        actions={
+          <CtaButton onClick={() => router.push("/shop/banners/create")}>
+            <Plus className="h-3.5 w-3.5" />
+            Add New Banner
+          </CtaButton>
+        }
       />
-
-      <EcosystemActionBar>
-        <EcosystemActionBar.Group align="right">
-          <EcosystemActionBar.Item>
-            <Button
-              onClick={() => router.push("/shop/banners/create")}
-              className="font-semibold text-xs px-4 h-9 rounded-lg shadow-sm gap-2 bg-indigo-600 hover:bg-indigo-700 text-white"
-            >
-              <Plus className="h-4 w-4" /> Add New Banner
-            </Button>
-          </EcosystemActionBar.Item>
-          <EcosystemActionBar.Status active={banners.length > 0}>
-            {banners.length} Banners
-          </EcosystemActionBar.Status>
-        </EcosystemActionBar.Group>
-      </EcosystemActionBar>
 
       <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">
         <BannerList

@@ -13,31 +13,35 @@ import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header"
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { Store, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { CtaButton } from "@/components/ui/cta-button";
 import Link from "next/link";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { cn } from "@/lib/utils";
 
 const STATUS_OPTIONS = [
-  { key: "all",      label: "All",      status: "ALL",      dot: "" },
-  { key: "approved", label: "Approved", status: "APPROVED", dot: "bg-emerald-500" },
-  { key: "pending",  label: "Pending",  status: "PENDING",  dot: "bg-amber-500" },
-  { key: "disabled", label: "Disabled", status: "DISABLED", dot: "bg-orange-500" },
+  { key: "all", label: "All", status: "ALL", dot: "" },
+  {
+    key: "approved",
+    label: "Approved",
+    status: "APPROVED",
+    dot: "bg-emerald-500",
+  },
+  { key: "pending", label: "Pending", status: "PENDING", dot: "bg-amber-500" },
+  {
+    key: "disabled",
+    label: "Disabled",
+    status: "DISABLED",
+    dot: "bg-orange-500",
+  },
   { key: "rejected", label: "Rejected", status: "REJECTED", dot: "bg-red-500" },
 ];
 
 const ListingsAllPage = () => {
   const searchParams = useSearchParams();
   const initialStatusParam = searchParams.get("status") || "ALL";
-  const [activeStatus, setActiveStatus] = useState<string>(initialStatusParam.toUpperCase());
+  const [activeStatus, setActiveStatus] = useState<string>(
+    initialStatusParam.toUpperCase(),
+  );
   const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
-  
+
   const moduleName = useModuleStore((state) => state.listingModuleName);
   const singularName = useModuleStore((state) => state.listingSingularName);
 
@@ -59,7 +63,7 @@ const ListingsAllPage = () => {
       item.id?.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  const currentStatus = STATUS_OPTIONS.find((s) => s.status === activeStatus) || STATUS_OPTIONS[0];
+
 
   return (
     <EcosystemWrapper>
@@ -70,7 +74,7 @@ const ListingsAllPage = () => {
         icon={Store}
         breadcrumbs={[
           { label: moduleName, href: "/listing" },
-          { label: "All" }
+          { label: "All" },
         ]}
       />
 
@@ -89,45 +93,26 @@ const ListingsAllPage = () => {
 
         <EcosystemActionBar.Group>
           <EcosystemActionBar.Item>
-            <Select
+            <EcosystemActionBar.Select
               value={activeStatus}
               onValueChange={(val) => setActiveStatus(val)}
-            >
-              <SelectTrigger className="w-[150px] h-9 rounded-lg border-border bg-card text-sm font-medium text-foreground shadow-none focus:ring-2 focus:ring-ring/20">
-                <div className="flex items-center gap-2">
-                  {currentStatus.dot && (
-                    <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", currentStatus.dot)} />
-                  )}
-                  <SelectValue placeholder="Status" />
-                </div>
-              </SelectTrigger>
-              <SelectContent className="rounded-xl border-border shadow-lg p-1">
-                {STATUS_OPTIONS.map((opt) => (
-                  <SelectItem
-                    key={opt.key}
-                    value={opt.status}
-                    className="rounded-lg text-sm font-medium py-2"
-                  >
-                    <div className="flex items-center gap-2">
-                      {opt.dot && (
-                        <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", opt.dot)} />
-                      )}
-                      {opt.label}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              placeholder="Status"
+              options={STATUS_OPTIONS.map((opt) => ({
+                value: opt.status,
+                label: opt.label,
+                dot: opt.dot || undefined,
+              }))}
+            />
           </EcosystemActionBar.Item>
         </EcosystemActionBar.Group>
 
         <EcosystemActionBar.Group align="right">
           <EcosystemActionBar.Item>
             <Link href="/listing/create">
-              <Button className="font-semibold text-xs px-4 h-9 rounded-lg shadow-sm gap-2 bg-indigo-600 hover:bg-indigo-700 text-white">
-                <Plus className="h-4 w-4" />
+              <CtaButton>
+                <Plus className="h-3.5 w-3.5" />
                 Create {singularName}
-              </Button>
+              </CtaButton>
             </Link>
           </EcosystemActionBar.Item>
           <EcosystemActionBar.Status active={filteredListings.length > 0}>

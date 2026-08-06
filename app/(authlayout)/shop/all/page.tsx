@@ -26,7 +26,7 @@ import { ProductCard } from "@/components/shop/product-card";
 import { ProductSheet } from "@/components/shop/product-sheet";
 import { ProductFormValues } from "@/components/shop/product-form";
 import { toast } from "sonner";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CtaButton } from "@/components/ui/cta-button";
 import { motion, AnimatePresence } from "framer-motion";
 import TableLoading from "@/components/layout/table-loading";
 import { useModuleStore } from "@/store/useModuleStore";
@@ -170,34 +170,20 @@ function ShopPage() {
 
         <EcosystemActionBar.Group align="right">
           <EcosystemActionBar.Item>
-            <Tabs
+            <EcosystemActionBar.ViewToggle
               value={view}
-              onValueChange={(val: string) => setView(val as "grid" | "table")}
-              className="bg-muted p-0.5 rounded-lg border border-border mr-2"
-            >
-              <TabsList className="bg-transparent border-none h-auto p-0 gap-0.5">
-                <TabsTrigger
-                  value="grid"
-                  className="h-8 px-3 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground transition-all text-xs font-medium"
-                >
-                  <LayoutGrid className="h-3.5 w-3.5 mr-1.5" />
-                  Grid
-                </TabsTrigger>
-                <TabsTrigger
-                  value="table"
-                  className="h-8 px-3 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground transition-all text-xs font-medium"
-                >
-                  <ListIcon className="h-3.5 w-3.5 mr-1.5" />
-                  Table
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
+              onChange={(val) => setView(val as "grid" | "table")}
+              options={[
+                { id: "grid", label: "Grid", icon: LayoutGrid },
+                { id: "table", label: "Table", icon: ListIcon },
+              ]}
+            />
           </EcosystemActionBar.Item>
           <EcosystemActionBar.Item>
-            <Button onClick={handleCreate} className="font-semibold text-xs px-4 h-9 rounded-lg shadow-sm gap-2 bg-indigo-600 hover:bg-indigo-700 text-white">
-              <Plus className="h-4 w-4" />
+            <CtaButton onClick={handleCreate}>
+              <Plus className="h-3.5 w-3.5" />
               Add {singularName}
-            </Button>
+            </CtaButton>
           </EcosystemActionBar.Item>
           <EcosystemActionBar.Status active={filteredProducts.length > 0}>
              {filteredProducts.length} {moduleName}

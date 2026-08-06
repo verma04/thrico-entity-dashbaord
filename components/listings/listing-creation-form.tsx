@@ -114,27 +114,6 @@ export function ListingCreationForm({
 
   return (
     <div className="flex flex-col h-full bg-background overflow-hidden rounded-t-[inherit]">
-      {/* Header section - Sticky */}
-      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 border-b px-6 py-4">
-        <div className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-3 mb-1">
-              <div className="p-2.5 rounded-xl bg-primary/10 ring-1 ring-primary/20">
-                <ShoppingBag className="h-5 w-5 text-primary" />
-              </div>
-              <h2 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-                Create {singularName}
-              </h2>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium">
-              <span>{moduleName}</span>
-              <ChevronRight className="h-3 w-3" />
-              <span>Create New {singularName}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Main Content Area - Scrollable */}
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-7xl mx-auto px-6 py-8">

@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { CtaButton } from "@/components/ui/cta-button";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { EventsCreationForm } from "./events-creation-form";
@@ -47,7 +47,7 @@ const Create = ({}) => {
 
   return (
     <>
-      <Button onClick={() => setOpen(true)}>Create</Button>
+      <CtaButton onClick={() => setOpen(true)}>Create</CtaButton>
 
       <AnimatePresence>
         {open && (

@@ -14,15 +14,7 @@ import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrappe
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { cn } from "@/lib/utils";
+import { CtaButton } from "@/components/ui/cta-button";
 
 const STATUS_OPTIONS = [
   { key: "all",      label: "All",      status: JobStatus.ALL,      dot: "" },
@@ -58,8 +50,6 @@ const Page = () => {
     (typeof job.location === 'string' ? job.location : job.location?.name || '').toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
 
-  const currentStatus = STATUS_OPTIONS.find((s) => s.status === activeStatus) || STATUS_OPTIONS[0];
-
   return (
     <EcosystemWrapper>
       <EcosystemHeader
@@ -88,45 +78,26 @@ const Page = () => {
 
         <EcosystemActionBar.Group>
           <EcosystemActionBar.Item>
-            <Select
+            <EcosystemActionBar.Select
               value={activeStatus}
               onValueChange={(val) => setActiveStatus(val as JobStatus)}
-            >
-              <SelectTrigger className="w-[150px] h-9 rounded-lg border-border bg-card text-sm font-medium text-foreground shadow-none focus:ring-2 focus:ring-ring/20">
-                <div className="flex items-center gap-2">
-                  {currentStatus.dot && (
-                    <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", currentStatus.dot)} />
-                  )}
-                  <SelectValue placeholder="Status" />
-                </div>
-              </SelectTrigger>
-              <SelectContent className="rounded-xl border-border shadow-lg p-1">
-                {STATUS_OPTIONS.map((opt) => (
-                  <SelectItem
-                    key={opt.key}
-                    value={opt.status}
-                    className="rounded-lg text-sm font-medium py-2"
-                  >
-                    <div className="flex items-center gap-2">
-                      {opt.dot && (
-                        <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", opt.dot)} />
-                      )}
-                      {opt.label}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              placeholder="Status"
+              options={STATUS_OPTIONS.map((opt) => ({
+                value: opt.status,
+                label: opt.label,
+                dot: opt.dot || undefined,
+              }))}
+            />
           </EcosystemActionBar.Item>
         </EcosystemActionBar.Group>
 
         <EcosystemActionBar.Group align="right">
           <EcosystemActionBar.Item>
             <Link href="/jobs/create">
-              <Button className="font-semibold text-xs px-4 h-9 rounded-lg shadow-sm gap-2 bg-indigo-600 hover:bg-indigo-700 text-white">
-                <Plus className="h-4 w-4" />
+              <CtaButton>
+                <Plus className="h-3.5 w-3.5" />
                 Create {singularName}
-              </Button>
+              </CtaButton>
             </Link>
           </EcosystemActionBar.Item>
           <EcosystemActionBar.Status active={filteredData.length > 0}>

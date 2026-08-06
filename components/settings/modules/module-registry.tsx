@@ -46,7 +46,7 @@ export default function ModuleRegistry({
           <p className="text-[14px] font-semibold text-blue-900 leading-none">Configuration Guide</p>
           <p className="text-[13px] text-blue-700/80 leading-relaxed max-w-3xl">
             Toggle modules to enable them. Click any module's <strong>icon</strong> to customize it. 
-            Use the <Star className="inline h-3.5 w-3.5 text-amber-500 -mt-0.5 mx-0.5" /> to feature modules prominently.
+            Use the <Star className="inline h-3.5 w-3.5 text-amber-500 -mt-0.5 mx-0.5" /> to mark modules as popular.
             You can seamlessly rename modules or add a subtitle directly on their row. Changes are saved together.
           </p>
         </div>
@@ -55,12 +55,12 @@ export default function ModuleRegistry({
       {/* Search + Info bar */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between">
         <div className="relative max-w-md w-full">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/70" />
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/70" />
           <Input
             placeholder="Search modules..."
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-9 h-10 text-[14px] border-border/60 bg-muted/30 focus:bg-card shadow-sm rounded-lg transition-colors"
+            className="pl-8 h-7 text-[11px] border-border/60 bg-muted/30 focus:bg-card shadow-sm rounded-md transition-colors"
           />
         </div>
         <div className="flex items-center gap-4 text-[12px] text-muted-foreground bg-muted/30 px-3 py-1.5 rounded-lg border border-border/50">

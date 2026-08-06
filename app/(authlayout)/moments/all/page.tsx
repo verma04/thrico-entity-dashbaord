@@ -96,8 +96,8 @@ function MomentsListPage() {
         <EcosystemActionBar.Group align="right">
           <EcosystemActionBar.Item>
             <Link href="/moments/create">
-              <CtaButton className="gap-2 px-4 h-9">
-                <Plus className="h-4 w-4" />
+              <CtaButton>
+                <Plus className="h-3.5 w-3.5" />
                 Create
               </CtaButton>
             </Link>

@@ -12,6 +12,10 @@ import { useAddMentor } from "@/graphql/actions/mentorship/mentorship-actions";
 import { notify } from "@/lib/notify";
 import { useModuleStore } from "@/store/useModuleStore";
 
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { UserPlus } from "lucide-react";
+
 const AddMentorPage = () => {
   const singularName = useModuleStore((state) => state.mentorshipSingularName);
   const router = useRouter();
@@ -57,15 +61,27 @@ const AddMentorPage = () => {
   };
 
   return (
-    <div className="h-full overflow-hidden bg-white">
-      <MentorCreationForm
-        loading={loading}
-        onFinish={onFinish}
-        onCancel={onCancel}
-        submitError={submitError}
-        onDismissError={() => setSubmitError(null)}
+    <EcosystemWrapper>
+      <EcosystemHeader
+        title={`Add ${singularName}`}
+        badgeText="New"
+        description={`Onboard a new ${singularName.toLowerCase()} to the platform.`}
+        icon={UserPlus}
+        breadcrumbs={[
+          { label: "Mentorship", href: "/mentorship/all" },
+          { label: "Add" }
+        ]}
       />
-    </div>
+      <div className="flex-1 overflow-auto bg-background/50 p-6">
+        <MentorCreationForm
+          loading={loading}
+          onFinish={onFinish}
+          onCancel={onCancel}
+          submitError={submitError}
+          onDismissError={() => setSubmitError(null)}
+        />
+      </div>
+    </EcosystemWrapper>
   );
 };
 

@@ -1,5 +1,14 @@
 import React from "react";
-import { Star, Globe, Lock, Pencil, Eye, ChevronLeft, Smartphone, Monitor } from "lucide-react";
+import {
+  Star,
+  Globe,
+  Lock,
+  Pencil,
+  Eye,
+  ChevronLeft,
+  Smartphone,
+  Monitor,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
@@ -53,7 +62,7 @@ export default function ModuleRow({
     if (!iconSearch.trim()) return ALL_LUCIDE_ICONS;
     const query = iconSearch.toLowerCase();
     return ALL_LUCIDE_ICONS.filter((name) =>
-      name.toLowerCase().includes(query)
+      name.toLowerCase().includes(query),
     );
   }, [iconSearch]);
 
@@ -73,7 +82,7 @@ export default function ModuleRow({
   return (
     <div
       className={cn(
-        "flex flex-col lg:flex-row lg:items-center gap-5 px-5 py-4 rounded-xl border bg-card transition-all duration-200 group relative",
+        "flex flex-col lg:flex-row lg:items-center gap-3 px-3 py-2 rounded-lg border bg-card transition-all duration-200 group relative",
         module.enabled
           ? "border-border/60 hover:bg-muted/30 hover:border-border hover:shadow-sm"
           : "border-border/30 bg-muted/10 opacity-70 hover:opacity-100",
@@ -82,7 +91,7 @@ export default function ModuleRow({
       {/* Left accent bar */}
       <div
         className={cn(
-          "absolute left-0 top-3 bottom-3 w-1 rounded-r-full transition-colors",
+          "absolute left-0 top-2 bottom-2 w-1 rounded-r-full transition-colors",
           !module.enabled
             ? "bg-muted-foreground/20"
             : module.isPublicFacing
@@ -98,7 +107,7 @@ export default function ModuleRow({
             <button
               disabled={!module.enabled || userRole === "directory"}
               className={cn(
-                "h-11 w-11 rounded-xl border flex items-center justify-center shrink-0 transition-colors relative group/icon cursor-pointer",
+                "h-8 w-8 rounded-lg border flex items-center justify-center shrink-0 transition-colors relative group/icon cursor-pointer",
                 module.enabled
                   ? module.isPublicFacing
                     ? "bg-emerald-50 border-emerald-200 hover:border-emerald-400 shadow-sm"
@@ -107,8 +116,12 @@ export default function ModuleRow({
               )}
               title="Click to customize icon"
             >
-              <div className="scale-125">
-                {getNavIcon(module.customIcon || module.icon, module.enabled, module.name)}
+              <div className="scale-100">
+                {getNavIcon(
+                  module.customIcon || module.icon,
+                  module.enabled,
+                  module.name,
+                )}
               </div>
               {module.enabled && userRole !== "directory" && (
                 <div className="absolute inset-0 bg-background/80 rounded-xl flex items-center justify-center opacity-0 group-hover/icon:opacity-100 transition-opacity">
@@ -149,7 +162,9 @@ export default function ModuleRow({
                   <div className="h-6 w-6 rounded bg-card border flex items-center justify-center">
                     {getNavIcon(iconSearch.trim(), true)}
                   </div>
-                  <span className="text-[12px] font-mono truncate max-w-[140px]">{iconSearch.trim()}</span>
+                  <span className="text-[12px] font-mono truncate max-w-[140px]">
+                    {iconSearch.trim()}
+                  </span>
                 </div>
                 <button
                   onClick={() => {
@@ -165,8 +180,14 @@ export default function ModuleRow({
             {/* Icons Grid with Optimized Infinite Scroll */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
-                <span>{iconSearch ? `Matching (${allFilteredIcons.length})` : "All Icons"}</span>
-                <span>{visibleIcons.length} / {allFilteredIcons.length}</span>
+                <span>
+                  {iconSearch
+                    ? `Matching (${allFilteredIcons.length})`
+                    : "All Icons"}
+                </span>
+                <span>
+                  {visibleIcons.length} / {allFilteredIcons.length}
+                </span>
               </div>
               <div
                 onScroll={handleScroll}
@@ -181,7 +202,7 @@ export default function ModuleRow({
                     className={cn(
                       "h-8 w-8 rounded flex flex-col items-center justify-center transition-all hover:bg-card hover:shadow-sm border border-transparent",
                       (module.customIcon || module.icon) === iconName &&
-                        "bg-primary/10 border-primary/40 text-primary shadow-sm"
+                        "bg-primary/10 border-primary/40 text-primary shadow-sm",
                     )}
                     title={iconName}
                   >
@@ -197,7 +218,7 @@ export default function ModuleRow({
           <div className="flex items-center gap-2">
             <span
               className={cn(
-                "text-[14px] font-bold tracking-tight truncate transition-colors",
+                "text-[13px] font-bold tracking-tight truncate transition-colors",
                 module.enabled ? "text-foreground" : "text-muted-foreground",
               )}
             >
@@ -206,10 +227,10 @@ export default function ModuleRow({
             <Popover>
               <PopoverTrigger asChild>
                 <button
-                  className="h-5 w-5 rounded-md flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground transition-colors opacity-0 group-hover:opacity-100"
+                  className="h-4 w-4 rounded-md flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground transition-colors opacity-0 group-hover:opacity-100"
                   title="Preview header"
                 >
-                  <Eye className="h-3.5 w-3.5" />
+                  <Eye className="h-3 w-3" />
                 </button>
               </PopoverTrigger>
               <PopoverContent
@@ -243,7 +264,7 @@ export default function ModuleRow({
               </PopoverContent>
             </Popover>
           </div>
-          
+
           <div className="flex items-center gap-1.5 mt-1">
             {module.required && (
               <span className="text-[9px] font-semibold text-amber-700 bg-amber-50 border border-amber-200/60 px-1.5 py-px rounded uppercase tracking-wide">
@@ -290,14 +311,14 @@ export default function ModuleRow({
               onChange={(e) => onChangeCustomName(module.id, e.target.value)}
               disabled={!module.enabled}
               className={cn(
-                "h-9 text-[13px] font-medium transition-all shadow-none",
+                "h-7 text-[11px] font-medium transition-all shadow-none",
                 "bg-transparent border-transparent hover:border-border/80 focus:bg-background focus:border-ring",
                 !module.enabled && "opacity-50 pointer-events-none",
               )}
             />
           ) : (
-            <div className="h-9 flex items-center px-3 rounded-md bg-muted/20 border border-dashed border-border/40 cursor-not-allowed">
-              <span className="text-[12px] text-muted-foreground/50 truncate">
+            <div className="h-7 flex items-center px-2 rounded-md bg-muted/20 border border-dashed border-border/40 cursor-not-allowed">
+              <span className="text-[11px] text-muted-foreground/50 truncate">
                 {module.customName || module.name}
               </span>
             </div>
@@ -317,14 +338,14 @@ export default function ModuleRow({
               onChange={(e) => onChangeSubtitle(module.id, e.target.value)}
               disabled={!module.enabled}
               className={cn(
-                "h-9 text-[13px] font-medium transition-all shadow-none",
+                "h-7 text-[11px] font-medium transition-all shadow-none",
                 "bg-transparent border-transparent hover:border-border/80 focus:bg-background focus:border-ring",
                 !module.enabled && "opacity-50 pointer-events-none",
               )}
             />
           ) : (
-            <div className="h-9 flex items-center px-3 rounded-md bg-muted/20 border border-dashed border-border/40 cursor-not-allowed">
-              <span className="text-[12px] text-muted-foreground/50 truncate">
+            <div className="h-7 flex items-center px-2 rounded-md bg-muted/20 border border-dashed border-border/40 cursor-not-allowed">
+              <span className="text-[11px] text-muted-foreground/50 truncate">
                 {module.subtitle || "No subtitle"}
               </span>
             </div>
@@ -333,7 +354,7 @@ export default function ModuleRow({
       </div>
 
       {/* Right Section: Actions Box */}
-      <div className="flex items-center gap-1.5 bg-muted/30 p-1.5 rounded-xl border border-border/50 shrink-0 w-full sm:w-auto overflow-x-auto">
+      <div className="flex items-center gap-1 bg-muted/30 p-1 rounded-lg border border-border/50 shrink-0 w-full sm:w-auto overflow-x-auto">
         {/* Popular Toggle */}
         <TooltipProvider>
           <Tooltip>
@@ -345,18 +366,29 @@ export default function ModuleRow({
                 }}
                 disabled={!module.enabled}
                 className={cn(
-                  "flex flex-col items-center justify-center gap-1 h-[42px] w-[52px] rounded-lg transition-all border",
+                  "flex flex-col items-center justify-center gap-0.5 h-[36px] w-[46px] rounded-md transition-all border",
                   module.isPopular
-                    ? "bg-amber-50 border-amber-200 text-amber-500 shadow-sm"
+                    ? "bg-primary border-primary text-primary-foreground shadow-sm"
                     : "bg-transparent border-transparent text-muted-foreground/50 hover:bg-muted hover:text-foreground",
                   !module.enabled && "opacity-40 cursor-not-allowed",
                 )}
               >
-                <Star className="h-4 w-4" fill={module.isPopular ? "currentColor" : "none"} />
-                <span className="text-[9px] font-medium leading-none">Featured</span>
+                <Star
+                  className="h-4 w-4"
+                  fill={module.isPopular ? "currentColor" : "none"}
+                />
+                <span className="text-[9px] font-medium leading-none">
+                  Popular
+                </span>
               </button>
             </TooltipTrigger>
-            <TooltipContent>{!module.enabled ? "Enable module first" : module.isPopular ? "Remove from featured" : "Feature this module"}</TooltipContent>
+            <TooltipContent>
+              {!module.enabled
+                ? "Enable module first"
+                : module.isPopular
+                  ? "Remove from popular"
+                  : "Mark as popular"}
+            </TooltipContent>
           </Tooltip>
         </TooltipProvider>
 
@@ -368,19 +400,35 @@ export default function ModuleRow({
             <TooltipTrigger asChild>
               <button
                 onClick={() => {
-                  if (!module.enabled || !module.isPublicFacing || userRole === "directory") return;
-                  if (!module.showInMobileNavigation && modules.filter((m) => m.showInMobileNavigation).length >= 3) return;
+                  if (
+                    !module.enabled ||
+                    !module.isPublicFacing ||
+                    userRole === "directory"
+                  )
+                    return;
+                  if (
+                    !module.showInMobileNavigation &&
+                    modules.filter((m) => m.showInMobileNavigation).length >= 3
+                  )
+                    return;
                   onToggleNavigation(module.id);
                 }}
-                disabled={!module.enabled || !module.isPublicFacing || userRole === "directory" || (!module.showInMobileNavigation && modules.filter((m) => m.showInMobileNavigation).length >= 3)}
+                disabled={
+                  !module.enabled ||
+                  !module.isPublicFacing ||
+                  userRole === "directory" ||
+                  (!module.showInMobileNavigation &&
+                    modules.filter((m) => m.showInMobileNavigation).length >= 3)
+                }
                 className={cn(
-                  "flex flex-col items-center justify-center gap-1 h-[42px] w-[52px] rounded-lg transition-all border",
+                  "flex flex-col items-center justify-center gap-0.5 h-[36px] w-[46px] rounded-md transition-all border",
                   !module.isPublicFacing
                     ? "opacity-30 cursor-not-allowed bg-transparent border-transparent"
                     : module.showInMobileNavigation
-                      ? "bg-violet-50 border-violet-200 text-violet-600 shadow-sm"
+                      ? "bg-primary border-primary text-primary-foreground shadow-sm"
                       : "bg-transparent border-transparent text-muted-foreground/50 hover:bg-muted hover:text-foreground",
-                  (!module.enabled || userRole === "directory") && "opacity-40 cursor-not-allowed",
+                  (!module.enabled || userRole === "directory") &&
+                    "opacity-40 cursor-not-allowed",
                 )}
               >
                 <Smartphone className="h-4 w-4" />
@@ -394,7 +442,8 @@ export default function ModuleRow({
                   ? "Enable module first"
                   : module.showInMobileNavigation
                     ? "Remove from mobile navigation"
-                    : modules.filter((m) => m.showInMobileNavigation).length >= 3
+                    : modules.filter((m) => m.showInMobileNavigation).length >=
+                        3
                       ? "Maximum 3 mobile nav slots reached"
                       : "Add to mobile app navigation"}
             </TooltipContent>
@@ -407,18 +456,28 @@ export default function ModuleRow({
             <TooltipTrigger asChild>
               <button
                 onClick={() => {
-                  if (!module.enabled || !module.isPublicFacing || userRole === "directory") return;
+                  if (
+                    !module.enabled ||
+                    !module.isPublicFacing ||
+                    userRole === "directory"
+                  )
+                    return;
                   onToggleWebNavigation(module.id);
                 }}
-                disabled={!module.enabled || !module.isPublicFacing || userRole === "directory"}
+                disabled={
+                  !module.enabled ||
+                  !module.isPublicFacing ||
+                  userRole === "directory"
+                }
                 className={cn(
-                  "flex flex-col items-center justify-center gap-1 h-[42px] w-[52px] rounded-lg transition-all border",
+                  "flex flex-col items-center justify-center gap-0.5 h-[36px] w-[46px] rounded-md transition-all border",
                   !module.isPublicFacing
                     ? "opacity-30 cursor-not-allowed bg-transparent border-transparent"
                     : module.showInWebNavigation
-                      ? "bg-blue-50 border-blue-200 text-blue-600 shadow-sm"
+                      ? "bg-primary border-primary text-primary-foreground shadow-sm"
                       : "bg-transparent border-transparent text-muted-foreground/50 hover:bg-muted hover:text-foreground",
-                  (!module.enabled || userRole === "directory") && "opacity-40 cursor-not-allowed",
+                  (!module.enabled || userRole === "directory") &&
+                    "opacity-40 cursor-not-allowed",
                 )}
               >
                 <Monitor className="h-4 w-4" />
@@ -449,12 +508,13 @@ export default function ModuleRow({
                     checked={module.enabled}
                     onCheckedChange={() => onToggleModule(module.id)}
                     disabled={module.required || userRole === "directory"}
-                    className="data-[state=checked]:bg-emerald-500"
                   />
                   <span
                     className={cn(
                       "text-[9px] font-bold uppercase tracking-wide transition-colors",
-                      module.enabled ? "text-emerald-600" : "text-muted-foreground",
+                      module.enabled
+                        ? "text-foreground"
+                        : "text-muted-foreground",
                     )}
                   >
                     {module.enabled ? "Enabled" : "Disabled"}

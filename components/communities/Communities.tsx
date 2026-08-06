@@ -9,13 +9,7 @@ import { LayoutGrid, List as ListIcon, Users, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CommunityCard from "./community-card";
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import { cn } from "@/lib/utils";
 
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
@@ -70,8 +64,7 @@ export default function Communities({
     );
   }, [communities, search]);
 
-  const currentStatus =
-    STATUS_OPTIONS.find((s) => s.value === status) || STATUS_OPTIONS[0];
+
 
   return (
     <EcosystemWrapper>
@@ -119,42 +112,16 @@ export default function Communities({
 
         <EcosystemActionBar.Group>
           <EcosystemActionBar.Item>
-            <Select value={status} onValueChange={setStatus}>
-              <SelectTrigger className="w-[160px] h-9 rounded-lg border-border bg-card text-sm font-medium text-foreground shadow-none focus:ring-2 focus:ring-ring/20">
-                <div className="flex items-center gap-2">
-                  {currentStatus.dot && (
-                    <span
-                      className={cn(
-                        "h-1.5 w-1.5 rounded-full shrink-0",
-                        currentStatus.dot,
-                      )}
-                    />
-                  )}
-                  <SelectValue placeholder="Status" />
-                </div>
-              </SelectTrigger>
-              <SelectContent className="rounded-xl border-border shadow-lg p-1">
-                {STATUS_OPTIONS.map((opt) => (
-                  <SelectItem
-                    key={opt.value}
-                    value={opt.value}
-                    className="rounded-lg text-sm font-medium py-2"
-                  >
-                    <div className="flex items-center gap-2">
-                      {opt.dot && (
-                        <span
-                          className={cn(
-                            "h-1.5 w-1.5 rounded-full shrink-0",
-                            opt.dot,
-                          )}
-                        />
-                      )}
-                      {opt.label}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <EcosystemActionBar.Select
+              value={status}
+              onValueChange={setStatus}
+              placeholder="Status"
+              options={STATUS_OPTIONS.map((opt) => ({
+                value: opt.value,
+                label: opt.label,
+                dot: opt.dot || undefined,
+              }))}
+            />
           </EcosystemActionBar.Item>
         </EcosystemActionBar.Group>
 

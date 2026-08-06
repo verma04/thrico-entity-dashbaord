@@ -17,6 +17,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
+  CtaSelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 import { Plus, LayoutGrid, List as ListIcon, Tag } from "lucide-react";
@@ -30,6 +31,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import TableLoading from "@/components/layout/table-loading";
 
 import { useModuleStore } from "@/store/useModuleStore";
+import { CtaButton } from "@/components/ui/cta-button";
 
 export function OffersManager() {
   const moduleName = useModuleStore((state) => state.offerModuleName);
@@ -100,30 +102,29 @@ export function OffersManager() {
               <TabsList className="bg-transparent border-none h-auto p-0 gap-0.5">
                 <TabsTrigger
                   value="grid"
-                  className="h-8 px-3 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground transition-all text-xs font-medium"
+                  className="h-6 px-2 rounded-sm data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground transition-all text-[11px] font-medium"
                 >
-                  <LayoutGrid className="h-3.5 w-3.5 mr-1.5" />
+                  <LayoutGrid className="h-3 w-3 mr-1" />
                   Grid
                 </TabsTrigger>
                 <TabsTrigger
                   value="table"
-                  className="h-8 px-3 rounded-md data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground transition-all text-xs font-medium"
+                  className="h-6 px-2 rounded-sm data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground transition-all text-[11px] font-medium"
                 >
-                  <ListIcon className="h-3.5 w-3.5 mr-1.5" />
+                  <ListIcon className="h-3 w-3 mr-1" />
                   Table
                 </TabsTrigger>
               </TabsList>
             </Tabs>
-            <Button
+            <CtaButton
               onClick={() => {
                 setEditingOffer(null);
                 setIsDialogOpen(true);
               }}
-              className="font-semibold text-xs px-6 h-10 rounded-lg shadow-sm gap-2"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-3.5 w-3.5" />
               Create {singularName}
-            </Button>
+            </CtaButton>
           </div>
         }
       />
@@ -147,12 +148,12 @@ export function OffersManager() {
               value={selectedCategory}
               onValueChange={setSelectedCategory}
             >
-              <SelectTrigger className="w-[170px] h-9 rounded-lg border-border bg-card text-sm font-medium text-foreground shadow-none focus:ring-2 focus:ring-ring/20">
-                <div className="flex items-center gap-2">
-                  <LayoutGrid className="h-3.5 w-3.5 text-muted-foreground" />
+              <CtaSelectTrigger className="w-[140px]">
+                <div className="flex items-center gap-1.5">
+                  <LayoutGrid className="h-3 w-3 text-muted-foreground" />
                   <SelectValue placeholder="All Categories" />
                 </div>
-              </SelectTrigger>
+              </CtaSelectTrigger>
               <SelectContent className="rounded-xl border-border shadow-lg p-1">
                 <SelectItem
                   value="all"
@@ -175,9 +176,9 @@ export function OffersManager() {
 
           <EcosystemActionBar.Item>
             <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-              <SelectTrigger className="w-[140px] h-9 rounded-lg border-border bg-card text-sm font-medium text-foreground shadow-none focus:ring-2 focus:ring-ring/20">
+              <CtaSelectTrigger className="w-[110px]">
                 <SelectValue placeholder="All Status" />
-              </SelectTrigger>
+              </CtaSelectTrigger>
               <SelectContent className="rounded-xl border-border shadow-lg p-1">
                 <SelectItem
                   value="all"

@@ -11,5 +11,5 @@ function AllOffersPage() {
 
 export default withSubscriptionCheck(
   withModulePermission(AllOffersPage, "OFFERS", "canRead"),
-  "offers"
+  "offers",
 );

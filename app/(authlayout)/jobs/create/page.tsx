@@ -8,8 +8,14 @@ import { JobCreationForm } from "@/components/jobs/create/job-creation-form";
 import { useToast } from "@/components/ui/use-toast";
 import { withModulePermission } from "@/components/hoc/with-module-permission";
 import { useModuleStore } from "@/store/useModuleStore";
+import { Briefcase } from "lucide-react";
+
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 
 const CreateJobPage = () => {
+  const moduleName = useModuleStore((state) => state.jobModuleName);
   const singularName = useModuleStore((state) => state.jobSingularName);
   const router = useRouter();
   const { toast } = useToast();
@@ -25,7 +31,8 @@ const CreateJobPage = () => {
     onError: (error: any) => {
       toast({
         title: "Error",
-        description: error.message || `Failed to create ${singularName.toLowerCase()}`,
+        description:
+          error.message || `Failed to create ${singularName.toLowerCase()}`,
         variant: "destructive",
       });
     },
@@ -77,14 +84,27 @@ const CreateJobPage = () => {
   };
 
   return (
-    <div className="h-full overflow-hidden">
-      <JobCreationForm
-        initialValues={{}}
-        loading={loading}
-        onFinish={onFinish}
-        onCancel={onCancel}
+    <EcosystemWrapper>
+      <EcosystemHeader
+        title={`Create ${singularName}`}
+        badgeText="New Posting"
+        description={`Fill in the details to publish a new ${singularName.toLowerCase()}.`}
+        icon={Briefcase}
+        breadcrumbs={[
+          { label: moduleName, href: "/jobs/all" },
+          { label: "Create" },
+        ]}
       />
-    </div>
+
+      <EcosystemContainer className="p-0 border-none shadow-none ring-0 bg-transparent">
+        <JobCreationForm
+          initialValues={{}}
+          loading={loading}
+          onFinish={onFinish}
+          onCancel={onCancel}
+        />
+      </EcosystemContainer>
+    </EcosystemWrapper>
   );
 };
 

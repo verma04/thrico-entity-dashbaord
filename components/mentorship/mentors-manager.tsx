@@ -25,15 +25,7 @@ import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrappe
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
 import Link from "next/link";
 
 const STATUS_OPTIONS = [
@@ -108,10 +100,6 @@ export function MentorsManager() {
   }));
 
   const categories = categoriesData?.getMentorCategories || [];
-  const currentStatus =
-    STATUS_OPTIONS.find((opt) => opt.value === selectedStatus) ||
-    STATUS_OPTIONS[0];
-
   return (
     <EcosystemWrapper>
       <EcosystemHeader
@@ -126,7 +114,7 @@ export function MentorsManager() {
         actions={
           <Link href="/mentorship/add-mentor">
             <CtaButton>
-              <Plus className="h-4 w-4 mr-1.5" />
+              <Plus className="h-3.5 w-3.5" />
               Onboard {singularName}
             </CtaButton>
           </Link>
@@ -148,73 +136,32 @@ export function MentorsManager() {
 
         <EcosystemActionBar.Group>
           <EcosystemActionBar.Item>
-            <Select
+            <EcosystemActionBar.Select
               value={selectedCategory}
               onValueChange={setSelectedCategory}
-            >
-              <SelectTrigger className="w-[180px] h-9 rounded-lg border-border bg-card text-sm font-medium text-foreground shadow-none focus:ring-2 focus:ring-ring/20">
-                <div className="flex items-center gap-2">
-                  <LayoutGrid className="h-3.5 w-3.5 text-muted-foreground" />
-                  <SelectValue placeholder="All Categories" />
-                </div>
-              </SelectTrigger>
-              <SelectContent className="rounded-xl border-border shadow-lg p-1">
-                <SelectItem
-                  value="all"
-                  className="rounded-lg text-sm font-medium py-2"
-                >
-                  All Categories
-                </SelectItem>
-                {categories.map((cat) => (
-                  <SelectItem
-                    key={cat.id}
-                    value={cat.id}
-                    className="rounded-lg text-sm font-medium py-2"
-                  >
-                    {cat.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              placeholder="All Categories"
+              options={[
+                { value: "all", label: "All Categories", icon: LayoutGrid },
+                ...categories.map((cat: any) => ({
+                  value: cat.id,
+                  label: cat.title,
+                })),
+              ]}
+            />
           </EcosystemActionBar.Item>
 
           <EcosystemActionBar.Item>
-            <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-              <SelectTrigger className="w-[160px] h-9 rounded-lg border-border bg-card text-sm font-medium text-foreground focus:ring-2 focus:ring-ring/20 shadow-none">
-                <div className="flex items-center gap-2">
-                  {currentStatus.dot && (
-                    <span
-                      className={cn(
-                        "h-1.5 w-1.5 rounded-full shrink-0",
-                        currentStatus.dot,
-                      )}
-                    />
-                  )}
-                  <SelectValue placeholder="Status" />
-                </div>
-              </SelectTrigger>
-              <SelectContent className="rounded-xl border-border shadow-lg p-1">
-                {STATUS_OPTIONS.map((opt) => (
-                  <SelectItem
-                    key={opt.value}
-                    value={opt.value}
-                    className="rounded-lg text-sm font-medium py-2"
-                  >
-                    <div className="flex items-center gap-2">
-                      {opt.dot && (
-                        <span
-                          className={cn(
-                            "h-1.5 w-1.5 rounded-full shrink-0",
-                            opt.dot,
-                          )}
-                        />
-                      )}
-                      {opt.label}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <EcosystemActionBar.Select
+              value={selectedStatus}
+              onValueChange={setSelectedStatus}
+              placeholder="Status"
+              options={STATUS_OPTIONS.map((opt) => ({
+                value: opt.value,
+                label: opt.label,
+                icon: opt.icon,
+                dot: opt.dot || undefined,
+              }))}
+            />
           </EcosystemActionBar.Item>
         </EcosystemActionBar.Group>
 

@@ -3,24 +3,12 @@
 import { withModulePermission } from "@/components/hoc/with-module-permission";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 
-
 import { useState, useMemo } from "react";
+
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  CheckCircle,
-  Clock,
-  XCircle,
-  List,
   LayoutGrid,
   ListIcon,
   Calendar,
-  SlidersHorizontal,
 } from "lucide-react";
 
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
@@ -39,18 +27,38 @@ import { useModuleStore } from "@/store/useModuleStore";
 // ─────────────────────────────────────────────────────────────────────────────
 
 const STATUS_OPTIONS = [
-  { key: "all",      label: "All",      status: EventStatus.ALL,      dot: "" },
-  { key: "approved", label: "Approved", status: EventStatus.APPROVED, dot: "bg-emerald-500" },
-  { key: "pending",  label: "Pending",  status: EventStatus.PENDING,  dot: "bg-amber-500" },
-  { key: "disabled", label: "Disabled", status: EventStatus.DISABLED, dot: "bg-orange-500" },
-  { key: "rejected", label: "Rejected", status: EventStatus.REJECTED, dot: "bg-red-500" },
+  { key: "all", label: "All", status: EventStatus.ALL, dot: "" },
+  {
+    key: "approved",
+    label: "Approved",
+    status: EventStatus.APPROVED,
+    dot: "bg-emerald-500",
+  },
+  {
+    key: "pending",
+    label: "Pending",
+    status: EventStatus.PENDING,
+    dot: "bg-amber-500",
+  },
+  {
+    key: "disabled",
+    label: "Disabled",
+    status: EventStatus.DISABLED,
+    dot: "bg-orange-500",
+  },
+  {
+    key: "rejected",
+    label: "Rejected",
+    status: EventStatus.REJECTED,
+    dot: "bg-red-500",
+  },
 ];
 
 const SORT_OPTIONS = [
-  { value: "newest",   label: "Newest First" },
-  { value: "oldest",   label: "Oldest First" },
-  { value: "title",    label: "Title A–Z" },
-  { value: "attendees",label: "Most Attendees" },
+  { value: "newest", label: "Newest First" },
+  { value: "oldest", label: "Oldest First" },
+  { value: "title", label: "Title A–Z" },
+  { value: "attendees", label: "Most Attendees" },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -60,7 +68,9 @@ const SORT_OPTIONS = [
 function AllEventsPage() {
   const moduleName = useModuleStore((state) => state.eventModuleName);
   const singularName = useModuleStore((state) => state.eventSingularName);
-  const [activeStatus, setActiveStatus] = useState<EventStatus>(EventStatus.ALL);
+  const [activeStatus, setActiveStatus] = useState<EventStatus>(
+    EventStatus.ALL,
+  );
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("newest");
@@ -89,9 +99,13 @@ function AllEventsPage() {
     return [...events].sort((a, b) => {
       switch (sortBy) {
         case "newest":
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          return (
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
         case "oldest":
-          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+          return (
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          );
         case "title":
           return (a.title || "").localeCompare(b.title || "");
         case "attendees":
@@ -102,8 +116,7 @@ function AllEventsPage() {
     });
   }, [eventsData?.getAllEvents, searchTerm, sortBy]);
 
-  const currentStatus =
-    STATUS_OPTIONS.find((s) => s.status === activeStatus) || STATUS_OPTIONS[0];
+
 
   return (
     <EcosystemWrapper>
@@ -113,10 +126,7 @@ function AllEventsPage() {
         badgeText="Community Hub"
         description={`Monitor, manage, and scale your community ${singularName.toLowerCase()} programming.`}
         icon={Calendar}
-        breadcrumbs={[
-          { label: moduleName, href: "/events" },
-          { label: "All" }
-        ]}
+        breadcrumbs={[{ label: moduleName, href: "/events" }, { label: "All" }]}
       />
 
       {/* Action Bar */}
@@ -137,56 +147,26 @@ function AllEventsPage() {
         <EcosystemActionBar.Group>
           {/* Status filter */}
           <EcosystemActionBar.Item>
-            <Select
+            <EcosystemActionBar.Select
               value={activeStatus}
               onValueChange={(val) => setActiveStatus(val as EventStatus)}
-            >
-              <SelectTrigger className="w-[150px] h-9 rounded-lg border-border bg-card text-sm font-medium text-foreground shadow-none focus:ring-2 focus:ring-ring/20">
-                <div className="flex items-center gap-2">
-                  {currentStatus.dot && (
-                    <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", currentStatus.dot)} />
-                  )}
-                  <SelectValue placeholder="Status" />
-                </div>
-              </SelectTrigger>
-              <SelectContent className="rounded-xl border-border shadow-lg p-1">
-                {STATUS_OPTIONS.map((opt) => (
-                  <SelectItem
-                    key={opt.key}
-                    value={opt.status}
-                    className="rounded-lg text-sm font-medium py-2"
-                  >
-                    <div className="flex items-center gap-2">
-                      {opt.dot && (
-                        <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", opt.dot)} />
-                      )}
-                      {opt.label}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              placeholder="Status"
+              options={STATUS_OPTIONS.map((opt) => ({
+                value: opt.status,
+                label: opt.label,
+                dot: opt.dot || undefined,
+              }))}
+            />
           </EcosystemActionBar.Item>
 
           {/* Sort */}
           <EcosystemActionBar.Item>
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-[150px] h-9 rounded-lg border-border bg-card text-sm font-medium text-foreground shadow-none focus:ring-2 focus:ring-ring/20">
-                <SlidersHorizontal className="h-3.5 w-3.5 mr-2 text-muted-foreground shrink-0" />
-                <SelectValue placeholder="Sort" />
-              </SelectTrigger>
-              <SelectContent className="rounded-xl border-border shadow-lg p-1">
-                {SORT_OPTIONS.map((opt) => (
-                  <SelectItem
-                    key={opt.value}
-                    value={opt.value}
-                    className="rounded-lg text-sm font-medium py-2"
-                  >
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <EcosystemActionBar.Select
+              value={sortBy}
+              onValueChange={setSortBy}
+              placeholder="Sort"
+              options={SORT_OPTIONS}
+            />
           </EcosystemActionBar.Item>
         </EcosystemActionBar.Group>
 
@@ -211,15 +191,17 @@ function AllEventsPage() {
       </EcosystemActionBar>
 
       <EcosystemContainer className="p-0 border-none shadow-none ring-0 bg-transparent">
-        <AllEvents data={filteredEvents} loading={loading} viewMode={viewMode} />
+        <AllEvents
+          data={filteredEvents}
+          loading={loading}
+          viewMode={viewMode}
+        />
       </EcosystemContainer>
     </EcosystemWrapper>
   );
 }
 
-
-
 export default withSubscriptionCheck(
   withModulePermission(AllEventsPage, "EVENTS", "canRead"),
-  "events"
+  "events",
 );
