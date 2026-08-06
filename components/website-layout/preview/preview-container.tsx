@@ -20,6 +20,15 @@ export const PreviewContainer = ({
 
   return (
     <div className="flex-1 overflow-auto bg-muted/30 p-4">
+      {/* Scoped style: forces all preview children to inherit the selected font.
+          #id selector (1,0,0) beats Tailwind's .font-sans (0,1,0) specificity,
+          so this works even with @theme inline in globals.css. */}
+      <style>{`
+        #website-preview-container,
+        #website-preview-container * {
+          font-family: inherit;
+        }
+      `}</style>
       <div
         id="website-preview-container"
         className={cn(
@@ -54,3 +63,4 @@ export const PreviewContainer = ({
     </div>
   );
 };
+

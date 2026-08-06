@@ -244,13 +244,14 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-plus-jakarta-sans",
 });
 
-
 import BuilderLayout from "@/components/website-layout/builder-layout";
 import { redirect } from "next/navigation";
 
 const WebsiteBuilderPage = () => {
   return (
-    <div className={`fixed inset-0 z-50 bg-background w-screen h-screen p-0 m-0 flex flex-col overflow-hidden animate-in fade-in duration-500 ${plusJakartaSans.variable} ${figtree.variable} ${roobert.variable} ${avantGarde.variable} ${spaceGrotesk.variable} ${inter.variable} ${playfair.variable} ${outfit.variable} ${firaCode.variable} ${roboto.variable} ${openSans.variable} ${montserrat.variable} ${lato.variable} ${poppins.variable} ${nunito.variable} ${sourceSans3.variable} ${workSans.variable} ${ubuntu.variable} ${merriweather.variable} ${lora.variable} ${cormorantGaramond.variable} ${bitter.variable} ${oswald.variable} ${raleway.variable} ${bebasNeue.variable} ${cinzel.variable} ${pacifico.variable}`}>
+    <div
+      className={`fixed inset-0 z-50 bg-background w-screen h-screen p-0 m-0 flex flex-col overflow-hidden animate-in fade-in duration-500 ${plusJakartaSans.variable} ${figtree.variable} ${roobert.variable} ${avantGarde.variable} ${spaceGrotesk.variable} ${inter.variable} ${playfair.variable} ${outfit.variable} ${firaCode.variable} ${roboto.variable} ${openSans.variable} ${montserrat.variable} ${lato.variable} ${poppins.variable} ${nunito.variable} ${sourceSans3.variable} ${workSans.variable} ${ubuntu.variable} ${merriweather.variable} ${lora.variable} ${cormorantGaramond.variable} ${bitter.variable} ${oswald.variable} ${raleway.variable} ${bebasNeue.variable} ${cinzel.variable} ${pacifico.variable}`}
+    >
       <header className="flex flex-row items-center justify-between px-8 py-4 border-b shrink-0 bg-background/80 backdrop-blur-md relative z-10">
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
