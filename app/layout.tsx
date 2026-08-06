@@ -76,7 +76,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${figtree.className} ${figtree.variable} antialiased`}>
         <Toaster position="top-right" />
         <ThemeProvider

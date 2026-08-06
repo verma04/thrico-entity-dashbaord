@@ -18,6 +18,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
   Card,
   CardContent,
   CardDescription,
@@ -44,8 +50,6 @@ interface RoleCreationFormProps {
 const permissionTypes = ["Read", "Create", "Edit", "Delete"] as const;
 
 const adminAccessLabels: Record<string, string> = {
-  website: "Website",
-  moderation: "Moderation",
   reports: "Reports",
   settings: "Settings",
   subscription: "Subscription",
@@ -55,8 +59,9 @@ const adminAccessLabels: Record<string, string> = {
   domain: "Domain",
   permissions: "Permissions",
   adminUsers: "Admin Users",
-  users: "Users",
 };
+
+
 
 export function RoleCreationForm({
   initialValues,
@@ -70,9 +75,18 @@ export function RoleCreationForm({
   const { data: modulesData, loading: modulesLoading } =
     useGetAvailableModules();
 
+  const rawModules = modulesData?.getAvailableModules;
+  let groupedModules: Record<string, string[]> = {};
+  
+  if (rawModules && typeof rawModules === 'object' && !Array.isArray(rawModules)) {
+    groupedModules = rawModules;
+  } else if (Array.isArray(rawModules)) {
+    groupedModules = { "Modules": rawModules };
+  }
+  
+  const availableModules = Object.values(groupedModules).flat() as string[];
+
   const defaultAdminAccess = {
-    website: false,
-    moderation: false,
     reports: false,
     settings: false,
     subscription: false,
@@ -82,7 +96,6 @@ export function RoleCreationForm({
     domain: false,
     permissions: false,
     adminUsers: false,
-    users: false,
   };
 
   const [formData, setFormData] = useState({ name: "", description: "" });
@@ -153,9 +166,11 @@ export function RoleCreationForm({
   };
 
   const toggleAllAdminAccess = (checked: boolean) => {
-    setAdminAccess(
-      Object.fromEntries(Object.keys(adminAccess).map((k) => [k, checked])),
-    );
+    const newAdminAccess = {
+      ...adminAccess,
+      ...Object.fromEntries(Object.keys(adminAccessLabels).map((k) => [k, checked])),
+    };
+    setAdminAccess(newAdminAccess);
     markDirty();
   };
 
@@ -176,7 +191,6 @@ export function RoleCreationForm({
     type: string,
     checked: boolean,
   ) => {
-    const availableModules = modulesData?.getAvailableModules || [];
     setPermissions((prev) => {
       const next = { ...prev };
       availableModules.forEach((mod: string) => {
@@ -196,7 +210,6 @@ export function RoleCreationForm({
   };
 
   const toggleAllPermissions = (checked: boolean) => {
-    const availableModules = modulesData?.getAvailableModules || [];
     const allPerms: Record<string, Record<string, boolean>> = {};
     availableModules.forEach((mod: string) => {
       allPerms[mod] = {
@@ -237,9 +250,48 @@ export function RoleCreationForm({
     }
   };
 
-  const availableModules = modulesData?.getAvailableModules || [];
+
   const allAdminSelected = Object.values(adminAccess).every((v) => v);
   const isEditing = !!initialValues;
+
+
+
+  const categories = Object.keys(groupedModules)
+    .filter((c) => c !== "Other")
+    .sort((a, b) => a.localeCompare(b));
+
+  const isFullAdmin =
+    Object.values(adminAccess).every(Boolean) &&
+    availableModules.length > 0 &&
+    availableModules.every((mod: string) =>
+      permissionTypes.every((t) => !!permissions[mod]?.[t]),
+    );
+
+  const handleFullAdminChange = (checked: boolean) => {
+    if (checked) {
+      const allAdmin = Object.keys(adminAccessLabels).reduce(
+        (acc, key) => {
+          acc[key] = true;
+          return acc;
+        },
+        {} as Record<string, boolean>,
+      );
+      setAdminAccess(allAdmin);
+
+      const allPerms = availableModules.reduce(
+        (acc: any, mod: string) => {
+          acc[mod] = { Read: true, Create: true, Edit: true, Delete: true };
+          return acc;
+        },
+        {} as Record<string, Record<string, boolean>>,
+      );
+      setPermissions(allPerms);
+    } else {
+      setAdminAccess({ ...defaultAdminAccess });
+      setPermissions({});
+    }
+    markDirty();
+  };
 
   return (
     <EcosystemWrapper>
@@ -339,61 +391,28 @@ export function RoleCreationForm({
                       />
                     </div>
                   </div>
-                </CardContent>
-              </Card>
 
-              <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden">
-                <CardHeader className="bg-muted/30 pb-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="text-xl">
-                        Admin Access Scopes
-                      </CardTitle>
-                      <CardDescription>
-                        Grants elevated access to platform administration areas
-                      </CardDescription>
-                    </div>
-                    <label className="flex items-center gap-2 cursor-pointer bg-background border px-3 py-1.5 rounded-lg">
-                      <Checkbox
-                        checked={allAdminSelected}
-                        onCheckedChange={(checked) =>
-                          toggleAllAdminAccess(!!checked)
-                        }
-                        className="h-4 w-4 rounded border-border/60"
-                      />
-                      <span className="text-xs font-medium">
-                        Select all scopes
-                      </span>
-                    </label>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-6 space-y-4">
-                  {Object.keys(adminAccess).some((k) => adminAccess[k]) && (
-                    <div className="flex items-center gap-2 p-3 bg-amber-50/80 border border-amber-200/60 rounded-lg">
-                      <ShieldAlert className="h-4 w-4 text-amber-600 shrink-0" />
-                      <p className="text-xs text-amber-700">
-                        Some admin scopes grant broad access. Assign carefully.
+                  <div className="flex items-center justify-between pt-4 mt-2 border-t border-border/50">
+                    <div className="space-y-0.5">
+                      <Label className="text-sm font-semibold flex items-center gap-2">
+                        <ShieldCheck className="w-4 h-4 text-primary" />
+                        Full Admin Access
+                      </Label>
+                      <p className="text-xs text-muted-foreground max-w-sm">
+                        Grant full access to all platform modules, settings, and
+                        administration capabilities.
                       </p>
                     </div>
-                  )}
-
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 p-4 bg-muted/30 rounded-lg border border-border/50">
-                    {Object.keys(adminAccess).map((key) => (
-                      <label
-                        key={key}
-                        className="flex items-center gap-2.5 p-3 rounded-md bg-background border hover:bg-muted/50 cursor-pointer transition-colors group"
-                      >
-                        <Checkbox
-                          id={`admin-${key}`}
-                          checked={adminAccess[key]}
-                          onCheckedChange={() => toggleAdminAccess(key)}
-                          className="h-4 w-4 rounded border-border/60 shrink-0"
-                        />
-                        <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors">
-                          {adminAccessLabels[key] ?? key}
-                        </span>
-                      </label>
-                    ))}
+                    <label className="flex items-center gap-2 cursor-pointer bg-background border px-4 py-2 rounded-lg hover:bg-muted/50 transition-colors">
+                      <Checkbox
+                        checked={isFullAdmin}
+                        onCheckedChange={(c) => handleFullAdminChange(!!c)}
+                        className="h-5 w-5 rounded border-border/60 data-[state=checked]:bg-primary"
+                      />
+                      <span className="text-sm font-bold text-foreground">
+                        Grant All
+                      </span>
+                    </label>
                   </div>
                 </CardContent>
               </Card>
@@ -468,85 +487,213 @@ export function RoleCreationForm({
                       ))}
                     </div>
                   ) : (
-                    <div className="space-y-2">
-                      {availableModules.map((moduleName: string) => {
-                        const allChecked = permissionTypes.every(
-                          (type) => !!permissions[moduleName]?.[type],
-                        );
-                        const anyChecked = permissionTypes.some(
-                          (type) => !!permissions[moduleName]?.[type],
-                        );
-                        return (
-                          <div
-                            key={moduleName}
-                            className={`group flex items-center gap-4 px-4 py-3.5 rounded-xl border transition-all ${
-                              anyChecked
-                                ? "bg-primary/[0.02] border-primary/20 ring-1 ring-primary/10"
-                                : "bg-background border-border/50 hover:border-border hover:bg-muted/20"
-                            }`}
-                          >
-                            <Checkbox
-                              checked={allChecked}
-                              onCheckedChange={(checked) =>
-                                toggleAllModulePermissions(
-                                  moduleName,
-                                  !!checked,
-                                )
-                              }
-                              className="h-4 w-4 rounded border-border/60 shrink-0"
-                            />
+                    <Accordion type="multiple" className="space-y-4">
+                      {categories.map((category) => {
+                        const modulesInCategory = groupedModules[category];
 
-                            <div className="flex items-center gap-3 min-w-[160px]">
-                              <div
-                                className={`h-9 w-9 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-                                  anyChecked
-                                    ? "bg-primary/10 text-primary border border-primary/20"
-                                    : "bg-muted text-muted-foreground border border-border/50"
-                                }`}
-                              >
-                                <ModuleIcon
-                                  name={moduleName}
-                                  className="w-4 h-4"
-                                />
-                              </div>
-                              <span className="text-sm font-semibold capitalize text-foreground">
-                                {moduleName.replace(/_/g, " ")}
-                              </span>
+                        const allCategoryChecked = modulesInCategory.every(
+                          (mod) =>
+                            permissionTypes.every(
+                              (type) => !!permissions[mod]?.[type],
+                            ),
+                        );
+                        const anyCategoryChecked = modulesInCategory.some(
+                          (mod) =>
+                            permissionTypes.some(
+                              (type) => !!permissions[mod]?.[type],
+                            ),
+                        );
+
+                        const toggleCategoryPermissions = (
+                          checked: boolean,
+                        ) => {
+                          setPermissions((prev) => {
+                            const next = { ...prev };
+                            modulesInCategory.forEach((mod) => {
+                              next[mod] = {
+                                Read: checked,
+                                Create: checked,
+                                Edit: checked,
+                                Delete: checked,
+                              };
+                            });
+                            return next;
+                          });
+                          markDirty();
+                        };
+
+                        return (
+                          <AccordionItem
+                            value={category}
+                            key={category}
+                            className="border bg-background rounded-xl overflow-hidden shadow-sm px-2"
+                          >
+                            <div className="flex items-center gap-3">
+                              <Checkbox
+                                checked={allCategoryChecked}
+                                onCheckedChange={(c) =>
+                                  toggleCategoryPermissions(!!c)
+                                }
+                                className={`ml-4 h-4 w-4 rounded border-border/60 ${anyCategoryChecked && !allCategoryChecked ? "bg-primary/50" : ""}`}
+                              />
+                              <AccordionTrigger className="hover:no-underline py-4 flex-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-semibold text-[15px]">
+                                    {category}
+                                  </span>
+                                  <Badge
+                                    variant="secondary"
+                                    className="ml-2 text-[10px] h-5 px-1.5"
+                                  >
+                                    {modulesInCategory.length}
+                                  </Badge>
+                                </div>
+                              </AccordionTrigger>
                             </div>
 
-                            <div className="flex items-center gap-2 ml-auto">
-                              {permissionTypes.map((type) => {
-                                const isChecked =
-                                  !!permissions[moduleName]?.[type];
+                            <AccordionContent className="pt-0 pb-4 px-4 space-y-2">
+                              {modulesInCategory.map((moduleName: string) => {
+                                const allChecked = permissionTypes.every(
+                                  (type) => !!permissions[moduleName]?.[type],
+                                );
+                                const anyChecked = permissionTypes.some(
+                                  (type) => !!permissions[moduleName]?.[type],
+                                );
                                 return (
-                                  <button
-                                    key={type}
-                                    type="button"
-                                    onClick={() =>
-                                      togglePermission(moduleName, type)
-                                    }
-                                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
-                                      isChecked
-                                        ? "bg-primary/10 text-primary border-primary/25 hover:bg-primary/15"
-                                        : "bg-muted/40 text-muted-foreground border-transparent hover:bg-muted/80 hover:text-foreground"
+                                  <div
+                                    key={moduleName}
+                                    className={`group flex flex-col md:flex-row md:items-center gap-4 px-4 py-3.5 rounded-xl border transition-all ${
+                                      anyChecked
+                                        ? "bg-primary/[0.02] border-primary/20 ring-1 ring-primary/10"
+                                        : "bg-background border-border/50 hover:border-border hover:bg-muted/20"
                                     }`}
                                   >
-                                    <div
-                                      className={`h-1.5 w-1.5 rounded-full transition-colors ${
-                                        isChecked
-                                          ? "bg-primary"
-                                          : "bg-muted-foreground/30"
-                                      }`}
-                                    />
-                                    {type}
-                                  </button>
+                                    <div className="flex items-center gap-3 md:w-1/3">
+                                      <Checkbox
+                                        checked={allChecked}
+                                        onCheckedChange={(checked) =>
+                                          toggleAllModulePermissions(
+                                            moduleName,
+                                            !!checked,
+                                          )
+                                        }
+                                        className="h-4 w-4 rounded border-border/60 shrink-0"
+                                      />
+                                      <div
+                                        className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                                          anyChecked
+                                            ? "bg-primary/10 text-primary border border-primary/20"
+                                            : "bg-muted text-muted-foreground border border-border/50"
+                                        }`}
+                                      >
+                                        <ModuleIcon
+                                          name={moduleName}
+                                          className="w-4 h-4"
+                                        />
+                                      </div>
+                                      <span className="text-sm font-medium capitalize text-foreground truncate">
+                                        {moduleName.replace(/_/g, " ")}
+                                      </span>
+                                    </div>
+
+                                    <div className="flex flex-wrap items-center gap-2 md:ml-auto">
+                                      {permissionTypes.map((type) => {
+                                        const isChecked =
+                                          !!permissions[moduleName]?.[type];
+                                        return (
+                                          <button
+                                            key={type}
+                                            type="button"
+                                            onClick={() =>
+                                              togglePermission(moduleName, type)
+                                            }
+                                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+                                              isChecked
+                                                ? "bg-primary/10 text-primary border-primary/25 hover:bg-primary/15"
+                                                : "bg-muted/40 text-muted-foreground border-transparent hover:bg-muted/80 hover:text-foreground"
+                                            }`}
+                                          >
+                                            <div
+                                              className={`h-1.5 w-1.5 rounded-full transition-colors ${
+                                                isChecked
+                                                  ? "bg-primary"
+                                                  : "bg-muted-foreground/30"
+                                              }`}
+                                            />
+                                            {type}
+                                          </button>
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
                                 );
                               })}
-                            </div>
-                          </div>
+                            </AccordionContent>
+                          </AccordionItem>
                         );
                       })}
-                    </div>
+
+                      {/* Admin Access Scopes Accordion Item */}
+                      <AccordionItem
+                        value="admin-scopes"
+                        className="border bg-background rounded-xl overflow-hidden shadow-sm px-2"
+                      >
+                        <div className="flex items-center gap-3">
+                          <Checkbox
+                            checked={allAdminSelected}
+                            onCheckedChange={(checked) =>
+                              toggleAllAdminAccess(!!checked)
+                            }
+                            className={`ml-4 h-4 w-4 rounded border-border/60 ${Object.values(adminAccess).some((v) => v) && !allAdminSelected ? "bg-primary/50" : ""}`}
+                          />
+                          <AccordionTrigger className="hover:no-underline py-4 flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-semibold text-[15px]">
+                                Settings & Control
+                              </span>
+                              <Badge
+                                variant="secondary"
+                                className="ml-2 text-[10px] h-5 px-1.5"
+                              >
+                                {Object.keys(adminAccessLabels).length}
+                              </Badge>
+                            </div>
+                          </AccordionTrigger>
+                        </div>
+
+                        <AccordionContent className="pt-0 pb-4 px-4 space-y-2">
+                          {Object.keys(adminAccessLabels).some(
+                            (k) => adminAccess[k],
+                          ) && (
+                            <div className="flex items-center gap-2 p-3 mb-4 bg-amber-50/80 border border-amber-200/60 rounded-lg">
+                              <ShieldAlert className="h-4 w-4 text-amber-600 shrink-0" />
+                              <p className="text-xs text-amber-700">
+                                Some admin scopes grant broad access. Assign
+                                carefully.
+                              </p>
+                            </div>
+                          )}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                            {Object.keys(adminAccessLabels).map((key) => (
+                              <label
+                                key={key}
+                                className="flex items-center gap-3 p-3.5 rounded-xl bg-background border border-border/50 hover:bg-muted/20 hover:border-border cursor-pointer transition-all group"
+                              >
+                                <Checkbox
+                                  id={`admin-${key}`}
+                                  checked={adminAccess[key]}
+                                  onCheckedChange={() => toggleAdminAccess(key)}
+                                  className="h-4 w-4 rounded border-border/60 shrink-0"
+                                />
+                                <span className="text-sm font-semibold text-foreground truncate">
+                                  {adminAccessLabels[key] ?? key}
+                                </span>
+                              </label>
+                            ))}
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
                   )}
                 </CardContent>
               </Card>
@@ -570,6 +717,7 @@ export function RoleCreationForm({
                   adminAccess={adminAccess}
                   permissions={permissions}
                   adminAccessLabels={adminAccessLabels}
+                  groupedModules={groupedModules}
                 />
 
                 <Card className="border-none shadow-sm ring-1 ring-border/50">
@@ -617,7 +765,6 @@ export function RoleCreationForm({
           </div>
         </div>
       </div>
-
     </EcosystemWrapper>
   );
 }

@@ -12,8 +12,6 @@ export const GET_USER = gql`
       memberStatus
 
       permissions {
-        website
-        moderation
         reports
         settings
         subscription

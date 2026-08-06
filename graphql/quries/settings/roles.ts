@@ -8,8 +8,6 @@ export const GET_ROLES = gql`
       description
       isSystem
       adminAccess {
-        website
-        moderation
         reports
         settings
         subscription
@@ -19,7 +17,6 @@ export const GET_ROLES = gql`
         domain
         permissions
         adminUsers
-        users
       }
       modulePermissions {
         id
@@ -41,8 +38,6 @@ export const GET_ROLE_BY_ID = gql`
       description
       isSystem
       adminAccess {
-        website
-        moderation
         reports
         settings
         subscription
@@ -52,7 +47,6 @@ export const GET_ROLE_BY_ID = gql`
         domain
         permissions
         adminUsers
-        users
       }
       modulePermissions {
         id
@@ -116,8 +110,6 @@ export const GET_ADMIN_USERS = gql`
           description
           isSystem
           adminAccess {
-            website
-            moderation
             reports
             settings
             subscription
@@ -137,15 +129,12 @@ export const GET_ADMIN_USERS = gql`
             policies
             contactSupport
             integrations
-            users
           }
         }
         roleId
         memberStatus
         isSuperAdmin
         permissions {
-          website
-          moderation
           reports
           settings
           subscription
@@ -165,7 +154,6 @@ export const GET_ADMIN_USERS = gql`
           policies
           contactSupport
           integrations
-          users
         }
         modulePermissions {
           id
@@ -199,8 +187,6 @@ export const GET_ADMIN_BY_ID = gql`
         description
         isSystem
         adminAccess {
-          website
-          moderation
           reports
           settings
           subscription
@@ -220,15 +206,12 @@ export const GET_ADMIN_BY_ID = gql`
           policies
           contactSupport
           integrations
-          users
         }
       }
       roleId
       memberStatus
       isSuperAdmin
       permissions {
-        website
-        moderation
         reports
         settings
         subscription
@@ -248,7 +231,6 @@ export const GET_ADMIN_BY_ID = gql`
         policies
         contactSupport
         integrations
-        users
       }
       modulePermissions {
         id
@@ -283,8 +265,6 @@ export const CREATE_ADMIN = gql`
 
         description
         adminAccess {
-          website
-          moderation
           reports
           settings
           subscription
@@ -294,7 +274,6 @@ export const CREATE_ADMIN = gql`
           domain
           permissions
           adminUsers
-          users
         }
       }
       status

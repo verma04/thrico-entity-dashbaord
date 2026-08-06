@@ -160,7 +160,8 @@ export default function AddRoleDialog({ open, onOpenChange, role }: AddRoleDialo
   };
 
   const togglePermissionTypeForAllModules = (type: string, checked: boolean) => {
-    const availableModules = modulesData?.getAvailableModules || [];
+    const raw = modulesData?.getAvailableModules;
+    const availableModules = Array.isArray(raw) ? raw : (raw ? Object.values(raw).flat() : []);
     setPermissions((prev) => {
       const next = { ...prev };
       availableModules.forEach((mod: string) => {
@@ -174,7 +175,8 @@ export default function AddRoleDialog({ open, onOpenChange, role }: AddRoleDialo
   };
 
   const toggleAllPermissions = (checked: boolean) => {
-    const availableModules = modulesData?.getAvailableModules || [];
+    const raw = modulesData?.getAvailableModules;
+    const availableModules = Array.isArray(raw) ? raw : (raw ? Object.values(raw).flat() : []);
     const allPerms: Record<string, Record<string, boolean>> = {};
     availableModules.forEach((mod: string) => {
       allPerms[mod] = {
@@ -231,7 +233,8 @@ export default function AddRoleDialog({ open, onOpenChange, role }: AddRoleDialo
   };
 
   const isLoading = creating || updating;
-  const availableModules = modulesData?.getAvailableModules || [];
+  const raw = modulesData?.getAvailableModules;
+  const availableModules = (Array.isArray(raw) ? raw : (raw ? Object.values(raw).flat() : [])) as string[];
   const allAdminSelected = Object.values(adminAccess).every((v) => v);
 
   return (

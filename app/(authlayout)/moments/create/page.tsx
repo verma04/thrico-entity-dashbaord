@@ -10,10 +10,7 @@ import { MomentCreationForm } from "@/components/moments/add/moment-creation-for
 import { useToast } from "@/components/ui/use-toast";
 import { useAdminGenerateMomentUploadUrl, useAdminConfirmMomentUpload } from "@/graphql/actions/moments";
 import { useModuleStore } from "@/store/useModuleStore";
-
-import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
-import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
-import { PlaySquare } from "lucide-react";
+import { EcosystemWrapper } from "@/components/layout/ecosystem";
 
 const CreateMomentPage = () => {
   const singularName = useModuleStore((state) => state.momentSingularName);
@@ -172,8 +169,8 @@ const CreateMomentPage = () => {
   };
 
   return (
-    <EcosystemWrapper>
-      <EcosystemHeader
+    <EcosystemWrapper
+     
         title={`Create ${singularName}`}
         badgeText="New"
         description={`Add a new ${singularName.toLowerCase()} to the feed.`}

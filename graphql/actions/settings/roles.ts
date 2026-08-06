@@ -15,8 +15,6 @@ import {
 } from "../../quries/settings/roles";
 
 export interface AdminAccess {
-  website: boolean;
-  moderation: boolean;
   reports: boolean;
   settings: boolean;
   subscription: boolean;
@@ -26,7 +24,6 @@ export interface AdminAccess {
   domain: boolean;
   permissions: boolean;
   adminUsers: boolean;
-  users: boolean;
 }
 
 export interface ModulePermission {
@@ -56,7 +53,7 @@ export interface GetRoleByIdResponse {
 }
 
 export interface GetAvailableModulesResponse {
-  getAvailableModules: string[];
+  getAvailableModules: Record<string, string[]>;
 }
 
 export interface CreateRoleInput {

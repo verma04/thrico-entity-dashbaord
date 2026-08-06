@@ -8,9 +8,7 @@ import {
 } from "@/components/ui/platform/settings-page";
 import { toast } from "sonner";
 import { useEntitySettings, useUpdateEntitySettings } from "@/graphql/actions";
-import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
-import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
-import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { EcosystemWrapper } from "@/components/layout/ecosystem";
 
 const FIELDS: SettingsField[] = [
   {
@@ -35,6 +33,7 @@ const MediaGallerySettings = () => {
       toast.error("Failed to update settings");
     }
   };
+
 
   return (
     <EcosystemWrapper>
@@ -64,6 +63,7 @@ const MediaGallerySettings = () => {
       </EcosystemContainer>
     </EcosystemWrapper>
   );
+  
 };
 
 export default MediaGallerySettings;

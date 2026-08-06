@@ -811,7 +811,7 @@ export const adminSettings = [
     icon: <BookOpen size={18} />,
   },
   {
-    key: "cust-int",
+    key: "cust-support",
     label: "Contact Support",
     path: "/settings/contact",
     icon: <LifeBuoy size={18} />,
@@ -1230,6 +1230,8 @@ export const useFilteredManagementItems = () => {
                 return hasModulePermission("LANGUAGES");
               if (child.key === "cust-int")
                 return hasModulePermission("INTEGRATIONS");
+              if (child.key === "cust-support")
+                return hasModulePermission("CONTACT_SUPPORT");
               if (child.key === "team-users")
                 return (
                   hasModulePermission("USERS_AND_PERMISSIONS") ||

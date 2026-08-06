@@ -21,11 +21,11 @@ import { DashboardSectionHeading } from "@/components/home/dashboard-section-hea
 import { EcosystemKPI } from "@/components/layout/ecosystem/ecosystem-analytics";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { 
+import {
   useGetImpactTemplates,
   useGetImpactUsers,
   useGetImpactRules,
-  useGetImpactActivityLog
+  useGetImpactActivityLog,
 } from "@/graphql/actions/impact";
 import { TemplateForm } from "@/components/impact/template-form";
 
@@ -33,28 +33,34 @@ export default function ImpactScoreOverview() {
   const { data, loading: templateLoading } = useGetImpactTemplates();
   const { data: usersData, loading: usersLoading } = useGetImpactUsers();
   const { data: rulesData, loading: rulesLoading } = useGetImpactRules();
-  const { data: activityData, loading: activityLoading } = useGetImpactActivityLog();
+  const { data: activityData, loading: activityLoading } =
+    useGetImpactActivityLog();
 
   const templates = data?.impactTemplates || [];
   const activeTemplate = templates.find((t: any) => t.isActive);
 
   const users = usersData?.getImpactUsers?.nodes || [];
   const totalUsersCount = usersData?.getImpactUsers?.totalCount || 0;
-  
+
   const avgScore = useMemo(() => {
     if (users.length === 0) return 0;
-    const sum = users.reduce((acc: number, user: any) => acc + (user.score || 0), 0);
+    const sum = users.reduce(
+      (acc: number, user: any) => acc + (user.score || 0),
+      0,
+    );
     return Math.round(sum / users.length);
   }, [users]);
-  
+
   const platinumMembersCount = useMemo(() => {
-    return users.filter((u: any) => u.tier?.toLowerCase() === 'platinum').length;
+    return users.filter((u: any) => u.tier?.toLowerCase() === "platinum")
+      .length;
   }, [users]);
 
   const totalEventsCount = activityData?.getImpactActivityLog?.length || 0;
   const totalRulesCount = rulesData?.impactRules?.length || 0;
 
-  const isLoading = templateLoading || usersLoading || rulesLoading || activityLoading;
+  const isLoading =
+    templateLoading || usersLoading || rulesLoading || activityLoading;
 
   const kpis = [
     {
@@ -73,7 +79,11 @@ export default function ImpactScoreOverview() {
     },
     {
       title: "Total Events",
-      value: isLoading ? "—" : totalEventsCount >= 1000 ? (totalEventsCount/1000).toFixed(1) + 'k' : totalEventsCount.toString(),
+      value: isLoading
+        ? "—"
+        : totalEventsCount >= 1000
+          ? (totalEventsCount / 1000).toFixed(1) + "k"
+          : totalEventsCount.toString(),
       icon: Activity,
       color: "text-zinc-900",
       bg: "bg-zinc-100",
@@ -86,7 +96,7 @@ export default function ImpactScoreOverview() {
       desc: "Configure scoring thresholds, decay rates, and category weights.",
       count: templates.length.toString(),
       icon: Layers,
-      link: "/impact-score/templates",
+      link: "/gamification/impact-score/templates",
     },
     {
       title: "Scoring Rules",
@@ -105,10 +115,14 @@ export default function ImpactScoreOverview() {
         badgeText="Overview"
         icon={Trophy}
         actions={
-          <div className="flex items-center gap-4"
-        breadcrumbs={[{ label: "Gamification", href: "/gamification" }, { label: "Impact Score" }]}
-      >
-            <Link href="/impact-score/templates">
+          <div
+            className="flex items-center gap-4"
+            breadcrumbs={[
+              { label: "Gamification", href: "/gamification" },
+              { label: "Impact Score" },
+            ]}
+          >
+            <Link href="/gamification/impact-score/templates">
               <Button
                 variant="outline"
                 className="h-9 px-4 rounded-lg border-zinc-200 font-semibold text-xs text-zinc-600 gap-2 hover:bg-zinc-50 transition-all shadow-sm"
@@ -124,8 +138,8 @@ export default function ImpactScoreOverview() {
       <EcosystemContainer className="p-6 lg:p-8 space-y-8">
         {!activeTemplate && !isLoading ? (
           <div className="max-w-3xl mx-auto space-y-4">
-            <DashboardSectionHeading 
-              title="Create Template" 
+            <DashboardSectionHeading
+              title="Create Template"
               titleClassName="normal-case tracking-normal text-sm text-foreground"
             />
             <div className="p-5 rounded-[20px] bg-muted/30 border border-transparent">
@@ -138,8 +152,8 @@ export default function ImpactScoreOverview() {
           <>
             {/* KPI Grid */}
             <section className="space-y-4">
-              <DashboardSectionHeading 
-                title="Impact Score Overview" 
+              <DashboardSectionHeading
+                title="Impact Score Overview"
                 titleClassName="normal-case tracking-normal text-sm text-foreground"
               />
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -152,8 +166,8 @@ export default function ImpactScoreOverview() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-8">
               {/* Modules Grid */}
               <section className="lg:col-span-8 space-y-4">
-                <DashboardSectionHeading 
-                  title="Impact Modules" 
+                <DashboardSectionHeading
+                  title="Impact Modules"
                   titleClassName="normal-case tracking-normal text-sm text-foreground"
                 />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -199,8 +213,8 @@ export default function ImpactScoreOverview() {
 
               {/* Sidebar / Settings */}
               <section className="lg:col-span-4 space-y-4">
-                <DashboardSectionHeading 
-                  title="Active Template Details" 
+                <DashboardSectionHeading
+                  title="Active Template Details"
                   titleClassName="normal-case tracking-normal text-sm text-foreground"
                 />
                 <div className="p-5 rounded-[20px] bg-muted/30 border border-transparent">
@@ -251,7 +265,7 @@ export default function ImpactScoreOverview() {
                         No active template found.
                       </p>
                       <Link
-                        href="/impact-score/templates"
+                        href="/gamification/impact-score/templates"
                         className="text-xs text-indigo-600 font-medium hover:underline mt-2 inline-block"
                       >
                         Create Template &rarr;

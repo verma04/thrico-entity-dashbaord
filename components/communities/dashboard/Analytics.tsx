@@ -261,48 +261,48 @@ export default function CommunitiesAnalytics() {
                     {topCommunities
                       .slice(0, 6)
                       .map((community: TopCommunity, idx: number) => {
-                      const maxMembers = topCommunities[0]?.members || 1;
-                      const barWidth = Math.round(
-                        (community.members / maxMembers) * 100,
-                      );
+                        const maxMembers = topCommunities[0]?.members || 1;
+                        const barWidth = Math.round(
+                          (community.members / maxMembers) * 100,
+                        );
 
-                      return (
-                        <div
-                          key={community.name}
-                          className="flex items-center gap-4 p-3 rounded-xl hover:bg-muted/50 transition-colors group"
-                        >
-                          <div className="w-8 h-8 rounded-lg bg-muted/50 border border-border flex items-center justify-center text-xs font-bold text-muted-foreground">
-                            {idx + 1}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between mb-1.5">
-                              <span className="text-sm font-semibold text-foreground truncate">
-                                {community.name}
-                              </span>
-                              <div className="flex items-center gap-4 text-muted-foreground">
-                                <span className="flex items-center gap-1.5 text-xs font-medium tabular-nums">
-                                  <Users
-                                    size={12}
-                                    className="text-muted-foreground"
-                                  />
-                                  {community.members.toLocaleString()}
+                        return (
+                          <div
+                            key={community.name}
+                            className="flex items-center gap-4 p-3 rounded-xl hover:bg-muted/50 transition-colors group"
+                          >
+                            <div className="w-8 h-8 rounded-lg bg-muted/50 border border-border flex items-center justify-center text-xs font-bold text-muted-foreground">
+                              {idx + 1}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between mb-1.5">
+                                <span className="text-sm font-semibold text-foreground truncate">
+                                  {community.name}
                                 </span>
-                                <span className="flex items-center gap-1.5 text-xs font-medium tabular-nums px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
-                                  <Eye size={10} />
-                                  {community.views.toLocaleString()}
-                                </span>
+                                <div className="flex items-center gap-4 text-muted-foreground">
+                                  <span className="flex items-center gap-1.5 text-xs font-medium tabular-nums">
+                                    <Users
+                                      size={12}
+                                      className="text-muted-foreground"
+                                    />
+                                    {community.members.toLocaleString()}
+                                  </span>
+                                  <span className="flex items-center gap-1.5 text-xs font-medium tabular-nums px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                                    <Eye size={10} />
+                                    {community.views.toLocaleString()}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+                                <div
+                                  className="h-full bg-primary rounded-full transition-all duration-1000"
+                                  style={{ width: `${barWidth}%` }}
+                                />
                               </div>
                             </div>
-                            <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
-                              <div
-                                className="h-full bg-primary rounded-full transition-all duration-1000"
-                                style={{ width: `${barWidth}%` }}
-                              />
-                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
                   </div>
                 )}
               </div>
@@ -315,39 +315,39 @@ export default function CommunitiesAnalytics() {
               />
               <div className="rounded-[20px] border border-transparent bg-muted/30 p-5">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {topCreators
-                  .slice(0, 6)
-                  .map((creator: TopCreator, idx: number) => (
-                    <div
-                      key={creator.name}
-                      className="flex items-center justify-between p-3 rounded-xl border border-border bg-card hover:border-border hover:shadow-sm transition-all group"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-lg bg-muted/50 border border-border flex items-center justify-center text-xs font-bold text-muted-foreground overflow-hidden">
-                          {creator.avatar ? (
-                            <img
-                              src={getPreferredMediaUrl(creator?.avatar)}
-                              alt=""
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            creator.name.charAt(0)
-                          )}
+                  {topCreators
+                    .slice(0, 6)
+                    .map((creator: TopCreator, idx: number) => (
+                      <div
+                        key={creator.name}
+                        className="flex items-center justify-between p-3 rounded-xl border border-border bg-card hover:border-border hover:shadow-sm transition-all group"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="h-9 w-9 rounded-lg bg-muted/50 border border-border flex items-center justify-center text-xs font-bold text-muted-foreground overflow-hidden">
+                            {creator.avatar ? (
+                              <img
+                                src={getPreferredMediaUrl(creator?.avatar)}
+                                alt=""
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              creator.name.charAt(0)
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-foreground truncate">
+                              {creator.name}
+                            </p>
+                            <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+                              {creator.communitiesCreated} {moduleName}
+                            </p>
+                          </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-foreground truncate">
-                            {creator.name}
-                          </p>
-                          <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
-                            {creator.communitiesCreated} {moduleName}
-                          </p>
+                        <div className="text-xs font-bold text-muted-foreground group-hover:text-muted-foreground transition-colors">
+                          #{idx + 1}
                         </div>
                       </div>
-                      <div className="text-xs font-bold text-muted-foreground group-hover:text-muted-foreground transition-colors">
-                        #{idx + 1}
-                      </div>
-                    </div>
-                  ))}
+                    ))}
                 </div>
               </div>
             </section>
@@ -439,24 +439,6 @@ export default function CommunitiesAnalytics() {
                 </div>
               </div>
             </section>
-
-            <div className="bg-primary text-primary-foreground rounded-2xl p-6 text-white shadow-lg relative overflow-hidden group">
-              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                <TrendingUp size={48} />
-              </div>
-              <h4 className="text-base font-bold tracking-tight mb-2">
-                Growth
-              </h4>
-              <p className="text-xs text-muted-foreground leading-relaxed font-medium mb-6">
-                {moduleName} are growing by 12.4% each year.
-              </p>
-              <Button
-                size="sm"
-                className="w-full font-bold bg-card text-foreground hover:bg-muted transition-colors"
-              >
-                View Details
-              </Button>
-            </div>
           </div>
         </div>
       </EcosystemContainer>
