@@ -8,6 +8,7 @@ import {
 } from "@/graphql/actions/email";
 import { useGetEntity } from "@/graphql/actions";
 import { motion, AnimatePresence } from "framer-motion";
+import { CtaButton } from "@/components/ui/cta-button";
 import {
   ArrowLeft,
   Save,
@@ -43,6 +44,7 @@ import {
 } from "lucide-react";
 import { useEmailStore, type EmailTemplate } from "@/store/useEmailStore";
 import { cn } from "@/lib/utils";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { ImageUploadWithCrop } from "@/components/ui/image-upload-with-crop";
 import { STARTER_TEMPLATES } from "@/lib/email-templates";
@@ -149,80 +151,70 @@ const blockDefs: {
     label: "Header",
     icon: Layout,
     description: "Brand logo & tagline",
-    accent: "bg-indigo-500 shadow-indigo-100",
-    pill: "bg-indigo-50 text-indigo-700 border-indigo-100",
+    accent: "bg-slate-100 text-slate-600 border border-slate-200", pill: "bg-slate-50 text-slate-600 border border-slate-200",
   },
   {
     type: "navbar",
     label: "Navbar",
     icon: Link,
     description: "Row of navigation links",
-    accent: "bg-cyan-500 shadow-cyan-100",
-    pill: "bg-cyan-50 text-cyan-700 border-cyan-100",
+    accent: "bg-slate-100 text-slate-600 border border-slate-200", pill: "bg-slate-50 text-slate-600 border border-slate-200",
   },
   {
     type: "heading",
     label: "Heading",
     icon: Type,
     description: "Large title text",
-    accent: "bg-violet-600 shadow-violet-100",
-    pill: "bg-violet-50 text-violet-700 border-violet-100",
+    accent: "bg-slate-100 text-slate-600 border border-slate-200", pill: "bg-slate-50 text-slate-600 border border-slate-200",
   },
   {
     type: "text",
     label: "Text",
     icon: AlignLeft,
     description: "Body paragraph",
-    accent: "bg-blue-500 shadow-blue-100",
-    pill: "bg-blue-50 text-blue-700 border-blue-100",
+    accent: "bg-slate-100 text-slate-600 border border-slate-200", pill: "bg-slate-50 text-slate-600 border border-slate-200",
   },
   {
     type: "image",
     label: "Image",
     icon: ImageIcon,
     description: "Remote URL media",
-    accent: "bg-emerald-500 shadow-emerald-100",
-    pill: "bg-emerald-50 text-emerald-700 border-emerald-100",
+    accent: "bg-slate-100 text-slate-600 border border-slate-200", pill: "bg-slate-50 text-slate-600 border border-slate-200",
   },
   {
     type: "button",
     label: "Button",
     icon: MousePointer2,
     description: "Call-to-action link",
-    accent: "bg-amber-500 shadow-amber-100",
-    pill: "bg-amber-50 text-amber-700 border-amber-100",
+    accent: "bg-slate-100 text-slate-600 border border-slate-200", pill: "bg-slate-50 text-slate-600 border border-slate-200",
   },
   {
     type: "divider",
     label: "Divider",
     icon: Minus,
     description: "Horizontal rule",
-    accent: "bg-slate-400 shadow-slate-100",
-    pill: "bg-slate-100 text-slate-600 border-slate-200",
+    accent: "bg-slate-100 text-slate-600 border border-slate-200", pill: "bg-slate-50 text-slate-600 border border-slate-200",
   },
   {
     type: "spacer",
     label: "Spacer",
     icon: Space,
     description: "Vertical gap",
-    accent: "bg-rose-400 shadow-rose-100",
-    pill: "bg-rose-50 text-rose-700 border-rose-100",
+    accent: "bg-slate-100 text-slate-600 border border-slate-200", pill: "bg-slate-50 text-slate-600 border border-slate-200",
   },
   {
     type: "footer",
     label: "Footer",
     icon: Settings2,
     description: "Legal & social footer",
-    accent: "bg-zinc-800 shadow-zinc-100",
-    pill: "bg-zinc-50 text-zinc-700 border-zinc-100",
+    accent: "bg-slate-100 text-slate-600 border border-slate-200", pill: "bg-slate-50 text-slate-600 border border-slate-200",
   },
   {
     type: "app_links",
     label: "App Download",
     icon: Smartphone,
     description: "iOS & Android badges",
-    accent: "bg-sky-500 shadow-sky-100",
-    pill: "bg-sky-50 text-sky-700 border-sky-100",
+    accent: "bg-slate-100 text-slate-600 border border-slate-200", pill: "bg-slate-50 text-slate-600 border border-slate-200",
   },
 ];
 
@@ -598,14 +590,14 @@ function PropertiesPanel({
       <div className="flex items-center gap-2.5 pb-4 border-b border-slate-200">
         <div
           className={cn(
-            "h-8 w-8 rounded-xl flex items-center justify-center text-white shadow-sm",
+            "h-8 w-8 rounded-xl flex items-center justify-center shadow-sm",
             def.accent,
           )}
         >
           <def.icon className="h-4 w-4" />
         </div>
         <div>
-          <p className="text-[14px] font-black text-slate-900 leading-none">
+          <p className="text-[14px] font-bold text-slate-900 leading-none">
             {def.label}
           </p>
           <p className="text-[10px] font-medium text-slate-400 mt-1">
@@ -618,7 +610,7 @@ function PropertiesPanel({
         block.type === "heading" ||
         block.type === "button") && (
         <div>
-          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 leading-none">
+          <label className="block text-[10px] font-semibold tracking-wider text-slate-400 uppercase tracking-widest mb-2 leading-none">
             {block.type === "button" ? "Display Label" : "Content Body"}
           </label>
           <AutoResizeTextarea
@@ -632,7 +624,7 @@ function PropertiesPanel({
       {block.type === "image" && (
         <div className="space-y-6">
           <div className="space-y-3">
-            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">
+            <label className="block text-[10px] font-semibold tracking-wider text-slate-400 uppercase tracking-widest leading-none">
               Asset Source
             </label>
             <ImageUploadWithCrop
@@ -652,7 +644,7 @@ function PropertiesPanel({
           </div>
 
           <div>
-            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 leading-none">
+            <label className="block text-[10px] font-semibold tracking-wider text-slate-400 uppercase tracking-widest mb-2 leading-none">
               Direct Access URL
             </label>
             <input
@@ -665,7 +657,7 @@ function PropertiesPanel({
           </div>
 
           <div>
-            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 leading-none">
+            <label className="block text-[10px] font-semibold tracking-wider text-slate-400 uppercase tracking-widest mb-2 leading-none">
               Accessibility (Alt)
             </label>
             <input
@@ -684,7 +676,7 @@ function PropertiesPanel({
         block.type === "button" ||
         block.type === "image") && (
         <div className="pt-6 border-t border-slate-200">
-          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 leading-none">
+          <label className="block text-[10px] font-semibold tracking-wider text-slate-400 uppercase tracking-widest mb-2 leading-none">
             Target Destination
           </label>
           <div className="relative group">
@@ -704,14 +696,14 @@ function PropertiesPanel({
       {(block.type === "text" || block.type === "heading") && (
         <>
           <div>
-            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2.5">
+            <label className="block text-[10px] font-semibold tracking-wider text-slate-400 uppercase tracking-widest mb-2.5">
               Typography
             </label>
             <div className="flex items-center bg-slate-200/50 p-1 rounded-xl w-fit">
               <button
                 onClick={() => update({ bold: !block.bold })}
                 className={cn(
-                  "h-8 px-3 rounded-lg flex items-center justify-center text-[12px] font-black transition-all",
+                  "h-8 px-3 rounded-lg flex items-center justify-center text-[12px] font-bold transition-all",
                   block.bold
                     ? "bg-white text-slate-900 shadow-xs ring-1 ring-slate-200"
                     : "text-slate-400 hover:text-slate-600",
@@ -722,7 +714,7 @@ function PropertiesPanel({
               <button
                 onClick={() => update({ italic: !block.italic })}
                 className={cn(
-                  "h-8 px-3 rounded-lg flex items-center justify-center italic text-[12px] font-black transition-all",
+                  "h-8 px-3 rounded-lg flex items-center justify-center italic text-[12px] font-bold transition-all",
                   block.italic
                     ? "bg-white text-slate-900 shadow-xs ring-1 ring-slate-200"
                     : "text-slate-400 hover:text-slate-600",
@@ -1420,7 +1412,7 @@ export default function TemplateBuilder({
         }
       `}</style>
       {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <header className="shrink-0 bg-white/80 backdrop-blur-md border-b border-slate-100 flex items-center justify-between px-6 h-16 sticky top-0 z-50">
+      <header className="shrink-0 bg-white/80 backdrop-blur-md border-b border-slate-200/60 bg-white/50 flex items-center justify-between px-6 h-16 sticky top-0 z-50">
         <div className="flex items-center gap-4">
           <button
             onClick={() => router.push("/email/templates")}
@@ -1465,7 +1457,7 @@ export default function TemplateBuilder({
             <button
               onClick={() => setPreviewMode("desktop")}
               className={cn(
-                "h-7 px-4 rounded-lg flex items-center gap-1.5 text-[11px] font-black transition-all",
+                "h-7 px-4 rounded-lg flex items-center gap-1.5 text-[11px] font-bold transition-all",
                 previewMode === "desktop"
                   ? "bg-white text-slate-900 border border-slate-200 shadow-xs"
                   : "text-slate-500 hover:text-slate-700",
@@ -1477,7 +1469,7 @@ export default function TemplateBuilder({
             <button
               onClick={() => setPreviewMode("mobile")}
               className={cn(
-                "h-7 px-4 rounded-lg flex items-center gap-1.5 text-[11px] font-black transition-all",
+                "h-7 px-4 rounded-lg flex items-center gap-1.5 text-[11px] font-bold transition-all",
                 previewMode === "mobile"
                   ? "bg-white text-slate-900 border border-slate-200 shadow-xs"
                   : "text-slate-500 hover:text-slate-700",
@@ -1490,70 +1482,51 @@ export default function TemplateBuilder({
 
           <div className="h-6 w-px bg-slate-200 mx-1" />
 
-          <button
+          <CtaButton
             onClick={handleSave}
             disabled={isSaving}
-            className="h-9 px-5 bg-indigo-600 hover:bg-indigo-700 text-white text-[12px] font-black rounded-xl flex items-center gap-2 transition-all disabled:opacity-60 disabled:cursor-not-allowed group active:scale-95"
+            className="h-9 px-5 text-[12px] rounded-xl font-medium"
           >
             <Save className="h-3.5 w-3.5" />
             {isSaving ? "Saving..." : "Save Template"}
-          </button>
+          </CtaButton>
         </div>
       </header>
 
       {/* ── 3-Column Body ──────────────────────────────────────────────────── */}
       <div className="flex-1 min-h-0 flex overflow-hidden">
         {/* ── Left Panel: Blocks & Settings ─────────────────────────────── */}
-        <div className="w-[240px] shrink-0 bg-white border-r border-slate-100 flex flex-col">
+        <div className="w-[240px] shrink-0 bg-slate-50/50 border-r border-slate-200/60 flex flex-col">
           {/* Tabs */}
-          <div className="p-2 border-b border-slate-100 bg-white">
-            <div className="relative flex p-1 bg-slate-50 rounded-xl border border-slate-200">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  layoutId="sidebar-tab-pill"
-                  className="absolute inset-y-1 bg-white rounded-lg shadow-xs border border-slate-200"
-                  style={{
-                    width: "calc(33.33% - 4px)",
-                    left:
-                      activeTab === "blocks"
-                        ? "4px"
-                        : activeTab === "templates"
-                          ? "33.33%"
-                          : "66.66%",
-                  }}
-                  transition={{ type: "spring", bounce: 0, duration: 0.3 }}
-                />
-              </AnimatePresence>
-              {(["blocks", "templates", "settings"] as const).map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={cn(
-                    "relative z-10 flex-1 h-8 text-[10px] font-black uppercase tracking-widest transition-colors flex items-center justify-center gap-1.5",
-                    activeTab === tab
-                      ? "text-slate-900"
-                      : "text-slate-400 hover:text-slate-600",
-                  )}
-                >
-                  {tab === "blocks" && (
-                    <Layout className="h-3 w-3 text-indigo-600" />
-                  )}
-                  {tab === "templates" && (
-                    <Sparkles className="h-3 w-3 text-indigo-600" />
-                  )}
-                  {tab === "settings" && (
-                    <Settings2 className="h-3 w-3 text-indigo-600" />
-                  )}
-                  <span className="hidden min-[1100px]:inline">{tab}</span>
-                </button>
-              ))}
-            </div>
+          <div className="p-2 border-b border-slate-200/60 bg-white">
+            <Tabs
+              value={activeTab}
+              onValueChange={(v) => setActiveTab(v as "blocks" | "templates" | "settings")}
+              className="bg-slate-50/50 p-1 rounded-xl border border-slate-200/60 shrink-0 w-full"
+            >
+              <TabsList className="bg-transparent border-none h-auto p-0 gap-1 w-full grid grid-cols-3">
+                {(["blocks", "templates", "settings"] as const).map((tab) => (
+                  <TabsTrigger
+                    key={tab}
+                    value={tab}
+                    className="h-8 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-slate-900 text-slate-500 transition-all text-[10px] font-bold uppercase tracking-widest flex items-center justify-center px-0 border border-transparent data-[state=active]:border-slate-200/60"
+                  >
+                    <span className="min-[1100px]:hidden">
+                      {tab === "blocks" && <Layout className="h-3.5 w-3.5" />}
+                      {tab === "templates" && <Sparkles className="h-3.5 w-3.5" />}
+                      {tab === "settings" && <Settings2 className="h-3.5 w-3.5" />}
+                    </span>
+                    <span className="hidden min-[1100px]:inline">{tab}</span>
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
             {activeTab === "blocks" && (
               <div className="space-y-1.5">
-                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-1 pb-2">
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest px-1 pb-2">
                   Library
                 </p>
                 {blockDefs.map((def) => (
@@ -1564,14 +1537,14 @@ export default function TemplateBuilder({
                   >
                     <div
                       className={cn(
-                        "h-8 w-8 rounded-lg flex items-center justify-center text-white shrink-0 transition-transform shadow-xs",
+                        "h-8 w-8 rounded-lg flex items-center justify-center shrink-0 transition-transform shadow-xs",
                         def.accent,
                       )}
                     >
                       <def.icon className="h-4 w-4" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[12px] font-black text-slate-900">
+                      <p className="text-[12px] font-bold text-slate-900">
                         {def.label}
                       </p>
                       <p className="text-[10px] font-medium text-slate-500 truncate">
@@ -1587,7 +1560,7 @@ export default function TemplateBuilder({
             {activeTab === "templates" && (
               <div className="space-y-4 pt-1">
                 <div className="px-1">
-                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest pb-2 flex items-center justify-between">
+                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest pb-2 flex items-center justify-between">
                     Blueprints
                     <Sparkles className="h-2.5 w-2.5 text-indigo-500" />
                   </p>
@@ -1628,7 +1601,7 @@ export default function TemplateBuilder({
                             `bg-${t.color}-500`,
                           )}
                         />
-                        <p className="text-[13px] font-black text-slate-900">
+                        <p className="text-[13px] font-bold text-slate-900">
                           {t.label}
                         </p>
                         <p className="text-[11px] font-medium text-slate-500 mt-1 leading-tight">
@@ -1644,7 +1617,7 @@ export default function TemplateBuilder({
             {activeTab === "settings" && (
               <div className="space-y-6 pt-1">
                 <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 leading-none">
+                  <label className="block text-[10px] font-semibold tracking-wider text-slate-400 uppercase tracking-widest mb-1.5 leading-none">
                     Template Name
                   </label>
                   <input
@@ -1656,7 +1629,7 @@ export default function TemplateBuilder({
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 leading-none">
+                  <label className="block text-[10px] font-semibold tracking-wider text-slate-400 uppercase tracking-widest mb-1.5 leading-none">
                     Subject Line
                   </label>
                   <input
@@ -1668,7 +1641,7 @@ export default function TemplateBuilder({
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 leading-none">
+                  <label className="block text-[10px] font-semibold tracking-wider text-slate-400 uppercase tracking-widest mb-2 leading-none">
                     Brand Color
                   </label>
                   <div className="flex items-center gap-2">

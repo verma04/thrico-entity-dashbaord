@@ -14,7 +14,7 @@ export function ResponsiveContainer({
     <RechartsResponsiveContainer
       width={width}
       height={height}
-      className={`p-5 rounded-[20px] bg-muted/30 border border-transparent ${className || ""}`}
+      className={`p-5 rounded-[20px]  bg-white border border-transparent ${className || ""}`}
       {...props}
     >
       {children}

@@ -137,7 +137,7 @@ export function EcosystemKPI({
           >
             <Icon
               className={cn(
-                "h-3 w-3",
+                "h-3 w-3 z-1",
                 (currentStyle as any).iconColor ?? "text-white",
               )}
             />

@@ -910,12 +910,7 @@ export const emailItems = [
     path: "/email/templates",
     icon: <FileText size={18} />,
   },
-  {
-    key: "email-campaigns",
-    label: "Automation Campaigns",
-    path: "/email/automation",
-    icon: <Zap size={18} />,
-  },
+
   {
     key: "email-settings",
     label: "Email Settings",

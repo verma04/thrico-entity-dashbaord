@@ -13,14 +13,8 @@ import {
   LayoutGrid,
   Activity,
   RotateCcw,
-  ShieldCheck,
-  BarChart3,
   Globe,
-  Timer,
-  Sparkles,
   Eye,
-  Crown,
-  TrendingUp,
   Search,
   Users2,
 } from "lucide-react";
@@ -35,7 +29,6 @@ import { Button } from "@/components/ui/button";
 import { subDays } from "date-fns";
 import { DateRange } from "react-day-picker";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
-import moment from "moment";
 import { AccessDeniedAlert } from "@/components/shared/access-denied-alert";
 import { useModuleStore } from "@/store/useModuleStore";
 import { getPreferredMediaUrl } from "@/lib/media-utils";
@@ -247,18 +240,19 @@ export default function CommunitiesAnalytics() {
                 title={`Best ${moduleName}`}
                 titleClassName="normal-case tracking-normal text-sm text-foreground"
               />
-              <div className="rounded-[20px] border border-transparent bg-muted/30 p-5">
-                {loading ? (
-                  <div className="h-72">
-                    <ChartSkeleton />
-                  </div>
-                ) : topCommunities.length === 0 ? (
-                  <div className="h-72">
-                    <EmptyChart message="No info to show for this time." />
-                  </div>
-                ) : (
-                  <div className="space-y-1">
-                    {topCommunities
+              <div className="w-full overflow-x-auto">
+                <div className="rounded-[20px] border border-transparent bg-muted/30 p-5 min-w-[500px]">
+                  {loading ? (
+                    <div className="h-72">
+                      <ChartSkeleton />
+                    </div>
+                  ) : topCommunities.length === 0 ? (
+                    <div className="h-72">
+                      <EmptyChart message="No info to show for this time." />
+                    </div>
+                  ) : (
+                    <div className="space-y-1">
+                      {topCommunities
                       .slice(0, 6)
                       .map((community: TopCommunity, idx: number) => {
                         const maxMembers = topCommunities[0]?.members || 1;
@@ -305,6 +299,7 @@ export default function CommunitiesAnalytics() {
                       })}
                   </div>
                 )}
+                </div>
               </div>
             </section>
 
