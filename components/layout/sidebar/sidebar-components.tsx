@@ -205,8 +205,8 @@ export function MenuItemRow({
           </span>
           {!item.isLocked && item.badge && (
             <Badge
-              variant="outline"
-              className="ml-auto mr-1 text-[9px] h-[17px] px-1.5 bg-primary/8 text-primary border-primary/20 rounded font-semibold uppercase tracking-wider shrink-0 group-data-[collapsible=icon]:hidden"
+              variant="secondary"
+              className="ml-auto mr-1 text-[10px] leading-none h-5 px-2 bg-indigo-50 hover:bg-indigo-50 text-indigo-600 dark:bg-indigo-500/20 dark:hover:bg-indigo-500/20 dark:text-indigo-400 border-none rounded-md font-medium shrink-0 group-data-[collapsible=icon]:hidden"
             >
               {item.badge}
             </Badge>
@@ -308,8 +308,8 @@ export function MenuItemRow({
           )}
           {!item.isLocked && item.badge && (
             <Badge
-              variant="outline"
-              className="ml-auto text-[9px] h-[17px] px-1.5 bg-primary/8 text-primary border-primary/20 rounded font-semibold uppercase tracking-wider shrink-0 group-data-[collapsible=icon]:hidden"
+              variant="secondary"
+              className="ml-auto text-[10px] leading-none h-5 px-2 bg-indigo-50 hover:bg-indigo-50 text-indigo-600 dark:bg-indigo-500/20 dark:hover:bg-indigo-500/20 dark:text-indigo-400 border-none rounded-md font-medium shrink-0 group-data-[collapsible=icon]:hidden"
             >
               {item.badge}
             </Badge>

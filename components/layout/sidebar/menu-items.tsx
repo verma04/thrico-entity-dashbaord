@@ -73,6 +73,14 @@ import {
   UserPlus,
   Network,
   Share2,
+  Bot,
+  BrainCircuit,
+  BarChart2,
+  Link2,
+  Wand2,
+  Plus,
+  List,
+  Clock,
 } from "lucide-react";
 import { useMemo } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -109,6 +117,121 @@ export const homeItems = [
   //   path: "/chat",
   //   icon: <MessageSquare size={18} />,
   // },
+];
+
+// --- 1b. AI ---
+export const aiStudioItems = [
+  {
+    key: "ai-ask",
+    label: "Ask or Create",
+    path: "/ai-agent",
+    icon: <Wand2 size={18} />,
+    badge: "Beta",
+  },
+  {
+    key: "ai-analytics",
+    label: "Analytics",
+    path: "/ai-agent/analytics",
+    icon: <BarChart2 size={18} />,
+    badge: "Beta",
+  },
+  {
+    key: "ai-skills",
+    label: "Skills",
+    path: "/ai-agent/skills",
+    icon: <BrainCircuit size={18} />,
+    badge: "Beta",
+  },
+  {
+    key: "ai-connections",
+    label: "Connectors",
+    path: "/ai-agent/connections",
+    icon: <Link2 size={18} />,
+    badge: "Beta",
+  },
+  {
+    key: "ai-onboarding",
+    label: "Onboarding Assistant",
+    path: "/ai-agent/onboarding",
+    icon: <Rocket size={18} />,
+    badge: "Beta",
+  },
+];
+
+export const aiSuperAgentsItems = [
+  {
+    key: "ai-create-agent",
+    label: "Create Agent",
+    path: "/ai-agent/super-agents/create",
+    icon: <Plus size={18} />,
+    badge: "Beta",
+  },
+  {
+    key: "ai-all-agents",
+    label: "All Agents",
+    path: "/ai-agent/super-agents/all",
+    icon: <List size={18} />,
+    badge: "Beta",
+  },
+  {
+    key: "ai-my-agents",
+    label: "My Agents",
+    path: "/ai-agent/super-agents/my",
+    icon: <User2 size={18} />,
+    badge: "Beta",
+  },
+  {
+    key: "ai-recent-super-agents",
+    label: "Recent Super Agents",
+    path: "/ai-agent/super-agents/recent",
+    icon: <Clock size={18} />,
+    badge: "Beta",
+  },
+  {
+    key: "ai-communities-agent",
+    label: "Communities Agent",
+    path: "/ai-agent/super-agents/communities",
+    icon: <Users size={18} />,
+    badge: "Beta",
+  },
+  {
+    key: "ai-survey-agent",
+    label: "Survey Agent",
+    path: "/ai-agent/super-agents/survey",
+    icon: <ClipboardList size={18} />,
+    badge: "Beta",
+  },
+  {
+    key: "ai-membership-manager-agent",
+    label: "Membership Manager Agent",
+    path: "/ai-agent/super-agents/membership-manager",
+    icon: <UserCog size={18} />,
+    badge: "Beta",
+  },
+];
+
+export const aiChatItems = [
+  {
+    key: "ai-recent-chats",
+    label: "Recent Chats",
+    path: "/ai-agent/chat/recent",
+    icon: <Clock size={18} />,
+    badge: "Beta",
+  },
+  {
+    key: "ai-all-chats",
+    label: "All Chats",
+    path: "/ai-agent/chat/all",
+    icon: <List size={18} />,
+    badge: "Beta",
+  },
+  {
+    key: "ai-new-conversation",
+    label: "New Conversation",
+    path: "/ai-agent/chat/new",
+    icon: <Plus size={18} />,
+    badge: "Beta",
+  },
 ];
 
 // --- 2. MEMBERS ---
@@ -709,14 +832,13 @@ export const modules = [
 ];
 
 // --- 5. ADMIN SETTINGS ---
-export const adminSettings = [
+export const billingAndTeamItems = [
   {
     key: "acc-plan",
     label: "Subscription & Plan",
     path: "/settings/subscription",
     icon: <Wallet size={18} />,
   },
-
   {
     key: "account",
     label: "Account",
@@ -728,11 +850,8 @@ export const adminSettings = [
         label: "Billing Details",
         path: "/settings/billing/details",
       },
-      // { key: "acc-inv", label: "Invoices", path: "/settings/invoices" },
-      // { key: "acc-export", label: "Export Data", path: "/settings/export" },
     ],
   },
-
   {
     key: "team",
     label: "Team",
@@ -745,6 +864,9 @@ export const adminSettings = [
       },
     ],
   },
+];
+
+export const setupAndDesignItems = [
   {
     key: "customisation",
     label: "Design & Style",
@@ -780,7 +902,9 @@ export const adminSettings = [
     path: "/settings/integrations#setup",
     icon: <Zap size={18} />,
   },
+];
 
+export const supportAndLegalItems = [
   {
     key: "policies",
     label: "Policies & Terms",
@@ -799,7 +923,6 @@ export const adminSettings = [
       { key: "pol-taxes", label: "Taxes & Duties", path: "/settings/taxes" },
     ],
   },
-
   {
     key: "learnings",
     label: "Help Guides",
@@ -812,7 +935,6 @@ export const adminSettings = [
     path: "/settings/contact",
     icon: <LifeBuoy size={18} />,
   },
-
   {
     key: "acc-audit",
     label: "Audit Log",
@@ -889,7 +1011,11 @@ export const websiteItems = [
 
 // --- Legacy exports for compatibility while refactoring sidebar.tsx ---
 export const main = homeItems;
-export const settings = adminSettings;
+export const settings = [
+  ...billingAndTeamItems,
+  ...setupAndDesignItems,
+  ...supportAndLegalItems,
+];
 export const extendedItems = modules;
 export const gamification = gamificationEngine;
 
@@ -1089,6 +1215,18 @@ export const useFilteredExtendedItems = () => {
     () => filterItems(homeItems, true),
     [data, user],
   );
+  const filteredAiStudio = useMemo(
+    () => filterItems(aiStudioItems, true),
+    [data, user],
+  );
+  const filteredAiSuperAgents = useMemo(
+    () => filterItems(aiSuperAgentsItems, true),
+    [data, user],
+  );
+  const filteredAiChat = useMemo(
+    () => filterItems(aiChatItems, true),
+    [data, user],
+  );
   const filteredMembers = useMemo(
     () => filterItems(membersIntelligence, true),
     [data, user],
@@ -1121,6 +1259,9 @@ export const useFilteredExtendedItems = () => {
 
   return {
     homeItems: filteredHome,
+    aiStudioItems: filteredAiStudio,
+    aiSuperAgentsItems: filteredAiSuperAgents,
+    aiChatItems: filteredAiChat,
     membersIntelligence: filteredMembers,
     feedItems: filteredFeed as any[],
     moderationItems: filteredModeration as any[],
@@ -1156,16 +1297,20 @@ export const useFilteredManagementItems = () => {
     return !!modulePermission?.[action];
   };
 
-  const filteredItems = useMemo(() => {
-    if (isSuperAdmin || isSystemRole) return adminSettings;
+  const filterSettingsGroup = (group: any[]) => {
+    if (isSuperAdmin || isSystemRole) return group;
 
-    return adminSettings
+    return group
       .map((section) => {
-        // Deep copy the section to avoid mutating original
         const filteredSection = { ...section };
 
         // Top level section permission checks
-        if (section.key === "SETTINGS") {
+        if (
+          section.key === "customisation" ||
+          section.key === "cust-dom" ||
+          section.key === "cust-mod" ||
+          section.key === "cust-int"
+        ) {
           const canSeeAny =
             hasModulePermission("APPEARANCE") ||
             hasModulePermission("DOMAIN") ||
@@ -1183,7 +1328,11 @@ export const useFilteredManagementItems = () => {
           if (!canSeeAny) return null;
         }
 
-        if (section.key === "SETTINGS") {
+        if (
+          section.key === "account" ||
+          section.key === "acc-plan" ||
+          section.key === "acc-audit"
+        ) {
           const canSeeAny =
             hasModulePermission("BILLING") ||
             hasModulePermission("SUBSCRIPTION") ||
@@ -1199,7 +1348,7 @@ export const useFilteredManagementItems = () => {
           if (!canSeeAny) return null;
         }
 
-        if (section.key === "support") {
+        if (section.key === "cust-support") {
           if (
             !hasModulePermission("CONTACT_SUPPORT") &&
             !hasModulePermission("FEEDBACK")
@@ -1210,7 +1359,7 @@ export const useFilteredManagementItems = () => {
         // Filter children if they exist
         if (filteredSection.children) {
           filteredSection.children = filteredSection.children.filter(
-            (child) => {
+            (child: any) => {
               if (child.key === "cust-logo" || child.key === "cust-brand")
                 return hasModulePermission("APPEARANCE");
               if (child.key === "cust-dom")
@@ -1243,12 +1392,10 @@ export const useFilteredManagementItems = () => {
               if (child.key === "sup-manager")
                 return hasModulePermission("CONTACT_SUPPORT");
 
-              // Allow default access for others if parent is allowed
               return true;
             },
           );
 
-          // If all children were filtered out, don't show the section (unless it's supposed to be empty)
           if (
             filteredSection.children.length === 0 &&
             section.children &&
@@ -1260,11 +1407,26 @@ export const useFilteredManagementItems = () => {
 
         return filteredSection;
       })
-      .filter(Boolean) as typeof adminSettings;
-  }, [user, isSuperAdmin, isSystemRole]);
+      .filter(Boolean);
+  };
+
+  const filteredBillingAndTeam = useMemo(
+    () => filterSettingsGroup(billingAndTeamItems),
+    [user, isSuperAdmin, isSystemRole],
+  );
+  const filteredSetupAndDesign = useMemo(
+    () => filterSettingsGroup(setupAndDesignItems),
+    [user, isSuperAdmin, isSystemRole],
+  );
+  const filteredSupportAndLegal = useMemo(
+    () => filterSettingsGroup(supportAndLegalItems),
+    [user, isSuperAdmin, isSystemRole],
+  );
 
   return {
-    managementItems: filteredItems,
+    billingAndTeamItems: filteredBillingAndTeam,
+    setupAndDesignItems: filteredSetupAndDesign,
+    supportAndLegalItems: filteredSupportAndLegal,
   };
 };
 

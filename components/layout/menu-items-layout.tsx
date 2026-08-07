@@ -44,76 +44,28 @@ function TabButton({
     <button
       onClick={item.locked ? undefined : onClick}
       className={cn(
-        "group/tab relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12.5px] font-medium transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-primary/50 whitespace-nowrap",
+        "relative px-4 py-3  text-[12px] font-medium transition-colors duration-150 outline-none whitespace-nowrap",
         item.locked
-          ? "cursor-not-allowed opacity-50 text-muted-foreground bg-transparent"
+          ? "cursor-not-allowed opacity-40 text-muted-foreground"
           : isActive
-            ? "bg-primary/5"
-            : "text-muted-foreground hover:text-foreground hover:bg-muted/30",
-        fullWidth && "w-full justify-center",
+            ? "text-foreground"
+            : "text-muted-foreground hover:text-foreground",
+        fullWidth && "flex-1 text-center",
       )}
     >
-      {/* SVG Defs for Icon Gradient */}
-      {isActive && !item.locked && (
-        <svg width="0" height="0" className="absolute">
-          <defs>
-            <linearGradient
-              id="tab-active-gradient"
-              x1="0%"
-              y1="100%"
-              x2="100%"
-              y2="0%"
-            >
-              <stop stopColor="#ff5733" offset="0%" />
-              <stop stopColor="#0967ff" offset="50%" />
-              <stop stopColor="#0967ff" offset="100%" />
-            </linearGradient>
-          </defs>
-        </svg>
-      )}
+      <span className="flex items-center gap-1.5">
+        {item.label}
+        {item.locked && <Lock className="h-3 w-3 text-muted-foreground/50" />}
+      </span>
 
-      {/* Animated pill background */}
+      {/* Active underline indicator */}
       {isActive && !item.locked && (
-        <motion.span
-          layoutId="menu-tab-pill"
-          className="absolute inset-0 rounded-lg border border-primary/10 shadow-sm"
-          transition={{ type: "spring", bounce: 0.2, duration: 0.5 }}
+        <motion.div
+          layoutId="menu-tab-underline"
+          className="absolute bottom-0 left-0 right-0 h-[2px] bg-foreground dark:bg-white"
+          transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
         />
       )}
-
-      {/* Icon */}
-      <span
-        className={cn(
-          "relative z-9 shrink-0 transition-all duration-200",
-          item.locked
-            ? "text-muted-foreground/60"
-            : isActive
-              ? "[&_svg]:stroke-[url(#tab-active-gradient)] drop-shadow-sm"
-              : "text-muted-foreground group-hover/tab:text-foreground",
-        )}
-      >
-        {React.isValidElement(item.icon)
-          ? React.cloneElement(
-              item.icon as React.ReactElement<{ className?: string }>,
-              { className: "h-3.5 w-3.5" },
-            )
-          : item.icon}
-      </span>
-
-      {/* Label */}
-      <span
-        className={cn(
-          "relative z-9 leading-none tracking-tight transition-all flex items-center gap-1",
-          isActive && !item.locked
-            ? "font-bold text-transparent bg-clip-text bg-gradient-to-tr from-[#ff5733] via-[#0967ff] to-[#0967ff]"
-            : "font-medium",
-        )}
-      >
-        {item.label}
-        {item.locked && (
-          <Lock className="h-3 w-3 ml-0.5 text-muted-foreground/50" />
-        )}
-      </span>
     </button>
   );
 }
@@ -138,38 +90,24 @@ function MenuTabs({
   onClose: () => void;
 }) {
   return (
-    <nav className="sticky top-0 z-10 bg-white dark:bg-background/90 backdrop-blur-xl border-b border-border/50">
+    <nav className="sticky top-0 z-10 bg-white dark:bg-background border-t border-b border-border">
       <div className={cn("px-6 relative", !fullWidth && "max-w-7xl mx-auto")}>
-        <div className="flex h-14 items-center gap-1 overflow-x-auto no-scrollbar">
-          {sortedSectionNames.map((sectionName, sIdx) => (
+        <div className="flex items-center gap-0 overflow-x-auto no-scrollbar">
+          {sortedSectionNames.map((sectionName) => (
             <React.Fragment key={sectionName}>
-              {sIdx > 0 && (
-                <div className="mx-4 h-4 w-px bg-border/50 shrink-0" />
-              )}
-
-              <div
-                className={cn(
-                  "flex items-center gap-0.5",
-                  fullWidth && "flex-1",
-                )}
-              >
-                {sections[sectionName].map((item) => (
-                  <TabButton
-                    key={item.key}
-                    item={item}
-                    isActive={
-                      activeTab === item.key ||
-                      fullKey.startsWith(item.key + "/")
-                    }
-                    onClick={() => onChange(item.key)}
-                    fullWidth={fullWidth}
-                  />
-                ))}
-              </div>
+              {sections[sectionName].map((item) => (
+                <TabButton
+                  key={item.key}
+                  item={item}
+                  isActive={
+                    activeTab === item.key || fullKey.startsWith(item.key + "/")
+                  }
+                  onClick={() => onChange(item.key)}
+                  fullWidth={fullWidth}
+                />
+              ))}
             </React.Fragment>
           ))}
-
-          <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-16 bg-linear-to-l from-background to-transparent z-10" />
         </div>
 
         {fixed && (
@@ -181,8 +119,6 @@ function MenuTabs({
           </button>
         )}
       </div>
-
-      <div className="absolute bottom-0 left-0 right-0 h-px bg-border" />
     </nav>
   );
 }

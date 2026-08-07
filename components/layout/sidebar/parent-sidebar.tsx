@@ -16,11 +16,13 @@ import {
   Blocks,
   Globe,
   FileText,
+  Sparkles,
 } from "lucide-react";
 import { NavRailItem } from "./sidebar-components";
 
 // Helper to determine the active tab for the parent sidebar
 function getActiveTab(pathName: string) {
+  if (pathName.startsWith("/ai-agent")) return "ai";
   if (pathName.startsWith("/gamification")) return "gamification";
   if (pathName.startsWith("/members")) return "members";
 
@@ -61,7 +63,6 @@ function getActiveTab(pathName: string) {
     "/support",
     "/trust-center",
     "/wall-of-fame",
-    "/ai-agent",
   ];
   if (moduleRoutes.some((route) => pathName.startsWith(route)))
     return "modules";
@@ -70,6 +71,7 @@ function getActiveTab(pathName: string) {
   if (pathName.startsWith("/settings")) return "settings";
   if (pathName.startsWith("/email")) return "email";
   if (pathName.startsWith("/mobile-app")) return "mobile-app";
+  if (pathName.startsWith("/ai-agent")) return "ai";
   return "home";
 }
 
@@ -87,6 +89,7 @@ export function ParentSidebar() {
           href="/"
           active={activeTab === "home"}
         />
+
         <NavRailItem
           icon={<Users size={20} />}
           label="Members"
@@ -111,6 +114,7 @@ export function ParentSidebar() {
           href="/communities"
           active={activeTab === "modules"}
         />
+
         <NavRailItem
           icon={<Mail size={20} />}
           label="Email"
@@ -129,6 +133,12 @@ export function ParentSidebar() {
           label="Mobile App"
           href="/mobile-app"
           active={activeTab === "mobile-app"}
+        />
+        <NavRailItem
+          icon={<Sparkles size={20} />}
+          label="AI"
+          href="/ai-agent"
+          active={activeTab === "ai"}
         />
         <NavRailItem
           icon={<Settings size={20} />}

@@ -30,6 +30,7 @@ import {
   emailItems,
   mobileAppItems,
   websiteItems,
+  aiItems as aiItemsRaw,
 } from "./menu-items";
 import { useWorkspaceSwitch } from "@/hooks/use-workspace-switch";
 
@@ -42,6 +43,7 @@ import { SwitchingLoader } from "./switching-loader";
 
 type ActiveTab =
   | "home"
+  | "ai"
   | "members"
   | "content"
   | "gamification"
@@ -59,6 +61,8 @@ function getActiveTab(pathName: string): ActiveTab {
 
   if (pathName.startsWith("/members")) return "members";
 
+  if (pathName.startsWith("/ai-agent")) return "ai";
+
   if (
     pathName.startsWith("/moderation") ||
     pathName.startsWith("/feed") ||
@@ -72,8 +76,7 @@ function getActiveTab(pathName: string): ActiveTab {
   if (
     pathName === "/" ||
     pathName.startsWith("/dashboard") ||
-    pathName.startsWith("/chat") ||
-    pathName.startsWith("/ai-agent")
+    pathName.startsWith("/chat")
   )
     return "home";
 
@@ -109,6 +112,9 @@ export function ChildSidebarContainer({
 
   const {
     homeItems,
+    aiStudioItems,
+    aiSuperAgentsItems,
+    aiChatItems,
     membersIntelligence,
     feedItems,
     moderationItems,
@@ -117,7 +123,11 @@ export function ChildSidebarContainer({
     modules: modulesItems,
     gamificationLabel,
   } = useFilteredExtendedItems();
-  const { managementItems: managementFolders } = useFilteredManagementItems();
+  const {
+    billingAndTeamItems,
+    setupAndDesignItems,
+    supportAndLegalItems,
+  } = useFilteredManagementItems();
 
   const toggleGroup = (key: string) => {
     setOpenGroup((prev) => (prev === key ? null : key));
@@ -156,6 +166,18 @@ export function ChildSidebarContainer({
     () => filterList(homeItems as MenuItem[], searchQuery),
     [searchQuery, homeItems, filterList],
   );
+  const filteredAiStudio = useMemo(
+    () => filterList(aiStudioItems as MenuItem[], searchQuery),
+    [searchQuery, aiStudioItems, filterList],
+  );
+  const filteredAiSuperAgents = useMemo(
+    () => filterList(aiSuperAgentsItems as MenuItem[], searchQuery),
+    [searchQuery, aiSuperAgentsItems, filterList],
+  );
+  const filteredAiChat = useMemo(
+    () => filterList(aiChatItems as MenuItem[], searchQuery),
+    [searchQuery, aiChatItems, filterList],
+  );
   const filteredMembers = useMemo(
     () => filterList(membersIntelligence as MenuItem[], searchQuery),
     [searchQuery, membersIntelligence, filterList],
@@ -180,9 +202,17 @@ export function ChildSidebarContainer({
     () => filterList(modulesItems as MenuItem[], searchQuery),
     [searchQuery, modulesItems, filterList],
   );
-  const filteredSettings = useMemo(
-    () => filterList(managementFolders as MenuItem[], searchQuery),
-    [searchQuery, managementFolders, filterList],
+  const filteredBillingAndTeam = useMemo(
+    () => filterList(billingAndTeamItems as MenuItem[], searchQuery),
+    [searchQuery, billingAndTeamItems, filterList],
+  );
+  const filteredSetupAndDesign = useMemo(
+    () => filterList(setupAndDesignItems as MenuItem[], searchQuery),
+    [searchQuery, setupAndDesignItems, filterList],
+  );
+  const filteredSupportAndLegal = useMemo(
+    () => filterList(supportAndLegalItems as MenuItem[], searchQuery),
+    [searchQuery, supportAndLegalItems, filterList],
   );
   const filteredEmail = useMemo(
     () => filterList(emailItems as MenuItem[], searchQuery),
@@ -244,6 +274,9 @@ export function ChildSidebarContainer({
   const allSearchItems = useMemo(() => {
     return [
       ...flattenItems(homeItems as MenuItem[], "Home"),
+      ...flattenItems(aiStudioItems as MenuItem[], "AI"),
+      ...flattenItems(aiSuperAgentsItems as MenuItem[], "AI"),
+      ...flattenItems(aiChatItems as MenuItem[], "AI"),
       ...flattenItems(membersIntelligence as MenuItem[], "Members"),
       ...flattenItems(feedItems as MenuItem[], "Content"),
       ...flattenItems(moderationItems as MenuItem[], "Content"),
@@ -251,7 +284,9 @@ export function ChildSidebarContainer({
       ...flattenItems(gamificationEngine as MenuItem[], "Gamification"),
       ...flattenItems(modulesItems as MenuItem[], "Modules"),
       ...flattenItems(websiteItems as MenuItem[], "Website"),
-      ...flattenItems(managementFolders as MenuItem[], "Settings"),
+      ...flattenItems(billingAndTeamItems as MenuItem[], "Settings"),
+      ...flattenItems(setupAndDesignItems as MenuItem[], "Settings"),
+      ...flattenItems(supportAndLegalItems as MenuItem[], "Settings"),
       ...flattenItems(profileItems, "Account"),
     ];
   }, [
@@ -262,7 +297,9 @@ export function ChildSidebarContainer({
     reportedItems,
     gamificationEngine,
     modulesItems,
-    managementFolders,
+    billingAndTeamItems,
+    setupAndDesignItems,
+    supportAndLegalItems,
     profileItems,
     flattenItems,
   ]);
@@ -355,6 +392,32 @@ export function ChildSidebarContainer({
               />
             )}
 
+            {activeTab === "ai" && (
+              <>
+                <CollapsibleSection
+                  sectionKey="ai-studio"
+                  label="AI Studio"
+                  items={filteredAiStudio}
+                  renderItems={renderItems}
+                  className="mb-1"
+                />
+                <CollapsibleSection
+                  sectionKey="ai-super-agents"
+                  label="Super Agents"
+                  items={filteredAiSuperAgents}
+                  renderItems={renderItems}
+                  className="mb-1"
+                />
+                <CollapsibleSection
+                  sectionKey="ai-chat"
+                  label="Chat"
+                  items={filteredAiChat}
+                  renderItems={renderItems}
+                  className="mb-1"
+                />
+              </>
+            )}
+
             {activeTab === "members" && (
               <CollapsibleSection
                 sectionKey="members"
@@ -422,12 +485,29 @@ export function ChildSidebarContainer({
             )}
 
             {activeTab === "settings" && (
-              <CollapsibleSection
-                sectionKey="settings"
-                label="Settings"
-                items={filteredSettings}
-                renderItems={renderItems}
-              />
+              <>
+                <CollapsibleSection
+                  sectionKey="settings-billing"
+                  label="Billing & Team"
+                  items={filteredBillingAndTeam}
+                  renderItems={renderItems}
+                  className="mb-1"
+                />
+                <CollapsibleSection
+                  sectionKey="settings-setup"
+                  label="Setup & Design"
+                  items={filteredSetupAndDesign}
+                  renderItems={renderItems}
+                  className="mb-1"
+                />
+                <CollapsibleSection
+                  sectionKey="settings-support"
+                  label="Support & Legal"
+                  items={filteredSupportAndLegal}
+                  renderItems={renderItems}
+                  className="mb-1"
+                />
+              </>
             )}
 
             {activeTab === "email" && (
@@ -447,7 +527,9 @@ export function ChildSidebarContainer({
               filteredReported.length === 0 &&
               filteredGamification.length === 0 &&
               filteredModules.length === 0 &&
-              filteredSettings.length === 0 &&
+              filteredBillingAndTeam.length === 0 &&
+              filteredSetupAndDesign.length === 0 &&
+              filteredSupportAndLegal.length === 0 &&
               filteredWebsite.length === 0 &&
               filteredProfile.length === 0 && (
                 <div className="py-8 text-center group-data-[collapsible=icon]:hidden">
