@@ -131,7 +131,9 @@ export function MomentCreationForm({
                     <Video className="h-5 w-5" />
                   </div>
                   <h1 className="text-xl font-bold tracking-tight text-slate-900">
-                    {step === 1 ? `Broadcast ${singularName}` : "Finalize Manifest"}
+                    {step === 1
+                      ? `Broadcast ${singularName}`
+                      : "Finalize Manifest"}
                   </h1>
                 </div>
                 <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-1">

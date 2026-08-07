@@ -57,15 +57,14 @@ import { cn } from "@/lib/utils";
 
 // ─── Industry color palette ──────────────────────────────────────
 const INDUSTRY_COLORS = [
-  "#d7d7e9ff", // indigo
-  "#cee4e7ff", // cyan
-  "#ecd3c4ff", // orange
-  "#edccccff", // red
-  "#d3c6e1ff", // purple
-  "#cfe6ffff", // blue
-  "#d6f1dfff", // green
-  "#f6efceb2", // yellow
-  "#f1d1e0ff", // pink
+  "#f4f4f5", // zinc-100
+  "#e4e4e7", // zinc-200
+  "#d4d4d8", // zinc-300
+  "#a1a1aa", // zinc-400
+  "#71717a", // zinc-500
+  "#52525b", // zinc-600
+  "#3f3f46", // zinc-700
+  "#27272a", // zinc-800
 ];
 
 function getIndustryColor(index: number) {
@@ -88,7 +87,7 @@ const GRAPH_STYLESHEET: any[] = [
       height: 30,
       shape: "ellipse",
       "border-width": 1.5,
-      "border-color": "#e2e8f0",
+      "border-color": "#e4e4e7",
       "text-margin-y": 6,
       "text-outline-width": 0,
       "overlay-padding": 6,
@@ -108,7 +107,7 @@ const GRAPH_STYLESHEET: any[] = [
     selector: "edge[relationType='CONNECTED']",
     style: {
       width: 0.8,
-      "line-color": "#cbd5e1",
+      "line-color": "#d4d4d8",
       "target-arrow-shape": "none",
       "curve-style": "bezier",
       opacity: 0.5,
@@ -118,8 +117,8 @@ const GRAPH_STYLESHEET: any[] = [
     selector: "edge[relationType='FOLLOWS']",
     style: {
       width: 0.6,
-      "line-color": "#94a3b8",
-      "target-arrow-color": "#94a3b8",
+      "line-color": "#a1a1aa",
+      "target-arrow-color": "#a1a1aa",
       "target-arrow-shape": "triangle",
       "curve-style": "bezier",
       opacity: 0.35,
@@ -173,11 +172,11 @@ function FilterTag({
   onRemove: () => void;
 }) {
   return (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-medium rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200">
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-medium rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-700">
       {label}
       <button
         onClick={onRemove}
-        className="ml-0.5 hover:text-indigo-900 transition-colors"
+        className="ml-0.5 hover:text-zinc-900 dark:hover:text-zinc-300 transition-colors"
       >
         <X className="h-2.5 w-2.5" />
       </button>
@@ -526,7 +525,8 @@ function UserDetailPanel({
           <div className="flex items-center gap-4 mt-3">
             <div className="flex flex-col bg-slate-50 px-3 py-1.5 rounded-md border border-slate-100 flex-1">
               <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider flex items-center gap-1">
-                <Star className="h-3 w-3 text-amber-400" /> Points
+                <Star className="h-3 w-3 text-zinc-500 dark:text-zinc-400" />{" "}
+                Points
               </span>
               <span className="text-sm font-semibold text-slate-700">
                 {user.gamificationScore ?? 0}
@@ -534,7 +534,8 @@ function UserDetailPanel({
             </div>
             <div className="flex flex-col bg-slate-50 px-3 py-1.5 rounded-md border border-slate-100 flex-1">
               <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider flex items-center gap-1">
-                <Heart className="h-3 w-3 text-rose-400" /> Impact
+                <Heart className="h-3 w-3 text-zinc-500 dark:text-zinc-400" />{" "}
+                Impact
               </span>
               <span className="text-sm font-semibold text-slate-700">
                 {user.impactScore ?? 0}
@@ -914,20 +915,20 @@ export function UsersGraphView({
   const legend = (
     <>
       <div className="flex items-center gap-2">
-        <div className="h-3 w-3 rounded-full bg-indigo-400 border border-indigo-300" />
-        <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">
+        <div className="h-3 w-3 rounded-full bg-zinc-400 border border-zinc-300" />
+        <span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
           Users
         </span>
       </div>
       <div className="flex items-center gap-2">
-        <div className="h-2 w-5 rounded bg-slate-300" />
-        <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">
+        <div className="h-2 w-5 rounded bg-zinc-300 dark:bg-zinc-700" />
+        <span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
           Connected
         </span>
       </div>
       <div className="flex items-center gap-2">
-        <div className="h-0 w-5 border-t border-dashed border-slate-400" />
-        <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">
+        <div className="h-0 w-5 border-t border-dashed border-zinc-400 dark:border-zinc-600" />
+        <span className="text-[10px] font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
           Follows
         </span>
       </div>
@@ -952,7 +953,7 @@ export function UsersGraphView({
             {activeFilterCount > 0 && (
               <button
                 onClick={clearAllFilters}
-                className="flex items-center gap-1.5 text-[10px] font-medium text-rose-500 hover:text-rose-600 bg-rose-50 hover:bg-rose-100 px-2 py-1 rounded-md border border-rose-200 transition-all duration-150 active:scale-95"
+                className="flex items-center gap-1.5 text-[10px] font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 px-2 py-1 rounded-md border border-zinc-200 dark:border-zinc-700 transition-all duration-150 active:scale-95"
               >
                 <X className="h-3 w-3" />
                 Clear all ({activeFilterCount})
@@ -960,7 +961,7 @@ export function UsersGraphView({
             )}
           </div>
           <p className="text-[10px] text-slate-500 mt-1">
-            <span className="text-indigo-600 font-semibold">
+            <span className="text-zinc-600 dark:text-zinc-300 font-semibold">
               {stats.totalNodes}
             </span>{" "}
             people · {stats.totalEdges} relationships
@@ -992,7 +993,7 @@ export function UsersGraphView({
                 <span className="text-xs text-slate-500 font-medium">
                   Max Nodes
                 </span>
-                <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">
+                <span className="text-xs font-bold text-zinc-600 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded-full border border-zinc-200 dark:border-zinc-700">
                   {limit}
                 </span>
               </div>
@@ -1097,7 +1098,7 @@ export function UsersGraphView({
             />
           </FilterSection>
           <FilterSection
-            icon={<Star className="h-3.5 w-3.5 text-amber-500" />}
+            icon={<Star className="h-3.5 w-3.5 text-zinc-500 dark:text-zinc-400" />}
             title="Gamification Points"
           >
             <div className="px-3 pt-4 pb-2">
@@ -1121,7 +1122,7 @@ export function UsersGraphView({
           </FilterSection>
 
           <FilterSection
-            icon={<Heart className="h-3.5 w-3.5 text-rose-500" />}
+            icon={<Heart className="h-3.5 w-3.5 text-zinc-500 dark:text-zinc-400" />}
             title="Impact Score"
           >
             <div className="px-3 pt-4 pb-2">

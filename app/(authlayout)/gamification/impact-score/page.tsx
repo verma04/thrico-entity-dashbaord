@@ -19,7 +19,7 @@ import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header"
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { DashboardSectionHeading } from "@/components/home/dashboard-section-heading";
 import { EcosystemKPI } from "@/components/layout/ecosystem/ecosystem-analytics";
-import { Button } from "@/components/ui/button";
+import { CtaButton } from "@/components/ui/cta-button";
 import { cn } from "@/lib/utils";
 import {
   useGetImpactTemplates,
@@ -96,7 +96,7 @@ export default function ImpactScoreOverview() {
       desc: "Configure scoring thresholds, decay rates, and category weights.",
       count: templates.length.toString(),
       icon: Layers,
-      link: "/gamification/impact-score/templates",
+      link: "/gamification/impact-score/settings",
     },
     {
       title: "Scoring Rules",
@@ -122,14 +122,14 @@ export default function ImpactScoreOverview() {
               { label: "Impact Score" },
             ]}
           >
-            <Link href="/gamification/impact-score/templates">
-              <Button
+            <Link href="/gamification/impact-score/settings">
+              <CtaButton
                 variant="outline"
                 className="h-9 px-4 rounded-lg border-zinc-200 font-semibold text-xs text-zinc-600 gap-2 hover:bg-zinc-50 transition-all shadow-sm"
               >
                 <Settings className="h-4 w-4 text-indigo-500" />
                 Configure
-              </Button>
+              </CtaButton>
             </Link>
           </div>
         }
@@ -173,14 +173,14 @@ export default function ImpactScoreOverview() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {modules.map((mod, i) => (
                     <Link key={i} href={mod.link}>
-                      <div className="p-6 rounded-xl bg-white border border-zinc-200 hover:border-indigo-200 hover:shadow-lg hover:shadow-indigo-500/5 transition-all group relative overflow-hidden h-full flex flex-col justify-between">
+                      <div className="p-6 rounded-xl bg-white dark:bg-background border border-zinc-200 dark:border-neutral-800 hover:border-zinc-300 dark:hover:border-neutral-700 hover:shadow-lg hover:shadow-zinc-500/5 transition-all group relative overflow-hidden h-full flex flex-col justify-between">
                         <div>
                           <div className="flex items-center justify-between mb-5">
-                            <div className="h-12 w-12 rounded-xl bg-zinc-50 border border-zinc-100 flex items-center justify-center text-zinc-400 group-hover:bg-indigo-50 group-hover:text-indigo-600 group-hover:border-indigo-100 transition-colors">
+                            <div className="h-12 w-12 rounded-xl bg-zinc-50 dark:bg-neutral-900 border border-zinc-100 dark:border-neutral-800 flex items-center justify-center text-zinc-400 group-hover:bg-zinc-100 dark:group-hover:bg-neutral-800 group-hover:text-zinc-900 dark:group-hover:text-zinc-100 group-hover:border-zinc-200 dark:group-hover:border-neutral-700 transition-colors">
                               <mod.icon size={22} />
                             </div>
                             <div className="text-right">
-                              <span className="text-3xl font-bold text-zinc-900 tracking-tight">
+                              <span className="text-3xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">
                                 {mod.count}
                               </span>
                               <p className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider mt-1">
@@ -190,20 +190,20 @@ export default function ImpactScoreOverview() {
                           </div>
 
                           <div className="space-y-1">
-                            <h3 className="text-[15px] font-semibold text-zinc-900 group-hover:text-indigo-600 transition-colors">
+                            <h3 className="text-[15px] font-semibold text-zinc-900 dark:text-zinc-100 group-hover:text-zinc-700 dark:group-hover:text-zinc-300 transition-colors">
                               {mod.title}
                             </h3>
-                            <p className="text-xs text-zinc-500 leading-relaxed font-medium">
+                            <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed font-medium">
                               {mod.desc}
                             </p>
                           </div>
                         </div>
 
-                        <div className="flex items-center justify-between mt-6 pt-5 border-t border-zinc-50">
-                          <span className="text-[11px] font-semibold text-zinc-400 group-hover:text-amber-600 transition-colors">
+                        <div className="flex items-center justify-between mt-6 pt-5 border-t border-zinc-50 dark:border-neutral-800">
+                          <span className="text-[11px] font-semibold text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-100 transition-colors">
                             Manage
                           </span>
-                          <ArrowRight className="h-4 w-4 text-zinc-300 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all" />
+                          <ArrowRight className="h-4 w-4 text-zinc-300 dark:text-zinc-600 group-hover:text-zinc-900 dark:group-hover:text-zinc-100 group-hover:translate-x-1 transition-all" />
                         </div>
                       </div>
                     </Link>
@@ -219,12 +219,13 @@ export default function ImpactScoreOverview() {
                 />
                 <div className="p-5 rounded-[20px] bg-muted/30 border border-transparent">
                   {activeTemplate ? (
-                    <div className="space-y-1.5 mt-4 overflow-hidden rounded-xl border border-zinc-100">
+                    <div className="space-y-1.5 mt-4 overflow-hidden rounded-xl border border-zinc-100 dark:border-neutral-800">
                       {[
                         {
                           label: "Score Range",
                           value: `${activeTemplate.minScore} - ${activeTemplate.maxScore}`,
-                          color: "text-zinc-900 bg-zinc-50/50",
+                          color:
+                            "text-zinc-900 dark:text-zinc-100 bg-zinc-100 dark:bg-zinc-800",
                         },
                         {
                           label: "Decay Engine",
@@ -232,20 +233,21 @@ export default function ImpactScoreOverview() {
                             ? "Enabled"
                             : "Disabled",
                           color: activeTemplate.decayEnabled
-                            ? "text-rose-600 bg-rose-50/50"
-                            : "text-zinc-500 bg-zinc-50/50",
+                            ? "text-zinc-900 dark:text-zinc-100 bg-zinc-100 dark:bg-zinc-800"
+                            : "text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800",
                         },
                         {
                           label: "Refresh Frequency",
                           value: activeTemplate.refreshFrequency,
-                          color: "text-indigo-600 bg-indigo-50/50",
+                          color:
+                            "text-zinc-900 dark:text-zinc-100 bg-zinc-100 dark:bg-zinc-800",
                         },
                       ].map((row, i) => (
                         <div
                           key={i}
-                          className="flex items-center justify-between px-4 py-3 bg-white border-b last:border-0 border-zinc-50"
+                          className="flex items-center justify-between px-4 py-3 bg-white dark:bg-neutral-900/50 border-b last:border-0 border-zinc-50 dark:border-neutral-800"
                         >
-                          <span className="text-[11px] font-semibold text-zinc-500">
+                          <span className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-400">
                             {row.label}
                           </span>
                           <span
@@ -261,12 +263,12 @@ export default function ImpactScoreOverview() {
                     </div>
                   ) : (
                     <div className="py-6 text-center">
-                      <p className="text-sm text-zinc-500">
+                      <p className="text-sm text-zinc-500 dark:text-zinc-400">
                         No active template found.
                       </p>
                       <Link
-                        href="/gamification/impact-score/templates"
-                        className="text-xs text-indigo-600 font-medium hover:underline mt-2 inline-block"
+                        href="/gamification/impact-score/settings"
+                        className="text-xs text-zinc-900 dark:text-zinc-100 font-medium hover:underline mt-2 inline-block"
                       >
                         Create Template &rarr;
                       </Link>

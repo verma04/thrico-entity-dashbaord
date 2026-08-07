@@ -70,11 +70,11 @@ export function EconomicConfiguration({ data, loading }: EconomicConfigProps) {
   return (
     <div className="space-y-6 max-w-2xl">
       {/* Info Banner */}
-      <div className="flex items-start gap-3 p-4 rounded-lg bg-blue-50/60 border border-blue-100">
-        <Info className="h-4 w-4 text-blue-500 shrink-0 mt-0.5" />
+      <div className="flex items-start gap-3 p-4 rounded-lg bg-zinc-50/50 dark:bg-neutral-900/50 border border-zinc-200 dark:border-neutral-800 text-zinc-700 dark:text-zinc-300">
+        <Info className="h-4 w-4 text-zinc-500 dark:text-zinc-400 shrink-0 mt-0.5" />
         <div className="space-y-1">
-          <p className="text-xs font-semibold text-blue-900">How this works</p>
-          <p className="text-xs text-blue-800/80 leading-relaxed">
+          <p className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">How this works</p>
+          <p className="text-xs leading-relaxed">
             Activity Points ÷ Normalization Factor = Entity Currency earned. For
             most entities, a factor of <strong>100</strong> is a stable starting
             point.
@@ -87,8 +87,8 @@ export function EconomicConfiguration({ data, loading }: EconomicConfigProps) {
         {/* Currency Name */}
         <div className="p-5 rounded-xl border border-border bg-card space-y-4">
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-indigo-50 flex items-center justify-center">
-              <Palette className="h-4 w-4 text-indigo-600" />
+            <div className="h-8 w-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center">
+              <Palette className="h-4 w-4 text-zinc-900 dark:text-zinc-100" />
             </div>
             <div>
               <p className="text-sm font-semibold text-foreground">
@@ -122,8 +122,8 @@ export function EconomicConfiguration({ data, loading }: EconomicConfigProps) {
         {/* Normalization Factor */}
         <div className="p-5 rounded-xl border border-border bg-card space-y-4">
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-emerald-50 flex items-center justify-center">
-              <Zap className="h-4 w-4 text-emerald-600" />
+            <div className="h-8 w-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center">
+              <Zap className="h-4 w-4 text-zinc-900 dark:text-zinc-100" />
             </div>
             <div>
               <p className="text-sm font-semibold text-foreground">
@@ -153,7 +153,7 @@ export function EconomicConfiguration({ data, loading }: EconomicConfigProps) {
               </p>
             )}
           </div>
-          <div className="px-3 py-2 rounded-lg bg-emerald-50/70 border border-emerald-100 text-xs text-emerald-800">
+          <div className="px-3 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xs text-zinc-700 dark:text-zinc-300">
             <span className="font-medium">Example: </span>
             100 pts ÷ {formik.values.normalizationFactor || 1} ={" "}
             <span className="font-bold">

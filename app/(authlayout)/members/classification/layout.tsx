@@ -169,7 +169,7 @@ export default function ClassificationLayout({
         />
 
         {/* Modern Sub-tabs Navigation */}
-        <div className=" bg-white shadow-sm px-6 flex items-center justify-between">
+        <div className="bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800 shadow-sm px-6 flex items-center justify-between">
           <div className="flex gap-6">
             {tabs.map((tab) => {
               const isActive = activeTab === tab.id;
@@ -179,7 +179,7 @@ export default function ClassificationLayout({
                   onClick={() => router.push(tab.href)}
                   className={`flex items-center gap-2 px-1 py-4 text-sm font-semibold border-b-2 transition-all duration-200 -mb-[2px] ${
                     isActive
-                      ? "border-indigo-600 text-indigo-600"
+                      ? "border-zinc-900 text-zinc-900 dark:border-zinc-100 dark:text-zinc-100"
                       : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
                   }`}
                 >

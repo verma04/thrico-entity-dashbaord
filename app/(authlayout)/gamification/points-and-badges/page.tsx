@@ -108,8 +108,8 @@ export default function GamificationOverview() {
         ? "—"
         : (gamificationStats?.totalPointsAwarded?.toLocaleString() ?? "0"),
       icon: Zap,
-      color: "text-amber-600",
-      bg: "bg-amber-50",
+      color: "text-zinc-900",
+      bg: "bg-zinc-100",
     },
     {
       title: "Badges Earned",
@@ -117,8 +117,8 @@ export default function GamificationOverview() {
         ? "—"
         : (gamificationStats?.totalBadgesEarned?.toLocaleString() ?? "0"),
       icon: Award,
-      color: "text-indigo-600",
-      bg: "bg-indigo-50",
+      color: "text-zinc-900",
+      bg: "bg-zinc-100",
     },
     {
       title: "Active Rules",
@@ -126,8 +126,8 @@ export default function GamificationOverview() {
         ? "—"
         : (gamificationStats?.activePointRules?.toString() ?? "0"),
       icon: Coins,
-      color: "text-emerald-600",
-      bg: "bg-emerald-50",
+      color: "text-zinc-900",
+      bg: "bg-zinc-100",
     },
   ];
 
@@ -208,35 +208,37 @@ export default function GamificationOverview() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {modules.map((mod, i) => (
                 <Link key={i} href={mod.link}>
-                  <div className="p-6 rounded-xl bg-white border border-zinc-200 hover:border-indigo-200 hover:shadow-lg hover:shadow-indigo-500/5 transition-all group relative overflow-hidden">
-                    <div className="flex items-center justify-between mb-5">
-                      <div className="h-12 w-12 rounded-xl bg-zinc-50 border border-zinc-100 flex items-center justify-center text-zinc-400 group-hover:bg-indigo-50 group-hover:text-indigo-600 group-hover:border-indigo-100 transition-colors">
-                        <mod.icon size={22} />
+                  <div className="p-6 rounded-xl bg-white dark:bg-background border border-zinc-200 dark:border-neutral-800 hover:border-zinc-300 dark:hover:border-neutral-700 hover:shadow-lg hover:shadow-zinc-500/5 transition-all group relative overflow-hidden h-full flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center justify-between mb-5">
+                        <div className="h-12 w-12 rounded-xl bg-zinc-50 dark:bg-neutral-900 border border-zinc-100 dark:border-neutral-800 flex items-center justify-center text-zinc-400 group-hover:bg-zinc-100 dark:group-hover:bg-neutral-800 group-hover:text-zinc-900 dark:group-hover:text-zinc-100 group-hover:border-zinc-200 dark:group-hover:border-neutral-700 transition-colors">
+                          <mod.icon size={22} />
+                        </div>
+                        <div className="text-right">
+                          <span className="text-3xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">
+                            {mod.count}
+                          </span>
+                          <p className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider mt-1">
+                            Items
+                          </p>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <span className="text-3xl font-bold text-zinc-900 tracking-tight">
-                          {mod.count}
-                        </span>
-                        <p className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider mt-1">
-                          Items
+
+                      <div className="space-y-1">
+                        <h3 className="text-[15px] font-semibold text-zinc-900 dark:text-zinc-100 group-hover:text-zinc-700 dark:group-hover:text-zinc-300 transition-colors">
+                          {mod.title}
+                        </h3>
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed font-medium">
+                          {mod.desc}
                         </p>
                       </div>
                     </div>
 
-                    <div className="space-y-1">
-                      <h3 className="text-[15px] font-semibold text-zinc-900 group-hover:text-indigo-600 transition-colors">
-                        {mod.title}
-                      </h3>
-                      <p className="text-xs text-zinc-500 leading-relaxed font-medium">
-                        {mod.desc}
-                      </p>
-                    </div>
-
-                    <div className="flex items-center justify-between mt-6 pt-5 border-t border-zinc-50">
-                      <span className="text-[11px] font-semibold text-zinc-400 group-hover:text-amber-600 transition-colors">
+                    <div className="flex items-center justify-between mt-6 pt-5 border-t border-zinc-50 dark:border-neutral-800">
+                      <span className="text-[11px] font-semibold text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-100 transition-colors">
                         Manage
                       </span>
-                      <ArrowRight className="h-4 w-4 text-zinc-300 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all" />
+                      <ArrowRight className="h-4 w-4 text-zinc-300 dark:text-zinc-600 group-hover:text-zinc-900 dark:group-hover:text-zinc-100 group-hover:translate-x-1 transition-all" />
                     </div>
                   </div>
                 </Link>
@@ -251,42 +253,42 @@ export default function GamificationOverview() {
               titleClassName="normal-case tracking-normal text-sm text-foreground"
             />
             <div className="p-5 rounded-[20px] bg-muted/30 border border-transparent">
-              <div className="space-y-1.5 overflow-hidden rounded-xl border border-zinc-100">
+              <div className="space-y-1.5 overflow-hidden rounded-xl border border-zinc-100 dark:border-neutral-800">
                 {[
                   {
                     label: "Engine Status",
                     value: settings.isEnabled ? "Active" : "Paused",
                     color: settings.isEnabled
-                      ? "text-emerald-600 bg-emerald-50/50"
-                      : "text-rose-500 bg-rose-50/50",
+                      ? "text-zinc-900 dark:text-zinc-100 bg-zinc-100 dark:bg-zinc-800"
+                      : "text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800",
                   },
                   {
                     label: "Login Rewards",
                     value: reloginConfig.isEnabled ? "Enabled" : "Disabled",
                     color: reloginConfig.isEnabled
-                      ? "text-indigo-600 bg-indigo-50/50"
-                      : "text-zinc-500 bg-zinc-50/50",
+                      ? "text-zinc-900 dark:text-zinc-100 bg-zinc-100 dark:bg-zinc-800"
+                      : "text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800",
                   },
                   {
                     label: "Daily Cap",
                     value: settings.dailyPointsCap
                       ? `${settings.dailyPointsCap} pt`
                       : "Unlimited",
-                    color: "text-zinc-900 bg-zinc-50/50",
+                    color: "text-zinc-900 dark:text-zinc-100 bg-zinc-100 dark:bg-zinc-800",
                   },
                   {
                     label: "Point Decay",
                     value: settings.pointDecayEnabled ? "Enabled" : "Disabled",
                     color: settings.pointDecayEnabled
-                      ? "text-rose-600 bg-rose-50/50"
-                      : "text-zinc-500 bg-zinc-50/50",
+                      ? "text-zinc-900 dark:text-zinc-100 bg-zinc-100 dark:bg-zinc-800"
+                      : "text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800",
                   },
                 ].map((row, i) => (
                   <div
                     key={i}
-                    className="flex items-center justify-between px-4 py-3 bg-white"
+                    className="flex items-center justify-between px-4 py-3 bg-white dark:bg-neutral-900/50 border-b last:border-0 border-zinc-50 dark:border-neutral-800"
                   >
-                    <span className="text-[11px] font-semibold text-zinc-500">
+                    <span className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-400">
                       {row.label}
                     </span>
                     <span
@@ -317,17 +319,17 @@ export default function GamificationOverview() {
                   <Link
                     key={i}
                     href={link.href}
-                    className="flex items-center justify-between p-4 rounded-xl border border-zinc-100 bg-white hover:bg-zinc-50 hover:border-zinc-200 transition-all group"
+                    className="flex items-center justify-between p-4 rounded-xl border border-zinc-100 dark:border-neutral-800 bg-white dark:bg-neutral-900/50 hover:bg-zinc-50 dark:hover:bg-neutral-900 hover:border-zinc-200 dark:hover:border-neutral-700 transition-all group"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-zinc-50 group-hover:bg-indigo-50 transition-colors">
-                        <link.icon className="h-4 w-4 text-zinc-400 group-hover:text-indigo-600" />
+                      <div className="p-2 rounded-lg bg-zinc-50 dark:bg-neutral-950 group-hover:bg-zinc-100 dark:group-hover:bg-neutral-800 transition-colors">
+                        <link.icon className="h-4 w-4 text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-100" />
                       </div>
-                      <span className="text-[13px] font-semibold text-zinc-700">
+                      <span className="text-[13px] font-semibold text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-900 dark:group-hover:text-zinc-100 transition-colors">
                         {link.label}
                       </span>
                     </div>
-                    <ChevronRight className="h-4 w-4 text-zinc-300 group-hover:text-zinc-400 transition-colors" />
+                    <ChevronRight className="h-4 w-4 text-zinc-300 dark:text-zinc-600 group-hover:text-zinc-900 dark:group-hover:text-zinc-100 transition-colors" />
                   </Link>
                 ))}
               </div>

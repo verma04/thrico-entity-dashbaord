@@ -134,7 +134,7 @@ export function RankList({
             checked={rank.isActive}
             onCheckedChange={() => handleToggle(rank.id)}
             disabled={toggling}
-            className="scale-90 data-[state=checked]:bg-emerald-500"
+            className="scale-90 data-[state=checked]:bg-zinc-900 dark:data-[state=checked]:bg-zinc-100"
           />
           <AdminStatusBadge status={rank.isActive ? "APPROVED" : "PENDING"}>
             {rank.isActive ? "Unlocked" : "Hidden"}

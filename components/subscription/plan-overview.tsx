@@ -279,7 +279,7 @@ const PlanOverview = () => {
         planOverview.subscriptionType === "paid" &&
         planOverview?.billingCycle === "monthly" && (
           <div className="border-t border-border/50 px-5 py-4">
-            <div className="flex items-center justify-between gap-4 px-4 py-3.5 rounded-lg bg-slate-900 dark:bg-muted text-white dark:text-foreground dark:text-foreground">
+            <div className="flex items-center justify-between gap-4 px-4 py-3.5 rounded-lg bg-slate-900 dark:bg-muted text-white dark:text-foreground">
               <div className="flex items-center gap-3">
                 <div className="h-7 w-7 rounded-md bg-card/10 dark:bg-slate-900/10 flex items-center justify-center shrink-0">
                   <Sparkles className="h-3.5 w-3.5 text-white dark:text-foreground" />
@@ -288,7 +288,7 @@ const PlanOverview = () => {
                   <p className="text-[13px] font-semibold leading-none">
                     Save 20% with annual billing
                   </p>
-                  <p className="text-[11px] text-muted-foreground mt-1">
+                  <p className="text-[11px] text-slate-300 dark:text-muted-foreground mt-1">
                     Switch to yearly and reduce your total cost
                   </p>
                 </div>

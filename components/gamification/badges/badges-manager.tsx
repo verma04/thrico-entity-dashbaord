@@ -108,9 +108,9 @@ export function BadgesManager() {
         </div>
 
         <div className="px-6">
-          <div className="flex items-start gap-4 p-4 rounded-2xl bg-indigo-50/30 border border-indigo-100/50 mb-6 font-medium text-indigo-700/80">
-            <div className="h-8 w-8 rounded-full bg-white flex items-center justify-center shadow-sm shrink-0 border border-indigo-100">
-              <Info className="h-4 w-4 text-indigo-500" />
+          <div className="flex items-start gap-4 p-4 rounded-2xl bg-zinc-50/50 dark:bg-neutral-900/50 border border-zinc-200 dark:border-neutral-800 mb-6 font-medium text-zinc-700 dark:text-zinc-300">
+            <div className="h-8 w-8 rounded-full bg-white dark:bg-neutral-900 flex items-center justify-center shadow-sm shrink-0 border border-zinc-200 dark:border-neutral-800">
+              <Info className="h-4 w-4 text-zinc-500 dark:text-zinc-400" />
             </div>
             <p className="text-[13px] leading-relaxed">
               Badges are permanent records once issued to members. To stop

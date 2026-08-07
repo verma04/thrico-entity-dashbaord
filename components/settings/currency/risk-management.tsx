@@ -88,13 +88,13 @@ export function RiskManagement() {
   return (
     <div className="max-w-2xl space-y-6">
       {/* Info Banner */}
-      <div className="flex items-start gap-3 p-4 rounded-lg bg-amber-50/60 border border-amber-100">
-        <Info className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+      <div className="flex items-start gap-3 p-4 rounded-lg bg-zinc-50/50 dark:bg-neutral-900/50 border border-zinc-200 dark:border-neutral-800 text-zinc-700 dark:text-zinc-300">
+        <Info className="h-4 w-4 text-zinc-500 dark:text-zinc-400 shrink-0 mt-0.5" />
         <div className="space-y-1">
-          <p className="text-xs font-semibold text-amber-900">
+          <p className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
             How risk controls work
           </p>
-          <p className="text-xs text-amber-800/80 leading-relaxed">
+          <p className="text-xs leading-relaxed">
             These caps control how much {currencyName} can be minted through TC
             conversions. Setting a <strong>Global Limit</strong> acts as an
             emergency brake — once hit, no more {currencyName} can be generated
@@ -106,8 +106,8 @@ export function RiskManagement() {
       {/* Guardrails Card */}
       <div className="rounded-xl border border-border bg-card p-5 space-y-5">
         <div className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg bg-rose-50 flex items-center justify-center">
-            <ShieldAlert className="h-4 w-4 text-rose-600" />
+          <div className="h-8 w-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center">
+            <ShieldAlert className="h-4 w-4 text-zinc-900 dark:text-zinc-100" />
           </div>
           <div>
             <p className="text-sm font-semibold text-foreground">

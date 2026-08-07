@@ -61,14 +61,14 @@ export function InterestDialog({
               htmlFor="interest-title"
               className="text-sm font-semibold text-foreground"
             >
-              Interest Name <span className="text-rose-500">*</span>
+              Interest Name <span className="text-zinc-500">*</span>
             </Label>
             <Input
               id="interest-title"
               placeholder="e.g., Photography, Travel, Gardening"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="rounded-xl border-border focus-visible:ring-rose-500/20"
+              className="rounded-xl border-border focus-visible:ring-zinc-500/20"
               onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
             />
           </div>
@@ -85,7 +85,7 @@ export function InterestDialog({
           <Button
             onClick={handleSubmit}
             disabled={!title.trim() || isLoading}
-            className="rounded-lg font-semibold bg-indigo-600 hover:bg-indigo-700 text-white gap-2"
+            className="rounded-lg font-semibold bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-zinc-200 dark:text-zinc-900 text-white gap-2"
           >
             {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
             {editingInterest ? "Update" : "Save Interest"}

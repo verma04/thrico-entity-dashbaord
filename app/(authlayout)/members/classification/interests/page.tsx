@@ -240,7 +240,7 @@ export default function InterestsPage() {
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
-              className="bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-semibold gap-2"
+              className="bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-zinc-200 dark:text-zinc-900 text-white rounded-lg font-semibold gap-2"
               onClick={(e) => {
                 e.preventDefault();
                 handleDelete();

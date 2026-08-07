@@ -57,7 +57,13 @@ function TabButton({
       {isActive && !item.locked && (
         <svg width="0" height="0" className="absolute">
           <defs>
-            <linearGradient id="tab-active-gradient" x1="0%" y1="100%" x2="100%" y2="0%">
+            <linearGradient
+              id="tab-active-gradient"
+              x1="0%"
+              y1="100%"
+              x2="100%"
+              y2="0%"
+            >
               <stop stopColor="#ff5733" offset="0%" />
               <stop stopColor="#0967ff" offset="50%" />
               <stop stopColor="#0967ff" offset="100%" />
@@ -132,7 +138,7 @@ function MenuTabs({
   onClose: () => void;
 }) {
   return (
-    <nav className="sticky top-0 z-10 bg-white backdrop-blur-xl   border-b border-border/50">
+    <nav className="sticky top-0 z-10 bg-white dark:bg-background/90 backdrop-blur-xl border-b border-border/50">
       <div className={cn("px-6 relative", !fullWidth && "max-w-7xl mx-auto")}>
         <div className="flex h-14 items-center gap-1 overflow-x-auto no-scrollbar">
           {sortedSectionNames.map((sectionName, sIdx) => (
@@ -326,7 +332,7 @@ const MenuItemsLayout = ({
   return (
     <div
       className={cn(
-        "bg-background border-t-1 text-foreground flex flex-col w-full mt-2  bg-[#f9f9f9] dark:border-neutral-800",
+        "bg-background border-t-1 text-foreground flex flex-col w-full mt-2 bg-[#f9f9f9] dark:bg-background dark:border-neutral-800",
         fixed
           ? "fixed inset-0 z-20 bg-background h-screen w-screen overflow-hidden"
           : fullHeight

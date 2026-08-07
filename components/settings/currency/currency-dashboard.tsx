@@ -62,16 +62,16 @@ export function CurrencyDashboard({
       value: isLoading ? "—" : formatNumber(stats?.redemptionVolume || 0),
       trend: -2,
       icon: CreditCard,
-      color: "text-indigo-600",
-      bg: "bg-indigo-50",
+      color: "text-zinc-900 dark:text-zinc-100",
+      bg: "bg-zinc-100 dark:bg-zinc-800",
     },
     {
       title: "Active Users",
       value: isLoading ? "—" : formatNumber(stats?.activeUsers || 0),
       trend: 8,
       icon: Activity,
-      color: "text-emerald-600",
-      bg: "bg-emerald-50",
+      color: "text-zinc-900 dark:text-zinc-100",
+      bg: "bg-zinc-100 dark:bg-zinc-800",
     },
   ];
 
@@ -114,28 +114,28 @@ export function CurrencyDashboard({
                     >
                       <stop
                         offset="5%"
-                        stopColor="#6366f1"
+                        stopColor="#71717a"
                         stopOpacity={0.08}
                       />
-                      <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                      <stop offset="95%" stopColor="#71717a" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid
                     strokeDasharray="3 3"
                     vertical={false}
-                    stroke="#f1f5f9"
+                    stroke="#e4e4e7"
                   />
                   <XAxis
                     dataKey="name"
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fontSize: 10, fontWeight: 600, fill: "#94a3b8" }}
+                    tick={{ fontSize: 10, fontWeight: 600, fill: "#a1a1aa" }}
                     dy={10}
                   />
                   <YAxis
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fontSize: 10, fontWeight: 600, fill: "#94a3b8" }}
+                    tick={{ fontSize: 10, fontWeight: 600, fill: "#a1a1aa" }}
                     tickFormatter={formatNumber}
                   />
                   <Tooltip
@@ -157,7 +157,7 @@ export function CurrencyDashboard({
                   <Area
                     type="monotone"
                     dataKey="amount"
-                    stroke="#6366f1"
+                    stroke="#52525b"
                     strokeWidth={3}
                     fillOpacity={1}
                     fill="url(#colorAmount)"
@@ -214,7 +214,7 @@ export function CurrencyDashboard({
                 </div>
                 <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden border border-border">
                   <div
-                    className="h-full bg-indigo-500 rounded-full transition-all duration-1000"
+                    className="h-full bg-zinc-700 dark:bg-zinc-300 rounded-full transition-all duration-1000"
                     style={{ width: `${config?.maxTcPercentage || 30}%` }}
                   />
                 </div>

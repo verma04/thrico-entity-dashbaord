@@ -15,22 +15,22 @@ export function StatsCards({ ranks }: StatsCardsProps) {
       label: "Total Ranks",
       value: totalRanks,
       icon: Layers,
-      accent: "text-orange-600",
-      bg: "bg-orange-50",
+      accent: "text-zinc-900 dark:text-zinc-100",
+      bg: "bg-zinc-100 dark:bg-zinc-800",
     },
     {
       label: "Active Ranks",
       value: activeRanks,
       icon: CheckCircle2,
-      accent: "text-emerald-600",
-      bg: "bg-emerald-50",
+      accent: "text-zinc-900 dark:text-zinc-100",
+      bg: "bg-zinc-100 dark:bg-zinc-800",
     },
     {
       label: "Status",
       value: totalRanks > 0 ? "Configured" : "Not Set Up",
       icon: Trophy,
-      accent: "text-amber-600",
-      bg: "bg-amber-50",
+      accent: "text-zinc-900 dark:text-zinc-100",
+      bg: "bg-zinc-100 dark:bg-zinc-800",
     },
   ];
 

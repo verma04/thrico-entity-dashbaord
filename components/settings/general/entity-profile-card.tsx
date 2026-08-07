@@ -134,7 +134,7 @@ export const EntityProfileCard = ({
                   {name}
                 </h3>
                 <div className="flex items-center gap-2 text-muted-foreground font-bold text-sm tracking-wide">
-                  <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
+                  <span className="w-2 h-2 rounded-full bg-zinc-800 dark:bg-zinc-200 animate-pulse" />
                   Active Community Workspace
                 </div>
               </div>

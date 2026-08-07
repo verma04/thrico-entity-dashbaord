@@ -300,7 +300,7 @@ export function ChildSidebarContainer({
         isSwitching={isSwitching}
         handleSwitch={handleSwitch}
       />
-      <div className="flex flex-1 relative w-full bg-white group/sidebar-wrapper">
+      <div className="flex flex-1 relative w-full bg-white dark:bg-neutral-950 group/sidebar-wrapper">
         <ParentSidebar />
         {/* ── SIDEBAR ── */}
         {activeTab !== "mobile-app" && (

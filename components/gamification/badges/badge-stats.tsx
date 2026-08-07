@@ -14,22 +14,22 @@ export function BadgeStats({ badges }: BadgeStatsProps) {
       label: "Total Badges",
       value: badges.length,
       icon: Award,
-      accent: "text-violet-600",
-      bg: "bg-violet-50",
+      accent: "text-zinc-900 dark:text-zinc-100",
+      bg: "bg-zinc-100 dark:bg-zinc-800",
     },
     {
       label: "Action-Based",
       value: actionBadges.length,
       icon: Star,
-      accent: "text-amber-600",
-      bg: "bg-amber-50",
+      accent: "text-zinc-900 dark:text-zinc-100",
+      bg: "bg-zinc-100 dark:bg-zinc-800",
     },
     {
       label: "Points-Based",
       value: pointsBadges.length,
       icon: Trophy,
-      accent: "text-orange-600",
-      bg: "bg-orange-50",
+      accent: "text-zinc-900 dark:text-zinc-100",
+      bg: "bg-zinc-100 dark:bg-zinc-800",
     },
   ];
 

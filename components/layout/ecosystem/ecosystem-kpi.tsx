@@ -195,7 +195,7 @@ export function EcosystemKPI({
 
       {/* Subtle sparkline in the background at bottom */}
       <div className="absolute bottom-0 left-0 right-0 h-8 pointer-events-none opacity-30 mix-blend-multiply dark:mix-blend-lighten">
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
           <AreaChart
             data={chartData}
             margin={{ top: 0, right: 0, left: 0, bottom: 0 }}

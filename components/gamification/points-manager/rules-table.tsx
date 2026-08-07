@@ -54,10 +54,10 @@ export function RulesTable({
         const moduleInfo = getModuleInfo(rule.module);
         return (
           <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center shrink-0">
+            <div className="h-8 w-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center shrink-0">
               {renderModuleIcon(
                 moduleInfo?.icon || "Settings",
-                "h-4 w-4 text-indigo-600",
+                "h-4 w-4 text-zinc-900 dark:text-zinc-100",
               )}
             </div>
             <div className="flex flex-col">
@@ -77,7 +77,7 @@ export function RulesTable({
       header: "Trigger Event",
       cell: (rule: PointRule) => (
         <div className="flex items-center gap-2">
-           <Zap className="h-3.5 w-3.5 text-amber-500 opacity-70" />
+           <Zap className="h-3.5 w-3.5 text-zinc-500 dark:text-zinc-400 opacity-70" />
            <span className="text-sm font-medium text-foreground capitalize">
              {rule.action.replace(/_/g, " ").toLowerCase()}
            </span>
@@ -89,7 +89,7 @@ export function RulesTable({
       header: "Yield",
       cell: (rule: PointRule) => (
         <div className="flex items-center gap-1.5">
-           <span className="font-mono text-[13px] font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-100 shadow-sm">
+           <span className="font-mono text-[13px] font-bold text-zinc-900 dark:text-zinc-100 bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-md border border-zinc-200 dark:border-zinc-700 shadow-sm">
              +{rule.points.toLocaleString()}
            </span>
            <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">PTS</span>
@@ -141,7 +141,7 @@ export function RulesTable({
             checked={rule.isActive}
             onCheckedChange={() => handleToggleActive(rule.id)}
             disabled={toggling}
-            className="scale-90 data-[state=checked]:bg-emerald-500"
+            className="scale-90 data-[state=checked]:bg-zinc-900 dark:data-[state=checked]:bg-zinc-100"
           />
           <AdminStatusBadge status={rule.isActive ? "APPROVED" : "PENDING"}>
              {rule.isActive ? "Active" : "Disabled"}

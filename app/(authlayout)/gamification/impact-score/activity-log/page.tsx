@@ -11,7 +11,7 @@ import {
   ShieldAlert,
   Award,
 } from "lucide-react";
-import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { EcosystemCard } from "@/components/layout/ecosystem/ecosystem-analytics";
@@ -71,7 +71,11 @@ export default function ImpactActivityLogPage() {
         description="Real-time stream of points awarded and deducted by the engine."
         badgeText="Monitoring"
         icon={Activity}
-        breadcrumbs={[{ label: "Gamification", href: "/gamification" }, { label: "Impact Score", href: "/impact-score" }, { label: "Activity Log" }]}
+        breadcrumbs={[
+          { label: "Gamification", href: "/gamification" },
+          { label: "Impact Score", href: "/impact-score" },
+          { label: "Activity Log" },
+        ]}
       />
       <EcosystemContainer className="p-6 lg:p-8">
         <div className="max-w-5xl mx-auto space-y-6">
@@ -81,12 +85,12 @@ export default function ImpactActivityLogPage() {
             icon={Zap}
           >
             <div className="mt-6 flex flex-col space-y-6">
-              <div className="flex items-center gap-4 bg-zinc-50/50 p-2 rounded-lg border border-zinc-100/60">
+              <div className="flex items-center gap-4 bg-zinc-50/50 dark:bg-neutral-900/50 p-2 rounded-lg border border-zinc-100/60 dark:border-neutral-800">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
                   <Input
                     placeholder="Search by user name or reason..."
-                    className="pl-9 bg-white border-zinc-200 shadow-sm w-full transition-all focus-visible:ring-brand-500"
+                    className="pl-9 bg-white dark:bg-neutral-900 border-zinc-200 dark:border-neutral-800 shadow-sm w-full transition-all focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
@@ -128,11 +132,11 @@ export default function ImpactActivityLogPage() {
                       return (
                         <div
                           key={log?.id}
-                          className="group flex items-start gap-4 p-4 rounded-xl border border-zinc-100 bg-white hover:border-zinc-200 hover:shadow-sm transition-all duration-200"
+                          className="group flex items-start gap-4 p-4 rounded-xl border border-zinc-100 dark:border-neutral-800 bg-white dark:bg-neutral-900 hover:border-zinc-300 dark:hover:border-neutral-700 hover:shadow-sm transition-all duration-200"
                         >
-                          <Avatar className="h-10 w-10 border-2 border-white shadow-sm ring-1 ring-zinc-100">
+                          <Avatar className="h-10 w-10 border-2 border-white dark:border-neutral-950 shadow-sm ring-1 ring-zinc-100 dark:ring-neutral-800">
                             <AvatarImage src={log?.user?.avatarUrl} />
-                            <AvatarFallback className="bg-brand-50 text-brand-700 font-semibold text-xs">
+                            <AvatarFallback className="bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 font-semibold text-xs">
                               {log?.user?.firstName?.charAt(0) || ""}
                               {log?.user?.lastName?.charAt(0) || ""}
                             </AvatarFallback>
@@ -140,7 +144,7 @@ export default function ImpactActivityLogPage() {
 
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between gap-4 mb-1">
-                              <h4 className="text-sm font-semibold text-zinc-900 truncate">
+                              <h4 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate">
                                 {log?.user?.firstName || "Unknown"}{" "}
                                 {log?.user?.lastName || "User"}
                               </h4>
@@ -155,28 +159,28 @@ export default function ImpactActivityLogPage() {
                               </div>
                             </div>
 
-                            <p className="text-sm text-zinc-600 line-clamp-2 leading-relaxed">
+                            <p className="text-sm text-zinc-600 dark:text-zinc-400 line-clamp-2 leading-relaxed">
                               {log?.changeReason || "Action performed"}
                             </p>
 
                             <div className="flex items-center gap-3 mt-3">
                               <Badge
                                 variant="outline"
-                                className="bg-zinc-50 text-zinc-600 border-zinc-200 text-[10px] uppercase tracking-wider font-semibold py-0.5 px-2"
+                                className="bg-zinc-50 dark:bg-neutral-800 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-neutral-700 text-[10px] uppercase tracking-wider font-semibold py-0.5 px-2"
                               >
                                 ID: {log?.id.substring(0, 8)}
                               </Badge>
                             </div>
                           </div>
 
-                          <div className="flex flex-col items-end gap-1.5 shrink-0 pl-4 border-l border-zinc-100">
+                          <div className="flex flex-col items-end gap-1.5 shrink-0 pl-4 border-l border-zinc-100 dark:border-neutral-800">
                             <div
                               className={`flex items-center gap-1.5 font-bold text-sm px-2.5 py-1 rounded-full ${
                                 isPositive
-                                  ? "bg-emerald-50 text-emerald-600"
+                                  ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
                                   : isNegative
-                                    ? "bg-rose-50 text-rose-600"
-                                    : "bg-zinc-50 text-zinc-600"
+                                    ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                                    : "bg-zinc-50 dark:bg-zinc-800/50 text-zinc-600 dark:text-zinc-400"
                               }`}
                             >
                               {isPositive ? (

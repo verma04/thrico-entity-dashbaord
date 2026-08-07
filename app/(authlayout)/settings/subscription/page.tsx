@@ -44,10 +44,7 @@ const Page = () => {
         <Trail storageStats={storageStats} storageSummary={storageSummary} />
       )}
       {subscription?.subscriptionType === "paid" && (
-        <PaidPlan
-          storageStats={storageStats}
-          storageSummary={storageSummary}
-        />
+        <PaidPlan storageStats={storageStats} storageSummary={storageSummary} />
       )}
     </>
   );

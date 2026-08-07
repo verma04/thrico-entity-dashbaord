@@ -150,7 +150,7 @@ export function InterestsListView({
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3
-                    className="font-semibold text-foreground truncate group-hover:text-rose-600 transition-colors"
+                    className="font-semibold text-foreground truncate group-hover:text-zinc-600 transition-colors"
                     title={interest.title}
                   >
                     {interest.title}
@@ -169,7 +169,7 @@ export function InterestsListView({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 text-muted-foreground hover:text-indigo-600 hover:bg-indigo-50 rounded-lg"
+                  className="h-8 w-8 text-muted-foreground hover:text-zinc-600 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg"
                   onClick={(e) => {
                     e.stopPropagation();
                     onEdit(interest);
@@ -180,7 +180,7 @@ export function InterestsListView({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 text-muted-foreground hover:text-rose-600 hover:bg-rose-50 rounded-lg"
+                  className="h-8 w-8 text-muted-foreground hover:text-zinc-600 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg"
                   onClick={(e) => {
                     e.stopPropagation();
                     onDelete(interest);

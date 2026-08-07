@@ -47,9 +47,9 @@ const GRAPH_STYLESHEET: any[] = [
   {
     selector: "node[type='interest']",
     style: {
-      "background-color": "#fce7f3",
+      "background-color": "#f4f4f5",
       label: "data(label)",
-      color: "#9d174d",
+      color: "#27272a",
       "text-valign": "center",
       "text-halign": "center",
       "font-size": "11px",
@@ -58,7 +58,7 @@ const GRAPH_STYLESHEET: any[] = [
       height: "data(size)",
       shape: "round-rectangle",
       "border-width": 1.5,
-      "border-color": "#fbcfe8",
+      "border-color": "#e4e4e7",
       "text-outline-width": 0,
       "overlay-padding": 8,
       "text-max-width": "80px",
@@ -69,8 +69,8 @@ const GRAPH_STYLESHEET: any[] = [
     selector: "edge",
     style: {
       width: 1,
-      "line-color": "#e2e8f0",
-      "target-arrow-color": "#e2e8f0",
+      "line-color": "#e4e4e7",
+      "target-arrow-color": "#e4e4e7",
       "target-arrow-shape": "triangle",
       "curve-style": "bezier",
       opacity: 0.8,
@@ -97,8 +97,8 @@ const GRAPH_STYLESHEET: any[] = [
     selector: "edge.highlighted",
     style: {
       width: 1.5,
-      "line-color": "#94a3b8",
-      "target-arrow-color": "#94a3b8",
+      "line-color": "#a1a1aa",
+      "target-arrow-color": "#a1a1aa",
       opacity: 1,
       "z-index": 999,
     } as any,
@@ -395,14 +395,14 @@ export function InterestsGraphView() {
   const legend = (
     <>
       <div className="flex items-center gap-2">
-        <div className="h-3 w-3 rounded-full bg-indigo-100 border border-indigo-200" />
-        <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">
+        <div className="h-3 w-3 rounded-full bg-zinc-200 border border-zinc-300" />
+        <span className="text-[10px] font-medium text-zinc-500 uppercase tracking-wider">
           Users
         </span>
       </div>
       <div className="flex items-center gap-2">
-        <div className="h-3 w-3 rounded bg-pink-100 border border-pink-200" />
-        <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">
+        <div className="h-3 w-3 rounded bg-zinc-300 border border-zinc-400" />
+        <span className="text-[10px] font-medium text-zinc-500 uppercase tracking-wider">
           Interests
         </span>
       </div>

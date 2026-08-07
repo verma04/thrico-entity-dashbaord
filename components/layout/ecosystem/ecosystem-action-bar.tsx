@@ -29,7 +29,7 @@ export function EcosystemActionBar({
     <div
       className={cn(
         "relative flex flex-col sm:flex-row sm:items-center gap-2 w-full",
-        "p-3 bg-white ",
+        "p-3 bg-white dark:bg-transparent",
         shadow !== "none" && "shadow-sm",
         className,
       )}

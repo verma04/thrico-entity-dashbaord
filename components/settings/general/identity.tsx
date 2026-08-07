@@ -64,7 +64,7 @@ export default function Identity() {
             <InfoRow
               label="Protocol Status"
               value="Active / Synchronized"
-              valueClass="text-emerald-600"
+              valueClass="text-zinc-600 dark:text-zinc-400"
               dot="emerald"
             />
             <InfoRow
@@ -150,7 +150,7 @@ function InfoRow({
           <div
             className={cn(
               "w-1.5 h-1.5 rounded-full",
-              dot === "emerald" ? "bg-emerald-500" : "bg-zinc-400",
+              dot === "emerald" ? "bg-zinc-800 dark:bg-zinc-200" : "bg-zinc-400",
             )}
           />
         )}
@@ -159,7 +159,7 @@ function InfoRow({
             href={href}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[12.5px] font-medium text-emerald-600 hover:text-emerald-700 hover:underline flex items-center gap-1 transition-all"
+            className="text-[12.5px] font-medium text-zinc-600 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300 hover:underline flex items-center gap-1 transition-all"
           >
             {value}
             <ExternalLink size={11} strokeWidth={2.5} />
