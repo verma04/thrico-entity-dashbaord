@@ -101,6 +101,33 @@ export function BadgesManager() {
           </EcosystemActionBar>
         }
       />
+      <EcosystemActionBar shadow="sm" className="">
+        <EcosystemActionBar.Item grow className="max-w-sm">
+          <EcosystemActionBar.Search
+            value={search}
+            onChange={setSearch}
+            placeholder="Search badges..."
+          />
+        </EcosystemActionBar.Item>
+        <EcosystemActionBar.Group align="right">
+          <EcosystemActionBar.Item>
+            <EcosystemActionBar.Select
+              value={selectedModule}
+              onValueChange={(val) => setSelectedModule(val as any)}
+              options={[
+                { value: "ALL", label: "All Modules", icon: LayoutGrid },
+                ...subscriptionModules.map((m) => ({
+                  value: m.id,
+                  label: m.name,
+                  icon:
+                    (require("lucide-react") as any)[m.icon] ||
+                    require("lucide-react").Settings,
+                })),
+              ]}
+            />
+          </EcosystemActionBar.Item>
+        </EcosystemActionBar.Group>
+      </EcosystemActionBar>
 
       <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0 space-y-6">
         <div className="px-6 py-4">
@@ -117,44 +144,6 @@ export function BadgesManager() {
               issuing a badge without affecting existing recipients, safely
               disable it via the status toggle.
             </p>
-          </div>
-
-          <div className="mb-4 flex items-center gap-4">
-            <div className="flex-1 max-w-sm">
-              <EcosystemActionBar.Search
-                value={search}
-                onChange={setSearch}
-                placeholder="Search badges..."
-              />
-            </div>
-            <Select
-              value={selectedModule}
-              onValueChange={(val) => setSelectedModule(val as any)}
-            >
-              <SelectTrigger className="w-[180px] h-10 text-sm rounded-xl border-border bg-card shadow-sm">
-                <div className="flex items-center gap-2">
-                  <LayoutGrid className="h-3.5 w-3.5 text-muted-foreground" />
-                  <SelectValue placeholder="All Modules" />
-                </div>
-              </SelectTrigger>
-              <SelectContent className="rounded-xl p-1 shadow-lg border-border">
-                <SelectItem value="ALL" className="rounded-lg py-2">
-                  All Modules
-                </SelectItem>
-                {subscriptionModules.map((mod) => (
-                  <SelectItem
-                    key={mod.id}
-                    value={mod.id}
-                    className="rounded-lg py-2"
-                  >
-                    <div className="flex items-center gap-2">
-                      {renderModuleIcon(mod.icon, "h-3.5 w-3.5")}
-                      {mod.name}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
 
           <BadgeList

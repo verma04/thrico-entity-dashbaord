@@ -37,6 +37,15 @@ export function RanksManager() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingRank, setEditingRank] = useState<Rank | null>(null);
 
+  const [search, setSearch] = useState("");
+
+  const filteredRanks = React.useMemo(() => {
+    if (!search) return ranks;
+    return ranks.filter((r: Rank) =>
+      r.name.toLowerCase().includes(search.toLowerCase()),
+    );
+  }, [ranks, search]);
+
   const handleOpenDialog = (rank?: Rank) => {
     setEditingRank(rank || null);
     setIsDialogOpen(true);
@@ -58,7 +67,7 @@ export function RanksManager() {
   };
 
   const handleMoveRank = async (index: number, direction: "up" | "down") => {
-    const sortedRanks = [...ranks].sort((a, b) => a.order - b.order);
+    const sortedRanks = [...filteredRanks].sort((a, b) => a.order - b.order);
     const targetIndex = direction === "up" ? index - 1 : index + 1;
 
     if (targetIndex < 0 || targetIndex >= sortedRanks.length) return;
@@ -120,8 +129,18 @@ export function RanksManager() {
             </p>
           </div>
 
+          <EcosystemActionBar shadow="sm" className="">
+            <EcosystemActionBar.Item grow className="max-w-sm">
+              <EcosystemActionBar.Search
+                value={search}
+                onChange={setSearch}
+                placeholder="Search ranks..."
+              />
+            </EcosystemActionBar.Item>
+          </EcosystemActionBar>
+
           <RankList
-            ranks={ranks}
+            ranks={filteredRanks}
             onMoveUp={(index) => handleMoveRank(index, "up")}
             onMoveDown={(index) => handleMoveRank(index, "down")}
             onEdit={handleOpenDialog}

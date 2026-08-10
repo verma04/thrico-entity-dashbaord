@@ -60,14 +60,6 @@ export function DashboardGrowthChart() {
     <Card className="border-border/60 bg-gradient-to-b from-background to-muted/20 shadow-sm relative h-full flex flex-col">
       <CardHeader className="flex flex-row items-start justify-between pb-2 border-b border-border/40 mb-4">
         <div className="space-y-1 w-full sm:w-auto min-w-[200px]">
-          <CardTitle className="text-emerald-500 tracking-wider flex items-center gap-2 text-base">
-            <div className="p-1.5 rounded-md bg-emerald-500/10">
-              <Users className="h-4 w-4 text-emerald-500" />
-            </div>
-            Community Growth
-          </CardTitle>
-          <CardDescription>New members joining over time</CardDescription>
-
           {!loading && (
             <div className="mt-4 pt-2">
               <div className="flex items-baseline gap-2">

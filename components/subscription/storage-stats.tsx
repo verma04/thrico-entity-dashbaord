@@ -1,8 +1,7 @@
 "use client";
 
 import React from "react";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
+
 import { Button } from "@/components/ui/button";
 import { Database, HardDrive, FileText, PieChart } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -53,8 +52,10 @@ export const StorageStats = ({
 
   if (error) {
     return (
-      <AccessDeniedAlert 
-        message={error.message || "You do not have permission to view storage details."} 
+      <AccessDeniedAlert
+        message={
+          error.message || "You do not have permission to view storage details."
+        }
       />
     );
   }
@@ -185,8 +186,11 @@ export const StorageStats = ({
                     <div className="h-5 w-5 rounded bg-muted flex items-center justify-center shrink-0">
                       <PieChart className="h-2.5 w-2.5 text-muted-foreground" />
                     </div>
-                    <span className="text-[12px] font-medium text-foreground capitalize truncate">
+                    <span className="text-[12px] font-medium text-foreground uppercase truncate">
                       {stat.module.replace(/_/g, " ")}
+                    </span>
+                    <span className="text-[10px] font-medium text-muted-foreground bg-muted/50 border border-border/50 px-1.5 py-0.5 rounded-md whitespace-nowrap">
+                      {stat.fileCount} ({Math.round(modulePercent)}%)
                     </span>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">

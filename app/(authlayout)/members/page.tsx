@@ -1,60 +1,52 @@
 "use client";
 
 import React from "react";
-
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   Users,
-  UserCheck,
-  UserPlus,
-  TrendingUp,
-  Activity,
-  ShieldCheck,
-  Zap,
   RotateCcw,
-  AlertTriangle,
+  BarChart3,
 } from "lucide-react";
-import { ResponsiveContainer } from "@/components/ui/responsive-container";
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-} from "recharts";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
-import {
-  EcosystemKPI,
-  EcosystemCard,
-} from "@/components/layout/ecosystem/ecosystem-analytics";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import {
-  useGetMembersStats,
-  useGetGrowthStats,
-} from "@/graphql/actions/membership/membership-queries";
-import { TimeRange } from "@/graphql/actions/dashboard";
 import { subDays } from "date-fns";
 import { DateRange } from "react-day-picker";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
-import moment from "moment";
 import { withModulePermission } from "@/components/hoc/with-module-permission";
-import { useRouter } from "next/navigation";
 import { useCheckMemberSubscription } from "@/graphql/actions/membership/membership-queries";
 import { SubscriptionLimitBanner } from "@/components/members/users/subscription-alerts";
 import { DashboardSectionHeading } from "@/components/home/dashboard-section-heading";
+import {
+  useGetMemberKPIDashboard,
+  TimeRange,
+} from "@/graphql/actions/member-kpi-dashboard";
+
+// KPI Section components
+import { KPIPipelineNav } from "@/components/members/kpi-dashboard/kpi-pipeline-nav";
+import { KPINorthStar } from "@/components/members/kpi-dashboard/kpi-north-star";
+import { KPIMembershipHealth } from "@/components/members/kpi-dashboard/kpi-membership-health";
+import { KPIGrowthRetention } from "@/components/members/kpi-dashboard/kpi-growth-retention";
+import { KPIEngagement } from "@/components/members/kpi-dashboard/kpi-engagement";
+import { KPIAdvocacyGamification } from "@/components/members/kpi-dashboard/kpi-advocacy-gamification";
+import { KPIMonetisation } from "@/components/members/kpi-dashboard/kpi-monetisation";
+import { KPICommunityHealth } from "@/components/members/kpi-dashboard/kpi-community-health";
+
+const timeRangeMap: Record<string, TimeRange> = {
+  "24h": TimeRange.LAST_24_HOURS,
+  "7d": TimeRange.LAST_7_DAYS,
+  "30d": TimeRange.LAST_30_DAYS,
+  "90d": TimeRange.LAST_90_DAYS,
+};
+
 function MembersPage() {
-  const router = useRouter();
-  const [timeRange, setTimeRange] = React.useState<TimeRange>(
-    TimeRange.LAST_7_DAYS,
-  );
+  const [timeRange, setTimeRange] = React.useState("7d");
   const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
     from: subDays(new Date(), 7),
     to: new Date(),
   });
+  const [activeSection, setActiveSection] = React.useState("membership");
 
   const handleDateChange = (range: DateRange | undefined) => {
     setDateRange(range);
@@ -62,93 +54,53 @@ function MembersPage() {
     const diffDays = Math.round(
       (range.to.getTime() - range.from.getTime()) / (1000 * 60 * 60 * 24),
     );
-    if (diffDays <= 1) setTimeRange(TimeRange.LAST_24_HOURS);
-    else if (diffDays <= 7) setTimeRange(TimeRange.LAST_7_DAYS);
-    else if (diffDays <= 30) setTimeRange(TimeRange.LAST_30_DAYS);
-    else if (diffDays <= 90) setTimeRange(TimeRange.LAST_90_DAYS);
+    if (diffDays <= 1) setTimeRange("24h");
+    else if (diffDays <= 7) setTimeRange("7d");
+    else if (diffDays <= 30) setTimeRange("30d");
+    else setTimeRange("90d");
   };
 
-  const commonVariables = {
-    timeRange,
-    dateRange:
-      dateRange?.from && dateRange?.to
-        ? {
-            startDate: dateRange.from.toISOString(),
-            endDate: dateRange.to.toISOString(),
-          }
-        : undefined,
-  };
+  const formattedDateRange = React.useMemo(() => {
+    if (!dateRange?.from || !dateRange?.to) return undefined;
+    return {
+      startDate: dateRange.from.toISOString(),
+      endDate: dateRange.to.toISOString(),
+    };
+  }, [dateRange]);
 
-  const { data, loading, refetch } = useGetMembersStats(
-    commonVariables.timeRange,
-    commonVariables.dateRange,
+  const { data, loading, refetch } = useGetMemberKPIDashboard(
+    timeRangeMap[timeRange],
+    formattedDateRange,
   );
 
   const { data: subData } = useCheckMemberSubscription();
   const subscriptionInfo = subData?.checkMemberSubscription;
 
-  const { data: growthStatsData, loading: growthLoading } = useGetGrowthStats(
-    commonVariables.timeRange,
-    commonVariables.dateRange,
-    {
-      refetchQueries: [], // Optional
-    },
-  );
+  const kpis = data?.getCommunityKPIs;
 
-  const stats = data?.getMembersStats;
-  const growthData =
-    growthStatsData?.getGrowthStats?.data.map((d: any) => ({
-      name: moment(d.date).format("MMM"),
-      Members: d.count,
-    })) || [];
-
-  const kpis = [
-    {
-      title: "Total Members",
-      value: loading ? "..." : (stats?.totalMembers?.toLocaleString() ?? "0"),
-      trend: stats?.totalMembersChange ?? 0,
-      icon: Users,
-      color: "text-indigo-500",
-      bg: "bg-indigo-500/10",
-    },
-    {
-      title: "Active Users",
-      value: loading ? "..." : (stats?.activeMembers?.toLocaleString() ?? "0"),
-      trend: stats?.activeMembersChange ?? 0,
-      icon: UserCheck,
-      color: "text-emerald-500",
-      bg: "bg-emerald-500/10",
-    },
-    {
-      title: "New Joins",
-      value: loading
-        ? "..."
-        : (stats?.newMembersThisMonth?.toLocaleString() ?? "0"),
-      trend: stats?.newMembersChange ?? 0,
-      icon: UserPlus,
-      color: "text-violet-500",
-      bg: "bg-violet-500/10",
-    },
-    {
-      title: "Active Rate",
-      value: loading ? "..." : `${stats?.activeRate ?? 0}%`,
-      trend: stats?.activeRateChange ?? 0,
-      icon: Activity,
-      color: "text-amber-500",
-      bg: "bg-amber-500/10",
-    },
-  ];
+  // Build a flat record for easy access by key
+  const kpiData: Record<string, any> = React.useMemo(() => {
+    if (!kpis) return {};
+    return { ...kpis } as Record<string, any>;
+  }, [kpis]);
 
   const handleRefresh = async () => {
-    await Promise.all([refetch()]);
+    await refetch();
   };
+
+  const scrollToSection = (key: string) => {
+    setActiveSection(key);
+    const el = document.getElementById(`kpi-section-${key}`);
+    el?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   return (
-    <EcosystemWrapper anonymized-1="members-registry">
+    <EcosystemWrapper anonymized-1="members-kpi-dashboard">
       <EcosystemHeader
-        title="Member List"
-        badgeText="Directory"
-        description="View and manage all members in your community, track growth, and see activity levels."
-        icon={Users}
+        title="Community KPI Dashboard"
+        badgeText="Analytics"
+        description="Full-spectrum community health metrics — Acquire, Activate, Engage, Retain, Advocate, Monetize."
+        icon={BarChart3}
         breadcrumbs={[
           { label: "Members", href: "/members/all" },
           { label: "Dashboard" },
@@ -161,7 +113,6 @@ function MembersPage() {
               defaultValue="LAST_7_DAYS"
             />
             <div className="h-4 w-px bg-border mx-1" />
-
             <Button
               variant="outline"
               size="icon"
@@ -175,114 +126,82 @@ function MembersPage() {
         }
       />
 
-      <EcosystemContainer className="space-y-12 p-8 lg:p-12">
+      <EcosystemContainer className="space-y-10 p-6 lg:p-10">
         {/* Subscription Limit Warning Banner */}
         <SubscriptionLimitBanner subscriptionInfo={subscriptionInfo} />
 
-        <section className="space-y-4">
+        {/* Pipeline Navigation */}
+        <KPIPipelineNav
+          activeSection={activeSection}
+          onSectionClick={scrollToSection}
+        />
+
+        {/* ── North Star ── */}
+        <KPINorthStar
+          loading={loading}
+          value={kpis?.activeUsers?.value ?? 0}
+          change={kpis?.activeUsers?.change}
+          trend={kpis?.activeUsers?.trend}
+        />
+
+        {/* ── 1. Membership Health ── */}
+        <section id="kpi-section-membership" className="space-y-3 scroll-mt-24">
           <DashboardSectionHeading
-            title="Platform Traffic"
-            titleClassName="normal-case tracking-normal text-sm text-foreground"
+            title="Membership Health"
+            icon={<Users className="h-3.5 w-3.5 text-cyan-500" />}
+            description="Baseline membership vitals and activity rates"
           />
-          {/* KPI Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {kpis.map((kpi, i) => (
-              <EcosystemKPI key={i} {...kpi} trendLabel="Registry" />
-            ))}
-          </div>
+          <KPIMembershipHealth loading={loading} data={kpiData} />
         </section>
 
-        <section className="space-y-4 mt-8">
+        {/* ── 2. Growth & Retention ── */}
+        <section id="kpi-section-growth" className="space-y-3 scroll-mt-24">
           <DashboardSectionHeading
-            title="Growth Over Time"
-            titleClassName="normal-case tracking-normal text-sm text-foreground"
+            title="Growth & Retention"
+            icon={<BarChart3 className="h-3.5 w-3.5 text-blue-500" />}
+            description="Acquisition, activation milestones, and cohort retention"
           />
-          <div className="grid grid-cols-1 lg:grid-cols-1 gap-10">
-            <div className="lg:col-span-1">
-              <div className="h-[350px] w-full p-5 rounded-[20px] bg-muted/30 border border-transparent">
-                {growthLoading ? (
-                  <div className="flex items-center justify-center h-full">
-                    <Skeleton className="h-[300px] w-full rounded-xl" />
-                  </div>
-                ) : growthData.length === 0 ? (
-                  <div className="flex items-center justify-center h-full text-muted-foreground font-black text-[10px] uppercase tracking-widest italic bg-muted/30 rounded-xl border border-dashed border-border">
-                    No growth data available for this period
-                  </div>
-                ) : (
-                  <ResponsiveContainer>
-                    <AreaChart data={growthData}>
-                      <defs>
-                        <linearGradient
-                          id="colorMembers"
-                          x1="0"
-                          y1="0"
-                          x2="0"
-                          y2="1"
-                        >
-                          <stop
-                            offset="5%"
-                            stopColor="#6366f1"
-                            stopOpacity={0.1}
-                          />
-                          <stop
-                            offset="95%"
-                            stopColor="#6366f1"
-                            stopOpacity={0}
-                          />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid
-                        strokeDasharray="3 3"
-                        vertical={false}
-                        stroke="#f1f5f9"
-                      />
-                      <XAxis
-                        dataKey="name"
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{
-                          fontSize: 10,
-                          fontWeight: 900,
-                          fill: "#94a3b8",
-                        }}
-                        dy={15}
-                      />
-                      <YAxis
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{
-                          fontSize: 10,
-                          fontWeight: 900,
-                          fill: "#94a3b8",
-                        }}
-                      />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: "#0f172a",
-                          border: "none",
-                          borderRadius: "16px",
-                        }}
-                        itemStyle={{
-                          color: "#fff",
-                          fontWeight: 900,
-                          fontSize: "10px",
-                        }}
-                        labelStyle={{ display: "none" }}
-                      />
-                      <Area
-                        type="monotone"
-                        dataKey="members"
-                        stroke="#6366f1"
-                        strokeWidth={4}
-                        fillOpacity={1}
-                        fill="url(#colorMembers)"
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                )}
-              </div>
-            </div>
-          </div>
+          <KPIGrowthRetention loading={loading} data={kpiData} />
+        </section>
+
+        {/* ── 3. Engagement ── */}
+        <section id="kpi-section-engagement" className="space-y-3 scroll-mt-24">
+          <DashboardSectionHeading
+            title="Engagement"
+            icon={<BarChart3 className="h-3.5 w-3.5 text-violet-500" />}
+            description="Depth of participation, content quality, and stickiness"
+          />
+          <KPIEngagement loading={loading} data={kpiData} />
+        </section>
+
+        {/* ── 4. Community Health ── */}
+        <section id="kpi-section-health" className="space-y-3 scroll-mt-24">
+          <DashboardSectionHeading
+            title="Community Health"
+            icon={<BarChart3 className="h-3.5 w-3.5 text-emerald-500" />}
+            description="Overall community wellbeing, satisfaction, and churn signals"
+          />
+          <KPICommunityHealth loading={loading} data={kpiData} />
+        </section>
+
+        {/* ── 5. Advocacy & Gamification ── */}
+        <section id="kpi-section-advocacy" className="space-y-3 scroll-mt-24">
+          <DashboardSectionHeading
+            title="Advocacy & Gamification"
+            icon={<BarChart3 className="h-3.5 w-3.5 text-pink-500" />}
+            description="Superfans, gamification rewards, and advocacy scoring"
+          />
+          <KPIAdvocacyGamification loading={loading} data={kpiData} />
+        </section>
+
+        {/* ── 6. Monetisation ── */}
+        <section id="kpi-section-monetisation" className="space-y-3 scroll-mt-24">
+          <DashboardSectionHeading
+            title="Monetisation"
+            icon={<BarChart3 className="h-3.5 w-3.5 text-rose-500" />}
+            description="Connecting community engagement to economic value"
+          />
+          <KPIMonetisation loading={loading} data={kpiData} />
         </section>
       </EcosystemContainer>
     </EcosystemWrapper>

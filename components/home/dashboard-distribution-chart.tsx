@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
-import { Monitor, Smartphone, LayoutGrid } from "lucide-react"
+import * as React from "react";
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import { Monitor, Smartphone, LayoutGrid } from "lucide-react";
 
 import {
   Card,
@@ -10,7 +10,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 
 import {
   ChartContainer,
@@ -19,20 +19,24 @@ import {
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
-} from "@/components/ui/chart"
+} from "@/components/ui/chart";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { ChartTimeFilter, ChartTimeFilterValue, getChartTimeFilter } from "./chart-time-filter"
+} from "@/components/ui/select";
+import {
+  ChartTimeFilter,
+  ChartTimeFilterValue,
+  getChartTimeFilter,
+} from "./chart-time-filter";
 
 import {
   useGetDeviceDistribution,
   TimeRange,
-} from "@/graphql/actions/dashboard"
+} from "@/graphql/actions/dashboard";
 
 const chartConfig = {
   visitors: {
@@ -53,14 +57,19 @@ const chartConfig = {
     color: "#10b981", // Emerald
     icon: Smartphone,
   },
-} satisfies ChartConfig
+} satisfies ChartConfig;
 
 export function DashboardDistributionChart() {
-  const [filterKey, setFilterKey] = React.useState("90d")
-  const [filterValue, setFilterValue] = React.useState<ChartTimeFilterValue>(getChartTimeFilter("90d"))
+  const [filterKey, setFilterKey] = React.useState("90d");
+  const [filterValue, setFilterValue] = React.useState<ChartTimeFilterValue>(
+    getChartTimeFilter("90d"),
+  );
 
-  const { data, loading } = useGetDeviceDistribution(filterValue.timeRange, filterValue.dateRange)
-  const chartData = data?.getDeviceDistribution || []
+  const { data, loading } = useGetDeviceDistribution(
+    filterValue.timeRange,
+    filterValue.dateRange,
+  );
+  const chartData = data?.getDeviceDistribution || [];
 
   // Calculate totals for a premium metric display
   const totals = React.useMemo(() => {
@@ -70,49 +79,58 @@ export function DashboardDistributionChart() {
         ios: acc.ios + curr.ios,
         android: acc.android + curr.android,
       }),
-      { web: 0, ios: 0, android: 0 }
-    )
-  }, [chartData])
+      { web: 0, ios: 0, android: 0 },
+    );
+  }, [chartData]);
 
-  const totalAll = totals.web + totals.ios + totals.android
+  const totalAll = totals.web + totals.ios + totals.android;
 
   return (
     <Card className="border-border/60 bg-gradient-to-b from-background to-muted/10 shadow-sm overflow-hidden flex flex-col h-full">
       <CardHeader className="flex flex-col gap-4 border-b border-border/40 pb-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1.5 w-full">
-          <CardTitle className="text-primary tracking-wider flex items-center gap-2">
-            <div className="p-1.5 rounded-md bg-primary/10"><LayoutGrid className="h-4 w-4 text-primary" /></div>
-            Platform Traffic
-          </CardTitle>
-          <CardDescription>Visitor engagement across Web, iOS, and Android platforms.</CardDescription>
-          
           {!loading && totalAll > 0 && (
             <div className="flex items-center gap-4 pt-3">
               <div className="flex items-center gap-1.5">
                 <div className="h-2 w-2 rounded-full bg-[#6366f1]" />
-                <span className="text-xs font-medium text-muted-foreground">Web <span className="text-foreground font-semibold">{(totals.web / totalAll * 100).toFixed(0)}%</span></span>
+                <span className="text-xs font-medium text-muted-foreground">
+                  Web{" "}
+                  <span className="text-foreground font-semibold">
+                    {((totals.web / totalAll) * 100).toFixed(0)}%
+                  </span>
+                </span>
               </div>
               <div className="flex items-center gap-1.5">
                 <div className="h-2 w-2 rounded-full bg-[#0ea5e9]" />
-                <span className="text-xs font-medium text-muted-foreground">iOS <span className="text-foreground font-semibold">{(totals.ios / totalAll * 100).toFixed(0)}%</span></span>
+                <span className="text-xs font-medium text-muted-foreground">
+                  iOS{" "}
+                  <span className="text-foreground font-semibold">
+                    {((totals.ios / totalAll) * 100).toFixed(0)}%
+                  </span>
+                </span>
               </div>
               <div className="flex items-center gap-1.5">
                 <div className="h-2 w-2 rounded-full bg-[#10b981]" />
-                <span className="text-xs font-medium text-muted-foreground">Android <span className="text-foreground font-semibold">{(totals.android / totalAll * 100).toFixed(0)}%</span></span>
+                <span className="text-xs font-medium text-muted-foreground">
+                  Android{" "}
+                  <span className="text-foreground font-semibold">
+                    {((totals.android / totalAll) * 100).toFixed(0)}%
+                  </span>
+                </span>
               </div>
             </div>
           )}
         </div>
-        
+
         <ChartTimeFilter
           value={filterKey}
           onChange={(key, val) => {
-            setFilterKey(key)
-            setFilterValue(val)
+            setFilterKey(key);
+            setFilterValue(val);
           }}
         />
       </CardHeader>
-      
+
       <CardContent className="flex-1 px-0 pb-0 pt-6 relative min-h-[300px]">
         {loading && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/50 backdrop-blur-sm transition-all duration-300">
@@ -124,13 +142,16 @@ export function DashboardDistributionChart() {
             </div>
           </div>
         )}
-        
+
         <div className="px-2 sm:px-6 h-full">
           <ChartContainer
             config={chartConfig}
             className="aspect-auto h-full min-h-[300px] w-full"
           >
-            <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+            <AreaChart
+              data={chartData}
+              margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+            >
               <defs>
                 <linearGradient id="fillWeb" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#6366f1" stopOpacity={0.4} />
@@ -145,7 +166,11 @@ export function DashboardDistributionChart() {
                   <stop offset="95%" stopColor="#10b981" stopOpacity={0.0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid vertical={false} strokeDasharray="4 4" className="stroke-muted-foreground/15" />
+              <CartesianGrid
+                vertical={false}
+                strokeDasharray="4 4"
+                className="stroke-muted-foreground/15"
+              />
               <XAxis
                 dataKey="date"
                 tickLine={false}
@@ -153,12 +178,15 @@ export function DashboardDistributionChart() {
                 tickMargin={12}
                 minTickGap={40}
                 tickFormatter={(value) => {
-                  const date = new Date(value)
-                  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+                  const date = new Date(value);
+                  return date.toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  });
                 }}
                 className="text-[10px] font-semibold text-muted-foreground/70"
               />
-              <YAxis 
+              <YAxis
                 tickLine={false}
                 axisLine={false}
                 tickMargin={8}
@@ -166,16 +194,20 @@ export function DashboardDistributionChart() {
                 className="text-[10px] font-semibold text-muted-foreground/70"
               />
               <ChartTooltip
-                cursor={{ stroke: 'hsl(var(--muted-foreground)/0.3)', strokeWidth: 1, strokeDasharray: '4 4' }}
+                cursor={{
+                  stroke: "hsl(var(--muted-foreground)/0.3)",
+                  strokeWidth: 1,
+                  strokeDasharray: "4 4",
+                }}
                 content={
                   <ChartTooltipContent
                     labelFormatter={(value) => {
                       return new Date(value).toLocaleDateString("en-US", {
-                        weekday: 'short',
+                        weekday: "short",
                         month: "short",
                         day: "numeric",
                         year: "numeric",
-                      })
+                      });
                     }}
                     indicator="dot"
                     className="backdrop-blur-xl bg-background/95 border-border/50 shadow-xl rounded-xl"
@@ -189,7 +221,7 @@ export function DashboardDistributionChart() {
                 stroke="#10b981"
                 stackId="a"
                 strokeWidth={2}
-                activeDot={{ r: 6, strokeWidth: 0, fill: '#10b981' }}
+                activeDot={{ r: 6, strokeWidth: 0, fill: "#10b981" }}
               />
               <Area
                 dataKey="ios"
@@ -198,7 +230,7 @@ export function DashboardDistributionChart() {
                 stroke="#0ea5e9"
                 stackId="a"
                 strokeWidth={2}
-                activeDot={{ r: 6, strokeWidth: 0, fill: '#0ea5e9' }}
+                activeDot={{ r: 6, strokeWidth: 0, fill: "#0ea5e9" }}
               />
               <Area
                 dataKey="web"
@@ -207,12 +239,12 @@ export function DashboardDistributionChart() {
                 stroke="#6366f1"
                 stackId="a"
                 strokeWidth={2}
-                activeDot={{ r: 6, strokeWidth: 0, fill: '#6366f1' }}
+                activeDot={{ r: 6, strokeWidth: 0, fill: "#6366f1" }}
               />
             </AreaChart>
           </ChartContainer>
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

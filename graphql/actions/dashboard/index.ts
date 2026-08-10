@@ -122,8 +122,7 @@ export interface ModerationStat {
 
 export interface ModulePerformance {
   module: string;
-  value: string | number;
-  subtext: string;
+  stats: string[];
 }
 
 export interface CommunityKPIs {

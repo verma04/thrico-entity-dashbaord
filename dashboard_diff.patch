@@ -1,0 +1,670 @@
+--- dashboard_head.tsx	2026-08-10 17:26:12
++++ components/home/dashboard.tsx	2026-08-10 17:23:59
+@@ -5,16 +5,13 @@
+ import { useRouter } from "next/navigation";
+ import {
+   Activity,
+-  TrendingUp,
+   TrendingDown,
+   Zap,
+   Heart,
+   Star,
+   FileText,
+   Repeat,
+-  Eye,
+   Shield,
+-  ShieldCheck,
+   MessageSquare,
+   Trophy,
+   Calendar,
+@@ -29,6 +26,11 @@
+   History,
+   Award,
+   AlertTriangle,
++  UserPlus,
++  UserCheck,
++  Camera,
++  Image,
++  Briefcase,
+ } from "lucide-react";
+ import { ResponsiveContainer, AreaChart, Area } from "recharts";
+ import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+@@ -107,14 +109,12 @@
+ 
+ const ModulePerformanceCard = ({
+   title,
+-  value,
+-  subtext,
++  stats,
+   icon: Icon,
+   color = "text-primary",
+ }: {
+   title: string;
+-  value: string;
+-  subtext: string;
++  stats?: string[];
+   icon: LucideIcon;
+   color?: string;
+ }) => {
+@@ -141,13 +141,49 @@
+         <h4 className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-[0.18em] leading-none mb-1.5">
+           {title}
+         </h4>
+-        <div className="flex items-baseline gap-1.5">
+-          <span className="text-base font-bold text-foreground tracking-tight tabular-nums leading-none">
+-            {value}
+-          </span>
+-          <span className="text-[9px] text-muted-foreground/50 truncate leading-none">
+-            {subtext}
+-          </span>
++        <div className="flex flex-col gap-0.5">
++          {stats ? (
++            <div className="flex flex-wrap items-center gap-1.5">
++              {stats.map((stat, i) => {
++                const match = stat.match(/^([\d\.]+[KkMmBb]?|xxx)\s+(.*)$/i);
++                if (match) {
++                  return (
++                    <React.Fragment key={i}>
++                      <span className="flex items-baseline gap-1">
++                        <span className="text-sm font-bold text-foreground tracking-tight tabular-nums leading-none group-hover:underline">
++                          {match[1]}
++                        </span>
++                        <span className="text-[10px] text-muted-foreground truncate leading-none">
++                          {match[2]}
++                        </span>
++                      </span>
++                      {i < stats.length - 1 && (
++                        <span className="text-muted-foreground/30 text-[10px] font-light">
++                          |
++                        </span>
++                      )}
++                    </React.Fragment>
++                  );
++                }
++                return (
++                  <React.Fragment key={i}>
++                    <span className="text-sm font-bold text-foreground tracking-tight tabular-nums leading-none group-hover:underline">
++                      {stat}
++                    </span>
++                    {i < stats.length - 1 && (
++                      <span className="text-muted-foreground/30 text-[10px] font-light">
++                        |
++                      </span>
++                    )}
++                  </React.Fragment>
++                );
++              })}
++            </div>
++          ) : (
++            <span className="text-sm font-bold text-foreground tracking-tight tabular-nums leading-none group-hover:underline">
++              0
++            </span>
++          )}
+         </div>
+       </div>
+     </div>
+@@ -178,6 +214,8 @@
+   });
+   const [showAllContentTypes, setShowAllContentTypes] = useState(false);
+   const [showAllFeatureModules, setShowAllFeatureModules] = useState(false);
++  const [showAllModerationItems, setShowAllModerationItems] = useState(false);
++  const [isRefreshing, setIsRefreshing] = useState(false);
+ 
+   const handleDateChange = (range: DateRange | undefined) => {
+     setDateRange(range);
+@@ -217,9 +255,13 @@
+   );
+ 
+   const loading = loadingKpis || loadingFeatures;
+-  const refetch = () => {
+-    refetchKpis();
+-    refetchFeatures();
++  const handleRefresh = async () => {
++    setIsRefreshing(true);
++    try {
++      await Promise.all([refetchKpis(), refetchFeatures()]);
++    } finally {
++      setIsRefreshing(false);
++    }
+   };
+ 
+   const { data: subData, loading: subLoading } = useCheckMemberSubscription();
+@@ -260,6 +302,7 @@
+       color: "bg-cyan-500",
+       icon: Users,
+       tooltip: "Members who joined during the selected period",
++      href: "/members/all?filter=new",
+     },
+     {
+       title: "Active Members",
+@@ -267,6 +310,7 @@
+       color: "bg-emerald-500",
+       icon: Activity,
+       tooltip: "Count of unique members active within the selected date range",
++      href: "/members/all?filter=active",
+     },
+     {
+       title: "Blocked Members",
+@@ -274,6 +318,7 @@
+       color: "bg-blue-500",
+       icon: Shield,
+       tooltip: "Total blocked members across the platform",
++      href: "/members/all?filter=blocked",
+     },
+     {
+       title: "Engagement Rate",
+@@ -395,84 +440,159 @@
+ 
+   const modulePerformanceList = [
+     {
++      title: "Members",
++      icon: Users,
++      color: "text-blue-600",
++      href: "/members",
++      stats: ["106 registered", "107 approved"],
++    },
++    {
++      title: "Referrals",
++      icon: UserPlus,
++      color: "text-indigo-600",
++      href: "/referrals",
++      stats: ["10 referrers", "3000 referees"],
++    },
++    {
++      title: "Connection Requests",
++      icon: UserCheck,
++      color: "text-emerald-600",
++      href: "/contacts",
++      stats: ["1000 sent", "800 accepted"],
++    },
++    {
++      title: "Gamification",
++      icon: Trophy,
++      color: "text-amber-600",
++      href: "/gamification/points-and-badges",
++      stats: ["130K points earned", "60 coins earned"],
++    },
++    {
++      title: "Leaderboard",
++      icon: Trophy,
++      color: "text-yellow-600",
++      href: "/gamification/leaderboard",
++      stats: ["100 Above 1000 points", "xxx at 0 points"],
++    },
++    {
++      title: "Moderation",
++      icon: Shield,
++      color: "text-red-600",
++      href: "/moderation",
++      stats: ["100 reported items", "10 removed"],
++    },
++    {
++      title: "Posts",
++      icon: MessageSquare,
++      color: "text-sky-600",
++      href: "/feed",
++      stats: ["11000 total", "200 deleted"],
++    },
++    {
++      title: "Moments",
++      icon: Camera,
++      color: "text-pink-600",
++      href: "/moments",
++      stats: ["2000 total", "1800 active"],
++    },
++    {
++      title: "Media Gallery",
++      icon: Image,
++      color: "text-purple-600",
++      href: "/media-gallery",
++      stats: ["10 albums", "200 photos"],
++    },
++    {
+       title: "Communities",
+       icon: Users,
+       color: "text-blue-600",
+       href: "/communities",
++      stats: ["20 total", "20 active"],
+     },
+     {
+       title: "Events",
+       icon: Calendar,
+       color: "text-orange-600",
+       href: "/events",
++      stats: ["2 total", "1 upcoming"],
+     },
+-    { title: "Jobs", icon: Target, color: "text-emerald-600", href: "/jobs" },
+     {
++      title: "Opportunities",
++      icon: Briefcase,
++      color: "text-teal-600",
++      href: "/opportunities",
++      stats: ["10 total", "1 active"],
++    },
++    {
++      title: "Jobs",
++      icon: Target,
++      color: "text-emerald-600",
++      href: "/jobs",
++      stats: ["2 total", "1 active"],
++    },
++    {
++      title: "Mentors",
++      icon: Users,
++      color: "text-cyan-600",
++      href: "/mentorship",
++      stats: ["10 applied", "2 approved", "1 added"],
++    },
++    {
++      title: "Offers",
++      icon: Target,
++      color: "text-rose-600",
++      href: "/offers",
++      stats: ["15 total", "3 active"],
++    },
++    {
+       title: "Shop",
+       icon: ShoppingBag,
+       color: "text-purple-600",
+       href: "/shop",
++      stats: ["2 total", "1 active"],
+     },
+     {
+       title: "Listings",
+       icon: ShoppingBag,
+       color: "text-violet-600",
+       href: "/listing",
++      stats: ["4 total", "3 active"],
+     },
+     {
+       title: "Polls",
+       icon: FileText,
+       color: "text-yellow-600",
+       href: "/polls",
++      stats: ["30 total", "2 active"],
+     },
+     {
+       title: "Surveys",
+       icon: FileText,
+       color: "text-amber-600",
+       href: "/surveys",
++      stats: ["5 total", "1 active"],
+     },
+     {
+-      title: "Discussions",
++      title: "Forums",
+       icon: MessageSquare,
+       color: "text-pink-600",
+       href: "/forums",
++      stats: ["3 total", "3 active"],
+     },
+     {
+-      title: "Gamification",
+-      icon: Trophy,
+-      color: "text-amber-600",
+-      href: "/gamification/points-and-badges",
+-    },
+-    {
+-      title: "Leaderboard",
+-      icon: Trophy,
++      title: "Sponsors",
++      icon: Star,
+       color: "text-yellow-600",
+-      href: "/gamification/points-and-badges",
++      href: "/sponsors",
++      stats: ["4 total"],
+     },
+     {
+-      title: "Offers",
+-      icon: Target,
+-      color: "text-rose-600",
+-      href: "/offers",
+-    },
+-    {
+       title: "Stories",
+       icon: Sparkles,
+       color: "text-violet-600",
+-      href: "/stories/settings",
+-    },
+-    {
+-      title: "Mentorship",
+-      icon: Users,
+-      color: "text-cyan-600",
+-      href: "/mentorship",
++      href: "/stories",
++      stats: ["10 members posted", "100 total"],
+     },
+-    {
+-      title: "Moderation",
+-      icon: Shield,
+-      color: "text-red-600",
+-      href: "/moderation",
+-    },
+   ];
+ 
+   const getMetric = (key: string): DashboardMetricValue => {
+@@ -484,6 +604,9 @@
+     return isDashboardMetricValue(metric) ? metric : {};
+   };
+ 
++  const totalReported =
++    kpis?.moderationStats?.reduce((acc, curr) => acc + curr.count, 0) || 0;
++
+   const visibleFeatureModules = showAllFeatureModules
+     ? modulePerformanceList
+     : modulePerformanceList.slice(0, 9);
+@@ -492,8 +615,7 @@
+     <EcosystemWrapper className="m-2">
+       <EcosystemHeader
+         title="Community Overview"
+-        badgeText="Live Stats"
+-        description="Track how your community is growing, engaging, and interacting in real-time."
++        description="Your community at a glance"
+         icon={Activity}
+         actions={
+           <div className="flex items-center gap-3">
+@@ -507,9 +629,13 @@
+               variant="outline"
+               size="icon"
+               className="h-9 w-9 text-zinc-400 hover:text-indigo-600 rounded-lg transition-all"
+-              onClick={() => refetch()}
++              onClick={handleRefresh}
++              disabled={loading || isRefreshing}
+             >
+-              <RotateCcw size={14} className={cn(loading && "animate-spin")} />
++              <RotateCcw
++                size={14}
++                className={cn((loading || isRefreshing) && "animate-spin")}
++              />
+             </Button>
+           </div>
+         }
+@@ -521,7 +647,7 @@
+ 
+         {/* 1. Core Stats */}
+         <section className="space-y-3">
+-          <DashboardSectionHeading title="Core Community Stats" />
++          <DashboardSectionHeading title="CORE COMMUNITY INSIGHTS" />
+           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+             {vitals.map((v) => {
+               const item = getMetric(v.key);
+@@ -536,75 +662,28 @@
+                   color={v.color}
+                   suffix={(v as any).suffix}
+                   tooltip={(v as any).tooltip}
++                  href={(v as any).href}
+                 />
+               );
+             })}
+           </div>
+         </section>
+ 
+-        <div className="grid grid-cols-1 lg:grid-cols-10 gap-4">
+-          <section className="lg:col-span-7 space-y-4">
+-            <DashboardSectionHeading title="Platform Traffic" />
+-            <DashboardDistributionChart />
+-          </section>
+-          <section className="lg:col-span-3 space-y-4">
+-            <DashboardSectionHeading title="Login Sessions" />
+-            <DashboardSessionRadarChart />
+-          </section>
+-        </div>
+-
+-        {/* 2. Content & Feed */}
+-        <section className="space-y-3 mt-20">
+-          <DashboardSectionHeading title="Content & Feed" />
+-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+-            <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6">
+-              {contentFeed.map((v) => {
+-                const item = getMetric(v.key);
+-                return (
+-                  <EcosystemKPI
+-                    key={v.key}
+-                    title={v.title}
+-                    value={loading ? "..." : (item?.value ?? "0")}
+-                    trend={item?.change ?? 0}
+-                    trendData={item?.trend ?? [0, 0, 0, 0, 0, 0, 0]}
+-                    icon={v.icon}
+-                    suffix={(v as any).suffix}
+-                    tooltip={(v as any).tooltip}
+-                  />
+-                );
+-              })}
+-            </div>
+-
+-            {/* Content Type Breakdown */}
+-            <div className="lg:col-span-4 rounded-2xl border border-border/50 bg-card p-5 shadow-sm">
+-              <div className="flex items-center justify-between mb-5">
+-                <div>
+-                  <p className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em] mb-0.5">
+-                    What members post
+-                  </p>
+-                  <h3 className="text-sm font-semibold text-foreground leading-none">
+-                    Content Mix
+-                  </h3>
+-                </div>
+-                {kpis?.contentTypeBreakdown &&
+-                  kpis.contentTypeBreakdown.length > 2 && (
+-                    <Button
+-                      variant="ghost"
+-                      size="sm"
+-                      className="text-[10px] text-muted-foreground font-medium h-7 px-2 rounded-lg hover:bg-muted"
++       
++          <section className="lg:col-span-7 space-y-4">                     className="text-[10px] text-muted-foreground font-medium underline underline-offset-2 hover:text-foreground transition-colors"
+                       onClick={() =>
+                         setShowAllContentTypes(!showAllContentTypes)
+                       }
+                     >
+-                      {showAllContentTypes ? "Less" : "More"}
+-                    </Button>
++                      {showAllContentTypes ? "View Less" : "View More"}
++                    </button>
+                   )}
+               </div>
+               <div className="space-y-4">
+-                {(showAllContentTypes
+-                  ? kpis?.contentTypeBreakdown
+-                  : kpis?.contentTypeBreakdown?.slice(0, 2)
+-                )?.map((item, i) => {
++                {(() => {
++                  const sorted = [...(kpis?.contentTypeBreakdown || [])].sort((a, b) => b.percentage - a.percentage);
++                  return (showAllContentTypes ? sorted : sorted.slice(0, 2));
++                })()?.map((item, i) => {
+                   const barColors = [
+                     "bg-gradient-to-r from-indigo-500 to-blue-400",
+                     "bg-gradient-to-r from-violet-500 to-purple-400",
+@@ -646,84 +725,57 @@
+         </section>
+ 
+         {/* 3. Moderation Overview & Module Performance */}
+-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
++        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+           {/* Moderation */}
+-          <section className="lg:col-span-4 space-y-3">
++          <section className="lg:col-span-4 space-y-3 flex flex-col">
+             <DashboardSectionHeading
+               title="Safety & Moderation"
+               icon={<Shield className="h-3.5 w-3.5 text-rose-500" />}
+               titleClassName="text-rose-600 dark:text-rose-400"
+               rightElement={
+-                <div className="text-rose-600 dark:text-rose-400 text-[10px] font-bold px-2.5 py-1 rounded-full bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/25 tabular-nums">
+-                  {kpis?.moderationStats?.reduce(
+-                    (acc, s) =>
+-                      acc +
+-                      (s.status === "Urgent" || s.status === "Review"
+-                        ? s.count
+-                        : 0),
+-                    0,
+-                  ) ?? 0}{" "}
+-                  pending
++                <div className="flex items-center gap-2">
++                  {(kpis?.moderationStats?.length ?? 0) > 5 && (
++                    <Button
++                      variant="ghost"
++                      size="sm"
++                      className="text-[10px] text-muted-foreground font-medium h-7 px-2.5 rounded-lg hover:bg-muted"
++                      onClick={() => setShowAllModerationItems((prev) => !prev)}
++                    >
++                      {showAllModerationItems ? "View Less" : "View More"}
++                    </Button>
++                  )}
+                 </div>
+               }
+             />
+ 
+-            <div className="rounded-2xl border border-border/50 bg-card overflow-hidden shadow-sm">
++            <div className="rounded-2xl border border-border/50 bg-card overflow-hidden shadow-sm flex flex-col flex-1">
+               {/* Table header */}
+-              <div className="grid grid-cols-3 border-b border-border/50 bg-muted/30 px-4 py-2.5">
++              <div className="grid grid-cols-2 border-b border-border/50 bg-muted/30 px-4 py-2.5">
+                 <span className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em]">
+                   Type
+                 </span>
+-                <span className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em]">
++                <span className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em] text-right">
+                   Count
+                 </span>
+-                <span className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em]">
+-                  Status
+-                </span>
+               </div>
+-              <div className="divide-y divide-border/40">
+-                {kpis?.moderationStats?.map((stat, i) => (
+-                  <div
++              <div className="divide-y divide-border/40 overflow-y-auto flex-1">
++                {(showAllModerationItems
++                  ? kpis?.moderationStats
++                  : kpis?.moderationStats?.slice(0, 5)
++                )?.map((stat, i) => (
++                  <Link
+                     key={i}
+-                    className="grid grid-cols-3 items-center px-4 py-3 hover:bg-muted/25 transition-colors"
++                    href={`/moderation?tab=${stat.type.replace("Reported ", "").toLowerCase()}`}
++                    className="grid grid-cols-2 items-center px-4 py-3 hover:bg-muted/25 transition-colors group cursor-pointer"
+                   >
+-                    <span className="text-[12px] text-foreground/85 font-medium truncate pr-2">
++                    <span className="text-[12px] text-foreground/85 font-medium truncate pr-2 group-hover:text-primary transition-colors">
+                       {stat.type}
+                     </span>
+-                    <span className="text-[13px] font-bold text-foreground tabular-nums">
++                    <span className="text-[13px] font-bold text-foreground tabular-nums text-right">
+                       {stat.count}
+                     </span>
+-                    <div>
+-                      <span
+-                        className={cn(
+-                          "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider",
+-                          stat.status === "Urgent"
+-                            ? "bg-rose-500/10 text-rose-600 dark:text-rose-400"
+-                            : stat.status === "Review"
+-                              ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+-                              : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+-                        )}
+-                      >
+-                        <span
+-                          className={cn(
+-                            "h-1 w-1 rounded-full",
+-                            stat.status === "Urgent"
+-                              ? "bg-rose-500"
+-                              : stat.status === "Review"
+-                                ? "bg-amber-500"
+-                                : "bg-emerald-500",
+-                          )}
+-                        />
+-                        {stat.status}
+-                      </span>
+-                    </div>
+-                  </div>
+-                )) || (
+-                  <div className="px-4 py-10 text-center text-[11px] text-muted-foreground/40">
+-                    <Shield className="h-6 w-6 mx-auto mb-2 opacity-30" />
+-                    No active alerts
+-                  </div>
+-                )}
++                  </Link>
++                ))}
+               </div>
+             </div>
+           </section>
+@@ -731,7 +783,7 @@
+           {/* Module Performance Grid */}
+           <section className="lg:col-span-8 space-y-3">
+             <DashboardSectionHeading
+-              title="Feature Modules"
++              title="QUICK STATS"
+               rightElement={
+                 modulePerformanceList.length > 9 && (
+                   <Button
+@@ -757,8 +809,7 @@
+                   <ModulePerformanceCard
+                     title={mod.title}
+                     icon={mod.icon}
+-                    value={dataItem?.value?.toString() ?? "0"}
+-                    subtext={dataItem?.subtext ?? "Initializing..."}
++                    stats={dataItem?.stats ?? mod.stats}
+                     color={mod.color}
+                   />
+                 );
+@@ -782,7 +833,7 @@
+             <DashboardGrowthChart />
+           </section>
+           <section className="space-y-3">
+-            <DashboardSectionHeading title="Content Breakdown" />
++            <DashboardSectionHeading title="CONTENT INSIGHTS" />
+             <DashboardContentBreakdownChart
+               data={kpis?.contentTypeBreakdown || []}
+               // loading={kpisLoading}
+@@ -815,7 +866,7 @@
+         {/* 4.5. Gamification Leaderboard + Activity Log + Impact Score */}
+         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mt-20">
+           {/* Leaderboard */}
+-          <section className="space-y-3">
++          <section className="space-y-3 flex flex-col h-full">
+             <DashboardSectionHeading
+               title="Gamification Leaderboard"
+               icon={<Trophy className="h-3.5 w-3.5 text-amber-500" />}
+@@ -831,7 +882,7 @@
+                 </Link>
+               }
+             />
+-            <div className="rounded-2xl border border-border/50 bg-card overflow-hidden shadow-sm">
++            <div className="rounded-2xl border border-border/50 bg-card overflow-hidden shadow-sm flex-1">
+               {loadingLeaderboard ? (
+                 <div className="divide-y divide-border/40">
+                   {[1, 2, 3, 4, 5].map((i) => (
+@@ -938,7 +989,7 @@
+           </section>
+ 
+           {/* Activity Log */}
+-          <section className="space-y-3">
++          <section className="space-y-3 flex flex-col h-full">
+             <DashboardSectionHeading
+               title="Activity Log"
+               icon={<History className="h-3.5 w-3.5 text-indigo-500" />}
+@@ -954,7 +1005,7 @@
+                 </Link>
+               }
+             />
+-            <div className="rounded-2xl border border-border/50 bg-card overflow-hidden shadow-sm">
++            <div className="rounded-2xl border border-border/50 bg-card overflow-hidden shadow-sm flex-1">
+               {loadingActivityLog ? (
+                 <div className="divide-y divide-border/40">
+                   {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+@@ -1085,7 +1136,7 @@
+           </section>
+ 
+           {/* Impact Score */}
+-          <section className="space-y-3">
++          <section className="space-y-3 flex flex-col h-full">
+             <DashboardSectionHeading
+               title="Impact Score"
+               icon={<Users className="h-3.5 w-3.5 text-rose-500" />}
+@@ -1101,7 +1152,7 @@
+                 </Link>
+               }
+             />
+-            <div className="rounded-2xl border border-border/50 bg-card overflow-hidden shadow-sm h-full">
++            <div className="rounded-2xl border border-border/50 bg-card overflow-hidden shadow-sm flex-1">
+               {loadingImpact ? (
+                 <div className="divide-y divide-border/40">
+                   {[1, 2, 3, 4, 5].map((i) => (

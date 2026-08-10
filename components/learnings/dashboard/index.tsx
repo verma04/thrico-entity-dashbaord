@@ -17,6 +17,7 @@ import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header"
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 
 // ---------------------------------------------------------------------------
 // Static Content
@@ -201,9 +202,9 @@ export default function LearningsDashboard() {
       <EcosystemActionBar shadow="none">
         <div className="flex items-center justify-between w-full overflow-hidden">
           <div className="flex items-center gap-2 px-1 shrink-0">
-            <ShieldCheck className="h-4 w-4 text-emerald-500" />
+            <Switch id="active-mode" defaultChecked />
             <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground italic">
-              Verified Node
+              Active
             </span>
           </div>
 

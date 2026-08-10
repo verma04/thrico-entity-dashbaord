@@ -5,13 +5,16 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   Activity,
+  TrendingUp,
   TrendingDown,
   Zap,
   Heart,
   Star,
   FileText,
   Repeat,
+  Eye,
   Shield,
+  ShieldCheck,
   MessageSquare,
   Trophy,
   Calendar,
@@ -26,11 +29,6 @@ import {
   History,
   Award,
   AlertTriangle,
-  UserPlus,
-  UserCheck,
-  Camera,
-  Image,
-  Briefcase,
 } from "lucide-react";
 import { ResponsiveContainer, AreaChart, Area } from "recharts";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
@@ -86,19 +84,80 @@ const isDashboardMetricValue = (
   value !== null &&
   ("value" in value || "change" in value || "trend" in value);
 
+// ---------------------------------------------------------------------------
+// Module Performance Card
+// ---------------------------------------------------------------------------
+// Map color class to border/bg accent
+const colorToBorderMap: Record<string, { border: string; bg: string }> = {
+  "text-blue-600": { border: "border-l-blue-500", bg: "bg-blue-500/8" },
+  "text-orange-600": { border: "border-l-orange-500", bg: "bg-orange-500/8" },
+  "text-emerald-600": {
+    border: "border-l-emerald-500",
+    bg: "bg-emerald-500/8",
+  },
+  "text-purple-600": { border: "border-l-purple-500", bg: "bg-purple-500/8" },
+  "text-violet-600": { border: "border-l-violet-500", bg: "bg-violet-500/8" },
+  "text-yellow-600": { border: "border-l-yellow-500", bg: "bg-yellow-500/8" },
+  "text-amber-600": { border: "border-l-amber-500", bg: "bg-amber-500/8" },
+  "text-pink-600": { border: "border-l-pink-500", bg: "bg-pink-500/8" },
+  "text-cyan-600": { border: "border-l-cyan-500", bg: "bg-cyan-500/8" },
+  "text-red-600": { border: "border-l-red-500", bg: "bg-red-500/8" },
+  "text-rose-600": { border: "border-l-rose-500", bg: "bg-rose-500/8" },
+};
 
+const ModulePerformanceCard = ({
+  title,
+  value,
+  subtext,
+  icon: Icon,
+  color = "text-primary",
+}: {
+  title: string;
+  value: string;
+  subtext: string;
+  icon: LucideIcon;
+  color?: string;
+}) => {
+  const accent = colorToBorderMap[color] ?? {
+    border: "border-l-primary",
+    bg: "bg-primary/5",
+  };
+  return (
+    <div
+      className={cn(
+        "rounded-xl border border-l-[3px] border-border/50 bg-card p-3.5 shadow-sm transition-all duration-200 group hover:-translate-y-0.5 hover:shadow-md hover:border-border/80 flex items-center gap-3",
+        accent.border,
+      )}
+    >
+      <div
+        className={cn(
+          "h-9 w-9 rounded-lg flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-110",
+          accent.bg,
+        )}
+      >
+        <Icon className={cn("h-4 w-4", color)} />
+      </div>
+      <div className="min-w-0 flex-1">
+        <h4 className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-[0.18em] leading-none mb-1.5">
+          {title}
+        </h4>
+        <div className="flex items-baseline gap-1.5">
+          <span className="text-base font-bold text-foreground tracking-tight tabular-nums leading-none">
+            {value}
+          </span>
+          <span className="text-[9px] text-muted-foreground/50 truncate leading-none">
+            {subtext}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+};
 import { DashboardDistributionChart } from "./dashboard-distribution-chart";
 import { DashboardSessionRadarChart } from "./dashboard-session-radar-chart";
 import { DashboardContentBreakdownChart } from "./dashboard-content-breakdown-chart";
 import { DashboardGrowthChart } from "./dashboard-growth-chart";
 import { DashboardSectionHeading } from "./dashboard-section-heading";
-import { DashboardCoreInsights } from "./dashboard-core-insights";
-import { DashboardTrafficSessions } from "./dashboard-traffic-sessions";
-import { DashboardContentFeed } from "./dashboard-content-feed";
-import { DashboardAcquisition } from "./dashboard-acquisition";
-import { DashboardSafetyModeration } from "./dashboard-safety-moderation";
-import { DashboardQuickStats } from "./dashboard-quick-stats";
-import { DashboardPlatformStorage } from "./dashboard-platform-storage";
 
 const timeRangeMap: Record<string, TimeRange> = {
   "24h": TimeRange.LAST_24_HOURS,
@@ -117,7 +176,8 @@ export default function Dashboard() {
     from: subDays(new Date(), 7),
     to: new Date(),
   });
-  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showAllContentTypes, setShowAllContentTypes] = useState(false);
+  const [showAllFeatureModules, setShowAllFeatureModules] = useState(false);
 
   const handleDateChange = (range: DateRange | undefined) => {
     setDateRange(range);
@@ -157,13 +217,9 @@ export default function Dashboard() {
   );
 
   const loading = loadingKpis || loadingFeatures;
-  const handleRefresh = async () => {
-    setIsRefreshing(true);
-    try {
-      await Promise.all([refetchKpis(), refetchFeatures()]);
-    } finally {
-      setIsRefreshing(false);
-    }
+  const refetch = () => {
+    refetchKpis();
+    refetchFeatures();
   };
 
   const { data: subData, loading: subLoading } = useCheckMemberSubscription();
@@ -197,6 +253,228 @@ export default function Dashboard() {
     },
   });
 
+  const vitals = [
+    {
+      title: "New Members",
+      key: "newMembers",
+      color: "bg-cyan-500",
+      icon: Users,
+      tooltip: "Members who joined during the selected period",
+    },
+    {
+      title: "Active Members",
+      key: "activeUsers",
+      color: "bg-emerald-500",
+      icon: Activity,
+      tooltip: "Count of unique members active within the selected date range",
+    },
+    {
+      title: "Blocked Members",
+      key: "blockMembers",
+      color: "bg-blue-500",
+      icon: Shield,
+      tooltip: "Total blocked members across the platform",
+    },
+    {
+      title: "Engagement Rate",
+      key: "engagementRate",
+      color: "bg-amber-400",
+      suffix: "%",
+      icon: Target,
+      tooltip: "(DAU / Total Members) × 100",
+    },
+    {
+      title: "Retention Rate",
+      key: "retentionRate",
+      color: "bg-indigo-500",
+      suffix: "%",
+      icon: Heart,
+      tooltip: "(MAU / Total Members) × 100",
+    },
+
+    {
+      title: "Churn Rate",
+      key: "churnRate",
+      color: "bg-rose-500",
+      suffix: "%",
+      icon: TrendingDown,
+      tooltip: "((Total Members - DAU) / Total Members) × 100",
+    },
+    {
+      title: "Community Health",
+      key: "healthIndex",
+      color: "bg-red-500",
+      icon: Award,
+      tooltip:
+        "Weighted Avg: Engagement (40%) + Retention (40%) + Content Activity (20%)",
+    },
+    {
+      title: "Member Happiness",
+      key: "communityNPS",
+      color: "bg-yellow-400",
+      icon: Star,
+      tooltip: "Engagement Rate × 1.2 - Churn Rate × 0.5",
+    },
+  ];
+
+  const contentFeed = [
+    {
+      title: "Total Posts",
+      key: "totalPosts",
+      icon: FileText,
+      tooltip: "Total feed entries, stories, and discussions",
+    },
+    {
+      title: "Post Frequency",
+      key: "contributionFrequency",
+      icon: Zap,
+      suffix: "/wk",
+      tooltip: "(Total Posts / DAU / Days in Period) × 7",
+    },
+    {
+      title: "Reply Rate",
+      key: "interactionReciprocity",
+      icon: Repeat,
+      suffix: "%",
+      tooltip: "(Feed Comments / Total Posts) × 100",
+    },
+  ];
+
+  const acquisitionRet = [
+    {
+      title: "Member Activation",
+      key: "memberActivationRate",
+      icon: Target,
+      suffix: "%",
+      tooltip: "((New Members who posted) / New Members) × 100",
+    },
+    {
+      title: "Advocacy Index",
+      key: "communityAdvocacyIndex",
+      icon: Heart,
+      tooltip: "(New Members / DAU) × 10",
+    },
+    {
+      title: "Superfan Count",
+      key: "superfanRatio",
+      icon: Star,
+      suffix: "%",
+      tooltip: "((DAU × 0.12) / Total Members) × 100",
+    },
+    {
+      title: "Referrals Joined",
+      key: "referralsJoined",
+      icon: Users,
+      tooltip: "Members who joined via a referral link",
+    },
+    {
+      title: "Gamification Points",
+      key: "gamificationPointsEarned",
+      icon: Zap,
+      tooltip: "Total gamification points earned by members",
+    },
+    {
+      title: "Badges Earned",
+      key: "badgesEarned",
+      icon: Trophy,
+      tooltip: "Total badges earned by members",
+    },
+    {
+      title: "Leaderboard Players",
+      key: "leaderboardParticipants",
+      icon: Trophy,
+      tooltip: "Total participants actively competing on the leaderboard",
+    },
+    {
+      title: "Currency Payouts",
+      key: "totalCurrencyPayouts",
+      icon: Zap,
+      tooltip: "Total currency payouts distributed to members",
+    },
+  ];
+
+  const modulePerformanceList = [
+    {
+      title: "Communities",
+      icon: Users,
+      color: "text-blue-600",
+      href: "/communities",
+    },
+    {
+      title: "Events",
+      icon: Calendar,
+      color: "text-orange-600",
+      href: "/events",
+    },
+    { title: "Jobs", icon: Target, color: "text-emerald-600", href: "/jobs" },
+    {
+      title: "Shop",
+      icon: ShoppingBag,
+      color: "text-purple-600",
+      href: "/shop",
+    },
+    {
+      title: "Listings",
+      icon: ShoppingBag,
+      color: "text-violet-600",
+      href: "/listing",
+    },
+    {
+      title: "Polls",
+      icon: FileText,
+      color: "text-yellow-600",
+      href: "/polls",
+    },
+    {
+      title: "Surveys",
+      icon: FileText,
+      color: "text-amber-600",
+      href: "/surveys",
+    },
+    {
+      title: "Discussions",
+      icon: MessageSquare,
+      color: "text-pink-600",
+      href: "/forums",
+    },
+    {
+      title: "Gamification",
+      icon: Trophy,
+      color: "text-amber-600",
+      href: "/gamification/points-and-badges",
+    },
+    {
+      title: "Leaderboard",
+      icon: Trophy,
+      color: "text-yellow-600",
+      href: "/gamification/points-and-badges",
+    },
+    {
+      title: "Offers",
+      icon: Target,
+      color: "text-rose-600",
+      href: "/offers",
+    },
+    {
+      title: "Stories",
+      icon: Sparkles,
+      color: "text-violet-600",
+      href: "/stories/settings",
+    },
+    {
+      title: "Mentorship",
+      icon: Users,
+      color: "text-cyan-600",
+      href: "/mentorship",
+    },
+    {
+      title: "Moderation",
+      icon: Shield,
+      color: "text-red-600",
+      href: "/moderation",
+    },
+  ];
+
   const getMetric = (key: string): DashboardMetricValue => {
     if (!kpis || !(key in kpis)) {
       return {};
@@ -206,16 +484,16 @@ export default function Dashboard() {
     return isDashboardMetricValue(metric) ? metric : {};
   };
 
-  const totalReported =
-    kpis?.moderationStats?.reduce((acc, curr) => acc + curr.count, 0) || 0;
-
-
+  const visibleFeatureModules = showAllFeatureModules
+    ? modulePerformanceList
+    : modulePerformanceList.slice(0, 9);
 
   return (
     <EcosystemWrapper className="m-2">
       <EcosystemHeader
         title="Community Overview"
-        description="Your community at a glance"
+        badgeText="Live Stats"
+        description="Track how your community is growing, engaging, and interacting in real-time."
         icon={Activity}
         actions={
           <div className="flex items-center gap-3">
@@ -229,13 +507,9 @@ export default function Dashboard() {
               variant="outline"
               size="icon"
               className="h-9 w-9 text-zinc-400 hover:text-indigo-600 rounded-lg transition-all"
-              onClick={handleRefresh}
-              disabled={loading || isRefreshing}
+              onClick={() => refetch()}
             >
-              <RotateCcw
-                size={14}
-                className={cn((loading || isRefreshing) && "animate-spin")}
-              />
+              <RotateCcw size={14} className={cn(loading && "animate-spin")} />
             </Button>
           </div>
         }
@@ -246,34 +520,259 @@ export default function Dashboard() {
         <SubscriptionLimitBanner subscriptionInfo={subscriptionInfo} />
 
         {/* 1. Core Stats */}
-        <DashboardCoreInsights
-          loading={loadingKpis}
-          getMetric={getMetric}
-          DashboardSectionHeading={DashboardSectionHeading}
-        />
+        <section className="space-y-3">
+          <DashboardSectionHeading title="Core Community Stats" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {vitals.map((v) => {
+              const item = getMetric(v.key);
+              return (
+                <EcosystemKPI
+                  key={v.key}
+                  title={v.title}
+                  value={loading ? "..." : (item?.value ?? "0")}
+                  trend={item?.change ?? 0}
+                  trendData={item?.trend ?? [0, 0, 0, 0, 0, 0, 0]}
+                  icon={v.icon}
+                  color={v.color}
+                  suffix={(v as any).suffix}
+                  tooltip={(v as any).tooltip}
+                />
+              );
+            })}
+          </div>
+        </section>
 
-        <DashboardTrafficSessions
-          DashboardSectionHeading={DashboardSectionHeading}
-        />
+        <div className="grid grid-cols-1 lg:grid-cols-10 gap-4">
+          <section className="lg:col-span-7 space-y-4">
+            <DashboardSectionHeading title="Platform Traffic" />
+            <DashboardDistributionChart />
+          </section>
+          <section className="lg:col-span-3 space-y-4">
+            <DashboardSectionHeading title="Login Sessions" />
+            <DashboardSessionRadarChart />
+          </section>
+        </div>
 
         {/* 2. Content & Feed */}
-        <DashboardContentFeed
-          loading={loadingKpis}
-          kpis={kpis}
-          getMetric={getMetric}
-          DashboardSectionHeading={DashboardSectionHeading}
-        />
+        <section className="space-y-3 mt-20">
+          <DashboardSectionHeading title="Content & Feed" />
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+            <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6">
+              {contentFeed.map((v) => {
+                const item = getMetric(v.key);
+                return (
+                  <EcosystemKPI
+                    key={v.key}
+                    title={v.title}
+                    value={loading ? "..." : (item?.value ?? "0")}
+                    trend={item?.change ?? 0}
+                    trendData={item?.trend ?? [0, 0, 0, 0, 0, 0, 0]}
+                    icon={v.icon}
+                    suffix={(v as any).suffix}
+                    tooltip={(v as any).tooltip}
+                  />
+                );
+              })}
+            </div>
+
+            {/* Content Type Breakdown */}
+            <div className="lg:col-span-4 rounded-2xl border border-border/50 bg-card p-5 shadow-sm">
+              <div className="flex items-center justify-between mb-5">
+                <div>
+                  <p className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em] mb-0.5">
+                    What members post
+                  </p>
+                  <h3 className="text-sm font-semibold text-foreground leading-none">
+                    Content Mix
+                  </h3>
+                </div>
+                {kpis?.contentTypeBreakdown &&
+                  kpis.contentTypeBreakdown.length > 2 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-[10px] text-muted-foreground font-medium h-7 px-2 rounded-lg hover:bg-muted"
+                      onClick={() =>
+                        setShowAllContentTypes(!showAllContentTypes)
+                      }
+                    >
+                      {showAllContentTypes ? "Less" : "More"}
+                    </Button>
+                  )}
+              </div>
+              <div className="space-y-4">
+                {(showAllContentTypes
+                  ? kpis?.contentTypeBreakdown
+                  : kpis?.contentTypeBreakdown?.slice(0, 2)
+                )?.map((item, i) => {
+                  const barColors = [
+                    "bg-gradient-to-r from-indigo-500 to-blue-400",
+                    "bg-gradient-to-r from-violet-500 to-purple-400",
+                    "bg-gradient-to-r from-pink-500 to-rose-400",
+                    "bg-gradient-to-r from-amber-500 to-orange-400",
+                    "bg-gradient-to-r from-emerald-500 to-teal-400",
+                  ];
+                  return (
+                    <div key={i} className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] text-foreground/80 font-medium capitalize">
+                          {item?.type?.toLowerCase() === "dashboard"
+                            ? "Text feed"
+                            : item?.type?.replace(/[-_]/g, " ")?.toLowerCase()}
+                        </span>
+                        <span className="text-[11px] font-bold text-foreground tabular-nums">
+                          {Math?.round(item?.percentage)}%
+                        </span>
+                      </div>
+                      <div className="h-1.5 w-full bg-muted/80 rounded-full overflow-hidden">
+                        <div
+                          className={cn(
+                            "h-full rounded-full transition-all duration-700 ease-out",
+                            barColors[i % barColors.length],
+                          )}
+                          style={{ width: `${item.percentage}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                }) || (
+                  <div className="flex flex-col items-center justify-center h-36 text-muted-foreground/40 text-[11px]">
+                    No data available
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
 
         {/* 3. Moderation Overview & Module Performance */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-          <DashboardSafetyModeration
-            kpis={kpis}
-            DashboardSectionHeading={DashboardSectionHeading}
-          />
-          <DashboardQuickStats
-            featureModules={featureModules}
-            DashboardSectionHeading={DashboardSectionHeading}
-          />
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Moderation */}
+          <section className="lg:col-span-4 space-y-3">
+            <DashboardSectionHeading
+              title="Safety & Moderation"
+              icon={<Shield className="h-3.5 w-3.5 text-rose-500" />}
+              titleClassName="text-rose-600 dark:text-rose-400"
+              rightElement={
+                <div className="text-rose-600 dark:text-rose-400 text-[10px] font-bold px-2.5 py-1 rounded-full bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/25 tabular-nums">
+                  {kpis?.moderationStats?.reduce(
+                    (acc, s) =>
+                      acc +
+                      (s.status === "Urgent" || s.status === "Review"
+                        ? s.count
+                        : 0),
+                    0,
+                  ) ?? 0}{" "}
+                  pending
+                </div>
+              }
+            />
+
+            <div className="rounded-2xl border border-border/50 bg-card overflow-hidden shadow-sm">
+              {/* Table header */}
+              <div className="grid grid-cols-3 border-b border-border/50 bg-muted/30 px-4 py-2.5">
+                <span className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em]">
+                  Type
+                </span>
+                <span className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em]">
+                  Count
+                </span>
+                <span className="text-[9px] font-bold text-muted-foreground/60 uppercase tracking-[0.2em]">
+                  Status
+                </span>
+              </div>
+              <div className="divide-y divide-border/40">
+                {kpis?.moderationStats?.map((stat, i) => (
+                  <div
+                    key={i}
+                    className="grid grid-cols-3 items-center px-4 py-3 hover:bg-muted/25 transition-colors"
+                  >
+                    <span className="text-[12px] text-foreground/85 font-medium truncate pr-2">
+                      {stat.type}
+                    </span>
+                    <span className="text-[13px] font-bold text-foreground tabular-nums">
+                      {stat.count}
+                    </span>
+                    <div>
+                      <span
+                        className={cn(
+                          "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider",
+                          stat.status === "Urgent"
+                            ? "bg-rose-500/10 text-rose-600 dark:text-rose-400"
+                            : stat.status === "Review"
+                              ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                              : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            "h-1 w-1 rounded-full",
+                            stat.status === "Urgent"
+                              ? "bg-rose-500"
+                              : stat.status === "Review"
+                                ? "bg-amber-500"
+                                : "bg-emerald-500",
+                          )}
+                        />
+                        {stat.status}
+                      </span>
+                    </div>
+                  </div>
+                )) || (
+                  <div className="px-4 py-10 text-center text-[11px] text-muted-foreground/40">
+                    <Shield className="h-6 w-6 mx-auto mb-2 opacity-30" />
+                    No active alerts
+                  </div>
+                )}
+              </div>
+            </div>
+          </section>
+
+          {/* Module Performance Grid */}
+          <section className="lg:col-span-8 space-y-3">
+            <DashboardSectionHeading
+              title="Feature Modules"
+              rightElement={
+                modulePerformanceList.length > 9 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-[10px] text-muted-foreground font-medium h-7 px-2.5 rounded-lg hover:bg-muted"
+                    onClick={() => setShowAllFeatureModules((prev) => !prev)}
+                  >
+                    {showAllFeatureModules ? "View less" : "View More"}
+                  </Button>
+                )
+              }
+            />
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5">
+              {visibleFeatureModules.map((mod) => {
+                const dataItem = featureModules?.find(
+                  (m) =>
+                    m.module.toLowerCase() === mod.title.toLowerCase() ||
+                    m.module.includes(mod.title) ||
+                    mod.title.includes(m.module),
+                );
+                const card = (
+                  <ModulePerformanceCard
+                    title={mod.title}
+                    icon={mod.icon}
+                    value={dataItem?.value?.toString() ?? "0"}
+                    subtext={dataItem?.subtext ?? "Initializing..."}
+                    color={mod.color}
+                  />
+                );
+
+                return mod.href ? (
+                  <Link href={mod.href} key={mod.title} className="block">
+                    {card}
+                  </Link>
+                ) : (
+                  <div key={mod.title}>{card}</div>
+                );
+              })}
+            </div>
+          </section>
         </div>
 
         {/* 3.5. Insights Row (Growth & Content Breakdown) */}
@@ -283,7 +782,7 @@ export default function Dashboard() {
             <DashboardGrowthChart />
           </section>
           <section className="space-y-3">
-            <DashboardSectionHeading title="CONTENT INSIGHTS" />
+            <DashboardSectionHeading title="Content Breakdown" />
             <DashboardContentBreakdownChart
               data={kpis?.contentTypeBreakdown || []}
               // loading={kpisLoading}
@@ -292,16 +791,31 @@ export default function Dashboard() {
         </div>
 
         {/* 4. Growing & Keeping Members */}
-        <DashboardAcquisition
-          loading={loadingKpis}
-          getMetric={getMetric}
-          DashboardSectionHeading={DashboardSectionHeading}
-        />
+        <section className="space-y-3 mt-20">
+          <DashboardSectionHeading title="Growing & Keeping Members" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {acquisitionRet.map((v) => {
+              const item = getMetric(v.key);
+              return (
+                <EcosystemKPI
+                  key={v.key}
+                  title={v.title}
+                  value={loading ? "..." : (item?.value ?? "0")}
+                  trend={item?.change ?? 0}
+                  trendData={item?.trend ?? [0, 0, 0, 0, 0, 0, 0]}
+                  icon={v.icon}
+                  suffix={(v as any).suffix}
+                  tooltip={(v as any).tooltip}
+                />
+              );
+            })}
+          </div>
+        </section>
 
         {/* 4.5. Gamification Leaderboard + Activity Log + Impact Score */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mt-20">
           {/* Leaderboard */}
-          <section className="space-y-3 flex flex-col h-full">
+          <section className="space-y-3">
             <DashboardSectionHeading
               title="Gamification Leaderboard"
               icon={<Trophy className="h-3.5 w-3.5 text-amber-500" />}
@@ -317,7 +831,7 @@ export default function Dashboard() {
                 </Link>
               }
             />
-            <div className="rounded-2xl border border-border/50 bg-card overflow-hidden shadow-sm flex-1">
+            <div className="rounded-2xl border border-border/50 bg-card overflow-hidden shadow-sm">
               {loadingLeaderboard ? (
                 <div className="divide-y divide-border/40">
                   {[1, 2, 3, 4, 5].map((i) => (
@@ -424,7 +938,7 @@ export default function Dashboard() {
           </section>
 
           {/* Activity Log */}
-          <section className="space-y-3 flex flex-col h-full">
+          <section className="space-y-3">
             <DashboardSectionHeading
               title="Activity Log"
               icon={<History className="h-3.5 w-3.5 text-indigo-500" />}
@@ -440,7 +954,7 @@ export default function Dashboard() {
                 </Link>
               }
             />
-            <div className="rounded-2xl border border-border/50 bg-card overflow-hidden shadow-sm flex-1">
+            <div className="rounded-2xl border border-border/50 bg-card overflow-hidden shadow-sm">
               {loadingActivityLog ? (
                 <div className="divide-y divide-border/40">
                   {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
@@ -571,7 +1085,7 @@ export default function Dashboard() {
           </section>
 
           {/* Impact Score */}
-          <section className="space-y-3 flex flex-col h-full">
+          <section className="space-y-3">
             <DashboardSectionHeading
               title="Impact Score"
               icon={<Users className="h-3.5 w-3.5 text-rose-500" />}
@@ -587,7 +1101,7 @@ export default function Dashboard() {
                 </Link>
               }
             />
-            <div className="rounded-2xl border border-border/50 bg-card overflow-hidden shadow-sm flex-1">
+            <div className="rounded-2xl border border-border/50 bg-card overflow-hidden shadow-sm h-full">
               {loadingImpact ? (
                 <div className="divide-y divide-border/40">
                   {[1, 2, 3, 4, 5].map((i) => (
@@ -690,13 +1204,34 @@ export default function Dashboard() {
         </div>
 
         {/* 5. Platform Storage & Subscription Details Row */}
-        <DashboardPlatformStorage
-          statsLoading={statsLoading}
-          summaryLoading={summaryLoading}
-          storageStats={storageStats}
-          storageSummary={storageSummary}
-          DashboardSectionHeading={DashboardSectionHeading}
-        />
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Storage Stats */}
+          <section className="lg:col-span-4 space-y-3">
+            <DashboardSectionHeading
+              title="Platform Storage"
+              icon={<Database className="h-3.5 w-3.5 text-slate-500" />}
+            />
+            <div className="h-full">
+              {statsLoading || summaryLoading ? (
+                <div className="h-[280px] border border-border/70 rounded-2xl bg-gradient-to-b from-background to-muted/25 animate-pulse flex items-center justify-center">
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium">
+                    Crunching usage data...
+                  </span>
+                </div>
+              ) : (
+                <StorageStats stats={storageStats} summary={storageSummary} />
+              )}
+            </div>
+          </section>
+
+          {/* Subscription Details */}
+          <section className="lg:col-span-8 space-y-3">
+            <DashboardSectionHeading title="Subscription Details" />
+            <div className="h-full">
+              <PlanOverview />
+            </div>
+          </section>
+        </div>
       </EcosystemContainer>
     </EcosystemWrapper>
   );

@@ -9,7 +9,6 @@ import { LayoutGrid, List as ListIcon, Users, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CommunityCard from "./community-card";
 
-
 import { cn } from "@/lib/utils";
 
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
@@ -63,8 +62,6 @@ export default function Communities({
         c.description?.toLowerCase().includes(search.toLowerCase()),
     );
   }, [communities, search]);
-
-
 
   return (
     <EcosystemWrapper>

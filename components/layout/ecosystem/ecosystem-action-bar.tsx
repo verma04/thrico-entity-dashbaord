@@ -243,19 +243,7 @@ export function EcosystemActionBarSelect({
           className,
         )}
       >
-        <div className="flex items-center gap-1.5 truncate">
-          {currentOption?.dot && (
-            <span
-              className={cn("h-1.5 w-1.5 rounded-full shrink-0", currentOption.dot)}
-            />
-          )}
-          {currentOption?.icon && (
-            <currentOption.icon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-          )}
-          <span className="truncate">
-            <SelectValue placeholder={placeholder} />
-          </span>
-        </div>
+        <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent className="rounded-lg border-border shadow-md p-1 min-w-[120px]">
         {options.map((opt) => (

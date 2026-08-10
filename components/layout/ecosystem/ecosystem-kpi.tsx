@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { formatNumber } from "@/lib/formatNumber";
 import { ResponsiveContainer, AreaChart, Area } from "recharts";
+import Link from "next/link";
 import {
   Tooltip,
   TooltipContent,
@@ -35,6 +36,7 @@ export interface EcosystemKPIProps {
     | "purple"
     | "orange"
     | "slate";
+  href?: string;
 }
 
 const colorStyles = {
@@ -103,6 +105,7 @@ export function EcosystemKPI({
   tooltip,
   suffix = "",
   colorScheme,
+  href,
 }: EcosystemKPIProps) {
   const isPositive = trend !== undefined && trend >= 0;
   const isNegative = trend !== undefined && trend < 0;
@@ -120,13 +123,8 @@ export function EcosystemKPI({
   const formattedValue =
     typeof value === "number" ? formatNumber(value) : value;
 
-  return (
-    <div
-      className={cn(
-        "relative flex flex-col p-3 rounded-[12px] border transition-all duration-300 hover:shadow-sm overflow-hidden",
-        currentStyle.bg,
-      )}
-    >
+  const content = (
+    <>
       <div className="flex items-start justify-between relative z-10">
         {Icon ? (
           <div
@@ -163,12 +161,12 @@ export function EcosystemKPI({
       </div>
 
       <div className="mt-2 relative z-10">
-        <h3 className="text-[8px] font-bold text-muted-foreground/60 uppercase tracking-[0.1em] mb-0.5 leading-tight">
+        <h3 className="text-[8px] font-bold text-muted-foreground/60 uppercase tracking-[0.1em] mb-0.5 leading-tight group-hover:text-primary transition-colors">
           {title}
         </h3>
 
         <div className="flex items-end gap-1.5">
-          <span className="text-base font-bold text-foreground tracking-tight leading-none tabular-nums">
+          <span className="text-base font-bold text-foreground tracking-tight leading-none tabular-nums group-hover:text-primary transition-colors">
             {formattedValue}
             {suffix}
           </span>
@@ -239,6 +237,26 @@ export function EcosystemKPI({
           </AreaChart>
         </ResponsiveContainer>
       </div>
+    </>
+  );
+
+  const wrapperClasses = cn(
+    "relative flex flex-col p-3 rounded-[12px] border transition-all duration-300 hover:shadow-sm overflow-hidden",
+    currentStyle.bg,
+    href ? "cursor-pointer hover:border-primary/50 group" : ""
+  );
+
+  if (href) {
+    return (
+      <Link href={href} className={wrapperClasses}>
+        {content}
+      </Link>
+    );
+  }
+
+  return (
+    <div className={wrapperClasses}>
+      {content}
     </div>
   );
 }

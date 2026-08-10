@@ -199,7 +199,7 @@ const PlanOverview = () => {
         <div className="grid grid-cols-1 gap-4">
           <StatCard
             icon={Users}
-            label="Team Members"
+            label="Total Members"
             used={planOverview?.userUsage?.used ?? 0}
             limit={planOverview?.userUsage?.limit ?? 0}
           />
@@ -219,7 +219,7 @@ const PlanOverview = () => {
             <Boxes className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
           </div>
           <div>
-            <p className="text-[12px] font-semibold text-foreground leading-none">Modules</p>
+            <p className="text-[12px] font-semibold text-foreground leading-none">Modules & Features</p>
             <p className="text-[11px] text-muted-foreground mt-1">
               Active modules in your plan
             </p>

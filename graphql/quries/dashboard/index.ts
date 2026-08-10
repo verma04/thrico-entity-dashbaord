@@ -28,8 +28,7 @@ export const GET_FEATURE_MODULE_PERFORMANCE = gql`
   query GetFeatureModulePerformance($timeRange: TimeRange, $dateRange: DateRangeInput) {
     getFeatureModulePerformance(timeRange: $timeRange, dateRange: $dateRange) {
       module
-      value
-      subtext
+      stats
     }
   }
 `;
@@ -163,8 +162,7 @@ export const GET_COMMUNITY_KPIS = gql`
       # 5. Module Performance
       modulePerformance {
         module
-        value
-        subtext
+        stats
       }
     }
   }

@@ -24,8 +24,18 @@ export function LeaderboardManager() {
     notifyOnNetworkStatusChange: true,
   });
 
+  const [search, setSearch] = useState("");
+
   const leaderboard = data?.getLeaderboard;
   const entries = leaderboard?.entries || [];
+
+  const filteredEntries = React.useMemo(() => {
+    if (!search) return entries;
+    return entries.filter((e: any) => {
+      const name = `${e.user.firstName} ${e.user.lastName}`.toLowerCase();
+      return name.includes(search.toLowerCase());
+    });
+  }, [entries, search]);
 
   return (
     <EcosystemWrapper>
@@ -72,7 +82,16 @@ export function LeaderboardManager() {
         </div>
 
         <div className="px-6">
-          <LeaderboardTable entries={entries} isLoading={loading} />
+          <EcosystemActionBar shadow="sm" className="">
+            <EcosystemActionBar.Item grow className="max-w-sm">
+              <EcosystemActionBar.Search
+                value={search}
+                onChange={setSearch}
+                placeholder="Search members..."
+              />
+            </EcosystemActionBar.Item>
+          </EcosystemActionBar>
+          <LeaderboardTable entries={filteredEntries} isLoading={loading} />
         </div>
       </EcosystemContainer>
     </EcosystemWrapper>
