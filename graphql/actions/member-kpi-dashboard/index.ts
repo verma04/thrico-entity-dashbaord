@@ -90,5 +90,7 @@ export const useGetMemberKPIDashboard = (
     { timeRange?: TimeRange; dateRange?: DateRangeInput }
   >(GET_MEMBER_KPI_DASHBOARD, {
     variables: { timeRange, dateRange },
+    fetchPolicy: "cache-and-network",
+    notifyOnNetworkStatusChange: true,
     ...options,
   });

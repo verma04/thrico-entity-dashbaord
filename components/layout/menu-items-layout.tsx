@@ -1,9 +1,23 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Wrench, AlertTriangle, X, Lock } from "lucide-react";
+import {
+  LayoutDashboard,
+  Wrench,
+  AlertTriangle,
+  X,
+  Lock,
+  GripVertical,
+} from "lucide-react";
 import { motion } from "framer-motion";
+import {
+  DragDropContext,
+  Droppable,
+  Draggable,
+  DropResult,
+} from "@hello-pangea/dnd";
 import { cn } from "@/lib/utils";
 import { useUserStore } from "@/store/store";
 
@@ -26,37 +40,26 @@ type MenuItemsLayoutProps = {
   fullHeight?: boolean;
   fixed?: boolean;
   className?: string;
+  enableReorder?: boolean;
+  onReorder?: (newOrder: string[]) => void;
 };
 
 /* ─── Single Tab Button ─────────────────────────────────────────────────── */
 function TabButton({
   item,
   isActive,
-  onClick,
+  href,
   fullWidth,
 }: {
   item: MenuItem;
   isActive: boolean;
-  onClick: () => void;
+  href: string;
   fullWidth?: boolean;
 }) {
-  return (
-    <button
-      onClick={item.locked ? undefined : onClick}
-      className={cn(
-        "relative px-4 py-3  text-[12px] font-medium transition-colors duration-150 outline-none whitespace-nowrap",
-        item.locked
-          ? "cursor-not-allowed opacity-40 text-muted-foreground"
-          : isActive
-            ? "text-foreground"
-            : "text-muted-foreground hover:text-foreground",
-        fullWidth && "flex-1 text-center",
-      )}
-    >
-      <span className="flex items-center gap-1.5">
-        {item.label}
-        {item.locked && <Lock className="h-3 w-3 text-muted-foreground/50" />}
-      </span>
+  const content = (
+    <>
+      {item.label}
+      {item.locked && <Lock className="h-3 w-3 text-muted-foreground/50" />}
 
       {/* Active underline indicator */}
       {isActive && !item.locked && (
@@ -66,7 +69,31 @@ function TabButton({
           transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
         />
       )}
-    </button>
+    </>
+  );
+
+  const className = cn(
+    "relative px-4 py-3  text-[12px] font-medium transition-colors duration-150 outline-none whitespace-nowrap flex items-center gap-1.5",
+    item.locked
+      ? "cursor-not-allowed opacity-40 text-muted-foreground"
+      : isActive
+        ? "text-foreground"
+        : "text-muted-foreground hover:text-foreground",
+    fullWidth && "flex-1 justify-center",
+  );
+
+  if (item.locked) {
+    return (
+      <button className={className} disabled>
+        {content}
+      </button>
+    );
+  }
+
+  return (
+    <Link href={href} className={className} draggable={false}>
+      {content}
+    </Link>
   );
 }
 
@@ -77,8 +104,10 @@ function MenuTabs({
   sortedSectionNames,
   activeTab,
   fullKey,
-  onChange,
+  activeBase,
   onClose,
+  enableReorder,
+  onReorder,
 }: {
   fullWidth: boolean;
   fixed: boolean;
@@ -86,34 +115,95 @@ function MenuTabs({
   sortedSectionNames: string[];
   activeTab: string;
   fullKey: string;
-  onChange: (key: string) => void;
+  activeBase: string;
   onClose: () => void;
+  enableReorder?: boolean;
+  onReorder?: (newOrder: string[]) => void;
 }) {
+  const handleDragEnd = (result: DropResult) => {
+    if (!result.destination || !onReorder) return;
+    const { source, destination } = result;
+    if (source.index === destination.index) return;
+
+    // Flatten the items to reorder
+    const allItems = sortedSectionNames.flatMap((section) => sections[section]);
+    const itemsCopy = [...allItems];
+    const [reorderedItem] = itemsCopy.splice(source.index, 1);
+    itemsCopy.splice(destination.index, 0, reorderedItem);
+    onReorder(itemsCopy.map((i) => i.key));
+  };
+
+  const renderTabs = () => {
+    return sortedSectionNames.map((sectionName) => (
+      <React.Fragment key={sectionName}>
+        {sections[sectionName].map((item, index) => {
+          const href =
+            item.key === "dashboard" || item.key === ""
+              ? `/${activeBase}`
+              : `/${activeBase}/${item.key}`;
+
+          const tabButton = (
+            <TabButton
+              key={item.key}
+              item={item}
+              isActive={
+                activeTab === item.key || fullKey.startsWith(item.key + "/")
+              }
+              href={href}
+              fullWidth={fullWidth}
+            />
+          );
+
+          if (enableReorder) {
+            return (
+              <Draggable key={item.key} draggableId={item.key} index={index}>
+                {(provided) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.draggableProps}
+                    {...provided.dragHandleProps}
+                  >
+                    {tabButton}
+                  </div>
+                )}
+              </Draggable>
+            );
+          }
+
+          return tabButton;
+        })}
+      </React.Fragment>
+    ));
+  };
+
   return (
-    <nav className="sticky top-0 z-10 bg-white dark:bg-background border-t border-b border-border">
+    <nav className="sticky top-0 z-40 bg-white dark:bg-background border-t border-b border-border">
       <div className={cn("px-6 relative", !fullWidth && "max-w-7xl mx-auto")}>
-        <div className="flex items-center gap-0 overflow-x-auto no-scrollbar">
-          {sortedSectionNames.map((sectionName) => (
-            <React.Fragment key={sectionName}>
-              {sections[sectionName].map((item) => (
-                <TabButton
-                  key={item.key}
-                  item={item}
-                  isActive={
-                    activeTab === item.key || fullKey.startsWith(item.key + "/")
-                  }
-                  onClick={() => onChange(item.key)}
-                  fullWidth={fullWidth}
-                />
-              ))}
-            </React.Fragment>
-          ))}
-        </div>
+        {enableReorder ? (
+          <DragDropContext onDragEnd={handleDragEnd}>
+            <Droppable droppableId="menu-tabs" direction="horizontal">
+              {(provided) => (
+                <div
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}
+                  className="flex items-center gap-0 overflow-x-auto no-scrollbar"
+                >
+                  {renderTabs()}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </DragDropContext>
+        ) : (
+          <div className="flex items-center gap-0 overflow-x-auto no-scrollbar">
+            {renderTabs()}
+          </div>
+        )}
 
         {fixed && (
           <button
             onClick={onClose}
-            className="absolute right-4 top-1/2 -translate-y-1/2 h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-all z-12"
+            className="absolute right-4 top-1/2 -translate-y-1/2 h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-all z-50"
           >
             <X className="h-4 w-4" />
           </button>
@@ -161,6 +251,8 @@ const MenuItemsLayout = ({
   fullHeight = false,
   fixed = false,
   className,
+  enableReorder = false,
+  onReorder,
 }: MenuItemsLayoutProps) => {
   const router = useRouter();
   const pathname = usePathname();
@@ -260,11 +352,6 @@ const MenuItemsLayout = ({
     return a.localeCompare(b);
   });
 
-  const onChange = (key: string) => {
-    if (key === "dashboard" || key === "") router.push(`/${active}`);
-    else router.push(`/${active}/${key}`);
-  };
-
   return (
     <div
       className={cn(
@@ -285,8 +372,10 @@ const MenuItemsLayout = ({
           sortedSectionNames={sortedSectionNames}
           activeTab={activeTab}
           fullKey={fullKey}
-          onChange={onChange}
+          activeBase={active}
           onClose={() => router.back()}
+          enableReorder={enableReorder}
+          onReorder={onReorder}
         />
       )}
 

@@ -49,62 +49,6 @@ export function ProfileTab({ member }: { member: any }) {
         </section>
       )}
 
-      {/* Industries */}
-      {member.industries && member.industries.length > 0 && (
-        <section>
-          <SectionTitle icon={Briefcase}>Industries</SectionTitle>
-          <div className="flex flex-wrap gap-1.5">
-            {member.industries.map((industry: any) => (
-              <Badge key={industry.id} variant="secondary" className="text-xs font-medium">
-                {industry.title}
-              </Badge>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Job Functions */}
-      {member.jobFunctions && member.jobFunctions.length > 0 && (
-        <section>
-          <SectionTitle icon={Briefcase}>Job Functions</SectionTitle>
-          <div className="flex flex-wrap gap-1.5">
-            {member.jobFunctions.map((jf: any) => (
-              <Badge key={jf.id} variant="secondary" className="text-xs font-medium">
-                {jf.title}
-              </Badge>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Interests */}
-      {member.interests && member.interests.length > 0 && (
-        <section>
-          <SectionTitle icon={GraduationCap}>Interests</SectionTitle>
-          <div className="flex flex-wrap gap-1.5">
-            {member.interests.map((interest: any) => (
-              <Badge key={interest.id} variant="secondary" className="text-xs font-medium">
-                {interest.title}
-              </Badge>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Skills */}
-      {member.skills && member.skills.length > 0 && (
-        <section>
-          <SectionTitle icon={GraduationCap}>Skills</SectionTitle>
-          <div className="flex flex-wrap gap-1.5">
-            {member.skills.map((skill: any) => (
-              <Badge key={skill.skillId || skill.id} variant="secondary" className="text-xs font-medium">
-                {skill.name}
-              </Badge>
-            ))}
-          </div>
-        </section>
-      )}
-
       {/* Experience */}
       <section>
         <SectionTitle icon={Briefcase}>Experience</SectionTitle>
@@ -178,6 +122,62 @@ export function ProfileTab({ member }: { member: any }) {
           <EmptyContentSection message="No education history provided." />
         )}
       </section>
+
+      {/* Industries */}
+      {member.industries && member.industries.length > 0 && (
+        <section>
+          <SectionTitle icon={Briefcase}>Industries</SectionTitle>
+          <div className="flex flex-wrap gap-1.5">
+            {member.industries.map((industry: any) => (
+              <Badge key={industry.id} variant="secondary" className="text-xs font-medium">
+                {industry.title}
+              </Badge>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Job Functions */}
+      {member.jobFunctions && member.jobFunctions.length > 0 && (
+        <section>
+          <SectionTitle icon={Briefcase}>Job Functions</SectionTitle>
+          <div className="flex flex-wrap gap-1.5">
+            {member.jobFunctions.map((jf: any) => (
+              <Badge key={jf.id} variant="secondary" className="text-xs font-medium">
+                {jf.title}
+              </Badge>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Interests */}
+      {member.interests && member.interests.length > 0 && (
+        <section>
+          <SectionTitle icon={GraduationCap}>Interests</SectionTitle>
+          <div className="flex flex-wrap gap-1.5">
+            {member.interests.map((interest: any) => (
+              <Badge key={interest.id} variant="secondary" className="text-xs font-medium">
+                {interest.title}
+              </Badge>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Skills */}
+      {member.skills && member.skills.length > 0 && (
+        <section>
+          <SectionTitle icon={GraduationCap}>Skills</SectionTitle>
+          <div className="flex flex-wrap gap-1.5">
+            {member.skills.map((skill: any) => (
+              <Badge key={skill.skillId || skill.id} variant="secondary" className="text-xs font-medium">
+                {skill.name}
+              </Badge>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Verification */}
       {member.verification && (

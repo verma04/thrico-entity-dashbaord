@@ -10,7 +10,7 @@ import {
   useBulkAddSkills,
 } from "@/graphql/quries/skills/skill-queries";
 import { Button } from "@/components/ui/button";
-import { Plus, Filter, Loader2, LayoutGrid, Network } from "lucide-react";
+import { Plus, Loader2, LayoutGrid, Network } from "lucide-react";
 import { useDebounce } from "use-debounce";
 import {
   AlertDialog,
@@ -22,7 +22,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
+import { ClassificationActionBar } from "../../../../../components/classfications/shared/classification-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { notify } from "@/lib/notify";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -116,36 +116,14 @@ export default function SkillsPage() {
 
   return (
     <>
-      <EcosystemActionBar
-        shadow="none"
-        className="rounded-xl border border-border"
-      >
-        <EcosystemActionBar.Group>
-          <EcosystemActionBar.Item grow className="max-w-[360px]">
-            <EcosystemActionBar.Search
-              value={search}
-              onChange={setSearch}
-              placeholder="Search skills..."
-            />
-          </EcosystemActionBar.Item>
-        </EcosystemActionBar.Group>
-
-        <EcosystemActionBar.Separator />
-
-        <EcosystemActionBar.Group align="right">
-          {/* View toggle */}
-          <EcosystemActionBar.ViewToggle
-            value={activeTab}
-            onChange={setActiveTab}
-            options={[
-              { id: "list", label: "List", icon: LayoutGrid },
-              { id: "graph", label: "Graph", icon: Network },
-            ]}
-          />
-
-          <EcosystemActionBar.Separator />
-
-          <div className="flex gap-2">
+      <ClassificationActionBar
+        search={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search skills..."
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        actions={
+          <>
             <CtaButton
               variant="outline"
               onClick={handleBulkAdd}
@@ -167,25 +145,11 @@ export default function SkillsPage() {
               <Plus className="h-3.5 w-3.5" />
               Add Skill
             </CtaButton>
-          </div>
-
-          <EcosystemActionBar.Separator />
-
-          <EcosystemActionBar.Item>
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-6 w-6 rounded-md border-border bg-card text-muted-foreground hover:text-foreground shadow-sm"
-            >
-              <Filter className="h-3.5 w-3.5" />
-            </Button>
-          </EcosystemActionBar.Item>
-
-          <EcosystemActionBar.Status active={skills.length > 0}>
-            {skills.length} Skills
-          </EcosystemActionBar.Status>
-        </EcosystemActionBar.Group>
-      </EcosystemActionBar>
+          </>
+        }
+        statusText={`${skills.length} Skills`}
+        statusActive={skills.length > 0}
+      />
 
       <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0 mt-4">
         {activeTab === "list" ? (

@@ -6,7 +6,25 @@ import { Button } from "@/components/ui/button";
 import UserActions from "./user-actions";
 import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
 import { safeFormat } from "@/lib/date-utils";
-import { Mail, MapPin, Smartphone, Users } from "lucide-react";
+import {
+  Mail,
+  MapPin,
+  Smartphone,
+  Users,
+  SlidersHorizontal,
+  Trophy,
+  Award,
+  Heart,
+  Wallet,
+} from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuCheckboxItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import { UserDetail, useBulkChangeUserStatus } from "@/graphql/actions";
 import {
   AdminTable,
@@ -20,6 +38,13 @@ import {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const columns: AdminTableColumn<UserDetail>[] = [
+  {
+    key: "serial",
+    header: "S.No",
+    headerClassName: "w-12 text-center",
+    className: "text-center text-xs font-medium text-muted-foreground",
+    cell: (_, index) => index + 1,
+  },
   {
     key: "member",
     header: "Member",
@@ -88,31 +113,7 @@ const columns: AdminTableColumn<UserDetail>[] = [
       </div>
     ),
   },
-  {
-    key: "industries",
-    header: "Industries",
-    cell: (row) => (
-      <div className="flex flex-wrap gap-1 max-w-[200px]">
-        {row.industries && row.industries.length > 0 ? (
-          row.industries.slice(0, 2).map((ind: any) => (
-            <span
-              key={ind.id}
-              className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-tight bg-indigo-50 text-indigo-700 border border-indigo-100/50"
-            >
-              {ind.title}
-            </span>
-          ))
-        ) : (
-          <span className="text-[11px] text-muted-foreground/50">—</span>
-        )}
-        {row.industries && row.industries.length > 2 && (
-          <span className="text-[9px] font-bold text-muted-foreground bg-muted/50 px-1 rounded">
-            +{row.industries.length - 2}
-          </span>
-        )}
-      </div>
-    ),
-  },
+
   {
     key: "membershipTier",
     header: "Tier",
@@ -190,6 +191,7 @@ const columns: AdminTableColumn<UserDetail>[] = [
       </div>
     ),
   },
+
   {
     key: "lastSession",
     header: "Last Session",
@@ -219,20 +221,109 @@ const columns: AdminTableColumn<UserDetail>[] = [
       </div>
     ),
   },
+
+  {
+    key: "points",
+    header: "Points",
+    cell: (row: any) => (
+      <div className="text-[12px] font-medium text-indigo-600 dark:text-indigo-400">
+        {row.gamificationSummary?.totalPointsEarned?.toLocaleString() || "0"}
+      </div>
+    ),
+  },
+  {
+    key: "wallet",
+    header: "Wallet",
+    cell: (row: any) => (
+      <div className="flex items-center gap-1.5 text-[12px] font-medium text-amber-600 dark:text-amber-500">
+        <Wallet className="h-3.5 w-3.5" />
+        {row.entityCurrencyWallet?.balance
+          ? parseFloat(row.entityCurrencyWallet.balance).toLocaleString()
+          : "0"}
+      </div>
+    ),
+  },
+
+  {
+    key: "rank",
+    header: "Rank",
+    cell: (row: any) => (
+      <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
+        <Trophy className="h-3.5 w-3.5 text-muted-foreground/70" />#
+        {row.gamificationSummary?.rankPosition || "—"}
+      </div>
+    ),
+  },
+  {
+    key: "badges",
+    header: "Badges",
+    cell: (row: any) => (
+      <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
+        <Award className="h-3.5 w-3.5 text-muted-foreground/70" />
+        {row.gamificationSummary?.totalBadgesEarned || "0"}
+      </div>
+    ),
+  },
+  {
+    key: "impact",
+    header: "Impact",
+    cell: (row: any) => (
+      <div className="flex items-center gap-1.5 text-[12px] font-medium text-rose-600 dark:text-rose-400">
+        <Heart className="h-3.5 w-3.5" />
+        {row.impactScore?.toLocaleString() || "0"}
+      </div>
+    ),
+  },
+  {
+    key: "industries",
+    header: "Industries",
+    cell: (row) => (
+      <div className="flex flex-wrap gap-1 max-w-[200px]">
+        {row.industries && row.industries.length > 0 ? (
+          row.industries.slice(0, 2).map((ind: any) => (
+            <span
+              key={ind.id}
+              className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-tight bg-indigo-50 text-indigo-700 border border-indigo-100/50"
+            >
+              {ind.title}
+            </span>
+          ))
+        ) : (
+          <span className="text-[11px] text-muted-foreground/50">—</span>
+        )}
+        {row.industries && row.industries.length > 2 && (
+          <span className="text-[9px] font-bold text-muted-foreground bg-muted/50 px-1 rounded">
+            +{row.industries.length - 2}
+          </span>
+        )}
+      </div>
+    ),
+  },
   {
     key: "actions",
-    header: "",
+    header: "Action",
     headerClassName: "w-12",
     className: "text-right",
+    isFixedRight: true,
     cell: (row) => <UserActions user={row} />,
   },
 ];
+
+export const userTableColumns = columns;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Component
 // ─────────────────────────────────────────────────────────────────────────────
 
-export function UserList({ users }: { users: UserDetail[] }) {
+export function UserList({
+  users,
+  visibleColumns,
+  offset = 0,
+}: {
+  users: UserDetail[];
+  visibleColumns?: Record<string, boolean>;
+  offset?: number;
+}) {
   const [rowSelection, setRowSelection] = React.useState<
     Record<string, boolean>
   >({});
@@ -263,19 +354,24 @@ export function UserList({ users }: { users: UserDetail[] }) {
     }
   };
 
+  const activeColumns = React.useMemo(() => {
+    if (!visibleColumns) return columns;
+    return columns.filter((col) => visibleColumns[col.key] !== false);
+  }, [visibleColumns]);
+
   return (
     <div className="space-y-3">
       {/* Bulk Action Bar */}
       {selectedRowsIds.length > 0 && (
         <div className="flex items-center gap-2 p-2.5 bg-primary/5 border border-primary/10 rounded-xl animate-in fade-in slide-in-from-top-2">
-          <span className="text-xs font-semibold text-foreground px-2.5 py-1 bg-primary/10 rounded-lg">
+          <span className="text-xs font-semibold text-foreground px-2.5 py-1 bg-primary/10 rounded-lg whitespace-nowrap">
             {selectedRowsIds.length} selected
           </span>
-          <div className="h-3.5 w-px bg-border mx-1" />
+          <div className="h-3.5 w-px bg-border mx-1 shrink-0" />
           <Button
             size="sm"
             variant="outline"
-            className="h-7 text-xs font-medium border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+            className="h-7 px-2 text-xs font-medium border-emerald-200 text-emerald-700 hover:bg-emerald-50 whitespace-nowrap"
             onClick={() => handleBulkAction("APPROVE")}
             disabled={bulkLoading}
           >
@@ -284,7 +380,7 @@ export function UserList({ users }: { users: UserDetail[] }) {
           <Button
             size="sm"
             variant="outline"
-            className="h-7 text-xs font-medium border-rose-200 text-rose-700 hover:bg-rose-50"
+            className="h-7 px-2 text-xs font-medium border-rose-200 text-rose-700 hover:bg-rose-50 whitespace-nowrap"
             onClick={() => handleBulkAction("BLOCK")}
             disabled={bulkLoading}
           >
@@ -293,7 +389,7 @@ export function UserList({ users }: { users: UserDetail[] }) {
           <Button
             size="sm"
             variant="outline"
-            className="h-7 text-xs font-medium border-border text-muted-foreground hover:bg-muted"
+            className="h-7 px-2 text-xs font-medium border-border text-muted-foreground hover:bg-muted whitespace-nowrap"
             onClick={() => handleBulkAction("REJECT")}
             disabled={bulkLoading}
           >
@@ -303,13 +399,14 @@ export function UserList({ users }: { users: UserDetail[] }) {
       )}
 
       <AdminTable<UserDetail>
-        columns={columns}
+        columns={activeColumns}
         data={users}
         keyExtractor={(u) => u.id}
         emptyIcon={Users}
         emptyTitle="No members found"
         emptyDescription="Try adjusting your search or filter criteria."
         pageSize={100}
+        baseIndex={offset}
       />
     </div>
   );

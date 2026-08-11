@@ -278,13 +278,43 @@ function NodeDetailPanel({
   );
 }
 
+import { GraphFilterCombobox } from "@/components/classfications/shared/graph-filter-combobox";
+import { cn } from "@/lib/utils";
+
 export function LocationGraphView() {
-  const { data, loading } = useGetUserLocationGraph({
-    variables: { limit: 100 },
-  });
   const [selectedNode, setSelectedNode] = useState<SelectedNodeInfo | null>(
     null,
   );
+  const [selectedLocationId, setSelectedLocationId] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const { data: optionsData } = useGetUserLocationGraph({
+    variables: { limit: 1000, search: searchQuery },
+  });
+
+  const availableLocations = useMemo(() => {
+    const edges = optionsData?.getUserLocationGraph || [];
+    const locationsMap = new Map<string, any>();
+    edges.forEach((e) => {
+      if (!locationsMap.has(e.location.title)) {
+        locationsMap.set(e.location.title, {
+          id: e.location.title,
+          title: e.location.title,
+        });
+      }
+    });
+    return Array.from(locationsMap.values()).sort((a, b) =>
+      a.title.localeCompare(b.title),
+    );
+  }, [optionsData]);
+
+  const { data, loading } = useGetUserLocationGraph({
+    variables: {
+      limit: 1000,
+      locationName:
+        selectedLocationId === "all" ? undefined : selectedLocationId,
+    },
+  });
 
   const elements = useMemo(() => {
     const edges = data?.getUserLocationGraph || [];
@@ -410,25 +440,64 @@ export function LocationGraphView() {
   );
 
   return (
-    <EcosystemGraphView
-      elements={elements}
-      stylesheet={GRAPH_STYLESHEET}
-      loading={loading}
-      loadingText="Loading location graph..."
-      emptyTitle="No graph data available"
-      emptyDescription="There are no user-location relationships to visualize yet."
-      legend={legend}
-      selectedNodeId={selectedNode ? selectedNode.data.id : null}
-      onNodeSelect={handleNodeSelect}
-      onNodeDeselect={() => setSelectedNode(null)}
-      detailPanel={
-        selectedNode ? (
-          <NodeDetailPanel
-            info={selectedNode}
-            onClose={() => setSelectedNode(null)}
+    <div className="flex h-[calc(100vh-200px)] min-h-[600px] overflow-hidden rounded-xl border border-slate-200 bg-white">
+      {/* ─── LEFT: Filters Panel ──────────────────────────────── */}
+      <div className="w-64 min-w-[256px] border-r border-slate-200 flex flex-col bg-slate-50/50">
+        <div className="px-4 py-3 border-b border-slate-200">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-bold text-slate-700 uppercase tracking-widest">
+              Filters
+            </h3>
+            {selectedLocationId !== "all" && (
+              <button
+                onClick={() => setSelectedLocationId("all")}
+                className="flex items-center gap-1.5 text-[10px] font-medium text-zinc-500 hover:text-zinc-600 bg-zinc-100 hover:bg-zinc-200 px-2 py-1 rounded-md border border-zinc-200 transition-all duration-150 active:scale-95"
+              >
+                <X className="h-3 w-3" />
+                Clear
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-4">
+          <GraphFilterCombobox
+            value={selectedLocationId}
+            onChange={setSelectedLocationId}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            options={availableLocations}
+            placeholder="Search locations..."
+            allLabel="All Locations"
+            label="Filter by Location"
+            icon={<MapPin className="h-3.5 w-3.5" />}
           />
-        ) : null
-      }
-    />
+        </div>
+      </div>
+
+      {/* ─── CENTER: Graph (using EcosystemGraphView) ─────────── */}
+      <div className="flex-1 flex flex-col relative">
+        <EcosystemGraphView
+          elements={elements}
+          stylesheet={GRAPH_STYLESHEET}
+          loading={loading}
+          loadingText="Loading location graph..."
+          emptyTitle="No graph data available"
+          emptyDescription="There are no user-location relationships to visualize yet."
+          legend={legend}
+          selectedNodeId={selectedNode ? selectedNode.data.id : null}
+          onNodeSelect={handleNodeSelect}
+          onNodeDeselect={() => setSelectedNode(null)}
+          detailPanel={
+            selectedNode ? (
+              <NodeDetailPanel
+                info={selectedNode}
+                onClose={() => setSelectedNode(null)}
+              />
+            ) : null
+          }
+        />
+      </div>
+    </div>
   );
 }

@@ -249,11 +249,12 @@ export interface GetUserInterestsGraphData {
 
 export interface GetUserInterestsGraphVars {
   limit?: number;
+  interestId?: string;
 }
 
 export const GET_USER_INTERESTS_GRAPH = gql`
-  query GetUserInterestsGraph($limit: Int) {
-    getUserInterestsGraph(limit: $limit) {
+  query GetUserInterestsGraph($limit: Int, $interestId: ID) {
+    getUserInterestsGraph(limit: $limit, interestId: $interestId) {
       user {
         id
         globalUserId

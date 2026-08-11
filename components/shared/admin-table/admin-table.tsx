@@ -12,8 +12,16 @@ import {
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { ChevronLeft, ChevronRight, FileSearch } from "lucide-react";
+import { ChevronLeft, ChevronRight, FileSearch, SlidersHorizontal } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuCheckboxItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -24,6 +32,7 @@ export interface AdminTableColumn<T = any> {
   header: string;
   className?: string;
   headerClassName?: string;
+  isFixedRight?: boolean;
   cell: (row: T, index: number) => React.ReactNode;
 }
 
@@ -38,6 +47,9 @@ export interface AdminTableProps<T = any> {
   emptyDescription?: string;
   loadingRows?: number;
   className?: string;
+  enableColumnToggle?: boolean;
+  size?: "sm" | "md";
+  baseIndex?: number;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -208,6 +220,7 @@ export function Pagination({
   pageSize,
   onPageChange,
   compact = false,
+  extraTopRight,
 }: {
   currentPage: number;
   totalPages: number;
@@ -215,6 +228,7 @@ export function Pagination({
   pageSize: number;
   onPageChange: (page: number) => void;
   compact?: boolean;
+  extraTopRight?: React.ReactNode;
 }) {
   if (totalPages <= 1) return null;
 
@@ -302,7 +316,15 @@ export function Pagination({
           {" of "}
           <span className=" text-foreground">{totalPages}</span>
         </p>
-        {nav}
+        <div className="flex items-center gap-3">
+          {nav}
+          {extraTopRight && (
+            <>
+              <div className="h-4 w-px bg-border" />
+              {extraTopRight}
+            </>
+          )}
+        </div>
       </div>
     );
   }
@@ -361,14 +383,31 @@ export function AdminTable<T = any>({
   emptyDescription,
   loadingRows = 8,
   className,
+  enableColumnToggle = false,
+  size = "md",
+  baseIndex,
 }: AdminTableProps<T>) {
   const [currentPage, setCurrentPage] = useState(1);
+  const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({});
 
   const totalItems = data?.length ?? 0;
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
   const safePage = Math.min(currentPage, totalPages);
   const paginatedData =
     data?.slice((safePage - 1) * pageSize, safePage * pageSize) ?? [];
+
+  const absoluteIndexBase = (baseIndex ?? 0) + (safePage - 1) * pageSize;
+
+  const activeColumns = enableColumnToggle
+    ? columns.filter((col) => visibleColumns[col.key] !== false)
+    : columns;
+
+  const toggleColumn = (key: string) => {
+    setVisibleColumns((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  };
 
   if (loading) {
     return <TableSkeleton rows={loadingRows} cols={columns.length} />;
@@ -386,17 +425,47 @@ export function AdminTable<T = any>({
           pageSize={pageSize}
           onPageChange={setCurrentPage}
           compact
+          extraTopRight={
+            enableColumnToggle && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-6 px-2 text-[11px] font-semibold text-muted-foreground hover:text-foreground">
+                    <SlidersHorizontal className="h-3.5 w-3.5 mr-1.5" />
+                    Columns
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-[180px]">
+                  <DropdownMenuLabel className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider px-2 py-1.5">Toggle Columns</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {columns
+                    .filter((c) => !c.isFixedRight && c.header)
+                    .map((col) => (
+                      <DropdownMenuCheckboxItem
+                        key={col.key}
+                        checked={visibleColumns[col.key] !== false}
+                        onCheckedChange={() => toggleColumn(col.key)}
+                        className="text-xs font-medium cursor-pointer"
+                      >
+                        {col.header || col.key}
+                      </DropdownMenuCheckboxItem>
+                    ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )
+          }
         />
 
         <Table>
           {/* Header */}
           <TableHeader>
             <TableRow className="hover:bg-transparent border-b border-border bg-muted/30">
-              {columns.map((col) => (
+              {activeColumns.map((col) => (
                 <TableHead
                   key={col.key}
                   className={cn(
-                    "h-10 px-5 text-[10px]  uppercase tracking-widest text-muted-foreground/70 whitespace-nowrap",
+                    size === "sm" ? "h-8 px-3" : "h-10 px-5",
+                    "text-[10px] uppercase tracking-widest text-muted-foreground/70 whitespace-nowrap",
+                    col.isFixedRight && "sticky right-0 bg-muted z-10 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)]",
                     col.headerClassName,
                   )}
                 >
@@ -414,27 +483,34 @@ export function AdminTable<T = any>({
                   icon={emptyIcon}
                   title={emptyTitle}
                   description={emptyDescription}
-                  colSpan={columns.length}
+                  colSpan={activeColumns.length}
                 />
               ) : (
-                paginatedData.map((row, idx) => (
-                  <motion.tr
-                    key={keyExtractor(row, idx)}
+                paginatedData.map((row, idx) => {
+                  const absoluteIdx = absoluteIndexBase + idx;
+                  return (
+                    <motion.tr
+                      key={keyExtractor(row, idx)}
                     initial={{ opacity: 0, y: 6 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.18, delay: idx * 0.025 }}
                     className="group border-b border-border/40 last:border-0 hover:bg-muted/30 transition-colors duration-150"
                   >
-                    {columns.map((col) => (
+                    {activeColumns.map((col) => (
                       <TableCell
                         key={col.key}
-                        className={cn("px-5 py-3", col.className)}
+                        className={cn(
+                          size === "sm" ? "px-3 py-1.5" : "px-5 py-3",
+                          col.isFixedRight && "sticky right-0 bg-card group-hover:bg-muted/50 z-10 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)]",
+                          col.className
+                        )}
                       >
-                        {col.cell(row, idx)}
+                        {col.cell(row, absoluteIdx)}
                       </TableCell>
                     ))}
                   </motion.tr>
-                ))
+                  );
+                })
               )}
             </AnimatePresence>
           </TableBody>

@@ -313,6 +313,9 @@ export default function UserActions({ user }: { user: UserDetail }) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          <div className="px-2 py-1.5 text-sm font-semibold border-b border-border/50 mb-1">
+            {user.user?.firstName} {user.user?.lastName}
+          </div>
           {actions.map((action, idx) =>
             action.type === "separator" ? (
               <DropdownMenuSeparator key={idx} />

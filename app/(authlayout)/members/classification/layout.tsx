@@ -1,9 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useMemo } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import MenuItemsLayout from "@/components/layout/menu-items-layout";
 import {
   Building2,
   Briefcase,
@@ -13,10 +14,14 @@ import {
   Building,
   Type,
   MapPin,
-  AlertTriangle,
   Loader2,
 } from "lucide-react";
 import { useCheckMemberSubscription } from "@/graphql/actions/membership/membership-queries";
+import { useClassificationStore } from "@/store/classification-store";
+import {
+  useGetClassificationTabOrder,
+  useUpdateClassificationTabOrder,
+} from "@/graphql/actions/classification/classification-actions";
 
 export default function ClassificationLayout({
   children,
@@ -43,65 +48,85 @@ export default function ClassificationLayout({
                 ? "headline"
                 : pathname.includes("/members/classification/location")
                   ? "location"
-                  : "interests";
+                  : "location";
 
-  const tabs = [
+  const defaultItems = useMemo(() => [
     {
-      id: "interests",
-      label: "Interests",
-      icon: <Heart className="h-4 w-4" />,
-      href: "/members/classification/interests",
-    },
-    {
-      id: "industries",
-      label: "Industries",
-      icon: <Building2 className="h-4 w-4" />,
-      href: "/members/classification/industries",
-    },
-
-    {
-      id: "skills",
-      label: "Skills",
-      icon: <Award className="h-4 w-4" />,
-      href: "/members/classification/skills",
-    },
-    {
-      id: "functions",
-      label: "Job Functions",
-      icon: <Briefcase className="h-4 w-4" />,
-      href: "/members/classification/functions",
-    },
-    {
-      id: "experience",
-      label: "Experience",
-      icon: <Building className="h-4 w-4" />,
-      href: "/members/classification/experience",
-    },
-    {
-      id: "education",
-      label: "Education",
-      icon: <GraduationCap className="h-4 w-4" />,
-      href: "/members/classification/education",
-    },
-    {
-      id: "headline",
-      label: "Headlines",
-      icon: <Type className="h-4 w-4" />,
-      href: "/members/classification/headline",
-    },
-    {
-      id: "location",
+      key: "location",
       label: "Locations",
       icon: <MapPin className="h-4 w-4" />,
-      href: "/members/classification/location",
     },
-  ];
+    {
+      key: "experience",
+      label: "Companies",
+      icon: <Building className="h-4 w-4" />,
+    },
+    {
+      key: "education",
+      label: "Colleges",
+      icon: <GraduationCap className="h-4 w-4" />,
+    },
+    {
+      key: "industries",
+      label: "Industries",
+      icon: <Building2 className="h-4 w-4" />,
+    },
+    {
+      key: "functions",
+      label: "Job Functions",
+      icon: <Briefcase className="h-4 w-4" />,
+    },
+    {
+      key: "interests",
+      label: "Interests",
+      icon: <Heart className="h-4 w-4" />,
+    },
+    {
+      key: "skills",
+      label: "Skills",
+      icon: <Award className="h-4 w-4" />,
+    },
+    {
+      key: "headline",
+      label: "Headlines",
+      icon: <Type className="h-4 w-4" />,
+    },
+  ], []);
+
+  const { tabOrder, setTabOrder } = useClassificationStore();
+  const { data: orderData } = useGetClassificationTabOrder();
+  const [updateTabOrder] = useUpdateClassificationTabOrder();
+
+  useEffect(() => {
+    if (orderData?.getClassificationTabOrder?.tabs?.length > 0) {
+      const serverTabs = orderData.getClassificationTabOrder.tabs;
+      if (JSON.stringify(serverTabs) !== JSON.stringify(tabOrder)) {
+        setTabOrder(serverTabs);
+      }
+    }
+  }, [orderData, tabOrder, setTabOrder]);
+
+  const items = useMemo(() => {
+    if (tabOrder.length === 0) return defaultItems;
+    
+    return [...defaultItems].sort((a, b) => {
+      const indexA = tabOrder.indexOf(a.key);
+      const indexB = tabOrder.indexOf(b.key);
+      if (indexA === -1 && indexB === -1) return 0;
+      if (indexA === -1) return 1;
+      if (indexB === -1) return -1;
+      return indexA - indexB;
+    });
+  }, [defaultItems, tabOrder]);
+
+  const handleReorder = (newOrder: string[]) => {
+    setTabOrder(newOrder);
+    updateTabOrder({ variables: { input: { tabs: newOrder } } });
+  };
 
   const { data: subData, loading: subLoading } = useCheckMemberSubscription();
-  const hasReachedLimit = subData?.checkMemberSubscription?.hasReachedLimit;
   const message = subData?.checkMemberSubscription?.message;
 
-  console.log(message);
   if (subLoading) {
     return (
       <EcosystemWrapper anonymized-1="member-classifications">
@@ -112,43 +137,8 @@ export default function ClassificationLayout({
     );
   }
 
-  // if (hasReachedLimit) {
-  //   return (
-  //     <EcosystemWrapper anonymized-1="member-classifications">
-  //       <div className="flex flex-col gap-6">
-  //         <EcosystemHeader
-  //           title="Member Classifications"
-  //           badgeText="Directory Settings"
-  //           description="Manage taxonomy classifications to catalog, segment, and filter community members."
-  //           icon={Building2}
-  //         />
-  //         <div className="flex h-[400px] items-center justify-center bg-card rounded-xl border border-border p-6">
-  //           <div className="max-w-md w-full bg-amber-50 border border-amber-200 text-amber-800 rounded-2xl p-8 text-center space-y-4 shadow-sm">
-  //             <AlertTriangle className="h-12 w-12 text-amber-600 mx-auto" />
-  //             <h2 className="text-xl font-bold text-amber-900">
-  //               Feature Locked
-  //             </h2>
-  //             <p className="text-amber-700 font-medium">
-  //               {message ||
-  //                 "You have reached your subscription limit. Please upgrade your subscription to access member classifications."}
-  //             </p>
-  //             <div className="pt-4">
-  //               <button
-  //                 className="inline-flex items-center justify-center rounded-xl text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background bg-white border border-amber-200 text-amber-900 hover:bg-amber-100 h-10 py-2 px-4 w-full"
-  //                 onClick={() => router.push("/settings/subscription")}
-  //               >
-  //                 Upgrade Subscription
-  //               </button>
-  //             </div>
-  //           </div>
-  //         </div>
-  //       </div>
-  //     </EcosystemWrapper>
-  //   );
-  // }
-
   const activeTabLabel =
-    tabs.find((t) => t.id === activeTab)?.label || "Classifications";
+    items.find((t) => t.key === activeTab)?.label || "Classifications";
 
   return (
     <EcosystemWrapper anonymized-1="member-classifications">
@@ -156,42 +146,29 @@ export default function ClassificationLayout({
         <EcosystemHeader
           title="Member Classifications"
           badgeText="Directory Settings"
-          description="Manage taxonomy classifications to catalog, segment, and filter community members."
+          description="View member attribute groups and classifications"
           icon={Building2}
           breadcrumbs={[
             { label: "Members", href: "/members/all" },
             {
               label: "Classification",
-              href: "/members/classification/interests",
+              href: "/members/classification/location",
             },
             { label: activeTabLabel },
           ]}
         />
 
-        {/* Modern Sub-tabs Navigation */}
-        <div className="bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800 shadow-sm px-6 flex items-center justify-between">
-          <div className="flex gap-6">
-            {tabs.map((tab) => {
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => router.push(tab.href)}
-                  className={`flex items-center gap-2 px-1 py-4 text-sm font-semibold border-b-2 transition-all duration-200 -mb-[2px] ${
-                    isActive
-                      ? "border-zinc-900 text-zinc-900 dark:border-zinc-100 dark:text-zinc-100"
-                      : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
-                  }`}
-                >
-                  {tab.icon}
-                  {tab.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="w-full">{children}</div>
+        <MenuItemsLayout
+          items={items}
+          active="members/classification"
+          hideDefaultTabs
+          showAdminTabs={false}
+          className="mt-0 bg-transparent dark:bg-transparent border-t-0"
+          enableReorder={true}
+          onReorder={handleReorder}
+        >
+          {children}
+        </MenuItemsLayout>
       </div>
     </EcosystemWrapper>
   );

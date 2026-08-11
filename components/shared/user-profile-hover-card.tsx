@@ -20,6 +20,14 @@ import {
   Wrench,
   Heart,
   ArrowRight,
+  Trophy,
+  Medal,
+  Coins,
+  Target,
+  Gift,
+  Award,
+  Star,
+  Users
 } from "lucide-react";
 import { useGetUserDetailsById } from "@/graphql/actions/membership/membership-queries";
 import { format } from "date-fns";
@@ -42,7 +50,6 @@ export function UserProfileHoverCard({
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
-  // Fetch full profile details when the hover card is open
   const { data, loading } = useGetUserDetailsById({
     variables: { input: { id: user.id } },
     skip: !isOpen || !user.id,
@@ -112,13 +119,27 @@ export function UserProfileHoverCard({
     ? format(parsedDate, "MMMM yyyy")
     : null;
 
+  // Gamification stats
+  const gamification = fullData?.gamificationSummary;
+  const wallet = fullData?.entityCurrencyWallet;
+  const impactScore = fullData?.impactScore || 0;
+  const points = gamification?.totalPointsEarned || 0;
+  const badges = gamification?.totalBadgesEarned || 0;
+  const rank = gamification?.rankPosition || "Unranked";
+  const coins = wallet?.balance || 0;
+  const rewardsRedeemed = wallet?.totalSpent || 0;
+
+  // Connections
+  const connectionCount = fullData?.stats?.totalConnections || 0;
+
   return (
     <HoverCard openDelay={300} closeDelay={200} onOpenChange={setIsOpen}>
       <HoverCardTrigger asChild>{children}</HoverCardTrigger>
       <HoverCardContent
-        className="w-80 p-0 overflow-hidden shadow-xl border-slate-200 rounded-xl bg-white"
-        side="right"
+        className="w-80 p-0 overflow-hidden shadow-xl border-slate-200 rounded-xl bg-white z-[100]"
+        side="bottom"
         align="start"
+        sideOffset={4}
       >
         {loading && isOpen && !fullData ? (
           <div className="flex flex-col bg-slate-50">
@@ -329,6 +350,61 @@ export function UserProfileHoverCard({
                       </div>
                     </div>
                   )}
+                </div>
+              )}
+
+              {/* Gamification Summary */}
+              {fullData && (
+                <div className="mt-4 pt-3 border-t border-slate-100">
+                  <div className="flex flex-wrap gap-x-3 gap-y-2">
+                    <div className="flex items-center gap-1" title="Impact Score">
+                      <Target className="h-3.5 w-3.5 text-indigo-500" />
+                      <span className="text-xs font-semibold text-slate-700">{impactScore}</span>
+                    </div>
+                    <div className="flex items-center gap-1" title="Rank">
+                      <Award className="h-3.5 w-3.5 text-amber-500" />
+                      <span className="text-xs font-semibold text-slate-700">{rank}</span>
+                    </div>
+                    <div className="flex items-center gap-1" title="Points">
+                      <Star className="h-3.5 w-3.5 text-yellow-500" />
+                      <span className="text-xs font-semibold text-slate-700">{points}</span>
+                    </div>
+                    <div className="flex items-center gap-1" title="Badges">
+                      <Medal className="h-3.5 w-3.5 text-emerald-500" />
+                      <span className="text-xs font-semibold text-slate-700">{badges}</span>
+                    </div>
+                    <div className="flex items-center gap-1" title="Coins">
+                      <Coins className="h-3.5 w-3.5 text-orange-500" />
+                      <span className="text-xs font-semibold text-slate-700">{coins}</span>
+                    </div>
+                    <div className="flex items-center gap-1" title="Rewards Redeemed">
+                      <Gift className="h-3.5 w-3.5 text-rose-500" />
+                      <span className="text-xs font-semibold text-slate-700">{rewardsRedeemed}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Connections Summary */}
+              {connectionCount > 0 && (
+                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-slate-700">
+                    <Users className="h-4 w-4 text-slate-500" />
+                    <span className="text-xs font-semibold">{connectionCount} Connections</span>
+                  </div>
+                  <div className="flex -space-x-2 overflow-hidden">
+                    {/* Placeholder avatars until backend supports fetching connection photos */}
+                    {Array.from({ length: Math.min(3, connectionCount) }).map((_, idx) => (
+                      <Avatar key={idx} className="inline-block h-6 w-6 rounded-full ring-2 ring-white">
+                        <AvatarFallback className="text-[9px] bg-slate-100 text-slate-400">U</AvatarFallback>
+                      </Avatar>
+                    ))}
+                    {connectionCount > 3 && (
+                      <div className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 ring-2 ring-white text-[9px] font-medium text-slate-600 z-10">
+                        +{connectionCount - 3}
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 

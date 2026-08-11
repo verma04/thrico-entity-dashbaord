@@ -1,4 +1,10 @@
-import { gql, QueryHookOptions, useQuery, useMutation, MutationHookOptions } from "@apollo/client";
+import {
+  gql,
+  QueryHookOptions,
+  useQuery,
+  useMutation,
+  MutationHookOptions,
+} from "@apollo/client";
 
 // ---------------------------------------------------------
 // TYPES
@@ -36,8 +42,13 @@ export const GET_INDUSTRIES = gql`
   }
 `;
 
-export function useGetIndustries(options?: QueryHookOptions<GetIndustriesData, GetIndustriesVars>) {
-  return useQuery<GetIndustriesData, GetIndustriesVars>(GET_INDUSTRIES, options);
+export function useGetIndustries(
+  options?: QueryHookOptions<GetIndustriesData, GetIndustriesVars>,
+) {
+  return useQuery<GetIndustriesData, GetIndustriesVars>(
+    GET_INDUSTRIES,
+    options,
+  );
 }
 
 // ---------------------------------------------------------
@@ -63,7 +74,10 @@ export const ADD_INDUSTRY = gql`
 `;
 
 export function useAddIndustry(
-  options?: MutationHookOptions<AddIndustryResponse, { input: AddIndustryInput }>,
+  options?: MutationHookOptions<
+    AddIndustryResponse,
+    { input: AddIndustryInput }
+  >,
 ) {
   return useMutation<AddIndustryResponse, { input: AddIndustryInput }>(
     ADD_INDUSTRY,
@@ -95,7 +109,10 @@ export const UPDATE_INDUSTRY = gql`
 `;
 
 export function useUpdateIndustry(
-  options?: MutationHookOptions<UpdateIndustryResponse, { input: UpdateIndustryInput }>,
+  options?: MutationHookOptions<
+    UpdateIndustryResponse,
+    { input: UpdateIndustryInput }
+  >,
 ) {
   return useMutation<UpdateIndustryResponse, { input: UpdateIndustryInput }>(
     UPDATE_INDUSTRY,
@@ -125,7 +142,10 @@ export const DELETE_INDUSTRY = gql`
 `;
 
 export function useDeleteIndustry(
-  options?: MutationHookOptions<DeleteIndustryResponse, { input: DeleteIndustryInput }>,
+  options?: MutationHookOptions<
+    DeleteIndustryResponse,
+    { input: DeleteIndustryInput }
+  >,
 ) {
   return useMutation<DeleteIndustryResponse, { input: DeleteIndustryInput }>(
     DELETE_INDUSTRY,
@@ -155,7 +175,10 @@ export const BULK_ADD_INDUSTRIES = gql`
 `;
 
 export function useBulkAddIndustries(
-  options?: MutationHookOptions<BulkAddIndustryResponse, { input: BulkAddIndustryInput }>,
+  options?: MutationHookOptions<
+    BulkAddIndustryResponse,
+    { input: BulkAddIndustryInput }
+  >,
 ) {
   return useMutation<BulkAddIndustryResponse, { input: BulkAddIndustryInput }>(
     BULK_ADD_INDUSTRIES,
@@ -192,8 +215,16 @@ export interface GetUsersByIndustryVars {
 }
 
 export const GET_USERS_BY_INDUSTRY_NEO4J = gql`
-  query GetUsersByIndustryNeo4j($industryId: ID!, $limit: Int, $cursor: String) {
-    getUsersByIndustryNeo4j(industryId: $industryId, limit: $limit, cursor: $cursor) {
+  query GetUsersByIndustryNeo4j(
+    $industryId: ID!
+    $limit: Int
+    $cursor: String
+  ) {
+    getUsersByIndustryNeo4j(
+      industryId: $industryId
+      limit: $limit
+      cursor: $cursor
+    ) {
       data {
         id
         globalUserId
@@ -210,7 +241,10 @@ export const GET_USERS_BY_INDUSTRY_NEO4J = gql`
 `;
 
 export function useGetUsersByIndustryNeo4j(
-  options?: QueryHookOptions<GetUsersByIndustryResponse, GetUsersByIndustryVars>,
+  options?: QueryHookOptions<
+    GetUsersByIndustryResponse,
+    GetUsersByIndustryVars
+  >,
 ) {
   return useQuery<GetUsersByIndustryResponse, GetUsersByIndustryVars>(
     GET_USERS_BY_INDUSTRY_NEO4J,
@@ -252,8 +286,8 @@ export interface GetUserIndustriesGraphVars {
 }
 
 export const GET_USER_INDUSTRIES_GRAPH = gql`
-  query GetUserIndustriesGraph($limit: Int) {
-    getUserIndustriesGraph(limit: $limit) {
+  query GetUserIndustriesGraph($limit: Int, $industryId: ID) {
+    getUserIndustriesGraph(limit: $limit, industryId: $industryId) {
       user {
         id
         globalUserId
@@ -273,7 +307,10 @@ export const GET_USER_INDUSTRIES_GRAPH = gql`
 `;
 
 export function useGetUserIndustriesGraph(
-  options?: QueryHookOptions<GetUserIndustriesGraphData, GetUserIndustriesGraphVars>,
+  options?: QueryHookOptions<
+    GetUserIndustriesGraphData,
+    GetUserIndustriesGraphVars
+  >,
 ) {
   return useQuery<GetUserIndustriesGraphData, GetUserIndustriesGraphVars>(
     GET_USER_INDUSTRIES_GRAPH,

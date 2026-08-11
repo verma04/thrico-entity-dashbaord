@@ -266,8 +266,8 @@ export interface GetUserSkillsGraphVars {
 }
 
 export const GET_USER_SKILLS_GRAPH = gql`
-  query GetUserSkillsGraph($limit: Int) {
-    getUserSkillsGraph(limit: $limit) {
+  query GetUserSkillsGraph($limit: Int, $skillId: ID) {
+    getUserSkillsGraph(limit: $limit, skillId: $skillId) {
       user {
         id
         globalUserId

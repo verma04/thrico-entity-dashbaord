@@ -24,6 +24,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 import { useToast } from "@/components/ui/use-toast";
 import {
@@ -63,6 +65,13 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   DetailedSkillsSection,
   skillValidationSchema,
 } from "./detailed-skills-section";
@@ -75,6 +84,7 @@ export function MemberCreationForm({
   onFinish,
   onCancel,
   isEdit = false,
+  serverError,
 }: any) {
   const { toast } = useToast();
   const [imageUrl, setImageUrl] = useState<string | null>(
@@ -129,6 +139,10 @@ export function MemberCreationForm({
     skills: Yup.array().of(skillValidationSchema),
     interestIds: Yup.array().of(Yup.string()),
     membershipTierId: Yup.string().nullable(),
+    phone: Yup.string().max(20, "Max 20 characters"),
+    gender: Yup.string().nullable(),
+    language: Yup.string().max(50, "Max 50 characters"),
+    location: Yup.string().max(100, "Max 100 characters"),
   });
 
   const formik = useFormik({
@@ -146,6 +160,9 @@ export function MemberCreationForm({
       skills: [],
       interestIds: [],
       membershipTierId: null,
+      gender: "",
+      language: "",
+      location: "",
       ...(initialValues || {}),
     },
     enableReinitialize: true,
@@ -180,44 +197,25 @@ export function MemberCreationForm({
   return (
     <FormikProvider value={formik}>
       <>
-        <div className="flex flex-col h-full bg-muted/30 overflow-hidden rounded-t-[inherit]">
-          {/* Header section - Sticky */}
-          <div className="sticky top-0 z-30 bg-card/80 backdrop-blur-md border-b border-border px-6 py-4">
-            <div className="max-w-5xl mx-auto w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div>
-                <div className="flex items-center gap-3 mb-1">
-                  <div className="p-2.5 rounded-xl bg-indigo-600/10 ring-1 ring-indigo-600/20">
-                    <User className="h-5 w-5 text-indigo-600" />
-                  </div>
-                  <h1 className="text-2xl font-black tracking-tight text-foreground">
-                    {isEdit ? "Edit Member Details" : "Add New Member"}
-                  </h1>
-                </div>
-                <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground ml-1">
-                  <span>Community</span>
-                  <ChevronRight className="h-3 w-3" />
-                  <span>Members</span>
-                  <ChevronRight className="h-3 w-3" />
-                  <span className="text-indigo-600 font-bold">
-                    {isEdit ? "Edit Profile" : "Add New"}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Main Content Area - Scrollable */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="max-w-5xl mx-auto px-6 py-10">
+        <div>
+          <div className="max-w-5xl mx-auto px-6 ">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
               <div className="lg:col-span-8 space-y-8">
                 <form onSubmit={handleSubmit} className="space-y-8">
+                  {serverError && (
+                    <Alert variant="destructive" className="mb-6">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertTitle>Error</AlertTitle>
+                      <AlertDescription>{serverError}</AlertDescription>
+                    </Alert>
+                  )}
+
                   {/* Personal Info */}
-                  <Card className="border-none shadow-sm ring-1 ring-slate-200 overflow-hidden rounded-2xl bg-card">
-                    <CardHeader className="bg-muted/30 border-b border-border pb-4">
+                  <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden">
+                    <CardHeader className="bg-muted/30 pb-4">
                       <div className="flex items-center gap-2 mb-1">
-                        <User className="h-4 w-4 text-indigo-600" />
+                        <User className="h-4 w-4 text-primary" />
                         <CardTitle className="text-lg font-bold text-foreground">
                           Personal Information
                         </CardTitle>
@@ -242,7 +240,6 @@ export function MemberCreationForm({
                             id="firstName"
                             name="firstName"
                             placeholder="John"
-                            className="h-11 rounded-xl border-border focus:ring-4 focus:ring-indigo-500/5 transition-all"
                             value={formik.values.firstName}
                             onChange={formik.handleChange}
                             onBlur={formik.handleBlur}
@@ -267,7 +264,6 @@ export function MemberCreationForm({
                             id="lastName"
                             name="lastName"
                             placeholder="Doe"
-                            className="h-11 rounded-xl border-border focus:ring-4 focus:ring-indigo-500/5 transition-all"
                             value={formik.values.lastName}
                             onChange={formik.handleChange}
                             onBlur={formik.handleBlur}
@@ -297,7 +293,7 @@ export function MemberCreationForm({
                               name="email"
                               type="email"
                               placeholder="john.doe@example.com"
-                              className="h-11 pl-10 rounded-xl border-border focus:ring-4 focus:ring-indigo-500/5 transition-all"
+                              className="pl-10"
                               value={formik.values.email}
                               onChange={formik.handleChange}
                               onBlur={formik.handleBlur}
@@ -309,6 +305,116 @@ export function MemberCreationForm({
                               {formik.errors.email as string}
                             </p>
                           )}
+                        </div>
+
+                        {/* Mobile */}
+                        <div className="space-y-2">
+                          <Label
+                            htmlFor="phone"
+                            className="text-sm font-bold text-foreground"
+                          >
+                            Mobile
+                          </Label>
+                          <div className="relative">
+                            <Input
+                              id="phone"
+                              name="phone"
+                              type="tel"
+                              placeholder="+1 (555) 000-0000"
+                              className="pl-10"
+                              value={formik.values.phone}
+                              onChange={formik.handleChange}
+                              onBlur={formik.handleBlur}
+                            />
+                            <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          </div>
+                          {formik.touched.phone && formik.errors.phone && (
+                            <p className="text-xs font-semibold text-rose-500">
+                              {formik.errors.phone as string}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Gender */}
+                        <div className="space-y-2">
+                          <Label className="text-sm font-bold text-foreground">
+                            Gender
+                          </Label>
+                          <Select
+                            value={formik.values.gender}
+                            onValueChange={(value) =>
+                              handleInputChange("gender", value)
+                            }
+                          >
+                            <SelectTrigger className="w-full ">
+                              <SelectValue placeholder="Select gender" />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-xl border-border">
+                              <SelectItem value="Male">Male</SelectItem>
+                              <SelectItem value="Female">Female</SelectItem>
+                              <SelectItem value="Other">Other</SelectItem>
+                              <SelectItem value="Prefer not to say">
+                                Prefer not to say
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                          {formik.touched.gender && formik.errors.gender && (
+                            <p className="text-xs font-semibold text-rose-500">
+                              {formik.errors.gender as string}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Language */}
+                        <div className="space-y-2">
+                          <Label
+                            htmlFor="language"
+                            className="text-sm font-bold text-foreground"
+                          >
+                            Language
+                          </Label>
+                          <Input
+                            id="language"
+                            name="language"
+                            placeholder="e.g. English, Spanish"
+                            value={formik.values.language}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                          />
+                          {formik.touched.language &&
+                            formik.errors.language && (
+                              <p className="text-xs font-semibold text-rose-500">
+                                {formik.errors.language as string}
+                              </p>
+                            )}
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Location */}
+                        <div className="space-y-2">
+                          <Label
+                            htmlFor="location"
+                            className="text-sm font-bold text-foreground"
+                          >
+                            Location
+                          </Label>
+                          <Input
+                            id="location"
+                            name="location"
+                            placeholder="City, Country"
+                            value={formik.values.location}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                          />
+                          {formik.touched.location &&
+                            formik.errors.location && (
+                              <p className="text-xs font-semibold text-rose-500">
+                                {formik.errors.location as string}
+                              </p>
+                            )}
                         </div>
 
                         {/* Date of Birth */}
@@ -324,7 +430,7 @@ export function MemberCreationForm({
                               <Button
                                 variant="outline"
                                 className={cn(
-                                  "w-full h-11 justify-start text-left font-normal rounded-xl border-border hover:bg-muted/50 transition-all",
+                                  "w-full justify-start text-left font-normal",
                                   !formik.values.dob && "text-muted-foreground",
                                 )}
                               >
@@ -337,7 +443,7 @@ export function MemberCreationForm({
                               </Button>
                             </PopoverTrigger>
                             <PopoverContent
-                              className="w-auto p-0 rounded-2xl shadow-xl border-border"
+                              className="w-auto p-0"
                               align="start"
                             >
                               <Calendar
@@ -359,14 +465,54 @@ export function MemberCreationForm({
                           </Popover>
                         </div>
                       </div>
+
+                      {/* Headline */}
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="headline"
+                          className="text-sm font-bold text-foreground"
+                        >
+                          Headline
+                        </Label>
+                        <Input
+                          id="headline"
+                          name="headline"
+                          placeholder="e.g. Senior Software Engineer at Tech Corp"
+                          value={formik.values.headline}
+                          onChange={formik.handleChange}
+                          onBlur={formik.handleBlur}
+                        />
+                        <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">
+                          A short summary of their current role or expertise
+                        </p>
+                      </div>
+
+                      {/* About / Bio */}
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="about"
+                          className="text-sm font-bold text-foreground"
+                        >
+                          About User
+                        </Label>
+                        <Textarea
+                          id="about"
+                          name="about"
+                          placeholder="Tell us more about the member..."
+                          className="min-h-[120px] resize-none"
+                          value={formik.values.about}
+                          onChange={formik.handleChange}
+                          onBlur={formik.handleBlur}
+                        />
+                      </div>
                     </CardContent>
                   </Card>
 
                   {/* Professional Info */}
-                  <Card className="border-none shadow-sm ring-1 ring-slate-200 overflow-hidden rounded-2xl bg-card">
-                    <CardHeader className="bg-muted/30 border-b border-border pb-4">
+                  <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden">
+                    <CardHeader className="bg-muted/30 pb-4">
                       <div className="flex items-center gap-2 mb-1">
-                        <Layout className="h-4 w-4 text-indigo-600" />
+                        <Layout className="h-4 w-4 text-primary" />
                         <CardTitle className="text-lg font-bold text-foreground">
                           Professional Information
                         </CardTitle>
@@ -390,7 +536,7 @@ export function MemberCreationForm({
                               variant="outline"
                               role="combobox"
                               aria-expanded={isIndustryPopoverOpen}
-                              className="w-full justify-between h-auto min-h-[44px] rounded-xl border-border hover:bg-muted/50 transition-all px-3 py-2 text-left font-normal"
+                              className="w-full justify-between font-normal"
                             >
                               <div className="flex flex-wrap gap-1.5">
                                 {formik.values.industryIds.length > 0 ? (
@@ -403,7 +549,7 @@ export function MemberCreationForm({
                                         <Badge
                                           key={id}
                                           variant="secondary"
-                                          className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-100 py-0.5 px-2 rounded-lg text-[11px] font-bold flex items-center gap-1"
+                                          className=" flex items-center gap-1"
                                           onClick={(e) => {
                                             e.stopPropagation();
                                             const next =
@@ -431,7 +577,7 @@ export function MemberCreationForm({
                               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                             </Button>
                           </PopoverTrigger>
-                          <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 rounded-2xl shadow-xl border-border overflow-hidden">
+                          <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
                             <Command className="border-none">
                               <CommandInput
                                 placeholder="Search industries..."
@@ -460,7 +606,7 @@ export function MemberCreationForm({
                                           next,
                                         );
                                       }}
-                                      className="flex items-center justify-between py-2.5 px-3 cursor-pointer hover:bg-muted/50 transition-colors"
+                                      className="flex items-center justify-between cursor-pointer"
                                     >
                                       <div className="flex items-center gap-2">
                                         <div
@@ -469,7 +615,7 @@ export function MemberCreationForm({
                                             formik.values.industryIds.includes(
                                               industry.id,
                                             )
-                                              ? "bg-indigo-600 border-indigo-600"
+                                              ? "bg-primary border-primary"
                                               : "bg-card",
                                           )}
                                         >
@@ -496,114 +642,112 @@ export function MemberCreationForm({
                       </div>
 
                       {/* Membership Tier */}
-                      {isEdit && (
-                        <div className="space-y-2">
-                          <Label className="text-sm font-bold text-foreground">
-                            Membership Tier
-                          </Label>
-                          <Popover
-                            open={isTierPopoverOpen}
-                            onOpenChange={setIsTierPopoverOpen}
-                          >
-                            <PopoverTrigger asChild>
-                              <Button
-                                variant="outline"
-                                role="combobox"
-                                aria-expanded={isTierPopoverOpen}
-                                className="w-full justify-between h-auto min-h-[44px] rounded-xl border-border hover:bg-muted/50 transition-all px-3 py-2 text-left font-normal"
-                              >
-                                <div className="flex flex-wrap gap-1.5">
-                                  {formik.values.membershipTierId ? (
-                                    <Badge
-                                      variant="secondary"
-                                      className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-100 py-0.5 px-2 rounded-lg text-[11px] font-bold flex items-center gap-1"
-                                    >
-                                      {
-                                        membershipTiers.find(
-                                          (t: any) =>
-                                            t.id ===
-                                            formik.values.membershipTierId,
-                                        )?.name
-                                      }
-                                    </Badge>
-                                  ) : (
-                                    <span className="text-muted-foreground">
-                                      Select membership tier...
+                      <div className="space-y-2">
+                        <Label className="text-sm font-bold text-foreground">
+                          Membership Tier
+                        </Label>
+                        <Popover
+                          open={isTierPopoverOpen}
+                          onOpenChange={setIsTierPopoverOpen}
+                        >
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              role="combobox"
+                              aria-expanded={isTierPopoverOpen}
+                              className="w-full justify-between font-normal"
+                            >
+                              <div className="flex flex-wrap gap-1.5">
+                                {formik.values.membershipTierId ? (
+                                  <Badge
+                                    variant="secondary"
+                                    className=" flex items-center gap-1"
+                                  >
+                                    {
+                                      membershipTiers.find(
+                                        (t: any) =>
+                                          t.id ===
+                                          formik.values.membershipTierId,
+                                      )?.name
+                                    }
+                                  </Badge>
+                                ) : (
+                                  <span className="text-muted-foreground">
+                                    Select membership tier...
+                                  </span>
+                                )}
+                              </div>
+                              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
+                            <Command className="border-none">
+                              <CommandInput
+                                placeholder="Search tiers..."
+                                className="h-11 border-none focus:ring-0"
+                              />
+                              <CommandList className="max-h-[300px]">
+                                <CommandEmpty>No tier found.</CommandEmpty>
+                                <CommandGroup>
+                                  <CommandItem
+                                    key="none"
+                                    value="none"
+                                    onSelect={() => {
+                                      formik.setFieldValue(
+                                        "membershipTierId",
+                                        null,
+                                      );
+                                      setIsTierPopoverOpen(false);
+                                    }}
+                                    className="flex items-center justify-between cursor-pointer"
+                                  >
+                                    <span className="text-sm font-semibold text-muted-foreground">
+                                      None
                                     </span>
-                                  )}
-                                </div>
-                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 rounded-2xl shadow-xl border-border overflow-hidden">
-                              <Command className="border-none">
-                                <CommandInput
-                                  placeholder="Search tiers..."
-                                  className="h-11 border-none focus:ring-0"
-                                />
-                                <CommandList className="max-h-[300px]">
-                                  <CommandEmpty>No tier found.</CommandEmpty>
-                                  <CommandGroup>
+                                  </CommandItem>
+                                  {membershipTiers.map((tier: any) => (
                                     <CommandItem
-                                      key="none"
-                                      value="none"
+                                      key={tier.id}
+                                      value={tier.name}
                                       onSelect={() => {
                                         formik.setFieldValue(
                                           "membershipTierId",
-                                          null,
+                                          tier.id,
                                         );
                                         setIsTierPopoverOpen(false);
                                       }}
-                                      className="flex items-center justify-between py-2.5 px-3 cursor-pointer hover:bg-muted/50 transition-colors"
+                                      className="flex items-center justify-between cursor-pointer"
                                     >
-                                      <span className="text-sm font-semibold text-muted-foreground">
-                                        None
-                                      </span>
-                                    </CommandItem>
-                                    {membershipTiers.map((tier: any) => (
-                                      <CommandItem
-                                        key={tier.id}
-                                        value={tier.name}
-                                        onSelect={() => {
-                                          formik.setFieldValue(
-                                            "membershipTierId",
-                                            tier.id,
-                                          );
-                                          setIsTierPopoverOpen(false);
-                                        }}
-                                        className="flex items-center justify-between py-2.5 px-3 cursor-pointer hover:bg-muted/50 transition-colors"
-                                      >
-                                        <div className="flex items-center gap-2">
-                                          <div
-                                            className={cn(
-                                              "h-4 w-4 rounded border border-border flex items-center justify-center transition-all",
-                                              formik.values.membershipTierId ===
-                                                tier.id
-                                                ? "bg-indigo-600 border-indigo-600"
-                                                : "bg-card",
-                                            )}
-                                          >
-                                            {formik.values.membershipTierId ===
-                                              tier.id && (
-                                              <Check className="h-3 w-3 text-white" />
-                                            )}
-                                          </div>
-                                          <span className="text-sm font-semibold text-foreground">
-                                            {tier.name}
-                                          </span>
+                                      <div className="flex items-center gap-2">
+                                        <div
+                                          className={cn(
+                                            "h-4 w-4 rounded border border-border flex items-center justify-center transition-all",
+                                            formik.values.membershipTierId ===
+                                              tier.id
+                                              ? "bg-primary border-primary"
+                                              : "bg-card",
+                                          )}
+                                        >
+                                          {formik.values.membershipTierId ===
+                                            tier.id && (
+                                            <Check className="h-3 w-3 text-white" />
+                                          )}
                                         </div>
-                                      </CommandItem>
-                                    ))}
-                                  </CommandGroup>
-                                </CommandList>
-                              </Command>
-                            </PopoverContent>
-                          </Popover>
-                          <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">
-                            Select the membership tier for this user
-                          </p>
-                        </div>
-                      )}
+                                        <span className="text-sm font-semibold text-foreground">
+                                          {tier.name}
+                                        </span>
+                                      </div>
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                        <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">
+                          Select the membership tier for this user
+                        </p>
+                      </div>
 
                       <div className="space-y-2">
                         <Label className="text-sm font-bold text-foreground">
@@ -618,7 +762,7 @@ export function MemberCreationForm({
                               variant="outline"
                               role="combobox"
                               aria-expanded={isJobFunctionPopoverOpen}
-                              className="w-full justify-between h-auto min-h-[44px] rounded-xl border-border hover:bg-muted/50 transition-all px-3 py-2 text-left font-normal"
+                              className="w-full justify-between font-normal"
                             >
                               <div className="flex flex-wrap gap-1.5">
                                 {formik.values.jobFunctionIds.length > 0 ? (
@@ -631,7 +775,7 @@ export function MemberCreationForm({
                                         <Badge
                                           key={id}
                                           variant="secondary"
-                                          className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-100 py-0.5 px-2 rounded-lg text-[11px] font-bold flex items-center gap-1"
+                                          className=" flex items-center gap-1"
                                           onClick={(e) => {
                                             e.stopPropagation();
                                             const next =
@@ -659,7 +803,7 @@ export function MemberCreationForm({
                               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                             </Button>
                           </PopoverTrigger>
-                          <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 rounded-2xl shadow-xl border-border overflow-hidden">
+                          <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
                             <Command className="border-none">
                               <CommandInput
                                 placeholder="Search job functions..."
@@ -687,7 +831,7 @@ export function MemberCreationForm({
                                           next,
                                         );
                                       }}
-                                      className="flex items-center justify-between py-2.5 px-3 cursor-pointer hover:bg-muted/50 transition-colors"
+                                      className="flex items-center justify-between cursor-pointer"
                                     >
                                       <div className="flex items-center gap-2">
                                         <div
@@ -696,7 +840,7 @@ export function MemberCreationForm({
                                             formik.values.jobFunctionIds.includes(
                                               jf.id,
                                             )
-                                              ? "bg-indigo-600 border-indigo-600"
+                                              ? "bg-primary border-primary"
                                               : "bg-card",
                                           )}
                                         >
@@ -735,7 +879,7 @@ export function MemberCreationForm({
                               variant="outline"
                               role="combobox"
                               aria-expanded={isInterestPopoverOpen}
-                              className="w-full justify-between h-auto min-h-[44px] rounded-xl border-border hover:bg-muted/50 transition-all px-3 py-2 text-left font-normal"
+                              className="w-full justify-between font-normal"
                             >
                               <div className="flex flex-wrap gap-1.5">
                                 {formik.values.interestIds.length > 0 ? (
@@ -748,7 +892,7 @@ export function MemberCreationForm({
                                         <Badge
                                           key={id}
                                           variant="secondary"
-                                          className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-100 py-0.5 px-2 rounded-lg text-[11px] font-bold flex items-center gap-1"
+                                          className=" flex items-center gap-1"
                                           onClick={(e) => {
                                             e.stopPropagation();
                                             const next =
@@ -776,7 +920,7 @@ export function MemberCreationForm({
                               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                             </Button>
                           </PopoverTrigger>
-                          <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 rounded-2xl shadow-xl border-border overflow-hidden">
+                          <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
                             <Command className="border-none">
                               <CommandInput
                                 placeholder="Search interests..."
@@ -805,7 +949,7 @@ export function MemberCreationForm({
                                           next,
                                         );
                                       }}
-                                      className="flex items-center justify-between py-2.5 px-3 cursor-pointer hover:bg-muted/50 transition-colors"
+                                      className="flex items-center justify-between cursor-pointer"
                                     >
                                       <div className="flex items-center gap-2">
                                         <div
@@ -814,7 +958,7 @@ export function MemberCreationForm({
                                             formik.values.interestIds.includes(
                                               interest.id,
                                             )
-                                              ? "bg-indigo-600 border-indigo-600"
+                                              ? "bg-primary border-primary"
                                               : "bg-card",
                                           )}
                                         >
@@ -841,47 +985,6 @@ export function MemberCreationForm({
                       </div>
 
                       <DetailedSkillsSection entitySkills={skills} />
-
-                      {/* Headline */}
-                      <div className="space-y-2">
-                        <Label
-                          htmlFor="headline"
-                          className="text-sm font-bold text-foreground"
-                        >
-                          Headline
-                        </Label>
-                        <Input
-                          id="headline"
-                          name="headline"
-                          placeholder="e.g. Senior Software Engineer at Tech Corp"
-                          className="h-11 rounded-xl border-border focus:ring-4 focus:ring-indigo-500/5 transition-all"
-                          value={formik.values.headline}
-                          onChange={formik.handleChange}
-                          onBlur={formik.handleBlur}
-                        />
-                        <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">
-                          A short summary of their current role or expertise
-                        </p>
-                      </div>
-
-                      {/* About / Bio */}
-                      <div className="space-y-2">
-                        <Label
-                          htmlFor="about"
-                          className="text-sm font-bold text-foreground"
-                        >
-                          About User
-                        </Label>
-                        <Textarea
-                          id="about"
-                          name="about"
-                          placeholder="Tell us more about the member..."
-                          className="min-h-[120px] rounded-xl border-border focus:ring-4 focus:ring-indigo-500/5 transition-all resize-none"
-                          value={formik.values.about}
-                          onChange={formik.handleChange}
-                          onBlur={formik.handleBlur}
-                        />
-                      </div>
                     </CardContent>
                   </Card>
                 </form>
@@ -890,11 +993,11 @@ export function MemberCreationForm({
               {/* Sidebar Info */}
               <div className="lg:col-span-4">
                 <div className="sticky top-24 space-y-6">
-                  <Card className="border-none shadow-md shadow-indigo-600/5 ring-1 ring-slate-200 rounded-3xl overflow-hidden bg-card">
+                  <Card className="border-none shadow-md shadow-indigo-600/5 ring-1 ring-border/50 overflow-hidden bg-card">
                     <div className="h-24 bg-linear-to-br from-indigo-600 to-violet-700" />
                     <div className="px-6 pb-8 -mt-12 text-center">
-                      <div className="inline-flex p-1 bg-card rounded-3xl shadow-lg mb-4 group relative cursor-pointer">
-                        <div className="h-24 w-24 rounded-2xl bg-muted flex items-center justify-center overflow-hidden">
+                      <div className="inline-flex p-1 bg-card  shadow-lg mb-4 group relative cursor-pointer">
+                        <div className="h-24 w-24 bg-muted flex items-center justify-center overflow-hidden">
                           {imageUrl ? (
                             <Image
                               src={`https://cdn.thrico.network/${imageUrl}`}
@@ -933,7 +1036,7 @@ export function MemberCreationForm({
                           ? `${formik.values.firstName} ${formik.values.lastName}`
                           : "New Member Preview"}
                       </h3>
-                      <p className="text-sm font-semibold text-indigo-600 mt-1">
+                      <p className="text-sm font-semibold text-primary mt-1">
                         {formik.values.headline || "Professional Headline"}
                       </p>
 
@@ -950,7 +1053,7 @@ export function MemberCreationForm({
                     </div>
                   </Card>
 
-                  <Card className="border-none shadow-sm ring-1 ring-slate-200 rounded-2xl bg-card">
+                  <Card className="border-none shadow-sm ring-1 ring-border/50 rounded-2xl bg-card">
                     <CardContent className="p-5 flex items-start gap-4">
                       <div className="h-8 w-8 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center shrink-0 mt-0.5">
                         <Mail className="h-4 w-4" />
@@ -965,7 +1068,7 @@ export function MemberCreationForm({
                           monitor its delivery status in the{" "}
                           <Link
                             href="/email"
-                            className="text-indigo-600 hover:text-indigo-800 hover:underline transition-all font-semibold"
+                            className="text-primary hover:text-indigo-800 hover:underline transition-all font-semibold"
                           >
                             Email Dashboard
                           </Link>

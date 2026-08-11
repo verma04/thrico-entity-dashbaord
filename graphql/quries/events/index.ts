@@ -59,6 +59,32 @@ export const GET_ALL_EVENTS = gql`
   }
 `;
 
+export const GET_CREATED_EVENTS = gql`
+  query GetCreatedEvents($input: InputGetEvents!) {
+    getCreatedEvents(input: $input) {
+      totalCount
+      hasNextPage
+      hasPreviousPage
+      events {
+        ${events}
+      }
+    }
+  }
+`;
+
+export const GET_JOINED_EVENTS = gql`
+  query GetJoinedEvents($input: InputGetEvents!) {
+    getJoinedEvents(input: $input) {
+      totalCount
+      hasNextPage
+      hasPreviousPage
+      events {
+        ${events}
+      }
+    }
+  }
+`;
+
 export const CHANGE_EVENT_STATUS = gql`
   mutation ChangeEventStatus($input: ChangeEventStatusInput!) {
     changeEventStatus(input: $input) {

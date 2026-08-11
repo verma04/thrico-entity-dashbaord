@@ -30,7 +30,11 @@ export const useGetCurrencyTransactions = (variables?: {
   limit?: number;
   cursor?: string;
 }) =>
-  useQuery(GET_CURRENCY_TRANSACTIONS, { variables, skip: variables?.userId === "" });
+  useQuery(GET_CURRENCY_TRANSACTIONS, { 
+    variables, 
+    skip: variables?.userId === "",
+    fetchPolicy: "cache-and-network" 
+  });
 
 export const useUpdateEntityCurrencyConfig = (options?: any) =>
   useMutation(UPDATE_ENTITY_CURRENCY_CONFIG, {

@@ -1,8 +1,8 @@
 import { gql, useQuery } from "@apollo/client";
 
 export const GET_USER_EXPERIENCE_GRAPH = gql`
-  query GetUserExperienceGraph($search: String, $limit: Int, $offset: Int) {
-    getUserExperienceGraph(search: $search, limit: $limit, offset: $offset) {
+  query GetUserExperienceGraph($search: String, $companyName: String, $limit: Int, $offset: Int) {
+    getUserExperienceGraph(search: $search, companyName: $companyName, limit: $limit, offset: $offset) {
       user {
         id
         globalUserId

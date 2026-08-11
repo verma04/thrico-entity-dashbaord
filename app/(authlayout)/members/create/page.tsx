@@ -8,19 +8,19 @@ import { withModulePermission } from "@/components/hoc/with-module-permission";
 
 import { useAddNewMember } from "@/graphql/actions/membership/membership-mutations";
 import { useCheckMemberSubscription } from "@/graphql/actions/membership/membership-queries";
-import { AlertTriangle, Loader2, UserPlus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { UserPlus } from "lucide-react";
 
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
-import { InlineAlert } from "@/components/ui/inline-alert";
+import { SubscriptionLimitBanner } from "@/components/members/manage/subscription-alerts";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const AddMemberPage = () => {
   const router = useRouter();
   const { toast } = useToast();
 
-  const [addMember, { loading }] = useAddNewMember({
+  const [addMember, { loading, error }] = useAddNewMember({
     onCompleted: () => {
       toast({
         title: "Success",
@@ -52,6 +52,11 @@ const AddMemberPage = () => {
       skillIds: values.skillIds,
       skills: values.skills,
       interestIds: values.interestIds,
+      phone: values.phone,
+      gender: values.gender,
+      language: values.language,
+      location: values.location,
+      membershipTierId: values.membershipTierId,
     };
 
     addMember({ variables: { input } });
@@ -62,45 +67,80 @@ const AddMemberPage = () => {
   };
 
   const { data: subData, loading: subLoading } = useCheckMemberSubscription();
-  const hasReachedLimit = subData?.checkMemberSubscription?.hasReachedLimit;
-  const message = subData?.checkMemberSubscription?.message;
+  const subscriptionInfo = subData?.checkMemberSubscription;
 
   if (subLoading) {
-    return (
-      <div className="flex h-full items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
-  if (hasReachedLimit) {
     return (
       <EcosystemWrapper>
         <EcosystemHeader
           title="Add Member"
+          breadcrumbs={[
+            { label: "Community", href: "/" },
+            { label: "Members", href: "/members/all" },
+            { label: "Add Member" },
+          ]}
           badgeText="Community"
           description="Add a new member to your community."
           icon={UserPlus}
         />
-        <EcosystemContainer className="p-6">
-          <InlineAlert
-            variant="alert"
-            title="Member Limit Reached"
-            message={
-              message ||
-              "You have reached your subscription limit. Please upgrade your subscription to add more members."
-            }
-          />
-          <div className="mt-6 flex gap-3">
-            <Button
-              variant="default"
-              onClick={() => router.push("/settings/subscription")}
-            >
-              Upgrade Subscription
-            </Button>
-            <Button variant="outline" onClick={() => router.back()}>
-              Go Back
-            </Button>
+        <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0">
+          <div className="flex-1 overflow-y-auto">
+            <div className="max-w-5xl mx-auto px-6 py-10">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+                <div className="lg:col-span-8 space-y-8">
+                  <div className="border-none shadow-sm ring-1 ring-slate-200 overflow-hidden rounded-2xl bg-card">
+                    <div className="bg-muted/30 border-b border-border p-6 pb-4">
+                      <Skeleton className="h-6 w-1/3 mb-2" />
+                      <Skeleton className="h-4 w-1/2" />
+                    </div>
+                    <div className="p-6 pt-8 space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <Skeleton className="h-4 w-24" />
+                          <Skeleton className="h-11 w-full rounded-xl" />
+                        </div>
+                        <div className="space-y-2">
+                          <Skeleton className="h-4 w-24" />
+                          <Skeleton className="h-11 w-full rounded-xl" />
+                        </div>
+                        <div className="space-y-2">
+                          <Skeleton className="h-4 w-24" />
+                          <Skeleton className="h-11 w-full rounded-xl" />
+                        </div>
+                        <div className="space-y-2">
+                          <Skeleton className="h-4 w-24" />
+                          <Skeleton className="h-11 w-full rounded-xl" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="border-none shadow-sm ring-1 ring-slate-200 overflow-hidden rounded-2xl bg-card">
+                    <div className="bg-muted/30 border-b border-border p-6 pb-4">
+                      <Skeleton className="h-6 w-1/3 mb-2" />
+                      <Skeleton className="h-4 w-1/2" />
+                    </div>
+                    <div className="p-6 pt-8 space-y-6">
+                      <div className="space-y-2">
+                        <Skeleton className="h-4 w-24" />
+                        <Skeleton className="h-11 w-full rounded-xl" />
+                      </div>
+                      <div className="space-y-2">
+                        <Skeleton className="h-4 w-24" />
+                        <Skeleton className="h-11 w-full rounded-xl" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="lg:col-span-4 space-y-6">
+                  <div className="border-none shadow-sm ring-1 ring-slate-200 overflow-hidden rounded-2xl bg-card p-6 flex flex-col items-center">
+                    <Skeleton className="h-32 w-32 rounded-full mb-4" />
+                    <Skeleton className="h-10 w-full rounded-xl" />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </EcosystemContainer>
       </EcosystemWrapper>
@@ -111,13 +151,22 @@ const AddMemberPage = () => {
     <EcosystemWrapper>
       <EcosystemHeader
         title="Add Member"
+        breadcrumbs={[
+          { label: "Community", href: "/" },
+          { label: "Members", href: "/members/all" },
+          { label: "Add Member" },
+        ]}
         badgeText="Community"
         description="Add a new member to your community."
         icon={UserPlus}
       />
+      <div className=" mx-auto  pt-6">
+        <SubscriptionLimitBanner subscriptionInfo={subscriptionInfo} />
+      </div>
       <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0">
         <MemberCreationForm
           loading={loading}
+          serverError={error?.message?.replace("GraphQL error: ", "")}
           onFinish={onFinish}
           onCancel={onCancel}
         />

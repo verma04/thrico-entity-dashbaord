@@ -13,10 +13,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  useGetAuditLogs,
-  useGetAuditLogById,
-} from "@/graphql/actions/audit";
+import { useGetAuditLogs, useGetAuditLogById } from "@/graphql/actions/audit";
 import {
   Dialog,
   DialogContent,
@@ -25,7 +22,6 @@ import {
 } from "@/components/ui/dialog";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
-import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { AdminTable } from "@/components/shared/admin-table/admin-table";
 import { cn } from "@/lib/utils";
@@ -36,9 +32,16 @@ export interface ModuleAuditLogProps {
   title: string;
   description: string;
   breadcrumbs?: { label: string; href?: string }[];
+  tableSize?: "sm" | "md";
 }
 
-export function ModuleAuditLog({ moduleKey, title, description, breadcrumbs }: ModuleAuditLogProps) {
+export function ModuleAuditLog({
+  moduleKey,
+  title,
+  description,
+  breadcrumbs,
+  tableSize,
+}: ModuleAuditLogProps) {
   const [page, setPage] = useState(1);
   const [selectedLogId, setSelectedLogId] = useState<string | null>(null);
 
@@ -233,39 +236,34 @@ export function ModuleAuditLog({ moduleKey, title, description, breadcrumbs }: M
         description={description}
         icon={History}
         breadcrumbs={breadcrumbs}
-      />
-
-      <EcosystemActionBar shadow="none">
-        <EcosystemActionBar.Group grow>
-          <div className="flex flex-col">
-            <span className="text-[11px] font-semibold text-foreground uppercase tracking-tight leading-none">
-              Module Logs
-            </span>
-            <span className="text-[9px] text-zinc-400 mt-1 uppercase tracking-widest">
-              {moduleKey}
-            </span>
+        actions={
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-9 w-9 text-zinc-400 hover:text-foreground rounded-xl transition-all bg-white border-zinc-200 shadow-sm"
+                onClick={() => refetch()}
+              >
+                <RotateCcw
+                  className={cn("h-4 w-4", logLoading && "animate-spin")}
+                />
+              </Button>
+              <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-card border border-border rounded-lg text-[10px] uppercase font-bold tracking-wider text-muted-foreground whitespace-nowrap shadow-sm h-9">
+                <span
+                  className={cn(
+                    "h-1.5 w-1.5 rounded-full shrink-0",
+                    logs.length > 0
+                      ? "bg-emerald-500 animate-pulse"
+                      : "bg-muted-foreground/30",
+                  )}
+                />
+                {meta.totalItems} Records
+              </div>
+            </div>
           </div>
-        </EcosystemActionBar.Group>
-
-        <EcosystemActionBar.Group align="right">
-          <EcosystemActionBar.Item>
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-9 w-9 text-zinc-400 hover:text-foreground rounded-xl transition-all bg-white border-zinc-200"
-              onClick={() => refetch()}
-            >
-              <RotateCcw
-                className={cn("h-4 w-4", logLoading && "animate-spin")}
-              />
-            </Button>
-          </EcosystemActionBar.Item>
-
-          <EcosystemActionBar.Status active={logs.length > 0}>
-            {meta.totalItems} Records
-          </EcosystemActionBar.Status>
-        </EcosystemActionBar.Group>
-      </EcosystemActionBar>
+        }
+      />
 
       <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">
         <div className="px-6 py-4">
@@ -274,6 +272,7 @@ export function ModuleAuditLog({ moduleKey, title, description, breadcrumbs }: M
             data={logs}
             loading={logLoading}
             keyExtractor={(log) => log.id}
+            size={tableSize}
             emptyTitle="No logs found"
             emptyDescription="No activity has been recorded yet."
             pagination={{

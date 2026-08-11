@@ -69,6 +69,19 @@ export const GET_JOBS = gql`
   }
 `;
 
+export const GET_APPLIED_JOBS = gql`
+  query GetAppliedJobs($userId: ID!, $page: Int, $limit: Int) {
+    getAppliedJobs(userId: $userId, page: $page, limit: $limit) {
+      data {
+        ${jobs}
+      }
+      total
+      offset
+      limit
+    }
+  }
+`;
+
 export const GET_JOB_BY_ID = gql`
   query GetJobById($id: ID!) {
     getJobById(id: $id) {

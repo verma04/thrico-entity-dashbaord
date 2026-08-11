@@ -1,6 +1,6 @@
 "use client";
 
-import User from "@/components/members/users/user";
+import User from "@/components/members/manage/members-manage";
 import { withModulePermission } from "@/components/hoc/with-module-permission";
 import { useCheckMemberSubscription } from "@/graphql/actions/membership/membership-queries";
 

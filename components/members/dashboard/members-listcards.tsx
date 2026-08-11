@@ -26,7 +26,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import UserActions from "../users/user-actions";
+import UserActions from "../manage/user-actions";
 
 interface MembersListCardsProps {
   manualData?: any[];

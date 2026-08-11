@@ -8,6 +8,8 @@ export interface UsersGraphFilter {
   interests?: string[];
   gamificationScore?: ScoreFilter;
   impactScore?: ScoreFilter;
+  coins?: ScoreFilter;
+  gender?: string[];
 }
 
 export interface ScoreFilter {
@@ -24,6 +26,7 @@ export interface GraphNode {
   entityId?: string;
   gamificationScore?: number;
   impactScore?: number;
+  coins?: number;
 }
 
 export interface GraphEdge {

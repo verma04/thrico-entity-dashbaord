@@ -140,6 +140,18 @@ const details = `
         badgeIcon
         badgeColor
       }
+      entityCurrencyWallet {
+        id
+        balance
+        totalEarned
+        totalSpent
+      }
+      gamificationSummary {
+        totalPointsEarned
+        totalBadgesEarned
+        rankPosition
+      }
+      impactScore
 `;
 export const GET_ALL_USER = gql`
   query GetAllUser($input: allStatusInput) {
@@ -269,6 +281,9 @@ export const GET_USER_DETIALS = gql`
         yearsOfExperience
         description
       }
+      stats {
+        totalConnections
+      }
       referrer {
         user {
           id
@@ -277,6 +292,18 @@ export const GET_USER_DETIALS = gql`
           avatar
         }
       }
+      entityCurrencyWallet {
+        id
+        balance
+        totalEarned
+        totalSpent
+      }
+      gamificationSummary {
+        totalPointsEarned
+        totalBadgesEarned
+        rankPosition
+      }
+      impactScore
     }
   }
 `;
@@ -361,7 +388,16 @@ export const ADD_NEW_MEMBER = gql`
         lastName
         email
         avatar
+        location
+        profile {
+          gender
+          language
+          phone {
+            phoneNumber
+          }
+        }
       }
+      membershipTierId
       industries {
         id
         title
@@ -480,6 +516,25 @@ export const GET_USER_REFERRALS = gql`
   }
 `;
 
+export const GET_TOP_REFERRALS = gql`
+  query GetTopReferrals($limit: Int) {
+    getTopReferrals(limit: $limit) {
+      data {
+        referrer {
+          user {
+            firstName
+            lastName
+            email
+            avatar
+          }
+        }
+        referralsCount
+      }
+      totalCount
+    }
+  }
+`;
+
 export const GET_ALL_REFERRALS = gql`
   query GetAllReferrals($limit: Int, $offset: Int) {
     getAllReferrals(limit: $limit, offset: $offset) {
@@ -591,6 +646,7 @@ export const GET_USERS_GRAPH = gql`
         entityId
         gamificationScore
         impactScore
+        coins
       }
       edges {
         source

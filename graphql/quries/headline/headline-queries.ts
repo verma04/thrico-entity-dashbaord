@@ -1,8 +1,8 @@
 import { gql, useQuery } from "@apollo/client";
 
 export const GET_USER_HEADLINE_GRAPH = gql`
-  query GetUserHeadlineGraph($limit: Int) {
-    getUserHeadlineGraph(limit: $limit) {
+  query GetUserHeadlineGraph($search: String, $headlineName: String, $limit: Int, $offset: Int) {
+    getUserHeadlineGraph(search: $search, headlineName: $headlineName, limit: $limit, offset: $offset) {
       user {
         id
         globalUserId

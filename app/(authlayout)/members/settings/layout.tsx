@@ -23,7 +23,7 @@ function aalsoe({ children }: { children: React.ReactNode }) {
   return (
     <PlatformSettingsLayout
       title="Member Settings"
-      description="Manage your profile, preferences, and subscription settings to customize your community experience."
+      description="Manage member registration settings"
       headerIcon={Users}
       tabs={TABS}
       breadcrumb={[

@@ -66,7 +66,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDistanceToNow } from "date-fns";
 import { useGetImpactUsers } from "@/graphql/actions";
 import { useCheckMemberSubscription } from "@/graphql/actions/membership/membership-queries";
-import { SubscriptionLimitBanner } from "@/components/members/users/subscription-alerts";
+import { SubscriptionLimitBanner } from "@/components/members/manage/subscription-alerts";
 
 // ---------------------------------------------------------------------------
 // KPI Helpers

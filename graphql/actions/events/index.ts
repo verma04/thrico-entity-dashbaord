@@ -14,6 +14,8 @@ import {
   GET_EVENT_STATS,
   GET_EVENTS,
   GET_ALL_EVENTS,
+  GET_CREATED_EVENTS,
+  GET_JOINED_EVENTS,
   GET_EVENT_BY_ID,
   UPDATE_EVENT,
   GET_EVENT_SPEAKERS,
@@ -687,7 +689,8 @@ export function useUpdateEvent(options?: MutationHookOptions<any, any>) {
   return useMutation(UPDATE_EVENT, {
     ...options,
     refetchQueries: (result) => {
-      const updatedId = result.data?.updateEvent?.id || options?.variables?.eventId;
+      const updatedId =
+        result.data?.updateEvent?.id || options?.variables?.eventId;
       if (updatedId) {
         return [
           {
@@ -713,7 +716,9 @@ export function useAddEventSpeaker(options?: MutationHookOptions<any, any>) {
   return useMutation(ADD_EVENT_SPEAKER, {
     ...options,
     refetchQueries: (result) => {
-      const updatedId = result.data ? (Object.values(result.data)[0] as any)?.eventId : options?.variables?.input?.eventId;
+      const updatedId = result.data
+        ? (Object.values(result.data)[0] as any)?.eventId
+        : options?.variables?.input?.eventId;
       if (updatedId) {
         return [
           {
@@ -762,7 +767,9 @@ export function useAddEventSponsorship(
   return useMutation(ADD_EVENT_SPONSORSHIP, {
     ...options,
     refetchQueries: (result) => {
-      const updatedId = result.data ? (Object.values(result.data)[0] as any)?.eventId : options?.variables?.input?.eventId;
+      const updatedId = result.data
+        ? (Object.values(result.data)[0] as any)?.eventId
+        : options?.variables?.input?.eventId;
       if (updatedId) {
         return [
           {
@@ -792,7 +799,9 @@ export function useAddEventSponsor(options?: MutationHookOptions<any, any>) {
   return useMutation(ADD_EVENT_SPONSOR, {
     ...options,
     refetchQueries: (result) => {
-      const updatedId = result.data ? (Object.values(result.data)[0] as any)?.eventId : options?.variables?.input?.eventId;
+      const updatedId = result.data
+        ? (Object.values(result.data)[0] as any)?.eventId
+        : options?.variables?.input?.eventId;
       if (updatedId) {
         return [
           {
@@ -883,7 +892,9 @@ export function useAddEventVenue(options?: MutationHookOptions<any, any>) {
   return useMutation(ADD_EVENT_VENUE, {
     ...options,
     refetchQueries: (result) => {
-      const updatedId = result.data ? (Object.values(result.data)[0] as any)?.eventId : options?.variables?.input?.eventId;
+      const updatedId = result.data
+        ? (Object.values(result.data)[0] as any)?.eventId
+        : options?.variables?.input?.eventId;
       if (updatedId) {
         return [
           {
@@ -919,7 +930,9 @@ export function useAddEventAgenda(options?: MutationHookOptions<any, any>) {
   return useMutation(ADD_EVENT_AGENDA, {
     ...options,
     refetchQueries: (result) => {
-      const updatedId = result.data ? (Object.values(result.data)[0] as any)?.eventId : options?.variables?.input?.eventId;
+      const updatedId = result.data
+        ? (Object.values(result.data)[0] as any)?.eventId
+        : options?.variables?.input?.eventId;
       if (updatedId) {
         return [
           {
@@ -955,7 +968,9 @@ export function useAddEventTicket(options?: MutationHookOptions<any, any>) {
   return useMutation(ADD_EVENT_TICKET, {
     ...options,
     refetchQueries: (result) => {
-      const updatedId = result.data ? (Object.values(result.data)[0] as any)?.eventId : options?.variables?.input?.eventId;
+      const updatedId = result.data
+        ? (Object.values(result.data)[0] as any)?.eventId
+        : options?.variables?.input?.eventId;
       if (updatedId) {
         return [
           {
@@ -989,7 +1004,9 @@ export function useAddEventPromoCode(options?: MutationHookOptions<any, any>) {
   return useMutation(ADD_EVENT_PROMO_CODE, {
     ...options,
     refetchQueries: (result) => {
-      const updatedId = result.data ? (Object.values(result.data)[0] as any)?.eventId : options?.variables?.input?.eventId;
+      const updatedId = result.data
+        ? (Object.values(result.data)[0] as any)?.eventId
+        : options?.variables?.input?.eventId;
       if (updatedId) {
         return [
           {
@@ -1131,7 +1148,7 @@ export function useDeleteEventMedia(
     {
       ...options,
       refetchQueries: ["GetEventMedia"],
-    }
+    },
   );
 }
 
@@ -1307,7 +1324,9 @@ export function useAddEventTeamMember(options?: MutationHookOptions<any, any>) {
   return useMutation(ADD_EVENT_TEAM_MEMBER, {
     ...options,
     refetchQueries: (result) => {
-      const updatedId = result.data ? (Object.values(result.data)[0] as any)?.eventId : options?.variables?.input?.eventId;
+      const updatedId = result.data
+        ? (Object.values(result.data)[0] as any)?.eventId
+        : options?.variables?.input?.eventId;
       if (updatedId) {
         return [
           {
@@ -1321,11 +1340,15 @@ export function useAddEventTeamMember(options?: MutationHookOptions<any, any>) {
   });
 }
 
-export function useUpdateEventTeamMember(options?: MutationHookOptions<any, any>) {
+export function useUpdateEventTeamMember(
+  options?: MutationHookOptions<any, any>,
+) {
   return useMutation(UPDATE_EVENT_TEAM_MEMBER, { ...options });
 }
 
-export function useDeleteEventTeamMember(options?: MutationHookOptions<any, any>) {
+export function useDeleteEventTeamMember(
+  options?: MutationHookOptions<any, any>,
+) {
   return useMutation(DELETE_EVENT_TEAM_MEMBER, {
     ...options,
     refetchQueries: ["GetEventTeam"],
@@ -1335,27 +1358,36 @@ export function useDeleteEventTeamMember(options?: MutationHookOptions<any, any>
 // --- Special Sponsorship Hooks ---
 
 export function useEventSpecialSponsorships(eventId: string) {
-  return useQuery<{ getEventSpecialSponsorships: EventSpecialSponsorship[] }>(GET_EVENT_SPECIAL_SPONSORSHIPS, {
-    variables: { eventId },
-    skip: !eventId,
-  });
+  return useQuery<{ getEventSpecialSponsorships: EventSpecialSponsorship[] }>(
+    GET_EVENT_SPECIAL_SPONSORSHIPS,
+    {
+      variables: { eventId },
+      skip: !eventId,
+    },
+  );
 }
 
-export function useAddEventSpecialSponsorship(options?: MutationHookOptions<any, any>) {
+export function useAddEventSpecialSponsorship(
+  options?: MutationHookOptions<any, any>,
+) {
   return useMutation(ADD_EVENT_SPECIAL_SPONSORSHIP, {
     ...options,
     refetchQueries: ["GetEventSpecialSponsorships"],
   });
 }
 
-export function useUpdateEventSpecialSponsorship(options?: MutationHookOptions<any, any>) {
+export function useUpdateEventSpecialSponsorship(
+  options?: MutationHookOptions<any, any>,
+) {
   return useMutation(UPDATE_EVENT_SPECIAL_SPONSORSHIP, {
     ...options,
     refetchQueries: ["GetEventSpecialSponsorships"],
   });
 }
 
-export function useDeleteEventSpecialSponsorship(options?: MutationHookOptions<any, any>) {
+export function useDeleteEventSpecialSponsorship(
+  options?: MutationHookOptions<any, any>,
+) {
   return useMutation(DELETE_EVENT_SPECIAL_SPONSORSHIP, {
     ...options,
     refetchQueries: ["GetEventSpecialSponsorships"],
@@ -1364,25 +1396,34 @@ export function useDeleteEventSpecialSponsorship(options?: MutationHookOptions<a
 
 // --- Special Sponsor Hooks ---
 
-export function useAddEventSpecialSponsor(options?: MutationHookOptions<any, any>) {
+export function useAddEventSpecialSponsor(
+  options?: MutationHookOptions<any, any>,
+) {
   return useMutation(ADD_EVENT_SPECIAL_SPONSOR, {
     ...options,
     refetchQueries: ["GetEventSpecialSponsorships"],
   });
 }
 
-export function useUpdateEventSpecialSponsor(options?: MutationHookOptions<any, any>) {
+export function useUpdateEventSpecialSponsor(
+  options?: MutationHookOptions<any, any>,
+) {
   return useMutation(UPDATE_EVENT_SPECIAL_SPONSOR, {
     ...options,
     refetchQueries: ["GetEventSpecialSponsorships"],
   });
 }
 
-export function useDeleteEventSpecialSponsor(options?: MutationHookOptions<any, any>) {
+export function useDeleteEventSpecialSponsor(
+  options?: MutationHookOptions<any, any>,
+) {
   return useMutation(DELETE_EVENT_SPECIAL_SPONSOR, {
     ...options,
     refetchQueries: ["GetEventSpecialSponsorships"],
   });
 }
 
-
+export const getCreatedEvents = (options: any) =>
+  useQuery(GET_CREATED_EVENTS, options);
+export const getJoinedEvents = (options: any) =>
+  useQuery(GET_JOINED_EVENTS, options);

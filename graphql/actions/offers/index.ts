@@ -7,6 +7,8 @@ import {
 import {
   GET_OFFER_STATS,
   GET_OFFERS,
+  GET_CREATED_OFFERS,
+  GET_CLAIMED_OFFERS,
   GET_OFFER_CATEGORIES,
   CREATE_OFFER,
   UPDATE_OFFER,
@@ -142,6 +144,47 @@ export const useGetOffers = (
 ) =>
   useQuery<{ getOffers: Offer[] }, { input?: GetOffersInput }>(GET_OFFERS, {
     variables: { input },
+    ...options,
+  });
+
+export interface GetOffersPaginatedResponse {
+  data: Offer[];
+  total: number;
+  offset?: number;
+  limit?: number;
+}
+
+export const useCreatedOffers = (
+  userId: string,
+  page: number = 1,
+  limit: number = 10,
+  options?: QueryHookOptions<
+    { getCreatedOffersByUserId: GetOffersPaginatedResponse },
+    { userId: string; page: number; limit: number }
+  >
+) =>
+  useQuery<
+    { getCreatedOffersByUserId: GetOffersPaginatedResponse },
+    { userId: string; page: number; limit: number }
+  >(GET_CREATED_OFFERS, {
+    variables: { userId, page, limit },
+    ...options,
+  });
+
+export const useClaimedOffers = (
+  userId: string,
+  page: number = 1,
+  limit: number = 10,
+  options?: QueryHookOptions<
+    { getClaimedOffers: GetOffersPaginatedResponse },
+    { userId: string; page: number; limit: number }
+  >
+) =>
+  useQuery<
+    { getClaimedOffers: GetOffersPaginatedResponse },
+    { userId: string; page: number; limit: number }
+  >(GET_CLAIMED_OFFERS, {
+    variables: { userId, page, limit },
     ...options,
   });
 

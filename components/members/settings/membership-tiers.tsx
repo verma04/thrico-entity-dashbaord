@@ -4,8 +4,6 @@ import React, { useState } from "react";
 import { useQuery, useMutation } from "@apollo/client";
 import {
   GET_MEMBERSHIP_TIERS,
-  CREATE_MEMBERSHIP_TIER,
-  UPDATE_MEMBERSHIP_TIER,
   DELETE_MEMBERSHIP_TIER,
 } from "@/graphql/membership-tier";
 import {
@@ -39,100 +37,48 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { RichTextEditor } from "@/components/ui/rich-text-editor";
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { CtaButton } from "@/components/ui/cta-button";
+import { TierModal } from "./tier-modal";
 
 export default function MembershipTiers() {
   const { data, loading, refetch } = useQuery(GET_MEMBERSHIP_TIERS);
-  const [createTier] = useMutation(CREATE_MEMBERSHIP_TIER);
-  const [updateTier] = useMutation(UPDATE_MEMBERSHIP_TIER);
   const [deleteTier] = useMutation(DELETE_MEMBERSHIP_TIER);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTier, setEditingTier] = useState<any>(null);
   const [expandedTierId, setExpandedTierId] = useState<string | null>(null);
-  const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    badgeColor: "#fbbf24",
-    benefits: "",
-  });
+  const [tierToDelete, setTierToDelete] = useState<string | null>(null);
 
   const tiers = data?.getMembershipTiers || [];
 
   const handleOpenModal = (tier: any = null) => {
-    if (tier) {
-      setEditingTier(tier);
-      setFormData({
-        name: tier.name,
-        description: tier.description || "",
-        badgeColor: tier.badgeColor || "#fbbf24",
-        benefits: tier.benefits ? tier.benefits.join("<br />") : "",
-      });
-    } else {
-      setEditingTier(null);
-      setFormData({
-        name: "",
-        description: "",
-        badgeColor: "#fbbf24",
-        benefits: "",
-      });
-    }
+    setEditingTier(tier);
     setIsModalOpen(true);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleDelete = async () => {
+    if (!tierToDelete) return;
     try {
-      const input = {
-        name: formData.name,
-        description: formData.description,
-        badgeColor: formData.badgeColor,
-        benefits: [formData.benefits].filter(Boolean),
-      };
-
-      if (editingTier) {
-        await updateTier({
-          variables: {
-            id: editingTier.id,
-            input,
-          },
-        });
-        toast.success("Membership tier updated successfully");
-      } else {
-        await createTier({
-          variables: {
-            input,
-          },
-        });
-        toast.success("Membership tier created successfully");
-      }
-      setIsModalOpen(false);
-      refetch();
-    } catch (error: any) {
-      toast.error(error.message || "Something went wrong");
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this tier?")) return;
-    try {
-      await deleteTier({ variables: { id } });
+      await deleteTier({ variables: { id: tierToDelete } });
       toast.success("Membership tier deleted successfully");
       refetch();
     } catch (error: any) {
       toast.error(error.message || "Something went wrong");
+    } finally {
+      setTierToDelete(null);
     }
   };
 
@@ -216,15 +162,27 @@ export default function MembershipTiers() {
                     <TableRow>
                       <TableCell>
                         <div className="flex items-center gap-2 font-medium">
-                          <div
-                            className="w-8 h-8 rounded-full flex items-center justify-center bg-opacity-20"
-                            style={{ backgroundColor: `${tier.badgeColor}20` }}
-                          >
-                            <Award
-                              className="h-4 w-4"
-                              style={{ color: tier.badgeColor }}
+                          {tier.badgeIcon ? (
+                            <img
+                              src={
+                                tier.badgeIcon.startsWith("http")
+                                  ? tier.badgeIcon
+                                  : `https://cdn.thrico.network/${tier.badgeIcon}`
+                              }
+                              alt={tier.name}
+                              className="w-8 h-8 rounded-full object-cover"
                             />
-                          </div>
+                          ) : (
+                            <div
+                              className="w-8 h-8 rounded-full flex items-center justify-center bg-opacity-20"
+                              style={{ backgroundColor: `${tier.badgeColor}20` }}
+                            >
+                              <Award
+                                className="h-4 w-4"
+                                style={{ color: tier.badgeColor }}
+                              />
+                            </div>
+                          )}
                           <span style={{ color: tier.badgeColor }}>
                             {tier.name}
                           </span>
@@ -302,7 +260,7 @@ export default function MembershipTiers() {
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem
-                                onClick={() => handleDelete(tier.id)}
+                                onClick={() => setTierToDelete(tier.id)}
                                 className="text-red-600 focus:text-red-600 focus:bg-red-50"
                               >
                                 <Trash2 className="h-4 w-4 mr-2" /> Delete Tier
@@ -334,87 +292,29 @@ export default function MembershipTiers() {
           </Table>
         </div>
 
-        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-          <DialogContent className="sm:max-w-[500px]">
-            <DialogHeader>
-              <DialogTitle>
-                {editingTier
-                  ? "Edit Membership Tier"
-                  : "Create Membership Tier"}
-              </DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4 pt-4">
-              <div className="space-y-2">
-                <Label>Tier Name</Label>
-                <Input
-                  required
-                  placeholder="e.g. Platinum Member"
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                />
-              </div>
+        <TierModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          editingTier={editingTier}
+          onSuccess={refetch}
+        />
 
-              <div className="space-y-2">
-                <Label>Description</Label>
-                <Input
-                  placeholder="Short description of this tier"
-                  value={formData.description}
-                  onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
-                  }
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>Badge Color (Hex)</Label>
-                <div className="flex gap-2">
-                  <Input
-                    type="color"
-                    className="w-12 p-1 h-10"
-                    value={formData.badgeColor}
-                    onChange={(e) =>
-                      setFormData({ ...formData, badgeColor: e.target.value })
-                    }
-                  />
-                  <Input
-                    placeholder="#fbbf24"
-                    value={formData.badgeColor}
-                    onChange={(e) =>
-                      setFormData({ ...formData, badgeColor: e.target.value })
-                    }
-                    className="flex-1"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Benefits</Label>
-                <RichTextEditor
-                  value={formData.benefits}
-                  onChange={(content) =>
-                    setFormData({ ...formData, benefits: content })
-                  }
-                  placeholder="List the benefits of this tier..."
-                />
-              </div>
-
-              <div className="flex justify-end gap-2 pt-4 border-t">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsModalOpen(false)}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit">
-                  {editingTier ? "Save Changes" : "Create Tier"}
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <AlertDialog open={!!tierToDelete} onOpenChange={(open) => !open && setTierToDelete(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Membership Tier?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete this tier? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </EcosystemContainer>
     </EcosystemWrapper>
   );

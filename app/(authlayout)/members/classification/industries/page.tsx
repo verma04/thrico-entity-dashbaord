@@ -10,7 +10,7 @@ import {
   useBulkAddIndustries,
 } from "@/graphql/quries/industries/industry-queries";
 import { Button } from "@/components/ui/button";
-import { Plus, Filter, Loader2, LayoutGrid, Network } from "lucide-react";
+import { Plus, Loader2, LayoutGrid, Network } from "lucide-react";
 import { useDebounce } from "use-debounce";
 import {
   AlertDialog,
@@ -22,7 +22,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
+import { ClassificationActionBar } from "../../../../../components/classfications/shared/classification-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { notify } from "@/lib/notify";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -36,7 +36,7 @@ import { RECOMMENDED_INDUSTRIES } from "../../../../../components/classfications
 export default function IndustriesPage() {
   const [search, setSearch] = useState("");
   const [debouncedSearch] = useDebounce(search, 300);
-  
+
   const { data, loading, refetch } = useGetIndustries({
     variables: { search: debouncedSearch, limit: 100 },
   });
@@ -121,36 +121,14 @@ export default function IndustriesPage() {
 
   return (
     <>
-      <EcosystemActionBar
-        shadow="none"
-        className="rounded-xl border border-border"
-      >
-        <EcosystemActionBar.Group>
-          <EcosystemActionBar.Item grow className="max-w-[360px]">
-            <EcosystemActionBar.Search
-              value={search}
-              onChange={setSearch}
-              placeholder="Search industries..."
-            />
-          </EcosystemActionBar.Item>
-        </EcosystemActionBar.Group>
-
-        <EcosystemActionBar.Separator />
-
-        <EcosystemActionBar.Group align="right">
-          {/* View toggle */}
-          <EcosystemActionBar.ViewToggle
-            value={activeTab}
-            onChange={setActiveTab}
-            options={[
-              { id: "list", label: "List", icon: LayoutGrid },
-              { id: "graph", label: "Graph", icon: Network },
-            ]}
-          />
-
-          <EcosystemActionBar.Separator />
-
-          <div className="flex gap-2">
+      <ClassificationActionBar
+        search={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search industries..."
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        actions={
+          <>
             <CtaButton
               variant="outline"
               onClick={handleBulkAdd}
@@ -172,25 +150,11 @@ export default function IndustriesPage() {
               <Plus className="h-3.5 w-3.5" />
               Add Industry
             </CtaButton>
-          </div>
-
-          <EcosystemActionBar.Separator />
-
-          <EcosystemActionBar.Item>
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-6 w-6 rounded-md border-border bg-card text-muted-foreground hover:text-foreground shadow-sm"
-            >
-              <Filter className="h-3.5 w-3.5" />
-            </Button>
-          </EcosystemActionBar.Item>
-
-          <EcosystemActionBar.Status active={industries.length > 0}>
-            {industries.length} Industries
-          </EcosystemActionBar.Status>
-        </EcosystemActionBar.Group>
-      </EcosystemActionBar>
+          </>
+        }
+        statusText={`${industries.length} Industries`}
+        statusActive={industries.length > 0}
+      />
 
       <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0 mt-4">
         {activeTab === "list" ? (

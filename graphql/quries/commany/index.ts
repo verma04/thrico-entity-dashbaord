@@ -84,3 +84,75 @@ export const GET_SEARCH_SKILLS = gql`
     }
   }
 `;
+
+export const GET_SEARCH_DEGREE = gql`
+  query GetSearchDegree($input: ClassificationSearchInput) {
+    getSearchDegree(input: $input) {
+      edges {
+        node {
+          id
+          title
+        }
+        cursor
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+`;
+
+export const GET_SEARCH_INTERESTS = gql`
+  query GetSearchInterests($input: ClassificationSearchInput) {
+    getSearchInterests(input: $input) {
+      edges {
+        node {
+          id
+          title
+        }
+        cursor
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+`;
+
+export const GET_SEARCH_INDUSTRIES = gql`
+  query GetSearchIndustries($input: ClassificationSearchInput) {
+    getSearchIndustries(input: $input) {
+      edges {
+        node {
+          id
+          title
+        }
+        cursor
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+`;
+
+export const GET_SEARCH_FUNCTIONS = gql`
+  query GetSearchFunctions($input: ClassificationSearchInput) {
+    getSearchFunctions(input: $input) {
+      edges {
+        node {
+          id
+          title
+        }
+        cursor
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+`;

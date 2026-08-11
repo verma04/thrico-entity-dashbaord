@@ -8,6 +8,7 @@ import {
   ShoppingBag,
   Briefcase,
   AlertTriangle,
+  Wallet,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ModulePerformanceCard } from "@/components/layout/ecosystem/module-performance-card";
@@ -19,6 +20,13 @@ const modulePerformanceList = [
     color: "text-blue-600",
     href: "/members",
     stats: ["106 registered", "107 approved"],
+  },
+  {
+    title: "Wallet",
+    icon: Wallet,
+    color: "text-amber-600",
+    href: "/wallet",
+    stats: ["10,000 Total", "2,500 Active"],
   },
   {
     title: "Referrals",

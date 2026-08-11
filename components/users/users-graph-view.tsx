@@ -44,11 +44,15 @@ import {
   GraduationCap,
   Heart,
   MapPin,
+  BookOpen,
+  Briefcase,
+  User,
   Link2,
   UserPlus,
   Check,
   ChevronsUpDown,
   Layers,
+  Coins,
 } from "lucide-react";
 import { useDebounce } from "use-debounce";
 import { EcosystemGraphView } from "@/components/shared/ecosystem-graph-view";
@@ -541,6 +545,15 @@ function UserDetailPanel({
                 {user.impactScore ?? 0}
               </span>
             </div>
+            <div className="flex flex-col bg-slate-50 px-3 py-1.5 rounded-md border border-slate-100 flex-1">
+              <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider flex items-center gap-1">
+                <Coins className="h-3 w-3 text-zinc-500 dark:text-zinc-400" />{" "}
+                Coins
+              </span>
+              <span className="text-sm font-semibold text-slate-700">
+                {user.coins ?? 0}
+              </span>
+            </div>
           </div>
         </div>
 
@@ -633,12 +646,15 @@ export function UsersGraphView({
   const [education, setEducation] = useState<string[]>([]);
   const [company, setCompany] = useState<string[]>([]);
   const [interests, setInterests] = useState<string[]>([]);
+  const [gender, setGender] = useState<string[]>([]);
   const [gamificationScore, setGamificationScore] = useState<[number, number]>([
     0, 10000,
   ]);
   const [debouncedGamificationScore] = useDebounce(gamificationScore, 500);
   const [impactScore, setImpactScore] = useState<[number, number]>([0, 1000]);
   const [debouncedImpactScore] = useDebounce(impactScore, 500);
+  const [coins, setCoins] = useState<[number, number]>([0, 10000]);
+  const [debouncedCoins] = useDebounce(coins, 500);
   const [limit, setLimit] = useState<number>(200);
 
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
@@ -653,20 +669,33 @@ export function UsersGraphView({
     if (education.length > 0) f.education = education;
     if (company.length > 0) f.company = company;
     if (interests.length > 0) f.interests = interests;
+    if (gender.length > 0) f.gender = gender;
     if (
       debouncedGamificationScore[0] > 0 ||
       debouncedGamificationScore[1] < 10000
     ) {
       f.gamificationScore = {
         min: debouncedGamificationScore[0],
-        max: debouncedGamificationScore[1],
       };
+      if (debouncedGamificationScore[1] < 10000) {
+        f.gamificationScore.max = debouncedGamificationScore[1];
+      }
     }
     if (debouncedImpactScore[0] > 0 || debouncedImpactScore[1] < 1000) {
       f.impactScore = {
         min: debouncedImpactScore[0],
-        max: debouncedImpactScore[1],
       };
+      if (debouncedImpactScore[1] < 1000) {
+        f.impactScore.max = debouncedImpactScore[1];
+      }
+    }
+    if (debouncedCoins[0] > 0 || debouncedCoins[1] < 10000) {
+      f.coins = {
+        min: debouncedCoins[0],
+      };
+      if (debouncedCoins[1] < 10000) {
+        f.coins.max = debouncedCoins[1];
+      }
     }
     return Object.keys(f).length > 0 ? f : undefined;
   }, [
@@ -677,8 +706,10 @@ export function UsersGraphView({
     education,
     company,
     interests,
+    gender,
     debouncedGamificationScore,
     debouncedImpactScore,
+    debouncedCoins,
   ]);
 
   const activeFilterCount =
@@ -686,13 +717,15 @@ export function UsersGraphView({
     (debouncedLocation.length > 0 ? 1 : 0) +
     industries.length +
     skills.length +
-    education.length +
-    company.length +
-    interests.length +
+    (education.length > 0 ? 1 : 0) +
+    (company.length > 0 ? 1 : 0) +
+    (interests.length > 0 ? 1 : 0) +
+    (gender.length > 0 ? 1 : 0) +
     (debouncedGamificationScore[0] > 0 || debouncedGamificationScore[1] < 10000
       ? 1
       : 0) +
-    (debouncedImpactScore[0] > 0 || debouncedImpactScore[1] < 1000 ? 1 : 0);
+    (debouncedImpactScore[0] > 0 || debouncedImpactScore[1] < 1000 ? 1 : 0) +
+    (debouncedCoins[0] > 0 || debouncedCoins[1] < 10000 ? 1 : 0);
 
   const clearAllFilters = () => {
     setSearchInput("");
@@ -702,8 +735,10 @@ export function UsersGraphView({
     setEducation([]);
     setCompany([]);
     setInterests([]);
+    setGender([]);
     setGamificationScore([0, 10000]);
     setImpactScore([0, 1000]);
+    setCoins([0, 10000]);
     setLimit(200);
   };
 
@@ -749,15 +784,15 @@ export function UsersGraphView({
   });
 
   const industryOptions = useMemo(
-    () => industriesData?.getIndustries.map((i) => i.title) || [],
+    () => industriesData?.getIndustries?.map((i) => i?.title).filter(Boolean) || [],
     [industriesData],
   );
   const skillOptions = useMemo(
-    () => skillsData?.getSkills.map((s) => s.title) || [],
+    () => skillsData?.getSkills?.map((s) => s?.title).filter(Boolean) || [],
     [skillsData],
   );
   const interestOptions = useMemo(
-    () => interestsData?.getInterests.map((i) => i.title) || [],
+    () => interestsData?.getInterests?.map((i) => i?.title).filter(Boolean) || [],
     [interestsData],
   );
   const educationOptions = useMemo(
@@ -765,10 +800,10 @@ export function UsersGraphView({
       Array.from(
         new Set(
           educationData?.getUserEducationGraph
-            .map((e) => e.school.title)
-            .filter(Boolean),
+            ?.map((e) => e?.school?.title)
+            .filter(Boolean) || [],
         ),
-      ) || [],
+      ),
     [educationData],
   );
   const companyOptions = useMemo(
@@ -776,10 +811,10 @@ export function UsersGraphView({
       Array.from(
         new Set(
           experienceData?.getUserExperienceGraph
-            .map((e) => e.company.title)
-            .filter(Boolean),
+            ?.map((e) => e?.company?.title)
+            .filter(Boolean) || [],
         ),
-      ) || [],
+      ),
     [experienceData],
   );
   const locationOptions = useMemo(
@@ -787,10 +822,10 @@ export function UsersGraphView({
       Array.from(
         new Set(
           locationData?.getUserLocationGraph
-            .map((l) => l.location.title)
-            .filter(Boolean),
+            ?.map((l) => l?.location?.title)
+            .filter(Boolean) || [],
         ),
-      ) || [],
+      ),
     [locationData],
   );
 
@@ -1097,8 +1132,25 @@ export function UsersGraphView({
               onSearchChange={setInterestSearch}
             />
           </FilterSection>
+
           <FilterSection
-            icon={<Star className="h-3.5 w-3.5 text-zinc-500 dark:text-zinc-400" />}
+            icon={<User className="h-3.5 w-3.5" />}
+            title="Gender"
+          >
+            <FilterCombobox
+              placeholder="Select genders..."
+              options={["male", "female", "other"]}
+              values={gender}
+              onAdd={(v) => !gender.includes(v) && setGender([...gender, v])}
+              onRemove={(v) => setGender(gender.filter((g) => g !== v))}
+              searchValue=""
+              onSearchChange={() => {}}
+            />
+          </FilterSection>
+          <FilterSection
+            icon={
+              <Star className="h-3.5 w-3.5 text-zinc-500 dark:text-zinc-400" />
+            }
             title="Gamification Points"
           >
             <div className="px-3 pt-4 pb-2">
@@ -1122,7 +1174,9 @@ export function UsersGraphView({
           </FilterSection>
 
           <FilterSection
-            icon={<Heart className="h-3.5 w-3.5 text-zinc-500 dark:text-zinc-400" />}
+            icon={
+              <Heart className="h-3.5 w-3.5 text-zinc-500 dark:text-zinc-400" />
+            }
             title="Impact Score"
           >
             <div className="px-3 pt-4 pb-2">
@@ -1138,6 +1192,30 @@ export function UsersGraphView({
                 <span>{impactScore[0]}</span>
                 <span>
                   {impactScore[1] === 1000 ? "1000+" : impactScore[1]}
+                </span>
+              </div>
+            </div>
+          </FilterSection>
+
+          <FilterSection
+            icon={
+              <Coins className="h-3.5 w-3.5 text-zinc-500 dark:text-zinc-400" />
+            }
+            title="Coins"
+          >
+            <div className="px-3 pt-4 pb-2">
+              <Slider
+                min={0}
+                max={10000}
+                step={100}
+                value={[coins[0], coins[1]]}
+                onValueChange={(val) => setCoins([val[0], val[1]])}
+                className="mt-2"
+              />
+              <div className="flex justify-between items-center mt-3 text-[10px] text-slate-500 font-medium">
+                <span>{coins[0]}</span>
+                <span>
+                  {coins[1] === 10000 ? "10000+" : coins[1]}
                 </span>
               </div>
             </div>

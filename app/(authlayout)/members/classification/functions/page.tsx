@@ -11,9 +11,9 @@ import {
 } from "@/graphql/quries/functions/function-queries";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Briefcase, Filter, Loader2, Plus, Pencil, Trash2, UserCheck } from "lucide-react";
+import { Briefcase, Loader2, Plus, UserCheck } from "lucide-react";
+import { ClassificationCard } from "../../../../../components/classfications/shared/classification-card";
+import { ClassificationSkeletonGrid } from "../../../../../components/classfications/shared/classification-skeleton";
 import { CtaButton } from "@/components/ui/cta-button";
 import {
   Dialog,
@@ -33,10 +33,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
+import { ClassificationActionBar } from "../../../../../components/classfications/shared/classification-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { notify } from "@/lib/notify";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // ── Color palette for functions ──
 const FUNCTION_COLORS = [
@@ -150,27 +151,7 @@ function FunctionsGrid({
 }) {
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-4 md:p-6">
-        {Array(8)
-          .fill(0)
-          .map((_, i) => (
-            <Card
-              key={i}
-              className="border border-border rounded-xl overflow-hidden"
-            >
-              <Skeleton className="h-1.5 w-full" />
-              <CardContent className="p-6">
-                <div className="flex items-center gap-4">
-                  <Skeleton className="h-12 w-12 rounded-xl" />
-                  <div className="space-y-2 flex-1">
-                    <Skeleton className="h-5 w-3/4" />
-                    <Skeleton className="h-3 w-1/2" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-      </div>
+      <ClassificationSkeletonGrid className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4 md:p-6" />
     );
   }
 
@@ -189,68 +170,21 @@ function FunctionsGrid({
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-4 md:p-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4 md:p-6">
       {functions.map((func, index) => {
         const color = getFunctionColor(index);
         return (
-          <Card
+          <ClassificationCard
             key={func.id}
-            className="border border-border shadow-sm hover:shadow-md transition-all duration-300 group overflow-hidden rounded-xl hover:border-indigo-500/20 hover:-translate-y-1 bg-card cursor-pointer"
-          >
-            {/* Color bar */}
-            <div
-              className="h-1.5 w-full opacity-80 group-hover:opacity-100 transition-opacity"
-              style={{ backgroundColor: color }}
-            />
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-4">
-                  <div
-                    className="h-12 w-12 rounded-xl flex items-center justify-center shadow-sm"
-                    style={{
-                      backgroundColor: `${color}15`,
-                      color: color,
-                    }}
-                  >
-                    <UserCheck className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-md w-full text-foreground group-hover:text-indigo-600 transition-colors">
-                      {func.title}
-                    </h3>
-                    <p className="text-xs font-semibold text-muted-foreground mt-1 uppercase tracking-wider">
-                      Job Function
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-muted-foreground hover:text-indigo-600 hover:bg-indigo-50 rounded-lg"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onEdit(func);
-                    }}
-                  >
-                    <Pencil className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-muted-foreground hover:text-rose-600 hover:bg-rose-50 rounded-lg"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDelete(func);
-                    }}
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+            id={func.id}
+            title={func.title}
+            count={0}
+            users={[]}
+            color={color}
+            icon={<UserCheck className="h-4 w-4" />}
+            onEdit={() => onEdit(func)}
+            onDelete={() => onDelete(func)}
+          />
         );
       })}
     </div>
@@ -407,7 +341,7 @@ const RECOMMENDED_FUNCTIONS = [
   "XML/Data Structuring",
   "Youth Program Coordination",
   "YouTube Channel Management",
-  "CRM Management"
+  "CRM Management",
 ];
 
 // ── Main Page ──
@@ -415,10 +349,11 @@ export default function FunctionsPage() {
   const { data, loading, refetch } = useGetFunctions();
   const [search, setSearch] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingFunction, setEditingFunction] = useState<MemberFunction | null>(null);
-  const [functionToDelete, setFunctionToDelete] = useState<MemberFunction | null>(
+  const [editingFunction, setEditingFunction] = useState<MemberFunction | null>(
     null,
   );
+  const [functionToDelete, setFunctionToDelete] =
+    useState<MemberFunction | null>(null);
 
   const [addFunction, { loading: creating }] = useAddFunction({
     onCompleted: () => {
@@ -497,21 +432,12 @@ export default function FunctionsPage() {
 
   return (
     <>
-      <EcosystemActionBar shadow="none" className="rounded-xl border border-border">
-        <EcosystemActionBar.Group>
-          <EcosystemActionBar.Item grow className="max-w-[360px]">
-            <EcosystemActionBar.Search
-              value={search}
-              onChange={setSearch}
-              placeholder="Search job functions..."
-            />
-          </EcosystemActionBar.Item>
-        </EcosystemActionBar.Group>
-
-        <EcosystemActionBar.Separator />
-
-        <EcosystemActionBar.Group align="right">
-          <div className="flex gap-2">
+      <ClassificationActionBar
+        search={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search job functions..."
+        actions={
+          <>
             <CtaButton
               variant="outline"
               onClick={handleBulkAdd}
@@ -533,25 +459,11 @@ export default function FunctionsPage() {
               <Plus className="h-3.5 w-3.5" />
               Add Function
             </CtaButton>
-          </div>
-
-          <EcosystemActionBar.Separator />
-
-          <EcosystemActionBar.Item>
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-6 w-6 rounded-md border-border bg-card text-muted-foreground hover:text-foreground shadow-sm"
-            >
-              <Filter className="h-3.5 w-3.5" />
-            </Button>
-          </EcosystemActionBar.Item>
-
-          <EcosystemActionBar.Status active={filteredFunctions.length > 0}>
-            {filteredFunctions.length} Functions
-          </EcosystemActionBar.Status>
-        </EcosystemActionBar.Group>
-      </EcosystemActionBar>
+          </>
+        }
+        statusText={`${filteredFunctions.length} Functions`}
+        statusActive={filteredFunctions.length > 0}
+      />
 
       <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0 mt-4">
         <FunctionsGrid

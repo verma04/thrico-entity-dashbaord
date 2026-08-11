@@ -48,7 +48,7 @@ import { DateRange } from "react-day-picker";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { withModulePermission } from "@/components/hoc/with-module-permission";
 import { useCheckMemberSubscription } from "@/graphql/actions/membership/membership-queries";
-import { SubscriptionLimitBanner } from "@/components/members/users/subscription-alerts";
+import { SubscriptionLimitBanner } from "@/components/members/manage/subscription-alerts";
 import { DashboardSectionHeading } from "@/components/home/dashboard-section-heading";
 import {
   useGetMemberKPIDashboard,

@@ -1,8 +1,8 @@
 import { gql, useQuery } from "@apollo/client";
 
 export const GET_USER_EDUCATION_GRAPH = gql`
-  query GetUserEducationGraph($search: String, $limit: Int, $offset: Int) {
-    getUserEducationGraph(search: $search, limit: $limit, offset: $offset) {
+  query GetUserEducationGraph($search: String, $schoolName: String, $limit: Int, $offset: Int) {
+    getUserEducationGraph(search: $search, schoolName: $schoolName, limit: $limit, offset: $offset) {
       user {
         id
         globalUserId

@@ -2,22 +2,27 @@
 
 import { useEntitySettings, useUpdateEntitySettings } from "@/graphql/actions";
 import { Users, ShieldCheck, Zap } from "lucide-react";
-import { PlatformSettingsPage, SettingsField } from "@/components/ui/platform/settings-page";
+import {
+  PlatformSettingsPage,
+  SettingsField,
+} from "@/components/ui/platform/settings-page";
 import { toast } from "sonner";
 
 const FIELDS: SettingsField[] = [
   {
-    key: "autoApproveUser",
-    label: "Auto Approve New Users",
-    description: "Automatically approve new user registrations without manual intervention.",
-    icon: Zap,
+    key: "allowNewUser",
+    label: "Allow New Member Registration",
+    description:
+      "Temporarily pause or resume the onboarding of new ecosystem participants.",
+    icon: ShieldCheck,
     section: "Registration Protocol",
   },
   {
-    key: "allowNewUser",
-    label: "Allow New User Registration",
-    description: "Temporarily pause or resume the onboarding of new ecosystem participants.",
-    icon: ShieldCheck,
+    key: "autoApproveUser",
+    label: "Auto Approve New Members",
+    description:
+      "Automatically approve new member registrations without manual intervention.",
+    icon: Zap,
     section: "Registration Protocol",
   },
 ];
@@ -56,4 +61,3 @@ const Settings = () => {
 };
 
 export default Settings;
-

@@ -60,6 +60,86 @@ export const GET_OFFERS = gql`
   }
 `;
 
+export const GET_CREATED_OFFERS = gql`
+  query GetCreatedOffersByUserId($userId: ID!, $page: Int, $limit: Int) {
+    getCreatedOffersByUserId(userId: $userId, page: $page, limit: $limit) {
+      data {
+        id
+        title
+        description
+        image
+        discount
+        validityStart
+        validityEnd
+        status
+        claimsCount
+        viewsCount
+        isActive
+        category {
+          id
+          name
+          color
+        }
+        verification {
+          isVerified
+          verificationReason
+        }
+        addedBy
+        creator {
+          id
+          firstName
+          lastName
+          avatar
+        }
+        createdAt
+      }
+      total
+      offset
+      limit
+    }
+  }
+`;
+
+export const GET_CLAIMED_OFFERS = gql`
+  query GetClaimedOffers($userId: ID!, $page: Int, $limit: Int) {
+    getClaimedOffers(userId: $userId, page: $page, limit: $limit) {
+      data {
+        id
+        title
+        description
+        image
+        discount
+        validityStart
+        validityEnd
+        status
+        claimsCount
+        viewsCount
+        isActive
+        category {
+          id
+          name
+          color
+        }
+        verification {
+          isVerified
+          verificationReason
+        }
+        addedBy
+        creator {
+          id
+          firstName
+          lastName
+          avatar
+        }
+        createdAt
+      }
+      total
+      offset
+      limit
+    }
+  }
+`;
+
 export const GET_OFFER_BY_ID = gql`
   query GetOfferById($id: ID!) {
     getOfferById(id: $id) {

@@ -11,6 +11,7 @@ import {
   GET_GROWTH_STATS,
   GET_USER_REFERRALS,
   GET_ALL_REFERRALS,
+  GET_TOP_REFERRALS,
   SEARCH_USER_WITH_AI,
   GET_USER_NEO4J_RELATIONSHIPS,
   GET_USER_SESSIONS,
@@ -125,6 +126,18 @@ export interface UserDetail {
     isActive: boolean;
     createdAt: string;
   };
+  entityCurrencyWallet?: {
+    id: string;
+    balance: number;
+    totalEarned: number;
+    totalSpent: number;
+  };
+  gamificationSummary?: {
+    totalPointsEarned: number;
+    totalBadgesEarned: number;
+    rankPosition: string | number;
+  };
+  impactScore?: number;
 }
 
 export interface GetAllUserResponse {
@@ -201,6 +214,25 @@ export interface GetAllReferralsResponse {
   };
 }
 
+export interface TopReferrerItem {
+  referrer: {
+    user: {
+      firstName: string;
+      lastName: string;
+      email: string;
+      avatar: string;
+    };
+  };
+  referralsCount: number;
+}
+
+export interface GetTopReferralsResponse {
+  getTopReferrals: {
+    data: TopReferrerItem[];
+    totalCount: number;
+  };
+}
+
 // ---------------------------------------------------------
 // QUERY HOOKS
 // ---------------------------------------------------------
@@ -233,6 +265,12 @@ export const useGetAllUser = (input?: {
   industryId?: string | null;
   search?: string | null;
   membershipTierId?: string | null;
+  location?: string[] | null;
+  company?: string[] | null;
+  college?: string[] | null;
+  functionTitle?: string[] | null;
+  interestTitle?: string[] | null;
+  skillName?: string[] | null;
 }) =>
   useQuery<GetAllUserResponse>(GET_ALL_USER, {
     variables: {
@@ -243,6 +281,12 @@ export const useGetAllUser = (input?: {
         industryId: input?.industryId ?? null,
         search: input?.search ?? null,
         membershipTierId: input?.membershipTierId ?? null,
+        location: input?.location ?? null,
+        company: input?.company ?? null,
+        college: input?.college ?? null,
+        functionTitle: input?.functionTitle ?? null,
+        interestTitle: input?.interestTitle ?? null,
+        skillName: input?.skillName ?? null,
       },
     },
 
@@ -293,11 +337,20 @@ export const useGetUserReferrals = (
   });
 
 export const useGetAllReferrals = (
-  variables?: { limit?: number; offset?: number },
+  input: { limit: number; offset: number },
   options?: any,
 ) =>
   useQuery<GetAllReferralsResponse>(GET_ALL_REFERRALS, {
-    variables,
+    variables: input,
+    ...options,
+  });
+
+export const useGetTopReferrals = (
+  input?: { limit?: number },
+  options?: any,
+) =>
+  useQuery<GetTopReferralsResponse>(GET_TOP_REFERRALS, {
+    variables: input,
     ...options,
   });
 

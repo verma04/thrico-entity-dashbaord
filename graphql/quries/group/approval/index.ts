@@ -124,6 +124,74 @@ export const GET_COMMUNITIES = gql`
   }
 `;
 
+export const GET_JOINED_COMMUNITIES = gql`
+  query GetJoinedCommunities($input: InputGetCommunities!) {
+    getJoinedCommunities(input: $input) {
+      total
+      data {
+        id
+        title
+        addedBy
+        privacy
+        cover
+        status
+        description
+        createdAt
+        updatedAt
+        tagline
+        location
+        numberOfUser
+        verification {
+          id
+          isVerifiedAt
+          isVerified
+          verificationReason
+        }
+        creator {
+          id
+          firstName
+          lastName
+          avatar
+        }
+      }
+    }
+  }
+`;
+
+export const GET_CREATED_COMMUNITIES = gql`
+  query GetCreatedCommunities($input: InputGetCommunities!) {
+    getCreatedCommunities(input: $input) {
+      total
+      data {
+        id
+        title
+        addedBy
+        privacy
+        cover
+        status
+        description
+        createdAt
+        updatedAt
+        tagline
+        location
+        numberOfUser
+        verification {
+          id
+          isVerifiedAt
+          isVerified
+          verificationReason
+        }
+        creator {
+          id
+          firstName
+          lastName
+          avatar
+        }
+      }
+    }
+  }
+`;
+
 export const GET_COMMUNITY_BY_ID = gql`
 query GetCommunityById($input: GetCommunityByIdInput!) {
   getCommunityById(input: $input) {

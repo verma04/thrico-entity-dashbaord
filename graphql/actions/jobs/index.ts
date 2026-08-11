@@ -8,6 +8,7 @@ import {
   GET_JOB_BY_ID,
   GET_JOB_APPLICATION_TREND,
   GET_JOB_TYPE_DISTRIBUTION,
+  GET_APPLIED_JOBS,
 } from "@/graphql/quries/jobs";
 import {
   gql,
@@ -224,6 +225,12 @@ export function useJobs(
   options?: QueryHookOptions<{ getJob: GetJobResponse }, { input?: GetJobInput }>,
 ): QueryResult<{ getJob: GetJobResponse }, { input?: GetJobInput }> {
   return useQuery(GET_JOBS, options);
+}
+
+export function useAppliedJobs(
+  options?: QueryHookOptions<{ getAppliedJobs: GetJobResponse }, { userId: string, page?: number, limit?: number }>,
+): QueryResult<{ getAppliedJobs: GetJobResponse }, { userId: string, page?: number, limit?: number }> {
+  return useQuery(GET_APPLIED_JOBS, options);
 }
 
 export function useGetJobById(

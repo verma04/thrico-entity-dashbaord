@@ -23,6 +23,8 @@ import {
   GetCommunityActivityTrendResponse,
   GET_COMMUNITY_RATINGS,
   VOTE_COMMUNITY_RATING_HELPFULNESS,
+  GET_JOINED_COMMUNITIES,
+  GET_CREATED_COMMUNITIES,
 } from "../../quries/group/approval";
 
 export const getCommunityRatings = (options: any) =>
@@ -80,6 +82,12 @@ export const addCommunity = (options: any) =>
 
 export const getCommunities = (options: any) =>
   useQuery(GET_COMMUNITIES, options);
+
+export const getJoinedCommunities = (options: any) =>
+  useQuery(GET_JOINED_COMMUNITIES, options);
+
+export const getCreatedCommunities = (options: any) =>
+  useQuery(GET_CREATED_COMMUNITIES, options);
 
 export const getCommunityById = (options: any) =>
   useQuery(GET_COMMUNITY_BY_ID, options);
