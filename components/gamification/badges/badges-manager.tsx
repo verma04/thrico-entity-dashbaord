@@ -46,7 +46,7 @@ export function BadgesManager() {
       gamificationModulesData?.getEntityGamificationModules?.modules || [];
     return modules.map((m: any) => ({
       id: m.id,
-      name: m.name,
+      name: m.name ? m.name.charAt(0).toUpperCase() + m.name.slice(1) : m.name,
       icon: m.icon,
     }));
   }, [gamificationModulesData]);
@@ -79,7 +79,7 @@ export function BadgesManager() {
       <EcosystemHeader
         title="Badges"
         badgeText="Recognition"
-        description="Create and manage badges to recognize member achievements and drive sustained community engagement."
+        description="Create and manage badges to recognise member achievements."
         icon={Award}
         breadcrumbs={[
           { label: "Gamification", href: "/gamification" },

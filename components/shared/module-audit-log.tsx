@@ -11,8 +11,10 @@ import {
   Fingerprint,
   ShieldX,
   ShieldCheck,
+  Search,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useGetAuditLogs, useGetAuditLogById } from "@/graphql/actions/audit";
 import {
   Dialog,
@@ -23,6 +25,7 @@ import {
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { AdminTable } from "@/components/shared/admin-table/admin-table";
 import { cn } from "@/lib/utils";
 import moment from "moment";
@@ -44,6 +47,16 @@ export function ModuleAuditLog({
 }: ModuleAuditLogProps) {
   const [page, setPage] = useState(1);
   const [selectedLogId, setSelectedLogId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  
+  // Use debounced search to avoid too many requests
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  React.useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchQuery), 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   const { data: logDetailsData, loading: logDetailsLoading } =
     useGetAuditLogById(
@@ -58,6 +71,9 @@ export function ModuleAuditLog({
   } = useGetAuditLogs({
     pagination: { page, limit: 12 },
     module: moduleKey,
+    search: debouncedSearch || undefined,
+    startDate: startDate || undefined,
+    endDate: endDate || undefined,
   });
 
   const logs = logData?.auditLogs?.data || [];
@@ -265,8 +281,44 @@ export function ModuleAuditLog({
         }
       />
 
-      <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">
-        <div className="px-6 py-4">
+      <EcosystemActionBar shadow="none">
+        <EcosystemActionBar.Group>
+          <EcosystemActionBar.Item grow className="max-w-md">
+            <EcosystemActionBar.Search
+              value={searchQuery}
+              onChange={setSearchQuery}
+              placeholder="Search by name, rule, or action..."
+            />
+          </EcosystemActionBar.Item>
+        </EcosystemActionBar.Group>
+
+        <EcosystemActionBar.Separator />
+
+        <EcosystemActionBar.Group>
+          <EcosystemActionBar.Item>
+            <div className="flex items-center gap-2">
+              <Input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="w-[140px] h-8 bg-card text-xs font-medium border-border focus-visible:ring-ring"
+                title="Start Date"
+              />
+              <span className="text-muted-foreground text-xs font-medium px-1">to</span>
+              <Input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="w-[140px] h-8 bg-card text-xs font-medium border-border focus-visible:ring-ring"
+                title="End Date"
+              />
+            </div>
+          </EcosystemActionBar.Item>
+        </EcosystemActionBar.Group>
+      </EcosystemActionBar>
+
+      <EcosystemContainer className="p-0 overflow-hidden border border-zinc-200 shadow-sm rounded-xl bg-white mt-4">
+        <div className="px-0 py-0">
           <AdminTable
             columns={columns}
             data={logs}

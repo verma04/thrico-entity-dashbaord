@@ -17,7 +17,7 @@ export default function EconomicsPage() {
       <EcosystemHeader
         title="Economics"
         badgeText={`${currencyModuleName} Config`}
-        description={`Configure your local ${currencyModuleName.toLowerCase()} branding and normalization factors.`}
+        description={`Maintain your gamification ${currencyModuleName.toLowerCase()} normalization factor and label.`}
         icon={Coins}
         breadcrumbs={[{ label: "Gamification", href: "/gamification" }, { label: "Currency", href: "/gamification/currency" }, { label: "Economics" }]}
       />

@@ -196,6 +196,17 @@ export function ImpactMembersTable({
         </div>
       ),
     },
+    {
+      key: "lastUpdated",
+      header: "Last Updated",
+      cell: (node: ImpactUserNode) => (
+        <span className="text-xs text-muted-foreground whitespace-nowrap">
+          {node.lastCalculatedAt
+            ? format(new Date(node.lastCalculatedAt), "MMM d, yyyy HH:mm")
+            : "Never"}
+        </span>
+      ),
+    },
   ];
 
   return (

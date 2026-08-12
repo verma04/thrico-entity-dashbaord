@@ -91,7 +91,7 @@ export function PointRuleForm({
   );
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-24 bg-light-50">
       {/* Main Form */}
       <div className="lg:col-span-8 space-y-6">
         <form onSubmit={formik.handleSubmit} className="space-y-6">
@@ -114,7 +114,9 @@ export function PointRuleForm({
                   <SelectContent>
                     {modules.map((mod) => (
                       <SelectItem key={mod.id} value={mod.id}>
-                        {mod.name}
+                        {mod.name
+                          ? mod.name.charAt(0).toUpperCase() + mod.name.slice(1)
+                          : mod.name}
                       </SelectItem>
                     ))}
                   </SelectContent>

@@ -16,7 +16,7 @@ export function ImpactMembersManager() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [debouncedSearch] = useDebounce(search, 500);
-  const pageSize = 20;
+  const pageSize = 100;
 
   const offset = (page - 1) * pageSize;
 
@@ -54,7 +54,7 @@ export function ImpactMembersManager() {
     return (
       <EcosystemWrapper>
         <EcosystemHeader
-          title="Community Members (Impact Scores)"
+          title="Member Scores"
           badgeText="Impact Scores"
           description="View and rank all community members by their total impact score."
           icon={Users}
@@ -89,7 +89,7 @@ export function ImpactMembersManager() {
   return (
     <EcosystemWrapper>
       <EcosystemHeader
-        title="Community Members"
+        title="Member Scores"
         badgeText="Impact Scores"
         description="View all community members and their corresponding impact scores and tiers."
         icon={Users}

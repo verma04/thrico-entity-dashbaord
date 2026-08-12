@@ -82,6 +82,16 @@ import {
   List,
   Clock,
   Award,
+  Medal,
+  TrendingUp,
+  ListOrdered,
+  PlayCircle,
+  Puzzle,
+  Waypoints,
+  Tags,
+  PlusCircle,
+  AlertTriangle,
+  Scale,
 } from "lucide-react";
 import { useMemo } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -409,31 +419,37 @@ export const gamificationEngine = [
         key: "eng-dash",
         label: "Dashboard",
         path: "/gamification/points-and-badges",
+        icon: <LayoutDashboard size={18} />,
       },
       {
         key: "eng-points",
         label: "Points",
         path: "/gamification/points-and-badges/points",
+        icon: <Coins size={18} />,
       },
       {
         key: "eng-badges",
         label: "Badges",
         path: "/gamification/points-and-badges/badges",
+        icon: <Medal size={18} />,
       },
       {
         key: "eng-ranks",
         label: "Ranks",
         path: "/gamification/points-and-badges/ranks",
+        icon: <TrendingUp size={18} />,
       },
       {
         key: "eng-leaderboard",
         label: "Leaderboard",
         path: "/gamification/points-and-badges/leaderboard",
+        icon: <ListOrdered size={18} />,
       },
       {
         key: "eng-log",
         label: "Activity Log",
         path: "/gamification/points-and-badges/activity-log",
+        icon: <History size={18} />,
       },
     ],
   },
@@ -448,21 +464,25 @@ export const gamificationEngine = [
         key: "game-dash",
         label: "Dashboard",
         path: "/gamification/engagement-games",
+        icon: <LayoutDashboard size={18} />,
       },
       {
         key: "game-spin",
         label: "Spin Wheel",
         path: "/gamification/engagement-games/spin-wheel",
+        icon: <PlayCircle size={18} />,
       },
       {
         key: "game-scratch",
         label: "Scratch Card",
         path: "/gamification/engagement-games/scratch-card",
+        icon: <Ticket size={18} />,
       },
       {
         key: "game-match",
         label: "Match & Win",
         path: "/gamification/engagement-games/match-win",
+        icon: <Puzzle size={18} />,
       },
     ],
   },
@@ -473,27 +493,35 @@ export const gamificationEngine = [
     isMobileOnly: true,
     icon: <Coins size={18} />,
     children: [
-      { key: "cur-dash", label: "Dashboard", path: "/gamification/currency" },
+      {
+        key: "cur-dash",
+        label: "Dashboard",
+        path: "/gamification/currency",
+        icon: <LayoutDashboard size={18} />,
+      },
       {
         key: "cur-economics",
         label: "Economics",
         path: "/gamification/currency/economics",
+        icon: <LineChart size={18} />,
       },
       {
         key: "cur-abuse",
         label: "Anti-Abuse",
         path: "/gamification/currency/risk",
+        icon: <ShieldAlert size={18} />,
       },
-
       {
         key: "cur-trace",
         label: "Quick Trace",
         path: "/gamification/currency/trace",
+        icon: <Waypoints size={18} />,
       },
       {
         key: "cur-audit",
         label: "Audit Log",
         path: "/gamification/currency/audit-log",
+        icon: <History size={18} />,
       },
     ],
   },
@@ -504,23 +532,36 @@ export const gamificationEngine = [
     isMobileOnly: true,
     icon: <Gift size={18} />,
     children: [
-      { key: "rew-dash", label: "Dashboard", path: "/gamification/rewards" },
+      {
+        key: "rew-dash",
+        label: "Dashboard",
+        path: "/gamification/rewards",
+        icon: <LayoutDashboard size={18} />,
+      },
       {
         key: "rcoupons",
         label: "Rewards & Vouchers",
         path: "/gamification/rewards/coupons",
+        icon: <Tags size={18} />,
       },
       {
         key: "rew-coupons",
         label: "Create Reward",
         path: "/gamification/rewards/coupons/create",
+        icon: <PlusCircle size={18} />,
       },
       {
         key: "redemptions",
         label: "Redemption",
         path: "/gamification/rewards/redemptions",
+        icon: <CheckCircle size={18} />,
       },
-      { key: "rew-fraud", label: "Fraud", path: "/gamification/rewards/fraud" },
+      {
+        key: "rew-fraud",
+        label: "Fraud",
+        path: "/gamification/rewards/fraud",
+        icon: <AlertTriangle size={18} />,
+      },
     ],
   },
   {
@@ -535,21 +576,31 @@ export const gamificationEngine = [
         key: "imp-dash",
         label: "Dashboard",
         path: "/gamification/impact-score",
+        icon: <LayoutDashboard size={18} />,
       },
       {
         key: "imp-rules",
         label: "Rules",
         path: "/gamification/impact-score/rules",
+        icon: <Scale size={18} />,
       },
       {
         key: "imp-audit",
         label: "Activity Log",
         path: "/gamification/impact-score/activity-log",
+        icon: <History size={18} />,
       },
       {
         key: "imp-members",
-        label: "Members",
+        label: "Member Scores",
         path: "/gamification/impact-score/members",
+        icon: <Users size={18} />,
+      },
+      {
+        key: "imp-docs",
+        label: "Documentation",
+        path: "/gamification/impact-score/documentation",
+        icon: <BookOpen size={18} />,
       },
     ],
   },
@@ -1259,11 +1310,6 @@ export const useFilteredExtendedItems = () => {
     [data, user],
   );
 
-  const gamificationModule = data?.checkEntitySubscription?.modules?.find(
-    (m: any) => m.name === "Points & Badges" || m.name === "Gamification",
-  );
-  const gamificationLabel = gamificationModule?.customName || "Gamification";
-
   return {
     homeItems: filteredHome,
     aiStudioItems: filteredAiStudio,
@@ -1275,7 +1321,6 @@ export const useFilteredExtendedItems = () => {
     reportedItems: filteredReported as any[],
     gamificationEngine: filteredGamification as any[],
     modules: filteredModules as any[],
-    gamificationLabel,
     loading: subLoading,
   };
 };

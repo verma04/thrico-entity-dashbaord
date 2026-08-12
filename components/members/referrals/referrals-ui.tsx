@@ -4,6 +4,7 @@ import React, { useState, useMemo } from "react";
 import {
   useGetAllReferrals,
   useGetTopReferrals,
+  useSearchUserWithAI,
 } from "@/graphql/actions/membership/membership-queries";
 import {
   AdminTable,
@@ -46,10 +47,53 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export function ReferralsUI() {
   const [activeTab, setActiveTab] = useState("top");
   const [selectedReferrerId, setSelectedReferrerId] = useState<string>("all");
+  const [selectedReferrerName, setSelectedReferrerName] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const searchTimeoutRef = React.useRef<NodeJS.Timeout>();
+
+  const [searchUserWithAI, { data: searchData, loading: searchLoading }] =
+    useSearchUserWithAI();
+
+  const handleSearch = (value: string) => {
+    setSearchQuery(value);
+    
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    
+    if (value.trim().length > 2) {
+      searchTimeoutRef.current = setTimeout(() => {
+        searchUserWithAI({
+          variables: {
+            query: value,
+            limit: 10,
+            offset: 0,
+          },
+        });
+      }, 500);
+    }
+  };
 
   const { data: allReferralsData, loading: allLoading } = useGetAllReferrals({
     limit: 500,
@@ -169,7 +213,7 @@ export function ReferralsUI() {
             { label: "Referrals" },
           ]}
         />
-        
+
         <EcosystemContainer className="m-4">
           <div className="w-full space-y-6">
             <div className="border-b border-border w-full flex gap-6 h-12">
@@ -179,7 +223,7 @@ export function ReferralsUI() {
 
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {[1, 2, 3].map(i => (
+                {[1, 2, 3].map((i) => (
                   <Skeleton key={i} className="h-[104px] rounded-xl" />
                 ))}
               </div>
@@ -387,30 +431,111 @@ export function ReferralsUI() {
                   </CardDescription>
                 </div>
                 <div>
-                  <Select
-                    value={selectedReferrerId}
-                    onValueChange={setSelectedReferrerId}
-                  >
-                    <SelectTrigger className="w-[280px] h-9 text-xs font-semibold bg-white">
-                      <SelectValue placeholder="Select a member..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all" className="text-xs">
-                        All Members
-                      </SelectItem>
-                      {topReferrers.map((r: any) => (
-                        <SelectItem
-                          key={r.referrer?.user?.email}
-                          value={r.referrer?.user?.email}
-                          className="text-xs font-medium"
-                        >
-                          {r.referrer?.user?.firstName}{" "}
-                          {r.referrer?.user?.lastName} ({r.referralsCount}{" "}
-                          referrals)
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Popover open={open} onOpenChange={setOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={open}
+                        className="w-[280px] h-9 text-xs font-semibold bg-white justify-between"
+                      >
+                        {selectedReferrerId === "all"
+                          ? "All Members"
+                          : selectedReferrerName || selectedReferrerId || "Select a member..."}
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[280px] p-0">
+                      <Command shouldFilter={false}>
+                        <CommandInput
+                          placeholder="Search member..."
+                          className="h-9 text-xs"
+                          value={searchQuery}
+                          onValueChange={handleSearch}
+                        />
+                        <CommandList>
+                          {!searchLoading && <CommandEmpty className="text-xs p-4 text-center text-muted-foreground">No member found.</CommandEmpty>}
+                          <CommandGroup>
+                            <CommandItem
+                              value="all members"
+                              onSelect={() => {
+                                setSelectedReferrerId("all");
+                                setSelectedReferrerName(null);
+                                setOpen(false);
+                                setSearchQuery("");
+                              }}
+                              className="text-xs font-medium"
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  selectedReferrerId === "all" ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                              All Members
+                            </CommandItem>
+                            
+                            {searchLoading && searchQuery.trim().length > 2 && (
+                              <div className="p-4 text-center text-xs text-muted-foreground">Searching backend...</div>
+                            )}
+
+                            {searchQuery.trim().length > 2 && searchData?.searchUserWithAI?.data ? (
+                              searchData.searchUserWithAI.data.map((u: any) => (
+                                <CommandItem
+                                  key={u.email}
+                                  value={`${u.firstName} ${u.lastName} ${u.email}`}
+                                  onSelect={() => {
+                                    setSelectedReferrerId(u.email);
+                                    setSelectedReferrerName(`${u.firstName} ${u.lastName}`);
+                                    setOpen(false);
+                                    setSearchQuery("");
+                                  }}
+                                  className="text-xs font-medium"
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      selectedReferrerId === u.email ? "opacity-100" : "opacity-0"
+                                    )}
+                                  />
+                                  {u.firstName} {u.lastName}
+                                </CommandItem>
+                              ))
+                            ) : (
+                              topReferrers
+                                .filter((r: any) =>
+                                  !searchQuery.trim() ||
+                                  `${r.referrer?.user?.firstName} ${r.referrer?.user?.lastName} ${r.referrer?.user?.email}`
+                                    .toLowerCase()
+                                    .includes(searchQuery.toLowerCase())
+                                )
+                                .map((r: any) => (
+                                <CommandItem
+                                  key={r.referrer?.user?.email}
+                                  value={`${r.referrer?.user?.firstName} ${r.referrer?.user?.lastName} ${r.referrer?.user?.email}`}
+                                  onSelect={() => {
+                                    setSelectedReferrerId(r.referrer?.user?.email);
+                                    setSelectedReferrerName(`${r.referrer?.user?.firstName} ${r.referrer?.user?.lastName}`);
+                                    setOpen(false);
+                                    setSearchQuery("");
+                                  }}
+                                  className="text-xs font-medium"
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      selectedReferrerId === r.referrer?.user?.email ? "opacity-100" : "opacity-0"
+                                    )}
+                                  />
+                                  {r.referrer?.user?.firstName} {r.referrer?.user?.lastName} ({r.referralsCount} referrals)
+                                </CommandItem>
+                              ))
+                            )}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                 </div>
               </CardHeader>
               <CardContent className="p-8">
@@ -430,6 +555,7 @@ export function ReferralsUI() {
                           <div className="flex items-start justify-between gap-4">
                             <div className="flex items-center gap-3">
                               <Avatar className="h-8 w-8 bg-indigo-50/50 text-indigo-600 border border-indigo-100">
+                                <AvatarImage src={`https://cdn.thrico.network/${referee?.avatar}`} />
                                 <AvatarFallback className="text-[10px] font-bold bg-transparent">
                                   {referee?.firstName?.[0]}
                                   {referee?.lastName?.[0]}

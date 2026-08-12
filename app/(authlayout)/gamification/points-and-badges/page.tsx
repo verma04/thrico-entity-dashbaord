@@ -153,20 +153,14 @@ export default function GamificationOverview() {
       icon: Crown,
       link: "/gamification/points-and-badges/ranks",
     },
-    {
-      title: "Streak Bonuses",
-      desc: "Give extra points for daily activity streaks.",
-      count: reloginConfig.streakBonuses.length,
-      icon: Flame,
-      link: "/gamification/points-and-badges/relogin",
-    },
+
   ];
 
   return (
     <EcosystemWrapper anonymized-1="gamification-analytics">
       <EcosystemHeader
         title={`${gamificationModuleName} Dashboard`}
-        description="Manage points, badges, and user rewards across your community."
+        description="View insights on gamification engine. Add name, points, badges, ranks, referral count, coins"
         badgeText="Overview"
         icon={Trophy}
         breadcrumbs={[
@@ -274,7 +268,8 @@ export default function GamificationOverview() {
                     value: settings.dailyPointsCap
                       ? `${settings.dailyPointsCap} pt`
                       : "Unlimited",
-                    color: "text-zinc-900 dark:text-zinc-100 bg-zinc-100 dark:bg-zinc-800",
+                    color:
+                      "text-zinc-900 dark:text-zinc-100 bg-zinc-100 dark:bg-zinc-800",
                   },
                   {
                     label: "Point Decay",
@@ -308,12 +303,12 @@ export default function GamificationOverview() {
                   {
                     label: "View Leaderboard",
                     icon: Trophy,
-                    href: "/gamification/leaderboard",
+                    href: "/gamification/points-and-badges/leaderboard",
                   },
                   {
                     label: "Activity History",
                     icon: History,
-                    href: "/gamification/activity-log",
+                    href: "/gamification/points-and-badges/activity-log",
                   },
                 ].map((link, i) => (
                   <Link

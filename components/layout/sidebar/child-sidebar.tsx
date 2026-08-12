@@ -121,7 +121,6 @@ export function ChildSidebarContainer({
     reportedItems,
     gamificationEngine,
     modules: modulesItems,
-    gamificationLabel,
   } = useFilteredExtendedItems();
   const {
     billingAndTeamItems,
@@ -349,7 +348,7 @@ export function ChildSidebarContainer({
           <SidebarHeader className="h-10 flex items-center justify-between flex-row px-4 pb-0 pt-0 group-data-[collapsible=icon]:px-1 group-data-[collapsible=icon]:justify-center">
             {!isCollapsed && (
               <span className="text-lg font-bold text-neutral-900 dark:text-neutral-100 capitalize tracking-tight w-full">
-                {activeTab}
+                {activeTab === "gamification" ? "Gamification Engine" : activeTab}
               </span>
             )}
             {isCollapsed && (
@@ -455,13 +454,24 @@ export function ChildSidebarContainer({
             )}
 
             {activeTab === "gamification" && (
-              <CollapsibleSection
-                sectionKey="gamification"
-                label={gamificationLabel}
-                items={filteredGamification}
-                renderItems={renderItems}
-                className="mb-1"
-              />
+              <>
+                {filteredGamification.map((group) => {
+                  const groupItems = (group.children || []).map((child) => ({
+                    ...child,
+                    icon: child.icon || group.icon,
+                  })) as MenuItem[];
+                  return (
+                    <CollapsibleSection
+                      key={group.key}
+                      sectionKey={group.key}
+                      label={typeof group.label === "string" ? group.label : group.key}
+                      items={groupItems}
+                      renderItems={renderItems}
+                      className="mb-1"
+                    />
+                  );
+                })}
+              </>
             )}
 
             {activeTab === "modules" && (

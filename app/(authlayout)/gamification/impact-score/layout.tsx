@@ -38,7 +38,7 @@ function ImpactScoreLayout({ children }: { children: React.ReactNode }) {
       },
       {
         key: "members",
-        label: "Check Score",
+        label: "Member Scores",
         icon: <Users className="h-4 w-4" />,
       },
       {
@@ -50,7 +50,11 @@ function ImpactScoreLayout({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <MenuItemsLayout active="gamification/impact-score" items={items} showAdminTabs={false}>
+    <MenuItemsLayout
+      active="gamification/impact-score"
+      items={items}
+      showAdminTabs={false}
+    >
       <CardContent className="">{children}</CardContent>
     </MenuItemsLayout>
   );

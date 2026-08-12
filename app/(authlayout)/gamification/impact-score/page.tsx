@@ -6,11 +6,7 @@ import {
   Activity,
   Layers,
   Settings,
-  ShieldCheck,
   TrendingUp,
-  Award,
-  Users,
-  ChevronRight,
   ArrowRight,
 } from "lucide-react";
 import Link from "next/link";
@@ -40,7 +36,6 @@ export default function ImpactScoreOverview() {
   const activeTemplate = templates.find((t: any) => t.isActive);
 
   const users = usersData?.getImpactUsers?.nodes || [];
-  const totalUsersCount = usersData?.getImpactUsers?.totalCount || 0;
 
   const avgScore = useMemo(() => {
     if (users.length === 0) return 0;
@@ -51,12 +46,25 @@ export default function ImpactScoreOverview() {
     return Math.round(sum / users.length);
   }, [users]);
 
-  const platinumMembersCount = useMemo(() => {
-    return users.filter((u: any) => u.tier?.toLowerCase() === "platinum")
-      .length;
+  const maxScore = useMemo(() => {
+    if (users.length === 0) return 0;
+    return Math.max(...users.map((u: any) => u.score || 0));
   }, [users]);
 
-  const totalEventsCount = activityData?.getImpactActivityLog?.length || 0;
+  const maxScoreMembers = useMemo(() => {
+    if (users.length === 0) return 0;
+    return users.filter((u: any) => (u.score || 0) === maxScore).length;
+  }, [users, maxScore]);
+
+  const minScore = useMemo(() => {
+    if (users.length === 0) return 0;
+    return Math.min(...users.map((u: any) => u.score || 0));
+  }, [users]);
+
+  const minScoreMembers = useMemo(() => {
+    if (users.length === 0) return 0;
+    return users.filter((u: any) => (u.score || 0) === minScore).length;
+  }, [users, minScore]);
   const totalRulesCount = rulesData?.impactRules?.length || 0;
 
   const isLoading =
@@ -64,29 +72,43 @@ export default function ImpactScoreOverview() {
 
   const kpis = [
     {
-      title: "Avg Community Score",
+      title: "Avg. Impact Score",
       value: isLoading ? "—" : avgScore.toString(),
       icon: TrendingUp,
-      color: "text-emerald-600",
-      bg: "bg-emerald-50",
+      colorScheme: "lime" as const,
+      tooltip: "Formula: Total Score of all users / Number of users",
     },
     {
-      title: "Platinum Members",
-      value: isLoading ? "—" : platinumMembersCount.toString(),
+      title: "Max Impact Score",
+      value: isLoading ? (
+        "—"
+      ) : (
+        <span className="flex items-baseline gap-1.5">
+          {maxScore}
+          <span className="text-[11px] text-muted-foreground font-semibold lowercase tracking-widest leading-none">
+            / {maxScoreMembers} members
+          </span>
+        </span>
+      ),
       icon: Trophy,
-      color: "text-amber-600",
-      bg: "bg-amber-50",
+      colorScheme: "indigo" as const,
+      tooltip: "Highest score achieved by members",
     },
     {
-      title: "Total Events",
-      value: isLoading
-        ? "—"
-        : totalEventsCount >= 1000
-          ? (totalEventsCount / 1000).toFixed(1) + "k"
-          : totalEventsCount.toString(),
+      title: "Min Impact Score",
+      value: isLoading ? (
+        "—"
+      ) : (
+        <span className="flex items-baseline gap-1.5">
+          {minScore}
+          <span className="text-[11px] text-muted-foreground font-semibold lowercase tracking-widest leading-none">
+            / {minScoreMembers} members
+          </span>
+        </span>
+      ),
       icon: Activity,
-      color: "text-zinc-900",
-      bg: "bg-zinc-100",
+      colorScheme: "rose" as const,
+      tooltip: "Lowest score achieved by members",
     },
   ];
 
@@ -111,17 +133,15 @@ export default function ImpactScoreOverview() {
     <EcosystemWrapper anonymized-1="impact-score-analytics">
       <EcosystemHeader
         title="Impact Score Engine"
-        description="A dynamic trust and contribution score to measure user reputation."
+        description="A realtime engagement activities based Impact Score Insights"
         badgeText="Overview"
         icon={Trophy}
+        breadcrumbs={[
+          { label: "Gamification", href: "/gamification" },
+          { label: "Impact Score" },
+        ]}
         actions={
-          <div
-            className="flex items-center gap-4"
-            breadcrumbs={[
-              { label: "Gamification", href: "/gamification" },
-              { label: "Impact Score" },
-            ]}
-          >
+          <div className="flex items-center gap-4">
             <Link href="/gamification/impact-score/settings">
               <CtaButton
                 variant="outline"

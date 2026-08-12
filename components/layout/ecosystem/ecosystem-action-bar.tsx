@@ -148,14 +148,14 @@ export function EcosystemActionBarSearch({
 }) {
   return (
     <div className={cn("relative w-full group", className)}>
-      <div className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none">
-        <Search className="h-3.5 w-3.5 text-muted-foreground/60 group-focus-within:text-foreground transition-colors" />
+      <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+        <Search className="h-4 w-4 text-muted-foreground/60 group-focus-within:text-foreground transition-colors" />
       </div>
       <Input
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="pl-8 h-6 bg-muted border-border rounded-md text-[11px] text-foreground placeholder:text-muted-foreground/50 focus-visible:ring-2 focus-visible:ring-ring/20 transition-all"
+        className="pl-9 h-9 bg-background border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/20 transition-all shadow-sm"
       />
     </div>
   );

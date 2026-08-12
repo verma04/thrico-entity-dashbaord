@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { renderModuleIcon } from "@/components/subscription/utils";
 import { Badge, useToggleBadge } from "@/graphql/actions";
 import { toast } from "sonner";
+import { BadgeIcon } from "./badge-icon";
 
 interface BadgeListProps {
   badges: Badge[];
@@ -50,9 +51,10 @@ export function BadgeList({
       header: "Recognition Badge",
       cell: (badge: Badge) => (
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center text-xl shrink-0 shadow-sm">
-            {badge.icon}
-          </div>
+          <BadgeIcon 
+            icon={badge.icon} 
+            className="h-10 w-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xl shrink-0 shadow-sm"
+          />
           <div className="flex flex-col min-w-0">
             <span className="text-sm font-bold text-foreground truncate max-w-[180px]">
               {badge.name}

@@ -7,6 +7,7 @@ import { LeaderboardEntry } from "@/graphql/actions";
 import { Medal, Award, TrendingUp, Coins } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { BadgeIcon } from "@/components/gamification/badges/badge-icon";
 
 interface LeaderboardTableProps {
   entries: LeaderboardEntry[];
@@ -90,19 +91,13 @@ export function LeaderboardTable({
       cell: (entry: LeaderboardEntry) => (
         <div className="flex items-center gap-3">
           <div
-            className="h-9 w-9 rounded-xl flex items-center justify-center shadow-sm border"
+            className="h-9 w-9 rounded-xl flex items-center justify-center shadow-sm border overflow-hidden"
             style={{
               backgroundColor: `${entry?.currentRank?.color}12`,
               borderColor: `${entry?.currentRank?.color}25`,
             }}
           >
-            <span
-              className="text-lg"
-              role="img"
-              aria-label={entry?.currentRank?.name}
-            >
-              {entry?.currentRank?.icon || "⭐"}
-            </span>
+            <BadgeIcon icon={entry?.currentRank?.icon} className="h-full w-full text-lg" imageClassName="rounded-xl" />
           </div>
           <div className="flex flex-col">
             <span
@@ -156,7 +151,7 @@ export function LeaderboardTable({
         const wallet = entry?.entityCurrencyWallet;
         return (
           <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-1.5 font-mono text-[13px] font-bold text-amber-600">
+            <div className="flex items-center gap-1.5 font-mono text-[13px] font-medium text-amber-600">
               <Coins className="h-3.5 w-3.5" />
               {wallet?.balance?.toLocaleString() ?? 0}
             </div>

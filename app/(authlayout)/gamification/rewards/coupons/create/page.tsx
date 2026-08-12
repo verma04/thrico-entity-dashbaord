@@ -10,7 +10,7 @@ import { RewardFormSections } from "@/components/rewards/coupons/form/reward-for
 import { RewardPreviewSidebar } from "@/components/rewards/coupons/form/reward-preview-sidebar";
 import { RewardStudioHeader } from "@/components/rewards/coupons/form/reward-form-header";
 import { couponSchema } from "@/components/rewards/coupons/types";
-import { EcosystemContainer } from "@/components/layout/ecosystem";
+import { EcosystemContainer, EcosystemForm } from "@/components/layout/ecosystem";
 
 export default function CreateCouponPage() {
   const { toast } = useToast();
@@ -105,9 +105,9 @@ export default function CreateCouponPage() {
           <div className="max-w-[1400px] mx-auto px-6 py-10">
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-12">
               <div className="space-y-12">
-                <form onSubmit={formik.handleSubmit}>
+                <EcosystemForm onSubmit={formik.handleSubmit}>
                   <RewardFormSections formik={formik} />
-                </form>
+                </EcosystemForm>
               </div>
 
               {/* Sidebar / Preview */}

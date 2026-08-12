@@ -46,6 +46,9 @@ export interface GetAuditLogsVariables {
   };
   module?: string;
   resourceId?: string;
+  search?: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 export const useGetAuditLogs = (variables: GetAuditLogsVariables, options?: any) => 

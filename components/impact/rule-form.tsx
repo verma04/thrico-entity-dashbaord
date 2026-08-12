@@ -4,7 +4,15 @@ import React, { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useRouter } from "next/navigation";
-import { Zap, ChevronRight, Info, Trophy, Target, Clock, Shield } from "lucide-react";
+import {
+  Zap,
+  ChevronRight,
+  Info,
+  Trophy,
+  Target,
+  Clock,
+  Shield,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -45,6 +53,8 @@ interface ImpactRuleFormProps {
   templates: any[];
 }
 
+import { EcosystemForm } from "@/components/layout/ecosystem/ecosystem-form";
+
 export function ImpactRuleForm({
   initialValues,
   onSubmit,
@@ -79,7 +89,7 @@ export function ImpactRuleForm({
         await onSubmit(payload);
         setSaved(true);
         setTimeout(() => {
-          router.push("/impact-score/rules");
+          router.push("/gamification/impact-score/rules/");
         }, 1500);
       } catch (error: any) {
         toast({
@@ -96,10 +106,13 @@ export function ImpactRuleForm({
   );
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-24">
       {/* Main Form */}
       <div className="lg:col-span-8 space-y-6">
-        <form onSubmit={formik.handleSubmit} className="space-y-6">
+        <EcosystemForm
+          onSubmit={formik.handleSubmit}
+          className="space-y-6 bg-transparent text-foreground p-0 lg:p-0 border-none"
+        >
           <EcosystemCard
             title="Action Definition"
             description="Specify which user action triggers this impact score change."
@@ -111,7 +124,6 @@ export function ImpactRuleForm({
                 <Select
                   onValueChange={(val) => formik.setFieldValue("category", val)}
                   value={formik.values.category}
-                  disabled={isEdit}
                 >
                   <SelectTrigger id="category" className="h-11 shadow-none">
                     <SelectValue placeholder="Select category" />
@@ -136,7 +148,6 @@ export function ImpactRuleForm({
                 <Select
                   onValueChange={(val) => formik.setFieldValue("module", val)}
                   value={formik.values.module}
-                  disabled={isEdit}
                 >
                   <SelectTrigger id="module" className="h-11 shadow-none">
                     <SelectValue placeholder="Select a module" />
@@ -144,7 +155,9 @@ export function ImpactRuleForm({
                   <SelectContent>
                     {modules.map((mod) => (
                       <SelectItem key={mod.id} value={mod.id}>
-                        {mod.name}
+                        {mod.name
+                          ? mod.name.charAt(0).toUpperCase() + mod.name.slice(1)
+                          : mod.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -161,7 +174,7 @@ export function ImpactRuleForm({
                 <Select
                   onValueChange={(val) => formik.setFieldValue("action", val)}
                   value={formik.values.action}
-                  disabled={!formik.values.module || isEdit}
+                  disabled={!formik.values.module}
                 >
                   <SelectTrigger id="action" className="h-11 shadow-none">
                     <SelectValue
@@ -224,7 +237,7 @@ export function ImpactRuleForm({
                     <Clock className="h-4 w-4 text-muted-foreground" />
                     Frequency Limitations (Anti-Abuse)
                   </h4>
-                  
+
                   <div className="flex items-start gap-3 mb-6 bg-indigo-50/50 border border-indigo-100/50 p-4 rounded-xl">
                     <Info className="h-4 w-4 text-indigo-500 mt-0.5 shrink-0" />
                     <div className="space-y-1.5">
@@ -232,7 +245,9 @@ export function ImpactRuleForm({
                         Daily Limit
                       </p>
                       <p className="text-[11px] text-indigo-900/60 leading-relaxed">
-                        The <strong>maximum number of times</strong> this action can award impact points per day per user. Set to 0 for unlimited.
+                        The <strong>maximum number of times</strong> this action
+                        can award impact points per day per user. Set to 0 for
+                        unlimited.
                       </p>
                     </div>
                   </div>
@@ -271,7 +286,7 @@ export function ImpactRuleForm({
               </div>
             </div>
           </EcosystemCard>
-        </form>
+        </EcosystemForm>
       </div>
 
       {/* Sidebar */}
@@ -301,7 +316,9 @@ export function ImpactRuleForm({
                   </div>
                   <div className="flex items-end gap-1">
                     <span className="text-3xl font-black">
-                      {formik.values.points > 0 ? `+${formik.values.points}` : formik.values.points}
+                      {formik.values.points > 0
+                        ? `+${formik.values.points}`
+                        : formik.values.points}
                     </span>
                     <span className="text-sm font-bold mb-1 opacity-80">
                       IMP
@@ -318,7 +335,9 @@ export function ImpactRuleForm({
                 <div className="flex justify-between text-xs border-b pb-2">
                   <span className="text-muted-foreground">Daily Limit</span>
                   <span className="font-bold">
-                    {formik.values.dailyLimit ? `${formik.values.dailyLimit} times` : "∞"}
+                    {formik.values.dailyLimit
+                      ? `${formik.values.dailyLimit} times`
+                      : "∞"}
                   </span>
                 </div>
                 <div className="flex justify-between text-xs border-b pb-2">
@@ -340,8 +359,8 @@ export function ImpactRuleForm({
             </CardHeader>
             <CardContent>
               <p className="text-xs text-amber-800 leading-relaxed font-medium">
-                Impact rules directly affect user reputation scores. Changes
-                are applied in real-time by the gamification worker.
+                Impact rules directly affect user reputation scores. Changes are
+                applied in real-time by the gamification worker.
               </p>
             </CardContent>
           </Card>

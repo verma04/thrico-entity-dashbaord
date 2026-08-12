@@ -100,7 +100,7 @@ export default function ImpactRulesPage() {
             <Zap className="h-4 w-4 text-indigo-600" />
           </div>
           <div className="flex flex-col">
-            <span className="text-sm font-semibold text-foreground capitalize">
+            <span className="text-xs font-semibold text-foreground capitalize">
               {(rule.action || "—").replace(/_/g, " ")}
             </span>
             {rule.formula && (
@@ -116,7 +116,7 @@ export default function ImpactRulesPage() {
       key: "module",
       header: "Module",
       cell: (rule: any) => (
-        <span className="text-sm font-medium text-muted-foreground capitalize">
+        <span className="text-xs font-medium text-muted-foreground capitalize">
           {(rule.module || "—").replace(/_/g, " ")}
         </span>
       ),
@@ -147,7 +147,7 @@ export default function ImpactRulesPage() {
         <div className="flex items-center gap-1.5">
           <span
             className={cn(
-              "font-mono text-[13px] font-bold px-2.5 py-1 rounded-md border shadow-sm",
+              "font-mono text-xs font-bold px-2.5 py-1 rounded-md border shadow-sm",
               rule.points > 0
                 ? "text-emerald-600 bg-emerald-50 border-emerald-100"
                 : rule.points < 0
@@ -167,7 +167,7 @@ export default function ImpactRulesPage() {
       header: "Daily Cap",
       cell: (rule: any) => (
         <div className="flex flex-col">
-          <span className="text-[12px] font-bold text-foreground">
+          <span className="text-[11px] font-bold text-foreground">
             {rule.dailyLimit ? `${rule.dailyLimit}x` : "∞"}
           </span>
           <span className="text-[9px] text-muted-foreground uppercase tracking-widest font-bold">
@@ -194,6 +194,34 @@ export default function ImpactRulesPage() {
           >
             {rule.enabled !== false ? "Active" : "Disabled"}
           </AdminStatusBadge>
+        </div>
+      ),
+    },
+    {
+      key: "createdAt",
+      header: "Created",
+      cell: (rule: any) => (
+        <div className="flex flex-col">
+          <span className="text-[11px] font-medium text-foreground">
+            {rule.createdBy ? `${rule.createdBy.firstName} ${rule.createdBy.lastName}` : "System"}
+          </span>
+          <span className="text-[10px] text-muted-foreground">
+            {rule.createdAt ? new Date(rule.createdAt).toLocaleDateString() : "—"}
+          </span>
+        </div>
+      ),
+    },
+    {
+      key: "updatedAt",
+      header: "Last Updated",
+      cell: (rule: any) => (
+        <div className="flex flex-col">
+          <span className="text-[11px] font-medium text-foreground">
+            {rule.updatedBy ? `${rule.updatedBy.firstName} ${rule.updatedBy.lastName}` : "—"}
+          </span>
+          <span className="text-[10px] text-muted-foreground">
+            {rule.updatedAt ? new Date(rule.updatedAt).toLocaleDateString() : "—"}
+          </span>
         </div>
       ),
     },
@@ -263,6 +291,7 @@ export default function ImpactRulesPage() {
             columns={columns}
             data={filteredRules}
             loading={loading}
+            size="sm"
             keyExtractor={(rule) => rule.id}
             emptyTitle={
               search ? "No rules match your search" : "No rules configured yet"

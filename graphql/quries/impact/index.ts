@@ -33,6 +33,17 @@ export const GET_IMPACT_RULES = gql`
       formula
       enabled
       createdAt
+      updatedAt
+      createdBy {
+        id
+        firstName
+        lastName
+      }
+      updatedBy {
+        id
+        firstName
+        lastName
+      }
     }
   }
 `;
@@ -50,6 +61,17 @@ export const GET_IMPACT_RULE_BY_ID = gql`
       formula
       enabled
       createdAt
+      updatedAt
+      createdBy {
+        id
+        firstName
+        lastName
+      }
+      updatedBy {
+        id
+        firstName
+        lastName
+      }
     }
   }
 `;

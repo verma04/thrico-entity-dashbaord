@@ -739,18 +739,18 @@ export const GET_SPIN_SCRATCH_STATS = gql`
       totalMatchWins
       totalTcBurned
       totalTcRewarded
-      netTcBurned
-      spinStatsToday {
+      totalUniqueMembers
+      spinStats {
         plays
         tcBurned
         tcRewarded
       }
-      scratchStatsToday {
+      scratchStats {
         plays
         tcBurned
         tcRewarded
       }
-      matchWinStatsToday {
+      matchWinStats {
         plays
         tcBurned
         tcRewarded

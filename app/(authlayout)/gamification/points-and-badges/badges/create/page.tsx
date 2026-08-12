@@ -52,7 +52,7 @@ export default function CreateBadgePage() {
       <EcosystemHeader
         title="Badge Studio"
         badgeText={`${gamificationModuleName} Studio`}
-        description="Design and deploy achievement nodes to incentivize community behaviors."
+        description="Design and deploy badges to incentivise community members."
         icon={Award}
         breadcrumbs={[
           { label: "Gamification", href: "/gamification" },

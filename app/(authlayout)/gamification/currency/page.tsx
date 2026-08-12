@@ -66,7 +66,7 @@ export default function CurrencySettingsPage() {
       <EcosystemHeader
         title={`${currencyModuleName} Dashboard`}
         badgeText={`${currencyModuleName} Stats`}
-        description={`Monitor your entity's local economy — ${currencyModuleName.toLowerCase()} earnings, redemptions, and active circulation at a glance.`}
+        description={`Insights on ${currencyModuleName.toLowerCase()} earned and redeemed across the ecosystem.`}
         icon={Coins}
         breadcrumbs={[
           { label: "Gamification", href: "/gamification" },

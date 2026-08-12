@@ -86,7 +86,6 @@ export function TemplateForm() {
       });
       const isEditing = templatesData?.impactTemplates && templatesData.impactTemplates.length > 0;
       toast.success(isEditing ? "Template updated successfully!" : "Template created successfully!");
-      router.push("/impact-score");
     } catch (error) {
       console.error(error);
       toast.error("Failed to create template.");

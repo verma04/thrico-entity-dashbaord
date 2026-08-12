@@ -89,7 +89,7 @@ export function RanksManager() {
       <EcosystemHeader
         title="Ranks"
         badgeText="Hierarchy"
-        description="Define the progression hierarchy. Set point thresholds for each rank level to visualize member status."
+        description="Set point thresholds for each rank level."
         icon={Crown}
         breadcrumbs={[
           { label: "Gamification", href: "/gamification" },
@@ -111,6 +111,15 @@ export function RanksManager() {
           </EcosystemActionBar>
         }
       />
+      <EcosystemActionBar shadow="sm" className="">
+        <EcosystemActionBar.Item grow className="max-w-sm">
+          <EcosystemActionBar.Search
+            value={search}
+            onChange={setSearch}
+            placeholder="Search ranks..."
+          />
+        </EcosystemActionBar.Item>
+      </EcosystemActionBar>
 
       <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0 space-y-6">
         <div className="px-6 py-4">
@@ -128,16 +137,6 @@ export function RanksManager() {
               these thresholds.
             </p>
           </div>
-
-          <EcosystemActionBar shadow="sm" className="">
-            <EcosystemActionBar.Item grow className="max-w-sm">
-              <EcosystemActionBar.Search
-                value={search}
-                onChange={setSearch}
-                placeholder="Search ranks..."
-              />
-            </EcosystemActionBar.Item>
-          </EcosystemActionBar>
 
           <RankList
             ranks={filteredRanks}

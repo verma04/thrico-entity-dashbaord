@@ -86,12 +86,24 @@ export const GET_CURRENCY_TRANSACTIONS = gql`
 export const GET_CURRENCY_STATS = gql`
   query GetCurrencyStats($timeRange: TimeRange, $dateRange: DateRangeInput) {
     getCurrencyStats(timeRange: $timeRange, dateRange: $dateRange) {
+      totalBalance
       totalEarned
       redemptionVolume
       activeUsers
       currencyFlow {
         name
         amount
+      }
+      topEarners {
+        userId
+        rank
+        amount
+        userBasicInfo {
+          id
+          firstName
+          lastName
+          avatar
+        }
       }
     }
   }

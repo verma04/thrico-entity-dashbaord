@@ -12,23 +12,24 @@ import {
   Award,
 } from "lucide-react";
 
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
-import { EcosystemCard } from "@/components/layout/ecosystem/ecosystem-analytics";
+import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { useGetImpactActivityLog } from "@/graphql/actions/impact";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { formatDistanceToNow } from "date-fns";
+import { AdminTable } from "@/components/shared/admin-table/admin-table";
+import { cn } from "@/lib/utils";
 
 export default function ImpactActivityLogPage() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [page, setPage] = useState(1);
 
   const { data, loading, error } = useGetImpactActivityLog({
     variables: {
       input: {
-        limit: 100,
+        limit: 500, // Fetch more for client-side pagination
         offset: 0,
       },
     },
@@ -46,29 +47,100 @@ export default function ImpactActivityLogPage() {
     return userName.includes(searchLower) || reason.includes(searchLower);
   });
 
-  const LoadingSkeleton = () => (
-    <div className="space-y-4 mt-6">
-      {[1, 2, 3, 4, 5].map((i) => (
-        <div
-          key={i}
-          className="flex items-start gap-4 p-4 rounded-xl border border-zinc-100 bg-white/50 animate-pulse"
-        >
-          <div className="w-10 h-10 rounded-full bg-zinc-200" />
-          <div className="flex-1 space-y-2">
-            <div className="h-4 bg-zinc-200 rounded w-1/4" />
-            <div className="h-3 bg-zinc-200 rounded w-1/2" />
-          </div>
-          <div className="w-16 h-8 rounded-full bg-zinc-200" />
-        </div>
-      ))}
-    </div>
+  const PAGE_SIZE = 15;
+  const paginatedLogs = filteredLogs.slice(
+    (page - 1) * PAGE_SIZE,
+    page * PAGE_SIZE
   );
 
+  const columns = [
+    {
+      key: "user",
+      header: "User",
+      cell: (log: any) => (
+        <div className="flex items-center gap-3">
+          <Avatar className="h-8 w-8 border border-zinc-200 shadow-sm">
+            <AvatarImage src={log?.user?.avatarUrl} />
+            <AvatarFallback className="bg-zinc-100 text-zinc-900 text-[10px] font-semibold">
+              {log?.user?.firstName?.charAt(0) || ""}
+              {log?.user?.lastName?.charAt(0) || ""}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col">
+            <span className="text-xs font-semibold text-foreground">
+              {log?.user?.firstName || "Unknown"} {log?.user?.lastName || "User"}
+            </span>
+            <span className="text-[10px] text-muted-foreground font-mono">
+              ID: {log?.id.substring(0, 8)}
+            </span>
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: "action",
+      header: "Action / Event",
+      cell: (log: any) => (
+        <span className="text-xs text-foreground line-clamp-1 max-w-[250px]">
+          {log?.changeReason || "Action performed"}
+        </span>
+      ),
+    },
+    {
+      key: "amount",
+      header: "Impact",
+      cell: (log: any) => {
+        const isPositive = log?.changeAmount > 0;
+        const isNegative = log?.changeAmount < 0;
+        return (
+          <span
+            className={cn(
+              "font-mono text-xs font-bold px-2.5 py-1 rounded-md border shadow-sm",
+              isPositive
+                ? "text-emerald-600 bg-emerald-50 border-emerald-100"
+                : isNegative
+                  ? "text-rose-600 bg-rose-50 border-rose-100"
+                  : "text-zinc-600 bg-zinc-50 border-zinc-100",
+            )}
+          >
+            {isPositive ? "+" : ""}
+            {log?.changeAmount}
+          </span>
+        );
+      },
+    },
+    {
+      key: "newScore",
+      header: "New Score",
+      cell: (log: any) => (
+        <span className="text-[11px] font-mono font-bold text-foreground bg-zinc-50 border border-zinc-100 px-2 py-0.5 rounded">
+          {log?.newScore}
+        </span>
+      ),
+    },
+    {
+      key: "createdAt",
+      header: "Time",
+      cell: (log: any) => (
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <Clock className="h-3 w-3 shrink-0" />
+          <span className="whitespace-nowrap">
+            {log?.createdAt
+              ? formatDistanceToNow(new Date(log?.createdAt), {
+                  addSuffix: true,
+                })
+              : "Unknown time"}
+          </span>
+        </div>
+      ),
+    },
+  ];
+
   return (
-    <>
+    <EcosystemWrapper>
       <EcosystemHeader
-        title="Activity Log"
-        description="Real-time stream of points awarded and deducted by the engine."
+        title="Impact Score Overview"
+        description="Real-time overview of member impact score"
         badgeText="Monitoring"
         icon={Activity}
         breadcrumbs={[
@@ -77,139 +149,51 @@ export default function ImpactActivityLogPage() {
           { label: "Activity Log" },
         ]}
       />
-      <EcosystemContainer className="p-6 lg:p-8">
-        <div className="max-w-5xl mx-auto space-y-6">
-          <EcosystemCard
-            title="User Activity Stream"
-            description="Live view of impact score events across your community."
-            icon={Zap}
-          >
-            <div className="mt-6 flex flex-col space-y-6">
-              <div className="flex items-center gap-4 bg-zinc-50/50 dark:bg-neutral-900/50 p-2 rounded-lg border border-zinc-100/60 dark:border-neutral-800">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
-                  <Input
-                    placeholder="Search by user name or reason..."
-                    className="pl-9 bg-white dark:bg-neutral-900 border-zinc-200 dark:border-neutral-800 shadow-sm w-full transition-all focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </div>
-                <div className="text-sm text-zinc-500 font-medium px-4 whitespace-nowrap">
-                  {filteredLogs.length} events
-                </div>
-              </div>
 
-              {loading ? (
-                <LoadingSkeleton />
-              ) : error ? (
-                <div className="p-6 text-center border border-red-100 bg-red-50/50 rounded-xl mt-6">
-                  <ShieldAlert className="h-8 w-8 text-red-400 mx-auto mb-3" />
-                  <p className="text-sm font-semibold text-red-800">
-                    Error loading activity log
-                  </p>
-                  <p className="text-xs text-red-600 mt-1">{error.message}</p>
-                </div>
-              ) : filteredLogs.length === 0 ? (
-                <div className="py-16 flex flex-col items-center justify-center text-center border-2 border-dashed border-zinc-100 rounded-xl bg-zinc-50/50 mt-6">
-                  <Activity className="h-10 w-10 text-zinc-300 mb-4" />
-                  <p className="text-base font-semibold text-zinc-700">
-                    No activity found
-                  </p>
-                  <p className="text-sm text-zinc-500 mt-1 max-w-sm">
-                    {searchTerm
-                      ? "No events match your search criteria."
-                      : "User impact events will be displayed here once actions are tracked."}
-                  </p>
-                </div>
-              ) : (
-                <ScrollArea className="h-[600px] pr-4 -mr-4 mt-6">
-                  <div className="space-y-4">
-                    {filteredLogs.map((log: any) => {
-                      const isPositive = log?.changeAmount > 0;
-                      const isNegative = log?.changeAmount < 0;
+      <EcosystemActionBar shadow="none">
+        <EcosystemActionBar.Group>
+          <EcosystemActionBar.Item grow className="max-w-md">
+            <EcosystemActionBar.Search
+              value={searchTerm}
+              onChange={setSearchTerm}
+              placeholder="Search by user name or reason..."
+            />
+          </EcosystemActionBar.Item>
+        </EcosystemActionBar.Group>
+      </EcosystemActionBar>
 
-                      return (
-                        <div
-                          key={log?.id}
-                          className="group flex items-start gap-4 p-4 rounded-xl border border-zinc-100 dark:border-neutral-800 bg-white dark:bg-neutral-900 hover:border-zinc-300 dark:hover:border-neutral-700 hover:shadow-sm transition-all duration-200"
-                        >
-                          <Avatar className="h-10 w-10 border-2 border-white dark:border-neutral-950 shadow-sm ring-1 ring-zinc-100 dark:ring-neutral-800">
-                            <AvatarImage src={log?.user?.avatarUrl} />
-                            <AvatarFallback className="bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 font-semibold text-xs">
-                              {log?.user?.firstName?.charAt(0) || ""}
-                              {log?.user?.lastName?.charAt(0) || ""}
-                            </AvatarFallback>
-                          </Avatar>
-
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between gap-4 mb-1">
-                              <h4 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate">
-                                {log?.user?.firstName || "Unknown"}{" "}
-                                {log?.user?.lastName || "User"}
-                              </h4>
-                              <div className="flex items-center gap-1.5 text-xs text-zinc-400 shrink-0">
-                                <Clock className="h-3 w-3" />
-                                {log?.createdAt
-                                  ? formatDistanceToNow(
-                                      new Date(parseInt(log?.createdAt)),
-                                      { addSuffix: true },
-                                    )
-                                  : "Unknown time"}
-                              </div>
-                            </div>
-
-                            <p className="text-sm text-zinc-600 dark:text-zinc-400 line-clamp-2 leading-relaxed">
-                              {log?.changeReason || "Action performed"}
-                            </p>
-
-                            <div className="flex items-center gap-3 mt-3">
-                              <Badge
-                                variant="outline"
-                                className="bg-zinc-50 dark:bg-neutral-800 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-neutral-700 text-[10px] uppercase tracking-wider font-semibold py-0.5 px-2"
-                              >
-                                ID: {log?.id.substring(0, 8)}
-                              </Badge>
-                            </div>
-                          </div>
-
-                          <div className="flex flex-col items-end gap-1.5 shrink-0 pl-4 border-l border-zinc-100 dark:border-neutral-800">
-                            <div
-                              className={`flex items-center gap-1.5 font-bold text-sm px-2.5 py-1 rounded-full ${
-                                isPositive
-                                  ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
-                                  : isNegative
-                                    ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
-                                    : "bg-zinc-50 dark:bg-zinc-800/50 text-zinc-600 dark:text-zinc-400"
-                              }`}
-                            >
-                              {isPositive ? (
-                                <TrendingUp className="h-3.5 w-3.5" />
-                              ) : isNegative ? (
-                                <TrendingDown className="h-3.5 w-3.5" />
-                              ) : (
-                                <Award className="h-3.5 w-3.5" />
-                              )}
-                              {isPositive ? "+" : ""}
-                              {log?.changeAmount} pts
-                            </div>
-                            <div className="text-[11px] font-medium text-zinc-400">
-                              New Score:{" "}
-                              <span className="text-zinc-700">
-                                {log?.newScore}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </ScrollArea>
-              )}
-            </div>
-          </EcosystemCard>
+      <EcosystemContainer className="p-0 overflow-hidden border border-zinc-200 shadow-sm rounded-xl bg-white mt-4">
+        {error ? (
+          <div className="p-6 text-center border-b border-red-100 bg-red-50/50">
+            <ShieldAlert className="h-8 w-8 text-red-400 mx-auto mb-3" />
+            <p className="text-sm font-semibold text-red-800">
+              Error loading activity log
+            </p>
+            <p className="text-xs text-red-600 mt-1">{error.message}</p>
+          </div>
+        ) : null}
+        <div className="px-0 py-0">
+          <AdminTable
+            columns={columns}
+            data={paginatedLogs}
+            loading={loading}
+            keyExtractor={(log) => log.id}
+            size="sm"
+            emptyTitle="No activity found"
+            emptyDescription={
+              searchTerm
+                ? "No events match your search criteria."
+                : "User impact events will be displayed here once actions are tracked."
+            }
+            pagination={{
+              pageIndex: page - 1,
+              pageSize: PAGE_SIZE,
+              pageCount: Math.ceil(filteredLogs.length / PAGE_SIZE) || 1,
+              onPageChange: (i) => setPage(i + 1),
+            }}
+          />
         </div>
       </EcosystemContainer>
-    </>
+    </EcosystemWrapper>
   );
 }

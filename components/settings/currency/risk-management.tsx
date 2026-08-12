@@ -92,11 +92,10 @@ export function RiskManagement() {
         <Info className="h-4 w-4 text-zinc-500 dark:text-zinc-400 shrink-0 mt-0.5" />
         <div className="space-y-1">
           <p className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
-            How risk controls work
+            How {currencyName} generation and allocation works
           </p>
           <p className="text-xs leading-relaxed">
-            These caps control how much {currencyName} can be minted through TC
-            conversions. Setting a <strong>Global Limit</strong> acts as an
+            These caps control how much {currencyName} can be minted and allocated. Setting a <strong>Global Limit</strong> acts as an
             emergency brake — once hit, no more {currencyName} can be generated
             until it is raised.
           </p>
@@ -114,7 +113,7 @@ export function RiskManagement() {
               Generation Caps
             </p>
             <p className="text-xs text-muted-foreground">
-              {currencyName} minting limits via TC conversions
+              {currencyName} minting and allocation limits
             </p>
           </div>
         </div>

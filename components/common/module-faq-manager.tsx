@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, FileQuestion, HelpCircle, Loader2 } from "lucide-react";
+import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 import { useGetFaqByModule, useUpdateFaqByModule } from "@/graphql/actions/faq";
 import { CtaButton } from "@/components/ui/cta-button";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
@@ -115,6 +116,36 @@ export function ModuleFaqListManager({
     }
   };
 
+  const handleMoveFaq = (index: number, direction: "up" | "down") => {
+    if (direction === "up" && index === 0) return;
+    if (direction === "down" && index === faqItems.length - 1) return;
+
+    const newIndex = direction === "up" ? index - 1 : index + 1;
+    const newItems = [...faqItems];
+    const temp = newItems[index];
+    newItems[index] = newItems[newIndex];
+    newItems[newIndex] = temp;
+
+    setFaqItems(newItems);
+    handleSave(newItems);
+  };
+
+  const handleDragEnd = (result: DropResult) => {
+    if (!result.destination) return;
+
+    const startIndex = result.source.index;
+    const endIndex = result.destination.index;
+
+    if (startIndex === endIndex) return;
+
+    const newItems = Array.from(faqItems);
+    const [removed] = newItems.splice(startIndex, 1);
+    newItems.splice(endIndex, 0, removed);
+
+    setFaqItems(newItems);
+    handleSave(newItems);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -158,28 +189,57 @@ export function ModuleFaqListManager({
                 </p>
               </div>
             ) : (
-              <div className="grid gap-3">
-                <AnimatePresence>
-                  {faqItems.map((faq, index) => (
-                    <motion.div
-                      key={faq.id}
-                      initial={{ opacity: 0, y: 5 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.98 }}
-                      transition={{ delay: index * 0.03 }}
+              <DragDropContext onDragEnd={handleDragEnd}>
+                <Droppable droppableId="faq-list">
+                  {(provided) => (
+                    <div
+                      {...provided.droppableProps}
+                      ref={provided.innerRef}
+                      className="grid gap-3"
                     >
-                      <FaqRow
-                        faq={faq}
-                        onEdit={() => handleEdit(faq)}
-                        onDelete={() => {
-                          setFaqToDelete(faq);
-                          setDeleteDialogOpen(true);
-                        }}
-                      />
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-              </div>
+                      <AnimatePresence>
+                        {faqItems.map((faq, index) => (
+                          <Draggable key={faq.id} draggableId={faq.id} index={index}>
+                            {(provided, snapshot) => (
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                className={snapshot.isDragging ? "z-50" : ""}
+                              >
+                                <motion.div
+                                  initial={{ opacity: 0, y: 5 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  exit={{ opacity: 0, scale: 0.98 }}
+                                  transition={{ delay: index * 0.03 }}
+                                >
+                                  <FaqRow
+                                    faq={faq}
+                                    onEdit={() => handleEdit(faq)}
+                                    onDelete={() => {
+                                      setFaqToDelete(faq);
+                                      setDeleteDialogOpen(true);
+                                    }}
+                                    onMoveUp={
+                                      index > 0 ? () => handleMoveFaq(index, "up") : undefined
+                                    }
+                                    onMoveDown={
+                                      index < faqItems.length - 1
+                                        ? () => handleMoveFaq(index, "down")
+                                        : undefined
+                                    }
+                                    dragHandleProps={provided.dragHandleProps}
+                                  />
+                                </motion.div>
+                              </div>
+                            )}
+                          </Draggable>
+                        ))}
+                        {provided.placeholder}
+                      </AnimatePresence>
+                    </div>
+                  )}
+                </Droppable>
+              </DragDropContext>
             )}
           </div>
 

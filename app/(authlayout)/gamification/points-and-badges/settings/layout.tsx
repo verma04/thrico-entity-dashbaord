@@ -29,7 +29,7 @@ export default function GamificationSettingsLayout({
   return (
     <PlatformSettingsLayout
       title={`${gamificationName} Settings`}
-      description="Define the rules, rewards, and parameters for your ecosystem's engagement layer."
+      description="Define the rules, rewards, and parameters for the gamification engine."
       headerIcon={Gamepad2}
       tabs={tabs}
       breadcrumb={[

@@ -42,7 +42,7 @@ export function LeaderboardManager() {
       <EcosystemHeader
         title="Leaderboard"
         badgeText="Competition"
-        description="Monitor the highest engaging members across the platform. Rankings are calculated based on total points lifecycle."
+        description="Monitor the gamified leaderboard."
         icon={Trophy}
         breadcrumbs={[
           { label: "Gamification", href: "/gamification" },
@@ -50,6 +50,15 @@ export function LeaderboardManager() {
         ]}
       />
 
+      <EcosystemActionBar shadow="sm" className="">
+        <EcosystemActionBar.Item grow className="max-w-sm">
+          <EcosystemActionBar.Search
+            value={search}
+            onChange={setSearch}
+            placeholder="Search members..."
+          />
+        </EcosystemActionBar.Item>
+      </EcosystemActionBar>
       <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0 space-y-6">
         <div className="px-6 py-4 grid grid-cols-1 md:grid-cols-2 gap-3">
           <div className="flex items-center gap-3 p-4 rounded-lg border border-border bg-card">
@@ -82,15 +91,6 @@ export function LeaderboardManager() {
         </div>
 
         <div className="px-6">
-          <EcosystemActionBar shadow="sm" className="">
-            <EcosystemActionBar.Item grow className="max-w-sm">
-              <EcosystemActionBar.Search
-                value={search}
-                onChange={setSearch}
-                placeholder="Search members..."
-              />
-            </EcosystemActionBar.Item>
-          </EcosystemActionBar>
           <LeaderboardTable entries={filteredEntries} isLoading={loading} />
         </div>
       </EcosystemContainer>

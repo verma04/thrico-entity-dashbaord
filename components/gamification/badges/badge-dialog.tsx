@@ -23,6 +23,7 @@ import * as Yup from "yup";
 import React, { useEffect } from "react";
 import { Badge, GamificationTrigger } from "@/graphql/actions";
 import { renderModuleIcon } from "@/components/subscription/utils";
+import { GamificationIconPreview } from "@/components/gamification/shared/gamification-icon-preview";
 
 const ICON_CATEGORIES = [
   {
@@ -184,35 +185,19 @@ export function BadgeDialog({
             <div className="space-y-4">
               <Label>Badge Identity</Label>
 
-              <div className="relative overflow-hidden rounded-2xl border bg-linear-to-br from-primary/5 via-background to-primary/10 p-6 shadow-sm ring-1 ring-inset ring-primary/10">
-                <div className="flex items-center gap-6">
-                  <div className="relative">
-                    <div className="absolute -inset-4 rounded-full bg-primary/20 blur-2xl animate-pulse" />
-                    <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl bg-background shadow-xl ring-1 ring-border text-4xl transform hover:scale-110 transition-transform duration-300">
-                      {formik.values.icon}
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                    <h3 className="text-xl font-bold tracking-tight text-foreground">
-                      {formik.values.name || "Badge Name"}
-                    </h3>
-                    <p className="text-sm text-muted-foreground line-clamp-2 max-w-[200px]">
-                      {formik.values.description ||
-                        "Enter a description below to see it here..."}
-                    </p>
-                    <div className="pt-1">
-                      <BadgeUI
-                        variant="outline"
-                        className="bg-background/50 backdrop-blur-sm text-[10px] uppercase tracking-wider font-bold"
-                      >
-                        {formik.values.type === "ACTION"
-                          ? "Action Challenge"
-                          : "Points Milestone"}
-                      </BadgeUI>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <GamificationIconPreview
+                icon={formik.values.icon}
+                name={formik.values.name}
+                subtitle={
+                  formik.values.description ||
+                  "Enter a description below to see it here..."
+                }
+                badgeLabel={
+                  formik.values.type === "ACTION"
+                    ? "Action Challenge"
+                    : "Points Milestone"
+                }
+              />
 
               <div className="space-y-3">
                 <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">

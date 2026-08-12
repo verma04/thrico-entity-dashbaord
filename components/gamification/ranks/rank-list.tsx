@@ -11,6 +11,7 @@ import { Pencil, ArrowUp, ArrowDown, Crown, TrendingUp } from "lucide-react";
 import { Rank, useToggleRank } from "@/graphql/actions";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { BadgeIcon } from "@/components/gamification/badges/badge-icon";
 
 interface RankListProps {
   ranks: Rank[];
@@ -82,13 +83,13 @@ export function RankList({
       cell: (rank: Rank, index: number) => (
         <div className="flex items-center gap-3">
           <div
-            className="h-10 w-10 text-xl flex items-center justify-center rounded-xl border shadow-sm shrink-0"
+            className="h-10 w-10 text-xl flex items-center justify-center rounded-xl border shadow-sm shrink-0 overflow-hidden"
             style={{
               backgroundColor: `${rank.color}12`,
               borderColor: `${rank.color}25`,
             }}
           >
-            <span>{rank.icon}</span>
+            <BadgeIcon icon={rank.icon} className="h-full w-full text-xl" imageClassName="rounded-xl" />
           </div>
           <div className="flex flex-col">
             <span className="text-sm font-bold text-foreground">
@@ -137,7 +138,7 @@ export function RankList({
             className="scale-90 data-[state=checked]:bg-zinc-900 dark:data-[state=checked]:bg-zinc-100"
           />
           <AdminStatusBadge status={rank.isActive ? "APPROVED" : "PENDING"}>
-            {rank.isActive ? "Unlocked" : "Hidden"}
+            {rank.isActive ? "Active" : "Hidden"}
           </AdminStatusBadge>
         </div>
       ),

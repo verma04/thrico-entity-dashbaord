@@ -22,13 +22,16 @@ import { useModuleStore } from "@/store/useModuleStore";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { DashboardSectionHeading } from "@/components/home/dashboard-section-heading";
-import { EcosystemKPI, EcosystemTodayCard, EcosystemHealthBar } from "@/components/layout/ecosystem/ecosystem-analytics";
+import {
+  EcosystemKPI,
+  EcosystemTodayCard,
+  EcosystemHealthBar,
+} from "@/components/layout/ecosystem/ecosystem-analytics";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-
 
 export default function EngagementDashboardPage() {
   const gamesCenterModuleName = useModuleStore(
@@ -91,9 +94,9 @@ export default function EngagementDashboardPage() {
       colorScheme: "orange" as const,
     },
     {
-      title: "Net TC Burned",
-      value: loading ? "—" : (stats?.netTcBurned?.toLocaleString() ?? "0"),
-      trendLabel: "After payouts",
+      title: "Total Unique Members",
+      value: loading ? "—" : (stats?.totalUniqueMembers?.toLocaleString() ?? "0"),
+      trendLabel: "Played games",
       icon: Flame,
       colorScheme: "rose" as const,
     },
@@ -116,9 +119,9 @@ export default function EngagementDashboardPage() {
   return (
     <EcosystemWrapper>
       <EcosystemHeader
-        title={`${gamesCenterModuleName} Dashboard`}
+        title="Member Games"
         badgeText={gamesCenterModuleName}
-        description="Platform-wide overview of all engagement games — spins, scratches, and match plays."
+        description="Overall member games insights"
         icon={LayoutDashboard}
         breadcrumbs={[
           { label: "Gamification", href: "/gamification" },
@@ -158,10 +161,10 @@ export default function EngagementDashboardPage() {
           </div>
         </section>
 
-        {/* Today's Breakdown */}
+        {/* Activities */}
         <section className="space-y-4">
           <DashboardSectionHeading
-            title="Today's Activity"
+            title="Activities"
             titleClassName="normal-case tracking-normal text-sm text-foreground"
           />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -169,9 +172,9 @@ export default function EngagementDashboardPage() {
               title="Spin Wheel"
               icon={Dices}
               colorScheme="indigo"
-              plays={stats?.spinStatsToday?.plays ?? 0}
-              tcBurned={stats?.spinStatsToday?.tcBurned ?? 0}
-              tcRewarded={stats?.spinStatsToday?.tcRewarded ?? 0}
+              plays={stats?.spinStats?.plays ?? 0}
+              tcBurned={stats?.spinStats?.tcBurned ?? 0}
+              tcRewarded={stats?.spinStats?.tcRewarded ?? 0}
               href="/gamification/engagement-games/spin-wheel"
               loading={loading}
             />
@@ -179,9 +182,9 @@ export default function EngagementDashboardPage() {
               title="Scratch Card"
               icon={RectangleHorizontal}
               colorScheme="sky"
-              plays={stats?.scratchStatsToday?.plays ?? 0}
-              tcBurned={stats?.scratchStatsToday?.tcBurned ?? 0}
-              tcRewarded={stats?.scratchStatsToday?.tcRewarded ?? 0}
+              plays={stats?.scratchStats?.plays ?? 0}
+              tcBurned={stats?.scratchStats?.tcBurned ?? 0}
+              tcRewarded={stats?.scratchStats?.tcRewarded ?? 0}
               href="/gamification/engagement-games/scratch-card"
               loading={loading}
             />
@@ -189,9 +192,9 @@ export default function EngagementDashboardPage() {
               title="Match & Win"
               icon={Trophy}
               colorScheme="orange"
-              plays={stats?.matchWinStatsToday?.plays ?? 0}
-              tcBurned={stats?.matchWinStatsToday?.tcBurned ?? 0}
-              tcRewarded={stats?.matchWinStatsToday?.tcRewarded ?? 0}
+              plays={stats?.matchWinStats?.plays ?? 0}
+              tcBurned={stats?.matchWinStats?.tcBurned ?? 0}
+              tcRewarded={stats?.matchWinStats?.tcRewarded ?? 0}
               href="/gamification/engagement-games/match-win"
               loading={loading}
             />
@@ -208,20 +211,20 @@ export default function EngagementDashboardPage() {
             {[
               {
                 label: "Spin Wheel",
-                burned: stats?.spinStatsToday?.tcBurned ?? 0,
-                rewarded: stats?.spinStatsToday?.tcRewarded ?? 0,
+                burned: stats?.spinStats?.tcBurned ?? 0,
+                rewarded: stats?.spinStats?.tcRewarded ?? 0,
                 colorScheme: "indigo" as const,
               },
               {
                 label: "Scratch Card",
-                burned: stats?.scratchStatsToday?.tcBurned ?? 0,
-                rewarded: stats?.scratchStatsToday?.tcRewarded ?? 0,
+                burned: stats?.scratchStats?.tcBurned ?? 0,
+                rewarded: stats?.scratchStats?.tcRewarded ?? 0,
                 colorScheme: "sky" as const,
               },
               {
                 label: "Match & Win",
-                burned: stats?.matchWinStatsToday?.tcBurned ?? 0,
-                rewarded: stats?.matchWinStatsToday?.tcRewarded ?? 0,
+                burned: stats?.matchWinStats?.tcBurned ?? 0,
+                rewarded: stats?.matchWinStats?.tcRewarded ?? 0,
                 colorScheme: "orange" as const,
               },
             ].map((row) => (

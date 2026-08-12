@@ -9,24 +9,16 @@ import {
   useGetGamificationStats,
   PointRule,
 } from "@/graphql/actions";
-import { Button } from "@/components/ui/button";
+
 import { CtaButton } from "@/components/ui/cta-button";
 import { Plus, Info, Coins, LayoutGrid, RotateCcw } from "lucide-react";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import { StatsCards } from "./stats-cards";
 import { RulesTable } from "./rules-table";
-import { cn } from "@/lib/utils";
-import { renderModuleIcon } from "@/components/subscription/utils";
 
 export function PointsManager() {
   const router = useRouter();
@@ -56,7 +48,7 @@ export function PointsManager() {
       gamificationModulesData?.getEntityGamificationModules?.modules || [];
     return modules.map((m) => ({
       id: m.id,
-      name: m.name,
+      name: m.name ? m.name.charAt(0).toUpperCase() + m.name.slice(1) : m.name,
       icon: m.icon || "Settings",
     }));
   }, [gamificationModulesData]);
@@ -89,7 +81,7 @@ export function PointsManager() {
       <EcosystemHeader
         title="Points"
         badgeText="Gamification"
-        description="Define point rules for community actions. Set caps and triggers to control point distribution."
+        description="Define and allocate point rules for various engagements and activities by module."
         icon={Coins}
         breadcrumbs={[
           { label: "Gamification", href: "/gamification" },

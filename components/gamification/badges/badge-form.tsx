@@ -13,6 +13,9 @@ import {
   Trophy,
   Target,
   Search,
+  Upload,
+  Loader2,
+  ImageIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,6 +34,8 @@ import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel"
 import { useToast } from "@/hooks/use-toast";
 import { EcosystemCard } from "@/components/layout/ecosystem/ecosystem-analytics";
 import { cn } from "@/lib/utils";
+import { useUploadImage } from "@/graphql/actions";
+import { getPreferredMediaUrl } from "@/utils/media";
 
 const ICON_CATEGORIES = [
   {
@@ -119,6 +124,8 @@ export function BadgeForm({
   const { toast } = useToast();
   const [saved, setSaved] = useState(false);
   const [iconSearch, setIconSearch] = useState("");
+  const [iconMode, setIconMode] = useState<"emoji" | "upload">("emoji");
+  const [uploadImage, { loading: isUploading }] = useUploadImage();
 
   const formik = useFormik({
     initialValues: initialValues || {
@@ -150,12 +157,14 @@ export function BadgeForm({
     },
   });
 
+  const isIconImage = formik.values.icon?.includes("/") || formik.values.icon?.startsWith("http");
+
   const filteredTriggers = triggers.filter(
     (t) => t.moduleId === formik.values.module,
   );
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-24">
       <div className="lg:col-span-8 space-y-8">
         <form onSubmit={formik.handleSubmit} className="space-y-8">
           <EcosystemCard
@@ -189,35 +198,90 @@ export function BadgeForm({
                 <div className="w-full md:w-[300px] space-y-4">
                   <Label>Visual Representation</Label>
                   <div className="flex flex-col gap-4 p-4 rounded-xl border bg-muted/20">
-                    <div className="h-20 w-20 mx-auto bg-white rounded-2xl shadow-xl flex items-center justify-center text-4xl border animate-in zoom-in-90 duration-300">
-                      {formik.values.icon}
+                    <div className="h-20 w-20 mx-auto bg-white rounded-2xl shadow-xl flex items-center justify-center text-4xl border animate-in zoom-in-90 duration-300 overflow-hidden">
+                      {isIconImage ? (
+                        <img src={getPreferredMediaUrl(formik.values.icon)} alt="Icon" className="h-full w-full object-cover" />
+                      ) : (
+                        formik.values.icon || "⭐"
+                      )}
                     </div>
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-                      <Input
-                        placeholder="Filter icons..."
-                        className="pl-9 h-8 text-xs bg-white"
-                        value={iconSearch}
-                        onChange={(e) => setIconSearch(e.target.value)}
-                      />
+
+                    <div className="flex bg-white rounded-lg p-1 border text-[11px] font-medium">
+                      <button 
+                        type="button" 
+                        onClick={() => setIconMode("emoji")} 
+                        className={cn("flex-1 py-1 rounded-md transition-all", iconMode === "emoji" ? "bg-indigo-50 text-indigo-700 shadow-sm" : "text-muted-foreground")}
+                      >
+                        Emoji
+                      </button>
+                      <button 
+                        type="button"
+                        onClick={() => setIconMode("upload")}
+                        className={cn("flex-1 py-1 rounded-md transition-all", iconMode === "upload" ? "bg-indigo-50 text-indigo-700 shadow-sm" : "text-muted-foreground")}
+                      >
+                        Custom Icon
+                      </button>
                     </div>
-                    <div className="grid grid-cols-6 gap-2 max-h-[150px] overflow-y-auto pr-1">
-                      {ICON_CATEGORIES.flatMap((c) => c.icons).map((icon) => (
-                        <button
-                          key={icon}
-                          type="button"
-                          onClick={() => formik.setFieldValue("icon", icon)}
-                          className={cn(
-                            "h-8 w-8 rounded-lg flex items-center justify-center text-lg transition-all",
-                            formik.values.icon === icon
-                              ? "bg-indigo-600 text-white shadow-lg scale-110"
-                              : "bg-white hover:bg-muted",
-                          )}
-                        >
-                          {icon}
-                        </button>
-                      ))}
-                    </div>
+
+                    {iconMode === "emoji" ? (
+                      <>
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                          <Input
+                            placeholder="Filter icons..."
+                            className="pl-9 h-8 text-xs bg-white"
+                            value={iconSearch}
+                            onChange={(e) => setIconSearch(e.target.value)}
+                          />
+                        </div>
+                        <div className="grid grid-cols-6 gap-2 max-h-[150px] overflow-y-auto pr-1">
+                          {ICON_CATEGORIES.flatMap((c) => c.icons).map((icon) => (
+                            <button
+                              key={icon}
+                              type="button"
+                              onClick={() => formik.setFieldValue("icon", icon)}
+                              className={cn(
+                                "h-8 w-8 rounded-lg flex items-center justify-center text-lg transition-all",
+                                formik.values.icon === icon
+                                  ? "bg-indigo-600 text-white shadow-lg scale-110"
+                                  : "bg-white hover:bg-muted",
+                              )}
+                            >
+                              {icon}
+                            </button>
+                          ))}
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center border-2 border-dashed rounded-xl p-4 gap-2 bg-white hover:bg-muted/50 transition-colors text-center relative h-[150px]">
+                        <input
+                          type="file"
+                          accept="image/png, image/jpeg, image/svg+xml"
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                          disabled={isUploading}
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              try {
+                                const res = await uploadImage({ variables: { file } });
+                                if (res.data?.uploadImage) {
+                                  formik.setFieldValue("icon", res.data.uploadImage);
+                                }
+                              } catch (err) {
+                                toast({ title: "Upload Failed", variant: "destructive" });
+                              }
+                            }
+                          }}
+                        />
+                        {isUploading ? (
+                          <Loader2 className="h-6 w-6 text-indigo-500 animate-spin" />
+                        ) : (
+                          <Upload className="h-6 w-6 text-muted-foreground mb-1" />
+                        )}
+                        <p className="text-xs font-semibold text-foreground">Click to upload icon</p>
+                        <p className="text-[10px] text-muted-foreground leading-tight">Recommended: 256x256px<br/>Supported: PNG, JPG, SVG</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -279,7 +343,7 @@ export function BadgeForm({
                       <SelectContent>
                         {modules.map((m) => (
                           <SelectItem key={m.id} value={m.id}>
-                            {m.name}
+                            {m.name ? m.name.charAt(0).toUpperCase() + m.name.slice(1) : m.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -334,8 +398,12 @@ export function BadgeForm({
             <CardContent className="pt-8 flex flex-col items-center text-center space-y-4">
               <div className="relative group">
                 <div className="absolute -inset-4 bg-indigo-500/20 rounded-full blur-2xl group-hover:bg-indigo-500/40 transition-colors" />
-                <div className="relative h-24 w-24 bg-white rounded-3xl shadow-2xl border flex items-center justify-center text-5xl transition-transform group-hover:scale-105">
-                  {formik.values.icon}
+                <div className="relative h-24 w-24 bg-white rounded-3xl shadow-2xl border flex items-center justify-center text-5xl transition-transform group-hover:scale-105 overflow-hidden">
+                  {isIconImage ? (
+                    <img src={getPreferredMediaUrl(formik.values.icon)} alt="Icon" className="h-full w-full object-cover" />
+                  ) : (
+                    formik.values.icon || "⭐"
+                  )}
                 </div>
                 <div className="absolute -bottom-2 -right-2 h-8 w-8 bg-indigo-600 rounded-full border-4 border-white flex items-center justify-center shadow-lg">
                   <Trophy className="h-4 w-4 text-white" />
@@ -362,15 +430,15 @@ export function BadgeForm({
             </CardContent>
           </Card>
 
-          <Card className="border-none shadow-xl bg-zinc-900 text-white">
-            <CardHeader>
-              <CardTitle className="text-sm font-bold flex items-center gap-2">
-                <Gamepad2 className="h-4 w-4 text-indigo-400" />
+          <Card className="border-none shadow-sm ring-1 ring-border/50">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-2 text-foreground">
+                <Gamepad2 className="h-4 w-4 text-indigo-500" />
                 Meta Configuration
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-xs text-zinc-400 leading-relaxed font-medium">
+              <p className="text-xs text-muted-foreground leading-relaxed font-medium">
                 Members who meet the criteria after deployment will be
                 automatically awarded.
               </p>
