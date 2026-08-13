@@ -9,7 +9,9 @@ import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-cont
 import { useModuleStore } from "@/store/useModuleStore";
 
 export default function EconomicsPage() {
-  const currencyModuleName = useModuleStore((state) => state.currencyModuleName);
+  const currencyModuleName = useModuleStore(
+    (state) => state.currencyModuleName,
+  );
   const { data, loading } = useGetEntityCurrencyConfig();
 
   return (
@@ -19,7 +21,11 @@ export default function EconomicsPage() {
         badgeText={`${currencyModuleName} Config`}
         description={`Maintain your gamification ${currencyModuleName.toLowerCase()} normalization factor and label.`}
         icon={Coins}
-        breadcrumbs={[{ label: "Gamification", href: "/gamification" }, { label: "Currency", href: "/gamification/currency" }, { label: "Economics" }]}
+        breadcrumbs={[
+          { label: "Gamification", href: "/gamification" },
+          { label: "Currency", href: "/gamification/currency" },
+          { label: "Economics" },
+        ]}
       />
       <EcosystemContainer className="p-6">
         <div className="space-y-6">

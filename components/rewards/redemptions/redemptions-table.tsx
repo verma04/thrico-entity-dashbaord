@@ -11,6 +11,9 @@ import {
   UserProfileHoverCard,
   UserProfileHoverData,
 } from "@/components/shared/user-profile-hover-card";
+import { useModuleStore } from "@/store/useModuleStore";
+import { useGetEntityCurrencyConfig } from "@/graphql/actions/currency";
+import { formatDistanceToNow } from "date-fns";
 
 export interface Redemption {
   id: string;
@@ -30,6 +33,7 @@ export interface Redemption {
   tcUsed: number;
   totalCost: number;
   claimedAt: string;
+  createdAt: string;
   status: string;
   metadata?: {
     voucherCode?: string;
@@ -46,6 +50,11 @@ export function RedemptionsTable({
   isLoading,
 }: RedemptionsTableProps) {
   const { toast } = useToast();
+  const currencyModuleName = useModuleStore(
+    (state) => state.currencyModuleName,
+  );
+  const { data, loading } = useGetEntityCurrencyConfig();
+  const currencyName = data?.getEntityCurrencyConfig?.currencyName || currencyModuleName;
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -66,15 +75,6 @@ export function RedemptionsTable({
 
   const columns = [
     {
-      key: "rank",
-      header: "Rank",
-      cell: (row: Redemption, index: number) => (
-        <span className="font-mono text-xs text-muted-foreground font-semibold">
-          #{index + 1}
-        </span>
-      ),
-    },
-    {
       key: "user",
       header: "User",
       cell: (row: Redemption) => {
@@ -90,7 +90,9 @@ export function RedemptionsTable({
           <UserProfileHoverCard user={hoverUser}>
             <div className="flex items-center gap-3 cursor-pointer">
               <Avatar className="h-8 w-8 border border-border shrink-0">
-                <AvatarImage src={`https://cdn.thrico.network/${user.avatar}`} />
+                <AvatarImage
+                  src={`https://cdn.thrico.network/${user.avatar}`}
+                />
                 <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-bold">
                   {user.firstName[0]}
                   {user.lastName[0]}
@@ -113,39 +115,42 @@ export function RedemptionsTable({
       key: "reward",
       header: "Coupon",
       cell: (row: Redemption) => (
-        <span className="font-medium text-foreground">
-          {row.reward?.title}
-        </span>
+        <span className="font-medium text-foreground">{row.reward?.title}</span>
       ),
     },
     {
       key: "tcUsed",
-      header: "TC Spent",
+      header: "Coins Spent",
       cell: (row: Redemption) => (
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-50 border border-amber-200 text-amber-700 text-[10px] font-black uppercase tracking-tighter">
-            <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-            {row.tcUsed || 0} TC
-          </div>
           {row.ecUsed > 0 && (
             <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-black uppercase tracking-tighter">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              {row.ecUsed} EC
+              {row.ecUsed} {currencyName || "EC"}
             </div>
           )}
         </div>
       ),
     },
     {
-      key: "claimedAt",
-      header: "Date",
-      cell: (row: Redemption) => (
-        <span className="text-sm text-muted-foreground">
-          {row.claimedAt
-            ? new Date(row.claimedAt).toLocaleDateString()
-            : "-"}
-        </span>
-      ),
+      key: "createdAt",
+      header: "Date & Time",
+      cell: (row: Redemption) => {
+        const dateObj = row.createdAt ? new Date(row.createdAt) : null;
+        const validDate = dateObj && !isNaN(dateObj.getTime());
+        return (
+          <div className="flex flex-col">
+            <span className="text-sm text-foreground">
+              {validDate ? formatDistanceToNow(dateObj, { addSuffix: true }) : "-"}
+            </span>
+            {validDate && (
+              <span className="text-[11px] text-muted-foreground">
+                {dateObj.toLocaleDateString()} at {dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            )}
+          </div>
+        );
+      },
     },
     {
       key: "status",

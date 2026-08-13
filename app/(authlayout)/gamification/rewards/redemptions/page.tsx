@@ -28,12 +28,8 @@ export default function RedemptionsPage() {
   const [debouncedSearch] = useDebounce(search, 500);
   const pageSize = 100;
 
-  // Note: Assuming useGetRedemptions accepts pagination and search params.
-  // If not, it will just fetch the default set and we map them.
   const { data, loading, refetch } = useGetRedemptions({
-    // If your GraphQL action takes pagination/search variables, add them here
-    // pagination: { page, limit: pageSize },
-    // filter: { search: debouncedSearch }
+    pagination: { page, limit: pageSize },
   });
 
   // Client-side filtering if API doesn't support it directly yet
@@ -51,13 +47,7 @@ export default function RedemptionsPage() {
     );
   }
 
-  // Client-side pagination if needed
-  const paginatedRedemptions = redemptions.slice(
-    (page - 1) * pageSize,
-    page * pageSize,
-  );
-
-  const hasNextPage = page * pageSize < redemptions.length;
+  const hasNextPage = (data?.getRedemptions?.length || 0) === pageSize;
   const hasPrevPage = page > 1;
 
   const handleNextPage = () => {
@@ -80,7 +70,7 @@ export default function RedemptionsPage() {
         `${r.user?.firstName || ""} ${r.user?.lastName || ""}`.trim(),
         r.reward?.title || "",
         r.status || "completed",
-        r.claimedAt || "",
+        r.createdAt || "",
       ]),
     ]
       .map((row) => row.join(","))
@@ -192,7 +182,7 @@ export default function RedemptionsPage() {
 
         <div className="px-6">
           <RedemptionsTable
-            redemptions={paginatedRedemptions}
+            redemptions={redemptions}
             isLoading={loading}
           />
         </div>
