@@ -1,81 +1,77 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import {
   Download,
-  History,
   Ticket,
-  CheckCircle2,
-  Clock,
-  Users,
+  ChevronLeft,
+  ChevronRight,
+  RotateCcw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
 
 import { useGetRedemptions } from "@/graphql/actions/rewards";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
-import { EcosystemKPI } from "@/components/layout/ecosystem/ecosystem-analytics";
-import { RotateCw, Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
-
 import { cn } from "@/lib/utils";
 import { RedemptionsTable } from "@/components/rewards/redemptions/redemptions-table";
 import { useModuleStore } from "@/store/useModuleStore";
+import { useDebounce } from "use-debounce";
 
 export default function RedemptionsPage() {
   const rewardsModuleName = useModuleStore((state) => state.rewardsModuleName);
-  const { data, loading } = useGetRedemptions();
-  const redemptions = data?.getRedemptions || [];
 
-  const totalRedemptions = redemptions.length;
-  const fulfilledCount = redemptions.filter(
-    (r: any) => r.status === "fulfilled" || r.status === "completed",
-  ).length;
-  const pendingCount = redemptions.filter(
-    (r: any) => r.status === "pending",
-  ).length;
-  const successRate =
-    totalRedemptions > 0
-      ? Math.round((fulfilledCount / totalRedemptions) * 100)
-      : 0;
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const [debouncedSearch] = useDebounce(search, 500);
+  const pageSize = 100;
 
-  const stats = [
-    {
-      label: "Total Redemptions",
-      value: loading ? "—" : totalRedemptions,
-      desc: "All time records",
-      icon: Ticket,
-      color: "text-indigo-600",
-      bg: "bg-indigo-50",
-    },
-    {
-      label: "Fulfilled",
-      value: loading ? "—" : fulfilledCount,
-      desc: "Successfully delivered",
-      icon: CheckCircle2,
-      color: "text-emerald-600",
-      bg: "bg-emerald-50",
-    },
-    {
-      label: "Pending",
-      value: loading ? "—" : pendingCount,
-      desc: "Awaiting fulfillment",
-      icon: Clock,
-      color: pendingCount > 0 ? "text-amber-600" : "text-slate-500",
-      bg: pendingCount > 0 ? "bg-amber-50" : "bg-slate-100",
-    },
-    {
-      label: "Success Rate",
-      value: loading ? "—" : `${successRate}%`,
-      desc: "Fulfillment efficiency",
-      icon: Users,
-      color: successRate >= 90 ? "text-emerald-600" : "text-amber-600",
-      bg: successRate >= 90 ? "bg-emerald-50" : "bg-amber-50",
-    },
-  ];
+  // Note: Assuming useGetRedemptions accepts pagination and search params.
+  // If not, it will just fetch the default set and we map them.
+  const { data, loading, refetch } = useGetRedemptions({
+    // If your GraphQL action takes pagination/search variables, add them here
+    // pagination: { page, limit: pageSize },
+    // filter: { search: debouncedSearch }
+  });
+
+  // Client-side filtering if API doesn't support it directly yet
+  let redemptions = data?.getRedemptions || [];
+  const totalCount = redemptions.length;
+
+  if (debouncedSearch) {
+    const s = debouncedSearch.toLowerCase();
+    redemptions = redemptions.filter(
+      (r: any) =>
+        r.user?.firstName?.toLowerCase().includes(s) ||
+        r.user?.lastName?.toLowerCase().includes(s) ||
+        r.user?.email?.toLowerCase().includes(s) ||
+        r.reward?.title?.toLowerCase().includes(s),
+    );
+  }
+
+  // Client-side pagination if needed
+  const paginatedRedemptions = redemptions.slice(
+    (page - 1) * pageSize,
+    page * pageSize,
+  );
+
+  const hasNextPage = page * pageSize < redemptions.length;
+  const hasPrevPage = page > 1;
+
+  const handleNextPage = () => {
+    if (hasNextPage) setPage((p) => p + 1);
+  };
+
+  const handlePrevPage = () => {
+    if (hasPrevPage) setPage((p) => p - 1);
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setPage(1); // Reset page on search
+  };
 
   const handleExport = () => {
     const csv = [
@@ -106,76 +102,99 @@ export default function RedemptionsPage() {
         badgeText="Reports"
         description={`A complete log of every ${rewardsModuleName.toLowerCase()} claimed by your community members.`}
         icon={Ticket}
-        breadcrumbs={[{ label: "Gamification", href: "/gamification" }, { label: "Rewards", href: "/gamification/rewards" }, { label: "Redemptions" }]}
-        actions={
-          <EcosystemActionBar shadow="none" className="p-0 border-none bg-transparent gap-2">
-            <EcosystemActionBar.Group>
-              <div className="flex items-center gap-2 px-1">
-                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">
-                  {totalRedemptions} Live Records
-                </span>
-              </div>
-            </EcosystemActionBar.Group>
-
-            <EcosystemActionBar.Group align="right">
-              <EcosystemActionBar.CtaButton onClick={handleExport} disabled={redemptions.length === 0}>
-                <Download className="h-3 w-3" />
-                Export Dataset
-              </EcosystemActionBar.CtaButton>
-            </EcosystemActionBar.Group>
-          </EcosystemActionBar>
-        }
+        breadcrumbs={[
+          { label: "Gamification", href: "/gamification" },
+          { label: "Rewards", href: "/gamification/rewards" },
+          { label: "Redemptions" },
+        ]}
       />
 
-      <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0 space-y-6">
-        <div className="px-6 py-4 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-          {/* Stats row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {stats.map((s, i) => (
-              <EcosystemKPI
-                key={i}
-                title={s.label}
-                value={s.value}
-                icon={s.icon}
-                color={s.color}
-                bg={s.bg}
-                trendLabel={s.desc}
-              />
-            ))}
-          </div>
+      <EcosystemActionBar shadow="none">
+        <EcosystemActionBar.Group>
+          <EcosystemActionBar.Item grow className="max-w-xs">
+            <EcosystemActionBar.Search
+              value={search}
+              onChange={handleSearchChange}
+              placeholder="Search by member name or coupon..."
+            />
+          </EcosystemActionBar.Item>
+        </EcosystemActionBar.Group>
 
-          {/* Table container */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between px-1">
-              <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center">
-                  <History className="h-4 w-4 text-indigo-600" />
-                </div>
-                <div>
-                  <h2 className="text-sm font-black text-foreground uppercase tracking-tight">
-                    Active Fulfillment Log
-                  </h2>
-                  <p className="text-[11px] text-muted-foreground font-medium italic opacity-70">
-                    Real-time ledger of reward lifecycle events
-                  </p>
-                </div>
-              </div>
+        <EcosystemActionBar.Group align="right">
+          <EcosystemActionBar.Item>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => refetch()}
+              className="h-9 w-9 border-border rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted"
+            >
+              <RotateCcw className={cn(loading && "animate-spin")} size={14} />
+            </Button>
+          </EcosystemActionBar.Item>
 
-              {!loading && totalRedemptions > 0 && (
-                <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-100 border border-zinc-200">
-                  <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
-                    Showing
-                  </span>
-                  <span className="text-[10px] font-black text-indigo-600 tabular-nums">
-                    {totalRedemptions} Node entries
-                  </span>
-                </div>
-              )}
+          <EcosystemActionBar.Item>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExport}
+              disabled={redemptions.length === 0}
+              className="h-9 border-border rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted gap-2"
+            >
+              <Download size={14} />
+              Export
+            </Button>
+          </EcosystemActionBar.Item>
+
+          <EcosystemActionBar.Item>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handlePrevPage}
+                disabled={!hasPrevPage || loading}
+                className="h-8 w-8 border-border rounded-lg text-muted-foreground hover:text-foreground disabled:opacity-30"
+              >
+                <ChevronLeft size={14} />
+              </Button>
+              <span className="text-xs text-muted-foreground font-medium px-2 min-w-[60px] text-center">
+                Page {page}
+              </span>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleNextPage}
+                disabled={!hasNextPage || loading}
+                className="h-8 w-8 border-border rounded-lg text-muted-foreground hover:text-foreground disabled:opacity-30"
+              >
+                <ChevronRight size={14} />
+              </Button>
             </div>
+          </EcosystemActionBar.Item>
 
-            <RedemptionsTable redemptions={redemptions} isLoading={loading} />
+          <EcosystemActionBar.Status active={totalCount > 0}>
+            {totalCount} Redemptions
+          </EcosystemActionBar.Status>
+        </EcosystemActionBar.Group>
+      </EcosystemActionBar>
+
+      <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0 space-y-6">
+        <div className="px-6 py-2">
+          <div className="flex items-start gap-3 p-4 rounded-xl bg-muted/50 border border-border">
+            <div className="h-7 w-7 rounded-lg bg-background flex items-center justify-center shadow-sm shrink-0 border border-border">
+              <Ticket className="h-3.5 w-3.5 text-muted-foreground" />
+            </div>
+            <p className="text-[12px] text-muted-foreground leading-relaxed">
+              This list logs all redemptions across your ecosystem. You can
+              search by user name, email, or reward title.
+            </p>
           </div>
+        </div>
+
+        <div className="px-6">
+          <RedemptionsTable
+            redemptions={paginatedRedemptions}
+            isLoading={loading}
+          />
         </div>
       </EcosystemContainer>
     </EcosystemWrapper>

@@ -24,6 +24,8 @@ import {
   Clock,
   Upload,
   CheckCircle2,
+  ArrowUp,
+  ArrowDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -35,6 +37,11 @@ import {
   CartesianGrid,
   Area,
   AreaChart,
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  Cell,
 } from "recharts";
 import { ResponsiveContainer } from "@/components/ui/responsive-container";
 import {
@@ -65,6 +72,17 @@ import { subDays } from "date-fns";
 import { DateRange } from "react-day-picker";
 import { TimeRange } from "@/graphql/actions/rewards";
 import { useModuleStore } from "@/store/useModuleStore";
+
+
+const TOP_REWARDS = [
+  { name: "Amazon ₹100", value: 124, pct: 100 },
+  { name: "Premium 10%", value: 86, pct: 69 },
+  { name: "Starbucks", value: 72, pct: 58 },
+  { name: "Event Ticket", value: 45, pct: 36 },
+  { name: "Zomato Pro", value: 38, pct: 31 },
+];
+
+const COLORS = ["#6366f1", "#8b5cf6", "#10b981", "#f43f5e", "#f97316"];
 
 export default function RewardsDashboard() {
   const rewardsModuleName = useModuleStore((state) => state.rewardsModuleName);
@@ -162,7 +180,8 @@ export default function RewardsDashboard() {
   const chartData =
     stats?.redemptionTrend?.map((t: any) => ({
       name: moment(t.date).format("ddd"),
-      val: t.value || 0,
+      val: t.count || 0,
+      tc: t.value || 0,
     })) || [];
 
   const navCards = [
@@ -202,15 +221,7 @@ export default function RewardsDashboard() {
       stat: null,
       statLabel: "protected",
     },
-    {
-      title: "Analytics",
-      desc: "Deep insights into reward performance",
-      icon: BarChart3,
-      link: "/gamification/rewards/analytics",
-      color: "sky",
-      stat: null,
-      statLabel: "live data",
-    },
+    
   ];
 
   const colorMap: Record<
@@ -271,6 +282,16 @@ export default function RewardsDashboard() {
       bg: "bg-emerald-50",
       bar: "bg-emerald-500",
     };
+  };
+
+
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (!active || !payload?.length) return null;
+    return (
+      <div className="bg-zinc-900 text-white rounded-xl px-4 py-3 shadow-xl text-xs">
+        <p className="font-semibold">{payload[0]?.value?.toLocaleString()} {payload[0]?.name === "tc" ? "points" : "redemptions"}</p>
+      </div>
+    );
   };
 
   return (
@@ -848,6 +869,117 @@ export default function RewardsDashboard() {
             )}
           </div>
         </section>
+
+        
+        {/* Charts Row 2 - Points Spent Line Chart */}
+        <section className="space-y-4">
+          <DashboardSectionHeading
+            title="Points Spent Over Time"
+            titleClassName="normal-case tracking-normal text-sm text-foreground"
+          />
+          <div className="p-5 rounded-[20px] bg-muted/30 border border-transparent">
+            <div className="h-[260px] w-full">
+              {statsLoading ? (
+                <div className="h-full w-full flex items-center justify-center bg-muted/30 rounded-xl border border-border">
+                  <div className="h-8 w-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : chartData.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center gap-3 text-center">
+                  <div className="h-12 w-12 bg-muted rounded-2xl flex items-center justify-center border border-border">
+                    <Flame className="h-5 w-5 text-muted-foreground/30" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">No data yet</p>
+                    <p className="text-xs text-muted-foreground mt-0.5 max-w-[180px] leading-relaxed">
+                      Points data appears once members start redeeming
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={chartData} margin={{ top: 8, right: 0, left: -16, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                    <XAxis dataKey="name" fontSize={10} fontWeight={600} tickLine={false} axisLine={false} tick={{ fill: "#94a3b8" }} dy={8} />
+                    <YAxis fontSize={10} fontWeight={600} tickLine={false} axisLine={false} tick={{ fill: "#94a3b8" }} />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Line
+                      type="monotone"
+                      dataKey="tc"
+                      stroke="#f97316"
+                      strokeWidth={2.5}
+                      dot={false}
+                      activeDot={{ r: 5, fill: "#f97316", strokeWidth: 2, stroke: "#fff" }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* Most Popular Rewards and Dummy Breakdown */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <section className="space-y-4">
+            <DashboardSectionHeading
+              title="Most Popular Rewards"
+              titleClassName="normal-case tracking-normal text-sm text-foreground"
+            />
+            <div className="p-5 rounded-[20px] bg-muted/30 border border-transparent">
+              <div className="space-y-4">
+                {TOP_REWARDS.map((r, i) => (
+                  <div key={i} className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className={cn(
+                          "shrink-0 h-5 w-5 rounded-full text-[10px] font-black flex items-center justify-center",
+                          i === 0 ? "bg-yellow-100 text-yellow-700" : "bg-muted text-muted-foreground"
+                        )}>
+                          {i + 1}
+                        </span>
+                        <span className="text-sm font-medium text-foreground truncate">{r.name}</span>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-sm font-bold text-foreground tabular-nums">{r.value}</span>
+                        <span className="text-[10px] text-muted-foreground font-medium">claims</span>
+                      </div>
+                    </div>
+                    <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all duration-700 ease-out"
+                        style={{ width: `${r.pct}%`, backgroundColor: COLORS[i] }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          <section className="space-y-4">
+            <DashboardSectionHeading
+              title="Engagement Metrics"
+              titleClassName="normal-case tracking-normal text-sm text-foreground"
+            />
+            <div className="grid grid-cols-1 gap-4">
+              {[
+                { label: "Avg. redemptions per user", value: "2.4", icon: Ticket, sub: "per month" },
+                { label: "Points per redemption", value: "183", icon: Zap, sub: "average cost" },
+                { label: "Repeat claimers", value: "61%", icon: Activity, sub: "of redeemers" },
+              ].map((m, i) => (
+                <div key={i} className="flex items-center gap-4 p-5 rounded-xl border border-border bg-card">
+                  <div className="h-10 w-10 rounded-xl bg-muted border border-border/50 flex items-center justify-center shrink-0">
+                    <m.icon className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">{m.label}</p>
+                    <p className="text-xl font-bold text-foreground tabular-nums">{m.value}</p>
+                    <p className="text-[11px] text-muted-foreground/60">{m.sub}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
 
         {/* Navigation Cards */}
         <div className="space-y-4">

@@ -8,18 +8,13 @@ import {
 } from "@/components/ui/hover-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useGetUserProfile } from "@/components/grapqhl/queries/profile";
-import { useHandleStartChat } from "@/hooks/chat/use-handle-start-chat";
 import {
-  MessageSquare,
-  Loader2,
-  Users,
   Briefcase,
   GraduationCap,
   Building2,
   Wrench,
   Heart,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
@@ -32,7 +27,6 @@ interface UserHoverCardProps {
 
 export function UserHoverCard({ userId, children }: UserHoverCardProps) {
   const [fetchProfile, { data, loading, error }] = useGetUserProfile();
-  const { handleStartChat, isLoading: startingChat } = useHandleStartChat();
 
   const handleOpenChange = (open: boolean) => {
     if (open && !data && !loading && userId) {
@@ -93,7 +87,7 @@ export function UserHoverCard({ userId, children }: UserHoverCardProps) {
             <div className="h-16 w-full bg-muted relative">
               {profile.cover || user?.cover ? (
                 <img
-                  src={(getMediaUrl(profile.cover || user?.cover) || "")}
+                  src={getMediaUrl(profile.cover || user?.cover) || ""}
                   alt="Cover"
                   className="h-full w-full object-cover"
                 />
@@ -106,11 +100,7 @@ export function UserHoverCard({ userId, children }: UserHoverCardProps) {
               <div className="flex justify-between items-start">
                 <Avatar className="h-16 w-16 border-4 border-background -mt-8 relative z-10">
                   <AvatarImage
-                    src={
-                      user?.avatar
-                        ? (getMediaUrl(user.avatar) || "")
-                        : ""
-                    }
+                    src={user?.avatar ? getMediaUrl(user.avatar) || "" : ""}
                   />
                   <AvatarFallback className="text-lg font-semibold bg-muted">
                     {fallbackText}
@@ -118,25 +108,6 @@ export function UserHoverCard({ userId, children }: UserHoverCardProps) {
                 </Avatar>
 
                 <div className="mt-2 flex items-center gap-2">
-                  <Button
-                    size="sm"
-                    variant="default"
-                    className="h-8"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      if (user?.id) {
-                        handleStartChat(user.id);
-                      }
-                    }}
-                    disabled={startingChat}
-                  >
-                    {startingChat ? (
-                      <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />
-                    ) : (
-                      <MessageSquare className="h-3.5 w-3.5 mr-1.5" />
-                    )}
-                    Message
-                  </Button>
                   <Button asChild size="sm" variant="outline" className="h-8">
                     <Link
                       href={`/dashboard/network/profile/${user?.id || userId}`}

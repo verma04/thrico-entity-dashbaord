@@ -86,7 +86,6 @@ const isDashboardMetricValue = (
   value !== null &&
   ("value" in value || "change" in value || "trend" in value);
 
-
 import { DashboardDistributionChart } from "./dashboard-distribution-chart";
 import { DashboardSessionRadarChart } from "./dashboard-session-radar-chart";
 import { DashboardContentBreakdownChart } from "./dashboard-content-breakdown-chart";
@@ -209,8 +208,6 @@ export default function Dashboard() {
   const totalReported =
     kpis?.moderationStats?.reduce((acc, curr) => acc + curr.count, 0) || 0;
 
-
-
   return (
     <EcosystemWrapper className="m-2">
       <EcosystemHeader
@@ -306,7 +303,7 @@ export default function Dashboard() {
               title="Gamification Leaderboard"
               icon={<Trophy className="h-3.5 w-3.5 text-amber-500" />}
               rightElement={
-                <Link href="/gamification/leaderboard">
+                <Link href="/gamification/points-and-badges/leaderboard">
                   <Button
                     variant="ghost"
                     size="sm"
@@ -429,7 +426,7 @@ export default function Dashboard() {
               title="Activity Log"
               icon={<History className="h-3.5 w-3.5 text-indigo-500" />}
               rightElement={
-                <Link href="/gamification/activity-log">
+                <Link href="/gamification/points-and-badges/leaderboard">
                   <Button
                     variant="ghost"
                     size="sm"
@@ -576,7 +573,7 @@ export default function Dashboard() {
               title="Impact Score"
               icon={<Users className="h-3.5 w-3.5 text-rose-500" />}
               rightElement={
-                <Link href="/impact-score/members">
+                <Link href="/gamification/impact-score/members">
                   <Button
                     variant="ghost"
                     size="sm"

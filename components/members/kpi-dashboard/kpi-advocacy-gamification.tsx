@@ -1,13 +1,7 @@
 "use client";
 
 import React from "react";
-import {
-  Heart,
-  Star,
-  Zap,
-  Trophy,
-  Crown,
-} from "lucide-react";
+import { Heart, Star, Zap, Trophy, Crown } from "lucide-react";
 import { EcosystemKPI } from "@/components/layout/ecosystem/ecosystem-kpi";
 import type { StatValue } from "@/graphql/actions/member-kpi-dashboard";
 
@@ -16,7 +10,8 @@ const kpis = [
     title: "Advocacy Index",
     key: "communityAdvocacyIndex" as const,
     icon: Heart,
-    tooltip: "Composite score (0–100): 0.4 × Referral + 0.35 × Reshare + 0.25 × Review",
+    tooltip:
+      "Composite score (0–100): 0.4 × Referral + 0.35 × Reshare + 0.25 × Review",
     colorScheme: "rose" as const,
   },
   {
@@ -48,7 +43,7 @@ const kpis = [
     icon: Crown,
     tooltip: "COUNT(DISTINCT member_id WHERE appeared_on_leaderboard = true)",
     colorScheme: "sky" as const,
-    href: "/gamification/leaderboard",
+    href: "/gamification/points-and-badges/leaderboard",
   },
 ];
 
@@ -57,7 +52,10 @@ interface KPIAdvocacyGamificationProps {
   data: Record<string, StatValue | undefined>;
 }
 
-export function KPIAdvocacyGamification({ loading, data }: KPIAdvocacyGamificationProps) {
+export function KPIAdvocacyGamification({
+  loading,
+  data,
+}: KPIAdvocacyGamificationProps) {
   // Special rendering for advocacy index gauge
   const advocacyMetric = data["communityAdvocacyIndex"];
   const advocacyValue = Number(advocacyMetric?.value ?? 0);
@@ -80,7 +78,9 @@ export function KPIAdvocacyGamification({ loading, data }: KPIAdvocacyGamificati
           </div>
           <span className="ml-auto text-2xl font-extrabold text-foreground tabular-nums">
             {loading ? "..." : advocacyValue}
-            <span className="text-xs text-muted-foreground font-medium ml-0.5">/100</span>
+            <span className="text-xs text-muted-foreground font-medium ml-0.5">
+              /100
+            </span>
           </span>
         </div>
         {/* Progress bar */}
@@ -91,8 +91,12 @@ export function KPIAdvocacyGamification({ loading, data }: KPIAdvocacyGamificati
           />
         </div>
         <div className="flex justify-between mt-1.5">
-          <span className="text-[9px] text-muted-foreground/50 font-bold uppercase tracking-wider">Low</span>
-          <span className="text-[9px] text-muted-foreground/50 font-bold uppercase tracking-wider">High</span>
+          <span className="text-[9px] text-muted-foreground/50 font-bold uppercase tracking-wider">
+            Low
+          </span>
+          <span className="text-[9px] text-muted-foreground/50 font-bold uppercase tracking-wider">
+            High
+          </span>
         </div>
       </div>
 

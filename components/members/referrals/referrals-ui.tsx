@@ -23,6 +23,7 @@ import {
   ChevronDown,
   Circle,
 } from "lucide-react";
+import { UserHoverCard } from "@/components/shared/user-hover-card";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
@@ -123,20 +124,22 @@ export function ReferralsUI() {
       cell: (row) => {
         const referrer = row.referrer?.user;
         return (
-          <div className="flex items-center gap-2.5 py-1">
-            <Avatar className="h-7 w-7">
-              <AvatarImage
-                src={`https://cdn.thrico.network/${referrer?.avatar}`}
-              />
-              <AvatarFallback className="text-[9px] bg-primary/10 text-primary">
-                {referrer?.firstName?.[0]}
-                {referrer?.lastName?.[0]}
-              </AvatarFallback>
-            </Avatar>
-            <span className="text-xs font-semibold">
-              {referrer?.firstName} {referrer?.lastName}
-            </span>
-          </div>
+          <UserHoverCard userId={referrer?.id}>
+            <div className="flex items-center gap-2.5 py-1">
+              <Avatar className="h-7 w-7">
+                <AvatarImage
+                  src={`https://cdn.thrico.network/${referrer?.avatar}`}
+                />
+                <AvatarFallback className="text-[9px] bg-primary/10 text-primary">
+                  {referrer?.firstName?.[0]}
+                  {referrer?.lastName?.[0]}
+                </AvatarFallback>
+              </Avatar>
+              <span className="text-xs font-semibold">
+                {referrer?.firstName} {referrer?.lastName}
+              </span>
+            </div>
+          </UserHoverCard>
         );
       },
     },
@@ -146,20 +149,22 @@ export function ReferralsUI() {
       cell: (row) => {
         const referee = row.referee?.user;
         return (
-          <div className="flex items-center gap-2.5 py-1">
-            <Avatar className="h-7 w-7 border border-primary/10">
-              <AvatarImage
-                src={`https://cdn.thrico.network/${referee?.avatar}`}
-              />
-              <AvatarFallback className="text-[9px] bg-primary/10 text-primary">
-                {referee?.firstName?.[0]}
-                {referee?.lastName?.[0]}
-              </AvatarFallback>
-            </Avatar>
-            <span className="text-xs font-medium">
-              {referee?.firstName} {referee?.lastName}
-            </span>
-          </div>
+          <UserHoverCard userId={referee?.id}>
+            <div className="flex items-center gap-2.5 py-1">
+              <Avatar className="h-7 w-7 border border-primary/10">
+                <AvatarImage
+                  src={`https://cdn.thrico.network/${referee?.avatar}`}
+                />
+                <AvatarFallback className="text-[9px] bg-primary/10 text-primary">
+                  {referee?.firstName?.[0]}
+                  {referee?.lastName?.[0]}
+                </AvatarFallback>
+              </Avatar>
+              <span className="text-xs font-medium">
+                {referee?.firstName} {referee?.lastName}
+              </span>
+            </div>
+          </UserHoverCard>
         );
       },
     },
@@ -354,24 +359,28 @@ export function ReferralsUI() {
                           >
                             {index + 1}
                           </div>
-                          <Avatar className="h-9 w-9">
-                            <AvatarImage
-                              src={`https://cdn.thrico.network/${referrer.referrer?.user?.avatar}`}
-                            />
-                            <AvatarFallback className="text-[10px] bg-primary/10 text-primary font-bold">
-                              {referrer.referrer?.user?.firstName?.[0]}
-                              {referrer.referrer?.user?.lastName?.[0]}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex flex-col min-w-0 flex-1">
-                            <span className="text-sm font-semibold truncate">
-                              {referrer.referrer?.user?.firstName}{" "}
-                              {referrer.referrer?.user?.lastName}
-                            </span>
-                            <span className="text-[10px] text-muted-foreground font-medium">
-                              {isTop ? "Top referrer" : "Referrer"}
-                            </span>
-                          </div>
+                          <UserHoverCard userId={referrer.referrer?.user?.id}>
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                              <Avatar className="h-9 w-9">
+                                <AvatarImage
+                                  src={`https://cdn.thrico.network/${referrer.referrer?.user?.avatar}`}
+                                />
+                                <AvatarFallback className="text-[10px] bg-primary/10 text-primary font-bold">
+                                  {referrer.referrer?.user?.firstName?.[0]}
+                                  {referrer.referrer?.user?.lastName?.[0]}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex flex-col min-w-0">
+                                <span className="text-sm font-semibold truncate">
+                                  {referrer.referrer?.user?.firstName}{" "}
+                                  {referrer.referrer?.user?.lastName}
+                                </span>
+                                <span className="text-[10px] text-muted-foreground font-medium">
+                                  {isTop ? "Top referrer" : "Referrer"}
+                                </span>
+                              </div>
+                            </div>
+                          </UserHoverCard>
                           <div className="flex flex-col items-end justify-center">
                             <span className="text-sm font-bold">
                               {referrer.referralsCount}
@@ -554,27 +563,31 @@ export function ReferralsUI() {
 
                           <div className="flex items-start justify-between gap-4">
                             <div className="flex items-center gap-3">
-                              <Avatar className="h-8 w-8 bg-indigo-50/50 text-indigo-600 border border-indigo-100">
-                                <AvatarImage src={`https://cdn.thrico.network/${referee?.avatar}`} />
-                                <AvatarFallback className="text-[10px] font-bold bg-transparent">
-                                  {referee?.firstName?.[0]}
-                                  {referee?.lastName?.[0]}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div className="flex flex-col">
-                                <span className="text-sm font-semibold">
-                                  Referred {referee?.firstName}{" "}
-                                  {referee?.lastName}
-                                </span>
-                                <span className="text-xs text-muted-foreground">
-                                  {row.referee?.isApproved
-                                    ? "Active member"
-                                    : "Invite pending activation"}
-                                  {isFirst &&
-                                    selectedReferrerId !== "all" &&
-                                    " · First referral"}
-                                </span>
-                              </div>
+                              <UserHoverCard userId={referee?.id}>
+                                <div className="flex items-center gap-3">
+                                  <Avatar className="h-8 w-8 bg-indigo-50/50 text-indigo-600 border border-indigo-100">
+                                    <AvatarImage src={`https://cdn.thrico.network/${referee?.avatar}`} />
+                                    <AvatarFallback className="text-[10px] font-bold bg-transparent">
+                                      {referee?.firstName?.[0]}
+                                      {referee?.lastName?.[0]}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <div className="flex flex-col">
+                                    <span className="text-sm font-semibold">
+                                      Referred {referee?.firstName}{" "}
+                                      {referee?.lastName}
+                                    </span>
+                                    <span className="text-xs text-muted-foreground">
+                                      {row.referee?.isApproved
+                                        ? "Active member"
+                                        : "Invite pending activation"}
+                                      {isFirst &&
+                                        selectedReferrerId !== "all" &&
+                                        " · First referral"}
+                                    </span>
+                                  </div>
+                                </div>
+                              </UserHoverCard>
                             </div>
                             <span className="text-xs font-medium text-muted-foreground whitespace-nowrap pt-1">
                               {safeLocaleDateString(referee?.createdAt)}

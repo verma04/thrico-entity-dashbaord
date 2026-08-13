@@ -1,15 +1,16 @@
 "use client";
 
 import React from "react";
-import { ColumnDef } from "@tanstack/react-table";
-import { AppDataTable } from "@/components/ui/app-data-table";
-import { Badge } from "@/components/ui/badge";
+import { AdminTable } from "@/components/shared/admin-table/admin-table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Copy, CheckCircle2, Clock, AlertCircle } from "lucide-react";
+import { Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { cn } from "@/lib/utils";
 import { AdminStatusBadge } from "@/components/shared/admin-table/admin-table";
+import {
+  UserProfileHoverCard,
+  UserProfileHoverData,
+} from "@/components/shared/user-profile-hover-card";
 
 export interface Redemption {
   id: string;
@@ -63,88 +64,103 @@ export function RedemptionsTable({
     return "DISABLED";
   };
 
-  const columns: ColumnDef<Redemption>[] = [
+  const columns = [
     {
-      id: "user",
-      accessorFn: (row) =>
-        `${row.user.firstName} ${row.user.lastName} ${row.user.email}`,
-      header: "User",
-      cell: ({ row }) => {
-        const user = row.original.user;
-        const fullName = `${user.firstName} ${user.lastName}`;
-        return (
-          <div className="flex items-center gap-3">
-            <Avatar className="h-8 w-8 ring-1 ring-border">
-              <AvatarImage src={`https://cdn.thrico.network/${user.avatar}`} />
-              <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-bold">
-                {user.firstName[0]}
-                {user.lastName[0]}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col min-w-0">
-              <span className="font-bold text-foreground truncate max-w-[120px]">
-                {fullName}
-              </span>
-              <span className="text-[10px] text-muted-foreground truncate max-w-[120px]">
-                {user.email}
-              </span>
-            </div>
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: "reward.title",
-      header: "Coupon",
-      cell: ({ row }) => (
-        <span className="font-medium text-foreground">
-          {row.original.reward?.title}
+      key: "rank",
+      header: "Rank",
+      cell: (row: Redemption, index: number) => (
+        <span className="font-mono text-xs text-muted-foreground font-semibold">
+          #{index + 1}
         </span>
       ),
     },
     {
-      accessorKey: "tcUsed",
+      key: "user",
+      header: "User",
+      cell: (row: Redemption) => {
+        const user = row.user;
+        const fullName = `${user.firstName} ${user.lastName}`;
+        const hoverUser: UserProfileHoverData = {
+          id: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          avatar: user.avatar || "",
+        };
+        return (
+          <UserProfileHoverCard user={hoverUser}>
+            <div className="flex items-center gap-3 cursor-pointer">
+              <Avatar className="h-8 w-8 border border-border shrink-0">
+                <AvatarImage src={`https://cdn.thrico.network/${user.avatar}`} />
+                <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-bold">
+                  {user.firstName[0]}
+                  {user.lastName[0]}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col min-w-0">
+                <span className="font-bold text-foreground truncate max-w-[120px] hover:underline">
+                  {fullName}
+                </span>
+                <span className="text-[10px] text-muted-foreground truncate max-w-[120px]">
+                  {user.email}
+                </span>
+              </div>
+            </div>
+          </UserProfileHoverCard>
+        );
+      },
+    },
+    {
+      key: "reward",
+      header: "Coupon",
+      cell: (row: Redemption) => (
+        <span className="font-medium text-foreground">
+          {row.reward?.title}
+        </span>
+      ),
+    },
+    {
+      key: "tcUsed",
       header: "TC Spent",
-      cell: ({ row }) => (
+      cell: (row: Redemption) => (
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-50 border border-amber-200 text-amber-700 text-[10px] font-black uppercase tracking-tighter">
             <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-            {row.original.tcUsed || 0} TC
+            {row.tcUsed || 0} TC
           </div>
-          {row.original.ecUsed > 0 && (
+          {row.ecUsed > 0 && (
             <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-black uppercase tracking-tighter">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              {row.original.ecUsed} EC
+              {row.ecUsed} EC
             </div>
           )}
         </div>
       ),
     },
     {
-      accessorKey: "claimedAt",
+      key: "claimedAt",
       header: "Date",
-      cell: ({ row }) => (
+      cell: (row: Redemption) => (
         <span className="text-sm text-muted-foreground">
-          {row.original.claimedAt
-            ? new Date(row.original.claimedAt).toLocaleDateString()
+          {row.claimedAt
+            ? new Date(row.claimedAt).toLocaleDateString()
             : "-"}
         </span>
       ),
     },
     {
-      accessorKey: "status",
+      key: "status",
       header: "Status",
-      cell: ({ row }) => (
-        <AdminStatusBadge status={getStatusType(row.original.status)}>
-          {row.original.status || "Completed"}
+      cell: (row: Redemption) => (
+        <AdminStatusBadge status={getStatusType(row.status)}>
+          {row.status || "Completed"}
         </AdminStatusBadge>
       ),
     },
     {
-      id: "voucherCode",
+      key: "voucherCode",
       header: "Voucher Code",
-      cell: ({ row }) => {
-        const code = row.original.metadata?.voucherCode;
+      cell: (row: Redemption) => {
+        const code = row.metadata?.voucherCode;
         if (!code)
           return (
             <span className="text-muted-foreground text-xs italic">
@@ -172,12 +188,13 @@ export function RedemptionsTable({
   ];
 
   return (
-    <AppDataTable
+    <AdminTable
       columns={columns}
-      data={redemptions}
-      isLoading={isLoading}
-      searchableColumns={[{ id: "user", placeholder: "Search users..." }]}
-      isShowExportButtons={true}
+      data={redemptions || []}
+      loading={isLoading}
+      keyExtractor={(node) => node.id}
+      emptyTitle="No redemptions found"
+      emptyDescription="No rewards have been claimed yet."
     />
   );
 }

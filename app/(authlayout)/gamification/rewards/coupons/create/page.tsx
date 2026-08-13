@@ -10,7 +10,10 @@ import { RewardFormSections } from "@/components/rewards/coupons/form/reward-for
 import { RewardPreviewSidebar } from "@/components/rewards/coupons/form/reward-preview-sidebar";
 import { RewardStudioHeader } from "@/components/rewards/coupons/form/reward-form-header";
 import { couponSchema } from "@/components/rewards/coupons/types";
-import { EcosystemContainer, EcosystemForm } from "@/components/layout/ecosystem";
+import {
+  EcosystemContainer,
+  EcosystemForm,
+} from "@/components/layout/ecosystem";
 
 export default function CreateCouponPage() {
   const { toast } = useToast();

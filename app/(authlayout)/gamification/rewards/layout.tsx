@@ -25,11 +25,6 @@ function RewardsLayout({ children }: { children: React.ReactNode }) {
       icon: <LayoutDashboard className="h-4 w-4" />,
     },
     {
-      key: "analytics",
-      label: "Analytics",
-      icon: <BarChart3 className="h-4 w-4" />,
-    },
-    {
       key: "coupons",
       label: `${rewardsModuleName} & Vouchers`,
       icon: <Ticket className="h-4 w-4" />,

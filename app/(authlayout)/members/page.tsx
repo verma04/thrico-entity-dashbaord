@@ -302,7 +302,7 @@ const advocacyGamificationKPIs = [
     icon: Crown,
     color: "bg-cyan-500",
     tooltip: "COUNT(DISTINCT member_id WHERE appeared_on_leaderboard = true)",
-    href: "/gamification/leaderboard",
+    href: "/gamification/points-and-badges/leaderboard",
   },
 ];
 
