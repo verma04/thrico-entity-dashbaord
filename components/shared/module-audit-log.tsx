@@ -27,6 +27,8 @@ import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header"
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { AdminTable } from "@/components/shared/admin-table/admin-table";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
+import { useUrlDateRange } from "@/hooks/use-url-date-range";
 import { cn } from "@/lib/utils";
 import moment from "moment";
 
@@ -48,8 +50,7 @@ export function ModuleAuditLog({
   const [page, setPage] = useState(1);
   const [selectedLogId, setSelectedLogId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const { dateRange, handleDateChange } = useUrlDateRange(7);
   
   // Use debounced search to avoid too many requests
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -72,8 +73,8 @@ export function ModuleAuditLog({
     pagination: { page, limit: 12 },
     module: moduleKey,
     search: debouncedSearch || undefined,
-    startDate: startDate || undefined,
-    endDate: endDate || undefined,
+    startDate: dateRange?.from ? dateRange.from.toISOString() : undefined,
+    endDate: dateRange?.to ? dateRange.to.toISOString() : undefined,
   });
 
   const logs = logData?.auditLogs?.data || [];
@@ -296,23 +297,11 @@ export function ModuleAuditLog({
 
         <EcosystemActionBar.Group>
           <EcosystemActionBar.Item>
-            <div className="flex items-center gap-2">
-              <Input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="w-[140px] h-8 bg-card text-xs font-medium border-border focus-visible:ring-ring"
-                title="Start Date"
-              />
-              <span className="text-muted-foreground text-xs font-medium px-1">to</span>
-              <Input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="w-[140px] h-8 bg-card text-xs font-medium border-border focus-visible:ring-ring"
-                title="End Date"
-              />
-            </div>
+            <DateRangePicker
+              date={dateRange}
+              onDateChange={handleDateChange}
+              defaultValue="LAST_7_DAYS"
+            />
           </EcosystemActionBar.Item>
         </EcosystemActionBar.Group>
       </EcosystemActionBar>

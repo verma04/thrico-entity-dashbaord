@@ -15,6 +15,11 @@ import {
 import GamificationMenuLayout from "@/components/gamification/gamification-menu-layout";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 
+import { useTabOrder } from "@/hooks/use-tab-order";
+import { createLayoutStore } from "@/store/create-layout-store";
+
+const usePointsAndBadgesStore = createLayoutStore();
+
 function GamificationLayout({ children }: { children: React.ReactNode }) {
   const items = [
     {
@@ -55,10 +60,15 @@ function GamificationLayout({ children }: { children: React.ReactNode }) {
     },
   ];
 
+  const { getOrderedTabs, onReorder } = useTabOrder("POINTS_AND_BADGES", usePointsAndBadgesStore, items);
+  const orderedItems = getOrderedTabs(items);
+
   return (
     <GamificationMenuLayout
       basePath="/gamification/points-and-badges"
-      items={items}
+      items={orderedItems}
+      enableReorder={true}
+      onReorder={onReorder}
     >
       {children}
     </GamificationMenuLayout>

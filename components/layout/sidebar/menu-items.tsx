@@ -115,19 +115,6 @@ export const homeItems = [
     path: "/",
     icon: <Home size={18} />,
   },
-  // {
-  //   key: "ai-agent",
-  //   label: "AI Agent Studio",
-  //   path: "/ai-agent",
-  //   icon: <Sparkles size={18} />,
-  //   badge: "New",
-  // },
-  // {
-  //   key: "chat",
-  //   label: "AI Assistant",
-  //   path: "/chat",
-  //   icon: <MessageSquare size={18} />,
-  // },
 ];
 
 // --- 1b. AI ---

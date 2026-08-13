@@ -15,9 +15,16 @@ import MenuItemsLayout from "@/components/layout/menu-items-layout";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 import { useModuleStore } from "@/store/useModuleStore";
 
+import { useTabOrder } from "@/hooks/use-tab-order";
+import { createLayoutStore } from "@/store/create-layout-store";
+
+const useRewardsLayoutStore = createLayoutStore();
+
 function RewardsLayout({ children }: { children: React.ReactNode }) {
   const rewardsModuleName = useModuleStore((state) => state.rewardsModuleName);
-  const rewardsSingularName = useModuleStore((state) => state.rewardsSingularName);
+  const rewardsSingularName = useModuleStore(
+    (state) => state.rewardsSingularName,
+  );
   const items = [
     {
       key: "",
@@ -57,12 +64,17 @@ function RewardsLayout({ children }: { children: React.ReactNode }) {
     },
   ];
 
+  const { getOrderedTabs, onReorder } = useTabOrder("REWARDS", useRewardsLayoutStore, items);
+  const orderedItems = getOrderedTabs(items);
+
   return (
     <MenuItemsLayout
       className="p-0"
       active="gamification/rewards"
-      items={items}
+      items={orderedItems}
       hideDefaultTabs={true}
+      enableReorder={true}
+      onReorder={onReorder}
     >
       {children}
     </MenuItemsLayout>

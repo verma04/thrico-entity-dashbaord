@@ -5,6 +5,10 @@ import MenuItemsLayout from "@/components/layout/menu-items-layout";
 import { Mail, PaintBucket, Send, BarChart3, GitBranch } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { EmailDomainGate } from "@/components/email/domain-gate";
+import { useTabOrder } from "@/hooks/use-tab-order";
+import { createLayoutStore } from "@/store/create-layout-store";
+
+const useEmailLayoutStore = createLayoutStore();
 
 function EmailLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -52,13 +56,18 @@ function EmailLayout({ children }: { children: React.ReactNode }) {
     pathname.includes("/email/templates/create") ||
     pathname.includes("/email/automation");
 
+  const { getOrderedTabs, onReorder } = useTabOrder("EMAIL", useEmailLayoutStore, items);
+  const orderedItems = getOrderedTabs(items);
+
   return (
     <MenuItemsLayout
       fixed={isTakeoverPage}
       fullHeight={isTakeoverPage}
       hideDefaultTabs={true}
       active={"email"}
-      items={items}
+      items={orderedItems}
+      enableReorder={true}
+      onReorder={onReorder}
     >
       <EmailDomainGate>{children}</EmailDomainGate>
     </MenuItemsLayout>

@@ -18,10 +18,7 @@ import {
 } from "lucide-react";
 import { useCheckMemberSubscription } from "@/graphql/actions/membership/membership-queries";
 import { useClassificationStore } from "@/store/classification-store";
-import {
-  useGetClassificationTabOrder,
-  useUpdateClassificationTabOrder,
-} from "@/graphql/actions/classification/classification-actions";
+import { useTabOrder } from "@/hooks/use-tab-order";
 
 export default function ClassificationLayout({
   children,
@@ -50,79 +47,54 @@ export default function ClassificationLayout({
                   ? "location"
                   : "location";
 
-  const defaultItems = useMemo(() => [
-    {
-      key: "location",
-      label: "Locations",
-      icon: <MapPin className="h-4 w-4" />,
-    },
-    {
-      key: "experience",
-      label: "Companies",
-      icon: <Building className="h-4 w-4" />,
-    },
-    {
-      key: "education",
-      label: "Colleges",
-      icon: <GraduationCap className="h-4 w-4" />,
-    },
-    {
-      key: "industries",
-      label: "Industries",
-      icon: <Building2 className="h-4 w-4" />,
-    },
-    {
-      key: "functions",
-      label: "Job Functions",
-      icon: <Briefcase className="h-4 w-4" />,
-    },
-    {
-      key: "interests",
-      label: "Interests",
-      icon: <Heart className="h-4 w-4" />,
-    },
-    {
-      key: "skills",
-      label: "Skills",
-      icon: <Award className="h-4 w-4" />,
-    },
-    {
-      key: "headline",
-      label: "Headlines",
-      icon: <Type className="h-4 w-4" />,
-    },
-  ], []);
+  const defaultItems = useMemo(
+    () => [
+      {
+        key: "location",
+        label: "Locations",
+        icon: <MapPin className="h-4 w-4" />,
+      },
+      {
+        key: "experience",
+        label: "Companies",
+        icon: <Building className="h-4 w-4" />,
+      },
+      {
+        key: "education",
+        label: "Colleges",
+        icon: <GraduationCap className="h-4 w-4" />,
+      },
+      {
+        key: "industries",
+        label: "Industries",
+        icon: <Building2 className="h-4 w-4" />,
+      },
+      {
+        key: "functions",
+        label: "Job Functions",
+        icon: <Briefcase className="h-4 w-4" />,
+      },
+      {
+        key: "interests",
+        label: "Interests",
+        icon: <Heart className="h-4 w-4" />,
+      },
+      {
+        key: "skills",
+        label: "Skills",
+        icon: <Award className="h-4 w-4" />,
+      },
+      {
+        key: "headline",
+        label: "Headlines",
+        icon: <Type className="h-4 w-4" />,
+      },
+    ],
+    [],
+  );
 
-  const { tabOrder, setTabOrder } = useClassificationStore();
-  const { data: orderData } = useGetClassificationTabOrder();
-  const [updateTabOrder] = useUpdateClassificationTabOrder();
-
-  useEffect(() => {
-    if (orderData?.getClassificationTabOrder?.tabs?.length > 0) {
-      const serverTabs = orderData.getClassificationTabOrder.tabs;
-      if (JSON.stringify(serverTabs) !== JSON.stringify(tabOrder)) {
-        setTabOrder(serverTabs);
-      }
-    }
-  }, [orderData, tabOrder, setTabOrder]);
-
-  const items = useMemo(() => {
-    if (tabOrder.length === 0) return defaultItems;
-    
-    return [...defaultItems].sort((a, b) => {
-      const indexA = tabOrder.indexOf(a.key);
-      const indexB = tabOrder.indexOf(b.key);
-      if (indexA === -1 && indexB === -1) return 0;
-      if (indexA === -1) return 1;
-      if (indexB === -1) return -1;
-      return indexA - indexB;
-    });
-  }, [defaultItems, tabOrder]);
-
-  const handleReorder = (newOrder: string[]) => {
-    setTabOrder(newOrder);
-    updateTabOrder({ variables: { input: { tabs: newOrder } } });
-  };
+  const { getOrderedTabs, onReorder } = useTabOrder("CLASSIFICATION", useClassificationStore, defaultItems);
+  const items = getOrderedTabs(defaultItems);
 
   const { data: subData, loading: subLoading } = useCheckMemberSubscription();
   const message = subData?.checkMemberSubscription?.message;
@@ -165,7 +137,7 @@ export default function ClassificationLayout({
           showAdminTabs={false}
           className="mt-0 bg-transparent dark:bg-transparent border-t-0"
           enableReorder={true}
-          onReorder={handleReorder}
+          onReorder={onReorder}
         >
           {children}
         </MenuItemsLayout>

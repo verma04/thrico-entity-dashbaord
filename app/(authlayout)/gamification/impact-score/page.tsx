@@ -24,8 +24,11 @@ import {
   useGetImpactActivityLog,
 } from "@/graphql/actions/impact";
 import { TemplateForm } from "@/components/impact/template-form";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
+import { useUrlDateRange } from "@/hooks/use-url-date-range";
 
 export default function ImpactScoreOverview() {
+  const { dateRange, handleDateChange } = useUrlDateRange(7);
   const { data, loading: templateLoading } = useGetImpactTemplates();
   const { data: usersData, loading: usersLoading } = useGetImpactUsers();
   const { data: rulesData, loading: rulesLoading } = useGetImpactRules();

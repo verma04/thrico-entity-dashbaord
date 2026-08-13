@@ -36,6 +36,7 @@ export const GET_REWARDS = gql`
       couponType
       remainingVouchers
       totalVouchers
+      redeemedCount
     }
   }
 `;
@@ -169,11 +170,14 @@ export const GET_REWARD_STATS = gql`
       totalTcBurned
       activeCoupons
       lowInventoryItems
+      successfulRedemptions
       redemptionTrend {
         date
         count
         value
       }
+      uniqueRedeemers
+      repeatClaimers
     }
   }
 `;
@@ -788,6 +792,16 @@ export const GET_VOUCHERS_PAGINATED = gql`
       totalCount
       hasNextPage
       hasPreviousPage
+    }
+  }
+`;
+
+export const GET_POPULAR_REWARDS = gql`
+  query GetPopularRewards($limit: Int) {
+    getPopularRewards(limit: $limit) {
+      id
+      title
+      redeemedCount
     }
   }
 `;

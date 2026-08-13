@@ -2,50 +2,20 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
   Activity,
-  TrendingDown,
-  Zap,
-  Heart,
-  Star,
-  FileText,
-  Repeat,
-  Shield,
-  MessageSquare,
   Trophy,
-  Calendar,
-  ShoppingBag,
-  Target,
-  Sparkles,
   RotateCcw,
-  LucideIcon,
   Users,
-  Database,
-  Info,
   History,
   Award,
-  AlertTriangle,
-  UserPlus,
-  UserCheck,
-  Camera,
-  Image,
-  Briefcase,
 } from "lucide-react";
-import { ResponsiveContainer, AreaChart, Area } from "recharts";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
-import { EcosystemKPI } from "@/components/layout/ecosystem/ecosystem-kpi";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import {
   useGetCommunityKPIs,
   useGetFeatureModulePerformance,
@@ -53,12 +23,11 @@ import {
 } from "@/graphql/actions/dashboard";
 import { subDays } from "date-fns";
 import { DateRange } from "react-day-picker";
-import { StorageStats } from "@/components/subscription/storage-stats";
 import {
   useGetStorageStats,
   useGetStorageSummary,
 } from "@/graphql/storage/storage-hooks";
-import PlanOverview from "@/components/subscription/plan-overview";
+import { useUrlDateRange } from "@/hooks/use-url-date-range";
 import {
   useGetLeaderboard,
   useGetGamificationActivityLog,
@@ -86,8 +55,6 @@ const isDashboardMetricValue = (
   value !== null &&
   ("value" in value || "change" in value || "trend" in value);
 
-import { DashboardDistributionChart } from "./dashboard-distribution-chart";
-import { DashboardSessionRadarChart } from "./dashboard-session-radar-chart";
 import { DashboardContentBreakdownChart } from "./dashboard-content-breakdown-chart";
 import { DashboardGrowthChart } from "./dashboard-growth-chart";
 import { DashboardSectionHeading } from "./dashboard-section-heading";
@@ -110,27 +77,8 @@ const timeRangeMap: Record<string, TimeRange> = {
 // Main Dashboard Component
 // ---------------------------------------------------------------------------
 export default function Dashboard() {
-  const router = useRouter();
-  const [timeRange, setTimeRange] = React.useState("7d");
-  const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
-    from: subDays(new Date(), 7),
-    to: new Date(),
-  });
+  const { dateRange, timeRange, handleDateChange } = useUrlDateRange(7);
   const [isRefreshing, setIsRefreshing] = useState(false);
-
-  const handleDateChange = (range: DateRange | undefined) => {
-    setDateRange(range);
-    // Determine time range loosely based on duration for fallback
-    if (range?.from && range?.to) {
-      const days = Math.round(
-        (range.to.getTime() - range.from.getTime()) / (1000 * 60 * 60 * 24),
-      );
-      if (days <= 1) setTimeRange("24h");
-      else if (days <= 7) setTimeRange("7d");
-      else if (days <= 30) setTimeRange("30d");
-      else setTimeRange("90d");
-    }
-  };
 
   const formattedDateRange = React.useMemo(() => {
     if (!dateRange?.from || !dateRange?.to) return undefined;
@@ -165,7 +113,7 @@ export default function Dashboard() {
     }
   };
 
-  const { data: subData, loading: subLoading } = useCheckMemberSubscription();
+  const { data: subData } = useCheckMemberSubscription();
   const subscriptionInfo = subData?.checkMemberSubscription;
 
   const { data: statsData, loading: statsLoading } = useGetStorageStats();
@@ -204,9 +152,6 @@ export default function Dashboard() {
     const metric = kpis[key as keyof typeof kpis];
     return isDashboardMetricValue(metric) ? metric : {};
   };
-
-  const totalReported =
-    kpis?.moderationStats?.reduce((acc, curr) => acc + curr.count, 0) || 0;
 
   return (
     <EcosystemWrapper className="m-2">

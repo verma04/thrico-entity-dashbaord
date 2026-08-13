@@ -17,6 +17,7 @@ import {
   GET_VOUCHERS_BY_REWARD_MECHANISM,
   GET_VOUCHER,
   GET_VOUCHERS_PAGINATED,
+  GET_POPULAR_REWARDS,
 } from "../../quries/rewards/rewards-queries";
 import { GET_SPIN_SCRATCH_STATS } from "../../quries/rewards/stats";
 import { TimeRange, DateRangeInput } from "../dashbaord/dashboard-quries";
@@ -138,3 +139,6 @@ export const useGetSpinScratchStats = (
   timeRange?: TimeRange,
   dateRange?: DateRangeInput,
 ) => useQuery(GET_SPIN_SCRATCH_STATS, { variables: { timeRange, dateRange } });
+
+export const useGetPopularRewards = (limit?: number) =>
+  useQuery(GET_POPULAR_REWARDS, { variables: { limit } });

@@ -37,10 +37,18 @@ import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-cont
 import { EcosystemKPI } from "@/components/layout/ecosystem/ecosystem-analytics";
 import { EcosystemCard } from "@/components/layout/ecosystem/ecosystem-card";
 import { DashboardSectionHeading } from "@/components/home/dashboard-section-heading";
+import { useUrlDateRange } from "@/hooks/use-url-date-range";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useModuleStore } from "@/store/useModuleStore";
+
+const timeRangeMap: Record<string, TimeRange> = {
+  "24h": TimeRange.LAST_24_HOURS,
+  "7d": TimeRange.LAST_7_DAYS,
+  "30d": TimeRange.LAST_30_DAYS,
+  "90d": TimeRange.LAST_90_DAYS,
+};
 
 export default function GamificationOverview() {
   const gamificationModuleName = useModuleStore(
@@ -48,25 +56,7 @@ export default function GamificationOverview() {
   );
   const { reloginConfig, settings } = useGamificationStore();
 
-  const [timeRange, setTimeRange] = React.useState<TimeRange>(
-    TimeRange.LAST_7_DAYS,
-  );
-  const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
-    from: subDays(new Date(), 7),
-    to: new Date(),
-  });
-
-  const handleDateChange = (range: DateRange | undefined) => {
-    setDateRange(range);
-    if (!range?.from || !range?.to) return;
-    const diffDays = Math.round(
-      (range.to.getTime() - range.from.getTime()) / (1000 * 60 * 60 * 24),
-    );
-    if (diffDays <= 1) setTimeRange(TimeRange.LAST_24_HOURS);
-    else if (diffDays <= 7) setTimeRange(TimeRange.LAST_7_DAYS);
-    else if (diffDays <= 30) setTimeRange(TimeRange.LAST_30_DAYS);
-    else if (diffDays <= 90) setTimeRange(TimeRange.LAST_90_DAYS);
-  };
+  const { dateRange, timeRange, handleDateChange } = useUrlDateRange(7);
 
   const formattedDateRange =
     dateRange?.from && dateRange?.to
@@ -77,7 +67,7 @@ export default function GamificationOverview() {
       : undefined;
 
   const { data: statsData, loading: statsLoading } = useGetGamificationStats(
-    timeRange,
+    timeRangeMap[timeRange],
     formattedDateRange,
   );
   const { data: rulesData, loading: rulesLoading } = useGetPointRules();
@@ -153,7 +143,6 @@ export default function GamificationOverview() {
       icon: Crown,
       link: "/gamification/points-and-badges/ranks",
     },
-
   ];
 
   return (

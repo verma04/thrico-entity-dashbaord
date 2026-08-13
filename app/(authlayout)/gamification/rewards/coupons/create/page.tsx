@@ -103,6 +103,11 @@ export default function CreateCouponPage() {
   return (
     <EcosystemContainer className="p-0 bg-transparent border-none shadow-none ring-0">
       <div className="flex flex-col h-full bg-[#fafafa] dark:bg-black/5 overflow-hidden relative">
+        <RewardStudioHeader
+          title="Create Reward Coupon"
+          breadcrumbs={["Gamification", "Rewards", "Reward Coupons", "Create"]}
+          onCancel={() => router.push("/gamification/rewards/coupons")}
+        />
         {/* Main Content Area */}
         <div className="flex-1 overflow-y-auto">
           <div className="max-w-[1400px] mx-auto px-6 py-10">

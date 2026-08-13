@@ -562,10 +562,11 @@ export const useGetUserActivityLog = (
   userId: string,
   limit?: number,
   offset?: number,
+  pointFilter?: string,
   options?: any,
 ) =>
   useQuery(GET_USER_ACTIVITY_LOG, {
-    variables: { userId, limit, offset },
+    variables: { userId, limit, offset, pointFilter: pointFilter === "all" ? null : pointFilter },
     skip: !userId,
     ...options,
   });
@@ -581,3 +582,64 @@ export const useGetUserEarnedBadges = (
     skip: !userId,
     ...options,
   });
+
+export interface EntityCurrencyWalletWithUser {
+  id: string;
+  userId: string;
+  entityId: string;
+  balance: number;
+  totalEarned: number;
+  totalSpent: number;
+  totalConvertedToTc: number;
+  createdAt: string;
+  updatedAt: string;
+  user: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    avatar: string;
+  };
+}
+
+export interface GetEntityCurrencyWalletsData {
+  getEntityCurrencyWallets: {
+    data: EntityCurrencyWalletWithUser[];
+    totalCount: number;
+  };
+}
+
+export const GET_ENTITY_CURRENCY_WALLETS = gql`
+  query GetEntityCurrencyWallets($limit: Int, $offset: Int, $search: String) {
+    getEntityCurrencyWallets(limit: $limit, offset: $offset, search: $search) {
+      data {
+        id
+        userId
+        entityId
+        balance
+        totalEarned
+        totalSpent
+        totalConvertedToTc
+        createdAt
+        updatedAt
+        user {
+          id
+          firstName
+          lastName
+          email
+          avatar
+        }
+      }
+      totalCount
+    }
+  }
+`;
+
+export function useGetEntityCurrencyWallets(
+  options?: QueryHookOptions<GetEntityCurrencyWalletsData>
+) {
+  return useQuery<GetEntityCurrencyWalletsData>(
+    GET_ENTITY_CURRENCY_WALLETS,
+    options
+  );
+}

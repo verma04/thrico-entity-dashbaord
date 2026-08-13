@@ -8,9 +8,15 @@ import {
   Activity,
   LayoutDashboard,
   History,
+  Wallet,
 } from "lucide-react";
 import GamificationMenuLayout from "@/components/gamification/gamification-menu-layout";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
+
+import { useTabOrder } from "@/hooks/use-tab-order";
+import { createLayoutStore } from "@/store/create-layout-store";
+
+const useCurrencyLayoutStore = createLayoutStore();
 
 function CurrencyLayout({ children }: { children: React.ReactNode }) {
   const items = [
@@ -40,10 +46,23 @@ function CurrencyLayout({ children }: { children: React.ReactNode }) {
       label: "Audit Log",
       icon: <History className="h-4 w-4" />,
     },
+    {
+      key: "member-wallet",
+      label: "Member Wallet",
+      icon: <Wallet className="h-4 w-4" />,
+    },
   ];
 
+  const { getOrderedTabs, onReorder } = useTabOrder("CURRENCY", useCurrencyLayoutStore, items);
+  const orderedItems = getOrderedTabs(items);
+
   return (
-    <GamificationMenuLayout basePath="/gamification/currency" items={items}>
+    <GamificationMenuLayout 
+      basePath="/gamification/currency" 
+      items={orderedItems}
+      enableReorder={true}
+      onReorder={onReorder}
+    >
       {children}
     </GamificationMenuLayout>
   );

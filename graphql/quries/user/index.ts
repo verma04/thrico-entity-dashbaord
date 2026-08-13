@@ -667,3 +667,19 @@ export const CHECK_MEMBER_SUBSCRIPTION = gql`
     }
   }
 `;
+
+export const GET_MEMBERS_TAB_ORDER = gql`
+  query GetMembersTabOrder {
+    getMembersTabOrder {
+      tabs
+    }
+  }
+`;
+
+export const UPDATE_MEMBERS_TAB_ORDER = gql`
+  mutation UpdateMembersTabOrder($input: UpdateMembersTabOrderInput!) {
+    updateMembersTabOrder(input: $input) {
+      tabs
+    }
+  }
+`;

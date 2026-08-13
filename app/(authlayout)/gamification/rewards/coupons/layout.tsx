@@ -34,6 +34,16 @@ export default function CouponsLayout({
     // },
   ];
 
+  const isCreatePage = pathname.includes("/create");
+
+  if (isCreatePage) {
+    return (
+      <EcosystemWrapper>
+        <div className="flex-1">{children}</div>
+      </EcosystemWrapper>
+    );
+  }
+
   return (
     <EcosystemWrapper>
       <EcosystemHeader

@@ -13,6 +13,11 @@ import {
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 
+import { useTabOrder } from "@/hooks/use-tab-order";
+import { createLayoutStore } from "@/store/create-layout-store";
+
+const useImpactScoreLayoutStore = createLayoutStore();
+
 function ImpactScoreLayout({ children }: { children: React.ReactNode }) {
   const items = React.useMemo(() => {
     return [
@@ -49,11 +54,16 @@ function ImpactScoreLayout({ children }: { children: React.ReactNode }) {
     ];
   }, []);
 
+  const { getOrderedTabs, onReorder } = useTabOrder("IMPACT_SCORE", useImpactScoreLayoutStore, items);
+  const orderedItems = getOrderedTabs(items);
+
   return (
     <MenuItemsLayout
       active="gamification/impact-score"
-      items={items}
+      items={orderedItems}
       showAdminTabs={false}
+      enableReorder={true}
+      onReorder={onReorder}
     >
       <CardContent className="">{children}</CardContent>
     </MenuItemsLayout>

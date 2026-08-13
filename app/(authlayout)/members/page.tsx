@@ -50,6 +50,7 @@ import { withModulePermission } from "@/components/hoc/with-module-permission";
 import { useCheckMemberSubscription } from "@/graphql/actions/membership/membership-queries";
 import { SubscriptionLimitBanner } from "@/components/members/manage/subscription-alerts";
 import { DashboardSectionHeading } from "@/components/home/dashboard-section-heading";
+import { useUrlDateRange } from "@/hooks/use-url-date-range";
 import {
   useGetMemberKPIDashboard,
   TimeRange,
@@ -392,26 +393,9 @@ const timeRangeMap: Record<string, TimeRange> = {
 // Main Component
 // ---------------------------------------------------------------------------
 function MembersPage() {
-  const [timeRange, setTimeRange] = React.useState("7d");
-  const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
-    from: subDays(new Date(), 7),
-    to: new Date(),
-  });
+  const { dateRange, timeRange, handleDateChange } = useUrlDateRange(7);
   const [isRefreshing, setIsRefreshing] = React.useState(false);
   const [activeSection, setActiveSection] = React.useState("membership");
-
-  const handleDateChange = (range: DateRange | undefined) => {
-    setDateRange(range);
-    if (range?.from && range?.to) {
-      const days = Math.round(
-        (range.to.getTime() - range.from.getTime()) / (1000 * 60 * 60 * 24),
-      );
-      if (days <= 1) setTimeRange("24h");
-      else if (days <= 7) setTimeRange("7d");
-      else if (days <= 30) setTimeRange("30d");
-      else setTimeRange("90d");
-    }
-  };
 
   const formattedDateRange = React.useMemo(() => {
     if (!dateRange?.from || !dateRange?.to) return undefined;

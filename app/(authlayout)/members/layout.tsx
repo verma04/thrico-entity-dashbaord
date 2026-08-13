@@ -3,11 +3,13 @@
 import * as React from "react";
 import { usePathname } from "next/navigation";
 import { CardContent } from "@/components/ui/card";
-import { Users, Plus, Building2, Network, Award, AlertTriangle, FileText, Wrench } from "lucide-react";
+import { Users, Plus, Building2, Network, Award, AlertTriangle, FileText, Wrench, LayoutDashboard } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 import { useModulePermission } from "@/hooks/use-module-permission";
 import { useUserStore } from "@/store/store";
+import { useMembersLayoutStore } from "@/store/members-layout-store";
+import { useTabOrder } from "@/hooks/use-tab-order";
 
 function MembersLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -28,8 +30,13 @@ function MembersLayout({ children }: { children: React.ReactNode }) {
     return !!user.permissions?.reports;
   }, [user]);
 
-  const items = React.useMemo(() => {
+  const defaultItems = React.useMemo(() => {
     return [
+      {
+        key: "dashboard",
+        label: "Dashboard",
+        icon: <LayoutDashboard className="h-4 w-4" />,
+      },
       {
         key: "all",
         label: "Manage Members",
@@ -90,8 +97,19 @@ function MembersLayout({ children }: { children: React.ReactNode }) {
     ];
   }, [canRead, canCreate, hasReportsPerm, hasSettingsPerm]);
 
+  const { getOrderedTabs, onReorder } = useTabOrder("MEMBERS", useMembersLayoutStore, defaultItems);
+
+  const sortedItems = getOrderedTabs(defaultItems);
+
   return (
-    <MenuItemsLayout active="members" items={items} showAdminTabs={false}>
+    <MenuItemsLayout 
+      active="members" 
+      items={sortedItems} 
+      hideDefaultTabs={true}
+      showAdminTabs={false}
+      enableReorder={true}
+      onReorder={onReorder}
+    >
       {children}
     </MenuItemsLayout>
   );

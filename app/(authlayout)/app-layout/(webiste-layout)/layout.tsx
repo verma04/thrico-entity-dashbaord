@@ -8,6 +8,10 @@ import { useWebsiteBuilderStore } from "@/store/useWebsiteBuilderStore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CardContent } from "@/components/ui/card";
 import { Layout, Menu, PanelBottom, Globe, Settings, Plus } from "lucide-react";
+import { useTabOrder } from "@/hooks/use-tab-order";
+import { createLayoutStore } from "@/store/create-layout-store";
+
+const useWebsiteLayoutStore = createLayoutStore();
 
 function RootLayout({ children }: { children: React.ReactNode }) {
   const { data, loading } = useGetWebsite();
@@ -88,14 +92,19 @@ function RootLayout({ children }: { children: React.ReactNode }) {
     );
   }
 
+  const { getOrderedTabs, onReorder } = useTabOrder("WEBSITE", useWebsiteLayoutStore, items);
+  const orderedItems = getOrderedTabs(items);
+
   return (
     <div className="w-full h-full flex flex-col">
       <PlanDrawer />
       <MenuItemsLayout
         active="app-layout"
-        items={items}
+        items={orderedItems}
         hideDefaultTabs={true}
         showAdminTabs={false}
+        enableReorder={true}
+        onReorder={onReorder}
       >
         {children}
       </MenuItemsLayout>

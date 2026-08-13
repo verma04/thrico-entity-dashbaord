@@ -7,17 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useReSeedDefaultCurrency, TimeRange } from "@/graphql/actions";
 import { toast } from "sonner";
 import { RotateCcw, Coins, ShieldCheck } from "lucide-react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
@@ -25,6 +15,14 @@ import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-cont
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { subDays } from "date-fns";
 import { DateRange } from "react-day-picker";
+import { useUrlDateRange } from "@/hooks/use-url-date-range";
+
+const timeRangeMap: Record<string, TimeRange> = {
+  "24h": TimeRange.LAST_24_HOURS,
+  "7d": TimeRange.LAST_7_DAYS,
+  "30d": TimeRange.LAST_30_DAYS,
+  "90d": TimeRange.LAST_90_DAYS,
+};
 
 export default function CurrencySettingsPage() {
   const currencyModuleName = useModuleStore(
@@ -35,23 +33,7 @@ export default function CurrencySettingsPage() {
     onError: (err: any) => toast.error(err.message),
   });
 
-  const [timeRange, setTimeRange] = useState<TimeRange>(TimeRange.LAST_7_DAYS);
-  const [dateRange, setDateRange] = useState<DateRange | undefined>({
-    from: subDays(new Date(), 7),
-    to: new Date(),
-  });
-
-  const handleDateChange = (range: DateRange | undefined) => {
-    setDateRange(range);
-    if (!range?.from || !range?.to) return;
-    const diffDays = Math.round(
-      (range.to.getTime() - range.from.getTime()) / (1000 * 60 * 60 * 24),
-    );
-    if (diffDays <= 1) setTimeRange(TimeRange.LAST_24_HOURS);
-    else if (diffDays <= 7) setTimeRange(TimeRange.LAST_7_DAYS);
-    else if (diffDays <= 30) setTimeRange(TimeRange.LAST_30_DAYS);
-    else if (diffDays <= 90) setTimeRange(TimeRange.LAST_90_DAYS);
-  };
+  const { dateRange, timeRange, handleDateChange } = useUrlDateRange(7);
 
   const formattedDateRange =
     dateRange?.from && dateRange?.to
@@ -90,7 +72,7 @@ export default function CurrencySettingsPage() {
 
       <EcosystemContainer className="p-6 lg:p-8">
         <CurrencyDashboard
-          timeRange={timeRange}
+          timeRange={timeRangeMap[timeRange]}
           dateRange={formattedDateRange}
         />
       </EcosystemContainer>

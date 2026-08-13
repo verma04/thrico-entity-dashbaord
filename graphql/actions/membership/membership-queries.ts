@@ -16,6 +16,7 @@ import {
   GET_USER_NEO4J_RELATIONSHIPS,
   GET_USER_SESSIONS,
   CHECK_MEMBER_SUBSCRIPTION,
+  GET_MEMBERS_TAB_ORDER,
 } from "../../quries/user";
 import { TimeRange, DateRangeInput } from "../dashbaord/dashboard-quries";
 
@@ -422,3 +423,9 @@ export const useCheckMemberSubscription = (options?: any) =>
     fetchPolicy: "network-only",
     ...options,
   });
+
+export const useGetMembersTabOrder = () => {
+  return useQuery(GET_MEMBERS_TAB_ORDER, {
+    fetchPolicy: "network-only",
+  });
+};

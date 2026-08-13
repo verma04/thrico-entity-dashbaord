@@ -120,6 +120,24 @@ function MenuTabs({
   enableReorder?: boolean;
   onReorder?: (newOrder: string[]) => void;
 }) {
+  React.useEffect(() => {
+    if (typeof window !== "undefined" && process.env.NODE_ENV === "development") {
+      const originalWarn = console.warn;
+      console.warn = (...args: any[]) => {
+        if (
+          typeof args[0] === "string" &&
+          args[0].includes("unsupported nested scroll container detected")
+        ) {
+          return;
+        }
+        originalWarn(...args);
+      };
+      return () => {
+        console.warn = originalWarn;
+      };
+    }
+  }, []);
+
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination || !onReorder) return;
     const { source, destination } = result;
@@ -134,9 +152,11 @@ function MenuTabs({
   };
 
   const renderTabs = () => {
+    let globalIndex = 0;
     return sortedSectionNames.map((sectionName) => (
       <React.Fragment key={sectionName}>
-        {sections[sectionName].map((item, index) => {
+        {sections[sectionName].map((item) => {
+          const currentIndex = globalIndex++;
           const href =
             item.key === "dashboard" || item.key === ""
               ? `/${activeBase}`
@@ -156,7 +176,7 @@ function MenuTabs({
 
           if (enableReorder) {
             return (
-              <Draggable key={item.key} draggableId={item.key} index={index}>
+              <Draggable key={item.key} draggableId={item.key} index={currentIndex}>
                 {(provided) => (
                   <div
                     ref={provided.innerRef}
@@ -324,15 +344,17 @@ const MenuItemsLayout = ({
   const menuitems: MenuItem[] = hideDefaultTabs ? items : defaultTabs;
 
   // Group by section
-  const sections = menuitems.reduce(
-    (acc, item) => {
-      const section = item.section || "General";
-      if (!acc[section]) acc[section] = [];
-      acc[section].push(item);
-      return acc;
-    },
-    {} as Record<string, MenuItem[]>,
-  );
+  const sections = enableReorder 
+    ? { "All": menuitems }
+    : menuitems.reduce(
+        (acc, item) => {
+          const section = item.section || "General";
+          if (!acc[section]) acc[section] = [];
+          acc[section].push(item);
+          return acc;
+        },
+        {} as Record<string, MenuItem[]>,
+      );
 
   const sectionOrder = [
     "System",
@@ -343,14 +365,17 @@ const MenuItemsLayout = ({
     "Management",
     "Admin",
   ];
-  const sortedSectionNames = Object.keys(sections).sort((a, b) => {
-    const ia = sectionOrder.indexOf(a);
-    const ib = sectionOrder.indexOf(b);
-    if (ia !== -1 && ib !== -1) return ia - ib;
-    if (ia !== -1) return -1;
-    if (ib !== -1) return 1;
-    return a.localeCompare(b);
-  });
+  
+  const sortedSectionNames = enableReorder
+    ? ["All"]
+    : Object.keys(sections).sort((a, b) => {
+        const ia = sectionOrder.indexOf(a);
+        const ib = sectionOrder.indexOf(b);
+        if (ia !== -1 && ib !== -1) return ia - ib;
+        if (ia !== -1) return -1;
+        if (ib !== -1) return 1;
+        return a.localeCompare(b);
+      });
 
   return (
     <div

@@ -1,110 +1,44 @@
 "use client";
 
 import React from "react";
-import {
-  Flame,
-  Ticket,
-  Package,
-  Plus,
-  ArrowRight,
-  TrendingUp,
-  History,
-  ShieldCheck,
-  Trophy,
-  Activity,
-  RotateCcw,
-  BarChart3,
-  Gift,
-  Users,
-  Sparkles,
-  AlertTriangle,
-  Zap,
-  Gamepad2,
-  ChevronRight,
-  Clock,
-  Upload,
-  CheckCircle2,
-  ArrowUp,
-  ArrowDown,
-} from "lucide-react";
+import { Gift, Plus, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
 import Link from "next/link";
-import {
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid,
-  Area,
-  AreaChart,
-  BarChart,
-  Bar,
-  LineChart,
-  Line,
-  Cell,
-} from "recharts";
-import { ResponsiveContainer } from "@/components/ui/responsive-container";
-import {
-  useGetRewardStats,
-  useGetRedemptions,
-  useGetRewards,
-} from "@/graphql/actions/rewards";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  UserProfileHoverCard,
-  UserProfileHoverData,
-} from "@/components/shared/user-profile-hover-card";
-import moment from "moment";
+import { useGetRewardStats, useGetRedemptions, useGetRewards, TimeRange } from "@/graphql/actions/rewards";
+import { useGetCurrencyStats } from "@/graphql/actions/currency";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
-import { DashboardSectionHeading } from "@/components/home/dashboard-section-heading";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
-import {
-  EcosystemKPI,
-  EcosystemCard,
-} from "@/components/layout/ecosystem/ecosystem-analytics";
 import { cn } from "@/lib/utils";
-
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { subDays } from "date-fns";
 import { DateRange } from "react-day-picker";
-import { TimeRange } from "@/graphql/actions/rewards";
 import { useModuleStore } from "@/store/useModuleStore";
+import { useUrlDateRange } from "@/hooks/use-url-date-range";
 
+const timeRangeMap: Record<string, TimeRange> = {
+  "24h": TimeRange.LAST_24_HOURS,
+  "7d": TimeRange.LAST_7_DAYS,
+  "30d": TimeRange.LAST_30_DAYS,
+  "90d": TimeRange.LAST_90_DAYS,
+};
+import moment from "moment";
 
-const TOP_REWARDS = [
-  { name: "Amazon ₹100", value: 124, pct: 100 },
-  { name: "Premium 10%", value: 86, pct: 69 },
-  { name: "Starbucks", value: 72, pct: 58 },
-  { name: "Event Ticket", value: 45, pct: 36 },
-  { name: "Zomato Pro", value: 38, pct: 31 },
-];
-
-const COLORS = ["#6366f1", "#8b5cf6", "#10b981", "#f43f5e", "#f97316"];
+import { RewardsBanner } from "@/components/rewards/dashboard/rewards-banner";
+import { RewardsOverviewKpis } from "@/components/rewards/dashboard/rewards-overview-kpis";
+import { RedemptionActivityChart } from "@/components/rewards/dashboard/redemption-activity-chart";
+import { RecentRedemptions } from "@/components/rewards/dashboard/recent-redemptions";
+import { InventoryGlance } from "@/components/rewards/dashboard/inventory-glance";
+import { PointsSpentChart } from "@/components/rewards/dashboard/points-spent-chart";
+import { PopularRewards } from "@/components/rewards/dashboard/popular-rewards";
+import { EngagementMetrics } from "@/components/rewards/dashboard/engagement-metrics";
+import { RewardsNavigation } from "@/components/rewards/dashboard/rewards-navigation";
 
 export default function RewardsDashboard() {
   const rewardsModuleName = useModuleStore((state) => state.rewardsModuleName);
-  const [timeRange, setTimeRange] = React.useState<TimeRange>(
-    TimeRange.LAST_7_DAYS,
-  );
-  const [dateRange, setDateRange] = React.useState<DateRange | undefined>({
-    from: subDays(new Date(), 7),
-    to: new Date(),
-  });
 
-  const handleDateChange = (range: DateRange | undefined) => {
-    setDateRange(range);
-    if (!range?.from || !range?.to) return;
-    const diffDays = Math.round(
-      (range.to.getTime() - range.from.getTime()) / (1000 * 60 * 60 * 24),
-    );
-    if (diffDays <= 1) setTimeRange(TimeRange.LAST_24_HOURS);
-    else if (diffDays <= 7) setTimeRange(TimeRange.LAST_7_DAYS);
-    else if (diffDays <= 30) setTimeRange(TimeRange.LAST_30_DAYS);
-    else if (diffDays <= 90) setTimeRange(TimeRange.LAST_90_DAYS);
-  };
+  const { dateRange, timeRange, handleDateChange } = useUrlDateRange(7);
 
   const formattedDateRange =
     dateRange?.from && dateRange?.to
@@ -118,7 +52,12 @@ export default function RewardsDashboard() {
     data: statsData,
     loading: statsLoading,
     refetch,
-  } = useGetRewardStats(timeRange, formattedDateRange);
+  } = useGetRewardStats(timeRangeMap[timeRange], formattedDateRange);
+
+  const {
+    data: currencyStatsData,
+    loading: currencyStatsLoading,
+  } = useGetCurrencyStats(timeRangeMap[timeRange], formattedDateRange);
   const { data: redemptionsData, loading: redemptionsLoading } =
     useGetRedemptions({
       pagination: { page: 1, limit: 6 },
@@ -140,159 +79,18 @@ export default function RewardsDashboard() {
     (r: any) => r.remainingVouchers === undefined || r.remainingVouchers > 10,
   );
 
-  const kpis = [
-    {
-      title: "Total Redemptions",
-      value: statsLoading ? "..." : stats?.totalRedemptions || "0",
-      icon: Ticket,
-      color: "text-indigo-600",
-      bg: "bg-indigo-50",
-      trendLabel: "All time records",
-    },
-    {
-      title: "Points Distributed",
-      value: statsLoading
-        ? "..."
-        : stats?.totalTcBurned?.toLocaleString() || "0",
-      icon: Flame,
-      color: "text-orange-600",
-      bg: "bg-orange-50",
-      trendLabel: "Value given back",
-    },
-    {
-      title: "Low Stock Items",
-      value: statsLoading ? "..." : stats?.lowInventoryItems || "0",
-      icon: AlertTriangle,
-      color: "text-rose-600",
-      bg: "bg-rose-50",
-      trendLabel: "Needs attention",
-    },
-    {
-      title: "Success Rate",
-      value: statsLoading ? "..." : "94.2%",
-      icon: Activity,
-      color: "text-emerald-600",
-      bg: "bg-emerald-50",
-      trendLabel: "Fulfillment health",
-    },
-  ];
-
   const chartData =
     stats?.redemptionTrend?.map((t: any) => ({
-      name: moment(t.date).format("ddd"),
+      name: moment(t.date).format("MMM DD"),
       val: t.count || 0,
       tc: t.value || 0,
     })) || [];
 
-  const navCards = [
-    {
-      title: "Rewards & Codes",
-      desc: "Manage offers, vouchers & inventory",
-      icon: Ticket,
-      link: "/gamification/rewards/coupons",
-      color: "indigo",
-      stat: stats?.activeCoupons || 0,
-      statLabel: "active",
-    },
-    {
-      title: "Interactions",
-      desc: "Spin wheel, scratch card & match games",
-      icon: Gamepad2,
-      link: "/gamification/engagement-games",
-      color: "violet",
-      stat: null,
-      statLabel: "3 types",
-    },
-    {
-      title: "History",
-      desc: "Full log of all claimed rewards",
-      icon: History,
-      link: "/gamification/rewards/redemptions",
-      color: "emerald",
-      stat: stats?.totalRedemptions || 0,
-      statLabel: "total",
-    },
-    {
-      title: "Security",
-      desc: "Fraud rules & redemption limits",
-      icon: ShieldCheck,
-      link: "/gamification/rewards/fraud",
-      color: "rose",
-      stat: null,
-      statLabel: "protected",
-    },
-    
-  ];
-
-  const colorMap: Record<
-    string,
-    { icon: string; badge: string; ring: string; dot: string }
-  > = {
-    indigo: {
-      icon: "text-indigo-600",
-      badge: "bg-indigo-50 text-indigo-700 border-indigo-100",
-      ring: "group-hover:ring-indigo-200",
-      dot: "bg-indigo-500",
-    },
-    amber: {
-      icon: "text-amber-600",
-      badge: "bg-amber-50 text-amber-700 border-amber-100",
-      ring: "group-hover:ring-amber-200",
-      dot: "bg-amber-500",
-    },
-    violet: {
-      icon: "text-violet-600",
-      badge: "bg-violet-50 text-violet-700 border-violet-100",
-      ring: "group-hover:ring-violet-200",
-      dot: "bg-violet-500",
-    },
-    emerald: {
-      icon: "text-emerald-600",
-      badge: "bg-emerald-50 text-emerald-700 border-emerald-100",
-      ring: "group-hover:ring-emerald-200",
-      dot: "bg-emerald-500",
-    },
-    rose: {
-      icon: "text-rose-600",
-      badge: "bg-rose-50 text-rose-700 border-rose-100",
-      ring: "group-hover:ring-rose-200",
-      dot: "bg-rose-500",
-    },
-    sky: {
-      icon: "text-sky-600",
-      badge: "bg-sky-50 text-sky-700 border-sky-100",
-      ring: "group-hover:ring-sky-200",
-      dot: "bg-sky-500",
-    },
-  };
-
-  const getStockColor = (remaining: number | undefined) => {
-    if (remaining === undefined)
-      return {
-        text: "text-slate-500",
-        bg: "bg-slate-100",
-        bar: "bg-slate-300",
-      };
-    if (remaining <= 5)
-      return { text: "text-rose-600", bg: "bg-rose-50", bar: "bg-rose-500" };
-    if (remaining <= 10)
-      return { text: "text-amber-600", bg: "bg-amber-50", bar: "bg-amber-500" };
-    return {
-      text: "text-emerald-600",
-      bg: "bg-emerald-50",
-      bar: "bg-emerald-500",
-    };
-  };
-
-
-  const CustomTooltip = ({ active, payload }: any) => {
-    if (!active || !payload?.length) return null;
-    return (
-      <div className="bg-zinc-900 text-white rounded-xl px-4 py-3 shadow-xl text-xs">
-        <p className="font-semibold">{payload[0]?.value?.toLocaleString()} {payload[0]?.name === "tc" ? "points" : "redemptions"}</p>
-      </div>
-    );
-  };
+  const pointsSpentData =
+    currencyStatsData?.getCurrencyStats?.currencyFlow?.map((t: any) => ({
+      name: t.name,
+      amount: t.amount || 0,
+    })) || [];
 
   return (
     <EcosystemWrapper data-section="rewards-dashboard">
@@ -340,720 +138,29 @@ export default function RewardsDashboard() {
       />
 
       <EcosystemContainer className="p-6 lg:p-8 space-y-8">
-        {/* Gamification Feature Banner */}
-        <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-violet-800 p-6 md:p-8 shadow-xl shadow-indigo-500/20">
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMyI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnpNMzYgMjR2NmgxMnYtNkgzNnpNMjQgMzR2NmgxMnYtNkgyNHoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-40" />
-          <div className="absolute -right-20 -top-20 h-56 w-56 rounded-full bg-white/8 blur-3xl transition-transform duration-700 group-hover:scale-110" />
-          <div className="absolute -left-10 -bottom-10 h-40 w-40 rounded-full bg-violet-500/20 blur-2xl" />
-
-          <div className="relative z-10 flex flex-col md:flex-row md:items-center gap-6">
-            <div className="space-y-3 flex-1">
-              <div className="flex items-center gap-2">
-                <div className="h-6 w-6 rounded-full bg-white/20 backdrop-blur flex items-center justify-center">
-                  <Sparkles className="h-3 w-3 text-white" />
-                </div>
-                <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/60">
-                  Interactive Rewards
-                </span>
-              </div>
-              <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight leading-tight max-w-lg">
-                Scratch Cards, Spin Wheels
-                <br />
-                <span className="text-white/70">&amp; Match-to-Win Games</span>
-              </h2>
-              <p className="text-white/55 text-sm leading-relaxed max-w-sm">
-                Boost engagement by up to 3× with gamified rewards. Members love
-                instant-reveal experiences.
-              </p>
-              <div className="flex items-center gap-3 pt-1">
-                <Link href="/gamification/rewards/coupons/create">
-                  <Button className="bg-white text-indigo-700 hover:bg-indigo-50 font-bold px-5 rounded-full text-xs h-9 gap-2 shadow-lg shadow-indigo-900/30 group/btn">
-                    Get Started
-                    <ChevronRight className="h-3.5 w-3.5 group-hover/btn:translate-x-0.5 transition-transform" />
-                  </Button>
-                </Link>
-                <Link href="/gamification/rewards/analytics">
-                  <Button
-                    variant="ghost"
-                    className="text-white/70 hover:text-white hover:bg-white/10 font-medium text-xs h-9 rounded-full px-4"
-                  >
-                    View analytics
-                  </Button>
-                </Link>
-              </div>
-            </div>
-
-            <div className="hidden md:flex items-end gap-3">
-              {[
-                {
-                  icon: Gamepad2,
-                  label: "Match",
-                  delay: "200ms",
-                  rotate: "-6deg",
-                  size: "h-20 w-20",
-                },
-                {
-                  icon: RotateCcw,
-                  label: "Spin",
-                  delay: "0ms",
-                  rotate: "0deg",
-                  size: "h-24 w-24 -translate-y-2",
-                },
-                {
-                  icon: Zap,
-                  label: "Scratch",
-                  delay: "100ms",
-                  rotate: "6deg",
-                  size: "h-20 w-20",
-                },
-              ].map((item, i) => (
-                <div
-                  key={i}
-                  style={{
-                    rotate: item.rotate,
-                    transitionDelay: item.delay,
-                  }}
-                  className={cn(
-                    "rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 flex flex-col items-center justify-center gap-2 group-hover:rotate-0 transition-all duration-500",
-                    item.size,
-                  )}
-                >
-                  <item.icon className="h-7 w-7 text-white opacity-80" />
-                  <span className="text-[8px] font-bold text-white/50 tracking-widest uppercase">
-                    {item.label}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* KPI Cards */}
-        <section className="space-y-4">
-          <DashboardSectionHeading
-            title="Rewards Overview"
-            titleClassName="normal-case tracking-normal text-sm text-foreground"
-          />
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {kpis.map((kpi, i) => (
-              <EcosystemKPI key={i} {...kpi} />
-            ))}
-          </div>
-        </section>
-
-        {/* Chart + Recent Activity */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Area Chart */}
-          <section className="lg:col-span-8 space-y-4">
-            <DashboardSectionHeading
-              title="Redemption Activity"
-              titleClassName="normal-case tracking-normal text-sm text-foreground"
-            />
-            <div className="p-5 rounded-[20px] bg-muted/30 border border-transparent">
-              <div className="h-[300px] w-full">
-                {statsLoading ? (
-                  <div className="h-full w-full flex items-center justify-center bg-muted/30 rounded-xl border border-border">
-                    <div className="h-8 w-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                  </div>
-                ) : chartData.length === 0 ? (
-                  <div className="h-full flex flex-col items-center justify-center gap-4 text-center">
-                    <div className="h-14 w-14 bg-muted rounded-2xl flex items-center justify-center border border-border">
-                      <TrendingUp className="h-6 w-6 text-muted-foreground/40" />
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-sm font-semibold text-foreground">
-                        No activity yet
-                      </p>
-                      <p className="text-xs text-muted-foreground max-w-[200px] leading-relaxed">
-                        Redemption trends will appear here once members start
-                        claiming rewards
-                      </p>
-                    </div>
-                    <Link href="/gamification/rewards/coupons/create">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="gap-2 rounded-full text-xs"
-                      >
-                        <Plus className="h-3 w-3" />
-                        Create first reward
-                      </Button>
-                    </Link>
-                  </div>
-                ) : (
-                  <ResponsiveContainer>
-                    <AreaChart
-                      data={chartData}
-                      margin={{ top: 8, right: 0, left: -16, bottom: 0 }}
-                    >
-                      <defs>
-                        <linearGradient
-                          id="rewardGrad"
-                          x1="0"
-                          y1="0"
-                          x2="0"
-                          y2="1"
-                        >
-                          <stop
-                            offset="0%"
-                            stopColor="#6366f1"
-                            stopOpacity={0.2}
-                          />
-                          <stop
-                            offset="100%"
-                            stopColor="#6366f1"
-                            stopOpacity={0}
-                          />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid
-                        strokeDasharray="3 3"
-                        vertical={false}
-                        stroke="hsl(var(--border))"
-                      />
-                      <XAxis
-                        dataKey="name"
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{
-                          fontSize: 10,
-                          fontWeight: 600,
-                          fill: "#94a3b8",
-                        }}
-                        dy={10}
-                      />
-                      <YAxis
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{
-                          fontSize: 10,
-                          fontWeight: 600,
-                          fill: "#94a3b8",
-                        }}
-                      />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: "#18181b",
-                          border: "none",
-                          borderRadius: "12px",
-                          padding: "10px 14px",
-                        }}
-                        itemStyle={{
-                          color: "#fff",
-                          fontWeight: 600,
-                          fontSize: "12px",
-                        }}
-                        labelStyle={{ display: "none" }}
-                        formatter={(v: any) => [`${v} redemptions`, ""]}
-                      />
-                      <Area
-                        type="monotone"
-                        dataKey="val"
-                        stroke="#6366f1"
-                        strokeWidth={2.5}
-                        fill="url(#rewardGrad)"
-                        dot={false}
-                        activeDot={{
-                          r: 5,
-                          fill: "#6366f1",
-                          strokeWidth: 2,
-                          stroke: "#fff",
-                        }}
-                        animationDuration={1200}
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                )}
-              </div>
-            </div>
-          </section>
-
-          {/* Recent Redemptions */}
-          <section className="lg:col-span-4 space-y-4">
-            <DashboardSectionHeading
-              title="Recent Activity"
-              titleClassName="normal-case tracking-normal text-sm text-foreground"
-            />
-            <div className="p-5 rounded-[20px] bg-muted/30 border border-transparent">
-              <div className="space-y-1">
-                {redemptionsLoading ? (
-                  [1, 2, 3, 4, 5].map((i) => (
-                    <div
-                      key={i}
-                      className="flex gap-3 p-2.5 rounded-lg animate-pulse"
-                    >
-                      <Skeleton className="h-8 w-8 rounded-lg shrink-0" />
-                      <div className="space-y-1.5 flex-1">
-                        <Skeleton className="h-3 w-24" />
-                        <Skeleton className="h-2.5 w-32" />
-                      </div>
-                    </div>
-                  ))
-                ) : redemptions.length > 0 ? (
-                  redemptions.map((act: any, i: number) => {
-                    const hoverUser: UserProfileHoverData = {
-                      id: act.user?.id,
-                      firstName: act.user?.firstName,
-                      lastName: act.user?.lastName,
-                      avatar: act.user?.avatar,
-                    };
-                    return (
-                      <div
-                        key={i}
-                        className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-muted/60 transition-colors group/item cursor-default"
-                      >
-                        <UserProfileHoverCard user={hoverUser}>
-                          <div className="flex items-center gap-3 cursor-pointer flex-1 min-w-0">
-                            <Avatar className="h-8 w-8 border border-border shrink-0 group-hover/item:border-indigo-200 transition-colors">
-                              <AvatarImage
-                                src={
-                                  act.user?.avatar
-                                    ? `https://cdn.thrico.network/${act.user.avatar}`
-                                    : ""
-                                }
-                                alt={act.user?.firstName}
-                                className="object-cover"
-                              />
-                              <AvatarFallback className="text-[10px] bg-muted text-muted-foreground font-semibold group-hover/item:bg-indigo-50 group-hover/item:text-indigo-600 transition-colors">
-                                {act.user?.firstName?.charAt(0)}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-[12px] font-semibold text-foreground truncate leading-none hover:underline">
-                                {act.user?.firstName} {act.user?.lastName}
-                              </p>
-                              <p className="text-[11px] text-muted-foreground truncate leading-none mt-0.5">
-                                {act.reward?.title}
-                              </p>
-                            </div>
-                          </div>
-                        </UserProfileHoverCard>
-                        <div className="flex items-center gap-1 text-[10px] text-muted-foreground/70 font-medium shrink-0">
-                          <Clock className="h-3 w-3" />
-                          {moment(act.createdAt).fromNow(true)}
-                        </div>
-                      </div>
-                    );
-                  })
-                ) : (
-                  <div className="py-10 text-center space-y-3">
-                    <div className="h-12 w-12 bg-muted rounded-2xl flex items-center justify-center mx-auto border border-border">
-                      <History className="h-5 w-5 text-muted-foreground/40" />
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-sm font-semibold text-foreground">
-                        No activity yet
-                      </p>
-                      <p className="text-[11px] text-muted-foreground/60 max-w-[150px] mx-auto leading-relaxed">
-                        Activity appears when members start redeeming
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="mt-4 pt-4 border-t border-border">
-                <Link href="rewards/redemptions ">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full gap-2 rounded-lg"
-                  >
-                    View full history
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </section>
-        </div>
-
-        {/* ── Inventory Snapshot ────────────────────────────────────── */}
-        <section className="space-y-4">
-          <DashboardSectionHeading
-            title="Inventory at a Glance"
-            titleClassName="normal-case tracking-normal text-sm text-foreground"
-          />
-          <div className="p-5 rounded-[20px] bg-muted/30 border border-transparent">
-            {rewardsLoading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-4">
-                {[1, 2, 3].map((i) => (
-                  <div
-                    key={i}
-                    className="p-4 rounded-xl border border-border animate-pulse"
-                  >
-                    <div className="flex gap-3">
-                      <Skeleton className="h-10 w-10 rounded-lg shrink-0" />
-                      <div className="space-y-2 flex-1">
-                        <Skeleton className="h-3 w-2/3" />
-                        <Skeleton className="h-2 w-full" />
-                        <Skeleton className="h-2 w-1/3" />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : inventoryRewards.length === 0 ? (
-              <div className="py-12 flex flex-col items-center justify-center gap-3 text-center mt-2">
-                <div className="h-12 w-12 bg-muted rounded-2xl flex items-center justify-center border border-border">
-                  <Package className="h-5 w-5 text-muted-foreground/30" />
-                </div>
-                <div className="space-y-1">
-                  <p className="text-sm font-semibold text-foreground">
-                    No inventory-tracked rewards
-                  </p>
-                  <p className="text-xs text-muted-foreground max-w-[220px] leading-relaxed">
-                    Enable inventory tracking on a reward to monitor stock
-                    levels here
-                  </p>
-                </div>
-                <Link href="/gamification/rewards/coupons/create">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="gap-2 rounded-full text-xs mt-1"
-                  >
-                    <Plus className="h-3 w-3" />
-                    Create reward
-                  </Button>
-                </Link>
-              </div>
-            ) : (
-              <>
-                {/* Summary bar */}
-                <div className="flex items-center gap-4 mt-4 mb-3 flex-wrap">
-                  <div className="flex items-center gap-1.5 text-xs font-medium">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
-                    <span className="text-foreground font-bold tabular-nums">
-                      {healthyRewards.length}
-                    </span>
-                    <span className="text-muted-foreground">healthy</span>
-                  </div>
-                  {lowStockRewards.length > 0 && (
-                    <div className="flex items-center gap-1.5 text-xs font-medium">
-                      <AlertTriangle className="h-3.5 w-3.5 text-rose-500" />
-                      <span className="text-foreground font-bold tabular-nums">
-                        {lowStockRewards.length}
-                      </span>
-                      <span className="text-muted-foreground">low stock</span>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-1.5 text-xs font-medium">
-                    <Package className="h-3.5 w-3.5 text-muted-foreground" />
-                    <span className="text-foreground font-bold tabular-nums">
-                      {inventoryRewards.length}
-                    </span>
-                    <span className="text-muted-foreground">tracked</span>
-                  </div>
-                </div>
-
-                {/* Reward inventory cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {/* Show low stock first, then healthy */}
-                  {[...lowStockRewards, ...healthyRewards]
-                    .slice(0, 9)
-                    .map((reward: any) => {
-                      const remaining = reward.remainingVouchers;
-                      const total = reward.totalVouchers || 0;
-                      const pct =
-                        total > 0
-                          ? Math.round((remaining / total) * 100)
-                          : remaining > 0
-                            ? 100
-                            : 0;
-                      const colors = getStockColor(remaining);
-
-                      return (
-                        <div
-                          key={reward.id}
-                          className="group flex items-start gap-3.5 p-4 rounded-xl border border-border bg-card hover:border-indigo-200/60 hover:shadow-sm transition-all"
-                        >
-                          {/* Thumbnail */}
-                          <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-slate-50 to-slate-100 dark:from-zinc-800 dark:to-zinc-900 border border-border/50 overflow-hidden shrink-0 flex items-center justify-center">
-                            {reward.image ? (
-                              <img
-                                src={reward.image}
-                                alt={reward.title}
-                                className="h-full w-full object-cover"
-                              />
-                            ) : (
-                              <Ticket className="h-4 w-4 text-muted-foreground/30" />
-                            )}
-                          </div>
-
-                          {/* Info */}
-                          <div className="flex-1 min-w-0 space-y-2">
-                            <div className="flex items-start justify-between gap-2">
-                              <h4 className="text-xs font-semibold text-foreground truncate leading-tight">
-                                {reward.title}
-                              </h4>
-                              <span
-                                className={cn(
-                                  "inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-bold shrink-0",
-                                  remaining !== undefined && remaining <= 10
-                                    ? "bg-rose-50 text-rose-600 border border-rose-100"
-                                    : "bg-emerald-50 text-emerald-600 border border-emerald-100",
-                                )}
-                              >
-                                {remaining !== undefined && remaining <= 5 ? (
-                                  <>
-                                    <AlertTriangle className="h-2.5 w-2.5" />
-                                    Critical
-                                  </>
-                                ) : remaining !== undefined &&
-                                  remaining <= 10 ? (
-                                  <>
-                                    <AlertTriangle className="h-2.5 w-2.5" />
-                                    Low
-                                  </>
-                                ) : (
-                                  <>
-                                    <CheckCircle2 className="h-2.5 w-2.5" />
-                                    OK
-                                  </>
-                                )}
-                              </span>
-                            </div>
-
-                            {/* Stock bar */}
-                            <div className="space-y-1">
-                              <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
-                                <div
-                                  className={cn(
-                                    "h-full rounded-full transition-all duration-700",
-                                    colors.bar,
-                                  )}
-                                  style={{
-                                    width: `${Math.max(pct, 2)}%`,
-                                  }}
-                                />
-                              </div>
-                              <div className="flex items-center justify-between text-[10px]">
-                                <span
-                                  className={cn(
-                                    "font-bold tabular-nums",
-                                    colors.text,
-                                  )}
-                                >
-                                  {remaining ?? "∞"} remaining
-                                </span>
-                                {total > 0 && (
-                                  <span className="text-muted-foreground/60 tabular-nums">
-                                    of {total}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                </div>
-
-                {/* View all link */}
-                {inventoryRewards.length > 9 && (
-                  <div className="mt-4 pt-4 border-t border-border">
-                    <Link href="/gamification/rewards/coupons">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full gap-2 rounded-lg"
-                      >
-                        View all {inventoryRewards.length} tracked rewards
-                        <ArrowRight className="h-3.5 w-3.5" />
-                      </Button>
-                    </Link>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        </section>
-
+        <RewardsBanner />
+        <RewardsOverviewKpis stats={stats} statsLoading={statsLoading} />
         
-        {/* Charts Row 2 - Points Spent Line Chart */}
-        <section className="space-y-4">
-          <DashboardSectionHeading
-            title="Points Spent Over Time"
-            titleClassName="normal-case tracking-normal text-sm text-foreground"
-          />
-          <div className="p-5 rounded-[20px] bg-muted/30 border border-transparent">
-            <div className="h-[260px] w-full">
-              {statsLoading ? (
-                <div className="h-full w-full flex items-center justify-center bg-muted/30 rounded-xl border border-border">
-                  <div className="h-8 w-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                </div>
-              ) : chartData.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center gap-3 text-center">
-                  <div className="h-12 w-12 bg-muted rounded-2xl flex items-center justify-center border border-border">
-                    <Flame className="h-5 w-5 text-muted-foreground/30" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">No data yet</p>
-                    <p className="text-xs text-muted-foreground mt-0.5 max-w-[180px] leading-relaxed">
-                      Points data appears once members start redeeming
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={chartData} margin={{ top: 8, right: 0, left: -16, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
-                    <XAxis dataKey="name" fontSize={10} fontWeight={600} tickLine={false} axisLine={false} tick={{ fill: "#94a3b8" }} dy={8} />
-                    <YAxis fontSize={10} fontWeight={600} tickLine={false} axisLine={false} tick={{ fill: "#94a3b8" }} />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Line
-                      type="monotone"
-                      dataKey="tc"
-                      stroke="#f97316"
-                      strokeWidth={2.5}
-                      dot={false}
-                      activeDot={{ r: 5, fill: "#f97316", strokeWidth: 2, stroke: "#fff" }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              )}
-            </div>
-          </div>
-        </section>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <RedemptionActivityChart chartData={chartData} statsLoading={statsLoading} />
+          <RecentRedemptions redemptions={redemptions} redemptionsLoading={redemptionsLoading} />
+        </div>
 
-        {/* Most Popular Rewards and Dummy Breakdown */}
+        <InventoryGlance 
+          inventoryRewards={inventoryRewards}
+          lowStockRewards={lowStockRewards}
+          healthyRewards={healthyRewards}
+          rewardsLoading={rewardsLoading}
+        />
+        
+        <PointsSpentChart chartData={pointsSpentData} statsLoading={currencyStatsLoading} />
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <section className="space-y-4">
-            <DashboardSectionHeading
-              title="Most Popular Rewards"
-              titleClassName="normal-case tracking-normal text-sm text-foreground"
-            />
-            <div className="p-5 rounded-[20px] bg-muted/30 border border-transparent">
-              <div className="space-y-4">
-                {TOP_REWARDS.map((r, i) => (
-                  <div key={i} className="space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span className={cn(
-                          "shrink-0 h-5 w-5 rounded-full text-[10px] font-black flex items-center justify-center",
-                          i === 0 ? "bg-yellow-100 text-yellow-700" : "bg-muted text-muted-foreground"
-                        )}>
-                          {i + 1}
-                        </span>
-                        <span className="text-sm font-medium text-foreground truncate">{r.name}</span>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className="text-sm font-bold text-foreground tabular-nums">{r.value}</span>
-                        <span className="text-[10px] text-muted-foreground font-medium">claims</span>
-                      </div>
-                    </div>
-                    <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-                      <div
-                        className="h-full rounded-full transition-all duration-700 ease-out"
-                        style={{ width: `${r.pct}%`, backgroundColor: COLORS[i] }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          <section className="space-y-4">
-            <DashboardSectionHeading
-              title="Engagement Metrics"
-              titleClassName="normal-case tracking-normal text-sm text-foreground"
-            />
-            <div className="grid grid-cols-1 gap-4">
-              {[
-                { label: "Avg. redemptions per user", value: "2.4", icon: Ticket, sub: "per month" },
-                { label: "Points per redemption", value: "183", icon: Zap, sub: "average cost" },
-                { label: "Repeat claimers", value: "61%", icon: Activity, sub: "of redeemers" },
-              ].map((m, i) => (
-                <div key={i} className="flex items-center gap-4 p-5 rounded-xl border border-border bg-card">
-                  <div className="h-10 w-10 rounded-xl bg-muted border border-border/50 flex items-center justify-center shrink-0">
-                    <m.icon className="h-5 w-5 text-muted-foreground" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">{m.label}</p>
-                    <p className="text-xl font-bold text-foreground tabular-nums">{m.value}</p>
-                    <p className="text-[11px] text-muted-foreground/60">{m.sub}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
+          <PopularRewards />
+          <EngagementMetrics stats={stats} />
         </div>
 
-        {/* Navigation Cards */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 px-1">
-            <Trophy className="h-4 w-4 text-foreground/60" />
-            <h2 className="text-sm font-semibold text-foreground">
-              Manage your rewards program
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-            {navCards.map((item, i) => {
-              const colors = colorMap[item.color];
-              return (
-                <Link key={i} href={item.link}>
-                  <div
-                    className={cn(
-                      "group relative p-4 rounded-xl bg-card border border-border hover:shadow-md transition-all duration-300 cursor-pointer h-full flex flex-col gap-3",
-                      "ring-2 ring-transparent",
-                      colors.ring,
-                    )}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="h-9 w-9 rounded-lg bg-muted border border-border/60 flex items-center justify-center transition-colors group-hover:bg-white group-hover:shadow-sm">
-                        <item.icon
-                          className={cn(
-                            "h-4 w-4 text-muted-foreground transition-colors",
-                            `group-hover:${colors.icon.replace("text-", "text-")}`,
-                          )}
-                          size={16}
-                        />
-                      </div>
-                      <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/30 group-hover:text-foreground group-hover:translate-x-0.5 transition-all" />
-                    </div>
-                    <div className="space-y-1">
-                      <h3 className="text-sm font-semibold text-foreground leading-none">
-                        {item.title}
-                      </h3>
-                      <p className="text-[10px] text-muted-foreground/70 leading-snug">
-                        {item.desc}
-                      </p>
-                    </div>
-                    {item.stat !== null && (
-                      <div
-                        className={cn(
-                          "inline-flex self-start items-center gap-1 px-2 py-0.5 rounded-full border text-[9px] font-bold uppercase tracking-wide",
-                          colors.badge,
-                        )}
-                      >
-                        <span
-                          className={cn("h-1 w-1 rounded-full", colors.dot)}
-                        />
-                        {item.stat} {item.statLabel}
-                      </div>
-                    )}
-                    {item.stat === null && (
-                      <div
-                        className={cn(
-                          "inline-flex self-start items-center gap-1 px-2 py-0.5 rounded-full border text-[9px] font-bold uppercase tracking-wide",
-                          colors.badge,
-                        )}
-                      >
-                        <span
-                          className={cn("h-1 w-1 rounded-full", colors.dot)}
-                        />
-                        {item.statLabel}
-                      </div>
-                    )}
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
+        <RewardsNavigation stats={stats} />
       </EcosystemContainer>
     </EcosystemWrapper>
   );

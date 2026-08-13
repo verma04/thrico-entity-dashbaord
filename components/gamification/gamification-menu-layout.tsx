@@ -14,10 +14,14 @@ const GamificationMenuLayout = ({
   children,
   items,
   basePath = "/gamification",
+  enableReorder,
+  onReorder,
 }: {
   children: React.ReactNode;
   items: MenuItem[];
   basePath?: string;
+  enableReorder?: boolean;
+  onReorder?: (newOrder: string[]) => void;
 }) => {
   // Convert basePath to active string expected by MenuItemsLayout
   // e.g. "/gamification/currency" -> "gamification/currency"
@@ -30,6 +34,8 @@ const GamificationMenuLayout = ({
       hideDefaultTabs={true}
       showAdminTabs={false}
       fullWidth={false}
+      enableReorder={enableReorder}
+      onReorder={onReorder}
     >
       {children}
     </MenuItemsLayout>

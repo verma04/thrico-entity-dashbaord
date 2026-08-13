@@ -16,7 +16,7 @@ export function EcosystemForm({
   return (
     <form
       className={cn(
-        "bg-black dark:bg-black p-6 lg:p-8 rounded-3xl shadow-sm border border-border/40 text-white w-full",
+        "bg-white dark:bg-black p-6 lg:p-8 rounded-3xl shadow-sm border border-border/40 text-foreground w-full",
         className
       )}
       {...props}

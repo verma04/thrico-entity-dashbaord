@@ -194,7 +194,8 @@ export function MenuItemRow({
             {iconEl}
             <span
               className={cn(
-                "truncate text-[13px] leading-none tracking-[-0.01em] transition-colors duration-150 group-data-[collapsible=icon]:hidden",
+                "truncate leading-none tracking-[-0.01em] transition-colors duration-150 group-data-[collapsible=icon]:hidden",
+                depth > 0 ? "text-[12px]" : "text-[13px]",
                 isActive && !item.isLocked
                   ? "font-medium text-foreground"
                   : "font-normal text-inherit",
@@ -292,7 +293,8 @@ export function MenuItemRow({
           {iconEl}
           <span
             className={cn(
-              "text-[13px] leading-none tracking-[-0.01em] transition-colors duration-150 truncate group-data-[collapsible=icon]:hidden",
+              "leading-none tracking-[-0.01em] transition-colors duration-150 truncate group-data-[collapsible=icon]:hidden",
+              depth > 0 ? "text-[12px]" : "text-[13px]",
               isActive && !item.isLocked
                 ? "text-foreground font-medium"
                 : "text-inherit font-normal",

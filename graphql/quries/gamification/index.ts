@@ -417,11 +417,12 @@ export const GET_GAMIFICATION_SUMMARY = gql`
 `;
 
 export const GET_USER_ACTIVITY_LOG = gql`
-  query GetUserActivity($userId: ID!, $limit: Int, $offset: Int) {
+  query GetUserActivity($userId: ID!, $limit: Int, $offset: Int, $pointFilter: String) {
     getUserActivityLog(input: { 
       userId: $userId, 
       limit: $limit, 
-      offset: $offset 
+      offset: $offset,
+      pointFilter: $pointFilter
     }) {
       id
       type
