@@ -3,9 +3,7 @@
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { Separator } from "@/components/ui/separator";
-import { SlackIntegrationCard } from "@/components/settings/integrations/slack-integration-card";
-import { GoogleMeetIntegrationCard } from "@/components/settings/integrations/google-meet-integration-card";
-import { SendGridIntegrationCard } from "@/components/settings/integrations/sendgrid-integration-card";
+import { ShopifyIntegrationCard } from "@/components/settings/integrations/shopify-integration-card";
 import { Search, Blocks, Inbox } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
@@ -17,9 +15,9 @@ export default function IntegrationsPage() {
 
   const allIntegrations = [
     {
-      id: "slack",
-      name: "Slack",
-      component: <SlackIntegrationCard />,
+      id: "shopify",
+      name: "Shopify",
+      component: <ShopifyIntegrationCard />,
     },
   ];
 

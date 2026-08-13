@@ -2,7 +2,7 @@
 
 import React from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Loader2, Save, RotateCcw, Check } from "lucide-react";
+import { Loader2, AlertCircle, Check } from "lucide-react";
 
 export interface FloatingSavePanelProps {
   hasChanged: boolean;
@@ -21,52 +21,49 @@ export function FloatingSavePanel({
   isSaving,
   onSave,
   onReset,
-  title = "Unsaved Changes",
-  description = "You have made changes to the settings",
-  buttonText = "Apply Changes",
+  title = "Unsaved changes",
+  buttonText = "Save",
 }: FloatingSavePanelProps) {
   return (
     <AnimatePresence>
       {hasChanged && (
         <motion.div
-          initial={{ opacity: 0, y: 20, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 20, scale: 0.95 }}
-          className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-3 pl-4 pr-1.5 py-1.5 rounded-full bg-foreground shadow-2xl border border-white/10"
+          initial={{ opacity: 0, y: 60 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 60 }}
+          transition={{ type: "spring", damping: 25, stiffness: 300 }}
+          className="fixed bottom-0 left-0 right-0 z-[100]"
         >
-          <div className="flex items-center gap-2">
-            <div className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
-            <span className="text-[11px] font-semibold text-background tracking-wide">
-              {title}
-            </span>
-            {description && (
-              <span className="text-[10px] text-background/60 ml-1 hidden sm:inline-block">
-                — {description}
+          {/* Dark contextual save bar */}
+          <div className="bg-[#1a1a1a] border-t border-[#333] px-4 py-3 flex items-center justify-between">
+            {/* Left: icon + label */}
+            <div className="flex items-center gap-3">
+              <AlertCircle size={20} className="text-white/80 flex-shrink-0" />
+              <span className="text-[14px] font-medium text-white">
+                {title}
               </span>
-            )}
-          </div>
+            </div>
 
-          <div className="flex items-center gap-1.5 border-l border-background/20 pl-3">
-            <button
-              onClick={onReset}
-              disabled={isSaving}
-              className="h-6 px-3 rounded-full text-[10px] font-medium text-background/70 hover:text-background hover:bg-background/10 transition-all disabled:opacity-40 flex items-center gap-1.5"
-            >
-              <RotateCcw size={10} className="opacity-70" />
-              Discard
-            </button>
-            <button
-              onClick={onSave}
-              disabled={isSaving}
-              className="h-6 px-3 rounded-full text-[10px] font-semibold bg-background text-foreground hover:bg-muted active:scale-[0.98] transition-all disabled:opacity-60 flex items-center gap-1.5 shadow-sm"
-            >
-              {isSaving ? (
-                <Loader2 size={12} className="animate-spin" />
-              ) : (
-                <Save size={12} />
-              )}
-              {buttonText}
-            </button>
+            {/* Right: action buttons */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={onReset}
+                disabled={isSaving}
+                className="h-8 px-4 rounded-lg text-[13px] font-medium text-white/90 bg-transparent hover:bg-white/10 active:bg-white/15 transition-colors disabled:opacity-40"
+              >
+                Discard
+              </button>
+              <button
+                onClick={onSave}
+                disabled={isSaving}
+                className="h-8 px-4 rounded-lg text-[13px] font-medium text-white bg-transparent border border-white/40 hover:border-white/70 hover:bg-white/5 active:bg-white/10 transition-all disabled:opacity-50 flex items-center gap-2"
+              >
+                {isSaving && (
+                  <Loader2 size={14} className="animate-spin" />
+                )}
+                {buttonText}
+              </button>
+            </div>
           </div>
         </motion.div>
       )}

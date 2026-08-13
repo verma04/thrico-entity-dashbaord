@@ -158,3 +158,5 @@ export const useUpdateFeedEntityName = (options?: any) =>
     refetchQueries: [{ query: GET_ENTITY_SETTINGS }],
     awaitRefetchQueries: true,
   });
+
+export * from "./shopify";
