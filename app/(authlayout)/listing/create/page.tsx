@@ -11,6 +11,7 @@ import { useModuleStore } from "@/store/useModuleStore";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { Store } from "lucide-react";
+import { EcosystemContainer } from "@/components/layout/ecosystem";
 
 const CreateListingPage = () => {
   const singularName = useModuleStore((state) => state.listingSingularName);
@@ -28,7 +29,8 @@ const CreateListingPage = () => {
     onError: (error: any) => {
       toast({
         title: "Error",
-        description: error.message || `Failed to create ${singularName.toLowerCase()}`,
+        description:
+          error.message || `Failed to create ${singularName.toLowerCase()}`,
         variant: "destructive",
       });
     },
@@ -56,26 +58,28 @@ const CreateListingPage = () => {
     router.back();
   };
 
+  const moduleName = useModuleStore((state) => state.listingModuleName);
+
   return (
     <EcosystemWrapper>
       <EcosystemHeader
         title={`Create ${singularName}`}
-        badgeText="New"
-        description={`Add a new ${singularName.toLowerCase()} to the marketplace.`}
+        badgeText="Marketplace"
+        description={`Add a new ${singularName.toLowerCase()} to your community marketplace.`}
         icon={Store}
         breadcrumbs={[
-          { label: "Marketplace", href: "/listing/all" },
-          { label: "Create" }
+          { label: moduleName, href: "/listing/all" },
+          { label: `Create ${singularName}` },
         ]}
       />
-      <div className="flex-1 overflow-auto bg-background/50 p-6">
+      <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0">
         <ListingCreationForm
           initialValues={{}}
           loading={loading}
           onFinish={onFinish}
           onCancel={onCancel}
         />
-      </div>
+      </EcosystemContainer>
     </EcosystemWrapper>
   );
 };

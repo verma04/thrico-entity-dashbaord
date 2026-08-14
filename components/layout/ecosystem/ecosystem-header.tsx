@@ -42,7 +42,7 @@ export function EcosystemHeader({
   return (
     <div
       className={cn(
-        "flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-1 m-3 mb-0 pb-0",
+        "flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-1 px-4 m-3 mb-0 pb-0",
         className,
       )}
     >

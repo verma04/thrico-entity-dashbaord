@@ -101,10 +101,10 @@ export function DetailedSkillsSection({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between mb-2">
-        <Label className="text-sm font-bold text-foreground">
-          Detailed Skills
+        <Label className="text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-400">
+          Detailed Competencies
         </Label>
-        <p className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">
+        <p className="text-[10px] uppercase tracking-wider font-bold text-zinc-400">
           Add specific skills with proficiency
         </p>
       </div>
@@ -112,7 +112,7 @@ export function DetailedSkillsSection({
       <FieldArray
         name="skills"
         render={(arrayHelpers) => (
-          <div className="space-y-6">
+          <div className="space-y-5">
             {values.skills && values.skills.length > 0 ? (
               values.skills.map((skill: any, index: number) => {
                 const skillErrors = (errors.skills as any)?.[index] || {};
@@ -121,29 +121,29 @@ export function DetailedSkillsSection({
                 return (
                   <div
                     key={index}
-                    className="p-4 rounded-xl border border-border bg-muted/50 relative"
+                    className="p-4 rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/40 dark:bg-zinc-900/40 relative space-y-4"
                   >
-                    <div className="absolute top-4 right-4">
+                    <div className="absolute top-3.5 right-3.5">
                       <Button
                         type="button"
                         variant="ghost"
                         size="icon"
-                        className="text-rose-500 hover:text-rose-600 hover:bg-rose-50 h-8 w-8 rounded-lg"
+                        className="text-zinc-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 h-7 w-7 rounded-lg transition-colors"
                         onClick={() => arrayHelpers.remove(index)}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-                      <div className="space-y-2">
-                        <Label className="text-xs font-semibold text-muted-foreground">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-1">
+                      <div className="space-y-1.5">
+                        <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
                           Skill Name <span className="text-rose-500">*</span>
                         </Label>
                         <Input
                           name={`skills.${index}.name`}
                           placeholder="e.g. React.js"
-                          className="h-10 rounded-lg bg-card"
+                          className="h-10 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
                           value={skill.name}
                           onChange={(e) =>
                             setFieldValue(
@@ -153,14 +153,14 @@ export function DetailedSkillsSection({
                           }
                         />
                         {skillErrors.name && skillTouched.name && (
-                          <p className="text-[10px] text-rose-500">
+                          <p className="text-[11px] text-rose-500 font-medium">
                             {skillErrors.name}
                           </p>
                         )}
                       </div>
 
-                      <div className="space-y-2">
-                        <Label className="text-xs font-semibold text-muted-foreground">
+                      <div className="space-y-1.5">
+                        <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
                           Category <span className="text-rose-500">*</span>
                         </Label>
                         <Popover
@@ -178,8 +178,8 @@ export function DetailedSkillsSection({
                               role="combobox"
                               aria-expanded={openComboboxes[index]}
                               className={cn(
-                                "w-full justify-between h-10 rounded-lg bg-card",
-                                !skill.category && "text-muted-foreground",
+                                "w-full justify-between h-10 text-xs font-semibold bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800",
+                                !skill.category && "text-zinc-400 font-normal",
                               )}
                             >
                               {skill.category
@@ -191,15 +191,15 @@ export function DetailedSkillsSection({
                                         (c) => c.value === skill.category,
                                       )?.label) || skill.category
                                 : "Select category"}
-                              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                              <ChevronsUpDown className="ml-2 h-3.5 w-3.5 shrink-0 opacity-50" />
                             </Button>
                           </PopoverTrigger>
                           <PopoverContent
                             className="w-[var(--radix-popover-trigger-width)] p-0"
                             align="start"
                           >
-                            <Command>
-                              <CommandInput placeholder="Search category..." />
+                            <Command className="border-none">
+                              <CommandInput placeholder="Search category..." className="h-10 text-xs" />
                               <CommandList className="max-h-[200px]">
                                 <CommandEmpty>No category found.</CommandEmpty>
                                 <CommandGroup>
@@ -226,16 +226,12 @@ export function DetailedSkillsSection({
                                               [index]: false,
                                             });
                                           }}
+                                          className="flex items-center justify-between text-xs font-semibold cursor-pointer"
                                         >
-                                          <Check
-                                            className={cn(
-                                              "mr-2 h-4 w-4",
-                                              skill.category === c.title
-                                                ? "opacity-100"
-                                                : "opacity-0",
-                                            )}
-                                          />
-                                          {c.title}
+                                          <span>{c.title}</span>
+                                          {skill.category === c.title && (
+                                            <Check className="h-3.5 w-3.5 text-zinc-900 dark:text-zinc-100" />
+                                          )}
                                         </CommandItem>
                                       ))
                                     : skillCategories.map((c) => (
@@ -256,16 +252,12 @@ export function DetailedSkillsSection({
                                               [index]: false,
                                             });
                                           }}
+                                          className="flex items-center justify-between text-xs font-semibold cursor-pointer"
                                         >
-                                          <Check
-                                            className={cn(
-                                              "mr-2 h-4 w-4",
-                                              skill.category === c.value
-                                                ? "opacity-100"
-                                                : "opacity-0",
-                                            )}
-                                          />
-                                          {c.label}
+                                          <span>{c.label}</span>
+                                          {skill.category === c.value && (
+                                            <Check className="h-3.5 w-3.5 text-zinc-900 dark:text-zinc-100" />
+                                          )}
                                         </CommandItem>
                                       ))}
                                 </CommandGroup>
@@ -274,14 +266,14 @@ export function DetailedSkillsSection({
                           </PopoverContent>
                         </Popover>
                         {skillErrors.category && skillTouched.category && (
-                          <p className="text-[10px] text-rose-500">
+                          <p className="text-[11px] text-rose-500 font-medium">
                             {skillErrors.category}
                           </p>
                         )}
                       </div>
 
-                      <div className="space-y-2">
-                        <Label className="text-xs font-semibold text-muted-foreground">
+                      <div className="space-y-1.5">
+                        <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
                           Level <span className="text-rose-500">*</span>
                         </Label>
                         <Select
@@ -290,33 +282,33 @@ export function DetailedSkillsSection({
                             setFieldValue(`skills.${index}.level`, val)
                           }
                         >
-                          <SelectTrigger className="h-10 rounded-lg bg-card">
+                          <SelectTrigger className="h-10 text-xs font-semibold bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800">
                             <SelectValue placeholder="Select level" />
                           </SelectTrigger>
                           <SelectContent>
                             {skillLevels.map((l) => (
-                              <SelectItem key={l.value} value={l.value}>
+                              <SelectItem key={l.value} value={l.value} className="text-xs font-medium">
                                 {l.label}
                               </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
                         {skillErrors.level && skillTouched.level && (
-                          <p className="text-[10px] text-rose-500">
+                          <p className="text-[11px] text-rose-500 font-medium">
                             {skillErrors.level}
                           </p>
                         )}
                       </div>
 
-                      <div className="space-y-2">
-                        <Label className="text-xs font-semibold text-muted-foreground">
+                      <div className="space-y-1.5">
+                        <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
                           Years of Experience
                         </Label>
                         <Input
                           type="number"
                           name={`skills.${index}.yearsOfExperience`}
                           placeholder="e.g. 3"
-                          className="h-10 rounded-lg bg-card"
+                          className="h-10 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
                           value={skill.yearsOfExperience}
                           onChange={(e) =>
                             setFieldValue(
@@ -329,27 +321,28 @@ export function DetailedSkillsSection({
                       </div>
                     </div>
 
-                    <div className="mt-4 space-y-2">
-                      <Label className="text-xs font-semibold text-muted-foreground">
-                        Tags <span className="text-rose-500">*</span>
+                    <div className="space-y-1.5 pt-1">
+                      <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                        Tags & Keywords <span className="text-rose-500">*</span>
                       </Label>
-                      <div className="flex flex-wrap gap-2 mb-2">
+                      <div className="flex flex-wrap gap-1.5 mb-1.5">
                         {skill.tags?.map((tag: string) => (
                           <Badge
                             key={tag}
-                            className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-100"
+                            variant="secondary"
+                            className="bg-zinc-200/80 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 text-[10px] font-bold px-2 py-0.5 flex items-center gap-1"
                           >
                             {tag}
                             <X
-                              className="h-3 w-3 ml-1 cursor-pointer"
+                              className="h-2.5 w-2.5 cursor-pointer hover:text-rose-500"
                               onClick={() => removeTag(index, tag)}
                             />
                           </Badge>
                         ))}
                       </div>
                       <Input
-                        placeholder="Type a tag and press enter..."
-                        className="h-10 rounded-lg bg-card"
+                        placeholder="Type a tag and press Enter or comma..."
+                        className="h-10 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-xs font-medium"
                         value={tagInput[index] || ""}
                         onChange={(e) =>
                           setTagInput({ ...tagInput, [index]: e.target.value })
@@ -357,19 +350,19 @@ export function DetailedSkillsSection({
                         onKeyDown={(e) => handleAddTag(index, e)}
                       />
                       {skillErrors.tags && skillTouched.tags && (
-                        <p className="text-[10px] text-rose-500">
+                        <p className="text-[11px] text-rose-500 font-medium">
                           {skillErrors.tags}
                         </p>
                       )}
                     </div>
 
-                    <div className="mt-4 space-y-2">
-                      <Label className="text-xs font-semibold text-muted-foreground">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
                         Description
                       </Label>
                       <Textarea
-                        placeholder="Describe how you used this skill..."
-                        className="min-h-[80px] rounded-lg bg-card resize-none"
+                        placeholder="Describe how this skill is applied..."
+                        className="min-h-[72px] bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-xs font-medium resize-none shadow-none"
                         value={skill.description}
                         onChange={(e) =>
                           setFieldValue(
@@ -383,9 +376,9 @@ export function DetailedSkillsSection({
                 );
               })
             ) : (
-              <div className="text-center p-8 border border-dashed border-border rounded-xl bg-muted/30">
-                <Star className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                <p className="text-sm text-muted-foreground font-medium">
+              <div className="text-center p-8 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl bg-zinc-50/30 dark:bg-zinc-900/20">
+                <Star className="h-7 w-7 text-zinc-400 mx-auto mb-2 opacity-60" />
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
                   No detailed skills added yet.
                 </p>
               </div>
@@ -394,7 +387,7 @@ export function DetailedSkillsSection({
             <Button
               type="button"
               variant="outline"
-              className="w-full border-dashed border-2 border-indigo-200 text-indigo-600 hover:bg-indigo-50 hover:border-indigo-300 transition-all rounded-xl h-12"
+              className="w-full border-dashed border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800/60 hover:border-zinc-400 dark:hover:border-zinc-600 transition-all rounded-xl h-11 text-xs font-semibold"
               onClick={() =>
                 arrayHelpers.push({
                   skillId: null,

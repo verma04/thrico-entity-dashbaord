@@ -15,6 +15,7 @@ import { RewardPreviewSidebar } from "@/components/rewards/coupons/form/reward-p
 import { RewardInfoSidebar } from "@/components/rewards/coupons/form/reward-info-sidebar";
 import { RewardFormHeader } from "@/components/rewards/coupons/form/reward-form-header";
 import { couponSchema } from "@/components/rewards/coupons/types";
+import { PolarisFormLayout } from "@/components/gamification/shared/polaris-form-ui";
 
 export default function EditRewardPage() {
   const { toast } = useToast();
@@ -99,7 +100,7 @@ export default function EditRewardPage() {
         });
         setSaved(true);
         setTimeout(() => {
-          router.push("/rewards/coupons");
+          router.push("/gamification/rewards/coupons");
         }, 1500);
       } catch (err: any) {
         toast({
@@ -113,32 +114,27 @@ export default function EditRewardPage() {
 
   if (fetchLoading) {
     return (
-      <div className="min-h-screen bg-[#fafafa] dark:bg-black/5">
+      <div className="min-h-screen bg-[#fafafa] dark:bg-black/10">
         <RewardFormHeader
           title="Loading Reward..."
-          backUrl="/rewards/coupons"
+          backUrl="/gamification/rewards/coupons"
         />
-        <div className="max-w-[1400px] mx-auto px-6 py-10">
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-12">
-            <div className="space-y-12">
+        <div className="max-w-7xl mx-auto px-6 py-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div className="lg:col-span-8 space-y-6">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="space-y-6">
-                  <div className="flex items-start gap-4">
-                    <Skeleton className="h-10 w-10 rounded-xl" />
-                    <div className="space-y-2 flex-1">
-                      <Skeleton className="h-4 w-40" />
-                      <Skeleton className="h-3 w-64" />
-                    </div>
-                  </div>
-                  <div className="pl-14 space-y-4">
-                    <Skeleton className="h-10 w-full rounded-lg" />
-                    <Skeleton className="h-20 w-full rounded-lg" />
-                  </div>
+                <div
+                  key={i}
+                  className="p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 space-y-4"
+                >
+                  <Skeleton className="h-5 w-48" />
+                  <Skeleton className="h-4 w-72" />
+                  <Skeleton className="h-11 w-full rounded-lg" />
                 </div>
               ))}
             </div>
-            <div>
-              <Skeleton className="aspect-[3/4] w-full rounded-[32px]" />
+            <div className="lg:col-span-4">
+              <Skeleton className="aspect-[3/4] w-full rounded-2xl" />
             </div>
           </div>
         </div>
@@ -148,23 +144,22 @@ export default function EditRewardPage() {
 
   if (!reward) {
     return (
-      <div className="min-h-screen bg-[#fafafa] dark:bg-black/5 flex items-center justify-center">
+      <div className="min-h-screen bg-[#fafafa] dark:bg-black/10 flex items-center justify-center">
         <div className="text-center space-y-4">
-          <div className="h-16 w-16 rounded-2xl bg-muted flex items-center justify-center mx-auto border border-border">
-            <Ticket className="h-7 w-7 text-muted-foreground/30" />
+          <div className="h-16 w-16 rounded-2xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mx-auto border border-zinc-200 dark:border-zinc-700">
+            <Ticket className="h-7 w-7 text-zinc-400" />
           </div>
           <div className="space-y-1">
-            <h2 className="text-lg font-bold text-foreground">
+            <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
               Reward not found
             </h2>
-            <p className="text-sm text-muted-foreground max-w-xs">
+            <p className="text-xs text-zinc-500 max-w-xs">
               This reward may have been deleted or the link is invalid.
             </p>
           </div>
           <Link href="/gamification/rewards/coupons">
-            <Button variant="outline" className="rounded-full px-6 gap-2">
-              <Sparkles className="h-3.5 w-3.5" />
-              Back to rewards
+            <Button variant="outline" className="rounded-lg px-5 text-xs font-semibold">
+              Back to Reward Coupons
             </Button>
           </Link>
         </div>
@@ -173,32 +168,30 @@ export default function EditRewardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#fafafa] dark:bg-black/5 pb-20">
+    <div className="min-h-screen bg-[#fafafa] dark:bg-black/10 pb-20">
       <RewardFormHeader
         title="Edit Reward"
         subtitle={`Editing · ${reward.title}`}
-        backUrl="/rewards/coupons"
+        backUrl="/gamification/rewards/coupons"
         icon={Sparkles}
       />
 
-      <main className="max-w-[1400px] mx-auto px-6 py-10">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-12">
-          {/* Form */}
-          <div className="space-y-12">
-            <form onSubmit={formik.handleSubmit}>
-              <RewardFormSections formik={formik} rewardId={rewardId} />
-            </form>
-          </div>
-
-          {/* Sticky Preview & Info */}
-          <div className="space-y-6">
-            <RewardPreviewSidebar formik={formik} />
-            <RewardInfoSidebar
-              reward={reward}
-              inventoryRequired={formik.values.inventoryRequired}
-            />
-          </div>
-        </div>
+      <main className="px-6 py-8">
+        <PolarisFormLayout
+          sidebar={
+            <div className="space-y-6">
+              <RewardPreviewSidebar formik={formik} />
+              <RewardInfoSidebar
+                reward={reward}
+                inventoryRequired={formik.values.inventoryRequired}
+              />
+            </div>
+          }
+        >
+          <form onSubmit={formik.handleSubmit} className="space-y-6">
+            <RewardFormSections formik={formik} rewardId={rewardId} />
+          </form>
+        </PolarisFormLayout>
       </main>
 
       <FloatingSavePanel

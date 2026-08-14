@@ -127,7 +127,11 @@ export const MenuEditor = ({ menuItems, onChange }: MenuEditorProps) => {
             )}
           >
             {items.map((item, index) => (
-              <Draggable key={item.id} draggableId={item.id} index={index}>
+              <Draggable
+                key={item.id || `item-${depth}-${index}`}
+                draggableId={String(item.id || `item-${depth}-${index}`)}
+                index={index}
+              >
                 {(provided, snapshot) => (
                   <div
                     ref={provided.innerRef}

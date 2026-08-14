@@ -8,12 +8,10 @@ import { useCreateReward } from "@/graphql/actions/rewards";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { RewardFormSections } from "@/components/rewards/coupons/form/reward-form-sections";
 import { RewardPreviewSidebar } from "@/components/rewards/coupons/form/reward-preview-sidebar";
-import { RewardStudioHeader } from "@/components/rewards/coupons/form/reward-form-header";
-import { couponSchema } from "@/components/rewards/coupons/types";
-import {
-  EcosystemContainer,
-  EcosystemForm,
-} from "@/components/layout/ecosystem";
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { Ticket } from "lucide-react";
 
 export default function CreateCouponPage() {
   const { toast } = useToast();
@@ -60,7 +58,7 @@ export default function CreateCouponPage() {
               title: values.title,
               description: values.description,
               howToClaim: values.howToClaim,
-              categoryId: "cat-002", // Default to internal, can be expanded if category selection is added later
+              categoryId: "cat-002",
               tcCost: values.tcCost,
               inventoryRequired: values.inventoryRequired,
               perUserLimit: values.perUserLimit,
@@ -83,8 +81,8 @@ export default function CreateCouponPage() {
           },
         });
         toast({
-          title: "Boom! Reward is live",
-          description: `${values.title} has been added to the hub.`,
+          title: "Reward Published",
+          description: `${values.title} has been added to the catalog.`,
         });
         setSaved(true);
         setTimeout(() => {
@@ -92,7 +90,7 @@ export default function CreateCouponPage() {
         }, 1500);
       } catch (err: any) {
         toast({
-          title: "Whoops!",
+          title: "Failed to create reward",
           description: err.message,
           variant: "destructive",
         });
@@ -101,40 +99,39 @@ export default function CreateCouponPage() {
   });
 
   return (
-    <EcosystemContainer className="p-0 bg-transparent border-none shadow-none ring-0">
-      <div className="flex flex-col h-full bg-[#fafafa] dark:bg-black/5 overflow-hidden relative">
-        <RewardStudioHeader
-          title="Create Reward Coupon"
-          breadcrumbs={["Gamification", "Rewards", "Reward Coupons", "Create"]}
-          onCancel={() => router.push("/gamification/rewards/coupons")}
-        />
-        {/* Main Content Area */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="max-w-[1400px] mx-auto px-6 py-10">
-            <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-12">
-              <div className="space-y-12">
-                <EcosystemForm onSubmit={formik.handleSubmit}>
-                  <RewardFormSections formik={formik} />
-                </EcosystemForm>
-              </div>
+    <EcosystemWrapper>
+      <EcosystemHeader
+        title="Create Reward Coupon"
+        badgeText="Reward Studio"
+        description="Design and publish coupon rewards redeemable by community members."
+        icon={Ticket}
+        breadcrumbs={[
+          { label: "Gamification", href: "/gamification" },
+          { label: "Rewards", href: "/gamification/rewards" },
+          { label: "Reward Coupons", href: "/gamification/rewards/coupons" },
+          { label: "Create" },
+        ]}
+      />
+      <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0">
+        <PolarisFormLayout
+          sidebar={<RewardPreviewSidebar formik={formik} showStrategy />}
+        >
+          <form onSubmit={formik.handleSubmit} className="space-y-6">
+            <RewardFormSections formik={formik} />
+          </form>
+        </PolarisFormLayout>
+      </EcosystemContainer>
 
-              {/* Sidebar / Preview */}
-              <RewardPreviewSidebar formik={formik} showStrategy />
-            </div>
-          </div>
-        </div>
-
-        <FloatingSavePanel
-          hasChanged={formik.dirty}
-          saved={saved}
-          isSaving={loading}
-          onSave={() => formik.submitForm()}
-          onReset={() => formik.resetForm()}
-          title="Unsaved Changes"
-          description="You have pending changes to this reward."
-          buttonText="Publish Reward"
-        />
-      </div>
-    </EcosystemContainer>
+      <FloatingSavePanel
+        hasChanged={formik.dirty}
+        saved={saved}
+        isSaving={loading}
+        onSave={() => formik.submitForm()}
+        onReset={() => formik.resetForm()}
+        title="Unsaved Reward"
+        description="You have pending changes to this reward configuration."
+        buttonText="Publish Reward"
+      />
+    </EcosystemWrapper>
   );
 }

@@ -3,16 +3,16 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import {
   ShoppingBag,
   ChevronLeft,
   ChevronRight,
   ExternalLink,
+  Tag,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { resolveCdnUrl, getCategoryDefaultImage } from "@/lib/shop-utils";
+import { resolveCdnUrl } from "@/lib/shop-utils";
 
 interface ProductPreviewProps {
   formData: any;
@@ -31,7 +31,6 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
 export function ProductPreview({ formData, imageUrl }: ProductPreviewProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  // Consolidate images: prioritize form images array, then single image, then fallback
   const images =
     formData.images && formData.images.length > 0
       ? formData.images
@@ -56,143 +55,106 @@ export function ProductPreview({ formData, imageUrl }: ProductPreviewProps) {
   };
 
   return (
-    <Card className="overflow-hidden border-border/50 shadow-lg transition-all hover:shadow-xl group">
+    <div className="rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 overflow-hidden shadow-xs">
       {/* Image Carousel */}
-      <div className="relative aspect-[4/3] w-full bg-muted overflow-hidden">
+      <div className="relative aspect-[4/3] w-full bg-zinc-200 dark:bg-zinc-800 overflow-hidden">
         <Image
           src={displayImage}
           alt="Product preview"
           fill
           className={cn(
-            "object-cover transition-transform duration-500 group-hover:scale-105",
+            "object-cover transition-transform duration-500 hover:scale-105",
             isOutOfStock && "grayscale opacity-80",
           )}
         />
 
         {/* Badges */}
-        <div className="absolute top-3 left-3 flex flex-col gap-2">
-          {isOutOfStock && (
-            <Badge variant="destructive" className="font-bold shadow-sm">
+        <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
+          {isOutOfStock ? (
+            <Badge variant="destructive" className="text-[10px] font-bold px-2 py-0.5">
               Out of Stock
             </Badge>
-          )}
-          {!isOutOfStock && (
-            <Badge className="bg-primary/90 hover:bg-primary shadow-sm font-semibold">
-              New Arrival
+          ) : (
+            <Badge className="bg-black/60 text-white backdrop-blur-md border-none text-[10px] font-bold px-2 py-0.5">
+              Available
             </Badge>
           )}
         </div>
 
         {/* Price Tag */}
         {formData.price && (
-          <div className="absolute bottom-3 right-3">
-            <Badge
-              variant="secondary"
-              className="backdrop-blur-md bg-background/80 text-foreground border-border/50 shadow-sm text-lg px-3 py-1.5"
-            >
-              <span className="text-xs mr-1 text-muted-foreground align-top mt-0.5">
-                {formData.currency}
-              </span>
-              {currencySymbol}
-              {formData.price}
-            </Badge>
+          <div className="absolute bottom-2.5 right-2.5">
+            <span className="px-2.5 py-1 rounded-lg bg-zinc-900/90 dark:bg-zinc-100/90 text-white dark:text-zinc-900 backdrop-blur-md text-xs font-extrabold shadow-sm">
+              {currencySymbol}{formData.price}
+            </span>
           </div>
         )}
 
         {/* Carousel Controls */}
         {images.length > 1 && (
-          <div className="absolute inset-0 flex items-center justify-between p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="absolute inset-0 flex items-center justify-between p-2 opacity-0 hover:opacity-100 transition-opacity">
             <Button
+              type="button"
               variant="ghost"
               size="icon"
-              className="h-8 w-8 rounded-full bg-background/50 hover:bg-background/80 backdrop-blur-sm"
+              className="h-7 w-7 rounded-full bg-black/60 hover:bg-black text-white backdrop-blur-sm"
               onClick={prevImage}
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-3.5 w-3.5" />
             </Button>
             <Button
+              type="button"
               variant="ghost"
               size="icon"
-              className="h-8 w-8 rounded-full bg-background/50 hover:bg-background/80 backdrop-blur-sm"
+              className="h-7 w-7 rounded-full bg-black/60 hover:bg-black text-white backdrop-blur-sm"
               onClick={nextImage}
             >
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-3.5 w-3.5" />
             </Button>
-          </div>
-        )}
-
-        {/* Image Indicators */}
-        {images.length > 1 && (
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-            {images.map((_: any, idx: number) => (
-              <div
-                key={idx}
-                className={cn(
-                  "w-1.5 h-1.5 rounded-full shadow-sm transition-all",
-                  idx === currentImageIndex ? "bg-white w-3" : "bg-white/50",
-                )}
-              />
-            ))}
           </div>
         )}
       </div>
 
-      <CardContent className="p-5 space-y-4">
-        <div className="space-y-1.5">
-          <div className="flex items-start justify-between gap-2">
-            <h3 className="font-semibold text-xl leading-tight truncate">
+      {/* Product Details */}
+      <div className="p-4 space-y-3">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0 flex-1">
+            <h3 className="font-bold text-sm text-zinc-900 dark:text-zinc-100 truncate">
               {formData.title || "Product Name"}
             </h3>
             {formData.category && (
-              <Badge
-                variant="outline"
-                className="text-[10px] shrink-0 uppercase tracking-wider"
-              >
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 capitalize flex items-center gap-1">
+                <Tag className="h-3 w-3" />
                 {formData.category}
-              </Badge>
+              </p>
             )}
           </div>
-          <p className="text-sm text-muted-foreground line-clamp-2 min-h-[2.5em]">
-            {formData.description || "Product description will appear here..."}
-          </p>
         </div>
 
+        <p className="text-[11px] text-zinc-600 dark:text-zinc-400 line-clamp-2 leading-relaxed">
+          {formData.description || "Product description will appear here..."}
+        </p>
+
         {/* Variants Summary */}
-        {formData.hasVariants && (
-          <div className="rounded-lg bg-muted/40 p-3 text-xs space-y-2 border border-border/50">
-            <div className="flex items-center gap-2 font-medium text-foreground">
-              <ShoppingBag className="w-3.5 h-3.5" />
-              <span>Options Available</span>
+        {formData.hasVariants && formData.options && formData.options.length > 0 && (
+          <div className="rounded-lg bg-zinc-100/80 dark:bg-zinc-800/80 p-2.5 text-xs space-y-1.5 border border-zinc-200/60 dark:border-zinc-700/60">
+            <div className="flex items-center gap-1.5 font-bold text-[10px] uppercase tracking-wider text-zinc-500">
+              <ShoppingBag className="w-3 h-3" />
+              <span>Configured Options</span>
             </div>
             <div className="flex flex-wrap gap-1">
-              {formData.options?.map((opt: any, idx: number) => (
-                <Badge
+              {formData.options.map((opt: any, idx: number) => (
+                <span
                   key={idx}
-                  variant="secondary"
-                  className="text-[10px] px-1.5 h-5 bg-background border-border/50"
+                  className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300"
                 >
-                  {opt.name}: {opt.values.length}
-                </Badge>
-              ))}
-              {!formData.options?.length && (
-                <span className="text-muted-foreground italic">
-                  No options defined yet
+                  {opt.name}: {opt.values?.length || 0}
                 </span>
-              )}
+              ))}
             </div>
           </div>
         )}
-      </CardContent>
-
-      <CardFooter className="p-5 pt-0">
-        <Button
-          className="w-full gap-2 font-semibold shadow-sm"
-          disabled={isOutOfStock}
-        >
-          {isOutOfStock ? "Unavailable" : "Buy Now"}
-          {!isOutOfStock && <ExternalLink className="w-4 h-4" />}
-        </Button>
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
   );
 }

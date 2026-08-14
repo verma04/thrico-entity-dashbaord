@@ -4,23 +4,12 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import {
-  RefreshCw,
   Trophy,
-  Settings,
-  History,
   Loader2,
   Plus,
-  Users,
-  Activity,
-  LayoutGrid,
   Coins,
-  Clock,
-  Sparkles,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
-import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -31,31 +20,31 @@ import {
   DialogFooter,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { SectionCard } from "../spin-wheel/section-card";
 import {
   useGetRewards,
   useGetMatchWinData,
-  useGetMatchWinPlays,
   useUpdateMatchWinConfig,
   useUpdateMatchWinSymbol,
   useUpsertMatchWinCombination,
   useDeleteMatchWinCombination,
-  useGetSpinScratchStats,
-  useGetInitialMatchWinConfig,
   useInitializeMatchWinConfig,
 } from "@/graphql/actions/rewards";
 import { useGetEntityCurrencyConfig } from "@/graphql/actions/currency";
-import { uniqueId } from "lodash";
 
 import { MatchWinCombination, MatchWinSymbol } from "./types";
-import { MatchWinStats } from "./match-win-stats";
-import { MatchWinActivityLog } from "./match-win-activity-log";
 import { SymbolsTable, CombinationsTable } from "./config-tables";
 import { EconomySidebar } from "./economy-sidebar";
 import { SymbolDialog } from "./symbol-dialog";
 import { CombinationDialog } from "./combination-dialog";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { EcosystemHeader } from "@/components/layout/ecosystem";
+import {
+  PolarisFormLayout,
+  PolarisFormCard,
+  PolarisPresetChips,
+} from "@/components/gamification/shared/polaris-form-ui";
+
+const COST_PRESETS = [5, 10, 25, 50, 100];
 
 export function MatchWinManager() {
   const {
@@ -63,21 +52,13 @@ export function MatchWinManager() {
     refetch: refetchData,
     loading: dataLoading,
   } = useGetMatchWinData();
-  const {
-    data: playsData,
-    refetch: refetchPlays,
-    loading: playsLoading,
-  } = useGetMatchWinPlays({
-    pagination: { page: 1, limit: 10 },
-  });
-  const { data: statsData, refetch: refetchStats } = useGetSpinScratchStats();
   const { data: rewardsData } = useGetRewards({
     status: "ACTIVE",
     pagination: { page: 1, limit: 100 },
   });
   const { data: currencyConfig } = useGetEntityCurrencyConfig();
   const currencyName =
-    currencyConfig?.getEntityCurrencyConfig?.currencyName || "Tokens";
+    currencyConfig?.getEntityCurrencyConfig?.currencyName || "Points";
 
   const [updateConfig, { loading: savingConfig }] = useUpdateMatchWinConfig();
   const [updateSymbol, { loading: updatingSymbol }] = useUpdateMatchWinSymbol();
@@ -184,7 +165,6 @@ export function MatchWinManager() {
       setIsActive(config.isActive ?? false);
       setCostPerPlay(config.costPerPlay ?? 25);
       setMaxPlaysPerDay(config.maxPlaysPerDay ?? 3);
-      setFestivalMode(config.festivalMode ?? false);
     }
   };
 
@@ -236,7 +216,6 @@ export function MatchWinManager() {
     }
     const isNoRewards = editingCombination.type === "NO_REWARDS";
 
-    // Client-side validation: if it is a winning combination, make sure all 3 symbols are selected!
     if (!isNoRewards) {
       const s1 = editingCombination.symbol1Id || editingCombination.symbol1?.id;
       const s2 = editingCombination.symbol2Id || editingCombination.symbol2?.id;
@@ -293,176 +272,194 @@ export function MatchWinManager() {
       });
       toast.success("Combination deleted");
       refetchData();
-    } catch (err) {
+    } catch {
       toast.error("Failed to delete combination");
     }
   };
 
-  const isMutating =
-    savingConfig ||
-    updatingSymbol ||
-    upsertingCombination ||
-    deletingCombination ||
-    initializingConfig;
-
   if (dataLoading) {
     return (
-      <div className="p-6 space-y-4 animate-pulse">
-        <div className="h-24 bg-muted rounded-xl" />
-        <div className="grid grid-cols-3 gap-4">
-          <div className="col-span-2 h-64 bg-muted rounded-xl" />
-          <div className="h-64 bg-muted rounded-xl" />
-        </div>
+      <div className="flex h-96 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-zinc-900 dark:text-zinc-100" />
       </div>
     );
   }
 
   if (!config) {
     return (
-      <div className="flex flex-col items-center justify-center p-16 text-center space-y-5">
-        <div className="h-16 w-16 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center">
-          <Trophy className="h-7 w-7 text-indigo-500" />
+      <div className="max-w-md mx-auto text-center space-y-6 py-20">
+        <div className="h-16 w-16 bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded-2xl flex items-center justify-center mx-auto border border-zinc-200 dark:border-zinc-700">
+          <Trophy className="h-8 w-8" />
         </div>
-        <div className="max-w-sm space-y-1.5">
-          <h3 className="text-base font-semibold text-foreground">
+        <div className="space-y-2">
+          <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
             Initialize Match & Win
-          </h3>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            Match & Win hasn&apos;t been set up yet. Initialize the system to
-            configure symbols and reward combinations.
+          </h2>
+          <p className="text-zinc-500 text-xs leading-relaxed">
+            Match & Win hasn&apos;t been set up yet. Initialize the engine to configure symbols and winning combinations.
           </p>
         </div>
         <Button
           onClick={handleInitializeConfig}
           disabled={initializingConfig}
-          className="gap-2"
+          className="w-full h-11 text-xs font-bold bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-100 dark:text-zinc-900 rounded-xl shadow-xs"
         >
-          {initializingConfig ? "Initializing..." : "Initialize System"}
+          {initializingConfig && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+          Initialize Game Engine
         </Button>
       </div>
     );
   }
 
   return (
-    <>
-      <EcosystemHeader
-        title="Match & Win"
-        badgeText="Engagement"
-        description={`Configure the 3-column symbol matching game — set ${currencyName || "tokens"} costs, probabilities, rewards, and campaign windows.`}
-        icon={Trophy}
-        breadcrumbs={[
-          { label: "Gamification", href: "/gamification" },
-          { label: "Engagement Games", href: "/gamification/engagement-games" },
-          { label: "Match & Win" },
-        ]}
-        actions={
-          <EcosystemActionBar
-            shadow="none"
-            className="p-0 border-none bg-transparent"
-          >
-            <EcosystemActionBar.Group>
-              <div
-                className={cn(
-                  "h-2 w-2 rounded-full animate-pulse",
-                  isActive ? "bg-emerald-500" : "bg-amber-500",
-                )}
-              />
-              <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">
-                {isActive ? "Live" : "Paused"}
-              </span>
-              <EcosystemActionBar.Separator />
-              <Users className="h-3.5 w-3.5 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground whitespace-nowrap">
-                {playsData?.getMatchWinPlays?.length ?? 0} recent plays
-              </span>
-            </EcosystemActionBar.Group>
-          </EcosystemActionBar>
-        }
-      />
+    <div className="flex flex-col min-h-screen bg-[#fafafa] dark:bg-black/10 overflow-hidden relative">
+      <div className="border-b border-zinc-200/80 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md">
+        <div className="max-w-[1040px] mx-auto px-4 sm:px-6 md:px-8 py-3">
+          <EcosystemHeader
+            title="Match & Win"
+            badgeText="Interactive Game"
+            description={`Configure the 3-column slot matching game — set ${currencyName} cost per play, winning combinations, and odds.`}
+            icon={Trophy}
+            breadcrumbs={[
+              { label: "Gamification", href: "/gamification" },
+              { label: "Engagement Games", href: "/gamification/engagement-games" },
+              { label: "Match & Win" },
+            ]}
+          />
+        </div>
+      </div>
 
-      <EcosystemContainer className="p-6 space-y-5">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-          {/* Left col: 2/3 */}
-          <div className="lg:col-span-2 space-y-5">
-            <div className="grid grid-cols-2 gap-4">
-              <SectionCard
-                icon={Trophy}
-                iconBg="bg-indigo-50"
-                iconColor="text-indigo-600"
-                title="System Status"
-              >
-                <div className="flex items-center justify-between py-1">
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">
-                      {isActive ? "Active" : "Paused"}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Match & Win availability
+      <div className="flex-1 overflow-y-auto">
+        <PolarisFormLayout
+          sidebar={
+            <EconomySidebar
+              costPerPlay={costPerPlay}
+              maxPlaysPerDay={maxPlaysPerDay}
+              avgPayout={avgPayout}
+              profitMargin={profitMargin}
+              currencyName={currencyName}
+            />
+          }
+        >
+          <div className="space-y-6">
+            {/* Step 1: Game Economics & State */}
+            <PolarisFormCard
+              step={1}
+              title="Game Economics & State"
+              description="Control availability, participation cost in points, and daily play velocity."
+              badge="Game Rules"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {/* Status Switch Card */}
+                <div className="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/30 flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label
+                      htmlFor="matchWinActive"
+                      className="text-xs font-semibold text-zinc-800 dark:text-zinc-200 block cursor-pointer"
+                    >
+                      Game Status
+                    </Label>
+                    <p className="text-[11px] text-zinc-500">
+                      {isActive ? "Live and playable by members" : "Game currently paused"}
                     </p>
                   </div>
                   <Switch
+                    id="matchWinActive"
                     checked={isActive}
                     onCheckedChange={setIsActive}
-                    className="data-[state=checked]:bg-emerald-500"
+                    className="data-[state=checked]:bg-zinc-900 dark:data-[state=checked]:bg-zinc-100"
                   />
                 </div>
-              </SectionCard>
 
-              <SectionCard
-                icon={Coins}
-                iconBg="bg-amber-50"
-                iconColor="text-amber-600"
-                title="Cost per Play (Coins)"
-              >
-                <Input
-                  type="number"
-                  min={1}
-                  value={costPerPlay}
-                  onChange={(e) => setCostPerPlay(Number(e.target.value))}
-                  className="font-mono h-9"
-                />
-              </SectionCard>
-            </div>
+                {/* Daily Cap */}
+                <div className="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/30 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label
+                      htmlFor="dailyCap"
+                      className="text-xs font-semibold text-zinc-800 dark:text-zinc-200"
+                    >
+                      Daily Limit / Member
+                    </Label>
+                    <span className="text-[10px] text-zinc-400">
+                      Velocity Control
+                    </span>
+                  </div>
+                  <div className="relative">
+                    <Input
+                      id="dailyCap"
+                      type="number"
+                      min={1}
+                      value={maxPlaysPerDay}
+                      onChange={(e) => setMaxPlaysPerDay(Number(e.target.value))}
+                      className="h-10 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-xs font-semibold shadow-none"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-zinc-400 font-medium">
+                      plays / day
+                    </span>
+                  </div>
+                </div>
+              </div>
 
-            <SectionCard
-              icon={Clock}
-              iconBg="bg-blue-50"
-              iconColor="text-blue-600"
-              title="Campaign Schedule"
-              description="Daily limits and campaign window"
-            >
-              <div className="space-y-1.5 max-w-xs">
-                <Label className="text-xs font-semibold text-muted-foreground">
-                  Daily Cap
+              {/* Cost Per Play Input with Presets */}
+              <div className="space-y-3 pt-4 border-t border-zinc-100 dark:border-zinc-800">
+                <Label
+                  htmlFor="costPerPlay"
+                  className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                >
+                  Cost per Play ({currencyName})
                 </Label>
-                <Input
-                  type="number"
-                  min={1}
-                  value={maxPlaysPerDay}
-                  onChange={(e) => setMaxPlaysPerDay(Number(e.target.value))}
-                />
-              </div>
-            </SectionCard>
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  <div className="relative flex-1">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-900 dark:text-zinc-100">
+                      <Coins className="h-4 w-4" />
+                    </div>
+                    <Input
+                      id="costPerPlay"
+                      type="number"
+                      min={1}
+                      value={costPerPlay}
+                      onChange={(e) => setCostPerPlay(Number(e.target.value))}
+                      className="h-11 pl-10 pr-16 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-base font-bold text-zinc-900 dark:text-zinc-100 shadow-none focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+                    />
+                    <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-xs font-bold text-zinc-400 uppercase tracking-wider">
+                      {currencyName.substring(0, 3).toUpperCase()}
+                    </div>
+                  </div>
 
-            <SectionCard
-              icon={LayoutGrid}
-              iconBg="bg-slate-50"
-              iconColor="text-slate-600"
-              title="Symbol Matrix"
-              description="The 3 symbols used in the matching game"
+                  <PolarisPresetChips
+                    presets={COST_PRESETS}
+                    currentValue={Number(costPerPlay)}
+                    onSelect={(v) => setCostPerPlay(v)}
+                    prefix=""
+                  />
+                </div>
+              </div>
+            </PolarisFormCard>
+
+            {/* Step 2: Symbol Matrix */}
+            <PolarisFormCard
+              step={2}
+              title="Game Reel Icons"
+              description="Customize the 3 icon assets used across the slot reels."
+              badge={`${dbSymbols.length} Symbols`}
             >
-              <div className="p-1">
-                <SymbolsTable symbols={dbSymbols} onEdit={handleEditSymbol} />
-              </div>
-            </SectionCard>
+              <SymbolsTable symbols={dbSymbols} onEdit={handleEditSymbol} />
+            </PolarisFormCard>
 
-            <SectionCard
-              icon={Trophy}
-              iconBg="bg-amber-50"
-              iconColor="text-amber-600"
+            {/* Step 3: Win Logic Combinations */}
+            <PolarisFormCard
+              step={3}
               title="Reward Combinations"
-              description="Winning symbol combinations and their rewards"
-              action={
+              description="Winning symbol patterns, jackpot multiplier values, and probability odds."
+              badge={`${dbCombinations.length} Combinations`}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                  Total Allocated Win Rate:{" "}
+                  <strong className="text-zinc-900 dark:text-zinc-100">
+                    {totalProbability.toFixed(1)}%
+                  </strong>
+                </p>
                 <Button
                   size="sm"
                   onClick={() => {
@@ -475,51 +472,36 @@ export function MatchWinManager() {
                     });
                     setIsCombinationDialogOpen(true);
                   }}
-                  className="gap-1.5 h-7 text-xs"
+                  className="gap-1.5 h-8 text-xs font-bold bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-100 dark:text-zinc-900 rounded-lg shadow-xs"
                 >
-                  <Plus className="h-3 w-3" /> Add
+                  <Plus className="h-3.5 w-3.5" /> Add Combination
                 </Button>
-              }
-            >
-              <div className="p-1">
-                <CombinationsTable
-                  combinations={dbCombinations}
-                  totalProbability={totalProbability}
-                  onEdit={(c) => {
-                    setEditingCombination(c);
-                    setIsCombinationDialogOpen(true);
-                  }}
-                  onDelete={setDeletingCombinationId}
-                  onAdd={() => {
-                    setEditingCombination({
-                      key: "",
-                      type: "COINS",
-                      value: 0,
-                      probability: 10,
-                      maxWins: 0,
-                    });
-                    setIsCombinationDialogOpen(true);
-                  }}
-                  currencyName={currencyName}
-                />
               </div>
-            </SectionCard>
-          </div>
 
-          {/* Right col: Preview + Economy */}
-          <div className="space-y-5">
-            <div className="sticky top-6 space-y-6">
-              <EconomySidebar
-                costPerPlay={costPerPlay}
-                maxPlaysPerDay={maxPlaysPerDay}
-                avgPayout={avgPayout}
-                profitMargin={profitMargin}
+              <CombinationsTable
+                combinations={dbCombinations}
+                totalProbability={totalProbability}
+                onEdit={(c) => {
+                  setEditingCombination(c);
+                  setIsCombinationDialogOpen(true);
+                }}
+                onDelete={setDeletingCombinationId}
+                onAdd={() => {
+                  setEditingCombination({
+                    key: "",
+                    type: "COINS",
+                    value: 0,
+                    probability: 10,
+                    maxWins: 0,
+                  });
+                  setIsCombinationDialogOpen(true);
+                }}
                 currencyName={currencyName}
               />
-            </div>
+            </PolarisFormCard>
           </div>
-        </div>
-      </EcosystemContainer>
+        </PolarisFormLayout>
+      </div>
 
       {/* Dialogs */}
       <SymbolDialog
@@ -550,8 +532,9 @@ export function MatchWinManager() {
         onSave={handleSaveConfig}
         onReset={handleReset}
         saved={saved}
-        title="Unsaved Changes"
-        description="You have modified the match win game configuration."
+        title="Unsaved Configuration"
+        description="You have pending changes to the Match & Win configuration."
+        buttonText="Save Configuration"
       />
 
       {/* Delete Confirmation Dialog */}
@@ -559,12 +542,11 @@ export function MatchWinManager() {
         open={!!deletingCombinationId}
         onOpenChange={(open) => !open && setDeletingCombinationId(null)}
       >
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md rounded-2xl">
           <DialogHeader>
             <DialogTitle>Confirm Delete</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete this combination? This action
-              cannot be undone.
+              Are you sure you want to delete this combination? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="sm:justify-end gap-2">
@@ -572,6 +554,7 @@ export function MatchWinManager() {
               variant="outline"
               size="sm"
               onClick={() => setDeletingCombinationId(null)}
+              className="rounded-lg text-xs font-semibold"
             >
               Cancel
             </Button>
@@ -585,12 +568,13 @@ export function MatchWinManager() {
                 }
               }}
               disabled={deletingCombination}
+              className="rounded-lg text-xs font-bold"
             >
-              {deletingCombination ? "Deleting..." : "Delete"}
+              {deletingCombination ? "Deleting..." : "Delete Combination"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 }

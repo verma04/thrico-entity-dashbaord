@@ -11,6 +11,9 @@ import {
   Zap,
   Info,
   Upload,
+  Link as LinkIcon,
+  Layers,
+  Coins,
 } from "lucide-react";
 import { ImageUploadWithCrop } from "@/components/ui/image-upload-with-crop";
 import { Input } from "@/components/ui/input";
@@ -25,7 +28,6 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
-import { CreatorSection } from "./creator-section";
 import { useGetEntityCurrencyConfig } from "@/graphql/actions/currency";
 import Link from "next/link";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
@@ -36,11 +38,18 @@ import {
   useGetVouchers,
 } from "@/graphql/actions/rewards";
 import { Button } from "@/components/ui/button";
+import {
+  PolarisFormCard,
+  PolarisPresetChips,
+  PolarisInfoBanner,
+} from "@/components/gamification/shared/polaris-form-ui";
 
 interface RewardFormSectionsProps {
   formik: any;
   rewardId?: string;
 }
+
+const COST_PRESETS = [10, 50, 100, 250, 500];
 
 export function RewardFormSections({
   formik,
@@ -48,9 +57,7 @@ export function RewardFormSections({
 }: RewardFormSectionsProps) {
   const { data: currencyConfig } = useGetEntityCurrencyConfig();
   const [uploadVouchers, { loading: uploading }] = useUploadVouchers();
-  const { data: voucherData, refetch: refetchVoucher } = useGetVoucher(
-    rewardId || "",
-  );
+  const { data: voucherData } = useGetVoucher(rewardId || "");
   const { data: vouchersListData } = useGetVouchers({
     rewardId: rewardId || "",
     pagination: { page: 1, limit: 100 },
@@ -180,38 +187,39 @@ export function RewardFormSections({
     setUploadData([]);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
+
   const currencyName =
-    currencyConfig?.getEntityCurrencyConfig?.currencyName ||
-    "Your currency name";
+    currencyConfig?.getEntityCurrencyConfig?.currencyName || "Points";
   const err = (field: string) =>
     formik.touched[field] && formik.errors[field] ? (
-      <p className="text-[10px] font-medium text-rose-500 mt-1 dark:text-rose-400">
+      <p className="text-[11px] font-medium text-rose-500 mt-1 dark:text-rose-400">
         {formik.errors[field] as string}
       </p>
     ) : null;
 
   return (
-    <div className="space-y-12">
-      {/* 1. Identity */}
-      <CreatorSection
-        icon={Ticket}
+    <div className="space-y-6">
+      {/* 1. Identity & Presentation */}
+      <PolarisFormCard
+        step={1}
         title="Identity & Presentation"
-        subtitle="Update what members see when browsing rewards."
-        accent="indigo"
+        description="Define what members see when browsing rewards in your community catalog."
+        badge="Reward Info"
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-2">
-          <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+          {/* Left Column: Title, Description, URL */}
+          <div className="md:col-span-7 space-y-4">
             <div className="space-y-2">
               <Label
                 htmlFor="title"
-                className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground"
+                className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
               >
-                Title
+                Reward Title
               </Label>
               <Input
                 id="title"
-                placeholder="e.g. ₹500 Amazon Gift Card"
-                className="bg-white dark:bg-muted/10 border-border/40 focus:ring-1 focus:ring-indigo-500/20"
+                placeholder="e.g. ₹500 Amazon Gift Card, 20% Off Merch"
+                className="h-11 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 shadow-none font-medium"
                 {...formik.getFieldProps("title")}
               />
               {err("title")}
@@ -220,15 +228,15 @@ export function RewardFormSections({
             <div className="space-y-2">
               <Label
                 htmlFor="description"
-                className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground"
+                className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
               >
                 Detailed Description
               </Label>
               <Textarea
                 id="description"
                 rows={4}
-                placeholder="Describe the value and instructions..."
-                className="bg-white dark:bg-muted/10 border-border/40 resize-none"
+                placeholder="Describe what members receive and highlight key terms..."
+                className="bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 shadow-none resize-none leading-relaxed"
                 {...formik.getFieldProps("description")}
               />
               {err("description")}
@@ -237,27 +245,31 @@ export function RewardFormSections({
             <div className="space-y-2">
               <Label
                 htmlFor="url"
-                className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground"
+                className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
               >
-                Reward URL
+                Reward URL (Optional)
               </Label>
-              <Input
-                id="url"
-                type="url"
-                placeholder="https://example.com/reward"
-                className="bg-white dark:bg-muted/10 border-border/40 focus:ring-1 focus:ring-indigo-500/20"
-                {...formik.getFieldProps("url")}
-              />
+              <div className="relative">
+                <LinkIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+                <Input
+                  id="url"
+                  type="url"
+                  placeholder="https://yourstore.com/redeem"
+                  className="pl-10 h-11 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 shadow-none text-xs font-medium"
+                  {...formik.getFieldProps("url")}
+                />
+              </div>
               {err("url")}
             </div>
           </div>
 
-          <div className="space-y-6">
+          {/* Right Column: Banner & Active Switch */}
+          <div className="md:col-span-5 space-y-4">
             <div className="space-y-2">
-              <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-                Cover Image
+              <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                Cover Banner
               </Label>
-              <div className="rounded-xl border border-dashed border-border/60 p-1 bg-white dark:bg-black/5 overflow-hidden">
+              <div className="rounded-xl border border-zinc-200 dark:border-zinc-700 p-1 bg-zinc-50/50 dark:bg-zinc-800/30 overflow-hidden">
                 <ImageUploadWithCrop
                   currentImage={formik.values.image}
                   onImageUpdate={(url) => formik.setFieldValue("image", url)}
@@ -269,16 +281,16 @@ export function RewardFormSections({
               </div>
             </div>
 
-            <div className="bg-white dark:bg-muted/5 rounded-2xl border border-border/40 p-5 flex items-center justify-between shadow-sm">
+            <div className="bg-zinc-50/50 dark:bg-zinc-800/40 rounded-xl border border-zinc-200 dark:border-zinc-700 p-4 flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label
                   htmlFor="isActive"
-                  className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground block"
+                  className="text-xs font-semibold text-zinc-800 dark:text-zinc-200 block cursor-pointer"
                 >
-                  Active Status
+                  Active in Catalog
                 </Label>
-                <p className="text-[10px] text-muted-foreground">
-                  Allow members to view and redeem this reward.
+                <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                  Allow members to view and claim.
                 </p>
               </div>
               <Switch
@@ -296,84 +308,94 @@ export function RewardFormSections({
           </div>
         </div>
 
-        {/* Full-width Claim Instructions */}
-        <div className="space-y-2 mt-8 pt-6 border-t border-border/25">
+        {/* Claim Instructions */}
+        <div className="space-y-2 pt-4 border-t border-zinc-100 dark:border-zinc-800">
           <Label
             htmlFor="howToClaim"
-            className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground block"
+            className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 block"
           >
             How to Claim Instructions
           </Label>
           <RichTextEditor
             value={formik.values.howToClaim || ""}
             onChange={(val) => formik.setFieldValue("howToClaim", val)}
-            placeholder="Step-by-step instructions on how users can claim or redeem this reward..."
-            minHeight="140px"
+            placeholder="Step-by-step instructions on how members can claim or redeem this reward..."
+            minHeight="130px"
           />
           {err("howToClaim")}
         </div>
-      </CreatorSection>
+      </PolarisFormCard>
 
-      {/* 2. Economics */}
-      <CreatorSection
-        icon={Settings}
+      {/* 2. Reward Economics */}
+      <PolarisFormCard
+        step={2}
         title="Reward Economics"
-        subtitle="Adjust the value, cost, and validity period."
-        accent="amber"
+        description="Adjust point pricing, discount format, and reward expiration rules."
+        badge="Pricing Engine"
       >
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          <div className="space-y-2">
+        {/* Point Cost Field with Quick Presets */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
             <Label
               htmlFor="tcCost"
-              className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1"
+              className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5"
             >
-              Price ({currencyName})
+              Point Cost ({currencyName})
               <Link
                 href="/currency/economics"
                 target="_blank"
                 title={`Manage ${currencyName} Economics`}
               >
-                <Info className="h-3 w-3 text-indigo-500 hover:text-indigo-600 transition-colors cursor-pointer" />
+                <Info className="h-3.5 w-3.5 text-zinc-900 dark:text-zinc-100 hover:opacity-80 transition-opacity cursor-pointer" />
               </Link>
             </Label>
-            <div className="relative">
-              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-[10px] font-bold">
-                {currencyName.substring(0, 3).toUpperCase()}
+            <span className="text-[11px] text-zinc-400 font-medium">
+              Min. 1 {currencyName}
+            </span>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <div className="relative flex-1">
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-900 dark:text-zinc-100">
+                <Coins className="h-4 w-4" />
               </div>
               <Input
                 id="tcCost"
                 type="number"
                 min={1}
-                className={cn(
-                  "pl-10 bg-white dark:bg-muted/10 border-border/40",
-                  formik.touched.tcCost && formik.errors.tcCost
-                    ? "border-rose-400 focus:ring-rose-500/20"
-                    : "",
-                )}
+                className="h-11 pl-10 pr-16 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-base font-bold text-zinc-900 dark:text-zinc-100 shadow-none focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
                 {...formik.getFieldProps("tcCost")}
               />
+              <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-xs font-bold text-zinc-400 uppercase tracking-wider">
+                {currencyName.substring(0, 3).toUpperCase()}
+              </div>
             </div>
-            {err("tcCost")}
-            {!formik.errors.tcCost && (
-              <p className="text-[9px] text-muted-foreground">
-                Min. 1 {currencyName} — cannot be free.
-              </p>
-            )}
-          </div>
 
+            <PolarisPresetChips
+              presets={COST_PRESETS}
+              currentValue={Number(formik.values.tcCost)}
+              onSelect={(v) => formik.setFieldValue("tcCost", v)}
+              prefix=""
+            />
+          </div>
+          {err("tcCost")}
+        </div>
+
+        {/* Discount & Expiration Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-zinc-100 dark:border-zinc-800">
           <div className="space-y-2">
-            <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-              Type
+            <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+              Discount Type
             </Label>
             <Select
               onValueChange={(v) => formik.setFieldValue("discountType", v)}
               value={formik.values.discountType}
             >
-              <SelectTrigger className="bg-white dark:bg-muted/10 border-border/40">
+              <SelectTrigger className="h-10 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-xs shadow-none">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Flat">Flat Discount</SelectItem>
+                <SelectItem value="Flat">Flat Value</SelectItem>
                 <SelectItem value="Percentage">Percentage %</SelectItem>
                 <SelectItem value="Access">Exclusive Access</SelectItem>
               </SelectContent>
@@ -383,14 +405,14 @@ export function RewardFormSections({
           <div className="space-y-2">
             <Label
               htmlFor="discountValue"
-              className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground"
+              className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
             >
-              Value
+              Discount Value
             </Label>
             <Input
               id="discountValue"
-              placeholder="e.g. 500"
-              className="bg-white dark:bg-muted/10 border-border/40"
+              placeholder="e.g. 500 or 20%"
+              className="h-10 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-xs shadow-none font-medium"
               {...formik.getFieldProps("discountValue")}
             />
             {err("discountValue")}
@@ -399,14 +421,14 @@ export function RewardFormSections({
           <div className="space-y-2">
             <Label
               htmlFor="validityDays"
-              className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground"
+              className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
             >
               Validity (Days)
             </Label>
             <Input
               id="validityDays"
               type="number"
-              className="bg-white dark:bg-muted/10 border-border/40"
+              className="h-10 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-xs shadow-none font-medium"
               name="validityDays"
               value={formik.values.validityDays}
               onChange={(e) => {
@@ -415,7 +437,6 @@ export function RewardFormSections({
                 if (!isNaN(days)) {
                   const date = new Date();
                   date.setDate(date.getDate() + days);
-                  // Adjust for local timezone
                   const offset = date.getTimezoneOffset() * 60000;
                   const localISOTime = new Date(date.getTime() - offset)
                     .toISOString()
@@ -433,20 +454,20 @@ export function RewardFormSections({
           <div className="space-y-2">
             <Label
               htmlFor="expiryDate"
-              className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground"
+              className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
             >
               Expiry Date
             </Label>
             <Input
               id="expiryDate"
               type="datetime-local"
-              className="bg-white dark:bg-muted/10 border-border/40"
+              className="h-10 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-xs shadow-none font-medium"
               name="expiryDate"
               value={formik.values.expiryDate}
               onClick={(e) => {
                 try {
                   (e.target as any).showPicker();
-                } catch (err) {
+                } catch {
                   // Ignore if unsupported
                 }
               }}
@@ -474,337 +495,193 @@ export function RewardFormSections({
             {err("expiryDate")}
           </div>
         </div>
-      </CreatorSection>
+      </PolarisFormCard>
 
-      {/* 3. Delivery */}
-      <CreatorSection
-        icon={PackageCheck}
-        title="Delivery & Supply"
-        subtitle="Manage stock tracking and redemption limits."
-        accent="emerald"
+      {/* 3. Delivery & Fulfillment */}
+      <PolarisFormCard
+        step={3}
+        title="Delivery & Fulfillment"
+        description="Configure reward distribution channels, voucher inventories, and supply limits."
+        badge="Fulfillment Engine"
       >
-        <div className="bg-white dark:bg-muted/5 rounded-2xl border border-border/40 p-6 space-y-8 shadow-sm">
-          <div className="space-y-8">
-            {/* 1. Reward Mechanism Area */}
-            <div className="space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="space-y-1">
-                  <h3 className="text-[12px] font-bold text-foreground uppercase tracking-wider">
-                    1. Reward Mechanism
-                  </h3>
-                  <p className="text-[11px] text-muted-foreground font-medium">
-                    Choose how members can earn or claim this reward.
-                  </p>
-                </div>
-                {/* Select All toggle */}
-                {(() => {
-                  const ALL_IDS = [
-                    "COUPON",
-                    "SPIN_WHEEL",
-                    "SCRATCH_CARD",
-                    "MATCH_AND_WIN",
-                  ];
-                  const selected: string[] = Array.isArray(
-                    formik.values.rewardMechanism,
-                  )
-                    ? formik.values.rewardMechanism
-                    : formik.values.rewardMechanism
-                      ? [formik.values.rewardMechanism]
-                      : [];
-                  const allSelected = ALL_IDS.every((id) =>
-                    selected.includes(id),
-                  );
-                  return (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (allSelected) {
-                          formik.setFieldValue("rewardMechanism", ["COUPON"]);
-                        } else {
-                          formik.setFieldValue("rewardMechanism", ALL_IDS);
-                          formik.setFieldValue("couponType", "ONE_TO_MANY");
-                          formik.setFieldValue("inventoryRequired", false);
-                          formik.setFieldValue("totalUsageLimit", 0);
-                          formik.setFieldValue("perUserLimit", 0);
-                        }
-                      }}
-                      className={cn(
-                        "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold transition-all border shrink-0",
-                        allSelected
-                          ? "bg-gradient-to-r from-indigo-600 via-violet-600 to-rose-500 border-transparent text-white shadow-md"
-                          : "bg-white dark:bg-muted/10 border-border/40 text-muted-foreground hover:border-indigo-300 hover:text-indigo-600",
-                      )}
-                    >
-                      <Zap className="h-2.5 w-2.5" />
-                      {allSelected ? "All Selected" : "Select All"}
-                    </button>
-                  );
-                })()}
-              </div>
+        {/* Step 3.1: Reward Mechanism Channels */}
+        <div className="space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+              Distribution Channels
+            </Label>
+            {(() => {
+              const ALL_IDS = [
+                "COUPON",
+                "SPIN_WHEEL",
+                "SCRATCH_CARD",
+                "MATCH_AND_WIN",
+              ];
+              const selected: string[] = Array.isArray(
+                formik.values.rewardMechanism,
+              )
+                ? formik.values.rewardMechanism
+                : formik.values.rewardMechanism
+                  ? [formik.values.rewardMechanism]
+                  : [];
+              const allSelected = ALL_IDS.every((id) =>
+                selected.includes(id),
+              );
+              return (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (allSelected) {
+                      formik.setFieldValue("rewardMechanism", ["COUPON"]);
+                    } else {
+                      formik.setFieldValue("rewardMechanism", ALL_IDS);
+                      formik.setFieldValue("couponType", "ONE_TO_MANY");
+                      formik.setFieldValue("inventoryRequired", false);
+                      formik.setFieldValue("totalUsageLimit", 0);
+                      formik.setFieldValue("perUserLimit", 0);
+                    }
+                  }}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-1 rounded-lg text-[11px] font-semibold transition-all border shrink-0 cursor-pointer",
+                    allSelected
+                      ? "bg-zinc-900 text-white border-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 shadow-xs"
+                      : "bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100",
+                  )}
+                >
+                  <Zap className="h-3 w-3" />
+                  {allSelected ? "All Channels Active" : "Select All Channels"}
+                </button>
+              );
+            })()}
+          </div>
 
-              <div className="flex flex-wrap gap-2 pt-2">
-                {(
-                  [
-                    {
-                      id: "COUPON",
-                      label: "Coupon",
-                      icon: Ticket,
-                      activeClass: "bg-indigo-600 border-indigo-600",
-                    },
-                    {
-                      id: "SPIN_WHEEL",
-                      label: "Spin Wheel",
-                      icon: RotateCw,
-                      activeClass: "bg-violet-600 border-violet-600",
-                    },
-                    {
-                      id: "SCRATCH_CARD",
-                      label: "Scratch Card",
-                      icon: Sparkles,
-                      activeClass: "bg-amber-500 border-amber-500",
-                    },
-                    {
-                      id: "MATCH_AND_WIN",
-                      label: "Match & Win",
-                      icon: Gamepad2,
-                      activeClass: "bg-rose-600 border-rose-600",
-                    },
-                  ] as const
-                ).map((mech) => {
-                  const MechIcon = mech.icon;
-                  const selected: string[] = Array.isArray(
-                    formik.values.rewardMechanism,
-                  )
-                    ? formik.values.rewardMechanism
-                    : formik.values.rewardMechanism
-                      ? [formik.values.rewardMechanism]
-                      : [];
-                  const isActive = selected.includes(mech.id);
-                  return (
-                    <button
-                      key={mech.id}
-                      type="button"
-                      onClick={() => {
-                        const current: string[] = Array.isArray(
-                          formik.values.rewardMechanism,
-                        )
-                          ? formik.values.rewardMechanism
-                          : formik.values.rewardMechanism
-                            ? [formik.values.rewardMechanism]
-                            : [];
-                        if (isActive && current.length > 1) {
-                          formik.setFieldValue(
-                            "rewardMechanism",
-                            current.filter((v) => v !== mech.id),
-                          );
-                        } else if (!isActive) {
-                          formik.setFieldValue("rewardMechanism", [
-                            ...current,
-                            mech.id,
-                          ]);
-                          if (
-                            [
-                              "SPIN_WHEEL",
-                              "SCRATCH_CARD",
-                              "MATCH_AND_WIN",
-                            ].includes(mech.id)
-                          ) {
-                            formik.setFieldValue("couponType", "ONE_TO_MANY");
-                            formik.setFieldValue("inventoryRequired", false);
-                            formik.setFieldValue("totalUsageLimit", 0);
-                            formik.setFieldValue("perUserLimit", 0);
-                          }
-                        }
-                      }}
-                      className={cn(
-                        "flex items-center gap-1.5 px-4 py-2 rounded-full text-[10px] font-bold transition-all border",
-                        isActive
-                          ? cn(
-                              mech.activeClass,
-                              "text-white shadow-md scale-[1.05]",
-                            )
-                          : "bg-white dark:bg-muted/10 border-border/40 text-muted-foreground hover:border-border",
-                      )}
-                    >
-                      <MechIcon
-                        className={cn("h-3 w-3", isActive && "animate-pulse")}
-                      />
-                      {mech.label}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Per-mechanism description callouts */}
-              {(() => {
-                const ALL_IDS = [
-                  "COUPON",
-                  "SPIN_WHEEL",
-                  "SCRATCH_CARD",
-                  "MATCH_AND_WIN",
-                ];
-                const selected: string[] = Array.isArray(
-                  formik.values.rewardMechanism,
-                )
-                  ? formik.values.rewardMechanism
-                  : formik.values.rewardMechanism
-                    ? [formik.values.rewardMechanism]
-                    : [];
-
-                const mechanismInfo: Record<string, any> = {
-                  COUPON: {
-                    label: "Standard Coupon",
-                    icon: Ticket,
-                    desc: "A redeemable coupon code members claim directly from the Rewards hub.",
-                    bg: "bg-indigo-50/60 dark:bg-indigo-500/10",
-                    border: "border-indigo-100 dark:border-indigo-500/20",
-                    iconColor: "text-indigo-600",
-                  },
-                  SPIN_WHEEL: {
-                    label: "Spin Wheel Prize",
-                    icon: RotateCw,
-                    desc: "Available as a prize tier in the Spin Wheel game.",
-                    bg: "bg-violet-50/60 dark:bg-violet-500/10",
-                    border: "border-violet-100 dark:border-violet-500/20",
-                    iconColor: "text-violet-600",
-                  },
-                  SCRATCH_CARD: {
-                    label: "Scratch Card Prize",
-                    icon: Sparkles,
-                    desc: "Distributed via the Scratch Card game.",
-                    bg: "bg-amber-50/60 dark:bg-amber-500/10",
-                    border: "border-amber-100 dark:border-amber-500/20",
-                    iconColor: "text-amber-600",
-                  },
-                  MATCH_AND_WIN: {
-                    label: "Match & Win Prize",
-                    icon: Gamepad2,
-                    desc: "Awarded through the Match & Win slot-style game.",
-                    bg: "bg-rose-50/60 dark:bg-rose-500/10",
-                    border: "border-rose-100 dark:border-rose-500/20",
-                    iconColor: "text-rose-600",
-                  },
-                };
-                const visibleIds = ALL_IDS.filter((id) =>
-                  selected.includes(id),
-                );
-                if (visibleIds.length === 0) return null;
-                return (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-4">
-                    {visibleIds.map((id) => {
-                      const info = mechanismInfo[id];
-                      if (!info) return null;
-                      const MechIcon = info.icon;
-                      return (
-                        <div
-                          key={id}
-                          className={cn(
-                            "flex items-start gap-3 p-3 rounded-xl border",
-                            info.bg,
-                            info.border,
-                          )}
-                        >
-                          <div
-                            className={cn(
-                              "h-6 w-6 rounded-lg flex items-center justify-center shrink-0 bg-white/70 dark:bg-black/20 border border-white/50",
-                              info.border,
-                            )}
-                          >
-                            <MechIcon
-                              className={cn("h-3 w-3", info.iconColor)}
-                            />
-                          </div>
-                          <div className="space-y-0.5">
-                            <p
-                              className={cn(
-                                "text-[10px] font-bold uppercase tracking-wider",
-                                info.iconColor,
-                              )}
-                            >
-                              {info.label}
-                            </p>
-                            <p className="text-[11px] text-muted-foreground leading-relaxed">
-                              {info.desc}
-                            </p>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                );
-              })()}
-            </div>
-
-            <div className="w-full h-px bg-border/40" />
-
-            {/* 2. Code Configuration Area */}
-            <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-                <div className="space-y-1">
-                  <h3 className="text-[12px] font-bold text-foreground uppercase tracking-wider">
-                    2. Code Configuration
-                  </h3>
-                  <p className="text-[11px] text-muted-foreground">
-                    One to One: Unique voucher codes (Coupons only). One to
-                    Many: Single global code.
-                  </p>
-                </div>
-                <div className="flex flex-col items-start sm:items-end gap-1.5 w-full sm:w-64 shrink-0">
-                  <Select
-                    value={formik.values.couponType}
-                    onValueChange={(v) => {
-                      formik.setFieldValue("couponType", v);
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {(
+              [
+                {
+                  id: "COUPON",
+                  label: "Catalog Coupon",
+                  desc: "Direct claim in Rewards Hub",
+                  icon: Ticket,
+                },
+                {
+                  id: "SPIN_WHEEL",
+                  label: "Spin Wheel",
+                  desc: "Prize wheel win slice",
+                  icon: RotateCw,
+                },
+                {
+                  id: "SCRATCH_CARD",
+                  label: "Scratch Card",
+                  desc: "Hidden scratch prize",
+                  icon: Sparkles,
+                },
+                {
+                  id: "MATCH_AND_WIN",
+                  label: "Match & Win",
+                  desc: "Mini-game jackpot tier",
+                  icon: Gamepad2,
+                },
+              ] as const
+            ).map((mech) => {
+              const MechIcon = mech.icon;
+              const selected: string[] = Array.isArray(
+                formik.values.rewardMechanism,
+              )
+                ? formik.values.rewardMechanism
+                : formik.values.rewardMechanism
+                  ? [formik.values.rewardMechanism]
+                  : [];
+              const isActive = selected.includes(mech.id);
+              return (
+                <button
+                  key={mech.id}
+                  type="button"
+                  onClick={() => {
+                    const current: string[] = Array.isArray(
+                      formik.values.rewardMechanism,
+                    )
+                      ? formik.values.rewardMechanism
+                      : formik.values.rewardMechanism
+                        ? [formik.values.rewardMechanism]
+                        : [];
+                    if (isActive && current.length > 1) {
                       formik.setFieldValue(
-                        "inventoryRequired",
-                        v === "ONE_TO_ONE",
+                        "rewardMechanism",
+                        current.filter((v) => v !== mech.id),
                       );
-                      if (v === "ONE_TO_ONE") {
-                        formik.setFieldValue("couponCode", "");
-                        const selected = Array.isArray(
-                          formik.values.rewardMechanism,
-                        )
-                          ? formik.values.rewardMechanism
-                          : formik.values.rewardMechanism
-                            ? [formik.values.rewardMechanism]
-                            : [];
-                        const updated = selected.filter(
-                          (m: string) =>
-                            ![
-                              "SPIN_WHEEL",
-                              "SCRATCH_CARD",
-                              "MATCH_AND_WIN",
-                            ].includes(m),
-                        );
-                        formik.setFieldValue(
-                          "rewardMechanism",
-                          updated.length > 0 ? updated : ["COUPON"],
-                        );
+                    } else if (!isActive) {
+                      formik.setFieldValue("rewardMechanism", [
+                        ...current,
+                        mech.id,
+                      ]);
+                      if (
+                        [
+                          "SPIN_WHEEL",
+                          "SCRATCH_CARD",
+                          "MATCH_AND_WIN",
+                        ].includes(mech.id)
+                      ) {
+                        formik.setFieldValue("couponType", "ONE_TO_MANY");
+                        formik.setFieldValue("inventoryRequired", false);
+                        formik.setFieldValue("totalUsageLimit", 0);
+                        formik.setFieldValue("perUserLimit", 0);
                       }
-                    }}
-                    disabled={(() => {
-                      const selected = Array.isArray(
-                        formik.values.rewardMechanism,
-                      )
-                        ? formik.values.rewardMechanism
-                        : formik.values.rewardMechanism
-                          ? [formik.values.rewardMechanism]
-                          : [];
-                      return selected.length === 0;
-                    })()}
+                    }
+                  }}
+                  className={cn(
+                    "flex flex-col items-start gap-2 p-3.5 rounded-xl border text-left transition-all cursor-pointer",
+                    isActive
+                      ? "border-zinc-900 bg-zinc-900/[0.03] dark:bg-zinc-100/10 dark:border-zinc-100 ring-2 ring-zinc-900/20 shadow-xs"
+                      : "border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/30 hover:border-zinc-300",
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "h-8 w-8 rounded-lg flex items-center justify-center shrink-0 border transition-colors",
+                      isActive
+                        ? "bg-zinc-900 text-white border-zinc-900 dark:bg-zinc-100 dark:text-zinc-900"
+                        : "bg-white dark:bg-zinc-800 text-zinc-500 border-zinc-200 dark:border-zinc-700",
+                    )}
                   >
-                    <SelectTrigger className="bg-white dark:bg-muted/10 border-border/40 text-[11px] font-bold h-9">
-                      <SelectValue placeholder="Select mechanism first" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="ONE_TO_ONE" className="text-[11px]">
-                        One to One (Inventory)
-                      </SelectItem>
-                      <SelectItem value="ONE_TO_MANY" className="text-[11px]">
-                        One to Many (Manual)
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {(() => {
+                    <MechIcon className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 block">
+                      {mech.label}
+                    </span>
+                    <span className="text-[10px] text-zinc-500 dark:text-zinc-400 line-clamp-1 mt-0.5">
+                      {mech.desc}
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Step 3.2: Code Configuration */}
+        <div className="space-y-4 pt-4 border-t border-zinc-100 dark:border-zinc-800">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                Code Format
+              </Label>
+              <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">
+                Choose single shared code vs unique multi-voucher inventory.
+              </p>
+            </div>
+            <div className="w-full sm:w-60">
+              <Select
+                value={formik.values.couponType}
+                onValueChange={(v) => {
+                  formik.setFieldValue("couponType", v);
+                  formik.setFieldValue(
+                    "inventoryRequired",
+                    v === "ONE_TO_ONE",
+                  );
+                  if (v === "ONE_TO_ONE") {
+                    formik.setFieldValue("couponCode", "");
                     const selected = Array.isArray(
                       formik.values.rewardMechanism,
                     )
@@ -812,426 +689,351 @@ export function RewardFormSections({
                       : formik.values.rewardMechanism
                         ? [formik.values.rewardMechanism]
                         : [];
-                    if (selected.length === 0) {
-                      return (
-                        <p className="text-[9px] text-amber-600/80 dark:text-amber-500/80 text-right pr-2">
-                          Please select a mechanism first.
-                        </p>
-                      );
-                    }
-                    if (
-                      selected.some((m: string) =>
-                        [
+                    const updated = selected.filter(
+                      (m: string) =>
+                        ![
                           "SPIN_WHEEL",
                           "SCRATCH_CARD",
                           "MATCH_AND_WIN",
                         ].includes(m),
-                      )
-                    ) {
-                      return (
-                        <p className="text-[9px] text-amber-600/80 dark:text-amber-500/80 text-right pr-2">
-                          Games use One-to-Many. Selecting One-to-One will
-                          remove games.
-                        </p>
-                      );
-                    }
-                    return null;
-                  })()}
-                </div>
+                    );
+                    formik.setFieldValue(
+                      "rewardMechanism",
+                      updated.length > 0 ? updated : ["COUPON"],
+                    );
+                  }
+                }}
+              >
+                <SelectTrigger className="h-10 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-xs font-semibold shadow-none">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ONE_TO_MANY" className="text-xs">
+                    One-to-Many (Single Global Code)
+                  </SelectItem>
+                  <SelectItem value="ONE_TO_ONE" className="text-xs">
+                    One-to-One (Unique Codes Inventory)
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Global Coupon Code input */}
+          {formik.values.couponType === "ONE_TO_MANY" && (
+            <div className="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/30 space-y-2">
+              <Label
+                htmlFor="couponCode"
+                className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+              >
+                Global Coupon Code
+              </Label>
+              <div className="max-w-md">
+                <Input
+                  id="couponCode"
+                  placeholder="e.g. SUMMER2026, THRICOPARTNER"
+                  className="h-10 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-xs font-mono uppercase tracking-wider font-bold shadow-none"
+                  {...formik.getFieldProps("couponCode")}
+                />
               </div>
+              <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                Single code that all members receive when redeeming this reward.
+              </p>
+              {err("couponCode")}
+            </div>
+          )}
 
-              {formik.values.couponType === "ONE_TO_MANY" && (
-                <div className="bg-white dark:bg-muted/5 rounded-xl border border-border/40 p-4 space-y-3">
-                  <Label
-                    htmlFor="couponCode"
-                    className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground"
+          {/* One-to-One CSV Upload Area */}
+          {formik.values.couponType === "ONE_TO_ONE" && (
+            <div className="space-y-4">
+              <div className="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-800/40 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="text-xs font-semibold text-zinc-800 dark:text-zinc-200 block">
+                      Voucher Code Ingestion
+                    </Label>
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">
+                      Upload CSV containing unique single-use voucher codes.
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={downloadTemplate}
+                    className="text-[11px] font-semibold text-zinc-900 dark:text-zinc-100 border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 h-8 rounded-lg"
                   >
-                    Global Coupon Code
-                  </Label>
-                  <div className="max-w-xs">
-                    <Input
-                      id="couponCode"
-                      placeholder="e.g. SUMMER50"
-                      className="bg-white dark:bg-muted/10 border-border/40 focus:ring-1 focus:ring-indigo-500/20 h-9"
-                      {...formik.getFieldProps("couponCode")}
-                    />
-                  </div>
-                  <p className="text-[10px] text-muted-foreground leading-relaxed">
-                    Enter the single code that all members will use to redeem
-                    this reward.
-                  </p>
-                  {err("couponCode")}
-
-                  {/* Display Voucher Extra Details if available */}
-                  {voucherData?.getVoucher && (
-                    <div className="mt-4 pt-4 border-t border-border/40 space-y-3">
-                      <h4 className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-                        Global Voucher Details
-                      </h4>
-                      <div className="grid grid-cols-2 gap-4">
-                        {voucherData.getVoucher.code && (
-                          <div>
-                            <span className="text-[9px] text-muted-foreground uppercase">
-                              Code
-                            </span>
-                            <p className="text-[12px] font-mono mt-0.5">
-                              {voucherData.getVoucher.code}
-                            </p>
-                          </div>
-                        )}
-                        {voucherData.getVoucher.cardNumber && (
-                          <div>
-                            <span className="text-[9px] text-muted-foreground uppercase">
-                              Card Number
-                            </span>
-                            <p className="text-[12px] font-mono mt-0.5">
-                              {voucherData.getVoucher.cardNumber}
-                            </p>
-                          </div>
-                        )}
-                        {voucherData.getVoucher.pin && (
-                          <div>
-                            <span className="text-[9px] text-muted-foreground uppercase">
-                              PIN
-                            </span>
-                            <p className="text-[12px] font-mono mt-0.5">
-                              {voucherData.getVoucher.pin}
-                            </p>
-                          </div>
-                        )}
-                        {voucherData.getVoucher.expiryDate && (
-                          <div>
-                            <span className="text-[9px] text-muted-foreground uppercase">
-                              Expiry
-                            </span>
-                            <p className="text-[12px] mt-0.5">
-                              {new Date(
-                                Number(voucherData.getVoucher.expiryDate),
-                              ).toLocaleDateString()}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
+                    CSV Template
+                  </Button>
                 </div>
-              )}
 
-              {rewardId && formik.values.couponType === "ONE_TO_ONE" && (
-                <div className="bg-white dark:bg-muted/5 rounded-xl border border-border/40 p-5 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground block">
-                        Voucher Code Inventory
-                      </Label>
-                      <p className="text-[10px] text-muted-foreground">
-                        Upload a CSV file containing unique voucher codes for
-                        this reward.
-                      </p>
-                    </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      onClick={downloadTemplate}
-                      className="text-[9px] font-black text-indigo-600 uppercase tracking-widest hover:bg-indigo-50/50 h-7 px-2.5 rounded-lg shrink-0"
-                    >
-                      Get CSV Template
-                    </Button>
+                {uploadStep === "idle" ? (
+                  <div
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                    onClick={triggerFileInput}
+                    className={cn(
+                      "border-2 border-dashed border-zinc-200 dark:border-zinc-700 hover:border-zinc-900 dark:hover:border-zinc-100 rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-all bg-zinc-50/50 dark:bg-zinc-900/30",
+                      isDragging && "border-zinc-900 dark:border-zinc-100 bg-zinc-900/5",
+                    )}
+                  >
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={onFileChange}
+                      accept=".csv,.txt"
+                      className="hidden"
+                    />
+                    <Upload className="h-6 w-6 text-zinc-900 dark:text-zinc-100 mb-2 opacity-80" />
+                    <p className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">
+                      Drag & drop your voucher CSV here, or{" "}
+                      <span className="text-zinc-900 dark:text-zinc-100 underline">browse</span>
+                    </p>
+                    <p className="text-[11px] text-zinc-400 mt-1">
+                      Format: code, cardNumber, pin
+                    </p>
                   </div>
-
-                  {uploadStep === "idle" ? (
-                    <div
-                      onDragOver={handleDragOver}
-                      onDragLeave={handleDragLeave}
-                      onDrop={handleDrop}
-                      onClick={triggerFileInput}
-                      className={cn(
-                        "border-2 border-dashed border-border/60 hover:border-indigo-500/40 rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-300 bg-zinc-50/40 dark:bg-black/5 hover:bg-indigo-500/[0.01]",
-                        isDragging && "border-indigo-500 bg-indigo-500/[0.02]",
-                      )}
-                    >
-                      <input
-                        type="file"
-                        ref={fileInputRef}
-                        onChange={onFileChange}
-                        accept=".csv,.txt"
-                        className="hidden"
-                      />
-                      <Upload className="h-6 w-6 text-indigo-500 mb-2 opacity-60" />
-                      <p className="text-[11px] font-bold text-foreground">
-                        Drag & drop your CSV file here, or{" "}
-                        <span className="text-indigo-600">browse</span>
-                      </p>
-                      <p className="text-[9px] text-muted-foreground mt-1">
-                        Accepts .csv and .txt (each line is a voucher code)
-                      </p>
-                    </div>
-                  ) : uploadStep === "validating" ? (
-                    <div className="border border-border/40 rounded-xl p-8 flex flex-col items-center justify-center text-center bg-zinc-50/20">
-                      <RotateCw className="h-5 w-5 text-indigo-600 animate-spin mb-2" />
-                      <p className="text-[11px] font-bold text-foreground">
-                        Analyzing codes...
-                      </p>
-                      <p className="text-[9px] text-muted-foreground mt-1">
-                        Parsing data structure and compiling codes.
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="border border-border/40 rounded-xl p-5 space-y-4 bg-zinc-50/20">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Ticket className="h-4 w-4 text-emerald-500" />
-                          <span className="text-[11px] font-bold text-foreground truncate max-w-[200px]">
-                            {uploadedFile?.name}
-                          </span>
-                        </div>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          onClick={resetUpload}
-                          className="text-[9px] font-bold text-muted-foreground uppercase hover:bg-muted h-7 px-2"
-                        >
-                          Reset
-                        </Button>
-                      </div>
-
-                      <div className="bg-emerald-500/[0.03] border border-emerald-500/10 rounded-lg p-3 flex items-center justify-between text-[11px]">
-                        <span className="text-muted-foreground font-medium">
-                          Valid codes found:
-                        </span>
-                        <span className="font-black text-emerald-600 text-xs tabular-nums">
-                          {validCount}
-                        </span>
-                      </div>
-
+                ) : uploadStep === "validating" ? (
+                  <div className="border border-zinc-200 dark:border-zinc-700 rounded-xl p-6 flex flex-col items-center justify-center text-center bg-zinc-50/30">
+                    <RotateCw className="h-5 w-5 text-zinc-900 dark:text-zinc-100 animate-spin mb-2" />
+                    <p className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">
+                      Analyzing codes...
+                    </p>
+                  </div>
+                ) : (
+                  <div className="border border-zinc-200 dark:border-zinc-700 rounded-xl p-4 space-y-3 bg-zinc-50/30">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold text-zinc-800 truncate max-w-[200px]">
+                        {uploadedFile?.name}
+                      </span>
                       <Button
                         type="button"
-                        onClick={confirmUpload}
-                        disabled={uploading}
-                        className="w-full h-9 rounded-xl text-xs font-bold gap-2 shadow-sm"
+                        variant="ghost"
+                        size="sm"
+                        onClick={resetUpload}
+                        className="text-xs text-zinc-500 h-7 px-2"
                       >
-                        {uploading && (
-                          <RotateCw className="h-3 w-3 animate-spin" />
-                        )}
-                        Confirm and Load {validCount} Vouchers
+                        Reset
                       </Button>
                     </div>
-                  )}
 
-                  {/* Voucher Inventory Table */}
-                  {vouchersListData?.getVouchers &&
-                    vouchersListData.getVouchers.length > 0 && (
-                      <div className="mt-6 pt-6 border-t border-border/40 space-y-4">
-                        <h4 className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground flex items-center justify-between">
-                          <span>
-                            Uploaded Vouchers (
-                            {vouchersListData.getVouchers.length})
-                          </span>
-                        </h4>
-                        <div className="rounded-xl border border-border/40 overflow-hidden bg-white dark:bg-black/10">
-                          <table className="w-full text-left text-[11px]">
-                            <thead className="bg-muted/50 border-b border-border/40">
-                              <tr>
-                                <th className="px-4 py-2.5 font-bold text-muted-foreground">
-                                  Code
-                                </th>
-                                <th className="px-4 py-2.5 font-bold text-muted-foreground">
-                                  Status
-                                </th>
-                                <th className="px-4 py-2.5 font-bold text-muted-foreground">
-                                  Created
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-border/40">
-                              {vouchersListData.getVouchers.map((v: any) => (
-                                <tr
-                                  key={v.id}
-                                  className="hover:bg-muted/30 transition-colors"
-                                >
-                                  <td className="px-4 py-2.5 font-mono text-[10px] text-foreground">
-                                    {v.code}
-                                  </td>
-                                  <td className="px-4 py-2.5">
-                                    {v.isUsed ? (
-                                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-rose-500/10 text-rose-600">
-                                        Used
-                                      </span>
-                                    ) : (
-                                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/10 text-emerald-600">
-                                        Available
-                                      </span>
+                    <div className="bg-[#008060]/5 border border-[#008060]/20 rounded-lg p-2.5 flex items-center justify-between text-xs">
+                      <span className="text-zinc-600 font-medium">
+                        Valid codes detected:
+                      </span>
+                      <span className="font-bold text-[#008060] text-sm tabular-nums">
+                        {validCount}
+                      </span>
+                    </div>
+
+                    <Button
+                      type="button"
+                      onClick={confirmUpload}
+                      disabled={uploading}
+                      className="w-full h-9 rounded-lg text-xs font-bold bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-100 dark:text-zinc-900"
+                    >
+                      {uploading && (
+                        <RotateCw className="h-3 w-3 animate-spin mr-2" />
+                      )}
+                      Confirm & Load {validCount} Vouchers
+                    </Button>
+                  </div>
+                )}
+
+                {/* Uploaded Vouchers Table */}
+                {vouchersListData?.getVouchers &&
+                  vouchersListData.getVouchers.length > 0 && (
+                    <div className="space-y-3 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+                      <h4 className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                        Uploaded Vouchers ({vouchersListData.getVouchers.length})
+                      </h4>
+                      <div className="rounded-xl border border-zinc-200 dark:border-zinc-700 overflow-hidden bg-white dark:bg-zinc-800">
+                        <table className="w-full text-left text-xs">
+                          <thead className="bg-zinc-50 dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-700">
+                            <tr>
+                              <th className="px-4 py-2 font-semibold text-zinc-600 dark:text-zinc-400">
+                                Code
+                              </th>
+                              <th className="px-4 py-2 font-semibold text-zinc-600 dark:text-zinc-400">
+                                Status
+                              </th>
+                              <th className="px-4 py-2 font-semibold text-zinc-600 dark:text-zinc-400">
+                                Created
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-zinc-100 dark:divide-zinc-700">
+                            {vouchersListData.getVouchers.map((v: any) => (
+                              <tr key={v.id}>
+                                <td className="px-4 py-2 font-mono text-[11px] text-zinc-900 dark:text-zinc-100">
+                                  {v.code}
+                                </td>
+                                <td className="px-4 py-2">
+                                  <span
+                                    className={cn(
+                                      "inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold",
+                                      v.isUsed
+                                        ? "bg-rose-500/10 text-rose-600"
+                                        : "bg-[#008060]/10 text-[#008060]",
                                     )}
-                                  </td>
-                                  <td className="px-4 py-2.5 text-muted-foreground">
-                                    {new Date(
-                                      Number(v.createdAt),
-                                    ).toLocaleDateString()}
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
+                                  >
+                                    {v.isUsed ? "Used" : "Available"}
+                                  </span>
+                                </td>
+                                <td className="px-4 py-2 text-zinc-500">
+                                  {new Date(
+                                    Number(v.createdAt),
+                                  ).toLocaleDateString()}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
                       </div>
-                    )}
-                </div>
-              )}
-
-              {formik.values.inventoryRequired && (
-                <div className="flex items-start gap-3 p-4 rounded-xl bg-indigo-50/50 border border-indigo-100 dark:bg-indigo-500/10 dark:border-indigo-500/20">
-                  <Info className="h-4 w-4 text-indigo-500 mt-0.5" />
-                  <p className="text-[11px] text-indigo-700 dark:text-indigo-300 leading-relaxed font-medium">
-                    Since you've selected <strong>One to One</strong>, you'll
-                    need to upload unique voucher codes from the Inventory tab
-                    in Rewards & Codes after saving.
-                  </p>
-                </div>
-              )}
+                    </div>
+                  )}
+              </div>
             </div>
+          )}
+        </div>
 
-            <div className="w-full h-px bg-border/40" />
+        {/* Step 3.3: Supply & User Limits */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-zinc-100 dark:border-zinc-800">
+          <div className="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-800/40 space-y-2">
+            <div className="flex items-center justify-between">
+              <Label
+                htmlFor="totalUsageLimit"
+                className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400"
+              >
+                Total Supply
+              </Label>
+              <button
+                type="button"
+                onClick={() => formik.setFieldValue("totalUsageLimit", 0)}
+                className="text-[10px] text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+              >
+                Unlimited
+              </button>
+            </div>
+            <div className="relative">
+              <Input
+                id="totalUsageLimit"
+                type="number"
+                placeholder="0 = Unlimited"
+                className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-700 text-xs font-semibold shadow-none"
+                {...formik.getFieldProps("totalUsageLimit")}
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-zinc-400 font-medium">
+                Units
+              </span>
+            </div>
+          </div>
 
-            {/* 3. Limits Area */}
-            <div className="space-y-4">
-              <div className="space-y-1">
-                <h3 className="text-[12px] font-bold text-foreground uppercase tracking-wider">
-                  3. Redemption Limits
-                </h3>
-                <p className="text-[11px] text-muted-foreground">
-                  Set caps to prevent over-redemption. Disabled for game
-                  rewards.
-                </p>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-                <div className="bg-white dark:bg-muted/5 rounded-xl border border-border/40 p-4 space-y-3">
-                  <Label
-                    htmlFor="totalUsageLimit"
-                    className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground"
-                  >
-                    Total Supply
-                  </Label>
-                  <Input
-                    id="totalUsageLimit"
-                    type="number"
-                    placeholder="0 = Unlimited"
-                    disabled={(() => {
-                      const selected = Array.isArray(
-                        formik.values.rewardMechanism,
-                      )
-                        ? formik.values.rewardMechanism
-                        : formik.values.rewardMechanism
-                          ? [formik.values.rewardMechanism]
-                          : [];
-                      return selected.some((m: string) =>
-                        [
-                          "SPIN_WHEEL",
-                          "SCRATCH_CARD",
-                          "MATCH_AND_WIN",
-                        ].includes(m),
-                      );
-                    })()}
-                    className="bg-muted/10 border-border/40 disabled:opacity-50 h-9"
-                    {...formik.getFieldProps("totalUsageLimit")}
-                  />
-                  <p className="text-[9px] text-muted-foreground">
-                    Maximum redemptions globally. 0 = unlimited.
-                  </p>
-                </div>
-                <div className="bg-white dark:bg-muted/5 rounded-xl border border-border/40 p-4 space-y-3">
-                  <Label
-                    htmlFor="perUserLimit"
-                    className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground"
-                  >
-                    Limit Per Member
-                  </Label>
-                  <Input
-                    id="perUserLimit"
-                    type="number"
-                    disabled={(() => {
-                      const selected = Array.isArray(
-                        formik.values.rewardMechanism,
-                      )
-                        ? formik.values.rewardMechanism
-                        : formik.values.rewardMechanism
-                          ? [formik.values.rewardMechanism]
-                          : [];
-                      return selected.some((m: string) =>
-                        [
-                          "SPIN_WHEEL",
-                          "SCRATCH_CARD",
-                          "MATCH_AND_WIN",
-                        ].includes(m),
-                      );
-                    })()}
-                    className="bg-muted/10 border-border/40 disabled:opacity-50 h-9"
-                    {...formik.getFieldProps("perUserLimit")}
-                  />
-                  <p className="text-[9px] text-muted-foreground">
-                    Times a single user can claim this.
-                  </p>
-                </div>
-              </div>
+          <div className="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-800/40 space-y-2">
+            <div className="flex items-center justify-between">
+              <Label
+                htmlFor="perUserLimit"
+                className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400"
+              >
+                Limit Per Member
+              </Label>
+              <button
+                type="button"
+                onClick={() => formik.setFieldValue("perUserLimit", 0)}
+                className="text-[10px] text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+              >
+                Unlimited
+              </button>
+            </div>
+            <div className="relative">
+              <Input
+                id="perUserLimit"
+                type="number"
+                placeholder="0 = Unlimited"
+                className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-700 text-xs font-semibold shadow-none"
+                {...formik.getFieldProps("perUserLimit")}
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-zinc-400 font-medium">
+                Claims / User
+              </span>
             </div>
           </div>
         </div>
-      </CreatorSection>
+      </PolarisFormCard>
 
-      {/* 4. Safeguards */}
-      <CreatorSection
-        icon={ShieldCheck}
+      {/* 4. Eligibility & Guardrails */}
+      <PolarisFormCard
+        step={4}
         title="Eligibility & Guardrails"
-        subtitle="Control who can redeem and prevent abuse."
-        accent="rose"
+        description="Set member anti-abuse guardrails and account qualification requirements."
+        badge="Fraud Guard"
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white dark:bg-muted/5 rounded-2xl border border-border/40 p-5 space-y-2">
-            <div className="h-8 w-8 rounded-lg bg-rose-50 dark:bg-rose-500/10 flex items-center justify-center">
-              <Target className="h-4 w-4 text-rose-500" />
+        <PolarisInfoBanner
+          title="Account Age & Activity Protection"
+          description="Enforce minimum participation standards to prevent bots and newly created throwaway accounts from draining reward inventory."
+        />
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-800/40 space-y-2">
+            <div className="flex items-center justify-between">
+              <Label
+                htmlFor="minAccountAge"
+                className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400"
+              >
+                Min Account Age
+              </Label>
+              <button
+                type="button"
+                onClick={() => formik.setFieldValue("minAccountAge", 0)}
+                className="text-[10px] text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+              >
+                Any Age
+              </button>
             </div>
-            <Label
-              htmlFor="minAccountAge"
-              className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground block pt-2"
-            >
-              Min Account Age
-            </Label>
-            <div className="flex items-center gap-2">
+            <div className="relative">
               <Input
                 id="minAccountAge"
                 type="number"
-                className="h-8 text-xs bg-muted/10"
+                className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-700 text-xs font-semibold shadow-none"
                 {...formik.getFieldProps("minAccountAge")}
               />
-              <span className="text-[10px] font-bold text-muted-foreground uppercase">
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-zinc-400 font-medium">
                 Days
               </span>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-muted/5 rounded-2xl border border-border/40 p-5 space-y-2">
-            <div className="h-8 w-8 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center">
-              <Zap className="h-4 w-4 text-emerald-500" />
+          <div className="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-800/40 space-y-2">
+            <div className="flex items-center justify-between">
+              <Label
+                htmlFor="minActivityRequired"
+                className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400"
+              >
+                Min Activity Required
+              </Label>
+              <button
+                type="button"
+                onClick={() => formik.setFieldValue("minActivityRequired", 0)}
+                className="text-[10px] text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+              >
+                No Threshold
+              </button>
             </div>
-            <Label
-              htmlFor="minActivityRequired"
-              className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground block pt-2"
-            >
-              Min Activity
-            </Label>
-            <div className="flex items-center gap-2">
+            <div className="relative">
               <Input
                 id="minActivityRequired"
                 type="number"
-                className="h-8 text-xs bg-muted/10"
+                className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-700 text-xs font-semibold shadow-none"
                 {...formik.getFieldProps("minActivityRequired")}
               />
-              <span className="text-[10px] font-bold text-muted-foreground uppercase">
-                Points
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-zinc-400 font-medium">
+                Earned Points
               </span>
             </div>
           </div>
         </div>
-      </CreatorSection>
+      </PolarisFormCard>
     </div>
   );
 }

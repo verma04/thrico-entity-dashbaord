@@ -2,13 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, FileQuestion, HelpCircle, Loader2 } from "lucide-react";
+import { Plus, FileQuestion, HelpCircle, Loader2, Sparkles } from "lucide-react";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 import { useGetFaqByModule, useUpdateFaqByModule } from "@/graphql/actions/faq";
-import { CtaButton } from "@/components/ui/cta-button";
-import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
-import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
-import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 import { FaqItem } from "./faq/faq-types";
@@ -16,6 +13,10 @@ import { FaqRow } from "./faq/faq-row";
 import { FaqPreview } from "./faq/faq-preview";
 import { FaqEditorDialog } from "./faq/faq-editor-dialog";
 import { FaqDeleteDialog } from "./faq/faq-delete-dialog";
+import {
+  PolarisSidebarCard,
+  PolarisTipCard,
+} from "@/components/gamification/shared/polaris-form-ui";
 
 interface ModuleFaqListManagerProps {
   moduleName: string;
@@ -26,7 +27,7 @@ interface ModuleFaqListManagerProps {
 export function ModuleFaqListManager({
   moduleName,
   title = "FAQ Management",
-  description = "Manage frequently asked questions for this module's knowledge base.",
+  description = "Manage frequently asked questions and knowledge base resources for your community.",
 }: ModuleFaqListManagerProps) {
   const [faqItems, setFaqItems] = useState<FaqItem[]>([]);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
@@ -84,7 +85,7 @@ export function ModuleFaqListManager({
 
   const handleSaveItem = () => {
     if (!question.trim() || !answer.trim()) {
-      toast.error("Please fill in all fields.");
+      toast.error("Please fill in both question and answer fields.");
       return;
     }
 
@@ -148,45 +149,70 @@ export function ModuleFaqListManager({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-zinc-200" />
+      <div className="flex items-center justify-center min-h-[300px]">
+        <Loader2 className="h-6 w-6 animate-spin text-zinc-400" />
       </div>
     );
   }
 
   return (
     <>
-      <EcosystemWrapper className="max-w-6xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-700">
-        <EcosystemHeader
-          title={title}
-          description={description}
-          icon={HelpCircle}
-          actions={
-            <CtaButton onClick={handleCreate}>
-              <Plus className="h-4 w-4 mr-2" />
-              Create Entry
-            </CtaButton>
-          }
-        />
+      <div className="space-y-6">
+        {/* Sub-header Controls */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-200/80 dark:border-zinc-800">
+          <div>
+            <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-100">
+              {title}
+            </h2>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+              {description}
+            </p>
+          </div>
+          <Button
+            type="button"
+            onClick={handleCreate}
+            size="sm"
+            className="h-9 px-4 text-xs font-bold bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 shadow-xs flex items-center gap-1.5"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            Add FAQ Entry
+          </Button>
+        </div>
 
-        <EcosystemContainer className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* List Area */}
-          <div className="lg:col-span-7 space-y-6">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">
-              Knowledge Repository
-            </h3>
+        {/* 12-Col Main Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* FAQ Entries List */}
+          <div className="lg:col-span-7 space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">
+                Knowledge Entries ({faqItems.length})
+              </span>
+              <span className="text-[11px] text-zinc-400">
+                Drag to reorder
+              </span>
+            </div>
 
             {faqItems.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20 px-6 border border-dashed border-zinc-200 rounded-[24px] bg-zinc-50/20 group hover:bg-zinc-50 transition-all duration-500">
-                <div className="w-12 h-12 rounded-[16px] bg-white border border-zinc-100 flex items-center justify-center text-zinc-300 mb-6 group-hover:scale-110 transition-transform">
-                  <FileQuestion size={24} strokeWidth={1.5} />
+              <div className="flex flex-col items-center justify-center py-16 px-6 border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl bg-zinc-50/40 dark:bg-zinc-900/40 text-center">
+                <div className="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-400 mb-3">
+                  <FileQuestion size={20} strokeWidth={1.5} />
                 </div>
-                <h3 className="text-sm font-semibold tracking-tight text-zinc-900 mb-1">
-                  No Entries Yet
+                <h3 className="text-xs font-bold text-zinc-800 dark:text-zinc-200 mb-1">
+                  No Knowledge Base Entries Yet
                 </h3>
-                <p className="text-[12px] text-zinc-400 text-center max-w-xs font-medium">
-                  Construct your module's knowledge base to assist end-users.
+                <p className="text-[11px] text-zinc-400 max-w-xs mb-4">
+                  Construct your module's frequently asked questions to guide community members.
                 </p>
+                <Button
+                  type="button"
+                  onClick={handleCreate}
+                  variant="outline"
+                  size="sm"
+                  className="h-8 text-xs font-semibold border-zinc-200 dark:border-zinc-800"
+                >
+                  <Plus className="h-3.5 w-3.5 mr-1.5" />
+                  Create First Entry
+                </Button>
               </div>
             ) : (
               <DragDropContext onDragEnd={handleDragEnd}>
@@ -195,11 +221,15 @@ export function ModuleFaqListManager({
                     <div
                       {...provided.droppableProps}
                       ref={provided.innerRef}
-                      className="grid gap-3"
+                      className="grid gap-2.5"
                     >
                       <AnimatePresence>
                         {faqItems.map((faq, index) => (
-                          <Draggable key={faq.id} draggableId={faq.id} index={index}>
+                          <Draggable
+                            key={faq.id || `faq-${index}`}
+                            draggableId={String(faq.id || `faq-${index}`)}
+                            index={index}
+                          >
                             {(provided, snapshot) => (
                               <div
                                 ref={provided.innerRef}
@@ -220,7 +250,9 @@ export function ModuleFaqListManager({
                                       setDeleteDialogOpen(true);
                                     }}
                                     onMoveUp={
-                                      index > 0 ? () => handleMoveFaq(index, "up") : undefined
+                                      index > 0
+                                        ? () => handleMoveFaq(index, "up")
+                                        : undefined
                                     }
                                     onMoveDown={
                                       index < faqItems.length - 1
@@ -243,16 +275,24 @@ export function ModuleFaqListManager({
             )}
           </div>
 
-          {/* Preview Area */}
-          <div className="lg:col-span-5">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">
-              Client Interface Preview
-            </h3>
+          {/* Sticky Sidebar Live Preview */}
+          <div className="lg:col-span-5 space-y-6">
+            <div className="sticky top-6 space-y-6">
+              <PolarisSidebarCard
+                title="Client Accordion Preview"
+                badge="Interactive"
+                icon={Sparkles}
+              >
+                <FaqPreview faqItems={faqItems} />
+              </PolarisSidebarCard>
 
-            <FaqPreview faqItems={faqItems} />
+              <PolarisTipCard title="Knowledge Base Guidance">
+                Structure answers concisely with bullet points. Clear explanations reduce support inquiries by up to 40%.
+              </PolarisTipCard>
+            </div>
           </div>
-        </EcosystemContainer>
-      </EcosystemWrapper>
+        </div>
+      </div>
 
       <FaqEditorDialog
         isOpen={isEditorOpen}

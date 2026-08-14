@@ -1,12 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { RectangleHorizontal, Plus, Clock, Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { RectangleHorizontal, Plus, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import {
   useGetScratchCardConfig,
@@ -19,8 +17,6 @@ import {
   useLazyGetVouchersByRewardMechanism,
 } from "@/graphql/actions/rewards";
 import { useGetEntityCurrencyConfig } from "@/graphql/actions/currency";
-import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
-import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import {
   AlertDialog,
@@ -32,6 +28,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  PolarisFormLayout,
+  PolarisFormCard,
+  PolarisTipCard,
+} from "@/components/gamification/shared/polaris-form-ui";
 
 import { ScratchRewardTier, RewardType } from "./types";
 import { ScratchCardPreview } from "./scratch-card-preview";
@@ -39,44 +40,6 @@ import { EconomyMonitor } from "./economy-monitor";
 import { TiersTable } from "./tiers-table";
 import { TierDialog } from "./tier-dialog";
 import { EcosystemHeader } from "@/components/layout/ecosystem";
-
-const SectionCard = ({
-  title,
-  description,
-  icon: Icon,
-  iconBg,
-  iconColor,
-  children,
-  action,
-}: {
-  title: string;
-  description?: string;
-  icon: any;
-  iconBg: string;
-  iconColor: string;
-  children: React.ReactNode;
-  action?: React.ReactNode;
-}) => (
-  <div className="rounded-xl border border-border bg-card overflow-hidden">
-    <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-muted/20">
-      <div className="flex items-center gap-3">
-        <div
-          className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 ${iconBg}`}
-        >
-          <Icon className={`h-4 w-4 ${iconColor}`} />
-        </div>
-        <div>
-          <p className="text-sm font-semibold text-foreground">{title}</p>
-          {description && (
-            <p className="text-xs text-muted-foreground">{description}</p>
-          )}
-        </div>
-      </div>
-      {action}
-    </div>
-    <div className="p-5">{children}</div>
-  </div>
-);
 
 export function ScratchCardManager() {
   const {
@@ -99,7 +62,7 @@ export function ScratchCardManager() {
   const [isEnabled, setIsEnabled] = useState(false);
   const { data: currencyConfig } = useGetEntityCurrencyConfig();
   const currencyName =
-    currencyConfig?.getEntityCurrencyConfig?.currencyName || "Tokens";
+    currencyConfig?.getEntityCurrencyConfig?.currencyName || "Points";
   const [tiers, setTiers] = useState<ScratchRewardTier[]>([]);
   const [editingTier, setEditingTier] = useState<ScratchRewardTier | null>(
     null,
@@ -255,127 +218,125 @@ export function ScratchCardManager() {
   if (configLoading) {
     return (
       <div className="flex h-96 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <Loader2 className="h-8 w-8 animate-spin text-zinc-900 dark:text-zinc-100" />
       </div>
     );
   }
 
   if (!config) {
     return (
-      <EcosystemContainer className="p-6">
-        <div className="max-w-md mx-auto text-center space-y-6 py-12">
-          <div className="h-20 w-20 bg-indigo-50 text-indigo-600 rounded-3xl flex items-center justify-center mx-auto shadow-sm ring-1 ring-indigo-100">
-            <RectangleHorizontal className="h-10 w-10" />
-          </div>
-          <div className="space-y-2">
-            <h2 className="text-2xl font-bold text-foreground">
-              Initialize Scratch Card
-            </h2>
-            <p className="text-muted-foreground text-sm">
-              It looks like the scratch card module hasn't been set up yet.
-              Initialize it now to start adding reward tiers and configuring
-              gameplay.
-            </p>
-          </div>
-          <Button
-            onClick={() => handleSaveConfig()}
-            disabled={savingConfig}
-            className="w-full h-12 text-base font-semibold shadow-lg shadow-indigo-200"
-          >
-            {savingConfig && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-            Initialize Module
-          </Button>
+      <div className="max-w-md mx-auto text-center space-y-6 py-20">
+        <div className="h-16 w-16 bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 rounded-2xl flex items-center justify-center mx-auto border border-zinc-200 dark:border-zinc-700">
+          <Sparkles className="h-8 w-8" />
         </div>
-      </EcosystemContainer>
+        <div className="space-y-2">
+          <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
+            Initialize Scratch Card
+          </h2>
+          <p className="text-zinc-500 text-xs leading-relaxed">
+            The scratch card engine hasn't been provisioned for this organization yet. Initialize it now to configure tiers and start rewarding members.
+          </p>
+        </div>
+        <Button
+          onClick={() => handleSaveConfig()}
+          disabled={savingConfig}
+          className="w-full h-11 text-xs font-bold bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-100 dark:text-zinc-900 rounded-xl shadow-xs"
+        >
+          {savingConfig && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+          Initialize Module
+        </Button>
+      </div>
     );
   }
 
   return (
-    <>
-      <EcosystemHeader
-        title="Scratch Card"
-        badgeText="Engagement"
-        description={`Configure scratch card reward tiers, ${currencyName} costs, probability weights, and campaign windows.`}
-        icon={RectangleHorizontal}
-        breadcrumbs={[
-          { label: "Gamification", href: "/gamification" },
-          { label: "Engagement Games", href: "/gamification/engagement-games" },
-          { label: "Scratch Card" },
-        ]}
-        actions={
-          <EcosystemActionBar
-            shadow="none"
-            className="p-0 border-none bg-transparent"
-          >
-            <EcosystemActionBar.Group>
-              <div
-                className={cn(
-                  "h-2 w-2 rounded-full animate-pulse",
-                  isEnabled ? "bg-emerald-500" : "bg-amber-500",
-                )}
-              />
-              <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">
-                {isEnabled ? "Active" : "Paused"}
-              </span>
-              <EcosystemActionBar.Separator />
-              <span className="text-xs text-muted-foreground whitespace-nowrap">
-                {tiers.length} reward tiers
-              </span>
-            </EcosystemActionBar.Group>
-          </EcosystemActionBar>
-        }
-      />
+    <div className="flex flex-col min-h-screen bg-[#fafafa] dark:bg-black/10 overflow-hidden relative">
+      <div className="border-b border-zinc-200/80 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md">
+        <div className="max-w-[1040px] mx-auto px-4 sm:px-6 md:px-8 py-3">
+          <EcosystemHeader
+            title="Scratch Card"
+            badgeText="Interactive Game"
+            description={`Configure scratch card prize tiers, ${currencyName} cost per play, and win probabilities.`}
+            icon={Sparkles}
+            breadcrumbs={[
+              { label: "Gamification", href: "/gamification" },
+              { label: "Engagement Games", href: "/gamification/engagement-games" },
+              { label: "Scratch Card" },
+            ]}
+          />
+        </div>
+      </div>
 
-      <EcosystemContainer className="p-6 space-y-5">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-          {/* Left: 2/3 */}
-          <div className="lg:col-span-2 space-y-5">
-            <div className="grid grid-cols-1 gap-4">
-              <SectionCard
-                icon={RectangleHorizontal}
-                iconBg="bg-blue-50"
-                iconColor="text-blue-600"
-                title="System Status"
-              >
-                <div className="flex items-center justify-between py-1">
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">
-                      {isEnabled ? "Active" : "Paused"}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Scratch card availability
-                    </p>
-                  </div>
-                  <Switch
-                    checked={isEnabled}
-                    onCheckedChange={setIsEnabled}
-                    className="data-[state=checked]:bg-emerald-500"
-                  />
-                </div>
-              </SectionCard>
+      <div className="flex-1 overflow-y-auto">
+        <PolarisFormLayout
+          sidebar={
+            <div className="space-y-6">
+              {/* Member Live Simulator */}
+              <ScratchCardPreview />
+
+              {/* Economic Health */}
+              <EconomyMonitor avgPayout={avgPayout} currencyName={currencyName} />
+
+              {/* Strategic Tip */}
+              <PolarisTipCard title="Engagement Tip">
+                Daily scratch cards provide high daily check-in motivation. Require minimum account age or activity points on top tiers to eliminate multi-account farming.
+              </PolarisTipCard>
             </div>
+          }
+        >
+          <div className="space-y-6">
+            {/* Step 1: System Status & State */}
+            <PolarisFormCard
+              step={1}
+              title="Game Status & Engine"
+              description="Control availability of the scratch card experience for community members."
+              badge="Game State"
+            >
+              <div className="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/30 flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label
+                    htmlFor="scratchActive"
+                    className="text-xs font-semibold text-zinc-800 dark:text-zinc-200 block cursor-pointer"
+                  >
+                    Scratch Game Availability
+                  </Label>
+                  <p className="text-[11px] text-zinc-500">
+                    {isEnabled ? "Live and claimable by qualified members" : "Game currently paused"}
+                  </p>
+                </div>
+                <Switch
+                  id="scratchActive"
+                  checked={isEnabled}
+                  onCheckedChange={setIsEnabled}
+                  className="data-[state=checked]:bg-zinc-900 dark:data-[state=checked]:bg-zinc-100"
+                />
+              </div>
+            </PolarisFormCard>
 
-            {/* Tiers Table */}
-            <SectionCard
-              icon={RectangleHorizontal}
-              iconBg="bg-violet-50"
-              iconColor="text-violet-600"
-              title="Reward Tiers"
-              description={`${tiers.length} tiers configured`}
-              action={
+            {/* Step 2: Reward Tiers Table */}
+            <PolarisFormCard
+              step={2}
+              title="Scratch Reward Tiers"
+              description="Manage prize tiers, points, voucher connections, and claim qualifications."
+              badge={`${tiers.length} Active Tiers`}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                  {tiers.length} total prize tiers configured
+                </p>
                 <Button
                   size="sm"
                   onClick={handleAddTier}
                   disabled={tiers.length >= 12}
-                  className="gap-1.5 h-7 text-xs"
+                  className="gap-1.5 h-8 text-xs font-bold bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-100 dark:text-zinc-900 rounded-lg shadow-xs"
                 >
-                  <Plus className="h-3 w-3" />
-                  Add Tier
+                  <Plus className="h-3.5 w-3.5" /> Add Tier
                 </Button>
-              }
-            >
+              </div>
+
               <TiersTable
                 tiers={tiers}
+                currencyName={currencyName}
                 onEdit={(tier) => {
                   setEditingTier({ ...tier });
                   setIsDialogOpen(true);
@@ -383,18 +344,10 @@ export function ScratchCardManager() {
                 onDelete={setDeletingTierId}
                 onToggleActive={handleToggleActive}
               />
-            </SectionCard>
+            </PolarisFormCard>
           </div>
-
-          {/* Right: 1/3 Preview + Economy Monitor */}
-          <div className="space-y-5">
-            <div className="sticky top-6 space-y-6">
-              <ScratchCardPreview />
-              <EconomyMonitor avgPayout={avgPayout} />
-            </div>
-          </div>
-        </div>
-      </EcosystemContainer>
+        </PolarisFormLayout>
+      </div>
 
       <FloatingSavePanel
         hasChanged={hasChanged}
@@ -402,8 +355,9 @@ export function ScratchCardManager() {
         onSave={handleSaveConfig}
         onReset={handleReset}
         saved={saved}
-        title="Unsaved Changes"
-        description="You have modified the scratch card settings."
+        title="Unsaved Configuration"
+        description="You have pending changes to the scratch card settings."
+        buttonText="Save Configuration"
       />
 
       <TierDialog
@@ -423,25 +377,28 @@ export function ScratchCardManager() {
         open={!!deletingTierId}
         onOpenChange={(open) => !open && setDeletingTierId(null)}
       >
-        <AlertDialogContent>
+        <AlertDialogContent className="rounded-2xl border-zinc-200 dark:border-zinc-800">
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the
-              reward tier and remove it from the scratch card game.
+            <AlertDialogTitle className="text-base font-bold">
+              Delete Reward Tier?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-xs text-zinc-500">
+              This action cannot be undone. This will permanently delete the reward tier from the scratch card engine.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogFooter className="gap-2 sm:gap-0">
+            <AlertDialogCancel className="rounded-lg text-xs font-semibold">
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteTier}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-lg text-xs font-bold"
             >
               {deletingTier ? "Deleting..." : "Delete Tier"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </>
+    </div>
   );
 }

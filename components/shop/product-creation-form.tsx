@@ -4,15 +4,22 @@ import { useState, useEffect } from "react";
 import { FormikProvider, useFormik } from "formik";
 import * as Yup from "yup";
 import { Button } from "@/components/ui/button";
-
 import { useToast } from "@/components/ui/use-toast";
-import { ShoppingBag, Info, ChevronRight, Save, Loader2 } from "lucide-react";
+import {
+  ShoppingBag,
+  Sparkles,
+  Store,
+  Tag,
+  DollarSign,
+  Package,
+  Layers,
+  Globe,
+} from "lucide-react";
 import { ProductPreview } from "./product-preview";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
-
 import { useShopStore } from "@/store/useShopStore";
-import { ProductFormValues } from "./product-form"; // Reuse types if possible
+import { ProductFormValues } from "./product-form";
 import { CATEGORY_CONFIG } from "./category-config";
 import { useModuleStore } from "@/store/useModuleStore";
 
@@ -21,8 +28,14 @@ import { MediaSection } from "./form-sections/media-section";
 import { PricingSection } from "./form-sections/pricing-section";
 import { VariantsSection } from "./form-sections/variants-section";
 import { ExternalLinkSection } from "./form-sections/external-link-section";
+import {
+  PolarisFormLayout,
+  PolarisFormCard,
+  PolarisSidebarCard,
+  PolarisSummaryRow,
+  PolarisTipCard,
+} from "@/components/gamification/shared/polaris-form-ui";
 
-// Schema mimicking ProductForm but ensuring it works here
 const productSchema = Yup.object().shape({
   title: Yup.string()
     .min(2, "Title must be at least 2 characters")
@@ -107,37 +120,15 @@ export function ProductCreationForm({
     },
     validationSchema: productSchema,
     onSubmit: (values) => {
-      // Merge Formik values with Zustand state
       const submissionData: ProductFormValues = {
         ...values,
         variants: variants,
-
         hasVariants: hasVariants,
       };
 
       onFinish(submissionData);
     },
   });
-
-  // Category Preset Logic
-  useEffect(() => {
-    const categoryId = formik.values.category;
-    // Only apply if we have no options yet and we are not in edit mode (checking initialValues id/presence might be better but checking options length is okay for now)
-    // Actually, if user switches category, maybe we should suggest?
-    // Let's be conservative: only if options are empty.
-    if (categoryId && options.length === 0 && !initialValues) {
-      const config = CATEGORY_CONFIG[categoryId];
-      if (config) {
-        // We need a way to set options in batch.
-        // Current store has addOption.
-        // Let's iterate.
-        config.presets.forEach((preset) => {
-          // Check if option exists? Logic is getting complex for effect.
-          // Ideally store should handle "applyPreset(preset)".
-        });
-      }
-    }
-  }, [formik.values.category, options.length, initialValues]);
 
   const handleSubmit = (e?: React.BaseSyntheticEvent) => {
     if (e && e.preventDefault) {
@@ -156,7 +147,7 @@ export function ProductCreationForm({
   };
 
   const getButtonLabel = () => {
-    if (mode === "create") return `Create ${singularName}`;
+    if (mode === "create") return `Publish ${singularName}`;
     switch (activeTab) {
       case "media":
         return "Save Media";
@@ -165,139 +156,210 @@ export function ProductCreationForm({
       case "inventory":
         return "Save Variants";
       default:
-        return "Save General Info";
+        return "Save Product";
     }
   };
 
-  // Show validation errors via toast if user tries to submit
-  useEffect(() => {
-    if (formik.submitCount > 0 && !formik.isValid) {
-      const errorKeys = Object.keys(formik.errors);
-      if (errorKeys.length > 0) {
-        toast({
-          title: "Check form values",
-          description:
-            "There are validation errors in the form. Please check all fields.",
-          variant: "destructive",
-        });
-      }
-    }
-  }, [formik.submitCount, formik.isValid, formik.errors, toast]);
+  const getCategoryName = () => {
+    const cat = categories.find((c) => c.id === formik.values.category);
+    return cat ? cat.name : formik.values.category || "Uncategorized";
+  };
 
   return (
-    <>
-      <FormikProvider value={formik}>
-        <>
-          <div className="flex flex-col h-full bg-background min-h-0 rounded-t-[inherit]">
-            {/* Main Content Area - Scrollable */}
-            <div className="flex-1 overflow-y-auto pb-20 sm:pb-0">
-              <div className="max-w-7xl mx-auto px-6 py-8">
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                  <div className="lg:col-span-8 space-y-8">
-                    <form onSubmit={handleSubmit} className="space-y-8">
-                      {mode === "create" ? (
-                        <>
-                          <BasicInfoSection />
-                          <MediaSection />
-                          <PricingSection categories={categories} />
-                          <ExternalLinkSection entityName={entityName} />
-                        </>
-                      ) : (
-                        <Tabs
-                          value={activeTab}
-                          onValueChange={setActiveTab}
-                          className="w-full space-y-8"
-                        >
-                          <div className="flex items-center justify-between border-b pb-1">
-                            <TabsList className="bg-transparent h-auto p-0 gap-6">
-                              <TabsTrigger
-                                value="general"
-                                className="bg-transparent border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none px-0 pb-2 text-sm font-medium transition-all"
-                              >
-                                General
-                              </TabsTrigger>
-                              <TabsTrigger
-                                value="media"
-                                className="bg-transparent border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none px-0 pb-2 text-sm font-medium transition-all"
-                              >
-                                Media
-                              </TabsTrigger>
-                              <TabsTrigger
-                                value="options"
-                                className="bg-transparent border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none px-0 pb-2 text-sm font-medium transition-all"
-                              >
-                                {singularName} Options
-                              </TabsTrigger>
-                              <TabsTrigger
-                                value="inventory"
-                                className="bg-transparent border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent rounded-none px-0 pb-2 text-sm font-medium transition-all"
-                              >
-                                Variants
-                              </TabsTrigger>
-                            </TabsList>
-                          </div>
+    <FormikProvider value={formik}>
+      <PolarisFormLayout
+        sidebar={
+          <div className="space-y-6">
+            {/* Live Product Preview */}
+            <PolarisSidebarCard title={`${singularName} Preview`} badge="Live Storefront" icon={Sparkles}>
+              <ProductPreview
+                formData={{
+                  ...formik.values,
+                  hasVariants,
+                  options,
+                }}
+              />
 
-                          <TabsContent
-                            value="general"
-                            className="space-y-8 mt-0 border-none p-0 outline-none"
-                          >
-                            <BasicInfoSection />
-                            <PricingSection categories={categories} />
-                            <ExternalLinkSection entityName={entityName} />
-                          </TabsContent>
-
-                          <TabsContent
-                            value="media"
-                            className="mt-0 border-none p-0 outline-none"
-                          >
-                            <MediaSection />
-                          </TabsContent>
-
-                          <TabsContent
-                            value="options"
-                            className="mt-0 border-none p-0 outline-none"
-                          >
-                            <VariantsSection
-                              showOnly="options"
-                              onTabChange={setActiveTab}
-                            />
-                          </TabsContent>
-
-                          <TabsContent
-                            value="inventory"
-                            className="mt-0 border-none p-0 outline-none"
-                          >
-                            <VariantsSection
-                              showOnly="table"
-                              onTabChange={setActiveTab}
-                            />
-                          </TabsContent>
-                        </Tabs>
-                      )}
-                    </form>
-                  </div>
-
-                  {/* Side Preview */}
-                  <div className="lg:col-span-4">
-                    <div className="sticky top-6 space-y-6">
-                      <div className="flex items-center justify-between">
-                        <h3 className="text-lg font-bold">
-                          {singularName} Preview
-                        </h3>
-                      </div>
-                      <ProductPreview
-                        formData={{
-                          ...formik.values,
-                          hasVariants,
-                        }}
-                      />
-                    </div>
-                  </div>
-                </div>
+              {/* Structured Configuration Breakdown */}
+              <div className="space-y-1.5 pt-2">
+                <PolarisSummaryRow
+                  label="Product Title"
+                  value={
+                    <span className="truncate max-w-[150px] inline-block font-semibold">
+                      {formik.values.title || "Not specified"}
+                    </span>
+                  }
+                />
+                <PolarisSummaryRow
+                  label="Price"
+                  value={
+                    formik.values.price
+                      ? `${formik.values.currency} ${formik.values.price}`
+                      : "Not set"
+                  }
+                />
+                <PolarisSummaryRow
+                  label="Category"
+                  value={getCategoryName()}
+                />
+                <PolarisSummaryRow
+                  label="Stock Status"
+                  value={formik.values.isOutOfStock ? "Out of Stock" : "In Stock"}
+                />
+                {formik.values.sku && (
+                  <PolarisSummaryRow
+                    label="SKU"
+                    value={formik.values.sku}
+                    isLast
+                  />
+                )}
               </div>
-            </div>
-          </div>
+            </PolarisSidebarCard>
 
+            {/* Storefront Conversion Tip */}
+            <PolarisTipCard title={`${singularName} Commerce Tip`}>
+              Clear multi-angle imagery, concise SKU labeling, and categorized pricing increase checkout conversion rates by up to 35%.
+            </PolarisTipCard>
+          </div>
+        }
+      >
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {mode === "create" ? (
+            <>
+              <PolarisFormCard
+                step={1}
+                title={`Core ${singularName} Identity`}
+                description={`Provide a title, SKU identifier, detailed description, and availability status.`}
+                badge="Required"
+              >
+                <BasicInfoSection />
+              </PolarisFormCard>
+
+              <PolarisFormCard
+                step={2}
+                title="Product Media & Imagery"
+                description="Upload high-resolution photography and multi-angle product shots."
+                badge="Media"
+              >
+                <MediaSection />
+              </PolarisFormCard>
+
+              <PolarisFormCard
+                step={3}
+                title="Valuation & Category Classification"
+                description="Set the base retail price, currency unit, and storefront taxonomy category."
+                badge="Pricing"
+              >
+                <PricingSection categories={categories} />
+              </PolarisFormCard>
+
+              <PolarisFormCard
+                step={4}
+                title="External Fulfillment & Attribution"
+                description="Attach an external checkout URL with auto-generated UTM tracking codes."
+                badge="Optional"
+              >
+                <ExternalLinkSection entityName={entityName} />
+              </PolarisFormCard>
+            </>
+          ) : (
+            <Tabs
+              value={activeTab}
+              onValueChange={setActiveTab}
+              className="w-full space-y-6"
+            >
+              <div className="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 pb-1">
+                <TabsList className="bg-transparent h-auto p-0 gap-6">
+                  <TabsTrigger
+                    value="general"
+                    className="bg-transparent border-b-2 border-transparent data-[state=active]:border-zinc-900 dark:data-[state=active]:border-zinc-100 data-[state=active]:bg-transparent rounded-none px-0 pb-2 text-xs font-semibold transition-all text-zinc-500 data-[state=active]:text-zinc-900 dark:data-[state=active]:text-zinc-100"
+                  >
+                    General Info
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="media"
+                    className="bg-transparent border-b-2 border-transparent data-[state=active]:border-zinc-900 dark:data-[state=active]:border-zinc-100 data-[state=active]:bg-transparent rounded-none px-0 pb-2 text-xs font-semibold transition-all text-zinc-500 data-[state=active]:text-zinc-900 dark:data-[state=active]:text-zinc-100"
+                  >
+                    Media Gallery
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="options"
+                    className="bg-transparent border-b-2 border-transparent data-[state=active]:border-zinc-900 dark:data-[state=active]:border-zinc-100 data-[state=active]:bg-transparent rounded-none px-0 pb-2 text-xs font-semibold transition-all text-zinc-500 data-[state=active]:text-zinc-900 dark:data-[state=active]:text-zinc-100"
+                  >
+                    Options & Attributes
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="inventory"
+                    className="bg-transparent border-b-2 border-transparent data-[state=active]:border-zinc-900 dark:data-[state=active]:border-zinc-100 data-[state=active]:bg-transparent rounded-none px-0 pb-2 text-xs font-semibold transition-all text-zinc-500 data-[state=active]:text-zinc-900 dark:data-[state=active]:text-zinc-100"
+                  >
+                    SKU Variants
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+
+              <TabsContent
+                value="general"
+                className="space-y-6 mt-0 border-none p-0 outline-none"
+              >
+                <PolarisFormCard
+                  step={1}
+                  title="General Product Details"
+                  description="Manage basic information, pricing, and external checkout links."
+                >
+                  <BasicInfoSection />
+                  <PricingSection categories={categories} />
+                  <ExternalLinkSection entityName={entityName} />
+                </PolarisFormCard>
+              </TabsContent>
+
+              <TabsContent
+                value="media"
+                className="mt-0 border-none p-0 outline-none"
+              >
+                <PolarisFormCard
+                  step={2}
+                  title="Media Gallery"
+                  description="Upload and organize catalog images for this product."
+                >
+                  <MediaSection />
+                </PolarisFormCard>
+              </TabsContent>
+
+              <TabsContent
+                value="options"
+                className="mt-0 border-none p-0 outline-none"
+              >
+                <PolarisFormCard
+                  step={3}
+                  title="Product Options"
+                  description="Configure product attribute options such as Size, Color, and Material."
+                >
+                  <VariantsSection
+                    showOnly="options"
+                    onTabChange={setActiveTab}
+                  />
+                </PolarisFormCard>
+              </TabsContent>
+
+              <TabsContent
+                value="inventory"
+                className="mt-0 border-none p-0 outline-none"
+              >
+                <PolarisFormCard
+                  step={4}
+                  title="Variant SKU Inventory"
+                  description="Manage individual inventory quantities and prices per variant combination."
+                >
+                  <VariantsSection
+                    showOnly="table"
+                    onTabChange={setActiveTab}
+                  />
+                </PolarisFormCard>
+              </TabsContent>
+            </Tabs>
+          )}
+
+          {/* Floating Action Bar */}
           <FloatingSavePanel
             hasChanged={formik.dirty}
             saved={false}
@@ -308,12 +370,12 @@ export function ProductCreationForm({
               if (onCancel) onCancel();
               else window.history.back();
             }}
-            title={`Unsaved ${mode === "create" ? `${singularName} Data` : "Changes"}`}
-            description="You have unfilled form data."
+            title={mode === "create" ? `Publish ${singularName}` : `Save ${singularName}`}
+            description="You have unsaved changes to this product configuration."
             buttonText={getButtonLabel()}
           />
-        </>
-      </FormikProvider>
-    </>
+        </form>
+      </PolarisFormLayout>
+    </FormikProvider>
   );
 }

@@ -201,8 +201,8 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
                     ) : (
                       navigationModules.map((module, idx) => (
                         <Draggable
-                          key={module.id}
-                          draggableId={module.id}
+                          key={module.id || `module-${idx}`}
+                          draggableId={String(module.id || `module-${idx}`)}
                           index={idx}
                         >
                           {(dragProvided, dragSnapshot) => (

@@ -12,6 +12,7 @@ import { useModuleStore } from "@/store/useModuleStore";
 
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { Store } from "lucide-react";
 
 const CreateProductPage = () => {
@@ -83,26 +84,28 @@ const CreateProductPage = () => {
     { id: "services", name: "Services" },
   ];
 
+  const moduleName = useModuleStore((state) => state.shopModuleName);
+
   return (
     <EcosystemWrapper>
       <EcosystemHeader
         title={`Create ${singularName}`}
-        badgeText="New"
-        description={`Add a new ${singularName.toLowerCase()} to the marketplace.`}
+        badgeText="Storefront"
+        description={`Publish a new ${singularName.toLowerCase()} to your community storefront.`}
         icon={Store}
         breadcrumbs={[
-          { label: "Marketplace", href: "/shop/all" },
-          { label: "Create" },
+          { label: moduleName, href: "/shop/all" },
+          { label: `Create ${singularName}` },
         ]}
       />
-      <div className="flex-1 overflow-auto bg-background/50 p-6">
+      <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0">
         <ProductCreationForm
           loading={loading}
           onFinish={onFinish}
           onCancel={onCancel}
           categories={categories}
         />
-      </div>
+      </EcosystemContainer>
     </EcosystemWrapper>
   );
 };

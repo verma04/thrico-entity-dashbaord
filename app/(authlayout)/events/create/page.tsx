@@ -13,6 +13,7 @@ import { useModuleStore } from "@/store/useModuleStore";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { Calendar } from "lucide-react";
+import { EcosystemContainer } from "@/components/layout/ecosystem";
 
 const CreateEventPage = () => {
   const singularName = useModuleStore((state) => state.eventSingularName);
@@ -62,19 +63,21 @@ const CreateEventPage = () => {
     router.back();
   };
 
+  const moduleName = useModuleStore((state) => state.eventModuleName);
+
   return (
     <EcosystemWrapper>
       <EcosystemHeader
         title={`Create ${singularName}`}
-        badgeText="New"
+        badgeText="Events Studio"
         description={`Add a new ${singularName.toLowerCase()} to your community.`}
         icon={Calendar}
         breadcrumbs={[
-          { label: "Events", href: "/events/all" },
-          { label: "Create" },
+          { label: moduleName, href: "/events/all" },
+          { label: `Create ${singularName}` },
         ]}
       />
-      <div className="flex-1 overflow-auto bg-background/50 p-6">
+      <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0">
         <EventsCreationForm
           initialValues={{}}
           loading={loading}
@@ -83,7 +86,7 @@ const CreateEventPage = () => {
           cover={cover}
           setCover={setCover}
         />
-      </div>
+      </EcosystemContainer>
     </EcosystemWrapper>
   );
 };

@@ -11,8 +11,11 @@ export default function SidebarLayout({
 }) {
   return (
     <div className="h-screen overflow-hidden flex flex-col bg-neutral-50 dark:bg-neutral-950">
-      <SidebarProvider defaultOpen={true}>
-        <div className="flex flex-col flex-1 min-h-0 w-full">
+      <SidebarProvider
+        defaultOpen={true}
+        style={{ "--sidebar-width": "210px" } as React.CSSProperties}
+      >
+        <div className="flex-1 overflow-hidden min-h-0 w-full sm:w-[90%] md:w-[95%] lg:w-full">
           <ChildSidebarContainer>{children}</ChildSidebarContainer>
         </div>
       </SidebarProvider>

@@ -9,25 +9,21 @@ import {
 } from "@hello-pangea/dnd";
 import {
   GripVertical,
-  Settings2,
-  Info,
-  Sparkles,
-  ShieldCheck,
-  Users2,
-  MessageSquare,
-  BarChart2,
-  Film,
   LucideIcon,
-  RotateCcw,
-  Loader2,
-  Save,
-  Check,
+  Sparkles,
+  Layers,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useUpdateFeedOrder } from "@/graphql/actions";
+import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
+import {
+  PolarisFormLayout,
+  PolarisFormCard,
+  PolarisSidebarCard,
+  PolarisSummaryRow,
+  PolarisTipCard,
+} from "@/components/gamification/shared/polaris-form-ui";
 
 interface SourceItem {
   id: string;
@@ -93,7 +89,7 @@ const FeedSourceOrdering: React.FC<FeedSourceOrderingProps> = ({
       });
 
       if (data?.updateFeedOrder) {
-        toast.success("Feed prioritization sequence updated.");
+        toast.success("Feed prioritization sequence synchronized successfully.");
         setIsDirty(false);
         setSaved(true);
         setTimeout(() => setSaved(false), 2500);
@@ -114,149 +110,134 @@ const FeedSourceOrdering: React.FC<FeedSourceOrderingProps> = ({
   };
 
   return (
-    <div className="space-y-6">
-      {/* Drag & Drop List */}
-      <DragDropContext onDragEnd={handleDragEnd}>
-        <Droppable droppableId="feed-sources">
-          {(provided) => (
-            <div
-              {...provided.droppableProps}
-              ref={provided.innerRef}
-              className="space-y-2.5"
+    <div className="space-y-6 max-w-[1040px]">
+      <PolarisFormLayout
+        sidebar={
+          <div className="space-y-6">
+            {/* Live Sequence Ranking */}
+            <PolarisSidebarCard
+              title="Current Sequence"
+              badge="Live Order"
+              icon={Sparkles}
             >
-              {sources.map((source, index) => (
-                <Draggable
-                  key={source.id}
-                  draggableId={source.id}
-                  index={index}
-                >
-                  {(provided, snapshot) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                      className={cn(
-                        "group relative flex items-center gap-4 p-3 rounded-xl border transition-all duration-200",
-                        snapshot.isDragging
-                          ? "bg-card border-zinc-900 shadow-xl z-50 scale-[1.02]"
-                          : "bg-muted/30 border-border hover:border-border hover:bg-card",
-                      )}
-                    >
-                      {/* Drag Handle */}
-                      <div
-                        {...provided.dragHandleProps}
-                        className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-grab active:cursor-grabbing"
+              <div className="space-y-1.5">
+                {sources.map((source, idx) => (
+                  <PolarisSummaryRow
+                    key={source.id}
+                    label={`#${idx + 1} ${source.label.replace("Show ", "").replace(" in Feed", "")}`}
+                    value={source.enabled ? "Active" : "Disabled in Config"}
+                    isLast={idx === sources.length - 1}
+                  />
+                ))}
+              </div>
+            </PolarisSidebarCard>
+
+            {/* Algorithm Guidance Tip */}
+            <PolarisTipCard title="Feed Ranking Tip">
+              Placing dynamic, interactive modules (like Polls or Moments) higher in the sequence boosts user daily engagement by up to 35%.
+            </PolarisTipCard>
+          </div>
+        }
+      >
+        <div className="space-y-6">
+          <PolarisFormCard
+            step={1}
+            title="Module Prioritization Hierarchy"
+            description="Drag and drop to reposition module feed items in the preferred display sequence."
+            badge="Drag & Drop"
+          >
+            {/* Drag & Drop List */}
+            <DragDropContext onDragEnd={handleDragEnd}>
+              <Droppable droppableId="feed-sources">
+                {(provided) => (
+                  <div
+                    {...provided.droppableProps}
+                    ref={provided.innerRef}
+                    className="space-y-2.5"
+                  >
+                    {sources.map((source, index) => (
+                      <Draggable
+                        key={source.id || `source-${index}`}
+                        draggableId={String(source.id || `source-${index}`)}
+                        index={index}
                       >
-                        <GripVertical size={16} />
-                      </div>
+                        {(provided, snapshot) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            className={cn(
+                              "group relative flex items-center gap-3.5 p-3 rounded-xl border transition-all duration-200",
+                              snapshot.isDragging
+                                ? "bg-white dark:bg-zinc-900 border-zinc-900 dark:border-zinc-100 shadow-xl z-50 scale-[1.02]"
+                                : "bg-white dark:bg-zinc-900/60 border-zinc-200/80 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700",
+                            )}
+                          >
+                            {/* Drag Handle */}
+                            <div
+                              {...provided.dragHandleProps}
+                              className="p-1 rounded-md text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 cursor-grab active:cursor-grabbing"
+                            >
+                              <GripVertical size={16} />
+                            </div>
 
-                      {/* Rank Indicator */}
-                      <div className="flex items-center justify-center w-6 h-6 rounded-lg bg-card border border-border text-[10px] font-bold text-muted-foreground tabular-nums">
-                        {index + 1}
-                      </div>
+                            {/* Rank Indicator */}
+                            <div className="flex items-center justify-center w-6 h-6 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-[10px] font-bold text-zinc-600 dark:text-zinc-400 tabular-nums">
+                              {index + 1}
+                            </div>
 
-                      {/* Icon & Label */}
-                      <div className="flex items-center gap-3.5 flex-1 min-w-0">
-                        <div className="w-10 h-10 rounded-xl bg-card border border-border flex items-center justify-center text-foreground shrink-0 shadow-sm group-hover:bg-muted/50 transition-colors">
-                          <source.icon size={18} strokeWidth={2} />
-                        </div>
-                        <div className="min-w-0">
-                          <h4 className="text-[13.5px] font-medium text-foreground leading-none">
-                            {source.label
-                              .replace("Show ", "")
-                              .replace(" in Feed", "")}
-                          </h4>
-                          <p className="mt-1.5 text-[11.5px] text-muted-foreground leading-relaxed truncate max-w-[300px]">
-                            {source.description}
-                          </p>
-                        </div>
-                      </div>
+                            {/* Icon & Label */}
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                              <div className="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center text-zinc-700 dark:text-zinc-300 shrink-0">
+                                <source.icon size={15} strokeWidth={2} />
+                              </div>
+                              <div className="min-w-0">
+                                <h4 className="text-xs font-bold text-zinc-900 dark:text-zinc-100 leading-none">
+                                  {source.label
+                                    .replace("Show ", "")
+                                    .replace(" in Feed", "")}
+                                </h4>
+                                <p className="mt-1 text-[11px] text-zinc-500 dark:text-zinc-400 truncate max-w-[340px]">
+                                  {source.description}
+                                </p>
+                              </div>
+                            </div>
 
-                      {/* Status / Tags */}
-                      <div className="flex items-center gap-3 shrink-0 mr-2">
-                        {!source.enabled && (
-                          <span className="text-[10px] font-medium text-amber-500 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100/50">
-                            Disabled in Config
-                          </span>
+                            {/* Status / Tags */}
+                            <div className="flex items-center gap-2 shrink-0 pr-1">
+                              {!source.enabled ? (
+                                <span className="text-[10px] font-semibold text-amber-700 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20">
+                                  Disabled in Config
+                                </span>
+                              ) : (
+                                <span className="text-[10px] font-semibold text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded-md">
+                                  Active
+                                </span>
+                              )}
+                            </div>
+                          </div>
                         )}
-                        {source.enabled && (
-                          <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </Draggable>
-              ))}
-              {provided.placeholder}
-            </div>
-          )}
-        </Droppable>
-      </DragDropContext>
-
-      {/* Footer Disclaimer */}
-      <div className="flex items-start gap-2.5 p-4 rounded-xl bg-muted/50 border border-border/80">
-        <Info size={14} className="text-muted-foreground mt-0.5 shrink-0" />
-        <p className="text-[11px] text-muted-foreground leading-relaxed font-medium">
-          Changes will be applied to all users once saved.
-        </p>
-      </div>
-
-      {/* ── Floating Action Bar ── */}
-      <AnimatePresence>
-        {isDirty && (
-          <motion.div
-            initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            exit={{ opacity: 0, y: 20, filter: "blur(10px)" }}
-            className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-4 px-5 py-3 rounded-2xl bg-primary text-primary-foreground border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.3)] backdrop-blur-md"
-          >
-            <div className="flex flex-col">
-              <span className="text-[11px] font-bold text-white/90 leading-none">
-                Unsaved Changes
-              </span>
-              <span className="text-[10px] text-muted-foreground mt-0.5">
-                You have changed the order
-              </span>
-            </div>
-
-            <div className="w-px h-8 bg-card/10 mx-1" />
-
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handleReset}
-                disabled={isSaving}
-                className="h-9 px-4 rounded-xl text-[12px] font-medium text-muted-foreground hover:text-white hover:bg-card/5 transition-all disabled:opacity-40 flex items-center gap-2"
-              >
-                <RotateCcw size={13} />
-                Discard
-              </button>
-              <button
-                onClick={handleSaveOrder}
-                disabled={isSaving}
-                className="h-9 px-5 rounded-xl text-[12px] font-bold bg-card text-foreground hover:bg-muted transition-all disabled:opacity-60 flex items-center gap-2 shadow-lg"
-              >
-                {isSaving ? (
-                  <Loader2 size={13} className="animate-spin" />
-                ) : (
-                  <Save size={13} />
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
+                  </div>
                 )}
-                Save
-              </button>
-            </div>
-          </motion.div>
-        )}
-        {!isDirty && saved && (
-          <motion.div
-            key="saved-floating"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100] px-4 py-2 rounded-xl bg-emerald-500 text-white text-[12px] font-bold shadow-xl flex items-center gap-2"
-          >
-            <Check size={14} strokeWidth={3} />
-            Sequence Saved
-          </motion.div>
-        )}
-      </AnimatePresence>
+              </Droppable>
+            </DragDropContext>
+          </PolarisFormCard>
+
+          {/* Floating Action Bar */}
+          <FloatingSavePanel
+            hasChanged={isDirty}
+            saved={saved}
+            isSaving={isSaving}
+            onSave={handleSaveOrder}
+            onReset={handleReset}
+            title="Save Prioritization Order"
+            description="You have modified the feed source sequence."
+            buttonText="Save Sequence"
+          />
+        </div>
+      </PolarisFormLayout>
     </div>
   );
 };

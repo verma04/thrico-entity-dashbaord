@@ -2,24 +2,13 @@
 
 import React from "react";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
 import {
   Calendar,
   Clock,
   MapPin,
-  User,
-  Share2,
-  Heart,
+  Laptop,
+  RefreshCw,
   Users,
   Eye,
   Star,
@@ -59,23 +48,7 @@ export function EventPreview({ eventData, coverImage }: EventPreviewProps) {
 
   const formatTime = (time: any) => {
     if (!time) return "Time not set";
-    // Parse HH:mm if it's a simple time string, or fallback to default parsing
     return moment(time, ["HH:mm", moment.ISO_8601]).format("hh:mm A");
-  };
-
-  const getEventTypeBadgeClass = (eventType: string) => {
-    const normalizedType = eventType?.toUpperCase();
-    switch (normalizedType) {
-      case "IN_PERSON":
-        return "bg-blue-500/5 text-blue-600 border-blue-500/20";
-      case "ONLINE":
-      case "VIRTUAL":
-        return "bg-green-500/5 text-green-600 border-green-500/20";
-      case "HYBRID":
-        return "bg-purple-500/5 text-purple-600 border-purple-500/20";
-      default:
-        return "bg-gray-500/5 text-gray-600 border-gray-500/20";
-    }
   };
 
   const getEventTypeLabel = (eventType: string) => {
@@ -89,136 +62,91 @@ export function EventPreview({ eventData, coverImage }: EventPreviewProps) {
       case "HYBRID":
         return "Hybrid";
       default:
-        return "Unknown";
+        return "In Person";
     }
   };
 
   return (
-    <Card className="max-w-[600px] mx-auto border-none shadow-xl ring-1 ring-border/50 overflow-hidden">
+    <div className="rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 overflow-hidden shadow-xs">
       {/* Cover Image */}
-      <div className="relative h-[200px] overflow-hidden">
+      <div className="aspect-[3/2] w-full overflow-hidden bg-zinc-200 dark:bg-zinc-800 relative">
         <Image
           src={coverImage || "https://cdn.thrico.network/default_event.png"}
           alt="Event cover"
-          fill
-          className="object-cover"
+          width={1536}
+          height={1024}
+          className="object-cover w-full h-full transition-transform hover:scale-105 duration-300"
         />
-        <div className="absolute top-4 right-4 flex gap-2">
-          <Button
-            size="icon"
+        <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5">
+          <Badge
             variant="secondary"
-            className="rounded-full bg-white/90 hover:bg-white"
+            className="bg-black/60 text-white backdrop-blur-md border-none text-[10px] font-bold px-2 py-0.5"
           >
-            <Share2 className="h-4 w-4" />
-          </Button>
-          <Button
-            size="icon"
-            variant="secondary"
-            className="rounded-full bg-white/90 hover:bg-white"
-          >
-            <Heart className="h-4 w-4" />
-          </Button>
+            {getEventTypeLabel(type)}
+          </Badge>
         </div>
       </div>
 
-      {/* Event Content */}
-      <CardContent className="p-6 space-y-6">
-        {/* Header */}
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1 space-y-2">
-            <h3 className="text-2xl font-bold leading-tight">{title}</h3>
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="outline" className={getEventTypeBadgeClass(type)}>
-                {getEventTypeLabel(type)}
-              </Badge>
-              {location?.name && (
-                <span className="text-sm text-muted-foreground flex items-center gap-1">
-                  <MapPin className="h-3.5 w-3.5" />
-                  {location.name}
-                </span>
-              )}
-            </div>
-          </div>
-          <Avatar className="h-12 w-12">
-            <AvatarFallback>
-              <User className="h-6 w-6" />
-            </AvatarFallback>
-          </Avatar>
+      {/* Event Details */}
+      <div className="p-4 space-y-3">
+        <div>
+          <h3 className="font-bold text-sm text-zinc-900 dark:text-zinc-100 truncate">
+            {title || "Event Title"}
+          </h3>
+          {location?.name && (
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 flex items-center gap-1 truncate">
+              <MapPin className="h-3 w-3 shrink-0" />
+              {location.name}
+            </p>
+          )}
         </div>
 
-        {/* Event Details */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-1">
-            <p className="text-sm font-semibold flex items-center gap-1.5">
-              <Calendar className="h-4 w-4" />
+        {/* Schedule Grid */}
+        <div className="grid grid-cols-2 gap-2 py-2 border-y border-zinc-100 dark:border-zinc-800 text-xs">
+          <div className="space-y-0.5">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
               Date & Time
+            </span>
+            <p className="font-semibold text-zinc-900 dark:text-zinc-100 text-xs truncate">
+              {formatDate(startDate)}
             </p>
-            <div className="text-sm">
-              <p>{formatDate(startDate)}</p>
-              {endDate && startDate !== endDate && (
-                <p className="text-muted-foreground">- {formatDate(endDate)}</p>
-              )}
-            </div>
-            <p className="text-sm text-muted-foreground flex items-center gap-1.5">
-              <Clock className="h-3.5 w-3.5" />
+            <p className="text-[11px] text-zinc-500 flex items-center gap-1">
+              <Clock className="h-3 w-3" />
               {formatTime(startTime)}
             </p>
           </div>
-          <div className="space-y-1">
-            <p className="text-sm font-semibold">Registration Deadline</p>
-            <p className="text-sm text-muted-foreground">
-              {formatDate(lastDateOfRegistration)}
+          <div className="space-y-0.5">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+              Registration
+            </span>
+            <p className="font-semibold text-zinc-900 dark:text-zinc-100 text-xs truncate">
+              {lastDateOfRegistration ? formatDate(lastDateOfRegistration) : "Open"}
             </p>
+            <p className="text-[11px] text-zinc-500">Deadline</p>
           </div>
         </div>
 
-        <Separator />
-
-        {/* Description */}
-        <div className="space-y-2">
-          <h4 className="text-base font-semibold">About this event</h4>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            {description}
-          </p>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex gap-3">
-          <Button className="flex-1" size="lg">
-            Register Now
-          </Button>
-          <Button variant="outline" size="lg">
-            Learn More
-          </Button>
-        </div>
-
-        {/* Event Stats */}
-        <div className="bg-muted/50 p-4 rounded-lg mt-4">
-          <div className="grid grid-cols-3 gap-4 text-center">
-            <div>
-              <p className="text-lg font-bold">0</p>
-              <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
-                <Users className="h-3 w-3" />
-                Registered
-              </p>
-            </div>
-            <div>
-              <p className="text-lg font-bold">0</p>
-              <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
-                <Eye className="h-3 w-3" />
-                Views
-              </p>
-            </div>
-            <div>
-              <p className="text-lg font-bold">0</p>
-              <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
-                <Star className="h-3 w-3" />
-                Interested
-              </p>
-            </div>
+        {/* Counter Grid */}
+        <div className="grid grid-cols-3 gap-2">
+          <div className="text-center p-2 rounded-lg bg-white dark:bg-zinc-800/80 border border-zinc-200/60 dark:border-zinc-700/60">
+            <div className="text-xs font-bold text-zinc-900 dark:text-zinc-100">0</div>
+            <p className="text-[10px] text-zinc-400 font-medium">Registered</p>
+          </div>
+          <div className="text-center p-2 rounded-lg bg-white dark:bg-zinc-800/80 border border-zinc-200/60 dark:border-zinc-700/60">
+            <div className="text-xs font-bold text-zinc-900 dark:text-zinc-100">0</div>
+            <p className="text-[10px] text-zinc-400 font-medium">Views</p>
+          </div>
+          <div className="text-center p-2 rounded-lg bg-white dark:bg-zinc-800/80 border border-zinc-200/60 dark:border-zinc-700/60">
+            <div className="text-xs font-bold text-zinc-900 dark:text-zinc-100">0</div>
+            <p className="text-[10px] text-zinc-400 font-medium">Interested</p>
           </div>
         </div>
-      </CardContent>
-    </Card>
+
+        {/* Description snippet */}
+        <div className="text-[11px] text-zinc-600 dark:text-zinc-400 leading-relaxed line-clamp-3">
+          {description || "Event description will appear here..."}
+        </div>
+      </div>
+    </div>
   );
 }

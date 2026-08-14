@@ -156,7 +156,11 @@ const WebNavigation: React.FC<WebNavigationProps> = ({
                       </div>
                     ) : (
                       navigationModules.map((module, idx) => (
-                        <Draggable key={module.id} draggableId={module.id} index={idx}>
+                        <Draggable
+                          key={module.id || `module-${idx}`}
+                          draggableId={String(module.id || `module-${idx}`)}
+                          index={idx}
+                        >
                           {(dragProvided, dragSnapshot) => (
                             <div
                               ref={dragProvided.innerRef}

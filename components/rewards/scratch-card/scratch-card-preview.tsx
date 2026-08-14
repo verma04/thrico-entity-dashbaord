@@ -1,69 +1,62 @@
 import React from "react";
-import { Sparkles } from "lucide-react";
+import { Sparkles, RectangleHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PolarisSidebarCard } from "@/components/gamification/shared/polaris-form-ui";
 
 export function ScratchCardPreview() {
   return (
-    <div className="relative group mx-auto max-w-[340px]">
-      {/* Glowing ambient background shadow */}
-      <div className="absolute -inset-0.5 bg-gradient-to-b from-indigo-500/20 to-purple-500/20 rounded-[36px] blur-xl opacity-50 group-hover:opacity-100 transition-opacity duration-500" />
+    <PolarisSidebarCard
+      title="Member Experience Preview"
+      badge="Live Scratch"
+      icon={RectangleHorizontal}
+    >
+      <div className="rounded-2xl border border-zinc-200/80 dark:border-zinc-800 bg-zinc-950 text-white overflow-hidden flex flex-col p-2 relative shadow-md">
+        {/* Subtle glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-44 h-44 bg-[#008060]/20 rounded-full blur-2xl pointer-events-none" />
 
-      {/* Mock Phone Frame */}
-      <div className="relative flex flex-col w-full bg-white dark:bg-zinc-900 rounded-[32px] shadow-2xl border border-zinc-200/50 dark:border-white/5 overflow-hidden text-zinc-900 dark:text-zinc-100 p-2">
-        <div className="flex-1 rounded-[24px] bg-indigo-950 overflow-hidden flex flex-col relative border border-indigo-900/50 shadow-inner">
-          {/* Game Header */}
-          <div className="p-5 text-center relative z-10 space-y-1 bg-gradient-to-b from-indigo-900 to-transparent">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/10 mb-2">
-              <Sparkles className="h-3 w-3 text-amber-400" />
-              <span className="text-[9px] font-bold uppercase tracking-widest text-indigo-200">
-                Daily Scratch
-              </span>
+        <div className="rounded-xl bg-zinc-900/90 border border-zinc-800 p-4 flex flex-col items-center relative z-10 space-y-3">
+          {/* Header */}
+          <div className="text-center space-y-1">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/10 text-[9px] font-bold uppercase tracking-widest text-[#95BF47]">
+              <Sparkles className="h-2.5 w-2.5" />
+              Daily Scratch
             </div>
-            <h3 className="text-xl font-bold text-white tracking-tight">
+            <h4 className="text-sm font-bold text-white tracking-tight">
               Scratch & Win
-            </h3>
-            <p className="text-[10px] text-indigo-300">
-              Reveal hidden symbols for a chance to win.
+            </h4>
+            <p className="text-[10px] text-zinc-400">
+              Reveal hidden symbols for a chance to win prizes
             </p>
           </div>
 
-          {/* Canvas / Scratch Area */}
-          <div className="flex-1 flex flex-col items-center justify-center p-6 relative z-10 min-h-[220px]">
-            {/* Subtle backglow */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-indigo-500/30 rounded-full blur-2xl" />
-
-            {/* The Card */}
-            <div className="relative w-full aspect-[4/3] rounded-xl bg-zinc-300 dark:bg-zinc-800 border-2 border-dashed border-zinc-400 dark:border-zinc-600 flex items-center justify-center overflow-hidden group/card cursor-crosshair">
-              {/* Silver foil texture simulation */}
-              <div className="absolute inset-0 bg-gradient-to-br from-zinc-200 via-zinc-400 to-zinc-300 dark:from-zinc-700 dark:via-zinc-600 dark:to-zinc-800 opacity-90" />
-              <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/brushed-alum.png')] opacity-30 mix-blend-overlay" />
-
-              <div className="relative flex flex-col items-center gap-2">
-                <Sparkles className="h-8 w-8 text-zinc-500 dark:text-zinc-400 group-hover/card:animate-pulse" />
-                <span className="text-xs font-black text-zinc-600 dark:text-zinc-300 tracking-widest uppercase">
-                  Scratch Here
+          {/* Interactive Scratch Foil Area */}
+          <div className="w-full py-2 flex items-center justify-center">
+            <div className="relative w-full aspect-[16/10] rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center overflow-hidden group/card shadow-inner cursor-crosshair">
+              {/* Foil Shimmer */}
+              <div className="absolute inset-0 bg-gradient-to-br from-zinc-700 via-zinc-600 to-zinc-800 opacity-95" />
+              <div className="relative flex flex-col items-center gap-1.5 z-10">
+                <Sparkles className="h-6 w-6 text-zinc-400 group-hover/card:text-[#95BF47] group-hover/card:scale-110 transition-all" />
+                <span className="text-[10px] font-black text-zinc-300 tracking-widest uppercase">
+                  Scratch Area
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Game Bottom Bar */}
-          <div className="p-6 relative z-10 mt-auto bg-gradient-to-t from-black/80 to-transparent">
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-200">
-                Live Preview
-              </span>
-            </div>
+          {/* Action CTA */}
+          <div className="w-full space-y-2 pt-1">
             <Button
               disabled
-              className="w-full h-12 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-sm shadow-[0_0_20px_rgba(245,158,11,0.4)] border-none"
+              className="w-full h-10 rounded-xl bg-white text-zinc-950 font-bold text-xs shadow-sm border-none cursor-default opacity-95"
             >
-              Get Free Card
+              Claim Free Scratch Card
             </Button>
+            <p className="text-center text-[10px] text-zinc-400 font-medium">
+              1 free card available per qualified member
+            </p>
           </div>
         </div>
       </div>
-    </div>
+    </PolarisSidebarCard>
   );
 }

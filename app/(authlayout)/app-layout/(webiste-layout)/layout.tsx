@@ -42,38 +42,48 @@ function RootLayout({ children }: { children: React.ReactNode }) {
     }
   }, [website, loading, initializeWebsiteData]);
 
-  const items = [
-    {
-      key: "",
-      label: "Pages",
-      icon: <Layout className="h-4 w-4" />,
-    },
-    {
-      key: "create",
-      label: "Create Page",
-      icon: <Plus className="h-4 w-4" />,
-    },
-    {
-      key: "navigation",
-      label: "Navigation",
-      icon: <Menu className="h-4 w-4" />,
-    },
-    {
-      key: "footer",
-      label: "Footer",
-      icon: <PanelBottom className="h-4 w-4" />,
-    },
-    {
-      key: "seo",
-      label: "SEO",
-      icon: <Globe className="h-4 w-4" />,
-    },
-    {
-      key: "settings",
-      label: "Settings",
-      icon: <Settings className="h-4 w-4" />,
-    },
-  ];
+  const items = React.useMemo(
+    () => [
+      {
+        key: "",
+        label: "Pages",
+        icon: <Layout className="h-4 w-4" />,
+      },
+      {
+        key: "create",
+        label: "Create Page",
+        icon: <Plus className="h-4 w-4" />,
+      },
+      {
+        key: "navigation",
+        label: "Navigation",
+        icon: <Menu className="h-4 w-4" />,
+      },
+      {
+        key: "footer",
+        label: "Footer",
+        icon: <PanelBottom className="h-4 w-4" />,
+      },
+      {
+        key: "seo",
+        label: "SEO",
+        icon: <Globe className="h-4 w-4" />,
+      },
+      {
+        key: "settings",
+        label: "Settings",
+        icon: <Settings className="h-4 w-4" />,
+      },
+    ],
+    [],
+  );
+
+  const { getOrderedTabs, onReorder } = useTabOrder(
+    "WEBSITE",
+    useWebsiteLayoutStore,
+    items,
+  );
+  const orderedItems = getOrderedTabs(items);
 
   if (loading) {
     return (
@@ -91,9 +101,6 @@ function RootLayout({ children }: { children: React.ReactNode }) {
       </div>
     );
   }
-
-  const { getOrderedTabs, onReorder } = useTabOrder("WEBSITE", useWebsiteLayoutStore, items);
-  const orderedItems = getOrderedTabs(items);
 
   return (
     <div className="w-full h-full flex flex-col">

@@ -2,16 +2,10 @@
 
 import React from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 import {
-  Users,
-  UserCog,
-  CalendarDays,
   Briefcase,
   ShoppingBag,
-  List,
   Globe,
   ShieldCheck,
   Sparkles,
@@ -70,55 +64,56 @@ function RootLayout({ children }: { children: React.ReactNode }) {
         actions={<PostModal />}
       />
 
-      <EcosystemActionBar shadow="sm">
-        <div className="flex items-center gap-1 w-full overflow-x-auto no-scrollbar pb-1">
+      <EcosystemActionBar
+        shadow="none"
+        className="p-0 border-b border-border bg-white dark:bg-background"
+      >
+        <div className="flex items-center gap-0 w-full overflow-x-auto no-scrollbar px-6">
           {tabs.map((tab) => (
             <button
               key={tab.key}
               onClick={() => router.push(`/feed/${tab.key}`)}
               className={cn(
-                "group/tab relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12.5px] font-medium transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/50 whitespace-nowrap",
+                "group/tab relative flex items-center gap-1.5 px-4 py-3 text-[12px] font-medium transition-colors duration-150 outline-none whitespace-nowrap",
                 activeTab === tab.key
-                  ? "text-indigo-700"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/70",
+                  ? "text-foreground"
+                  : "text-muted-foreground hover:text-foreground",
               )}
             >
-              {/* Animated pill background */}
+              {/* Active underline indicator */}
               {activeTab === tab.key && (
-                <motion.span
-                  layoutId="feed-tab-pill"
-                  className="absolute inset-0 rounded-lg bg-indigo-50 border border-indigo-100/80 shadow-[0_1px_3px_0_oklch(0.55_0.24_264/0.08)]"
+                <motion.div
+                  layoutId="feed-tab-underline"
+                  className="absolute bottom-0 left-0 right-0 h-[2px] bg-foreground dark:bg-white"
                   transition={{
                     type: "spring",
-                    bounce: 0.18,
-                    duration: 0.38,
+                    bounce: 0.2,
+                    duration: 0.4,
                   }}
                 />
               )}
 
               {/* Icon */}
-              <span
+              <tab.icon
                 className={cn(
-                  "relative z-10 shrink-0 transition-all duration-200",
+                  "h-3.5 w-3.5 transition-colors duration-150",
                   activeTab === tab.key
-                    ? "text-indigo-600"
-                    : "text-muted-foreground group-hover/tab:text-muted-foreground",
+                    ? "text-foreground"
+                    : "text-muted-foreground group-hover/tab:text-foreground",
                 )}
-              >
-                <tab.icon className="h-3.5 w-3.5" />
-              </span>
+              />
 
               {/* Label */}
-              <span className="relative z-10 leading-none">{tab.label}</span>
+              <span className="leading-none">{tab.label}</span>
 
               {/* Count */}
               {tab.count !== undefined && (
                 <span
                   className={cn(
-                    "relative z-10 ml-0.5 flex h-4 items-center justify-center rounded-full px-1.5 text-[10px] font-medium",
+                    "ml-1 flex h-4 items-center justify-center rounded-full px-1.5 text-[10px] font-medium transition-colors",
                     activeTab === tab.key
-                      ? "bg-indigo-100 text-indigo-700"
-                      : "bg-muted text-muted-foreground",
+                      ? "bg-foreground/10 text-foreground"
+                      : "bg-muted text-muted-foreground group-hover/tab:bg-muted/80",
                   )}
                 >
                   {tab.count}

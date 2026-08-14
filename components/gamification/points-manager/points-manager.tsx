@@ -12,7 +12,14 @@ import {
 
 import { CtaButton } from "@/components/ui/cta-button";
 import * as LucideIcons from "lucide-react";
-import { Plus, Info, Coins, LayoutGrid, RotateCcw, Settings } from "lucide-react";
+import {
+  Plus,
+  Info,
+  Coins,
+  LayoutGrid,
+  RotateCcw,
+  Settings,
+} from "lucide-react";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
@@ -97,18 +104,24 @@ export function PointsManager() {
       list = list.filter(
         (rule) =>
           rule.module?.toLowerCase() === selectedModule.toLowerCase() ||
-          subscriptionSources.find(
-            (s) => s.id?.toLowerCase() === selectedModule.toLowerCase(),
-          )?.uuid?.toLowerCase() === rule.module?.toLowerCase() ||
-          subscriptionSources.find(
-            (s) => s.uuid?.toLowerCase() === selectedModule.toLowerCase(),
-          )?.id?.toLowerCase() === rule.module?.toLowerCase() ||
-          subscriptionSources.find(
-            (s) => (s as any).slug?.toLowerCase() === selectedModule.toLowerCase(),
-          )?.id?.toLowerCase() === rule.module?.toLowerCase() ||
-          subscriptionSources.find(
-            (s) => (s as any).slug?.toLowerCase() === selectedModule.toLowerCase(),
-          )?.uuid?.toLowerCase() === rule.module?.toLowerCase(),
+          subscriptionSources
+            .find((s) => s.id?.toLowerCase() === selectedModule.toLowerCase())
+            ?.uuid?.toLowerCase() === rule.module?.toLowerCase() ||
+          subscriptionSources
+            .find((s) => s.uuid?.toLowerCase() === selectedModule.toLowerCase())
+            ?.id?.toLowerCase() === rule.module?.toLowerCase() ||
+          subscriptionSources
+            .find(
+              (s) =>
+                (s as any).slug?.toLowerCase() === selectedModule.toLowerCase(),
+            )
+            ?.id?.toLowerCase() === rule.module?.toLowerCase() ||
+          subscriptionSources
+            .find(
+              (s) =>
+                (s as any).slug?.toLowerCase() === selectedModule.toLowerCase(),
+            )
+            ?.uuid?.toLowerCase() === rule.module?.toLowerCase(),
       );
     }
     if (search) {
@@ -174,13 +187,29 @@ export function PointsManager() {
               value={selectedModule}
               onValueChange={(val) => setSelectedModule(val as any)}
               options={[
-                { value: "ALL", label: subscriptionSources.some(s => s.type === "INTEGRATION") ? "All Modules & Integrations" : "All Modules", icon: LayoutGrid },
-                { value: "SOURCE_MODULE", label: "All Modules", icon: Settings },
-                ...(subscriptionSources.some(s => s.type === "INTEGRATION") ? [{
-                  value: "SOURCE_INTEGRATION",
-                  label: "All Integrations",
-                  icon: (LucideIcons as any)["Boxes"] || LayoutGrid,
-                }] : []),
+                {
+                  value: "ALL",
+                  label: subscriptionSources.some(
+                    (s) => s.type === "INTEGRATION",
+                  )
+                    ? "All Modules & Integrations"
+                    : "All Modules",
+                  icon: LayoutGrid,
+                },
+                {
+                  value: "SOURCE_MODULE",
+                  label: "All Modules",
+                  icon: Settings,
+                },
+                ...(subscriptionSources.some((s) => s.type === "INTEGRATION")
+                  ? [
+                      {
+                        value: "SOURCE_INTEGRATION",
+                        label: "All Integrations",
+                        icon: (LucideIcons as any)["Boxes"] || LayoutGrid,
+                      },
+                    ]
+                  : []),
                 ...subscriptionSources.map((m) => ({
                   value: m.id,
                   label: `${m.name}${m.type === "INTEGRATION" ? " (Integration)" : ""}`,

@@ -5,16 +5,22 @@ import { Rss } from "lucide-react";
 import { useEntitySettings } from "@/graphql/actions";
 import { FEED_FIELDS } from "@/components/settings/feed/feed-visibility";
 import FeedSourceOrdering from "@/components/settings/feed/feed-source-ordering";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const FeedOrderingPage = () => {
   const { data, loading } = useEntitySettings();
 
   if (loading || !data) {
     return (
-      <div className="flex flex-col gap-3 max-w-2xl">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="h-16 w-full rounded-xl bg-muted/50 animate-pulse" />
-        ))}
+      <div className="space-y-6 max-w-[1040px]">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div className="lg:col-span-8 space-y-4">
+            <Skeleton className="h-44 w-full rounded-2xl" />
+          </div>
+          <div className="lg:col-span-4 space-y-4">
+            <Skeleton className="h-64 w-full rounded-2xl" />
+          </div>
+        </div>
       </div>
     );
   }
@@ -39,11 +45,7 @@ const FeedOrderingPage = () => {
       enabled: !!(data.getEntitySettings as any)[f.key],
     }));
 
-  return (
-    <div className="max-w-2xl px-4 sm:px-0">
-      <FeedSourceOrdering initialSources={sources} />
-    </div>
-  );
+  return <FeedSourceOrdering initialSources={sources} />;
 };
 
 export default FeedOrderingPage;

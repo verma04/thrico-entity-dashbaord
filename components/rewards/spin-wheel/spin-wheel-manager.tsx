@@ -1,18 +1,11 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -34,18 +27,10 @@ import {
   Plus,
   Trash2,
   Edit,
-  Shield,
-  TrendingUp,
-  AlertTriangle,
-  Clock,
-  Save,
   Coins,
-  Crown,
   Ticket,
-  XCircle,
   Users,
-  Loader2,
-  Info,
+  Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -57,51 +42,49 @@ import {
   useUpdateSpinWheelPrize,
   useDeleteSpinWheelPrize,
   useGetSpinActivity,
-  useGetRewards,
   useLazyGetVouchersByRewardMechanism,
 } from "@/graphql/actions/rewards";
 import { useGetEntityCurrencyConfig } from "@/graphql/actions/currency";
-import moment from "moment";
-import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
-import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
+import {
+  PolarisFormLayout,
+  PolarisFormCard,
+  PolarisPresetChips,
+  PolarisTipCard,
+  PolarisInfoBanner,
+} from "@/components/gamification/shared/polaris-form-ui";
 
-import { RewardType, WheelSegment } from "./types";
+import { WheelSegment } from "./types";
 import {
   SEGMENT_COLORS,
   REWARD_LABELS,
   REWARD_BADGE,
   REWARD_ICON,
 } from "./constants";
-import { WheelPreview } from "./wheel-preview";
-import { SectionCard } from "./section-card";
 import { EconomyMonitor } from "./economy-monitor";
 import { GamePreviewMockup } from "./game-preview-mockup";
 import { SegmentDialog } from "./segment-dialog";
 import { EcosystemHeader } from "@/components/layout/ecosystem";
 
+const COST_PRESETS = [5, 10, 20, 50, 100];
+
 export function SpinWheelManager() {
   const {
     data: configData,
     loading: configLoading,
-    refetch: refetchConfig,
   } = useGetSpinWheelConfig();
   const { data: prizesData, refetch: refetchPrizes } = useGetSpinWheelPrizes();
   const { data: activityData } = useGetSpinActivity({
     pagination: { page: 1, limit: 10 },
   });
-  const { data: rewardsData } = useGetRewards({
-    status: "ACTIVE",
-    pagination: { page: 1, limit: 100 },
-  });
   const { data: currencyConfig } = useGetEntityCurrencyConfig();
   const currencyName =
-    currencyConfig?.getEntityCurrencyConfig?.currencyName || "Tokens";
+    currencyConfig?.getEntityCurrencyConfig?.currencyName || "Points";
 
   const config = configData?.getSpinWheelConfig;
   const [isActive, setIsActive] = useState(false);
-  const [costPerSpin, setCostPerSpin] = useState(0);
-  const [maxSpinsPerDay, setMaxSpinsPerDay] = useState(0);
+  const [costPerSpin, setCostPerSpin] = useState(20);
+  const [maxSpinsPerDay, setMaxSpinsPerDay] = useState(3);
   const [campaignStartDate, setCampaignStartDate] = useState<string | null>(
     null,
   );
@@ -182,15 +165,13 @@ export function SpinWheelManager() {
   const avgPayout = segments.reduce(
     (sum, seg) =>
       seg.rewardType === "COINS"
-        ? sum + (seg.rewardValue * seg.probability) / totalProbability
+        ? sum + (seg.rewardValue * seg.probability) / (totalProbability || 1)
         : sum,
     0,
   );
   const profitMargin =
     costPerSpin > 0 ? ((costPerSpin - avgPayout) / costPerSpin) * 100 : 0;
   const isHealthy = profitMargin >= 20 && profitMargin <= 40;
-  const isMutating =
-    savingConfig || creatingSegment || updatingSegment || deletingSegment;
 
   const handleSaveConfig = async () => {
     if (costPerSpin < 1) {
@@ -298,128 +279,173 @@ export function SpinWheelManager() {
   };
 
   return (
-    <>
-      <EcosystemHeader
-        title="Spin Wheel"
-        badgeText="Engagement"
-        description={`Configure spin wheel segments, ${currencyName} costs, and winning probabilities.`}
-        icon={Dices}
-        breadcrumbs={[
-          { label: "Gamification", href: "/gamification" },
-          { label: "Engagement Games", href: "/gamification/engagement-games" },
-          { label: "Spin Wheel" },
-        ]}
-        actions={
-          <EcosystemActionBar
-            shadow="none"
-            className="p-0 border-none bg-transparent"
-          >
-            <EcosystemActionBar.Group>
-              <div
-                className={cn(
-                  "h-2 w-2 rounded-full animate-pulse",
-                  isActive ? "bg-emerald-500" : "bg-amber-500",
-                )}
+    <div className="flex flex-col min-h-screen bg-[#fafafa] dark:bg-black/10 overflow-hidden relative">
+      <div className="border-b border-zinc-200/80 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md">
+        <div className="max-w-[1040px] mx-auto px-4 sm:px-6 md:px-8 py-3">
+          <EcosystemHeader
+            title="Spin Wheel"
+            badgeText="Interactive Game"
+            description={`Configure spin wheel segments, ${currencyName} cost per spin, and win probabilities.`}
+            icon={Dices}
+            breadcrumbs={[
+              { label: "Gamification", href: "/gamification" },
+              { label: "Engagement Games", href: "/gamification/engagement-games" },
+              { label: "Spin Wheel" },
+            ]}
+          />
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto">
+        <PolarisFormLayout
+          sidebar={
+            <div className="space-y-6">
+              {/* Phone Live Simulator */}
+              <GamePreviewMockup
+                segments={segments}
+                costPerSpin={costPerSpin}
+                maxSpinsPerDay={maxSpinsPerDay}
+                currencyName={currencyName}
               />
-              <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">
-                {isActive ? "Live" : "Paused"}
-              </span>
-              <EcosystemActionBar.Separator />
-              <Users className="h-3.5 w-3.5 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground whitespace-nowrap">
-                {activities.length} recent spins
-              </span>
-            </EcosystemActionBar.Group>
 
-          </EcosystemActionBar>
-        }
-      />
+              {/* Economic Health Monitor */}
+              <EconomyMonitor
+                avgPayout={avgPayout}
+                profitMargin={profitMargin}
+                isHealthy={isHealthy}
+                currencyName={currencyName}
+              />
 
-      <EcosystemContainer className="p-6 space-y-5">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-          {/* Left col: 2/3 */}
-          <div className="lg:col-span-2 space-y-5">
-            <div className="grid grid-cols-2 gap-4">
-              <SectionCard
-                icon={Dices}
-                iconBg="bg-indigo-50"
-                iconColor="text-indigo-600"
-                title="System Status"
-              >
-                <div className="flex items-center justify-between py-1">
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">
-                      {isActive ? "Active" : "Paused"}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Spin wheel availability
+              {/* Strategic Tip */}
+              <PolarisTipCard title="Engagement Tip">
+                Include a mix of small frequent wins (e.g. 5–10 points) and rare grand prizes (exclusive vouchers) to maximize daily retention without inflating your point economy.
+              </PolarisTipCard>
+            </div>
+          }
+        >
+          <div className="space-y-6">
+            {/* Step 1: Game Control & Economics */}
+            <PolarisFormCard
+              step={1}
+              title="Game Economics & State"
+              description="Control availability, participation cost in points, and daily spin velocity."
+              badge="Game Rules"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {/* Status Switch Card */}
+                <div className="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/30 flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label
+                      htmlFor="spinActive"
+                      className="text-xs font-semibold text-zinc-800 dark:text-zinc-200 block cursor-pointer"
+                    >
+                      Game Status
+                    </Label>
+                    <p className="text-[11px] text-zinc-500">
+                      {isActive ? "Currently live for members" : "Game paused"}
                     </p>
                   </div>
                   <Switch
+                    id="spinActive"
                     checked={isActive}
                     onCheckedChange={setIsActive}
-                    className="data-[state=checked]:bg-emerald-500"
+                    className="data-[state=checked]:bg-zinc-900 dark:data-[state=checked]:bg-zinc-100"
                   />
                 </div>
-              </SectionCard>
 
-              <SectionCard
-                icon={Coins}
-                iconBg="bg-amber-50"
-                iconColor="text-amber-600"
-                title="Cost per Spin (Coins)"
-              >
-                <Input
-                  type="number"
-                  min={1}
-                  value={costPerSpin}
-                  onChange={(e) => setCostPerSpin(Number(e.target.value))}
-                  className="font-mono h-9"
-                />
-              </SectionCard>
-            </div>
-
-            <SectionCard
-              icon={Clock}
-              iconBg="bg-blue-50"
-              iconColor="text-blue-600"
-              title="Campaign Schedule"
-              description="Daily limits and campaign window"
-            >
-              <div className="space-y-1.5 max-w-xs">
-                <Label className="text-xs font-semibold text-muted-foreground">
-                  Daily Cap
-                </Label>
-                <Input
-                  type="number"
-                  min={1}
-                  value={maxSpinsPerDay}
-                  onChange={(e) => setMaxSpinsPerDay(Number(e.target.value))}
-                />
+                {/* Daily Cap */}
+                <div className="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/30 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label
+                      htmlFor="dailyCap"
+                      className="text-xs font-semibold text-zinc-800 dark:text-zinc-200"
+                    >
+                      Daily Limit / Member
+                    </Label>
+                    <span className="text-[10px] text-zinc-400">
+                      Velocity Control
+                    </span>
+                  </div>
+                  <div className="relative">
+                    <Input
+                      id="dailyCap"
+                      type="number"
+                      min={1}
+                      value={maxSpinsPerDay}
+                      onChange={(e) => setMaxSpinsPerDay(Number(e.target.value))}
+                      className="h-10 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-xs font-semibold shadow-none"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-zinc-400 font-medium">
+                      spins / day
+                    </span>
+                  </div>
+                </div>
               </div>
-            </SectionCard>
 
-            <SectionCard
-              icon={Dices}
-              iconBg="bg-violet-50"
-              iconColor="text-violet-600"
-              title="Wheel Segments"
-              description={`${segments.length} segments configured`}
-              action={
+              {/* Cost Per Spin Input with Presets */}
+              <div className="space-y-3 pt-4 border-t border-zinc-100 dark:border-zinc-800">
+                <Label
+                  htmlFor="costPerSpin"
+                  className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                >
+                  Cost per Spin ({currencyName})
+                </Label>
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  <div className="relative flex-1">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-900 dark:text-zinc-100">
+                      <Coins className="h-4 w-4" />
+                    </div>
+                    <Input
+                      id="costPerSpin"
+                      type="number"
+                      min={1}
+                      value={costPerSpin}
+                      onChange={(e) => setCostPerSpin(Number(e.target.value))}
+                      className="h-11 pl-10 pr-16 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-base font-bold text-zinc-900 dark:text-zinc-100 shadow-none focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+                    />
+                    <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-xs font-bold text-zinc-400 uppercase tracking-wider">
+                      {currencyName.substring(0, 3).toUpperCase()}
+                    </div>
+                  </div>
+
+                  <PolarisPresetChips
+                    presets={COST_PRESETS}
+                    currentValue={Number(costPerSpin)}
+                    onSelect={(v) => setCostPerSpin(v)}
+                    prefix=""
+                  />
+                </div>
+              </div>
+            </PolarisFormCard>
+
+            {/* Step 2: Wheel Segments Configuration */}
+            <PolarisFormCard
+              step={2}
+              title="Wheel Segments & Probability"
+              description={`Configure up to 12 reward segments and their respective winning odds.`}
+              badge={`${segments.length} / 12 Segments`}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                  Total Relative Weight:{" "}
+                  <strong className="text-zinc-900 dark:text-zinc-100">
+                    {totalProbability}
+                  </strong>
+                </p>
                 <Button
                   size="sm"
                   onClick={handleAddSegment}
                   disabled={segments.length >= 12}
-                  className="gap-1.5 h-7 text-xs"
+                  className="gap-1.5 h-8 text-xs font-bold bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-100 dark:text-zinc-900 rounded-lg shadow-xs"
                 >
-                  <Plus className="h-3 w-3" /> Add Segment
+                  <Plus className="h-3.5 w-3.5" /> Add Segment
                 </Button>
-              }
-            >
-              <div className="rounded-lg border border-border overflow-hidden">
+              </div>
+
+              <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden bg-white dark:bg-zinc-900 shadow-xs">
                 <Table>
                   <TableHeader>
-                    <TableRow className="bg-muted/30 hover:bg-muted/30">
+                    <TableRow className="bg-zinc-50/70 dark:bg-zinc-800/40 border-b border-zinc-200 dark:border-zinc-800">
                       <TableHead className="h-10 text-xs font-semibold w-[40px]">
                         #
                       </TableHead>
@@ -433,7 +459,7 @@ export function SpinWheelManager() {
                         Value
                       </TableHead>
                       <TableHead className="h-10 text-xs font-semibold">
-                        Probability
+                        Odds %
                       </TableHead>
                       <TableHead className="h-10 text-xs font-semibold text-center">
                         Active
@@ -448,24 +474,27 @@ export function SpinWheelManager() {
                       <TableRow>
                         <TableCell
                           colSpan={7}
-                          className="h-20 text-center text-sm text-muted-foreground"
+                          className="h-24 text-center text-xs text-zinc-400"
                         >
-                          No segments yet. Add one to get started.
+                          No segments defined. Click "Add Segment" to begin.
                         </TableCell>
                       </TableRow>
                     ) : (
                       segments.map((seg, i) => (
-                        <TableRow key={seg.id} className="group h-12">
-                          <TableCell className="font-mono text-xs text-muted-foreground">
+                        <TableRow
+                          key={seg.id}
+                          className="group h-12 border-b border-zinc-100 dark:border-zinc-800/60 hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30"
+                        >
+                          <TableCell className="font-mono text-xs text-zinc-400">
                             {i + 1}
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
                               <span
-                                className="h-2.5 w-2.5 rounded-sm shrink-0"
+                                className="h-3 w-3 rounded-full shrink-0 shadow-xs"
                                 style={{ background: seg.color }}
                               />
-                              <span className="text-sm font-medium text-foreground">
+                              <span className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
                                 {seg.label}
                               </span>
                             </div>
@@ -473,7 +502,7 @@ export function SpinWheelManager() {
                           <TableCell>
                             <span
                               className={cn(
-                                "text-[11px] font-medium px-2 py-0.5 rounded-md flex items-center gap-1 w-fit",
+                                "text-[10px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1 w-fit border",
                                 REWARD_BADGE[seg.rewardType],
                               )}
                             >
@@ -481,45 +510,47 @@ export function SpinWheelManager() {
                               {REWARD_LABELS[seg.rewardType]}
                             </span>
                           </TableCell>
-                          <TableCell className="text-sm font-medium text-foreground">
+                          <TableCell className="text-xs font-medium text-zinc-900 dark:text-zinc-100">
                             {seg.rewardType === "COINS" &&
-                              `${seg.rewardValue} Coins`}
+                              `${seg.rewardValue} ${currencyName}`}
                             {seg.rewardType === "VOUCHER" && (
                               <div className="flex items-center gap-1.5">
                                 {seg.reward?.image ? (
                                   <img
                                     src={seg.reward.image}
                                     alt=""
-                                    className="h-5 w-5 rounded object-cover border border-border/40 shrink-0"
+                                    className="h-5 w-5 rounded object-cover border border-zinc-200 shrink-0"
                                   />
                                 ) : (
-                                  <div className="h-5 w-5 rounded bg-muted flex items-center justify-center border border-border/40 shrink-0">
-                                    <Ticket className="h-3 w-3 text-muted-foreground" />
+                                  <div className="h-5 w-5 rounded bg-zinc-100 flex items-center justify-center border shrink-0">
+                                    <Ticket className="h-3 w-3 text-zinc-500" />
                                   </div>
                                 )}
                                 <span
-                                  className="text-xs font-medium text-foreground truncate max-w-[100px]"
+                                  className="text-xs font-medium truncate max-w-[120px]"
                                   title={seg.reward?.title}
                                 >
                                   {seg.reward?.title || `₹${seg.rewardValue}`}
                                 </span>
                               </div>
                             )}
-                            {seg.rewardType === "NO_REWARDS" && "—"}
+                            {seg.rewardType === "NO_REWARDS" && (
+                              <span className="text-zinc-400">—</span>
+                            )}
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
-                              <div className="w-16 h-1.5 bg-muted rounded-full overflow-hidden">
+                              <div className="w-14 h-1.5 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
                                 <div
-                                  className="h-full bg-indigo-500 rounded-full"
+                                  className="h-full bg-zinc-900 dark:bg-zinc-100 rounded-full"
                                   style={{
-                                    width: `${(seg.probability / totalProbability) * 100}%`,
+                                    width: `${(seg.probability / (totalProbability || 1)) * 100}%`,
                                   }}
                                 />
                               </div>
-                              <span className="text-xs text-muted-foreground font-mono">
+                              <span className="text-[11px] text-zinc-500 font-mono font-semibold">
                                 {(
-                                  (seg.probability / totalProbability) *
+                                  (seg.probability / (totalProbability || 1)) *
                                   100
                                 ).toFixed(1)}
                                 %
@@ -537,35 +568,35 @@ export function SpinWheelManager() {
                                       input: { isActive: v },
                                     },
                                   });
-                                  toast.success("Updated");
+                                  toast.success("Updated segment status");
                                   refetchPrizes();
                                 } catch {
                                   toast.error("Update failed");
                                 }
                               }}
-                              className="scale-75"
+                              className="scale-75 data-[state=checked]:bg-zinc-900 dark:data-[state=checked]:bg-zinc-100"
                             />
                           </TableCell>
                           <TableCell className="text-right">
-                            <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="flex justify-end gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-7 w-7 rounded-lg"
+                                className="h-7 w-7 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800"
                                 onClick={() => {
                                   setEditingSegment({ ...seg });
                                   setIsDialogOpen(true);
                                 }}
                               >
-                                <Edit className="h-3.5 w-3.5" />
+                                <Edit className="h-3.5 w-3.5 text-zinc-600 dark:text-zinc-400" />
                               </Button>
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-7 w-7 rounded-lg hover:text-rose-600"
+                                className="h-7 w-7 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/30 hover:text-rose-600"
                                 onClick={() => setDeletingSegmentId(seg.id)}
                               >
-                                <Trash2 className="h-3.5 w-3.5" />
+                                <Trash2 className="h-3.5 w-3.5 text-zinc-400 hover:text-rose-600" />
                               </Button>
                             </div>
                           </TableCell>
@@ -575,27 +606,10 @@ export function SpinWheelManager() {
                   </TableBody>
                 </Table>
               </div>
-            </SectionCard>
+            </PolarisFormCard>
           </div>
-
-          {/* Right col: Preview + Economy */}
-          <div className="space-y-5">
-            <div className="sticky top-6 space-y-6">
-              <GamePreviewMockup
-                segments={segments}
-                costPerSpin={costPerSpin}
-                maxSpinsPerDay={maxSpinsPerDay}
-              />
-
-              <EconomyMonitor
-                avgPayout={avgPayout}
-                profitMargin={profitMargin}
-                isHealthy={isHealthy}
-              />
-            </div>
-          </div>
-        </div>
-      </EcosystemContainer>
+        </PolarisFormLayout>
+      </div>
 
       <FloatingSavePanel
         hasChanged={hasChanged}
@@ -605,6 +619,7 @@ export function SpinWheelManager() {
         saved={saved}
         title="Unsaved Configuration"
         description="You have pending changes to the spin wheel settings."
+        buttonText="Save Configuration"
       />
 
       {/* Segment Dialog */}
@@ -627,12 +642,12 @@ export function SpinWheelManager() {
         open={!!deletingSegmentId}
         onOpenChange={(open) => !open && setDeletingSegmentId(null)}
       >
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md rounded-2xl">
           <DialogHeader>
             <DialogTitle>Confirm Delete</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete this segment? This action cannot
-              be undone.
+              Are you sure you want to delete this segment from the spin wheel?
+              This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="sm:justify-end gap-2">
@@ -640,6 +655,7 @@ export function SpinWheelManager() {
               variant="outline"
               size="sm"
               onClick={() => setDeletingSegmentId(null)}
+              className="rounded-lg text-xs font-semibold"
             >
               Cancel
             </Button>
@@ -653,12 +669,13 @@ export function SpinWheelManager() {
                 }
               }}
               disabled={deletingSegment}
+              className="rounded-lg text-xs font-bold"
             >
-              {deletingSegment ? "Deleting..." : "Delete"}
+              {deletingSegment ? "Deleting..." : "Delete Segment"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 }

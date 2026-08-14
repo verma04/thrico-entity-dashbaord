@@ -4,15 +4,19 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import {
   Trophy,
-  TrendingUp,
-  AlertTriangle,
   Shield,
   Info,
   Dices,
   Gift,
   Star,
+  CheckCircle2,
+  AlertTriangle,
 } from "lucide-react";
-import { GameHowItWorks } from "../shared/game-how-it-works";
+import {
+  PolarisSidebarCard,
+  PolarisSummaryRow,
+  PolarisTipCard,
+} from "@/components/gamification/shared/polaris-form-ui";
 
 interface EconomySidebarProps {
   costPerPlay: number;
@@ -27,179 +31,152 @@ export const EconomySidebar = ({
   maxPlaysPerDay,
   avgPayout,
   profitMargin,
-  currencyName = "Tokens",
+  currencyName = "Points",
 }: EconomySidebarProps) => {
   const isHealthy = profitMargin >= 20 && profitMargin <= 40;
 
   return (
     <div className="space-y-6">
-      {/* Vibe Check: Live Preview (Mobile Mockup) */}
-      <div className="relative group mx-auto max-w-[340px]">
-        {/* Glowing ambient background shadow */}
-        <div className="absolute -inset-0.5 bg-gradient-to-b from-indigo-500/20 to-purple-500/20 rounded-[36px] blur-xl opacity-50 group-hover:opacity-100 transition-opacity duration-500" />
+      {/* Live Member Experience Preview */}
+      <PolarisSidebarCard
+        title="Member Experience Preview"
+        badge="Live Slot"
+        icon={Trophy}
+      >
+        <div className="rounded-2xl border border-zinc-200/80 dark:border-zinc-800 bg-zinc-950 text-white overflow-hidden flex flex-col p-2 relative shadow-md">
+          {/* Subtle glow */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-44 h-44 bg-[#008060]/20 rounded-full blur-2xl pointer-events-none" />
 
-        {/* Mock Phone Frame */}
-        <div className="relative flex flex-col w-full bg-white dark:bg-zinc-900 rounded-[32px] shadow-2xl border border-zinc-200/50 dark:border-white/5 overflow-hidden text-zinc-900 dark:text-zinc-100 p-2">
-          <div className="flex-1 rounded-[24px] bg-indigo-950 overflow-hidden flex flex-col relative border border-indigo-900/50 shadow-inner">
-            {/* Game Header */}
-            <div className="p-5 text-center relative z-10 space-y-1 bg-gradient-to-b from-indigo-900 to-transparent">
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/10 mb-2">
-                <Trophy className="h-3 w-3 text-amber-400" />
-                <span className="text-[9px] font-bold uppercase tracking-widest text-indigo-200">
-                  Daily Match
-                </span>
+          <div className="rounded-xl bg-zinc-900/90 border border-zinc-800 p-4 flex flex-col items-center relative z-10 space-y-3">
+            {/* Header */}
+            <div className="text-center space-y-1">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/10 text-[9px] font-bold uppercase tracking-widest text-[#95BF47]">
+                <Trophy className="h-2.5 w-2.5" />
+                Daily Match
               </div>
-              <h3 className="text-xl font-bold text-white tracking-tight">
+              <h4 className="text-sm font-bold text-white tracking-tight">
                 Match & Win
-              </h3>
-              <p className="text-[10px] text-indigo-300">
-                Match 3 symbols to claim the jackpot.
+              </h4>
+              <p className="text-[10px] text-zinc-400">
+                Match 3 symbols across the reels to claim the jackpot
               </p>
             </div>
 
-            {/* Canvas / Game Area */}
-            <div className="flex-1 flex flex-col items-center justify-center p-6 relative z-10 min-h-[220px]">
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-indigo-500/30 rounded-full blur-2xl" />
-
-              {/* Slot Machine Display */}
-              <div className="relative w-full bg-indigo-900/50 border-4 border-indigo-500/30 rounded-2xl p-4 flex justify-between gap-3 shadow-[inset_0_4px_20px_rgba(0,0,0,0.5)]">
+            {/* Slot Machine Display */}
+            <div className="w-full py-2 flex items-center justify-center">
+              <div className="relative w-full bg-zinc-900 border border-zinc-700/80 rounded-xl p-3 flex justify-between gap-2 shadow-inner">
                 {[Dices, Star, Gift].map((Icon, idx) => (
                   <div
                     key={idx}
-                    className="flex-1 aspect-square bg-white dark:bg-zinc-800 rounded-xl flex items-center justify-center shadow-md border-b-4 border-zinc-300 dark:border-zinc-900 overflow-hidden relative group/slot"
+                    className="flex-1 aspect-square bg-zinc-800 rounded-lg border border-zinc-700 flex items-center justify-center shadow-xs overflow-hidden relative"
                   >
-                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/5" />
-                    <Icon className="h-8 w-8 text-indigo-500 animate-pulse" />
+                    <Icon className="h-6 w-6 text-[#95BF47] animate-pulse" />
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Game Bottom Bar */}
-            <div className="p-6 relative z-10 mt-auto bg-gradient-to-t from-black/80 to-transparent">
-              <div className="flex items-center justify-center gap-2 mb-4">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-200">
-                  Live Preview
-                </span>
-              </div>
+            {/* Bottom Button */}
+            <div className="w-full space-y-2 pt-1">
               <button
                 disabled
-                className="w-full h-12 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-sm shadow-[0_0_20px_rgba(245,158,11,0.4)] border-none flex items-center justify-center"
+                className="w-full h-10 rounded-xl bg-white text-zinc-950 font-bold text-xs shadow-sm border-none flex items-center justify-center cursor-default opacity-95"
               >
-                Play For {costPerPlay} {currencyName}
+                Play for {costPerPlay} {currencyName}
               </button>
-              <p className="text-center text-[9px] text-indigo-400/70 mt-3 font-medium">
-                {maxPlaysPerDay} Plays Remaining Today
+              <p className="text-center text-[10px] text-zinc-400 font-medium">
+                {maxPlaysPerDay > 0
+                  ? `${maxPlaysPerDay} plays per member / day`
+                  : "Unlimited plays per day"}
               </p>
             </div>
           </div>
         </div>
-      </div>
+      </PolarisSidebarCard>
 
-      {/* Economy Monitor */}
-      <div className="rounded-[24px] border border-border bg-card p-5 max-w-[340px] mx-auto shadow-sm">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="h-8 w-8 rounded-xl bg-orange-500/10 flex items-center justify-center border border-orange-500/20">
-            <Shield className="h-4 w-4 text-orange-600" />
-          </div>
-          <div>
-            <h4 className="text-sm font-bold text-foreground leading-none">
-              Economy Monitor
-            </h4>
-            <p className="text-[10px] font-medium text-muted-foreground mt-1 uppercase tracking-wider">
-              Health Check
-            </p>
-          </div>
-        </div>
-
+      {/* Economy Health Monitor */}
+      <PolarisSidebarCard
+        title="Game Economy Monitor"
+        badge={isHealthy ? "Healthy Margin" : "Attention"}
+        icon={Shield}
+      >
         <div className="space-y-4">
-          <div className="flex items-center justify-between p-3 rounded-xl bg-muted/40 border border-border/50">
-            <span className="text-xs font-semibold text-muted-foreground">
-              Avg. Payout
-            </span>
-            <span className="text-sm font-bold font-mono text-foreground">
-              {avgPayout.toFixed(1)}{" "}
-              <span className="text-[10px]">{currencyName}</span>
-            </span>
+          <div className="space-y-2">
+            <PolarisSummaryRow
+              label="Avg. Payout / Play"
+              value={`${avgPayout.toFixed(1)} ${currencyName}`}
+            />
+            <PolarisSummaryRow
+              label="Target House Margin"
+              value="20% – 40%"
+              isLast
+            />
           </div>
 
+          {/* Profit Margin Gauge Card */}
           <div
             className={cn(
-              "p-4 rounded-2xl border transition-colors",
+              "p-4 rounded-xl border transition-all",
               isHealthy
-                ? "bg-emerald-50/50 border-emerald-200"
-                : "bg-rose-50/50 border-rose-200",
+                ? "bg-[#008060]/[0.03] border-[#008060]/20 dark:bg-[#008060]/10"
+                : "bg-rose-50/60 border-rose-200 dark:bg-rose-500/10 dark:border-rose-500/20",
             )}
           >
-            <div className="flex items-center justify-between mb-1">
-              <p
+            <div className="flex items-center justify-between mb-1.5">
+              <span
                 className={cn(
-                  "text-xs font-bold uppercase tracking-wider",
-                  isHealthy ? "text-emerald-600" : "text-rose-600",
+                  "text-[10px] font-bold uppercase tracking-wider",
+                  isHealthy ? "text-[#008060]" : "text-rose-600 dark:text-rose-400",
                 )}
               >
-                Profit Margin
-              </p>
+                Simulated House Margin
+              </span>
               {isHealthy ? (
-                <TrendingUp className="h-4 w-4 text-emerald-500" />
+                <CheckCircle2 className="h-4 w-4 text-[#008060]" />
               ) : (
                 <AlertTriangle className="h-4 w-4 text-rose-500" />
               )}
             </div>
             <div className="flex items-baseline gap-2">
-              <p
+              <span
                 className={cn(
-                  "text-3xl font-black font-mono tracking-tighter",
-                  isHealthy ? "text-emerald-700" : "text-rose-700",
+                  "text-2xl font-black font-mono tracking-tight",
+                  isHealthy
+                    ? "text-[#008060]"
+                    : "text-rose-700 dark:text-rose-400",
                 )}
               >
                 {profitMargin.toFixed(1)}%
-              </p>
+              </span>
             </div>
-            <p
-              className={cn(
-                "text-[10px] font-bold mt-1 uppercase tracking-wider",
-                isHealthy ? "text-emerald-600/70" : "text-rose-600/70",
-              )}
-            >
-              Target: 20–40%
-            </p>
+            <div className="w-full bg-zinc-200 dark:bg-zinc-700 h-1.5 rounded-full mt-2 overflow-hidden">
+              <div
+                className={cn(
+                  "h-full rounded-full transition-all",
+                  isHealthy ? "bg-[#008060]" : "bg-rose-500",
+                )}
+                style={{ width: `${Math.min(Math.max(profitMargin, 0), 100)}%` }}
+              />
+            </div>
           </div>
 
           {!isHealthy && (
-            <div className="flex gap-2.5 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 items-start">
+            <div className="flex gap-2.5 p-3 rounded-xl bg-rose-50 dark:bg-rose-500/10 border border-rose-200/80 dark:border-rose-500/20 items-start">
               <Info className="h-4 w-4 text-rose-500 shrink-0 mt-0.5" />
-              <p className="text-[11px] font-medium text-rose-700 leading-relaxed">
+              <p className="text-[11px] font-medium text-rose-700 dark:text-rose-300 leading-relaxed">
                 {profitMargin < 20
-                  ? "Margin too low. Increase play cost or adjust combo probabilities."
-                  : "Margin too high. Game may feel unrewarding; consider better payouts."}
+                  ? "Margin is below target. Increase spin cost or lower high-tier combo probabilities to balance payouts."
+                  : "Margin is very high. Consider improving winning odds to ensure gameplay feels rewarding."}
               </p>
             </div>
           )}
         </div>
-      </div>
-      {/* How it Works Info */}
-      <GameHowItWorks
-        gameName="Match & Win"
-        currencyName={currencyName}
-        paragraphs={[
-          <>
-            Match & Win is a 3-symbol slot game. Users pay a set{" "}
-            <strong className="text-foreground">{currencyName}</strong> cost to
-            spin.
-          </>,
-          <>
-            When played, the system picks a winning combination based on the{" "}
-            <strong className="text-foreground">Probability</strong> you define.
-            If the outcome doesn&apos;t match a combination, the user loses.
-          </>,
-          <>
-            Keep your <strong className="text-foreground">Profit Margin</strong>{" "}
-            healthy (20–40%) to ensure it&apos;s fun for users and profitable.
-          </>,
-        ]}
-      />
+      </PolarisSidebarCard>
+
+      {/* Strategic Tip */}
+      <PolarisTipCard title="Slot Rule Strategy">
+        Ensure the sum of all winning combination probabilities stays well under 100% (typically 30–50% total win rate). The unallocated percentage serves as the fallback loss outcome.
+      </PolarisTipCard>
     </div>
   );
 };

@@ -10,6 +10,7 @@ import { useModuleStore } from "@/store/useModuleStore";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { Users } from "lucide-react";
+import { EcosystemContainer } from "@/components/layout/ecosystem";
 
 const CreateCommunityPage = () => {
   const router = useRouter();
@@ -30,7 +31,8 @@ const CreateCommunityPage = () => {
     onError: (error: any) => {
       toast({
         title: "Error",
-        description: error.message || `Failed to create ${singularName.toLowerCase()}`,
+        description:
+          error.message || `Failed to create ${singularName.toLowerCase()}`,
         variant: "destructive",
       });
     },
@@ -57,10 +59,10 @@ const CreateCommunityPage = () => {
         icon={Users}
         breadcrumbs={[
           { label: moduleName, href: "/communities/all" },
-          { label: "Create" }
+          { label: `Create ${singularName}` },
         ]}
       />
-      <div className="flex-1 overflow-auto bg-background/50 p-6">
+      <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0">
         <CommunityCreationForm
           initialValues={{
             requireAdminApprovalForPosts: false,
@@ -74,7 +76,7 @@ const CreateCommunityPage = () => {
           cover={cover}
           setCover={setCover}
         />
-      </div>
+      </EcosystemContainer>
     </EcosystemWrapper>
   );
 };

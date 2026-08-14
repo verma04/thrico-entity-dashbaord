@@ -66,8 +66,8 @@ export function QuestionListSidebar() {
               >
                 {questions.map((q, index) => (
                   <Draggable
-                    key={q.id}
-                    draggableId={String(q.id)}
+                    key={q.id || `q-${index}`}
+                    draggableId={String(q.id || `q-${index}`)}
                     index={index}
                   >
                     {(provided) => (

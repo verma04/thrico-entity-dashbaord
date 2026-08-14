@@ -93,6 +93,7 @@ export function RanksManager() {
         icon={Crown}
         breadcrumbs={[
           { label: "Gamification", href: "/gamification" },
+          { label: "Points & Badges", href: "/gamification/points-and-badges" },
           { label: "Ranks" },
         ]}
         actions={

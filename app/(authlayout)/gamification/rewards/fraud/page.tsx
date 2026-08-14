@@ -2,26 +2,20 @@
 
 import React from "react";
 import {
-  ShieldAlert,
-  AlertTriangle,
-  Save,
-  Info,
   ShieldCheck,
-  Activity,
+  ShieldAlert,
   Zap,
+  Sparkles,
+  Lock,
+  Smartphone,
+  Globe,
+  UserCheck,
+  Activity,
   CheckCircle2,
-  XCircle,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
 import {
   useGetRewardSecuritySettings,
@@ -29,77 +23,17 @@ import {
 } from "@/graphql/actions/rewards";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
-import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
-import { EcosystemCard } from "@/components/layout/ecosystem/ecosystem-analytics";
-import { cn } from "@/lib/utils";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { useModuleStore } from "@/store/useModuleStore";
-
-interface ToggleRowProps {
-  label: string;
-  desc: string;
-  checked: boolean;
-  onChange: (v: boolean) => void;
-  icon?: React.ReactNode;
-  badge?: "enabled" | "disabled";
-}
-
-function ToggleRow({
-  label,
-  desc,
-  checked,
-  onChange,
-  icon,
-  badge,
-}: ToggleRowProps) {
-  return (
-    <div className="flex items-center justify-between p-4 rounded-xl border border-border bg-card hover:bg-muted/30 transition-colors group">
-      <div className="flex items-center gap-3 pr-4 flex-1 min-w-0">
-        {icon && (
-          <div
-            className={cn(
-              "h-8 w-8 rounded-lg border flex items-center justify-center shrink-0 transition-colors",
-              checked
-                ? "bg-emerald-50 border-emerald-100 text-emerald-600"
-                : "bg-muted border-border text-muted-foreground",
-            )}
-          >
-            {icon}
-          </div>
-        )}
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <Label className="text-sm font-semibold text-foreground cursor-pointer">
-              {label}
-            </Label>
-            {badge && (
-              <span
-                className={cn(
-                  "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide border",
-                  checked
-                    ? "bg-emerald-50 text-emerald-700 border-emerald-100"
-                    : "bg-muted text-muted-foreground border-border",
-                )}
-              >
-                {checked ? (
-                  <CheckCircle2 className="h-2.5 w-2.5" />
-                ) : (
-                  <XCircle className="h-2.5 w-2.5" />
-                )}
-                {checked ? "Active" : "Off"}
-              </span>
-            )}
-          </div>
-          <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-            {desc}
-          </p>
-        </div>
-      </div>
-      <Switch checked={checked} onCheckedChange={onChange} />
-    </div>
-  );
-}
+import {
+  PolarisFormLayout,
+  PolarisFormCard,
+  PolarisSidebarCard,
+  PolarisSummaryRow,
+  PolarisTipCard,
+} from "@/components/gamification/shared/polaris-form-ui";
+import { cn } from "@/lib/utils";
 
 export default function FraudPage() {
   const rewardsModuleName = useModuleStore((state) => state.rewardsModuleName);
@@ -168,41 +102,25 @@ export default function FraudPage() {
       });
       toast({
         title: "Settings saved",
-        description: "Security configuration updated successfully.",
+        description: "Fraud prevention and security rules updated successfully.",
       });
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     } catch {
       toast({
         title: "Update failed",
-        description: "Could not save settings. Please try again.",
+        description: "Could not save security configuration. Please try again.",
         variant: "destructive",
       });
     }
   };
 
-  // Compute a rough "security score"
-  const score = [
-    localSettings.dailyRedemptionLimit > 0,
-  ].filter(Boolean).length;
-
-  const maxScore = 1;
-  const scoreLabel = score === maxScore ? "Strong" : "Weak";
-  const scoreColor =
-    score === maxScore
-      ? "text-emerald-600"
-      : "text-rose-600";
-  const scoreBg =
-    score === maxScore
-      ? "bg-emerald-500"
-      : "bg-rose-500";
-
   return (
-    <EcosystemWrapper data-section="fraud-control">
+    <EcosystemWrapper>
       <EcosystemHeader
-        title="Security Settings"
-        badgeText="Fraud Prevention"
-        description={`Set limits and verification rules to protect your ${rewardsModuleName.toLowerCase()} from misuse.`}
+        title="Fraud Prevention & Security"
+        badgeText="Rewards Engine"
+        description={`Configure redemption rate limits, identity requirements, and abuse prevention rules for your ${rewardsModuleName.toLowerCase()}.`}
         icon={ShieldCheck}
         breadcrumbs={[
           { label: "Gamification", href: "/gamification" },
@@ -211,179 +129,196 @@ export default function FraudPage() {
         ]}
       />
 
-      <EcosystemActionBar shadow="none">
-        <div className="flex items-center gap-3">
-          <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="text-xs font-medium text-muted-foreground">
-            Protection active
-          </span>
+      <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0">
+        <PolarisFormLayout
+          sidebar={
+            <div className="space-y-6">
+              {/* Live Security Posture Preview */}
+              <PolarisSidebarCard
+                title="Protection Status"
+                badge="Active Shield"
+                icon={Sparkles}
+              >
+                <div className="rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 p-4 space-y-3 shadow-xs">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-xl bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 flex items-center justify-center shrink-0">
+                      <ShieldCheck className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-xs text-zinc-900 dark:text-zinc-100">
+                        Fraud Defense Network
+                      </h4>
+                      <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                        Real-time transaction scoring active
+                      </p>
+                    </div>
+                  </div>
+                </div>
 
-          <div className="h-4 w-px bg-border" />
+                {/* Structured Configuration Breakdown */}
+                <div className="space-y-1.5 pt-2">
+                  <PolarisSummaryRow
+                    label="Daily Limit"
+                    value={
+                      localSettings.dailyRedemptionLimit
+                        ? `${localSettings.dailyRedemptionLimit} claims/day`
+                        : "Unlimited"
+                    }
+                  />
+                  <PolarisSummaryRow
+                    label="IP Velocity"
+                    value={
+                      localSettings.maxIpVelocity
+                        ? `Max ${localSettings.maxIpVelocity} claims/IP`
+                        : "Uncapped"
+                    }
+                  />
+                  <PolarisSummaryRow
+                    label="KYC Gate"
+                    value={localSettings.requireKyc ? "Enforced" : "Disabled"}
+                  />
+                  <PolarisSummaryRow
+                    label="Device Lock"
+                    value={localSettings.lockToDeviceId ? "Locked" : "Flexible"}
+                    isLast
+                  />
+                </div>
+              </PolarisSidebarCard>
 
-          <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-            <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />
-            Changes apply immediately after saving
-          </div>
-        </div>
-      </EcosystemActionBar>
-
-      <EcosystemContainer className="space-y-6 p-6 lg:p-8 max-w-4xl">
-        {/* Security score overview */}
-        <div className="flex items-center gap-5 p-5 rounded-2xl border border-border bg-card">
-          <div className="relative h-16 w-16 shrink-0">
-            <svg viewBox="0 0 36 36" className="h-full w-full -rotate-90">
-              <circle
-                cx="18"
-                cy="18"
-                r="14"
-                fill="none"
-                stroke="hsl(var(--muted))"
-                strokeWidth="3"
-              />
-              <circle
-                cx="18"
-                cy="18"
-                r="14"
-                fill="none"
-                stroke={
-                  score === maxScore ? "#10b981" : "#f43f5e"
-                }
-                strokeWidth="3"
-                strokeDasharray={`${(score / maxScore) * 87.96} 87.96`}
-                strokeLinecap="round"
-                className="transition-all duration-700"
-              />
-            </svg>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-sm font-black text-foreground">
-                {score}/{maxScore}
-              </span>
+              {/* Security Best Practice Tip */}
+              <PolarisTipCard title="Fraud Defense Strategy">
+                Enforcing IP velocity caps and device locking deters sybil account generation and automated coupon harvesting by over 92%.
+              </PolarisTipCard>
             </div>
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <h3 className="text-base font-bold text-foreground">
-                Security Score
-              </h3>
-              <span className={cn("text-sm font-bold", scoreColor)}>
-                {scoreLabel}
-              </span>
-            </div>
-            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-              {score < maxScore
-                ? `Enable ${maxScore - score} more protection rule${maxScore - score > 1 ? "s" : ""} to maximize reward security.`
-                : "All protection rules are active. Your rewards are well secured."}
-            </p>
-            <div className="flex items-center gap-1 mt-3">
-              {[...Array(maxScore)].map((_, i) => (
-                <div
-                  key={i}
-                  className={cn(
-                    "h-1.5 flex-1 rounded-full transition-all duration-500",
-                    i < score ? scoreBg : "bg-muted",
-                  )}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Redemption Limits */}
-        <EcosystemCard
-          title="Redemption Limits"
-          description="Cap how many rewards can be claimed per day to prevent abuse"
-          icon={ShieldAlert}
+          }
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-2">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label className="text-xs font-semibold text-muted-foreground">
-                  Daily Redemption Limit
-                </Label>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <Info className="h-3.5 w-3.5 text-muted-foreground/50 hover:text-foreground transition-colors" />
-                    </TooltipTrigger>
-                    <TooltipContent className="max-w-xs text-xs">
-                      The maximum total redemptions allowed across the platform
-                      in 24 hours. Set to 0 for unlimited.
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-              <div className="relative">
-                <Zap className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/40" />
-                <Input
-                  type="number"
-                  value={localSettings.dailyRedemptionLimit}
-                  className="pl-10 h-10"
-                  onChange={(e) =>
-                    set("dailyRedemptionLimit", parseInt(e.target.value) || 0)
-                  }
-                />
-              </div>
-              <p className="text-[11px] text-muted-foreground/60">
-                Set to 0 for unlimited
-              </p>
-            </div>
+          <div className="space-y-6">
+            {/* Step 1: Daily Velocity & Rate Limiting */}
+            <PolarisFormCard
+              step={1}
+              title="Redemption Rate Limits & Velocity Caps"
+              description="Establish platform-wide daily redemption ceilings and per-IP transaction rate limiting."
+              badge="Velocity Limits"
+            >
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label htmlFor="dailyLimit" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5">
+                    <Zap className="h-3.5 w-3.5 text-zinc-400" />
+                    Daily Platform Redemption Cap
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id="dailyLimit"
+                      type="number"
+                      min={0}
+                      value={localSettings.dailyRedemptionLimit}
+                      onChange={(e) =>
+                        set("dailyRedemptionLimit", parseInt(e.target.value) || 0)
+                      }
+                      className="h-10 pr-12 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-zinc-400 uppercase">
+                      claims
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-zinc-400">
+                    Max total rewards redeemable across 24h · 0 for unlimited
+                  </p>
+                </div>
 
-            <div className="space-y-2">
-              <Label className="text-xs font-semibold text-muted-foreground">
-                Minimum Account Age (Days)
-              </Label>
-              <div className="relative">
-                <Activity className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/40" />
-                <Input type="number" defaultValue={30} className="pl-10 h-10" />
+                <div className="space-y-1.5">
+                  <Label htmlFor="ipVelocity" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5">
+                    <Globe className="h-3.5 w-3.5 text-zinc-400" />
+                    Max IP Velocity (Per Hour)
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id="ipVelocity"
+                      type="number"
+                      min={0}
+                      value={localSettings.maxIpVelocity}
+                      onChange={(e) =>
+                        set("maxIpVelocity", parseInt(e.target.value) || 0)
+                      }
+                      className="h-10 pr-12 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-zinc-400 uppercase">
+                      per IP
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-zinc-400">
+                    Max redemptions allowed from a single IP address per hour
+                  </p>
+                </div>
               </div>
-              <p className="text-[11px] text-muted-foreground/60">
-                Members must be this old before redeeming
-              </p>
-            </div>
-          </div>
-        </EcosystemCard>
+            </PolarisFormCard>
 
-        {/* Access Restrictions */}
-        <EcosystemCard
-          title="Access Restrictions"
-          description="Rank and network-level controls for redemption eligibility"
-          icon={ShieldCheck}
-        >
-          <div className="space-y-2 mt-2">
-            <ToggleRow
-              label="Leaderboard Priority"
-              desc="Only top 100 participants can redeem rewards"
-              checked={false}
-              onChange={() => {}}
-              icon={<Activity className="h-4 w-4" />}
-            />
+            {/* Step 2: Verification Boundaries & Identity Assurance */}
+            <PolarisFormCard
+              step={2}
+              title="Identity Assurance & Device Fingerprinting"
+              description="Protect catalog rewards by demanding verified member credentials and unique device binding."
+              badge="Identity & Device"
+            >
+              <div className="space-y-3">
+                {/* KYC Toggle Card */}
+                <div className="flex items-center justify-between p-3.5 rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shrink-0 border border-zinc-200 dark:border-zinc-700">
+                      <UserCheck className="h-4 w-4 text-zinc-600 dark:text-zinc-400" />
+                    </div>
+                    <div className="space-y-0.5">
+                      <Label className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
+                        Mandatory Identity Verification (KYC)
+                      </Label>
+                      <p className="text-[10px] text-zinc-500 dark:text-zinc-400">
+                        Require members to have verified identity credentials before claiming high-value rewards.
+                      </p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={localSettings.requireKyc}
+                    onCheckedChange={(v) => set("requireKyc", v)}
+                  />
+                </div>
+
+                {/* Device ID Lock Toggle Card */}
+                <div className="flex items-center justify-between p-3.5 rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shrink-0 border border-zinc-200 dark:border-zinc-700">
+                      <Smartphone className="h-4 w-4 text-zinc-600 dark:text-zinc-400" />
+                    </div>
+                    <div className="space-y-0.5">
+                      <Label className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
+                        Hardware & Device ID Lock
+                      </Label>
+                      <p className="text-[10px] text-zinc-500 dark:text-zinc-400">
+                        Restrict reward redemptions strictly to the member's registered primary device identifier.
+                      </p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={localSettings.lockToDeviceId}
+                    onCheckedChange={(v) => set("lockToDeviceId", v)}
+                  />
+                </div>
+              </div>
+            </PolarisFormCard>
           </div>
 
-          <div className="mt-4 flex items-start gap-3 p-4 rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-500/10 dark:border-amber-500/20">
-            <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-            <div className="space-y-0.5">
-              <h4 className="text-sm font-semibold text-amber-900 dark:text-amber-300">
-                Fair warning
-              </h4>
-              <p className="text-xs text-amber-700 dark:text-amber-400/80 leading-relaxed">
-                Stricter rules may block some legitimate users. Monitor
-                redemption activity closely after changes.
-              </p>
-            </div>
-          </div>
-        </EcosystemCard>
+          {/* Floating Action Bar */}
+          <FloatingSavePanel
+            hasChanged={hasChanged}
+            saved={saved}
+            isSaving={updating}
+            onSave={handleSave}
+            onReset={handleReset}
+            title="Save Security Policy"
+            description="You have unsaved changes to fraud prevention rules."
+            buttonText="Apply Settings"
+          />
+        </PolarisFormLayout>
       </EcosystemContainer>
-
-      <FloatingSavePanel
-        hasChanged={hasChanged}
-        saved={saved}
-        isSaving={updating}
-        onSave={handleSave}
-        onReset={handleReset}
-        title="Unsaved Changes"
-        description="Security configuration has been modified."
-        buttonText="Apply Changes"
-      />
     </EcosystemWrapper>
   );
 }

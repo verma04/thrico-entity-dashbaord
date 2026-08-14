@@ -85,7 +85,7 @@ export default function EditPointRulePage() {
           { label: "Edit Rule" },
         ]}
       />
-      <EcosystemContainer className="p-0 bg-transparent border-none shadow-none ring-0">
+      <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0">
         <PointRuleForm
           initialValues={rule}
           onSubmit={handleUpdate}

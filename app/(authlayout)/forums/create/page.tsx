@@ -10,9 +10,15 @@ import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check"
 
 import { useModuleStore } from "@/store/useModuleStore";
 
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { MessageSquare } from "lucide-react";
+
 const CreateForumPage = () => {
   const router = useRouter();
   const { toast } = useToast();
+  const moduleName = useModuleStore((state) => state.forumModuleName);
   const singularName = useModuleStore((state) => state.forumSingularName);
 
   const [add, { loading }] = addDiscussionForum({
@@ -50,14 +56,26 @@ const CreateForumPage = () => {
   };
 
   return (
-    <div className="h-full overflow-hidden">
-      <ForumCreationForm
-        initialValues={{}}
-        loading={loading}
-        onFinish={onFinish}
-        onCancel={onCancel}
+    <EcosystemWrapper>
+      <EcosystemHeader
+        title={`New ${singularName}`}
+        badgeText={moduleName}
+        description={`Start a new discussion thread or question in your ${moduleName.toLowerCase()}.`}
+        icon={MessageSquare}
+        breadcrumbs={[
+          { label: moduleName, href: "/forums/all" },
+          { label: `New ${singularName}` },
+        ]}
       />
-    </div>
+      <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0">
+        <ForumCreationForm
+          initialValues={{}}
+          loading={loading}
+          onFinish={onFinish}
+          onCancel={onCancel}
+        />
+      </EcosystemContainer>
+    </EcosystemWrapper>
   );
 };
 

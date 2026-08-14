@@ -10,15 +10,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { ImageUploadWithCrop } from "@/components/ui/image-upload-with-crop";
 import {
   Select,
@@ -31,16 +22,25 @@ import { useCreateSponsor, useUpdateSponsor } from "@/graphql/actions/sponsors";
 import { useGetSponsorCategories } from "@/graphql/actions/sponsorCategories";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import {
-  ChevronRight,
   HeartHandshake,
   Globe,
   Link as LinkIcon,
+  Sparkles,
+  ExternalLink,
+  ShieldCheck,
 } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import {
+  PolarisFormLayout,
+  PolarisFormCard,
+  PolarisSidebarCard,
+  PolarisSummaryRow,
+  PolarisTipCard,
+} from "@/components/gamification/shared/polaris-form-ui";
 
 interface SponsorFormProps {
   initialData?: any;
@@ -122,286 +122,304 @@ export default function SponsorForm({ initialData, isEdit }: SponsorFormProps) {
     <EcosystemWrapper>
       <EcosystemHeader
         title={isEdit ? "Edit Sponsor" : "Create Sponsor"}
-        description={isEdit ? "Update sponsor details and manage their visibility." : "Add a new sponsor to feature on your platform."}
-        badgeText="Sponsors"
+        description={
+          isEdit
+            ? "Update sponsor details and manage their platform exposure."
+            : "Add a new commercial partner or sponsor to feature on your platform."
+        }
+        badgeText="Partners Studio"
         icon={HeartHandshake}
         breadcrumbs={[
           { label: "Sponsors", href: "/sponsors/all" },
-          { label: isEdit ? "Edit Sponsor" : "Create Sponsor" }
+          { label: isEdit ? "Edit Sponsor" : "Create Sponsor" },
         ]}
       />
-      <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">
-        <div className="px-6 py-8">
-          <Formik
-            initialValues={initialValues}
-            validationSchema={validationSchema}
-            onSubmit={handleSubmit}
-          >
-            {({
-              values,
-              setFieldValue,
-              errors,
-              touched,
-              dirty,
-              handleSubmit: formikSubmit,
-              resetForm,
-            }) => (
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                {/* Form fields */}
-                <div className="lg:col-span-8 space-y-8">
-                  <Form className="space-y-8">
-                    <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden">
-                      <CardHeader className="bg-muted/30 pb-4">
-                        <CardTitle className="text-xl">
-                          Basic Information
-                        </CardTitle>
-                        <CardDescription>
-                          Details about the sponsor
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="pt-6 space-y-6">
-                        <div className="space-y-2">
-                          <Label>Sponsor Image *</Label>
-                          <div className="w-full max-w-sm">
-                            <ImageUploadWithCrop
-                              returnFileOnly={true}
-                              onFileChange={(file) => {
-                                setImageFile(file);
-                              }}
-                              onImageUpdate={() => {}} // Not needed when returnFileOnly is true
-                              aspectRatio={4 / 3}
-                              recommendedWidth={400}
-                              currentImage={initialData?.image || undefined}
-                              label=""
-                            />
-                          </div>
-                          <p className="text-xs text-muted-foreground">
-                            Upload a logo or image for the sponsor. Recommended
-                            aspect ratio is 4:3.
-                          </p>
-                        </div>
+      <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0">
+        <Formik
+          initialValues={initialValues}
+          validationSchema={validationSchema}
+          onSubmit={handleSubmit}
+        >
+          {({
+            values,
+            setFieldValue,
+            errors,
+            touched,
+            dirty,
+            handleSubmit: formikSubmit,
+            resetForm,
+          }) => {
+            const getSelectedCategoryName = () => {
+              if (!values.categoryId) return "None";
+              const cat = categoriesData?.getSponsorCategories?.find(
+                (c: any) => c.id === values.categoryId,
+              );
+              return cat ? cat.title : "Assigned";
+            };
 
-                        <div className="space-y-2">
-                          <Label htmlFor="title" className="text-sm font-medium">
-                            Sponsor Name / Title *
-                          </Label>
-                          <Field
-                            as={Input}
-                            id="title"
-                            name="title"
-                            placeholder="e.g. Acme Corp"
-                            className={cn(
-                              touched.title &&
-                                errors.title &&
-                                "border-destructive",
-                            )}
-                          />
-                          {errors.title && touched.title && (
-                            <div className="text-destructive text-xs mt-1">
-                              {errors.title}
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label
-                            htmlFor="description"
-                            className="text-sm font-medium"
-                          >
-                            Description
-                          </Label>
-                          <Field
-                            as={Textarea}
-                            id="description"
-                            name="description"
-                            placeholder="Brief description about the sponsor"
-                            rows={4}
-                            className={cn(
-                              "resize-none",
-                              touched.description &&
-                                errors.description &&
-                                "border-destructive",
-                            )}
-                          />
-                          {errors.description && touched.description && (
-                            <div className="text-destructive text-xs mt-1">
-                              {errors.description}
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label
-                            htmlFor="externalUrl"
-                            className="text-sm font-medium"
-                          >
-                            External Link (URL)
-                          </Label>
-                          <div className="relative">
-                            <LinkIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                            <Field
-                              as={Input}
-                              id="externalUrl"
-                              name="externalUrl"
-                              type="url"
-                              placeholder="https://example.com"
-                              className={cn(
-                                "pl-10",
-                                touched.externalUrl &&
-                                  errors.externalUrl &&
-                                  "border-destructive",
-                              )}
-                            />
-                          </div>
-                          {errors.externalUrl && touched.externalUrl && (
-                            <div className="text-destructive text-xs mt-1">
-                              {errors.externalUrl}
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label className="text-sm font-medium">Category</Label>
-                          <Select
-                            value={values.categoryId || "none"}
-                            onValueChange={(val) =>
-                              setFieldValue("categoryId", val === "none" ? "" : val)
-                            }
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a category" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="none">None</SelectItem>
-                              {categoriesData?.getSponsorCategories?.map((cat: any) => (
-                                <SelectItem key={cat.id} value={cat.id}>
-                                  {cat.title}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <p className="text-xs text-muted-foreground">
-                            Assign this sponsor to a specific category.
-                          </p>
-                        </div>
-
-                        <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border">
-                          <div>
-                            <Label className="text-base font-semibold">
-                              Active Status
-                            </Label>
-                            <p className="text-sm text-muted-foreground">
-                              Determines if this sponsor is visible on the
-                              platform.
-                            </p>
-                          </div>
-                          <Switch
-                            checked={values.isActive}
-                            onCheckedChange={(val) =>
-                              setFieldValue("isActive", val)
-                            }
-                          />
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Form>
-                </div>
-
-                {/* Preview Sidebar */}
-                <div className="lg:col-span-4">
-                  <div className="sticky top-6 space-y-6">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-lg font-bold">Listing Preview</h3>
-                      <Badge
-                        variant="outline"
-                        className="bg-green-500/5 text-green-600 border-green-500/20"
-                      >
-                        Live Preview
-                      </Badge>
-                    </div>
-
-                    <Card className="border-none shadow-xl ring-1 ring-border/50 overflow-hidden bg-card/50 backdrop-blur-sm">
-                      <div className="h-2 bg-gradient-to-r from-primary to-primary/60" />
-                      <CardContent className="pt-6 space-y-6">
-                        <div className="w-full aspect-[4/3] relative rounded-lg overflow-hidden bg-muted flex items-center justify-center border">
+            return (
+              <PolarisFormLayout
+                sidebar={
+                  <div className="space-y-6">
+                    {/* Live Partner Preview Card */}
+                    <PolarisSidebarCard
+                      title="Sponsor Preview"
+                      badge="Live Brand"
+                      icon={Sparkles}
+                    >
+                      <div className="rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 overflow-hidden shadow-xs">
+                        {/* Logo Container */}
+                        <div className="w-full aspect-[4/3] relative bg-white dark:bg-zinc-800/80 flex items-center justify-center p-4 border-b border-zinc-100 dark:border-zinc-800">
                           {imageFile ? (
                             <Image
                               src={URL.createObjectURL(imageFile)}
                               alt="Preview"
                               fill
-                              className="object-contain"
+                              className="object-contain p-4"
                             />
                           ) : initialData?.image ? (
                             <Image
                               src={initialData.image}
                               alt="Preview"
                               fill
-                              className="object-contain"
+                              className="object-contain p-4"
                             />
                           ) : (
-                            <div className="text-muted-foreground text-xs flex flex-col items-center gap-2">
+                            <div className="text-zinc-400 text-xs flex flex-col items-center gap-2">
                               <HeartHandshake className="h-8 w-8 opacity-20" />
-                              <span>No Image</span>
+                              <span className="text-[10px] font-medium">Brand Logo Preview</span>
                             </div>
                           )}
                         </div>
 
-                        <div>
-                          <h4 className="font-bold text-xl leading-tight text-center">
+                        {/* Details */}
+                        <div className="p-4 space-y-3">
+                          <h4 className="font-bold text-sm text-zinc-900 dark:text-zinc-100 text-center truncate">
                             {values.title || "Sponsor Title"}
                           </h4>
-                        </div>
 
-                        {values.description && (
-                          <>
-                            <Separator className="opacity-50" />
-                            <div className="text-sm text-center text-muted-foreground line-clamp-4">
+                          {values.description && (
+                            <p className="text-[11px] text-zinc-600 dark:text-zinc-400 text-center leading-relaxed line-clamp-3">
                               {values.description}
-                            </div>
-                          </>
-                        )}
+                            </p>
+                          )}
 
-                        {values.externalUrl && (
-                          <Button
-                            variant="outline"
-                            className="w-full gap-2"
-                            disabled
-                          >
-                            <Globe className="h-4 w-4" />
-                            Visit Website
-                          </Button>
-                        )}
+                          {values.externalUrl && (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="w-full h-8 text-xs font-semibold gap-1.5 border-zinc-200 dark:border-zinc-700 pointer-events-none"
+                            >
+                              <Globe className="h-3.5 w-3.5 text-zinc-500" />
+                              Visit Partner Website
+                            </Button>
+                          )}
+                        </div>
+                      </div>
 
-                        <p className="text-[10px] text-center text-muted-foreground italic mt-4">
-                          Preview version - Final layout may vary
-                        </p>
-                      </CardContent>
-                    </Card>
+                      {/* Structured Configuration Breakdown */}
+                      <div className="space-y-1.5 pt-2">
+                        <PolarisSummaryRow
+                          label="Partner Name"
+                          value={
+                            <span className="truncate max-w-[150px] inline-block font-semibold">
+                              {values.title || "Not specified"}
+                            </span>
+                          }
+                        />
+                        <PolarisSummaryRow
+                          label="Category"
+                          value={getSelectedCategoryName()}
+                        />
+                        <PolarisSummaryRow
+                          label="External Link"
+                          value={values.externalUrl ? "Configured" : "None"}
+                        />
+                        <PolarisSummaryRow
+                          label="Visibility"
+                          value={values.isActive ? "Active (Live)" : "Hidden"}
+                          isLast
+                        />
+                      </div>
+                    </PolarisSidebarCard>
 
-                    <FloatingSavePanel
-                      hasChanged={dirty || !!imageFile}
-                      saved={false}
-                      isSaving={creating || updating}
-                      onSave={() => formikSubmit()}
-                      onReset={() => {
-                        resetForm();
-                        setImageFile(null);
-                        router.back();
-                      }}
-                      title={isEdit ? "Unsaved Changes" : "Unsaved Sponsor"}
-                      description={
-                        isEdit
-                          ? "You have unsaved edits."
-                          : "You have unfilled form data."
-                      }
-                      buttonText={isEdit ? "Update Sponsor" : "Publish Sponsor"}
-                    />
+                    {/* Partnership Strategy Tip */}
+                    <PolarisTipCard title="Sponsorship Exposure Tip">
+                      High-contrast vector logos with transparent backgrounds maintain optimal fidelity across dark and light dashboard themes.
+                    </PolarisTipCard>
                   </div>
-                </div>
-              </div>
-            )}
-          </Formik>
-        </div>
+                }
+              >
+                <Form className="space-y-6">
+                  {/* Step 1: Partner Brand & Identity */}
+                  <PolarisFormCard
+                    step={1}
+                    title="Partner Brand & Identity"
+                    description="Upload the brand mark logo, partner title, and promotional description."
+                    badge="Required"
+                  >
+                    {/* Image Upload Box */}
+                    <div className="space-y-2">
+                      <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                        Sponsor Logo / Asset <span className="text-rose-500">*</span>
+                      </Label>
+                      <div className="w-full max-w-sm">
+                        <ImageUploadWithCrop
+                          returnFileOnly={true}
+                          onFileChange={(file) => {
+                            setImageFile(file);
+                          }}
+                          onImageUpdate={() => {}}
+                          aspectRatio={4 / 3}
+                          recommendedWidth={400}
+                          currentImage={initialData?.image || undefined}
+                          label=""
+                        />
+                      </div>
+                      <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                        Recommended aspect ratio is 4:3 (400 × 300px). Supports PNG, JPG, WEBP.
+                      </p>
+                    </div>
+
+                    {/* Title */}
+                    <div className="space-y-1.5 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+                      <Label htmlFor="title" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                        Sponsor / Organization Name <span className="text-rose-500">*</span>
+                      </Label>
+                      <Field
+                        as={Input}
+                        id="title"
+                        name="title"
+                        placeholder="e.g., Acme Innovations Corp"
+                        className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
+                      />
+                      {errors.title && touched.title && (
+                        <p className="text-[11px] text-rose-500 font-medium">
+                          {errors.title}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Description */}
+                    <div className="space-y-1.5">
+                      <Label htmlFor="description" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                        Partner Profile & Offer Summary
+                      </Label>
+                      <Field
+                        as={Textarea}
+                        id="description"
+                        name="description"
+                        placeholder="Brief summary about the sponsor partnership, community perks, or mission..."
+                        rows={3}
+                        className="min-h-[100px] bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-medium resize-none shadow-none"
+                      />
+                      {errors.description && touched.description && (
+                        <p className="text-[11px] text-rose-500 font-medium">
+                          {errors.description}
+                        </p>
+                      )}
+                    </div>
+                  </PolarisFormCard>
+
+                  {/* Step 2: Destination Link & Taxonomy */}
+                  <PolarisFormCard
+                    step={2}
+                    title="Destination Link & Taxonomy Tier"
+                    description="Set up click-through destination URLs and assign sponsorship classification."
+                    badge="Placement"
+                  >
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {/* External URL */}
+                      <div className="space-y-1.5">
+                        <Label htmlFor="externalUrl" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                          External Website Destination (URL)
+                        </Label>
+                        <div className="relative">
+                          <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+                          <Field
+                            as={Input}
+                            id="externalUrl"
+                            name="externalUrl"
+                            type="url"
+                            placeholder="https://partner-website.com"
+                            className="h-10 pl-9 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
+                          />
+                        </div>
+                        {errors.externalUrl && touched.externalUrl && (
+                          <p className="text-[11px] text-rose-500 font-medium">
+                            {errors.externalUrl}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Category Select */}
+                      <div className="space-y-1.5">
+                        <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                          Sponsorship Category / Tier
+                        </Label>
+                        <Select
+                          value={values.categoryId || "none"}
+                          onValueChange={(val) =>
+                            setFieldValue("categoryId", val === "none" ? "" : val)
+                          }
+                        >
+                          <SelectTrigger className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold">
+                            <SelectValue placeholder="Select tier or category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">No Specific Category</SelectItem>
+                            {categoriesData?.getSponsorCategories?.map((cat: any) => (
+                              <SelectItem key={cat.id} value={cat.id}>
+                                {cat.title}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    {/* Active Status Switch Card */}
+                    <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800">
+                      <div className="flex items-center justify-between p-3.5 rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/40 dark:bg-zinc-900/40">
+                        <div className="space-y-0.5">
+                          <Label className="text-xs font-bold text-zinc-800 dark:text-zinc-200">
+                            Active Visibility Status
+                          </Label>
+                          <p className="text-[10px] text-zinc-500 dark:text-zinc-400">
+                            Determines if this sponsor is actively displayed across community portals.
+                          </p>
+                        </div>
+                        <Switch
+                          checked={values.isActive}
+                          onCheckedChange={(val) =>
+                            setFieldValue("isActive", val)
+                          }
+                        />
+                      </div>
+                    </div>
+                  </PolarisFormCard>
+
+                  {/* Floating Action Bar */}
+                  <FloatingSavePanel
+                    hasChanged={dirty || !!imageFile}
+                    saved={false}
+                    isSaving={creating || updating}
+                    onSave={() => formikSubmit()}
+                    onReset={() => {
+                      resetForm();
+                      setImageFile(null);
+                      router.back();
+                    }}
+                    title={isEdit ? "Save Sponsor Changes" : "Publish Sponsor"}
+                    description="You have unsaved changes to this partner configuration."
+                    buttonText={isEdit ? "Update Sponsor" : "Publish Sponsor"}
+                  />
+                </Form>
+              </PolarisFormLayout>
+            );
+          }}
+        </Formik>
       </EcosystemContainer>
     </EcosystemWrapper>
   );

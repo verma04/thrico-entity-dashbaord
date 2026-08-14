@@ -5,7 +5,13 @@ import { cn } from "@/lib/utils";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { CtaButton } from "@/components/ui/cta-button";
 
@@ -252,7 +258,9 @@ export function EcosystemActionBarSelect({
           >
             <div className="flex items-center gap-1.5">
               {opt.dot && (
-                <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", opt.dot)} />
+                <span
+                  className={cn("h-1.5 w-1.5 rounded-full shrink-0", opt.dot)}
+                />
               )}
               {opt.icon && (
                 <opt.icon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />

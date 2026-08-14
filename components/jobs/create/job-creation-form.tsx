@@ -1,17 +1,10 @@
 "use client";
 
 import React from "react";
-import { useFormik } from "formik";
+import { FormikProvider, useFormik } from "formik";
 import * as Yup from "yup";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -23,20 +16,20 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import {
   Plus,
-  X,
   Briefcase,
   MapPin,
   DollarSign,
   Clock,
   Globe,
   GraduationCap,
-  ChevronRight,
-  Save,
+  Sparkles,
   Trash2,
   CheckCircle2,
+  Building,
+  Laptop,
+  Layers,
 } from "lucide-react";
 import { CompanyAutocompleteSelect } from "./company-auto-complete";
 import { JobTitleAutocomplete } from "./job-title-auto-complete";
@@ -45,6 +38,13 @@ import GooglePlacesInput from "@/components/layout/google-place-input";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { cn } from "@/lib/utils";
 import { useModuleStore } from "@/store/useModuleStore";
+import {
+  PolarisFormLayout,
+  PolarisFormCard,
+  PolarisSidebarCard,
+  PolarisSummaryRow,
+  PolarisTipCard,
+} from "@/components/gamification/shared/polaris-form-ui";
 
 interface ListingCreationFormProps {
   initialValues?: Record<string, any>;
@@ -63,7 +63,7 @@ const jobSchema = Yup.object().shape({
   experienceLevel: Yup.string().required("Experience level is required"),
   description: Yup.string()
     .required("Job description is required")
-    .min(50, "Description must be at least 50 characters"),
+    .min(30, "Description must be at least 30 characters"),
   requirements: Yup.array().of(
     Yup.string().required("Requirement cannot be empty"),
   ),
@@ -89,9 +89,9 @@ export function JobCreationForm({
       company: initialValues?.company || "",
       location: initialValues?.location || "",
       salary: initialValues?.salary || "",
-      jobType: initialValues?.jobType || "",
-      workplaceType: initialValues?.workplaceType || "",
-      experienceLevel: initialValues?.experienceLevel || "",
+      jobType: initialValues?.jobType || "FULL-TIME",
+      workplaceType: initialValues?.workplaceType || "REMOTE",
+      experienceLevel: initialValues?.experienceLevel || "MID-LEVEL",
       description: initialValues?.description || "",
       requirements: initialValues?.requirements || [""],
       responsibilities: initialValues?.responsibilities || [""],
@@ -134,46 +134,54 @@ export function JobCreationForm({
     formik.setFieldValue(fieldName, newList);
   };
 
-  const renderListSection = (
+  const formatLocationName = (loc: any) => {
+    if (!loc) return "Location not set";
+    if (typeof loc === "string") return loc;
+    return loc.name || loc.address || "Location not set";
+  };
+
+  const getCompanyName = () => {
+    if (!formik.values.company) return "Hiring Company";
+    if (typeof formik.values.company === "string") return formik.values.company;
+    return formik.values.company.name || "Hiring Company";
+  };
+
+  const renderListBuilder = (
     fieldName: string,
     label: string,
     placeholder: string,
     Icon: React.ElementType,
-  ) => (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded-md bg-primary/10">
-            <Icon className="h-4 w-4 text-primary" />
+  ) => {
+    const list = formik.values[fieldName as keyof typeof formik.values] as string[];
+    return (
+      <div className="space-y-2.5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="h-6 w-6 rounded-md bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-600 dark:text-zinc-400">
+              <Icon className="h-3.5 w-3.5" />
+            </div>
+            <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+              {label}
+            </Label>
+            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
+              {list.filter((i) => i.trim()).length}
+            </span>
           </div>
-          <Label className="text-base font-semibold">{label}</Label>
-          <Badge variant="secondary" className="ml-1">
-            {
-              (
-                formik.values[
-                  fieldName as keyof typeof formik.values
-                ] as string[]
-              ).length
-            }
-          </Badge>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => handleAddListItem(fieldName)}
+            className="h-7 px-2.5 text-xs font-semibold border-dashed border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+          >
+            <Plus className="h-3 w-3 mr-1" />
+            Add Item
+          </Button>
         </div>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => handleAddListItem(fieldName)}
-          className="h-8 px-2"
-        >
-          <Plus className="h-4 w-4 mr-1" />
-          Add
-        </Button>
-      </div>
-      <div className="space-y-3">
-        {(
-          formik.values[fieldName as keyof typeof formik.values] as string[]
-        ).map((item, index) => (
-          <div key={index} className="space-y-1">
-            <div className="flex gap-2">
+
+        <div className="space-y-2">
+          {list.map((item, index) => (
+            <div key={index} className="flex items-center gap-2">
               <Input
                 placeholder={placeholder}
                 value={item}
@@ -182,575 +190,482 @@ export function JobCreationForm({
                 }
                 onBlur={formik.handleBlur}
                 name={`${fieldName}[${index}]`}
-                className={cn(
-                  "flex-1",
-                  formik.touched[fieldName as keyof typeof formik.touched] &&
-                    (
-                      formik.errors[
-                        fieldName as keyof typeof formik.errors
-                      ] as any
-                    )?.[index] &&
-                    "border-destructive",
-                )}
+                className="h-9 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-medium"
               />
-              {(
-                formik.values[
-                  fieldName as keyof typeof formik.values
-                ] as string[]
-              ).length > 1 && (
+              {list.length > 1 && (
                 <Button
                   type="button"
                   variant="ghost"
-                  size="sm"
+                  size="icon"
                   onClick={() => handleRemoveListItem(fieldName, index)}
-                  className="text-muted-foreground hover:text-destructive transition-colors"
+                  className="h-8 w-8 text-zinc-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 shrink-0"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-3.5 w-3.5" />
                 </Button>
               )}
             </div>
-            {formik.touched[fieldName as keyof typeof formik.touched] &&
-              (formik.errors[fieldName as keyof typeof formik.errors] as any)?.[
-                index
-              ] && (
-                <p className="text-xs text-destructive ml-1">
-                  {String(
-                    (
-                      formik.errors[
-                        fieldName as keyof typeof formik.errors
-                      ] as any
-                    )[index],
-                  )}
-                </p>
-              )}
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
-    <div className="flex flex-col h-full bg-background overflow-hidden rounded-t-[inherit]">
-      {/* Header section - Sticky */}
-      {/* Header section - Sticky */}
-      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 border-b px-6 py-4">
-        <div className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-3 mb-1">
-              <div className="p-2.5 rounded-xl bg-primary/10 ring-1 ring-primary/20">
-                <Briefcase className="h-5 w-5 text-primary" />
-              </div>
-              <h1 className="text-2xl font-bold tracking-tight">
-                {initialValues?.title
-                  ? `Edit ${singularName} Posting`
-                  : `Create ${singularName} Posting`}
-              </h1>
-            </div>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground ml-1">
-              <span>{moduleName}</span>
-              <ChevronRight className="h-3 w-3" />
-              <span>
-                {initialValues?.title ? "Edit Listing" : "Create New Listing"}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content Area - Scrollable */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <div className="lg:col-span-8 space-y-8">
-              <form className="space-y-8">
-                {/* Basic Info */}
-                <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden">
-                  <CardHeader className="bg-muted/30 pb-4">
-                    <CardTitle className="text-xl">Basic Information</CardTitle>
-                    <CardDescription>
-                      Core details about the role and company
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="pt-6 space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <Label htmlFor="title" className="text-sm font-medium">
-                          {singularName} Title{" "}
-                          <span className="text-destructive">*</span>
-                        </Label>
-                        <JobTitleAutocomplete
-                          value={formik.values.title}
-                          onChange={(val) => formik.setFieldValue("title", val)}
-                          onBlur={formik.handleBlur}
-                          placeholder="e.g., Senior Frontend Developer"
-                          error={
-                            !!(formik.touched.title && formik.errors.title)
-                          }
+    <FormikProvider value={formik}>
+      <PolarisFormLayout
+        sidebar={
+          <div className="space-y-6">
+            {/* Live Role Preview Card */}
+            <PolarisSidebarCard title={`${singularName} Preview`} badge="Live Preview" icon={Sparkles}>
+              <div className="rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 p-4 space-y-4 shadow-xs">
+                <div className="flex items-start gap-3">
+                  <div className="h-12 w-12 rounded-xl bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 flex items-center justify-center border border-zinc-800 dark:border-zinc-200 shrink-0 overflow-hidden shadow-xs">
+                    {typeof formik.values.company === "object" && formik.values.company?.logo ? (
+                      <Avatar className="h-full w-full rounded-none">
+                        <AvatarImage
+                          src={`https://cdn.thrico.network/${formik.values.company.logo}`}
+                          alt={getCompanyName()}
                         />
-                        {formik.touched.title && formik.errors.title && (
-                          <p className="text-xs text-destructive">
-                            {String(formik.errors.title)}
-                          </p>
-                        )}
-                      </div>
-                      <div className="space-y-2">
-                        <Label
-                          htmlFor="company"
-                          className="text-sm font-medium"
-                        >
-                          Company <span className="text-destructive">*</span>
-                        </Label>
-                        <CompanyAutocompleteSelect
-                          onChange={(value) =>
-                            formik.setFieldValue("company", value)
-                          }
-                        />
-                        {formik.touched.company && formik.errors.company && (
-                          <p className="text-xs text-destructive">
-                            {String(formik.errors.company)}
-                          </p>
-                        )}
-                      </div>
-                    </div>
+                        <AvatarFallback className="bg-transparent text-white dark:text-zinc-900 font-bold text-xs">
+                          {getCompanyName().charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                    ) : (
+                      <Briefcase className="h-5 w-5" />
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h4 className="font-bold text-sm text-zinc-900 dark:text-zinc-100 truncate">
+                      {formik.values.title || `${singularName} Role Title`}
+                    </h4>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 flex items-center gap-1 mt-0.5 truncate">
+                      <Building className="h-3 w-3 shrink-0" />
+                      {getCompanyName()}
+                    </p>
+                  </div>
+                </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <Label
-                          htmlFor="location"
-                          className="text-sm font-medium"
-                        >
-                          Location <span className="text-destructive">*</span>
-                        </Label>
-                        <div className="relative">
-                          <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground z-10" />
-                          <GooglePlacesInput
-                            id="location"
-                            name="location"
-                            onBlur={formik.handleBlur}
-                            placeholder="Remote / City, Country"
-                            className={cn(
-                              "pl-10",
-                              formik.touched.location &&
-                                formik.errors.location &&
-                                "border-destructive",
-                            )}
-                            initialValue={
-                              typeof formik.values.location === "object"
-                                ? formik.values.location
-                                : formik.values.location
-                                  ? {
-                                      name: formik.values.location,
-                                      address: formik.values.location,
-                                      latitude: 0,
-                                      longitude: 0,
-                                    }
-                                  : null
-                            }
-                            onChange={(loc) =>
-                              formik.setFieldValue("location", loc)
-                            }
-                          />
-                        </div>
-                        {formik.touched.location && formik.errors.location && (
-                          <p className="text-xs text-destructive">
-                            {String(formik.errors.location)}
-                          </p>
-                        )}
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="salary" className="text-sm font-medium">
-                          Salary Range
-                        </Label>
-                        <div className="relative">
-                          <DollarSign className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                          <Input
-                            id="salary"
-                            name="salary"
-                            placeholder="e.g., $120k - $160k"
-                            className="pl-10"
-                            value={formik.values.salary}
-                            onChange={formik.handleChange}
-                            onBlur={formik.handleBlur}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Employment Details */}
-                <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden">
-                  <CardHeader className="bg-muted/30 pb-4">
-                    <CardTitle className="text-xl">
-                      Employment Details
-                    </CardTitle>
-                    <CardDescription>
-                      Select the type of engagement and work environment
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="pt-6 space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <div className="space-y-2">
-                        <Label
-                          htmlFor="jobType"
-                          className="text-sm font-medium"
-                        >
-                          {singularName} Type{" "}
-                          <span className="text-destructive">*</span>
-                        </Label>
-                        <Select
-                          onValueChange={(value) =>
-                            formik.setFieldValue("jobType", value)
-                          }
-                          value={formik.values.jobType}
-                        >
-                          <SelectTrigger
-                            id="jobType"
-                            className={cn(
-                              formik.touched.jobType &&
-                                formik.errors.jobType &&
-                                "border-destructive",
-                            )}
-                          >
-                            <SelectValue placeholder="Select type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="FULL-TIME">Full-time</SelectItem>
-                            <SelectItem value="PART-TIME">Part-time</SelectItem>
-                            <SelectItem value="CONTRACT">Contract</SelectItem>
-                            <SelectItem value="INTERNSHIP">
-                              Internship
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                        {formik.touched.jobType && formik.errors.jobType && (
-                          <p className="text-xs text-destructive">
-                            {String(formik.errors.jobType)}
-                          </p>
-                        )}
-                      </div>
-                      <div className="space-y-2">
-                        <Label
-                          htmlFor="workplaceType"
-                          className="text-sm font-medium"
-                        >
-                          Work Arrangement{" "}
-                          <span className="text-destructive">*</span>
-                        </Label>
-                        <Select
-                          onValueChange={(value) =>
-                            formik.setFieldValue("workplaceType", value)
-                          }
-                          value={formik.values.workplaceType}
-                        >
-                          <SelectTrigger
-                            id="workplaceType"
-                            className={cn(
-                              formik.touched.workplaceType &&
-                                formik.errors.workplaceType &&
-                                "border-destructive",
-                            )}
-                          >
-                            <SelectValue placeholder="Select arrangement" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="ON-SITE">On-site</SelectItem>
-                            <SelectItem value="HYBRID">Hybrid</SelectItem>
-                            <SelectItem value="REMOTE">Remote</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        {formik.touched.workplaceType &&
-                          formik.errors.workplaceType && (
-                            <p className="text-xs text-destructive">
-                              {String(formik.errors.workplaceType)}
-                            </p>
-                          )}
-                      </div>
-                      <div className="space-y-2">
-                        <Label
-                          htmlFor="experienceLevel"
-                          className="text-sm font-medium"
-                        >
-                          Experience Level{" "}
-                          <span className="text-destructive">*</span>
-                        </Label>
-                        <Select
-                          onValueChange={(value) =>
-                            formik.setFieldValue("experienceLevel", value)
-                          }
-                          value={formik.values.experienceLevel}
-                        >
-                          <SelectTrigger
-                            id="experienceLevel"
-                            className={cn(
-                              formik.touched.experienceLevel &&
-                                formik.errors.experienceLevel &&
-                                "border-destructive",
-                            )}
-                          >
-                            <SelectValue placeholder="Select level" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="ENTRY-LEVEL">
-                              Entry-level
-                            </SelectItem>
-                            <SelectItem value="MID-LEVEL">Mid-level</SelectItem>
-                            <SelectItem value="SENIOR">Senior</SelectItem>
-                            <SelectItem value="LEAD">Lead/Manager</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        {formik.touched.experienceLevel &&
-                          formik.errors.experienceLevel && (
-                            <p className="text-xs text-destructive">
-                              {String(formik.errors.experienceLevel)}
-                            </p>
-                          )}
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="description"
-                        className="text-sm font-medium"
-                      >
-                        Job Description{" "}
-                        <span className="text-destructive">*</span>
-                      </Label>
-                      <Textarea
-                        id="description"
-                        name="description"
-                        placeholder="Describe the role, company culture, and expectations..."
-                        className={cn(
-                          "min-h-[160px] resize-none",
-                          formik.touched.description &&
-                            formik.errors.description &&
-                            "border-destructive",
-                        )}
-                        value={formik.values.description}
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
-                      />
-                      {formik.touched.description &&
-                        formik.errors.description && (
-                          <p className="text-xs text-destructive">
-                            {String(formik.errors.description)}
-                          </p>
-                        )}
-                      <p className="text-[11px] text-muted-foreground text-right italic">
-                        {formik.values.description.length} characters (min 50)
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* List Sections */}
-                <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden">
-                  <CardHeader className="bg-muted/30 pb-4">
-                    <CardTitle className="text-xl">
-                      Requirements & Benefits
-                    </CardTitle>
-                    <CardDescription>
-                      Detailed lists of what you expect and what you offer
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="pt-6 space-y-10">
-                    <div className="grid grid-cols-1 gap-10">
-                      {renderListSection(
-                        "requirements",
-                        "Requirements",
-                        "e.g., 5+ years of React experience",
-                        GraduationCap,
-                      )}
-                      <Separator />
-                      {renderListSection(
-                        "responsibilities",
-                        "Key Responsibilities",
-                        "e.g., Lead a team of 4 frontend engineers",
-                        CheckCircle2,
-                      )}
-                      <Separator />
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-2">
-                          <div className="p-1.5 rounded-md bg-primary/10">
-                            <Briefcase className="h-4 w-4 text-primary" />
-                          </div>
-                          <Label className="text-base font-semibold">
-                            Required Skills
-                          </Label>
-                          <Badge variant="secondary" className="ml-1">
-                            {
-                              formik.values.skills.filter(
-                                (s: string) => s.trim() !== "",
-                              ).length
-                            }
-                          </Badge>
-                        </div>
-                        <SkillsAutocomplete
-                          value={formik.values.skills}
-                          onChange={(val) =>
-                            formik.setFieldValue("skills", val)
-                          }
-                        />
-                      </div>
-                      <Separator />
-                      {renderListSection(
-                        "benefits",
-                        "Benefits & Perks",
-                        "e.g., Unlimited PTO, Health Insurance",
-                        DollarSign,
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              </form>
-            </div>
-
-            {/* Live Preview Sidebar */}
-            <div className="lg:col-span-4">
-              <div className="sticky top-6 space-y-6">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-bold">Listing Preview</h3>
+                {/* Metadata Badges */}
+                <div className="flex flex-wrap gap-1.5 pt-1">
                   <Badge
                     variant="outline"
-                    className="bg-green-500/5 text-green-600 border-green-500/20"
+                    className="bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700 text-[10px] font-semibold"
                   >
-                    Live Preview
+                    <MapPin className="h-3 w-3 mr-1" />
+                    {formatLocationName(formik.values.location)}
                   </Badge>
+                  <Badge
+                    variant="outline"
+                    className="bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 border-none text-[10px] font-bold"
+                  >
+                    {formik.values.workplaceType}
+                  </Badge>
+                  <Badge
+                    variant="outline"
+                    className="bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700 text-[10px] font-semibold"
+                  >
+                    {formik.values.jobType}
+                  </Badge>
+                  {formik.values.salary && (
+                    <Badge
+                      variant="outline"
+                      className="bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 border-zinc-200 dark:border-zinc-700 text-[10px] font-semibold"
+                    >
+                      <DollarSign className="h-3 w-3 mr-0.5" />
+                      {formik.values.salary}
+                    </Badge>
+                  )}
                 </div>
 
-                <Card className="border-none shadow-xl ring-1 ring-border/50 overflow-hidden bg-card/50 backdrop-blur-sm">
-                  <div className="h-2 bg-gradient-to-r from-primary to-primary/60" />
-                  <CardContent className="pt-6 space-y-6">
-                    <div className="flex items-center gap-4">
-                      <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center border border-primary/20 overflow-hidden">
-                        {formik.values.company?.logo ? (
-                          <Avatar className="h-full w-full rounded-none">
-                            <AvatarImage
-                              src={`https://cdn.thrico.network/${formik.values.company.logo}`}
-                              alt={formik.values.company.name}
-                            />
-                            <AvatarFallback className="bg-transparent">
-                              <Briefcase className="h-7 w-7 text-primary" />
-                            </AvatarFallback>
-                          </Avatar>
-                        ) : (
-                          <Briefcase className="h-7 w-7 text-primary" />
-                        )}
-                      </div>
-                      <div>
-                        <h4 className="font-bold text-lg leading-tight">
-                          {formik.values.title ||
-                            `${singularName} Position Title`}
-                        </h4>
-                        <p className="text-muted-foreground text-sm flex items-center gap-1 mt-1">
-                          {formik.values.company?.name || "Company Name"}
-                        </p>
-                      </div>
+                {/* Description Snippet */}
+                <div className="text-[11px] text-zinc-600 dark:text-zinc-400 leading-relaxed line-clamp-3 pt-1 border-t border-zinc-100 dark:border-zinc-800">
+                  {formik.values.description || "Role overview and expectations will appear here..."}
+                </div>
+
+                {/* Skills tags preview */}
+                {formik.values.skills.some((s: string) => s.trim()) && (
+                  <div className="space-y-1 pt-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                      Core Skills
+                    </span>
+                    <div className="flex flex-wrap gap-1">
+                      {formik.values.skills
+                        .filter((s: string) => s.trim())
+                        .slice(0, 4)
+                        .map((skill: string, i: number) => (
+                          <span
+                            key={i}
+                            className="px-2 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 text-[10px] font-medium"
+                          >
+                            {skill}
+                          </span>
+                        ))}
                     </div>
-
-                    <div className="flex flex-wrap gap-2">
-                      <Badge
-                        variant="secondary"
-                        className="bg-primary/5 text-primary border-primary/10 hover:bg-primary/10"
-                      >
-                        <MapPin className="h-3 w-3 mr-1" />
-                        {typeof formik.values.location === "object"
-                          ? formik.values.location?.name
-                          : formik.values.location || "Location"}
-                      </Badge>
-                      <Badge
-                        variant="secondary"
-                        className="bg-blue-500/5 text-blue-600 border-blue-500/10 hover:bg-blue-500/10"
-                      >
-                        <Clock className="h-3 w-3 mr-1" />
-                        {formik.values.workplaceType || "Work Type"}
-                      </Badge>
-                      {formik.values.salary && (
-                        <Badge
-                          variant="secondary"
-                          className="bg-green-500/5 text-green-600 border-green-500/10 hover:bg-green-500/10"
-                        >
-                          <DollarSign className="h-3 w-3 mr-1" />
-                          {formik.values.salary}
-                        </Badge>
-                      )}
-                    </div>
-
-                    <Separator className="opacity-50" />
-
-                    <div className="space-y-4">
-                      <div>
-                        <h5 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
-                          Description
-                        </h5>
-                        <p className="text-sm line-clamp-3 text-foreground/80 leading-relaxed">
-                          {formik.values.description ||
-                            "Describe the role and what makes it unique..."}
-                        </p>
-                      </div>
-
-                      {formik.values.skills.some((s: string) => s.trim()) && (
-                        <div>
-                          <h5 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
-                            Skills
-                          </h5>
-                          <div className="flex flex-wrap gap-1.5">
-                            {formik.values.skills
-                              .filter((s: string) => s.trim())
-                              .map((skill: string, i: number) => (
-                                <Badge
-                                  key={i}
-                                  variant="outline"
-                                  className="text-[10px] px-1.5 py-0"
-                                >
-                                  {skill}
-                                </Badge>
-                              ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    <Button className="w-full mt-4" disabled>
-                      Apply Now
-                    </Button>
-
-                    <p className="text-[10px] text-center text-muted-foreground italic">
-                      Preview version - Final layout may vary slightly
-                    </p>
-                  </CardContent>
-                </Card>
-
-                <div className="p-4 rounded-xl bg-muted/30 border border-dashed border-border flex items-start gap-4">
-                  <div className="mt-1 p-1 bg-primary/20 rounded-full">
-                    <Plus className="h-3 w-3 text-primary" />
                   </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    Make sure your {singularName.toLowerCase()} description
-                    includes key performance indicators and growth opportunities
-                    to attract the best talent.
+                )}
+              </div>
+
+              {/* Structured Configuration Breakdown */}
+              <div className="space-y-1.5 pt-2">
+                <PolarisSummaryRow
+                  label="Role Title"
+                  value={
+                    <span className="truncate max-w-[150px] inline-block font-semibold">
+                      {formik.values.title || "Not set"}
+                    </span>
+                  }
+                />
+                <PolarisSummaryRow
+                  label="Hiring Company"
+                  value={
+                    <span className="truncate max-w-[150px] inline-block">
+                      {getCompanyName()}
+                    </span>
+                  }
+                />
+                <PolarisSummaryRow
+                  label="Arrangement"
+                  value={formik.values.workplaceType}
+                />
+                <PolarisSummaryRow
+                  label="Engagement"
+                  value={formik.values.jobType}
+                />
+                <PolarisSummaryRow
+                  label="Seniority"
+                  value={formik.values.experienceLevel}
+                />
+                <PolarisSummaryRow
+                  label="Compensation"
+                  value={formik.values.salary || "Undisclosed"}
+                  isLast
+                />
+              </div>
+            </PolarisSidebarCard>
+
+            {/* Role Strategy Tip */}
+            <PolarisTipCard title={`${singularName} Posting Advice`}>
+              Clear compensation brackets and explicit skill tags attract 3.5× more qualified applicants from within your member ecosystem.
+            </PolarisTipCard>
+          </div>
+        }
+      >
+        <form onSubmit={formik.handleSubmit} className="space-y-6">
+          {/* Step 1: Role Overview & Organization */}
+          <PolarisFormCard
+            step={1}
+            title={`Core ${singularName} Details & Organization`}
+            description={`Specify the role title, hiring company entity, geographic location, and compensation parameters.`}
+            badge="Required"
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="title" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                  {singularName} Title <span className="text-rose-500">*</span>
+                </Label>
+                <JobTitleAutocomplete
+                  value={formik.values.title}
+                  onChange={(val) => formik.setFieldValue("title", val)}
+                  onBlur={formik.handleBlur}
+                  placeholder="e.g., Senior Full-Stack Engineer"
+                  error={!!(formik.touched.title && formik.errors.title)}
+                />
+                {formik.touched.title && formik.errors.title && (
+                  <p className="text-[11px] text-rose-500 font-medium">
+                    {formik.errors.title as string}
                   </p>
+                )}
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="company" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                  Hiring Company <span className="text-rose-500">*</span>
+                </Label>
+                <CompanyAutocompleteSelect
+                  onChange={(value) =>
+                    formik.setFieldValue("company", value)
+                  }
+                />
+                {formik.touched.company && formik.errors.company && (
+                  <p className="text-[11px] text-rose-500 font-medium">
+                    {formik.errors.company as string}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+              <div className="space-y-1.5">
+                <Label htmlFor="location" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                  Location / Region <span className="text-rose-500">*</span>
+                </Label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 z-10" />
+                  <GooglePlacesInput
+                    id="location"
+                    name="location"
+                    onBlur={formik.handleBlur}
+                    placeholder="Search city, country or remote..."
+                    className="h-10 pl-9 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
+                    initialValue={
+                      typeof formik.values.location === "object"
+                        ? formik.values.location
+                        : formik.values.location
+                          ? {
+                              name: formik.values.location,
+                              address: formik.values.location,
+                              latitude: 0,
+                              longitude: 0,
+                            }
+                          : null
+                    }
+                    onChange={(loc) =>
+                      formik.setFieldValue("location", loc)
+                    }
+                  />
+                </div>
+                {formik.touched.location && formik.errors.location && (
+                  <p className="text-[11px] text-rose-500 font-medium">
+                    {formik.errors.location as string}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="salary" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                  Salary / Compensation Range
+                </Label>
+                <div className="relative">
+                  <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+                  <Input
+                    id="salary"
+                    name="salary"
+                    placeholder="e.g., $120,000 - $150,000 / yr"
+                    className="h-10 pl-9 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
+                    value={formik.values.salary}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                  />
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
 
-      <FloatingSavePanel
-        hasChanged={formik.dirty}
-        saved={false}
-        isSaving={loading}
-        onSave={() => formik.handleSubmit()}
-        onReset={() => {
-          formik.resetForm();
-          if (onCancel) onCancel();
-          else window.history.back();
-        }}
-        title={`Unsaved ${singularName} Posting`}
-        description="You have unfilled form data."
-        buttonText={`Publish ${singularName}`}
-      />
-    </div>
+            {/* Description Textarea */}
+            <div className="space-y-1.5 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+              <Label htmlFor="description" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                Role Description <span className="text-rose-500">*</span>
+              </Label>
+              <Textarea
+                id="description"
+                name="description"
+                placeholder="Describe the opportunity, impact, team structure, and day-to-day workflow..."
+                value={formik.values.description}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                className="min-h-[120px] bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-medium resize-none shadow-none"
+              />
+              <div className="flex items-center justify-between">
+                {formik.touched.description && formik.errors.description ? (
+                  <p className="text-[11px] text-rose-500 font-medium">
+                    {formik.errors.description as string}
+                  </p>
+                ) : <span />}
+                <p className="text-[10px] text-zinc-400 font-medium">
+                  {formik.values.description.length} characters (min 30)
+                </p>
+              </div>
+            </div>
+          </PolarisFormCard>
+
+          {/* Step 2: Employment Terms & Engagement */}
+          <PolarisFormCard
+            step={2}
+            title="Employment Terms & Workplace Arrangement"
+            description="Configure work location flexibility, commitment type, and required experience level."
+            badge="Structure"
+          >
+            {/* Workplace Arrangement Selectable Tiles */}
+            <div className="space-y-2">
+              <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                Workplace Arrangement <span className="text-rose-500">*</span>
+              </Label>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {[
+                  {
+                    value: "ON-SITE",
+                    label: "On-site",
+                    icon: Building,
+                    desc: "Full-time physical office presence",
+                  },
+                  {
+                    value: "HYBRID",
+                    label: "Hybrid",
+                    icon: Layers,
+                    desc: "Flexible split office & remote",
+                  },
+                  {
+                    value: "REMOTE",
+                    label: "Remote",
+                    icon: Laptop,
+                    desc: "100% location independent",
+                  },
+                ].map((item) => {
+                  const Icon = item.icon;
+                  const isSelected = formik.values.workplaceType === item.value;
+                  return (
+                    <button
+                      key={item.value}
+                      type="button"
+                      onClick={() => formik.setFieldValue("workplaceType", item.value)}
+                      className={cn(
+                        "relative flex flex-col items-start p-3.5 rounded-xl border text-left transition-all cursor-pointer",
+                        isSelected
+                          ? "border-zinc-900 dark:border-zinc-100 bg-zinc-900/[0.04] dark:bg-zinc-100/10 ring-2 ring-zinc-900/20 dark:ring-zinc-100/20 shadow-xs"
+                          : "border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/30 hover:border-zinc-300 dark:hover:border-zinc-700",
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          "h-8 w-8 rounded-lg flex items-center justify-center mb-2.5 border transition-colors",
+                          isSelected
+                            ? "bg-zinc-900 text-white border-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100"
+                            : "bg-white dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700",
+                        )}
+                      >
+                        <Icon className="h-4 w-4" />
+                      </div>
+                      <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
+                        {item.label}
+                      </span>
+                      <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-0.5 leading-relaxed">
+                        {item.desc}
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Engagement Type & Experience Level Dropdowns */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+              <div className="space-y-1.5">
+                <Label htmlFor="jobType" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                  Engagement Type <span className="text-rose-500">*</span>
+                </Label>
+                <Select
+                  onValueChange={(value) => formik.setFieldValue("jobType", value)}
+                  value={formik.values.jobType}
+                >
+                  <SelectTrigger
+                    id="jobType"
+                    className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
+                  >
+                    <SelectValue placeholder="Select engagement type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="FULL-TIME">Full-time</SelectItem>
+                    <SelectItem value="PART-TIME">Part-time</SelectItem>
+                    <SelectItem value="CONTRACT">Contract</SelectItem>
+                    <SelectItem value="INTERNSHIP">Internship</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="experienceLevel" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                  Seniority / Experience Level <span className="text-rose-500">*</span>
+                </Label>
+                <Select
+                  onValueChange={(value) =>
+                    formik.setFieldValue("experienceLevel", value)
+                  }
+                  value={formik.values.experienceLevel}
+                >
+                  <SelectTrigger
+                    id="experienceLevel"
+                    className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
+                  >
+                    <SelectValue placeholder="Select seniority level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ENTRY-LEVEL">Entry-level (0-2 yrs)</SelectItem>
+                    <SelectItem value="MID-LEVEL">Mid-level (3-5 yrs)</SelectItem>
+                    <SelectItem value="SENIOR">Senior (5-8 yrs)</SelectItem>
+                    <SelectItem value="LEAD">Lead / Manager (8+ yrs)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </PolarisFormCard>
+
+          {/* Step 3: Skills, Requirements & Perks */}
+          <PolarisFormCard
+            step={3}
+            title="Competencies, Requirements & Perks"
+            description="Detail required skill taxonomy, candidate qualifications, and benefits package."
+            badge="Qualifications"
+          >
+            {/* Skills Autocomplete */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <div className="h-6 w-6 rounded-md bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-600 dark:text-zinc-400">
+                  <Briefcase className="h-3.5 w-3.5" />
+                </div>
+                <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                  Required Skill Stack
+                </Label>
+              </div>
+              <SkillsAutocomplete
+                value={formik.values.skills}
+                onChange={(val) => formik.setFieldValue("skills", val)}
+              />
+            </div>
+
+            <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800">
+              {renderListBuilder(
+                "requirements",
+                "Qualifications & Requirements",
+                "e.g., 5+ years building scalable React applications",
+                GraduationCap,
+              )}
+            </div>
+
+            <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800">
+              {renderListBuilder(
+                "responsibilities",
+                "Key Responsibilities & Deliverables",
+                "e.g., Architect frontend design systems and mentor junior peers",
+                CheckCircle2,
+              )}
+            </div>
+
+            <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800">
+              {renderListBuilder(
+                "benefits",
+                "Benefits, Perks & Allowances",
+                "e.g., Competitive equity grant, annual wellness stipend",
+                DollarSign,
+              )}
+            </div>
+          </PolarisFormCard>
+
+          {/* Floating Save Action Bar */}
+          <FloatingSavePanel
+            hasChanged={formik.dirty}
+            saved={false}
+            isSaving={loading}
+            onSave={() => formik.handleSubmit()}
+            onReset={() => {
+              formik.resetForm();
+              if (onCancel) onCancel();
+              else window.history.back();
+            }}
+            title={`Publish ${singularName}`}
+            description="You have pending changes to this job listing configuration."
+            buttonText={`Publish ${singularName}`}
+          />
+        </form>
+      </PolarisFormLayout>
+    </FormikProvider>
   );
 }

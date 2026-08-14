@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { ChevronLeft, Sparkles, Ticket, ChevronRight } from "lucide-react";
+import { ChevronLeft, Ticket, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface RewardFormHeaderProps {
@@ -14,29 +14,31 @@ export function RewardFormHeader({
   title,
   subtitle,
   backUrl,
-  icon: Icon = Sparkles,
+  icon: Icon = Ticket,
 }: RewardFormHeaderProps) {
   return (
-    <div className="sticky top-0 z-20 bg-white/80 dark:bg-black/80 backdrop-blur-xl border-b border-border/50">
-      <div className="max-w-[1400px] mx-auto px-6 h-16 flex items-center justify-between">
+    <div className="sticky top-0 z-20 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl border-b border-zinc-200/80 dark:border-zinc-800">
+      <div className="max-w-[1040px] mx-auto px-4 sm:px-6 md:px-8 h-16 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Link href={backUrl}>
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 hover:bg-muted"
+              className="h-8 w-8 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg text-zinc-600 dark:text-zinc-400"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
           </Link>
-          <div className="h-4 w-px bg-border/50" />
+          <div className="h-4 w-px bg-zinc-200 dark:bg-zinc-800" />
           <div>
             <div className="flex items-center gap-2">
-              <Icon className="h-3.5 w-3.5 text-amber-500" />
-              <h1 className="text-sm font-bold tracking-tight">{title}</h1>
+              <Icon className="h-4 w-4 text-[#008060]" />
+              <h1 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">
+                {title}
+              </h1>
             </div>
             {subtitle && (
-              <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">
+              <p className="text-[10px] text-zinc-500 font-medium uppercase tracking-wider mt-0.5">
                 {subtitle}
               </p>
             )}
@@ -57,28 +59,37 @@ export function RewardStudioHeader({
   onCancel: () => void;
 }) {
   return (
-    <div className="sticky top-0 z-30 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 border-b px-6 py-4">
-      <div className="max-w-[1400px] mx-auto w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div className="sticky top-0 z-30 bg-white/95 dark:bg-zinc-900/95 backdrop-blur border-b border-zinc-200/80 dark:border-zinc-800 px-4 sm:px-6 md:px-8 py-4">
+      <div className="max-w-[1040px] mx-auto w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-3 mb-1">
-            <div className="p-2.5 rounded-xl bg-amber-500/10 ring-1 ring-amber-500/20">
-              <Ticket className="h-5 w-5 text-amber-600" />
+            <div className="p-2.5 rounded-xl bg-[#008060]/10 ring-1 ring-[#008060]/20 text-[#008060]">
+              <Ticket className="h-5 w-5" />
             </div>
-            <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+              {title}
+            </h1>
           </div>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground ml-1">
+          <div className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400 ml-1">
             {breadcrumbs.map((crumb, idx) => (
               <React.Fragment key={crumb}>
-                <span>{crumb}</span>
+                <span className={idx === breadcrumbs.length - 1 ? "font-semibold text-zinc-900 dark:text-zinc-200" : ""}>
+                  {crumb}
+                </span>
                 {idx < breadcrumbs.length - 1 && (
-                  <ChevronRight className="h-3 w-3" />
+                  <ChevronRight className="h-3 w-3 text-zinc-400" />
                 )}
               </React.Fragment>
             ))}
           </div>
         </div>
         <div className="hidden sm:flex gap-3">
-          <Button variant="outline" size="sm" onClick={onCancel}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onCancel}
+            className="border-zinc-200 dark:border-zinc-700 text-xs font-semibold rounded-lg"
+          >
             Cancel
           </Button>
         </div>

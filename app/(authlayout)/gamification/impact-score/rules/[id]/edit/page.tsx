@@ -1,19 +1,17 @@
 "use client";
 
 import React from "react";
-import { Trophy, ChevronRight } from "lucide-react";
+import { Trophy, Loader2 } from "lucide-react";
 import { useRouter, useParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import {
   useGetImpactRuleById,
   useGetImpactTemplates,
 } from "@/graphql/actions/impact";
 import { useMutation, gql } from "@apollo/client";
-import { useGetEntityGamificationModules } from "@/graphql/actions/gamification/gamification-quiries";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { ImpactRuleForm } from "@/components/impact/rule-form";
-import { EcosystemContainer } from "@/components/layout/ecosystem";
 
 const UPDATE_IMPACT_RULE = gql`
   mutation UpdateImpactRule($id: ID!, $input: CreateImpactRuleInput!) {
@@ -47,7 +45,10 @@ export default function EditImpactRulePage() {
   );
 
   const modules = moduleData?.getEntityGamificationModules?.modules || [];
+  const integrations = moduleData?.getEntityGamificationModules?.integrations || [];
   const triggers = moduleData?.getEntityGamificationModules?.triggers || [];
+  const moduleTriggers = moduleData?.getEntityGamificationModules?.moduleTriggers || [];
+  const integrationTriggers = moduleData?.getEntityGamificationModules?.integrationTriggers || [];
   const templates = templatesData?.impactTemplates || [];
 
   const rule = ruleData?.getImpactRuleById;
@@ -70,8 +71,8 @@ export default function EditImpactRulePage() {
 
   if (ruleLoading) {
     return (
-      <div className="p-8 text-center text-sm text-zinc-500">
-        Loading rule details...
+      <div className="flex h-96 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-zinc-900 dark:text-zinc-100" />
       </div>
     );
   }
@@ -84,7 +85,6 @@ export default function EditImpactRulePage() {
     );
   }
 
-  // Find the template ID for this rule, or default to the first template since backend drops templateId in update
   const templateId = rule.templateId || templates[0]?.id || "";
 
   return (
@@ -96,12 +96,12 @@ export default function EditImpactRulePage() {
         icon={Trophy}
         breadcrumbs={[
           { label: "Gamification", href: "/gamification" },
-          { label: "Impact Score", href: "/impact-score" },
-          { label: "Rules", href: "/impact-score/rules" },
+          { label: "Impact Score", href: "/gamification/impact-score" },
+          { label: "Rules", href: "/gamification/impact-score/rules" },
           { label: "Edit" },
         ]}
       />
-      <EcosystemContainer className="p-0 bg-transparent border-none shadow-none ring-0">
+      <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0">
         <ImpactRuleForm
           initialValues={{
             templateId,
@@ -111,13 +111,16 @@ export default function EditImpactRulePage() {
             points: rule.points,
             dailyLimit: rule.dailyLimit,
             formula: rule.formula || "",
-            description: "", // Rules don't have description in backend yet
+            description: "",
           }}
           isEdit
           onSubmit={handleUpdate}
           loading={isUpdating}
           modules={modules}
+          integrations={integrations}
           triggers={triggers}
+          moduleTriggers={moduleTriggers}
+          integrationTriggers={integrationTriggers}
           templates={templates}
         />
       </EcosystemContainer>

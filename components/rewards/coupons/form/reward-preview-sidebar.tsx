@@ -1,15 +1,15 @@
 import React from "react";
 import {
-  Eye,
-  Ticket,
   Zap,
-  Sparkles,
+  Gift,
   ArrowRight,
-  Sparkle,
-  Info,
 } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import {
+  PolarisSidebarCard,
+  PolarisTipCard,
+  PolarisSummaryRow,
+} from "@/components/gamification/shared/polaris-form-ui";
 
 interface RewardPreviewSidebarProps {
   formik: any;
@@ -20,155 +20,149 @@ export function RewardPreviewSidebar({
   formik,
   showStrategy = false,
 }: RewardPreviewSidebarProps) {
+  const getBannerUrl = () => {
+    if (!formik.values.image) return null;
+    return formik.values.image.startsWith("http")
+      ? formik.values.image
+      : `https://cdn.thrico.network/${formik.values.image}`;
+  };
+
+  const bannerUrl = getBannerUrl();
+
   return (
-    <div className="relative">
-      <div className="sticky top-28 space-y-6">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <div className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
-            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-              Live Preview
-            </span>
-          </div>
-          <Eye className="h-3.5 w-3.5 text-muted-foreground opacity-20" />
-        </div>
+    <div className="space-y-6">
+      {/* Live Member Discovery Preview */}
+      <PolarisSidebarCard title="Reward Preview" badge="Member View">
+        <div className="space-y-4">
+          {/* Card Mockup */}
+          <div className="rounded-2xl border border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm overflow-hidden flex flex-col">
+            {/* Banner Image */}
+            <div className="h-44 w-full bg-zinc-100 dark:bg-zinc-800 relative overflow-hidden">
+              {bannerUrl ? (
+                <img
+                  src={bannerUrl}
+                  alt="Reward banner"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="h-full w-full flex flex-col items-center justify-center bg-gradient-to-br from-zinc-50 to-zinc-100 dark:from-zinc-900 dark:to-zinc-800/60">
+                  <Gift className="h-8 w-8 text-zinc-300 dark:text-zinc-600" />
+                  <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider mt-2">
+                    No Banner Uploaded
+                  </p>
+                </div>
+              )}
 
-        {/* Phone-style preview */}
-        <div className="relative aspect-[3/4] w-full max-w-[340px] mx-auto group">
-          <div className="absolute inset-0 bg-amber-500/10 blur-[60px] rounded-full group-hover:bg-amber-500/20 transition-all duration-700" />
-
-          <div className="relative h-full w-full bg-white dark:bg-zinc-900 rounded-[32px] shadow-2xl border border-white/40 dark:border-white/5 overflow-hidden flex flex-col p-2">
-            <div className="flex-1 rounded-[24px] bg-[#f8f9ff] dark:bg-black/40 overflow-hidden flex flex-col">
-              {/* Header Image */}
-              <div className="h-[200px] w-full bg-muted relative">
-                {formik.values.image ? (
-                  <img
-                    src={
-                      formik.values.image.startsWith("http")
-                        ? formik.values.image
-                        : `https://cdn.thrico.network/${formik?.values?.image}`
-                    }
-                    alt="Preview"
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <div className="h-full w-full flex flex-col items-center justify-center bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-950/20 dark:to-indigo-900/10">
-                    <Ticket className="h-8 w-8 text-indigo-400 opacity-20" />
-                    <p className="text-[10px] text-indigo-400 font-bold uppercase tracking-widest mt-2">
-                      No Image
-                    </p>
-                  </div>
-                )}
-                <div className="absolute bottom-4 left-4">
-                  <div className="bg-black/80 dark:bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-2 border border-white/20">
-                    <Zap className="h-3 w-3 text-amber-400 fill-amber-400" />
-                    <span className="text-[12px] font-bold text-white dark:text-black leading-none">
-                      {formik.values.tcCost || 0} Points
-                    </span>
-                  </div>
+              {/* Point Cost Pill */}
+              <div className="absolute bottom-3 left-3">
+                <div className="bg-zinc-900/90 dark:bg-black/90 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-1.5 border border-white/20 shadow-sm">
+                  <Zap className="h-3.5 w-3.5 text-white fill-white" />
+                  <span className="text-xs font-bold text-white leading-none">
+                    {formik.values.tcCost || 1} Points
+                  </span>
                 </div>
               </div>
+            </div>
 
-              {/* Content */}
-              <div className="p-6 flex flex-col h-full">
-                <div className="flex-1 space-y-4">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-indigo-500">
-                        {formik.values.rewardMechanism
-                          ? String(formik.values.rewardMechanism).replace(
-                              /_/g,
-                              " ",
-                            )
-                          : "COUPON"}
-                      </span>
-                      {["SCRATCH_CARD", "SPIN_WHEEL", "MATCH_AND_WIN"].includes(
-                        String(formik.values.rewardMechanism),
-                      ) && (
-                        <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/30 text-[8px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-tighter">
-                          <Sparkle className="h-2 w-2 fill-current" />
-                          Interactive
-                        </div>
-                      )}
-                    </div>
-                    <h3 className="text-lg font-bold text-foreground leading-tight line-clamp-2">
-                      {formik.values.title || "Your Reward Title"}
-                    </h3>
-                  </div>
-
-                  <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-3">
-                    {formik.values.description ||
-                      "Description will appear here."}
-                  </p>
-
-                  <div className="flex items-center gap-4 py-2">
-                    <div className="flex flex-col gap-0.5">
-                      <span className="text-[8px] font-bold uppercase tracking-widest text-muted-foreground">
-                        Expires
-                      </span>
-                      <span className="text-[10px] font-bold">
-                        {formik.values.validityDays} Days
-                      </span>
-                    </div>
-                    <div className="h-4 w-px bg-border/40" />
-                    <div className="flex flex-col gap-0.5">
-                      <span className="text-[8px] font-bold uppercase tracking-widest text-muted-foreground">
-                        Supply
-                      </span>
-                      <span className="text-[10px] font-bold">
-                        {formik.values.totalUsageLimit || "∞"} Units
-                      </span>
-                    </div>
-                  </div>
+            {/* Card Body */}
+            <div className="p-4 space-y-3">
+              <div className="flex items-center justify-between text-xs pt-1">
+                <div className="flex items-center gap-1.5 font-bold text-zinc-900 dark:text-zinc-100">
+                  <Zap className="h-3.5 w-3.5 text-zinc-900 dark:text-zinc-100 fill-zinc-900 dark:fill-zinc-100" />
+                  <span>{formik.values.tcCost || 0}</span>
+                  <span className="text-[10px] text-zinc-400 font-medium">
+                    Points
+                  </span>
                 </div>
 
-                <div className="mt-auto">
-                  <Button
-                    disabled
-                    className="w-full h-11 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs gap-2 group/btn shadow-lg shadow-indigo-500/20"
-                  >
-                    Redeem Now
-                    <ArrowRight className="h-3.5 w-3.5 group-hover/btn:translate-x-1 transition-transform" />
-                  </Button>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-900 dark:text-zinc-100">
+                  {formik.values.discountType === "Percentage"
+                    ? `${formik.values.discountValue || 0}% Off`
+                    : `$${formik.values.discountValue || 0} Off`}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2 pt-1">
+                <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-[9px] font-bold text-zinc-800 dark:text-zinc-200">
+                  <span>
+                    {formik.values.couponType === "ONE_TO_ONE"
+                      ? "1 Code / User"
+                      : "Shared Code"}
+                  </span>
                 </div>
+              </div>
+              <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100 line-clamp-1">
+                {formik.values.title || "Your Reward Title"}
+              </h3>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2 leading-relaxed">
+                {formik.values.description ||
+                  "Enter a description to preview how this reward will appear to members."}
+              </p>
+
+              {/* Quick Summary Breakdown */}
+              <div className="space-y-1.5 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+                <PolarisSummaryRow
+                  label="Validity Period"
+                  value={`${formik.values.validityDays || 30} Days`}
+                />
+                <PolarisSummaryRow
+                  label="Available Supply"
+                  value={
+                    formik.values.totalUsageLimit
+                      ? `${formik.values.totalUsageLimit} Units`
+                      : "Unlimited"
+                  }
+                />
+                <PolarisSummaryRow
+                  label="Format"
+                  value={
+                    formik.values.couponType === "ONE_TO_ONE"
+                      ? "Unique Voucher"
+                      : "Global Code"
+                  }
+                  isLast
+                />
+              </div>
+
+              <div className="pt-2">
+                <Button
+                  disabled
+                  className="w-full h-10 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-100 dark:text-zinc-900 font-bold text-xs gap-2 shadow-xs cursor-default opacity-95"
+                >
+                  Claim Reward
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Button>
               </div>
             </div>
           </div>
         </div>
+      </PolarisSidebarCard>
 
-        {showStrategy && (
-          <Card className="border-none shadow-sm ring-1 ring-border/50">
-            <CardHeader className="pb-3 border-b bg-muted/20">
-              <CardTitle className="text-sm font-bold flex items-center gap-2">
-                <Info className="h-4 w-4 text-primary" />
-                Reward Strategy
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-4">
-              <ul className="space-y-3 text-xs text-muted-foreground">
-                <li className="flex gap-2">
-                  <span className="text-primary font-bold">•</span>
-                  <span>
-                    Interactive rewards (Spin Wheel) double conversion rates.
-                  </span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="text-primary font-bold">•</span>
-                  <span>
-                    Setting a minimum account age reduces reward farming.
-                  </span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="text-primary font-bold">•</span>
-                  <span>
-                    Banner images should be 16:9 for consistent display.
-                  </span>
-                </li>
-              </ul>
-            </CardContent>
-          </Card>
-        )}
-      </div>
+      {/* Strategic Tip Card */}
+      {showStrategy && (
+        <PolarisTipCard title="Reward Optimization Tip">
+          <ul className="space-y-2 text-[11px] text-zinc-600 dark:text-zinc-400">
+            <li className="flex items-start gap-1.5">
+              <span className="text-zinc-900 dark:text-zinc-100 font-bold">•</span>
+              <span>
+                Rewards attached to interactive games (Spin Wheel, Scratch Card) see 2.4x higher engagement.
+              </span>
+            </li>
+            <li className="flex items-start gap-1.5">
+              <span className="text-zinc-900 dark:text-zinc-100 font-bold">•</span>
+              <span>
+                Setting a minimum account age or activity points threshold prevents throwaway account farming.
+              </span>
+            </li>
+            <li className="flex items-start gap-1.5">
+              <span className="text-zinc-900 dark:text-zinc-100 font-bold">•</span>
+              <span>
+                Use high-contrast 16:9 banner visuals (1200x675) for maximum visual appeal in member catalogs.
+              </span>
+            </li>
+          </ul>
+        </PolarisTipCard>
+      )}
     </div>
   );
 }

@@ -70,6 +70,7 @@ import {
   useDeleteMediaGalleryAlbum,
   useReorderMediaGalleryAlbums,
 } from "@/graphql/actions/mediaGallery";
+import { cn } from "@/lib/utils";
 
 // ─── Sortable Album Card ────────────────────────────────────────────────────────
 function SortableAlbumCard({
@@ -249,7 +250,7 @@ function AlbumFormDialog({
           isFeatured,
           coverImageUpload: coverFile || undefined,
         });
-        toast.success("Album updated");
+        toast.success("Album updated successfully");
       } else {
         await onCreate({
           title,
@@ -258,7 +259,7 @@ function AlbumFormDialog({
           order: albumCount,
           coverImageUpload: coverFile || undefined,
         });
-        toast.success("Album created");
+        toast.success("Album created successfully");
       }
       onClose();
     } catch (err: any) {
@@ -270,24 +271,31 @@ function AlbumFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>
-            {editingAlbum ? "Edit Album" : "Create New Album"}
-          </DialogTitle>
-          <DialogDescription>
+      <DialogContent className="sm:max-w-md p-6 border-zinc-200 dark:border-zinc-800">
+        <DialogHeader className="space-y-1">
+          <div className="flex items-center gap-2.5 mb-1">
+            <div className="h-8 w-8 rounded-lg bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 flex items-center justify-center">
+              <ImageIcon className="h-4 w-4" />
+            </div>
+            <DialogTitle className="text-base font-bold text-zinc-900 dark:text-zinc-100">
+              {editingAlbum ? "Edit Album Details" : "Create Media Album"}
+            </DialogTitle>
+          </div>
+          <DialogDescription className="text-xs text-zinc-500 dark:text-zinc-400">
             {editingAlbum
-              ? "Update the album details below."
-              : "Create a new photo album for your media gallery."}
+              ? "Update the album metadata, cover photography, and featured status."
+              : "Organize photos, event highlights, and community media into an album."}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
-          {/* Cover Image Upload */}
+          {/* Cover Image Upload Box */}
           <div className="space-y-1.5">
-            <Label>Cover Image</Label>
+            <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+              Album Cover Frame (Optional)
+            </Label>
             <div
-              className="relative h-36 rounded-lg border-2 border-dashed border-gray-200 hover:border-indigo-300 bg-gray-50 cursor-pointer overflow-hidden transition-colors"
+              className="relative h-36 rounded-xl border-2 border-dashed border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600 bg-zinc-50/50 dark:bg-zinc-900/50 cursor-pointer overflow-hidden transition-all group flex items-center justify-center"
               onClick={() => coverInputRef.current?.click()}
             >
               {coverPreview ? (
@@ -298,16 +306,23 @@ function AlbumFormDialog({
                     alt="Cover preview"
                     className="w-full h-full object-cover"
                   />
-                  <div className="absolute inset-0 bg-black/30 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <span className="text-white text-sm font-medium">
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-xs">
+                    <span className="px-3 py-1 rounded-full bg-white text-zinc-900 text-xs font-bold shadow-md">
                       Change Cover
                     </span>
                   </div>
                 </>
               ) : (
-                <div className="flex flex-col items-center justify-center h-full gap-1.5 text-gray-400">
-                  <ImageIcon className="w-8 h-8" />
-                  <span className="text-xs">Click to upload cover image</span>
+                <div className="flex flex-col items-center justify-center h-full gap-1.5 text-zinc-400">
+                  <div className="h-8 w-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+                    <ImageIcon className="w-4 h-4 text-zinc-500" />
+                  </div>
+                  <span className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                    Click to select cover photography
+                  </span>
+                  <span className="text-[10px] text-zinc-400">
+                    PNG, JPG, WEBP (16:9 or 4:3 recommended)
+                  </span>
                 </div>
               )}
             </div>
@@ -320,35 +335,60 @@ function AlbumFormDialog({
             />
           </div>
 
+          {/* Title */}
           <div className="space-y-1.5">
-            <Label htmlFor="album-title">Title *</Label>
+            <Label
+              htmlFor="album-title"
+              className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+            >
+              Album Title <span className="text-rose-500">*</span>
+            </Label>
             <Input
               id="album-title"
-              placeholder="e.g., Annual Conference 2025"
+              placeholder="e.g., Annual Summit 2026 Highlights"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
+              className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
             />
           </div>
+
+          {/* Description */}
           <div className="space-y-1.5">
-            <Label htmlFor="album-description">Description</Label>
+            <Label
+              htmlFor="album-description"
+              className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+            >
+              Description & Context
+            </Label>
             <Textarea
               id="album-description"
-              placeholder="Describe what this album is about..."
+              placeholder="Describe event context, photographer credits, or album themes..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
+              className="min-h-[85px] bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-medium resize-none shadow-none"
             />
           </div>
-          <div className="flex items-center justify-between rounded-lg border border-amber-100 bg-amber-50 p-3">
-            <div>
+
+          {/* Featured Toggle Card */}
+          <div className="flex items-center justify-between p-3.5 rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
+            <div className="space-y-0.5">
               <Label
                 htmlFor="album-featured"
-                className="text-sm font-medium text-amber-800"
+                className="text-xs font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5"
               >
+                <Star
+                  className={cn(
+                    "h-3.5 w-3.5",
+                    isFeatured
+                      ? "text-amber-500 fill-amber-500"
+                      : "text-zinc-400",
+                  )}
+                />
                 Featured Album
               </Label>
-              <p className="text-xs text-amber-600 mt-0.5">
-                Featured albums are highlighted to users
+              <p className="text-[10px] text-zinc-500 dark:text-zinc-400">
+                Pin and highlight this album at the top of the gallery carousel.
               </p>
             </div>
             <Switch
@@ -359,11 +399,22 @@ function AlbumFormDialog({
           </div>
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={saving}>
+        <DialogFooter className="gap-2 sm:gap-0 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onClose}
+            disabled={saving}
+            className="h-9 text-xs font-semibold border-zinc-200 dark:border-zinc-800"
+          >
             Cancel
           </Button>
-          <Button onClick={handleSave} disabled={saving}>
+          <Button
+            type="button"
+            onClick={handleSave}
+            disabled={saving}
+            className="h-9 text-xs font-bold bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200"
+          >
             {saving
               ? "Saving…"
               : editingAlbum

@@ -67,8 +67,7 @@ export default function CreateBadgePage() {
           { label: "Add Badge" },
         ]}
       />
-
-      <EcosystemContainer className="p-0 bg-transparent border-none shadow-none ring-0">
+      <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0">
         <BadgeForm
           onSubmit={handleCreate}
           loading={isCreating}

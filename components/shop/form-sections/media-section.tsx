@@ -1,13 +1,6 @@
 "use client";
 
 import { useFormikContext } from "formik";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { MultiImageUpload } from "@/components/ui/multi-image-upload";
 import { ProductFormValues } from "../product-form";
@@ -19,30 +12,24 @@ export function MediaSection() {
 
   const handleImagesChange = (imgs: string[]) => {
     setFieldValue("images", imgs);
-
-    console.log(imgs);
-    // Backward compatibility or secondary field update if needed
-    // if (imgs.length > 0) setFieldValue("image", imgs[0]);
   };
 
   return (
-    <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden">
-      <CardHeader className="bg-muted/30 pb-4">
-        <CardTitle className="text-xl">{singularName} Media</CardTitle>
-        <CardDescription>Upload images for your {singularName.toLowerCase()}</CardDescription>
-      </CardHeader>
-      <CardContent className="pt-6 space-y-6">
-        <div className="space-y-2">
-          <div className="p-4 border border-dashed rounded-lg bg-muted/20">
-            <MultiImageUpload
-              images={values.images || (values.image ? [values.image] : [])}
-              onImagesChange={handleImagesChange}
-              maxImages={8}
-              returnKeyOnly={true}
-            />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="space-y-3">
+      <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+        Product Photography Gallery (Up to 8 Images)
+      </Label>
+      <div className="p-4 border border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl bg-zinc-50/40 dark:bg-zinc-900/40">
+        <MultiImageUpload
+          images={values.images || (values.image ? [values.image] : [])}
+          onImagesChange={handleImagesChange}
+          maxImages={8}
+          returnKeyOnly={true}
+        />
+      </div>
+      <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+        Supported formats: PNG, JPG, WEBP. First image will act as the primary catalog thumbnail.
+      </p>
+    </div>
   );
 }

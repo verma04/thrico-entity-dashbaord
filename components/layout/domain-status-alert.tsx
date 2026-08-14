@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { AlertCircle, ChevronRight, X, ExternalLink, ShieldAlert } from "lucide-react";
 import Link from "next/link";
 import { getCustomDomain } from "@/graphql/actions/domain";
+import { useCheckEntitySubscription } from "@/graphql/actions";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
@@ -12,8 +13,10 @@ export default function DomainStatusAlert() {
   const [isDismissed, setIsDismissed] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const { data, loading } = getCustomDomain();
+  const { data: subData } = useCheckEntitySubscription();
 
   const domain = data?.getCustomDomain;
+  const isTrial = subData?.checkEntitySubscription?.subscriptionType === "trial";
 
   const shouldShow = useMemo(() => {
     if (loading || !domain || isDismissed) return false;
@@ -28,7 +31,10 @@ export default function DomainStatusAlert() {
         initial={{ opacity: 0, y: 20, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
-        className="fixed bottom-6 left-6 z-100 w-full max-w-[340px]"
+        className={cn(
+          "fixed right-6 z-50 w-full max-w-[340px]",
+          isTrial ? "bottom-[120px]" : "bottom-6"
+        )}
       >
         <div 
           className={cn(

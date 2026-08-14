@@ -1,19 +1,16 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import {
   Globe,
   Layout,
   Layers,
-  ChevronRight,
-  Info,
   Smartphone,
   Laptop,
 } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -37,16 +34,15 @@ import { MenuEditor } from "@/components/website-layout/settings/menu-editor";
 
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { cn } from "@/lib/utils";
-
+import { EcosystemHeader } from "@/components/layout/ecosystem";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { EcosystemWrapper, EcosystemHeader, EcosystemContainer } from "@/components/layout/ecosystem";
+  PolarisFormLayout,
+  PolarisFormCard,
+  PolarisSidebarCard,
+  PolarisSummaryRow,
+  PolarisTipCard,
+  PolarisInfoBanner,
+} from "@/components/gamification/shared/polaris-form-ui";
 
 // ------------------------------------------------
 // TYPES
@@ -103,8 +99,8 @@ export default function NavigationManager() {
   const { toast } = useToast();
   const { globalHeader, updateModuleContent, updateModuleLayout } =
     useWebsiteBuilderStore();
-  const [previewDevice, setPreviewDevice] = React.useState<"mobile" | "desktop">("desktop");
-  const [saved, setSaved] = React.useState(false);
+  const [previewDevice, setPreviewDevice] = useState<"mobile" | "desktop">("desktop");
+  const [saved, setSaved] = useState(false);
 
   // Fetch website data
   const {
@@ -179,258 +175,256 @@ export default function NavigationManager() {
   });
 
   return (
-    <EcosystemWrapper>
-      <EcosystemHeader
-        title="Navigation Settings"
-        description="Configure your website's global navigation layout and structure."
-        icon={Globe}
-        badgeText="Website Builder"
-        breadcrumbs={[
-          { label: "Website Builder" },
-          { label: "General Settings" },
-          { label: "Global Navigation" }
-        ]}
-      />
+    <div className="flex flex-col min-h-screen bg-[#fafafa] dark:bg-black/10 overflow-hidden relative">
+      {/* Top Header with max-w-[1040px] Centered Breathing Space */}
+      <div className="border-b border-zinc-200/80 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md">
+        <div className="max-w-[1040px] mx-auto px-4 sm:px-6 md:px-8 py-3">
+          <EcosystemHeader
+            title="Navigation Settings"
+            description="Configure your website's global navigation layout, branding, and menu hierarchy."
+            icon={Globe}
+            badgeText="Website Builder"
+            breadcrumbs={[
+              { label: "Website Builder", href: "/app-layout" },
+              { label: "General Settings", href: "/app-layout/settings" },
+              { label: "Global Navigation" },
+            ]}
+          />
+        </div>
+      </div>
 
-      <EcosystemContainer>
-        <div className="pt-4">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            {/* Form Section */}
-            <div className="lg:col-span-8 space-y-8">
-              <form onSubmit={formik.handleSubmit} className="space-y-8">
-                {/* Architecture & Branding Section */}
-                <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden">
-                  <CardHeader className="bg-muted/30 pb-4">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Layout className="h-4 w-4 text-indigo-600" />
-                      <CardTitle className="text-xl">
-                        Identity & Layout
-                      </CardTitle>
-                    </div>
-                    <CardDescription>
-                      Define how your brand and navigation are presented.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="pt-6 space-y-8">
-                    <div className="grid gap-6 sm:grid-cols-2">
-                      <div className="space-y-2">
-                        <Label
-                          htmlFor="layout"
-                          className="text-sm font-medium"
-                        >
-                          Navigation Layout
-                        </Label>
-                        <Select
-                          value={formik.values.layout}
-                          onValueChange={(value) =>
-                            formik.setFieldValue("layout", value)
-                          }
-                        >
-                          <SelectTrigger
-                            id="layout"
-                            className="bg-background"
-                          >
-                            <SelectValue placeholder="Select a layout" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="simple">
-                              Simple (Right Aligned)
-                            </SelectItem>
-                            <SelectItem value="centered">
-                              Centered Logo
-                            </SelectItem>
-                            <SelectItem value="minimal">
-                              Minimal (Hamburger)
-                            </SelectItem>
-                            <SelectItem value="stacked">
-                              Stacked (Two Rows)
-                            </SelectItem>
-                            <SelectItem value="split">Split</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label
-                          htmlFor="logoType"
-                          className="text-sm font-medium"
-                        >
-                          Logo Preference
-                        </Label>
-                        <Select
-                          value={formik.values.logoType}
-                          onValueChange={(value) =>
-                            formik.setFieldValue("logoType", value)
-                          }
-                        >
-                          <SelectTrigger
-                            id="logoType"
-                            className="bg-background"
-                          >
-                            <SelectValue placeholder="Select logo type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="text">Text Logo</SelectItem>
-                            <SelectItem value="image">
-                              Image Logo
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-
-                    <div className="space-y-4 pt-2">
-                      {formik.values.logoType === "image" ? (
-                        <div className="space-y-2 bg-muted/20 p-6 rounded-2xl border border-dashed">
-                          <ImageUploadWithCrop
-                            label="Logo Image Asset"
-                            currentImage={formik.values.logoImage}
-                            onImageUpdate={(imageUrl: string) =>
-                              formik.setFieldValue("logoImage", imageUrl)
-                            }
-                            recommendedWidth={150}
-                            recommendedHeight={50}
-                            aspectRatio={3}
-                            showDimensions
-                          />
-                        </div>
-                      ) : (
-                        <div className="space-y-2">
-                          <Label
-                            htmlFor="logoText"
-                            className="text-sm font-medium"
-                          >
-                            Brand Name
-                          </Label>
-                          <Input
-                            id="logoText"
-                            placeholder="My Brand"
-                            {...formik.getFieldProps("logoText")}
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Menu Editor Section */}
-                <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden mb-12">
-                  <CardHeader className="bg-muted/30 pb-4">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Layers className="h-4 w-4 text-indigo-600" />
-                      <CardTitle className="text-xl">
-                        Menu Structure
-                      </CardTitle>
-                    </div>
-                    <CardDescription>
-                      Configure the links and hierarchical navigation menu.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="pt-8">
-                    <MenuEditor
-                      menuItems={formik.values.menuItems}
-                      onChange={(items) =>
-                        formik.setFieldValue("menuItems", items)
-                      }
-                    />
-                  </CardContent>
-                </Card>
-              </form>
-            </div>
-
-            {/* Sidebar / Preview Section */}
-            <div className="lg:col-span-4">
-              <div className="sticky top-6 space-y-6">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-bold">Live Preview</h3>
-                  <div className="flex items-center p-1 bg-muted rounded-lg border">
+      <div className="flex-1 overflow-y-auto">
+        <PolarisFormLayout
+          sidebar={
+            <div className="space-y-6">
+              {/* Live Preview Sidebar Card */}
+              <PolarisSidebarCard
+                title="Live Header Preview"
+                badge={previewDevice === "desktop" ? "Desktop View" : "Mobile View"}
+                icon={Layout}
+              >
+                <div className="space-y-3">
+                  {/* Device Switcher Pills */}
+                  <div className="flex items-center p-1 bg-zinc-100 dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700">
                     <button
+                      type="button"
                       onClick={() => setPreviewDevice("desktop")}
                       className={cn(
-                        "p-1.5 rounded-md transition-all",
-                        previewDevice === "desktop" ? "bg-background shadow-sm text-indigo-600" : "text-muted-foreground hover:text-foreground"
+                        "flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-semibold transition-all",
+                        previewDevice === "desktop"
+                          ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-xs"
+                          : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100",
                       )}
                     >
-                      <Laptop className="h-4 w-4" />
+                      <Laptop className="h-3.5 w-3.5" />
+                      Desktop
                     </button>
                     <button
+                      type="button"
                       onClick={() => setPreviewDevice("mobile")}
                       className={cn(
-                        "p-1.5 rounded-md transition-all",
-                        previewDevice === "mobile" ? "bg-background shadow-sm text-indigo-600" : "text-muted-foreground hover:text-foreground"
+                        "flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-semibold transition-all",
+                        previewDevice === "mobile"
+                          ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-xs"
+                          : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100",
                       )}
                     >
-                      <Smartphone className="h-4 w-4" />
+                      <Smartphone className="h-3.5 w-3.5" />
+                      Mobile
                     </button>
                   </div>
-                </div>
 
-                {/* Device Frame */}
-                <div className={cn(
-                  "relative mx-auto transition-all duration-500 overflow-hidden border bg-background shadow-xl rounded-2xl",
-                  previewDevice === "mobile" ? "w-[320px] h-[580px]" : "w-full aspect-video"
-                )}>
-                  <div className="absolute inset-0 overflow-y-auto">
-                    {/* Simulated Page Content */}
-                    <div className="bg-muted/50 min-h-full">
-                       <LivePreviewNavbar
-                        content={{
-                          logoText: formik.values.logoText,
-                          logoType: formik.values.logoType,
-                          logoImage: formik.values.logoImage,
-                          menuItems: formik.values.menuItems,
-                        }}
-                        layout={formik.values.layout}
-                        previewDevice={previewDevice}
-                      />
-                      <div className="p-8 space-y-6">
-                        <div className="h-8 w-1/3 bg-muted rounded-lg animate-pulse" />
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="h-32 bg-muted rounded-2xl animate-pulse" />
-                          <div className="h-32 bg-muted rounded-2xl animate-pulse" />
+                  {/* Canvas Device Frame */}
+                  <div
+                    className={cn(
+                      "relative mx-auto transition-all duration-300 overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm rounded-xl",
+                      previewDevice === "mobile"
+                        ? "w-full max-w-[280px] h-[380px]"
+                        : "w-full aspect-[4/3]",
+                    )}
+                  >
+                    <div className="absolute inset-0 overflow-y-auto no-scrollbar">
+                      <div className="bg-zinc-50/50 dark:bg-zinc-900/30 min-h-full flex flex-col">
+                        <LivePreviewNavbar
+                          content={{
+                            logoText: formik.values.logoText,
+                            logoType: formik.values.logoType,
+                            logoImage: formik.values.logoImage,
+                            menuItems: formik.values.menuItems,
+                          }}
+                          layout={formik.values.layout}
+                          previewDevice={previewDevice}
+                        />
+                        <div className="p-4 space-y-3 flex-1">
+                          <div className="h-4 w-1/3 bg-zinc-200/60 dark:bg-zinc-800 rounded animate-pulse" />
+                          <div className="grid grid-cols-2 gap-2">
+                            <div className="h-16 bg-zinc-100 dark:bg-zinc-800/60 rounded-xl animate-pulse" />
+                            <div className="h-16 bg-zinc-100 dark:bg-zinc-800/60 rounded-xl animate-pulse" />
+                          </div>
+                          <div className="h-24 bg-zinc-100 dark:bg-zinc-800/60 rounded-xl animate-pulse" />
                         </div>
-                        <div className="h-64 bg-muted rounded-3xl animate-pulse" />
-                        <div className="h-32 bg-muted rounded-2xl animate-pulse" />
                       </div>
                     </div>
                   </div>
+
+                  {/* Summary Rows */}
+                  <div className="space-y-1.5 pt-2">
+                    <PolarisSummaryRow
+                      label="Layout Style"
+                      value={formik.values.layout}
+                    />
+                    <PolarisSummaryRow
+                      label="Menu Links"
+                      value={`${formik.values.menuItems?.length || 0} top items`}
+                      isLast
+                    />
+                  </div>
+                </div>
+              </PolarisSidebarCard>
+
+              {/* Strategic Tip */}
+              <PolarisTipCard title="Navigation Best Practice">
+                Keep primary navigation focused to 5-7 top-level links. Use dropdown menus for secondary pages to reduce decision fatigue for visitors.
+              </PolarisTipCard>
+            </div>
+          }
+        >
+          <form onSubmit={formik.handleSubmit} className="space-y-6">
+            <PolarisInfoBanner
+              title="Global Navbar Scope"
+              description="Changes made to the global navigation apply to all pages across your website automatically."
+            />
+
+            {/* Step 1: Identity & Layout */}
+            <PolarisFormCard
+              step={1}
+              title="Brand Identity & Layout"
+              description="Configure how your brand logo and header alignment appear to visitors."
+              badge="Branding"
+              icon={Layout}
+            >
+              <div className="space-y-5">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {/* Layout Selector */}
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="layout"
+                      className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                    >
+                      Navigation Layout
+                    </Label>
+                    <Select
+                      value={formik.values.layout}
+                      onValueChange={(value) =>
+                        formik.setFieldValue("layout", value)
+                      }
+                    >
+                      <SelectTrigger
+                        id="layout"
+                        className="h-10 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-xs shadow-none focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+                      >
+                        <SelectValue placeholder="Select a layout" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="simple">
+                          Simple (Right Aligned Links)
+                        </SelectItem>
+                        <SelectItem value="centered">
+                          Centered Logo
+                        </SelectItem>
+                        <SelectItem value="minimal">
+                          Minimal (Hamburger Menu)
+                        </SelectItem>
+                        <SelectItem value="stacked">
+                          Stacked (Two Rows)
+                        </SelectItem>
+                        <SelectItem value="split">Split Navigation</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Logo Preference */}
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="logoType"
+                      className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                    >
+                      Logo Display Type
+                    </Label>
+                    <Select
+                      value={formik.values.logoType}
+                      onValueChange={(value) =>
+                        formik.setFieldValue("logoType", value)
+                      }
+                    >
+                      <SelectTrigger
+                        id="logoType"
+                        className="h-10 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-xs shadow-none focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+                      >
+                        <SelectValue placeholder="Select logo type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="text">Text / Wordmark</SelectItem>
+                        <SelectItem value="image">Image / Graphic Logo</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
-                <Card className="border-none shadow-sm ring-1 ring-border/50">
-                  <CardHeader className="pb-3 border-b bg-muted/20">
-                    <CardTitle className="text-sm font-bold flex items-center gap-2">
-                      <Info className="h-4 w-4 text-indigo-600" />
-                      Navigation Tips
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-4">
-                    <ul className="space-y-3 text-xs text-muted-foreground">
-                      <li className="flex gap-2">
-                        <span className="text-indigo-600 font-bold">•</span>
-                        <span>
-                          Centered logos work best for minimal, high-end brands.
-                        </span>
-                      </li>
-                      <li className="flex gap-2">
-                        <span className="text-indigo-600 font-bold">•</span>
-                        <span>
-                          Limit top-level menu items to 5-7 for optimal clarity.
-                        </span>
-                      </li>
-                      <li className="flex gap-2">
-                        <span className="text-indigo-600 font-bold">•</span>
-                        <span>
-                          SVG logos are recommended for crisp rendering across all devices.
-                        </span>
-                      </li>
-                    </ul>
-                  </CardContent>
-                </Card>
+                {/* Logo Value input */}
+                <div className="pt-1">
+                  {formik.values.logoType === "image" ? (
+                    <div className="space-y-2 bg-zinc-50 dark:bg-zinc-900/40 p-5 rounded-xl border border-dashed border-zinc-200 dark:border-zinc-800">
+                      <ImageUploadWithCrop
+                        label="Upload Brand Logo"
+                        currentImage={formik.values.logoImage}
+                        onImageUpdate={(imageUrl: string) =>
+                          formik.setFieldValue("logoImage", imageUrl)
+                        }
+                        recommendedWidth={150}
+                        recommendedHeight={50}
+                        aspectRatio={3}
+                        showDimensions
+                      />
+                    </div>
+                  ) : (
+                    <div className="space-y-1.5">
+                      <Label
+                        htmlFor="logoText"
+                        className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                      >
+                        Brand Name / Text
+                      </Label>
+                      <Input
+                        id="logoText"
+                        placeholder="e.g. Acme Community"
+                        {...formik.getFieldProps("logoText")}
+                        className="h-10 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-xs font-medium shadow-none focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          </div>
-        </div>
-      </EcosystemContainer>
+            </PolarisFormCard>
+
+            {/* Step 2: Menu Structure */}
+            <PolarisFormCard
+              step={2}
+              title="Menu Items & Hierarchy"
+              description="Add, arrange, and nest links to build your header navigation menu."
+              badge="Structure"
+              icon={Layers}
+            >
+              <MenuEditor
+                menuItems={formik.values.menuItems}
+                onChange={(items) =>
+                  formik.setFieldValue("menuItems", items)
+                }
+              />
+            </PolarisFormCard>
+          </form>
+        </PolarisFormLayout>
+      </div>
 
       <FloatingSavePanel
         onSave={() => formik.submitForm()}
@@ -438,9 +432,10 @@ export default function NavigationManager() {
         isSaving={isUpdating}
         hasChanged={formik.dirty}
         saved={saved}
-        title="Unsaved Changes"
+        title="Unsaved Navigation"
         description="You have modified the navigation configuration."
+        buttonText="Save Navigation"
       />
-    </EcosystemWrapper>
+    </div>
   );
 }

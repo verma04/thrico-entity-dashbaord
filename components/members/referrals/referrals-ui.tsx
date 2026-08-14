@@ -15,13 +15,13 @@ import { safeLocaleDateString } from "@/lib/date-utils";
 import { Badge } from "@/components/ui/badge";
 import { useCheckMemberSubscription } from "@/graphql/actions/membership/membership-queries";
 import {
-  Loader2,
   Network,
   Trophy,
   Users,
-  Star,
-  ChevronDown,
-  Circle,
+  Sparkles,
+  Check,
+  ChevronsUpDown,
+  Search,
 } from "lucide-react";
 import { UserHoverCard } from "@/components/shared/user-hover-card";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
@@ -40,13 +40,6 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Popover,
@@ -61,7 +54,6 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { Check, ChevronsUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -78,11 +70,11 @@ export function ReferralsUI() {
 
   const handleSearch = (value: string) => {
     setSearchQuery(value);
-    
+
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
     }
-    
+
     if (value.trim().length > 2) {
       searchTimeoutRef.current = setTimeout(() => {
         searchUserWithAI({
@@ -126,16 +118,16 @@ export function ReferralsUI() {
         return (
           <UserHoverCard userId={referrer?.id}>
             <div className="flex items-center gap-2.5 py-1">
-              <Avatar className="h-7 w-7">
+              <Avatar className="h-7 w-7 border border-zinc-200 dark:border-zinc-800">
                 <AvatarImage
                   src={`https://cdn.thrico.network/${referrer?.avatar}`}
                 />
-                <AvatarFallback className="text-[9px] bg-primary/10 text-primary">
+                <AvatarFallback className="text-[9px] font-bold bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300">
                   {referrer?.firstName?.[0]}
                   {referrer?.lastName?.[0]}
                 </AvatarFallback>
               </Avatar>
-              <span className="text-xs font-semibold">
+              <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
                 {referrer?.firstName} {referrer?.lastName}
               </span>
             </div>
@@ -151,16 +143,16 @@ export function ReferralsUI() {
         return (
           <UserHoverCard userId={referee?.id}>
             <div className="flex items-center gap-2.5 py-1">
-              <Avatar className="h-7 w-7 border border-primary/10">
+              <Avatar className="h-7 w-7 border border-zinc-200 dark:border-zinc-800">
                 <AvatarImage
                   src={`https://cdn.thrico.network/${referee?.avatar}`}
                 />
-                <AvatarFallback className="text-[9px] bg-primary/10 text-primary">
+                <AvatarFallback className="text-[9px] font-bold bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300">
                   {referee?.firstName?.[0]}
                   {referee?.lastName?.[0]}
                 </AvatarFallback>
               </Avatar>
-              <span className="text-xs font-medium">
+              <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">
                 {referee?.firstName} {referee?.lastName}
               </span>
             </div>
@@ -172,7 +164,7 @@ export function ReferralsUI() {
       key: "joined",
       header: "JOINED",
       cell: (row) => (
-        <span className="text-xs text-muted-foreground font-medium">
+        <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
           {safeLocaleDateString(row.referee?.user?.createdAt)}
         </span>
       ),
@@ -181,16 +173,16 @@ export function ReferralsUI() {
       key: "status",
       header: "STATUS",
       cell: (row) => (
-        <Badge
-          variant="outline"
-          className={
+        <span
+          className={cn(
+            "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border",
             row.referee?.isApproved
-              ? "bg-emerald-50/50 text-emerald-600 border-emerald-100 text-[10px] font-semibold py-0.5"
-              : "bg-amber-50/50 text-amber-600 border-amber-100 text-[10px] font-semibold py-0.5"
-          }
+              ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 border-zinc-900 dark:border-zinc-100"
+              : "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700",
+          )}
         >
           {row.referee?.isApproved ? "Active" : "Pending"}
-        </Badge>
+        </span>
       ),
     },
   ];
@@ -207,37 +199,27 @@ export function ReferralsUI() {
 
   if (loading && !referrals.length && !topReferrers.length) {
     return (
-      <EcosystemWrapper className="gap-6 m-4">
+      <EcosystemWrapper>
         <EcosystemHeader
-          title="Referral Network"
-          badgeText="Connections"
-          description="Monitor who is actively referring new members and track the approval status of invited users."
+          title="Member Referral Network"
+          badgeText="Growth & Acquisition"
+          description="Monitor member referral velocity, acquisition funnels, and reward attribution."
           icon={Network}
           breadcrumbs={[
             { label: "Members", href: "/members/all" },
-            { label: "Referrals" },
+            { label: "Referral Network" },
           ]}
         />
 
-        <EcosystemContainer className="m-4">
-          <div className="w-full space-y-6">
-            <div className="border-b border-border w-full flex gap-6 h-12">
-              <Skeleton className="h-4 w-24 mt-4" />
-              <Skeleton className="h-4 w-32 mt-4" />
-            </div>
-
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {[1, 2, 3].map((i) => (
-                  <Skeleton key={i} className="h-[104px] rounded-xl" />
-                ))}
-              </div>
-
-              <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
-                <Skeleton className="xl:col-span-4 h-[500px] rounded-xl" />
-                <Skeleton className="xl:col-span-8 h-[500px] rounded-xl" />
-              </div>
-            </div>
+        <EcosystemContainer className="p-6 lg:p-8 space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-28 rounded-2xl" />
+            ))}
+          </div>
+          <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+            <Skeleton className="xl:col-span-4 h-96 rounded-2xl" />
+            <Skeleton className="xl:col-span-8 h-96 rounded-2xl" />
           </div>
         </EcosystemContainer>
       </EcosystemWrapper>
@@ -245,15 +227,15 @@ export function ReferralsUI() {
   }
 
   return (
-    <EcosystemWrapper className="">
+    <EcosystemWrapper>
       <EcosystemHeader
-        title="Referral Network"
-        badgeText="Connections"
-        description="Monitor who is actively referring new members and track the approval status of invited users."
+        title="Member Referral Network"
+        badgeText="Growth & Acquisition"
+        description="Monitor member referral velocity, acquisition funnels, and reward attribution across the ecosystem."
         icon={Network}
         breadcrumbs={[
           { label: "Members", href: "/members/all" },
-          { label: "Referrals" },
+          { label: "Referral Network" },
         ]}
       />
 
@@ -263,154 +245,173 @@ export function ReferralsUI() {
         isAiMode={false}
       />
 
-      <EcosystemContainer className="m-4">
+      <EcosystemContainer className="p-6 lg:p-8 space-y-6">
         <Tabs
           value={activeTab}
           onValueChange={setActiveTab}
-          className="w-full "
+          className="w-full space-y-6"
         >
-          <TabsList className="bg-transparent border-b border-border w-full justify-start rounded-none h-12 p-0 gap-6">
+          <TabsList className="bg-transparent border-b border-zinc-200/80 dark:border-zinc-800 w-full justify-start rounded-none h-11 p-0 gap-6">
             <TabsTrigger
               value="top"
-              className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-12 px-0 font-semibold text-muted-foreground data-[state=active]:text-foreground"
+              className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-zinc-900 dark:data-[state=active]:border-zinc-100 rounded-none h-11 px-0 font-bold text-xs text-zinc-500 data-[state=active]:text-zinc-900 dark:data-[state=active]:text-zinc-100 transition-all"
             >
-              Top Referrals
+              Top Referrals & Leaderboard
             </TabsTrigger>
             <TabsTrigger
               value="history"
-              className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-12 px-0 font-semibold text-muted-foreground data-[state=active]:text-foreground"
+              className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-zinc-900 dark:data-[state=active]:border-zinc-100 rounded-none h-11 px-0 font-bold text-xs text-zinc-500 data-[state=active]:text-zinc-900 dark:data-[state=active]:text-zinc-100 transition-all"
             >
-              Referral History
+              Referral Timeline History
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="top" className="space-y-6 outline-none">
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card className="shadow-sm rounded-xl">
-                <CardHeader className="pb-2 pt-5">
-                  <CardDescription className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                    Total Referrals
-                  </CardDescription>
-                  <CardTitle className="text-3xl font-bold">
-                    {totalReferralsCount}
-                  </CardTitle>
-                </CardHeader>
-              </Card>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="p-5 rounded-2xl border border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 shadow-xs space-y-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                  Total Ecosystem Referrals
+                </span>
+                <p className="text-3xl font-black tracking-tight text-zinc-900 dark:text-zinc-100">
+                  {totalReferralsCount.toLocaleString()}
+                </p>
+                <p className="text-[11px] text-zinc-400 font-medium">
+                  Cumulative invitations dispatched
+                </p>
+              </div>
 
-              <Card className="shadow-sm rounded-xl">
-                <CardHeader className="pb-2 pt-5">
-                  <CardDescription className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                    Active Referrers
-                  </CardDescription>
-                  <CardTitle className="text-3xl font-bold">
-                    {totalActiveReferrers}
-                  </CardTitle>
-                </CardHeader>
-              </Card>
+              <div className="p-5 rounded-2xl border border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 shadow-xs space-y-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                  Active Member Referrers
+                </span>
+                <p className="text-3xl font-black tracking-tight text-zinc-900 dark:text-zinc-100">
+                  {totalActiveReferrers.toLocaleString()}
+                </p>
+                <p className="text-[11px] text-zinc-400 font-medium">
+                  Members with ≥ 1 confirmed invite
+                </p>
+              </div>
 
-              <Card className="shadow-sm rounded-xl bg-indigo-50/50 border-indigo-100">
-                <CardHeader className="pb-2 pt-5">
-                  <CardDescription className="text-xs font-bold uppercase tracking-wider text-indigo-600">
-                    Top Referrer
-                  </CardDescription>
-                  {bestReferrer ? (
-                    <>
-                      <CardTitle className="text-xl font-bold text-indigo-950 mt-1">
-                        {bestReferrer.referrer?.user?.firstName}{" "}
-                        {bestReferrer.referrer?.user?.lastName}
-                      </CardTitle>
-                      <p className="text-xs text-indigo-600/80 font-medium mt-1">
-                        {bestReferrer.referralsCount} referrals — highest in the
-                        community
-                      </p>
-                    </>
-                  ) : (
-                    <CardTitle className="text-xl font-bold text-indigo-900/40 mt-1">
-                      No referrers yet
-                    </CardTitle>
+              <div className="p-5 rounded-2xl border border-zinc-900/20 dark:border-zinc-100/20 bg-zinc-50 dark:bg-zinc-900/90 shadow-xs space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-900 dark:text-zinc-100 flex items-center gap-1">
+                    <Trophy className="h-3 w-3" /> Top Referrer
+                  </span>
+                  {bestReferrer && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900">
+                      Rank #1
+                    </span>
                   )}
-                </CardHeader>
-              </Card>
+                </div>
+                {bestReferrer ? (
+                  <>
+                    <p className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 truncate mt-1">
+                      {bestReferrer.referrer?.user?.firstName}{" "}
+                      {bestReferrer.referrer?.user?.lastName}
+                    </p>
+                    <p className="text-[11px] text-zinc-600 dark:text-zinc-400 font-semibold">
+                      {bestReferrer.referralsCount} successful member invites
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-sm font-semibold text-zinc-400 mt-2">
+                    No referrers active yet
+                  </p>
+                )}
+              </div>
             </div>
 
+            {/* Leaderboard & Log Table Grid */}
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
-              {/* Leaderboard */}
-              <Card className="xl:col-span-4 shadow-sm rounded-xl border-border">
-                <CardHeader className="pb-4">
-                  <CardTitle className="text-sm font-bold">
-                    Referral leaderboard
-                  </CardTitle>
-                  <CardDescription className="text-xs">
-                    Members ranked by number of people referred
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <div className="flex flex-col">
-                    {topReferrers.map((referrer: any, index: number) => {
-                      const isTop = index === 0;
-                      return (
-                        <div
-                          key={referrer.referrer?.user?.email}
-                          className={`flex items-center gap-3 p-4 border-t border-border ${isTop ? "bg-indigo-50/30" : ""}`}
-                        >
-                          <div
-                            className={`flex items-center justify-center w-6 h-6 rounded-full text-[10px] font-bold ${isTop ? "bg-indigo-600 text-white" : "bg-secondary text-secondary-foreground"}`}
-                          >
-                            {index + 1}
-                          </div>
-                          <UserHoverCard userId={referrer.referrer?.user?.id}>
-                            <div className="flex items-center gap-3 flex-1 min-w-0">
-                              <Avatar className="h-9 w-9">
-                                <AvatarImage
-                                  src={`https://cdn.thrico.network/${referrer.referrer?.user?.avatar}`}
-                                />
-                                <AvatarFallback className="text-[10px] bg-primary/10 text-primary font-bold">
-                                  {referrer.referrer?.user?.firstName?.[0]}
-                                  {referrer.referrer?.user?.lastName?.[0]}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div className="flex flex-col min-w-0">
-                                <span className="text-sm font-semibold truncate">
-                                  {referrer.referrer?.user?.firstName}{" "}
-                                  {referrer.referrer?.user?.lastName}
-                                </span>
-                                <span className="text-[10px] text-muted-foreground font-medium">
-                                  {isTop ? "Top referrer" : "Referrer"}
-                                </span>
-                              </div>
-                            </div>
-                          </UserHoverCard>
-                          <div className="flex flex-col items-end justify-center">
-                            <span className="text-sm font-bold">
-                              {referrer.referralsCount}
-                            </span>
-                            <span className="text-[8px] uppercase tracking-wider text-muted-foreground font-bold">
-                              Referred
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                    {topReferrers.length === 0 && (
-                      <div className="p-8 text-center text-sm text-muted-foreground">
-                        No referrers found.
-                      </div>
-                    )}
+              {/* Referral Leaderboard */}
+              <div className="xl:col-span-4 rounded-2xl border border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 overflow-hidden shadow-xs">
+                <div className="px-5 py-4 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-900 dark:text-zinc-100">
+                      Referral Leaderboard
+                    </h3>
+                    <p className="text-[11px] text-zinc-400">
+                      Top members ranked by invitations
+                    </p>
                   </div>
-                </CardContent>
-              </Card>
+                  <Sparkles className="h-4 w-4 text-zinc-400" />
+                </div>
 
-              {/* Log Table */}
-              <Card className="xl:col-span-8 shadow-sm rounded-xl border-border overflow-hidden">
-                <CardHeader className="pb-4 border-b border-border">
-                  <CardTitle className="text-sm font-bold">
-                    Referrer → Referee log
-                  </CardTitle>
-                  <CardDescription className="text-xs">
-                    Every referral pair, most recent first
-                  </CardDescription>
-                </CardHeader>
+                <div className="divide-y divide-zinc-100 dark:divide-zinc-800/60 max-h-[460px] overflow-y-auto">
+                  {topReferrers.map((referrer: any, index: number) => {
+                    const isTop = index === 0;
+                    return (
+                      <div
+                        key={referrer.referrer?.user?.email}
+                        className={cn(
+                          "flex items-center gap-3 p-3.5 transition-colors",
+                          isTop
+                            ? "bg-zinc-900/[0.02] dark:bg-zinc-100/5"
+                            : "hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30",
+                        )}
+                      >
+                        <div
+                          className={cn(
+                            "flex items-center justify-center w-6 h-6 rounded-lg text-[10px] font-bold shrink-0",
+                            isTop
+                              ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900"
+                              : "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400",
+                          )}
+                        >
+                          {index + 1}
+                        </div>
+                        <UserHoverCard userId={referrer.referrer?.user?.id}>
+                          <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                            <Avatar className="h-8 w-8 border border-zinc-200 dark:border-zinc-700">
+                              <AvatarImage
+                                src={`https://cdn.thrico.network/${referrer.referrer?.user?.avatar}`}
+                              />
+                              <AvatarFallback className="text-[9px] font-bold bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300">
+                                {referrer.referrer?.user?.firstName?.[0]}
+                                {referrer.referrer?.user?.lastName?.[0]}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex flex-col min-w-0">
+                              <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100 truncate">
+                                {referrer.referrer?.user?.firstName}{" "}
+                                {referrer.referrer?.user?.lastName}
+                              </span>
+                              <span className="text-[10px] text-zinc-400 font-medium">
+                                {isTop ? "Primary Advocate" : "Advocate"}
+                              </span>
+                            </div>
+                          </div>
+                        </UserHoverCard>
+                        <div className="text-right shrink-0">
+                          <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100 block">
+                            {referrer.referralsCount}
+                          </span>
+                          <span className="text-[9px] uppercase tracking-wider text-zinc-400 font-bold">
+                            Invites
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {topReferrers.length === 0 && (
+                    <div className="p-8 text-center text-xs text-zinc-400 font-medium">
+                      No referral records found.
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Referrer → Referee Log Table */}
+              <div className="xl:col-span-8 rounded-2xl border border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 overflow-hidden shadow-xs">
+                <div className="px-5 py-4 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-900 dark:text-zinc-100">
+                    Referral Attribution Log
+                  </h3>
+                  <p className="text-[11px] text-zinc-400 mt-0.5">
+                    Individual referrer-to-referee connection pairs
+                  </p>
+                </div>
                 <div className="overflow-hidden">
                   <AdminTable
                     columns={columns}
@@ -421,175 +422,198 @@ export function ReferralsUI() {
                     }
                     pageSize={10}
                     emptyTitle="No referrals found"
-                    emptyDescription="The referral network is currently empty. Connections will appear here as members invite others."
+                    emptyDescription="The referral network is currently empty. Connections will appear here as members invite peers."
                   />
                 </div>
-              </Card>
+              </div>
             </div>
           </TabsContent>
 
+          {/* Tab 2: Referral Timeline History */}
           <TabsContent value="history" className="space-y-6 outline-none">
-            <Card className="shadow-sm rounded-xl border-border">
-              <CardHeader className="pb-4 border-b border-border flex flex-row items-center justify-between">
+            <div className="rounded-2xl border border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 overflow-hidden shadow-xs">
+              <div className="px-6 py-4 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <CardTitle className="text-sm font-bold">
-                    Referral history
-                  </CardTitle>
-                  <CardDescription className="text-xs">
-                    Chronological referral timeline for a single member
-                  </CardDescription>
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-900 dark:text-zinc-100">
+                    Chronological Referral Timeline
+                  </h3>
+                  <p className="text-[11px] text-zinc-400 mt-0.5">
+                    Filter by specific member to audit invitation activity
+                  </p>
                 </div>
-                <div>
-                  <Popover open={open} onOpenChange={setOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={open}
-                        className="w-[280px] h-9 text-xs font-semibold bg-white justify-between"
-                      >
-                        {selectedReferrerId === "all"
-                          ? "All Members"
-                          : selectedReferrerName || selectedReferrerId || "Select a member..."}
-                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[280px] p-0">
-                      <Command shouldFilter={false}>
-                        <CommandInput
-                          placeholder="Search member..."
-                          className="h-9 text-xs"
-                          value={searchQuery}
-                          onValueChange={handleSearch}
-                        />
-                        <CommandList>
-                          {!searchLoading && <CommandEmpty className="text-xs p-4 text-center text-muted-foreground">No member found.</CommandEmpty>}
-                          <CommandGroup>
-                            <CommandItem
-                              value="all members"
-                              onSelect={() => {
-                                setSelectedReferrerId("all");
-                                setSelectedReferrerName(null);
-                                setOpen(false);
-                                setSearchQuery("");
-                              }}
-                              className="text-xs font-medium"
-                            >
-                              <Check
-                                className={cn(
-                                  "mr-2 h-4 w-4",
-                                  selectedReferrerId === "all" ? "opacity-100" : "opacity-0"
-                                )}
-                              />
-                              All Members
-                            </CommandItem>
-                            
-                            {searchLoading && searchQuery.trim().length > 2 && (
-                              <div className="p-4 text-center text-xs text-muted-foreground">Searching backend...</div>
-                            )}
 
-                            {searchQuery.trim().length > 2 && searchData?.searchUserWithAI?.data ? (
-                              searchData.searchUserWithAI.data.map((u: any) => (
+                <Popover open={open} onOpenChange={setOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={open}
+                      className="w-[280px] h-9 text-xs font-semibold bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 justify-between"
+                    >
+                      {selectedReferrerId === "all"
+                        ? "All Members"
+                        : selectedReferrerName || selectedReferrerId || "Filter by member..."}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[280px] p-0 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-xl">
+                    <Command shouldFilter={false}>
+                      <CommandInput
+                        placeholder="Search member name..."
+                        className="h-9 text-xs"
+                        value={searchQuery}
+                        onValueChange={handleSearch}
+                      />
+                      <CommandList>
+                        {!searchLoading && (
+                          <CommandEmpty className="text-xs p-3 text-center text-zinc-400">
+                            No member found.
+                          </CommandEmpty>
+                        )}
+                        <CommandGroup>
+                          <CommandItem
+                            value="all members"
+                            onSelect={() => {
+                              setSelectedReferrerId("all");
+                              setSelectedReferrerName(null);
+                              setOpen(false);
+                              setSearchQuery("");
+                            }}
+                            className="text-xs font-semibold cursor-pointer"
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-3.5 w-3.5",
+                                selectedReferrerId === "all"
+                                  ? "opacity-100"
+                                  : "opacity-0",
+                              )}
+                            />
+                            All Members
+                          </CommandItem>
+
+                          {searchLoading && searchQuery.trim().length > 2 && (
+                            <div className="p-3 text-center text-xs text-zinc-400">
+                              Searching database...
+                            </div>
+                          )}
+
+                          {searchQuery.trim().length > 2 &&
+                          searchData?.searchUserWithAI?.data
+                            ? searchData.searchUserWithAI.data.map((u: any) => (
                                 <CommandItem
                                   key={u.email}
                                   value={`${u.firstName} ${u.lastName} ${u.email}`}
                                   onSelect={() => {
                                     setSelectedReferrerId(u.email);
-                                    setSelectedReferrerName(`${u.firstName} ${u.lastName}`);
+                                    setSelectedReferrerName(
+                                      `${u.firstName} ${u.lastName}`,
+                                    );
                                     setOpen(false);
                                     setSearchQuery("");
                                   }}
-                                  className="text-xs font-medium"
+                                  className="text-xs font-semibold cursor-pointer"
                                 >
                                   <Check
                                     className={cn(
-                                      "mr-2 h-4 w-4",
-                                      selectedReferrerId === u.email ? "opacity-100" : "opacity-0"
+                                      "mr-2 h-3.5 w-3.5",
+                                      selectedReferrerId === u.email
+                                        ? "opacity-100"
+                                        : "opacity-0",
                                     )}
                                   />
                                   {u.firstName} {u.lastName}
                                 </CommandItem>
                               ))
-                            ) : (
-                              topReferrers
-                                .filter((r: any) =>
-                                  !searchQuery.trim() ||
-                                  `${r.referrer?.user?.firstName} ${r.referrer?.user?.lastName} ${r.referrer?.user?.email}`
-                                    .toLowerCase()
-                                    .includes(searchQuery.toLowerCase())
+                            : topReferrers
+                                .filter(
+                                  (r: any) =>
+                                    !searchQuery.trim() ||
+                                    `${r.referrer?.user?.firstName} ${r.referrer?.user?.lastName} ${r.referrer?.user?.email}`
+                                      .toLowerCase()
+                                      .includes(searchQuery.toLowerCase()),
                                 )
                                 .map((r: any) => (
-                                <CommandItem
-                                  key={r.referrer?.user?.email}
-                                  value={`${r.referrer?.user?.firstName} ${r.referrer?.user?.lastName} ${r.referrer?.user?.email}`}
-                                  onSelect={() => {
-                                    setSelectedReferrerId(r.referrer?.user?.email);
-                                    setSelectedReferrerName(`${r.referrer?.user?.firstName} ${r.referrer?.user?.lastName}`);
-                                    setOpen(false);
-                                    setSearchQuery("");
-                                  }}
-                                  className="text-xs font-medium"
-                                >
-                                  <Check
-                                    className={cn(
-                                      "mr-2 h-4 w-4",
-                                      selectedReferrerId === r.referrer?.user?.email ? "opacity-100" : "opacity-0"
-                                    )}
-                                  />
-                                  {r.referrer?.user?.firstName} {r.referrer?.user?.lastName} ({r.referralsCount} referrals)
-                                </CommandItem>
-                              ))
-                            )}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              </CardHeader>
-              <CardContent className="p-8">
+                                  <CommandItem
+                                    key={r.referrer?.user?.email}
+                                    value={`${r.referrer?.user?.firstName} ${r.referrer?.user?.lastName} ${r.referrer?.user?.email}`}
+                                    onSelect={() => {
+                                      setSelectedReferrerId(
+                                        r.referrer?.user?.email,
+                                      );
+                                      setSelectedReferrerName(
+                                        `${r.referrer?.user?.firstName} ${r.referrer?.user?.lastName}`,
+                                      );
+                                      setOpen(false);
+                                      setSearchQuery("");
+                                    }}
+                                    className="text-xs font-semibold cursor-pointer"
+                                  >
+                                    <Check
+                                      className={cn(
+                                        "mr-2 h-3.5 w-3.5",
+                                        selectedReferrerId ===
+                                          r.referrer?.user?.email
+                                          ? "opacity-100"
+                                          : "opacity-0",
+                                      )}
+                                    />
+                                    {r.referrer?.user?.firstName}{" "}
+                                    {r.referrer?.user?.lastName} (
+                                    {r.referralsCount} invites)
+                                  </CommandItem>
+                                ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              <div className="p-6">
                 {timelineHistory.length > 0 ? (
-                  <div className="relative border-l border-border/50 ml-4 space-y-8 pb-4">
+                  <div className="relative border-l border-zinc-200 dark:border-zinc-800 ml-4 space-y-6 pb-2">
                     {timelineHistory.map((row: any, i: number) => {
                       const referee = row.referee?.user;
                       const isFirst = i === timelineHistory.length - 1;
                       return (
                         <div
                           key={`${referee?.email}-${i}`}
-                          className="relative pl-8"
+                          className="relative pl-6"
                         >
                           {/* Timeline node */}
-                          <div className="absolute -left-[5px] top-1.5 w-[9px] h-[9px] rounded-full border-2 border-indigo-600 bg-white shadow-sm" />
+                          <div className="absolute -left-[5px] top-2 w-[9px] h-[9px] rounded-full border-2 border-zinc-900 bg-white dark:bg-zinc-900 dark:border-zinc-100 shadow-xs" />
 
                           <div className="flex items-start justify-between gap-4">
-                            <div className="flex items-center gap-3">
-                              <UserHoverCard userId={referee?.id}>
-                                <div className="flex items-center gap-3">
-                                  <Avatar className="h-8 w-8 bg-indigo-50/50 text-indigo-600 border border-indigo-100">
-                                    <AvatarImage src={`https://cdn.thrico.network/${referee?.avatar}`} />
-                                    <AvatarFallback className="text-[10px] font-bold bg-transparent">
-                                      {referee?.firstName?.[0]}
-                                      {referee?.lastName?.[0]}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                  <div className="flex flex-col">
-                                    <span className="text-sm font-semibold">
-                                      Referred {referee?.firstName}{" "}
-                                      {referee?.lastName}
-                                    </span>
-                                    <span className="text-xs text-muted-foreground">
-                                      {row.referee?.isApproved
-                                        ? "Active member"
-                                        : "Invite pending activation"}
-                                      {isFirst &&
-                                        selectedReferrerId !== "all" &&
-                                        " · First referral"}
-                                    </span>
-                                  </div>
+                            <UserHoverCard userId={referee?.id}>
+                              <div className="flex items-center gap-3">
+                                <Avatar className="h-8 w-8 border border-zinc-200 dark:border-zinc-700">
+                                  <AvatarImage
+                                    src={`https://cdn.thrico.network/${referee?.avatar}`}
+                                  />
+                                  <AvatarFallback className="text-[9px] font-bold bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300">
+                                    {referee?.firstName?.[0]}
+                                    {referee?.lastName?.[0]}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div className="flex flex-col">
+                                  <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
+                                    Invited {referee?.firstName}{" "}
+                                    {referee?.lastName}
+                                  </span>
+                                  <span className="text-[11px] text-zinc-400 font-medium">
+                                    {row.referee?.isApproved
+                                      ? "Active member account"
+                                      : "Invitation pending activation"}
+                                    {isFirst &&
+                                      selectedReferrerId !== "all" &&
+                                      " · First referral"}
+                                  </span>
                                 </div>
-                              </UserHoverCard>
-                            </div>
-                            <span className="text-xs font-medium text-muted-foreground whitespace-nowrap pt-1">
+                              </div>
+                            </UserHoverCard>
+
+                            <span className="text-xs font-semibold text-zinc-400 whitespace-nowrap pt-1">
                               {safeLocaleDateString(referee?.createdAt)}
                             </span>
                           </div>
@@ -598,12 +622,12 @@ export function ReferralsUI() {
                     })}
                   </div>
                 ) : (
-                  <div className="text-center py-12 text-muted-foreground text-sm">
-                    No referrals match the selected criteria.
+                  <div className="text-center py-12 text-zinc-400 text-xs font-medium">
+                    No referral events match the selected criteria.
                   </div>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
 

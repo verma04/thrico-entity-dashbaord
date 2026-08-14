@@ -7,6 +7,11 @@ import { useToast } from "@/components/ui/use-toast";
 import { useGetUserDetailsById, useUpdateMember } from "@/graphql/actions";
 import { UserDetailsSkeleton } from "@/components/members/details/detail-states";
 
+import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { User } from "lucide-react";
+
 const EditMemberPage = () => {
   const params = useParams();
   const router = useRouter();
@@ -39,7 +44,7 @@ const EditMemberPage = () => {
   const user = member?.user;
 
   if (queryLoading) return <UserDetailsSkeleton />;
-  if (!member) return <div>Member not found</div>;
+  if (!member || !user) return <div className="p-8 text-center text-sm text-zinc-500">Member not found</div>;
 
   const initialValues = {
     firstName: user.firstName || "",
@@ -83,15 +88,32 @@ const EditMemberPage = () => {
   };
 
   return (
-    <div className="h-full overflow-hidden bg-background">
-      <MemberCreationForm
-        initialValues={initialValues}
-        loading={mutationLoading}
-        onFinish={onFinish}
-        onCancel={onCancel}
-        isEdit={true}
+    <EcosystemWrapper>
+      <EcosystemHeader
+        title="Edit Member Profile"
+        breadcrumbs={[
+          { label: "Community", href: "/" },
+          { label: "Members", href: "/members" },
+          {
+            label: `${user.firstName || ""} ${user.lastName || ""}`.trim() || "Member",
+            href: `/members/${id}`,
+          },
+          { label: "Edit" },
+        ]}
+        badgeText="Community"
+        description="Update member profile attributes, taxonomy classification, and skills."
+        icon={User}
       />
-    </div>
+      <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0">
+        <MemberCreationForm
+          initialValues={initialValues}
+          loading={mutationLoading}
+          onFinish={onFinish}
+          onCancel={onCancel}
+          isEdit={true}
+        />
+      </EcosystemContainer>
+    </EcosystemWrapper>
   );
 };
 

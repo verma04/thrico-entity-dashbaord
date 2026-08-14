@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import {
@@ -9,13 +9,10 @@ import {
   Layers,
   Share2,
   PanelBottom,
-  ChevronRight,
-  Info,
   Smartphone,
   Laptop,
 } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -40,14 +37,15 @@ import { SocialLinksEditor } from "@/components/website-layout/settings/social-l
 import { MenuEditor } from "@/components/website-layout/settings/menu-editor";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { cn } from "@/lib/utils";
+import { EcosystemHeader } from "@/components/layout/ecosystem";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { EcosystemWrapper, EcosystemHeader, EcosystemContainer } from "@/components/layout/ecosystem";
+  PolarisFormLayout,
+  PolarisFormCard,
+  PolarisSidebarCard,
+  PolarisSummaryRow,
+  PolarisTipCard,
+  PolarisInfoBanner,
+} from "@/components/gamification/shared/polaris-form-ui";
 
 // ------------------------------------------------
 // TYPES
@@ -126,8 +124,8 @@ export default function FooterManager() {
   const { toast } = useToast();
   const { globalFooter, updateModuleContent, updateModuleLayout } =
     useWebsiteBuilderStore();
-  const [previewDevice, setPreviewDevice] = React.useState<"mobile" | "desktop">("desktop");
-  const [saved, setSaved] = React.useState(false);
+  const [previewDevice, setPreviewDevice] = useState<"mobile" | "desktop">("desktop");
+  const [saved, setSaved] = useState(false);
 
   // Fetch website data
   const { data: websiteData, refetch } = useGetWebsite({});
@@ -214,298 +212,296 @@ export default function FooterManager() {
   });
 
   return (
-    <EcosystemWrapper>
-      <EcosystemHeader
-        title="Footer Settings"
-        description="Configure your website's global footer layout and structure."
-        icon={PanelBottom}
-        badgeText="Website Builder"
-        breadcrumbs={[
-          { label: "Website Builder" },
-          { label: "General Settings" },
-          { label: "Global Footer" }
-        ]}
-      />
+    <div className="flex flex-col min-h-screen bg-[#fafafa] dark:bg-black/10 overflow-hidden relative">
+      {/* Centered Top Header with max-w-[1040px] Breathing Space */}
+      <div className="border-b border-zinc-200/80 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md">
+        <div className="max-w-[1040px] mx-auto px-4 sm:px-6 md:px-8 py-3">
+          <EcosystemHeader
+            title="Footer Settings"
+            description="Configure your website's global footer layout, copyright, links, and social channels."
+            icon={PanelBottom}
+            badgeText="Website Builder"
+            breadcrumbs={[
+              { label: "Website Builder", href: "/app-layout" },
+              { label: "General Settings", href: "/app-layout/settings" },
+              { label: "Global Footer" },
+            ]}
+          />
+        </div>
+      </div>
 
-      <EcosystemContainer>
-        <div className="pt-4">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            {/* Form Section */}
-            <div className="lg:col-span-8 space-y-8">
-              <form onSubmit={formik.handleSubmit} className="space-y-8">
-                {/* Architecture & Branding Section */}
-                <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden">
-                  <CardHeader className="bg-muted/30 pb-4">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Layout className="h-4 w-4 text-indigo-600" />
-                      <CardTitle className="text-xl">
-                        Identity & Base
-                      </CardTitle>
-                    </div>
-                    <CardDescription>
-                      Configure the foundational branding and layout of your footer.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="pt-6 space-y-8">
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="layout"
-                        className="text-sm font-medium"
-                      >
-                        Footer Layout
-                      </Label>
-                      <Select
-                        value={formik.values.layout}
-                        onValueChange={(value) =>
-                          formik.setFieldValue("layout", value)
-                        }
-                      >
-                        <SelectTrigger
-                          id="layout"
-                          className="bg-background"
-                        >
-                          <SelectValue placeholder="Select a layout" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="columns">
-                            Multi-Column
-                          </SelectItem>
-                          <SelectItem value="simple">Simple</SelectItem>
-                          <SelectItem value="minimal">Minimal</SelectItem>
-                          <SelectItem value="corporate">Corporate</SelectItem>
-                          <SelectItem value="newsletter">
-                            Newsletter
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="grid gap-6 sm:grid-cols-2">
-                      <div className="space-y-2">
-                        <Label
-                          htmlFor="logoType"
-                          className="text-sm font-medium"
-                        >
-                          Logo Preference
-                        </Label>
-                        <Select
-                          value={formik.values.logoType}
-                          onValueChange={(value) =>
-                            formik.setFieldValue("logoType", value)
-                          }
-                        >
-                          <SelectTrigger
-                            id="logoType"
-                            className="bg-background"
-                          >
-                            <SelectValue placeholder="Select logo type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="text">Text Logo</SelectItem>
-                            <SelectItem value="image">Image Logo</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label
-                          htmlFor="logoText"
-                          className="text-sm font-medium"
-                        >
-                          Brand Name
-                        </Label>
-                        <Input
-                          id="logoText"
-                          placeholder="My Brand"
-                          {...formik.getFieldProps("logoText")}
-                          disabled={formik.values.logoType === "image"}
-                        />
-                      </div>
-                    </div>
-
-                    {formik.values.logoType === "image" && (
-                      <div className="space-y-2 bg-muted/20 p-6 rounded-2xl border border-dashed">
-                        <ImageUploadWithCrop
-                          label="Logo Image Asset"
-                          currentImage={formik.values.logoImage}
-                          onImageUpdate={(imageUrl: string) =>
-                            formik.setFieldValue("logoImage", imageUrl)
-                          }
-                          recommendedWidth={150}
-                          recommendedHeight={50}
-                          aspectRatio={3}
-                          showDimensions
-                        />
-                      </div>
-                    )}
-
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="description"
-                        className="text-sm font-medium"
-                      >
-                        Brand Statement
-                      </Label>
-                      <Textarea
-                        id="description"
-                        placeholder="A brief description about your company..."
-                        rows={3}
-                        className="bg-background resize-none"
-                        {...formik.getFieldProps("description")}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                       <Label
-                        htmlFor="copyrightText"
-                        className="text-sm font-medium"
-                      >
-                        Copyright Attribution
-                      </Label>
-                      <Input
-                        id="copyrightText"
-                        placeholder="© 2025 All rights reserved."
-                        {...formik.getFieldProps("copyrightText")}
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Menu Structure Section */}
-                <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden">
-                  <CardHeader className="bg-muted/30 pb-4">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Layers className="h-4 w-4 text-indigo-600" />
-                      <CardTitle className="text-xl">
-                        Information Grid
-                      </CardTitle>
-                    </div>
-                    <CardDescription>
-                      Organize your navigation links and menus.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="pt-8">
-                    <MenuEditor
-                      menuItems={formik.values.menuItems}
-                      onChange={(items) => formik.setFieldValue("menuItems", items)}
-                    />
-                  </CardContent>
-                </Card>
-
-                {/* Social Bridges Section */}
-                <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden mb-12">
-                  <CardHeader className="bg-muted/30 pb-4">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Share2 className="h-4 w-4 text-indigo-600" />
-                      <CardTitle className="text-xl">
-                        Social Presence
-                      </CardTitle>
-                    </div>
-                    <CardDescription>
-                      Link your external platform profiles and digital bridges.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="pt-8">
-                    <SocialLinksEditor
-                      links={formik.values.socialLinks}
-                      onChange={(links) =>
-                        formik.setFieldValue("socialLinks", links)
-                      }
-                    />
-                  </CardContent>
-                </Card>
-              </form>
-            </div>
-
-            {/* Sidebar / Preview Section */}
-            <div className="lg:col-span-4">
-              <div className="sticky top-6 space-y-6">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-bold">Live Preview</h3>
-                  <div className="flex items-center p-1 bg-muted rounded-lg border">
+      <div className="flex-1 overflow-y-auto">
+        <PolarisFormLayout
+          sidebar={
+            <div className="space-y-6">
+              {/* Live Preview Sidebar Card */}
+              <PolarisSidebarCard
+                title="Live Footer Preview"
+                badge={previewDevice === "desktop" ? "Desktop View" : "Mobile View"}
+                icon={Layout}
+              >
+                <div className="space-y-3">
+                  {/* Device Switcher Pills */}
+                  <div className="flex items-center p-1 bg-zinc-100 dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700">
                     <button
+                      type="button"
                       onClick={() => setPreviewDevice("desktop")}
                       className={cn(
-                        "p-1.5 rounded-md transition-all",
-                        previewDevice === "desktop" ? "bg-background shadow-sm text-indigo-600" : "text-muted-foreground hover:text-foreground"
+                        "flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-semibold transition-all",
+                        previewDevice === "desktop"
+                          ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-xs"
+                          : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100",
                       )}
                     >
-                      <Laptop className="h-4 w-4" />
+                      <Laptop className="h-3.5 w-3.5" />
+                      Desktop
                     </button>
                     <button
+                      type="button"
                       onClick={() => setPreviewDevice("mobile")}
                       className={cn(
-                        "p-1.5 rounded-md transition-all",
-                        previewDevice === "mobile" ? "bg-background shadow-sm text-indigo-600" : "text-muted-foreground hover:text-foreground"
+                        "flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-xs font-semibold transition-all",
+                        previewDevice === "mobile"
+                          ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-xs"
+                          : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100",
                       )}
                     >
-                      <Smartphone className="h-4 w-4" />
+                      <Smartphone className="h-3.5 w-3.5" />
+                      Mobile
                     </button>
                   </div>
+
+                  {/* Device Canvas Frame */}
+                  <div
+                    className={cn(
+                      "relative mx-auto transition-all duration-300 overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm rounded-xl",
+                      previewDevice === "mobile"
+                        ? "w-full max-w-[280px] h-[380px]"
+                        : "w-full aspect-[4/3]",
+                    )}
+                  >
+                    <div className="absolute inset-0 overflow-y-auto no-scrollbar">
+                      <div className="bg-zinc-50/50 dark:bg-zinc-900/30 min-h-full flex flex-col justify-end">
+                        <div className="p-4 space-y-3">
+                          <div className="h-4 w-1/3 bg-zinc-200/60 dark:bg-zinc-800 rounded animate-pulse" />
+                          <div className="grid grid-cols-2 gap-2">
+                            <div className="h-14 bg-zinc-100 dark:bg-zinc-800/60 rounded-xl animate-pulse" />
+                            <div className="h-14 bg-zinc-100 dark:bg-zinc-800/60 rounded-xl animate-pulse" />
+                          </div>
+                        </div>
+
+                        <LivePreviewFooter
+                          content={{
+                            logoText: formik.values.logoText,
+                            logoType: formik.values.logoType,
+                            logoImage: formik.values.logoImage,
+                            description: formik.values.description,
+                            socialLinks: formik.values.socialLinks,
+                            menuItems: formik.values.menuItems,
+                            copyrightText: formik.values.copyrightText,
+                          }}
+                          layout={formik.values.layout}
+                          previewDevice={previewDevice}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Summary Rows */}
+                  <div className="space-y-1.5 pt-2">
+                    <PolarisSummaryRow
+                      label="Layout Style"
+                      value={formik.values.layout}
+                    />
+                    <PolarisSummaryRow
+                      label="Social Profiles"
+                      value={`${formik.values.socialLinks?.length || 0} channels`}
+                      isLast
+                    />
+                  </div>
+                </div>
+              </PolarisSidebarCard>
+
+              {/* Strategic Tip */}
+              <PolarisTipCard title="Footer Design Best Practice">
+                Your footer is the ultimate trust signal for members and search bots. Ensure essential legal pages (Privacy Policy, Terms of Service) and current copyright statements are linked clearly.
+              </PolarisTipCard>
+            </div>
+          }
+        >
+          <form onSubmit={formik.handleSubmit} className="space-y-6">
+            <PolarisInfoBanner
+              title="Global Footer Architecture"
+              description="Your footer appears on the bottom of every page across your domain. Keep copyright, brand messaging, and external links aligned with your brand voice."
+            />
+
+            {/* Step 1: Identity & Base */}
+            <PolarisFormCard
+              step={1}
+              title="Identity & Base Layout"
+              description="Configure footer layout structure, brand voice, and copyright attribution."
+              badge="Foundations"
+              icon={Layout}
+            >
+              <div className="space-y-5">
+                <div className="space-y-1.5">
+                  <Label
+                    htmlFor="layout"
+                    className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                  >
+                    Footer Layout Style
+                  </Label>
+                  <Select
+                    value={formik.values.layout}
+                    onValueChange={(value) =>
+                      formik.setFieldValue("layout", value)
+                    }
+                  >
+                    <SelectTrigger
+                      id="layout"
+                      className="h-10 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-xs shadow-none focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+                    >
+                      <SelectValue placeholder="Select a layout" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="columns">
+                        Multi-Column (Detailed Grid)
+                      </SelectItem>
+                      <SelectItem value="simple">Simple (Inline)</SelectItem>
+                      <SelectItem value="minimal">Minimal (Clean Stack)</SelectItem>
+                      <SelectItem value="corporate">Corporate (Heavy Base)</SelectItem>
+                      <SelectItem value="newsletter">
+                        Newsletter (Lead Capture Centric)
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
-                {/* Device Frame */}
-                <div className={cn(
-                  "relative mx-auto transition-all duration-500 overflow-hidden border bg-background shadow-xl rounded-2xl",
-                  previewDevice === "mobile" ? "w-[320px] h-[580px]" : "w-full aspect-video"
-                )}>
-                  <div className="absolute inset-0 overflow-y-auto">
-                    <div className="bg-muted/50 min-h-full flex flex-col">
-                      <div className="flex-1 p-8 space-y-6">
-                        <div className="h-8 w-1/3 bg-muted rounded-lg animate-pulse" />
-                        <div className="h-64 bg-muted rounded-3xl animate-pulse" />
-                      </div>
-                      <LivePreviewFooter
-                        content={{
-                          logoText: formik.values.logoText,
-                          logoType: formik.values.logoType,
-                          logoImage: formik.values.logoImage,
-                          description: formik.values.description,
-                          socialLinks: formik.values.socialLinks,
-                          menuItems: formik.values.menuItems,
-                          copyrightText: formik.values.copyrightText,
-                        }}
-                        layout={formik.values.layout}
-                      />
-                    </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="logoType"
+                      className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                    >
+                      Logo Display Type
+                    </Label>
+                    <Select
+                      value={formik.values.logoType}
+                      onValueChange={(value) =>
+                        formik.setFieldValue("logoType", value)
+                      }
+                    >
+                      <SelectTrigger
+                        id="logoType"
+                        className="h-10 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-xs shadow-none focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+                      >
+                        <SelectValue placeholder="Select logo type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="text">Text Wordmark</SelectItem>
+                        <SelectItem value="image">Image Asset</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="logoText"
+                      className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                    >
+                      Brand Name
+                    </Label>
+                    <Input
+                      id="logoText"
+                      placeholder="My Brand"
+                      {...formik.getFieldProps("logoText")}
+                      disabled={formik.values.logoType === "image"}
+                      className="h-10 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-xs font-medium shadow-none focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+                    />
                   </div>
                 </div>
 
-                <Card className="border-none shadow-sm ring-1 ring-border/50">
-                  <CardHeader className="pb-3 border-b bg-muted/20">
-                    <CardTitle className="text-sm font-bold flex items-center gap-2">
-                       <Info className="h-4 w-4 text-indigo-600" />
-                      Footer Tips
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-4">
-                    <ul className="space-y-3 text-xs text-muted-foreground">
-                      <li className="flex gap-2">
-                        <span className="text-indigo-600 font-bold">•</span>
-                        <span>
-                          Social links increase brand trust and community engagement.
-                        </span>
-                      </li>
-                      <li className="flex gap-2">
-                        <span className="text-indigo-600 font-bold">•</span>
-                        <span>
-                          Ensure your copyright text is updated for legal compliance.
-                        </span>
-                      </li>
-                      <li className="flex gap-2">
-                        <span className="text-indigo-600 font-bold">•</span>
-                        <span>
-                          Multi-column layouts are ideal for sites with deep content hierarchy.
-                        </span>
-                      </li>
-                    </ul>
-                  </CardContent>
-                </Card>
+                {formik.values.logoType === "image" && (
+                  <div className="bg-zinc-50 dark:bg-zinc-900/40 p-5 rounded-xl border border-dashed border-zinc-200 dark:border-zinc-800">
+                    <ImageUploadWithCrop
+                      label="Upload Footer Logo"
+                      currentImage={formik.values.logoImage}
+                      onImageUpdate={(imageUrl: string) =>
+                        formik.setFieldValue("logoImage", imageUrl)
+                      }
+                      recommendedWidth={150}
+                      recommendedHeight={50}
+                      aspectRatio={3}
+                      showDimensions
+                    />
+                  </div>
+                )}
+
+                <div className="space-y-1.5">
+                  <Label
+                    htmlFor="description"
+                    className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                  >
+                    Brand Statement / Mission Bio
+                  </Label>
+                  <Textarea
+                    id="description"
+                    placeholder="A brief 1-2 sentence description summarizing your community or brand mission..."
+                    rows={3}
+                    className="bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-xs resize-none shadow-none focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+                    {...formik.getFieldProps("description")}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label
+                    htmlFor="copyrightText"
+                    className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                  >
+                    Copyright Attribution
+                  </Label>
+                  <Input
+                    id="copyrightText"
+                    placeholder={`© ${new Date().getFullYear()} All rights reserved.`}
+                    {...formik.getFieldProps("copyrightText")}
+                    className="h-10 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-xs font-medium shadow-none focus-visible:ring-1 focus-visible:ring-zinc-900 dark:focus-visible:ring-zinc-100"
+                  />
+                </div>
               </div>
-            </div>
-          </div>
-        </div>
-      </EcosystemContainer>
+            </PolarisFormCard>
+
+            {/* Step 2: Information Grid & Menu */}
+            <PolarisFormCard
+              step={2}
+              title="Footer Links & Columns"
+              description="Organize navigation menus, legal links, and multi-column categories."
+              badge="Navigation"
+              icon={Layers}
+            >
+              <MenuEditor
+                menuItems={formik.values.menuItems}
+                onChange={(items) => formik.setFieldValue("menuItems", items)}
+              />
+            </PolarisFormCard>
+
+            {/* Step 3: Social Bridges */}
+            <PolarisFormCard
+              step={3}
+              title="Social Media Profiles"
+              description="Connect official social accounts (X, Instagram, LinkedIn, YouTube, Discord)."
+              badge="Bridges"
+              icon={Share2}
+            >
+              <SocialLinksEditor
+                links={formik.values.socialLinks}
+                onChange={(links) =>
+                  formik.setFieldValue("socialLinks", links)
+                }
+              />
+            </PolarisFormCard>
+          </form>
+        </PolarisFormLayout>
+      </div>
 
       <FloatingSavePanel
         onSave={() => formik.submitForm()}
@@ -513,9 +509,10 @@ export default function FooterManager() {
         isSaving={isUpdating}
         hasChanged={formik.dirty}
         saved={saved}
-        title="Unsaved Changes"
-        description="You have modified the footer configuration."
+        title="Unsaved Footer Changes"
+        description="You have modified footer branding, links, or social accounts."
+        buttonText="Save Footer"
       />
-    </EcosystemWrapper>
+    </div>
   );
 }

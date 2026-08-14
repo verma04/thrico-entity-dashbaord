@@ -5,12 +5,13 @@ import { useGetEntityCurrencyConfig } from "@/graphql/actions";
 import { Coins } from "lucide-react";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
-import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { useModuleStore } from "@/store/useModuleStore";
+
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 
 export default function EconomicsPage() {
   const currencyModuleName = useModuleStore(
-    (state) => state.currencyModuleName,
+    (state) => state.currencyModuleName || "Currency",
   );
   const { data, loading } = useGetEntityCurrencyConfig();
 
@@ -19,7 +20,7 @@ export default function EconomicsPage() {
       <EcosystemHeader
         title="Economics"
         badgeText={`${currencyModuleName} Config`}
-        description={`Maintain your gamification ${currencyModuleName.toLowerCase()} normalization factor and label.`}
+        description={`Maintain your gamification ${currencyModuleName.toLowerCase()} normalization factor and currency label.`}
         icon={Coins}
         breadcrumbs={[
           { label: "Gamification", href: "/gamification" },
@@ -27,10 +28,8 @@ export default function EconomicsPage() {
           { label: "Economics" },
         ]}
       />
-      <EcosystemContainer className="p-6">
-        <div className="space-y-6">
-          <EconomicConfiguration data={data} loading={loading} />
-        </div>
+      <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0">
+        <EconomicConfiguration data={data} loading={loading} />
       </EcosystemContainer>
     </EcosystemWrapper>
   );

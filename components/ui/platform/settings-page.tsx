@@ -1,14 +1,21 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
-import { Loader2, Save, RotateCcw, LucideIcon, Check } from "lucide-react";
-import { PlatformContainer } from "./container";
-import { AnimatePresence, motion } from "framer-motion";
+import { Loader2, LucideIcon, Sparkles } from "lucide-react";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FloatingSavePanel } from "./floating-save-panel";
+import {
+  PolarisFormLayout,
+  PolarisFormCard,
+  PolarisSidebarCard,
+  PolarisSummaryRow,
+  PolarisTipCard,
+} from "@/components/gamification/shared/polaris-form-ui";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export interface SettingsField {
   key: string;
@@ -84,7 +91,7 @@ export function PlatformSettingsPage<T extends Record<string, any>>({
   const groupedFields = useMemo(() => {
     const groups: Record<string, SettingsField[]> = {};
     fields.forEach((f) => {
-      const sec = f.section || "General";
+      const sec = f.section || "Governance & Parameters";
       if (!groups[sec]) groups[sec] = [];
       groups[sec].push(f);
     });
@@ -93,80 +100,105 @@ export function PlatformSettingsPage<T extends Record<string, any>>({
 
   if (loading || !settings) {
     return (
-      <PlatformContainer className="py-0">
-        <div className="flex flex-col gap-8">
-          {/* skeleton header */}
-          {!hideHeader && (
-            <div className="flex items-center gap-3 pb-6 border-b border-border ">
-              <div className="w-9 h-9 rounded-xl bg-muted  animate-pulse" />
-              <div className="space-y-2">
-                <div className="h-4 w-40 bg-muted  rounded-md animate-pulse" />
-                <div className="h-3 w-64 bg-muted/50  rounded-md animate-pulse" />
-              </div>
-            </div>
-          )}
-          {/* skeleton rows */}
-          <div className="max-w-2xl space-y-3">
-            {[1, 2].map((i) => (
-              <div
-                key={i}
-                className="h-[72px] rounded-xl border border-border  bg-muted/50/60  animate-pulse"
-              />
-            ))}
+      <div className="space-y-6 max-w-[1040px]">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div className="lg:col-span-8 space-y-4">
+            <Skeleton className="h-44 w-full rounded-2xl" />
+            <Skeleton className="h-44 w-full rounded-2xl" />
+          </div>
+          <div className="lg:col-span-4 space-y-4">
+            <Skeleton className="h-64 w-full rounded-2xl" />
           </div>
         </div>
-      </PlatformContainer>
+      </div>
     );
   }
 
   return (
-    <PlatformContainer className="py-0">
-      {/* ── Page Header ── */}
-
-      <FloatingSavePanel
-        hasChanged={hasChanged}
-        saved={saved}
-        isSaving={isSaving}
-        onSave={handleSave}
-        onReset={handleReset}
-      />
-
-      {/* ── Settings Sections ── */}
-      <div
-        className={cn("max-w-2xl space-y-10", !hideHeader ? "mt-2" : "mt-0")}
-      >
-        {Object.entries(groupedFields).map(
-          ([sectionName, sectionFields], si) => (
-            <motion.div
-              key={sectionName}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.25, delay: si * 0.06 }}
-              className="space-y-3"
+    <div className="space-y-6 max-w-[1040px]">
+      <PolarisFormLayout
+        sidebar={
+          <div className="space-y-6">
+            {/* Live Parameter State Sidebar */}
+            <PolarisSidebarCard
+              title="Active Parameters"
+              badge="Live Status"
+              icon={Sparkles}
             >
-              {/* Rows */}
-              <div className="rounded-xl border border-border/60  bg-card  overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-800/50">
-                {sectionFields.map((field) => (
-                  <SettingRow
-                    key={field.key}
-                    field={field}
-                    value={settings[field.key]}
-                    onChange={(v) => handleChange(field.key, v)}
-                    isDirty={
-                      data ? settings[field.key] !== data[field.key] : false
-                    }
-                  />
-                ))}
+              <div className="space-y-1.5">
+                {fields.map((f, idx) => {
+                  const val = settings[f.key];
+                  const displayVal =
+                    typeof val === "boolean"
+                      ? val
+                        ? "Enabled"
+                        : "Disabled"
+                      : val || "Default";
+
+                  return (
+                    <PolarisSummaryRow
+                      key={f.key}
+                      label={f.label}
+                      value={displayVal}
+                      isLast={idx === fields.length - 1}
+                    />
+                  );
+                })}
               </div>
-            </motion.div>
-          ),
-        )}
-      </div>
-    </PlatformContainer>
+            </PolarisSidebarCard>
+
+            {/* Contextual Guidance */}
+            <PolarisTipCard title="Governance Strategy">
+              Balancing open member creation permissions with auto-approval protocols maintains ecosystem quality while encouraging community participation.
+            </PolarisTipCard>
+          </div>
+        }
+      >
+        <div className="space-y-6">
+          {Object.entries(groupedFields).map(
+            ([sectionName, sectionFields], si) => (
+              <PolarisFormCard
+                key={sectionName}
+                step={si + 1}
+                title={sectionName}
+                description="Configure policy rules, automated processing, and member access permissions."
+                badge="Policy"
+              >
+                <div className="rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-800/80">
+                  {sectionFields.map((field) => (
+                    <SettingRow
+                      key={field.key}
+                      field={field}
+                      value={settings[field.key]}
+                      onChange={(v) => handleChange(field.key, v)}
+                      isDirty={
+                        data ? settings[field.key] !== data[field.key] : false
+                      }
+                    />
+                  ))}
+                </div>
+              </PolarisFormCard>
+            ),
+          )}
+
+          {/* Floating Action Bar */}
+          <FloatingSavePanel
+            hasChanged={hasChanged}
+            saved={saved}
+            isSaving={isSaving}
+            onSave={handleSave}
+            onReset={handleReset}
+            title="Save Protocol Changes"
+            description="You have unsaved changes to this module configuration."
+            buttonText="Save Protocols"
+          />
+        </div>
+      </PolarisFormLayout>
+    </div>
   );
 }
 
-// ── Internal Row Component ──────────────────────────────────────────────────
+// ── Internal Setting Row ──────────────────────────────────────────────────
 
 function SettingRow({
   field,
@@ -185,35 +217,30 @@ function SettingRow({
   return (
     <div
       className={cn(
-        "group flex items-center justify-between gap-6 px-5 py-4 transition-colors duration-150",
+        "group flex items-center justify-between gap-6 px-4 py-3.5 transition-colors duration-150",
         isDirty
-          ? "bg-amber-50/40 dark:bg-amber-900/20"
-          : "hover:bg-muted/50/60 ",
+          ? "bg-zinc-900/[0.03] dark:bg-zinc-100/5"
+          : "hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30",
       )}
     >
       {/* Left: icon + label + description */}
       <div className="flex items-start gap-3 min-w-0">
         {Icon && (
-          <div className="mt-0.5 w-7 h-7 rounded-lg bg-muted  border border-border/60  flex items-center justify-center text-muted-foreground  shrink-0 group-hover:bg-muted/50 dark:group-hover:bg-primary/80 group-hover:text-foreground dark:group-hover:text-muted-foreground transition-colors">
-            <Icon size={13} strokeWidth={2} />
+          <div className="mt-0.5 w-7 h-7 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center text-zinc-600 dark:text-zinc-400 shrink-0">
+            <Icon size={14} strokeWidth={2} />
           </div>
         )}
         <div className="min-w-0">
           <Label
             htmlFor={id}
-            className={cn(
-              "text-[13.5px] font-medium leading-none cursor-pointer",
-              isDirty
-                ? "text-amber-700 dark:text-amber-500"
-                : "text-foreground ",
-            )}
+            className="text-xs font-bold text-zinc-900 dark:text-zinc-100 cursor-pointer flex items-center gap-1.5"
           >
             {label}
             {isDirty && (
-              <span className="ml-2 inline-block w-1.5 h-1.5 rounded-full bg-amber-400 align-middle translate-y-[-1px]" />
+              <span className="inline-block w-1.5 h-1.5 rounded-full bg-zinc-900 dark:bg-zinc-100" />
             )}
           </Label>
-          <p className="mt-1 text-[12px] text-muted-foreground leading-relaxed font-normal max-w-[400px]">
+          <p className="mt-0.5 text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed font-medium max-w-[440px]">
             {description}
           </p>
         </div>
@@ -226,7 +253,6 @@ function SettingRow({
             id={id}
             checked={!!value}
             onCheckedChange={onChange}
-            className="data-[state=checked]:bg-primary dark:data-[state=checked]:bg-muted data-[state=unchecked]:bg-muted dark:data-[state=unchecked]:bg-primary/80 [&>span]:"
           />
         )}
         {(type === "text" || type === "number") && (
@@ -239,8 +265,8 @@ function SettingRow({
                 type === "number" ? Number(e.target.value) : e.target.value,
               )
             }
-            className="h-8 w-40 text-[13px] rounded-lg border-border  bg-card  focus-visible:ring-1 focus-visible:ring-zinc-300 dark:focus-visible:ring-zinc-700 focus-visible:ring-offset-0 font-medium shadow-none "
-            placeholder={`Enter value…`}
+            className="h-8 w-36 text-xs font-semibold rounded-lg border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50"
+            placeholder="Enter value…"
           />
         )}
       </div>

@@ -121,7 +121,10 @@ function MenuTabs({
   onReorder?: (newOrder: string[]) => void;
 }) {
   React.useEffect(() => {
-    if (typeof window !== "undefined" && process.env.NODE_ENV === "development") {
+    if (
+      typeof window !== "undefined" &&
+      process.env.NODE_ENV === "development"
+    ) {
       const originalWarn = console.warn;
       console.warn = (...args: any[]) => {
         if (
@@ -155,8 +158,10 @@ function MenuTabs({
     let globalIndex = 0;
     return sortedSectionNames.map((sectionName) => (
       <React.Fragment key={sectionName}>
-        {sections[sectionName].map((item) => {
+        {sections[sectionName].map((item, idx) => {
+          if (!item) return null;
           const currentIndex = globalIndex++;
+          const dragId = String(item.key || `tab-${sectionName}-${idx}-${currentIndex}`);
           const href =
             item.key === "dashboard" || item.key === ""
               ? `/${activeBase}`
@@ -164,10 +169,10 @@ function MenuTabs({
 
           const tabButton = (
             <TabButton
-              key={item.key}
+              key={dragId}
               item={item}
               isActive={
-                activeTab === item.key || fullKey.startsWith(item.key + "/")
+                activeTab === item.key || (!!item.key && fullKey.startsWith(item.key + "/"))
               }
               href={href}
               fullWidth={fullWidth}
@@ -176,7 +181,11 @@ function MenuTabs({
 
           if (enableReorder) {
             return (
-              <Draggable key={item.key} draggableId={item.key} index={currentIndex}>
+              <Draggable
+                key={dragId}
+                draggableId={dragId}
+                index={currentIndex}
+              >
                 {(provided) => (
                   <div
                     ref={provided.innerRef}
@@ -197,7 +206,7 @@ function MenuTabs({
   };
 
   return (
-    <nav className="sticky top-0 z-40 bg-white dark:bg-background border-t border-b border-border">
+    <nav className="sticky top-0 z-30 bg-white dark:bg-background border-b border-border">
       <div className={cn("px-6 relative", !fullWidth && "max-w-7xl mx-auto")}>
         {enableReorder ? (
           <DragDropContext onDragEnd={handleDragEnd}>
@@ -344,8 +353,8 @@ const MenuItemsLayout = ({
   const menuitems: MenuItem[] = hideDefaultTabs ? items : defaultTabs;
 
   // Group by section
-  const sections = enableReorder 
-    ? { "All": menuitems }
+  const sections = enableReorder
+    ? { All: menuitems }
     : menuitems.reduce(
         (acc, item) => {
           const section = item.section || "General";
@@ -365,7 +374,7 @@ const MenuItemsLayout = ({
     "Management",
     "Admin",
   ];
-  
+
   const sortedSectionNames = enableReorder
     ? ["All"]
     : Object.keys(sections).sort((a, b) => {
@@ -380,12 +389,12 @@ const MenuItemsLayout = ({
   return (
     <div
       className={cn(
-        "bg-background border-t-1 text-foreground flex flex-col w-full mt-2 bg-[#f9f9f9] dark:bg-background dark:border-neutral-800",
+        "bg-background text-foreground flex flex-col w-full sm:w-[90%] md:w-[95%] lg:w-full flex-1 min-h-full",
         fixed
-          ? "fixed inset-0 z-20 bg-background h-screen w-screen overflow-hidden"
+          ? "fixed inset-0 z-50 bg-background h-screen w-screen overflow-hidden"
           : fullHeight
-            ? "h-screen overflow-hidden"
-            : "min-h-screen",
+            ? "h-full overflow-hidden"
+            : "min-h-full",
         className,
       )}
     >

@@ -1,9 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Globe, Lock } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Globe, Lock, Laptop, MapPin, RefreshCw, Users, Calendar, MessageSquare } from "lucide-react";
 import { useModuleStore } from "@/store/useModuleStore";
 
 interface CommunityPreviewProps {
@@ -13,7 +12,7 @@ interface CommunityPreviewProps {
     tagline?: string;
     description?: string;
     privacy?: string;
-    coverImage?: string;
+    communityType?: string;
     enableEvents?: boolean;
   };
   imageUrl: string | null;
@@ -25,106 +24,82 @@ export function CommunityPreview({
 }: CommunityPreviewProps) {
   const singularName = useModuleStore((state) => state.communitySingularName);
 
+  const isPublic =
+    formData?.privacy === "PUBLIC" || formData?.privacy === "public";
+
   return (
-    <Card className="overflow-hidden shadow-md">
-      <CardContent className="p-0">
-        <div className="aspect-3/2 overflow-hidden bg-muted rounded-t-lg">
-          <Image
-            src={
-              imageUrl || `https://cdn.thrico.network/default_communities.png`
-            }
-            alt={`${singularName} cover`}
-            width={1536}
-            height={1024}
-            className="object-cover w-full h-full"
-          />
-        </div>
-
-        <div className="p-4">
-          <div className="flex items-center gap-2 mb-1">
-            <h3 className="font-semibold text-lg flex-1 truncate">
-              {formData?.name || formData?.title || `${singularName} Name`}
-            </h3>
-            {formData?.privacy === "PUBLIC" ||
-            formData?.privacy === "public" ? (
-              <Globe className="h-4 w-4 text-muted-foreground" />
+    <div className="rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 overflow-hidden shadow-xs">
+      {/* Cover Image */}
+      <div className="aspect-[3/2] w-full overflow-hidden bg-zinc-200 dark:bg-zinc-800 relative">
+        <Image
+          src={
+            imageUrl || `https://cdn.thrico.network/default_communities.png`
+          }
+          alt={`${singularName} cover`}
+          width={1536}
+          height={1024}
+          className="object-cover w-full h-full transition-transform hover:scale-105 duration-300"
+        />
+        <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5">
+          <Badge
+            variant="secondary"
+            className="bg-black/60 text-white backdrop-blur-md border-none text-[10px] font-bold px-2 py-0.5"
+          >
+            {isPublic ? (
+              <span className="flex items-center gap-1">
+                <Globe className="h-3 w-3" /> Public
+              </span>
             ) : (
-              <Lock className="h-4 w-4 text-muted-foreground" />
+              <span className="flex items-center gap-1">
+                <Lock className="h-3 w-3" /> Private
+              </span>
             )}
-          </div>
-
-          {formData?.tagline && (
-            <p className="text-sm text-muted-foreground mb-4">
-              {formData.tagline}
-            </p>
+          </Badge>
+          {formData?.communityType && (
+            <Badge
+              variant="secondary"
+              className="bg-black/60 text-white backdrop-blur-md border-none text-[10px] font-bold px-2 py-0.5"
+            >
+              {formData.communityType === "VIRTUAL" && "Virtual"}
+              {formData.communityType === "INPERSON" && "In-Person"}
+              {formData.communityType === "HYBRID" && "Hybrid"}
+            </Badge>
           )}
-
-          <Tabs defaultValue="discussion" className="mt-4">
-            <TabsList className="w-full">
-              <TabsTrigger value="discussion" className="flex-1">
-                Discussion
-              </TabsTrigger>
-              <TabsTrigger value="featured" className="flex-1">
-                Featured
-              </TabsTrigger>
-              <TabsTrigger value="people" className="flex-1">
-                People
-              </TabsTrigger>
-              <TabsTrigger value="media" className="flex-1">
-                Media
-              </TabsTrigger>
-              <TabsTrigger value="events" className="flex-1">
-                Events
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="discussion" className="mt-4">
-              <div className="grid grid-cols-3 text-center mb-4">
-                <div>
-                  <div className="text-2xl font-semibold">0</div>
-                  <p className="text-xs text-muted-foreground">Members</p>
-                </div>
-                <div>
-                  <div className="text-2xl font-semibold">0</div>
-                  <p className="text-xs text-muted-foreground">Posts</p>
-                </div>
-                <div>
-                  <div className="text-2xl font-semibold">0</div>
-                  <p className="text-xs text-muted-foreground">Events</p>
-                </div>
-              </div>
-
-              {formData?.description ? (
-                <p className="text-sm leading-relaxed">
-                  {formData.description}
-                </p>
-              ) : (
-                <div className="flex items-center justify-center h-20 border-2 border-dashed rounded-md bg-muted/50">
-                  <p className="text-sm text-muted-foreground">
-                    {singularName} description will appear here
-                  </p>
-                </div>
-              )}
-            </TabsContent>
-
-            <TabsContent value="featured" className="mt-4">
-              <p className="text-sm text-muted-foreground">Featured content</p>
-            </TabsContent>
-
-            <TabsContent value="people" className="mt-4">
-              <p className="text-sm text-muted-foreground">People content</p>
-            </TabsContent>
-
-            <TabsContent value="media" className="mt-4">
-              <p className="text-sm text-muted-foreground">Media content</p>
-            </TabsContent>
-
-            <TabsContent value="events" className="mt-4">
-              <p className="text-sm text-muted-foreground">Events content</p>
-            </TabsContent>
-          </Tabs>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+
+      {/* Community Details */}
+      <div className="p-4 space-y-3">
+        <div>
+          <h3 className="font-bold text-sm text-zinc-900 dark:text-zinc-100 truncate">
+            {formData?.name || formData?.title || `New ${singularName}`}
+          </h3>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 line-clamp-2 leading-relaxed">
+            {formData?.tagline || `A dedicated space for our community.`}
+          </p>
+        </div>
+
+        {/* Counter Grid */}
+        <div className="grid grid-cols-3 gap-2 py-2 border-y border-zinc-100 dark:border-zinc-800">
+          <div className="text-center p-2 rounded-lg bg-white dark:bg-zinc-800/80 border border-zinc-200/60 dark:border-zinc-700/60">
+            <div className="text-xs font-bold text-zinc-900 dark:text-zinc-100">0</div>
+            <p className="text-[10px] text-zinc-400 font-medium">Members</p>
+          </div>
+          <div className="text-center p-2 rounded-lg bg-white dark:bg-zinc-800/80 border border-zinc-200/60 dark:border-zinc-700/60">
+            <div className="text-xs font-bold text-zinc-900 dark:text-zinc-100">0</div>
+            <p className="text-[10px] text-zinc-400 font-medium">Posts</p>
+          </div>
+          <div className="text-center p-2 rounded-lg bg-white dark:bg-zinc-800/80 border border-zinc-200/60 dark:border-zinc-700/60">
+            <div className="text-xs font-bold text-zinc-900 dark:text-zinc-100">0</div>
+            <p className="text-[10px] text-zinc-400 font-medium">Events</p>
+          </div>
+        </div>
+
+        {/* Description snippet */}
+        <div className="text-[11px] text-zinc-600 dark:text-zinc-400 leading-relaxed line-clamp-3">
+          {formData?.description || `Description will be displayed here once entered...`}
+        </div>
+      </div>
+    </div>
   );
 }

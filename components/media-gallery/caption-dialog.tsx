@@ -11,7 +11,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogDescription,
 } from "@/components/ui/dialog";
+import { MessageSquareText } from "lucide-react";
 import { useUpdateMediaGalleryImage } from "@/graphql/actions/mediaGallery";
 
 export function CaptionDialog({
@@ -39,7 +41,7 @@ export function CaptionDialog({
     setSaving(true);
     try {
       await updateImage({ variables: { id: image.id, input: { caption } } });
-      toast.success("Caption saved");
+      toast.success("Caption updated successfully");
       onSaved();
       onClose();
     } catch (err: any) {
@@ -51,24 +53,48 @@ export function CaptionDialog({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-sm">
-        <DialogHeader>
-          <DialogTitle>Edit Caption</DialogTitle>
+      <DialogContent className="sm:max-w-sm p-6 border-zinc-200 dark:border-zinc-800">
+        <DialogHeader className="space-y-1">
+          <div className="flex items-center gap-2.5 mb-1">
+            <div className="h-8 w-8 rounded-lg bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 flex items-center justify-center">
+              <MessageSquareText className="h-4 w-4" />
+            </div>
+            <DialogTitle className="text-base font-bold text-zinc-900 dark:text-zinc-100">
+              Edit Photo Caption
+            </DialogTitle>
+          </div>
+          <DialogDescription className="text-xs text-zinc-500 dark:text-zinc-400">
+            Add context or credits displayed below this image in the lightbox.
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-2 py-2">
-          <Label htmlFor="caption-input">Caption</Label>
+          <Label htmlFor="caption-input" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+            Caption Text
+          </Label>
           <Input
             id="caption-input"
-            placeholder="Add a caption for this image…"
+            placeholder="Add descriptive caption or credits…"
             value={caption}
             onChange={(e) => setCaption(e.target.value)}
+            className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
           />
         </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={saving}>
+        <DialogFooter className="gap-2 sm:gap-0 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onClose}
+            disabled={saving}
+            className="h-9 text-xs font-semibold border-zinc-200 dark:border-zinc-800"
+          >
             Cancel
           </Button>
-          <Button onClick={handleSave} disabled={saving}>
+          <Button
+            type="button"
+            onClick={handleSave}
+            disabled={saving}
+            className="h-9 text-xs font-bold bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200"
+          >
             {saving ? "Saving…" : "Save Caption"}
           </Button>
         </DialogFooter>

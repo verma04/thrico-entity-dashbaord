@@ -76,7 +76,7 @@ const AddMemberPage = () => {
           title="Add Member"
           breadcrumbs={[
             { label: "Community", href: "/" },
-            { label: "Members", href: "/members/all" },
+            { label: "Members", href: "/members" },
             { label: "Add Member" },
           ]}
           badgeText="Community"
@@ -153,14 +153,14 @@ const AddMemberPage = () => {
         title="Add Member"
         breadcrumbs={[
           { label: "Community", href: "/" },
-          { label: "Members", href: "/members/all" },
+          { label: "Members", href: "/members" },
           { label: "Add Member" },
         ]}
         badgeText="Community"
         description="Add a new member to your community."
         icon={UserPlus}
       />
-      <div className=" mx-auto  pt-6">
+      <div className="max-w-[1040px] mx-auto px-4 sm:px-6 md:px-8 pt-6">
         <SubscriptionLimitBanner subscriptionInfo={subscriptionInfo} />
       </div>
       <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0">

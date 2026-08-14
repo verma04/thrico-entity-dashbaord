@@ -14,6 +14,7 @@ import {
 import { useModuleStore } from "@/store/useModuleStore";
 import { EcosystemWrapper } from "@/components/layout/ecosystem";
 import { EcosystemHeader } from "@/components/layout/ecosystem";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { PlaySquare } from "lucide-react";
 const CreateMomentPage = () => {
   const singularName = useModuleStore((state) => state.momentSingularName);
@@ -188,19 +189,21 @@ const CreateMomentPage = () => {
     }
   };
 
+  const moduleName = useModuleStore((state) => state.momentModuleName);
+
   return (
-    <EcosystemWrapper anonymized-1="media-create">
+    <EcosystemWrapper>
       <EcosystemHeader
         title={`Create ${singularName}`}
-        badgeText="New"
-        description={`Add a new ${singularName.toLowerCase()} to the feed.`}
+        badgeText="Moments Studio"
+        description={`Broadcast short-form ${singularName.toLowerCase()} stories to your community feed.`}
         icon={PlaySquare}
         breadcrumbs={[
-          { label: "Media", href: "/moments/all" },
-          { label: "Create" },
+          { label: moduleName, href: "/moments/all" },
+          { label: `Create ${singularName}` },
         ]}
       />
-      <div className="flex-1 overflow-auto bg-background/50 p-6">
+      <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0">
         <MomentCreationForm
           loading={isUploading || confirming}
           onUploadAssets={handleUploadAssets}
@@ -211,7 +214,7 @@ const CreateMomentPage = () => {
           uploadProgress={uploadProgress}
           uploadStatus={uploadStatus}
         />
-      </div>
+      </EcosystemContainer>
     </EcosystemWrapper>
   );
 };

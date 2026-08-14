@@ -1,55 +1,52 @@
 "use client";
 
-import { useState } from "react";
-import {
-  Formik,
-  Form,
-  Field,
-  ErrorMessage,
-  FormikProvider,
-  useFormik,
-} from "formik";
+import React, { useState } from "react";
+import { FormikProvider, useFormik } from "formik";
 import * as Yup from "yup";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
-import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useToast } from "@/components/ui/use-toast";
 import {
   Camera,
-  Info,
   Globe,
   Lock,
   Laptop,
   MapPin,
   RefreshCw,
   Users,
-  ChevronRight,
-  Save,
+  ShieldCheck,
+  Calendar,
+  Star,
+  Sparkles,
+  Info,
 } from "lucide-react";
 import { CommunityPreview } from "./community-preview";
 import { ImageCropper } from "./image-cropper";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { cn } from "@/lib/utils";
 import { useModuleStore } from "@/store/useModuleStore";
+import {
+  PolarisFormLayout,
+  PolarisFormCard,
+  PolarisSidebarCard,
+  PolarisSummaryRow,
+  PolarisTipCard,
+} from "@/components/gamification/shared/polaris-form-ui";
+
+interface CommunityCreationFormProps {
+  initialValues?: any;
+  loading?: boolean;
+  onFinish: (values: any) => void;
+  onCancel?: () => void;
+  cover?: any;
+  setCover: (cover: any) => void;
+  initialCoverUrl?: string;
+}
 
 export function CommunityCreationForm({
   initialValues,
@@ -59,7 +56,7 @@ export function CommunityCreationForm({
   cover,
   setCover,
   initialCoverUrl,
-}: any) {
+}: CommunityCreationFormProps) {
   const { toast } = useToast();
   const [imageUrl, setImageUrl] = useState<string | null>(
     initialCoverUrl || null,
@@ -86,9 +83,9 @@ export function CommunityCreationForm({
       title: initialValues?.title || "",
       tagline: initialValues?.tagline || "",
       description: initialValues?.description || "",
-      privacy: initialValues?.privacy || "",
-      communityType: initialValues?.communityType || "",
-      joiningTerms: initialValues?.joiningTerms || "",
+      privacy: initialValues?.privacy || "PUBLIC",
+      communityType: initialValues?.communityType || "VIRTUAL",
+      joiningTerms: initialValues?.joiningTerms || "ANYONE_CAN_JOIN",
       requireAdminApprovalForPosts:
         initialValues?.requireAdminApprovalForPosts ?? false,
       allowMemberInvites: initialValues?.allowMemberInvites ?? false,
@@ -128,608 +125,509 @@ export function CommunityCreationForm({
     formik.setFieldValue(field, value);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = (e?: React.FormEvent) => {
+    if (e && e.preventDefault) {
+      e.preventDefault();
+    }
     formik.handleSubmit();
   };
 
   return (
     <FormikProvider value={formik}>
-      <>
-        <div className="flex flex-col h-full bg-background overflow-hidden rounded-t-[inherit]">
-          {/* Main Content Area - Scrollable */}
-          <div className="flex-1 overflow-y-auto">
-            <div className="max-w-7xl mx-auto px-6 py-8">
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                <div className="lg:col-span-8 space-y-8">
-                  <form onSubmit={handleSubmit} className="space-y-8">
-                    {/* Basic Info */}
-                    <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden">
-                      <CardHeader className="bg-muted/30 pb-4">
-                        <CardTitle className="text-xl">
-                          Basic Information
-                        </CardTitle>
-                        <CardDescription>
-                          Core details about your {singularName.toLowerCase()}
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="pt-6 space-y-6">
-                        {/* Cover Image Section */}
-                        <div className="space-y-2">
-                          <Label>Cover Image</Label>
-                          <div className="relative">
-                            <div className="aspect-3/2 overflow-hidden rounded-lg bg-muted border-2 border-dashed">
-                              <Image
-                                src={
-                                  imageUrl ||
-                                  `https://cdn.thrico.network/default_communities.png`
-                                }
-                                alt={`${singularName} cover`}
-                                width={1536}
-                                height={1024}
-                                className="object-cover w-full h-full"
-                              />
-                            </div>
-                            <label htmlFor="cover-upload">
-                              <Button
-                                type="button"
-                                variant="secondary"
-                                size="sm"
-                                className="absolute bottom-4 right-4 gap-2"
-                                onClick={() =>
-                                  document
-                                    .getElementById("cover-upload")
-                                    ?.click()
-                                }
-                              >
-                                <Camera className="h-4 w-4" />
-                                Update Cover
-                              </Button>
-                            </label>
-                            <input
-                              id="cover-upload"
-                              type="file"
-                              accept="image/*"
-                              className="hidden"
-                              onChange={handleImageUpload}
-                            />
-                          </div>
-                          <p className="text-xs text-muted-foreground">
-                            Recommended size: 1536 x 1024px (3:2 ratio). Max
-                            file size: 5MB.
-                          </p>
-                        </div>
+      <PolarisFormLayout
+        sidebar={
+          <div className="space-y-6">
+            {/* Live Community Preview Card */}
+            <PolarisSidebarCard title={`${singularName} Preview`} badge="Live Preview" icon={Sparkles}>
+              <CommunityPreview imageUrl={imageUrl} formData={formik.values} />
 
-                        {/* Name Field */}
-                        <div className="space-y-2">
-                          <Label
-                            htmlFor="title"
-                            className="text-sm font-medium"
-                          >
-                            Name <span className="text-destructive">*</span>
-                          </Label>
-                          <Input
-                            id="title"
-                            name="title"
-                            placeholder={`Enter ${singularName.toLowerCase()} name`}
-                            maxLength={50}
-                            value={formik.values.title || ""}
-                            onChange={formik.handleChange}
-                            onBlur={formik.handleBlur}
-                            required
-                          />
-                          {formik.touched.title && formik.errors.title && (
-                            <p className="text-xs text-destructive">
-                              {formik.errors.title as string}
-                            </p>
-                          )}
-                          <p className="text-xs text-muted-foreground">
-                            This will be the main name of your{" "}
-                            {singularName.toLowerCase()}.
-                          </p>
-                        </div>
+              {/* Structured Configuration Breakdown */}
+              <div className="space-y-1.5 pt-2">
+                <PolarisSummaryRow
+                  label="Privacy"
+                  value={formik.values.privacy === "PUBLIC" ? "Public Access" : "Private (Invite Only)"}
+                />
+                <PolarisSummaryRow
+                  label="Meeting Mode"
+                  value={
+                    formik.values.communityType === "VIRTUAL"
+                      ? "Virtual Online"
+                      : formik.values.communityType === "INPERSON"
+                      ? "In-Person"
+                      : "Hybrid"
+                  }
+                />
+                <PolarisSummaryRow
+                  label="Joining Terms"
+                  value={
+                    formik.values.joiningTerms === "ANYONE_CAN_JOIN"
+                      ? "Direct Join"
+                      : "Admin Approval"
+                  }
+                />
+                <PolarisSummaryRow
+                  label="Post Moderation"
+                  value={formik.values.requireAdminApprovalForPosts ? "Admin Approval Required" : "Instant Publishing"}
+                />
+                <PolarisSummaryRow
+                  label="Member Invites"
+                  value={formik.values.allowMemberInvites ? "Enabled" : "Disabled"}
+                  isLast
+                />
+              </div>
+            </PolarisSidebarCard>
 
-                        {/* Tagline Field */}
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2">
-                            <Label
-                              htmlFor="tagline"
-                              className="text-sm font-medium"
-                            >
-                              Tagline
-                            </Label>
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Info className="h-4 w-4 text-muted-foreground" />
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>
-                                    A short, catchy headline that appears below
-                                    your {singularName.toLowerCase()} name.
-                                  </p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          </div>
-                          <Input
-                            id="tagline"
-                            name="tagline"
-                            placeholder={`Enter a catchy headline for your ${singularName.toLowerCase()}`}
-                            maxLength={100}
-                            value={formik.values.tagline || ""}
-                            onChange={formik.handleChange}
-                            onBlur={formik.handleBlur}
-                          />
-                          {formik.touched.tagline && formik.errors.tagline && (
-                            <p className="text-xs text-destructive">
-                              {formik.errors.tagline as string}
-                            </p>
-                          )}
-                          <p className="text-xs text-muted-foreground">
-                            A brief tagline that describes your{" "}
-                            {singularName.toLowerCase()}'s purpose.
-                          </p>
-                        </div>
-
-                        {/* Description Field */}
-                        <div className="space-y-2">
-                          <Label
-                            htmlFor="description"
-                            className="text-sm font-medium"
-                          >
-                            Description
-                          </Label>
-                          <Textarea
-                            id="description"
-                            name="description"
-                            placeholder={`Describe what your ${singularName.toLowerCase()} is about`}
-                            maxLength={300}
-                            rows={4}
-                            className="resize-none"
-                            value={formik.values.description || ""}
-                            onChange={formik.handleChange}
-                            onBlur={formik.handleBlur}
-                          />
-                          {formik.touched.description &&
-                            formik.errors.description && (
-                              <p className="text-xs text-destructive">
-                                {formik.errors.description as string}
-                              </p>
-                            )}
-                          <p className="text-xs text-muted-foreground">
-                            Tell potential members what your{" "}
-                            {singularName.toLowerCase()} is about and why they
-                            should join.
-                          </p>
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    {/* Community Settings */}
-                    <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden">
-                      <CardHeader className="bg-muted/30 pb-4">
-                        <CardTitle className="text-xl">
-                          {singularName} Settings
-                        </CardTitle>
-                        <CardDescription>
-                          Configure privacy, type, and joining requirements
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="pt-6 space-y-6">
-                        {/* Privacy Settings */}
-                        <div className="space-y-4">
-                          <div className="flex items-center gap-2">
-                            <div className="p-1.5 rounded-md bg-primary/10">
-                              <Globe className="h-4 w-4 text-primary" />
-                            </div>
-                            <Label className="text-base font-semibold">
-                              Privacy Settings{" "}
-                              <span className="text-destructive">*</span>
-                            </Label>
-                          </div>
-                          <RadioGroup
-                            value={formik.values.privacy}
-                            onValueChange={(value) =>
-                              handleInputChange("privacy", value)
-                            }
-                            className="space-y-3"
-                          >
-                            <div className="flex items-start space-x-3 space-y-0 p-4 rounded-lg border hover:bg-muted/50 transition-colors">
-                              <RadioGroupItem value="PUBLIC" id="public" />
-                              <Label
-                                htmlFor="public"
-                                className="font-normal cursor-pointer flex-1"
-                              >
-                                <div className="flex items-center gap-2 mb-1">
-                                  <Globe className="h-4 w-4" />
-                                  <span className="font-medium">Public</span>
-                                </div>
-                                <p className="text-sm text-muted-foreground">
-                                  Anyone can see and join this{" "}
-                                  {singularName.toLowerCase()}
-                                </p>
-                              </Label>
-                            </div>
-                            <div className="flex items-start space-x-3 space-y-0 p-4 rounded-lg border hover:bg-muted/50 transition-colors">
-                              <RadioGroupItem value="PRIVATE" id="private" />
-                              <Label
-                                htmlFor="private"
-                                className="font-normal cursor-pointer flex-1"
-                              >
-                                <div className="flex items-center gap-2 mb-1">
-                                  <Lock className="h-4 w-4" />
-                                  <span className="font-medium">Private</span>
-                                </div>
-                                <p className="text-sm text-muted-foreground">
-                                  Only invited members can see and join
-                                </p>
-                              </Label>
-                            </div>
-                          </RadioGroup>
-                          {formik.touched.privacy && formik.errors.privacy && (
-                            <p className="text-xs text-destructive">
-                              {formik.errors.privacy as string}
-                            </p>
-                          )}
-                        </div>
-
-                        <Separator />
-
-                        {/* Community Type */}
-                        <div className="space-y-4">
-                          <div className="flex items-center gap-2">
-                            <div className="p-1.5 rounded-md bg-primary/10">
-                              <Laptop className="h-4 w-4 text-primary" />
-                            </div>
-                            <Label className="text-base font-semibold">
-                              {singularName} Type{" "}
-                              <span className="text-destructive">*</span>
-                            </Label>
-                          </div>
-                          <RadioGroup
-                            value={formik.values.communityType}
-                            onValueChange={(value) =>
-                              handleInputChange("communityType", value)
-                            }
-                            className="space-y-3"
-                          >
-                            <div className="flex items-start space-x-3 space-y-0 p-4 rounded-lg border hover:bg-muted/50 transition-colors">
-                              <RadioGroupItem value="VIRTUAL" id="virtual" />
-                              <Label
-                                htmlFor="virtual"
-                                className="font-normal cursor-pointer flex-1"
-                              >
-                                <div className="flex items-center gap-2 mb-1">
-                                  <Laptop className="h-4 w-4" />
-                                  <span className="font-medium">Virtual</span>
-                                </div>
-                                <p className="text-sm text-muted-foreground">
-                                  Online-only {singularName.toLowerCase()}
-                                </p>
-                              </Label>
-                            </div>
-                            <div className="flex items-start space-x-3 space-y-0 p-4 rounded-lg border hover:bg-muted/50 transition-colors">
-                              <RadioGroupItem value="INPERSON" id="inperson" />
-                              <Label
-                                htmlFor="inperson"
-                                className="font-normal cursor-pointer flex-1"
-                              >
-                                <div className="flex items-center gap-2 mb-1">
-                                  <MapPin className="h-4 w-4" />
-                                  <span className="font-medium">In Person</span>
-                                </div>
-                                <p className="text-sm text-muted-foreground">
-                                  Meets physically at a location
-                                </p>
-                              </Label>
-                            </div>
-                            <div className="flex items-start space-x-3 space-y-0 p-4 rounded-lg border hover:bg-muted/50 transition-colors">
-                              <RadioGroupItem value="HYBRID" id="hybrid" />
-                              <Label
-                                htmlFor="hybrid"
-                                className="font-normal cursor-pointer flex-1"
-                              >
-                                <div className="flex items-center gap-2 mb-1">
-                                  <RefreshCw className="h-4 w-4" />
-                                  <span className="font-medium">Hybrid</span>
-                                </div>
-                                <p className="text-sm text-muted-foreground">
-                                  Both online and in-person
-                                </p>
-                              </Label>
-                            </div>
-                          </RadioGroup>
-                          {formik.touched.communityType &&
-                            formik.errors.communityType && (
-                              <p className="text-xs text-destructive">
-                                {formik.errors.communityType as string}
-                              </p>
-                            )}
-                        </div>
-
-                        <Separator />
-
-                        {/* Joining Terms */}
-                        <div className="space-y-4">
-                          <div className="flex items-center gap-2">
-                            <div className="p-1.5 rounded-md bg-primary/10">
-                              <Users className="h-4 w-4 text-primary" />
-                            </div>
-                            <Label className="text-base font-semibold">
-                              Joining Terms{" "}
-                              <span className="text-destructive">*</span>
-                            </Label>
-                          </div>
-                          <RadioGroup
-                            value={formik.values.joiningTerms}
-                            onValueChange={(value) =>
-                              handleInputChange("joiningTerms", value)
-                            }
-                            className="space-y-3"
-                          >
-                            <div className="flex items-start space-x-3 space-y-0 p-4 rounded-lg border hover:bg-muted/50 transition-colors">
-                              <RadioGroupItem
-                                value="ANYONE_CAN_JOIN"
-                                id="anyone"
-                              />
-                              <Label
-                                htmlFor="anyone"
-                                className="font-normal cursor-pointer flex-1"
-                              >
-                                <div className="font-medium mb-1">
-                                  Anyone Can Join
-                                </div>
-                                <p className="text-sm text-muted-foreground">
-                                  Anyone can join this{" "}
-                                  {singularName.toLowerCase()} directly
-                                </p>
-                              </Label>
-                            </div>
-                            <div className="flex items-start space-x-3 space-y-0 p-4 rounded-lg border hover:bg-muted/50 transition-colors">
-                              <RadioGroupItem
-                                value="ADMIN_ONLY_ADD"
-                                id="admin-only"
-                              />
-                              <Label
-                                htmlFor="admin-only"
-                                className="font-normal cursor-pointer flex-1"
-                              >
-                                <div className="font-medium mb-1">
-                                  Admin Only Add
-                                </div>
-                                <p className="text-sm text-muted-foreground">
-                                  Only admins can add members to this{" "}
-                                  {singularName.toLowerCase()}
-                                </p>
-                              </Label>
-                            </div>
-                          </RadioGroup>
-                          {formik.touched.joiningTerms &&
-                            formik.errors.joiningTerms && (
-                              <p className="text-xs text-destructive">
-                                {formik.errors.joiningTerms as string}
-                              </p>
-                            )}
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    {/* Additional Settings */}
-                    <Card className="border-none shadow-sm ring-1 ring-border/50 overflow-hidden">
-                      <CardHeader className="bg-muted/30 pb-4">
-                        <CardTitle className="text-xl">
-                          Additional Settings
-                        </CardTitle>
-                        <CardDescription>
-                          Optional features to enhance your{" "}
-                          {singularName.toLowerCase()}
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="pt-6 space-y-4">
-                        <div className="flex items-center justify-between p-4 rounded-lg border">
-                          <div className="space-y-0.5 flex-1">
-                            <Label
-                              htmlFor="approval"
-                              className="text-sm font-medium"
-                            >
-                              Require admin approval for new posts
-                            </Label>
-                            <p className="text-sm text-muted-foreground">
-                              All posts will need to be approved by an admin
-                              before being published
-                            </p>
-                          </div>
-                          <Switch
-                            id="approval"
-                            checked={formik.values.requireAdminApprovalForPosts}
-                            onCheckedChange={(checked) =>
-                              handleInputChange(
-                                "requireAdminApprovalForPosts",
-                                checked,
-                              )
-                            }
-                          />
-                        </div>
-
-                        <div className="flex items-center justify-between p-4 rounded-lg border">
-                          <div className="space-y-0.5 flex-1">
-                            <Label
-                              htmlFor="invites"
-                              className="text-sm font-medium"
-                            >
-                              Allow members to invite others
-                            </Label>
-                            <p className="text-sm text-muted-foreground">
-                              Members can invite friends to join the{" "}
-                              {singularName.toLowerCase()}
-                            </p>
-                          </div>
-                          <Switch
-                            id="invites"
-                            checked={formik.values.allowMemberInvites}
-                            onCheckedChange={(checked) =>
-                              handleInputChange("allowMemberInvites", checked)
-                            }
-                          />
-                        </div>
-
-                        <div className="flex items-center justify-between p-4 rounded-lg border">
-                          <div className="space-y-0.5 flex-1">
-                            <Label
-                              htmlFor="events"
-                              className="text-sm font-medium"
-                            >
-                              Enable {singularName.toLowerCase()} events
-                            </Label>
-                            <p className="text-sm text-muted-foreground">
-                              Allow creating and managing events within the
-                              {singularName.toLowerCase()}
-                            </p>
-                          </div>
-                          <Switch
-                            id="events"
-                            checked={formik.values.enableEvents}
-                            onCheckedChange={(checked) =>
-                              handleInputChange("enableEvents", checked)
-                            }
-                          />
-                        </div>
-
-                        <div className="flex items-center justify-between p-4 rounded-lg border">
-                          <div className="space-y-0.5 flex-1">
-                            <Label
-                              htmlFor="ratings"
-                              className="text-sm font-medium"
-                            >
-                              Enable {singularName.toLowerCase()} ratings and
-                              reviews
-                            </Label>
-                            <p className="text-sm text-muted-foreground">
-                              Allow members to rate and review{" "}
-                              {singularName.toLowerCase()} content
-                            </p>
-                          </div>
-                          <Switch
-                            id="ratings"
-                            checked={formik.values.enableRatingsAndReviews}
-                            onCheckedChange={(checked) =>
-                              handleInputChange(
-                                "enableRatingsAndReviews",
-                                checked,
-                              )
-                            }
-                          />
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </form>
+            {/* Community Growth Tip */}
+            <PolarisTipCard title={`${singularName} Launch Strategy`}>
+              High-performing {moduleName.toLowerCase()} start with clear descriptions, public discoverability, and active events to drive organic peer onboarding.
+            </PolarisTipCard>
+          </div>
+        }
+      >
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Step 1: Core Identity & Branding */}
+          <PolarisFormCard
+            step={1}
+            title={`Core ${singularName} Identity`}
+            description={`Establish the visual presence, title, and mission for your ${singularName.toLowerCase()}.`}
+            badge="Required"
+          >
+            {/* Cover Image Upload Area */}
+            <div className="space-y-2">
+              <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                Cover Banner <span className="text-rose-500">*</span>
+              </Label>
+              <div className="relative group aspect-[3/2] sm:aspect-[21/9] w-full rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center">
+                <Image
+                  src={
+                    imageUrl || `https://cdn.thrico.network/default_communities.png`
+                  }
+                  alt={`${singularName} cover`}
+                  width={1536}
+                  height={1024}
+                  className="object-cover w-full h-full transition-transform group-hover:scale-105 duration-300"
+                />
+                <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    className="h-9 px-4 bg-zinc-900/80 hover:bg-zinc-900 text-white backdrop-blur-md border-none text-xs font-semibold shadow-md gap-2 cursor-pointer"
+                    onClick={() =>
+                      document.getElementById("cover-upload")?.click()
+                    }
+                  >
+                    <Camera className="h-3.5 w-3.5" />
+                    Change Cover Banner
+                  </Button>
                 </div>
+                <input
+                  id="cover-upload"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageUpload}
+                />
+              </div>
+              <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                Recommended aspect ratio: 3:2 or 21:9 banner (1536 × 1024px). Max 5MB WebP, PNG, or JPG.
+              </p>
+            </div>
 
-                {/* Live Preview Sidebar */}
-                <div className="lg:col-span-4">
-                  <div className="sticky top-6 space-y-6">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-lg font-bold">
-                        {singularName} Preview
-                      </h3>
-                      <Badge
-                        variant="outline"
-                        className="bg-green-500/5 text-green-600 border-green-500/20"
-                      >
-                        Live Preview
-                      </Badge>
-                    </div>
+            {/* Name Field */}
+            <div className="space-y-1.5 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+              <Label htmlFor="title" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                {singularName} Name <span className="text-rose-500">*</span>
+              </Label>
+              <Input
+                id="title"
+                name="title"
+                placeholder={`e.g. NextGen Innovators Club`}
+                maxLength={50}
+                value={formik.values.title}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
+              />
+              {formik.touched.title && formik.errors.title && (
+                <p className="text-[11px] text-rose-500 font-medium">
+                  {formik.errors.title as string}
+                </p>
+              )}
+            </div>
 
-                    <CommunityPreview
-                      imageUrl={imageUrl}
-                      formData={formik.values}
-                    />
+            {/* Tagline Field */}
+            <div className="space-y-1.5">
+              <Label htmlFor="tagline" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                Headline / Tagline
+              </Label>
+              <Input
+                id="tagline"
+                name="tagline"
+                placeholder={`e.g. Connecting tech leaders, developers, and product creators.`}
+                maxLength={100}
+                value={formik.values.tagline}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
+              />
+              {formik.touched.tagline && formik.errors.tagline && (
+                <p className="text-[11px] text-rose-500 font-medium">
+                  {formik.errors.tagline as string}
+                </p>
+              )}
+            </div>
 
-                    <Card className="border-none shadow-sm ring-1 ring-border/50">
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-base">
-                          <Info className="h-5 w-5" />
-                          Tips for Success
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <ul className="space-y-3 text-sm">
-                          <li className="flex gap-2">
-                            <span className="text-primary font-bold">•</span>
-                            <span>
-                              Choose a clear, descriptive name that reflects
-                              your
-                              {singularName.toLowerCase()}'s purpose
-                            </span>
-                          </li>
-                          <li className="flex gap-2">
-                            <span className="text-primary font-bold">•</span>
-                            <span>
-                              Add a compelling headline that captures interest
-                            </span>
-                          </li>
-                          <li className="flex gap-2">
-                            <span className="text-primary font-bold">•</span>
-                            <span>
-                              Upload a high-quality cover image that represents
-                              your {singularName.toLowerCase()}
-                            </span>
-                          </li>
-                          <li className="flex gap-2">
-                            <span className="text-primary font-bold">•</span>
-                            <span>
-                              Write a detailed description explaining the
-                              benefits of joining
-                            </span>
-                          </li>
-                          <li className="flex gap-2">
-                            <span className="text-primary font-bold">•</span>
-                            <span>
-                              Consider your privacy settings carefully based on
-                              your {singularName.toLowerCase()} goals
-                            </span>
-                          </li>
-                        </ul>
-                      </CardContent>
-                    </Card>
+            {/* Description Field */}
+            <div className="space-y-1.5">
+              <Label htmlFor="description" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                About & Overview
+              </Label>
+              <Textarea
+                id="description"
+                name="description"
+                placeholder={`Describe the mission, activities, guidelines, and benefits of joining this ${singularName.toLowerCase()}...`}
+                maxLength={300}
+                value={formik.values.description}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                className="min-h-[84px] bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-medium resize-none shadow-none"
+              />
+            </div>
+          </PolarisFormCard>
+
+          {/* Step 2: Access & Governance Settings */}
+          <PolarisFormCard
+            step={2}
+            title="Access & Governance Policy"
+            description={`Define privacy bounds, physical location requirements, and entry conditions.`}
+            badge="Governance"
+          >
+            {/* Privacy Setting Selectable Tiles */}
+            <div className="space-y-2">
+              <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                Privacy Boundary <span className="text-rose-500">*</span>
+              </Label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => handleInputChange("privacy", "PUBLIC")}
+                  className={cn(
+                    "relative flex items-start gap-3.5 p-4 rounded-xl border text-left transition-all cursor-pointer",
+                    formik.values.privacy === "PUBLIC"
+                      ? "border-zinc-900 dark:border-zinc-100 bg-zinc-900/[0.04] dark:bg-zinc-100/10 ring-2 ring-zinc-900/20 dark:ring-zinc-100/20 shadow-xs"
+                      : "border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/30 hover:border-zinc-300 dark:hover:border-zinc-700",
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "h-9 w-9 rounded-lg flex items-center justify-center shrink-0 border transition-colors",
+                      formik.values.privacy === "PUBLIC"
+                        ? "bg-zinc-900 text-white border-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100"
+                        : "bg-white dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700",
+                    )}
+                  >
+                    <Globe className="h-4 w-4" />
                   </div>
-                </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
+                        Public {singularName}
+                      </span>
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
+                        Open
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5 leading-relaxed">
+                      Anyone in your ecosystem can discover, view, and join this {singularName.toLowerCase()}.
+                    </p>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleInputChange("privacy", "PRIVATE")}
+                  className={cn(
+                    "relative flex items-start gap-3.5 p-4 rounded-xl border text-left transition-all cursor-pointer",
+                    formik.values.privacy === "PRIVATE"
+                      ? "border-zinc-900 dark:border-zinc-100 bg-zinc-900/[0.04] dark:bg-zinc-100/10 ring-2 ring-zinc-900/20 dark:ring-zinc-100/20 shadow-xs"
+                      : "border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/30 hover:border-zinc-300 dark:hover:border-zinc-700",
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "h-9 w-9 rounded-lg flex items-center justify-center shrink-0 border transition-colors",
+                      formik.values.privacy === "PRIVATE"
+                        ? "bg-zinc-900 text-white border-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100"
+                        : "bg-white dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700",
+                    )}
+                  >
+                    <Lock className="h-4 w-4" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
+                        Private {singularName}
+                      </span>
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
+                        Restricted
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5 leading-relaxed">
+                      Only invited or approved members can view discussions and media.
+                    </p>
+                  </div>
+                </button>
               </div>
             </div>
-          </div>
 
-          {/* Image Cropper Modal */}
-          {selectedImage && (
-            <ImageCropper
-              cropModalVisible={cropModalVisible}
-              image={selectedImage}
-              onCropComplete={handleCropComplete}
-              onCancel={() => {
-                setCropModalVisible(false);
-                setSelectedImage(null);
-              }}
-            />
-          )}
-        </div>
+            {/* Meeting Mode / Community Type */}
+            <div className="space-y-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+              <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                Meeting Format <span className="text-rose-500">*</span>
+              </Label>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {[
+                  {
+                    value: "VIRTUAL",
+                    label: "Virtual",
+                    icon: Laptop,
+                    desc: "Digital discussions & virtual meetups",
+                  },
+                  {
+                    value: "INPERSON",
+                    label: "In Person",
+                    icon: MapPin,
+                    desc: "Local chapter meeting at a venue",
+                  },
+                  {
+                    value: "HYBRID",
+                    label: "Hybrid",
+                    icon: RefreshCw,
+                    desc: "Combined online feeds & physical events",
+                  },
+                ].map((type) => {
+                  const Icon = type.icon;
+                  const isSelected = formik.values.communityType === type.value;
+                  return (
+                    <button
+                      key={type.value}
+                      type="button"
+                      onClick={() => handleInputChange("communityType", type.value)}
+                      className={cn(
+                        "relative flex flex-col items-start p-3.5 rounded-xl border text-left transition-all cursor-pointer",
+                        isSelected
+                          ? "border-zinc-900 dark:border-zinc-100 bg-zinc-900/[0.04] dark:bg-zinc-100/10 ring-2 ring-zinc-900/20 dark:ring-zinc-100/20 shadow-xs"
+                          : "border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/30 hover:border-zinc-300 dark:hover:border-zinc-700",
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          "h-8 w-8 rounded-lg flex items-center justify-center mb-2.5 border transition-colors",
+                          isSelected
+                            ? "bg-zinc-900 text-white border-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100"
+                            : "bg-white dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700",
+                        )}
+                      >
+                        <Icon className="h-4 w-4" />
+                      </div>
+                      <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
+                        {type.label}
+                      </span>
+                      <p className="text-[10px] text-zinc-500 dark:text-zinc-400 mt-0.5 leading-relaxed">
+                        {type.desc}
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
-        <FloatingSavePanel
-          hasChanged={!initialValues?.title || formik.dirty}
-          saved={false}
-          isSaving={loading}
-          onSave={handleSubmit}
-          onReset={() => {
-            formik.resetForm();
-            if (onCancel) onCancel();
-            else window.history.back();
+            {/* Joining Terms */}
+            <div className="space-y-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+              <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                Membership Admission Terms <span className="text-rose-500">*</span>
+              </Label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => handleInputChange("joiningTerms", "ANYONE_CAN_JOIN")}
+                  className={cn(
+                    "relative flex items-start gap-3.5 p-4 rounded-xl border text-left transition-all cursor-pointer",
+                    formik.values.joiningTerms === "ANYONE_CAN_JOIN"
+                      ? "border-zinc-900 dark:border-zinc-100 bg-zinc-900/[0.04] dark:bg-zinc-100/10 ring-2 ring-zinc-900/20 dark:ring-zinc-100/20 shadow-xs"
+                      : "border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/30 hover:border-zinc-300 dark:hover:border-zinc-700",
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "h-9 w-9 rounded-lg flex items-center justify-center shrink-0 border transition-colors",
+                      formik.values.joiningTerms === "ANYONE_CAN_JOIN"
+                        ? "bg-zinc-900 text-white border-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100"
+                        : "bg-white dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700",
+                    )}
+                  >
+                    <Users className="h-4 w-4" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100 block">
+                      Direct Enrollment
+                    </span>
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5 leading-relaxed">
+                      Members can instantly join with a single click without moderation bottlenecks.
+                    </p>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleInputChange("joiningTerms", "ADMIN_ONLY_ADD")}
+                  className={cn(
+                    "relative flex items-start gap-3.5 p-4 rounded-xl border text-left transition-all cursor-pointer",
+                    formik.values.joiningTerms === "ADMIN_ONLY_ADD"
+                      ? "border-zinc-900 dark:border-zinc-100 bg-zinc-900/[0.04] dark:bg-zinc-100/10 ring-2 ring-zinc-900/20 dark:ring-zinc-100/20 shadow-xs"
+                      : "border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/30 hover:border-zinc-300 dark:hover:border-zinc-700",
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "h-9 w-9 rounded-lg flex items-center justify-center shrink-0 border transition-colors",
+                      formik.values.joiningTerms === "ADMIN_ONLY_ADD"
+                        ? "bg-zinc-900 text-white border-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100"
+                        : "bg-white dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700",
+                    )}
+                  >
+                    <ShieldCheck className="h-4 w-4" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100 block">
+                      Admin Invitation Only
+                    </span>
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5 leading-relaxed">
+                      Only ecosystem managers and community admins can assign members.
+                    </p>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </PolarisFormCard>
+
+          {/* Step 3: Permissions & Feature Controls */}
+          <PolarisFormCard
+            step={3}
+            title="Feature Toggles & Moderation"
+            description={`Enable specialized modules and enforce post moderation safeguards.`}
+            badge="Features"
+          >
+            <div className="space-y-3">
+              {/* Post Approval Toggle */}
+              <div className="p-4 rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/40 dark:bg-zinc-900/40 flex items-center justify-between gap-4">
+                <div className="space-y-0.5 flex-1">
+                  <Label htmlFor="approval" className="text-xs font-bold text-zinc-900 dark:text-zinc-100 cursor-pointer">
+                    Require admin review for new member posts
+                  </Label>
+                  <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                    Submitted discussion threads and media will queue in moderation before going live.
+                  </p>
+                </div>
+                <Switch
+                  id="approval"
+                  checked={formik.values.requireAdminApprovalForPosts}
+                  onCheckedChange={(checked) =>
+                    handleInputChange("requireAdminApprovalForPosts", checked)
+                  }
+                />
+              </div>
+
+              {/* Member Invites Toggle */}
+              <div className="p-4 rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/40 dark:bg-zinc-900/40 flex items-center justify-between gap-4">
+                <div className="space-y-0.5 flex-1">
+                  <Label htmlFor="invites" className="text-xs font-bold text-zinc-900 dark:text-zinc-100 cursor-pointer">
+                    Allow members to send peer invitations
+                  </Label>
+                  <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                    Existing participants can invite colleagues and contacts to join.
+                  </p>
+                </div>
+                <Switch
+                  id="invites"
+                  checked={formik.values.allowMemberInvites}
+                  onCheckedChange={(checked) =>
+                    handleInputChange("allowMemberInvites", checked)
+                  }
+                />
+              </div>
+
+              {/* Events Toggle */}
+              <div className="p-4 rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/40 dark:bg-zinc-900/40 flex items-center justify-between gap-4">
+                <div className="space-y-0.5 flex-1">
+                  <Label htmlFor="events" className="text-xs font-bold text-zinc-900 dark:text-zinc-100 cursor-pointer">
+                    Enable dedicated {singularName.toLowerCase()} calendar & events
+                  </Label>
+                  <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                    Host webinars, meetups, and workshops scoped specifically to this group.
+                  </p>
+                </div>
+                <Switch
+                  id="events"
+                  checked={formik.values.enableEvents}
+                  onCheckedChange={(checked) =>
+                    handleInputChange("enableEvents", checked)
+                  }
+                />
+              </div>
+
+              {/* Ratings and Reviews Toggle */}
+              <div className="p-4 rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/40 dark:bg-zinc-900/40 flex items-center justify-between gap-4">
+                <div className="space-y-0.5 flex-1">
+                  <Label htmlFor="ratings" className="text-xs font-bold text-zinc-900 dark:text-zinc-100 cursor-pointer">
+                    Enable ratings and member reviews
+                  </Label>
+                  <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                    Allow participants to submit peer reviews and public feedback.
+                  </p>
+                </div>
+                <Switch
+                  id="ratings"
+                  checked={formik.values.enableRatingsAndReviews}
+                  onCheckedChange={(checked) =>
+                    handleInputChange("enableRatingsAndReviews", checked)
+                  }
+                />
+              </div>
+            </div>
+          </PolarisFormCard>
+
+          {/* Floating Save Action Bar */}
+          <FloatingSavePanel
+            hasChanged={formik.dirty}
+            saved={false}
+            isSaving={loading}
+            onSave={handleSubmit}
+            onReset={() => {
+              formik.resetForm();
+              if (onCancel) onCancel();
+              else window.history.back();
+            }}
+            title={`Unsaved ${singularName}`}
+            description="You have modified the form configuration."
+            buttonText={`Create ${singularName}`}
+          />
+        </form>
+      </PolarisFormLayout>
+
+      {/* Image Cropper Modal */}
+      {selectedImage && (
+        <ImageCropper
+          cropModalVisible={cropModalVisible}
+          image={selectedImage}
+          onCropComplete={handleCropComplete}
+          onCancel={() => {
+            setCropModalVisible(false);
+            setSelectedImage(null);
           }}
-          title={`Unsaved ${singularName} Data`}
-          description="You have unfilled form data."
-          buttonText={
-            initialValues?.title ? "Save Changes" : `Create ${singularName}`
-          }
         />
-      </>
+      )}
     </FormikProvider>
   );
 }

@@ -18,9 +18,10 @@ import {
   DialogFooter,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Loader2, RefreshCw, Ticket } from "lucide-react";
+import { Loader2, RefreshCw, Ticket, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { RewardType, WheelSegment } from "./types";
+import { PolarisPresetChips } from "@/components/gamification/shared/polaris-form-ui";
 
 interface SegmentDialogProps {
   isDialogOpen: boolean;
@@ -36,6 +37,8 @@ interface SegmentDialogProps {
   currencyName?: string;
 }
 
+const SEGMENT_VALUE_PRESETS = [10, 25, 50, 100, 250];
+
 export function SegmentDialog({
   isDialogOpen,
   setIsDialogOpen,
@@ -47,23 +50,29 @@ export function SegmentDialog({
   uniqueVoucherRewards,
   vouchersLoading,
   getVouchers,
-  currencyName = "Tokens",
+  currencyName = "Points",
 }: SegmentDialogProps) {
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md rounded-2xl border-zinc-200 dark:border-zinc-800">
         <DialogHeader>
-          <DialogTitle>
-            {editingSegment?.id ? "Edit Segment" : "Add Segment"}
-          </DialogTitle>
-          <DialogDescription>
-            Configure label, reward type, value, and probability weight.
+          <div className="flex items-center gap-2 mb-1">
+            <div className="h-7 w-7 rounded-lg bg-[#008060]/10 text-[#008060] flex items-center justify-center">
+              <Sparkles className="h-4 w-4" />
+            </div>
+            <DialogTitle className="text-base font-bold text-zinc-900 dark:text-zinc-100">
+              {editingSegment?.id ? "Edit Wheel Segment" : "Add Wheel Segment"}
+            </DialogTitle>
+          </div>
+          <DialogDescription className="text-xs text-zinc-500">
+            Configure the prize type, value, and probability weight.
           </DialogDescription>
         </DialogHeader>
+
         <div className="space-y-4 py-2">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-muted-foreground">
+              <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
                 Reward Type
               </Label>
               <Select
@@ -82,42 +91,51 @@ export function SegmentDialog({
                   }
                 }}
               >
-                <SelectTrigger>
+                <SelectTrigger className="h-10 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-xs shadow-none">
                   <SelectValue placeholder="Select type..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="COINS">{currencyName}</SelectItem>
-                  <SelectItem value="VOUCHER">Voucher</SelectItem>
-                  <SelectItem value="NO_REWARDS">No Rewards</SelectItem>
+                  <SelectItem value="COINS" className="text-xs">
+                    {currencyName} (Points)
+                  </SelectItem>
+                  <SelectItem value="VOUCHER" className="text-xs">
+                    Voucher Coupon
+                  </SelectItem>
+                  <SelectItem value="NO_REWARDS" className="text-xs">
+                    No Reward (Try Again)
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
+
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-muted-foreground">
-                Label
+              <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                Display Label
               </Label>
               <Input
-                placeholder="e.g. 50 Coins"
+                placeholder="e.g. 50 Points, 20% Off"
                 value={editingSegment?.label || ""}
                 onChange={(e) =>
                   setEditingSegment((p) =>
                     p ? { ...p, label: e.target.value } : null,
                   )
                 }
+                className="h-10 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-xs shadow-none"
               />
             </div>
           </div>
 
           {editingSegment?.rewardType === "VOUCHER" && (
-            <div className="space-y-1.5">
+            <div className="space-y-2 p-3 rounded-xl bg-zinc-50/50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-700">
               <div className="flex items-center justify-between">
-                <Label className="text-xs font-semibold text-muted-foreground">
-                  Select Voucher
+                <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                  Select Voucher Reward
                 </Label>
                 <Button
+                  type="button"
                   variant="ghost"
                   size="sm"
-                  className="h-6 text-xs gap-1 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50"
+                  className="h-6 text-[11px] gap-1 text-[#008060] hover:bg-[#008060]/10 px-2 rounded-md"
                   onClick={() =>
                     getVouchers({
                       variables: {
@@ -153,7 +171,7 @@ export function SegmentDialog({
                   );
                 }}
               >
-                <SelectTrigger>
+                <SelectTrigger className="h-10 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-xs shadow-none">
                   {editingSegment?.rewardId ? (
                     (() => {
                       const selectedReward = uniqueVoucherRewards.find(
@@ -166,14 +184,14 @@ export function SegmentDialog({
                               <img
                                 src={selectedReward.image}
                                 alt={selectedReward.title}
-                                className="h-5 w-5 rounded object-cover border border-border/40 shrink-0"
+                                className="h-5 w-5 rounded object-cover border border-zinc-200 shrink-0"
                               />
                             ) : (
-                              <div className="h-5 w-5 rounded bg-muted flex items-center justify-center border border-border/40 shrink-0">
-                                <Ticket className="h-3 w-3 text-muted-foreground" />
+                              <div className="h-5 w-5 rounded bg-zinc-100 flex items-center justify-center shrink-0">
+                                <Ticket className="h-3 w-3 text-zinc-500" />
                               </div>
                             )}
-                            <span className="text-xs font-medium text-foreground truncate max-w-[150px]">
+                            <span className="text-xs font-medium text-zinc-900 dark:text-zinc-100 truncate max-w-[180px]">
                               {selectedReward.title}
                             </span>
                           </div>
@@ -195,18 +213,18 @@ export function SegmentDialog({
                 </SelectTrigger>
                 <SelectContent>
                   {uniqueVoucherRewards.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center p-4 space-y-3">
-                      <span className="text-sm text-muted-foreground">
-                        No vouchers found
+                    <div className="flex flex-col items-center justify-center p-4 space-y-2">
+                      <span className="text-xs text-zinc-500">
+                        No vouchers configured for Spin Wheel
                       </span>
                       <Button
                         asChild
                         variant="outline"
                         size="sm"
-                        className="w-full text-xs"
+                        className="w-full text-xs font-semibold"
                       >
-                        <Link href="/rewards/coupons/create">
-                          Add Vouchers to Spin & Wheel
+                        <Link href="/gamification/rewards/coupons/create">
+                          Create Reward Coupon
                         </Link>
                       </Button>
                       <SelectItem value="none" disabled className="hidden">
@@ -221,14 +239,14 @@ export function SegmentDialog({
                             <img
                               src={reward.image}
                               alt={reward.title}
-                              className="h-6 w-6 rounded object-cover border border-border/40 shrink-0"
+                              className="h-5 w-5 rounded object-cover border border-zinc-200 shrink-0"
                             />
                           ) : (
-                            <div className="h-6 w-6 rounded bg-muted flex items-center justify-center border border-border/40 shrink-0">
-                              <Ticket className="h-3.5 w-3.5 text-muted-foreground" />
+                            <div className="h-5 w-5 rounded bg-zinc-100 flex items-center justify-center shrink-0">
+                              <Ticket className="h-3 w-3 text-zinc-500" />
                             </div>
                           )}
-                          <span className="text-xs font-medium text-foreground truncate">
+                          <span className="text-xs font-medium text-zinc-900 dark:text-zinc-100 truncate">
                             {reward.title}
                           </span>
                         </div>
@@ -240,19 +258,12 @@ export function SegmentDialog({
             </div>
           )}
 
-          <div
-            className={cn(
-              "grid gap-4",
-              editingSegment?.rewardType === "COINS"
-                ? "grid-cols-2"
-                : "grid-cols-1",
-            )}
-          >
-            {editingSegment?.rewardType === "COINS" && (
-              <div className="space-y-1.5">
-                <Label className="text-xs font-semibold text-muted-foreground">
-                  Reward Value
-                </Label>
+          {editingSegment?.rewardType === "COINS" && (
+            <div className="space-y-2">
+              <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                Reward Value ({currencyName})
+              </Label>
+              <div className="flex flex-col gap-2">
                 <Input
                   type="number"
                   value={editingSegment?.rewardValue || 0}
@@ -265,41 +276,72 @@ export function SegmentDialog({
                             rewardValue: val,
                             label:
                               p.rewardType === "COINS"
-                                ? `${val} Coins`
+                                ? `${val} ${currencyName}`
                                 : p.label,
                           }
                         : null,
                     );
                   }}
+                  className="h-10 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-xs font-bold shadow-none"
+                />
+                <PolarisPresetChips
+                  presets={SEGMENT_VALUE_PRESETS}
+                  currentValue={Number(editingSegment?.rewardValue || 0)}
+                  onSelect={(val) => {
+                    setEditingSegment((p) =>
+                      p
+                        ? {
+                            ...p,
+                            rewardValue: val,
+                            label: `${val} ${currencyName}`,
+                          }
+                        : null,
+                    );
+                  }}
+                  prefix="+"
                 />
               </div>
-            )}
-            <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-muted-foreground">
+            </div>
+          )}
+
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
                 Probability Weight
               </Label>
-              <Input
-                type="number"
-                value={editingSegment?.probability || 0}
-                onChange={(e) =>
-                  setEditingSegment((p) =>
-                    p
-                      ? { ...p, probability: parseInt(e.target.value) || 0 }
-                      : null,
-                  )
-                }
-              />
+              <span className="text-[11px] text-zinc-400">
+                Relative odds ratio
+              </span>
             </div>
+            <Input
+              type="number"
+              min={1}
+              value={editingSegment?.probability || 0}
+              onChange={(e) =>
+                setEditingSegment((p) =>
+                  p
+                    ? { ...p, probability: parseInt(e.target.value) || 0 }
+                    : null,
+                )
+              }
+              className="h-10 bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-xs shadow-none"
+            />
           </div>
         </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+
+        <DialogFooter className="gap-2 sm:gap-0">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsDialogOpen(false)}
+            className="rounded-lg text-xs font-semibold"
+          >
             Cancel
           </Button>
           <Button
             onClick={handleSaveSegment}
             disabled={creatingSegment || updatingSegment}
-            className="gap-2"
+            className="rounded-lg text-xs font-bold bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-zinc-100 dark:text-zinc-900 gap-2"
           >
             {(creatingSegment || updatingSegment) && (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
