@@ -34,7 +34,8 @@ import {
 
 export const ShopifyIntegrationCard = () => {
   const { data, loading, refetch } = useGetShopifyConnection();
-  const { data: syncStatusData, refetch: refetchSyncStatus } = useGetShopifySyncStatus();
+  const { data: syncStatusData, refetch: refetchSyncStatus } =
+    useGetShopifySyncStatus();
   const [connectShopify] = useConnectShopify();
   const [disconnectShopify] = useDisconnectShopify();
 
@@ -57,17 +58,45 @@ export const ShopifyIntegrationCard = () => {
     setIsDialogOpen(true);
   };
 
+  const cleanDomain = (input: string): string => {
+    let cleaned = input.trim();
+    // Remove protocol (http://, https://, hhtps://, etc.)
+    cleaned = cleaned.replace(/^(?:https?|hhtps?):\/\//i, "");
+    // Remove any leading slashes
+    cleaned = cleaned.replace(/^\/+/, "");
+    // Remove trailing slashes and any pathname/query/hash
+    cleaned = cleaned.split("/")[0].split("?")[0].split("#")[0].trim();
+    return cleaned;
+  };
+
+  const handleDomainChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (
+      value.includes("://") ||
+      value.startsWith("//") ||
+      value.includes("/") ||
+      value.startsWith("http") ||
+      value.startsWith("hhtp")
+    ) {
+      setShopDomain(cleanDomain(value));
+    } else {
+      setShopDomain(value);
+    }
+  };
+
   const submitConnect = async () => {
-    if (!shopDomain) {
+    const cleaned = cleanDomain(shopDomain);
+    if (!cleaned) {
       toast.error(
         "Please enter your Shopify store domain (e.g. mystore.myshopify.com)",
       );
       return;
     }
 
+    setShopDomain(cleaned);
     setIsConnecting(true);
     try {
-      const result = await connectShopify({ variables: { shopDomain } });
+      const result = await connectShopify({ variables: { shopDomain: cleaned } });
       const authUrl = result.data?.connectShopify;
 
       if (authUrl) {
@@ -113,15 +142,44 @@ export const ShopifyIntegrationCard = () => {
   const renderSyncBadge = () => {
     switch (syncStatus) {
       case "SYNCED_TODAY":
-        return <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 text-[10px]">Synced Today</Badge>;
+        return (
+          <Badge
+            variant="secondary"
+            className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 text-[10px]"
+          >
+            Synced Today
+          </Badge>
+        );
       case "SYNC_AVAILABLE":
-        return <Badge variant="secondary" className="bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20 text-[10px]">Sync Available</Badge>;
+        return (
+          <Badge
+            variant="secondary"
+            className="bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20 text-[10px]"
+          >
+            Sync Available
+          </Badge>
+        );
       case "NEVER_SYNCED":
-        return <Badge variant="secondary" className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 text-[10px]">Never Synced</Badge>;
+        return (
+          <Badge
+            variant="secondary"
+            className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 text-[10px]"
+          >
+            Never Synced
+          </Badge>
+        );
       case "UNAUTHORIZED":
-        return <Badge variant="destructive" className="text-[10px]">Unauthorized</Badge>;
+        return (
+          <Badge variant="destructive" className="text-[10px]">
+            Unauthorized
+          </Badge>
+        );
       default:
-        return <Badge variant="outline" className="text-[10px]">Disconnected</Badge>;
+        return (
+          <Badge variant="outline" className="text-[10px]">
+            Disconnected
+          </Badge>
+        );
     }
   };
 
@@ -244,7 +302,12 @@ export const ShopifyIntegrationCard = () => {
                 id="shopDomain"
                 placeholder="e.g. mystore.myshopify.com"
                 value={shopDomain}
-                onChange={(e) => setShopDomain(e.target.value)}
+                onChange={handleDomainChange}
+                onPaste={(e) => {
+                  e.preventDefault();
+                  setShopDomain(cleanDomain(e.clipboardData.getData("text")));
+                }}
+                onBlur={() => setShopDomain((prev) => cleanDomain(prev))}
                 className="w-full h-8 text-xs"
               />
             </div>
