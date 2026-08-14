@@ -140,7 +140,8 @@ export const GoogleMeetIntegrationCard = () => {
   return (
     <IntegrationCard
       title="Google Meet"
-      description="Connect your company's Google Meet account to Thrico to get insights and analytics from video call meetings."
+      category="Video & Meetings"
+      description="Auto-generate secure Google Meet video links for events, coaching sessions, and community calls."
       icon={GoogleMeetIcon}
       iconBgColor="bg-[#E6F4EA]"
       isConnected={isConnected}
@@ -148,16 +149,15 @@ export const GoogleMeetIntegrationCard = () => {
       onConnect={handleConnect}
       onDisconnect={handleDisconnect}
     >
-      <div className="pt-4 border-t animate-in fade-in slide-in-from-top-2 duration-300 space-y-4">
-        <p className="text-sm text-muted-foreground leading-relaxed">
-          Google Meet is connected. Meetings will sync with your Google
-          Calendar.
+      <div className="space-y-3">
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          Google Meet is active. Meeting links will be automatically synced with your calendar events.
         </p>
 
         <Button
           variant="secondary"
           size="sm"
-          className="w-full text-xs h-8 gap-2"
+          className="w-full text-xs h-7.5 gap-1.5"
           onClick={createTestMeeting}
           disabled={isCreatingMeeting}
         >
@@ -166,11 +166,8 @@ export const GoogleMeetIntegrationCard = () => {
           ) : (
             <Calendar className="h-3.5 w-3.5" />
           )}
-          Create Test Meeting
+          Create Test Meeting Link
         </Button>
-        <p className="text-[10px] text-muted-foreground text-center">
-          Generates a 1-hour meeting link for testing.
-        </p>
       </div>
     </IntegrationCard>
   );

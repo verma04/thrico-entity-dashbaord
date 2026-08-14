@@ -20,6 +20,8 @@ import {
   AdminTable,
   AdminStatusBadge,
   AdminTableColumn,
+  AdminTableItem,
+  AdminTableDate,
   Pagination,
 } from "@/components/shared/admin-table/admin-table";
 import { safeFormat } from "@/lib/date-utils";
@@ -63,27 +65,19 @@ export default function ShopifyProductsPage() {
     {
       key: "serial",
       header: "S.No",
-      headerClassName: "w-12 text-center",
-      className: "text-center text-xs font-medium text-muted-foreground",
+      headerClassName: "w-10 text-center",
+      className: "text-center text-[11px] font-medium text-muted-foreground",
       cell: (_, index) => offset + index + 1,
     },
     {
       key: "product",
       header: "Product",
       cell: (row) => (
-        <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-lg border border-border/60 bg-muted/50 flex items-center justify-center shrink-0">
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </div>
-          <div className="flex flex-col min-w-0 max-w-[280px]">
-            <p className="text-[13px] font-semibold text-foreground leading-tight truncate">
-              {row.title || "Untitled Product"}
-            </p>
-            <p className="text-[11px] font-mono text-muted-foreground leading-tight mt-0.5 truncate">
-              ID: {row.shopifyProductId}
-            </p>
-          </div>
-        </div>
+        <AdminTableItem
+          icon={Package}
+          title={row.title || "Untitled Product"}
+          subtitle={`ID: ${row.shopifyProductId}`}
+        />
       ),
     },
     {
@@ -99,25 +93,14 @@ export default function ShopifyProductsPage() {
       key: "createdAt",
       header: "Created Date",
       cell: (row) => (
-        <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
-          <Calendar className="h-3.5 w-3.5 text-muted-foreground/50 shrink-0" />
-          <span>
-            {row.createdAt
-              ? safeFormat(row.createdAt, "dd MMM yyyy")
-              : "—"}
-          </span>
-        </div>
+        <AdminTableDate date={row.createdAt} />
       ),
     },
     {
       key: "updatedAt",
       header: "Last Updated",
       cell: (row) => (
-        <div className="text-[11px] text-muted-foreground">
-          {row.updatedAt
-            ? safeFormat(row.updatedAt, "dd MMM yyyy, HH:mm")
-            : "—"}
-        </div>
+        <AdminTableDate date={row.updatedAt} />
       ),
     },
   ];
@@ -180,6 +163,7 @@ export default function ShopifyProductsPage() {
             columns={columns}
             data={filteredProducts}
             loading={loading}
+            size="sm"
             keyExtractor={(row) => row.id || row.shopifyProductId}
             emptyIcon={Package}
             emptyTitle="No Shopify products found"

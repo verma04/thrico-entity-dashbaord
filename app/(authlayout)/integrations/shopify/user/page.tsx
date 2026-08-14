@@ -42,6 +42,8 @@ import {
   AdminTable,
   AdminStatusBadge,
   AdminTableColumn,
+  AdminTableItem,
+  AdminTableDate,
   Pagination,
 } from "@/components/shared/admin-table/admin-table";
 import { safeFormat } from "@/lib/date-utils";
@@ -99,42 +101,29 @@ export default function ShopifyUsersPage() {
     {
       key: "serial",
       header: "S.No",
-      headerClassName: "w-12 text-center",
-      className: "text-center text-xs font-medium text-muted-foreground",
+      headerClassName: "w-10 text-center",
+      className: "text-center text-[11px] font-medium text-muted-foreground",
       cell: (_, index) => offset + index + 1,
     },
     {
       key: "customer",
       header: "Customer",
-      cell: (row) => {
-        const initials = row.email
-          ? row.email.substring(0, 2).toUpperCase()
-          : "SC";
-        return (
-          <div className="flex items-center gap-3">
-            <Avatar className="h-9 w-9 rounded-lg border border-border/60 shrink-0">
-              <AvatarFallback className="rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-xs font-semibold">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col min-w-0 max-w-[240px]">
-              <p className="text-[13px] font-semibold text-foreground leading-tight truncate">
-                {row.email || "Unknown Customer"}
-              </p>
-              <p className="text-[11px] font-mono text-muted-foreground leading-tight mt-0.5 truncate">
-                ID: {row.shopifyCustomerId}
-              </p>
-            </div>
-          </div>
-        );
-      },
+      cell: (row) => (
+        <AdminTableItem
+          title={row.email || "Unknown Customer"}
+          subtitle={`ID: ${row.shopifyCustomerId}`}
+          fallbackText={
+            row.email ? row.email.substring(0, 2).toUpperCase() : "SC"
+          }
+        />
+      ),
     },
     {
       key: "contact",
       header: "Contact Email",
       cell: (row) => (
-        <div className="flex items-center gap-1.5 text-[12px] text-foreground/80">
-          <Mail className="h-3.5 w-3.5 text-muted-foreground/60 shrink-0" />
+        <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
+          <Mail className="h-3 w-3 text-muted-foreground/60 shrink-0" />
           <span className="truncate max-w-[200px]">{row.email || "—"}</span>
         </div>
       ),
@@ -152,63 +141,56 @@ export default function ShopifyUsersPage() {
       key: "createdAt",
       header: "Customer Since",
       cell: (row) => (
-        <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
-          <Calendar className="h-3.5 w-3.5 text-muted-foreground/50 shrink-0" />
-          <span>
-            {row.createdAt
-              ? safeFormat(row.createdAt, "dd MMM yyyy")
-              : "—"}
-          </span>
-        </div>
+        <AdminTableDate date={row.createdAt} />
       ),
     },
     {
       key: "lastSyncedAt",
       header: "Last Synced",
       cell: (row) => (
-        <div className="text-[11px] text-muted-foreground">
-          {row.lastSyncedAt
-            ? safeFormat(row.lastSyncedAt, "dd MMM yyyy, HH:mm")
-            : "—"}
-        </div>
+        <AdminTableDate date={row.lastSyncedAt} />
       ),
     },
     {
       key: "actions",
-      header: "Actions",
-      headerClassName: "w-16 text-right",
+      header: "",
+      headerClassName: "w-10 text-right",
       className: "text-right",
       cell: (row) => (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8 p-0">
-              <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md"
+            >
+              <MoreHorizontal className="h-3.5 w-3.5" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuLabel className="text-xs">Customer Actions</DropdownMenuLabel>
+            <DropdownMenuLabel className="text-[11px]">Customer Actions</DropdownMenuLabel>
             <DropdownMenuSeparator />
             {row.email && (
               <DropdownMenuItem
-                className="text-xs gap-2 cursor-pointer"
+                className="text-[11px] gap-2 cursor-pointer"
                 onClick={() => copyToClipboard(row.email, "email")}
               >
-                <Copy className="h-3.5 w-3.5 text-muted-foreground" />
+                <Copy className="h-3 w-3 text-muted-foreground" />
                 Copy Email
               </DropdownMenuItem>
             )}
             {row.shopifyCustomerId && (
               <DropdownMenuItem
-                className="text-xs gap-2 cursor-pointer"
+                className="text-[11px] gap-2 cursor-pointer"
                 onClick={() => copyToClipboard(row.shopifyCustomerId, "Customer ID")}
               >
-                <Copy className="h-3.5 w-3.5 text-muted-foreground" />
+                <Copy className="h-3 w-3 text-muted-foreground" />
                 Copy Customer ID
               </DropdownMenuItem>
             )}
             {shopDomain && row.shopifyCustomerId && (
               <DropdownMenuItem
-                className="text-xs gap-2 cursor-pointer"
+                className="text-[11px] gap-2 cursor-pointer"
                 onClick={() =>
                   window.open(
                     `https://${shopDomain}/admin/customers/${row.shopifyCustomerId.replace(/\D/g, "")}`,
@@ -216,7 +198,7 @@ export default function ShopifyUsersPage() {
                   )
                 }
               >
-                <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
+                <ExternalLink className="h-3 w-3 text-muted-foreground" />
                 View in Shopify
               </DropdownMenuItem>
             )}
@@ -304,6 +286,7 @@ export default function ShopifyUsersPage() {
             columns={columns}
             data={filteredCustomers}
             loading={loading}
+            size="sm"
             enableColumnToggle
             keyExtractor={(row) => row.id || row.shopifyCustomerId}
             emptyIcon={Users}

@@ -185,8 +185,8 @@ export const ShopifyIntegrationCard = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center p-6 bg-card rounded-xl border border-border">
-        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+      <div className="flex items-center justify-center p-8 bg-card rounded-xl border border-border/60">
+        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
       </div>
     );
   }
@@ -195,7 +195,8 @@ export const ShopifyIntegrationCard = () => {
     <>
       <IntegrationCard
         title="Shopify"
-        description="E-commerce & Retail"
+        category="E-Commerce"
+        description="Sync products, customers, and checkout orders from your online store directly with Thrico."
         icon={ShoppingBag}
         iconBgColor="bg-[#95BF47]"
         isConnected={isConnected}
@@ -203,97 +204,99 @@ export const ShopifyIntegrationCard = () => {
         onConnect={handleOpenConnectDialog}
         onDisconnect={handleDisconnect}
       >
-        <div className="pt-2 border-t space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
-          <div className="space-y-3">
-            <div className="flex flex-col gap-1 p-2 bg-muted/50 rounded-lg border border-border/50">
-              <div className="flex justify-between items-center">
-                <span className="text-[10px] text-muted-foreground uppercase font-semibold">
-                  Connected Store
-                </span>
-                <span className="text-xs font-medium">
-                  {connection?.shopDomain}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-[10px] text-muted-foreground uppercase font-semibold">
-                  Sync Status
-                </span>
-                {renderSyncBadge()}
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-[10px] text-muted-foreground uppercase font-semibold">
-                  Last Synced
-                </span>
-                <span className="text-xs font-medium">
-                  {connection?.lastSyncAt
-                    ? new Date(connection.lastSyncAt).toLocaleString()
-                    : "Never"}
-                </span>
-              </div>
+        <div className="space-y-3">
+          {/* Store Info Chips */}
+          <div className="flex flex-col gap-1.5 p-2.5 bg-background/80 rounded-lg border border-border/50 text-xs">
+            <div className="flex justify-between items-center">
+              <span className="text-[10px] text-muted-foreground uppercase font-semibold">
+                Connected Store
+              </span>
+              <span className="text-xs font-medium text-foreground font-mono">
+                {connection?.shopDomain}
+              </span>
             </div>
+            <div className="flex justify-between items-center">
+              <span className="text-[10px] text-muted-foreground uppercase font-semibold">
+                Sync Status
+              </span>
+              {renderSyncBadge()}
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-[10px] text-muted-foreground uppercase font-semibold">
+                Last Synced
+              </span>
+              <span className="text-[11px] font-medium text-muted-foreground">
+                {connection?.lastSyncAt
+                  ? new Date(connection.lastSyncAt).toLocaleString()
+                  : "Never"}
+              </span>
+            </div>
+          </div>
 
-            <div className="space-y-2">
-              <Label className="text-[10px] font-semibold uppercase text-muted-foreground tracking-wider">
-                Manual Sync
-              </Label>
-              <div className="grid grid-cols-3 gap-2">
-                <CtaButton
-                  variant="outline"
-                  className="w-full text-[10px]"
-                  onClick={() => handleSync("customers")}
-                  disabled={!!syncingState}
-                >
-                  {syncingState === "customers" ? (
-                    <Loader2 className="h-3 w-3 animate-spin mr-1" />
-                  ) : (
-                    <Users className="h-3 w-3 mr-1" />
-                  )}
-                  Customers
-                </CtaButton>
+          {/* Manual Sync Controls */}
+          <div className="space-y-1.5">
+            <Label className="text-[10px] font-semibold uppercase text-muted-foreground tracking-wider">
+              Manual Sync
+            </Label>
+            <div className="grid grid-cols-3 gap-1.5">
+              <CtaButton
+                variant="outline"
+                size="sm"
+                className="w-full text-[11px] h-7 px-2 font-medium"
+                onClick={() => handleSync("customers")}
+                disabled={!!syncingState}
+              >
+                {syncingState === "customers" ? (
+                  <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                ) : (
+                  <Users className="h-3 w-3 mr-1 opacity-70" />
+                )}
+                Customers
+              </CtaButton>
 
-                <CtaButton
-                  variant="outline"
-                  className="w-full text-[10px]"
-                  onClick={() => handleSync("products")}
-                  disabled={!!syncingState}
-                >
-                  {syncingState === "products" ? (
-                    <Loader2 className="h-3 w-3 animate-spin mr-1" />
-                  ) : (
-                    <Package className="h-3 w-3 mr-1" />
-                  )}
-                  Products
-                </CtaButton>
+              <CtaButton
+                variant="outline"
+                size="sm"
+                className="w-full text-[11px] h-7 px-2 font-medium"
+                onClick={() => handleSync("products")}
+                disabled={!!syncingState}
+              >
+                {syncingState === "products" ? (
+                  <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                ) : (
+                  <Package className="h-3 w-3 mr-1 opacity-70" />
+                )}
+                Products
+              </CtaButton>
 
-                <CtaButton
-                  variant="outline"
-                  className="w-full text-[10px]"
-                  onClick={() => handleSync("orders")}
-                  disabled={!!syncingState}
-                >
-                  {syncingState === "orders" ? (
-                    <Loader2 className="h-3 w-3 animate-spin mr-1" />
-                  ) : (
-                    <ShoppingCart className="h-3 w-3 mr-1" />
-                  )}
-                  Orders
-                </CtaButton>
-              </div>
+              <CtaButton
+                variant="outline"
+                size="sm"
+                className="w-full text-[11px] h-7 px-2 font-medium"
+                onClick={() => handleSync("orders")}
+                disabled={!!syncingState}
+              >
+                {syncingState === "orders" ? (
+                  <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                ) : (
+                  <ShoppingCart className="h-3 w-3 mr-1 opacity-70" />
+                )}
+                Orders
+              </CtaButton>
             </div>
           </div>
         </div>
       </IntegrationCard>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[400px] p-5">
+        <DialogContent className="sm:max-w-[400px] p-5 rounded-xl">
           <DialogHeader className="mb-2">
-            <DialogTitle className="text-lg">Connect Shopify Store</DialogTitle>
-            <DialogDescription className="text-xs">
-              Enter your Shopify store domain to authorize Thrico to access your
-              store's data.
+            <DialogTitle className="text-base font-semibold">Connect Shopify Store</DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">
+              Enter your Shopify store domain to authorize Thrico to access your store's data.
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-3 py-2">
+          <div className="grid gap-3 py-1">
             <div className="space-y-1.5">
               <Label htmlFor="shopDomain" className="text-xs font-medium">
                 Store Domain
@@ -308,19 +311,23 @@ export const ShopifyIntegrationCard = () => {
                   setShopDomain(cleanDomain(e.clipboardData.getData("text")));
                 }}
                 onBlur={() => setShopDomain((prev) => cleanDomain(prev))}
-                className="w-full h-8 text-xs"
+                className="w-full h-8 text-xs font-mono"
               />
             </div>
           </div>
-          <DialogFooter className="mt-4 gap-2 sm:gap-0">
+          <DialogFooter className="mt-3 gap-2 sm:gap-0">
             <CtaButton
               variant="outline"
+              size="sm"
+              className="h-8 text-xs"
               onClick={() => setIsDialogOpen(false)}
               disabled={isConnecting}
             >
               Cancel
             </CtaButton>
             <CtaButton
+              size="sm"
+              className="h-8 text-xs"
               onClick={submitConnect}
               disabled={isConnecting || !shopDomain}
             >

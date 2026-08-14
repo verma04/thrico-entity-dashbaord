@@ -51,7 +51,8 @@ export const SendGridIntegrationCard = () => {
   return (
     <IntegrationCard
       title="SendGrid"
-      description="Email Delivery & Marketing"
+      category="Email & Marketing"
+      description="Deliver high-deliverability transactional emails, event reminders, and member onboarding emails."
       icon={SendGridIcon}
       iconBgColor="bg-[#00B3E9]"
       isConnected={isConnected}
@@ -59,34 +60,29 @@ export const SendGridIntegrationCard = () => {
       onConnect={handleConnect}
       onDisconnect={handleDisconnect}
     >
-      <div className="pt-4 border-t space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
-        <p className="text-sm text-muted-foreground leading-relaxed">
-          Configure your SendGrid account to send transactional emails and
-          marketing campaigns directly from Thrico.
-        </p>
-
-        <div className="space-y-4">
-          <div className="space-y-1.5">
-            <Label className="text-xs font-medium text-foreground/80 flex items-center gap-2">
+      <div className="space-y-3">
+        <div className="space-y-2.5">
+          <div className="space-y-1">
+            <Label className="text-[10px] font-semibold uppercase text-muted-foreground tracking-wider flex items-center gap-1.5">
               <Key className="w-3 h-3" /> API Key
             </Label>
             <Input
               type="password"
               placeholder="SG.xxxxxxxxxxxx"
-              className="h-8 text-sm"
+              className="h-8 text-xs font-mono"
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
             />
           </div>
 
-          <div className="space-y-1.5">
-            <Label className="text-xs font-medium text-foreground/80 flex items-center gap-2">
+          <div className="space-y-1">
+            <Label className="text-[10px] font-semibold uppercase text-muted-foreground tracking-wider flex items-center gap-1.5">
               <Mail className="w-3 h-3" /> Verified Sender Email
             </Label>
             <Input
               type="email"
               placeholder="hello@yourdomain.com"
-              className="h-8 text-sm"
+              className="h-8 text-xs"
               value={senderEmail}
               onChange={(e) => setSenderEmail(e.target.value)}
             />
@@ -94,22 +90,18 @@ export const SendGridIntegrationCard = () => {
 
           <Button
             size="sm"
-            className="w-full text-xs h-8 gap-2"
+            className="w-full text-xs h-7.5 gap-1.5"
             onClick={handleSaveSettings}
             disabled={isSaving || !apiKey || !senderEmail}
           >
             {isSaving ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
             ) : (
-              <Send className="h-3.5 w-3.5" />
+              <Send className="h-3 w-3" />
             )}
             Save Configuration
           </Button>
         </div>
-
-        <p className="text-[10px] text-muted-foreground text-center">
-          Make sure your sender email is verified in SendGrid's dashboard.
-        </p>
       </div>
     </IntegrationCard>
   );

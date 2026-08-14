@@ -107,7 +107,8 @@ export const ZoomIntegrationCard = () => {
   return (
     <IntegrationCard
       title="Zoom"
-      description="Video Conferencing"
+      category="Video & Meetings"
+      description="Connect Zoom to automatically create and manage meeting rooms for webinars and virtual sessions."
       icon={Video}
       iconBgColor="bg-[#2D8CFF]"
       isConnected={isConnected}
@@ -115,10 +116,9 @@ export const ZoomIntegrationCard = () => {
       onConnect={handleConnect}
       onDisconnect={handleDisconnect}
     >
-      <div className="pt-4 border-t animate-in fade-in slide-in-from-top-2 duration-300">
-        <p className="text-sm text-muted-foreground leading-relaxed">
-          Zoom is connected. You can now automatically generate meeting links
-          for events and appointments.
+      <div className="space-y-2 text-xs text-muted-foreground leading-relaxed">
+        <p>
+          Zoom is active. You can automatically generate meeting links for events, coaching calls, and appointments.
         </p>
       </div>
     </IntegrationCard>

@@ -184,7 +184,8 @@ export const SlackIntegrationCard = () => {
   return (
     <IntegrationCard
       title="Slack"
-      description="Communication & Notifications"
+      category="Communication"
+      description="Send real-time alerts, member activity updates, and system notifications directly to workspace channels."
       icon={Slack}
       iconBgColor="bg-[#4A154B]"
       isConnected={isConnected}
@@ -192,15 +193,10 @@ export const SlackIntegrationCard = () => {
       onConnect={handleConnect}
       onDisconnect={handleDisconnect}
     >
-      <div className="pt-4 border-t space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
-        <p className="text-sm text-muted-foreground leading-relaxed">
-          Connect your Slack workspace to receive real-time notifications,
-          updates, and alerts directly in your team channels.
-        </p>
-
+      <div className="space-y-3">
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <Label className="text-xs font-medium text-foreground/80">
+            <Label className="text-[10px] font-semibold uppercase text-muted-foreground tracking-wider">
               Notification Channel
             </Label>
             {isSavingSettings && (
@@ -212,7 +208,7 @@ export const SlackIntegrationCard = () => {
             onValueChange={handleChannelChange}
             disabled={isLoadingChannels}
           >
-            <SelectTrigger className="h-8 text-sm">
+            <SelectTrigger className="h-8 text-xs bg-background">
               <SelectValue
                 placeholder={
                   isLoadingChannels ? "Loading channels..." : "Select channel"
@@ -221,7 +217,7 @@ export const SlackIntegrationCard = () => {
             </SelectTrigger>
             <SelectContent>
               {channels.map((channel) => (
-                <SelectItem key={channel.id} value={channel.id}>
+                <SelectItem key={channel.id} value={channel.id} className="text-xs">
                   #{channel.name}
                 </SelectItem>
               ))}
@@ -237,21 +233,17 @@ export const SlackIntegrationCard = () => {
         <Button
           variant="secondary"
           size="sm"
-          className="w-full text-xs h-8 gap-2"
+          className="w-full text-xs h-7.5 gap-1.5"
           onClick={handleTestMessage}
           disabled={isSendingTest || !selectedChannel}
         >
           {isSendingTest ? (
             <Loader2 className="h-3.5 w-3.5 animate-spin" />
           ) : (
-            <Send className="h-3.5 w-3.5" />
+            <Send className="h-3 w-3" />
           )}
           Send Test Message
         </Button>
-
-        <p className="text-[10px] text-muted-foreground text-center">
-          We'll post updates to the selected channel.
-        </p>
       </div>
     </IntegrationCard>
   );

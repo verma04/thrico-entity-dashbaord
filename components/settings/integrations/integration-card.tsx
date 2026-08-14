@@ -1,10 +1,9 @@
 "use client";
 
-import React, { ReactNode } from "react";
+import React, { ReactNode, useState } from "react";
 import { CtaButton } from "@/components/ui/cta-button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { LucideIcon, Check, ExternalLink, ChevronRight } from "lucide-react";
+import { LucideIcon, Check, ChevronRight, Settings2, Power, AlertTriangle, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   AlertDialog,
@@ -18,146 +17,195 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-interface IntegrationCardProps {
+export interface IntegrationCardProps {
   title: string;
+  category?: string;
   description: string;
-  icon: LucideIcon;
+  icon: LucideIcon | React.ComponentType<{ className?: string }>;
   iconColor?: string;
   iconBgColor?: string;
   isConnected: boolean;
-  isConnecting: boolean;
-  onConnect: () => void;
-  onDisconnect: () => void;
+  isConnecting?: boolean;
+  onConnect?: () => void;
+  onDisconnect?: () => void;
   children?: ReactNode;
+  badge?: string;
+  docsUrl?: string;
+  customAction?: ReactNode;
 }
 
 export const IntegrationCard = ({
   title,
+  category,
   description,
   icon: Icon,
   iconColor = "text-white",
   iconBgColor = "bg-primary",
   isConnected,
-  isConnecting,
+  isConnecting = false,
   onConnect,
   onDisconnect,
   children,
+  badge,
+  docsUrl,
+  customAction,
 }: IntegrationCardProps) => {
+  const [showConfig, setShowConfig] = useState(true);
+
   return (
-    <Card
+    <div
       className={cn(
-        "group transition-all duration-300 overflow-hidden border-muted/60",
+        "group relative flex flex-col justify-between rounded-xl border bg-card transition-all duration-200 shadow-2xs overflow-hidden",
         isConnected
-          ? "border-primary/20 bg-primary/5 shadow-sm"
-          : "hover:border-primary/20 hover:shadow-md bg-card"
+          ? "border-border/80 dark:border-border/70 hover:border-foreground/20"
+          : "border-border/60 hover:border-border hover:shadow-xs"
       )}
     >
-      <div className="flex flex-col sm:flex-row p-4 gap-4">
-        {/* Icon Section */}
-        <div className="shrink-0">
-          <div
-            className={cn(
-              "h-12 w-12 rounded-xl flex items-center justify-center shadow-sm transition-transform duration-300 group-hover:scale-105",
-              iconBgColor
-            )}
-          >
-            <Icon className={cn("h-6 w-6", iconColor)} />
-          </div>
-        </div>
-
-        {/* Content Section */}
-        <div className="flex-1 min-w-0 space-y-1">
-          <div className="flex items-center gap-2 mb-0.5">
-            <h3 className="text-base font-semibold tracking-tight text-foreground">
-              {title}
-            </h3>
-            {isConnected && (
-              <Badge
-                variant="outline"
-                className="gap-1 text-[10px] font-medium text-emerald-600 bg-emerald-50/50 border-emerald-200 px-2 py-0 rounded-full h-5"
-              >
-                <Check className="w-2.5 h-2.5" />
-                Active
-              </Badge>
-            )}
-          </div>
-          <p className="text-xs text-muted-foreground leading-relaxed max-w-2xl">
-            {description}
-          </p>
-
-          {/* Connected Content / Children */}
-          {isConnected ? (
-            <div className="pt-3 mt-1">
-              {children || (
-                <div className="flex items-center gap-2 text-xs text-muted-foreground bg-background/50 p-2.5 rounded-lg border border-transparent">
-                  <Check className="w-3.5 h-3.5 text-emerald-500" />
-                  Integration is active and running smoothly.
-                </div>
+      {/* Top Header & Info */}
+      <div className="p-4 sm:p-4.5 flex flex-col gap-3">
+        <div className="flex items-start justify-between gap-3">
+          {/* Brand Icon + Title Header */}
+          <div className="flex items-center gap-3 min-w-0">
+            <div
+              className={cn(
+                "h-10 w-10 sm:h-11 sm:w-11 rounded-xl flex items-center justify-center shrink-0 shadow-2xs transition-transform duration-200 group-hover:scale-102 border border-black/5 dark:border-white/10",
+                iconBgColor
               )}
-            </div>
-          ) : (
-            <div className="pt-1"></div>
-          )}
-        </div>
-
-        {/* Action Section */}
-        <div className="flex sm:flex-col items-center sm:items-end justify-center sm:justify-start gap-2 sm:pl-4 sm:border-l border-muted/50 w-full sm:w-auto mt-2 sm:mt-0">
-          {isConnected ? (
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <CtaButton
-                  variant="outline"
-                  className="w-full sm:w-28 text-destructive border-destructive/20 hover:bg-destructive/5 hover:border-destructive/30 hover:text-destructive"
-                >
-                  Uninstall
-                </CtaButton>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Uninstall {title}?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Are you sure you want to disconnect this integration? This
-                    action may stop data syncing and disable related features.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={onDisconnect}
-                    className="bg-destructive hover:bg-destructive/90"
-                  >
-                    Uninstall
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          ) : (
-            <CtaButton
-              className="w-full sm:w-28 group-hover:shadow-primary/25"
-              onClick={onConnect}
-              disabled={isConnecting}
             >
-              {isConnecting ? (
-                <>
-                  <span className="h-3 w-3 rounded-full border-2 border-current border-t-transparent animate-spin mr-1.5" />
-                  Installing
-                </>
-              ) : (
-                <>
-                  Install
-                  <ChevronRight className="w-3.5 h-3.5 opacity-50 group-hover:translate-x-0.5 transition-transform ml-1" />
-                </>
-              )}
-            </CtaButton>
-          )}
+              <Icon className={cn("h-5 w-5", iconColor)} />
+            </div>
 
-          {!isConnected && (
-            <p className="hidden sm:block text-[9px] text-muted-foreground text-center sm:text-right mt-1.5 max-w-[110px] leading-tight">
-              Enable to sync data & alerts
-            </p>
-          )}
+            <div className="min-w-0 space-y-0.5">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="text-sm font-semibold tracking-tight text-foreground truncate">
+                  {title}
+                </h3>
+                {category && (
+                  <span className="text-[10px] font-medium text-muted-foreground bg-muted/60 px-1.5 py-0.5 rounded border border-border/40 shrink-0">
+                    {category}
+                  </span>
+                )}
+                {badge && (
+                  <span className="text-[10px] font-semibold text-primary bg-primary/10 px-1.5 py-0.5 rounded border border-primary/20 shrink-0">
+                    {badge}
+                  </span>
+                )}
+              </div>
+
+              {/* Status indicator */}
+              <div className="flex items-center gap-1.5 pt-0.5">
+                {isConnected ? (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.2 rounded-full">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    Active
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-medium text-muted-foreground bg-muted/50 border border-border/50 px-1.5 py-0.2 rounded-full">
+                    <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/40" />
+                    Not Connected
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Action button */}
+          <div className="shrink-0 flex items-center gap-1.5">
+            {customAction ? (
+              customAction
+            ) : isConnected ? (
+              <div className="flex items-center gap-1.5">
+                {children && (
+                  <CtaButton
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowConfig(!showConfig)}
+                    className="h-7 text-xs px-2.5 text-muted-foreground hover:text-foreground"
+                    title="Toggle Settings"
+                  >
+                    <Settings2 className="h-3.5 w-3.5 mr-1" />
+                    {showConfig ? "Hide" : "Manage"}
+                  </CtaButton>
+                )}
+
+                {onDisconnect && (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <CtaButton
+                        variant="outline"
+                        size="sm"
+                        className="h-7 text-xs px-2.5 text-destructive border-destructive/20 hover:bg-destructive/5 hover:border-destructive/30 hover:text-destructive"
+                      >
+                        Disconnect
+                      </CtaButton>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent className="rounded-xl p-5 max-w-[400px]">
+                      <AlertDialogHeader>
+                        <div className="flex items-center gap-2.5 mb-1">
+                          <div className="h-8 w-8 rounded-lg bg-destructive/10 text-destructive flex items-center justify-center shrink-0">
+                            <AlertTriangle className="h-4 w-4" />
+                          </div>
+                          <AlertDialogTitle className="text-base font-semibold">
+                            Disconnect {title}?
+                          </AlertDialogTitle>
+                        </div>
+                        <AlertDialogDescription className="text-xs text-muted-foreground leading-relaxed">
+                          This will disconnect {title} from your workspace. Active data syncing and notifications will be paused immediately.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter className="mt-3 gap-2 sm:gap-0">
+                        <AlertDialogCancel className="h-8 text-xs">
+                          Cancel
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={onDisconnect}
+                          className="h-8 text-xs bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          Disconnect
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
+              </div>
+            ) : (
+              onConnect && (
+                <CtaButton
+                  size="sm"
+                  className="h-7 text-xs px-3 gap-1"
+                  onClick={onConnect}
+                  disabled={isConnecting}
+                >
+                  {isConnecting ? (
+                    <>
+                      <span className="h-3 w-3 rounded-full border-2 border-current border-t-transparent animate-spin mr-1" />
+                      Connecting...
+                    </>
+                  ) : (
+                    <>
+                      Connect
+                      <ChevronRight className="w-3.5 h-3.5 opacity-60" />
+                    </>
+                  )}
+                </CtaButton>
+              )
+            )}
+          </div>
         </div>
+
+        {/* Description */}
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          {description}
+        </p>
       </div>
-    </Card>
+
+      {/* Connected configuration drawer / Children */}
+      {isConnected && children && showConfig && (
+        <div className="border-t border-border/50 bg-muted/20 p-4 space-y-3 animate-in fade-in slide-in-from-top-1 duration-200">
+          {children}
+        </div>
+      )}
+    </div>
   );
 };
+

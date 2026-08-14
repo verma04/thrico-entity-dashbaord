@@ -19,6 +19,9 @@ import {
   AdminTable,
   AdminStatusBadge,
   AdminTableColumn,
+  AdminTableItem,
+  AdminTableMetric,
+  AdminTableDate,
   Pagination,
 } from "@/components/shared/admin-table/admin-table";
 import { safeFormat } from "@/lib/date-utils";
@@ -96,27 +99,19 @@ export default function ShopifyOrdersPage() {
     {
       key: "serial",
       header: "S.No",
-      headerClassName: "w-12 text-center",
-      className: "text-center text-xs font-medium text-muted-foreground",
+      headerClassName: "w-10 text-center",
+      className: "text-center text-[11px] font-medium text-muted-foreground",
       cell: (_, index) => offset + index + 1,
     },
     {
       key: "order",
       header: "Order",
       cell: (row) => (
-        <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-lg border border-border/60 bg-muted/50 flex items-center justify-center shrink-0">
-            <ShoppingCart className="h-4 w-4 text-muted-foreground" />
-          </div>
-          <div className="flex flex-col min-w-0 max-w-[280px]">
-            <p className="text-[13px] font-semibold text-foreground leading-tight truncate">
-              Order #{row.shopifyOrderId}
-            </p>
-            <p className="text-[11px] font-mono text-muted-foreground leading-tight mt-0.5 truncate">
-              ID: {row.id}
-            </p>
-          </div>
-        </div>
+        <AdminTableItem
+          icon={ShoppingCart}
+          title={`Order #${row.shopifyOrderId}`}
+          subtitle={`ID: ${row.id}`}
+        />
       ),
     },
     {
@@ -131,43 +126,14 @@ export default function ShopifyOrdersPage() {
         const initials = displayName
           ? displayName.substring(0, 2).toUpperCase()
           : "U";
-        
-        const avatarUrl = user?.avatar
-          ? user.avatar.startsWith("http")
-            ? user.avatar
-            : `https://cdn.thrico.network/${user.avatar}`
-          : undefined;
 
         return (
-          <div className="flex items-center gap-3">
-            <Avatar className="h-9 w-9 rounded-lg border border-border/60 shrink-0">
-              {avatarUrl && (
-                <AvatarImage
-                  src={avatarUrl}
-                  alt={displayName}
-                  className="object-cover"
-                />
-              )}
-              <AvatarFallback className="rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-xs font-semibold">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col min-w-0 max-w-[240px]">
-              <p className="text-[13px] font-semibold text-foreground leading-tight truncate">
-                {displayName}
-              </p>
-              {email && (
-                <p className="text-[11px] text-muted-foreground leading-tight mt-0.5 truncate">
-                  {email}
-                </p>
-              )}
-              {!user && row.userId && (
-                <p className="text-[11px] font-mono text-muted-foreground leading-tight mt-0.5 truncate">
-                  ID: {row.userId}
-                </p>
-              )}
-            </div>
-          </div>
+          <AdminTableItem
+            avatar={user?.avatar || undefined}
+            title={displayName}
+            subtitle={email || (row.userId ? `ID: ${row.userId}` : undefined)}
+            fallbackText={initials}
+          />
         );
       },
     },
@@ -175,14 +141,14 @@ export default function ShopifyOrdersPage() {
       key: "totalPrice",
       header: "Total",
       cell: (row) => (
-        <div className="flex items-center gap-1.5 text-[13px] font-semibold text-foreground">
-          <DollarSign className="h-3.5 w-3.5 text-muted-foreground/50 shrink-0" />
-          <span>
-            {row.totalPrice != null
+        <AdminTableMetric
+          value={
+            row.totalPrice != null
               ? `${Number(row.totalPrice).toFixed(2)} ${row.currency || ""}`
-              : "—"}
-          </span>
-        </div>
+              : "—"
+          }
+          variant="mono"
+        />
       ),
     },
     {
@@ -201,38 +167,29 @@ export default function ShopifyOrdersPage() {
         const points = row.reward?.pointsEarned;
         if (points != null) {
           return (
-            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">
-              <Gift className="h-3 w-3" />
-              <span>+{points} pts</span>
-            </div>
+            <AdminTableMetric
+              icon={Gift}
+              value={`+${points}`}
+              unit="PTS"
+              variant="emerald"
+            />
           );
         }
-        return <span className="text-muted-foreground/60 text-[12px]">—</span>;
+        return <span className="text-muted-foreground text-[11px]">—</span>;
       },
     },
     {
       key: "createdAt",
       header: "Created Date",
       cell: (row) => (
-        <div className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
-          <Calendar className="h-3.5 w-3.5 text-muted-foreground/50 shrink-0" />
-          <span>
-            {row.createdAt
-              ? safeFormat(row.createdAt, "dd MMM yyyy")
-              : "—"}
-          </span>
-        </div>
+        <AdminTableDate date={row.createdAt} />
       ),
     },
     {
       key: "updatedAt",
       header: "Last Updated",
       cell: (row) => (
-        <div className="text-[11px] text-muted-foreground">
-          {row.updatedAt
-            ? safeFormat(row.updatedAt, "dd MMM yyyy, HH:mm")
-            : "—"}
-        </div>
+        <AdminTableDate date={row.updatedAt} />
       ),
     },
   ];
@@ -295,6 +252,7 @@ export default function ShopifyOrdersPage() {
             columns={columns}
             data={filteredOrders}
             loading={loading}
+            size="sm"
             keyExtractor={(row) => row.id || row.shopifyOrderId}
             emptyIcon={ShoppingCart}
             emptyTitle="No Shopify orders found"
