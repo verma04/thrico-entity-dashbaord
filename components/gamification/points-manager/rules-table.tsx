@@ -4,6 +4,9 @@ import React from "react";
 import {
   AdminTable,
   AdminStatusBadge,
+  AdminTableItem,
+  AdminTableTag,
+  AdminTableMetric,
 } from "@/components/shared/admin-table/admin-table";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -62,22 +65,14 @@ export function RulesTable({
       cell: (rule: PointRule) => {
         const moduleInfo = getModuleInfo(rule.module);
         return (
-          <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center shrink-0">
-              {renderModuleIcon(
-                moduleInfo?.icon || "Settings",
-                "h-4 w-4 text-zinc-900 dark:text-zinc-100",
-              )}
-            </div>
-            <div className="flex flex-col">
-              <span className="text-sm font-semibold text-foreground">
-                {moduleInfo?.name || rule.module}
-              </span>
-              <span className="text-[10px] text-muted-foreground uppercase tracking-tighter font-light">
-                Level {rule.trigger === "FIRST_TIME" ? "One-Off" : "Recurring"}
-              </span>
-            </div>
-          </div>
+          <AdminTableItem
+            icon={renderModuleIcon(
+              moduleInfo?.icon || "Settings",
+              "h-3.5 w-3.5 text-foreground",
+            )}
+            title={moduleInfo?.name || rule.module}
+            subtitle={`Level ${rule.trigger === "FIRST_TIME" ? "One-Off" : "Recurring"}`}
+          />
         );
       },
     },
@@ -89,22 +84,9 @@ export function RulesTable({
         const source = rule.source || moduleInfo?.type || "MODULE";
         const isIntegration = source === "INTEGRATION";
         return (
-          <span
-            className={cn(
-              "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-[10px] font-bold uppercase tracking-wider",
-              isIntegration
-                ? "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20"
-                : "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",
-            )}
-          >
-            <span
-              className={cn(
-                "h-1.5 w-1.5 rounded-full shrink-0",
-                isIntegration ? "bg-purple-500" : "bg-blue-500",
-              )}
-            />
+          <AdminTableTag variant={isIntegration ? "purple" : "indigo"}>
             {isIntegration ? "Integration" : "Module"}
-          </span>
+          </AdminTableTag>
         );
       },
     },
@@ -112,9 +94,9 @@ export function RulesTable({
       key: "action",
       header: "Trigger Event",
       cell: (rule: PointRule) => (
-        <div className="flex items-center gap-2">
-          <Zap className="h-3.5 w-3.5 text-zinc-500 dark:text-zinc-400 opacity-70" />
-          <span className="text-sm font-medium text-foreground capitalize">
+        <div className="flex items-center gap-1.5 text-[12px] font-medium text-foreground capitalize">
+          <Zap className="h-3 w-3 text-muted-foreground/60 shrink-0" />
+          <span className="truncate max-w-[180px]">
             {rule.action.replace(/_/g, " ").toLowerCase()}
           </span>
         </div>
@@ -124,14 +106,11 @@ export function RulesTable({
       key: "points",
       header: "Yield",
       cell: (rule: PointRule) => (
-        <div className="flex items-center gap-1.5">
-          <span className="font-mono text-[13px] font-bold text-zinc-900 dark:text-zinc-100 bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded-md border border-zinc-200 dark:border-zinc-700 shadow-sm">
-            +{rule.points.toLocaleString()}
-          </span>
-          <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
-            PTS
-          </span>
-        </div>
+        <AdminTableMetric
+          value={`+${rule.points.toLocaleString()}`}
+          unit="PTS"
+          variant="indigo"
+        />
       ),
     },
     {
@@ -139,10 +118,10 @@ export function RulesTable({
       header: "Daily",
       cell: (rule: PointRule) => (
         <div className="flex flex-col">
-          <span className="text-[12px] font-bold text-foreground">
+          <span className="text-[12px] font-semibold text-foreground">
             {rule.dailyCap ? `${rule.dailyCap}x` : "∞"}
           </span>
-          <span className="text-[9px] text-muted-foreground uppercase tracking-widest font-bold">
+          <span className="text-[9px] text-muted-foreground uppercase tracking-wider font-semibold">
             Limit
           </span>
         </div>
@@ -153,10 +132,10 @@ export function RulesTable({
       header: "Weekly",
       cell: (rule: PointRule) => (
         <div className="flex flex-col">
-          <span className="text-[12px] font-bold text-foreground">
+          <span className="text-[12px] font-semibold text-foreground">
             {rule.weeklyCap ? `${rule.weeklyCap}x` : "∞"}
           </span>
-          <span className="text-[9px] text-muted-foreground uppercase tracking-widest font-bold">
+          <span className="text-[9px] text-muted-foreground uppercase tracking-wider font-semibold">
             Limit
           </span>
         </div>
@@ -167,10 +146,10 @@ export function RulesTable({
       header: "Monthly",
       cell: (rule: PointRule) => (
         <div className="flex flex-col">
-          <span className="text-[12px] font-bold text-foreground">
+          <span className="text-[12px] font-semibold text-foreground">
             {rule.monthlyCap ? `${rule.monthlyCap}x` : "∞"}
           </span>
-          <span className="text-[9px] text-muted-foreground uppercase tracking-widest font-bold">
+          <span className="text-[9px] text-muted-foreground uppercase tracking-wider font-semibold">
             Limit
           </span>
         </div>
@@ -180,14 +159,14 @@ export function RulesTable({
       key: "status",
       header: "Status",
       cell: (rule: PointRule) => (
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <Switch
             checked={rule.isActive}
             onCheckedChange={() => handleToggleActive(rule.id)}
             disabled={toggling}
-            className="scale-90 data-[state=checked]:bg-zinc-900 dark:data-[state=checked]:bg-zinc-100"
+            className="scale-75 data-[state=checked]:bg-zinc-900 dark:data-[state=checked]:bg-zinc-100"
           />
-          <AdminStatusBadge status={rule.isActive ? "APPROVED" : "PENDING"}>
+          <AdminStatusBadge status={rule.isActive ? "APPROVED" : "DISABLED"}>
             {rule.isActive ? "Active" : "Disabled"}
           </AdminStatusBadge>
         </div>
@@ -196,16 +175,17 @@ export function RulesTable({
     {
       key: "actions",
       header: "",
-      headerClassName: "w-[50px]",
+      headerClassName: "w-10 text-right",
+      className: "text-right",
       cell: (rule: PointRule) => (
-        <div className="flex justify-end pr-2">
+        <div className="flex justify-end">
           <Button
             variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted transition-all rounded-lg"
+            size="sm"
+            className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md"
             onClick={() => onEdit(rule)}
           >
-            <Pencil className="h-4 w-4" />
+            <Pencil className="h-3.5 w-3.5" />
           </Button>
         </div>
       ),

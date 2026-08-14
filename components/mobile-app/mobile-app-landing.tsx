@@ -123,7 +123,7 @@ export function MobileAppLanding() {
   const secondColumn = features.slice(half);
 
   return (
-    <div className="relative min-h-[calc(100vh-2rem)] w-full overflow-hidden bg-background flex flex-col xl:flex-row items-center justify-center p-6 lg:p-12 gap-12 lg:gap-24">
+    <div className="relative min-h-[calc(100vh-2rem)] w-full overflow-hidden bg-background flex flex-col xl:flex-row items-center justify-center p-6 lg:p-10 gap-8 lg:gap-16">
       {/* Background Grid Pattern */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
 
@@ -132,14 +132,14 @@ export function MobileAppLanding() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="relative z-10 max-w-2xl xl:max-w-xl space-y-8 text-center xl:text-left"
+        className="relative z-10 max-w-xl space-y-6 text-center xl:text-left"
       >
-        <div className="space-y-4">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-foreground">
+        <div className="space-y-3">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-foreground">
             {entityName} <br />
             <span className="text-muted-foreground">Mobile App</span>
           </h1>
-          <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed">
+          <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
             Transform {entityName} into a fully branded mobile experience.
             Launch your own community app with custom branding, native Android &
             iOS support, AI-powered engagement, push notifications, and seamless
@@ -147,62 +147,76 @@ export function MobileAppLanding() {
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center xl:justify-start gap-4 pt-4 flex-wrap">
+        <div className="flex flex-col sm:flex-row items-center justify-center xl:justify-start gap-3 pt-2 flex-wrap">
           <Button
-            size="lg"
             onClick={() => setIsModalOpen(true)}
-            className="h-14 px-8 text-base w-full sm:w-auto rounded-xl shadow-xl shadow-primary/20 group"
+            className="h-10 px-5 text-sm w-full sm:w-auto rounded-lg shadow-md shadow-primary/20 group font-medium"
           >
-            <Smartphone className="w-5 h-5 mr-2" />
+            <Smartphone className="w-4 h-4 mr-2" />
             Build Android App
-            <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+            <ArrowRight className="w-3.5 h-3.5 ml-2 group-hover:translate-x-1 transition-transform" />
           </Button>
           <Button
-            size="lg"
             variant="outline"
             onClick={() => setIsModalOpen(true)}
-            className="h-14 px-8 text-base w-full sm:w-auto rounded-xl bg-background hover:bg-muted/50 group"
+            className="h-10 px-5 text-sm w-full sm:w-auto rounded-lg bg-background hover:bg-muted/50 group font-medium"
           >
-            <Apple className="w-5 h-5 mr-2" />
+            <Apple className="w-4 h-4 mr-2" />
             Build iOS App
-            <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+            <ArrowRight className="w-3.5 h-3.5 ml-2 group-hover:translate-x-1 transition-transform" />
           </Button>
-          
+
           <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
             <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
-                <DialogTitle>Mobile App Inquiry</DialogTitle>
-                <DialogDescription>
-                  Interested in launching your own mobile app? Fill out the form below and our team will get in touch with you.
+                <DialogTitle className="text-base font-semibold">
+                  Mobile App Inquiry
+                </DialogTitle>
+                <DialogDescription className="text-xs text-muted-foreground">
+                  Interested in launching your own mobile app? Fill out the form
+                  below and our team will get in touch with you.
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleSubmit}>
-                <div className="grid gap-4 py-4">
-                  <div className="grid gap-2">
-                    <Label>Platform Needed</Label>
+                <div className="grid gap-3.5 py-3">
+                  <div className="grid gap-1.5">
+                    <Label className="text-xs font-medium">
+                      Platform Needed
+                    </Label>
                     <Select required>
-                      <SelectTrigger>
+                      <SelectTrigger className="h-9 text-xs">
                         <SelectValue placeholder="Select platform..." />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="android">Android Only</SelectItem>
-                        <SelectItem value="ios">iOS Only</SelectItem>
-                        <SelectItem value="both">Both Android & iOS</SelectItem>
+                        <SelectItem value="android" className="text-xs">
+                          Android Only
+                        </SelectItem>
+                        <SelectItem value="ios" className="text-xs">
+                          iOS Only
+                        </SelectItem>
+                        <SelectItem value="both" className="text-xs">
+                          Both Android & iOS
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="message">Message</Label>
+                  <div className="grid gap-1.5">
+                    <Label htmlFor="message" className="text-xs font-medium">
+                      Message
+                    </Label>
                     <Textarea
                       id="message"
                       placeholder="Tell us about your requirements..."
-                      className="resize-none"
+                      className="resize-none text-xs"
                       rows={4}
                       required
                     />
                   </div>
                 </div>
-                <Button type="submit" className="w-full h-12 text-base">
+                <Button
+                  type="submit"
+                  className="w-full h-9 text-xs font-medium"
+                >
                   Submit Inquiry
                 </Button>
               </form>
@@ -210,44 +224,46 @@ export function MobileAppLanding() {
           </Dialog>
         </div>
 
-        <div className="flex items-center justify-center xl:justify-start gap-6 pt-4 text-sm font-medium text-muted-foreground">
-          <span className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-green-500" /> No coding
+        <div className="flex items-center justify-center xl:justify-start gap-5 pt-2 text-xs font-medium text-muted-foreground">
+          <span className="flex items-center gap-1.5">
+            <CheckCircle2 className="w-3.5 h-3.5 text-green-500" /> No coding
             required
           </span>
-          <span className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-green-500" /> App Store &
+          <span className="flex items-center gap-1.5">
+            <CheckCircle2 className="w-3.5 h-3.5 text-green-500" /> App Store &
             Google Play
           </span>
         </div>
       </motion.div>
 
       {/* Right Visual Column (Feature Cards) */}
-      <div className="relative z-10 flex-1 w-full max-w-3xl xl:max-w-none h-[600px] overflow-hidden flex flex-row gap-6 [mask-image:linear-gradient(to_bottom,transparent,black_10%,black_90%,transparent)]">
+      <div className="relative z-10 flex-1 w-full max-w-2xl xl:max-w-none h-[520px] overflow-hidden flex flex-row gap-4 [mask-image:linear-gradient(to_bottom,transparent,black_10%,black_90%,transparent)]">
         <Marquee vertical className="flex-1 [--duration:40s]" pauseOnHover>
           {firstColumn.map((feature, i) => (
             <div
               key={i}
-              className="relative group bg-card border border-border/50 rounded-3xl p-6 md:p-8 shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden w-full"
+              className="relative group bg-card border border-border/50 rounded-2xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden w-full"
             >
               <div
                 className={cn(
-                  "absolute inset-0 bg-gradient-to-br to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500",
+                  "absolute inset-0 bg-gradient-to-br to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300",
                   feature.gradient,
                 )}
               />
-              <div className="relative space-y-4">
+              <div className="relative space-y-3">
                 <div
                   className={cn(
-                    "w-12 h-12 rounded-2xl flex items-center justify-center",
+                    "w-9 h-9 rounded-xl flex items-center justify-center",
                     feature.bg,
                   )}
                 >
-                  <feature.icon className={cn("w-6 h-6", feature.color)} />
+                  <feature.icon className={cn("w-4 h-4", feature.color)} />
                 </div>
-                <div className="space-y-2">
-                  <h3 className="text-xl font-bold">{feature.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
+                <div className="space-y-1">
+                  <h3 className="text-sm font-semibold text-foreground">
+                    {feature.title}
+                  </h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
                     {feature.description}
                   </p>
                 </div>
@@ -265,26 +281,28 @@ export function MobileAppLanding() {
           {secondColumn.map((feature, i) => (
             <div
               key={i}
-              className="relative group bg-card border border-border/50 rounded-3xl p-6 md:p-8 shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden w-full"
+              className="relative group bg-card border border-border/50 rounded-2xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden w-full"
             >
               <div
                 className={cn(
-                  "absolute inset-0 bg-gradient-to-br to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500",
+                  "absolute inset-0 bg-gradient-to-br to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300",
                   feature.gradient,
                 )}
               />
-              <div className="relative space-y-4">
+              <div className="relative space-y-3">
                 <div
                   className={cn(
-                    "w-12 h-12 rounded-2xl flex items-center justify-center",
+                    "w-9 h-9 rounded-xl flex items-center justify-center",
                     feature.bg,
                   )}
                 >
-                  <feature.icon className={cn("w-6 h-6", feature.color)} />
+                  <feature.icon className={cn("w-4 h-4", feature.color)} />
                 </div>
-                <div className="space-y-2">
-                  <h3 className="text-xl font-bold">{feature.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
+                <div className="space-y-1">
+                  <h3 className="text-sm font-semibold text-foreground">
+                    {feature.title}
+                  </h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
                     {feature.description}
                   </p>
                 </div>

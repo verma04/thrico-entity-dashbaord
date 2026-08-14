@@ -57,11 +57,11 @@ export function SubscriptionLimitBanner({
 export function SubscriptionFallbackMessage({
   subscriptionInfo,
   message,
-  isAiMode,
+  isAiMode = false,
 }: {
   subscriptionInfo?: SubscriptionInfo | any;
   message?: string;
-  isAiMode: boolean;
+  isAiMode?: boolean;
 }) {
   if (subscriptionInfo || !message || isAiMode) {
     return null;

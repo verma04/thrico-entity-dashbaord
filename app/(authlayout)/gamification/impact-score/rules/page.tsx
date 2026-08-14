@@ -29,37 +29,23 @@ import Link from "next/link";
 import {
   AdminTable,
   AdminStatusBadge,
+  AdminTableItem,
+  AdminTableTag,
+  AdminTableMetric,
+  AdminTableText,
 } from "@/components/shared/admin-table/admin-table";
 import { renderModuleIcon } from "@/components/subscription/utils";
 
-const CATEGORY_STYLES: Record<
+const CATEGORY_TAG_VARIANTS: Record<
   string,
-  { bg: string; text: string; dot: string }
+  "indigo" | "emerald" | "amber" | "purple" | "rose" | "default"
 > = {
-  ENGAGEMENT: { bg: "bg-blue-50", text: "text-blue-700", dot: "bg-blue-500" },
-  CONTRIBUTION: {
-    bg: "bg-emerald-50",
-    text: "text-emerald-700",
-    dot: "bg-emerald-500",
-  },
-  TRUST: { bg: "bg-amber-50", text: "text-amber-700", dot: "bg-amber-500" },
-  NETWORK: {
-    bg: "bg-violet-50",
-    text: "text-violet-700",
-    dot: "bg-violet-500",
-  },
-  CONSISTENCY: { bg: "bg-rose-50", text: "text-rose-700", dot: "bg-rose-500" },
+  ENGAGEMENT: "indigo",
+  CONTRIBUTION: "emerald",
+  TRUST: "amber",
+  NETWORK: "purple",
+  CONSISTENCY: "rose",
 };
-
-function getCategoryStyle(category: string) {
-  return (
-    CATEGORY_STYLES[category] || {
-      bg: "bg-zinc-50",
-      text: "text-zinc-700",
-      dot: "bg-zinc-500",
-    }
-  );
-}
 
 export default function ImpactRulesPage() {
   const { data, loading, refetch } = useGetImpactRules();
@@ -95,28 +81,18 @@ export default function ImpactRulesPage() {
       key: "action",
       header: "Action / Event",
       cell: (rule: any) => (
-        <div className="flex items-center gap-3">
-          <div className="h-8 w-8 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center shrink-0">
-            <Zap className="h-4 w-4 text-indigo-600" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs font-semibold text-foreground capitalize">
-              {(rule.action || "—").replace(/_/g, " ")}
-            </span>
-            {rule.formula && (
-              <span className="text-[10px] text-muted-foreground font-mono">
-                {rule.formula}
-              </span>
-            )}
-          </div>
-        </div>
+        <AdminTableItem
+          icon={Zap}
+          title={(rule.action || "—").replace(/_/g, " ")}
+          subtitle={rule.formula || undefined}
+        />
       ),
     },
     {
       key: "module",
       header: "Module",
       cell: (rule: any) => (
-        <span className="text-xs font-medium text-muted-foreground capitalize">
+        <span className="text-[12px] font-medium text-muted-foreground capitalize">
           {(rule.module || "—").replace(/_/g, " ")}
         </span>
       ),
@@ -124,42 +100,22 @@ export default function ImpactRulesPage() {
     {
       key: "category",
       header: "Category",
-      cell: (rule: any) => {
-        const catStyle = getCategoryStyle(rule.category);
-        return (
-          <span
-            className={cn(
-              "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider",
-              catStyle.bg,
-              catStyle.text,
-            )}
-          >
-            <span className={cn("h-1.5 w-1.5 rounded-full", catStyle.dot)} />
-            {rule.category}
-          </span>
-        );
-      },
+      cell: (rule: any) => (
+        <AdminTableTag
+          variant={CATEGORY_TAG_VARIANTS[rule.category?.toUpperCase()] || "default"}
+        >
+          {rule.category}
+        </AdminTableTag>
+      ),
     },
     {
       key: "points",
       header: "Impact",
       cell: (rule: any) => (
-        <div className="flex items-center gap-1.5">
-          <span
-            className={cn(
-              "font-mono text-xs font-bold px-2.5 py-1 rounded-md border shadow-sm",
-              rule.points > 0
-                ? "text-emerald-600 bg-emerald-50 border-emerald-100"
-                : rule.points < 0
-                  ? "text-rose-600 bg-rose-50 border-rose-100"
-                  : "text-zinc-600 bg-zinc-50 border-zinc-100",
-            )}
-          >
-            {rule.points > 0
-              ? `+${rule.points.toLocaleString()}`
-              : rule.points.toLocaleString()}
-          </span>
-        </div>
+        <AdminTableMetric
+          value={`${rule.points > 0 ? "+" : ""}${rule.points}`}
+          variant={rule.points > 0 ? "emerald" : rule.points < 0 ? "rose" : "default"}
+        />
       ),
     },
     {
@@ -167,10 +123,10 @@ export default function ImpactRulesPage() {
       header: "Daily Cap",
       cell: (rule: any) => (
         <div className="flex flex-col">
-          <span className="text-[11px] font-bold text-foreground">
+          <span className="text-[11px] font-mono font-semibold text-foreground">
             {rule.dailyLimit ? `${rule.dailyLimit}x` : "∞"}
           </span>
-          <span className="text-[9px] text-muted-foreground uppercase tracking-widest font-bold">
+          <span className="text-[9px] text-muted-foreground uppercase tracking-wider font-semibold">
             Limit
           </span>
         </div>
@@ -180,17 +136,17 @@ export default function ImpactRulesPage() {
       key: "status",
       header: "Status",
       cell: (rule: any) => (
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <Switch
             checked={rule.enabled !== false}
             onCheckedChange={() =>
               handleToggle(rule.id, rule.enabled !== false)
             }
             disabled={toggling}
-            className="scale-90 data-[state=checked]:bg-emerald-500"
+            className="scale-75 data-[state=checked]:bg-emerald-500"
           />
           <AdminStatusBadge
-            status={rule.enabled !== false ? "APPROVED" : "PENDING"}
+            status={rule.enabled !== false ? "APPROVED" : "DISABLED"}
           >
             {rule.enabled !== false ? "Active" : "Disabled"}
           </AdminStatusBadge>
@@ -201,43 +157,34 @@ export default function ImpactRulesPage() {
       key: "createdAt",
       header: "Created",
       cell: (rule: any) => (
-        <div className="flex flex-col">
-          <span className="text-[11px] font-medium text-foreground">
-            {rule.createdBy ? `${rule.createdBy.firstName} ${rule.createdBy.lastName}` : "System"}
-          </span>
-          <span className="text-[10px] text-muted-foreground">
-            {rule.createdAt ? new Date(rule.createdAt).toLocaleDateString() : "—"}
-          </span>
-        </div>
-      ),
-    },
-    {
-      key: "updatedAt",
-      header: "Last Updated",
-      cell: (rule: any) => (
-        <div className="flex flex-col">
-          <span className="text-[11px] font-medium text-foreground">
-            {rule.updatedBy ? `${rule.updatedBy.firstName} ${rule.updatedBy.lastName}` : "—"}
-          </span>
-          <span className="text-[10px] text-muted-foreground">
-            {rule.updatedAt ? new Date(rule.updatedAt).toLocaleDateString() : "—"}
-          </span>
-        </div>
+        <AdminTableText
+          primary={
+            rule.createdBy
+              ? `${rule.createdBy.firstName} ${rule.createdBy.lastName || ""}`
+              : "System"
+          }
+          secondary={
+            rule.createdAt
+              ? new Date(rule.createdAt).toLocaleDateString()
+              : "—"
+          }
+        />
       ),
     },
     {
       key: "actions",
       header: "",
-      headerClassName: "w-[50px]",
+      headerClassName: "w-10 text-right",
+      className: "text-right",
       cell: (rule: any) => (
-        <div className="flex justify-end pr-2">
+        <div className="flex justify-end">
           <Link href={`/gamification/impact-score/rules/${rule.id}/edit`}>
             <Button
               variant="ghost"
-              size="icon"
-              className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted transition-all rounded-lg"
+              size="sm"
+              className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md"
             >
-              <Pencil className="h-4 w-4" />
+              <Pencil className="h-3.5 w-3.5" />
             </Button>
           </Link>
         </div>
@@ -258,35 +205,35 @@ export default function ImpactRulesPage() {
           { label: "Rules" },
         ]}
         actions={
-          <EcosystemActionBar
-            shadow="none"
-            className="p-0 border-none bg-transparent gap-2"
-          >
-            <EcosystemActionBar.Group align="right">
-              <Link href="/gamification/impact-score/rules/create">
-                <CtaButton>
-                  <Plus className="h-3 w-3" />
-                  Create Rule
-                </CtaButton>
-              </Link>
-            </EcosystemActionBar.Group>
-          </EcosystemActionBar>
+          <Link href="/gamification/impact-score/rules/create">
+            <CtaButton>
+              <Plus className="h-3.5 w-3.5" />
+              Create Rule
+            </CtaButton>
+          </Link>
         }
       />
 
-      <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0 space-y-6">
-        <div className="px-6 py-4">
-          <div className="mb-4 max-w-sm relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/60" />
-            <input
-              type="text"
-              placeholder="Search rules..."
+      <EcosystemActionBar shadow="none">
+        <EcosystemActionBar.Group>
+          <EcosystemActionBar.Item grow className="max-w-xs">
+            <EcosystemActionBar.Search
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="h-10 w-full pl-9 pr-3 text-sm bg-card border border-border/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 shadow-sm transition-all"
+              onChange={setSearch}
+              placeholder="Search rules by module or action..."
             />
-          </div>
+          </EcosystemActionBar.Item>
+        </EcosystemActionBar.Group>
 
+        <EcosystemActionBar.Group align="right">
+          <EcosystemActionBar.Status active={filteredRules.length > 0}>
+            {filteredRules.length} Rules
+          </EcosystemActionBar.Status>
+        </EcosystemActionBar.Group>
+      </EcosystemActionBar>
+
+      <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">
+        <div className="overflow-hidden rounded-xl border border-border bg-card">
           <AdminTable
             columns={columns}
             data={filteredRules}

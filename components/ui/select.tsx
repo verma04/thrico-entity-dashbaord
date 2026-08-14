@@ -39,14 +39,14 @@ const CtaSelectTrigger = React.forwardRef<
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
-      "inline-flex items-center justify-between gap-1.5 rounded-md border border-border bg-transparent hover:bg-muted h-6 px-2.5 py-1 text-[11px] font-medium text-foreground shadow-sm cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 whitespace-nowrap [&>span]:line-clamp-1",
+      "inline-flex items-center justify-between gap-1.5 rounded-md border border-border bg-transparent hover:bg-muted h-8 px-2.5 py-1 text-xs font-medium text-foreground shadow-2xs cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 whitespace-nowrap [&>span]:line-clamp-1",
       className
     )}
     {...props}
   >
     {children}
     <SelectPrimitive.Icon asChild>
-      <ChevronDown className="h-3 w-3 opacity-50" />
+      <ChevronDown className="h-3.5 w-3.5 opacity-50 shrink-0" />
     </SelectPrimitive.Icon>
   </SelectPrimitive.Trigger>
 ))

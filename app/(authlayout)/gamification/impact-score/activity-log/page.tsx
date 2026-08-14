@@ -23,7 +23,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { AdminTable, AdminTableColumn } from "@/components/shared/admin-table/admin-table";
+import {
+  AdminTable,
+  AdminTableColumn,
+  AdminTableItem,
+  AdminTableTag,
+  AdminTableMetric,
+  AdminTableDate,
+} from "@/components/shared/admin-table/admin-table";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
@@ -99,9 +106,10 @@ export default function ImpactActivityLogPage() {
     {
       key: "rank",
       header: "#",
-      className: "w-14",
+      headerClassName: "w-10 text-center",
+      className: "text-center",
       cell: (_log, index) => (
-        <span className="font-mono text-xs text-muted-foreground font-semibold">
+        <span className="font-mono text-[11px] text-muted-foreground font-semibold">
           #{index + 1}
         </span>
       ),
@@ -120,7 +128,6 @@ export default function ImpactActivityLogPage() {
           : avatarUrl
             ? `https://cdn.thrico.network/${avatarUrl}`
             : "";
-        const initials = firstName.substring(0, 2).toUpperCase();
 
         const hoverUser: UserProfileHoverData = {
           id: user.id || "",
@@ -131,25 +138,14 @@ export default function ImpactActivityLogPage() {
 
         return (
           <UserProfileHoverCard user={hoverUser}>
-            <div className="flex items-center gap-3 cursor-pointer">
-              <Avatar className="h-8 w-8 border border-border shrink-0">
-                <AvatarImage
-                  src={fullAvatar}
-                  alt={fullName}
-                  className="object-cover"
-                />
-                <AvatarFallback className="text-[10px] bg-muted text-muted-foreground font-medium">
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col min-w-0">
-                <span className="text-sm font-medium text-foreground leading-tight hover:underline">
-                  {fullName}
-                </span>
-                <span className="text-[11px] text-muted-foreground font-mono">
-                  ID: {(user.id || log.id || "").substring(0, 8)}
-                </span>
-              </div>
+            <div>
+              <AdminTableItem
+                avatar={fullAvatar}
+                title={fullName}
+                subtitle={`ID: ${(user.id || log.id || "").substring(0, 8)}`}
+                fallbackText={firstName.substring(0, 2).toUpperCase()}
+                onClick={() => {}}
+              />
             </div>
           </UserProfileHoverCard>
         );
@@ -158,11 +154,14 @@ export default function ImpactActivityLogPage() {
     {
       key: "action",
       header: "Action / Event",
-      cell: (log: any) => (
-        <span className="text-xs font-medium text-foreground line-clamp-1 max-w-[250px]">
-          {log?.changeReason || "Action performed"}
-        </span>
-      ),
+      cell: (log: any) => {
+        const isDecay = log?.changeReason?.toLowerCase().includes("decay");
+        return (
+          <AdminTableTag variant={isDecay ? "rose" : "indigo"}>
+            {log?.changeReason?.replace(/_/g, " ") || "Action performed"}
+          </AdminTableTag>
+        );
+      },
     },
     {
       key: "amount",
@@ -171,26 +170,11 @@ export default function ImpactActivityLogPage() {
         const isPositive = log?.changeAmount > 0;
         const isNegative = log?.changeAmount < 0;
         return (
-          <div
-            className={cn(
-              "flex items-center gap-1 font-mono text-sm font-semibold",
-              isNegative
-                ? "text-rose-600 dark:text-rose-400"
-                : isPositive 
-                ? "text-emerald-600 dark:text-emerald-400"
-                : "text-zinc-600 dark:text-zinc-400"
-            )}
-          >
-            {isNegative ? (
-              <ArrowDownRight className="h-3.5 w-3.5" />
-            ) : isPositive ? (
-              <ArrowUpRight className="h-3.5 w-3.5" />
-            ) : null}
-            <span>
-              {isPositive ? "+" : ""}
-              {Number(log?.changeAmount || 0).toLocaleString()}
-            </span>
-          </div>
+          <AdminTableMetric
+            icon={isNegative ? ArrowDownRight : isPositive ? ArrowUpRight : undefined}
+            value={`${isPositive ? "+" : ""}${Number(log?.changeAmount || 0).toLocaleString()}`}
+            variant={isNegative ? "rose" : isPositive ? "emerald" : "default"}
+          />
         );
       },
     },
@@ -198,9 +182,10 @@ export default function ImpactActivityLogPage() {
       key: "newScore",
       header: "New Score",
       cell: (log: any) => (
-        <span className="font-mono text-xs font-medium text-foreground">
-          {Number(log?.newScore || 0).toLocaleString()}
-        </span>
+        <AdminTableMetric
+          value={Number(log?.newScore || 0).toLocaleString()}
+          variant="mono"
+        />
       ),
     },
     {
@@ -210,18 +195,14 @@ export default function ImpactActivityLogPage() {
         const dateObj = log.createdAt ? new Date(log.createdAt) : null;
         const validDate = dateObj && !isNaN(dateObj.getTime());
         return (
-          <div className="flex flex-col">
-            <span className="text-xs text-foreground">
-              {validDate
-                ? format(dateObj, "MMM d, yyyy")
-                : safeFormat(log.createdAt, "MMM dd, yyyy")}
-            </span>
-            <span className="text-[11px] text-muted-foreground">
-              {validDate
+          <AdminTableDate
+            date={validDate ? dateObj : log.createdAt}
+            time={
+              validDate
                 ? format(dateObj, "hh:mm a")
-                : safeFormat(log.createdAt, "HH:mm")}
-            </span>
-          </div>
+                : safeFormat(log.createdAt, "HH:mm")
+            }
+          />
         );
       },
     },

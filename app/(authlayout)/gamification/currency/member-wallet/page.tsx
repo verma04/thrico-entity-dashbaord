@@ -8,6 +8,8 @@ import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrappe
 import {
   AdminTable,
   AdminTableColumn,
+  AdminTableItem,
+  AdminTableMetric,
   Pagination,
 } from "@/components/shared/admin-table/admin-table";
 import { Wallet, Coins, Search, History } from "lucide-react";
@@ -44,8 +46,8 @@ export default function MemberWalletPage() {
     {
       key: "serial",
       header: "S.No",
-      headerClassName: "w-12 text-center",
-      className: "text-center text-xs font-medium text-muted-foreground",
+      headerClassName: "w-10 text-center",
+      className: "text-center text-[11px] font-medium text-muted-foreground",
       cell: (_, index) => offset + index + 1,
     },
     {
@@ -55,34 +57,13 @@ export default function MemberWalletPage() {
         const user = row.user;
         if (!user) return null;
         return (
-          <Link
-            href={`/members/${user?.id}`}
-            className="flex items-center gap-3 group"
-          >
-            <Avatar className="h-9 w-9 rounded-lg border border-border/60 shrink-0">
-              <AvatarImage
-                src={
-                  user?.avatar
-                    ? user?.avatar.startsWith("http")
-                      ? user?.avatar
-                      : `https://cdn.thrico.network/${user?.avatar}`
-                    : ""
-                }
-                alt={`${user?.firstName} ${user?.lastName}`}
-              />
-              <AvatarFallback className="rounded-lg bg-muted text-muted-foreground text-xs font-semibold uppercase">
-                {user?.firstName?.charAt(0)}
-                {user?.lastName?.charAt(0)}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col min-w-0">
-              <span className="font-bold text-foreground text-sm truncate group-hover:text-primary transition-colors">
-                {user?.firstName} {user?.lastName}
-              </span>
-              <span className="text-[11px] text-muted-foreground truncate">
-                {user?.email}
-              </span>
-            </div>
+          <Link href={`/members/${user?.id}`}>
+            <AdminTableItem
+              avatar={user?.avatar}
+              title={`${user?.firstName || ""} ${user?.lastName || ""}`}
+              subtitle={user?.email}
+              fallbackText={user?.firstName?.charAt(0)}
+            />
           </Link>
         );
       },
@@ -93,14 +74,15 @@ export default function MemberWalletPage() {
       cell: (row) => {
         const wallet = row;
         return (
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1 text-[13px] font-bold text-amber-600 dark:bg-amber-500/20 dark:text-amber-400">
-              <Coins className="h-4 w-4" />
-              {wallet?.balance
+          <AdminTableMetric
+            icon={Coins}
+            value={
+              wallet?.balance
                 ? parseFloat(wallet.balance).toLocaleString()
-                : "0"}
-            </div>
-          </div>
+                : "0"
+            }
+            variant="amber"
+          />
         );
       },
     },
@@ -110,12 +92,10 @@ export default function MemberWalletPage() {
       cell: (row) => {
         const wallet = row;
         return (
-          <div className="text-[12px] font-bold text-emerald-600 dark:text-emerald-400">
-            +
-            {wallet?.totalEarned
-              ? parseFloat(wallet.totalEarned).toLocaleString()
-              : "0"}
-          </div>
+          <AdminTableMetric
+            value={`+${wallet?.totalEarned ? parseFloat(wallet.totalEarned).toLocaleString() : "0"}`}
+            variant="emerald"
+          />
         );
       },
     },
@@ -125,33 +105,35 @@ export default function MemberWalletPage() {
       cell: (row) => {
         const wallet = row;
         return (
-          <div className="text-[12px] font-bold text-rose-600 dark:text-rose-400">
-            -
-            {wallet?.totalSpent
-              ? parseFloat(wallet.totalSpent).toLocaleString()
-              : "0"}
-          </div>
+          <AdminTableMetric
+            value={`-${wallet?.totalSpent ? parseFloat(wallet.totalSpent).toLocaleString() : "0"}`}
+            variant="rose"
+          />
         );
       },
     },
     {
       key: "actions",
       header: "Actions",
+      headerClassName: "w-28 text-right",
+      className: "text-right",
       isFixedRight: true,
       cell: (row) => {
         const user = row.user;
         if (!user) return null;
         return (
-          <CtaButton
+          <Button
             variant="outline"
+            size="sm"
+            className="h-6 px-2 text-[11px] font-medium gap-1 text-muted-foreground hover:text-foreground"
             onClick={() => {
               setSelectedUserId(user.id);
               setSelectedUserName(`${user.firstName} ${user.lastName}`);
             }}
           >
-            <History className="h-3.5 w-3.5" />
+            <History className="h-3 w-3" />
             History Log
-          </CtaButton>
+          </Button>
         );
       },
     },

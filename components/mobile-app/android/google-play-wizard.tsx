@@ -138,81 +138,81 @@ export function GooglePlayWizard({ open, onOpenChange, onComplete }: GooglePlayW
     switch (step) {
       case 1:
         return (
-          <div className="space-y-6">
-            <div className="text-center space-y-2">
-              <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-                <PlaySquare className="w-6 h-6 text-primary" />
+          <div className="space-y-5">
+            <div className="text-center space-y-1.5">
+              <div className="mx-auto w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center mb-3">
+                <PlaySquare className="w-5 h-5 text-primary" />
               </div>
-              <h3 className="text-lg font-medium">Before connecting, make sure you have:</h3>
+              <h3 className="text-sm font-semibold">Before connecting, make sure you have:</h3>
             </div>
             
-            <div className="space-y-3 bg-muted/30 p-4 rounded-lg">
-              <div className="flex items-center gap-3">
-                <CheckCircle2 className="w-5 h-5 text-primary" />
+            <div className="space-y-2.5 bg-muted/30 p-3.5 rounded-lg text-xs">
+              <div className="flex items-center gap-2.5">
+                <CheckCircle2 className="w-4 h-4 text-primary" />
                 <span>Google Play Developer Account</span>
               </div>
-              <div className="flex items-center gap-3">
-                <CheckCircle2 className="w-5 h-5 text-primary" />
+              <div className="flex items-center gap-2.5">
+                <CheckCircle2 className="w-4 h-4 text-primary" />
                 <span>Google Cloud Project</span>
               </div>
-              <div className="flex items-center gap-3">
-                <CheckCircle2 className="w-5 h-5 text-primary" />
+              <div className="flex items-center gap-2.5">
+                <CheckCircle2 className="w-4 h-4 text-primary" />
                 <span>Service Account JSON</span>
               </div>
-              <div className="flex items-center gap-3">
-                <CheckCircle2 className="w-5 h-5 text-primary" />
+              <div className="flex items-center gap-2.5">
+                <CheckCircle2 className="w-4 h-4 text-primary" />
                 <span>Google Play Developer API Enabled</span>
               </div>
             </div>
 
-            <div className="flex items-center justify-between text-sm text-muted-foreground p-4 border rounded-lg">
+            <div className="flex items-center justify-between text-xs text-muted-foreground p-3 border rounded-lg">
               <span>Estimated Time</span>
               <span className="font-medium text-foreground">10 Minutes</span>
             </div>
 
-            <Button className="w-full" onClick={handleNext}>Continue</Button>
+            <Button className="w-full h-9 text-xs" onClick={handleNext}>Continue</Button>
           </div>
         );
       case 2:
         return (
-          <div className="space-y-6">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="developerName">Developer Name</Label>
+          <div className="space-y-5">
+            <div className="space-y-3.5">
+              <div className="grid gap-1.5">
+                <Label htmlFor="developerName" className="text-xs font-medium">Developer Name</Label>
                 <Input 
                   id="developerName"
                   name="developerName"
-                  placeholder="e.g. HDFC Bank Ltd" 
+                  placeholder="e.g. Acme Corporation" 
                   value={formik.values.developerName}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
-                  className={formik.touched.developerName && formik.errors.developerName ? "border-red-500" : ""}
+                  className={`h-9 text-xs ${formik.touched.developerName && formik.errors.developerName ? "border-red-500" : ""}`}
                 />
                 {formik.touched.developerName && formik.errors.developerName && (
-                  <p className="text-sm text-red-500">{formik.errors.developerName as string}</p>
+                  <p className="text-xs text-red-500">{formik.errors.developerName as string}</p>
                 )}
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="developerEmail">Developer Email</Label>
+              <div className="grid gap-1.5">
+                <Label htmlFor="developerEmail" className="text-xs font-medium">Developer Email</Label>
                 <Input 
                   id="developerEmail" 
                   name="developerEmail"
                   type="email"
-                  placeholder="e.g. admin@hdfcbank.com" 
+                  placeholder="e.g. admin@acme.com" 
                   value={formik.values.developerEmail}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
-                  className={formik.touched.developerEmail && formik.errors.developerEmail ? "border-red-500" : ""}
+                  className={`h-9 text-xs ${formik.touched.developerEmail && formik.errors.developerEmail ? "border-red-500" : ""}`}
                 />
                 {formik.touched.developerEmail && formik.errors.developerEmail && (
-                  <p className="text-sm text-red-500">{formik.errors.developerEmail as string}</p>
+                  <p className="text-xs text-red-500">{formik.errors.developerEmail as string}</p>
                 )}
               </div>
             </div>
-            <div className="flex gap-3">
-              <Button variant="outline" className="flex-1" onClick={handleBack}>Back</Button>
+            <div className="flex gap-2.5">
+              <Button variant="outline" className="flex-1 h-9 text-xs" onClick={handleBack}>Back</Button>
               <Button 
-                className="flex-1" 
+                className="flex-1 h-9 text-xs" 
                 onClick={handleNext}
                 disabled={!isStep2Valid}
               >
@@ -223,40 +223,42 @@ export function GooglePlayWizard({ open, onOpenChange, onComplete }: GooglePlayW
         );
       case 3:
         return (
-          <div className="space-y-6">
+          <div className="space-y-5">
             {!fileName ? (
-              <div className="border-2 border-dashed rounded-lg p-10 flex flex-col items-center justify-center text-center space-y-4 hover:bg-muted/50 transition-colors">
-                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                  <UploadCloud className="w-6 h-6 text-primary" />
+              <div className="border-2 border-dashed rounded-lg p-8 flex flex-col items-center justify-center text-center space-y-3 hover:bg-muted/50 transition-colors">
+                <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                  <UploadCloud className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <p className="font-medium">Upload Google Play Service Account</p>
-                  <p className="text-sm text-muted-foreground mt-1">Drag & Drop JSON or</p>
+                  <p className="font-medium text-xs">Upload Google Play Service Account</p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">Drag & Drop JSON or</p>
                 </div>
                 <Button 
                   variant="outline" 
+                  size="sm"
+                  className="h-8 text-xs"
                   onClick={() => setFileName("mobile-publisher.json")}
                 >
                   Upload JSON
                 </Button>
-                <p className="text-xs text-muted-foreground mt-4">Accepted Format: .json</p>
+                <p className="text-[11px] text-muted-foreground mt-2">Accepted Format: .json</p>
               </div>
             ) : (
-              <div className="border rounded-lg p-6 flex flex-col items-center justify-center text-center space-y-4 bg-primary/5 border-primary/20">
-                <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center">
-                  <FileJson className="w-6 h-6 text-primary" />
+              <div className="border rounded-lg p-5 flex flex-col items-center justify-center text-center space-y-3 bg-primary/5 border-primary/20">
+                <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center">
+                  <FileJson className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-medium text-lg text-primary">Service Account Uploaded</h3>
-                  <p className="text-sm text-muted-foreground mt-1">Filename: {fileName}</p>
+                  <h3 className="font-semibold text-sm text-primary">Service Account Uploaded</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">Filename: {fileName}</p>
                 </div>
               </div>
             )}
 
-            <div className="flex gap-3">
-              <Button variant="outline" className="flex-1" onClick={handleBack}>Back</Button>
+            <div className="flex gap-2.5">
+              <Button variant="outline" className="flex-1 h-9 text-xs" onClick={handleBack}>Back</Button>
               <Button 
-                className="flex-1" 
+                className="flex-1 h-9 text-xs" 
                 onClick={() => {
                   handleNext();
                   simulateVerification();
@@ -270,9 +272,9 @@ export function GooglePlayWizard({ open, onOpenChange, onComplete }: GooglePlayW
         );
       case 4:
         return (
-          <div className="space-y-6">
-            <div className="text-center mb-6">
-              <h3 className="text-lg font-medium">{isVerifying ? "Checking Connection..." : "Google Play Connected"}</h3>
+          <div className="space-y-5">
+            <div className="text-center mb-4">
+              <h3 className="text-sm font-semibold">{isVerifying ? "Checking Connection..." : "Google Play Connected"}</h3>
             </div>
             
             <div className="space-y-4 border rounded-lg p-4">

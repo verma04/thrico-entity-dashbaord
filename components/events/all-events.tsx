@@ -45,8 +45,8 @@ const getColumns = (singularName: string): AdminTableColumn<Event>[] => [
     key: "event",
     header: singularName,
     cell: (row) => (
-      <div className="flex items-center gap-3">
-        <Avatar className="h-9 w-9 rounded-lg border border-border/60 shrink-0">
+      <div className="flex items-center gap-2.5">
+        <Avatar className="h-7 w-7 rounded-md border border-border/60 shrink-0">
           <AvatarImage
             src={
               row.cover
@@ -56,15 +56,15 @@ const getColumns = (singularName: string): AdminTableColumn<Event>[] => [
             alt={row.title}
             className="object-cover"
           />
-          <AvatarFallback className="rounded-lg bg-muted text-muted-foreground text-xs font-semibold">
-            <Calendar className="h-4 w-4" />
+          <AvatarFallback className="rounded-md bg-muted text-muted-foreground text-[10px] font-semibold">
+            <Calendar className="h-3.5 w-3.5" />
           </AvatarFallback>
         </Avatar>
         <div className="flex flex-col min-w-0">
-          <p className="text-[13px] font-semibold text-foreground leading-tight truncate max-w-[200px]">
+          <p className="text-[12px] font-semibold text-foreground leading-tight truncate max-w-[200px]">
             {row.title}
           </p>
-          <p className="text-[11px] text-muted-foreground mt-0.5 capitalize">
+          <p className="text-[10px] text-muted-foreground mt-0.5 capitalize">
             {row.type?.toLowerCase()} ·{" "}
             {row.startDate ? moment(row.startDate).format("MMM DD, YYYY") : "—"}
           </p>

@@ -4,6 +4,10 @@ import React, { useState, useMemo } from "react";
 import {
   AdminTable,
   AdminTableColumn,
+  AdminTableItem,
+  AdminTableTag,
+  AdminTableMetric,
+  AdminTableDate,
 } from "@/components/shared/admin-table/admin-table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -184,9 +188,10 @@ export function QuickAuditTrace() {
     {
       key: "rank",
       header: "#",
-      className: "w-14",
+      headerClassName: "w-10 text-center",
+      className: "text-center",
       cell: (_tx, index) => (
-        <span className="font-mono text-xs text-muted-foreground font-semibold">
+        <span className="font-mono text-[11px] text-muted-foreground font-semibold">
           #{index + 1}
         </span>
       ),
@@ -205,7 +210,6 @@ export function QuickAuditTrace() {
           : avatarUrl
             ? `https://cdn.thrico.network/${avatarUrl}`
             : "";
-        const initials = firstName.substring(0, 2).toUpperCase();
 
         const hoverUser: UserProfileHoverData = {
           id: tx.userId || user.id || "",
@@ -216,25 +220,14 @@ export function QuickAuditTrace() {
 
         return (
           <UserProfileHoverCard user={hoverUser}>
-            <div className="flex items-center gap-3 cursor-pointer">
-              <Avatar className="h-8 w-8 border border-border shrink-0">
-                <AvatarImage
-                  src={fullAvatar}
-                  alt={fullName}
-                  className="object-cover"
-                />
-                <AvatarFallback className="text-[10px] bg-muted text-muted-foreground font-medium">
-                  {initials}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col min-w-0">
-                <span className="text-sm font-medium text-foreground leading-tight hover:underline">
-                  {fullName}
-                </span>
-                <span className="text-[11px] text-muted-foreground font-mono">
-                  ID: {(tx.userId || user.id || "").substring(0, 8)}
-                </span>
-              </div>
+            <div>
+              <AdminTableItem
+                avatar={fullAvatar}
+                title={fullName}
+                subtitle={`ID: ${(tx.userId || user.id || "").substring(0, 8)}`}
+                fallbackText={firstName.substring(0, 2).toUpperCase()}
+                onClick={() => {}}
+              />
             </div>
           </UserProfileHoverCard>
         );
@@ -244,14 +237,21 @@ export function QuickAuditTrace() {
       key: "type",
       header: "Module / Type",
       cell: (tx) => {
-        const badge = getTypeBadge(tx.type);
+        const variantMap: Record<
+          string,
+          "indigo" | "purple" | "rose" | "amber" | "emerald" | "default"
+        > = {
+          POINTS_TO_EC: "indigo",
+          EC_TO_TC: "purple",
+          TC_DEBIT: "rose",
+          EC_DEBIT: "amber",
+          POINTS_AWARD: "emerald",
+        };
+        const variant = variantMap[tx.type] || "default";
         return (
-          <Badge
-            variant="outline"
-            className={cn("font-medium text-[11px] capitalize", badge.className)}
-          >
-            {badge.label}
-          </Badge>
+          <AdminTableTag variant={variant}>
+            {getTypeBadge(tx.type).label}
+          </AdminTableTag>
         );
       },
     },
@@ -261,24 +261,11 @@ export function QuickAuditTrace() {
       cell: (tx) => {
         const isDebit = tx.type?.includes("DEBIT");
         return (
-          <div
-            className={cn(
-              "flex items-center gap-1 font-mono text-sm font-semibold",
-              isDebit
-                ? "text-rose-600 dark:text-rose-400"
-                : "text-emerald-600 dark:text-emerald-400",
-            )}
-          >
-            {isDebit ? (
-              <ArrowDownRight className="h-3.5 w-3.5" />
-            ) : (
-              <ArrowUpRight className="h-3.5 w-3.5" />
-            )}
-            <span>
-              {isDebit ? "-" : "+"}
-              {Number(tx.amount || 0).toLocaleString()}
-            </span>
-          </div>
+          <AdminTableMetric
+            icon={isDebit ? ArrowDownRight : ArrowUpRight}
+            value={`${isDebit ? "-" : "+"}${Number(tx.amount || 0).toLocaleString()}`}
+            variant={isDebit ? "rose" : "emerald"}
+          />
         );
       },
     },
@@ -286,9 +273,10 @@ export function QuickAuditTrace() {
       key: "balance",
       header: "Balance After",
       cell: (tx) => (
-        <span className="font-mono text-xs font-medium text-foreground">
-          {Number(tx.balanceAfter || 0).toLocaleString()}
-        </span>
+        <AdminTableMetric
+          value={Number(tx.balanceAfter || 0).toLocaleString()}
+          variant="mono"
+        />
       ),
     },
     {
@@ -298,37 +286,33 @@ export function QuickAuditTrace() {
         const dateObj = tx.timestamp ? new Date(tx.timestamp) : null;
         const validDate = dateObj && !isNaN(dateObj.getTime());
         return (
-          <div className="flex flex-col">
-            <span className="text-xs text-foreground">
-              {validDate
-                ? format(dateObj, "MMM d, yyyy")
-                : safeFormat(tx.timestamp, "MMM dd, yyyy")}
-            </span>
-            <span className="text-[11px] text-muted-foreground">
-              {validDate
+          <AdminTableDate
+            date={validDate ? dateObj : tx.timestamp}
+            time={
+              validDate
                 ? format(dateObj, "hh:mm a")
-                : safeFormat(tx.timestamp, "HH:mm")}
-            </span>
-          </div>
+                : safeFormat(tx.timestamp, "HH:mm")
+            }
+          />
         );
       },
     },
     {
       key: "info",
       header: "Details",
-      headerClassName: "text-center w-16",
+      headerClassName: "text-center w-12",
       className: "text-center",
       cell: (tx) => {
         if (!tx.metadata)
-          return <span className="text-xs text-muted-foreground">—</span>;
+          return <span className="text-[10px] text-muted-foreground">—</span>;
         return (
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 rounded-lg"
+                  size="sm"
+                  className="h-6 w-6 p-0 rounded-md"
                 >
                   <Info className="h-3.5 w-3.5 text-muted-foreground" />
                 </Button>

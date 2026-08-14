@@ -47,18 +47,18 @@ export default function Jobs({ data }: { data: Job[] | undefined }) {
       key: "title",
       header: singularName,
       cell: (row) => (
-        <div className="flex items-center gap-4">
-          <div className="h-10 w-10 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center shrink-0">
-            <Briefcase className="h-5 w-5 text-indigo-500" />
+        <div className="flex items-center gap-2.5">
+          <div className="h-7 w-7 rounded-md bg-indigo-50 border border-indigo-100 flex items-center justify-center shrink-0">
+            <Briefcase className="h-3.5 w-3.5 text-indigo-500" />
           </div>
           <div className="flex flex-col min-w-0">
-            <span className="font-bold text-foreground leading-tight truncate max-w-[280px]">
+            <span className="text-[12px] font-semibold text-foreground leading-tight truncate max-w-[280px]">
               {row.title}
             </span>
             <div className="flex items-center gap-2 mt-0.5">
               <JobTypeBadge type={row.jobType} />
               {row.location && (
-                <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+                <span className="text-[10px] text-muted-foreground flex items-center gap-1">
                   <MapPin className="h-3 w-3" />
                   {typeof row.location === "string"
                     ? row.location

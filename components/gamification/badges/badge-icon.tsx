@@ -9,7 +9,20 @@ interface BadgeIconProps {
 }
 
 export function BadgeIcon({ icon, className, imageClassName }: BadgeIconProps) {
-  const isImage = icon?.includes("/") || icon?.startsWith("http");
+  if (!icon) {
+    return (
+      <div className={cn("flex items-center justify-center overflow-hidden", className)}>
+        <span>⭐</span>
+      </div>
+    );
+  }
+
+  const isImage =
+    icon.includes("/") ||
+    icon.startsWith("http") ||
+    icon.startsWith("data:") ||
+    icon.startsWith("blob:") ||
+    /\.(png|jpe?g|svg|webp|gif|avif|ico|bmp)(\?.*)?$/i.test(icon);
 
   return (
     <div className={cn("flex items-center justify-center overflow-hidden", className)}>
@@ -20,7 +33,7 @@ export function BadgeIcon({ icon, className, imageClassName }: BadgeIconProps) {
           className={cn("h-full w-full object-cover", imageClassName)}
         />
       ) : (
-        <span>{icon || "⭐"}</span>
+        <span>{icon}</span>
       )}
     </div>
   );

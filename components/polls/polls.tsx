@@ -75,10 +75,11 @@ const Poll: React.FC<PollProps> = ({ by: initialBy }) => {
              <EcosystemActionBar.Item>
                 <CtaButton
                   variant="outline"
+                  size="md"
                   onClick={() => refetch()}
-                  className="h-6 w-6 p-0 rounded-md border-border text-muted-foreground hover:text-foreground transition-all"
+                  className="h-8 w-8 p-0 rounded-md border-border text-muted-foreground hover:text-foreground transition-all"
                 >
-                  <RotateCw className={cn("h-3 w-3", loading && "animate-spin")} />
+                  <RotateCw className={cn("h-3.5 w-3.5", loading && "animate-spin")} />
                 </CtaButton>
              </EcosystemActionBar.Item>
           </EcosystemActionBar.Group>
@@ -86,7 +87,7 @@ const Poll: React.FC<PollProps> = ({ by: initialBy }) => {
           <EcosystemActionBar.Group align="right">
              <EcosystemActionBar.Item>
                 <Link href="/polls/create">
-                   <CtaButton className="gap-1.5">
+                   <CtaButton size="md" className="gap-1.5 h-8 px-3 text-xs">
                      <Plus className="h-3.5 w-3.5" />
                      Create {singularName}
                    </CtaButton>

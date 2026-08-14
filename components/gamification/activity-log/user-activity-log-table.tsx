@@ -6,6 +6,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from "date-fns";
 import { UserGamificationActivityLogEntry } from "@/graphql/actions/gamification/gamification-quiries";
 import { Badge } from "@/components/ui/badge";
+import { BadgeIcon } from "@/components/gamification/badges/badge-icon";
+import { getPreferredMediaUrl } from "@/utils/media";
 
 interface UserActivityLogTableProps {
   logs: UserGamificationActivityLogEntry[];
@@ -26,7 +28,7 @@ export function UserActivityLogTable({
           <div className="flex items-center gap-3">
             <Avatar className="h-8 w-8 border border-white shadow-sm shrink-0">
               <AvatarImage
-                src={`https://cdn.thrico.network/${user.avatar}`}
+                src={getPreferredMediaUrl(user.avatar) || ""}
                 alt={user.firstName}
               />
               <AvatarFallback className="text-[10px] bg-primary/5 text-primary">
@@ -67,10 +69,10 @@ export function UserActivityLogTable({
             <div className="flex flex-col max-w-[300px]">
               <div className="flex items-center gap-2">
                 {badgeIcon && (
-                  <img
-                    src={`https://cdn.thrico.network/${badgeIcon}`}
-                    alt={badgeName}
-                    className="h-4 w-4"
+                  <BadgeIcon
+                    icon={badgeIcon}
+                    className="h-4 w-4 shrink-0 text-xs"
+                    imageClassName="h-full w-full object-contain"
                   />
                 )}
                 <span className="text-xs font-bold text-blue-600">

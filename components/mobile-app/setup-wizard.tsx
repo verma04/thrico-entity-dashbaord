@@ -99,10 +99,10 @@ export function SetupWizard({
       {/* Sidebar Stepper */}
       <div className="lg:w-1/4 shrink-0">
         <div className="sticky top-6">
-          <h2 className="text-2xl font-semibold mb-2">{title}</h2>
-          <p className="text-muted-foreground mb-6 text-sm">{description}</p>
+          <h2 className="text-lg font-semibold mb-1">{title}</h2>
+          <p className="text-muted-foreground mb-4 text-xs">{description}</p>
 
-          <div className="space-y-4">
+          <div className="space-y-2.5">
             {steps.map((step, index) => {
               const isCompleted = currentStepIndex > index;
               const isCurrent = currentStepIndex === index;
@@ -110,7 +110,7 @@ export function SetupWizard({
               return (
                 <div
                   key={step.id}
-                  className={`flex items-start gap-3 p-3 rounded-lg transition-colors ${
+                  className={`flex items-start gap-2.5 p-2.5 rounded-lg transition-colors ${
                     isCurrent
                       ? "bg-primary/10 text-primary"
                       : isCompleted
@@ -120,25 +120,25 @@ export function SetupWizard({
                 >
                   <div className="mt-0.5 shrink-0">
                     {isCompleted ? (
-                      <CheckCircle2 className="w-5 h-5 text-green-500" />
+                      <CheckCircle2 className="w-4 h-4 text-green-500" />
                     ) : isCurrent ? (
-                      <div className="w-5 h-5 rounded-full border-2 border-primary flex items-center justify-center">
-                        <div className="w-2.5 h-2.5 bg-primary rounded-full" />
+                      <div className="w-4 h-4 rounded-full border-2 border-primary flex items-center justify-center">
+                        <div className="w-2 h-2 bg-primary rounded-full" />
                       </div>
                     ) : (
-                      <Circle className="w-5 h-5" />
+                      <Circle className="w-4 h-4" />
                     )}
                   </div>
                   <div>
                     <p
-                      className={`text-sm font-medium ${
+                      className={`text-xs font-medium ${
                         isCurrent ? "text-foreground" : ""
                       }`}
                     >
                       {step.title}
                     </p>
                     {isCurrent && (
-                      <p className="text-xs mt-1 text-muted-foreground">
+                      <p className="text-[11px] mt-0.5 text-muted-foreground">
                         {step.description}
                       </p>
                     )}
@@ -153,15 +153,15 @@ export function SetupWizard({
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
         <Card className="flex-1 border shadow-sm">
-          <CardContent className="p-6 md:p-8 flex flex-col h-full min-h-[500px]">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-medium">{currentStep.title}</h3>
-              <span className="text-sm text-muted-foreground">
+          <CardContent className="p-5 md:p-6 flex flex-col h-full min-h-[500px]">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-base font-semibold">{currentStep.title}</h3>
+              <span className="text-xs text-muted-foreground">
                 Step {currentStepIndex + 1} of {steps.length}
               </span>
             </div>
             
-            <Progress value={progress} className="h-1 mb-8" />
+            <Progress value={progress} className="h-1 mb-6" />
 
             <div className="flex-1">
               {currentStep.component}

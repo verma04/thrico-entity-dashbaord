@@ -84,21 +84,21 @@ export default function Reports({
                 value={selectedModule}
                 onValueChange={(val: any) => setSelectedModule(val)}
               >
-                <SelectTrigger className="h-9 w-[180px] rounded-xl border-border bg-card text-xs font-medium focus:ring-2 focus:ring-zinc-500/10 transition-all">
+                <SelectTrigger className="h-8 w-[180px] rounded-md border-border bg-card text-xs font-medium focus:ring-1 focus:ring-ring transition-all shadow-2xs">
                   <div className="flex items-center gap-2">
                     <LayoutGrid className="h-3.5 w-3.5 text-muted-foreground" />
                     <SelectValue placeholder="All Modules" />
                   </div>
                 </SelectTrigger>
-                <SelectContent className="rounded-xl border-border shadow-2xl p-1">
-                  <SelectItem value="ALL" className="rounded-lg text-xs py-2">
+                <SelectContent className="rounded-lg border-border shadow-md p-1">
+                  <SelectItem value="ALL" className="rounded-sm text-xs py-1">
                     All Modules
                   </SelectItem>
                   {availableModules.map((mod) => (
                     <SelectItem
                       key={mod}
                       value={mod}
-                      className="rounded-lg text-xs py-2"
+                      className="rounded-sm text-xs py-1"
                     >
                       {mod === "COMMUNITY" ? moduleName.toUpperCase() : mod}
                     </SelectItem>
@@ -112,7 +112,7 @@ export default function Reports({
             <Button
               variant="outline"
               size="icon"
-              className="h-9 w-9 text-muted-foreground hover:text-foreground rounded-xl transition-all bg-card border-border"
+              className="h-8 w-8 text-muted-foreground hover:text-foreground rounded-md transition-all bg-card border-border shadow-2xs"
               onClick={() => refetch()}
             >
               <RotateCcw size={14} className={cn(loading && "animate-spin")} />

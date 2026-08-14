@@ -1,19 +1,22 @@
 "use client";
 
 import React from "react";
-import { AdminTable } from "@/components/shared/admin-table/admin-table";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { format } from "date-fns";
-import { GamificationActivityLogEntry } from "@/graphql/actions/gamification/gamification-quiries";
-import { Badge } from "@/components/ui/badge";
 import {
-  UserProfileHoverCard,
-  UserProfileHoverData,
-} from "@/components/shared/user-profile-hover-card";
+  AdminTable,
+  AdminTableItem,
+  AdminTableTag,
+  AdminTableMetric,
+  AdminTableDate,
+} from "@/components/shared/admin-table/admin-table";
+import { UserProfileHoverCard } from "@/components/shared/user-profile-hover-card";
+import { GamificationActivityLogEntry } from "@/graphql/actions/gamification/gamification-quiries";
+import { BadgeIcon } from "@/components/gamification/badges/badge-icon";
+import { Activity } from "lucide-react";
+import { format } from "date-fns";
 
 interface ActivityLogTableProps {
   logs: GamificationActivityLogEntry[];
-  isLoading: boolean;
+  isLoading?: boolean;
 }
 
 export function ActivityLogTable({ logs, isLoading }: ActivityLogTableProps) {
@@ -23,7 +26,9 @@ export function ActivityLogTable({ logs, isLoading }: ActivityLogTableProps) {
       header: "Member",
       cell: (log: GamificationActivityLogEntry) => {
         const user = log.user;
-        const hoverUser: UserProfileHoverData = {
+        if (!user) return <span className="text-[12px] text-muted-foreground">Unknown</span>;
+
+        const hoverUser = {
           id: user.id,
           firstName: user.firstName,
           lastName: user.lastName,
@@ -31,25 +36,14 @@ export function ActivityLogTable({ logs, isLoading }: ActivityLogTableProps) {
         };
         return (
           <UserProfileHoverCard user={hoverUser}>
-            <div className="flex items-center gap-3 cursor-pointer">
-              <Avatar className="h-8 w-8 border border-border shrink-0">
-                <AvatarImage
-                  src={`https://cdn.thrico.network/${user.avatar}`}
-                  alt={user.firstName}
-                  className="object-cover"
-                />
-                <AvatarFallback className="text-[10px] bg-muted text-muted-foreground font-medium">
-                  {user.firstName.substring(0, 2).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col min-w-0">
-                <span className="text-sm font-medium text-foreground leading-tight hover:underline">
-                  {user.firstName} {user.lastName}
-                </span>
-                <span className="text-[11px] text-muted-foreground">
-                  ID: {user.id.substring(0, 8)}
-                </span>
-              </div>
+            <div>
+              <AdminTableItem
+                avatar={user.avatar}
+                title={`${user.firstName || ""} ${user.lastName || ""}`}
+                subtitle={`ID: ${user.id.substring(0, 8)}`}
+                fallbackText={user.firstName?.substring(0, 2).toUpperCase()}
+                onClick={() => {}}
+              />
             </div>
           </UserProfileHoverCard>
         );
@@ -59,9 +53,9 @@ export function ActivityLogTable({ logs, isLoading }: ActivityLogTableProps) {
       key: "activity",
       header: "Activity",
       cell: (log: GamificationActivityLogEntry) => (
-        <Badge variant="secondary" className="font-medium text-xs capitalize">
+        <AdminTableTag variant="indigo">
           {log.type.replace(/_/g, " ").toLowerCase()}
-        </Badge>
+        </AdminTableTag>
       ),
     },
     {
@@ -73,18 +67,18 @@ export function ActivityLogTable({ logs, isLoading }: ActivityLogTableProps) {
             <div className="flex flex-col max-w-[280px]">
               <div className="flex items-center gap-1.5">
                 {log.badgeIcon && (
-                  <img
-                    src={`https://cdn.thrico.network/${log.badgeIcon}`}
-                    alt={log.badgeName}
-                    className="h-4 w-4"
+                  <BadgeIcon
+                    icon={log.badgeIcon}
+                    className="h-4 w-4 shrink-0 text-xs"
+                    imageClassName="h-full w-full object-contain"
                   />
                 )}
-                <span className="text-xs font-semibold text-blue-600">
+                <span className="text-[12px] font-semibold text-indigo-600 dark:text-indigo-400">
                   {log.badgeName}
                 </span>
               </div>
               {log.badgeDescription && (
-                <span className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5">
+                <span className="text-[10px] text-muted-foreground line-clamp-1 mt-0.5">
                   {log.badgeDescription}
                 </span>
               )}
@@ -94,18 +88,18 @@ export function ActivityLogTable({ logs, isLoading }: ActivityLogTableProps) {
         if (log.ruleAction) {
           return (
             <div className="flex flex-col max-w-[280px]">
-              <span className="text-xs font-medium text-foreground capitalize">
+              <span className="text-[12px] font-medium text-foreground capitalize">
                 {log.ruleAction.replace(/_/g, " ").toLowerCase()}
               </span>
               {log.ruleDescription && (
-                <span className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5">
+                <span className="text-[10px] text-muted-foreground line-clamp-1 mt-0.5">
                   {log.ruleDescription}
                 </span>
               )}
             </div>
           );
         }
-        return <span className="text-xs text-muted-foreground">—</span>;
+        return <span className="text-[10px] text-muted-foreground">—</span>;
       },
     },
     {
@@ -115,14 +109,10 @@ export function ActivityLogTable({ logs, isLoading }: ActivityLogTableProps) {
         const points = log.points;
         const isPositive = points > 0;
         return (
-          <span
-            className={`font-mono text-sm font-semibold ${
-              isPositive ? "text-emerald-600" : "text-rose-600"
-            }`}
-          >
-            {isPositive ? "+" : ""}
-            {points}
-          </span>
+          <AdminTableMetric
+            value={`${isPositive ? "+" : ""}${points}`}
+            variant={isPositive ? "emerald" : "rose"}
+          />
         );
       },
     },
@@ -130,14 +120,10 @@ export function ActivityLogTable({ logs, isLoading }: ActivityLogTableProps) {
       key: "date",
       header: "Date",
       cell: (log: GamificationActivityLogEntry) => (
-        <div className="flex flex-col">
-          <span className="text-xs text-foreground">
-            {format(new Date(log.createdAt), "MMM d, yyyy")}
-          </span>
-          <span className="text-[11px] text-muted-foreground">
-            {format(new Date(log.createdAt), "hh:mm a")}
-          </span>
-        </div>
+        <AdminTableDate
+          date={log.createdAt}
+          time={format(new Date(log.createdAt), "hh:mm a")}
+        />
       ),
     },
   ];
@@ -148,8 +134,10 @@ export function ActivityLogTable({ logs, isLoading }: ActivityLogTableProps) {
       data={logs || []}
       loading={isLoading}
       keyExtractor={(log) => log.id}
-      emptyTitle="No activity logged yet"
-      emptyDescription="Activity will appear here once members start earning points and badges."
+      emptyIcon={Activity}
+      emptyTitle="No activity recorded"
+      emptyDescription="Member points and badge achievements will appear here in real-time."
+      size="sm"
     />
   );
 }

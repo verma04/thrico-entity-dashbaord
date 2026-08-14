@@ -12,6 +12,8 @@ import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrappe
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { Ticket } from "lucide-react";
+import { couponSchema } from "@/components/rewards/coupons/types";
+import { PolarisFormLayout } from "@/components/gamification/shared/polaris-form-ui";
 
 export default function CreateCouponPage() {
   const { toast } = useToast();

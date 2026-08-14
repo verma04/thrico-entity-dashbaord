@@ -162,10 +162,10 @@ export default function SendEmail() {
   const stepNames = ["Template", "Recipients", "Subject", "Review"];
 
   return (
-    <div className="w-full flex flex-col gap-10 p-8 lg:p-10 animate-in fade-in duration-500">
+    <div className="max-w-6xl mx-auto w-full py-8 px-6 space-y-8 animate-in fade-in duration-500">
       {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-10 items-start">
-        <div className="lg:col-span-3 flex flex-col gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
+        <div className="lg:col-span-3 flex flex-col gap-6">
           {/* Step Indicator */}
           <div className="bg-card rounded-2xl border border-border/50 p-5">
             <StepIndicator currentStep={step} steps={stepNames} />

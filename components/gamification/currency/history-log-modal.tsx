@@ -149,40 +149,40 @@ export function HistoryLogModal({
                   const isBadge = log.type === "BADGE";
 
                   return (
-                    <div key={log.id} className="group flex gap-3 items-start relative">
+                    <div key={log.id} className="group flex gap-2.5 items-start relative">
                       
                       {/* Timeline Icon */}
                       <div className={cn(
-                        "w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border-2 border-background shadow-sm transition-transform group-hover:scale-105",
+                        "w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border border-border/60 shadow-sm transition-transform group-hover:scale-105",
                         isBadge ? "bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400" :
                         isPositive ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400" :
                         "bg-rose-100 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400"
                       )}>
                         {isBadge ? (
-                          <Award className="h-4 w-4" />
+                          <Award className="h-3.5 w-3.5" />
                         ) : isPositive ? (
-                          <ArrowUpRight className="h-4 w-4" />
+                          <ArrowUpRight className="h-3.5 w-3.5" />
                         ) : (
-                          <ArrowDownRight className="h-4 w-4" />
+                          <ArrowDownRight className="h-3.5 w-3.5" />
                         )}
                       </div>
 
                       {/* Content Card */}
                       <div className="flex-1 min-w-0">
-                        <div className="bg-muted/10 hover:bg-muted/30 transition-colors border border-border/40 py-2.5 px-3.5 rounded-xl">
-                          <div className="flex items-start justify-between gap-3">
+                        <div className="bg-muted/10 hover:bg-muted/30 transition-colors border border-border/40 py-2 px-3 rounded-lg">
+                          <div className="flex items-start justify-between gap-2.5">
                             <div className="min-w-0 flex-1">
-                              <p className="text-[13px] font-bold text-foreground leading-snug truncate">
+                              <p className="text-[12px] font-semibold text-foreground leading-tight truncate">
                                 {isPoints ? log.ruleAction || (isPositive ? "Earned Points" : "Spent Points") : log.badgeName || "Earned Badge"}
                               </p>
-                              <p className="text-[11px] text-muted-foreground mt-0.5 font-medium truncate">
+                              <p className="text-[10px] text-muted-foreground mt-0.5 font-normal truncate">
                                 {log.createdAt ? moment(!isNaN(Number(log.createdAt)) ? Number(log.createdAt) : log.createdAt).format("MMM D, YYYY • h:mm A") : "Unknown Date"}
                               </p>
                             </div>
 
                             {/* Value Chip */}
                             <div className={cn(
-                              "flex items-center gap-1 px-2 py-1 rounded-md font-bold text-xs shrink-0 shadow-sm",
+                              "flex items-center gap-1 px-1.5 py-0.5 rounded font-semibold text-[11px] shrink-0",
                               isBadge ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20" :
                               isPositive ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20" :
                               "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20"
@@ -193,7 +193,7 @@ export function HistoryLogModal({
                                   {isPositive ? "+" : "-"}{Math.abs(log.points || 0)}
                                 </>
                               ) : (
-                                <span className="text-[10px] tracking-widest uppercase">
+                                <span className="text-[9px] tracking-wider uppercase font-bold">
                                   BADGE
                                 </span>
                               )}
@@ -202,7 +202,7 @@ export function HistoryLogModal({
 
                           {/* Description if available */}
                           {(log.ruleDescription || log.badgeDescription) && (
-                            <p className="mt-2 text-[12px] text-muted-foreground/80 leading-snug border-t border-border/40 pt-2">
+                            <p className="mt-1.5 text-[11px] text-muted-foreground leading-tight border-t border-border/30 pt-1.5">
                               {log.ruleDescription || log.badgeDescription}
                             </p>
                           )}
@@ -217,7 +217,7 @@ export function HistoryLogModal({
         </div>
 
         {/* Footer / Pagination */}
-        <div className="sticky bottom-0 z-10 bg-background/80 backdrop-blur-xl border-t border-border/50 px-6 py-4">
+        <div className="sticky bottom-0 z-10 bg-background/80 backdrop-blur-xl border-t border-border/50 px-6 py-3">
           <div className="flex items-center justify-between">
             <Button
               variant="outline"
@@ -227,13 +227,13 @@ export function HistoryLogModal({
                 setFilter("all"); // Reset filter on pagination to avoid empty screens
               }}
               disabled={page === 1 || loading}
-              className="h-9 px-4 rounded-xl text-xs font-semibold shadow-sm hover:bg-muted"
+              className="h-7 px-2.5 rounded-lg text-[11px] font-medium hover:bg-muted"
             >
-              <ChevronLeft className="h-4 w-4 mr-1.5" />
+              <ChevronLeft className="h-3.5 w-3.5 mr-1" />
               Previous
             </Button>
             <div className="flex flex-col items-center">
-              <span className="text-[13px] font-bold text-foreground">Page {page}</span>
+              <span className="text-[12px] font-semibold text-foreground">Page {page}</span>
             </div>
             <Button
               variant="outline"
@@ -243,10 +243,10 @@ export function HistoryLogModal({
                 setFilter("all");
               }}
               disabled={!hasMore || loading}
-              className="h-9 px-4 rounded-xl text-xs font-semibold shadow-sm hover:bg-muted"
+              className="h-7 px-2.5 rounded-lg text-[11px] font-medium hover:bg-muted"
             >
               Next
-              <ChevronRight className="h-4 w-4 ml-1.5" />
+              <ChevronRight className="h-3.5 w-3.5 ml-1" />
             </Button>
           </div>
         </div>

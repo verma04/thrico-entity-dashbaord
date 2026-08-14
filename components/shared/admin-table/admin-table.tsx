@@ -12,7 +12,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { ChevronLeft, ChevronRight, FileSearch, SlidersHorizontal } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  FileSearch,
+  SlidersHorizontal,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   DropdownMenu,
@@ -22,6 +27,10 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Clock } from "lucide-react";
+import { safeFormat } from "@/lib/date-utils";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -50,6 +59,272 @@ export interface AdminTableProps<T = any> {
   enableColumnToggle?: boolean;
   size?: "sm" | "md";
   baseIndex?: number;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Reusable Table Components
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface AdminTableItemProps {
+  avatar?: string | null;
+  icon?: React.ElementType | React.ReactNode;
+  fallbackText?: string;
+  title: React.ReactNode;
+  subtitle?: React.ReactNode;
+  badge?: React.ReactNode;
+  className?: string;
+  shape?: "square" | "circle";
+  maxTitleWidth?: string;
+  onClick?: () => void;
+}
+
+export function AdminTableItem({
+  avatar,
+  icon: Icon,
+  fallbackText,
+  title,
+  subtitle,
+  badge,
+  className,
+  shape = "square",
+  maxTitleWidth = "max-w-[220px]",
+  onClick,
+}: AdminTableItemProps) {
+  const isCircle = shape === "circle";
+  const roundedClass = isCircle ? "rounded-full" : "rounded-md";
+
+  return (
+    <div
+      onClick={onClick}
+      className={cn(
+        "flex items-center gap-2.5 min-w-0",
+        onClick && "cursor-pointer group",
+        className,
+      )}
+    >
+      {avatar !== undefined ? (
+        <Avatar
+          className={cn(
+            "h-7 w-7 border border-border/60 shrink-0",
+            roundedClass,
+          )}
+        >
+          <AvatarImage
+            src={
+              avatar
+                ? avatar.startsWith("http")
+                  ? avatar
+                  : `https://cdn.thrico.network/${avatar}`
+                : ""
+            }
+            alt={typeof title === "string" ? title : ""}
+            className="object-cover"
+          />
+          <AvatarFallback
+            className={cn(
+              "bg-muted text-muted-foreground text-[10px] font-semibold",
+              roundedClass,
+            )}
+          >
+            {fallbackText ||
+              (typeof title === "string"
+                ? title.slice(0, 2).toUpperCase()
+                : "—")}
+          </AvatarFallback>
+        </Avatar>
+      ) : Icon ? (
+        <div
+          className={cn(
+            "h-7 w-7 border border-border/60 bg-muted/60 flex items-center justify-center shrink-0 text-muted-foreground",
+            roundedClass,
+          )}
+        >
+          {React.isValidElement(Icon) ? (
+            Icon
+          ) : typeof Icon === "function" ? (
+            // @ts-ignore
+            <Icon className="h-3.5 w-3.5" />
+          ) : null}
+        </div>
+      ) : null}
+
+      <div className="flex flex-col min-w-0">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <p
+            className={cn(
+              "text-[12px] font-semibold text-foreground leading-tight truncate",
+              maxTitleWidth,
+              onClick && "group-hover:text-primary transition-colors",
+            )}
+          >
+            {title}
+          </p>
+          {badge}
+        </div>
+        {subtitle && (
+          <p
+            className={cn(
+              "text-[10px] text-muted-foreground leading-tight mt-0.5 truncate",
+              maxTitleWidth,
+            )}
+          >
+            {subtitle}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export function AdminTableTag({
+  children,
+  variant = "default",
+  className,
+}: {
+  children: React.ReactNode;
+  variant?:
+    | "default"
+    | "indigo"
+    | "purple"
+    | "emerald"
+    | "amber"
+    | "rose"
+    | "sky"
+    | "muted";
+  className?: string;
+}) {
+  const variants: Record<string, string> = {
+    default: "bg-muted text-muted-foreground border-border/60",
+    indigo:
+      "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800",
+    purple:
+      "bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 border-purple-200 dark:border-purple-800",
+    emerald:
+      "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800",
+    amber:
+      "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border-amber-200 dark:border-amber-800",
+    rose: "bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 border-rose-200 dark:border-rose-800",
+    sky: "bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-300 border-sky-200 dark:border-sky-800",
+    muted: "bg-muted/60 text-muted-foreground border-border/40",
+  };
+
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider border",
+        variants[variant] || variants.default,
+        className,
+      )}
+    >
+      {children}
+    </span>
+  );
+}
+
+export function AdminTableText({
+  primary,
+  secondary,
+  icon: Icon,
+  className,
+}: {
+  primary: React.ReactNode;
+  secondary?: React.ReactNode;
+  icon?: React.ElementType;
+  className?: string;
+}) {
+  return (
+    <div className={cn("flex flex-col gap-0.5 min-w-0", className)}>
+      <div className="flex items-center gap-1 text-[12px] text-foreground/90 font-medium">
+        {Icon && <Icon className="h-3 w-3 text-muted-foreground/60 shrink-0" />}
+        <span className="truncate max-w-[200px]">{primary}</span>
+      </div>
+      {secondary && (
+        <span
+          className={cn(
+            "text-[10px] text-muted-foreground leading-tight truncate max-w-[200px]",
+            Icon && "pl-4",
+          )}
+        >
+          {secondary}
+        </span>
+      )}
+    </div>
+  );
+}
+
+export function AdminTableMetric({
+  value,
+  unit,
+  icon: Icon,
+  variant = "default",
+  className,
+}: {
+  value: React.ReactNode;
+  unit?: string;
+  icon?: React.ElementType;
+  variant?: "default" | "indigo" | "amber" | "rose" | "emerald" | "mono";
+  className?: string;
+}) {
+  const colorMap: Record<string, string> = {
+    default: "text-foreground font-medium",
+    indigo: "text-indigo-600 dark:text-indigo-400 font-semibold",
+    amber: "text-amber-600 dark:text-amber-500 font-semibold",
+    rose: "text-rose-600 dark:text-rose-400 font-semibold",
+    emerald: "text-emerald-600 dark:text-emerald-400 font-semibold",
+    mono: "font-mono font-semibold text-foreground",
+  };
+
+  return (
+    <div
+      className={cn(
+        "inline-flex items-center gap-1 text-[12px]",
+        colorMap[variant] || colorMap.default,
+        className,
+      )}
+    >
+      {Icon && <Icon className="h-3.5 w-3.5 shrink-0 opacity-80" />}
+      <span>{value}</span>
+      {unit && (
+        <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-normal">
+          {unit}
+        </span>
+      )}
+    </div>
+  );
+}
+
+export function AdminTableDate({
+  date,
+  format = "MMM d, yyyy",
+  time,
+  icon: Icon,
+  className,
+}: {
+  date: string | number | Date | null | undefined;
+  format?: string;
+  time?: string | null;
+  icon?: boolean | React.ElementType;
+  className?: string;
+}) {
+  if (!date)
+    return <span className="text-[10px] text-muted-foreground/50">—</span>;
+
+  const IconComp =
+    Icon === true ? Clock : typeof Icon === "boolean" ? null : Icon;
+
+  return (
+    <div className={cn("flex flex-col gap-0.5", className)}>
+      <div className="flex items-center gap-1 text-[12px] text-muted-foreground whitespace-nowrap">
+        {IconComp && (
+          <IconComp className="h-3 w-3 shrink-0 text-muted-foreground/50" />
+        )}
+        <span>{safeFormat(date, format, "—")}</span>
+      </div>
+      {time && (
+        <span className="text-[10px] text-muted-foreground/70">{time}</span>
+      )}
+    </div>
+  );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -84,7 +359,7 @@ export function AdminStatusBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-[10px]  uppercase tracking-wide",
+        "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-[10px] font-semibold uppercase tracking-wide",
         color,
         className,
       )}
@@ -116,7 +391,7 @@ export function AdminVerifiedBadge({ verified }: { verified: boolean }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-[10px]  uppercase tracking-wide",
+        "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-[10px] font-semibold uppercase tracking-wide",
         verified
           ? "bg-blue-50 text-blue-700 border-blue-200"
           : "bg-slate-50 text-slate-400 border-slate-200",
@@ -144,8 +419,8 @@ function TableSkeleton({
         <TableHeader>
           <TableRow className="hover:bg-transparent border-b border-border/60">
             {Array.from({ length: cols }).map((_, i) => (
-              <TableHead key={i} className="h-11 px-5">
-                <Skeleton className="h-3 w-20 rounded" />
+              <TableHead key={i} className="h-8 px-3">
+                <Skeleton className="h-2.5 w-16 rounded" />
               </TableHead>
             ))}
           </TableRow>
@@ -153,18 +428,18 @@ function TableSkeleton({
         <TableBody>
           {Array.from({ length: rows }).map((_, rowIdx) => (
             <TableRow key={rowIdx} className="border-b border-border/40">
-              <TableCell className="px-5 py-3">
-                <div className="flex items-center gap-3">
-                  <Skeleton className="h-9 w-9 rounded-lg shrink-0" />
-                  <div className="space-y-1.5">
-                    <Skeleton className="h-3 w-28 rounded" />
-                    <Skeleton className="h-2.5 w-20 rounded" />
+              <TableCell className="px-3 py-1.5">
+                <div className="flex items-center gap-2.5">
+                  <Skeleton className="h-7 w-7 rounded-md shrink-0" />
+                  <div className="space-y-1">
+                    <Skeleton className="h-2.5 w-24 rounded" />
+                    <Skeleton className="h-2 w-16 rounded" />
                   </div>
                 </div>
               </TableCell>
               {Array.from({ length: cols - 1 }).map((_, colIdx) => (
-                <TableCell key={colIdx} className="px-5 py-3">
-                  <Skeleton className="h-3 w-24 rounded" />
+                <TableCell key={colIdx} className="px-3 py-1.5">
+                  <Skeleton className="h-2.5 w-16 rounded" />
                 </TableCell>
               ))}
             </TableRow>
@@ -388,7 +663,9 @@ export function AdminTable<T = any>({
   baseIndex,
 }: AdminTableProps<T>) {
   const [currentPage, setCurrentPage] = useState(1);
-  const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({});
+  const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>(
+    {},
+  );
 
   const totalItems = data?.length ?? 0;
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
@@ -429,13 +706,19 @@ export function AdminTable<T = any>({
             enableColumnToggle && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-6 px-2 text-[11px] font-semibold text-muted-foreground hover:text-foreground">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 px-2 text-[11px] font-semibold text-muted-foreground hover:text-foreground"
+                  >
                     <SlidersHorizontal className="h-3.5 w-3.5 mr-1.5" />
                     Columns
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-[180px]">
-                  <DropdownMenuLabel className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider px-2 py-1.5">Toggle Columns</DropdownMenuLabel>
+                  <DropdownMenuLabel className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider px-2 py-1.5">
+                    Toggle Columns
+                  </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   {columns
                     .filter((c) => !c.isFixedRight && c.header)
@@ -463,9 +746,10 @@ export function AdminTable<T = any>({
                 <TableHead
                   key={col.key}
                   className={cn(
-                    size === "sm" ? "h-8 px-3" : "h-10 px-5",
-                    "text-[10px] uppercase tracking-widest text-muted-foreground/70 whitespace-nowrap",
-                    col.isFixedRight && "sticky right-0 bg-muted z-10 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)]",
+                    size === "sm" ? "h-8 px-3" : "h-9 px-4",
+                    "text-[10px] font-semibold uppercase tracking-wider text-muted-foreground whitespace-nowrap",
+                    col.isFixedRight &&
+                      "sticky right-0 bg-muted z-10 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)]",
                     col.headerClassName,
                   )}
                 >
@@ -491,24 +775,27 @@ export function AdminTable<T = any>({
                   return (
                     <motion.tr
                       key={keyExtractor(row, idx)}
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.18, delay: idx * 0.025 }}
-                    className="group border-b border-border/40 last:border-0 hover:bg-muted/30 transition-colors duration-150"
-                  >
-                    {activeColumns.map((col) => (
-                      <TableCell
-                        key={col.key}
-                        className={cn(
-                          size === "sm" ? "px-3 py-1.5 text-xs" : "px-5 py-3 text-sm",
-                          col.isFixedRight && "sticky right-0 bg-card group-hover:bg-muted/50 z-10 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)]",
-                          col.className
-                        )}
-                      >
-                        {col.cell(row, absoluteIdx)}
-                      </TableCell>
-                    ))}
-                  </motion.tr>
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.18, delay: idx * 0.025 }}
+                      className="group border-b border-border/40 last:border-0 hover:bg-muted/30 transition-colors duration-150"
+                    >
+                      {activeColumns.map((col) => (
+                        <TableCell
+                          key={col.key}
+                          className={cn(
+                            size === "sm"
+                              ? "px-3 py-1.5 text-[12px]"
+                              : "px-4 py-2 text-[12px]",
+                            col.isFixedRight &&
+                              "sticky right-0 bg-card group-hover:bg-muted/50 z-10 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)]",
+                            col.className,
+                          )}
+                        >
+                          {col.cell(row, absoluteIdx)}
+                        </TableCell>
+                      ))}
+                    </motion.tr>
                   );
                 })
               )}

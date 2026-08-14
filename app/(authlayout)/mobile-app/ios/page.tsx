@@ -34,24 +34,24 @@ export default function IosOverviewPage() {
         <TabsContent value="dashboard" className="space-y-6">
           {!isSetupComplete && (
             <Card className="bg-primary/5 border-primary/20">
-              <CardContent className="p-6 flex flex-col md:flex-row items-center gap-6">
-                <div className="bg-primary/10 p-4 rounded-full text-primary">
-                  <Apple className="w-8 h-8" />
+              <CardContent className="p-4 sm:p-5 flex flex-col md:flex-row items-center gap-4">
+                <div className="bg-primary/10 p-3 rounded-full text-primary">
+                  <Apple className="w-6 h-6" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-semibold mb-2">Begin iOS Setup</h3>
-                  <p className="text-muted-foreground mb-4">
+                  <h3 className="text-base font-semibold mb-1">Begin iOS Setup</h3>
+                  <p className="text-xs text-muted-foreground mb-3">
                     Your iOS application setup hasn't started yet. Follow our guided wizard to prepare your app for the Apple App Store.
                   </p>
-                  <div className="flex items-center gap-4 mb-2">
-                    <Progress value={setupProgress} className="flex-1" />
-                    <span className="text-sm font-medium">{setupProgress}%</span>
+                  <div className="flex items-center gap-3 mb-1">
+                    <Progress value={setupProgress} className="flex-1 h-1.5" />
+                    <span className="text-xs font-medium">{setupProgress}%</span>
                   </div>
                 </div>
                 <div>
                   <Link href="/mobile-app/ios/setup">
-                    <Button className="w-full md:w-auto" size="lg">
-                      Start Setup <ArrowRight className="w-4 h-4 ml-2" />
+                    <Button className="w-full md:w-auto h-9 text-xs font-medium">
+                      Start Setup <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
                     </Button>
                   </Link>
                 </div>
@@ -61,42 +61,42 @@ export default function IosOverviewPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card className="md:col-span-2">
-              <CardHeader>
-                <CardTitle>Setup Status</CardTitle>
-                <CardDescription>Track your progress towards publishing</CardDescription>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base font-semibold">Setup Status</CardTitle>
+                <CardDescription className="text-xs">Track your progress towards publishing</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <Circle className="w-5 h-5 text-muted-foreground" />
-                      <span className="font-medium">Application Information</span>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between p-2.5 border rounded-lg">
+                    <div className="flex items-center gap-2.5">
+                      <Circle className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-xs font-medium">Application Information</span>
                     </div>
-                    <span className="text-sm text-muted-foreground bg-muted px-2 py-1 rounded">Pending</span>
+                    <span className="text-[11px] text-muted-foreground bg-muted px-2 py-0.5 rounded">Pending</span>
                   </div>
                   
-                  <div className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <Circle className="w-5 h-5 text-muted-foreground" />
-                      <span className="font-medium">Branding & Assets</span>
+                  <div className="flex items-center justify-between p-2.5 border rounded-lg">
+                    <div className="flex items-center gap-2.5">
+                      <Circle className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-xs font-medium">Branding & Assets</span>
                     </div>
-                    <span className="text-sm text-muted-foreground bg-muted px-2 py-1 rounded">Pending</span>
+                    <span className="text-[11px] text-muted-foreground bg-muted px-2 py-0.5 rounded">Pending</span>
                   </div>
 
-                  <div className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <Circle className="w-5 h-5 text-muted-foreground" />
-                      <span className="font-medium">Push Notifications</span>
+                  <div className="flex items-center justify-between p-2.5 border rounded-lg">
+                    <div className="flex items-center gap-2.5">
+                      <Circle className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-xs font-medium">Push Notifications</span>
                     </div>
-                    <span className="text-sm text-muted-foreground bg-muted px-2 py-1 rounded">Pending</span>
+                    <span className="text-[11px] text-muted-foreground bg-muted px-2 py-0.5 rounded">Pending</span>
                   </div>
 
-                  <div className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <Circle className="w-5 h-5 text-muted-foreground" />
-                      <span className="font-medium">Store Information</span>
+                  <div className="flex items-center justify-between p-2.5 border rounded-lg">
+                    <div className="flex items-center gap-2.5">
+                      <Circle className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-xs font-medium">Store Information</span>
                     </div>
-                    <span className="text-sm text-muted-foreground bg-muted px-2 py-1 rounded">Pending</span>
+                    <span className="text-[11px] text-muted-foreground bg-muted px-2 py-0.5 rounded">Pending</span>
                   </div>
                 </div>
               </CardContent>
@@ -104,34 +104,34 @@ export default function IosOverviewPage() {
 
             <div className="space-y-6">
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Settings className="w-5 h-5" /> Quick Actions
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-base font-semibold">
+                    <Settings className="w-4 h-4" /> Quick Actions
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2">
-                  <Button variant="outline" className="w-full justify-start" disabled>
+                <CardContent className="space-y-1.5">
+                  <Button variant="outline" size="sm" className="w-full justify-start text-xs h-8" disabled>
                     View Build History
                   </Button>
-                  <Button variant="outline" className="w-full justify-start" disabled>
+                  <Button variant="outline" size="sm" className="w-full justify-start text-xs h-8" disabled>
                     Activity Log
                   </Button>
-                  <Button variant="outline" className="w-full justify-start" disabled>
+                  <Button variant="outline" size="sm" className="w-full justify-start text-xs h-8" disabled>
                     App Settings
                   </Button>
                 </CardContent>
               </Card>
 
               <Card>
-                <CardHeader>
-                  <CardTitle>Need Help?</CardTitle>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base font-semibold">Need Help?</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground mb-4">
+                  <p className="text-xs text-muted-foreground mb-3">
                     Check our documentation on how to set up your Apple Developer account and configure your iOS app.
                   </p>
-                  <Button variant="link" className="px-0 h-auto">
-                    Read iOS Guide <ArrowRight className="w-4 h-4 ml-1" />
+                  <Button variant="link" className="px-0 h-auto text-xs">
+                    Read iOS Guide <ArrowRight className="w-3.5 h-3.5 ml-1" />
                   </Button>
                 </CardContent>
               </Card>

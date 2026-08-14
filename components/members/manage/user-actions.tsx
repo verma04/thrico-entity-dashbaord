@@ -308,8 +308,8 @@ export default function UserActions({ user }: { user: UserDetail }) {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="sm">
-            <MoreHorizontal className="h-4 w-4" />
+          <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-muted">
+            <MoreHorizontal className="h-3.5 w-3.5 text-muted-foreground" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">

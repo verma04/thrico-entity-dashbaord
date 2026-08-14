@@ -15,52 +15,56 @@ const Like = ({ item }: { item: FeedProps }) => {
   const client = useApolloClient();
   const [like] = useLikeFeed({});
 
-  const checkValueLikes = async (
+  const checkValueLikes = (
     feed: { id: number; totalReactions: number; isLiked: boolean }[],
     item: { id: number; totalReactions: number; isLiked: boolean }
   ) => {
-    const newData = await feed.map((set: any) =>
+    return feed.map((set: any) =>
       set.id === item.id
         ? {
             ...set,
             totalReactions: item?.isLiked
-              ? item?.totalReactions - 1
-              : item?.totalReactions + 1,
+              ? Math.max(0, (item?.totalReactions || 1) - 1)
+              : (item?.totalReactions || 0) + 1,
             isLiked: !item?.isLiked,
           }
         : set
     );
-
-    return newData;
   };
 
-  const likeUpdate = async () => {
-    const queryData = client.readQuery({
-      query: GET_ALL_FEED,
-      variables: {
-        input: {
-          offset: 0,
-          limit: 10,
+  const likeUpdate = () => {
+    try {
+      const queryData = client.readQuery({
+        query: GET_ALL_FEED,
+        variables: {
+          input: {
+            offset: 0,
+            limit: 10,
+          },
         },
-      },
-    });
+      });
 
-    if (!queryData?.getAllFeed) return;
+      if (!queryData?.getAllFeed) return;
 
-    const newFeedData = await checkValueLikes(queryData.getAllFeed, item);
-    client.writeQuery({
-      query: GET_ALL_FEED,
-      data: {
-        getAllFeed: newFeedData,
-      },
-      variables: {
-        input: {
-          offset: 0,
-          limit: 10,
+      const newFeedData = checkValueLikes(queryData.getAllFeed, item);
+      client.writeQuery({
+        query: GET_ALL_FEED,
+        data: {
+          getAllFeed: newFeedData,
         },
-      },
-    });
+        variables: {
+          input: {
+            offset: 0,
+            limit: 10,
+          },
+        },
+      });
+    } catch {
+      // Query might not be in cache, that's fine
+    }
   };
+
+  const reactionCount = item?.totalReactions || 0;
 
   return (
     <Button
@@ -68,12 +72,13 @@ const Like = ({ item }: { item: FeedProps }) => {
       variant="ghost"
       size="sm"
       className={cn(
-        "rounded-full h-9 px-4 font-bold text-[13px] transition-all flex items-center gap-2",
-        item?.isLiked 
-          ? "bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700" 
-          : "text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900"
+        "rounded-lg h-8 px-2.5 font-medium text-xs transition-all duration-200 flex items-center gap-1.5",
+        item?.isLiked
+          ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-500/20"
+          : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
       )}
-      onClick={async () => {
+      onClick={async (e) => {
+        e.stopPropagation();
         like({
           variables: {
             input: {
@@ -87,14 +92,23 @@ const Like = ({ item }: { item: FeedProps }) => {
       <Heart
         className={cn(
           "h-4 w-4 transition-transform duration-300",
-          item?.isLiked && "scale-110"
+          item?.isLiked ? "fill-rose-500 text-rose-500 scale-110" : "text-current"
         )}
-        fill={item?.isLiked ? "currentColor" : "none"}
-        strokeWidth={item?.isLiked ? 0 : 2.5}
+        strokeWidth={item?.isLiked ? 0 : 2}
       />
-      {item?.isLiked ? "Liked" : "Like"}
+      <span>
+        {reactionCount > 0 ? (
+          <span>
+            {item?.isLiked ? "Liked" : "Like"}{" "}
+            <span className="font-semibold text-[11px] opacity-90">({reactionCount})</span>
+          </span>
+        ) : (
+          "Like"
+        )}
+      </span>
     </Button>
   );
 };
 
 export default Like;
+

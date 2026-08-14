@@ -154,10 +154,10 @@ export function OffersManager() {
                   <SelectValue placeholder="All Categories" />
                 </div>
               </CtaSelectTrigger>
-              <SelectContent className="rounded-xl border-border shadow-lg p-1">
+              <SelectContent className="rounded-lg border-border shadow-md p-1 min-w-[140px]">
                 <SelectItem
                   value="all"
-                  className="rounded-lg text-sm font-medium py-2"
+                  className="rounded-sm text-xs font-medium py-1 px-2 cursor-pointer"
                 >
                   All Categories
                 </SelectItem>
@@ -165,7 +165,7 @@ export function OffersManager() {
                   <SelectItem
                     key={cat.id}
                     value={cat.id}
-                    className="rounded-lg text-sm font-medium py-2"
+                    className="rounded-sm text-xs font-medium py-1 px-2 cursor-pointer"
                   >
                     {cat.name}
                   </SelectItem>
@@ -176,31 +176,31 @@ export function OffersManager() {
 
           <EcosystemActionBar.Item>
             <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-              <CtaSelectTrigger className="w-[110px]">
+              <CtaSelectTrigger className="w-[120px]">
                 <SelectValue placeholder="All Status" />
               </CtaSelectTrigger>
-              <SelectContent className="rounded-xl border-border shadow-lg p-1">
+              <SelectContent className="rounded-lg border-border shadow-md p-1 min-w-[120px]">
                 <SelectItem
                   value="all"
-                  className="rounded-lg text-sm font-medium py-2"
+                  className="rounded-sm text-xs font-medium py-1 px-2 cursor-pointer"
                 >
                   All Status
                 </SelectItem>
                 <SelectItem
                   value="ACTIVE"
-                  className="rounded-lg text-sm font-medium py-2 text-emerald-600"
+                  className="rounded-sm text-xs font-medium py-1 px-2 text-emerald-600 cursor-pointer"
                 >
                   Active
                 </SelectItem>
                 <SelectItem
                   value="INACTIVE"
-                  className="rounded-lg text-sm font-medium py-2 text-muted-foreground"
+                  className="rounded-sm text-xs font-medium py-1 px-2 text-muted-foreground cursor-pointer"
                 >
                   Inactive
                 </SelectItem>
                 <SelectItem
                   value="EXPIRED"
-                  className="rounded-lg text-sm font-medium py-2 text-rose-600"
+                  className="rounded-sm text-xs font-medium py-1 px-2 text-rose-600 cursor-pointer"
                 >
                   Expired
                 </SelectItem>

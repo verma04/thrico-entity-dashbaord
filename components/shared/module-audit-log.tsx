@@ -25,8 +25,11 @@ import {
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
-import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
-import { AdminTable } from "@/components/shared/admin-table/admin-table";
+import {
+  AdminTable,
+  AdminTableItem,
+  AdminTableDate,
+} from "@/components/shared/admin-table/admin-table";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { useUrlDateRange } from "@/hooks/use-url-date-range";
 import { cn } from "@/lib/utils";
@@ -160,85 +163,62 @@ export function ModuleAuditLog({
       key: "createdAt",
       header: "Date & Time",
       cell: (log: any) => (
-        <div className="flex flex-col">
-          <div className="flex items-center gap-2">
-            <Clock className="h-3.5 w-3.5 text-zinc-400" />
-            <span className="text-sm text-foreground">
-              {moment(log.createdAt).format("MMM D, YYYY")}
-            </span>
-          </div>
-          <span className="text-[10px] text-zinc-400 ml-5.5 tabular-nums">
-            {moment(log.createdAt).format("HH:mm:ss")}
-          </span>
-        </div>
+        <AdminTableDate
+          date={log.createdAt}
+          time={moment(log.createdAt).format("HH:mm:ss")}
+        />
       ),
     },
     {
       key: "action",
       header: "Action",
       cell: (log: any) => (
-        <div className="flex items-center gap-3">
-          <div className="h-8 w-8 rounded-lg bg-zinc-100 border border-zinc-200 flex items-center justify-center shrink-0">
-            <Terminal className="h-4 w-4 text-zinc-400" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-sm font-medium text-foreground">
-              {log.action}
-            </span>
-            <div className="flex items-center gap-2 mt-0.5">
-              <span className="inline-flex h-4 items-center px-1.5 rounded-md text-[8px] font-medium uppercase tracking-widest bg-zinc-100 text-zinc-500 border border-zinc-200/50">
-                {log.module || "SYSTEM"}
-              </span>
-            </div>
-          </div>
-        </div>
+        <AdminTableItem
+          icon={Terminal}
+          title={log.action}
+          subtitle={log.module || "SYSTEM"}
+        />
       ),
     },
     {
       key: "admin",
       header: "Performed By",
       cell: (log: any) => (
-        <div className="flex items-center gap-3">
-          <div className="h-8 w-8 rounded-full bg-zinc-50 border border-zinc-200 flex items-center justify-center shrink-0">
-            <User className="h-4 w-4 text-zinc-400" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs font-medium text-foreground leading-none">
-              {log?.admin?.firstName
-                ? `${log.admin.firstName} ${log.admin?.lastName || ""}`
-                : "System"}
-            </span>
-            <span className="text-[9px] text-zinc-400 mt-1 uppercase tracking-tighter">
-              {log?.ipAddress || "Internal"}
-            </span>
-          </div>
-        </div>
+        <AdminTableItem
+          icon={User}
+          shape="circle"
+          title={
+            log?.admin?.firstName
+              ? `${log.admin.firstName} ${log.admin?.lastName || ""}`
+              : "System"
+          }
+          subtitle={log?.ipAddress || "Internal"}
+        />
       ),
     },
     {
       key: "target",
       header: "Target ID",
       cell: (log: any) => (
-        <div className="flex items-center gap-2">
-          <span className="font-mono text-[11px] text-zinc-500 truncate max-w-[140px] bg-zinc-50 px-2 py-1 rounded-lg border border-zinc-200/50">
-            {log.resourceId || log.targetUserId || "System"}
-          </span>
-        </div>
+        <span className="font-mono text-[11px] text-muted-foreground truncate max-w-[140px] bg-muted/60 px-1.5 py-0.5 rounded border border-border/50 inline-block">
+          {log.resourceId || log.targetUserId || "System"}
+        </span>
       ),
     },
     {
       key: "actions",
       header: "",
-      headerClassName: "w-[50px]",
+      headerClassName: "w-10 text-right",
+      className: "text-right",
       cell: (log: any) => (
-        <div className="flex justify-end pr-2">
+        <div className="flex justify-end">
           <Button
             variant="ghost"
-            size="icon"
+            size="sm"
             onClick={() => setSelectedLogId(log.id)}
-            className="h-8 w-8 text-zinc-400 hover:text-foreground hover:bg-zinc-100 rounded-lg transition-all"
+            className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md"
           >
-            <Eye className="h-4 w-4" />
+            <Eye className="h-3.5 w-3.5" />
           </Button>
         </div>
       ),

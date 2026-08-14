@@ -4,29 +4,32 @@ import React from "react";
 import {
   AdminTable,
   AdminStatusBadge,
+  AdminTableItem,
+  AdminTableTag,
+  AdminTableMetric,
 } from "@/components/shared/admin-table/admin-table";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Pencil, ArrowUp, ArrowDown, Crown, TrendingUp } from "lucide-react";
+import { Pencil, ArrowUp, ArrowDown, TrendingUp } from "lucide-react";
 import { Rank, useToggleRank } from "@/graphql/actions";
-import { toast } from "sonner";
-import { cn } from "@/lib/utils";
 import { BadgeIcon } from "@/components/gamification/badges/badge-icon";
+import { toast } from "sonner";
 
 interface RankListProps {
   ranks: Rank[];
+  onEdit: (rank: Rank) => void;
   onMoveUp: (index: number) => void;
   onMoveDown: (index: number) => void;
-  onEdit: (rank: Rank) => void;
   refetch: () => void;
   isLoading?: boolean;
 }
 
 export function RankList({
   ranks,
+  onEdit,
   onMoveUp,
   onMoveDown,
-  onEdit,
   refetch,
   isLoading,
 }: RankListProps) {
@@ -47,32 +50,33 @@ export function RankList({
   const columns = [
     {
       key: "order",
-      header: "Hierarchy",
-      headerClassName: "w-[80px]",
+      header: "Order",
+      headerClassName: "w-[60px] text-center",
+      className: "text-center",
       cell: (rank: Rank, index: number) => (
-        <div className="flex flex-col gap-0.5 items-center">
+        <div className="flex items-center justify-center gap-0.5">
           <Button
             variant="ghost"
-            size="icon"
+            size="sm"
             className={cn(
-              "h-6 w-6 rounded text-muted-foreground hover:text-foreground hover:bg-muted",
+              "h-5 w-5 p-0 rounded text-muted-foreground hover:text-foreground hover:bg-muted",
               index === 0 && "opacity-20 pointer-events-none",
             )}
             onClick={() => onMoveUp(index)}
           >
-            <ArrowUp className="h-3.5 w-3.5" />
+            <ArrowUp className="h-3 w-3" />
           </Button>
           <Button
             variant="ghost"
-            size="icon"
+            size="sm"
             className={cn(
-              "h-6 w-6 rounded text-muted-foreground hover:text-foreground hover:bg-muted",
+              "h-5 w-5 p-0 rounded text-muted-foreground hover:text-foreground hover:bg-muted",
               index === sortedRanks.length - 1 &&
                 "opacity-20 pointer-events-none",
             )}
             onClick={() => onMoveDown(index)}
           >
-            <ArrowDown className="h-3.5 w-3.5" />
+            <ArrowDown className="h-3 w-3" />
           </Button>
         </div>
       ),
@@ -81,48 +85,42 @@ export function RankList({
       key: "rank",
       header: "Rank Identity",
       cell: (rank: Rank, index: number) => (
-        <div className="flex items-center gap-3">
-          <div
-            className="h-10 w-10 text-xl flex items-center justify-center rounded-xl border shadow-sm shrink-0 overflow-hidden"
-            style={{
-              backgroundColor: `${rank.color}12`,
-              borderColor: `${rank.color}25`,
-            }}
-          >
-            <BadgeIcon icon={rank.icon} className="h-full w-full text-xl" imageClassName="rounded-xl" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-sm font-bold text-foreground">
-              {rank.name}
-            </span>
-            <div className="flex items-center gap-1.5">
-              <span
-                className="text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 bg-muted rounded border border-border"
-                style={{ color: rank.color, borderColor: `${rank.color}30` }}
-              >
-                Tier {index + 1}
-              </span>
+        <AdminTableItem
+          icon={
+            <div
+              className="h-7 w-7 flex items-center justify-center rounded-md border overflow-hidden shrink-0"
+              style={{
+                backgroundColor: `${rank.color}12`,
+                borderColor: `${rank.color}25`,
+              }}
+            >
+              <BadgeIcon icon={rank.icon} className="h-full w-full text-xs" imageClassName="rounded-md" />
             </div>
-          </div>
-        </div>
+          }
+          title={rank.name}
+          badge={
+            <span
+              className="text-[9px] font-bold uppercase tracking-wider px-1 py-0.5 rounded border"
+              style={{ color: rank.color, borderColor: `${rank.color}30`, backgroundColor: `${rank.color}10` }}
+            >
+              Tier {index + 1}
+            </span>
+          }
+        />
       ),
     },
     {
       key: "range",
       header: "Point Threshold",
       cell: (rank: Rank) => (
-        <div className="flex items-center gap-2">
-          <div className="h-5 w-5 rounded bg-muted flex items-center justify-center">
-            <TrendingUp className="h-2.5 w-2.5 text-muted-foreground" />
-          </div>
-          <div className="flex items-center gap-1.5 font-mono text-[12px] font-bold text-foreground">
-            <span>{rank?.minPoints?.toLocaleString()}</span>
-            <span className="text-muted-foreground opacity-40">—</span>
-            <span>{rank?.maxPoints?.toLocaleString()}</span>
-            <span className="text-[9px] text-zinc-400 font-black tracking-tighter uppercase">
-              PTS
-            </span>
-          </div>
+        <div className="flex items-center gap-1.5 text-[12px] font-mono font-medium text-foreground">
+          <TrendingUp className="h-3 w-3 text-muted-foreground/60 shrink-0" />
+          <span>{rank?.minPoints?.toLocaleString()}</span>
+          <span className="text-muted-foreground opacity-40">—</span>
+          <span>{rank?.maxPoints?.toLocaleString()}</span>
+          <span className="text-[9px] text-muted-foreground font-semibold uppercase tracking-wider">
+            PTS
+          </span>
         </div>
       ),
     },
@@ -130,14 +128,14 @@ export function RankList({
       key: "status",
       header: "Participation",
       cell: (rank: Rank) => (
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <Switch
             checked={rank.isActive}
             onCheckedChange={() => handleToggle(rank.id)}
             disabled={toggling}
-            className="scale-90 data-[state=checked]:bg-zinc-900 dark:data-[state=checked]:bg-zinc-100"
+            className="scale-75 data-[state=checked]:bg-zinc-900 dark:data-[state=checked]:bg-zinc-100"
           />
-          <AdminStatusBadge status={rank.isActive ? "APPROVED" : "PENDING"}>
+          <AdminStatusBadge status={rank.isActive ? "APPROVED" : "DISABLED"}>
             {rank.isActive ? "Active" : "Hidden"}
           </AdminStatusBadge>
         </div>
@@ -146,13 +144,14 @@ export function RankList({
     {
       key: "actions",
       header: "",
-      headerClassName: "w-[50px]",
+      headerClassName: "w-10 text-right",
+      className: "text-right",
       cell: (rank: Rank) => (
-        <div className="flex justify-end pr-2">
+        <div className="flex justify-end">
           <Button
             variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-muted-foreground hover:text-foreground transition-all rounded-lg"
+            size="sm"
+            className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md"
             onClick={() => onEdit(rank)}
           >
             <Pencil className="h-3.5 w-3.5" />
@@ -170,6 +169,7 @@ export function RankList({
       keyExtractor={(rank) => rank.id}
       emptyTitle="No levels defined"
       emptyDescription="Create community ranks to provide clear progression paths for your members."
+      size="sm"
     />
   );
 }

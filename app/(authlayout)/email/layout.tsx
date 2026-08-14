@@ -52,9 +52,9 @@ function EmailLayout({ children }: { children: React.ReactNode }) {
   ];
 
   const isTakeoverPage =
-    pathname.includes("/email/send") ||
     pathname.includes("/email/templates/create") ||
-    pathname.includes("/email/automation");
+    pathname.includes("/email/automation/add") ||
+    pathname.includes("/email/automation/edit");
 
   const { getOrderedTabs, onReorder } = useTabOrder("EMAIL", useEmailLayoutStore, items);
   const orderedItems = getOrderedTabs(items);

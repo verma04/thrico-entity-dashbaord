@@ -274,7 +274,7 @@ const User = ({
               value={status}
               onValueChange={(v) => setStatus(v as StatusValue)}
             >
-              <SelectTrigger className="w-[130px] h-6 rounded-md border-border bg-card text-[11px] font-semibold text-foreground shadow-none focus:ring-2 focus:ring-ring/20">
+              <SelectTrigger className="w-[130px] h-8 rounded-md border-border bg-card text-xs font-medium text-foreground shadow-2xs focus:ring-1 focus:ring-ring">
                 <div className="flex items-center gap-2">
                   {STATUS_TABS.find((t) => t.value === status)?.dot && (
                     <span
@@ -287,12 +287,12 @@ const User = ({
                   <SelectValue placeholder="Status" />
                 </div>
               </SelectTrigger>
-              <SelectContent className="rounded-xl border-border shadow-lg p-1">
+              <SelectContent className="rounded-lg border-border shadow-md p-1 min-w-[140px]">
                 {STATUS_TABS.map((opt) => (
                   <SelectItem
                     key={opt.value}
                     value={opt.value}
-                    className="rounded-md text-[11px] font-semibold py-1"
+                    className="rounded-sm text-xs font-medium py-1 px-2 cursor-pointer"
                   >
                     <div className="flex items-center gap-2">
                       {opt.dot && (
@@ -316,13 +316,13 @@ const User = ({
               value={selectedTier}
               onValueChange={(v) => setSelectedTier(v)}
             >
-              <SelectTrigger className="w-[130px] h-6 rounded-md border-border bg-card text-[11px] font-semibold text-foreground shadow-none focus:ring-2 focus:ring-ring/20">
+              <SelectTrigger className="w-[130px] h-8 rounded-md border-border bg-card text-xs font-medium text-foreground shadow-2xs focus:ring-1 focus:ring-ring">
                 <SelectValue placeholder="Tier" />
               </SelectTrigger>
-              <SelectContent className="rounded-xl border-border shadow-lg p-1">
+              <SelectContent className="rounded-lg border-border shadow-md p-1 min-w-[140px]">
                 <SelectItem
                   value="ALL"
-                  className="rounded-md text-[11px] font-semibold py-1"
+                  className="rounded-sm text-xs font-medium py-1 px-2 cursor-pointer"
                 >
                   All Tiers
                 </SelectItem>
@@ -330,7 +330,7 @@ const User = ({
                   <SelectItem
                     key={tier.id}
                     value={tier.id}
-                    className="rounded-md text-[11px] font-semibold py-1"
+                    className="rounded-sm text-xs font-medium py-1 px-2 cursor-pointer"
                   >
                     <div className="flex items-center gap-1.5">
                       {tier.badgeIcon && (
@@ -347,10 +347,9 @@ const User = ({
           <EcosystemActionBar.Item>
             <Button
               variant={showFilters ? "default" : "outline"}
-              size="sm"
               onClick={() => setShowFilters(!showFilters)}
               className={cn(
-                "h-6 px-2.5 rounded-md text-[11px] font-semibold gap-1.5 transition-all",
+                "h-8 px-2.5 rounded-md text-xs font-medium gap-1.5 transition-all shadow-2xs",
                 showFilters
                   ? "bg-primary text-primary-foreground"
                   : "border-border",
@@ -383,10 +382,9 @@ const User = ({
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="outline"
-                  size="sm"
-                  className="h-6 gap-2 shrink-0 bg-card border-border shadow-none text-[11px] font-semibold text-foreground px-2"
+                  className="h-8 gap-1.5 shrink-0 bg-card border-border shadow-2xs text-xs font-medium text-foreground px-2.5"
                 >
-                  <SlidersHorizontal className="h-3 w-3" />
+                  <SlidersHorizontal className="h-3.5 w-3.5" />
                   Columns
                 </Button>
               </DropdownMenuTrigger>
@@ -413,7 +411,7 @@ const User = ({
 
           <EcosystemActionBar.ViewToggle
             value={view}
-            onChange={setView}
+            onChange={(v) => setView(v as "grid" | "list")}
             options={[
               { id: "grid", label: "Grid", icon: LayoutGrid },
               { id: "list", label: "List", icon: ListIcon },

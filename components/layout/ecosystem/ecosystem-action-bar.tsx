@@ -35,8 +35,8 @@ export function EcosystemActionBar({
     <div
       className={cn(
         "relative flex flex-col sm:flex-row sm:items-center gap-2 w-full",
-        "p-3 bg-white dark:bg-transparent",
-        shadow !== "none" && "shadow-sm",
+        "px-3 py-2 bg-white dark:bg-transparent border-b border-border/60",
+        shadow !== "none" && "shadow-2xs",
         className,
       )}
     >
@@ -60,7 +60,7 @@ export function EcosystemActionBarGroup({
   return (
     <div
       className={cn(
-        "flex items-center gap-2 min-w-0",
+        "flex items-center gap-1.5 min-w-0",
         align === "right" && "sm:ml-auto justify-end",
         align === "center" && "justify-center mx-auto",
         className,
@@ -82,7 +82,7 @@ export function EcosystemActionBarSeparator({
   return (
     <div
       className={cn(
-        "hidden sm:block w-px h-6 bg-border mx-0.5 shrink-0",
+        "hidden sm:block w-px h-5 bg-border mx-0.5 shrink-0",
         className,
       )}
     />
@@ -102,7 +102,13 @@ export function EcosystemActionBarItem({
   grow?: boolean;
 }) {
   return (
-    <div className={cn("flex items-center gap-2", grow && "flex-1", className)}>
+    <div
+      className={cn(
+        "flex items-center gap-1.5",
+        grow ? "flex-1 min-w-0" : "shrink-0",
+        className,
+      )}
+    >
       {children}
     </div>
   );
@@ -123,7 +129,7 @@ export function EcosystemActionBarStatus({
   return (
     <div
       className={cn(
-        "flex items-center gap-1.5 px-2.5 py-1.5 bg-muted border border-border rounded-lg text-[10px] uppercase font-bold tracking-wider text-muted-foreground whitespace-nowrap",
+        "flex items-center gap-1.5 h-8 px-2.5 bg-muted border border-border rounded-md text-[10px] uppercase font-bold tracking-wider text-muted-foreground whitespace-nowrap",
         className,
       )}
     >
@@ -154,14 +160,14 @@ export function EcosystemActionBarSearch({
 }) {
   return (
     <div className={cn("relative w-full group", className)}>
-      <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-        <Search className="h-4 w-4 text-muted-foreground/60 group-focus-within:text-foreground transition-colors" />
+      <div className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none">
+        <Search className="h-3.5 w-3.5 text-muted-foreground/60 group-focus-within:text-foreground transition-colors" />
       </div>
       <Input
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="pl-9 h-9 bg-background border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/20 transition-all shadow-sm"
+        className="pl-8 h-8 bg-background border-border rounded-md text-xs text-foreground placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/20 transition-all shadow-2xs"
       />
     </div>
   );
@@ -191,9 +197,9 @@ export function EcosystemActionBarViewToggle({
     <Tabs
       value={value}
       onValueChange={onChange}
-      className="bg-muted p-0.5 rounded-lg border border-border shrink-0"
+      className="bg-muted p-0.5 rounded-md border border-border shrink-0 h-8 flex items-center"
     >
-      <TabsList className="bg-transparent border-none h-auto p-0 gap-0.5">
+      <TabsList className="bg-transparent border-none h-full p-0 gap-0.5 items-center">
         {options.map((opt) => {
           const Icon = opt.icon;
           return (
@@ -201,8 +207,8 @@ export function EcosystemActionBarViewToggle({
               key={opt.id}
               value={opt.id}
               className={cn(
-                "h-5 rounded-[4px] data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground transition-all text-[11px] font-medium flex items-center justify-center",
-                compact ? "w-6 px-0" : "px-2.5 gap-1.5",
+                "h-6.5 rounded data-[state=active]:bg-card data-[state=active]:shadow-2xs data-[state=active]:text-foreground text-muted-foreground transition-all text-[11px] font-medium flex items-center justify-center",
+                compact ? "w-6.5 px-0" : "px-2.5 gap-1.5",
               )}
               title={compact ? opt.label : undefined}
             >
@@ -243,18 +249,18 @@ export function EcosystemActionBarSelect({
     <Select value={value} onValueChange={onValueChange}>
       <SelectTrigger
         className={cn(
-          "w-auto min-w-[150px] h-9 px-3 rounded-lg border-border bg-background text-xs font-medium text-foreground shadow-sm focus:ring-2 focus:ring-ring/20 transition-all whitespace-nowrap gap-2",
+          "w-auto min-w-[130px] h-8 px-2.5 rounded-md border-border bg-background text-xs font-medium text-foreground shadow-2xs focus:ring-1 focus:ring-ring transition-all whitespace-nowrap gap-1.5",
           className,
         )}
       >
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
-      <SelectContent className="rounded-lg border-border shadow-md p-1 min-w-[160px]">
+      <SelectContent className="rounded-lg border-border shadow-md p-1 min-w-[150px]">
         {options.map((opt) => (
           <SelectItem
             key={opt.value}
             value={opt.value}
-            className="rounded-md text-[11px] font-medium py-1.5 px-2 cursor-pointer focus:bg-accent focus:text-accent-foreground"
+            className="rounded-sm text-xs font-medium py-1 px-2 cursor-pointer focus:bg-accent focus:text-accent-foreground"
           >
             <div className="flex items-center gap-1.5">
               {opt.dot && (

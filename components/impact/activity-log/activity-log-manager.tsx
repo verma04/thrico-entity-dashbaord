@@ -134,7 +134,7 @@ export function ActivityLogManager() {
               variant="outline"
               size="icon"
               onClick={() => refetch()}
-              className="h-9 w-9 border-border rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted"
+              className="h-8 w-8 border-border rounded-md text-muted-foreground hover:text-foreground hover:bg-muted shadow-2xs"
             >
               <RotateCcw
                 className={cn(loading && "animate-spin")}

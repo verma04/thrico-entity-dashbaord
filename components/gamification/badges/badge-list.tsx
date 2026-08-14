@@ -4,6 +4,8 @@ import React from "react";
 import {
   AdminTable,
   AdminStatusBadge,
+  AdminTableItem,
+  AdminTableTag,
 } from "@/components/shared/admin-table/admin-table";
 import { Pencil, Award, Zap, Coins } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,6 +21,7 @@ interface BadgeListProps {
   modules: { id: string; name: string; icon: string; type?: "MODULE" | "INTEGRATION" }[];
   onEdit: (badge: Badge) => void;
   refetchBadges: () => void;
+  refetchStats: () => void;
   isLoading?: boolean;
 }
 
@@ -28,10 +31,12 @@ export function BadgeList({
   onEdit,
   isLoading,
   refetchBadges,
+  refetchStats,
 }: BadgeListProps) {
   const [toggleBadge, { loading: toggling }] = useToggleBadge({
     onCompleted: () => {
       refetchBadges();
+      refetchStats();
       toast.success("Badge status updated");
     },
     onError: (err) => toast.error(err.message),
@@ -56,20 +61,16 @@ export function BadgeList({
       key: "badge",
       header: "Recognition Badge",
       cell: (badge: Badge) => (
-        <div className="flex items-center gap-3">
-          <BadgeIcon 
-            icon={badge.icon} 
-            className="h-10 w-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-xl shrink-0 shadow-sm"
-          />
-          <div className="flex flex-col min-w-0">
-            <span className="text-sm font-bold text-foreground truncate max-w-[180px]">
-              {badge.name}
-            </span>
-            <span className="text-[11px] text-muted-foreground line-clamp-1 max-w-[220px]">
-              {badge.description}
-            </span>
-          </div>
-        </div>
+        <AdminTableItem
+          icon={
+            <BadgeIcon
+              icon={badge.icon}
+              className="h-7 w-7 rounded-md bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-sm shrink-0 flex items-center justify-center"
+            />
+          }
+          title={badge.name}
+          subtitle={badge.description}
+        />
       ),
     },
     {
@@ -80,22 +81,9 @@ export function BadgeList({
         const source = badge.source || moduleInfo?.type || "MODULE";
         const isIntegration = source === "INTEGRATION";
         return (
-          <span
-            className={cn(
-              "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-[10px] font-bold uppercase tracking-wider",
-              isIntegration
-                ? "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20"
-                : "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",
-            )}
-          >
-            <span
-              className={cn(
-                "h-1.5 w-1.5 rounded-full shrink-0",
-                isIntegration ? "bg-purple-500" : "bg-blue-500",
-              )}
-            />
+          <AdminTableTag variant={isIntegration ? "purple" : "indigo"}>
             {isIntegration ? "Integration" : "Module"}
-          </span>
+          </AdminTableTag>
         );
       },
     },
@@ -105,21 +93,19 @@ export function BadgeList({
       cell: (badge: Badge) => {
         const moduleInfo = getModuleInfo(badge.module);
         return moduleInfo ? (
-          <div className="flex items-center gap-2 group">
-            <div className="h-6 w-6 rounded flex items-center justify-center bg-muted/60 border border-border/50 group-hover:bg-zinc-100 dark:group-hover:bg-zinc-800 group-hover:border-zinc-200 dark:group-hover:border-zinc-700 transition-colors">
+          <div className="flex items-center gap-1.5 group">
+            <div className="h-5 w-5 rounded flex items-center justify-center bg-muted/60 border border-border/50 transition-colors">
               {renderModuleIcon(
                 moduleInfo.icon,
-                "h-3 w-3 text-muted-foreground group-hover:text-zinc-900 dark:group-hover:text-zinc-100",
+                "h-3 w-3 text-muted-foreground",
               )}
             </div>
-            <span className="text-[11px] font-bold text-foreground">
+            <span className="text-[12px] font-semibold text-foreground truncate max-w-[120px]">
               {moduleInfo.name}
             </span>
           </div>
         ) : (
-          <div className="flex items-center gap-1.5 px-2 py-0.5 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded text-[10px] font-black text-zinc-700 dark:text-zinc-300 uppercase tracking-widest">
-            Global
-          </div>
+          <AdminTableTag variant="muted">Global</AdminTableTag>
         );
       },
     },
@@ -129,16 +115,16 @@ export function BadgeList({
       cell: (badge: Badge) => {
         const isAction = badge.type === "ACTION";
         return (
-          <div className="flex items-center gap-2">
-            <div className={isAction ? "text-zinc-500 dark:text-zinc-400" : "text-zinc-500 dark:text-zinc-400"}>
+          <div className="flex items-center gap-1.5">
+            <div className="text-muted-foreground/70">
               {isAction ? (
-                <Zap className="h-3.5 w-3.5" />
+                <Zap className="h-3 w-3" />
               ) : (
-                <Coins className="h-3.5 w-3.5" />
+                <Coins className="h-3 w-3" />
               )}
             </div>
             <div className="flex flex-col">
-              <span className="text-[11px] font-black text-foreground uppercase tracking-tight">
+              <span className="text-[12px] font-semibold text-foreground uppercase tracking-tight">
                 {isAction
                   ? (badge.condition?.action || badge.action || "").replace(
                       /_/g,
@@ -146,8 +132,8 @@ export function BadgeList({
                     )
                   : "Threshold Points"}
               </span>
-              <span className="text-[9px] text-muted-foreground font-bold font-mono">
-                REQUIREMENT:{" "}
+              <span className="text-[9px] text-muted-foreground font-semibold font-mono">
+                REQ:{" "}
                 {isAction
                   ? badge.condition?.count || badge.targetValue
                   : `${(badge.condition?.pointsRequired || badge.targetValue)?.toLocaleString()} PTS`}
@@ -161,14 +147,14 @@ export function BadgeList({
       key: "status",
       header: "Status",
       cell: (badge: Badge) => (
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <Switch
             checked={badge.isActive}
             onCheckedChange={() => handleToggleActive(badge.id)}
             disabled={toggling}
-            className="scale-90 data-[state=checked]:bg-zinc-900 dark:data-[state=checked]:bg-zinc-100"
+            className="scale-75 data-[state=checked]:bg-zinc-900 dark:data-[state=checked]:bg-zinc-100"
           />
-          <AdminStatusBadge status={badge.isActive ? "APPROVED" : "PENDING"}>
+          <AdminStatusBadge status={badge.isActive ? "APPROVED" : "DISABLED"}>
             {badge.isActive ? "Active" : "Disabled"}
           </AdminStatusBadge>
         </div>
@@ -177,13 +163,14 @@ export function BadgeList({
     {
       key: "actions",
       header: "",
-      headerClassName: "w-[50px]",
+      headerClassName: "w-10 text-right",
+      className: "text-right",
       cell: (badge: Badge) => (
-        <div className="flex justify-end pr-2">
+        <div className="flex justify-end">
           <Button
             variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-muted-foreground hover:text-foreground transition-all rounded-lg"
+            size="sm"
+            className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md"
             onClick={() => onEdit(badge)}
           >
             <Pencil className="h-3.5 w-3.5" />
@@ -201,6 +188,7 @@ export function BadgeList({
       keyExtractor={(badge) => badge.id}
       emptyTitle="No badges defined"
       emptyDescription="Badges motivate community participation. Create your first credential to reward member loyalty."
+      size="sm"
     />
   );
 }
