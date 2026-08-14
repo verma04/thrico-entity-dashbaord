@@ -90,7 +90,7 @@ export function NavRailItem({
   );
 
   const className = cn(
-    "flex flex-col items-center justify-center  w-[56px]  rounded-xl transition-all duration-200 group/navitem relative",
+    "flex flex-col items-center justify-center w-[50px] py-1 rounded-xl transition-all duration-200 group/navitem relative",
     !active && "hover:text-white hover:bg-white/5",
   );
 
@@ -141,7 +141,7 @@ export function MenuItemRow({
           className?: string;
         }>,
         {
-          size: depth > 0 ? 14 : 16,
+          size: depth > 0 ? 12 : 14,
           className: cn(
             "shrink-0 transition-colors duration-150",
             isActive
@@ -156,8 +156,8 @@ export function MenuItemRow({
     "group relative flex items-center w-full transition-colors duration-200 select-none",
     item.isLocked ? "cursor-not-allowed opacity-60" : "cursor-pointer",
     depth === 0
-      ? "h-8 px-2.5 rounded-md gap-2.5 my-[2px]"
-      : "h-7 px-2.5 rounded-md gap-2 my-[2px]",
+      ? "h-7 px-2 rounded-md gap-2 my-[1px]"
+      : "h-6 px-2 rounded-md gap-1.5 my-[1px]",
     isActive && !item.isLocked
       ? "bg-neutral-200/60 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 font-medium"
       : item.isLocked
@@ -195,7 +195,7 @@ export function MenuItemRow({
             <span
               className={cn(
                 "truncate leading-none tracking-[-0.01em] transition-colors duration-150 group-data-[collapsible=icon]:hidden",
-                depth > 0 ? "text-[12px]" : "text-[13px]",
+                depth > 0 ? "text-[11px]" : "text-[12px]",
                 isActive && !item.isLocked
                   ? "font-medium text-foreground"
                   : "font-normal text-inherit",
@@ -263,7 +263,7 @@ export function MenuItemRow({
           onClick={() => setLogoutOpen(true)}
         >
           {iconEl}
-          <span className="text-[13px] leading-none tracking-[-0.01em] font-normal truncate group-data-[collapsible=icon]:hidden">
+          <span className="text-[12px] leading-none tracking-[-0.01em] font-normal truncate group-data-[collapsible=icon]:hidden">
             {item.label}
           </span>
         </SidebarMenuButton>
@@ -294,7 +294,7 @@ export function MenuItemRow({
           <span
             className={cn(
               "leading-none tracking-[-0.01em] transition-colors duration-150 truncate group-data-[collapsible=icon]:hidden",
-              depth > 0 ? "text-[12px]" : "text-[13px]",
+              depth > 0 ? "text-[11px]" : "text-[12px]",
               isActive && !item.isLocked
                 ? "text-foreground font-medium"
                 : "text-inherit font-normal",

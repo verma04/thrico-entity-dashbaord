@@ -7,12 +7,43 @@ import {
   GET_USER_ACTIVITY_LOG,
   GET_USER_EARNED_BADGES,
 } from "../../quries/gamification";
+export type GamificationSourceType = "MODULE" | "INTEGRATION";
 
 export interface GamificationModule {
   id: string;
+  uuid?: string;
   name: string;
   description: string;
   icon: string;
+  isGamification?: boolean;
+}
+
+export interface GamificationIntegration {
+  id: string;
+  uuid?: string;
+  name: string;
+  slug?: string;
+  description: string;
+  icon: string;
+  isGamification?: boolean;
+}
+
+export interface GamificationModuleTrigger {
+  id: string;
+  moduleId: string;
+  name: string;
+  description: string;
+  type: string;
+  isActive?: boolean;
+}
+
+export interface GamificationIntegrationTrigger {
+  id: string;
+  integrationId: string;
+  name: string;
+  description: string;
+  type: string;
+  isActive?: boolean;
 }
 
 export interface GamificationTrigger {
@@ -21,23 +52,54 @@ export interface GamificationTrigger {
   name: string;
   description: string;
   type: string;
+  isActive?: boolean;
 }
 
 export interface GetEntityGamificationModulesData {
   getEntityGamificationModules: {
     modules: GamificationModule[];
+    integrations?: GamificationIntegration[];
+    moduleTriggers?: GamificationModuleTrigger[];
+    integrationTriggers?: GamificationIntegrationTrigger[];
     triggers: GamificationTrigger[];
   };
 }
 
-const GET_ENTITY_GAMIFICATION_MODULES = gql`
+export const GET_ENTITY_GAMIFICATION_MODULES = gql`
   query GetEntityGamificationModules {
     getEntityGamificationModules {
       modules {
         id
+        uuid
         name
         description
         icon
+        isGamification
+      }
+      integrations {
+        id
+        uuid
+        name
+        slug
+        description
+        icon
+        isGamification
+      }
+      moduleTriggers {
+        id
+        moduleId
+        name
+        description
+        type
+        isActive
+      }
+      integrationTriggers {
+        id
+        integrationId
+        name
+        description
+        type
+        isActive
       }
       triggers {
         id
@@ -45,6 +107,7 @@ const GET_ENTITY_GAMIFICATION_MODULES = gql`
         name
         description
         type
+        isActive
       }
     }
   }
@@ -60,6 +123,7 @@ export function useGetEntityGamificationModules(
 
 export interface Badge {
   id: string;
+  source?: "MODULE" | "INTEGRATION" | string;
   name: string;
   description: string;
   icon: string;
@@ -75,14 +139,29 @@ export interface Badge {
   updatedAt: string;
 }
 
+export interface BadgeFilter {
+  source?: GamificationSourceType;
+  type?: string;
+  module?: string;
+  action?: string;
+  isActive?: boolean;
+  isCompleted?: boolean;
+  search?: string;
+}
+
 export interface GetBadgesData {
   getBadges: Badge[];
 }
 
+export interface GetBadgesVariables {
+  filter?: BadgeFilter;
+}
+
 const GET_BADGES = gql`
-  query GetBadges {
-    getBadges {
+  query GetBadges($filter: BadgeFilter) {
+    getBadges(filter: $filter) {
       id
+      source
       name
       description
       icon
@@ -94,12 +173,20 @@ const GET_BADGES = gql`
       isActive
       createdAt
       updatedAt
+      userProgress {
+        id
+        progress
+        isCompleted
+        earnedAt
+      }
     }
   }
 `;
 
-export function useGetBadges(options?: QueryHookOptions<GetBadgesData>) {
-  return useQuery<GetBadgesData>(GET_BADGES, options);
+export function useGetBadges(
+  options?: QueryHookOptions<GetBadgesData, GetBadgesVariables>,
+) {
+  return useQuery<GetBadgesData, GetBadgesVariables>(GET_BADGES, options);
 }
 
 // ---------------------------------------------------------
@@ -108,6 +195,7 @@ export function useGetBadges(options?: QueryHookOptions<GetBadgesData>) {
 
 export interface PointRule {
   id: string;
+  source?: "MODULE" | "INTEGRATION" | string;
   module: string;
   action: string;
   trigger: string;
@@ -122,9 +210,12 @@ export interface PointRule {
 }
 
 export interface PointRuleFilter {
+  source?: GamificationSourceType | null;
   isActive?: boolean | null;
   module?: string | null;
+  action?: string | null;
   trigger?: string | null;
+  search?: string | null;
 }
 
 export interface GetPointRulesData {
@@ -135,6 +226,7 @@ const GET_POINT_RULES = gql`
   query GetPointRules($filter: PointRuleFilter) {
     getPointRules(filter: $filter) {
       id
+      source
       module
       action
       trigger

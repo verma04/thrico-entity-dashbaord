@@ -17,6 +17,7 @@ const details = `
         firstName
         lastName
         email
+        loginType
         avatar
        location 
         about {

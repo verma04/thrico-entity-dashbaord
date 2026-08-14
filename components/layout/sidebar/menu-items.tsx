@@ -95,7 +95,11 @@ import {
 } from "lucide-react";
 import { useMemo } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useGetUser, useCheckEntitySubscription } from "@/graphql/actions";
+import {
+  useGetUser,
+  useCheckEntitySubscription,
+  useHasAnyIntegration,
+} from "@/graphql/actions";
 import { useUserStore } from "@/store/store";
 
 const menuLink = (href: string, text: string) => (
@@ -1117,6 +1121,21 @@ export const emailItems = [
   },
 ];
 
+export const integrationsItems = [
+  {
+    key: "int-dashboard",
+    label: "App Integrations",
+    path: "/settings/integrations",
+    icon: <Zap size={18} />,
+  },
+  {
+    key: "int-shopify",
+    label: "Shopify",
+    path: "/integrations/shopify/user",
+    icon: <ShoppingBag size={18} />,
+  },
+];
+
 export const mobileAppItems = [
   {
     key: "ma-android",
@@ -1137,6 +1156,8 @@ export const mobileAppItems = [
  */
 export const useFilteredExtendedItems = () => {
   const { data, loading: subLoading } = useCheckEntitySubscription();
+  const { data: integrationsData, loading: integrationsLoading } =
+    useHasAnyIntegration();
   const user = useUserStore((state) => state.user);
 
   const filterItems = (
@@ -1186,6 +1207,10 @@ export const useFilteredExtendedItems = () => {
           !hasModulePermission("AI_MODERATION")
         )
           return acc;
+      }
+      if (item.key.startsWith("int-")) {
+        if (!integrationsData?.hasAnyIntegration) return acc;
+        if (!hasModulePermission("INTEGRATIONS")) return acc;
       }
 
       // 2. Home items and Dashboard should always be visible (or conditionally)
@@ -1327,6 +1352,10 @@ export const useFilteredExtendedItems = () => {
     () => filterItems(modules, false, true),
     [data, user],
   );
+  const filteredIntegrations = useMemo(
+    () => filterItems(integrationsItems, true),
+    [data, user, integrationsData],
+  );
 
   return {
     homeItems: filteredHome,
@@ -1339,7 +1368,8 @@ export const useFilteredExtendedItems = () => {
     reportedItems: filteredReported as any[],
     gamificationEngine: filteredGamification as any[],
     modules: filteredModules as any[],
-    loading: subLoading,
+    integrationsItems: filteredIntegrations as any[],
+    loading: subLoading || integrationsLoading,
   };
 };
 

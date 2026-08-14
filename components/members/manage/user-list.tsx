@@ -146,6 +146,15 @@ const columns: AdminTableColumn<UserDetail>[] = [
     ),
   },
   {
+    key: "source",
+    header: "Source",
+    cell: (row) => (
+      <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 uppercase">
+        {row.user?.loginType || "EMAIL"}
+      </span>
+    ),
+  },
+  {
     key: "joined",
     header: "Joined",
     cell: (row) => (

@@ -56,6 +56,89 @@ export const CALLBACK_SHOPIFY = gql`
   }
 `;
 
+// Pagination Queries
+export const GET_SHOPIFY_CUSTOMERS = gql`
+  query GetShopifyCustomers($input: ShopifyPaginationInput) {
+    getShopifyCustomers(input: $input) {
+      data {
+        id
+        shopifyCustomerId
+        email
+        status
+        createdAt
+        lastSyncedAt
+      }
+      total
+      limit
+      offset
+      hasMore
+    }
+  }
+`;
+
+export const GET_SHOPIFY_ORDERS = gql`
+  query GetShopifyOrders($input: ShopifyPaginationInput) {
+    getShopifyOrders(input: $input) {
+      data {
+        id
+        shopifyOrderId
+        userId
+        user {
+          id
+          firstName
+          lastName
+          email
+          avatar
+        }
+        totalPrice
+        currency
+        status
+        reward
+        createdAt
+        updatedAt
+      }
+      total
+      limit
+      offset
+      hasMore
+    }
+  }
+`;
+
+export const GET_SHOPIFY_PRODUCTS = gql`
+  query GetShopifyProducts($input: ShopifyPaginationInput) {
+    getShopifyProducts(input: $input) {
+      data {
+        id
+        shopifyProductId
+        title
+        status
+        createdAt
+        updatedAt
+      }
+      total
+      limit
+      offset
+      hasMore
+    }
+  }
+`;
+
+export const GET_SHOPIFY_STATS = gql`
+  query ShopifyStats($timeRange: ShopifyTimeRange, $dateRange: ShopifyDateRangeInput) {
+    shopifyStats(timeRange: $timeRange, dateRange: $dateRange) {
+      totalCustomers
+      syncedProducts
+      ordersProcessed
+      gamifiedRewardsClaimed
+      customerGrowth
+      productGrowth
+      orderGrowth
+      rewardGrowth
+    }
+  }
+`;
+
 // Hooks
 export const useGetShopifyConnection = () => useQuery(GET_SHOPIFY_CONNECTION);
 export const useGetShopifySyncStatus = (options?: any) => useQuery(GET_SHOPIFY_SYNC_STATUS, options);
@@ -67,3 +150,46 @@ export const useDisconnectShopify = () => useMutation(DISCONNECT_SHOPIFY);
 export const useSyncShopifyCustomers = () => useMutation(SYNC_SHOPIFY_CUSTOMERS);
 export const useSyncShopifyOrders = () => useMutation(SYNC_SHOPIFY_ORDERS);
 export const useSyncShopifyProducts = () => useMutation(SYNC_SHOPIFY_PRODUCTS);
+
+export enum ShopifyTimeRange {
+  TODAY = "TODAY",
+  YESTERDAY = "YESTERDAY",
+  LAST_7_DAYS = "LAST_7_DAYS",
+  LAST_30_DAYS = "LAST_30_DAYS",
+  THIS_MONTH = "THIS_MONTH",
+  LAST_MONTH = "LAST_MONTH",
+  CUSTOM = "CUSTOM",
+}
+
+export interface ShopifyDateRangeInput {
+  startDate: string;
+  endDate: string;
+}
+
+
+export interface ShopifyPaginationInput {
+  limit?: number;
+  offset?: number;
+}
+
+export const useGetShopifyCustomers = (
+  variables?: { input?: ShopifyPaginationInput },
+  options?: any
+) => useQuery(GET_SHOPIFY_CUSTOMERS, { variables, ...options });
+
+export const useGetShopifyOrders = (
+  variables?: { input?: ShopifyPaginationInput },
+  options?: any
+) => useQuery(GET_SHOPIFY_ORDERS, { variables, ...options });
+
+export const useGetShopifyProducts = (
+  variables?: { input?: ShopifyPaginationInput },
+  options?: any
+) => useQuery(GET_SHOPIFY_PRODUCTS, { variables, ...options });
+
+export const useGetShopifyStats = (
+  variables?: { timeRange?: ShopifyTimeRange; dateRange?: ShopifyDateRangeInput },
+  options?: any
+) => useQuery(GET_SHOPIFY_STATS, { variables, ...options });
+
+

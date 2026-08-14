@@ -144,6 +144,7 @@ const User = ({
       status: true,
       verification: true,
       joined: true,
+      source: true,
       referrer: true,
       lastSession: true,
       actions: true,

@@ -24,6 +24,7 @@ export default function CreatePointRulePage() {
     await createPointRule({
       variables: {
         input: {
+          source: values.source,
           module: values.module,
           action: values.action,
           trigger: values.trigger,
@@ -38,7 +39,13 @@ export default function CreatePointRulePage() {
   };
 
   const modules = moduleData?.getEntityGamificationModules?.modules || [];
+  const integrations =
+    moduleData?.getEntityGamificationModules?.integrations || [];
   const triggers = moduleData?.getEntityGamificationModules?.triggers || [];
+  const moduleTriggers =
+    moduleData?.getEntityGamificationModules?.moduleTriggers || [];
+  const integrationTriggers =
+    moduleData?.getEntityGamificationModules?.integrationTriggers || [];
 
   return (
     <EcosystemWrapper>
@@ -59,7 +66,10 @@ export default function CreatePointRulePage() {
           onSubmit={handleCreate}
           loading={isCreating}
           modules={modules}
+          integrations={integrations}
           triggers={triggers}
+          moduleTriggers={moduleTriggers}
+          integrationTriggers={integrationTriggers}
         />
       </EcosystemContainer>
     </EcosystemWrapper>

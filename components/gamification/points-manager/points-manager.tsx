@@ -11,7 +11,8 @@ import {
 } from "@/graphql/actions";
 
 import { CtaButton } from "@/components/ui/cta-button";
-import { Plus, Info, Coins, LayoutGrid, RotateCcw } from "lucide-react";
+import * as LucideIcons from "lucide-react";
+import { Plus, Info, Coins, LayoutGrid, RotateCcw, Settings } from "lucide-react";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
@@ -43,30 +44,85 @@ export function PointsManager() {
   const pointRules = pointRulesData?.getPointRules || [];
   const gamificationStats = gamificationStatsData?.getGamificationStats;
 
-  const subscriptionModules = useMemo(() => {
+  const subscriptionSources = useMemo(() => {
     const modules =
       gamificationModulesData?.getEntityGamificationModules?.modules || [];
-    return modules.map((m) => ({
+    const integrations =
+      gamificationModulesData?.getEntityGamificationModules?.integrations || [];
+
+    const formattedModules = modules.map((m) => ({
       id: m.id,
+      uuid: m.uuid,
       name: m.name ? m.name.charAt(0).toUpperCase() + m.name.slice(1) : m.name,
       icon: m.icon || "Settings",
+      type: "MODULE" as const,
     }));
+
+    const formattedIntegrations = integrations.map((i) => ({
+      id: i.id,
+      uuid: i.uuid,
+      name: i.name ? i.name.charAt(0).toUpperCase() + i.name.slice(1) : i.name,
+      icon: i.icon || "Boxes",
+      type: "INTEGRATION" as const,
+    }));
+
+    return [...formattedModules, ...formattedIntegrations];
   }, [gamificationModulesData]);
 
   const filteredRules = useMemo(() => {
     let list = pointRules;
-    if (selectedModule !== "ALL") {
-      list = list.filter((rule) => rule.module === selectedModule);
+    if (selectedModule === "SOURCE_MODULE") {
+      list = list.filter((r) => {
+        const moduleInfo = subscriptionSources.find(
+          (s) =>
+            s.id?.toLowerCase() === r.module?.toLowerCase() ||
+            s.uuid?.toLowerCase() === r.module?.toLowerCase() ||
+            (s as any).slug?.toLowerCase() === r.module?.toLowerCase(),
+        );
+        const source = r.source || moduleInfo?.type || "MODULE";
+        return source === "MODULE";
+      });
+    } else if (selectedModule === "SOURCE_INTEGRATION") {
+      list = list.filter((r) => {
+        const moduleInfo = subscriptionSources.find(
+          (s) =>
+            s.id?.toLowerCase() === r.module?.toLowerCase() ||
+            s.uuid?.toLowerCase() === r.module?.toLowerCase() ||
+            (s as any).slug?.toLowerCase() === r.module?.toLowerCase(),
+        );
+        const source = r.source || moduleInfo?.type || "MODULE";
+        return source === "INTEGRATION";
+      });
+    } else if (selectedModule !== "ALL") {
+      list = list.filter(
+        (rule) =>
+          rule.module?.toLowerCase() === selectedModule.toLowerCase() ||
+          subscriptionSources.find(
+            (s) => s.id?.toLowerCase() === selectedModule.toLowerCase(),
+          )?.uuid?.toLowerCase() === rule.module?.toLowerCase() ||
+          subscriptionSources.find(
+            (s) => s.uuid?.toLowerCase() === selectedModule.toLowerCase(),
+          )?.id?.toLowerCase() === rule.module?.toLowerCase() ||
+          subscriptionSources.find(
+            (s) => (s as any).slug?.toLowerCase() === selectedModule.toLowerCase(),
+          )?.id?.toLowerCase() === rule.module?.toLowerCase() ||
+          subscriptionSources.find(
+            (s) => (s as any).slug?.toLowerCase() === selectedModule.toLowerCase(),
+          )?.uuid?.toLowerCase() === rule.module?.toLowerCase(),
+      );
     }
     if (search) {
+      const q = search.toLowerCase();
       list = list.filter(
         (r) =>
-          r.action.toLowerCase().includes(search.toLowerCase()) ||
-          r.description?.toLowerCase().includes(search.toLowerCase()),
+          r.action?.toLowerCase().includes(q) ||
+          r.description?.toLowerCase().includes(q) ||
+          r.module?.toLowerCase().includes(q) ||
+          r.source?.toLowerCase().includes(q),
       );
     }
     return list;
-  }, [selectedModule, pointRules, search]);
+  }, [selectedModule, pointRules, search, subscriptionSources]);
 
   const handleCreate = () => {
     router.push("/gamification/points-and-badges/points/create");
@@ -118,13 +174,21 @@ export function PointsManager() {
               value={selectedModule}
               onValueChange={(val) => setSelectedModule(val as any)}
               options={[
-                { value: "ALL", label: "All Modules", icon: LayoutGrid },
-                ...subscriptionModules.map((m) => ({
+                { value: "ALL", label: subscriptionSources.some(s => s.type === "INTEGRATION") ? "All Modules & Integrations" : "All Modules", icon: LayoutGrid },
+                { value: "SOURCE_MODULE", label: "All Modules", icon: Settings },
+                ...(subscriptionSources.some(s => s.type === "INTEGRATION") ? [{
+                  value: "SOURCE_INTEGRATION",
+                  label: "All Integrations",
+                  icon: (LucideIcons as any)["Boxes"] || LayoutGrid,
+                }] : []),
+                ...subscriptionSources.map((m) => ({
                   value: m.id,
-                  label: m.name,
+                  label: `${m.name}${m.type === "INTEGRATION" ? " (Integration)" : ""}`,
                   icon:
-                    (require("lucide-react") as any)[m.icon] ||
-                    require("lucide-react").Settings,
+                    (LucideIcons as any)[m.icon] ||
+                    (m.type === "INTEGRATION"
+                      ? (LucideIcons as any)["Boxes"]
+                      : Settings),
                 })),
               ]}
             />
@@ -152,7 +216,7 @@ export function PointsManager() {
           <RulesTable
             rules={filteredRules}
             selectedModule={selectedModule}
-            modules={subscriptionModules}
+            modules={subscriptionSources}
             refetchRules={refetchRules}
             refetchStats={refetchStats}
             onEdit={handleEdit}

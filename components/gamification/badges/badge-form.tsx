@@ -16,6 +16,8 @@ import {
   Upload,
   Loader2,
   ImageIcon,
+  Layers,
+  Boxes,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -108,8 +110,11 @@ interface BadgeFormProps {
   onSubmit: (values: any) => Promise<void>;
   loading: boolean;
   isEdit?: boolean;
-  modules: any[];
-  triggers: any[];
+  modules?: any[];
+  integrations?: any[];
+  triggers?: any[];
+  moduleTriggers?: any[];
+  integrationTriggers?: any[];
 }
 
 export function BadgeForm({
@@ -117,8 +122,11 @@ export function BadgeForm({
   onSubmit,
   loading,
   isEdit,
-  modules,
-  triggers,
+  modules = [],
+  integrations = [],
+  triggers = [],
+  moduleTriggers = [],
+  integrationTriggers = [],
 }: BadgeFormProps) {
   const router = useRouter();
   const { toast } = useToast();
@@ -127,8 +135,41 @@ export function BadgeForm({
   const [iconMode, setIconMode] = useState<"emoji" | "upload">("emoji");
   const [uploadImage, { loading: isUploading }] = useUploadImage();
 
+  const initialSourceType = React.useMemo(() => {
+    if (initialValues?.source) return initialValues.source;
+    if (initialValues?.module) {
+      const isIntegration = integrations.some(
+        (i) =>
+          i.id?.toLowerCase() === initialValues.module?.toLowerCase() ||
+          i.uuid?.toLowerCase() === initialValues.module?.toLowerCase() ||
+          (i as any).slug?.toLowerCase() === initialValues.module?.toLowerCase(),
+      );
+      return isIntegration ? "INTEGRATION" : "MODULE";
+    }
+    return "MODULE";
+  }, [initialValues, integrations]);
+
+  const [sourceType, setSourceType] = useState<"MODULE" | "INTEGRATION">(
+    initialSourceType,
+  );
+
+  React.useEffect(() => {
+    if (initialValues?.source) {
+      setSourceType(initialValues.source);
+    } else if (initialValues?.module) {
+      const isIntegration = integrations.some(
+        (i) =>
+          i.id?.toLowerCase() === initialValues.module?.toLowerCase() ||
+          i.uuid?.toLowerCase() === initialValues.module?.toLowerCase() ||
+          (i as any).slug?.toLowerCase() === initialValues.module?.toLowerCase(),
+      );
+      setSourceType(isIntegration ? "INTEGRATION" : "MODULE");
+    }
+  }, [initialValues, integrations]);
+
   const formik = useFormik({
     initialValues: initialValues || {
+      source: initialSourceType,
       name: "",
       description: "",
       icon: "⭐",
@@ -142,7 +183,10 @@ export function BadgeForm({
     enableReinitialize: true,
     onSubmit: async (values) => {
       try {
-        await onSubmit(values);
+        await onSubmit({
+          ...values,
+          source: values.type === "ACTION" ? sourceType : undefined,
+        });
         setSaved(true);
         setTimeout(() => {
           router.push("/gamification/points-and-badges/badges");
@@ -157,11 +201,110 @@ export function BadgeForm({
     },
   });
 
-  const isIconImage = formik.values.icon?.includes("/") || formik.values.icon?.startsWith("http");
+  const allSources = React.useMemo(() => {
+    const mods = modules.map((m) => ({
+      id: m.id,
+      uuid: m.uuid,
+      name: m.name ? m.name.charAt(0).toUpperCase() + m.name.slice(1) : m.name,
+      type: "Module",
+      icon: m.icon,
+    }));
+    const ints = integrations.map((i) => ({
+      id: i.id,
+      uuid: i.uuid,
+      slug: (i as any).slug,
+      name: i.name ? i.name.charAt(0).toUpperCase() + i.name.slice(1) : i.name,
+      type: "Integration",
+      icon: i.icon,
+    }));
+    return { modules: mods, integrations: ints, all: [...mods, ...ints] };
+  }, [modules, integrations]);
 
-  const filteredTriggers = triggers.filter(
-    (t) => t.moduleId === formik.values.module,
-  );
+  const currentSourceList =
+    sourceType === "MODULE" ? allSources.modules : allSources.integrations;
+
+  const filteredTriggers = React.useMemo(() => {
+    const selected = formik.values.module;
+    if (!selected) return [];
+
+    const selectedSource = allSources.all.find(
+      (s) =>
+        s.id?.toLowerCase() === selected.toLowerCase() ||
+        (s.uuid && s.uuid.toLowerCase() === selected.toLowerCase()) ||
+        ((s as any).slug && (s as any).slug.toLowerCase() === selected.toLowerCase()),
+    );
+
+    const matchValues = new Set<string>();
+    matchValues.add(selected.toLowerCase());
+    if (selectedSource?.id) matchValues.add(selectedSource.id.toLowerCase());
+    if (selectedSource?.uuid) matchValues.add(selectedSource.uuid.toLowerCase());
+    if ((selectedSource as any)?.slug) matchValues.add((selectedSource as any).slug.toLowerCase());
+    if (selectedSource?.name) matchValues.add(selectedSource.name.toLowerCase());
+
+    const isMatch = (target?: string | null) => {
+      if (!target) return false;
+      return matchValues.has(target.toLowerCase());
+    };
+
+    const fromIntegrationTriggers = integrationTriggers.filter(
+      (t) =>
+        isMatch(t.integrationId) ||
+        isMatch(t.moduleId) ||
+        isMatch((t as any).slug) ||
+        isMatch((t as any).integrationSlug),
+    );
+
+    const fromModuleTriggers = moduleTriggers.filter(
+      (t) =>
+        isMatch(t.moduleId) ||
+        isMatch((t as any).integrationId) ||
+        isMatch((t as any).slug),
+    );
+
+    const fromGenericTriggers = triggers.filter(
+      (t) =>
+        isMatch(t.moduleId) ||
+        isMatch((t as any).integrationId) ||
+        isMatch((t as any).slug),
+    );
+
+    const combined = [
+      ...fromIntegrationTriggers,
+      ...fromModuleTriggers,
+      ...fromGenericTriggers,
+    ];
+
+    if (combined.length === 0 && sourceType === "INTEGRATION") {
+      integrationTriggers.forEach((t) => {
+        if (
+          isMatch(t.integrationId) ||
+          isMatch(t.moduleId) ||
+          isMatch(t.name) ||
+          isMatch((t as any).type)
+        ) {
+          combined.push(t);
+        }
+      });
+    }
+
+    const unique = new Map();
+    combined.forEach((item) => {
+      const key = item.id || item.name || item.description;
+      if (key && !unique.has(key)) {
+        unique.set(key, item);
+      }
+    });
+    return Array.from(unique.values());
+  }, [
+    formik.values.module,
+    sourceType,
+    moduleTriggers,
+    integrationTriggers,
+    triggers,
+    allSources,
+  ]);
+
+  const isIconImage = formik.values.icon?.includes("/") || formik.values.icon?.startsWith("http");
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-24">
@@ -215,8 +358,8 @@ export function BadgeForm({
                         Emoji
                       </button>
                       <button 
-                        type="button"
-                        onClick={() => setIconMode("upload")}
+                        type="button" 
+                        onClick={() => setIconMode("upload")} 
                         className={cn("flex-1 py-1 rounded-md transition-all", iconMode === "upload" ? "bg-indigo-50 text-indigo-700 shadow-sm" : "text-muted-foreground")}
                       >
                         Custom Icon
@@ -293,90 +436,256 @@ export function BadgeForm({
             description="Determine how this badge is algorithmically awarded."
             icon={Target}
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-              <div className="space-y-2">
-                <Label>Award Mechanism</Label>
-                <Select
-                  value={formik.values.type}
-                  onValueChange={(val) => formik.setFieldValue("type", val)}
-                  disabled={isEdit}
-                >
-                  <SelectTrigger className="h-11 shadow-none">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ACTION">Action Cumulative</SelectItem>
-                    <SelectItem value="POINTS">Milestone Threshold</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            <div className="space-y-6 mt-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label>Award Mechanism</Label>
+                  <Select
+                    value={formik.values.type}
+                    onValueChange={(val) => formik.setFieldValue("type", val)}
+                    disabled={isEdit}
+                  >
+                    <SelectTrigger className="h-11 shadow-none">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ACTION">Action Cumulative</SelectItem>
+                      <SelectItem value="POINTS">Milestone Threshold</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              <div className="space-y-2">
-                <Label>
-                  {formik.values.type === "ACTION"
-                    ? "Required Count"
-                    : "Required Points"}
-                </Label>
-                <Input
-                  type="number"
-                  {...formik.getFieldProps("targetValue")}
-                  className="h-11"
-                  min={1}
-                />
+                <div className="space-y-2">
+                  <Label>
+                    {formik.values.type === "ACTION"
+                      ? "Required Count"
+                      : "Required Points"}
+                  </Label>
+                  <Input
+                    type="number"
+                    {...formik.getFieldProps("targetValue")}
+                    className="h-11"
+                    min={1}
+                  />
+                </div>
               </div>
 
               {formik.values.type === "ACTION" && (
-                <>
-                  <div className="space-y-2">
-                    <Label>Target Module</Label>
-                    <Select
-                      value={formik.values.module}
-                      onValueChange={(val) => {
-                        formik.setFieldValue("module", val);
-                        formik.setFieldValue("action", "");
-                      }}
-                      disabled={isEdit}
-                    >
-                      <SelectTrigger className="h-11 shadow-none">
-                        <SelectValue placeholder="Identify module" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {modules.map((m) => (
-                          <SelectItem key={m.id} value={m.id}>
-                            {m.name ? m.name.charAt(0).toUpperCase() + m.name.slice(1) : m.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                <div className="space-y-5 pt-4 border-t border-dashed">
+                  {/* Origin Type Toggle (Module vs Integration) - only show when integrations exist */}
+                  {integrations.length > 0 && (
+                  <div className="space-y-3">
+                    <Label className="text-xs font-semibold text-foreground">
+                      Origin Type
+                    </Label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <button
+                        type="button"
+                        disabled={isEdit}
+                        onClick={() => {
+                          setSourceType("MODULE");
+                          formik.setFieldValue("source", "MODULE");
+                          formik.setFieldValue("module", "");
+                          formik.setFieldValue("action", "");
+                        }}
+                        className={cn(
+                          "flex items-center gap-3 p-3.5 rounded-xl border text-left transition-all cursor-pointer",
+                          sourceType === "MODULE"
+                            ? "border-zinc-900 bg-zinc-50/80 dark:border-zinc-100 dark:bg-zinc-800/60 ring-1 ring-zinc-900/10 dark:ring-zinc-100/10"
+                            : "border-border bg-card hover:bg-muted/40",
+                          isEdit && "opacity-70 cursor-not-allowed",
+                        )}
+                      >
+                        <div
+                          className={cn(
+                            "h-10 w-10 rounded-lg flex items-center justify-center shrink-0 border",
+                            sourceType === "MODULE"
+                              ? "bg-zinc-900 text-white border-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100"
+                              : "bg-muted text-muted-foreground border-border",
+                          )}
+                        >
+                          <Layers className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-bold text-foreground">
+                              Platform Module
+                            </span>
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                              {modules.length}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-muted-foreground mt-0.5">
+                            Core community modules (Feed, Forums, Events, etc.)
+                          </p>
+                        </div>
+                      </button>
+
+                      <button
+                        type="button"
+                        disabled={isEdit}
+                        onClick={() => {
+                          setSourceType("INTEGRATION");
+                          formik.setFieldValue("source", "INTEGRATION");
+                          formik.setFieldValue("module", "");
+                          formik.setFieldValue("action", "");
+                        }}
+                        className={cn(
+                          "flex items-center gap-3 p-3.5 rounded-xl border text-left transition-all cursor-pointer",
+                          sourceType === "INTEGRATION"
+                            ? "border-zinc-900 bg-zinc-50/80 dark:border-zinc-100 dark:bg-zinc-800/60 ring-1 ring-zinc-900/10 dark:ring-zinc-100/10"
+                            : "border-border bg-card hover:bg-muted/40",
+                          isEdit && "opacity-70 cursor-not-allowed",
+                        )}
+                      >
+                        <div
+                          className={cn(
+                            "h-10 w-10 rounded-lg flex items-center justify-center shrink-0 border",
+                            sourceType === "INTEGRATION"
+                              ? "bg-zinc-900 text-white border-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 dark:border-zinc-100"
+                              : "bg-muted text-muted-foreground border-border",
+                          )}
+                        >
+                          <Boxes className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-bold text-foreground">
+                              Integration
+                            </span>
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                              {integrations.length}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-muted-foreground mt-0.5">
+                            Connected apps & webhooks (Shopify, etc.)
+                          </p>
+                        </div>
+                      </button>
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label>Triggering Action</Label>
-                    <Select
-                      value={formik.values.action}
-                      onValueChange={(val) =>
-                        formik.setFieldValue("action", val)
-                      }
-                      disabled={!formik.values.module || isEdit}
-                    >
-                      <SelectTrigger className="h-11 shadow-none">
-                        <SelectValue
-                          placeholder={
-                            formik.values.module
-                              ? "Select action"
-                              : "Select module first"
-                          }
-                        />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {filteredTriggers.map((t) => (
-                          <SelectItem key={t.id} value={t.id}>
-                            {t.description}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                  )}
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="module">
+                        {sourceType === "MODULE"
+                          ? "Target Module"
+                          : "Target Integration"}
+                      </Label>
+                      <Select
+                        value={
+                          currentSourceList.find(
+                            (item) =>
+                              item.id?.toLowerCase() ===
+                                formik.values.module?.toLowerCase() ||
+                              item.uuid?.toLowerCase() ===
+                                formik.values.module?.toLowerCase() ||
+                              (item as any).slug?.toLowerCase() ===
+                                formik.values.module?.toLowerCase(),
+                          )?.id || formik.values.module
+                        }
+                        onValueChange={(val) => {
+                          formik.setFieldValue("module", val);
+                          formik.setFieldValue("action", "");
+                        }}
+                        disabled={isEdit}
+                      >
+                        <SelectTrigger className="h-11 shadow-none">
+                          <SelectValue
+                            placeholder={
+                              sourceType === "MODULE"
+                                ? "Select a module"
+                                : "Select an integration"
+                            }
+                          />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {currentSourceList.map((item) => (
+                            <SelectItem key={item.id} value={item.id}>
+                              {item.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {formik.touched.module && formik.errors.module && (
+                        <p className="text-xs text-destructive">
+                          {formik.errors.module as string}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="action">Triggering Action</Label>
+                      <Select
+                        value={
+                          filteredTriggers.find(
+                            (t) =>
+                              t.id === formik.values.action ||
+                              t.name === formik.values.action ||
+                              (t.name || t.id) === formik.values.action,
+                          )?.name ||
+                          filteredTriggers.find(
+                            (t) =>
+                              t.id === formik.values.action ||
+                              t.name === formik.values.action ||
+                              (t.name || t.id) === formik.values.action,
+                          )?.id ||
+                          formik.values.action
+                        }
+                        onValueChange={(val) =>
+                          formik.setFieldValue("action", val)
+                        }
+                        disabled={!formik.values.module || isEdit}
+                      >
+                        <SelectTrigger className="h-11 shadow-none">
+                          <SelectValue
+                            placeholder={
+                              formik.values.module
+                                ? "Select trigger event"
+                                : `Select ${sourceType === "MODULE" ? "module" : "integration"} first`
+                            }
+                          />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {filteredTriggers.length === 0 ? (
+                            <div className="p-3 text-xs text-muted-foreground text-center">
+                              No trigger events found for this{" "}
+                              {sourceType === "MODULE" ? "module" : "integration"}
+                            </div>
+                          ) : (
+                            filteredTriggers.map((t) => {
+                              const itemVal = t.name || t.id;
+                              return (
+                                <SelectItem key={t.id} value={itemVal}>
+                                  <div className="flex flex-col py-0.5 text-left">
+                                    <span className="font-medium text-xs text-foreground">
+                                      {t.name
+                                        ? t.name.replace(/_/g, " ")
+                                        : t.description}
+                                    </span>
+                                    {t.description &&
+                                      t.name &&
+                                      t.description !== t.name && (
+                                        <span className="text-[10px] text-muted-foreground line-clamp-1">
+                                          {t.description}
+                                        </span>
+                                      )}
+                                  </div>
+                                </SelectItem>
+                              );
+                            })
+                          )}
+                        </SelectContent>
+                      </Select>
+                      {formik.touched.action && formik.errors.action && (
+                        <p className="text-xs text-destructive">
+                          {formik.errors.action as string}
+                        </p>
+                      )}
+                    </div>
                   </div>
-                </>
+                </div>
               )}
             </div>
           </EcosystemCard>

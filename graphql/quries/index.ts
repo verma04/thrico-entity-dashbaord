@@ -248,18 +248,26 @@ export const CHECK_ENTITY_SUBSCRIPTIONS = gql`
       modules {
         id
         name
+        subtitle
         icon
+        customIcon
         showInMobileNavigation
         showInWebNavigation
         enabled
+        isPopular
         showInMobileNavigationSortNumber
         showInWebNavigationSortNumber
         customName
-        customIcon
-        isPopular
-        isPublicFacing
         canRename
-        subtitle
+        isPublicFacing
+      }
+      integrations {
+        id
+        name
+        slug
+        icon
+        description
+        enabled
       }
     }
   }
@@ -408,5 +416,11 @@ export const UPDATE_FEED_ORDER = gql`
 export const GET_MODULE_CUSTOM_NAME = gql`
   query GetModuleCustomName($id: String!) {
     getModuleCustomName(id: $id)
+  }
+`;
+
+export const HAS_ANY_INTEGRATION = gql`
+  query HasAnyIntegration {
+    hasAnyIntegration
   }
 `;

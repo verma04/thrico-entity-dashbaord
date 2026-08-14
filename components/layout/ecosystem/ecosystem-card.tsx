@@ -78,7 +78,7 @@ export function EcosystemCard({
   return (
     <div
       className={cn(
-        "relative flex flex-col p-5 rounded-[20px] border transition-all duration-300 hover:shadow-sm overflow-hidden",
+        "relative flex bg-white dark:bg-black flex-col p-5 rounded-[20px] border transition-all duration-300 hover:shadow-sm overflow-hidden",
         currentStyle.bg,
         className,
       )}

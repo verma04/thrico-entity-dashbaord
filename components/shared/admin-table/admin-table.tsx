@@ -384,7 +384,7 @@ export function AdminTable<T = any>({
   loadingRows = 8,
   className,
   enableColumnToggle = false,
-  size = "md",
+  size = "sm",
   baseIndex,
 }: AdminTableProps<T>) {
   const [currentPage, setCurrentPage] = useState(1);
@@ -500,7 +500,7 @@ export function AdminTable<T = any>({
                       <TableCell
                         key={col.key}
                         className={cn(
-                          size === "sm" ? "px-3 py-1.5" : "px-5 py-3",
+                          size === "sm" ? "px-3 py-1.5 text-xs" : "px-5 py-3 text-sm",
                           col.isFixedRight && "sticky right-0 bg-card group-hover:bg-muted/50 z-10 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)]",
                           col.className
                         )}

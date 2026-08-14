@@ -37,6 +37,7 @@ export default function EditBadgePage() {
       variables: {
         id: badgeId,
         input: {
+          source: values.type === "ACTION" ? values.source : undefined,
           name: values.name,
           description: values.description,
           icon: values.icon,
@@ -51,7 +52,13 @@ export default function EditBadgePage() {
   };
 
   const modules = moduleData?.getEntityGamificationModules?.modules || [];
+  const integrations =
+    moduleData?.getEntityGamificationModules?.integrations || [];
   const triggers = moduleData?.getEntityGamificationModules?.triggers || [];
+  const moduleTriggers =
+    moduleData?.getEntityGamificationModules?.moduleTriggers || [];
+  const integrationTriggers =
+    moduleData?.getEntityGamificationModules?.integrationTriggers || [];
 
   if (fetchLoading) {
     return (
@@ -65,7 +72,7 @@ export default function EditBadgePage() {
     return (
       <div className="h-screen w-full flex flex-col items-center justify-center space-y-4">
         <h2 className="text-xl font-bold">Badge Not Found</h2>
-        <Button onClick={() => router.push("/gamification/points-and-badges/")}>
+        <Button onClick={() => router.push("/gamification/points-and-badges/badges")}>
           Back to List
         </Button>
       </div>
@@ -81,7 +88,7 @@ export default function EditBadgePage() {
         icon={Award}
         breadcrumbs={[
           { label: "Gamification", href: "/gamification" },
-          { label: "Badges", href: "/gamification/points-and-badges" },
+          { label: "Badges", href: "/gamification/points-and-badges/badges" },
           { label: "Edit Badge" },
         ]}
       />
@@ -92,7 +99,10 @@ export default function EditBadgePage() {
           loading={isUpdating}
           isEdit={true}
           modules={modules}
+          integrations={integrations}
           triggers={triggers}
+          moduleTriggers={moduleTriggers}
+          integrationTriggers={integrationTriggers}
         />
       </EcosystemContainer>
     </EcosystemWrapper>

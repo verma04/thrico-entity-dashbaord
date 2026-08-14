@@ -51,9 +51,11 @@ type ActiveTab =
   | "settings"
   | "email"
   | "mobile-app"
-  | "website";
+  | "website"
+  | "integrations";
 
 function getActiveTab(pathName: string): ActiveTab {
+  if (pathName.startsWith("/settings/integrations") || pathName.startsWith("/integrations")) return "integrations";
   if (pathName.startsWith("/app-layout")) return "website";
   if (pathName.startsWith("/settings")) return "settings";
   if (pathName.startsWith("/email")) return "email";
@@ -121,6 +123,7 @@ export function ChildSidebarContainer({
     reportedItems,
     gamificationEngine,
     modules: modulesItems,
+    integrationsItems,
   } = useFilteredExtendedItems();
   const {
     billingAndTeamItems,
@@ -225,6 +228,10 @@ export function ChildSidebarContainer({
     () => filterList(websiteItems as MenuItem[], searchQuery),
     [searchQuery, filterList],
   );
+  const filteredIntegrations = useMemo(
+    () => filterList(integrationsItems as MenuItem[], searchQuery),
+    [searchQuery, integrationsItems, filterList],
+  );
 
   const { data: userData } = useGetUser();
   const { data: otherAccountsData } = useGetMyOtherAccounts();
@@ -282,6 +289,7 @@ export function ChildSidebarContainer({
       ...flattenItems(reportedItems as MenuItem[], "Content"),
       ...flattenItems(gamificationEngine as MenuItem[], "Gamification"),
       ...flattenItems(modulesItems as MenuItem[], "Modules"),
+      ...flattenItems(integrationsItems as MenuItem[], "Integrations"),
       ...flattenItems(websiteItems as MenuItem[], "Website"),
       ...flattenItems(billingAndTeamItems as MenuItem[], "Settings"),
       ...flattenItems(setupAndDesignItems as MenuItem[], "Settings"),
@@ -296,6 +304,7 @@ export function ChildSidebarContainer({
     reportedItems,
     gamificationEngine,
     modulesItems,
+    integrationsItems,
     billingAndTeamItems,
     setupAndDesignItems,
     supportAndLegalItems,
@@ -530,6 +539,16 @@ export function ChildSidebarContainer({
               />
             )}
 
+            {activeTab === "integrations" && (
+              <CollapsibleSection
+                sectionKey="integrations"
+                label="Integrations"
+                items={filteredIntegrations}
+                renderItems={renderItems}
+                className="mb-1"
+              />
+            )}
+
             {searchQuery.trim() &&
               filteredHome.length === 0 &&
               filteredFeed.length === 0 &&
@@ -541,7 +560,8 @@ export function ChildSidebarContainer({
               filteredSetupAndDesign.length === 0 &&
               filteredSupportAndLegal.length === 0 &&
               filteredWebsite.length === 0 &&
-              filteredProfile.length === 0 && (
+              filteredProfile.length === 0 &&
+              filteredIntegrations.length === 0 && (
                 <div className="py-8 text-center group-data-[collapsible=icon]:hidden">
                   <p className="text-[11.5px] text-muted-foreground/50">
                     No results found
@@ -592,6 +612,7 @@ export function ChildSidebarContainer({
             "Content",
             "Gamification",
             "Modules",
+            "Integrations",
             "Website",
             "Settings",
             "Account",

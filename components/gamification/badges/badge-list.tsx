@@ -8,6 +8,7 @@ import {
 import { Pencil, Award, Zap, Coins } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { cn } from "@/lib/utils";
 import { renderModuleIcon } from "@/components/subscription/utils";
 import { Badge, useToggleBadge } from "@/graphql/actions";
 import { toast } from "sonner";
@@ -15,7 +16,7 @@ import { BadgeIcon } from "./badge-icon";
 
 interface BadgeListProps {
   badges: Badge[];
-  modules: { id: string; name: string; icon: string }[];
+  modules: { id: string; name: string; icon: string; type?: "MODULE" | "INTEGRATION" }[];
   onEdit: (badge: Badge) => void;
   refetchBadges: () => void;
   isLoading?: boolean;
@@ -42,7 +43,12 @@ export function BadgeList({
 
   const getModuleInfo = (moduleId?: string) => {
     if (!moduleId) return null;
-    return modules.find((m) => m.id === moduleId);
+    return modules.find(
+      (m) =>
+        m.id?.toLowerCase() === moduleId.toLowerCase() ||
+        (m as any).uuid?.toLowerCase() === moduleId.toLowerCase() ||
+        (m as any).slug?.toLowerCase() === moduleId.toLowerCase(),
+    );
   };
 
   const columns = [
@@ -65,6 +71,33 @@ export function BadgeList({
           </div>
         </div>
       ),
+    },
+    {
+      key: "source",
+      header: "Source",
+      cell: (badge: Badge) => {
+        const moduleInfo = getModuleInfo(badge.module);
+        const source = badge.source || moduleInfo?.type || "MODULE";
+        const isIntegration = source === "INTEGRATION";
+        return (
+          <span
+            className={cn(
+              "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-[10px] font-bold uppercase tracking-wider",
+              isIntegration
+                ? "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20"
+                : "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",
+            )}
+          >
+            <span
+              className={cn(
+                "h-1.5 w-1.5 rounded-full shrink-0",
+                isIntegration ? "bg-purple-500" : "bg-blue-500",
+              )}
+            />
+            {isIntegration ? "Integration" : "Module"}
+          </span>
+        );
+      },
     },
     {
       key: "origin",

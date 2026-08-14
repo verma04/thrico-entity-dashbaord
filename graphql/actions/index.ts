@@ -17,6 +17,7 @@ import {
   GET_MY_OTHER_ACCOUNTS,
   SWITCH_TO_OTHER_ACCOUNT,
   GET_MODULE_CUSTOM_NAME,
+  HAS_ANY_INTEGRATION,
 } from "../quries";
 import { GET_MEMBERS_TERMS_AND_CONDITIONS } from "../quries/user";
 export * from "./membership/membership-queries";
@@ -154,12 +155,21 @@ export const useKycCountries = () => useQuery(GET_KYC_COUNTRIES);
 export const useCheckEntitySubscription = () =>
   useQuery<CheckEntitySubscriptionQuery>(CHECK_ENTITY_SUBSCRIPTIONS);
 
+export interface SubscriptionIntegration {
+  id: string;
+  name: string;
+  slug?: string;
+  icon?: string;
+  description?: string;
+  enabled?: boolean;
+}
+
 export interface SubscriptionDetails {
   subscriptionId: string;
   packageId: string;
   planName: string;
-  planType: "Standard" | "Custom";
-  billingCycle: "monthly" | "yearly";
+  planType: "Standard" | "Custom" | string;
+  billingCycle: "monthly" | "yearly" | string;
   price: number;
   startDate: string | Date;
   endDate: string | Date;
@@ -168,24 +178,28 @@ export interface SubscriptionDetails {
     | "scheduled_downgrade"
     | "scheduled_upgrade"
     | "cancelled"
-    | "suspended";
-  subscriptionType: "trial" | "paid";
+    | "suspended"
+    | boolean;
+  subscriptionType: "trial" | "paid" | string;
   graceUntil: string | null;
   modules?: {
     id: string;
     name: string;
-    icon: string;
-    showInMobileNavigation: boolean;
-    showInMobileNavigationSortNumber?: number;
-    showInWebNavigation: boolean;
-    showInWebNavigationSortNumber?: number;
-    enabled: boolean;
-    isPopular: boolean;
+    subtitle?: string | null;
     customName?: string | null;
     customIcon?: string | null;
-    isPublicFacing?: boolean;
+    icon: string;
+    enabled: boolean;
+    isPopular: boolean;
+    showInWebNavigation: boolean;
+    showInMobileNavigation: boolean;
+    showInMobileNavigationSortNumber?: number;
+    showInWebNavigationSortNumber?: number;
     canRename?: boolean;
+    isPublicFacing?: boolean;
   }[];
+  integrations?: SubscriptionIntegration[];
+  addons?: any[];
 }
 export interface CheckEntitySubscriptionQuery {
   checkEntitySubscription: SubscriptionDetails | null;
@@ -327,3 +341,6 @@ export const useGetModuleCustomName = (id: string) =>
     variables: { id },
     skip: !id,
   });
+
+export const useHasAnyIntegration = () =>
+  useQuery(HAS_ANY_INTEGRATION);

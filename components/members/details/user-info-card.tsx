@@ -339,6 +339,14 @@ export function UserInfoCard({ member }: { member: any }) {
               label="Language"
               value={user.profile?.language || "English"}
             />
+            {user.loginType && (
+              <InfoRow
+                icon={LinkIcon}
+                iconClass="text-indigo-500/70"
+                label="Source"
+                value={user.loginType.toUpperCase()}
+              />
+            )}
             {user.lastLoginAt && (
               <InfoRow
                 icon={Clock}

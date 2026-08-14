@@ -48,7 +48,10 @@ export default function EditPointRulePage() {
   };
 
   const modules = moduleData?.getEntityGamificationModules?.modules || [];
+  const integrations = moduleData?.getEntityGamificationModules?.integrations || [];
   const triggers = moduleData?.getEntityGamificationModules?.triggers || [];
+  const moduleTriggers = moduleData?.getEntityGamificationModules?.moduleTriggers || [];
+  const integrationTriggers = moduleData?.getEntityGamificationModules?.integrationTriggers || [];
 
   if (fetchLoading) {
     return (
@@ -89,7 +92,10 @@ export default function EditPointRulePage() {
           loading={isUpdating}
           isEdit={true}
           modules={modules}
+          integrations={integrations}
           triggers={triggers}
+          moduleTriggers={moduleTriggers}
+          integrationTriggers={integrationTriggers}
         />
       </EcosystemContainer>
     </EcosystemWrapper>

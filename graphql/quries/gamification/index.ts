@@ -5,6 +5,7 @@ export const GET_POINT_RULES = gql`
   query GetPointRules {
     pointRules {
       id
+      source
       module
       action
       trigger
@@ -21,6 +22,7 @@ export const GET_POINT_RULE = gql`
   query GetPointRule($id: ID!) {
     pointRule(id: $id) {
       id
+      source
       module
       action
       trigger
@@ -35,9 +37,10 @@ export const GET_POINT_RULE = gql`
 
 // Badges Queries
 export const GET_BADGES = gql`
-  query GetBadges {
-    badges {
+  query GetBadges($filter: BadgeFilter) {
+    badges(filter: $filter) {
       id
+      source
       name
       type
       module
@@ -265,9 +268,10 @@ export const DELETE_POINT_RULE = gql`
 
 // Badges Mutations
 export const CREATE_BADGE = gql`
-  mutation CreateBadge($input: CreateBadgeInput!) {
+  mutation CreateBadge($input: BadgeInput!) {
     createBadge(input: $input) {
       id
+      source
       name
       type
       module
@@ -287,6 +291,7 @@ export const UPDATE_BADGE = gql`
   mutation UpdateBadge($id: ID!, $input: UpdateBadgeInput!) {
     updateBadge(id: $id, input: $input) {
       id
+      source
       name
       type
       module
@@ -459,6 +464,54 @@ export const GET_USER_EARNED_BADGES = gql`
       pageInfo {
         hasNextPage
         totalCount
+      }
+    }
+  }
+`;
+
+export const GET_ENTITY_GAMIFICATION_MODULES = gql`
+  query GetEntityGamificationModules {
+    getEntityGamificationModules {
+      modules {
+        id
+        uuid
+        name
+        description
+        icon
+        isGamification
+      }
+      integrations {
+        id
+        uuid
+        name
+        slug
+        description
+        icon
+        isGamification
+      }
+      moduleTriggers {
+        id
+        moduleId
+        name
+        description
+        type
+        isActive
+      }
+      integrationTriggers {
+        id
+        integrationId
+        name
+        description
+        type
+        isActive
+      }
+      triggers {
+        id
+        moduleId
+        name
+        description
+        type
+        isActive
       }
     }
   }

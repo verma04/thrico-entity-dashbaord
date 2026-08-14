@@ -10,22 +10,14 @@ import {
 } from "@/graphql/actions";
 
 import { CtaButton } from "@/components/ui/cta-button";
-import { renderModuleIcon } from "@/components/subscription/utils";
+import * as LucideIcons from "lucide-react";
+import { Award, Plus, Info, LayoutGrid, RotateCcw, Settings } from "lucide-react";
 import { BadgeStats } from "./badge-stats";
 import { BadgeList } from "./badge-list";
-import { Award, Plus, Info, LayoutGrid, RotateCcw } from "lucide-react";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { cn } from "@/lib/utils";
 
 export function BadgesManager() {
   const router = useRouter();
@@ -41,30 +33,87 @@ export function BadgesManager() {
 
   const badges = (badgesData?.getBadges || []) as Badge[];
 
-  const subscriptionModules = useMemo(() => {
+  const subscriptionSources = useMemo(() => {
     const modules =
       gamificationModulesData?.getEntityGamificationModules?.modules || [];
-    return modules.map((m: any) => ({
+    const integrations =
+      gamificationModulesData?.getEntityGamificationModules?.integrations || [];
+
+    const formattedModules = modules.map((m: any) => ({
       id: m.id,
+      uuid: m.uuid,
       name: m.name ? m.name.charAt(0).toUpperCase() + m.name.slice(1) : m.name,
-      icon: m.icon,
+      icon: m.icon || "Settings",
+      type: "MODULE" as const,
     }));
+
+    const formattedIntegrations = integrations.map((i: any) => ({
+      id: i.id,
+      uuid: i.uuid,
+      slug: i.slug,
+      name: i.name ? i.name.charAt(0).toUpperCase() + i.name.slice(1) : i.name,
+      icon: i.icon || "Boxes",
+      type: "INTEGRATION" as const,
+    }));
+
+    return [...formattedModules, ...formattedIntegrations];
   }, [gamificationModulesData]);
 
   const filteredBadges = useMemo(() => {
     let list = badges;
-    if (selectedModule !== "ALL") {
-      list = list.filter((b) => b.module === selectedModule || !b.module);
-    }
-    if (search) {
+    if (selectedModule === "SOURCE_MODULE") {
+      list = list.filter((b) => {
+        const moduleInfo = subscriptionSources.find(
+          (s) =>
+            s.id?.toLowerCase() === b.module?.toLowerCase() ||
+            s.uuid?.toLowerCase() === b.module?.toLowerCase() ||
+            (s as any).slug?.toLowerCase() === b.module?.toLowerCase(),
+        );
+        const source = b.source || moduleInfo?.type || "MODULE";
+        return source === "MODULE";
+      });
+    } else if (selectedModule === "SOURCE_INTEGRATION") {
+      list = list.filter((b) => {
+        const moduleInfo = subscriptionSources.find(
+          (s) =>
+            s.id?.toLowerCase() === b.module?.toLowerCase() ||
+            s.uuid?.toLowerCase() === b.module?.toLowerCase() ||
+            (s as any).slug?.toLowerCase() === b.module?.toLowerCase(),
+        );
+        const source = b.source || moduleInfo?.type || "MODULE";
+        return source === "INTEGRATION";
+      });
+    } else if (selectedModule !== "ALL") {
       list = list.filter(
         (b) =>
-          b.name.toLowerCase().includes(search.toLowerCase()) ||
-          b.description?.toLowerCase().includes(search.toLowerCase()),
+          b.module?.toLowerCase() === selectedModule.toLowerCase() ||
+          subscriptionSources.find(
+            (s) => s.id?.toLowerCase() === selectedModule.toLowerCase(),
+          )?.uuid?.toLowerCase() === b.module?.toLowerCase() ||
+          subscriptionSources.find(
+            (s) => s.uuid?.toLowerCase() === selectedModule.toLowerCase(),
+          )?.id?.toLowerCase() === b.module?.toLowerCase() ||
+          subscriptionSources.find(
+            (s) => (s as any).slug?.toLowerCase() === selectedModule.toLowerCase(),
+          )?.id?.toLowerCase() === b.module?.toLowerCase() ||
+          subscriptionSources.find(
+            (s) => (s as any).slug?.toLowerCase() === selectedModule.toLowerCase(),
+          )?.uuid?.toLowerCase() === b.module?.toLowerCase(),
+      );
+    }
+    if (search) {
+      const q = search.toLowerCase();
+      list = list.filter(
+        (b) =>
+          b.name?.toLowerCase().includes(q) ||
+          b.description?.toLowerCase().includes(q) ||
+          b.action?.toLowerCase().includes(q) ||
+          b.module?.toLowerCase().includes(q) ||
+          b.source?.toLowerCase().includes(q),
       );
     }
     return list;
-  }, [badges, selectedModule, search]);
+  }, [badges, selectedModule, search, subscriptionSources]);
 
   const handleCreate = () => {
     router.push("/gamification/points-and-badges/badges/create");
@@ -115,13 +164,21 @@ export function BadgesManager() {
               value={selectedModule}
               onValueChange={(val) => setSelectedModule(val as any)}
               options={[
-                { value: "ALL", label: "All Modules", icon: LayoutGrid },
-                ...subscriptionModules.map((m) => ({
+                { value: "ALL", label: subscriptionSources.some(s => s.type === "INTEGRATION") ? "All Modules & Integrations" : "All Modules", icon: LayoutGrid },
+                { value: "SOURCE_MODULE", label: "All Modules", icon: Settings },
+                ...(subscriptionSources.some(s => s.type === "INTEGRATION") ? [{
+                  value: "SOURCE_INTEGRATION",
+                  label: "All Integrations",
+                  icon: (LucideIcons as any)["Boxes"] || LayoutGrid,
+                }] : []),
+                ...subscriptionSources.map((m) => ({
                   value: m.id,
-                  label: m.name,
+                  label: `${m.name}${m.type === "INTEGRATION" ? " (Integration)" : ""}`,
                   icon:
-                    (require("lucide-react") as any)[m.icon] ||
-                    require("lucide-react").Settings,
+                    (LucideIcons as any)[m.icon] ||
+                    (m.type === "INTEGRATION"
+                      ? (LucideIcons as any)["Boxes"]
+                      : Settings),
                 })),
               ]}
             />
@@ -148,7 +205,7 @@ export function BadgesManager() {
 
           <BadgeList
             badges={filteredBadges}
-            modules={subscriptionModules}
+            modules={subscriptionSources}
             refetchBadges={refetchBadges}
             onEdit={handleEdit}
             isLoading={badgesLoading}

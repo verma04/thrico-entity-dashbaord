@@ -23,6 +23,7 @@ export default function CreateBadgePage() {
 
   const handleCreate = async (values: any) => {
     const input: any = {
+      source: values.type === "ACTION" ? values.source : undefined,
       name: values.name,
       description: values.description,
       icon: values.icon,
@@ -45,7 +46,13 @@ export default function CreateBadgePage() {
   };
 
   const modules = moduleData?.getEntityGamificationModules?.modules || [];
+  const integrations =
+    moduleData?.getEntityGamificationModules?.integrations || [];
   const triggers = moduleData?.getEntityGamificationModules?.triggers || [];
+  const moduleTriggers =
+    moduleData?.getEntityGamificationModules?.moduleTriggers || [];
+  const integrationTriggers =
+    moduleData?.getEntityGamificationModules?.integrationTriggers || [];
 
   return (
     <EcosystemWrapper>
@@ -66,7 +73,10 @@ export default function CreateBadgePage() {
           onSubmit={handleCreate}
           loading={isCreating}
           modules={modules}
+          integrations={integrations}
           triggers={triggers}
+          moduleTriggers={moduleTriggers}
+          integrationTriggers={integrationTriggers}
         />
       </EcosystemContainer>
     </EcosystemWrapper>

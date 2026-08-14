@@ -1,10 +1,12 @@
 import { gql, useMutation, MutationHookOptions } from "@apollo/client";
+import { GamificationSourceType } from "./gamification-quiries";
 
 // ---------------------------------------------------------
 // BADGE MUTATIONS
 // ---------------------------------------------------------
 
 export interface BadgeInput {
+  source?: GamificationSourceType;
   name: string;
   description?: string;
   icon?: string;
@@ -16,6 +18,7 @@ export interface BadgeInput {
 }
 
 export interface BadgeUpdateInput {
+  source?: GamificationSourceType;
   name?: string;
   description?: string;
   icon?: string;
@@ -30,6 +33,7 @@ const CREATE_BADGE = gql`
   mutation CreateBadge($input: BadgeInput!) {
     createBadge(input: $input) {
       id
+      source
       name
       type
       module
@@ -49,6 +53,7 @@ const UPDATE_BADGE = gql`
   mutation UpdateBadge($id: ID!, $input: BadgeUpdateInput!) {
     updateBadge(id: $id, input: $input) {
       id
+      source
       name
       type
       module
@@ -74,6 +79,7 @@ const TOGGLE_BADGE = gql`
   mutation ToggleBadge($id: ID!) {
     toggleBadge(id: $id) {
       id
+      source
       name
       type
       module
@@ -106,10 +112,8 @@ export function useToggleBadge(options?: MutationHookOptions) {
 }
 
 // ---------------------------------------------------------
-// POINT RULE MUTATIONS
-// ---------------------------------------------------------
-
 export interface CreatePointRuleInput {
+  source?: GamificationSourceType;
   module: string;
   action: string;
   trigger: string;

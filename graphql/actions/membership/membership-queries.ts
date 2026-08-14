@@ -103,6 +103,7 @@ export interface UserDetail {
     firstName: string;
     lastName: string;
     email: string;
+    loginType?: string;
     avatar: string;
     createdAt: string;
     location?: {

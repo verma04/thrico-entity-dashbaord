@@ -233,19 +233,17 @@ export function EcosystemActionBarSelect({
   placeholder?: string;
   className?: string;
 }) {
-  const currentOption = options.find((opt) => opt.value === value);
-
   return (
     <Select value={value} onValueChange={onValueChange}>
       <SelectTrigger
         className={cn(
-          "w-[120px] h-6 px-2.5 rounded-md border-border bg-muted text-[11px] font-medium text-foreground shadow-none focus:ring-2 focus:ring-ring/20 transition-all",
+          "w-auto min-w-[150px] h-9 px-3 rounded-lg border-border bg-background text-xs font-medium text-foreground shadow-sm focus:ring-2 focus:ring-ring/20 transition-all whitespace-nowrap gap-2",
           className,
         )}
       >
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
-      <SelectContent className="rounded-lg border-border shadow-md p-1 min-w-[120px]">
+      <SelectContent className="rounded-lg border-border shadow-md p-1 min-w-[160px]">
         {options.map((opt) => (
           <SelectItem
             key={opt.value}
