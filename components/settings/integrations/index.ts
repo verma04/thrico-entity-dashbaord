@@ -1,5 +1,6 @@
 export * from "./integration-card";
 export * from "./shopify-integration-card";
+export * from "./woocommerce-integration-card";
 export * from "./slack-integration-card";
 export * from "./google-meet-integration-card";
 export * from "./zoom-integration-card";

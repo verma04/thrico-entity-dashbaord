@@ -193,10 +193,10 @@ export const SlackIntegrationCard = () => {
       onConnect={handleConnect}
       onDisconnect={handleDisconnect}
     >
-      <div className="space-y-3">
-        <div className="space-y-1.5">
+      <div className="space-y-3.5">
+        <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Label className="text-[10px] font-semibold uppercase text-muted-foreground tracking-wider">
+            <Label className="text-[10px] font-semibold uppercase text-muted-foreground/70 tracking-wider">
               Notification Channel
             </Label>
             {isSavingSettings && (
@@ -208,14 +208,14 @@ export const SlackIntegrationCard = () => {
             onValueChange={handleChannelChange}
             disabled={isLoadingChannels}
           >
-            <SelectTrigger className="h-8 text-xs bg-background">
+            <SelectTrigger className="h-8.5 text-xs bg-background/80 border-border/50 rounded-lg">
               <SelectValue
                 placeholder={
                   isLoadingChannels ? "Loading channels..." : "Select channel"
                 }
               />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="rounded-xl border-border/70">
               {channels.map((channel) => (
                 <SelectItem key={channel.id} value={channel.id} className="text-xs">
                   #{channel.name}
@@ -231,16 +231,16 @@ export const SlackIntegrationCard = () => {
         </div>
 
         <Button
-          variant="secondary"
+          variant="outline"
           size="sm"
-          className="w-full text-xs h-7.5 gap-1.5"
+          className="w-full text-xs h-8 gap-1.5 font-medium rounded-lg border-border/50 hover:bg-muted/50 transition-all duration-200"
           onClick={handleTestMessage}
           disabled={isSendingTest || !selectedChannel}
         >
           {isSendingTest ? (
             <Loader2 className="h-3.5 w-3.5 animate-spin" />
           ) : (
-            <Send className="h-3 w-3" />
+            <Send className="h-3.5 w-3.5 opacity-60" />
           )}
           Send Test Message
         </Button>

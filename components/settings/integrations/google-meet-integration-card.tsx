@@ -149,26 +149,26 @@ export const GoogleMeetIntegrationCard = () => {
       onConnect={handleConnect}
       onDisconnect={handleDisconnect}
     >
-      <div className="space-y-3">
-        <p className="text-xs text-muted-foreground leading-relaxed">
-          Google Meet is active. Meeting links will be automatically synced with your calendar events.
-        </p>
+        <div className="space-y-2.5">
+          <p className="text-[11.5px] text-muted-foreground leading-relaxed">
+            Google Meet is active. Meeting links will be automatically synced with your calendar events.
+          </p>
 
-        <Button
-          variant="secondary"
-          size="sm"
-          className="w-full text-xs h-7.5 gap-1.5"
-          onClick={createTestMeeting}
-          disabled={isCreatingMeeting}
-        >
-          {isCreatingMeeting ? (
-            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-          ) : (
-            <Calendar className="h-3.5 w-3.5" />
-          )}
-          Create Test Meeting Link
-        </Button>
-      </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full text-xs h-8 gap-1.5 font-medium rounded-lg border-border/50 hover:bg-muted/50 transition-all duration-200"
+            onClick={createTestMeeting}
+            disabled={isCreatingMeeting}
+          >
+            {isCreatingMeeting ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Calendar className="h-3.5 w-3.5 opacity-60" />
+            )}
+            Create Test Meeting Link
+          </Button>
+        </div>
     </IntegrationCard>
   );
 };

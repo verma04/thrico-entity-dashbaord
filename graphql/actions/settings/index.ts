@@ -160,3 +160,4 @@ export const useUpdateFeedEntityName = (options?: any) =>
   });
 
 export * from "./shopify";
+export * from "./woocommerce";

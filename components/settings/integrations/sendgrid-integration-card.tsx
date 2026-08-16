@@ -61,28 +61,28 @@ export const SendGridIntegrationCard = () => {
       onDisconnect={handleDisconnect}
     >
       <div className="space-y-3">
-        <div className="space-y-2.5">
+        <div className="space-y-2">
           <div className="space-y-1">
-            <Label className="text-[10px] font-semibold uppercase text-muted-foreground tracking-wider flex items-center gap-1.5">
+            <Label className="text-[10px] font-semibold uppercase text-muted-foreground/70 tracking-wider flex items-center gap-1.5">
               <Key className="w-3 h-3" /> API Key
             </Label>
             <Input
               type="password"
               placeholder="SG.xxxxxxxxxxxx"
-              className="h-8 text-xs font-mono"
+              className="h-8 text-xs font-mono bg-background/80 border-border/50 rounded-lg"
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
             />
           </div>
 
           <div className="space-y-1">
-            <Label className="text-[10px] font-semibold uppercase text-muted-foreground tracking-wider flex items-center gap-1.5">
+            <Label className="text-[10px] font-semibold uppercase text-muted-foreground/70 tracking-wider flex items-center gap-1.5">
               <Mail className="w-3 h-3" /> Verified Sender Email
             </Label>
             <Input
               type="email"
               placeholder="hello@yourdomain.com"
-              className="h-8 text-xs"
+              className="h-8 text-xs bg-background/80 border-border/50 rounded-lg"
               value={senderEmail}
               onChange={(e) => setSenderEmail(e.target.value)}
             />
@@ -90,14 +90,14 @@ export const SendGridIntegrationCard = () => {
 
           <Button
             size="sm"
-            className="w-full text-xs h-7.5 gap-1.5"
+            className="w-full text-xs h-8 gap-1.5 font-medium rounded-lg"
             onClick={handleSaveSettings}
             disabled={isSaving || !apiKey || !senderEmail}
           >
             {isSaving ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
             ) : (
-              <Send className="h-3 w-3" />
+              <Send className="h-3.5 w-3.5" />
             )}
             Save Configuration
           </Button>
