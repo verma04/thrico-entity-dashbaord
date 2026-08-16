@@ -32,7 +32,11 @@ import {
   AlertCircle,
   Code2,
   Sparkles,
+  Upload,
 } from "lucide-react";
+import { ExportCsvModal } from "@/components/shared/export-csv-modal";
+import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export-csv-modal";
+import { buildCsv, downloadCsv } from "@/lib/export-csv";
 
 import { useWebsiteBuilderStore } from "@/store/useWebsiteBuilderStore";
 import { getCustomDomain, getThricoDomain } from "@/graphql/actions/domain";
@@ -272,6 +276,7 @@ export default function SeoManager() {
   const [websiteUrl, setWebsiteUrl] = useState("https://thrico.community");
   const [editingPageId, setEditingPageId] = useState<string | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
 
   const { data: websiteData, loading: websiteLoading } = useGetWebsite({});
   const websiteId = websiteData?.getWebsite?.id;
@@ -481,6 +486,18 @@ export default function SeoManager() {
               { label: "General Settings", href: "/app-layout/settings" },
               { label: "SEO & Discoverability" },
             ]}
+            actions={
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setShowExportModal(true)}
+                className="h-8 gap-1.5 text-xs font-medium bg-card border-border shadow-2xs text-foreground px-2.5"
+              >
+                <Upload className="h-3.5 w-3.5" />
+                Export
+              </Button>
+            }
           />
         </div>
       </div>
@@ -739,6 +756,38 @@ export default function SeoManager() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <ExportCsvModal
+        open={showExportModal}
+        onOpenChange={setShowExportModal}
+        entityName="SEO pages"
+        description="Export website pages, meta titles, descriptions, and SEO configuration as CSV."
+        totalCount={pages.length}
+        onExport={(_scope: ExportCsvScope, format: ExportCsvFormat) => {
+          if (pages.length === 0) {
+            toast({
+              title: "Nothing to export",
+              description: "No SEO pages found.",
+              variant: "destructive",
+            });
+            return;
+          }
+          const csv = buildCsv(pages, [
+            { header: "Page Name", getValue: (p: any) => p.name || "" },
+            { header: "Slug", getValue: (p: any) => p.slug ? `/${p.slug}` : "" },
+            { header: "Meta Title", getValue: (p: any) => p.seo?.title || "" },
+            { header: "Meta Description", getValue: (p: any) => p.seo?.description || "" },
+            { header: "Keywords", getValue: (p: any) => Array.isArray(p.seo?.keywords) ? p.seo.keywords.join(", ") : (p.seo?.keywords || "") },
+            { header: "SEO Status", getValue: (p: any) => (p.seo?.title && p.seo?.description) ? "Optimized" : "Draft Meta" },
+            { header: "Include in Sitemap", getValue: (p: any) => (p.seo?.includeInSitemap ?? true) ? "Yes" : "No" },
+          ]);
+          downloadCsv(csv, `website-seo-${new Date().toISOString().slice(0, 10)}`, format);
+          toast({
+            title: "Export ready",
+            description: `${pages.length} page${pages.length !== 1 ? "s" : ""} exported.`,
+          });
+        }}
+      />
     </div>
   );
 }

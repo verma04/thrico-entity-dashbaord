@@ -1,8 +1,4 @@
-"use client";
-
 import React, { useState } from "react";
-import { ColumnDef } from "@tanstack/react-table";
-import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,7 +17,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 import {
   Plus,
   Trash2,
@@ -52,24 +47,27 @@ import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header"
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
-
-const SEVERITY_BADGE: Record<string, string> = {
-  LOW: "bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700",
-  MEDIUM: "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20",
-  HIGH: "bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20",
-};
+import {
+  AdminTable,
+  AdminTableColumn,
+  AdminTableItem,
+  AdminTableTag,
+  AdminTableDate,
+  Pagination,
+} from "@/components/shared/admin-table/admin-table";
 
 const CATEGORIES = ["spam", "offensive", "explicit", "harassment", "other"];
 
 export function BannedWordsManager() {
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
+  const [page, setPage] = useState(1);
+  const pageSize = 15;
+  const offset = (page - 1) * pageSize;
   const [searchQuery, setSearchQuery] = useState("");
   const [showExportModal, setShowExportModal] = useState(false);
 
   const { data, loading, refetch } = useGetBannedWords({
     limit: pageSize,
-    offset: pageIndex * pageSize,
+    offset,
   });
   const [addWord, { loading: adding }] = useAddBannedWord();
   const [updateWord, { loading: updating }] = useUpdateBannedWord();
@@ -85,7 +83,7 @@ export function BannedWordsManager() {
 
   const words = data?.getBannedWords.items || [];
   const totalCount = data?.getBannedWords.totalCount || 0;
-  const pageCount = Math.ceil(totalCount / pageSize);
+  const totalPages = Math.ceil(totalCount / pageSize) || 1;
 
   const filteredWords = words.filter((w) =>
     w.word.toLowerCase().includes(searchQuery.toLowerCase()),
@@ -143,71 +141,80 @@ export function BannedWordsManager() {
     }
   };
 
-  const columns: ColumnDef<BannedWord>[] = [
+  const columns: AdminTableColumn<BannedWord>[] = [
     {
-      accessorKey: "word",
+      key: "word",
       header: "Keyword / Regex Pattern",
-      cell: ({ row }) => (
-        <span className="font-bold text-xs text-zinc-900 dark:text-zinc-100 font-mono">
-          {row.original.word}
-        </span>
+      cell: (row) => (
+        <AdminTableItem
+          icon={Ban}
+          title={row.word}
+          titleClassName="font-mono text-[12px] font-semibold"
+        />
       ),
     },
     {
-      accessorKey: "severity",
+      key: "severity",
       header: "Severity Level",
-      cell: ({ row }) => (
-        <Badge
-          variant="outline"
-          className={cn(
-            "text-[10px] uppercase font-bold px-2 py-0.5 rounded-full border",
-            SEVERITY_BADGE[row.original.severity],
-          )}
-        >
-          {row.original.severity}
-        </Badge>
-      ),
+      cell: (row) => {
+        const severityVariants: Record<string, "rose" | "amber" | "default"> = {
+          HIGH: "rose",
+          MEDIUM: "amber",
+          LOW: "default",
+        };
+        return (
+          <AdminTableTag variant={severityVariants[row.severity] || "default"}>
+            {row.severity}
+          </AdminTableTag>
+        );
+      },
     },
     {
-      accessorKey: "category",
+      key: "category",
       header: "Classification",
-      cell: ({ row }) => (
-        <span className="capitalize text-xs text-zinc-600 dark:text-zinc-400 font-semibold">
-          {row.original.category}
-        </span>
+      cell: (row) => (
+        <AdminTableTag variant="purple">
+          {row.category}
+        </AdminTableTag>
       ),
     },
     {
-      accessorKey: "createdAt",
+      key: "createdAt",
       header: "Enacted Date",
-      cell: ({ row }) => (
-        <span className="text-zinc-500 dark:text-zinc-400 text-xs font-medium">
-          {new Date(parseInt(row.original.createdAt)).toLocaleDateString()}
-        </span>
+      cell: (row) => (
+        <AdminTableDate
+          date={
+            row.createdAt && !isNaN(Number(row.createdAt))
+              ? new Date(Number(row.createdAt))
+              : row.createdAt
+          }
+        />
       ),
     },
     {
-      id: "actions",
-      header: () => <div className="text-right">Actions</div>,
-      cell: ({ row }) => (
+      key: "actions",
+      header: "",
+      headerClassName: "w-16 text-right",
+      className: "text-right",
+      cell: (row) => (
         <div className="flex justify-end gap-1">
           <Button
             type="button"
             variant="ghost"
-            size="icon"
-            className="h-7 w-7 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
-            onClick={() => handleOpenDialog(row.original)}
+            size="sm"
+            className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md"
+            onClick={() => handleOpenDialog(row)}
           >
-            <Edit2 className="h-3.5 w-3.5" />
+            <Edit2 className="h-3 w-3" />
           </Button>
           <Button
             type="button"
             variant="ghost"
-            size="icon"
-            className="h-7 w-7 text-zinc-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20"
-            onClick={() => handleDelete(row.original.id)}
+            size="sm"
+            className="h-6 w-6 p-0 text-muted-foreground hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-md"
+            onClick={() => handleDelete(row.id)}
           >
-            <Trash2 className="h-3.5 w-3.5" />
+            <Trash2 className="h-3 w-3" />
           </Button>
         </div>
       ),
@@ -229,90 +236,85 @@ export function BannedWordsManager() {
 
       <EcosystemActionBar shadow="none">
         <EcosystemActionBar.Group>
-          <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400" />
-            <Input
-              placeholder="Search keyword filters..."
+          <EcosystemActionBar.Item grow className="max-w-xs">
+            <EcosystemActionBar.Search
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-8 h-8 w-[220px] text-xs bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800"
+              onChange={setSearchQuery}
+              placeholder="Search keyword filters…"
             />
-          </div>
-          <EcosystemActionBar.Separator />
-          <div className="flex items-center gap-1.5 text-xs text-zinc-500 font-semibold">
-            <ShieldAlert className="h-3.5 w-3.5 text-zinc-600 dark:text-zinc-400" />
+          </EcosystemActionBar.Item>
+        </EcosystemActionBar.Group>
+
+        <EcosystemActionBar.Separator />
+
+        <EcosystemActionBar.Group>
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-semibold">
+            <ShieldAlert className="h-3.5 w-3.5 text-muted-foreground" />
             {totalCount} Active Filters
           </div>
         </EcosystemActionBar.Group>
+
         <EcosystemActionBar.Group align="right">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => refetch()}
-            className="h-8 gap-1.5 text-xs font-semibold border-zinc-200 dark:border-zinc-800"
-          >
-            <RotateCcw className="h-3.5 w-3.5" />
-            Refresh
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => setShowExportModal(true)}
-            className="h-8 gap-1.5 text-xs font-medium bg-card border-border shadow-2xs text-foreground px-2.5"
-          >
-            <Upload className="h-3.5 w-3.5" />
-            Export
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            onClick={() => handleOpenDialog()}
-            className="h-8 gap-1.5 text-xs font-bold bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 shadow-xs"
-          >
-            <Plus className="h-3.5 w-3.5" />
-            Add Banned Keyword
-          </Button>
+          <EcosystemActionBar.Item>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => refetch()}
+              className="h-8 gap-1.5 text-xs font-semibold border-border"
+            >
+              <RotateCcw className={cn("h-3.5 w-3.5", loading && "animate-spin")} />
+              Refresh
+            </Button>
+          </EcosystemActionBar.Item>
+          <EcosystemActionBar.Item>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setShowExportModal(true)}
+              className="h-8 gap-1.5 text-xs font-medium bg-card border-border shadow-2xs text-foreground px-2.5"
+            >
+              <Upload className="h-3.5 w-3.5" />
+              Export
+            </Button>
+          </EcosystemActionBar.Item>
+          <EcosystemActionBar.Item>
+            <Button
+              type="button"
+              size="sm"
+              onClick={() => handleOpenDialog()}
+              className="h-8 gap-1.5 text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90 shadow-xs"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Add Banned Keyword
+            </Button>
+          </EcosystemActionBar.Item>
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
 
-      <EcosystemContainer className="p-6 lg:p-8 space-y-6">
-        <div className="rounded-2xl border border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 overflow-hidden shadow-xs">
-          <div className="px-5 py-4 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-lg bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 flex items-center justify-center shrink-0">
-                <Ban className="h-4 w-4" />
-              </div>
-              <div>
-                <p className="text-xs font-bold uppercase tracking-wider text-zinc-900 dark:text-zinc-100">
-                  Real-time Filter Matrix
-                </p>
-                <p className="text-[11px] text-zinc-400">
-                  Automated pattern matching across posts, comments, and profile narratives
-                </p>
-              </div>
-            </div>
-          </div>
+      <EcosystemContainer className="p-0 border border-border shadow-sm rounded-xl bg-card mt-4 overflow-hidden">
+        <AdminTable
+          columns={columns}
+          data={filteredWords}
+          loading={loading}
+          size="sm"
+          keyExtractor={(row) => row.id}
+          emptyIcon={Ban}
+          emptyTitle="No keyword filters found"
+          emptyDescription="No automated keyword filters configured yet. Click 'Add Banned Keyword' to create one."
+        />
 
-          <div className="p-1">
-            <DataTable
-              columns={columns}
-              data={filteredWords}
+        {totalPages > 1 && (
+          <div className="p-3 border-t border-border flex justify-end">
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              onPageChange={setPage}
               isLoading={loading}
-              manualPagination
-              totalRows={totalCount}
-              pageCount={pageCount}
-              pageIndex={pageIndex}
-              onPageChange={setPageIndex}
-              pageSize={pageSize}
-              onPageSizeChange={(size) => {
-                setPageSize(size);
-                setPageIndex(0);
-              }}
             />
           </div>
-        </div>
+        )}
       </EcosystemContainer>
 
       {/* Polaris Modal for Add/Edit Banned Word */}

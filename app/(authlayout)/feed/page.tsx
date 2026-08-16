@@ -137,7 +137,9 @@ export default function FeedPage() {
               },
               {
                 title: "Network Velocity",
-                value: kpis?.networkVelocity?.toFixed(2) ?? "0",
+                value: typeof kpis?.networkVelocity === "number"
+                  ? kpis.networkVelocity.toFixed(2)
+                  : String(kpis?.networkVelocity ?? "0"),
                 trend: kpis?.velocityTrend ?? 0,
                 icon: TrendingUp,
                 color: "text-violet-500",
@@ -146,7 +148,9 @@ export default function FeedPage() {
               },
               {
                 title: "Engagement Yield",
-                value: kpis?.engagementYield?.toFixed(2) ?? "0",
+                value: typeof kpis?.engagementYield === "number"
+                  ? kpis.engagementYield.toFixed(2)
+                  : String(kpis?.engagementYield ?? "0"),
                 trend: kpis?.yieldTrend ?? 0,
                 icon: Zap,
                 color: "text-amber-500",

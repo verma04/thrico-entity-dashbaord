@@ -1,9 +1,7 @@
-"use client";
-
 import type React from "react";
 import { Aperture as Picture } from "lucide-react";
-
 import { Button as UIButton } from "@/components/ui/button";
+import type { UploadFile } from "./types";
 
 export default function Media({
   fileList,

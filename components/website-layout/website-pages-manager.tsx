@@ -12,7 +12,11 @@ import {
   Trash2,
   Globe,
   Info,
+  Upload,
 } from "lucide-react";
+import { ExportCsvModal } from "@/components/shared/export-csv-modal";
+import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export-csv-modal";
+import { buildCsv, downloadCsv } from "@/lib/export-csv";
 import { useWebsiteBuilderStore } from "@/store/useWebsiteBuilderStore";
 import { useIsPremium } from "@/hooks/useIsPremium";
 import {
@@ -27,6 +31,8 @@ import {
   AdminTable,
   AdminStatusBadge,
   AdminTableColumn,
+  AdminTableItem,
+  AdminTableTag,
 } from "@/components/shared/admin-table/admin-table";
 import {
   EcosystemWrapper,
@@ -97,6 +103,7 @@ export function WebsitePagesManager() {
     open: boolean;
     pageId: string | null;
   }>({ open: false, pageId: null });
+  const [showExportModal, setShowExportModal] = useState(false);
 
   const displayPages = websiteData?.getWebsite?.pages || [];
 
@@ -152,32 +159,23 @@ export function WebsitePagesManager() {
   const columns: AdminTableColumn<any>[] = [
     {
       key: "designation",
-      header: "Name",
+      header: "Page Name",
       cell: (row) => (
-        <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center">
-            <Layout className="h-4 w-4 text-indigo-500" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-[13px] font-bold text-foreground leading-tight">
-              {row.name}
-            </span>
-            {row.slug === "home" && (
-              <span className="text-[10px] text-indigo-500 font-bold uppercase tracking-widest mt-0.5">
-                Home Page
-              </span>
-            )}
-          </div>
-        </div>
+        <AdminTableItem
+          icon={Layout}
+          title={row.name}
+          badge={row.slug === "home" ? "Home Page" : undefined}
+          badgeVariant="indigo"
+        />
       ),
     },
     {
       key: "namespace",
       header: "Path",
       cell: (row) => (
-        <code className="px-2 py-0.5 rounded-md bg-muted border border-border text-[11px] font-mono text-muted-foreground">
+        <AdminTableTag variant="muted">
           /{row.slug}
-        </code>
+        </AdminTableTag>
       ),
     },
     {
@@ -200,22 +198,26 @@ export function WebsitePagesManager() {
     },
     {
       key: "matrix-actions",
-      header: "Actions",
-      headerClassName: "text-right",
+      header: "",
+      headerClassName: "w-24 text-right",
       className: "text-right",
       cell: (row) => (
-        <div className="flex items-center justify-end gap-2">
-          <CtaButton variant="outline" onClick={() => handleEditPage(row.id)}>
-            <Layers className="h-3.5 w-3.5" />
+        <div className="flex items-center justify-end gap-1.5">
+          <CtaButton
+            variant="outline"
+            className="h-6 px-2 text-[11px] font-medium"
+            onClick={() => handleEditPage(row.id)}
+          >
+            <Layers className="h-3 w-3" />
             Design
           </CtaButton>
           {row.slug !== "home" && (
             <CtaButton
               variant="outline"
-              className="w-6 px-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 hover:border-destructive/20"
+              className="h-6 w-6 px-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 hover:border-destructive/20"
               onClick={() => handleDeletePage(row.id)}
             >
-              <Trash2 className="h-3.5 w-3.5" />
+              <Trash2 className="h-3 w-3" />
             </CtaButton>
           )}
         </div>
@@ -232,10 +234,22 @@ export function WebsitePagesManager() {
         badgeText="Website Builder"
         breadcrumbs={[{ label: "Website Builder" }, { label: "Website Pages" }]}
         actions={
-          <CtaButton onClick={() => setIsCreateOpen(true)}>
-            <Plus className="h-3.5 w-3.5" />
-            New Page
-          </CtaButton>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setShowExportModal(true)}
+              className="h-9 px-3 gap-1.5 shrink-0 bg-card border-border shadow-2xs text-xs font-medium text-foreground"
+            >
+              <Upload className="h-3.5 w-3.5" />
+              Export
+            </Button>
+            <CtaButton onClick={() => setIsCreateOpen(true)}>
+              <Plus className="h-3.5 w-3.5" />
+              New Page
+            </CtaButton>
+          </div>
         }
       />
 
@@ -277,6 +291,7 @@ export function WebsitePagesManager() {
               columns={columns}
               data={displayPages}
               loading={websiteLoading}
+              size="sm"
               keyExtractor={(p) => p.id}
               emptyIcon={Layout}
               emptyTitle="No Pages Found"
@@ -381,6 +396,36 @@ export function WebsitePagesManager() {
         confirmText={deletingPage ? "Deleting..." : "Delete Page"}
         confirmVariant="destructive"
         isLoading={deletingPage}
+      />
+
+      <ExportCsvModal
+        open={showExportModal}
+        onOpenChange={setShowExportModal}
+        entityName="website pages"
+        description="Export website pages, slug routes, and publication statuses as CSV."
+        totalCount={displayPages.length}
+        onExport={(_scope: ExportCsvScope, format: ExportCsvFormat) => {
+          if (displayPages.length === 0) {
+            toast({
+              title: "Nothing to export",
+              description: "No website pages found.",
+              variant: "destructive",
+            });
+            return;
+          }
+          const csv = buildCsv(displayPages, [
+            { header: "Page Name", getValue: (p: any) => p.name || "" },
+            { header: "Slug", getValue: (p: any) => p.slug ? `/${p.slug}` : "" },
+            { header: "Status", getValue: (p: any) => p.isEnabled ? "Published" : "Draft" },
+            { header: "Created At", getValue: (p: any) => p.createdAt ? new Date(p.createdAt).toISOString().slice(0, 10) : "" },
+            { header: "Updated At", getValue: (p: any) => p.updatedAt ? new Date(p.updatedAt).toISOString().slice(0, 10) : "" },
+          ]);
+          downloadCsv(csv, `website-pages-${new Date().toISOString().slice(0, 10)}`, format);
+          toast({
+            title: "Export ready",
+            description: `${displayPages.length} page${displayPages.length !== 1 ? "s" : ""} exported.`,
+          });
+        }}
       />
     </EcosystemWrapper>
   );

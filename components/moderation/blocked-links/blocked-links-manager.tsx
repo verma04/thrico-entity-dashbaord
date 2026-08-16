@@ -1,8 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { ColumnDef } from "@tanstack/react-table";
-import { DataTable } from "@/components/ui/data-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,8 +19,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
 import {
   Plus,
   Trash2,
@@ -52,17 +48,26 @@ import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header"
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
+import {
+  AdminTable,
+  AdminTableColumn,
+  AdminTableItem,
+  AdminTableTag,
+  AdminTableText,
+  Pagination,
+} from "@/components/shared/admin-table/admin-table";
 import { cn } from "@/lib/utils";
 
 export function BlockedLinksManager() {
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
+  const [page, setPage] = useState(1);
+  const pageSize = 15;
+  const offset = (page - 1) * pageSize;
   const [searchQuery, setSearchQuery] = useState("");
   const [showExportModal, setShowExportModal] = useState(false);
 
   const { data, loading, refetch } = useGetBlockedLinks({
     limit: pageSize,
-    offset: pageIndex * pageSize,
+    offset,
   });
   const [addLink, { loading: adding }] = useAddBlockedLink();
   const [updateLink, { loading: updating }] = useUpdateBlockedLink();
@@ -79,7 +84,7 @@ export function BlockedLinksManager() {
 
   const links = data?.getBlockedLinks.items || [];
   const totalCount = data?.getBlockedLinks.totalCount || 0;
-  const pageCount = Math.ceil(totalCount / pageSize);
+  const totalPages = Math.ceil(totalCount / pageSize) || 1;
 
   const filteredLinks = links.filter((l) =>
     l.url.toLowerCase().includes(searchQuery.toLowerCase()),
@@ -153,84 +158,86 @@ export function BlockedLinksManager() {
     }
   };
 
-  const columns: ColumnDef<BlockedLink>[] = [
+  const columns: AdminTableColumn<BlockedLink>[] = [
     {
-      accessorKey: "url",
+      key: "url",
       header: "URL / Domain Pattern",
-      cell: ({ row }) => (
-        <span className="font-bold text-xs text-zinc-900 dark:text-zinc-100 font-mono">
-          {row.original.url}
-        </span>
+      cell: (row) => (
+        <AdminTableItem
+          icon={Globe}
+          title={row.url}
+          titleClassName="font-mono text-[12px] font-semibold"
+          subtitle={row.reason || undefined}
+        />
       ),
     },
     {
-      accessorKey: "type",
+      key: "type",
       header: "Routing Type",
-      cell: ({ row }) => (
-        <Badge
-          variant="outline"
-          className="capitalize text-[10px] h-4 font-bold bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-700"
-        >
-          {row.original.type.toLowerCase()}
-        </Badge>
-      ),
+      cell: (row) => {
+        const typeVariants: Record<string, "indigo" | "emerald" | "purple" | "default"> = {
+          DOMAIN: "indigo",
+          URL: "emerald",
+          PATTERN: "purple",
+        };
+        return (
+          <AdminTableTag variant={typeVariants[row.type] || "default"}>
+            {row.type}
+          </AdminTableTag>
+        );
+      },
     },
     {
-      accessorKey: "isBlocked",
+      key: "isBlocked",
       header: "Policy Action",
-      cell: ({ row }) => (
-        <span
-          className={cn(
-            "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border",
-            row.original.isBlocked
-              ? "bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20"
-              : "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 border-zinc-900 dark:border-zinc-100",
-          )}
-        >
-          {row.original.isBlocked ? "Blocked" : "Whitelisted"}
-        </span>
+      cell: (row) => (
+        <AdminTableTag variant={row.isBlocked ? "rose" : "emerald"}>
+          {row.isBlocked ? "Blocked" : "Whitelisted"}
+        </AdminTableTag>
       ),
     },
     {
-      accessorKey: "reason",
+      key: "reason",
       header: "Internal Context",
-      cell: ({ row }) => (
-        <span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
-          {row.original.reason || "—"}
+      cell: (row) => (
+        <span className="text-[12px] text-muted-foreground font-medium">
+          {row.reason || "—"}
         </span>
       ),
     },
     {
-      id: "actions",
-      header: () => <div className="text-right">Actions</div>,
-      cell: ({ row }) => (
+      key: "actions",
+      header: "",
+      headerClassName: "w-28 text-right",
+      className: "text-right",
+      cell: (row) => (
         <div className="flex items-center justify-end gap-1">
           <Button
             type="button"
             variant="outline"
             size="sm"
-            className="h-7 px-2 text-[11px] font-semibold border-zinc-200 dark:border-zinc-800"
-            onClick={() => handleToggleStatus(row.original)}
+            className="h-6 px-2 text-[10px] font-semibold rounded-md border-border text-foreground hover:bg-muted"
+            onClick={() => handleToggleStatus(row)}
           >
-            {row.original.isBlocked ? "Allow" : "Block"}
+            {row.isBlocked ? "Allow" : "Block"}
           </Button>
           <Button
             type="button"
             variant="ghost"
-            size="icon"
-            className="h-7 w-7 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
-            onClick={() => handleOpenDialog(row.original)}
+            size="sm"
+            className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md"
+            onClick={() => handleOpenDialog(row)}
           >
-            <Edit2 className="h-3.5 w-3.5" />
+            <Edit2 className="h-3 w-3" />
           </Button>
           <Button
             type="button"
             variant="ghost"
-            size="icon"
-            className="h-7 w-7 text-zinc-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20"
-            onClick={() => handleDelete(row.original.id)}
+            size="sm"
+            className="h-6 w-6 p-0 text-muted-foreground hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-md"
+            onClick={() => handleDelete(row.id)}
           >
-            <Trash2 className="h-3.5 w-3.5" />
+            <Trash2 className="h-3 w-3" />
           </Button>
         </div>
       ),
@@ -252,90 +259,85 @@ export function BlockedLinksManager() {
 
       <EcosystemActionBar shadow="none">
         <EcosystemActionBar.Group>
-          <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400" />
-            <Input
-              placeholder="Search domains or routes..."
+          <EcosystemActionBar.Item grow className="max-w-xs">
+            <EcosystemActionBar.Search
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-8 h-8 w-[220px] text-xs bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800"
+              onChange={setSearchQuery}
+              placeholder="Search domains or routes…"
             />
-          </div>
-          <EcosystemActionBar.Separator />
-          <div className="flex items-center gap-1.5 text-xs text-zinc-500 font-semibold">
-            <ShieldCheck className="h-3.5 w-3.5 text-zinc-600 dark:text-zinc-400" />
+          </EcosystemActionBar.Item>
+        </EcosystemActionBar.Group>
+
+        <EcosystemActionBar.Separator />
+
+        <EcosystemActionBar.Group>
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-semibold">
+            <ShieldCheck className="h-3.5 w-3.5 text-muted-foreground" />
             {totalCount} Managed Route Rules
           </div>
         </EcosystemActionBar.Group>
+
         <EcosystemActionBar.Group align="right">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => refetch()}
-            className="h-8 gap-1.5 text-xs font-semibold border-zinc-200 dark:border-zinc-800"
-          >
-            <RotateCcw className="h-3.5 w-3.5" />
-            Refresh
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => setShowExportModal(true)}
-            className="h-8 gap-1.5 text-xs font-medium bg-card border-border shadow-2xs text-foreground px-2.5"
-          >
-            <Upload className="h-3.5 w-3.5" />
-            Export
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            onClick={() => handleOpenDialog()}
-            className="h-8 gap-1.5 text-xs font-bold bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 shadow-xs"
-          >
-            <Plus className="h-3.5 w-3.5" />
-            Add URL Policy
-          </Button>
+          <EcosystemActionBar.Item>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => refetch()}
+              className="h-8 gap-1.5 text-xs font-semibold border-border"
+            >
+              <RotateCcw className={cn("h-3.5 w-3.5", loading && "animate-spin")} />
+              Refresh
+            </Button>
+          </EcosystemActionBar.Item>
+          <EcosystemActionBar.Item>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setShowExportModal(true)}
+              className="h-8 gap-1.5 text-xs font-medium bg-card border-border shadow-2xs text-foreground px-2.5"
+            >
+              <Upload className="h-3.5 w-3.5" />
+              Export
+            </Button>
+          </EcosystemActionBar.Item>
+          <EcosystemActionBar.Item>
+            <Button
+              type="button"
+              size="sm"
+              onClick={() => handleOpenDialog()}
+              className="h-8 gap-1.5 text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90 shadow-xs"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Add URL Policy
+            </Button>
+          </EcosystemActionBar.Item>
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
 
-      <EcosystemContainer className="p-6 lg:p-8 space-y-6">
-        <div className="rounded-2xl border border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 overflow-hidden shadow-xs">
-          <div className="px-5 py-4 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-lg bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 flex items-center justify-center shrink-0">
-                <Globe className="h-4 w-4" />
-              </div>
-              <div>
-                <p className="text-xs font-bold uppercase tracking-wider text-zinc-900 dark:text-zinc-100">
-                  Domain & Route Registry
-                </p>
-                <p className="text-[11px] text-zinc-400">
-                  Real-time destination filtering applied to user posts, media links, and comment links
-                </p>
-              </div>
-            </div>
-          </div>
+      <EcosystemContainer className="p-0 border border-border shadow-sm rounded-xl bg-card mt-4 overflow-hidden">
+        <AdminTable
+          columns={columns}
+          data={filteredLinks}
+          loading={loading}
+          size="sm"
+          keyExtractor={(row) => row.id}
+          emptyIcon={Globe}
+          emptyTitle="No route policies found"
+          emptyDescription="No domain or URL restrictions enacted yet. Click 'Add URL Policy' to create one."
+        />
 
-          <div className="p-1">
-            <DataTable
-              columns={columns}
-              data={filteredLinks}
+        {totalPages > 1 && (
+          <div className="p-3 border-t border-border flex justify-end">
+            <Pagination
+              page={page}
+              totalPages={totalPages}
+              onPageChange={setPage}
               isLoading={loading}
-              manualPagination
-              totalRows={totalCount}
-              pageCount={pageCount}
-              pageIndex={pageIndex}
-              onPageChange={setPageIndex}
-              pageSize={pageSize}
-              onPageSizeChange={(size) => {
-                setPageSize(size);
-                setPageIndex(0);
-              }}
             />
           </div>
-        </div>
+        )}
       </EcosystemContainer>
 
       {/* Edit/Create Dialog */}
