@@ -3,18 +3,26 @@
 import { withModulePermission } from "@/components/hoc/with-module-permission";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 
-import { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useDebounce } from "use-debounce";
 
 import {
   LayoutGrid,
   ListIcon,
   Calendar,
+  Upload,
 } from "lucide-react";
 
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { Button } from "@/components/ui/button";
+import { ExportCsvModal } from "@/components/shared/export-csv-modal";
+import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export-csv-modal";
+import { buildCsv, downloadCsv } from "@/lib/export-csv";
+import { toast } from "sonner";
 
 import AllEvents from "../../../../components/events/all-events";
 import { useAllEvents, EventStatus } from "../../../../graphql/actions/events";
@@ -66,14 +74,63 @@ const SORT_OPTIONS = [
 // ─────────────────────────────────────────────────────────────────────────────
 
 function AllEventsPage() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const updateParams = useCallback(
+    (updates: Record<string, string | null>) => {
+      const params = new URLSearchParams(searchParams.toString());
+      for (const [key, value] of Object.entries(updates)) {
+        if (
+          value === null ||
+          value === "" ||
+          value === "ALL" ||
+          value === "0" ||
+          value === "newest"
+        ) {
+          params.delete(key);
+        } else {
+          params.set(key, value);
+        }
+      }
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [searchParams, pathname, router],
+  );
+
   const moduleName = useModuleStore((state) => state.eventModuleName);
   const singularName = useModuleStore((state) => state.eventSingularName);
+
   const [activeStatus, setActiveStatus] = useState<EventStatus>(
-    EventStatus.ALL,
+    (searchParams.get("status") as EventStatus) || EventStatus.ALL,
   );
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState("newest");
+  const [showExportModal, setShowExportModal] = useState(false);
+
+  const updateStatus = (val: EventStatus) => {
+    setActiveStatus(val);
+    updateParams({ status: val === EventStatus.ALL ? null : val });
+  };
+
+  const viewMode =
+    (searchParams.get("view") as "grid" | "list") || "grid";
+  const setViewMode = (val: "grid" | "list") =>
+    updateParams({ view: val === "grid" ? null : val });
+
+  const sortBy = searchParams.get("sort") || "newest";
+  const setSortBy = (val: string) =>
+    updateParams({ sort: val === "newest" ? null : val });
+
+  const [searchTerm, setSearchTerm] = useState(searchParams.get("q") || "");
+  const [debouncedSearch] = useDebounce(searchTerm, 500);
+
+  // Sync debounced search to URL
+  useEffect(() => {
+    const currentQ = searchParams.get("q") || "";
+    if (debouncedSearch.trim() !== currentQ) {
+      updateParams({ q: debouncedSearch.trim() || null });
+    }
+  }, [debouncedSearch, searchParams, updateParams]);
 
   const { data: eventsData, loading } = useAllEvents({
     variables: {
@@ -83,11 +140,13 @@ function AllEventsPage() {
     },
   });
 
+  const totalEvents = eventsData?.getAllEvents?.length || 0;
+
   const filteredEvents = useMemo(() => {
     let events = eventsData?.getAllEvents || [];
 
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
+    if (debouncedSearch) {
+      const term = debouncedSearch.toLowerCase().trim();
       events = events.filter(
         (e) =>
           e.title?.toLowerCase().includes(term) ||
@@ -114,9 +173,7 @@ function AllEventsPage() {
           return 0;
       }
     });
-  }, [eventsData?.getAllEvents, searchTerm, sortBy]);
-
-
+  }, [eventsData?.getAllEvents, debouncedSearch, sortBy]);
 
   return (
     <EcosystemWrapper>
@@ -130,7 +187,7 @@ function AllEventsPage() {
       />
 
       {/* Action Bar */}
-      <EcosystemActionBar>
+      <EcosystemActionBar shadow="none">
         <EcosystemActionBar.Group>
           {/* Search */}
           <EcosystemActionBar.Item grow className="max-w-xs">
@@ -172,6 +229,16 @@ function AllEventsPage() {
 
         <EcosystemActionBar.Group align="right">
           <EcosystemActionBar.Item>
+            <Button
+              variant="outline"
+              onClick={() => setShowExportModal(true)}
+              className="h-8 gap-1.5 shrink-0 bg-card border-border shadow-2xs text-xs font-medium text-foreground px-2.5"
+            >
+              <Upload className="h-3.5 w-3.5" />
+              Export
+            </Button>
+          </EcosystemActionBar.Item>
+          <EcosystemActionBar.Item>
             <EcosystemActionBar.ViewToggle
               value={viewMode}
               onChange={(val) => setViewMode(val as "grid" | "list")}
@@ -185,7 +252,7 @@ function AllEventsPage() {
             <Create />
           </EcosystemActionBar.Item>
           <EcosystemActionBar.Status active={filteredEvents.length > 0}>
-            {filteredEvents.length} {moduleName}
+            Showing {filteredEvents.length} of {totalEvents} {moduleName}
           </EcosystemActionBar.Status>
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
@@ -197,6 +264,33 @@ function AllEventsPage() {
           viewMode={viewMode}
         />
       </EcosystemContainer>
+
+      <ExportCsvModal
+        open={showExportModal}
+        onOpenChange={setShowExportModal}
+        entityName={moduleName.toLowerCase()}
+        description={`Export scheduled events and registrations as CSV. Includes title, description, dates, location, status, and attendees.`}
+        totalCount={totalEvents}
+        matchingCount={debouncedSearch.trim() || activeStatus !== EventStatus.ALL ? filteredEvents.length : undefined}
+        onExport={(_scope: ExportCsvScope, format: ExportCsvFormat) => {
+          const rows = filteredEvents;
+          if (rows.length === 0) {
+            toast.error("Nothing to export", { description: `No ${moduleName.toLowerCase()} found.` });
+            return;
+          }
+          const csv = buildCsv(rows, [
+            { header: "Title", getValue: (e: any) => e.title || "" },
+            { header: "Description", getValue: (e: any) => e.description || "" },
+            { header: "Start Date", getValue: (e: any) => e.startDate ? new Date(e.startDate).toISOString() : "" },
+            { header: "End Date", getValue: (e: any) => e.endDate ? new Date(e.endDate).toISOString() : "" },
+            { header: "Location / Mode", getValue: (e: any) => e.location || e.mode || "" },
+            { header: "Status", getValue: (e: any) => e.status || "" },
+            { header: "Attendees", getValue: (e: any) => e.attendeesCount ?? (e.attendees?.length || 0) },
+          ]);
+          downloadCsv(csv, `events-${new Date().toISOString().slice(0, 10)}`, format);
+          toast.success("Export ready", { description: `${rows.length} ${moduleName.toLowerCase()} exported.` });
+        }}
+      />
     </EcosystemWrapper>
   );
 }

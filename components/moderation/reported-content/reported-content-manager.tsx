@@ -28,7 +28,11 @@ import {
   ShieldAlert,
   CheckCircle,
   Clock,
+  Upload,
 } from "lucide-react";
+import { ExportCsvModal } from "@/components/shared/export-csv-modal";
+import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export-csv-modal";
+import { buildCsv, downloadCsv } from "@/lib/export-csv";
 import {
   useGetContentReports,
   useResolveReport,
@@ -56,6 +60,7 @@ export function ReportedContentManager() {
   );
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
+  const [showExportModal, setShowExportModal] = useState(false);
 
   const { data, loading, error, refetch } = useGetContentReports({
     status: statusFilter === "ALL" ? undefined : statusFilter,
@@ -370,6 +375,15 @@ export function ReportedContentManager() {
             <RotateCcw className="h-3.5 w-3.5" />
             Refresh
           </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowExportModal(true)}
+            className="h-8 gap-1.5 text-xs font-medium bg-card border-border shadow-2xs text-foreground px-2.5"
+          >
+            <Upload className="h-3.5 w-3.5" />
+            Export
+          </Button>
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
 
@@ -410,6 +424,34 @@ export function ReportedContentManager() {
           </div>
         </div>
       </EcosystemContainer>
+
+      <ExportCsvModal
+        open={showExportModal}
+        onOpenChange={setShowExportModal}
+        entityName="reported content items"
+        description="Export moderation content report queue and status logs as CSV."
+        totalCount={totalCount}
+        onExport={(_scope: ExportCsvScope, format: ExportCsvFormat) => {
+          const rows = reports;
+          if (rows.length === 0) {
+            toast.error("Nothing to export", { description: "No reports found." });
+            return;
+          }
+          const csv = buildCsv(rows, [
+            { header: "Content Type", getValue: (r) => r.contentType || "" },
+            { header: "Content ID", getValue: (r) => r.contentId || "" },
+            { header: "Content Preview", getValue: (r) => r.contentPreview || "" },
+            { header: "Reason", getValue: (r) => r.reason || "" },
+            { header: "Status", getValue: (r) => r.status || "PENDING" },
+            { header: "Reports Count", getValue: (r) => r.reportsCount ?? 1 },
+            { header: "Reported By", getValue: (r) => r.reportedBy ? `${r.reportedBy.firstName} ${r.reportedBy.lastName || ""}`.trim() : "" },
+            { header: "Reported User", getValue: (r) => r.reportedUser ? `${r.reportedUser.firstName} ${r.reportedUser.lastName || ""}`.trim() : "" },
+            { header: "Created At", getValue: (r) => r.createdAt ? new Date(parseInt(r.createdAt)).toISOString().slice(0, 10) : "" },
+          ]);
+          downloadCsv(csv, `moderation-reports-${new Date().toISOString().slice(0, 10)}`, format);
+          toast.success("Export ready", { description: `${rows.length} report${rows.length !== 1 ? "s" : ""} exported.` });
+        }}
+      />
     </div>
   );
 }

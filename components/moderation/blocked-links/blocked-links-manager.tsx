@@ -35,7 +35,11 @@ import {
   Loader2,
   Save,
   Globe,
+  Upload,
 } from "lucide-react";
+import { ExportCsvModal } from "@/components/shared/export-csv-modal";
+import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export-csv-modal";
+import { buildCsv, downloadCsv } from "@/lib/export-csv";
 import {
   useGetBlockedLinks,
   useAddBlockedLink,
@@ -54,6 +58,7 @@ export function BlockedLinksManager() {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showExportModal, setShowExportModal] = useState(false);
 
   const { data, loading, refetch } = useGetBlockedLinks({
     limit: pageSize,
@@ -275,12 +280,22 @@ export function BlockedLinksManager() {
           </Button>
           <Button
             type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setShowExportModal(true)}
+            className="h-8 gap-1.5 text-xs font-medium bg-card border-border shadow-2xs text-foreground px-2.5"
+          >
+            <Upload className="h-3.5 w-3.5" />
+            Export
+          </Button>
+          <Button
+            type="button"
             size="sm"
             onClick={() => handleOpenDialog()}
             className="h-8 gap-1.5 text-xs font-bold bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 shadow-xs"
           >
             <Plus className="h-3.5 w-3.5" />
-            Add Route Policy
+            Add URL Policy
           </Button>
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
@@ -323,120 +338,124 @@ export function BlockedLinksManager() {
         </div>
       </EcosystemContainer>
 
-      {/* Polaris Modal for Add/Edit Route Policy */}
+      {/* Edit/Create Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-md flex flex-col p-0 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl overflow-hidden">
-          <DialogHeader className="px-6 py-5 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 flex items-center justify-center">
-                <LinkIcon className="h-4 w-4" />
-              </div>
-              <div>
-                <DialogTitle className="text-base font-bold text-zinc-900 dark:text-zinc-100 leading-tight">
-                  {editingLink ? "Edit Route Policy" : "New Route Policy"}
-                </DialogTitle>
-                <DialogDescription className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
-                  Define domain pattern and specify automated blocking or whitelisting.
-                </DialogDescription>
-              </div>
-            </div>
+        <DialogContent className="sm:max-w-[425px] rounded-2xl border-zinc-200 dark:border-zinc-800">
+          <DialogHeader>
+            <DialogTitle className="text-base font-bold text-zinc-900 dark:text-zinc-100">
+              {editingLink ? "Edit URL Route Rule" : "Add URL Rule Policy"}
+            </DialogTitle>
+            <DialogDescription className="text-xs text-zinc-500">
+              Define domain matching pattern, routing type, and optional audit
+              rationale.
+            </DialogDescription>
           </DialogHeader>
-
-          <div className="p-6 space-y-4 bg-white dark:bg-zinc-950">
+          <div className="grid gap-4 py-3">
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                URL, Domain or Wildcard Pattern <span className="text-rose-500">*</span>
+              <Label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
+                Target URL / Domain
               </Label>
               <Input
-                placeholder="e.g., spam-site.com, *.unverified.io"
+                placeholder="e.g. spam-domain.com or https://example.com/bad"
                 value={formData.url}
                 onChange={(e) =>
-                  setFormData({ ...formData, url: e.target.value })
+                  setFormData((prev) => ({ ...prev, url: e.target.value }))
                 }
-                className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold font-mono"
+                className="h-9 text-xs bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 font-mono"
               />
             </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                  Routing Scope
-                </Label>
-                <Select
-                  value={formData.type}
-                  onValueChange={(v) =>
-                    setFormData({ ...formData, type: v as LinkType })
-                  }
-                >
-                  <SelectTrigger className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-xl border border-zinc-200 dark:border-zinc-800">
-                    <SelectItem value="DOMAIN" className="text-xs font-semibold">Domain Root</SelectItem>
-                    <SelectItem value="URL" className="text-xs font-semibold">Specific URL</SelectItem>
-                    <SelectItem value="PATTERN" className="text-xs font-semibold">Regex Wildcard</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-1.5">
-                <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                  Initial Action
-                </Label>
-                <div className="flex items-center justify-between h-10 px-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
-                  <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
-                    {formData.isBlocked ? "Restrict" : "Allow"}
-                  </span>
-                  <Switch
-                    checked={formData.isBlocked}
-                    onCheckedChange={(c) =>
-                      setFormData({ ...formData, isBlocked: c })
-                    }
-                  />
-                </div>
-              </div>
-            </div>
-
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                Reason / Note <span className="text-zinc-400 font-normal">(Optional)</span>
+              <Label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
+                Pattern Match Type
+              </Label>
+              <Select
+                value={formData.type}
+                onValueChange={(val: LinkType) =>
+                  setFormData((prev) => ({ ...prev, type: val }))
+                }
+              >
+                <SelectTrigger className="h-9 text-xs bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl border-zinc-200 dark:border-zinc-800">
+                  <SelectItem value="DOMAIN" className="text-xs">
+                    Domain (Entire Host)
+                  </SelectItem>
+                  <SelectItem value="URL" className="text-xs">
+                    Exact URL
+                  </SelectItem>
+                  <SelectItem value="PATTERN" className="text-xs">
+                    Regex Pattern
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
+                Reason / Enforcement Note
               </Label>
               <Input
-                placeholder="Internal audit note or incident reference..."
+                placeholder="e.g. Phishing source reported by watchdog"
                 value={formData.reason}
                 onChange={(e) =>
-                  setFormData({ ...formData, reason: e.target.value })
+                  setFormData((prev) => ({ ...prev, reason: e.target.value }))
                 }
-                className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
+                className="h-9 text-xs bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800"
               />
             </div>
           </div>
-
-          <DialogFooter className="px-6 py-4 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 flex items-center justify-end gap-2">
+          <DialogFooter>
             <Button
               type="button"
               variant="outline"
+              size="sm"
               onClick={() => setIsDialogOpen(false)}
-              className="h-9 text-xs font-semibold border-zinc-200 dark:border-zinc-800"
+              className="h-8 text-xs font-semibold"
             >
               Cancel
             </Button>
             <Button
               type="button"
+              size="sm"
               onClick={handleSave}
               disabled={adding || updating || !formData.url.trim()}
-              className="h-9 px-4 text-xs font-bold bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 flex items-center gap-1.5 shadow-xs"
+              className="h-8 gap-1.5 text-xs font-bold bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-zinc-800"
             >
               {adding || updating ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
               ) : (
                 <Save className="h-3.5 w-3.5" />
               )}
-              {editingLink ? "Save Changes" : "Enact Policy"}
+              {editingLink ? "Update Policy" : "Save Policy"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ExportCsvModal
+        open={showExportModal}
+        onOpenChange={setShowExportModal}
+        entityName="blocked links"
+        description="Export blocked links and route policies as CSV."
+        totalCount={totalCount}
+        matchingCount={searchQuery.trim() ? filteredLinks.length : undefined}
+        onExport={(_scope: ExportCsvScope, format: ExportCsvFormat) => {
+          const rows = filteredLinks;
+          if (rows.length === 0) {
+            toast.error("Nothing to export", { description: "No blocked links found." });
+            return;
+          }
+          const csv = buildCsv(rows, [
+            { header: "URL / Domain", getValue: (l) => l.url || "" },
+            { header: "Type", getValue: (l) => l.type || "" },
+            { header: "Status", getValue: (l) => l.isBlocked ? "Blocked" : "Allowed" },
+            { header: "Reason", getValue: (l) => l.reason || "" },
+            { header: "Created At", getValue: (l) => l.createdAt ? new Date(parseInt(l.createdAt)).toISOString().slice(0, 10) : "" },
+          ]);
+          downloadCsv(csv, `blocked-links-${new Date().toISOString().slice(0, 10)}`, format);
+          toast.success("Export ready", { description: `${rows.length} link policy rule${rows.length !== 1 ? "s" : ""} exported.` });
+        }}
+      />
     </EcosystemWrapper>
   );
 }

@@ -4,9 +4,10 @@ import { withModulePermission } from "@/components/hoc/with-module-permission";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useDebounce } from "use-debounce";
 import {
   useShopProducts,
   useCreateShopProduct,
@@ -16,11 +17,14 @@ import {
 import { useGetEntity } from "@/graphql/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ShoppingBag, Plus, Search, Filter, LayoutGrid, List as ListIcon, Tag } from "lucide-react";
+import { ShoppingBag, Plus, Search, Filter, LayoutGrid, List as ListIcon, Tag, RefreshCw, Upload } from "lucide-react";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { ExportCsvModal } from "@/components/shared/export-csv-modal";
+import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export-csv-modal";
+import { buildCsv, downloadCsv } from "@/lib/export-csv";
 import { ProductTable } from "@/components/shop/product-table";
 import { ProductCard } from "@/components/shop/product-card";
 import { ProductSheet } from "@/components/shop/product-sheet";
@@ -30,16 +34,50 @@ import { CtaButton } from "@/components/ui/cta-button";
 import { motion, AnimatePresence } from "framer-motion";
 import TableLoading from "@/components/layout/table-loading";
 import { useModuleStore } from "@/store/useModuleStore";
+import { cn } from "@/lib/utils";
 
 function ShopPage() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const updateParams = useCallback(
+    (updates: Record<string, string | null>) => {
+      const params = new URLSearchParams(searchParams.toString());
+      for (const [key, value] of Object.entries(updates)) {
+        if (value === null || value === "") {
+          params.delete(key);
+        } else {
+          params.set(key, value);
+        }
+      }
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [searchParams, pathname, router],
+  );
+
   const moduleName = useModuleStore((state) => state.shopModuleName);
   const singularName = useModuleStore((state) => state.shopSingularName);
-  const [view, setView] = useState<"grid" | "table">("grid");
-  const [search, setSearch] = useState("");
+
+  const view = (searchParams.get("view") as "grid" | "table") || "grid";
+  const setView = (v: "grid" | "table") =>
+    updateParams({ view: v === "grid" ? null : v });
+
+  const [search, setSearch] = useState(searchParams.get("q") || "");
+  const [debouncedSearch] = useDebounce(search, 500);
+
+  // Sync debounced search to URL
+  useEffect(() => {
+    const currentQ = searchParams.get("q") || "";
+    if (debouncedSearch.trim() !== currentQ) {
+      updateParams({ q: debouncedSearch.trim() || null });
+    }
+  }, [debouncedSearch, searchParams, updateParams]);
+
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-  const searchParams = useSearchParams();
 
   useEffect(() => {
     if (searchParams.get("action") === "create") {
@@ -50,16 +88,7 @@ function ShopPage() {
   // Reset to first page when search changes
   useEffect(() => {
     setPageIndex(0);
-  }, [search]);
-
-  // Debug logging
-  useEffect(() => {
-    console.log("[Pagination Debug] State:", {
-      pageIndex,
-      pageSize,
-      offset: pageIndex * pageSize,
-    });
-  }, [pageIndex, pageSize]);
+  }, [debouncedSearch]);
 
   const { data, loading, error, refetch } = useShopProducts({
     pagination: {
@@ -83,9 +112,15 @@ function ShopPage() {
 
   const products = data?.getShopProducts || [];
 
-  const filteredProducts = products.filter((product) =>
-    product.title.toLowerCase().includes(search.toLowerCase()),
-  );
+  const filteredProducts = useMemo(() => {
+    const q = debouncedSearch.toLowerCase().trim();
+    if (!q) return products;
+    return products.filter((product) =>
+      product.title?.toLowerCase().includes(q) ||
+      product.category?.toLowerCase().includes(q) ||
+      product.sku?.toLowerCase().includes(q),
+    );
+  }, [products, debouncedSearch]);
 
   const handleCreate = () => {
     setIsSheetOpen(true);
@@ -145,6 +180,20 @@ function ShopPage() {
           { label: moduleName, href: "/shop" },
           { label: "All" }
         ]}
+        actions={
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => refetch?.()}
+              className="h-9 w-9 rounded-lg border-border text-muted-foreground hover:text-foreground transition-all"
+            >
+              <RefreshCw
+                className={cn("h-3.5 w-3.5", loading && "animate-spin")}
+              />
+            </Button>
+          </div>
+        }
       />
 
       <EcosystemActionBar shadow="none">
@@ -153,22 +202,22 @@ function ShopPage() {
             <EcosystemActionBar.Search
               value={search}
               onChange={setSearch}
-              placeholder={`Search ${moduleName.toLowerCase()}...`}
+              placeholder={`Search ${moduleName.toLowerCase()}…`}
             />
           </EcosystemActionBar.Item>
         </EcosystemActionBar.Group>
 
-        <EcosystemActionBar.Separator />
-
-        <EcosystemActionBar.Group>
-           <EcosystemActionBar.Item>
-             <Button variant="outline" size="icon" className="h-9 w-9 rounded-lg border border-border text-muted-foreground hover:text-foreground">
-                <Filter className="h-4 w-4" />
-             </Button>
-           </EcosystemActionBar.Item>
-        </EcosystemActionBar.Group>
-
         <EcosystemActionBar.Group align="right">
+          <EcosystemActionBar.Item>
+            <Button
+              variant="outline"
+              onClick={() => setShowExportModal(true)}
+              className="h-8 gap-1.5 shrink-0 bg-card border-border shadow-2xs text-xs font-medium text-foreground px-2.5"
+            >
+              <Upload className="h-3.5 w-3.5" />
+              Export
+            </Button>
+          </EcosystemActionBar.Item>
           <EcosystemActionBar.Item>
             <EcosystemActionBar.ViewToggle
               value={view}
@@ -180,13 +229,16 @@ function ShopPage() {
             />
           </EcosystemActionBar.Item>
           <EcosystemActionBar.Item>
-            <CtaButton onClick={handleCreate}>
-              <Plus className="h-3.5 w-3.5" />
+            <CtaButton
+              onClick={handleCreate}
+              className="gap-2"
+            >
+              <Plus className="h-4 w-4" />
               Add {singularName}
             </CtaButton>
           </EcosystemActionBar.Item>
           <EcosystemActionBar.Status active={filteredProducts.length > 0}>
-             {filteredProducts.length} {moduleName}
+            Showing {filteredProducts.length} of {products.length} {moduleName}
           </EcosystemActionBar.Status>
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
@@ -258,6 +310,32 @@ function ShopPage() {
         categories={categories}
         entityName={entityData?.getEntity?.name || "Store"}
         mode="create"
+      />
+
+      <ExportCsvModal
+        open={showExportModal}
+        onOpenChange={setShowExportModal}
+        entityName={moduleName.toLowerCase()}
+        description={`Export shop products as CSV. Includes product title, description, price, stock, and categories.`}
+        totalCount={products.length}
+        matchingCount={debouncedSearch.trim() ? filteredProducts.length : undefined}
+        onExport={(_scope: ExportCsvScope, format: ExportCsvFormat) => {
+          const rows = filteredProducts;
+          if (rows.length === 0) {
+            toast.error("Nothing to export", { description: `No ${moduleName.toLowerCase()} found.` });
+            return;
+          }
+          const csv = buildCsv(rows, [
+            { header: "Title", getValue: (p) => p.title || "" },
+            { header: "Description", getValue: (p) => p.description || "" },
+            { header: "Price", getValue: (p) => p.price ?? "" },
+            { header: "Stock", getValue: (p) => p.stock ?? "" },
+            { header: "Category", getValue: (p) => p.category?.name || p.categoryName || "" },
+            { header: "Status", getValue: (p) => p.status || (p.isPublished ? "Published" : "Draft") },
+          ]);
+          downloadCsv(csv, `shop-products-${new Date().toISOString().slice(0, 10)}`, format);
+          toast.success("Export ready", { description: `${rows.length} ${singularName.toLowerCase()}${rows.length !== 1 ? "s" : ""} exported.` });
+        }}
       />
     </EcosystemWrapper>
   );

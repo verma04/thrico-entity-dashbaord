@@ -13,12 +13,16 @@ import { CtaButton } from "@/components/ui/cta-button";
 import { StatsCards } from "./stats-cards";
 import { RankList } from "./rank-list";
 import { RankDialog } from "./rank-dialog";
-import { Crown, Plus, Info, RotateCcw } from "lucide-react";
+import { Crown, Plus, Info, RotateCcw, Upload } from "lucide-react";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { cn } from "@/lib/utils";
+import { ExportCsvModal } from "@/components/shared/export-csv-modal";
+import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export-csv-modal";
+import { buildCsv, downloadCsv } from "@/lib/export-csv";
+import { toast } from "sonner";
 
 export function RanksManager() {
   const { data: ranksData, refetch, loading: ranksLoading } = useGetRanks();
@@ -36,8 +40,8 @@ export function RanksManager() {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingRank, setEditingRank] = useState<Rank | null>(null);
-
   const [search, setSearch] = useState("");
+  const [showExportModal, setShowExportModal] = useState(false);
 
   const filteredRanks = React.useMemo(() => {
     if (!search) return ranks;
@@ -120,6 +124,18 @@ export function RanksManager() {
             placeholder="Search ranks..."
           />
         </EcosystemActionBar.Item>
+        <EcosystemActionBar.Group align="right">
+          <EcosystemActionBar.Item>
+            <Button
+              variant="outline"
+              onClick={() => setShowExportModal(true)}
+              className="h-8 gap-1.5 shrink-0 bg-card border-border shadow-2xs text-xs font-medium text-foreground px-2.5"
+            >
+              <Upload className="h-3.5 w-3.5" />
+              Export
+            </Button>
+          </EcosystemActionBar.Item>
+        </EcosystemActionBar.Group>
       </EcosystemActionBar>
 
       <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0 space-y-6">
@@ -157,6 +173,45 @@ export function RanksManager() {
         onSave={handleSave}
         isLoading={creating || updating}
         nextOrder={ranks.length + 1}
+      />
+
+      {/* ── Export Modal ─────────────────────────────────────────────────── */}
+      <ExportCsvModal
+        open={showExportModal}
+        onOpenChange={setShowExportModal}
+        entityName="ranks"
+        description="Export rank definitions as a CSV file. Includes name, point thresholds, order, and status."
+        totalCount={ranks.length}
+        matchingCount={search.trim() ? filteredRanks.length : undefined}
+        onExport={(scope: ExportCsvScope, format: ExportCsvFormat) => {
+          const rows = scope === "matching" ? filteredRanks : ranks as Rank[];
+
+          if (rows.length === 0) {
+            toast.error("Nothing to export", {
+              description: "No ranks found to export.",
+            });
+            return;
+          }
+
+          const csv = buildCsv(rows, [
+            { header: "Name",       getValue: (r) => r.name || "" },
+            { header: "Min Points", getValue: (r) => r.minPoints ?? 0 },
+            { header: "Max Points", getValue: (r) => r.maxPoints ?? 0 },
+            { header: "Order",      getValue: (r) => r.order ?? "" },
+            { header: "Color",      getValue: (r) => r.color || "" },
+            { header: "Icon",       getValue: (r) => r.icon || "" },
+            { header: "Status",     getValue: (r) => r.isActive ? "Active" : "Inactive" },
+            { header: "Created At", getValue: (r) => r.createdAt ? new Date(r.createdAt).toISOString().slice(0, 10) : "" },
+            { header: "Updated At", getValue: (r) => r.updatedAt ? new Date(r.updatedAt).toISOString().slice(0, 10) : "" },
+          ]);
+
+          const label = scope === "matching" ? "ranks-search" : "ranks";
+          downloadCsv(csv, `${label}-${new Date().toISOString().slice(0, 10)}`, format);
+
+          toast.success("Export ready", {
+            description: `${rows.length} rank${rows.length !== 1 ? "s" : ""} exported successfully.`,
+          });
+        }}
       />
     </EcosystemWrapper>
   );

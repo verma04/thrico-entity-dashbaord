@@ -10,8 +10,12 @@ import {
   useBulkAddSkills,
 } from "@/graphql/quries/skills/skill-queries";
 import { Button } from "@/components/ui/button";
-import { Plus, Loader2, LayoutGrid, Network } from "lucide-react";
+import { Plus, Loader2, LayoutGrid, Network, Upload } from "lucide-react";
 import { useDebounce } from "use-debounce";
+import { ExportCsvModal } from "@/components/shared/export-csv-modal";
+import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export-csv-modal";
+import { buildCsv, downloadCsv } from "@/lib/export-csv";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -44,6 +48,7 @@ export default function SkillsPage() {
   const [editingSkill, setEditingSkill] = useState<Skill | null>(null);
   const [skillToDelete, setSkillToDelete] = useState<Skill | null>(null);
   const [activeTab, setActiveTab] = useState("list");
+  const [showExportModal, setShowExportModal] = useState(false);
 
   const [addSkill, { loading: creating }] = useAddSkill({
     onCompleted: () => {
@@ -145,6 +150,14 @@ export default function SkillsPage() {
               <Plus className="h-3.5 w-3.5" />
               Add Skill
             </CtaButton>
+            <Button
+              variant="outline"
+              onClick={() => setShowExportModal(true)}
+              className="h-8 gap-1.5 shrink-0 bg-card border-border shadow-2xs text-xs font-medium text-foreground px-2.5"
+            >
+              <Upload className="h-3.5 w-3.5" />
+              Export
+            </Button>
           </>
         }
         statusText={`${skills.length} Skills`}
@@ -215,6 +228,28 @@ export default function SkillsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <ExportCsvModal
+        open={showExportModal}
+        onOpenChange={setShowExportModal}
+        entityName="skills"
+        description="Export community member skill classifications as CSV."
+        totalCount={skills.length}
+        matchingCount={debouncedSearch.trim() ? skills.length : undefined}
+        onExport={(_scope: ExportCsvScope, format: ExportCsvFormat) => {
+          if (skills.length === 0) {
+            toast.error("Nothing to export", { description: "No skills found." });
+            return;
+          }
+          const csv = buildCsv(skills, [
+            { header: "Skill Title", getValue: (s) => s.title || "" },
+            { header: "Created At", getValue: (s) => s.createdAt ? new Date(s.createdAt).toISOString().slice(0, 10) : "" },
+            { header: "Updated At", getValue: (s) => s.updatedAt ? new Date(s.updatedAt).toISOString().slice(0, 10) : "" },
+          ]);
+          downloadCsv(csv, `skills-${new Date().toISOString().slice(0, 10)}`, format);
+          toast.success("Export ready", { description: `${skills.length} skill${skills.length !== 1 ? "s" : ""} exported.` });
+        }}
+      />
     </>
   );
 }

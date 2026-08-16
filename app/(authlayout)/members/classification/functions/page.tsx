@@ -11,7 +11,11 @@ import {
 } from "@/graphql/quries/functions/function-queries";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Briefcase, Loader2, Plus, UserCheck } from "lucide-react";
+import { Briefcase, Loader2, Plus, UserCheck, Upload } from "lucide-react";
+import { ExportCsvModal } from "@/components/shared/export-csv-modal";
+import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export-csv-modal";
+import { buildCsv, downloadCsv } from "@/lib/export-csv";
+import { toast } from "sonner";
 import { ClassificationCard } from "../../../../../components/classfications/shared/classification-card";
 import { ClassificationSkeletonGrid } from "../../../../../components/classfications/shared/classification-skeleton";
 import { CtaButton } from "@/components/ui/cta-button";
@@ -354,6 +358,7 @@ export default function FunctionsPage() {
   );
   const [functionToDelete, setFunctionToDelete] =
     useState<MemberFunction | null>(null);
+  const [showExportModal, setShowExportModal] = useState(false);
 
   const [addFunction, { loading: creating }] = useAddFunction({
     onCompleted: () => {
@@ -459,6 +464,14 @@ export default function FunctionsPage() {
               <Plus className="h-3.5 w-3.5" />
               Add Function
             </CtaButton>
+            <Button
+              variant="outline"
+              onClick={() => setShowExportModal(true)}
+              className="h-8 gap-1.5 shrink-0 bg-card border-border shadow-2xs text-xs font-medium text-foreground px-2.5"
+            >
+              <Upload className="h-3.5 w-3.5" />
+              Export
+            </Button>
           </>
         }
         statusText={`${filteredFunctions.length} Functions`}
@@ -525,6 +538,29 @@ export default function FunctionsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <ExportCsvModal
+        open={showExportModal}
+        onOpenChange={setShowExportModal}
+        entityName="job functions"
+        description="Export community member job function classifications as CSV."
+        totalCount={functions.length}
+        matchingCount={search.trim() ? filteredFunctions.length : undefined}
+        onExport={(_scope: ExportCsvScope, format: ExportCsvFormat) => {
+          const rows = filteredFunctions;
+          if (rows.length === 0) {
+            toast.error("Nothing to export", { description: "No functions found." });
+            return;
+          }
+          const csv = buildCsv(rows, [
+            { header: "Function Title", getValue: (f) => f.title || "" },
+            { header: "Created At", getValue: (f) => f.createdAt ? new Date(f.createdAt).toISOString().slice(0, 10) : "" },
+            { header: "Updated At", getValue: (f) => f.updatedAt ? new Date(f.updatedAt).toISOString().slice(0, 10) : "" },
+          ]);
+          downloadCsv(csv, `functions-${new Date().toISOString().slice(0, 10)}`, format);
+          toast.success("Export ready", { description: `${rows.length} function${rows.length !== 1 ? "s" : ""} exported.` });
+        }}
+      />
     </>
   );
 }

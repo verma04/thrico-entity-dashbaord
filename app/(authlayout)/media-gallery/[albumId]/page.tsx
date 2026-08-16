@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import { useParams } from "next/navigation";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useParams, useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useDebounce } from "use-debounce";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -16,6 +17,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Loader2,
+  RefreshCw,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -63,10 +65,40 @@ import { CommentsPanel } from "@/components/media-gallery/comments-panel";
 import { SortableImageCard } from "@/components/media-gallery/sortable-image-card";
 import { UploadZone } from "@/components/media-gallery/upload-zone";
 import { CaptionDialog } from "@/components/media-gallery/caption-dialog";
+import { cn } from "@/lib/utils";
 
 export default function AlbumDetailPage() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const params = useParams();
   const albumId = params.albumId as string;
+
+  const updateParams = useCallback(
+    (updates: Record<string, string | null>) => {
+      const p = new URLSearchParams(searchParams.toString());
+      for (const [key, value] of Object.entries(updates)) {
+        if (value === null || value === "") {
+          p.delete(key);
+        } else {
+          p.set(key, value);
+        }
+      }
+      router.replace(`${pathname}?${p.toString()}`, { scroll: false });
+    },
+    [searchParams, pathname, router],
+  );
+
+  const [search, setSearch] = useState(searchParams.get("q") || "");
+  const [debouncedSearch] = useDebounce(search, 500);
+
+  // Sync debounced search to URL
+  useEffect(() => {
+    const currentQ = searchParams.get("q") || "";
+    if (debouncedSearch.trim() !== currentQ) {
+      updateParams({ q: debouncedSearch.trim() || null });
+    }
+  }, [debouncedSearch, searchParams, updateParams]);
 
   const { data, loading, refetch } = useGetMediaGalleryAlbum(albumId);
   const [deleteImage] = useDeleteMediaGalleryImage(albumId);
@@ -101,8 +133,19 @@ export default function AlbumDetailPage() {
     }
   }, [album]);
 
+  const filteredImages = useMemo(() => {
+    const q = debouncedSearch.toLowerCase().trim();
+    if (!q) return images;
+    return images.filter(
+      (img) =>
+        img.caption?.toLowerCase().includes(q) ||
+        img.fileName?.toLowerCase().includes(q) ||
+        img.url?.toLowerCase().includes(q),
+    );
+  }, [images, debouncedSearch]);
+
   const handleDragEnd = async (event: DragEndEvent) => {
-    if (isSelectionMode) return; // Disable drag during selection
+    if (isSelectionMode) return;
 
     const { active, over } = event;
     if (!over || active.id === over.id) return;
@@ -115,6 +158,7 @@ export default function AlbumDetailPage() {
     try {
       await reorderImages({
         variables: {
+          albumId,
           input: reordered.map((img, idx) => ({ id: img.id, order: idx })),
         },
       });
@@ -150,7 +194,7 @@ export default function AlbumDetailPage() {
         ),
       );
       toast.success(`${selectedImageIds.size} images deleted`);
-      setSelectedImageIds(new Set());
+      clearSelection();
       setIsSelectionMode(false);
       refetch();
     } catch (err: any) {
@@ -190,69 +234,113 @@ export default function AlbumDetailPage() {
           { label: loading ? "Loading..." : (album?.title ?? "Album") }
         ]}
         actions={
-          <EcosystemActionBar shadow="none" className="p-0 border-none bg-transparent gap-2">
-            <EcosystemActionBar.Group align="right">
-              {!loading && images.length > 0 && (
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => refetch?.()}
+              className="h-9 w-9 rounded-lg border-border text-muted-foreground hover:text-foreground transition-all"
+            >
+              <RefreshCw
+                className={cn("h-3.5 w-3.5", loading && "animate-spin")}
+              />
+            </Button>
+          </div>
+        }
+      />
+      <EcosystemActionBar shadow="none">
+        <EcosystemActionBar.Group>
+          <EcosystemActionBar.Item grow className="max-w-xs">
+            <EcosystemActionBar.Search
+              value={search}
+              onChange={setSearch}
+              placeholder="Search images in album…"
+            />
+          </EcosystemActionBar.Item>
+        </EcosystemActionBar.Group>
+
+        <EcosystemActionBar.Separator />
+
+        <EcosystemActionBar.Group>
+          {!loading && images.length > 0 && (
+            <>
+              {isSelectionMode ? (
                 <>
-                  {isSelectionMode ? (
-                    <>
-                      <span className="text-sm font-medium text-gray-600 mr-2">
-                        {selectedImageIds.size} selected
-                      </span>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={
-                          selectedImageIds.size === images.length
-                            ? clearSelection
-                            : selectAll
-                        }
-                      >
-                        {selectedImageIds.size === images.length ? (
-                          <XSquare className="w-4 h-4 mr-2" />
-                        ) : (
-                          <CheckSquare className="w-4 h-4 mr-2" />
-                        )}
-                        {selectedImageIds.size === images.length
-                          ? "Clear"
-                          : "Select All"}
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => setShowBulkDeleteDialog(true)}
-                        disabled={selectedImageIds.size === 0}
-                      >
-                        <Trash2 className="w-4 h-4 mr-2" />
-                        Delete Selected
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setIsSelectionMode(false);
-                          clearSelection();
-                        }}
-                      >
-                        Cancel
-                      </Button>
-                    </>
-                  ) : (
+                  <EcosystemActionBar.Item>
+                    <span className="text-xs font-semibold text-muted-foreground">
+                      {selectedImageIds.size} selected
+                    </span>
+                  </EcosystemActionBar.Item>
+                  <EcosystemActionBar.Item>
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setIsSelectionMode(true)}
+                      className="h-8 text-xs font-semibold"
+                      onClick={
+                        selectedImageIds.size === images.length
+                          ? clearSelection
+                          : selectAll
+                      }
                     >
-                      <CheckSquare className="w-4 h-4 mr-2" />
-                      Select
+                      {selectedImageIds.size === images.length ? (
+                        <XSquare className="w-3.5 h-3.5 mr-1.5" />
+                      ) : (
+                        <CheckSquare className="w-3.5 h-3.5 mr-1.5" />
+                      )}
+                      {selectedImageIds.size === images.length
+                        ? "Clear"
+                        : "Select All"}
                     </Button>
-                  )}
+                  </EcosystemActionBar.Item>
+                  <EcosystemActionBar.Item>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      className="h-8 text-xs font-semibold"
+                      onClick={() => setShowBulkDeleteDialog(true)}
+                      disabled={selectedImageIds.size === 0}
+                    >
+                      <Trash2 className="w-3.5 h-3.5 mr-1.5" />
+                      Delete Selected
+                    </Button>
+                  </EcosystemActionBar.Item>
+                  <EcosystemActionBar.Item>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 text-xs font-semibold"
+                      onClick={() => {
+                        setIsSelectionMode(false);
+                        clearSelection();
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  </EcosystemActionBar.Item>
                 </>
+              ) : (
+                <EcosystemActionBar.Item>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 text-xs font-semibold"
+                    onClick={() => setIsSelectionMode(true)}
+                  >
+                    <CheckSquare className="w-3.5 h-3.5 mr-1.5" />
+                    Select
+                  </Button>
+                </EcosystemActionBar.Item>
               )}
-            </EcosystemActionBar.Group>
-          </EcosystemActionBar>
-        }
-      />
+            </>
+          )}
+        </EcosystemActionBar.Group>
+
+        <EcosystemActionBar.Group align="right">
+          <EcosystemActionBar.Status active={filteredImages.length > 0}>
+            Showing {filteredImages.length} of {images.length} Media
+          </EcosystemActionBar.Status>
+        </EcosystemActionBar.Group>
+      </EcosystemActionBar>
       <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0 space-y-6">
         <div className="px-6 py-4 space-y-6">
           {/* Image Grid */}
@@ -269,11 +357,11 @@ export default function AlbumDetailPage() {
           onDragEnd={handleDragEnd}
         >
           <SortableContext
-            items={images.map((i) => i.id)}
+            items={filteredImages.map((i) => i.id)}
             strategy={rectSortingStrategy}
           >
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-              {images.map((image) => (
+              {filteredImages.map((image) => (
                 <SortableImageCard
                   key={image.id}
                   image={image}

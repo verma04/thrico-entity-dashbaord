@@ -352,15 +352,8 @@ export function ChildSidebarContainer({
         {activeTab !== "mobile-app" && (
           <Sidebar
             collapsible="icon"
-            className="border bg-[#f9f9f9] dark:bg-background transition-[width] duration-150 ease-in-out left-[76px]! top-[64px]! h-[calc(100vh-72px)]! my-2 mt-0 z-30 shadow-sm rounded-2xl! rounded-r-none! rounded-br-none!"
-            style={
-              {
-                "--sidebar-width": "210px",
-                left: "76px",
-                top: "64px",
-                height: "calc(100vh - 72px)",
-              } as React.CSSProperties
-            }
+            className="border bg-[#f9f9f9] dark:bg-background transition-[width] duration-150 ease-in-out left-[76px]! top-[64px]! h-[calc(100vh-72px)]! mb-2 z-30 shadow-sm rounded-l-2xl!"
+            style={{ "--sidebar-width": "210px" } as React.CSSProperties}
           >
             <SidebarHeader className="h-10 flex items-center justify-between flex-row px-4 pb-0 pt-0 group-data-[collapsible=icon]:px-1 group-data-[collapsible=icon]:justify-center">
               {!isCollapsed && (
@@ -606,7 +599,7 @@ export function ChildSidebarContainer({
         )}
 
         {/* ── MAIN CONTENT ── */}
-        <SidebarInset className="bg-transparent overflow-hidden flex flex-col h-[calc(100vh-56px)] min-w-0 flex-1 relative z-0">
+        <SidebarInset className="bg-transparent overflow-hidden flex flex-col h-[calc(100vh-64px)] min-w-0 flex-1 relative z-0">
           <main className="flex-1 w-full min-w-0 overflow-y-auto">{children}</main>
         </SidebarInset>
       </div>

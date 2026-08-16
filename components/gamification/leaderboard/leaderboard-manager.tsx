@@ -9,6 +9,7 @@ import {
   TrendingUp,
   RotateCcw,
   ShieldCheck,
+  Upload,
 } from "lucide-react";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
@@ -16,6 +17,10 @@ import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-acti
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { ExportCsvModal } from "@/components/shared/export-csv-modal";
+import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export-csv-modal";
+import { buildCsv, downloadCsv } from "@/lib/export-csv";
+import { toast } from "sonner";
 
 export function LeaderboardManager() {
   const [pagination] = useState({ limit: 20, offset: 0 });
@@ -25,6 +30,7 @@ export function LeaderboardManager() {
   });
 
   const [search, setSearch] = useState("");
+  const [showExportModal, setShowExportModal] = useState(false);
 
   const leaderboard = data?.getLeaderboard;
   const entries = leaderboard?.entries || [];
@@ -58,6 +64,18 @@ export function LeaderboardManager() {
             placeholder="Search members..."
           />
         </EcosystemActionBar.Item>
+        <EcosystemActionBar.Group align="right">
+          <EcosystemActionBar.Item>
+            <Button
+              variant="outline"
+              onClick={() => setShowExportModal(true)}
+              className="h-8 gap-1.5 shrink-0 bg-card border-border shadow-2xs text-xs font-medium text-foreground px-2.5"
+            >
+              <Upload className="h-3.5 w-3.5" />
+              Export
+            </Button>
+          </EcosystemActionBar.Item>
+        </EcosystemActionBar.Group>
       </EcosystemActionBar>
       <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0 space-y-6">
         <div className="px-6 py-4 grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -94,6 +112,45 @@ export function LeaderboardManager() {
           <LeaderboardTable entries={filteredEntries} isLoading={loading} />
         </div>
       </EcosystemContainer>
+
+      {/* ── Export Modal ─────────────────────────────────────────────────── */}
+      <ExportCsvModal
+        open={showExportModal}
+        onOpenChange={setShowExportModal}
+        entityName="leaderboard entries"
+        description="Export the current leaderboard as a CSV file. Includes rank, member name, points, badges, rank tier, and wallet balance."
+        totalCount={leaderboard?.totalUsers ?? 0}
+        matchingCount={search.trim() ? filteredEntries.length : undefined}
+        onExport={(scope: ExportCsvScope, format: ExportCsvFormat) => {
+          const rows = scope === "matching" ? filteredEntries : entries;
+
+          if (rows.length === 0) {
+            toast.error("Nothing to export", {
+              description: "No leaderboard entries to export.",
+            });
+            return;
+          }
+
+          const csv = buildCsv(rows, [
+            { header: "Rank",           getValue: (e: any) => e.rank ?? "" },
+            { header: "First Name",     getValue: (e: any) => e.user?.firstName || "" },
+            { header: "Last Name",      getValue: (e: any) => e.user?.lastName || "" },
+            { header: "Total Points",   getValue: (e: any) => e.totalPoints ?? 0 },
+            { header: "Badges",         getValue: (e: any) => e.badgesCount ?? 0 },
+            { header: "Rank Tier",      getValue: (e: any) => e.currentRank?.name || "" },
+            { header: "Wallet Balance", getValue: (e: any) => e.entityCurrencyWallet?.balance ?? 0 },
+            { header: "Total Earned",   getValue: (e: any) => e.entityCurrencyWallet?.totalEarned ?? 0 },
+            { header: "Total Spent",    getValue: (e: any) => e.entityCurrencyWallet?.totalSpent ?? 0 },
+          ]);
+
+          const label = scope === "matching" ? "leaderboard-search" : "leaderboard";
+          downloadCsv(csv, `${label}-${new Date().toISOString().slice(0, 10)}`, format);
+
+          toast.success("Export ready", {
+            description: `${rows.length} entr${rows.length !== 1 ? "ies" : "y"} exported successfully.`,
+          });
+        }}
+      />
     </EcosystemWrapper>
   );
 }

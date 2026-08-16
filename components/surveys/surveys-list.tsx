@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import moment from "moment";
 import { useGetSurveys, Survey } from "@/graphql/surveys/survey-queries";
 import { toast } from "sonner";
@@ -124,18 +125,32 @@ export function SurveysList({
     },
   });
 
+  const searchParams = useSearchParams();
+  const searchQuery = searchParams.get("q") || "";
+
   const { data, loading, error } = useGetSurveys({
     variables: {
       input: {
-        limit: 10,
+        limit: 50,
         offset: 0,
-        search: null,
+        search: searchQuery.trim() || null,
         status: null,
       },
     },
+    fetchPolicy: "network-only",
   });
 
-  const surveys = data?.getSurveys?.surveys || [];
+  const rawSurveys = data?.getSurveys?.surveys || [];
+
+  const surveys = useMemo(() => {
+    if (!searchQuery.trim()) return rawSurveys;
+    const q = searchQuery.toLowerCase().trim();
+    return rawSurveys.filter(
+      (s) =>
+        s.title?.toLowerCase().includes(q) ||
+        s.description?.toLowerCase().includes(q),
+    );
+  }, [rawSurveys, searchQuery]);
 
   const handleUpdateDetails = () => {
     if (!editingDetailsSurvey || !canUpdate) return;

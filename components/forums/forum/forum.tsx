@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useDebounce } from "use-debounce";
 import List from "./forum-list";
 import { getDiscussionForum } from "../../../graphql/actions/discussion-form";
 import { discussionForumStatus } from "../ts-types";
@@ -11,10 +13,16 @@ import {
   List as ListIcon,
   MessageSquare,
   RefreshCw,
+  Upload,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { CtaButton } from "@/components/ui/cta-button";
 import ForumCard from "./forum-card";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import { ExportCsvModal } from "@/components/shared/export-csv-modal";
+import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export-csv-modal";
+import { buildCsv, downloadCsv } from "@/lib/export-csv";
 
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
@@ -46,12 +54,57 @@ interface ForumProps {
 }
 
 export default function Forum({ status: initialStatus }: ForumProps) {
-  const [view, setView] = useState<"grid" | "table">("table");
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState<discussionForumStatus>(
-    initialStatus || "ALL",
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const updateParams = useCallback(
+    (updates: Record<string, string | null>) => {
+      const params = new URLSearchParams(searchParams.toString());
+      for (const [key, value] of Object.entries(updates)) {
+        if (
+          value === null ||
+          value === "" ||
+          value === "ALL" ||
+          value === "0"
+        ) {
+          params.delete(key);
+        } else {
+          params.set(key, value);
+        }
+      }
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [searchParams, pathname, router],
   );
-  const [verificationFilter, setVerificationFilter] = useState("ALL");
+
+  const status =
+    (searchParams.get("status") as discussionForumStatus) ||
+    initialStatus ||
+    "ALL";
+  const setStatus = (v: discussionForumStatus) =>
+    updateParams({ status: v === "ALL" ? null : v });
+
+  const verificationFilter = searchParams.get("verification") || "ALL";
+  const setVerificationFilter = (v: string) =>
+    updateParams({ verification: v === "ALL" ? null : v });
+
+  const view = (searchParams.get("view") as "grid" | "table") || "table";
+  const setView = (v: "grid" | "table") =>
+    updateParams({ view: v === "table" ? null : v });
+
+  const [search, setSearch] = useState(searchParams.get("q") || "");
+  const [debouncedSearch] = useDebounce(search, 500);
+  const [showExportModal, setShowExportModal] = useState(false);
+
+  // Sync debounced search to URL
+  useEffect(() => {
+    const currentQ = searchParams.get("q") || "";
+    if (debouncedSearch.trim() !== currentQ) {
+      updateParams({ q: debouncedSearch.trim() || null });
+    }
+  }, [debouncedSearch, searchParams, updateParams]);
+
   const moduleName = useModuleStore((state) => state.forumModuleName);
   const singularName = useModuleStore((state) => state.forumSingularName);
 
@@ -66,11 +119,13 @@ export default function Forum({ status: initialStatus }: ForumProps) {
   const forums = data?.getDiscussionForum || [];
 
   const filteredForums = useMemo(() => {
+    const q = debouncedSearch.toLowerCase().trim();
     return forums.filter((f: any) => {
       // Apply Search Filter
       const matchesSearch =
-        f.title.toLowerCase().includes(search.toLowerCase()) ||
-        f.content?.toLowerCase().includes(search.toLowerCase());
+        !q ||
+        f.title?.toLowerCase().includes(q) ||
+        f.content?.toLowerCase().includes(q);
 
       // Apply Verification Filter
       const isVerified = f.verification?.isVerified || false;
@@ -83,10 +138,7 @@ export default function Forum({ status: initialStatus }: ForumProps) {
 
       return matchesSearch && matchesVerification;
     });
-  }, [forums, search, verificationFilter]);
-
-  const currentStatus =
-    STATUS_OPTIONS.find((s) => s.value === status) || STATUS_OPTIONS[0];
+  }, [forums, debouncedSearch, verificationFilter]);
 
   return (
     <EcosystemWrapper>
@@ -100,15 +152,29 @@ export default function Forum({ status: initialStatus }: ForumProps) {
         }
         icon={MessageSquare}
         breadcrumbs={[{ label: moduleName, href: "/forums" }, { label: "All" }]}
+        actions={
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => refetch?.()}
+              className="h-9 w-9 rounded-lg border-border text-muted-foreground hover:text-foreground transition-all"
+            >
+              <RefreshCw
+                className={cn("h-3.5 w-3.5", loading && "animate-spin")}
+              />
+            </Button>
+          </div>
+        }
       />
 
-      <EcosystemActionBar>
+      <EcosystemActionBar shadow="none">
         <EcosystemActionBar.Group>
           <EcosystemActionBar.Item grow className="max-w-xs">
             <EcosystemActionBar.Search
               value={search}
               onChange={setSearch}
-              placeholder="Search posts..."
+              placeholder={`Search ${moduleName.toLowerCase()}…`}
             />
           </EcosystemActionBar.Item>
         </EcosystemActionBar.Group>
@@ -120,7 +186,11 @@ export default function Forum({ status: initialStatus }: ForumProps) {
             <EcosystemActionBar.Select
               value={status}
               onValueChange={(val: any) => setStatus(val)}
-              options={STATUS_OPTIONS}
+              options={STATUS_OPTIONS.map((opt) => ({
+                value: opt.value,
+                label: opt.label,
+                dot: opt.dot || undefined,
+              }))}
               placeholder="Status"
             />
           </EcosystemActionBar.Item>
@@ -137,29 +207,30 @@ export default function Forum({ status: initialStatus }: ForumProps) {
 
         <EcosystemActionBar.Group align="right">
           <EcosystemActionBar.Item>
-            <div className="flex items-center gap-2">
-              <CtaButton
-                variant="outline"
-                onClick={() => refetch?.()}
-                className="h-6 w-6 p-0 rounded-md border-border text-muted-foreground hover:text-foreground transition-all"
-              >
-                <RefreshCw
-                  className={cn("h-3 w-3", loading && "animate-spin")}
-                />
-              </CtaButton>
-              <EcosystemActionBar.ViewToggle
-                value={view}
-                onChange={(val: string) => setView(val as "grid" | "table")}
-                options={[
-                  { id: "grid", label: "Grid", icon: LayoutGrid },
-                  { id: "table", label: "Table", icon: ListIcon },
-                ]}
-              />
-              <Post />
-            </div>
+            <Button
+              variant="outline"
+              onClick={() => setShowExportModal(true)}
+              className="h-8 gap-1.5 shrink-0 bg-card border-border shadow-2xs text-xs font-medium text-foreground px-2.5"
+            >
+              <Upload className="h-3.5 w-3.5" />
+              Export
+            </Button>
+          </EcosystemActionBar.Item>
+          <EcosystemActionBar.Item>
+            <EcosystemActionBar.ViewToggle
+              value={view}
+              onChange={(val: string) => setView(val as "grid" | "table")}
+              options={[
+                { id: "grid", label: "Grid", icon: LayoutGrid },
+                { id: "table", label: "Table", icon: ListIcon },
+              ]}
+            />
+          </EcosystemActionBar.Item>
+          <EcosystemActionBar.Item>
+            <Post />
           </EcosystemActionBar.Item>
           <EcosystemActionBar.Status active={filteredForums.length > 0}>
-            {filteredForums.length} {moduleName}
+            Showing {filteredForums.length} of {forums.length} {moduleName}
           </EcosystemActionBar.Status>
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
@@ -209,6 +280,32 @@ export default function Forum({ status: initialStatus }: ForumProps) {
           )}
         </AnimatePresence>
       </EcosystemContainer>
+
+      <ExportCsvModal
+        open={showExportModal}
+        onOpenChange={setShowExportModal}
+        entityName={moduleName.toLowerCase()}
+        description={`Export forum discussions and posts as CSV. Includes title, content, author, status, and verification.`}
+        totalCount={forums.length}
+        matchingCount={debouncedSearch.trim() || statusParam !== "ALL" || verificationParam !== "ALL" ? filteredForums.length : undefined}
+        onExport={(_scope: ExportCsvScope, format: ExportCsvFormat) => {
+          const rows = filteredForums;
+          if (rows.length === 0) {
+            toast.error("Nothing to export", { description: `No ${moduleName.toLowerCase()} found.` });
+            return;
+          }
+          const csv = buildCsv(rows, [
+            { header: "Title", getValue: (f) => f.title || "" },
+            { header: "Content", getValue: (f) => f.description || f.content || "" },
+            { header: "Author", getValue: (f) => f.creator ? `${f.creator.firstName || ""} ${f.creator.lastName || ""}`.trim() : "" },
+            { header: "Status", getValue: (f) => f.status || "" },
+            { header: "Verified", getValue: (f) => f.isVerified ? "Yes" : "No" },
+            { header: "Created At", getValue: (f) => f.createdAt ? new Date(f.createdAt).toISOString().slice(0, 10) : "" },
+          ]);
+          downloadCsv(csv, `forums-${new Date().toISOString().slice(0, 10)}`, format);
+          toast.success("Export ready", { description: `${rows.length} ${moduleName.toLowerCase()} exported.` });
+        }}
+      />
     </EcosystemWrapper>
   );
 }

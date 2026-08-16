@@ -1,13 +1,26 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useDebounce } from "use-debounce";
 import {
   ShoppingCart,
   RefreshCw,
   Calendar,
   DollarSign,
   Gift,
+  Upload,
 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ExportCsvModal } from "@/components/shared/export-csv-modal";
+import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export-csv-modal";
+import { buildCsv, downloadCsv } from "@/lib/export-csv";
 import { Button } from "@/components/ui/button";
 import { useGetShopifyOrders, useSyncShopifyOrders } from "@/graphql/actions";
 import { toast } from "sonner";
@@ -55,8 +68,48 @@ interface ShopifyOrder {
 }
 
 export default function ShopifyOrdersPage() {
-  const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const updateParams = useCallback(
+    (updates: Record<string, string | null>) => {
+      const params = new URLSearchParams(searchParams.toString());
+      for (const [key, value] of Object.entries(updates)) {
+        if (
+          value === null ||
+          value === "" ||
+          value === "ALL" ||
+          value === "0"
+        ) {
+          params.delete(key);
+        } else {
+          params.set(key, value);
+        }
+      }
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [searchParams, pathname, router],
+  );
+
+  const page = Number(searchParams.get("page") || "1");
+  const setPage = (p: number) =>
+    updateParams({ page: p <= 1 ? null : String(p) });
+
+  const statusFilter = searchParams.get("status") || "ALL";
+
+  const [search, setSearch] = useState(searchParams.get("q") || "");
+  const [debouncedSearch] = useDebounce(search, 500);
+
+  // Sync debounced search to URL
+  React.useEffect(() => {
+    const currentQ = searchParams.get("q") || "";
+    if (debouncedSearch.trim() !== currentQ) {
+      updateParams({ q: debouncedSearch.trim() || null, page: null });
+    }
+  }, [debouncedSearch, searchParams, updateParams]);
+
+  const [showExportModal, setShowExportModal] = useState(false);
   const limit = 20;
   const offset = (page - 1) * limit;
 
@@ -82,18 +135,24 @@ export default function ShopifyOrdersPage() {
 
   const filteredOrders = React.useMemo(() => {
     const orders = rawOrders || [];
-    if (!search.trim()) return orders;
-    const q = search.toLowerCase();
-    return orders.filter(
-      (order: ShopifyOrder) =>
+    return orders.filter((order: ShopifyOrder) => {
+      const q = debouncedSearch.toLowerCase().trim();
+      const matchesSearch =
+        !q ||
         order.shopifyOrderId?.toLowerCase().includes(q) ||
         order.userId?.toLowerCase().includes(q) ||
         order.status?.toLowerCase().includes(q) ||
         order.user?.firstName?.toLowerCase().includes(q) ||
         order.user?.lastName?.toLowerCase().includes(q) ||
-        order.user?.email?.toLowerCase().includes(q)
-    );
-  }, [rawOrders, search]);
+        order.user?.email?.toLowerCase().includes(q);
+
+      const matchesStatus =
+        statusFilter === "ALL" ||
+        order.status?.toUpperCase() === statusFilter.toUpperCase();
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [rawOrders, debouncedSearch, statusFilter]);
 
   const columns: AdminTableColumn<ShopifyOrder>[] = [
     {
@@ -228,7 +287,51 @@ export default function ShopifyOrdersPage() {
 
           <EcosystemActionBar.Separator />
 
+          {/* Primary filters & actions */}
           <EcosystemActionBar.Group>
+            <EcosystemActionBar.Item>
+              <Select
+                value={statusFilter}
+                onValueChange={(v) => updateParams({ status: v, page: null })}
+              >
+                <SelectTrigger className="w-[130px] h-8 rounded-md border-border bg-card text-xs font-medium text-foreground shadow-2xs focus:ring-1 focus:ring-ring">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent className="rounded-lg border-border shadow-md p-1 min-w-[140px]">
+                  <SelectItem
+                    value="ALL"
+                    className="rounded-sm text-xs font-medium py-1 px-2 cursor-pointer"
+                  >
+                    All Statuses
+                  </SelectItem>
+                  <SelectItem
+                    value="PAID"
+                    className="rounded-sm text-xs font-medium py-1 px-2 cursor-pointer"
+                  >
+                    Paid
+                  </SelectItem>
+                  <SelectItem
+                    value="PENDING"
+                    className="rounded-sm text-xs font-medium py-1 px-2 cursor-pointer"
+                  >
+                    Pending
+                  </SelectItem>
+                  <SelectItem
+                    value="REFUNDED"
+                    className="rounded-sm text-xs font-medium py-1 px-2 cursor-pointer"
+                  >
+                    Refunded
+                  </SelectItem>
+                  <SelectItem
+                    value="CANCELLED"
+                    className="rounded-sm text-xs font-medium py-1 px-2 cursor-pointer"
+                  >
+                    Cancelled
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </EcosystemActionBar.Item>
+
             <EcosystemActionBar.Item>
               <Button
                 variant="outline"
@@ -243,6 +346,24 @@ export default function ShopifyOrdersPage() {
                 {syncing ? "Syncing…" : "Sync Orders"}
               </Button>
             </EcosystemActionBar.Item>
+
+            <EcosystemActionBar.Item>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowExportModal(true)}
+                className="h-8 px-2.5 rounded-md text-[11px] font-medium gap-1.5 bg-card border-border shadow-2xs text-foreground"
+              >
+                <Upload className="h-3.5 w-3.5" />
+                Export
+              </Button>
+            </EcosystemActionBar.Item>
+          </EcosystemActionBar.Group>
+
+          <EcosystemActionBar.Group align="right">
+            <EcosystemActionBar.Status active={filteredOrders.length > 0}>
+              Showing {filteredOrders.length} of {totalCount} Orders
+            </EcosystemActionBar.Status>
           </EcosystemActionBar.Group>
         </EcosystemActionBar>
 
@@ -271,6 +392,38 @@ export default function ShopifyOrdersPage() {
             </div>
           )}
         </div>
+
+        <ExportCsvModal
+          open={showExportModal}
+          onOpenChange={setShowExportModal}
+          entityName="Shopify orders"
+          description="Export synchronized Shopify customer purchases and gamification reward logs as CSV."
+          totalCount={totalCount}
+          matchingCount={
+            debouncedSearch.trim() || statusFilter !== "ALL"
+              ? filteredOrders.length
+              : undefined
+          }
+          onExport={(_scope: ExportCsvScope, format: ExportCsvFormat) => {
+            const rows = filteredOrders;
+            if (rows.length === 0) {
+              toast.error("Nothing to export", { description: "No Shopify orders found." });
+              return;
+            }
+            const csv = buildCsv(rows, [
+              { header: "Shopify Order ID", getValue: (o: any) => o.shopifyOrderId || "" },
+              { header: "Customer Name", getValue: (o: any) => o.user ? `${o.user.firstName || ""} ${o.user.lastName || ""}`.trim() : "" },
+              { header: "Customer Email", getValue: (o: any) => o.user?.email || "" },
+              { header: "Total Price", getValue: (o: any) => o.totalPrice || "" },
+              { header: "Currency", getValue: (o: any) => o.currency || "USD" },
+              { header: "Status", getValue: (o: any) => o.status || "COMPLETED" },
+              { header: "Points Earned", getValue: (o: any) => o.reward?.pointsEarned ?? 0 },
+              { header: "Order Date", getValue: (o: any) => o.createdAt ? new Date(o.createdAt).toISOString().slice(0, 10) : "" },
+            ]);
+            downloadCsv(csv, `shopify-orders-${new Date().toISOString().slice(0, 10)}`, format);
+            toast.success("Export ready", { description: `${rows.length} order${rows.length !== 1 ? "s" : ""} exported.` });
+          }}
+        />
       </EcosystemContainer>
     </EcosystemWrapper>
   );

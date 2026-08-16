@@ -4,7 +4,11 @@ import React, { useState } from "react";
 import { useGetImpactActivityLog } from "@/graphql/actions";
 import { ActivityLogTable, ImpactActivityEntry } from "./activity-log-table";
 import { Button } from "@/components/ui/button";
-import { History, RotateCcw, Activity, ChevronLeft, ChevronRight } from "lucide-react";
+import { History, RotateCcw, Activity, ChevronLeft, ChevronRight, Upload } from "lucide-react";
+import { ExportCsvModal } from "@/components/shared/export-csv-modal";
+import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export-csv-modal";
+import { buildCsv, downloadCsv } from "@/lib/export-csv";
+import { toast } from "sonner";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
@@ -18,6 +22,7 @@ export function ActivityLogManager() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
+  const [showExportModal, setShowExportModal] = useState(false);
   const pageSize = 20;
 
   const offset = (page - 1) * pageSize;
@@ -136,10 +141,18 @@ export function ActivityLogManager() {
               onClick={() => refetch()}
               className="h-8 w-8 border-border rounded-md text-muted-foreground hover:text-foreground hover:bg-muted shadow-2xs"
             >
-              <RotateCcw
-                className={cn(loading && "animate-spin")}
-                size={14}
-              />
+              <RotateCcw className={cn(loading && "animate-spin")} size={14} />
+            </Button>
+          </EcosystemActionBar.Item>
+
+          <EcosystemActionBar.Item>
+            <Button
+              variant="outline"
+              onClick={() => setShowExportModal(true)}
+              className="h-8 gap-1.5 shrink-0 bg-card border-border shadow-2xs text-xs font-medium text-foreground px-2.5"
+            >
+              <Upload className="h-3.5 w-3.5" />
+              Export
             </Button>
           </EcosystemActionBar.Item>
 
@@ -191,6 +204,34 @@ export function ActivityLogManager() {
           <ActivityLogTable logs={filteredLogs} isLoading={loading} />
         </div>
       </EcosystemContainer>
+
+      <ExportCsvModal
+        open={showExportModal}
+        onOpenChange={setShowExportModal}
+        entityName="impact log entries"
+        description="Export impact score activity as CSV. Includes member name, score change, reason, and timestamps."
+        totalCount={logs.length}
+        matchingCount={(search.trim() || dateRange) ? filteredLogs.length : undefined}
+        onExport={(_scope: ExportCsvScope, format: ExportCsvFormat) => {
+          const rows = filteredLogs;
+          if (rows.length === 0) {
+            toast.error("Nothing to export", { description: "No entries match the current filters." });
+            return;
+          }
+          const csv = buildCsv(rows, [
+            { header: "First Name",    getValue: (e) => e.user?.firstName || "" },
+            { header: "Last Name",     getValue: (e) => e.user?.lastName || "" },
+            { header: "Change Amount", getValue: (e) => e.changeAmount ?? 0 },
+            { header: "Old Score",     getValue: (e) => e.oldScore ?? 0 },
+            { header: "New Score",     getValue: (e) => e.newScore ?? 0 },
+            { header: "Reason",        getValue: (e) => e.changeReason || "" },
+            { header: "Date",          getValue: (e) => e.createdAt ? new Date(e.createdAt).toISOString().slice(0, 10) : "" },
+            { header: "Time",          getValue: (e) => e.createdAt ? new Date(e.createdAt).toLocaleTimeString() : "" },
+          ]);
+          downloadCsv(csv, `impact-log-${new Date().toISOString().slice(0, 10)}`, format);
+          toast.success("Export ready", { description: `${rows.length} entr${rows.length !== 1 ? "ies" : "y"} exported.` });
+        }}
+      />
     </EcosystemWrapper>
   );
 }

@@ -1,9 +1,14 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
-import { Plus, GripVertical, Pencil, Trash2, Globe } from "lucide-react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useDebounce } from "use-debounce";
+import { Plus, GripVertical, Pencil, Trash2, Globe, RefreshCw, Upload } from "lucide-react";
 import { toast } from "sonner";
+import { ExportCsvModal } from "@/components/shared/export-csv-modal";
+import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export-csv-modal";
+import { buildCsv, downloadCsv } from "@/lib/export-csv";
 import {
   DndContext,
   closestCenter,
@@ -23,7 +28,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 
 import { Button } from "@/components/ui/button";
-
+import { CtaButton } from "@/components/ui/cta-button";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -48,6 +53,13 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import Image from "next/image";
+import { cn } from "@/lib/utils";
+
+const STATUS_OPTIONS = [
+  { value: "ALL", label: "All Status", dot: "" },
+  { value: "ACTIVE", label: "Active", dot: "bg-emerald-500" },
+  { value: "INACTIVE", label: "Inactive", dot: "bg-zinc-400" },
+];
 
 // Sortable Row Component
 function SortableSponsorRow({
@@ -79,17 +91,17 @@ function SortableSponsorRow({
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center gap-4 p-4 mb-2 bg-white border rounded-lg shadow-sm hover:shadow-md transition-shadow relative"
+      className="flex items-center gap-4 p-4 mb-2 bg-white dark:bg-card border border-border rounded-lg shadow-sm hover:shadow-md transition-shadow relative"
     >
       <div
         {...attributes}
         {...listeners}
-        className="cursor-grab p-2 hover:bg-gray-100 rounded-md"
+        className="cursor-grab p-2 hover:bg-muted rounded-md"
       >
-        <GripVertical className="w-5 h-5 text-gray-400" />
+        <GripVertical className="w-5 h-5 text-muted-foreground/60" />
       </div>
 
-      <div className="w-16 h-16 relative rounded-md overflow-hidden bg-gray-100 flex-shrink-0 border">
+      <div className="w-16 h-16 relative rounded-md overflow-hidden bg-muted flex-shrink-0 border border-border">
         {sponsor.image ? (
           <Image
             src={
@@ -99,40 +111,47 @@ function SortableSponsorRow({
             }
             alt={sponsor.title}
             fill
-            className="object-contain"
+            className="object-contain p-2"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
-            No Image
+          <div className="w-full h-full flex items-center justify-center text-muted-foreground/40 font-bold text-lg">
+            {sponsor.title.charAt(0)}
           </div>
         )}
       </div>
 
-      <div className="flex-grow min-w-0">
-        <h3 className="font-semibold text-gray-900 truncate">
-          {sponsor.title}
-        </h3>
-        {sponsor.description && (
-          <p className="text-sm text-gray-500 truncate">
-            {sponsor.description}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <h3 className="font-semibold text-foreground truncate text-sm">
+            {sponsor.title}
+          </h3>
+          {sponsor.badge && (
+            <span className="text-[10px] px-2 py-0.5 bg-primary/10 text-primary rounded-full font-medium">
+              {sponsor.badge}
+            </span>
+          )}
+        </div>
+        {sponsor.tagline && (
+          <p className="text-xs text-muted-foreground truncate mt-0.5">
+            {sponsor.tagline}
           </p>
         )}
-        {sponsor.externalUrl && (
+        {sponsor.url && (
           <a
-            href={sponsor.externalUrl}
+            href={sponsor.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-blue-600 hover:underline flex items-center gap-1 mt-1"
+            className="text-[11px] text-primary/80 hover:underline flex items-center gap-1 mt-1 truncate"
           >
-            <Globe className="w-3 h-3" />
-            {sponsor.externalUrl}
+            <Globe className="w-3 h-3 shrink-0" />
+            <span className="truncate">{sponsor.url}</span>
           </a>
         )}
       </div>
 
-      <div className="flex items-center gap-4 flex-shrink-0 ml-4">
+      <div className="flex items-center gap-4 shrink-0">
         <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-500">
+          <span className="text-xs text-muted-foreground">
             {sponsor.isActive ? "Active" : "Inactive"}
           </span>
           <Switch
@@ -165,23 +184,74 @@ function SortableSponsorRow({
 }
 
 export default function ManageSponsorsPage() {
-  const { data, loading, error } = useGetSponsors();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const updateParams = useCallback(
+    (updates: Record<string, string | null>) => {
+      const params = new URLSearchParams(searchParams.toString());
+      for (const [key, value] of Object.entries(updates)) {
+        if (value === null || value === "" || value === "ALL") {
+          params.delete(key);
+        } else {
+          params.set(key, value);
+        }
+      }
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [searchParams, pathname, router],
+  );
+
+  const statusFilter = searchParams.get("status") || "ALL";
+  const setStatusFilter = (v: string) =>
+    updateParams({ status: v === "ALL" ? null : v });
+
+  const [search, setSearch] = useState(searchParams.get("q") || "");
+  const [debouncedSearch] = useDebounce(search, 500);
+
+  // Sync debounced search to URL
+  useEffect(() => {
+    const currentQ = searchParams.get("q") || "";
+    if (debouncedSearch.trim() !== currentQ) {
+      updateParams({ q: debouncedSearch.trim() || null });
+    }
+  }, [debouncedSearch, searchParams, updateParams]);
+
+  const { data, loading, error, refetch } = useGetSponsors();
   const [updateSponsor] = useUpdateSponsor();
   const [deleteSponsor] = useDeleteSponsor();
   const [reorderSponsors] = useReorderSponsors();
 
   const [sponsors, setSponsors] = useState<any[]>([]);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [showExportModal, setShowExportModal] = useState(false);
 
   useEffect(() => {
     if (data?.getSponsors) {
-      // Sort them by displayOrder initially
       const sorted = [...data.getSponsors].sort(
         (a, b) => a.displayOrder - b.displayOrder,
       );
       setSponsors(sorted);
     }
   }, [data]);
+
+  const filteredSponsors = useMemo(() => {
+    const q = debouncedSearch.toLowerCase().trim();
+    return sponsors.filter((sponsor) => {
+      const matchesSearch =
+        !q ||
+        sponsor.title?.toLowerCase().includes(q) ||
+        sponsor.tagline?.toLowerCase().includes(q) ||
+        sponsor.url?.toLowerCase().includes(q);
+
+      const matchesStatus =
+        statusFilter === "ALL" ||
+        (statusFilter === "ACTIVE" ? sponsor.isActive : !sponsor.isActive);
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [sponsors, debouncedSearch, statusFilter]);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -200,13 +270,11 @@ export default function ManageSponsorsPage() {
 
         const newItems = arrayMove(items, oldIndex, newIndex);
 
-        // Prepare input for reorder mutation
         const reorderInput = newItems.map((item, index) => ({
           id: item.id,
           displayOrder: index,
         }));
 
-        // Execute mutation in background
         reorderSponsors({ variables: { input: reorderInput } }).catch((err) => {
           toast.error("Failed to reorder sponsors");
           console.error(err);
@@ -228,6 +296,7 @@ export default function ManageSponsorsPage() {
       toast.success(
         `Sponsor marked as ${!currentStatus ? "active" : "inactive"}`,
       );
+      refetch?.();
     } catch (err) {
       toast.error("Failed to update status");
     }
@@ -239,38 +308,11 @@ export default function ManageSponsorsPage() {
       await deleteSponsor({ variables: { id: deleteConfirmId } });
       toast.success("Sponsor deleted successfully");
       setDeleteConfirmId(null);
+      refetch?.();
     } catch (err) {
       toast.error("Failed to delete sponsor");
     }
   };
-
-  if (loading) {
-    return (
-      <EcosystemWrapper>
-        <EcosystemHeader
-          icon={Globe}
-          title="Manage Sponsors"
-          description="Loading sponsors..."
-          badgeText="Sponsors"
-          breadcrumbs={[
-            { label: "Sponsors", href: "/sponsors/all" },
-            { label: "Manage" },
-          ]}
-        />
-        <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">
-          <div className="space-y-4 px-6 py-4">
-            {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-24 w-full" />
-            ))}
-          </div>
-        </EcosystemContainer>
-      </EcosystemWrapper>
-    );
-  }
-
-  if (error) {
-    return <div className="p-6 text-red-500">Error loading sponsors.</div>;
-  }
 
   return (
     <EcosystemWrapper>
@@ -284,52 +326,115 @@ export default function ManageSponsorsPage() {
           { label: "Manage" },
         ]}
         actions={
-          <EcosystemActionBar
-            shadow="none"
-            className="p-0 border-none bg-transparent gap-2"
-          >
-            <EcosystemActionBar.Group align="right">
-              <Link href="/sponsors/create">
-                <EcosystemActionBar.CtaButton>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Sponsor
-                </EcosystemActionBar.CtaButton>
-              </Link>
-            </EcosystemActionBar.Group>
-          </EcosystemActionBar>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => refetch?.()}
+              className="h-9 w-9 rounded-lg border-border text-muted-foreground hover:text-foreground transition-all"
+            >
+              <RefreshCw
+                className={cn("h-3.5 w-3.5", loading && "animate-spin")}
+              />
+            </Button>
+            <Link href="/sponsors/create">
+              <CtaButton>
+                <Plus className="w-3.5 h-3.5" />
+                Add Sponsor
+              </CtaButton>
+            </Link>
+          </div>
         }
       />
+
+      <EcosystemActionBar shadow="none">
+        <EcosystemActionBar.Group>
+          <EcosystemActionBar.Item grow className="max-w-xs">
+            <EcosystemActionBar.Search
+              value={search}
+              onChange={setSearch}
+              placeholder="Search sponsors by title…"
+            />
+          </EcosystemActionBar.Item>
+        </EcosystemActionBar.Group>
+
+        <EcosystemActionBar.Separator />
+
+        <EcosystemActionBar.Group>
+          <EcosystemActionBar.Item>
+            <EcosystemActionBar.Select
+              value={statusFilter}
+              onValueChange={setStatusFilter}
+              placeholder="Status"
+              options={STATUS_OPTIONS.map((opt) => ({
+                value: opt.value,
+                label: opt.label,
+                dot: opt.dot || undefined,
+              }))}
+            />
+          </EcosystemActionBar.Item>
+        </EcosystemActionBar.Group>
+
+        <EcosystemActionBar.Group align="right">
+          <EcosystemActionBar.Item>
+            <Button
+              variant="outline"
+              onClick={() => setShowExportModal(true)}
+              className="h-8 gap-1.5 shrink-0 bg-card border-border shadow-2xs text-xs font-medium text-foreground px-2.5"
+            >
+              <Upload className="h-3.5 w-3.5" />
+              Export
+            </Button>
+          </EcosystemActionBar.Item>
+          <EcosystemActionBar.Status active={filteredSponsors.length > 0}>
+            Showing {filteredSponsors.length} of {sponsors.length} Sponsors
+          </EcosystemActionBar.Status>
+        </EcosystemActionBar.Group>
+      </EcosystemActionBar>
+
       <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">
         <div className="px-6 py-4">
-          <Card className="p-4 bg-gray-50/50">
-            {sponsors.length === 0 ? (
-              <div className="text-center py-12 text-gray-500">
-                No sponsors added yet. Click "Add Sponsor" to create one.
-              </div>
-            ) : (
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleDragEnd}
-              >
-                <SortableContext
-                  items={sponsors.map((s) => s.id)}
-                  strategy={verticalListSortingStrategy}
+          {loading ? (
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-20 w-full rounded-lg" />
+              ))}
+            </div>
+          ) : error ? (
+            <div className="p-6 text-red-500 text-sm">Error loading sponsors.</div>
+          ) : (
+            <Card className="p-4 bg-card border-border">
+              {filteredSponsors.length === 0 ? (
+                <div className="text-center py-12 text-muted-foreground text-sm">
+                  {sponsors.length === 0
+                    ? "No sponsors added yet. Click 'Add Sponsor' to create one."
+                    : "No sponsors match your current search and filters."}
+                </div>
+              ) : (
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleDragEnd}
                 >
-                  <div className="space-y-2">
-                    {sponsors.map((sponsor) => (
-                      <SortableSponsorRow
-                        key={sponsor.id}
-                        sponsor={sponsor}
-                        onToggleStatus={handleToggleStatus}
-                        onDelete={setDeleteConfirmId}
-                      />
-                    ))}
-                  </div>
-                </SortableContext>
-              </DndContext>
-            )}
-          </Card>
+                  <SortableContext
+                    items={filteredSponsors.map((s) => s.id)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    <div className="space-y-2">
+                      {filteredSponsors.map((sponsor) => (
+                        <SortableSponsorRow
+                          key={sponsor.id}
+                          sponsor={sponsor}
+                          onToggleStatus={handleToggleStatus}
+                          onDelete={setDeleteConfirmId}
+                        />
+                      ))}
+                    </div>
+                  </SortableContext>
+                </DndContext>
+              )}
+            </Card>
+          )}
 
           <AlertDialog
             open={!!deleteConfirmId}
@@ -356,6 +461,32 @@ export default function ManageSponsorsPage() {
           </AlertDialog>
         </div>
       </EcosystemContainer>
+
+      <ExportCsvModal
+        open={showExportModal}
+        onOpenChange={setShowExportModal}
+        entityName="sponsors"
+        description="Export sponsors list as CSV. Includes title, tagline, website URL, badge, and active status."
+        totalCount={sponsors.length}
+        matchingCount={debouncedSearch.trim() || statusFilter !== "ALL" ? filteredSponsors.length : undefined}
+        onExport={(_scope: ExportCsvScope, format: ExportCsvFormat) => {
+          const rows = filteredSponsors;
+          if (rows.length === 0) {
+            toast.error("Nothing to export", { description: "No sponsors found." });
+            return;
+          }
+          const csv = buildCsv(rows, [
+            { header: "Title", getValue: (s) => s.title || "" },
+            { header: "Tagline", getValue: (s) => s.tagline || "" },
+            { header: "URL", getValue: (s) => s.url || "" },
+            { header: "Badge", getValue: (s) => s.badge || "" },
+            { header: "Status", getValue: (s) => s.isActive ? "Active" : "Inactive" },
+            { header: "Display Order", getValue: (s) => s.displayOrder ?? "" },
+          ]);
+          downloadCsv(csv, `sponsors-${new Date().toISOString().slice(0, 10)}`, format);
+          toast.success("Export ready", { description: `${rows.length} sponsor${rows.length !== 1 ? "s" : ""} exported.` });
+        }}
+      />
     </EcosystemWrapper>
   );
 }

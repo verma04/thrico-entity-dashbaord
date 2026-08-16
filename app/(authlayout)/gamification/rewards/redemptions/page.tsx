@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import {
-  Download,
+  Upload,
   Ticket,
   ChevronLeft,
   ChevronRight,
@@ -19,6 +19,10 @@ import { cn } from "@/lib/utils";
 import { RedemptionsTable } from "@/components/rewards/redemptions/redemptions-table";
 import { useModuleStore } from "@/store/useModuleStore";
 import { useDebounce } from "use-debounce";
+import { ExportCsvModal } from "@/components/shared/export-csv-modal";
+import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export-csv-modal";
+import { buildCsv, downloadCsv } from "@/lib/export-csv";
+import { toast } from "sonner";
 
 export default function RedemptionsPage() {
   const rewardsModuleName = useModuleStore((state) => state.rewardsModuleName);
@@ -26,6 +30,7 @@ export default function RedemptionsPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [debouncedSearch] = useDebounce(search, 500);
+  const [showExportModal, setShowExportModal] = useState(false);
   const pageSize = 100;
 
   const { data, loading, refetch } = useGetRedemptions({
@@ -60,29 +65,7 @@ export default function RedemptionsPage() {
 
   const handleSearchChange = (value: string) => {
     setSearch(value);
-    setPage(1); // Reset page on search
-  };
-
-  const handleExport = () => {
-    const csv = [
-      ["User", "Reward", "Status", "Date"],
-      ...redemptions.map((r: any) => [
-        `${r.user?.firstName || ""} ${r.user?.lastName || ""}`.trim(),
-        r.reward?.title || "",
-        r.status || "completed",
-        r.createdAt || "",
-      ]),
-    ]
-      .map((row) => row.join(","))
-      .join("\n");
-
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `redemptions-${new Date().toISOString().split("T")[0]}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    setPage(1);
   };
 
   return (
@@ -125,12 +108,10 @@ export default function RedemptionsPage() {
           <EcosystemActionBar.Item>
             <Button
               variant="outline"
-              size="sm"
-              onClick={handleExport}
-              disabled={redemptions.length === 0}
-              className="h-9 border-border rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted gap-2"
+              onClick={() => setShowExportModal(true)}
+              className="h-8 gap-1.5 shrink-0 bg-card border-border shadow-2xs text-xs font-medium text-foreground px-2.5"
             >
-              <Download size={14} />
+              <Upload className="h-3.5 w-3.5" />
               Export
             </Button>
           </EcosystemActionBar.Item>
@@ -187,6 +168,46 @@ export default function RedemptionsPage() {
           />
         </div>
       </EcosystemContainer>
+
+      {/* ── Export Modal ─────────────────────────────────────────────────── */}
+      <ExportCsvModal
+        open={showExportModal}
+        onOpenChange={setShowExportModal}
+        entityName="redemptions"
+        description="Export redemption history as a CSV file. Includes member info, reward title, coins spent, status, voucher code, and date."
+        totalCount={totalCount}
+        matchingCount={debouncedSearch.trim() ? redemptions.length : undefined}
+        onExport={(scope: ExportCsvScope, format: ExportCsvFormat) => {
+          const rows = redemptions as any[];
+
+          if (rows.length === 0) {
+            toast.error("Nothing to export", {
+              description: "No redemptions match the current view.",
+            });
+            return;
+          }
+
+          const csv = buildCsv(rows, [
+            { header: "First Name",    getValue: (r) => r.user?.firstName || "" },
+            { header: "Last Name",     getValue: (r) => r.user?.lastName || "" },
+            { header: "Email",         getValue: (r) => r.user?.email || "" },
+            { header: "Reward",        getValue: (r) => r.reward?.title || "" },
+            { header: "Coins Spent",   getValue: (r) => r.ecUsed ?? 0 },
+            { header: "Total Cost",    getValue: (r) => r.totalCost ?? 0 },
+            { header: "Status",        getValue: (r) => r.status || "" },
+            { header: "Voucher Code",  getValue: (r) => r.metadata?.voucherCode || "" },
+            { header: "Claimed At",    getValue: (r) => r.claimedAt ? new Date(r.claimedAt).toISOString().slice(0, 10) : "" },
+            { header: "Created At",    getValue: (r) => r.createdAt ? new Date(r.createdAt).toISOString().slice(0, 10) : "" },
+          ]);
+
+          const label = scope === "matching" ? "redemptions-search" : `redemptions-page-${page}`;
+          downloadCsv(csv, `${label}-${new Date().toISOString().slice(0, 10)}`, format);
+
+          toast.success("Export ready", {
+            description: `${rows.length} redemption${rows.length !== 1 ? "s" : ""} exported successfully.`,
+          });
+        }}
+      />
     </EcosystemWrapper>
   );
 }

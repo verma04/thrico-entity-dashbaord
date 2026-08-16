@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useDebounce } from "use-debounce";
 import {
   Images,
   Plus,
@@ -12,8 +13,13 @@ import {
   StarOff,
   Image as ImageIcon,
   LayoutGrid,
+  RefreshCw,
+  Upload,
 } from "lucide-react";
 import { toast } from "sonner";
+import { ExportCsvModal } from "@/components/shared/export-csv-modal";
+import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export-csv-modal";
+import { buildCsv, downloadCsv } from "@/lib/export-csv";
 import {
   DndContext,
   closestCenter,
@@ -71,6 +77,12 @@ import {
   useReorderMediaGalleryAlbums,
 } from "@/graphql/actions/mediaGallery";
 import { cn } from "@/lib/utils";
+
+const FILTER_OPTIONS = [
+  { value: "ALL", label: "All Albums", dot: "" },
+  { value: "FEATURED", label: "Featured", dot: "bg-amber-500" },
+  { value: "REGULAR", label: "Regular", dot: "bg-zinc-400" },
+];
 
 // ─── Sortable Album Card ────────────────────────────────────────────────────────
 function SortableAlbumCard({
@@ -430,6 +442,39 @@ function AlbumFormDialog({
 // ─── Main Page ─────────────────────────────────────────────────────────────────
 export default function MediaGalleryPage() {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const updateParams = useCallback(
+    (updates: Record<string, string | null>) => {
+      const params = new URLSearchParams(searchParams.toString());
+      for (const [key, value] of Object.entries(updates)) {
+        if (value === null || value === "" || value === "ALL") {
+          params.delete(key);
+        } else {
+          params.set(key, value);
+        }
+      }
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [searchParams, pathname, router],
+  );
+
+  const filterParam = searchParams.get("filter") || "ALL";
+  const setFilterParam = (v: string) =>
+    updateParams({ filter: v === "ALL" ? null : v });
+
+  const [search, setSearch] = useState(searchParams.get("q") || "");
+  const [debouncedSearch] = useDebounce(search, 500);
+
+  // Sync debounced search to URL
+  useEffect(() => {
+    const currentQ = searchParams.get("q") || "";
+    if (debouncedSearch.trim() !== currentQ) {
+      updateParams({ q: debouncedSearch.trim() || null });
+    }
+  }, [debouncedSearch, searchParams, updateParams]);
+
   const { data, loading, refetch } = useGetMediaGalleryAlbums();
   const [createAlbum] = useCreateMediaGalleryAlbum();
   const [updateAlbum] = useUpdateMediaGalleryAlbum();
@@ -440,6 +485,7 @@ export default function MediaGalleryPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingAlbum, setEditingAlbum] = useState<any | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [showExportModal, setShowExportModal] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -453,6 +499,22 @@ export default function MediaGalleryPage() {
       setAlbums([...data.getMediaGalleryAlbums]);
     }
   }, [data]);
+
+  const filteredAlbums = useMemo(() => {
+    const q = debouncedSearch.toLowerCase().trim();
+    return albums.filter((album) => {
+      const matchesSearch =
+        !q ||
+        album.title?.toLowerCase().includes(q) ||
+        album.description?.toLowerCase().includes(q);
+
+      const matchesFilter =
+        filterParam === "ALL" ||
+        (filterParam === "FEATURED" ? album.isFeatured : !album.isFeatured);
+
+      return matchesSearch && matchesFilter;
+    });
+  }, [albums, debouncedSearch, filterParam]);
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
@@ -508,24 +570,74 @@ export default function MediaGalleryPage() {
         icon={Images}
         breadcrumbs={[{ label: "Media Gallery", href: "/media-gallery" }]}
         actions={
-          <EcosystemActionBar
-            shadow="none"
-            className="p-0 border-none bg-transparent gap-2"
-          >
-            <EcosystemActionBar.Group align="right">
-              <CtaButton
-                onClick={() => {
-                  setEditingAlbum(null);
-                  setIsFormOpen(true);
-                }}
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                New Album
-              </CtaButton>
-            </EcosystemActionBar.Group>
-          </EcosystemActionBar>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => refetch?.()}
+              className="h-9 w-9 rounded-lg border-border text-muted-foreground hover:text-foreground transition-all"
+            >
+              <RefreshCw
+                className={cn("h-3.5 w-3.5", loading && "animate-spin")}
+              />
+            </Button>
+            <CtaButton
+              onClick={() => {
+                setEditingAlbum(null);
+                setIsFormOpen(true);
+              }}
+            >
+              <Plus className="w-3.5 h-3.5" />
+              New Album
+            </CtaButton>
+          </div>
         }
       />
+
+      <EcosystemActionBar shadow="none">
+        <EcosystemActionBar.Group>
+          <EcosystemActionBar.Item grow className="max-w-xs">
+            <EcosystemActionBar.Search
+              value={search}
+              onChange={setSearch}
+              placeholder="Search albums by title…"
+            />
+          </EcosystemActionBar.Item>
+        </EcosystemActionBar.Group>
+
+        <EcosystemActionBar.Separator />
+
+        <EcosystemActionBar.Group>
+          <EcosystemActionBar.Item>
+            <EcosystemActionBar.Select
+              value={filterParam}
+              onValueChange={setFilterParam}
+              placeholder="Filter"
+              options={FILTER_OPTIONS.map((opt) => ({
+                value: opt.value,
+                label: opt.label,
+                dot: opt.dot || undefined,
+              }))}
+            />
+          </EcosystemActionBar.Item>
+        </EcosystemActionBar.Group>
+
+        <EcosystemActionBar.Group align="right">
+          <EcosystemActionBar.Item>
+            <Button
+              variant="outline"
+              onClick={() => setShowExportModal(true)}
+              className="h-8 gap-1.5 shrink-0 bg-card border-border shadow-2xs text-xs font-medium text-foreground px-2.5"
+            >
+              <Upload className="h-3.5 w-3.5" />
+              Export
+            </Button>
+          </EcosystemActionBar.Item>
+          <EcosystemActionBar.Status active={filteredAlbums.length > 0}>
+            Showing {filteredAlbums.length} of {albums.length} Albums
+          </EcosystemActionBar.Status>
+        </EcosystemActionBar.Group>
+      </EcosystemActionBar>
 
       <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0 space-y-6">
         <div className="px-6 py-4 space-y-6">
@@ -537,12 +649,12 @@ export default function MediaGalleryPage() {
               ))}
             </div>
           ) : albums.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 bg-gray-50/50 py-20 text-center">
-              <Images className="w-12 h-12 text-gray-300 mb-4" />
-              <h3 className="text-lg font-semibold text-gray-700">
+            <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-200 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-900/50 py-20 text-center">
+              <Images className="w-12 h-12 text-gray-300 dark:text-zinc-600 mb-4" />
+              <h3 className="text-lg font-semibold text-gray-700 dark:text-zinc-300">
                 No albums yet
               </h3>
-              <p className="mt-1 text-sm text-gray-400 max-w-xs">
+              <p className="mt-1 text-sm text-gray-400 dark:text-zinc-500 max-w-xs">
                 Create your first photo album to start building your media
                 gallery.
               </p>
@@ -558,6 +670,16 @@ export default function MediaGalleryPage() {
                 Create Album
               </Button>
             </div>
+          ) : filteredAlbums.length === 0 ? (
+            <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/20 py-20 text-center">
+              <Images className="w-12 h-12 text-muted-foreground/40 mb-4" />
+              <h3 className="text-sm font-semibold text-foreground">
+                No matching albums
+              </h3>
+              <p className="mt-1 text-xs text-muted-foreground max-w-xs">
+                Try adjusting your search query or filter selection.
+              </p>
+            </div>
           ) : (
             <DndContext
               sensors={sensors}
@@ -565,11 +687,11 @@ export default function MediaGalleryPage() {
               onDragEnd={handleDragEnd}
             >
               <SortableContext
-                items={albums.map((a) => a.id)}
+                items={filteredAlbums.map((a) => a.id)}
                 strategy={rectSortingStrategy}
               >
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {albums.map((album) => (
+                  {filteredAlbums.map((album) => (
                     <SortableAlbumCard
                       key={album?.id}
                       album={album}
@@ -602,8 +724,8 @@ export default function MediaGalleryPage() {
               <AlertDialogHeader>
                 <AlertDialogTitle>Delete Album?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This will permanently delete the album and all its images and
-                  comments. This action cannot be undone.
+                  This action cannot be undone. This will permanently delete the
+                  album and all its images and comments.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -619,6 +741,31 @@ export default function MediaGalleryPage() {
           </AlertDialog>
         </div>
       </EcosystemContainer>
+
+      <ExportCsvModal
+        open={showExportModal}
+        onOpenChange={setShowExportModal}
+        entityName="media albums"
+        description="Export media gallery albums as CSV. Includes album title, description, image count, and featured status."
+        totalCount={albums.length}
+        matchingCount={debouncedSearch.trim() || filterParam !== "ALL" ? filteredAlbums.length : undefined}
+        onExport={(_scope: ExportCsvScope, format: ExportCsvFormat) => {
+          const rows = filteredAlbums;
+          if (rows.length === 0) {
+            toast.error("Nothing to export", { description: "No albums found." });
+            return;
+          }
+          const csv = buildCsv(rows, [
+            { header: "Title", getValue: (a) => a.title || "" },
+            { header: "Description", getValue: (a) => a.description || "" },
+            { header: "Images Count", getValue: (a) => a.imagesCount ?? (a.images?.length || 0) },
+            { header: "Featured", getValue: (a) => a.isFeatured ? "Yes" : "No" },
+            { header: "Order", getValue: (a) => a.order ?? "" },
+          ]);
+          downloadCsv(csv, `media-albums-${new Date().toISOString().slice(0, 10)}`, format);
+          toast.success("Export ready", { description: `${rows.length} album${rows.length !== 1 ? "s" : ""} exported.` });
+        }}
+      />
     </EcosystemWrapper>
   );
 }

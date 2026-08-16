@@ -1,13 +1,19 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useDebounce } from "use-debounce";
 import List from "./communities-list";
 import { getCommunities } from "@/graphql/actions/group";
 import TableLoading from "../layout/table-loading";
 import { motion, AnimatePresence } from "framer-motion";
-import { LayoutGrid, List as ListIcon, Users, RefreshCw } from "lucide-react";
+import { LayoutGrid, List as ListIcon, Users, RefreshCw, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CommunityCard from "./community-card";
+import { ExportCsvModal } from "@/components/shared/export-csv-modal";
+import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export-csv-modal";
+import { buildCsv, downloadCsv } from "@/lib/export-csv";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
@@ -37,9 +43,48 @@ interface CommunitiesProps {
 export default function Communities({
   status: initialStatus,
 }: CommunitiesProps) {
-  const [view, setView] = useState<"grid" | "table">("table");
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState(initialStatus || "ALL");
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const updateParams = useCallback(
+    (updates: Record<string, string | null>) => {
+      const params = new URLSearchParams(searchParams.toString());
+      for (const [key, value] of Object.entries(updates)) {
+        if (
+          value === null ||
+          value === "" ||
+          value === "ALL" ||
+          value === "0"
+        ) {
+          params.delete(key);
+        } else {
+          params.set(key, value);
+        }
+      }
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [searchParams, pathname, router],
+  );
+
+  const status = searchParams.get("status") || initialStatus || "ALL";
+  const setStatus = (v: string) => updateParams({ status: v, page: null });
+
+  const view = (searchParams.get("view") as "grid" | "table") || "table";
+  const setView = (v: "grid" | "table") =>
+    updateParams({ view: v === "table" ? null : v });
+
+  const [search, setSearch] = useState(searchParams.get("q") || "");
+  const [debouncedSearch] = useDebounce(search, 500);
+  const [showExportModal, setShowExportModal] = useState(false);
+
+  // Sync debounced search to URL
+  useEffect(() => {
+    const currentQ = searchParams.get("q") || "";
+    if (debouncedSearch.trim() !== currentQ) {
+      updateParams({ q: debouncedSearch.trim() || null, page: null });
+    }
+  }, [debouncedSearch, searchParams, updateParams]);
 
   const moduleName = useModuleStore((state) => state.communityModuleName);
   const singularName = useModuleStore((state) => state.communitySingularName);
@@ -55,13 +100,15 @@ export default function Communities({
   const communities = data?.getCommunities || [];
 
   const filteredCommunities = useMemo(() => {
+    const q = debouncedSearch.toLowerCase().trim();
+    if (!q) return communities;
     return communities.filter(
       (c: any) =>
-        c.title.toLowerCase().includes(search.toLowerCase()) ||
-        c.tagline?.toLowerCase().includes(search.toLowerCase()) ||
-        c.description?.toLowerCase().includes(search.toLowerCase()),
+        c.title?.toLowerCase().includes(q) ||
+        c.tagline?.toLowerCase().includes(q) ||
+        c.description?.toLowerCase().includes(q),
     );
-  }, [communities, search]);
+  }, [communities, debouncedSearch]);
 
   return (
     <EcosystemWrapper>
@@ -94,7 +141,7 @@ export default function Communities({
         }
       />
 
-      <EcosystemActionBar>
+      <EcosystemActionBar shadow="none">
         <EcosystemActionBar.Group>
           <EcosystemActionBar.Item grow className="max-w-xs">
             <EcosystemActionBar.Search
@@ -124,6 +171,16 @@ export default function Communities({
 
         <EcosystemActionBar.Group align="right">
           <EcosystemActionBar.Item>
+            <Button
+              variant="outline"
+              onClick={() => setShowExportModal(true)}
+              className="h-8 gap-1.5 shrink-0 bg-card border-border shadow-2xs text-xs font-medium text-foreground px-2.5"
+            >
+              <Upload className="h-3.5 w-3.5" />
+              Export
+            </Button>
+          </EcosystemActionBar.Item>
+          <EcosystemActionBar.Item>
             <EcosystemActionBar.ViewToggle
               value={view}
               onChange={(val) => setView(val as "grid" | "table")}
@@ -134,7 +191,8 @@ export default function Communities({
             />
           </EcosystemActionBar.Item>
           <EcosystemActionBar.Status active={filteredCommunities.length > 0}>
-            {filteredCommunities.length} {moduleName}
+            Showing {filteredCommunities.length} of {communities.length}{" "}
+            {moduleName}
           </EcosystemActionBar.Status>
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
@@ -184,6 +242,32 @@ export default function Communities({
           )}
         </AnimatePresence>
       </EcosystemContainer>
+
+      <ExportCsvModal
+        open={showExportModal}
+        onOpenChange={setShowExportModal}
+        entityName={moduleName.toLowerCase()}
+        description={`Export communities and groups as CSV. Includes title, description, privacy, member count, and status.`}
+        totalCount={communities.length}
+        matchingCount={debouncedSearch.trim() || activeStatus !== "ALL" ? filteredCommunities.length : undefined}
+        onExport={(_scope: ExportCsvScope, format: ExportCsvFormat) => {
+          const rows = filteredCommunities;
+          if (rows.length === 0) {
+            toast.error("Nothing to export", { description: `No ${moduleName.toLowerCase()} found.` });
+            return;
+          }
+          const csv = buildCsv(rows, [
+            { header: "Title", getValue: (c: any) => c.title || "" },
+            { header: "Description", getValue: (c: any) => c.description || "" },
+            { header: "Privacy", getValue: (c: any) => c.privacy || (c.isPrivate ? "Private" : "Public") },
+            { header: "Status", getValue: (c: any) => c.status || "" },
+            { header: "Members Count", getValue: (c: any) => c.membersCount ?? (c.members?.length || 0) },
+            { header: "Created At", getValue: (c: any) => c.createdAt ? new Date(c.createdAt).toISOString().slice(0, 10) : "" },
+          ]);
+          downloadCsv(csv, `communities-${new Date().toISOString().slice(0, 10)}`, format);
+          toast.success("Export ready", { description: `${rows.length} ${moduleName.toLowerCase()} exported.` });
+        }}
+      />
     </EcosystemWrapper>
   );
 }

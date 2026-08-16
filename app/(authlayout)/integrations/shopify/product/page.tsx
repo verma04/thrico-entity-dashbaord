@@ -8,7 +8,11 @@ import {
   Tag,
   Calendar,
   Layers,
+  Upload,
 } from "lucide-react";
+import { ExportCsvModal } from "@/components/shared/export-csv-modal";
+import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export-csv-modal";
+import { buildCsv, downloadCsv } from "@/lib/export-csv";
 import { Button } from "@/components/ui/button";
 import { useGetShopifyProducts, useSyncShopifyProducts } from "@/graphql/actions";
 import { toast } from "sonner";
@@ -29,6 +33,7 @@ import { safeFormat } from "@/lib/date-utils";
 export default function ShopifyProductsPage() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [showExportModal, setShowExportModal] = useState(false);
   const limit = 20;
   const offset = (page - 1) * limit;
 
@@ -154,6 +159,18 @@ export default function ShopifyProductsPage() {
                 {syncing ? "Syncing…" : "Sync Products"}
               </Button>
             </EcosystemActionBar.Item>
+
+            <EcosystemActionBar.Item>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowExportModal(true)}
+                className="h-8 px-2.5 rounded-md text-[11px] font-medium gap-1.5 bg-card border-border shadow-2xs text-foreground"
+              >
+                <Upload className="h-3.5 w-3.5" />
+                Export
+              </Button>
+            </EcosystemActionBar.Item>
           </EcosystemActionBar.Group>
         </EcosystemActionBar>
 
@@ -182,6 +199,31 @@ export default function ShopifyProductsPage() {
             </div>
           )}
         </div>
+
+        <ExportCsvModal
+          open={showExportModal}
+          onOpenChange={setShowExportModal}
+          entityName="Shopify products"
+          description="Export synchronized Shopify store catalog items as CSV."
+          totalCount={totalCount}
+          matchingCount={search.trim() ? filteredProducts.length : undefined}
+          onExport={(_scope: ExportCsvScope, format: ExportCsvFormat) => {
+            const rows = filteredProducts;
+            if (rows.length === 0) {
+              toast.error("Nothing to export", { description: "No Shopify products found." });
+              return;
+            }
+            const csv = buildCsv(rows, [
+              { header: "Shopify Product ID", getValue: (p: any) => p.shopifyProductId || "" },
+              { header: "Title", getValue: (p: any) => p.title || "" },
+              { header: "Status", getValue: (p: any) => p.status || "ACTIVE" },
+              { header: "Created At", getValue: (p: any) => p.createdAt ? new Date(p.createdAt).toISOString().slice(0, 10) : "" },
+              { header: "Updated At", getValue: (p: any) => p.updatedAt ? new Date(p.updatedAt).toISOString().slice(0, 10) : "" },
+            ]);
+            downloadCsv(csv, `shopify-products-${new Date().toISOString().slice(0, 10)}`, format);
+            toast.success("Export ready", { description: `${rows.length} product${rows.length !== 1 ? "s" : ""} exported.` });
+          }}
+        />
       </EcosystemContainer>
     </EcosystemWrapper>
   );

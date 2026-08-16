@@ -85,7 +85,7 @@ export function ParentSidebar() {
   const showIntegrations = !!integrationsData?.hasAnyIntegration;
 
   return (
-    <div className="hidden md:flex w-[64px] flex-shrink-0 bg-black text-white flex-col items-center py-3 border-r border-neutral-900 z-50 rounded-xl my-2 mt-2 ml-2 mt-0 shadow-sm">
+    <div className="hidden md:flex w-[64px] flex-shrink-0 bg-black text-white flex-col items-center py-3 border-r border-neutral-900 z-50 rounded-l-xl my-2 ml-2 shadow-sm">
       <div className="flex flex-col gap-2.5 w-full items-center">
         {/* Nav Items */}
         <NavRailItem

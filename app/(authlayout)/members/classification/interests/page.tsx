@@ -10,8 +10,12 @@ import {
   useBulkAddInterests,
 } from "@/graphql/quries/interests/interest-queries";
 import { Button } from "@/components/ui/button";
-import { Plus, Loader2, LayoutGrid, Network } from "lucide-react";
+import { Plus, Loader2, LayoutGrid, Network, Upload } from "lucide-react";
 import { useDebounce } from "use-debounce";
+import { ExportCsvModal } from "@/components/shared/export-csv-modal";
+import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export-csv-modal";
+import { buildCsv, downloadCsv } from "@/lib/export-csv";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -46,6 +50,7 @@ export default function InterestsPage() {
     null,
   );
   const [activeTab, setActiveTab] = useState("list");
+  const [showExportModal, setShowExportModal] = useState(false);
 
   const [addInterest, { loading: creating }] = useAddInterest({
     onCompleted: () => {
@@ -150,6 +155,14 @@ export default function InterestsPage() {
               <Plus className="h-3.5 w-3.5" />
               Add Interest
             </CtaButton>
+            <Button
+              variant="outline"
+              onClick={() => setShowExportModal(true)}
+              className="h-8 gap-1.5 shrink-0 bg-card border-border shadow-2xs text-xs font-medium text-foreground px-2.5"
+            >
+              <Upload className="h-3.5 w-3.5" />
+              Export
+            </Button>
           </>
         }
         statusText={`${interests.length} Interests`}
@@ -220,6 +233,28 @@ export default function InterestsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <ExportCsvModal
+        open={showExportModal}
+        onOpenChange={setShowExportModal}
+        entityName="interests"
+        description="Export community member interest classifications as CSV."
+        totalCount={interests.length}
+        matchingCount={debouncedSearch.trim() ? interests.length : undefined}
+        onExport={(_scope: ExportCsvScope, format: ExportCsvFormat) => {
+          if (interests.length === 0) {
+            toast.error("Nothing to export", { description: "No interests found." });
+            return;
+          }
+          const csv = buildCsv(interests, [
+            { header: "Interest Title", getValue: (i) => i.title || "" },
+            { header: "Created At", getValue: (i) => i.createdAt ? new Date(i.createdAt).toISOString().slice(0, 10) : "" },
+            { header: "Updated At", getValue: (i) => i.updatedAt ? new Date(i.updatedAt).toISOString().slice(0, 10) : "" },
+          ]);
+          downloadCsv(csv, `interests-${new Date().toISOString().slice(0, 10)}`, format);
+          toast.success("Export ready", { description: `${interests.length} interest${interests.length !== 1 ? "s" : ""} exported.` });
+        }}
+      />
     </>
   );
 }

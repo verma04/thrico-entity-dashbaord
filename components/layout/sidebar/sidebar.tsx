@@ -15,7 +15,7 @@ export default function SidebarLayout({
         defaultOpen={true}
         style={{ "--sidebar-width": "210px" } as React.CSSProperties}
       >
-        <div className="flex-1 overflow-hidden min-h-0 w-full sm:w-[90%] md:w-[95%] lg:w-full">
+        <div className="flex-1 overflow-hidden min-h-0 w-full">
           <ChildSidebarContainer>{children}</ChildSidebarContainer>
         </div>
       </SidebarProvider>

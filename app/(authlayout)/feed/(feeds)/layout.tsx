@@ -12,10 +12,16 @@ import {
   Activity,
   LucideIcon,
   Pin,
+  Upload,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ExportCsvModal } from "@/components/shared/export-csv-modal";
+import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export-csv-modal";
+import { buildCsv, downloadCsv } from "@/lib/export-csv";
+import { toast } from "sonner";
 
 import PostModal from "@/components/feed/add-feed";
-import { useNumberOfFeeds } from "@/graphql/actions/feed";
+import { useNumberOfFeeds, useAllFeed } from "@/graphql/actions/feed";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
@@ -24,6 +30,16 @@ import { cn } from "@/lib/utils";
 
 function RootLayout({ children }: { children: React.ReactNode }) {
   const { data: feedData } = useNumberOfFeeds();
+  const [showExportModal, setShowExportModal] = React.useState(false);
+  const { data: allFeedData } = useAllFeed({
+    variables: {
+      input: {
+        offset: 0,
+        limit: 100,
+      },
+    },
+  });
+  const feeds = allFeedData?.getAllFeed || [];
   const router = useRouter();
   const pathname = usePathname();
   const activeTab = pathname.split("/")[2] || "all";
@@ -61,7 +77,21 @@ function RootLayout({ children }: { children: React.ReactNode }) {
           { label: "Feed", href: "/feed" },
           { label: "Content Feed" },
         ]}
-        actions={<PostModal />}
+        actions={
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setShowExportModal(true)}
+              className="h-9 px-3 gap-1.5 shrink-0 bg-card border-border shadow-2xs text-xs font-medium text-foreground"
+            >
+              <Upload className="h-3.5 w-3.5" />
+              Export
+            </Button>
+            <PostModal />
+          </div>
+        }
       />
 
       <EcosystemActionBar
@@ -126,6 +156,33 @@ function RootLayout({ children }: { children: React.ReactNode }) {
       <EcosystemContainer className="mt-8 space-y-6">
         <div className="transition-all duration-500">{children}</div>
       </EcosystemContainer>
+
+      <ExportCsvModal
+        open={showExportModal}
+        onOpenChange={setShowExportModal}
+        entityName="feed posts"
+        description="Export community feed updates, announcements, and engagement metrics as CSV."
+        totalCount={feedData?.numberOfFeeds || feeds.length}
+        onExport={(_scope: ExportCsvScope, format: ExportCsvFormat) => {
+          if (feeds.length === 0) {
+            toast.error("Nothing to export", { description: "No feed posts found." });
+            return;
+          }
+          const csv = buildCsv(feeds, [
+            { header: "Author First Name", getValue: (p: any) => p.user?.firstName || "" },
+            { header: "Author Last Name", getValue: (p: any) => p.user?.lastName || "" },
+            { header: "Content / Description", getValue: (p: any) => p.description || "" },
+            { header: "Source", getValue: (p: any) => p.source || "" },
+            { header: "Privacy", getValue: (p: any) => p.privacy || "" },
+            { header: "Reactions", getValue: (p: any) => p.totalReactions ?? 0 },
+            { header: "Comments", getValue: (p: any) => p.totalComment ?? 0 },
+            { header: "Reshares", getValue: (p: any) => p.totalReShare ?? 0 },
+            { header: "Created At", getValue: (p: any) => p.createdAt ? new Date(parseInt(p.createdAt)).toISOString().slice(0, 10) : "" },
+          ]);
+          downloadCsv(csv, `community-feed-${new Date().toISOString().slice(0, 10)}`, format);
+          toast.success("Export ready", { description: `${feeds.length} post${feeds.length !== 1 ? "s" : ""} exported.` });
+        }}
+      />
     </EcosystemWrapper>
   );
 }

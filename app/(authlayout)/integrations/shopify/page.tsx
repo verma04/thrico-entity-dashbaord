@@ -15,6 +15,7 @@ import {
   Activity,
   Award,
   Globe,
+  Tag,
 } from "lucide-react";
 import { ResponsiveContainer, AreaChart, Area } from "recharts";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
@@ -276,7 +277,7 @@ export default function ShopifyDashboardPage() {
         {/* ── 1. Commerce & Sync Metrics ── */}
         <section className="space-y-3">
           <DashboardSectionHeading title="COMMERCE & CUSTOMERS" />
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <EcosystemKPI
               title="Total Customers"
               value={statsLoading ? "..." : (stats?.totalCustomers ?? "0")}
@@ -302,6 +303,16 @@ export default function ShopifyDashboardPage() {
               trendData={[15, 22, 20, 30, 38, 45, 52]}
               icon={ShoppingCart}
               color="bg-cyan-500"
+              href="/integrations/shopify/orders"
+            />
+            <EcosystemKPI
+              title="Discounts & Coupons"
+              value="Catalog"
+              trend={0}
+              trendData={[8, 10, 12, 14, 15, 18, 20]}
+              icon={Tag}
+              color="bg-amber-500"
+              href="/integrations/shopify/coupons"
             />
             <EcosystemKPI
               title="Gamified Rewards"

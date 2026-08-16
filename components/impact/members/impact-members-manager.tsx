@@ -4,7 +4,11 @@ import React, { useState } from "react";
 import { useGetImpactUsers } from "@/graphql/actions";
 import { ImpactMembersTable, ImpactUserNode } from "./impact-members-table";
 import { Button } from "@/components/ui/button";
-import { Users, RotateCcw, ChevronLeft, ChevronRight } from "lucide-react";
+import { Users, RotateCcw, ChevronLeft, ChevronRight, Upload } from "lucide-react";
+import { ExportCsvModal } from "@/components/shared/export-csv-modal";
+import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export-csv-modal";
+import { buildCsv, downloadCsv } from "@/lib/export-csv";
+import { toast } from "sonner";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
@@ -16,6 +20,7 @@ export function ImpactMembersManager() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [debouncedSearch] = useDebounce(search, 500);
+  const [showExportModal, setShowExportModal] = useState(false);
   const pageSize = 100;
 
   const offset = (page - 1) * pageSize;
@@ -119,6 +124,17 @@ export function ImpactMembersManager() {
           </EcosystemActionBar.Item>
 
           <EcosystemActionBar.Item>
+            <Button
+              variant="outline"
+              onClick={() => setShowExportModal(true)}
+              className="h-8 gap-1.5 shrink-0 bg-card border-border shadow-2xs text-xs font-medium text-foreground px-2.5"
+            >
+              <Upload className="h-3.5 w-3.5" />
+              Export
+            </Button>
+          </EcosystemActionBar.Item>
+
+          <EcosystemActionBar.Item>
             <div className="flex items-center gap-1">
               <Button
                 variant="outline"
@@ -168,6 +184,36 @@ export function ImpactMembersManager() {
           <ImpactMembersTable users={nodes} isLoading={loading} />
         </div>
       </EcosystemContainer>
+
+      <ExportCsvModal
+        open={showExportModal}
+        onOpenChange={setShowExportModal}
+        entityName="impact members"
+        description="Export member impact scores as CSV. Includes all sub-scores (engagement, contribution, trust, network, consistency), tier, and last calculated date."
+        totalCount={totalCount}
+        matchingCount={debouncedSearch.trim() ? nodes.length : undefined}
+        onExport={(_scope: ExportCsvScope, format: ExportCsvFormat) => {
+          const rows = nodes;
+          if (rows.length === 0) {
+            toast.error("Nothing to export", { description: "No members found on this page." });
+            return;
+          }
+          const csv = buildCsv(rows, [
+            { header: "First Name",        getValue: (u) => u.user?.firstName || "" },
+            { header: "Last Name",         getValue: (u) => u.user?.lastName || "" },
+            { header: "Total Score",       getValue: (u) => u.score ?? 0 },
+            { header: "Tier",              getValue: (u) => u.tier || "" },
+            { header: "Engagement",        getValue: (u) => u.engagementScore ?? 0 },
+            { header: "Contribution",      getValue: (u) => u.contributionScore ?? 0 },
+            { header: "Trust",             getValue: (u) => u.trustScore ?? 0 },
+            { header: "Network",           getValue: (u) => u.networkScore ?? 0 },
+            { header: "Consistency",       getValue: (u) => u.consistencyScore ?? 0 },
+            { header: "Last Calculated",   getValue: (u) => u.lastCalculatedAt ? new Date(u.lastCalculatedAt).toISOString().slice(0, 10) : "" },
+          ]);
+          downloadCsv(csv, `impact-members-p${page}-${new Date().toISOString().slice(0, 10)}`, format);
+          toast.success("Export ready", { description: `${rows.length} member${rows.length !== 1 ? "s" : ""} exported.` });
+        }}
+      />
     </EcosystemWrapper>
   );
 }

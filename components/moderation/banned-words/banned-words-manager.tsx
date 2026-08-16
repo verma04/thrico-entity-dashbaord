@@ -33,8 +33,12 @@ import {
   ShieldAlert,
   Loader2,
   Save,
+  Upload,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ExportCsvModal } from "@/components/shared/export-csv-modal";
+import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export-csv-modal";
+import { buildCsv, downloadCsv } from "@/lib/export-csv";
 
 import {
   useGetBannedWords,
@@ -61,6 +65,7 @@ export function BannedWordsManager() {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showExportModal, setShowExportModal] = useState(false);
 
   const { data, loading, refetch } = useGetBannedWords({
     limit: pageSize,
@@ -252,6 +257,16 @@ export function BannedWordsManager() {
           </Button>
           <Button
             type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setShowExportModal(true)}
+            className="h-8 gap-1.5 text-xs font-medium bg-card border-border shadow-2xs text-foreground px-2.5"
+          >
+            <Upload className="h-3.5 w-3.5" />
+            Export
+          </Button>
+          <Button
+            type="button"
             size="sm"
             onClick={() => handleOpenDialog()}
             className="h-8 gap-1.5 text-xs font-bold bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 shadow-xs"
@@ -410,6 +425,30 @@ export function BannedWordsManager() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ExportCsvModal
+        open={showExportModal}
+        onOpenChange={setShowExportModal}
+        entityName="banned words"
+        description="Export banned keyword filter matrix and severity weights as CSV."
+        totalCount={totalCount}
+        matchingCount={searchQuery.trim() ? filteredWords.length : undefined}
+        onExport={(_scope: ExportCsvScope, format: ExportCsvFormat) => {
+          const rows = filteredWords;
+          if (rows.length === 0) {
+            toast.error("Nothing to export", { description: "No banned keywords found." });
+            return;
+          }
+          const csv = buildCsv(rows, [
+            { header: "Keyword / Phrase", getValue: (w) => w.word || "" },
+            { header: "Severity", getValue: (w) => w.severity || "" },
+            { header: "Category", getValue: (w) => w.category || "other" },
+            { header: "Created At", getValue: (w) => w.createdAt ? new Date(parseInt(w.createdAt)).toISOString().slice(0, 10) : "" },
+          ]);
+          downloadCsv(csv, `banned-words-${new Date().toISOString().slice(0, 10)}`, format);
+          toast.success("Export ready", { description: `${rows.length} keyword${rows.length !== 1 ? "s" : ""} exported.` });
+        }}
+      />
     </EcosystemWrapper>
   );
 }

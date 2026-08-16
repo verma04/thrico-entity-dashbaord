@@ -10,6 +10,7 @@ import {
   Search,
   Settings2,
   Pencil,
+  Upload,
 } from "lucide-react";
 import {
   useGetImpactRules,
@@ -35,6 +36,9 @@ import {
   AdminTableText,
 } from "@/components/shared/admin-table/admin-table";
 import { renderModuleIcon } from "@/components/subscription/utils";
+import { ExportCsvModal } from "@/components/shared/export-csv-modal";
+import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export-csv-modal";
+import { buildCsv, downloadCsv } from "@/lib/export-csv";
 
 const CATEGORY_TAG_VARIANTS: Record<
   string,
@@ -51,6 +55,7 @@ export default function ImpactRulesPage() {
   const { data, loading, refetch } = useGetImpactRules();
   const [toggleRule, { loading: toggling }] = useToggleImpactRule();
   const [search, setSearch] = React.useState("");
+  const [showExportModal, setShowExportModal] = React.useState(false);
 
   const allRules = data?.impactRules || [];
 
@@ -226,6 +231,16 @@ export default function ImpactRulesPage() {
         </EcosystemActionBar.Group>
 
         <EcosystemActionBar.Group align="right">
+          <EcosystemActionBar.Item>
+            <Button
+              variant="outline"
+              onClick={() => setShowExportModal(true)}
+              className="h-8 gap-1.5 shrink-0 bg-card border-border shadow-2xs text-xs font-medium text-foreground px-2.5"
+            >
+              <Upload className="h-3.5 w-3.5" />
+              Export
+            </Button>
+          </EcosystemActionBar.Item>
           <EcosystemActionBar.Status active={filteredRules.length > 0}>
             {filteredRules.length} Rules
           </EcosystemActionBar.Status>
@@ -251,6 +266,35 @@ export default function ImpactRulesPage() {
           />
         </div>
       </EcosystemContainer>
+
+      <ExportCsvModal
+        open={showExportModal}
+        onOpenChange={setShowExportModal}
+        entityName="impact rules"
+        description="Export impact scoring rules as CSV. Includes action, module, category, points, daily cap, formula, and status."
+        totalCount={allRules.length}
+        matchingCount={search.trim() ? filteredRules.length : undefined}
+        onExport={(_scope: ExportCsvScope, format: ExportCsvFormat) => {
+          const rows = filteredRules as any[];
+          if (rows.length === 0) {
+            toast.error("Nothing to export", { description: "No rules match the current search." });
+            return;
+          }
+          const csv = buildCsv(rows, [
+            { header: "Action",     getValue: (r) => r.action || "" },
+            { header: "Module",     getValue: (r) => r.module || "" },
+            { header: "Category",   getValue: (r) => r.category || "" },
+            { header: "Points",     getValue: (r) => r.points ?? 0 },
+            { header: "Daily Cap",  getValue: (r) => r.dailyLimit ?? "" },
+            { header: "Formula",    getValue: (r) => r.formula || "" },
+            { header: "Status",     getValue: (r) => r.enabled !== false ? "Active" : "Disabled" },
+            { header: "Created By", getValue: (r) => r.createdBy ? `${r.createdBy.firstName} ${r.createdBy.lastName || ""}`.trim() : "System" },
+            { header: "Created At", getValue: (r) => r.createdAt ? new Date(r.createdAt).toISOString().slice(0, 10) : "" },
+          ]);
+          downloadCsv(csv, `impact-rules-${new Date().toISOString().slice(0, 10)}`, format);
+          toast.success("Export ready", { description: `${rows.length} rule${rows.length !== 1 ? "s" : ""} exported.` });
+        }}
+      />
     </EcosystemWrapper>
   );
 }

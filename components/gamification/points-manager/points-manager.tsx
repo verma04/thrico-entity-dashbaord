@@ -19,6 +19,7 @@ import {
   LayoutGrid,
   RotateCcw,
   Settings,
+  Upload,
 } from "lucide-react";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
@@ -27,11 +28,17 @@ import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-cont
 
 import { StatsCards } from "./stats-cards";
 import { RulesTable } from "./rules-table";
+import { ExportCsvModal } from "@/components/shared/export-csv-modal";
+import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export-csv-modal";
+import { buildCsv, downloadCsv } from "@/lib/export-csv";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 export function PointsManager() {
   const router = useRouter();
   const { selectedModule, setSelectedModule } = useGamificationStore();
   const [search, setSearch] = useState("");
+  const [showExportModal, setShowExportModal] = useState(false);
 
   const { data: gamificationModulesData } = useGetEntityGamificationModules({});
 
@@ -222,6 +229,16 @@ export function PointsManager() {
               ]}
             />
           </EcosystemActionBar.Item>
+          <EcosystemActionBar.Item>
+            <Button
+              variant="outline"
+              onClick={() => setShowExportModal(true)}
+              className="h-8 gap-1.5 shrink-0 bg-card border-border shadow-2xs text-xs font-medium text-foreground px-2.5"
+            >
+              <Upload className="h-3.5 w-3.5" />
+              Export
+            </Button>
+          </EcosystemActionBar.Item>
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
 
@@ -253,6 +270,48 @@ export function PointsManager() {
           />
         </div>
       </EcosystemContainer>
+
+      {/* ── Export Modal ─────────────────────────────────────────────────── */}
+      <ExportCsvModal
+        open={showExportModal}
+        onOpenChange={setShowExportModal}
+        entityName="point rules"
+        description="Export point rules as a CSV file. Includes rule action, module, points, caps, and status."
+        totalCount={pointRules.length}
+        matchingCount={search.trim() ? filteredRules.length : undefined}
+        onExport={(scope: ExportCsvScope, format: ExportCsvFormat) => {
+          const rows = scope === "matching" ? filteredRules : filteredRules;
+
+          if (rows.length === 0) {
+            toast.error("Nothing to export", {
+              description: "No point rules match the current view.",
+            });
+            return;
+          }
+
+          const csv = buildCsv(rows, [
+            { header: "Action",       getValue: (r) => r.action || "" },
+            { header: "Module",       getValue: (r) => r.module || "" },
+            { header: "Source",       getValue: (r) => r.source || "MODULE" },
+            { header: "Trigger",      getValue: (r) => r.trigger || "" },
+            { header: "Points",       getValue: (r) => r.points ?? 0 },
+            { header: "Daily Cap",    getValue: (r) => r.dailyCap ?? "" },
+            { header: "Weekly Cap",   getValue: (r) => r.weeklyCap ?? "" },
+            { header: "Monthly Cap",  getValue: (r) => r.monthlyCap ?? "" },
+            { header: "Status",       getValue: (r) => r.isActive ? "Active" : "Inactive" },
+            { header: "Description",  getValue: (r) => r.description || "" },
+            { header: "Created At",   getValue: (r) => r.createdAt ? new Date(r.createdAt).toISOString().slice(0, 10) : "" },
+            { header: "Updated At",   getValue: (r) => r.updatedAt ? new Date(r.updatedAt).toISOString().slice(0, 10) : "" },
+          ]);
+
+          const label = scope === "matching" ? "point-rules-search" : "point-rules";
+          downloadCsv(csv, `${label}-${new Date().toISOString().slice(0, 10)}`, format);
+
+          toast.success("Export ready", {
+            description: `${rows.length} rule${rows.length !== 1 ? "s" : ""} exported successfully.`,
+          });
+        }}
+      />
     </EcosystemWrapper>
   );
 }

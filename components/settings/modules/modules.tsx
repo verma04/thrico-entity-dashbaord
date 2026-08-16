@@ -9,7 +9,13 @@ import {
   Smartphone,
   LayoutGrid,
   Monitor,
+  Upload,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ExportCsvModal } from "@/components/shared/export-csv-modal";
+import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export-csv-modal";
+import { buildCsv, downloadCsv } from "@/lib/export-csv";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import MobileNavigation from "./mobile-navigation";
 import WebNavigation from "./web-navigation";
@@ -86,6 +92,7 @@ export default function ModuleManagement() {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState<ActiveTab>("management");
   const [userRole] = useState("admin");
+  const [showExportModal, setShowExportModal] = useState(false);
   const [notification, setNotification] = useState<{
     type: "success" | "error";
     message: string;
@@ -386,6 +393,18 @@ export default function ModuleManagement() {
         icon={Puzzle}
         badgeText="Platform"
         showLiveIndicator={false}
+        actions={
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setShowExportModal(true)}
+            className="h-8 gap-1.5 text-xs font-medium bg-card border-border shadow-2xs text-foreground px-2.5"
+          >
+            <Upload className="h-3.5 w-3.5" />
+            Export
+          </Button>
+        }
       />
 
       <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">
@@ -541,6 +560,34 @@ export default function ModuleManagement() {
         isSaving={saving}
         onSave={saveChanges}
         onReset={onReset}
+      />
+
+      <ExportCsvModal
+        open={showExportModal}
+        onOpenChange={setShowExportModal}
+        entityName="modules"
+        description="Export all entity module activation statuses, categories, and navigation configurations as CSV."
+        totalCount={modules.length}
+        matchingCount={searchTerm.trim() ? filteredModules.length : undefined}
+        onExport={(_scope: ExportCsvScope, format: ExportCsvFormat) => {
+          const rows = filteredModules;
+          if (rows.length === 0) {
+            toast.error("Nothing to export", { description: "No modules found." });
+            return;
+          }
+          const csv = buildCsv(rows, [
+            { header: "Module Name", getValue: (m) => m.name || "" },
+            { header: "Category", getValue: (m) => m.category || "" },
+            { header: "Enabled", getValue: (m) => m.enabled ? "Active" : "Disabled" },
+            { header: "Required", getValue: (m) => m.required ? "Yes" : "No" },
+            { header: "Web Navigation", getValue: (m) => m.showInWebNavigation ? "Yes" : "No" },
+            { header: "Mobile Navigation", getValue: (m) => m.showInMobileNavigation ? "Yes" : "No" },
+            { header: "Public Facing", getValue: (m) => m.isPublicFacing ? "Yes" : "No" },
+            { header: "Popular", getValue: (m) => m.isPopular ? "Yes" : "No" },
+          ]);
+          downloadCsv(csv, `modules-${new Date().toISOString().slice(0, 10)}`, format);
+          toast.success("Export ready", { description: `${rows.length} module${rows.length !== 1 ? "s" : ""} exported.` });
+        }}
       />
     </EcosystemWrapper>
   );

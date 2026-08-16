@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useDebounce } from "use-debounce";
 
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -11,18 +13,21 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ExportCsvModal } from "@/components/shared/export-csv-modal";
+import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export-csv-modal";
+import { buildCsv, downloadCsv } from "@/lib/export-csv";
+import { toast as sonnerToast } from "sonner";
 import {
   MoreHorizontal,
   UserPlus,
   ShieldCheck,
-  Trash2,
   Lock,
-  Globe,
   UserCog,
   PowerOff,
   Power,
-  RotateCw,
+  RefreshCw,
   Users,
+  Upload,
 } from "lucide-react";
 import AddUserDialog from "./add-user-dialog";
 import ManagePermissionsDialog from "./manage-permissions-dialog";
@@ -42,17 +47,54 @@ import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-cont
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { CtaButton } from "@/components/ui/cta-button";
-import { useRouter } from "next/navigation";
+
+const STATUS_OPTIONS = [
+  { value: "ALL", label: "All Status", dot: "" },
+  { value: "active", label: "Active", dot: "bg-emerald-500" },
+  { value: "inactive", label: "Inactive", dot: "bg-zinc-400" },
+];
 
 export default function UsersTab() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
+
+  const updateParams = useCallback(
+    (updates: Record<string, string | null>) => {
+      const params = new URLSearchParams(searchParams.toString());
+      for (const [key, value] of Object.entries(updates)) {
+        if (value === null || value === "" || value === "ALL") {
+          params.delete(key);
+        } else {
+          params.set(key, value);
+        }
+      }
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [searchParams, pathname, router],
+  );
+
+  const statusFilter = searchParams.get("status") || "ALL";
+  const setStatusFilter = (v: string) =>
+    updateParams({ status: v === "ALL" ? null : v });
+
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
+  const [debouncedSearch] = useDebounce(searchQuery, 500);
+
+  // Sync debounced search to URL
+  useEffect(() => {
+    const currentQ = searchParams.get("q") || "";
+    if (debouncedSearch.trim() !== currentQ) {
+      updateParams({ q: debouncedSearch.trim() || null });
+    }
+  }, [debouncedSearch, searchParams, updateParams]);
+
   const { data, loading, error, refetch } = useGetAdminUsers();
-  console.log("GraphQL Error:", error);
-  console.log("GraphQL Data:", data);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
   const [showPermissionsDialog, setShowPermissionsDialog] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [showExportModal, setShowExportModal] = useState(false);
 
   const [updateUser, { loading: updatingStatus }] = useUpdateAdminUser({
     onCompleted: (data: any) => {
@@ -60,6 +102,7 @@ export default function UsersTab() {
         title: "Status updated",
         description: `User is now ${data.updateAdminUser.status}.`,
       });
+      refetch();
     },
     onError: (err: any) => {
       toast({
@@ -73,14 +116,20 @@ export default function UsersTab() {
   const users = data?.getAdminUsers?.data || [];
 
   const filteredUsers = useMemo(() => {
-    return users.filter(
-      (u) =>
-        `${u.firstName} ${u.lastName}`
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase()) ||
-        u.email.toLowerCase().includes(searchQuery.toLowerCase()),
-    );
-  }, [users, searchQuery]);
+    const q = debouncedSearch.toLowerCase().trim();
+    return users.filter((u) => {
+      const matchesSearch =
+        !q ||
+        `${u.firstName} ${u.lastName}`.toLowerCase().includes(q) ||
+        u.email?.toLowerCase().includes(q);
+
+      const matchesStatus =
+        statusFilter === "ALL" ||
+        u.status?.toLowerCase() === statusFilter.toLowerCase();
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [users, debouncedSearch, statusFilter]);
 
   const handleManagePermissions = (user: AdminUser) => {
     setSelectedUser(user);
@@ -101,100 +150,67 @@ export default function UsersTab() {
     {
       key: "user",
       header: "Member",
-      cell: (user: AdminUser) => (
-        <div className="flex items-center gap-3">
-          <Avatar className="h-8 w-8 border border-border shrink-0">
-            <AvatarImage src={user.avatar as any} />
-            <AvatarFallback className="text-[10px] bg-muted text-muted-foreground font-medium uppercase">
-              {user.firstName[0]}
-              {user.lastName[0]}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex flex-col min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-foreground">
+      cell: (user: AdminUser) => {
+        return (
+          <div className="flex items-center gap-3">
+            <Avatar className="h-9 w-9 border border-border">
+              <AvatarImage
+                src={
+                  user.avatar
+                    ? `https://cdn.thrico.network/${user.avatar}`
+                    : undefined
+                }
+              />
+              <AvatarFallback className="bg-primary/10 text-primary font-bold text-xs">
+                {user.firstName[0]}
+                {user.lastName[0]}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col">
+              <span className="font-semibold text-sm text-foreground">
                 {user.firstName} {user.lastName}
               </span>
-              {user.isSuperAdmin ? (
-                <span className="inline-flex items-center gap-1 text-[9px] font-medium text-indigo-600 bg-indigo-50 border border-indigo-100 px-1.5 py-0.5 rounded-md">
-                  <ShieldCheck className="w-2.5 h-2.5" />
-                  Owner
-                </span>
-              ) : user.role?.isSystem ? (
-                <span className="inline-flex items-center gap-1 text-[9px] font-medium text-emerald-600 bg-emerald-50 border border-emerald-100 px-1.5 py-0.5 rounded-md">
-                  <ShieldCheck className="w-2.5 h-2.5" />
-                  System
-                </span>
-              ) : null}
+              <span className="text-xs text-muted-foreground">
+                {user.email}
+              </span>
             </div>
-            <span className="text-[11px] text-muted-foreground">
-              {user.email}
-            </span>
           </div>
-        </div>
-      ),
+        );
+      },
     },
     {
       key: "role",
       header: "Role",
       cell: (user: AdminUser) => {
-        const roleName = user.isSuperAdmin
-          ? "Owner"
-          : user.role?.name || "Member";
         return (
-          <span className="text-sm font-medium text-foreground">
-            {roleName}
-          </span>
-        );
-      },
-    },
-    {
-      key: "access",
-      header: "Access",
-      cell: (user: AdminUser) => {
-        if (user.isSuperAdmin || user.role?.isSystem) {
-          return (
-            <div className="flex items-center gap-1.5 text-muted-foreground">
-              <Globe className="h-3 w-3" />
-              <span className="text-xs">Full access</span>
-            </div>
-          );
-        }
-        const perms =
-          user.modulePermissions || user.role?.modulePermissions || [];
-        if (!perms.length)
-          return (
-            <span className="text-xs text-muted-foreground">No access</span>
-          );
-        return (
-          <span className="text-xs text-muted-foreground">
-            {perms.length} module{perms.length !== 1 ? "s" : ""}
-          </span>
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-medium text-foreground">
+              {user.role?.name || "Member"}
+            </span>
+          </div>
         );
       },
     },
     {
       key: "status",
       header: "Status",
-      cell: (user: AdminUser) => (
-        <AdminStatusBadge
-          status={user.status === "active" ? "ACTIVE" : "PENDING"}
-        >
-          {user.status}
-        </AdminStatusBadge>
-      ),
+      cell: (user: AdminUser) => {
+        const isActive = user.status === "active";
+        return (
+          <AdminStatusBadge
+            status={user.status}
+            variant={isActive ? "success" : "neutral"}
+          />
+        );
+      },
     },
     {
       key: "actions",
-      header: "",
-      headerClassName: "w-[50px]",
+      header: "Actions",
+      className: "text-right",
       cell: (user: AdminUser) => {
-        if (user.isSuperAdmin || user.role?.isSystem)
-          return (
-            <div className="flex justify-end pr-2 opacity-20">
-              <Lock className="h-3.5 w-3.5" />
-            </div>
-          );
+        const isActive = user.status === "active";
         return (
           <div className="flex justify-end">
             <DropdownMenu>
@@ -202,51 +218,42 @@ export default function UsersTab() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 text-muted-foreground rounded-lg hover:text-foreground hover:bg-muted transition-all"
+                  className="h-8 w-8 text-muted-foreground hover:text-foreground"
                 >
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="w-44 p-1 rounded-xl border-border"
-              >
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={() => handleEditUser(user)}>
+                  <UserCog className="h-4 w-4 mr-2" />
+                  Edit Details
+                </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => handleManagePermissions(user)}
-                  className="gap-2.5 py-2 text-xs rounded-lg cursor-pointer"
                 >
-                  <ShieldCheck className="h-4 w-4 text-muted-foreground" />{" "}
-                  Permissions
+                  <Lock className="h-4 w-4 mr-2" />
+                  Manage Permissions
                 </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => handleEditUser(user)}
-                  className="gap-2.5 py-2 text-xs rounded-lg cursor-pointer"
-                >
-                  <UserCog className="h-4 w-4 text-muted-foreground" /> Edit
-                </DropdownMenuItem>
-                <DropdownMenuSeparator className="my-1" />
+                <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => handleUpdateStatus(user.id, user.status)}
-                  disabled={updatingStatus}
-                  className={cn(
-                    "gap-2.5 py-2 text-xs rounded-lg cursor-pointer",
-                    user.status === "active"
-                      ? "text-amber-600 focus:bg-amber-50"
-                      : "text-emerald-600 focus:bg-emerald-50",
-                  )}
+                  className={
+                    isActive
+                      ? "text-rose-600 focus:text-rose-600"
+                      : "text-emerald-600 focus:text-emerald-600"
+                  }
                 >
-                  {user.status === "active" ? (
+                  {isActive ? (
                     <>
-                      <PowerOff className="h-4 w-4" /> Deactivate
+                      <PowerOff className="h-4 w-4 mr-2" />
+                      Deactivate User
                     </>
                   ) : (
                     <>
-                      <Power className="h-4 w-4" /> Activate
+                      <Power className="h-4 w-4 mr-2" />
+                      Activate User
                     </>
                   )}
-                </DropdownMenuItem>
-                <DropdownMenuItem className="gap-2.5 py-2 text-xs rounded-lg cursor-pointer text-rose-600 focus:bg-rose-50">
-                  <Trash2 className="h-4 w-4" /> Delete
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -255,8 +262,6 @@ export default function UsersTab() {
       },
     },
   ];
-
-  const router = useRouter();
 
   return (
     <EcosystemWrapper>
@@ -272,72 +277,122 @@ export default function UsersTab() {
         showLiveIndicator={false}
         actions={
           <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => refetch?.()}
+              className="h-9 w-9 rounded-lg border-border text-muted-foreground hover:text-foreground transition-all"
+            >
+              <RefreshCw
+                className={cn("h-3.5 w-3.5", loading && "animate-spin")}
+              />
+            </Button>
             <CtaButton onClick={() => router.push("/settings/users/create")}>
-              <UserPlus className="h-3 w-3" />
+              <UserPlus className="h-3.5 w-3.5" />
               Add Member
             </CtaButton>
           </div>
         }
       />
-      <div className="space-y-0">
-        <EcosystemActionBar
-          shadow="none"
-          className="bg-transparent border-none py-2"
-        >
-          <EcosystemActionBar.Group grow>
-            <EcosystemActionBar.Item grow className="max-w-sm">
-              <EcosystemActionBar.Search
-                value={searchQuery}
-                onChange={setSearchQuery}
-                placeholder="Search members..."
-              />
-            </EcosystemActionBar.Item>
-          </EcosystemActionBar.Group>
-          <EcosystemActionBar.Group align="right">
-            <EcosystemActionBar.Item>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => refetch()}
-                className="h-9 w-9 rounded-xl text-muted-foreground border-border hover:text-foreground hover:bg-muted"
-              >
-                <RotateCw
-                  className={cn("h-4 w-4", loading ? "animate-spin" : "")}
-                />
-              </Button>
-            </EcosystemActionBar.Item>
-          </EcosystemActionBar.Group>
-        </EcosystemActionBar>
 
-        <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">
-          <div className="px-5">
-            <AdminTable
-              columns={columns}
-              data={filteredUsers}
-              loading={loading}
-              keyExtractor={(u) => u.id}
-              emptyTitle="No members found"
-              emptyDescription="No team members have been added yet."
+      <EcosystemActionBar shadow="none">
+        <EcosystemActionBar.Group>
+          <EcosystemActionBar.Item grow className="max-w-xs">
+            <EcosystemActionBar.Search
+              value={searchQuery}
+              onChange={setSearchQuery}
+              placeholder="Search members by name or email…"
             />
-          </div>
-        </EcosystemContainer>
+          </EcosystemActionBar.Item>
+        </EcosystemActionBar.Group>
 
-        <AddUserDialog
-          open={showAddDialog}
-          onOpenChange={(open) => {
-            setShowAddDialog(open);
-            if (!open) setSelectedUser(null);
-          }}
+        <EcosystemActionBar.Separator />
+
+        <EcosystemActionBar.Group>
+          <EcosystemActionBar.Item>
+            <EcosystemActionBar.Select
+              value={statusFilter}
+              onValueChange={setStatusFilter}
+              placeholder="Status"
+              options={STATUS_OPTIONS.map((opt) => ({
+                value: opt.value,
+                label: opt.label,
+                dot: opt.dot || undefined,
+              }))}
+            />
+          </EcosystemActionBar.Item>
+        </EcosystemActionBar.Group>
+
+        <EcosystemActionBar.Group align="right">
+          <EcosystemActionBar.Item>
+            <Button
+              variant="outline"
+              onClick={() => setShowExportModal(true)}
+              className="h-8 gap-1.5 shrink-0 bg-card border-border shadow-2xs text-xs font-medium text-foreground px-2.5"
+            >
+              <Upload className="h-3.5 w-3.5" />
+              Export
+            </Button>
+          </EcosystemActionBar.Item>
+          <EcosystemActionBar.Status active={filteredUsers.length > 0}>
+            Showing {filteredUsers.length} of {users.length} Members
+          </EcosystemActionBar.Status>
+        </EcosystemActionBar.Group>
+      </EcosystemActionBar>
+
+      <EcosystemContainer className="p-0 border-none bg-transparent shadow-none ring-0">
+        <div className="px-5">
+          <AdminTable
+            columns={columns}
+            data={filteredUsers}
+            loading={loading}
+            keyExtractor={(u) => u.id}
+            emptyTitle="No members found"
+            emptyDescription="No team members match your current search and filters."
+          />
+        </div>
+      </EcosystemContainer>
+
+      <AddUserDialog
+        open={showAddDialog}
+        onOpenChange={(open) => {
+          setShowAddDialog(open);
+          if (!open) setSelectedUser(null);
+        }}
+        user={selectedUser}
+      />
+      {selectedUser && (
+        <ManagePermissionsDialog
+          open={showPermissionsDialog}
+          onOpenChange={setShowPermissionsDialog}
           user={selectedUser}
         />
-        {selectedUser && (
-          <ManagePermissionsDialog
-            open={showPermissionsDialog}
-            onOpenChange={setShowPermissionsDialog}
-            user={selectedUser}
-          />
-        )}
-      </div>
+      )}
+
+      <ExportCsvModal
+        open={showExportModal}
+        onOpenChange={setShowExportModal}
+        entityName="team members"
+        description="Export admin users and team members as CSV. Includes names, emails, roles, and status."
+        totalCount={users.length}
+        matchingCount={debouncedSearch.trim() || statusFilter !== "ALL" ? filteredUsers.length : undefined}
+        onExport={(_scope: ExportCsvScope, format: ExportCsvFormat) => {
+          const rows = filteredUsers;
+          if (rows.length === 0) {
+            sonnerToast.error("Nothing to export", { description: "No members found." });
+            return;
+          }
+          const csv = buildCsv(rows, [
+            { header: "First Name", getValue: (u) => u.firstName || "" },
+            { header: "Last Name", getValue: (u) => u.lastName || "" },
+            { header: "Email", getValue: (u) => u.email || "" },
+            { header: "Role", getValue: (u) => u.role?.name || u.role || "Member" },
+            { header: "Status", getValue: (u) => u.status || "active" },
+          ]);
+          downloadCsv(csv, `members-${new Date().toISOString().slice(0, 10)}`, format);
+          sonnerToast.success("Export ready", { description: `${rows.length} member${rows.length !== 1 ? "s" : ""} exported.` });
+        }}
+      />
     </EcosystemWrapper>
   );
 }

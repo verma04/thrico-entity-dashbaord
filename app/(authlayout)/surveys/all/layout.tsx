@@ -1,9 +1,12 @@
 "use client";
 
-import { useSearchParams, useRouter } from "next/navigation";
-import { ClipboardList, Sparkles, Filter } from "lucide-react";
+import React, { useState, useCallback, useEffect, useMemo } from "react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { useDebounce } from "use-debounce";
+import { ClipboardList, Sparkles, Filter, PlusCircle, Upload, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { CtaButton as Button } from "@/components/ui/cta-button";
+import { Button as UIButton } from "@/components/ui/button";
 
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
@@ -11,17 +14,16 @@ import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-acti
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 
 import { SurveyAIAgentButton } from "@/components/surveys/survey-ai-agent";
-
 import { DateRangePicker } from "@/components/ui/date-range-picker";
-import { useState } from "react";
 import { DateRange } from "react-day-picker";
 import { subDays } from "date-fns";
 import { useModuleStore } from "@/store/useModuleStore";
-import { PlusCircle } from "lucide-react";
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Layout
-// ─────────────────────────────────────────────────────────────────────────────
+import { useGetSurveys, Survey } from "@/graphql/surveys/survey-queries";
+import { ExportCsvModal } from "@/components/shared/export-csv-modal";
+import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export-csv-modal";
+import { buildCsv, downloadCsv } from "@/lib/export-csv";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 export default function RootLayout({
   children,
@@ -31,24 +33,53 @@ export default function RootLayout({
   const singularName = useModuleStore((state) => state.surveySingularName);
   const moduleName = useModuleStore((state) => state.surveyModuleName);
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
-  const searchQuery = searchParams.get("q") || "";
+
+  const updateParams = useCallback(
+    (updates: Record<string, string | null>) => {
+      const params = new URLSearchParams(searchParams.toString());
+      for (const [key, value] of Object.entries(updates)) {
+        if (value === null || value === "" || value === "ALL") {
+          params.delete(key);
+        } else {
+          params.set(key, value);
+        }
+      }
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [searchParams, pathname, router],
+  );
+
+  const [search, setSearch] = useState(searchParams.get("q") || "");
+  const [debouncedSearch] = useDebounce(search, 500);
+  const [showExportModal, setShowExportModal] = useState(false);
+
+  // Sync debounced search to URL
+  useEffect(() => {
+    const currentQ = searchParams.get("q") || "";
+    if (debouncedSearch.trim() !== currentQ) {
+      updateParams({ q: debouncedSearch.trim() || null });
+    }
+  }, [debouncedSearch, searchParams, updateParams]);
+
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: subDays(new Date(), 30),
     to: new Date(),
   });
 
-  const updateFilters = (updates: Record<string, string | null>) => {
-    const params = new URLSearchParams(searchParams.toString());
-    Object.entries(updates).forEach(([key, value]) => {
-      if (value === null || value === "ALL" || value === "") {
-        params.delete(key);
-      } else {
-        params.set(key, value);
-      }
-    });
-    router.push(`/surveys/all?${params.toString()}`);
-  };
+  const { data, loading, refetch } = useGetSurveys();
+  const rawSurveys = useMemo(() => data?.getSurveys?.data || [], [data]);
+
+  const filteredSurveys = useMemo(() => {
+    const q = debouncedSearch.toLowerCase().trim();
+    if (!q) return rawSurveys;
+    return rawSurveys.filter(
+      (s: Survey) =>
+        s.title?.toLowerCase().includes(q) ||
+        s.description?.toLowerCase().includes(q),
+    );
+  }, [rawSurveys, debouncedSearch]);
 
   return (
     <EcosystemWrapper>
@@ -58,9 +89,19 @@ export default function RootLayout({
         badgeText="Community Insights"
         description="Review interaction datasets, sentiment tracking, and global response protocols."
         icon={ClipboardList}
-        breadcrumbs={[{ label: "Surveys", href: "/surveys" }, { label: "All" }]}
+        breadcrumbs={[{ label: moduleName, href: "/surveys" }, { label: "All" }]}
         actions={
           <div className="flex items-center gap-3 relative ml-auto">
+            <UIButton
+              variant="outline"
+              size="icon"
+              onClick={() => refetch?.()}
+              className="h-9 w-9 rounded-lg border-border text-muted-foreground hover:text-foreground transition-all"
+            >
+              <RefreshCw
+                className={cn("h-3.5 w-3.5", loading && "animate-spin")}
+              />
+            </UIButton>
             <Link href="/surveys/templates">
               <Button
                 variant="outline"
@@ -80,9 +121,9 @@ export default function RootLayout({
         <EcosystemActionBar.Group>
           <EcosystemActionBar.Item grow className="max-w-xs">
             <EcosystemActionBar.Search
-              value={searchQuery}
-              onChange={(val) => updateFilters({ q: val })}
-              placeholder="Search registry nodes..."
+              value={search}
+              onChange={setSearch}
+              placeholder={`Search ${moduleName.toLowerCase()}…`}
             />
           </EcosystemActionBar.Item>
         </EcosystemActionBar.Group>
@@ -93,17 +134,19 @@ export default function RootLayout({
           <EcosystemActionBar.Item>
             <DateRangePicker date={dateRange} onDateChange={setDateRange} />
           </EcosystemActionBar.Item>
-          <EcosystemActionBar.Item>
-            <Button
-              variant="outline"
-              className="h-6 w-6 p-0 rounded-md border-border text-muted-foreground hover:text-foreground transition-all"
-            >
-              <Filter className="h-3 w-3" />
-            </Button>
-          </EcosystemActionBar.Item>
         </EcosystemActionBar.Group>
 
         <EcosystemActionBar.Group align="right">
+          <EcosystemActionBar.Item>
+            <UIButton
+              variant="outline"
+              onClick={() => setShowExportModal(true)}
+              className="h-8 gap-1.5 shrink-0 bg-card border-border shadow-2xs text-xs font-medium text-foreground px-2.5"
+            >
+              <Upload className="h-3.5 w-3.5" />
+              Export
+            </UIButton>
+          </EcosystemActionBar.Item>
           <EcosystemActionBar.Item>
             <Link href="/surveys/create">
               <Button className="gap-1.5">
@@ -112,13 +155,39 @@ export default function RootLayout({
               </Button>
             </Link>
           </EcosystemActionBar.Item>
-          <EcosystemActionBar.Status active>
-            Active Datasets
+          <EcosystemActionBar.Status active={filteredSurveys.length > 0}>
+            Showing {filteredSurveys.length} of {rawSurveys.length} {moduleName}
           </EcosystemActionBar.Status>
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
 
       {children}
+
+      <ExportCsvModal
+        open={showExportModal}
+        onOpenChange={setShowExportModal}
+        entityName={moduleName.toLowerCase()}
+        description={`Export surveys and questionnaires as CSV. Includes title, description, status, and questions count.`}
+        totalCount={rawSurveys.length}
+        matchingCount={debouncedSearch.trim() ? filteredSurveys.length : undefined}
+        onExport={(_scope: ExportCsvScope, format: ExportCsvFormat) => {
+          const rows = filteredSurveys;
+          if (rows.length === 0) {
+            toast.error("Nothing to export", { description: `No ${moduleName.toLowerCase()} found.` });
+            return;
+          }
+          const csv = buildCsv(rows, [
+            { header: "Title", getValue: (s: any) => s.title || "" },
+            { header: "Description", getValue: (s: any) => s.description || "" },
+            { header: "Status", getValue: (s: any) => s.status || (s.isPublished ? "PUBLISHED" : "DRAFT") },
+            { header: "Questions Count", getValue: (s: any) => s.questions?.length ?? "" },
+            { header: "Responses Count", getValue: (s: any) => s.submissionsCount ?? "" },
+            { header: "Created At", getValue: (s: any) => s.createdAt ? new Date(s.createdAt).toISOString().slice(0, 10) : "" },
+          ]);
+          downloadCsv(csv, `surveys-${new Date().toISOString().slice(0, 10)}`, format);
+          toast.success("Export ready", { description: `${rows.length} ${moduleName.toLowerCase()} exported.` });
+        }}
+      />
     </EcosystemWrapper>
   );
 }

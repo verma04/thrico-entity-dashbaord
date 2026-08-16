@@ -524,9 +524,7 @@ export function RewardFormSections({
                 : formik.values.rewardMechanism
                   ? [formik.values.rewardMechanism]
                   : [];
-              const allSelected = ALL_IDS.every((id) =>
-                selected.includes(id),
-              );
+              const allSelected = ALL_IDS.every((id) => selected.includes(id));
               return (
                 <button
                   type="button"
@@ -676,10 +674,7 @@ export function RewardFormSections({
                 value={formik.values.couponType}
                 onValueChange={(v) => {
                   formik.setFieldValue("couponType", v);
-                  formik.setFieldValue(
-                    "inventoryRequired",
-                    v === "ONE_TO_ONE",
-                  );
+                  formik.setFieldValue("inventoryRequired", v === "ONE_TO_ONE");
                   if (v === "ONE_TO_ONE") {
                     formik.setFieldValue("couponCode", "");
                     const selected = Array.isArray(
@@ -775,7 +770,8 @@ export function RewardFormSections({
                     onClick={triggerFileInput}
                     className={cn(
                       "border-2 border-dashed border-zinc-200 dark:border-zinc-700 hover:border-zinc-900 dark:hover:border-zinc-100 rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-all bg-zinc-50/50 dark:bg-zinc-900/30",
-                      isDragging && "border-zinc-900 dark:border-zinc-100 bg-zinc-900/5",
+                      isDragging &&
+                        "border-zinc-900 dark:border-zinc-100 bg-zinc-900/5",
                     )}
                   >
                     <input
@@ -788,7 +784,9 @@ export function RewardFormSections({
                     <Upload className="h-6 w-6 text-zinc-900 dark:text-zinc-100 mb-2 opacity-80" />
                     <p className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">
                       Drag & drop your voucher CSV here, or{" "}
-                      <span className="text-zinc-900 dark:text-zinc-100 underline">browse</span>
+                      <span className="text-zinc-900 dark:text-zinc-100 underline">
+                        browse
+                      </span>
                     </p>
                     <p className="text-[11px] text-zinc-400 mt-1">
                       Format: code, cardNumber, pin
@@ -846,7 +844,8 @@ export function RewardFormSections({
                   vouchersListData.getVouchers.length > 0 && (
                     <div className="space-y-3 pt-2 border-t border-zinc-100 dark:border-zinc-800">
                       <h4 className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                        Uploaded Vouchers ({vouchersListData.getVouchers.length})
+                        Uploaded Vouchers ({vouchersListData.getVouchers.length}
+                        )
                       </h4>
                       <div className="rounded-xl border border-zinc-200 dark:border-zinc-700 overflow-hidden bg-white dark:bg-zinc-800">
                         <table className="w-full text-left text-xs">

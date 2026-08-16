@@ -14,7 +14,11 @@ import {
   Copy,
   Check,
   Filter,
+  Upload,
 } from "lucide-react";
+import { ExportCsvModal } from "@/components/shared/export-csv-modal";
+import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export-csv-modal";
+import { buildCsv, downloadCsv } from "@/lib/export-csv";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -52,6 +56,7 @@ export default function ShopifyUsersPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [page, setPage] = useState(1);
+  const [showExportModal, setShowExportModal] = useState(false);
   const limit = 20;
   const offset = (page - 1) * limit;
 
@@ -277,6 +282,18 @@ export default function ShopifyUsersPage() {
                 {syncing ? "Syncing…" : "Sync Customers"}
               </Button>
             </EcosystemActionBar.Item>
+
+            <EcosystemActionBar.Item>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowExportModal(true)}
+                className="h-8 px-2.5 rounded-md text-[11px] font-medium gap-1.5 bg-card border-border shadow-2xs text-foreground"
+              >
+                <Upload className="h-3.5 w-3.5" />
+                Export
+              </Button>
+            </EcosystemActionBar.Item>
           </EcosystemActionBar.Group>
         </EcosystemActionBar>
 
@@ -306,6 +323,33 @@ export default function ShopifyUsersPage() {
             </div>
           )}
         </div>
+
+        <ExportCsvModal
+          open={showExportModal}
+          onOpenChange={setShowExportModal}
+          entityName="Shopify customers"
+          description="Export synchronized Shopify customer accounts as CSV."
+          totalCount={totalCount}
+          matchingCount={(search.trim() || statusFilter !== "ALL") ? filteredCustomers.length : undefined}
+          onExport={(_scope: ExportCsvScope, format: ExportCsvFormat) => {
+            const rows = filteredCustomers;
+            if (rows.length === 0) {
+              toast.error("Nothing to export", { description: "No Shopify customers found." });
+              return;
+            }
+            const csv = buildCsv(rows, [
+              { header: "Shopify Customer ID", getValue: (c: any) => c.shopifyCustomerId || "" },
+              { header: "Email", getValue: (c: any) => c.email || "" },
+              { header: "First Name", getValue: (c: any) => c.firstName || "" },
+              { header: "Last Name", getValue: (c: any) => c.lastName || "" },
+              { header: "Status", getValue: (c: any) => c.status || "ACTIVE" },
+              { header: "Customer Since", getValue: (c: any) => c.createdAt ? new Date(c.createdAt).toISOString().slice(0, 10) : "" },
+              { header: "Last Synced", getValue: (c: any) => c.lastSyncedAt ? new Date(c.lastSyncedAt).toISOString().slice(0, 10) : "" },
+            ]);
+            downloadCsv(csv, `shopify-customers-${new Date().toISOString().slice(0, 10)}`, format);
+            toast.success("Export ready", { description: `${rows.length} customer${rows.length !== 1 ? "s" : ""} exported.` });
+          }}
+        />
       </EcosystemContainer>
     </EcosystemWrapper>
   );

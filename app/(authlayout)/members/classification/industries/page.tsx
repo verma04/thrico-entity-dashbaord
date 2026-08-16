@@ -10,8 +10,12 @@ import {
   useBulkAddIndustries,
 } from "@/graphql/quries/industries/industry-queries";
 import { Button } from "@/components/ui/button";
-import { Plus, Loader2, LayoutGrid, Network } from "lucide-react";
+import { Plus, Loader2, LayoutGrid, Network, Upload } from "lucide-react";
 import { useDebounce } from "use-debounce";
+import { ExportCsvModal } from "@/components/shared/export-csv-modal";
+import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export-csv-modal";
+import { buildCsv, downloadCsv } from "@/lib/export-csv";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -46,6 +50,7 @@ export default function IndustriesPage() {
     null,
   );
   const [activeTab, setActiveTab] = useState("list");
+  const [showExportModal, setShowExportModal] = useState(false);
 
   const [addIndustry, { loading: creating }] = useAddIndustry({
     onCompleted: () => {
@@ -150,6 +155,14 @@ export default function IndustriesPage() {
               <Plus className="h-3.5 w-3.5" />
               Add Industry
             </CtaButton>
+            <Button
+              variant="outline"
+              onClick={() => setShowExportModal(true)}
+              className="h-8 gap-1.5 shrink-0 bg-card border-border shadow-2xs text-xs font-medium text-foreground px-2.5"
+            >
+              <Upload className="h-3.5 w-3.5" />
+              Export
+            </Button>
           </>
         }
         statusText={`${industries.length} Industries`}
@@ -220,6 +233,28 @@ export default function IndustriesPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <ExportCsvModal
+        open={showExportModal}
+        onOpenChange={setShowExportModal}
+        entityName="industries"
+        description="Export community member industry classifications as CSV."
+        totalCount={industries.length}
+        matchingCount={debouncedSearch.trim() ? industries.length : undefined}
+        onExport={(_scope: ExportCsvScope, format: ExportCsvFormat) => {
+          if (industries.length === 0) {
+            toast.error("Nothing to export", { description: "No industries found." });
+            return;
+          }
+          const csv = buildCsv(industries, [
+            { header: "Industry Title", getValue: (ind) => ind.title || "" },
+            { header: "Created At", getValue: (ind) => ind.createdAt ? new Date(ind.createdAt).toISOString().slice(0, 10) : "" },
+            { header: "Updated At", getValue: (ind) => ind.updatedAt ? new Date(ind.updatedAt).toISOString().slice(0, 10) : "" },
+          ]);
+          downloadCsv(csv, `industries-${new Date().toISOString().slice(0, 10)}`, format);
+          toast.success("Export ready", { description: `${industries.length} industr${industries.length !== 1 ? "ies" : "y"} exported.` });
+        }}
+      />
     </>
   );
 }

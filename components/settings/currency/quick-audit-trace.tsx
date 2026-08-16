@@ -26,6 +26,7 @@ import {
   ArrowRight,
   X,
   AlertCircle,
+  Upload,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useGetCurrencyTransactions } from "@/graphql/actions/currency";
@@ -49,6 +50,10 @@ import {
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useModuleStore } from "@/store/useModuleStore";
+import { ExportCsvModal } from "@/components/shared/export-csv-modal";
+import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export-csv-modal";
+import { buildCsv, downloadCsv } from "@/lib/export-csv";
+import { toast } from "sonner";
 
 export type CurrencyTransactionNode = {
   transactionId: string;
@@ -72,9 +77,10 @@ export function QuickAuditTrace() {
   const currencyModuleName = useModuleStore(
     (state) => state.currencyModuleName,
   );
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState<string>("");
   const [selectedModule, setSelectedModule] = useState<string>("ALL");
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+  const [showExportModal, setShowExportModal] = useState(false);
 
   // Fetch directly linked from GraphQL backend
   const { data, loading, error, refetch } = useGetCurrencyTransactions({
@@ -417,6 +423,17 @@ export function QuickAuditTrace() {
           </EcosystemActionBar.Item>
 
           <EcosystemActionBar.Item>
+            <Button
+              variant="outline"
+              onClick={() => setShowExportModal(true)}
+              className="h-8 gap-1.5 shrink-0 bg-card border-border shadow-2xs text-xs font-medium text-foreground px-2.5"
+            >
+              <Upload className="h-3.5 w-3.5" />
+              Export
+            </Button>
+          </EcosystemActionBar.Item>
+
+          <EcosystemActionBar.Item>
             <Link href="/gamification/currency/audit-log">
               <Button
                 variant="outline"
@@ -476,6 +493,35 @@ export function QuickAuditTrace() {
           />
         </EcosystemContainer>
       )}
+
+      <ExportCsvModal
+        open={showExportModal}
+        onOpenChange={setShowExportModal}
+        entityName="currency transactions"
+        description="Export the current currency transaction trace as CSV. Filters for search, type, and date range are applied."
+        totalCount={transactions.length}
+        matchingCount={hasActiveFilters ? filteredTransactions.length : undefined}
+        onExport={(_scope: ExportCsvScope, format: ExportCsvFormat) => {
+          const rows = filteredTransactions;
+          if (rows.length === 0) {
+            toast.error("Nothing to export", { description: "No transactions match the current filters." });
+            return;
+          }
+          const csv = buildCsv(rows, [
+            { header: "First Name",     getValue: (tx) => tx.userBasicInfo?.firstName || "" },
+            { header: "Last Name",      getValue: (tx) => tx.userBasicInfo?.lastName || "" },
+            { header: "Type",           getValue: (tx) => tx.type || "" },
+            { header: "Amount",         getValue: (tx) => tx.amount ?? 0 },
+            { header: "Balance Before", getValue: (tx) => tx.balanceBefore ?? 0 },
+            { header: "Balance After",  getValue: (tx) => tx.balanceAfter ?? 0 },
+            { header: "Date",           getValue: (tx) => tx.timestamp ? new Date(tx.timestamp).toISOString().slice(0, 10) : "" },
+            { header: "Time",           getValue: (tx) => tx.timestamp ? new Date(tx.timestamp).toLocaleTimeString() : "" },
+            { header: "Metadata",       getValue: (tx) => tx.metadata ? JSON.stringify(tx.metadata) : "" },
+          ]);
+          downloadCsv(csv, `currency-trace-${new Date().toISOString().slice(0, 10)}`, format);
+          toast.success("Export ready", { description: `${rows.length} transaction${rows.length !== 1 ? "s" : ""} exported.` });
+        }}
+      />
     </>
   );
 }

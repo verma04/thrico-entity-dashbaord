@@ -10,6 +10,7 @@ import {
   Activity,
   ChevronLeft,
   ChevronRight,
+  Upload,
 } from "lucide-react";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
@@ -19,10 +20,15 @@ import { cn } from "@/lib/utils";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { DateRange } from "react-day-picker";
 import { startOfDay, endOfDay } from "date-fns";
+import { ExportCsvModal } from "@/components/shared/export-csv-modal";
+import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export-csv-modal";
+import { buildCsv, downloadCsv } from "@/lib/export-csv";
+import { toast } from "sonner";
 
 export function ActivityLogManager() {
   const [search, setSearch] = useState("");
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
+  const [showExportModal, setShowExportModal] = useState(false);
 
   const { data, loading, error, refetch } = useGetGamificationActivityLog({
     variables: {
@@ -146,7 +152,16 @@ export function ActivityLogManager() {
             </Button>
           </EcosystemActionBar.Item>
 
-
+          <EcosystemActionBar.Item>
+            <Button
+              variant="outline"
+              onClick={() => setShowExportModal(true)}
+              className="h-8 gap-1.5 shrink-0 bg-card border-border shadow-2xs text-xs font-medium text-foreground px-2.5"
+            >
+              <Upload className="h-3.5 w-3.5" />
+              Export
+            </Button>
+          </EcosystemActionBar.Item>
 
           <EcosystemActionBar.Status active={filteredLogs.length > 0}>
             {filteredLogs.length} Events
@@ -172,6 +187,47 @@ export function ActivityLogManager() {
           <ActivityLogTable logs={filteredLogs} isLoading={loading} />
         </div>
       </EcosystemContainer>
+
+      {/* ── Export Modal ─────────────────────────────────────────────────── */}
+      <ExportCsvModal
+        open={showExportModal}
+        onOpenChange={setShowExportModal}
+        entityName="activity log entries"
+        description="Export the current activity log as a CSV file. Date range and search filters are applied to the exported data."
+        totalCount={logs.length}
+        matchingCount={(search.trim() || dateRange) ? filteredLogs.length : undefined}
+        onExport={(scope: ExportCsvScope, format: ExportCsvFormat) => {
+          const rows = scope === "matching" ? filteredLogs : filteredLogs;
+
+          if (rows.length === 0) {
+            toast.error("Nothing to export", {
+              description: "No activity log entries match the current filters.",
+            });
+            return;
+          }
+
+          const csv = buildCsv(rows, [
+            { header: "Type",             getValue: (e) => e.type || "" },
+            { header: "First Name",       getValue: (e) => e.user?.firstName || "" },
+            { header: "Last Name",        getValue: (e) => e.user?.lastName || "" },
+            { header: "Points",           getValue: (e) => e.points ?? 0 },
+            { header: "Rule Action",      getValue: (e) => e.ruleAction || "" },
+            { header: "Rule Description", getValue: (e) => e.ruleDescription || "" },
+            { header: "Badge Name",       getValue: (e) => e.badgeName || "" },
+            { header: "Badge Description",getValue: (e) => e.badgeDescription || "" },
+            { header: "Badge Icon",       getValue: (e) => e.badgeIcon || "" },
+            { header: "Date",             getValue: (e) => e.createdAt ? new Date(e.createdAt).toISOString().slice(0, 10) : "" },
+            { header: "Time",             getValue: (e) => e.createdAt ? new Date(e.createdAt).toLocaleTimeString() : "" },
+          ]);
+
+          const label = scope === "matching" ? "activity-log-filtered" : "activity-log";
+          downloadCsv(csv, `${label}-${new Date().toISOString().slice(0, 10)}`, format);
+
+          toast.success("Export ready", {
+            description: `${rows.length} entr${rows.length !== 1 ? "ies" : "y"} exported successfully.`,
+          });
+        }}
+      />
     </EcosystemWrapper>
   );
 }

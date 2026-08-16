@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Users, Package, Gamepad2, LayoutDashboard, ShoppingBag, ShoppingCart } from "lucide-react";
+import { Users, Package, Gamepad2, LayoutDashboard, ShoppingBag, ShoppingCart, Tag } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
 
 export default function ShopifyIntegrationLayout({
@@ -24,6 +24,11 @@ export default function ShopifyIntegrationLayout({
       key: "orders",
       label: "Orders",
       icon: <ShoppingCart className="h-4 w-4" />,
+    },
+    {
+      key: "coupons",
+      label: "Coupons",
+      icon: <Tag className="h-4 w-4" />,
     },
     {
       key: "gamification",

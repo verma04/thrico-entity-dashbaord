@@ -22,7 +22,12 @@ import {
   Check,
   ChevronsUpDown,
   Search,
+  Upload,
 } from "lucide-react";
+import { ExportCsvModal } from "@/components/shared/export-csv-modal";
+import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export-csv-modal";
+import { buildCsv, downloadCsv } from "@/lib/export-csv";
+import { toast } from "sonner";
 import { UserHoverCard } from "@/components/shared/user-hover-card";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
@@ -63,6 +68,7 @@ export function ReferralsUI() {
   const [selectedReferrerName, setSelectedReferrerName] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showExportModal, setShowExportModal] = useState(false);
   const searchTimeoutRef = React.useRef<NodeJS.Timeout>();
 
   const [searchUserWithAI, { data: searchData, loading: searchLoading }] =
@@ -237,6 +243,16 @@ export function ReferralsUI() {
           { label: "Members", href: "/members/all" },
           { label: "Referral Network" },
         ]}
+        actions={
+          <Button
+            variant="outline"
+            onClick={() => setShowExportModal(true)}
+            className="h-8 gap-1.5 shrink-0 bg-card border-border shadow-2xs text-xs font-medium text-foreground px-2.5"
+          >
+            <Upload className="h-3.5 w-3.5" />
+            Export
+          </Button>
+        }
       />
 
       <SubscriptionLimitBanner subscriptionInfo={subscriptionInfo} />
@@ -637,6 +653,33 @@ export function ReferralsUI() {
           isLoading={loading}
         />
       </EcosystemContainer>
+
+      <ExportCsvModal
+        open={showExportModal}
+        onOpenChange={setShowExportModal}
+        entityName="referrals"
+        description="Export all referral pairs as CSV. Includes referrer name, referee name, email, status, and join date."
+        totalCount={totalReferralsCount}
+        onExport={(_scope: ExportCsvScope, format: ExportCsvFormat) => {
+          const rows = referrals as any[];
+          if (rows.length === 0) {
+            toast.error("Nothing to export", { description: "No referral records found." });
+            return;
+          }
+          const csv = buildCsv(rows, [
+            { header: "Referrer First Name", getValue: (r) => r.referrer?.user?.firstName || "" },
+            { header: "Referrer Last Name",  getValue: (r) => r.referrer?.user?.lastName || "" },
+            { header: "Referrer Email",      getValue: (r) => r.referrer?.user?.email || "" },
+            { header: "Referee First Name",  getValue: (r) => r.referee?.user?.firstName || "" },
+            { header: "Referee Last Name",   getValue: (r) => r.referee?.user?.lastName || "" },
+            { header: "Referee Email",       getValue: (r) => r.referee?.user?.email || "" },
+            { header: "Status",              getValue: (r) => r.referee?.isApproved ? "Active" : "Pending" },
+            { header: "Joined",              getValue: (r) => r.referee?.user?.createdAt ? new Date(r.referee.user.createdAt).toISOString().slice(0, 10) : "" },
+          ]);
+          downloadCsv(csv, `referrals-${new Date().toISOString().slice(0, 10)}`, format);
+          toast.success("Export ready", { description: `${rows.length} referral${rows.length !== 1 ? "s" : ""} exported.` });
+        }}
+      />
     </EcosystemWrapper>
   );
 }

@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useCallback, useEffect, useMemo } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useDebounce } from "use-debounce";
 import {
   useGetOffers,
   useGetOfferCategories,
@@ -20,28 +22,77 @@ import {
   CtaSelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, LayoutGrid, List as ListIcon, Tag } from "lucide-react";
+import { ExportCsvModal } from "@/components/shared/export-csv-modal";
+import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export-csv-modal";
+import { buildCsv, downloadCsv } from "@/lib/export-csv";
+import { Plus, LayoutGrid, List as ListIcon, Tag, RefreshCw, Upload } from "lucide-react";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { toast } from "sonner";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion, AnimatePresence } from "framer-motion";
 import TableLoading from "@/components/layout/table-loading";
 
 import { useModuleStore } from "@/store/useModuleStore";
 import { CtaButton } from "@/components/ui/cta-button";
+import { cn } from "@/lib/utils";
 
 export function OffersManager() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const updateParams = useCallback(
+    (updates: Record<string, string | null>) => {
+      const params = new URLSearchParams(searchParams.toString());
+      for (const [key, value] of Object.entries(updates)) {
+        if (
+          value === null ||
+          value === "" ||
+          value === "ALL" ||
+          value === "all" ||
+          value === "0"
+        ) {
+          params.delete(key);
+        } else {
+          params.set(key, value);
+        }
+      }
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [searchParams, pathname, router],
+  );
+
   const moduleName = useModuleStore((state) => state.offerModuleName);
   const singularName = useModuleStore((state) => state.offerSingularName);
-  const [view, setView] = useState<"grid" | "table">("table");
-  const [search, setSearch] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [selectedStatus, setSelectedStatus] = useState<string>("all");
+
+  const view = (searchParams.get("view") as "grid" | "table") || "table";
+  const setView = (v: "grid" | "table") =>
+    updateParams({ view: v === "table" ? null : v });
+
+  const selectedCategory = searchParams.get("category") || "all";
+  const setSelectedCategory = (v: string) =>
+    updateParams({ category: v === "all" ? null : v });
+
+  const selectedStatus = searchParams.get("status") || "all";
+  const setSelectedStatus = (v: string) =>
+    updateParams({ status: v === "all" ? null : v });
+
+  const [search, setSearch] = useState(searchParams.get("q") || "");
+  const [debouncedSearch] = useDebounce(search, 500);
+
+  // Sync debounced search to URL
+  useEffect(() => {
+    const currentQ = searchParams.get("q") || "";
+    if (debouncedSearch.trim() !== currentQ) {
+      updateParams({ q: debouncedSearch.trim() || null });
+    }
+  }, [debouncedSearch, searchParams, updateParams]);
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingOffer, setEditingOffer] = useState<Offer | null>(null);
+  const [showExportModal, setShowExportModal] = useState(false);
 
   // Queries
   const {
@@ -49,7 +100,7 @@ export function OffersManager() {
     loading: offersLoading,
     refetch: refetchOffers,
   } = useGetOffers({
-    search: search || undefined,
+    search: debouncedSearch.trim() || undefined,
     categoryId: selectedCategory === "all" ? undefined : selectedCategory,
     status: selectedStatus === "all" ? undefined : selectedStatus,
   });
@@ -81,7 +132,18 @@ export function OffersManager() {
     setIsDialogOpen(true);
   };
 
-  const offers = offersData?.getOffers || [];
+  const rawOffers = offersData?.getOffers || [];
+  const offers = useMemo(() => {
+    const q = debouncedSearch.toLowerCase().trim();
+    if (!q) return rawOffers;
+    return rawOffers.filter(
+      (o: any) =>
+        o.title?.toLowerCase().includes(q) ||
+        o.description?.toLowerCase().includes(q) ||
+        o.code?.toLowerCase().includes(q),
+    );
+  }, [rawOffers, debouncedSearch]);
+
   const categories = categoriesData?.getOfferCategories || [];
 
   return (
@@ -91,31 +153,22 @@ export function OffersManager() {
         badgeText="Marketing & Discounts"
         description={`Manage all active and inactive ${moduleName.toLowerCase()} across the platform.`}
         icon={Tag}
+        breadcrumbs={[
+          { label: moduleName, href: "/offers" },
+          { label: "All" },
+        ]}
         actions={
           <div className="flex items-center gap-2">
-            {/* View toggle */}
-            <Tabs
-              value={view}
-              onValueChange={(val: string) => setView(val as "grid" | "table")}
-              className="bg-muted p-0.5 rounded-lg border border-border mr-2"
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => refetchOffers?.()}
+              className="h-9 w-9 rounded-lg border-border text-muted-foreground hover:text-foreground transition-all"
             >
-              <TabsList className="bg-transparent border-none h-auto p-0 gap-0.5">
-                <TabsTrigger
-                  value="grid"
-                  className="h-6 px-2 rounded-sm data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground transition-all text-[11px] font-medium"
-                >
-                  <LayoutGrid className="h-3 w-3 mr-1" />
-                  Grid
-                </TabsTrigger>
-                <TabsTrigger
-                  value="table"
-                  className="h-6 px-2 rounded-sm data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-foreground text-muted-foreground transition-all text-[11px] font-medium"
-                >
-                  <ListIcon className="h-3 w-3 mr-1" />
-                  Table
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
+              <RefreshCw
+                className={cn("h-3.5 w-3.5", offersLoading && "animate-spin")}
+              />
+            </Button>
             <CtaButton
               onClick={() => {
                 setEditingOffer(null);
@@ -135,7 +188,7 @@ export function OffersManager() {
             <EcosystemActionBar.Search
               value={search}
               onChange={setSearch}
-              placeholder={`Search ${moduleName.toLowerCase()}...`}
+              placeholder={`Search ${moduleName.toLowerCase()}…`}
             />
           </EcosystemActionBar.Item>
         </EcosystemActionBar.Group>
@@ -210,8 +263,28 @@ export function OffersManager() {
         </EcosystemActionBar.Group>
 
         <EcosystemActionBar.Group align="right">
+          <EcosystemActionBar.Item>
+            <Button
+              variant="outline"
+              onClick={() => setShowExportModal(true)}
+              className="h-8 gap-1.5 shrink-0 bg-card border-border shadow-2xs text-xs font-medium text-foreground px-2.5"
+            >
+              <Upload className="h-3.5 w-3.5" />
+              Export
+            </Button>
+          </EcosystemActionBar.Item>
+          <EcosystemActionBar.Item>
+            <EcosystemActionBar.ViewToggle
+              value={view}
+              onChange={(val) => setView(val as "grid" | "table")}
+              options={[
+                { id: "grid", label: "Grid", icon: LayoutGrid },
+                { id: "table", label: "Table", icon: ListIcon },
+              ]}
+            />
+          </EcosystemActionBar.Item>
           <EcosystemActionBar.Status active={offers.length > 0}>
-            {offers.length} {moduleName}
+            Showing {offers.length} of {rawOffers.length} {moduleName}
           </EcosystemActionBar.Status>
         </EcosystemActionBar.Group>
       </EcosystemActionBar>
@@ -298,6 +371,33 @@ export function OffersManager() {
               },
             });
           }
+        }}
+      />
+
+      <ExportCsvModal
+        open={showExportModal}
+        onOpenChange={setShowExportModal}
+        entityName={moduleName.toLowerCase()}
+        description={`Export ${moduleName.toLowerCase()} directory as CSV. Includes title, description, code, discount, category, and status.`}
+        totalCount={rawOffers.length}
+        matchingCount={debouncedSearch.trim() || selectedCategory !== "all" || selectedStatus !== "all" ? offers.length : undefined}
+        onExport={(_scope: ExportCsvScope, format: ExportCsvFormat) => {
+          const rows = offers;
+          if (rows.length === 0) {
+            toast.error("Nothing to export", { description: `No ${moduleName.toLowerCase()} found.` });
+            return;
+          }
+          const csv = buildCsv(rows, [
+            { header: "Title", getValue: (o) => o.title || "" },
+            { header: "Description", getValue: (o) => o.description || "" },
+            { header: "Promo Code", getValue: (o) => o.code || "" },
+            { header: "Discount Value", getValue: (o) => o.discountValue ? `${o.discountValue}${o.discountType === "PERCENTAGE" ? "%" : ""}` : "" },
+            { header: "Category", getValue: (o) => o.category?.name || "" },
+            { header: "Status", getValue: (o) => o.status || "" },
+            { header: "Valid Until", getValue: (o) => o.endDate ? new Date(o.endDate).toISOString().slice(0, 10) : "" },
+          ]);
+          downloadCsv(csv, `offers-${new Date().toISOString().slice(0, 10)}`, format);
+          toast.success("Export ready", { description: `${rows.length} ${moduleName.toLowerCase()} exported.` });
         }}
       />
     </EcosystemWrapper>

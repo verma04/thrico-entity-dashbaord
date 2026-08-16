@@ -34,6 +34,7 @@ import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { useUrlDateRange } from "@/hooks/use-url-date-range";
 import { cn } from "@/lib/utils";
 import moment from "moment";
+import { EcosystemActionBar } from "../layout/ecosystem";
 
 export interface ModuleAuditLogProps {
   moduleKey: string;
@@ -54,7 +55,7 @@ export function ModuleAuditLog({
   const [selectedLogId, setSelectedLogId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const { dateRange, handleDateChange } = useUrlDateRange(7);
-  
+
   // Use debounced search to avoid too many requests
   const [debouncedSearch, setDebouncedSearch] = useState("");
   React.useEffect(() => {

@@ -6,8 +6,12 @@ import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrappe
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
-import { ShieldAlert, RotateCcw, LayoutGrid } from "lucide-react";
+import { ShieldAlert, RotateCcw, LayoutGrid, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ExportCsvModal } from "@/components/shared/export-csv-modal";
+import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export-csv-modal";
+import { buildCsv, downloadCsv } from "@/lib/export-csv";
+import { toast } from "sonner";
 import {
   Select,
   SelectContent,
@@ -34,6 +38,7 @@ export default function Reports({
     preselectedModule || "ALL",
   );
   const [search, setSearch] = useState("");
+  const [showExportModal, setShowExportModal] = useState(false);
 
   const queryModule = selectedModule === "ALL" ? undefined : selectedModule;
 
@@ -119,6 +124,17 @@ export default function Reports({
             </Button>
           </EcosystemActionBar.Item>
 
+          <EcosystemActionBar.Item>
+            <Button
+              variant="outline"
+              onClick={() => setShowExportModal(true)}
+              className="h-8 gap-1.5 shrink-0 bg-card border-border shadow-2xs text-xs font-medium text-foreground px-2.5"
+            >
+              <Upload className="h-3.5 w-3.5" />
+              Export
+            </Button>
+          </EcosystemActionBar.Item>
+
           <EcosystemActionBar.Status active={filteredReports.length > 0}>
             {filteredReports.length} Reports
           </EcosystemActionBar.Status>
@@ -132,6 +148,35 @@ export default function Reports({
           canEdit={canEdit}
         />
       </EcosystemContainer>
+
+      <ExportCsvModal
+        open={showExportModal}
+        onOpenChange={setShowExportModal}
+        entityName="reports"
+        description="Export reported content and safety incidents as CSV. Includes reason, description, module, reporter, status, and date."
+        totalCount={reports.length}
+        matchingCount={search.trim() ? filteredReports.length : undefined}
+        onExport={(_scope: ExportCsvScope, format: ExportCsvFormat) => {
+          const rows = filteredReports;
+          if (rows.length === 0) {
+            toast.error("Nothing to export", { description: "No reports found." });
+            return;
+          }
+          const csv = buildCsv(rows, [
+            { header: "Reason", getValue: (r) => r.reason || "" },
+            { header: "Description", getValue: (r) => r.description || "" },
+            { header: "Module", getValue: (r) => r.module === "COMMUNITY" ? moduleName : (r.module || "") },
+            { header: "Reporter First Name", getValue: (r) => r.reporter?.firstName || "" },
+            { header: "Reporter Last Name", getValue: (r) => r.reporter?.lastName || "" },
+            { header: "Reporter Email", getValue: (r) => r.reporter?.email || "" },
+            { header: "Target ID", getValue: (r) => r.targetId || "" },
+            { header: "Status", getValue: (r) => r.status || "PENDING" },
+            { header: "Created At", getValue: (r) => r.createdAt ? new Date(r.createdAt).toISOString().slice(0, 10) : "" },
+          ]);
+          downloadCsv(csv, `reports-${new Date().toISOString().slice(0, 10)}`, format);
+          toast.success("Export ready", { description: `${rows.length} report${rows.length !== 1 ? "s" : ""} exported.` });
+        }}
+      />
     </EcosystemWrapper>
   );
 }

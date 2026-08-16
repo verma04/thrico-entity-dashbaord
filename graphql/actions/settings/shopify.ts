@@ -139,6 +139,66 @@ export const GET_SHOPIFY_STATS = gql`
   }
 `;
 
+export const GET_SHOPIFY_COUPONS = gql`
+  query GetShopifyCoupons($input: ShopifyPaginationInput) {
+    getShopifyCoupons(input: $input) {
+      total
+      limit
+      offset
+      hasMore
+      data {
+        id
+        title
+        code
+        codes
+        isAutomatic
+        status
+        summary
+        discountType
+        value
+        currency
+        usageLimit
+        timesUsed
+        appliesOncePerCustomer
+        startsAt
+        endsAt
+        minimumRequirement {
+          type
+          greaterThanOrEqualTo
+          currency
+        }
+      }
+    }
+  }
+`;
+
+export const GET_ALL_SHOPIFY_COUPONS = gql`
+  query GetAllShopifyCoupons {
+    getAllShopifyCoupons {
+      id
+      title
+      code
+      codes
+      isAutomatic
+      status
+      summary
+      discountType
+      value
+      currency
+      usageLimit
+      timesUsed
+      appliesOncePerCustomer
+      startsAt
+      endsAt
+      minimumRequirement {
+        type
+        greaterThanOrEqualTo
+        currency
+      }
+    }
+  }
+`;
+
 // Hooks
 export const useGetShopifyConnection = () => useQuery(GET_SHOPIFY_CONNECTION);
 export const useGetShopifySyncStatus = (options?: any) => useQuery(GET_SHOPIFY_SYNC_STATUS, options);
@@ -166,10 +226,50 @@ export interface ShopifyDateRangeInput {
   endDate: string;
 }
 
-
 export interface ShopifyPaginationInput {
   limit?: number;
   offset?: number;
+}
+
+export interface ShopifyCouponMinimumRequirement {
+  type?: string | null;
+  greaterThanOrEqualTo?: number | null;
+  currency?: string | null;
+}
+
+export interface ShopifyCoupon {
+  id: string;
+  title: string;
+  code?: string | null;
+  codes: string[];
+  isAutomatic: boolean;
+  status: string;
+  summary?: string | null;
+  discountType: string;
+  value?: number | null;
+  currency?: string | null;
+  usageLimit?: number | null;
+  timesUsed: number;
+  appliesOncePerCustomer: boolean;
+  startsAt?: string | null;
+  endsAt?: string | null;
+  minimumRequirement?: ShopifyCouponMinimumRequirement | null;
+}
+
+export interface PaginatedShopifyCoupons {
+  data: ShopifyCoupon[];
+  total: number;
+  limit: number;
+  offset: number;
+  hasMore: boolean;
+}
+
+export interface GetShopifyCouponsResponse {
+  getShopifyCoupons: PaginatedShopifyCoupons;
+}
+
+export interface GetAllShopifyCouponsResponse {
+  getAllShopifyCoupons: ShopifyCoupon[];
 }
 
 export const useGetShopifyCustomers = (
@@ -191,5 +291,14 @@ export const useGetShopifyStats = (
   variables?: { timeRange?: ShopifyTimeRange; dateRange?: ShopifyDateRangeInput },
   options?: any
 ) => useQuery(GET_SHOPIFY_STATS, { variables, ...options });
+
+export const useGetShopifyCoupons = (
+  variables?: { input?: ShopifyPaginationInput },
+  options?: any
+) => useQuery<GetShopifyCouponsResponse>(GET_SHOPIFY_COUPONS, { variables, ...options });
+
+export const useGetAllShopifyCoupons = (options?: any) =>
+  useQuery<GetAllShopifyCouponsResponse>(GET_ALL_SHOPIFY_COUPONS, options);
+
 
 
