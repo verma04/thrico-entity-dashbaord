@@ -1,39 +1,29 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { FormikProvider, useFormik } from "formik";
 import * as Yup from "yup";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { notify } from "@/lib/notify";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
+import { toast } from "sonner";
 import {
   User,
-  ChevronRight,
   Search,
-  CheckCircle2,
   Check,
-  ChevronDown,
   X,
   Loader2,
   GraduationCap,
   Sparkles,
   Link as LinkIcon,
-  MapPin,
-  Clock,
-  Layout,
   Globe,
-  AlertTriangle,
+  CheckCircle2,
+  Layout,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
@@ -62,8 +52,15 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-
 import { useModuleStore } from "@/store/useModuleStore";
+import { notify } from "@/lib/notify";
+import {
+  PolarisFormLayout,
+  PolarisFormCard,
+  PolarisSidebarCard,
+  PolarisSummaryRow,
+  PolarisTipCard,
+} from "@/components/gamification/shared/polaris-form-ui";
 
 export function MentorCreationForm({
   loading,
@@ -153,8 +150,11 @@ export function MentorCreationForm({
     setSearchQuery("");
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = (e?: React.FormEvent) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (Object.keys(formik.errors).length > 0) {
+      toast.error("Please review and fix the highlighted form errors.");
+    }
     formik.handleSubmit();
   };
 
@@ -163,863 +163,654 @@ export function MentorCreationForm({
 
   return (
     <FormikProvider value={formik}>
-      <div className="flex flex-col h-full bg-slate-50/50 overflow-hidden">
-        {/* Header section - Sticky */}
-        <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200 px-6 py-4">
-          <div className="max-w-5xl mx-auto w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-3 mb-1">
-                <div className="p-2.5 rounded-xl bg-indigo-600/10 ring-1 ring-indigo-600/20">
-                  <GraduationCap className="h-5 w-5 text-indigo-600" />
+      <PolarisFormLayout
+        sidebar={
+          <div className="space-y-4">
+            {/* Live Profile Card */}
+            <PolarisSidebarCard title={`${singularName} Preview`} badge="Live Profile" icon={Sparkles}>
+              <div className="flex flex-col items-center text-center p-4 bg-zinc-50/60 dark:bg-zinc-900/60 rounded-xl border border-zinc-200/80 dark:border-zinc-800">
+                {/* Avatar */}
+                <div className="h-20 w-20 rounded-2xl bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center overflow-hidden border-2 border-white dark:border-zinc-700 shadow-md mb-3">
+                  {selectedUser?.user?.avatar ? (
+                    <Image
+                      src={`https://cdn.thrico.network/${selectedUser.user.avatar}`}
+                      alt="Avatar"
+                      width={80}
+                      height={80}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <User className="h-9 w-9 text-zinc-400" />
+                  )}
                 </div>
-                <h1 className="text-2xl font-black tracking-tight text-slate-900">
-                  Onboard {singularName}
-                </h1>
-              </div>
-              <div className="flex items-center gap-2 text-xs font-medium text-slate-500 ml-1">
-                <span>{moduleName}</span>
-                <ChevronRight className="h-3 w-3" />
-                <span className="text-indigo-600">Add {singularName}</span>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        {/* Main Content Area - Scrollable */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="max-w-5xl mx-auto px-6 py-10">
-            {/* Error Banner */}
-            {submitError && (
-              <div className="mb-8 animate-in fade-in slide-in-from-top-2 duration-300">
-                <div className="flex items-start gap-4 p-5 rounded-2xl bg-rose-50 border border-rose-200 ring-1 ring-rose-100">
-                  <div className="shrink-0 mt-0.5">
-                    <div className="h-10 w-10 rounded-xl bg-rose-100 flex items-center justify-center">
-                      <AlertTriangle className="h-5 w-5 text-rose-600" />
-                    </div>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="text-sm font-black text-rose-900 uppercase tracking-wide mb-1">
-                      Onboarding Failed
-                    </h4>
-                    <p className="text-sm font-medium text-rose-700 leading-relaxed">
-                      {submitError}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={onDismissError}
-                    className="shrink-0 p-1.5 rounded-lg hover:bg-rose-100 text-rose-400 hover:text-rose-600 transition-colors"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-            )}
-
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-              <div className="lg:col-span-8 space-y-8">
-                {/* Step 1: User Selection */}
-                {!selectedUser ? (
-                  <Card className="border-none shadow-sm ring-1 ring-slate-200 overflow-hidden rounded-2xl bg-white transition-all duration-300">
-                    <CardHeader className="bg-slate-50/50 border-b border-slate-100 pb-4">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Search className="h-4 w-4 text-indigo-600" />
-                        <CardTitle className="text-lg font-bold text-slate-800">
-                          Step 1: Find User
-                        </CardTitle>
-                      </div>
-                      <CardDescription className="text-slate-500 font-medium">
-                        Search and select a user to onboard as a{" "}
-                        {singularName.toLowerCase()}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="pt-8 space-y-6">
-                      <div className="relative">
-                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-                        <Input
-                          placeholder="Search users by name..."
-                          className="h-12 pl-11 rounded-xl border-slate-200 focus:ring-4 focus:ring-indigo-500/5 transition-all text-lg"
-                          value={searchQuery}
-                          onChange={handleSearch}
-                        />
-                        {searching && (
-                          <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
-                            <Loader2 className="h-5 w-5 text-indigo-600 animate-spin" />
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="space-y-3">
-                        {searchData?.searchUserByName?.map((user: any) => (
-                          <div
-                            key={user?.id}
-                            className="group flex items-center justify-between p-4 rounded-2xl border border-slate-100 bg-white hover:border-indigo-200 hover:bg-indigo-50/30 hover:shadow-lg hover:shadow-indigo-500/5 transition-all cursor-pointer"
-                            onClick={() => handleSelectUser(user)}
-                          >
-                            <div className="flex items-center gap-4">
-                              <div className="h-14 w-14 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0">
-                                {user?.user?.avatar ? (
-                                  <Image
-                                    src={`https://cdn.thrico.network/${user?.user?.avatar}`}
-                                    alt="Avatar"
-                                    width={56}
-                                    height={56}
-                                    className="h-full w-full object-cover"
-                                  />
-                                ) : (
-                                  <div className="h-full w-full flex items-center justify-center">
-                                    <User className="h-6 w-6 text-slate-300" />
-                                  </div>
-                                )}
-                              </div>
-                              <div>
-                                <h4 className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
-                                  {user?.user?.firstName} {user?.user?.lastName}
-                                </h4>
-                                <div className="flex items-center gap-2 mt-0.5">
-                                  <Badge
-                                    variant="outline"
-                                    className="text-[10px] h-5 bg-slate-50 text-slate-500 border-slate-200 uppercase font-bold tracking-wider"
-                                  >
-                                    {user?.status}
-                                  </Badge>
-                                  {user?.user?.profile?.headline && (
-                                    <>
-                                      <span className="h-1 w-1 rounded-full bg-slate-300" />
-                                      <span className="text-xs text-slate-500 font-medium">
-                                        {user?.user?.profile.headline}
-                                      </span>
-                                    </>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                            <div className="h-10 w-10 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 bg-indigo-600 text-white transition-all transform group-hover:scale-110 shadow-lg shadow-indigo-200">
-                              <Check className="h-5 w-5" />
-                            </div>
-                          </div>
-                        ))}
-                        {searchQuery.length >= 2 &&
-                          searchData?.searchUserByName?.length === 0 && (
-                            <div className="text-center py-10 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                              <User className="h-10 w-10 text-slate-300 mx-auto mb-3" />
-                              <p className="text-slate-500 font-medium">
-                                No users found matching "{searchQuery}"
-                              </p>
-                            </div>
-                          )}
-                        {!searchQuery && !selectedUser && (
-                          <div className="text-center py-10">
-                            <Sparkles className="h-10 w-10 text-indigo-100 mx-auto mb-3" />
-                            <p className="text-slate-400 font-medium text-sm">
-                              Start typing a name to find a potential{" "}
-                              {singularName.toLowerCase()}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <form
-                    onSubmit={handleSubmit}
-                    className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500"
-                  >
-                    {/* User Profile Hooked */}
-                    <div className="relative group">
-                      <div className="absolute inset-0 bg-linear-to-r from-indigo-500 to-violet-500 rounded-2xl blur-xl opacity-10 group-hover:opacity-20 transition-opacity" />
-                      <div className="relative flex items-center justify-between p-6 bg-white rounded-2xl ring-1 ring-slate-200 shadow-sm overflow-hidden">
-                        <div className="flex items-center gap-5">
-                          <div className="h-20 w-20 rounded-2xl overflow-hidden bg-slate-100 border-2 border-white shadow-xl rotate-[-2deg] group-hover:rotate-0 transition-transform">
-                            {selectedUser?.user?.avatar ? (
-                              <Image
-                                src={`https://cdn.thrico.network/${selectedUser?.user?.avatar}`}
-                                alt="Avatar"
-                                width={80}
-                                height={80}
-                                className="h-full w-full object-cover"
-                              />
-                            ) : (
-                              <div className="h-full w-full flex items-center justify-center">
-                                <User className="h-8 w-8 text-slate-300" />
-                              </div>
-                            )}
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-2 mb-1">
-                              <h2 className="text-2xl font-black text-slate-900 leading-tight">
-                                {selectedUser?.user?.firstName}{" "}
-                                {selectedUser?.user?.lastName}
-                              </h2>
-                              <div className="h-5 w-5 rounded-full bg-indigo-500 flex items-center justify-center">
-                                <Check className="h-3 w-3 text-white stroke-[3px]" />
-                              </div>
-                            </div>
-                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-                              {selectedUser?.user?.profile?.headline && (
-                                <div className="flex items-center gap-1.5 text-sm font-semibold text-indigo-600">
-                                  <Layout className="h-3.5 w-3.5" />
-                                  <span>
-                                    {selectedUser?.user?.profile.headline}
-                                  </span>
-                                </div>
-                              )}
-                              {selectedUser?.user?.profile?.currentPosition && (
-                                <div className="flex items-center gap-1.5 text-sm font-medium text-slate-500">
-                                  <span className="h-1 w-1 rounded-full bg-slate-300" />
-                                  <span>
-                                    {
-                                      selectedUser?.user?.profile
-                                        .currentPosition
-                                    }
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl"
-                          onClick={() => {
-                            setSelectedUser(null);
-                            formik.resetForm();
-                          }}
-                        >
-                          <X className="h-4 w-4 mr-2" />
-                          Change User
-                        </Button>
-                      </div>
-                    </div>
-
-                    {/* Mentorship Settings */}
-                    <Card className="border-none shadow-sm ring-1 ring-slate-200 overflow-hidden rounded-2xl bg-white">
-                      <CardHeader className="bg-slate-50/50 border-b border-slate-100 pb-4">
-                        <div className="flex items-center gap-2 mb-1">
-                          <GraduationCap className="h-4 w-4 text-indigo-600" />
-                          <CardTitle className="text-lg font-bold text-slate-800">
-                            {moduleName} Details
-                          </CardTitle>
-                        </div>
-                        <CardDescription className="text-slate-500 font-medium">
-                          Define the {singularName.toLowerCase()}'s profile and
-                          credentials
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="pt-8 space-y-8">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          {/* Display Name */}
-                          <div className="space-y-2.5">
-                            <Label
-                              htmlFor="displayName"
-                              className="text-sm font-bold text-slate-700 flex items-center gap-2"
-                            >
-                              Public Display Name{" "}
-                              <span className="text-rose-500">*</span>
-                            </Label>
-                            <Input
-                              id="displayName"
-                              name="displayName"
-                              placeholder={`e.g. ${singularName} John Doe`}
-                              className="h-11 rounded-xl border-slate-200 focus:ring-4 focus:ring-indigo-500/5 transition-all font-medium"
-                              value={formik.values.displayName}
-                              onChange={formik.handleChange}
-                              onBlur={formik.handleBlur}
-                            />
-                            {formik.touched.displayName &&
-                              formik.errors.displayName && (
-                                <p className="text-xs font-semibold text-rose-500 ml-1">
-                                  {formik.errors.displayName as string}
-                                </p>
-                              )}
-                          </div>
-
-                          {/* Category */}
-                          <div className="space-y-2.5">
-                            <Label
-                              htmlFor="category"
-                              className="text-sm font-bold text-slate-700 flex items-center gap-2"
-                            >
-                              {singularName} Category{" "}
-                              <span className="text-rose-500">*</span>
-                            </Label>
-                            <Select
-                              value={formik.values.category}
-                              onValueChange={(value) =>
-                                formik.setFieldValue("category", value)
-                              }
-                            >
-                              <SelectTrigger className="h-11 rounded-xl border-slate-200 focus:ring-4 focus:ring-indigo-500/5 transition-all font-medium">
-                                <SelectValue placeholder="Select a category" />
-                              </SelectTrigger>
-                              <SelectContent className="rounded-xl border-slate-200 shadow-xl overflow-hidden">
-                                {categories.map((cat: any) => (
-                                  <SelectItem
-                                    key={cat.id}
-                                    value={cat.id}
-                                    className="py-2.5"
-                                  >
-                                    {cat.title}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            {formik.touched.category &&
-                              formik.errors.category && (
-                                <p className="text-xs font-semibold text-rose-500 ml-1">
-                                  {formik.errors.category as string}
-                                </p>
-                              )}
-                          </div>
-                        </div>
-
-                        {/* Top Mentor Toggle */}
-                        <div className="flex items-center justify-between p-4 rounded-xl border border-indigo-100 bg-indigo-50/30">
-                          <div className="space-y-0.5">
-                            <Label
-                              htmlFor="isTopMentor"
-                              className="text-sm font-bold text-slate-700 flex items-center gap-2"
-                            >
-                              <Sparkles className="h-4 w-4 text-indigo-500" />
-                              Mark as Top {singularName}
-                            </Label>
-                            <p className="text-[10px] font-medium text-slate-500">
-                              Feature this {singularName.toLowerCase()} at the
-                              top of listings
-                            </p>
-                          </div>
-                          <Checkbox
-                            id="isTopMentor"
-                            checked={formik.values.isTopMentor}
-                            onCheckedChange={(checked) =>
-                              formik.setFieldValue("isTopMentor", checked)
-                            }
-                            className="h-5 w-5 rounded-md border-indigo-300 data-[state=checked]:bg-indigo-600"
-                          />
-                        </div>
-
-                        {/* Skills */}
-                        <div className="space-y-3">
-                          <Label className="text-sm font-bold text-slate-700">
-                            Expertise & Skills{" "}
-                            <span className="text-rose-500">*</span>
-                          </Label>
-                          <div className="relative group/skills">
-                            <div className="flex flex-wrap gap-2 p-3 min-h-[50px] bg-white rounded-xl ring-1 ring-slate-200 group-focus-within/skills:ring-2 group-focus-within/skills:ring-indigo-500/20 transition-all">
-                              {formik.values.skills.length === 0 && (
-                                <span className="text-slate-400 text-sm font-medium py-1.5 pl-1 italic">
-                                  No skills selected...
-                                </span>
-                              )}
-                              {formik.values.skills.map((skill: string) => (
-                                <Badge
-                                  key={skill}
-                                  variant="secondary"
-                                  className="h-8 pl-3 pr-2 bg-indigo-50 text-indigo-700 border-indigo-100 rounded-lg flex items-center gap-1.5 group/badge font-bold"
-                                >
-                                  {skill}
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      formik.setFieldValue(
-                                        "skills",
-                                        formik.values.skills.filter(
-                                          (s: string) => s !== skill,
-                                        ),
-                                      );
-                                    }}
-                                    className="hover:bg-indigo-200 rounded-sm p-0.5 transition-colors"
-                                  >
-                                    <X className="h-3 w-3" />
-                                  </button>
-                                </Badge>
-                              ))}
-                              <div className="ml-auto">
-                                <Popover>
-                                  <PopoverTrigger asChild>
-                                    <Button
-                                      type="button"
-                                      variant="ghost"
-                                      size="sm"
-                                      className="h-8 w-8 p-0 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 hover:text-white shadow-md shadow-indigo-200"
-                                    >
-                                      <Search className="h-4 w-4" />
-                                    </Button>
-                                  </PopoverTrigger>
-                                  <PopoverContent
-                                    className="w-[300px] p-0 rounded-2xl shadow-2xl border-slate-100"
-                                    align="end"
-                                  >
-                                    <Command>
-                                      <CommandInput placeholder="Search or add skill..." />
-                                      <CommandList className="max-h-[300px]">
-                                        <CommandEmpty>
-                                          <button
-                                            type="button"
-                                            className="w-full text-left p-4 text-sm font-bold text-indigo-600 hover:bg-indigo-50"
-                                            onClick={() => {
-                                              const input =
-                                                document.querySelector(
-                                                  "[cmdk-input]",
-                                                ) as HTMLInputElement;
-                                              const val = input.value;
-                                              if (
-                                                val &&
-                                                !formik.values.skills.includes(
-                                                  val,
-                                                )
-                                              ) {
-                                                formik.setFieldValue("skills", [
-                                                  ...formik.values.skills,
-                                                  val,
-                                                ]);
-                                              }
-                                            }}
-                                          >
-                                            + Add "New Skill"
-                                          </button>
-                                        </CommandEmpty>
-                                        <CommandGroup heading="Available Skills">
-                                          {availableSkills.map((skill: any) => (
-                                            <CommandItem
-                                              key={skill.id}
-                                              onSelect={() => {
-                                                if (
-                                                  !formik.values.skills.includes(
-                                                    skill.title,
-                                                  )
-                                                ) {
-                                                  formik.setFieldValue(
-                                                    "skills",
-                                                    [
-                                                      ...formik.values.skills,
-                                                      skill.title,
-                                                    ],
-                                                  );
-                                                }
-                                              }}
-                                              className="py-2.5 px-4 cursor-pointer"
-                                            >
-                                              <Check
-                                                className={cn(
-                                                  "mr-2 h-4 w-4",
-                                                  formik.values.skills.includes(
-                                                    skill.title,
-                                                  )
-                                                    ? "opacity-100"
-                                                    : "opacity-0",
-                                                )}
-                                              />
-                                              <span className="font-semibold text-slate-700">
-                                                {skill.title}
-                                              </span>
-                                            </CommandItem>
-                                          ))}
-                                        </CommandGroup>
-                                      </CommandList>
-                                    </Command>
-                                  </PopoverContent>
-                                </Popover>
-                              </div>
-                            </div>
-                            {formik.touched.skills && formik.errors.skills && (
-                              <p className="text-xs font-semibold text-rose-500 mt-2">
-                                {formik.errors.skills as string}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Description & Intro */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          <div className="space-y-2.5">
-                            <Label
-                              htmlFor="intro"
-                              className="text-sm font-bold text-slate-700 flex items-center gap-2"
-                            >
-                              One-liner Intro{" "}
-                              <span className="text-rose-500">*</span>
-                            </Label>
-                            <Input
-                              id="intro"
-                              name="intro"
-                              placeholder="e.g. Passionate about helping developers grow"
-                              className="h-11 rounded-xl border-slate-200 focus:ring-4 focus:ring-indigo-500/5 transition-all font-medium"
-                              value={formik.values.intro}
-                              onChange={formik.handleChange}
-                              onBlur={formik.handleBlur}
-                            />
-                            {formik.touched.intro && formik.errors.intro && (
-                              <p className="text-xs font-semibold text-rose-500 ml-1">
-                                {formik.errors.intro as string}
-                              </p>
-                            )}
-                          </div>
-
-                          <div className="space-y-2.5">
-                            <Label
-                              htmlFor="greatestAchievement"
-                              className="text-sm font-bold text-slate-700 flex items-center gap-2"
-                            >
-                              Greatest Achievement{" "}
-                              <span className="text-rose-500">*</span>
-                            </Label>
-                            <Input
-                              id="greatestAchievement"
-                              name="greatestAchievement"
-                              placeholder="e.g. Scaled a product to 1M users"
-                              className="h-11 rounded-xl border-slate-200 focus:ring-4 focus:ring-indigo-500/5 transition-all font-medium"
-                              value={formik.values.greatestAchievement}
-                              onChange={formik.handleChange}
-                              onBlur={formik.handleBlur}
-                            />
-                            {formik.touched.greatestAchievement &&
-                              formik.errors.greatestAchievement && (
-                                <p className="text-xs font-semibold text-rose-500 ml-1">
-                                  {formik.errors.greatestAchievement as string}
-                                </p>
-                              )}
-                          </div>
-                        </div>
-
-                        {/* About & Why */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          <div className="space-y-2.5">
-                            <Label
-                              htmlFor="about"
-                              className="text-sm font-bold text-slate-700"
-                            >
-                              About Me <span className="text-rose-500">*</span>
-                            </Label>
-                            <Textarea
-                              id="about"
-                              name="about"
-                              placeholder="Tell us about yourself..."
-                              className="min-h-[120px] rounded-2xl border-slate-200 focus:ring-4 focus:ring-indigo-500/5 transition-all resize-none p-4 font-medium"
-                              value={formik.values.about}
-                              onChange={formik.handleChange}
-                              onBlur={formik.handleBlur}
-                            />
-                            {formik.touched.about && formik.errors.about && (
-                              <p className="text-xs font-semibold text-rose-500 ml-1">
-                                {formik.errors.about as string}
-                              </p>
-                            )}
-                          </div>
-
-                          <div className="space-y-2.5">
-                            <Label
-                              htmlFor="whyDoWantBecomeMentor"
-                              className="text-sm font-bold text-slate-700"
-                            >
-                              Motivation for {moduleName}
-                            </Label>
-                            <Textarea
-                              id="whyDoWantBecomeMentor"
-                              name="whyDoWantBecomeMentor"
-                              placeholder={`Why do you want to become a ${singularName.toLowerCase()}?`}
-                              className="min-h-[120px] rounded-2xl border-slate-200 focus:ring-4 focus:ring-indigo-500/5 transition-all resize-none p-4 font-medium"
-                              value={formik.values.whyDoWantBecomeMentor}
-                              onChange={formik.handleChange}
-                              onBlur={formik.handleBlur}
-                            />
-                          </div>
-                        </div>
-
-                        {/* Description */}
-                        <div className="space-y-2.5">
-                          <Label
-                            htmlFor="description"
-                            className="text-sm font-bold text-slate-700"
-                          >
-                            Description / Bio Extras
-                          </Label>
-                          <Textarea
-                            id="description"
-                            name="description"
-                            placeholder="Any additional details you'd like to share..."
-                            className="min-h-[100px] rounded-2xl border-slate-200 focus:ring-4 focus:ring-indigo-500/5 transition-all resize-none p-4 font-medium"
-                            value={formik.values.description}
-                            onChange={formik.handleChange}
-                            onBlur={formik.handleBlur}
-                          />
-                        </div>
-
-                        {/* External Links */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          <div className="space-y-2.5">
-                            <Label
-                              htmlFor="featuredArticle"
-                              className="text-sm font-bold text-slate-700 flex items-center gap-2"
-                            >
-                              <LinkIcon className="h-3.5 w-3.5 text-indigo-500" />
-                              Featured Article URL
-                            </Label>
-                            <Input
-                              id="featuredArticle"
-                              name="featuredArticle"
-                              placeholder="https://medium.com/@username/article"
-                              className="h-11 rounded-xl border-slate-200 focus:ring-4 focus:ring-indigo-500/5 transition-all font-medium"
-                              value={formik.values.featuredArticle}
-                              onChange={formik.handleChange}
-                              onBlur={formik.handleBlur}
-                            />
-                            {formik.touched.featuredArticle &&
-                              formik.errors.featuredArticle && (
-                                <p className="text-xs font-semibold text-rose-500 ml-1">
-                                  {formik.errors.featuredArticle as string}
-                                </p>
-                              )}
-                          </div>
-
-                          <div className="space-y-2.5">
-                            <Label
-                              htmlFor="introVideo"
-                              className="text-sm font-bold text-slate-700 flex items-center gap-2"
-                            >
-                              <Globe className="h-3.5 w-3.5 text-indigo-500" />
-                              Intro Video URL
-                            </Label>
-                            <Input
-                              id="introVideo"
-                              name="introVideo"
-                              placeholder="https://youtube.com/watch?v=..."
-                              className="h-11 rounded-xl border-slate-200 focus:ring-4 focus:ring-indigo-500/5 transition-all font-medium"
-                              value={formik.values.introVideo}
-                              onChange={formik.handleChange}
-                              onBlur={formik.handleBlur}
-                            />
-                            {formik.touched.introVideo &&
-                              formik.errors.introVideo && (
-                                <p className="text-xs font-semibold text-rose-500 ml-1">
-                                  {formik.errors.introVideo as string}
-                                </p>
-                              )}
-                          </div>
-                        </div>
-
-                        {/* Agreement */}
-                        <div className="flex items-start gap-4 p-5 rounded-2xl bg-slate-50 border border-slate-100">
-                          <Checkbox
-                            id="agreement"
-                            checked={formik.values.agreement}
-                            onCheckedChange={(checked) =>
-                              formik.setFieldValue("agreement", checked)
-                            }
-                            className="mt-1 h-5 w-5 rounded-md border-slate-300 data-[state=checked]:bg-indigo-600"
-                          />
-                          <div className="grid gap-1.5 leading-none">
-                            <Label
-                              htmlFor="agreement"
-                              className="text-sm font-bold text-slate-900 cursor-pointer"
-                            >
-                              Confirm Onboarding Agreement
-                            </Label>
-                            <p className="text-xs font-medium text-slate-500 leading-relaxed">
-                              By checking this box, you confirm that this user
-                              has agreed to be a {singularName.toLowerCase()}{" "}
-                              and the information provided is accurate. The{" "}
-                              {singularName.toLowerCase()} profile will be
-                              automatically approved.
-                            </p>
-                          </div>
-                        </div>
-                        {formik.touched.agreement &&
-                          formik.errors.agreement && (
-                            <p className="text-xs font-semibold text-rose-500">
-                              {formik.errors.agreement as string}
-                            </p>
-                          )}
-                      </CardContent>
-                    </Card>
-                  </form>
+                <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate max-w-full">
+                  {formik.values.displayName || `New ${singularName}`}
+                </h3>
+                <p className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 mt-0.5 truncate max-w-full">
+                  {formik.values.intro || "One-liner intro"}
+                </p>
+                {formik.values.isTopMentor && (
+                  <Badge className="mt-2.5 bg-amber-400 text-amber-900 border-none text-[10px] font-bold px-2 py-0.5 flex items-center gap-1">
+                    <Sparkles className="h-3 w-3" />
+                    Top {singularName}
+                  </Badge>
                 )}
               </div>
 
-              {/* Sidebar Preview */}
-              <div className="lg:col-span-4">
-                <div className="sticky top-24 space-y-6">
-                  <div className="relative group h-fit">
-                    <div className="absolute inset-0 bg-linear-to-br from-indigo-500/20 to-violet-500/20 rounded-[2.5rem] blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                    <Card className="relative border-none shadow-xl shadow-indigo-600/5 ring-1 ring-slate-200 rounded-[2.5rem] overflow-hidden bg-white group/preview">
-                      <div className="h-32 bg-linear-to-br from-slate-900 to-slate-800 relative overflow-hidden">
-                        <div className="absolute inset-0 opacity-20">
-                          <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500 rounded-full -mr-16 -mt-16 blur-3xl animate-pulse" />
-                          <div className="absolute bottom-0 left-0 w-24 h-24 bg-violet-500 rounded-full -ml-12 -mb-12 blur-3xl" />
-                        </div>
-                        {/* Decorative Badge */}
-                        <div className="absolute top-4 right-4 flex gap-2">
-                          <div className="h-8 w-8 rounded-lg bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20">
-                            <Sparkles className="h-4 w-4 text-white" />
-                          </div>
-                        </div>
-                      </div>
+              {/* Summary rows */}
+              <div className="space-y-1.5 pt-1">
+                <PolarisSummaryRow
+                  label="Category"
+                  value={
+                    categories.find((c: any) => c.id === formik.values.category)?.title ||
+                    "Not selected"
+                  }
+                />
+                <PolarisSummaryRow
+                  label="Skills"
+                  value={
+                    formik.values.skills.length > 0
+                      ? `${formik.values.skills.length} Added`
+                      : "None"
+                  }
+                />
+                <PolarisSummaryRow
+                  label="User"
+                  value={
+                    selectedUser
+                      ? `${selectedUser.user?.firstName} ${selectedUser.user?.lastName}`
+                      : "Not selected"
+                  }
+                  isLast
+                />
+              </div>
+            </PolarisSidebarCard>
 
-                      <div className="px-8 pb-10 -mt-16 text-center relative">
-                        <div className="inline-flex p-1.5 bg-white rounded-[2rem] shadow-2xl mb-5 group/avatar relative">
-                          <div className="h-28 w-28 rounded-[1.75rem] bg-indigo-50 flex items-center justify-center overflow-hidden border-2 border-slate-50 relative group-hover/avatar:shadow-inner transition-all">
-                            {selectedUser?.user?.avatar ? (
-                              <Image
-                                src={`https://cdn.thrico.network/${selectedUser?.user?.avatar}`}
-                                alt="Avatar"
-                                width={112}
-                                height={112}
-                                className="h-full w-full object-cover transition-transform duration-500 group-hover/avatar:scale-110"
-                              />
-                            ) : (
-                              <User className="h-10 w-10 text-indigo-200" />
-                            )}
-                          </div>
+            {/* Direct Onboarding Notice */}
+            <PolarisSidebarCard title="Direct Onboarding" icon={CheckCircle2}>
+              <div className="text-xs text-zinc-600 dark:text-zinc-400 space-y-2 leading-relaxed">
+                <p>
+                  This action bypasses the standard application workflow.{" "}
+                  <strong>{singularName}s</strong> added here are immediately
+                  active and accessible by community members.
+                </p>
+              </div>
+            </PolarisSidebarCard>
 
-                          {/* Online status indicator if selected */}
-                          {selectedUser && (
-                            <div
-                              className="absolute bottom-2 right-2 h-6 w-6 rounded-full bg-emerald-500 border-4 border-white shadow-sm"
-                              title="Online"
+            {/* Tip */}
+            <PolarisTipCard title={`${singularName} Onboarding Tip`}>
+              Assigning accurate categories and skills upfront ensures better
+              discovery, matching, and member trust signals for the{" "}
+              {singularName.toLowerCase()}.
+            </PolarisTipCard>
+          </div>
+        }
+      >
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Server error */}
+          {submitError && (
+            <Alert variant="destructive" className="rounded-xl">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Onboarding Failed</AlertTitle>
+              <AlertDescription>
+                {submitError}
+                {onDismissError && (
+                  <button
+                    type="button"
+                    onClick={onDismissError}
+                    className="ml-2 underline text-xs"
+                  >
+                    Dismiss
+                  </button>
+                )}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* ── Step 1: User Selection ─────────────────────────────── */}
+          <PolarisFormCard
+            step={1}
+            title="Find & Select User"
+            description={`Search and select an existing community member to onboard as a ${singularName.toLowerCase()}.`}
+            badge="Required"
+          >
+            {!selectedUser ? (
+              <div className="space-y-3">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+                  <Input
+                    placeholder="Search users by name..."
+                    className="h-10 pl-9 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
+                    value={searchQuery}
+                    onChange={handleSearch}
+                  />
+                  {searching && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      <Loader2 className="h-4 w-4 text-primary animate-spin" />
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  {searchData?.searchUserByName?.map((user: any) => (
+                    <div
+                      key={user?.id}
+                      className="group flex items-center justify-between p-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-primary/40 hover:bg-primary/5 transition-all cursor-pointer"
+                      onClick={() => handleSelectUser(user)}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-xl overflow-hidden bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 shrink-0">
+                          {user?.user?.avatar ? (
+                            <Image
+                              src={`https://cdn.thrico.network/${user?.user?.avatar}`}
+                              alt="Avatar"
+                              width={40}
+                              height={40}
+                              className="h-full w-full object-cover"
                             />
+                          ) : (
+                            <div className="h-full w-full flex items-center justify-center">
+                              <User className="h-5 w-5 text-zinc-400" />
+                            </div>
                           )}
                         </div>
-
-                        <div className="space-y-4">
-                          <div>
-                            <h3 className="text-2xl font-black text-slate-900 leading-tight">
-                              {formik.values.displayName || "Mentor Name"}
-                            </h3>
-                            {formik.values.intro && (
-                              <p className="text-xs font-bold text-slate-500 mt-1 line-clamp-1">
-                                {formik.values.intro}
-                              </p>
-                            )}
-                            <div className="flex items-center justify-center gap-1.5 mt-2">
-                              <Badge className="bg-indigo-600 hover:bg-indigo-700 text-white border-none rounded-full px-4 h-7 text-[10px] font-black uppercase tracking-tighter shadow-lg shadow-indigo-100">
-                                {categories.find(
-                                  (c: any) => c.id === formik.values.category,
-                                )?.title || "Mentorship"}
-                              </Badge>
-                              {formik.values.isTopMentor && (
-                                <Badge className="bg-amber-400 hover:bg-amber-500 text-amber-900 border-none rounded-full px-3 h-7 text-[10px] font-black uppercase tracking-tighter shadow-lg shadow-amber-100 flex items-center gap-1">
-                                  <Sparkles className="h-3 w-3" />
-                                  Top
-                                </Badge>
-                              )}
-                              <span className="text-xs font-bold text-slate-400">
-                                &
-                              </span>
-                              <div className="flex items-center gap-1 text-xs font-black text-emerald-600 uppercase tracking-tight">
-                                <CheckCircle2 className="h-3 w-3" />
-                                Verified
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="pt-6 border-t border-slate-50 flex flex-col gap-4 text-left">
-                            <div className="space-y-3">
-                              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-1">
-                                Top Expertise
-                              </h4>
-                              <div className="flex flex-wrap gap-2">
-                                {formik.values.skills.length > 0 ? (
-                                  formik.values.skills
-                                    .slice(0, 3)
-                                    .map((skill: string) => (
-                                      <div
-                                        key={skill}
-                                        className="px-3 py-1.5 bg-slate-50 rounded-xl text-xs font-bold text-slate-600 border border-slate-100"
-                                      >
-                                        {skill}
-                                      </div>
-                                    ))
-                                ) : (
-                                  <div className="text-xs italic text-slate-400 font-medium px-1">
-                                    Select skills to preview
-                                  </div>
-                                )}
-                                {formik.values.skills.length > 3 && (
-                                  <div className="px-2 py-1.5 bg-slate-50 rounded-xl text-xs font-bold text-slate-400 border border-slate-100 italic">
-                                    +{formik.values.skills.length - 3} more
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-
-                            {selectedUser && (
-                              <div className="pt-2 flex flex-col gap-2">
-                                {selectedUser?.user?.profile
-                                  ?.currentPosition && (
-                                  <div className="flex items-center gap-3">
-                                    <div className="h-8 w-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100">
-                                      <Layout className="h-4 w-4" />
-                                    </div>
-                                    <span className="text-xs font-bold text-slate-600 truncate">
-                                      {
-                                        selectedUser?.user?.profile
-                                          .currentPosition
-                                      }
-                                    </span>
-                                  </div>
-                                )}
-                                <div className="flex items-center gap-3">
-                                  <div className="h-8 w-8 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center border border-violet-100">
-                                    <Globe className="h-4 w-4" />
-                                  </div>
-                                  <span className="text-xs font-bold text-slate-600 truncate">
-                                    Global Visibility
-                                  </span>
-                                </div>
-                              </div>
-                            )}
-                          </div>
+                        <div>
+                          <p className="text-xs font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-primary transition-colors">
+                            {user?.user?.firstName} {user?.user?.lastName}
+                          </p>
+                          {user?.user?.profile?.headline && (
+                            <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium">
+                              {user.user.profile.headline}
+                            </p>
+                          )}
                         </div>
                       </div>
-                    </Card>
-                  </div>
-
-                  {/* Informational Card */}
-                  <div className="p-6 rounded-[2rem] bg-indigo-600 text-white shadow-xl shadow-indigo-200 overflow-hidden relative">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl" />
-                    <div className="relative z-10 flex gap-4">
-                      <div className="h-10 w-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 shrink-0">
-                        <Sparkles className="h-5 w-5 text-indigo-100" />
-                      </div>
-                      <div className="space-y-1">
-                        <h4 className="text-sm font-black uppercase tracking-tight">
-                          Direct Onboarding
-                        </h4>
-                        <p className="text-[11px] text-indigo-50/80 font-medium leading-relaxed">
-                          This action bypasses the standard application
-                          workflow. Mentors added here are immediately active
-                          and accessible by community members.
-                        </p>
+                      <div className="h-7 w-7 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 bg-primary text-primary-foreground transition-all">
+                        <Check className="h-3.5 w-3.5" />
                       </div>
                     </div>
-                  </div>
+                  ))}
+
+                  {searchQuery.length >= 2 &&
+                    searchData?.searchUserByName?.length === 0 && (
+                      <div className="text-center py-8 bg-zinc-50 dark:bg-zinc-900/50 rounded-xl border border-dashed border-zinc-200 dark:border-zinc-800">
+                        <User className="h-8 w-8 text-zinc-300 mx-auto mb-2" />
+                        <p className="text-xs text-zinc-500 font-medium">
+                          No users found matching &quot;{searchQuery}&quot;
+                        </p>
+                      </div>
+                    )}
+
+                  {!searchQuery && (
+                    <div className="text-center py-8">
+                      <Sparkles className="h-8 w-8 text-zinc-200 dark:text-zinc-700 mx-auto mb-2" />
+                      <p className="text-xs text-zinc-400 font-medium">
+                        Start typing a name to find a{" "}
+                        {singularName.toLowerCase()}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
+            ) : (
+              /* Selected user chip */
+              <div className="flex items-center justify-between p-3 rounded-xl border border-primary/30 bg-primary/5 dark:bg-primary/10">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl overflow-hidden bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 shrink-0">
+                    {selectedUser?.user?.avatar ? (
+                      <Image
+                        src={`https://cdn.thrico.network/${selectedUser.user.avatar}`}
+                        alt="Avatar"
+                        width={40}
+                        height={40}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="h-full w-full flex items-center justify-center">
+                        <User className="h-5 w-5 text-zinc-400" />
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-1.5">
+                      <p className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
+                        {selectedUser.user?.firstName}{" "}
+                        {selectedUser.user?.lastName}
+                      </p>
+                      <div className="h-4 w-4 rounded-full bg-primary flex items-center justify-center">
+                        <Check className="h-2.5 w-2.5 text-primary-foreground stroke-[3px]" />
+                      </div>
+                    </div>
+                    {selectedUser.user?.profile?.headline && (
+                      <p className="text-[11px] text-zinc-500 font-medium">
+                        {selectedUser.user.profile.headline}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="text-zinc-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg text-xs h-8"
+                  onClick={() => {
+                    setSelectedUser(null);
+                    formik.resetForm();
+                  }}
+                >
+                  <X className="h-3.5 w-3.5 mr-1" />
+                  Change
+                </Button>
+              </div>
+            )}
+          </PolarisFormCard>
 
-        <FloatingSavePanel
-          hasChanged={formik.dirty && !!selectedUser}
-          saved={false}
-          isSaving={loading}
-          onSave={handleSubmit}
-          onReset={() => {
-            formik.resetForm();
-            setSelectedUser(null);
-            if (onCancel) onCancel();
-          }}
-          title="Mentor Configuration"
-          description={
-            selectedUser
-              ? `Ready to onboard ${selectedUser?.user?.firstName}`
-              : "Please select a user to continue"
-          }
-          buttonText="Confirm Onboarding"
-        />
-      </div>
+          {/* ── Step 2: Mentor Profile Details ─────────────────────── */}
+          <PolarisFormCard
+            step={2}
+            title={`${moduleName} Details`}
+            description={`Define the ${singularName.toLowerCase()}'s profile, credentials, and mentorship settings.`}
+            badge="Profile"
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Display Name */}
+              <div className="space-y-1.5">
+                <Label htmlFor="displayName" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                  Public Display Name <span className="text-rose-500">*</span>
+                </Label>
+                <Input
+                  id="displayName"
+                  name="displayName"
+                  placeholder={`e.g. ${singularName} Jane Doe`}
+                  value={formik.values.displayName}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
+                />
+                {formik.touched.displayName && formik.errors.displayName && (
+                  <p className="text-[11px] text-rose-500 font-medium">
+                    {formik.errors.displayName as string}
+                  </p>
+                )}
+              </div>
+
+              {/* Category */}
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                  {singularName} Category <span className="text-rose-500">*</span>
+                </Label>
+                <Select
+                  value={formik.values.category}
+                  onValueChange={(value) =>
+                    formik.setFieldValue("category", value)
+                  }
+                >
+                  <SelectTrigger className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold">
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((cat: any) => (
+                      <SelectItem key={cat.id} value={cat.id} className="text-xs">
+                        {cat.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {formik.touched.category && formik.errors.category && (
+                  <p className="text-[11px] text-rose-500 font-medium">
+                    {formik.errors.category as string}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* One-liner Intro & Greatest Achievement */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="intro" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                  One-liner Intro <span className="text-rose-500">*</span>
+                </Label>
+                <Input
+                  id="intro"
+                  name="intro"
+                  placeholder="e.g. Passionate about helping developers grow"
+                  value={formik.values.intro}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
+                />
+                {formik.touched.intro && formik.errors.intro && (
+                  <p className="text-[11px] text-rose-500 font-medium">
+                    {formik.errors.intro as string}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="greatestAchievement" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                  Greatest Achievement <span className="text-rose-500">*</span>
+                </Label>
+                <Input
+                  id="greatestAchievement"
+                  name="greatestAchievement"
+                  placeholder="e.g. Scaled a product to 1M users"
+                  value={formik.values.greatestAchievement}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
+                />
+                {formik.touched.greatestAchievement &&
+                  formik.errors.greatestAchievement && (
+                    <p className="text-[11px] text-rose-500 font-medium">
+                      {formik.errors.greatestAchievement as string}
+                    </p>
+                  )}
+              </div>
+            </div>
+
+            {/* About & Motivation */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="about" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                  About Me <span className="text-rose-500">*</span>
+                </Label>
+                <Textarea
+                  id="about"
+                  name="about"
+                  placeholder="Tell us about yourself..."
+                  value={formik.values.about}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  className="min-h-[100px] bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-medium resize-none shadow-none"
+                />
+                {formik.touched.about && formik.errors.about && (
+                  <p className="text-[11px] text-rose-500 font-medium">
+                    {formik.errors.about as string}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="whyDoWantBecomeMentor" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                  Motivation for {moduleName}
+                </Label>
+                <Textarea
+                  id="whyDoWantBecomeMentor"
+                  name="whyDoWantBecomeMentor"
+                  placeholder={`Why do you want to become a ${singularName.toLowerCase()}?`}
+                  value={formik.values.whyDoWantBecomeMentor}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  className="min-h-[100px] bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-medium resize-none shadow-none"
+                />
+              </div>
+            </div>
+
+            {/* Description / Bio Extras */}
+            <div className="space-y-1.5">
+              <Label htmlFor="description" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                Description / Bio Extras
+              </Label>
+              <Textarea
+                id="description"
+                name="description"
+                placeholder="Any additional details you'd like to share..."
+                value={formik.values.description}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                className="min-h-[80px] bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-medium resize-none shadow-none"
+              />
+            </div>
+
+            {/* Top Mentor Toggle */}
+            <div className="flex items-center justify-between p-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/40">
+              <div className="space-y-0.5">
+                <Label htmlFor="isTopMentor" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex items-center gap-2 cursor-pointer">
+                  <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+                  Mark as Top {singularName}
+                </Label>
+                <p className="text-[10px] text-zinc-500">
+                  Feature this {singularName.toLowerCase()} at the top of listings
+                </p>
+              </div>
+              <Checkbox
+                id="isTopMentor"
+                checked={formik.values.isTopMentor}
+                onCheckedChange={(checked) =>
+                  formik.setFieldValue("isTopMentor", checked)
+                }
+                className="h-5 w-5 rounded-md"
+              />
+            </div>
+          </PolarisFormCard>
+
+          {/* ── Step 3: Skills & Expertise ─────────────────────────── */}
+          <PolarisFormCard
+            step={3}
+            title="Expertise & Skills"
+            description={`Select the ${singularName.toLowerCase()}'s core competencies.`}
+            badge="Required"
+          >
+            <div className="space-y-3">
+              {/* Selected skills chips */}
+              <div className="flex flex-wrap gap-2 p-3 min-h-[48px] rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
+                {formik.values.skills.length === 0 && (
+                  <span className="text-xs text-zinc-400 font-medium py-1 pl-1 italic">
+                    No skills selected…
+                  </span>
+                )}
+                {formik.values.skills.map((skill: string) => (
+                  <Badge
+                    key={skill}
+                    variant="secondary"
+                    className="h-7 pl-3 pr-2 bg-zinc-200/80 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 text-[10px] font-bold flex items-center gap-1"
+                  >
+                    {skill}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        formik.setFieldValue(
+                          "skills",
+                          formik.values.skills.filter(
+                            (s: string) => s !== skill,
+                          ),
+                        );
+                      }}
+                      className="hover:text-rose-500 rounded-sm p-0.5 transition-colors"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                ))}
+                <div className="ml-auto">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 px-2.5 rounded-lg bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 text-[10px] font-bold"
+                      >
+                        <Search className="h-3.5 w-3.5 mr-1" />
+                        Add
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[280px] p-0 rounded-xl shadow-xl" align="end">
+                      <Command>
+                        <CommandInput placeholder="Search or add skill..." className="h-9 text-xs" />
+                        <CommandList className="max-h-[260px]">
+                          <CommandEmpty>
+                            <button
+                              type="button"
+                              className="w-full text-left p-3 text-xs font-bold text-primary hover:bg-primary/5"
+                              onClick={() => {
+                                const input = document.querySelector(
+                                  "[cmdk-input]",
+                                ) as HTMLInputElement;
+                                const val = input?.value;
+                                if (val && !formik.values.skills.includes(val)) {
+                                  formik.setFieldValue("skills", [
+                                    ...formik.values.skills,
+                                    val,
+                                  ]);
+                                }
+                              }}
+                            >
+                              + Add custom skill
+                            </button>
+                          </CommandEmpty>
+                          <CommandGroup heading="Available Skills">
+                            {availableSkills.map((skill: any) => (
+                              <CommandItem
+                                key={skill.id}
+                                onSelect={() => {
+                                  if (!formik.values.skills.includes(skill.title)) {
+                                    formik.setFieldValue("skills", [
+                                      ...formik.values.skills,
+                                      skill.title,
+                                    ]);
+                                  }
+                                }}
+                                className="text-xs font-semibold cursor-pointer"
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-3.5 w-3.5",
+                                    formik.values.skills.includes(skill.title)
+                                      ? "opacity-100"
+                                      : "opacity-0",
+                                  )}
+                                />
+                                {skill.title}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+              {formik.touched.skills && formik.errors.skills && (
+                <p className="text-[11px] text-rose-500 font-medium">
+                  {formik.errors.skills as string}
+                </p>
+              )}
+            </div>
+          </PolarisFormCard>
+
+          {/* ── Step 4: External Links ─────────────────────────────── */}
+          <PolarisFormCard
+            step={4}
+            title="External Links"
+            description="Optionally attach a featured article or intro video to enrich the profile."
+            badge="Optional"
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="featuredArticle" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5">
+                  <LinkIcon className="h-3 w-3 text-zinc-500" />
+                  Featured Article URL
+                </Label>
+                <Input
+                  id="featuredArticle"
+                  name="featuredArticle"
+                  placeholder="https://medium.com/@username/article"
+                  value={formik.values.featuredArticle}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
+                />
+                {formik.touched.featuredArticle && formik.errors.featuredArticle && (
+                  <p className="text-[11px] text-rose-500 font-medium">
+                    {formik.errors.featuredArticle as string}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="introVideo" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5">
+                  <Globe className="h-3 w-3 text-zinc-500" />
+                  Intro Video URL
+                </Label>
+                <Input
+                  id="introVideo"
+                  name="introVideo"
+                  placeholder="https://youtube.com/watch?v=..."
+                  value={formik.values.introVideo}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
+                />
+                {formik.touched.introVideo && formik.errors.introVideo && (
+                  <p className="text-[11px] text-rose-500 font-medium">
+                    {formik.errors.introVideo as string}
+                  </p>
+                )}
+              </div>
+            </div>
+          </PolarisFormCard>
+
+          {/* ── Step 5: Onboarding Agreement ───────────────────────── */}
+          <PolarisFormCard
+            step={5}
+            title="Onboarding Agreement"
+            description="Confirm that the user has agreed to be onboarded and all information is accurate."
+            badge="Required"
+          >
+            <div className="flex items-start gap-4 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/40">
+              <Checkbox
+                id="agreement"
+                checked={formik.values.agreement}
+                onCheckedChange={(checked) =>
+                  formik.setFieldValue("agreement", checked)
+                }
+                className="mt-0.5 h-5 w-5 rounded-md"
+              />
+              <div className="space-y-1">
+                <Label
+                  htmlFor="agreement"
+                  className="text-xs font-bold text-zinc-900 dark:text-zinc-100 cursor-pointer"
+                >
+                  Confirm Onboarding Agreement
+                </Label>
+                <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed">
+                  By checking this box, you confirm that this user has agreed to
+                  be a {singularName.toLowerCase()} and the information provided
+                  is accurate. The {singularName.toLowerCase()} profile will be
+                  automatically approved.
+                </p>
+              </div>
+            </div>
+            {formik.touched.agreement && formik.errors.agreement && (
+              <p className="text-[11px] text-rose-500 font-medium">
+                {formik.errors.agreement as string}
+              </p>
+            )}
+          </PolarisFormCard>
+
+          {/* Floating Save Panel */}
+          <FloatingSavePanel
+            hasChanged={formik.dirty && !!selectedUser}
+            saved={false}
+            isSaving={loading}
+            onSave={handleSubmit}
+            onReset={() => {
+              formik.resetForm();
+              setSelectedUser(null);
+              if (onCancel) onCancel();
+            }}
+            title={`Confirm ${singularName} Onboarding`}
+            description={
+              selectedUser
+                ? `Ready to onboard ${selectedUser?.user?.firstName}`
+                : "Please select a user to continue"
+            }
+            buttonText="Confirm Onboarding"
+          />
+        </form>
+      </PolarisFormLayout>
     </FormikProvider>
   );
 }

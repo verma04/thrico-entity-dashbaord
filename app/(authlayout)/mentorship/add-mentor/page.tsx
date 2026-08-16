@@ -3,7 +3,6 @@
 import { withModulePermission } from "@/components/hoc/with-module-permission";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 
-
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -14,6 +13,7 @@ import { useModuleStore } from "@/store/useModuleStore";
 
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
+import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
 import { UserPlus } from "lucide-react";
 
 const AddMentorPage = () => {
@@ -29,7 +29,8 @@ const AddMentorPage = () => {
       router.push("/mentorship/all");
     },
     onError: (error: any) => {
-      const message = error.message || `Failed to onboard ${singularName.toLowerCase()}`;
+      const message =
+        error.message || `Failed to onboard ${singularName.toLowerCase()}`;
       setSubmitError(message);
       notify.error(message);
     },
@@ -69,10 +70,10 @@ const AddMentorPage = () => {
         icon={UserPlus}
         breadcrumbs={[
           { label: "Mentorship", href: "/mentorship/all" },
-          { label: "Add" }
+          { label: "Add" },
         ]}
       />
-      <div className="flex-1 overflow-auto bg-background/50 p-6">
+      <EcosystemContainer className="h-full border-none shadow-none bg-transparent p-0 ring-0">
         <MentorCreationForm
           loading={loading}
           onFinish={onFinish}
@@ -80,14 +81,12 @@ const AddMentorPage = () => {
           submitError={submitError}
           onDismissError={() => setSubmitError(null)}
         />
-      </div>
+      </EcosystemContainer>
     </EcosystemWrapper>
   );
 };
 
-
-
 export default withSubscriptionCheck(
   withModulePermission(AddMentorPage, "MENTORSHIP", "canCreate"),
-  "mentorship"
+  "mentorship",
 );
