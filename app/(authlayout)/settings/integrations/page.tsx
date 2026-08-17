@@ -8,7 +8,9 @@ import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-acti
 import {
   ShopifyIntegrationCard,
   WooCommerceIntegrationCard,
+  HRIntegrationCard,
 } from "@/components/settings/integrations";
+import { HR_PROVIDERS_CONFIG, HRProviderMetaConfig, useGetHRProviders } from "@/graphql/actions";
 import {
   Search,
   Blocks,
@@ -21,6 +23,7 @@ import {
   Layers,
   ShoppingBag,
   ArrowRight,
+  Briefcase,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -40,6 +43,9 @@ export default function IntegrationsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
+  const { data: hrProvidersData, loading: hrLoading } = useGetHRProviders();
+  const hrProviders = hrProvidersData?.getHRProviders || [];
+
   const integrations: IntegrationItem[] = useMemo(
     () => [
       {
@@ -47,7 +53,8 @@ export default function IntegrationsPage() {
         name: "Shopify",
         category: "ecommerce",
         categoryLabel: "E-Commerce",
-        description: "Sync products, customers, and checkout orders in real-time.",
+        description:
+          "Sync products, customers, and checkout orders in real-time.",
         component: <ShopifyIntegrationCard />,
       },
       {
@@ -55,11 +62,26 @@ export default function IntegrationsPage() {
         name: "WooCommerce",
         category: "ecommerce",
         categoryLabel: "E-Commerce",
-        description: "Sync WordPress WooCommerce catalog, customers, and orders via REST API keys.",
+        description:
+          "Sync WordPress WooCommerce catalog, customers, and orders via REST API keys.",
         component: <WooCommerceIntegrationCard />,
       },
+      ...hrProviders
+        .map((meta: any) => {
+          const config = HR_PROVIDERS_CONFIG[meta.provider];
+          if (!config) return null;
+          return {
+            id: meta.provider.toLowerCase(),
+            name: meta.name || config.name,
+            category: "hr" as const,
+            categoryLabel: "HR & Directory",
+            description: config.description,
+            component: <HRIntegrationCard providerKey={config.provider} />,
+          };
+        })
+        .filter(Boolean) as IntegrationItem[],
     ],
-    []
+    [hrProviders],
   );
 
   const categories = [
@@ -69,6 +91,12 @@ export default function IntegrationsPage() {
       label: "E-Commerce",
       icon: ShoppingBag,
       count: integrations.filter((i) => i.category === "ecommerce").length,
+    },
+    {
+      id: "hr",
+      label: "HR & Directory",
+      icon: Briefcase,
+      count: integrations.filter((i) => i.category === "hr").length,
     },
   ];
 
@@ -148,7 +176,7 @@ export default function IntegrationsPage() {
                   <stat.icon
                     className={cn(
                       "h-3.5 w-3.5 opacity-70 transition-transform duration-300 group-hover:scale-110",
-                      stat.iconClass
+                      stat.iconClass,
                     )}
                   />
                 </div>
@@ -159,7 +187,7 @@ export default function IntegrationsPage() {
                   <span
                     className={cn(
                       "text-[11px] font-medium",
-                      stat.subClass || "text-muted-foreground"
+                      stat.subClass || "text-muted-foreground",
                     )}
                   >
                     {stat.sub}
@@ -184,7 +212,7 @@ export default function IntegrationsPage() {
                       "h-8 px-3 rounded-lg text-[12px] font-medium transition-all duration-200 flex items-center gap-1.5 shrink-0 border cursor-pointer",
                       isSelected
                         ? "bg-foreground text-background border-foreground shadow-sm font-semibold"
-                        : "bg-card text-muted-foreground hover:text-foreground border-border/50 hover:border-border/80 hover:bg-muted/40"
+                        : "bg-card text-muted-foreground hover:text-foreground border-border/50 hover:border-border/80 hover:bg-muted/40",
                     )}
                   >
                     <CatIcon className="h-3.5 w-3.5 opacity-70" />
@@ -194,7 +222,7 @@ export default function IntegrationsPage() {
                         "text-[10px] font-semibold tabular-nums px-1.5 py-0.5 rounded-md ml-0.5",
                         isSelected
                           ? "bg-background/20 text-background"
-                          : "bg-muted text-muted-foreground"
+                          : "bg-muted text-muted-foreground",
                       )}
                     >
                       {cat.count}
@@ -244,7 +272,8 @@ export default function IntegrationsPage() {
                 No matching integrations
               </p>
               <p className="text-[13px] text-muted-foreground mt-1.5 max-w-sm leading-relaxed">
-                We couldn't find any tools matching "{searchQuery}". Try a different search term or clear your filters.
+                We couldn't find any tools matching "{searchQuery}". Try a
+                different search term or clear your filters.
               </p>
               <Button
                 variant="outline"
@@ -271,7 +300,10 @@ export default function IntegrationsPage() {
                 Enterprise Integration Security
               </p>
               <p className="text-[12px] leading-[1.6]">
-                All third-party data synchronizations are encrypted end-to-end via TLS 1.3. API credentials and OAuth tokens are strictly isolated per tenant workspace and never exposed in client bundles.
+                All third-party data synchronizations are encrypted end-to-end
+                via TLS 1.3. API credentials and OAuth tokens are strictly
+                isolated per tenant workspace and never exposed in client
+                bundles.
               </p>
             </div>
           </div>
