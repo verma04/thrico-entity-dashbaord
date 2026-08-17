@@ -35,18 +35,21 @@ interface CoverProps {
   buttonText?: string;
 }
 
-const Cover = ({ imageUrl, setImageUrl, setCover, buttonText }: CoverProps) => {
+export const Cover = ({
+  imageUrl,
+  setImageUrl,
+  setCover,
+  buttonText,
+}: CoverProps) => {
   const [loading, setLoading] = useState(false);
 
   const handleChange: UploadProps["onChange"] = (info) => {
-    console.log(info);
     if (info.file.status === "uploading") {
       setLoading(true);
       return;
     }
     if (info.file.status === "done") {
       setCover(info.file.originFileObj as FileType);
-      // Get this url from response in real world.
       getBase64(info.file.originFileObj as FileType, (url) => {
         setLoading(false);
         setImageUrl(url);
@@ -62,52 +65,50 @@ const Cover = ({ imageUrl, setImageUrl, setCover, buttonText }: CoverProps) => {
       {buttonText ? buttonText : "Update Cover"}
     </Button>
   );
-  const dummyRequest = ({ file, onSuccess }: any) => {
+
+  const dummyRequest = ({ onSuccess }: any) => {
     onSuccess("ok");
   };
+
   return (
-    <>
-      <Card
-        extra={
-          <Alert
-            style={{ fontSize: 12, margin: 10 }}
-            type="info"
-            showIcon={true}
-            message="No custom cover image selected. The default image will be displayed until you upload a new one."
-          />
-        }
-        actions={[
-          <>
-            <ImgCrop rotationSlider aspectSlider>
-              <Upload
-                style={{ width: "100%" }}
-                showUploadList={false}
-                customRequest={dummyRequest}
-                beforeUpload={beforeUpload}
-                onChange={handleChange}
-              >
-                <>{uploadButton}</>
-              </Upload>
-            </ImgCrop>
-          </>,
-        ]}
-        style={{ width: "100%", marginBottom: 20 }}
-      >
-        <Flex style={{ width: "100%" }} justify="center" align="center">
-          <Image
-            src={
-              imageUrl
-                ? imageUrl
-                : `https://cdn.thrico.network/defaultEventCover.png`
-            }
-            alt="alt"
-            width={"100%"}
-            style={{ objectFit: "contain" }}
-            height={200}
-          />
-        </Flex>
-      </Card>
-    </>
+    <Card
+      extra={
+        <Alert
+          style={{ fontSize: 12, margin: 10 }}
+          type="info"
+          showIcon={true}
+          message="No custom cover image selected. The default image will be displayed until you upload a new one."
+        />
+      }
+      actions={[
+        <ImgCrop key="crop" rotationSlider aspectSlider>
+          <Upload
+            style={{ width: "100%" }}
+            showUploadList={false}
+            customRequest={dummyRequest}
+            beforeUpload={beforeUpload}
+            onChange={handleChange}
+          >
+            <>{uploadButton}</>
+          </Upload>
+        </ImgCrop>,
+      ]}
+      style={{ width: "100%", marginBottom: 20 }}
+    >
+      <Flex style={{ width: "100%" }} justify="center" align="center">
+        <Image
+          src={
+            imageUrl
+              ? imageUrl
+              : `https://cdn.thrico.network/defaultEventCover.png`
+          }
+          alt="alt"
+          width={"100%"}
+          style={{ objectFit: "contain" }}
+          height={200}
+        />
+      </Flex>
+    </Card>
   );
 };
 

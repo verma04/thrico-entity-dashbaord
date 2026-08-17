@@ -1,9 +1,8 @@
 "use client";
 
-import React from "react";
 import { useRouter } from "next/navigation";
-import { Award, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Award } from "lucide-react";
+
 import { useCreateBadge } from "@/graphql/actions/gamification/gamification-mutation";
 import { useGetEntityGamificationModules } from "@/graphql/actions/gamification/gamification-quiries";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
@@ -30,6 +29,12 @@ export default function CreateBadgePage() {
       type: values.type,
       module: values.type === "ACTION" ? values.module : undefined,
       action: values.type === "ACTION" ? values.action : undefined,
+      allowPushNotification: values.allowPushNotification,
+      allowEmailNotification: values.allowEmailNotification,
+      pushNotificationTitle: values.allowPushNotification ? values.pushNotificationTitle : undefined,
+      pushNotificationBody: values.allowPushNotification ? values.pushNotificationBody : undefined,
+      emailNotificationSubject: values.allowEmailNotification ? values.emailNotificationSubject : undefined,
+      emailNotificationBody: values.allowEmailNotification ? values.emailNotificationBody : undefined,
     };
 
     if (values.type === "ACTION") {
@@ -38,11 +43,15 @@ export default function CreateBadgePage() {
       input.points = Number(values.targetValue);
     }
 
-    await createBadge({
+    const res = await createBadge({
       variables: {
         input,
       },
     });
+
+    if (res?.errors && res.errors.length > 0) {
+      throw new Error(res.errors[0].message);
+    }
   };
 
   const modules = moduleData?.getEntityGamificationModules?.modules || [];

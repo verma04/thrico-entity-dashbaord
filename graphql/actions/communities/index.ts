@@ -1,7 +1,8 @@
 import { useQuery, QueryHookOptions, QueryResult } from "@apollo/client";
-import { TimeRange } from "..";
+import { DateRangeInput, TimeRange } from "../dashbaord/dashboard-quries";
 import { GET_COMMUNITIES_STATS } from "@/graphql/quries/communities";
-import { DateRangeInput } from "../dashbaord/dashboard-quries";
+
+export { TimeRange };
 
 // --- TypeScript Types ---
 
@@ -16,6 +17,7 @@ export type StatusDistributionPoint = {
 };
 
 export type TopCommunity = {
+  id?: string;
   name: string;
   members: number;
   posts: number;
@@ -23,6 +25,7 @@ export type TopCommunity = {
 };
 
 export type TopCreator = {
+  id?: string;
   name: string;
   avatar: string;
   communitiesCreated: number;

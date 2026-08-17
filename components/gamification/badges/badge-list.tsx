@@ -7,7 +7,24 @@ import {
   AdminTableItem,
   AdminTableTag,
 } from "@/components/shared/admin-table/admin-table";
-import { Pencil, Award, Zap, Coins } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import {
+  Pencil,
+  Award,
+  Zap,
+  Coins,
+  Bell,
+  Mail,
+  MoreHorizontal,
+  Copy,
+  Power,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
@@ -15,6 +32,7 @@ import { renderModuleIcon } from "@/components/subscription/utils";
 import { Badge, useToggleBadge } from "@/graphql/actions";
 import { toast } from "sonner";
 import { BadgeIcon } from "./badge-icon";
+import { BadgeNotificationModal } from "./badge-notification-modal";
 
 interface BadgeListProps {
   badges: Badge[];
@@ -33,6 +51,9 @@ export function BadgeList({
   refetchBadges,
   refetchStats,
 }: BadgeListProps) {
+  const [notificationModalBadge, setNotificationModalBadge] =
+    React.useState<Badge | null>(null);
+
   const [toggleBadge, { loading: toggling }] = useToggleBadge({
     onCompleted: () => {
       refetchBadges();
@@ -144,6 +165,43 @@ export function BadgeList({
       },
     },
     {
+      key: "notifications",
+      header: "Alerts",
+      cell: (badge: Badge) => {
+        const hasPush = badge.allowPushNotification !== false;
+        const hasEmail = badge.allowEmailNotification !== false;
+
+        return (
+          <div className="flex items-center gap-1.5">
+            <div
+              title={hasPush ? "Push Notification Enabled" : "Push Notification Muted"}
+              className={cn(
+                "flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium border transition-colors",
+                hasPush
+                  ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 border-zinc-200 dark:border-zinc-700"
+                  : "bg-transparent text-zinc-400 dark:text-zinc-600 border-transparent opacity-40",
+              )}
+            >
+              <Bell className="h-3 w-3" />
+              <span>Push</span>
+            </div>
+            <div
+              title={hasEmail ? "Email Notification Enabled" : "Email Notification Muted"}
+              className={cn(
+                "flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium border transition-colors",
+                hasEmail
+                  ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 border-zinc-200 dark:border-zinc-700"
+                  : "bg-transparent text-zinc-400 dark:text-zinc-600 border-transparent opacity-40",
+              )}
+            >
+              <Mail className="h-3 w-3" />
+              <span>Email</span>
+            </div>
+          </div>
+        );
+      },
+    },
+    {
       key: "status",
       header: "Status",
       cell: (badge: Badge) => (
@@ -162,33 +220,91 @@ export function BadgeList({
     },
     {
       key: "actions",
-      header: "",
-      headerClassName: "w-10 text-right",
+      header: "Action",
+      headerClassName: "w-12 text-right",
       className: "text-right",
       cell: (badge: Badge) => (
-        <div className="flex justify-end">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md"
-            onClick={() => onEdit(badge)}
-          >
-            <Pencil className="h-3.5 w-3.5" />
-          </Button>
+        <div className="flex justify-end items-center">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 w-6 p-0 hover:bg-muted text-muted-foreground hover:text-foreground"
+              >
+                <MoreHorizontal className="h-3.5 w-3.5" />
+                <span className="sr-only">Open actions</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <div className="px-2 py-1.5 text-xs font-semibold text-foreground border-b border-border/50 truncate">
+                {badge.name}
+              </div>
+              <DropdownMenuItem
+                className="cursor-pointer text-xs py-1.5"
+                onClick={() => onEdit(badge)}
+              >
+                <Pencil className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
+                <span>Edit Badge</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="cursor-pointer text-xs py-1.5"
+                onClick={() => setNotificationModalBadge(badge)}
+              >
+                <Bell className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
+                <span>Edit Notifications</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="cursor-pointer text-xs py-1.5"
+                onClick={() => handleToggleActive(badge.id)}
+              >
+                <Power
+                  className={cn(
+                    "h-3.5 w-3.5 mr-2",
+                    badge.isActive ? "text-amber-500" : "text-emerald-500",
+                  )}
+                />
+                <span>{badge.isActive ? "Disable Badge" : "Activate Badge"}</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="cursor-pointer text-xs py-1.5"
+                onClick={() => {
+                  navigator.clipboard.writeText(badge.id);
+                  toast.success("Badge ID copied to clipboard");
+                }}
+              >
+                <Copy className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
+                <span>Copy Badge ID</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       ),
     },
   ];
 
   return (
-    <AdminTable
-      columns={columns}
-      data={badges || []}
-      loading={isLoading}
-      keyExtractor={(badge) => badge.id}
-      emptyTitle="No badges defined"
-      emptyDescription="Badges motivate community participation. Create your first credential to reward member loyalty."
-      size="sm"
-    />
+    <>
+      <AdminTable
+        columns={columns}
+        data={badges || []}
+        loading={isLoading}
+        keyExtractor={(badge) => badge.id}
+        emptyTitle="No badges defined"
+        emptyDescription="Badges motivate community participation. Create your first credential to reward member loyalty."
+        size="sm"
+      />
+
+      <BadgeNotificationModal
+        badge={notificationModalBadge}
+        open={!!notificationModalBadge}
+        onOpenChange={(open) => !open && setNotificationModalBadge(null)}
+        onSuccess={() => {
+          refetchBadges();
+          refetchStats();
+        }}
+      />
+    </>
   );
 }

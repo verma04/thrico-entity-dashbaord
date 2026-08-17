@@ -27,10 +27,12 @@ export default function Reports({
   preselectedModule,
   canEdit = true,
   breadcrumbs,
+  description = "View and manage reported items",
 }: {
   preselectedModule?: ReportModule;
   canEdit?: boolean;
   breadcrumbs?: { label: string; href?: string }[];
+  description?: string;
 }) {
   const moduleName = useModuleStore((state) => state.communityModuleName);
 
@@ -66,7 +68,7 @@ export default function Reports({
       <EcosystemHeader
         title="Reports"
         badgeText="Safety"
-        description="View and manage reported content and users."
+        description={description}
         icon={ShieldAlert}
         breadcrumbs={breadcrumbs}
       />

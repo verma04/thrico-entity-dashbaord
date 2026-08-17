@@ -25,6 +25,7 @@ import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrappe
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { InlineAlert } from "@/components/ui/inline-alert";
 
 import { StatsCards } from "./stats-cards";
 import { RulesTable } from "./rules-table";
@@ -180,6 +181,14 @@ export function PointsManager() {
         }
       />
 
+      <div className="px-6 pt-2 pb-0">
+        <InlineAlert
+          variant="alert"
+          message="Point rules cannot be deleted to maintain historical consistency. Use the status toggle to disable a rule and immediately cease point distribution for that event."
+          className="rounded-xl"
+        />
+      </div>
+
       <EcosystemActionBar className="">
         <EcosystemActionBar.Item grow className="max-w-sm">
           <EcosystemActionBar.Search
@@ -248,17 +257,6 @@ export function PointsManager() {
         </div>
 
         <div className="px-6">
-          <div className="flex items-start gap-4 p-4 rounded-2xl bg-zinc-50/50 dark:bg-neutral-900/50 border border-zinc-200 dark:border-neutral-800 mb-6">
-            <div className="h-8 w-8 rounded-full bg-white dark:bg-neutral-900 flex items-center justify-center shadow-sm shrink-0 border border-zinc-200 dark:border-neutral-800">
-              <Info className="h-4 w-4 text-zinc-500 dark:text-zinc-400" />
-            </div>
-            <p className="text-[13px] text-zinc-700 dark:text-zinc-300 leading-relaxed font-medium">
-              Point rules cannot be deleted to maintain historical consistency.
-              Use the status toggle to disable a rule and immediately cease
-              point distribution for that event.
-            </p>
-          </div>
-
           <RulesTable
             rules={filteredRules}
             selectedModule={selectedModule}

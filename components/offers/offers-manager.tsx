@@ -23,9 +23,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ExportCsvModal } from "@/components/shared/export-csv-modal";
-import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export-csv-modal";
+import type {
+  ExportCsvScope,
+  ExportCsvFormat,
+} from "@/components/shared/export-csv-modal";
 import { buildCsv, downloadCsv } from "@/lib/export-csv";
-import { Plus, LayoutGrid, List as ListIcon, Tag, RefreshCw, Upload } from "lucide-react";
+import {
+  Plus,
+  LayoutGrid,
+  List as ListIcon,
+  Tag,
+  RefreshCw,
+  Upload,
+} from "lucide-react";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
@@ -37,6 +47,7 @@ import TableLoading from "@/components/layout/table-loading";
 import { useModuleStore } from "@/store/useModuleStore";
 import { CtaButton } from "@/components/ui/cta-button";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 export function OffersManager() {
   const router = useRouter();
@@ -99,11 +110,16 @@ export function OffersManager() {
     data: offersData,
     loading: offersLoading,
     refetch: refetchOffers,
-  } = useGetOffers({
-    search: debouncedSearch.trim() || undefined,
-    categoryId: selectedCategory === "all" ? undefined : selectedCategory,
-    status: selectedStatus === "all" ? undefined : selectedStatus,
-  });
+  } = useGetOffers(
+    {
+      search: debouncedSearch.trim() || undefined,
+      categoryId: selectedCategory === "all" ? undefined : selectedCategory,
+      status: selectedStatus === "all" ? undefined : selectedStatus,
+    },
+    {
+      fetchPolicy: "cache-and-network",
+    },
+  );
 
   const { data: categoriesData } = useGetOfferCategories();
 
@@ -153,10 +169,7 @@ export function OffersManager() {
         badgeText="Marketing & Discounts"
         description={`Manage all active and inactive ${moduleName.toLowerCase()} across the platform.`}
         icon={Tag}
-        breadcrumbs={[
-          { label: moduleName, href: "/offers" },
-          { label: "All" },
-        ]}
+        breadcrumbs={[{ label: moduleName, href: "/offers" }, { label: "All" }]}
         actions={
           <div className="flex items-center gap-2">
             <Button
@@ -169,15 +182,12 @@ export function OffersManager() {
                 className={cn("h-3.5 w-3.5", offersLoading && "animate-spin")}
               />
             </Button>
-            <CtaButton
-              onClick={() => {
-                setEditingOffer(null);
-                setIsDialogOpen(true);
-              }}
-            >
-              <Plus className="h-3.5 w-3.5" />
-              Create {singularName}
-            </CtaButton>
+            <Link href="/offers/create">
+              <CtaButton>
+                <Plus className="h-3.5 w-3.5" />
+                Create {singularName}
+              </CtaButton>
+            </Link>
           </div>
         }
       />
@@ -380,24 +390,48 @@ export function OffersManager() {
         entityName={moduleName.toLowerCase()}
         description={`Export ${moduleName.toLowerCase()} directory as CSV. Includes title, description, code, discount, category, and status.`}
         totalCount={rawOffers.length}
-        matchingCount={debouncedSearch.trim() || selectedCategory !== "all" || selectedStatus !== "all" ? offers.length : undefined}
+        matchingCount={
+          debouncedSearch.trim() ||
+          selectedCategory !== "all" ||
+          selectedStatus !== "all"
+            ? offers.length
+            : undefined
+        }
         onExport={(_scope: ExportCsvScope, format: ExportCsvFormat) => {
           const rows = offers;
           if (rows.length === 0) {
-            toast.error("Nothing to export", { description: `No ${moduleName.toLowerCase()} found.` });
+            toast.error("Nothing to export", {
+              description: `No ${moduleName.toLowerCase()} found.`,
+            });
             return;
           }
           const csv = buildCsv(rows, [
             { header: "Title", getValue: (o) => o.title || "" },
             { header: "Description", getValue: (o) => o.description || "" },
             { header: "Promo Code", getValue: (o) => o.code || "" },
-            { header: "Discount Value", getValue: (o) => o.discountValue ? `${o.discountValue}${o.discountType === "PERCENTAGE" ? "%" : ""}` : "" },
+            {
+              header: "Discount Value",
+              getValue: (o) =>
+                o.discountValue
+                  ? `${o.discountValue}${o.discountType === "PERCENTAGE" ? "%" : ""}`
+                  : "",
+            },
             { header: "Category", getValue: (o) => o.category?.name || "" },
             { header: "Status", getValue: (o) => o.status || "" },
-            { header: "Valid Until", getValue: (o) => o.endDate ? new Date(o.endDate).toISOString().slice(0, 10) : "" },
+            {
+              header: "Valid Until",
+              getValue: (o) =>
+                o.endDate ? new Date(o.endDate).toISOString().slice(0, 10) : "",
+            },
           ]);
-          downloadCsv(csv, `offers-${new Date().toISOString().slice(0, 10)}`, format);
-          toast.success("Export ready", { description: `${rows.length} ${moduleName.toLowerCase()} exported.` });
+          downloadCsv(
+            csv,
+            `offers-${new Date().toISOString().slice(0, 10)}`,
+            format,
+          );
+          toast.success("Export ready", {
+            description: `${rows.length} ${moduleName.toLowerCase()} exported.`,
+          });
         }}
       />
     </EcosystemWrapper>

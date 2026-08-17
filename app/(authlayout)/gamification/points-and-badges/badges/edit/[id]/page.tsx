@@ -33,7 +33,7 @@ export default function EditBadgePage() {
   }, [badgeData, badgeId]);
 
   const handleUpdate = async (values: any) => {
-    await updateBadge({
+    const res = await updateBadge({
       variables: {
         id: badgeId,
         input: {
@@ -45,10 +45,20 @@ export default function EditBadgePage() {
           module: values.module || "SYSTEM",
           action: values.action || "POINTS_THRESHOLD",
           targetValue: Number(values.targetValue),
+          allowPushNotification: values.allowPushNotification,
+          allowEmailNotification: values.allowEmailNotification,
+          pushNotificationTitle: values.allowPushNotification ? values.pushNotificationTitle : undefined,
+          pushNotificationBody: values.allowPushNotification ? values.pushNotificationBody : undefined,
+          emailNotificationSubject: values.allowEmailNotification ? values.emailNotificationSubject : undefined,
+          emailNotificationBody: values.allowEmailNotification ? values.emailNotificationBody : undefined,
           isActive: values.isActive,
         },
       },
     });
+
+    if (res?.errors && res.errors.length > 0) {
+      throw new Error(res.errors[0].message);
+    }
   };
 
   const modules = moduleData?.getEntityGamificationModules?.modules || [];

@@ -67,13 +67,7 @@ export function SubscriptionFallbackMessage({
     return null;
   }
 
-  return (
-    <InlineAlert
-      variant="alert"
-      message={message}
-      className="mb-4"
-    />
-  );
+  return <InlineAlert variant="alert" message={message} className="mb-4" />;
 }
 
 export function SubscriptionUpgradeBlock({

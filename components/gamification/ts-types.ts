@@ -95,6 +95,15 @@ export interface GamificationSettings {
   pointDecayEnabled: boolean;
   pointDecayPercentage: number;
   pointDecayPeriodDays: number;
+  // Notification Settings
+  enableGlobalPushNotifications?: boolean;
+  enableGlobalEmailNotifications?: boolean;
+  pointsPushNotificationEnabled?: boolean;
+  pointsEmailNotificationEnabled?: boolean;
+  badgesPushNotificationEnabled?: boolean;
+  badgesEmailNotificationEnabled?: boolean;
+  ranksPushNotificationEnabled?: boolean;
+  ranksEmailNotificationEnabled?: boolean;
 }
 
 // Module info for display

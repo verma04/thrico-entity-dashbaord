@@ -18,6 +18,7 @@ import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrappe
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { InlineAlert } from "@/components/ui/inline-alert";
 import { ExportCsvModal } from "@/components/shared/export-csv-modal";
 import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export-csv-modal";
 import { buildCsv, downloadCsv } from "@/lib/export-csv";
@@ -156,6 +157,15 @@ export function BadgesManager() {
           </EcosystemActionBar>
         }
       />
+
+      <div className="px-6 pt-2 pb-0">
+        <InlineAlert
+          variant="alert"
+          message="Badges are permanent records once issued to members. To stop issuing a badge without affecting existing recipients, safely disable it via the status toggle."
+          className="rounded-xl"
+        />
+      </div>
+
       <EcosystemActionBar shadow="sm" className="">
         <EcosystemActionBar.Item grow className="max-w-sm">
           <EcosystemActionBar.Search
@@ -208,17 +218,6 @@ export function BadgesManager() {
         </div>
 
         <div className="px-6">
-          <div className="flex items-start gap-4 p-4 rounded-2xl bg-zinc-50/50 dark:bg-neutral-900/50 border border-zinc-200 dark:border-neutral-800 mb-6 font-medium text-zinc-700 dark:text-zinc-300">
-            <div className="h-8 w-8 rounded-full bg-white dark:bg-neutral-900 flex items-center justify-center shadow-sm shrink-0 border border-zinc-200 dark:border-neutral-800">
-              <Info className="h-4 w-4 text-zinc-500 dark:text-zinc-400" />
-            </div>
-            <p className="text-[13px] leading-relaxed">
-              Badges are permanent records once issued to members. To stop
-              issuing a badge without affecting existing recipients, safely
-              disable it via the status toggle.
-            </p>
-          </div>
-
           <BadgeList
             badges={filteredBadges}
             modules={subscriptionSources}
@@ -257,8 +256,10 @@ export function BadgesManager() {
             { header: "Target Value", getValue: (b) => b.targetValue ?? "" },
             { header: "Count",        getValue: (b) => b.count ?? "" },
             { header: "Points",       getValue: (b) => b.points ?? "" },
-            { header: "Icon",         getValue: (b) => b.icon || "" },
-            { header: "Status",       getValue: (b) => b.isActive ? "Active" : "Inactive" },
+            { header: "Icon",               getValue: (b) => b.icon || "" },
+            { header: "Push Notification",  getValue: (b) => b.allowPushNotification !== false ? "Enabled" : "Disabled" },
+            { header: "Email Notification", getValue: (b) => b.allowEmailNotification !== false ? "Enabled" : "Disabled" },
+            { header: "Status",             getValue: (b) => b.isActive ? "Active" : "Inactive" },
             { header: "Created At",   getValue: (b) => b.createdAt ? new Date(b.createdAt).toISOString().slice(0, 10) : "" },
             { header: "Updated At",   getValue: (b) => b.updatedAt ? new Date(b.updatedAt).toISOString().slice(0, 10) : "" },
           ]);

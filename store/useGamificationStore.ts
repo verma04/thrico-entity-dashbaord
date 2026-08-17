@@ -201,6 +201,14 @@ const defaultSettings: GamificationSettings = {
   pointDecayEnabled: false,
   pointDecayPercentage: 5,
   pointDecayPeriodDays: 30,
+  enableGlobalPushNotifications: true,
+  enableGlobalEmailNotifications: true,
+  pointsPushNotificationEnabled: true,
+  pointsEmailNotificationEnabled: true,
+  badgesPushNotificationEnabled: true,
+  badgesEmailNotificationEnabled: true,
+  ranksPushNotificationEnabled: true,
+  ranksEmailNotificationEnabled: true,
 };
 
 interface GamificationState {

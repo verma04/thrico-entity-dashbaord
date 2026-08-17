@@ -8,13 +8,29 @@ import {
   AdminTableTag,
   AdminTableMetric,
 } from "@/components/shared/admin-table/admin-table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Pencil, Zap } from "lucide-react";
+import {
+  Pencil,
+  Zap,
+  Bell,
+  Mail,
+  MoreHorizontal,
+  Copy,
+  Power,
+} from "lucide-react";
 import { renderModuleIcon } from "@/components/subscription/utils";
 import { PointRule, useTogglePointRule } from "@/graphql/actions";
 import { toast } from "sonner";
+import { PointRuleNotificationModal } from "./point-rule-notification-modal";
 
 interface RulesTableProps {
   rules: PointRule[];
@@ -34,6 +50,9 @@ export function RulesTable({
   refetchRules,
   refetchStats,
 }: RulesTableProps) {
+  const [notificationModalRule, setNotificationModalRule] =
+    React.useState<PointRule | null>(null);
+
   const [togglePointRule, { loading: toggling }] = useTogglePointRule({
     onCompleted: () => {
       refetchRules();
@@ -156,6 +175,43 @@ export function RulesTable({
       ),
     },
     {
+      key: "notifications",
+      header: "Alerts",
+      cell: (rule: PointRule) => {
+        const hasPush = rule.allowPushNotification !== false;
+        const hasEmail = rule.allowEmailNotification !== false;
+
+        return (
+          <div className="flex items-center gap-1.5">
+            <div
+              title={hasPush ? "Push Notification Enabled" : "Push Notification Muted"}
+              className={cn(
+                "flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium border transition-colors",
+                hasPush
+                  ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 border-zinc-200 dark:border-zinc-700"
+                  : "bg-transparent text-zinc-400 dark:text-zinc-600 border-transparent opacity-40",
+              )}
+            >
+              <Bell className="h-3 w-3" />
+              <span>Push</span>
+            </div>
+            <div
+              title={hasEmail ? "Email Notification Enabled" : "Email Notification Muted"}
+              className={cn(
+                "flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium border transition-colors",
+                hasEmail
+                  ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 border-zinc-200 dark:border-zinc-700"
+                  : "bg-transparent text-zinc-400 dark:text-zinc-600 border-transparent opacity-40",
+              )}
+            >
+              <Mail className="h-3 w-3" />
+              <span>Email</span>
+            </div>
+          </div>
+        );
+      },
+    },
+    {
       key: "status",
       header: "Status",
       cell: (rule: PointRule) => (
@@ -174,33 +230,91 @@ export function RulesTable({
     },
     {
       key: "actions",
-      header: "",
-      headerClassName: "w-10 text-right",
+      header: "Action",
+      headerClassName: "w-12 text-right",
       className: "text-right",
       cell: (rule: PointRule) => (
-        <div className="flex justify-end">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md"
-            onClick={() => onEdit(rule)}
-          >
-            <Pencil className="h-3.5 w-3.5" />
-          </Button>
+        <div className="flex justify-end items-center">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 w-6 p-0 hover:bg-muted text-muted-foreground hover:text-foreground"
+              >
+                <MoreHorizontal className="h-3.5 w-3.5" />
+                <span className="sr-only">Open actions</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <div className="px-2 py-1.5 text-xs font-semibold text-foreground border-b border-border/50 truncate capitalize">
+                {rule.action.replace(/_/g, " ").toLowerCase()}
+              </div>
+              <DropdownMenuItem
+                className="cursor-pointer text-xs py-1.5"
+                onClick={() => onEdit(rule)}
+              >
+                <Pencil className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
+                <span>Edit Rule</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="cursor-pointer text-xs py-1.5"
+                onClick={() => setNotificationModalRule(rule)}
+              >
+                <Bell className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
+                <span>Edit Notifications</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="cursor-pointer text-xs py-1.5"
+                onClick={() => handleToggleActive(rule.id)}
+              >
+                <Power
+                  className={cn(
+                    "h-3.5 w-3.5 mr-2",
+                    rule.isActive ? "text-amber-500" : "text-emerald-500",
+                  )}
+                />
+                <span>{rule.isActive ? "Disable Rule" : "Activate Rule"}</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="cursor-pointer text-xs py-1.5"
+                onClick={() => {
+                  navigator.clipboard.writeText(rule.id);
+                  toast.success("Rule ID copied to clipboard");
+                }}
+              >
+                <Copy className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
+                <span>Copy Rule ID</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       ),
     },
   ];
 
   return (
-    <AdminTable
-      columns={columns}
-      data={rules || []}
-      loading={isLoading}
-      keyExtractor={(rule) => rule.id}
-      emptyTitle="No scoring rules found"
-      emptyDescription="Create a reward rule to start incentivizing engagement across the ecosystem."
-      size="sm"
-    />
+    <>
+      <AdminTable
+        columns={columns}
+        data={rules || []}
+        loading={isLoading}
+        keyExtractor={(rule) => rule.id}
+        emptyTitle="No scoring rules found"
+        emptyDescription="Create a reward rule to start incentivizing engagement across the ecosystem."
+        size="sm"
+      />
+
+      <PointRuleNotificationModal
+        rule={notificationModalRule}
+        open={!!notificationModalRule}
+        onOpenChange={(open) => !open && setNotificationModalRule(null)}
+        onSuccess={() => {
+          refetchRules();
+          refetchStats();
+        }}
+      />
+    </>
   );
 }

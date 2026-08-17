@@ -15,6 +15,12 @@ export interface BadgeInput {
   action?: string;
   count?: number;
   points?: number;
+  allowPushNotification?: boolean;
+  allowEmailNotification?: boolean;
+  pushNotificationTitle?: string;
+  pushNotificationBody?: string;
+  emailNotificationSubject?: string;
+  emailNotificationBody?: string;
 }
 
 export interface BadgeUpdateInput {
@@ -26,6 +32,12 @@ export interface BadgeUpdateInput {
   module?: string;
   action?: string;
   targetValue?: number;
+  allowPushNotification?: boolean;
+  allowEmailNotification?: boolean;
+  pushNotificationTitle?: string;
+  pushNotificationBody?: string;
+  emailNotificationSubject?: string;
+  emailNotificationBody?: string;
   isActive?: boolean;
 }
 
@@ -42,6 +54,12 @@ const CREATE_BADGE = gql`
       icon
       description
       condition
+      allowPushNotification
+      allowEmailNotification
+      pushNotificationTitle
+      pushNotificationBody
+      emailNotificationSubject
+      emailNotificationBody
       isActive
       createdAt
       updatedAt
@@ -62,6 +80,12 @@ const UPDATE_BADGE = gql`
       icon
       description
       condition
+      allowPushNotification
+      allowEmailNotification
+      pushNotificationTitle
+      pushNotificationBody
+      emailNotificationSubject
+      emailNotificationBody
       isActive
       createdAt
       updatedAt
@@ -88,6 +112,47 @@ const TOGGLE_BADGE = gql`
       icon
       description
       condition
+      allowPushNotification
+      allowEmailNotification
+      pushNotificationTitle
+      pushNotificationBody
+      emailNotificationSubject
+      emailNotificationBody
+      isActive
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export interface UpdateBadgeNotificationInput {
+  allowPushNotification?: boolean;
+  pushNotificationTitle?: string;
+  pushNotificationBody?: string;
+  allowEmailNotification?: boolean;
+  emailNotificationSubject?: string;
+  emailNotificationBody?: string;
+}
+
+const UPDATE_BADGE_NOTIFICATIONS = gql`
+  mutation UpdateBadgeNotifications($id: ID!, $input: UpdateBadgeNotificationInput!) {
+    updateBadgeNotifications(id: $id, input: $input) {
+      id
+      source
+      name
+      type
+      module
+      action
+      targetValue
+      icon
+      description
+      condition
+      allowPushNotification
+      allowEmailNotification
+      pushNotificationTitle
+      pushNotificationBody
+      emailNotificationSubject
+      emailNotificationBody
       isActive
       createdAt
       updatedAt
@@ -101,6 +166,10 @@ export function useCreateBadge(options?: MutationHookOptions) {
 
 export function useUpdateBadge(options?: MutationHookOptions) {
   return useMutation(UPDATE_BADGE, options);
+}
+
+export function useUpdateBadgeNotifications(options?: MutationHookOptions) {
+  return useMutation(UPDATE_BADGE_NOTIFICATIONS, options);
 }
 
 export function useDeleteBadge(options?: MutationHookOptions) {
@@ -146,6 +215,12 @@ const CREATE_POINT_RULE = gql`
       monthlyCap
       isActive
       description
+      allowPushNotification
+      allowEmailNotification
+      pushNotificationTitle
+      pushNotificationBody
+      emailNotificationSubject
+      emailNotificationBody
     }
   }
 `;
@@ -160,6 +235,12 @@ const UPDATE_POINT_RULE = gql`
       monthlyCap
       isActive
       description
+      allowPushNotification
+      allowEmailNotification
+      pushNotificationTitle
+      pushNotificationBody
+      emailNotificationSubject
+      emailNotificationBody
     }
   }
 `;
@@ -216,6 +297,12 @@ export interface CreateRankInput {
   color: string;
   icon: string;
   order: number;
+  allowPushNotification?: boolean;
+  allowEmailNotification?: boolean;
+  pushNotificationTitle?: string;
+  pushNotificationBody?: string;
+  emailNotificationSubject?: string;
+  emailNotificationBody?: string;
 }
 
 export interface UpdateRankInput {
@@ -226,6 +313,12 @@ export interface UpdateRankInput {
   icon?: string;
   order?: number;
   isActive?: boolean;
+  allowPushNotification?: boolean;
+  allowEmailNotification?: boolean;
+  pushNotificationTitle?: string;
+  pushNotificationBody?: string;
+  emailNotificationSubject?: string;
+  emailNotificationBody?: string;
 }
 
 export interface RankOrderInput {
@@ -243,6 +336,12 @@ const CREATE_RANK = gql`
       color
       icon
       order
+      allowPushNotification
+      allowEmailNotification
+      pushNotificationTitle
+      pushNotificationBody
+      emailNotificationSubject
+      emailNotificationBody
       isActive
     }
   }
@@ -258,6 +357,12 @@ const UPDATE_RANK = gql`
       color
       icon
       order
+      allowPushNotification
+      allowEmailNotification
+      pushNotificationTitle
+      pushNotificationBody
+      emailNotificationSubject
+      emailNotificationBody
       isActive
     }
   }

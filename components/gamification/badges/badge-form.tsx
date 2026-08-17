@@ -9,7 +9,10 @@ import {
   Search,
   Upload,
   Loader2,
+  Bell,
+  Mail,
 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -21,7 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useUploadImage } from "@/graphql/actions";
 import { getPreferredMediaUrl } from "@/utils/media";
@@ -99,6 +102,12 @@ const badgeSchema = Yup.object().shape({
     then: (schema) => schema.required("Specify the triggering action"),
     otherwise: (schema) => schema.optional(),
   }),
+  allowPushNotification: Yup.boolean().optional(),
+  allowEmailNotification: Yup.boolean().optional(),
+  pushNotificationTitle: Yup.string().optional(),
+  pushNotificationBody: Yup.string().optional(),
+  emailNotificationSubject: Yup.string().optional(),
+  emailNotificationBody: Yup.string().optional(),
 });
 
 interface BadgeFormProps {
@@ -125,7 +134,6 @@ export function BadgeForm({
   integrationTriggers = [],
 }: BadgeFormProps) {
   const router = useRouter();
-  const { toast } = useToast();
   const [saved, setSaved] = useState(false);
   const [iconSearch, setIconSearch] = useState("");
   const [iconMode, setIconMode] = useState<"emoji" | "upload">("emoji");
@@ -164,17 +172,43 @@ export function BadgeForm({
   }, [initialValues, integrations]);
 
   const formik = useFormik({
-    initialValues: initialValues || {
-      source: initialSourceType,
-      name: "",
-      description: "",
-      icon: "⭐",
-      type: "ACTION",
-      module: "",
-      action: "",
-      targetValue: 1,
-      isActive: true,
-    },
+    initialValues: initialValues
+      ? {
+          ...initialValues,
+          allowPushNotification:
+            initialValues.allowPushNotification !== undefined
+              ? initialValues.allowPushNotification
+              : true,
+          allowEmailNotification:
+            initialValues.allowEmailNotification !== undefined
+              ? initialValues.allowEmailNotification
+              : true,
+          pushNotificationTitle:
+            initialValues.pushNotificationTitle ?? "",
+          pushNotificationBody:
+            initialValues.pushNotificationBody ?? "",
+          emailNotificationSubject:
+            initialValues.emailNotificationSubject ?? "",
+          emailNotificationBody:
+            initialValues.emailNotificationBody ?? "",
+        }
+      : {
+          source: initialSourceType,
+          name: "",
+          description: "",
+          icon: "⭐",
+          type: "ACTION",
+          module: "",
+          action: "",
+          targetValue: 1,
+          allowPushNotification: true,
+          allowEmailNotification: true,
+          pushNotificationTitle: "",
+          pushNotificationBody: "",
+          emailNotificationSubject: "",
+          emailNotificationBody: "",
+          isActive: true,
+        },
     validationSchema: badgeSchema,
     enableReinitialize: true,
     onSubmit: async (values) => {
@@ -184,14 +218,22 @@ export function BadgeForm({
           source: values.type === "ACTION" ? sourceType : undefined,
         });
         setSaved(true);
+        toast.success(
+          isEdit
+            ? "Badge updated successfully!"
+            : "Badge created successfully!",
+        );
         setTimeout(() => {
           router.push("/gamification/points-and-badges/badges");
         }, 1500);
       } catch (error: any) {
-        toast({
-          title: "Save Failed",
-          description: error.message || "Failed to preserve configuration.",
-          variant: "destructive",
+        const errorMsg =
+          error?.graphQLErrors?.[0]?.message ||
+          error?.networkError?.result?.errors?.[0]?.message ||
+          error?.message ||
+          "Failed to preserve configuration.";
+        toast.error("Save Failed", {
+          description: errorMsg,
         });
       }
     },
@@ -335,6 +377,36 @@ export function BadgeForm({
                 <PolarisSummaryRow label="Type" value={formik.values.type === "ACTION" ? "Action Cumulative" : "Milestone Threshold"} />
                 <PolarisSummaryRow label="Target" value={`${formik.values.targetValue || 0} ${formik.values.type === "ACTION" ? "actions" : "points"}`} />
                 <PolarisSummaryRow label="Rarity Grade" value={<span className="text-zinc-900 dark:text-zinc-100 font-bold">Legendary</span>} />
+                <PolarisSummaryRow
+                  label="Push Alert"
+                  value={
+                    <span
+                      className={cn(
+                        "text-[11px] font-semibold",
+                        formik.values.allowPushNotification
+                          ? "text-emerald-600 dark:text-emerald-400"
+                          : "text-zinc-400 dark:text-zinc-500",
+                      )}
+                    >
+                      {formik.values.allowPushNotification ? "Enabled" : "Disabled"}
+                    </span>
+                  }
+                />
+                <PolarisSummaryRow
+                  label="Email Alert"
+                  value={
+                    <span
+                      className={cn(
+                        "text-[11px] font-semibold",
+                        formik.values.allowEmailNotification
+                          ? "text-emerald-600 dark:text-emerald-400"
+                          : "text-zinc-400 dark:text-zinc-500",
+                      )}
+                    >
+                      {formik.values.allowEmailNotification ? "Enabled" : "Disabled"}
+                    </span>
+                  }
+                />
                 <div className="h-2 w-full bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
                   <div className="h-full w-1/3 bg-zinc-900 dark:bg-zinc-100 rounded-full" />
                 </div>
@@ -450,8 +522,10 @@ export function BadgeForm({
                             if (res.data?.uploadImage) {
                               formik.setFieldValue("icon", res.data.uploadImage);
                             }
-                          } catch (err) {
-                            toast({ title: "Upload Failed", variant: "destructive" });
+                          } catch (err: any) {
+                            toast.error("Upload Failed", {
+                              description: err?.message || "Failed to upload image.",
+                            });
                           }
                         }
                       }}
@@ -646,6 +720,208 @@ export function BadgeForm({
               </div>
             </div>
           )}
+        </PolarisFormCard>
+
+        {/* Card 3: Notification Settings */}
+        <PolarisFormCard
+          step={3}
+          title="Notification Settings"
+          description="Configure alert channels and custom notification text when members unlock this badge."
+          badge="Notification Channels"
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {/* Push Notification Panel */}
+            <div className={cn(
+              "rounded-xl border transition-all p-4 space-y-4",
+              formik.values.allowPushNotification
+                ? "border-zinc-900/40 dark:border-zinc-100/40 bg-zinc-50/50 dark:bg-zinc-800/40"
+                : "border-zinc-200 dark:border-zinc-700/80 bg-white dark:bg-zinc-800/10 opacity-75"
+            )}>
+              <div
+                onClick={() =>
+                  formik.setFieldValue(
+                    "allowPushNotification",
+                    !formik.values.allowPushNotification,
+                  )
+                }
+                className="flex items-start gap-3.5 cursor-pointer select-none"
+              >
+                <div className="pt-0.5" onClick={(e) => e.stopPropagation()}>
+                  <Checkbox
+                    id="allowPushNotification"
+                    checked={formik.values.allowPushNotification}
+                    onCheckedChange={(checked) =>
+                      formik.setFieldValue("allowPushNotification", !!checked)
+                    }
+                  />
+                </div>
+                <div className="space-y-1 flex-1">
+                  <div className="flex items-center gap-2">
+                    <Bell className="h-4 w-4 text-zinc-700 dark:text-zinc-300" />
+                    <Label
+                      htmlFor="allowPushNotification"
+                      className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 cursor-pointer"
+                    >
+                      Allow push notification for user
+                    </Label>
+                  </div>
+                  <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                    Send an instant push notification to user's device when this badge is achieved.
+                  </p>
+                </div>
+              </div>
+
+              {formik.values.allowPushNotification && (
+                <div className="space-y-3 pt-3 border-t border-zinc-200/80 dark:border-zinc-700/80 animate-in fade-in-50 duration-200">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="pushNotificationTitle" className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300">
+                      Push Notification Title
+                    </Label>
+                    <Input
+                      id="pushNotificationTitle"
+                      placeholder="e.g. 🎉 New Badge Unlocked!"
+                      {...formik.getFieldProps("pushNotificationTitle")}
+                      className="h-9 text-xs bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="pushNotificationBody" className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300">
+                      Push Notification Message
+                    </Label>
+                    <Textarea
+                      id="pushNotificationBody"
+                      placeholder="e.g. Congratulations! You've unlocked the {{badgeName}} badge."
+                      {...formik.getFieldProps("pushNotificationBody")}
+                      className="min-h-[70px] text-xs bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 resize-none"
+                    />
+                  </div>
+                  <div className="flex items-center gap-1.5 text-[10px] text-zinc-400 dark:text-zinc-500">
+                    <span>Variables:</span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        formik.setFieldValue(
+                          "pushNotificationBody",
+                          `${formik.values.pushNotificationBody} {{badgeName}}`.trim(),
+                        )
+                      }
+                      className="px-1.5 py-0.5 rounded bg-zinc-200/70 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-300 dark:hover:bg-zinc-600 transition-colors font-mono"
+                    >
+                      {"{{badgeName}}"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        formik.setFieldValue(
+                          "pushNotificationBody",
+                          `${formik.values.pushNotificationBody} {{userName}}`.trim(),
+                        )
+                      }
+                      className="px-1.5 py-0.5 rounded bg-zinc-200/70 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-300 dark:hover:bg-zinc-600 transition-colors font-mono"
+                    >
+                      {"{{userName}}"}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Email Notification Panel */}
+            <div className={cn(
+              "rounded-xl border transition-all p-4 space-y-4",
+              formik.values.allowEmailNotification
+                ? "border-zinc-900/40 dark:border-zinc-100/40 bg-zinc-50/50 dark:bg-zinc-800/40"
+                : "border-zinc-200 dark:border-zinc-700/80 bg-white dark:bg-zinc-800/10 opacity-75"
+            )}>
+              <div
+                onClick={() =>
+                  formik.setFieldValue(
+                    "allowEmailNotification",
+                    !formik.values.allowEmailNotification,
+                  )
+                }
+                className="flex items-start gap-3.5 cursor-pointer select-none"
+              >
+                <div className="pt-0.5" onClick={(e) => e.stopPropagation()}>
+                  <Checkbox
+                    id="allowEmailNotification"
+                    checked={formik.values.allowEmailNotification}
+                    onCheckedChange={(checked) =>
+                      formik.setFieldValue("allowEmailNotification", !!checked)
+                    }
+                  />
+                </div>
+                <div className="space-y-1 flex-1">
+                  <div className="flex items-center gap-2">
+                    <Mail className="h-4 w-4 text-zinc-700 dark:text-zinc-300" />
+                    <Label
+                      htmlFor="allowEmailNotification"
+                      className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 cursor-pointer"
+                    >
+                      Allow email notification
+                    </Label>
+                  </div>
+                  <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                    Send a celebratory email notification when user achieves this badge.
+                  </p>
+                </div>
+              </div>
+
+              {formik.values.allowEmailNotification && (
+                <div className="space-y-3 pt-3 border-t border-zinc-200/80 dark:border-zinc-700/80 animate-in fade-in-50 duration-200">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="emailNotificationSubject" className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300">
+                      Email Subject
+                    </Label>
+                    <Input
+                      id="emailNotificationSubject"
+                      placeholder="e.g. You've earned a new badge: {{badgeName}}!"
+                      {...formik.getFieldProps("emailNotificationSubject")}
+                      className="h-9 text-xs bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="emailNotificationBody" className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300">
+                      Email Message / Content
+                    </Label>
+                    <Textarea
+                      id="emailNotificationBody"
+                      placeholder="e.g. Great job! You have successfully unlocked the {{badgeName}} badge on our platform."
+                      {...formik.getFieldProps("emailNotificationBody")}
+                      className="min-h-[70px] text-xs bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 resize-none"
+                    />
+                  </div>
+                  <div className="flex items-center gap-1.5 text-[10px] text-zinc-400 dark:text-zinc-500">
+                    <span>Variables:</span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        formik.setFieldValue(
+                          "emailNotificationBody",
+                          `${formik.values.emailNotificationBody} {{badgeName}}`.trim(),
+                        )
+                      }
+                      className="px-1.5 py-0.5 rounded bg-zinc-200/70 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-300 dark:hover:bg-zinc-600 transition-colors font-mono"
+                    >
+                      {"{{badgeName}}"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        formik.setFieldValue(
+                          "emailNotificationBody",
+                          `${formik.values.emailNotificationBody} {{userName}}`.trim(),
+                        )
+                      }
+                      className="px-1.5 py-0.5 rounded bg-zinc-200/70 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-300 dark:hover:bg-zinc-600 transition-colors font-mono"
+                    >
+                      {"{{userName}}"}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </PolarisFormCard>
       </form>
 

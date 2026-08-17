@@ -75,7 +75,7 @@ function CommunitiesLayout({ children }: { children: React.ReactNode }) {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: "100%" }}
         transition={{ duration: 0.3, ease: "easeInOut" }}
-        className="fixed inset-0 z-50 bg-background overflow-y-auto"
+        className=" bg-background overflow-y-auto"
       >
         {/* Top accent line */}
         <div className="h-[2px] bg-gradient-to-r from-primary/80 via-primary/40 to-transparent" />

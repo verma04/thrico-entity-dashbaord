@@ -1,7 +1,11 @@
 "use client";
 
 import React from "react";
-import { useOfferStore } from "@/store/useOfferStore";
+import {
+  useCreateOffer,
+  useGetOfferCategories,
+} from "@/graphql/actions/offers";
+import { GET_OFFERS, GET_OFFER_STATS } from "@/graphql/quries/offers";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -34,7 +38,6 @@ import {
 import { cn } from "@/lib/utils";
 import { FormikProvider, useFormik } from "formik";
 import * as Yup from "yup";
-import { Offer } from "@/types/offer-types";
 import { useRouter } from "next/navigation";
 import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel";
 import { withModulePermission } from "@/components/hoc/with-module-permission";
@@ -74,10 +77,30 @@ const offerSchema = Yup.object().shape({
 });
 
 function CreateOfferPage() {
-  const { addOffer, categories } = useOfferStore();
+  const { data: categoriesData, loading: categoriesLoading } =
+    useGetOfferCategories();
+  const categories = categoriesData?.getOfferCategories || [];
   const router = useRouter();
-  const singularName = useModuleStore((state) => state.offerSingularName) || "Offer";
-  const moduleName = useModuleStore((state) => state.offerModuleName) || "Offers";
+  const singularName =
+    useModuleStore((state) => state.offerSingularName) || "Offer";
+  const moduleName =
+    useModuleStore((state) => state.offerModuleName) || "Offers";
+
+  const [createOfferMutation, { loading: isCreating }] = useCreateOffer({
+    refetchQueries: ["GetOffers", "GetOfferStats"],
+    awaitRefetchQueries: true,
+    onCompleted: () => {
+      toast.success(`${singularName} Created`, {
+        description: `"${formik.values.title}" has been created successfully.`,
+      });
+      router.push("/offers/all");
+    },
+    onError: (error) => {
+      toast.error(
+        error.message || `Failed to create ${singularName.toLowerCase()}`,
+      );
+    },
+  });
 
   const formik = useFormik({
     initialValues: {
@@ -95,31 +118,39 @@ function CreateOfferPage() {
       isTrending: false,
     },
     validationSchema: offerSchema,
-    onSubmit: (values) => {
-      const now = new Date().toISOString();
-
-      const offerData: Offer = {
-        id: `offer-${Date.now()}`,
-        ...values,
-        categoryName: categories.find((c) => c.id === values.categoryId)?.name,
-        status: "approved",
-        source: "admin",
-        addedBy: "admin",
-        isActive: true,
-        createdAt: now,
-        updatedAt: now,
-      };
-
-      addOffer(offerData);
-      toast.success(`${singularName} Created`, {
-        description: `"${values.title}" has been created successfully.`,
-      });
-      router.push("/offers/all");
+    onSubmit: async (values) => {
+      try {
+        await createOfferMutation({
+          variables: {
+            input: {
+              title: values.title.trim(),
+              description: values.description.trim(),
+              categoryId: values.categoryId,
+              discount: values.discount.trim(),
+              validityStart: values.validFrom
+                ? new Date(values.validFrom).toISOString()
+                : new Date().toISOString(),
+              validityEnd: values.validTo
+                ? new Date(values.validTo).toISOString()
+                : new Date().toISOString(),
+              image: values.image || undefined,
+              termsAndConditions: values.terms
+                ? values.terms.trim()
+                : undefined,
+              website: values.website ? values.website.trim() : undefined,
+              status: "APPROVED",
+              isActive: true,
+            },
+          },
+        });
+      } catch (err) {
+        // Error is handled in onError
+      }
     },
   });
 
   const handleCancel = () => {
-    router.back();
+    router.push("/offers/all");
   };
 
   const handleSubmit = (e?: React.FormEvent) => {
@@ -130,7 +161,9 @@ function CreateOfferPage() {
     formik.handleSubmit();
   };
 
-  const selectedCategory = categories.find((c) => c.id === formik.values.categoryId);
+  const selectedCategory = categories.find(
+    (c) => c.id === formik.values.categoryId,
+  );
 
   return (
     <FormikProvider value={formik}>
@@ -243,8 +276,8 @@ function CreateOfferPage() {
                           formik.values.validFrom && formik.values.validTo
                             ? `${new Date(formik.values.validFrom).toLocaleDateString()} - ${new Date(formik.values.validTo).toLocaleDateString()}`
                             : formik.values.validFrom
-                            ? `From ${new Date(formik.values.validFrom).toLocaleDateString()}`
-                            : "Not specified"
+                              ? `From ${new Date(formik.values.validFrom).toLocaleDateString()}`
+                              : "Not specified"
                         }
                         isLast
                       />
@@ -254,7 +287,9 @@ function CreateOfferPage() {
 
                 {/* Promotional Strategy Tip */}
                 <PolarisTipCard title={`${singularName} Promotion Tip`}>
-                  Adding a high-contrast banner image, specific redemption codes, and distinct discount badges increases claim rates and community engagement.
+                  Adding a high-contrast banner image, specific redemption
+                  codes, and distinct discount badges increases claim rates and
+                  community engagement.
                 </PolarisTipCard>
               </div>
             }
@@ -278,7 +313,8 @@ function CreateOfferPage() {
                     maxFileSize={3}
                   />
                   <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
-                    Supports PNG, JPG, or WebP. Optimal ratio is 2:1 for seamless cross-device rendering.
+                    Supports PNG, JPG, or WebP. Optimal ratio is 2:1 for
+                    seamless cross-device rendering.
                   </p>
                 </div>
               </PolarisFormCard>
@@ -293,8 +329,12 @@ function CreateOfferPage() {
                 <div className="space-y-4">
                   {/* Title */}
                   <div className="space-y-1.5">
-                    <Label htmlFor="title" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                      {singularName} Title <span className="text-rose-500">*</span>
+                    <Label
+                      htmlFor="title"
+                      className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                    >
+                      {singularName} Title{" "}
+                      <span className="text-rose-500">*</span>
                     </Label>
                     <Input
                       id="title"
@@ -318,16 +358,29 @@ function CreateOfferPage() {
                     </Label>
                     <Select
                       value={formik.values.categoryId}
-                      onValueChange={(value) => formik.setFieldValue("categoryId", value)}
+                      onValueChange={(value) =>
+                        formik.setFieldValue("categoryId", value)
+                      }
+                      disabled={categoriesLoading}
                     >
                       <SelectTrigger className="h-10 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold">
-                        <SelectValue placeholder="Select a category" />
+                        <SelectValue
+                          placeholder={
+                            categoriesLoading
+                              ? "Loading categories..."
+                              : "Select a category"
+                          }
+                        />
                       </SelectTrigger>
                       <SelectContent>
                         {categories
                           .filter((c) => c.isActive !== false)
                           .map((cat) => (
-                            <SelectItem key={cat.id} value={cat.id} className="text-xs">
+                            <SelectItem
+                              key={cat.id}
+                              value={cat.id}
+                              className="text-xs"
+                            >
                               {cat.name}
                             </SelectItem>
                           ))}
@@ -342,8 +395,12 @@ function CreateOfferPage() {
 
                   {/* Description */}
                   <div className="space-y-1.5">
-                    <Label htmlFor="description" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                      Detailed Description <span className="text-rose-500">*</span>
+                    <Label
+                      htmlFor="description"
+                      className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                    >
+                      Detailed Description{" "}
+                      <span className="text-rose-500">*</span>
                     </Label>
                     <Textarea
                       id="description"
@@ -355,11 +412,14 @@ function CreateOfferPage() {
                       className="min-h-[110px] bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-medium resize-none shadow-none"
                     />
                     <div className="flex items-center justify-between">
-                      {formik.touched.description && formik.errors.description ? (
+                      {formik.touched.description &&
+                      formik.errors.description ? (
                         <p className="text-[11px] text-rose-500 font-medium">
                           {formik.errors.description as string}
                         </p>
-                      ) : <span />}
+                      ) : (
+                        <span />
+                      )}
                       <p className="text-[10px] text-zinc-400 font-mono">
                         {formik.values.description.length} characters (min 20)
                       </p>
@@ -378,7 +438,10 @@ function CreateOfferPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Discount */}
                   <div className="space-y-1.5">
-                    <Label htmlFor="discount" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                    <Label
+                      htmlFor="discount"
+                      className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                    >
                       Discount Value / Badge
                     </Label>
                     <div className="relative">
@@ -396,7 +459,10 @@ function CreateOfferPage() {
 
                   {/* Promo Code */}
                   <div className="space-y-1.5">
-                    <Label htmlFor="code" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                    <Label
+                      htmlFor="code"
+                      className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                    >
                       Promo / Coupon Code
                     </Label>
                     <Input
@@ -411,7 +477,10 @@ function CreateOfferPage() {
 
                   {/* Website URL */}
                   <div className="space-y-1.5 sm:col-span-2">
-                    <Label htmlFor="website" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                    <Label
+                      htmlFor="website"
+                      className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                    >
                       Redemption Website URL
                     </Label>
                     <div className="relative">
@@ -445,7 +514,10 @@ function CreateOfferPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Valid From */}
                   <div className="space-y-1.5">
-                    <Label htmlFor="validFrom" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                    <Label
+                      htmlFor="validFrom"
+                      className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                    >
                       Valid From <span className="text-rose-500">*</span>
                     </Label>
                     <div className="relative">
@@ -468,7 +540,10 @@ function CreateOfferPage() {
 
                   {/* Valid To */}
                   <div className="space-y-1.5">
-                    <Label htmlFor="validTo" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                    <Label
+                      htmlFor="validTo"
+                      className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                    >
                       Valid To <span className="text-rose-500">*</span>
                     </Label>
                     <div className="relative">
@@ -501,7 +576,10 @@ function CreateOfferPage() {
                 <div className="space-y-4">
                   {/* Terms */}
                   <div className="space-y-1.5">
-                    <Label htmlFor="terms" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                    <Label
+                      htmlFor="terms"
+                      className="text-xs font-semibold text-zinc-700 dark:text-zinc-300"
+                    >
                       Terms & Conditions
                     </Label>
                     <Textarea
@@ -574,7 +652,7 @@ function CreateOfferPage() {
               <FloatingSavePanel
                 hasChanged={formik.dirty}
                 saved={false}
-                isSaving={formik.isSubmitting}
+                isSaving={formik.isSubmitting || isCreating}
                 onSave={handleSubmit}
                 onReset={() => {
                   formik.resetForm();
@@ -594,5 +672,5 @@ function CreateOfferPage() {
 
 export default withSubscriptionCheck(
   withModulePermission(CreateOfferPage, "OFFERS", "canCreate"),
-  "offers"
+  "offers",
 );

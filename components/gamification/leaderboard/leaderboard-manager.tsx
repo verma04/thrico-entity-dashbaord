@@ -15,6 +15,7 @@ import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrappe
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
+import { InlineAlert } from "@/components/ui/inline-alert";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ExportCsvModal } from "@/components/shared/export-csv-modal";
@@ -48,13 +49,21 @@ export function LeaderboardManager() {
       <EcosystemHeader
         title="Leaderboard"
         badgeText="Competition"
-        description="Monitor the gamified leaderboard."
+        description="Monitor community rankings and point aggregates across all active members in real-time."
         icon={Trophy}
         breadcrumbs={[
           { label: "Gamification", href: "/gamification" },
           { label: "Leaderboard" },
         ]}
       />
+
+      <div className="px-6 pt-2 pb-0">
+        <InlineAlert
+          variant="alert"
+          message="Leaderboard rankings are updated in real-time based on cumulative lifetime points earned across all modules and connected apps."
+          className="rounded-xl"
+        />
+      </div>
 
       <EcosystemActionBar shadow="sm" className="">
         <EcosystemActionBar.Item grow className="max-w-sm">

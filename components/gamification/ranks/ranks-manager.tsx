@@ -1,10 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   useGetRanks,
-  useCreateRank,
-  useUpdateRank,
   useUpdateRankOrder,
   Rank,
 } from "@/graphql/actions";
@@ -12,34 +11,26 @@ import { Button } from "@/components/ui/button";
 import { CtaButton } from "@/components/ui/cta-button";
 import { StatsCards } from "./stats-cards";
 import { RankList } from "./rank-list";
-import { RankDialog } from "./rank-dialog";
-import { Crown, Plus, Info, RotateCcw, Upload } from "lucide-react";
+import { Crown, Plus, Upload } from "lucide-react";
 import { EcosystemWrapper } from "@/components/layout/ecosystem/ecosystem-wrapper";
 import { EcosystemHeader } from "@/components/layout/ecosystem/ecosystem-header";
 import { EcosystemActionBar } from "@/components/layout/ecosystem/ecosystem-action-bar";
 import { EcosystemContainer } from "@/components/layout/ecosystem/ecosystem-container";
-import { cn } from "@/lib/utils";
+import { InlineAlert } from "@/components/ui/inline-alert";
 import { ExportCsvModal } from "@/components/shared/export-csv-modal";
 import type { ExportCsvScope, ExportCsvFormat } from "@/components/shared/export-csv-modal";
 import { buildCsv, downloadCsv } from "@/lib/export-csv";
 import { toast } from "sonner";
 
 export function RanksManager() {
+  const router = useRouter();
   const { data: ranksData, refetch, loading: ranksLoading } = useGetRanks();
   const ranks = ranksData?.getRanks || [];
 
-  const [createRank, { loading: creating }] = useCreateRank({
-    onCompleted: () => refetch(),
-  });
-  const [updateRank, { loading: updating }] = useUpdateRank({
-    onCompleted: () => refetch(),
-  });
   const [updateRankOrder] = useUpdateRankOrder({
     onCompleted: () => refetch(),
   });
 
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingRank, setEditingRank] = useState<Rank | null>(null);
   const [search, setSearch] = useState("");
   const [showExportModal, setShowExportModal] = useState(false);
 
@@ -50,24 +41,12 @@ export function RanksManager() {
     );
   }, [ranks, search]);
 
-  const handleOpenDialog = (rank?: Rank) => {
-    setEditingRank(rank || null);
-    setIsDialogOpen(true);
+  const handleCreate = () => {
+    router.push("/gamification/points-and-badges/ranks/create");
   };
 
-  const handleSave = async (formData: any) => {
-    try {
-      if (editingRank) {
-        await updateRank({
-          variables: { id: editingRank.id, input: formData },
-        });
-      } else {
-        await createRank({ variables: { input: formData } });
-      }
-      setIsDialogOpen(false);
-    } catch (error) {
-      console.error("Error saving rank:", error);
-    }
+  const handleEdit = (rank: Rank) => {
+    router.push(`/gamification/points-and-badges/ranks/edit/${rank.id}`);
   };
 
   const handleMoveRank = async (index: number, direction: "up" | "down") => {
@@ -107,7 +86,7 @@ export function RanksManager() {
           >
             <EcosystemActionBar.Group align="right">
               <EcosystemActionBar.Item>
-                <CtaButton onClick={() => handleOpenDialog()}>
+                <CtaButton onClick={handleCreate}>
                   <Plus className="h-3 w-3" />
                   Add Rank
                 </CtaButton>
@@ -116,6 +95,15 @@ export function RanksManager() {
           </EcosystemActionBar>
         }
       />
+
+      <div className="px-6 pt-2 pb-0">
+        <InlineAlert
+          variant="alert"
+          message="Reordering ranks will automatically adjust the order property of each level. Member eligibility is calculated in real-time based on these thresholds."
+          className="rounded-xl"
+        />
+      </div>
+
       <EcosystemActionBar shadow="sm" className="">
         <EcosystemActionBar.Item grow className="max-w-sm">
           <EcosystemActionBar.Search
@@ -144,36 +132,16 @@ export function RanksManager() {
         </div>
 
         <div className="px-6">
-          <div className="flex items-start gap-4 p-4 rounded-2xl bg-zinc-50/50 dark:bg-neutral-900/50 border border-zinc-200 dark:border-neutral-800 mb-6 font-medium">
-            <div className="h-8 w-8 rounded-full bg-white dark:bg-neutral-900 flex items-center justify-center shadow-sm shrink-0 border border-zinc-200 dark:border-neutral-800">
-              <Info className="h-4 w-4 text-zinc-500 dark:text-zinc-400" />
-            </div>
-            <p className="text-[13px] text-zinc-700 dark:text-zinc-300 leading-relaxed">
-              Reordering ranks will automatically adjust the order property of
-              each level. Member eligibility is calculated in real-time based on
-              these thresholds.
-            </p>
-          </div>
-
           <RankList
             ranks={filteredRanks}
             onMoveUp={(index) => handleMoveRank(index, "up")}
             onMoveDown={(index) => handleMoveRank(index, "down")}
-            onEdit={handleOpenDialog}
+            onEdit={handleEdit}
             refetch={refetch}
             isLoading={ranksLoading}
           />
         </div>
       </EcosystemContainer>
-
-      <RankDialog
-        isOpen={isDialogOpen}
-        onOpenChange={setIsDialogOpen}
-        editingRank={editingRank}
-        onSave={handleSave}
-        isLoading={creating || updating}
-        nextOrder={ranks.length + 1}
-      />
 
       {/* ── Export Modal ─────────────────────────────────────────────────── */}
       <ExportCsvModal
@@ -194,15 +162,17 @@ export function RanksManager() {
           }
 
           const csv = buildCsv(rows, [
-            { header: "Name",       getValue: (r) => r.name || "" },
-            { header: "Min Points", getValue: (r) => r.minPoints ?? 0 },
-            { header: "Max Points", getValue: (r) => r.maxPoints ?? 0 },
-            { header: "Order",      getValue: (r) => r.order ?? "" },
-            { header: "Color",      getValue: (r) => r.color || "" },
-            { header: "Icon",       getValue: (r) => r.icon || "" },
-            { header: "Status",     getValue: (r) => r.isActive ? "Active" : "Inactive" },
-            { header: "Created At", getValue: (r) => r.createdAt ? new Date(r.createdAt).toISOString().slice(0, 10) : "" },
-            { header: "Updated At", getValue: (r) => r.updatedAt ? new Date(r.updatedAt).toISOString().slice(0, 10) : "" },
+            { header: "Name",               getValue: (r) => r.name || "" },
+            { header: "Min Points",         getValue: (r) => r.minPoints ?? 0 },
+            { header: "Max Points",         getValue: (r) => r.maxPoints ?? 0 },
+            { header: "Order",              getValue: (r) => r.order ?? "" },
+            { header: "Color",              getValue: (r) => r.color || "" },
+            { header: "Icon",               getValue: (r) => r.icon || "" },
+            { header: "Push Notification",  getValue: (r) => r.allowPushNotification !== false ? "Enabled" : "Disabled" },
+            { header: "Email Notification", getValue: (r) => r.allowEmailNotification !== false ? "Enabled" : "Disabled" },
+            { header: "Status",             getValue: (r) => r.isActive ? "Active" : "Inactive" },
+            { header: "Created At",         getValue: (r) => r.createdAt ? new Date(r.createdAt).toISOString().slice(0, 10) : "" },
+            { header: "Updated At",         getValue: (r) => r.updatedAt ? new Date(r.updatedAt).toISOString().slice(0, 10) : "" },
           ]);
 
           const label = scope === "matching" ? "ranks-search" : "ranks";

@@ -49,6 +49,12 @@ export const GET_BADGES = gql`
       icon
       description
       condition
+      allowPushNotification
+      allowEmailNotification
+      pushNotificationTitle
+      pushNotificationBody
+      emailNotificationSubject
+      emailNotificationBody
       isActive
       createdAt
       updatedAt

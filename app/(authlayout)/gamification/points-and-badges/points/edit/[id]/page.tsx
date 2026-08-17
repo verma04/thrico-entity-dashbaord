@@ -42,6 +42,12 @@ export default function EditPointRulePage() {
           monthlyCap: values.monthlyCap ? Number(values.monthlyCap) : null,
           description: values.description,
           isActive: values.isActive,
+          allowPushNotification: values.allowPushNotification,
+          allowEmailNotification: values.allowEmailNotification,
+          pushNotificationTitle: values.allowPushNotification ? values.pushNotificationTitle : undefined,
+          pushNotificationBody: values.allowPushNotification ? values.pushNotificationBody : undefined,
+          emailNotificationSubject: values.allowEmailNotification ? values.emailNotificationSubject : undefined,
+          emailNotificationBody: values.allowEmailNotification ? values.emailNotificationBody : undefined,
         },
       },
     });

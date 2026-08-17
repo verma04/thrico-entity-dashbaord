@@ -110,7 +110,7 @@ export function UserHoverCard({ userId, children }: UserHoverCardProps) {
                 <div className="mt-2 flex items-center gap-2">
                   <Button asChild size="sm" variant="outline" className="h-8">
                     <Link
-                      href={`/dashboard/network/profile/${user?.id || userId}`}
+                      href={`/members/${user?.id || userId}`}
                     >
                       View Profile
                     </Link>

@@ -96,30 +96,50 @@ export const ADD_COMMUNITY = gql`
 export const GET_COMMUNITIES = gql`
   query GetCommunities($input: InputGetCommunities!) {
     getCommunities(input: $input) {
-      id
-      title
-      addedBy
-      privacy
-      cover
-      status
-      description
-      createdAt
-      updatedAt
-      tagline
-      location
-      numberOfUser
-      verification {
+      data {
         id
-        isVerifiedAt
-        isVerified
-        verificationReason
+        slug
+        title
+        addedBy
+        cover
+        status
+        isApproved
+        description
+        createdAt
+        updatedAt
+        isFeatured
+        theme
+        interests
+        categories
+        numberOfUser
+        numberOfLikes
+        numberOfPost
+        numberOfViews
+        tag
+        location
+        requireAdminApprovalForPosts
+        allowMemberInvites
+        enableEvents
+        enableRatingsAndReviews
+        communityType
+        joiningTerms
+        privacy
+        allowMemberPosts
+        verification {
+          id
+          isVerifiedAt
+          isVerified
+          verificationReason
+        }
+        tagline
+        creator {
+          id
+          lastName
+          avatar
+          firstName
+        }
       }
-      creator {
-        id
-        firstName
-        lastName
-        avatar
-      }
+      total
     }
   }
 `;

@@ -64,13 +64,27 @@ export const addCommunity = (options: any) =>
             });
 
             if (cachedData && cachedData.getCommunities) {
-              cache.writeQuery({
-                query: GET_COMMUNITIES,
-                variables: { input: { status } },
-                data: {
-                  getCommunities: [addCommunity, ...cachedData.getCommunities],
-                },
-              });
+              if (Array.isArray(cachedData.getCommunities)) {
+                cache.writeQuery({
+                  query: GET_COMMUNITIES,
+                  variables: { input: { status } },
+                  data: {
+                    getCommunities: [addCommunity, ...cachedData.getCommunities],
+                  },
+                });
+              } else if (cachedData.getCommunities.data) {
+                cache.writeQuery({
+                  query: GET_COMMUNITIES,
+                  variables: { input: { status } },
+                  data: {
+                    getCommunities: {
+                      ...cachedData.getCommunities,
+                      data: [addCommunity, ...cachedData.getCommunities.data],
+                      total: (cachedData.getCommunities.total ?? cachedData.getCommunities.data.length) + 1,
+                    },
+                  },
+                });
+              }
             }
           } catch (error) {
             // Ignore if query not in cache yet
@@ -146,15 +160,31 @@ export const deleteCommunity = (options: any) =>
               variables: { input: { status } },
             });
             if (cachedData && cachedData.getCommunities) {
-              cache.writeQuery({
-                query: GET_COMMUNITIES,
-                variables: { input: { status } },
-                data: {
-                  getCommunities: cachedData.getCommunities.filter(
-                    (c: any) => c.id !== idToRemove,
-                  ),
-                },
-              });
+              if (Array.isArray(cachedData.getCommunities)) {
+                cache.writeQuery({
+                  query: GET_COMMUNITIES,
+                  variables: { input: { status } },
+                  data: {
+                    getCommunities: cachedData.getCommunities.filter(
+                      (c: any) => c.id !== idToRemove,
+                    ),
+                  },
+                });
+              } else if (cachedData.getCommunities.data) {
+                cache.writeQuery({
+                  query: GET_COMMUNITIES,
+                  variables: { input: { status } },
+                  data: {
+                    getCommunities: {
+                      ...cachedData.getCommunities,
+                      data: cachedData.getCommunities.data.filter(
+                        (c: any) => c.id !== idToRemove,
+                      ),
+                      total: Math.max(0, (cachedData.getCommunities.total ?? cachedData.getCommunities.data.length) - 1),
+                    },
+                  },
+                });
+              }
             }
           } catch (e) {
             // Ignore if query not in cache yet

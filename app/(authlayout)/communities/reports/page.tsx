@@ -14,6 +14,7 @@ function CommunityReportsPage() {
     <Reports 
       preselectedModule={ReportModule.COMMUNITY} 
       canEdit={canEdit}
+      description="View and manage reported items"
       breadcrumbs={[
         { label: moduleName, href: "/communities" },
         { label: "Reports" }

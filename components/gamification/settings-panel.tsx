@@ -17,6 +17,11 @@ import {
   Flame,
   Clock,
   Layers,
+  Bell,
+  Mail,
+  Award,
+  Crown,
+  Coins,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -111,6 +116,40 @@ export function SettingsPanel() {
                     localSettings.pointDecayEnabled
                       ? `${localSettings.pointDecayPercentage}% / ${localSettings.pointDecayPeriodDays}d`
                       : "Disabled"
+                  }
+                />
+                <PolarisSummaryRow
+                  label="Global Push Alerts"
+                  value={
+                    <span
+                      className={cn(
+                        "text-[11px] font-semibold",
+                        localSettings.enableGlobalPushNotifications !== false
+                          ? "text-emerald-600 dark:text-emerald-400"
+                          : "text-zinc-400 dark:text-zinc-500",
+                      )}
+                    >
+                      {localSettings.enableGlobalPushNotifications !== false
+                        ? "Enabled"
+                        : "Disabled"}
+                    </span>
+                  }
+                />
+                <PolarisSummaryRow
+                  label="Global Email Alerts"
+                  value={
+                    <span
+                      className={cn(
+                        "text-[11px] font-semibold",
+                        localSettings.enableGlobalEmailNotifications !== false
+                          ? "text-emerald-600 dark:text-emerald-400"
+                          : "text-zinc-400 dark:text-zinc-500",
+                      )}
+                    >
+                      {localSettings.enableGlobalEmailNotifications !== false
+                        ? "Enabled"
+                        : "Disabled"}
+                    </span>
                   }
                   isLast
                 />
@@ -346,6 +385,201 @@ export function SettingsPanel() {
                 )}
               </div>
             </PolarisFormCard>
+
+            {/* Step 4: Notification Channels & Alert Settings */}
+            <PolarisFormCard
+              step={4}
+              title="Notification Channels & Alert Settings"
+              description="Configure system-level defaults for dispatching Push and Email alerts across Points, Badges, and Ranks."
+              badge="Alert Engine"
+            >
+              <div className="space-y-5">
+                {/* Global Master Channel Switches */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-4 border-b border-zinc-100 dark:border-zinc-800">
+                  <div className="flex items-center justify-between p-3.5 rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
+                    <div className="space-y-0.5">
+                      <Label className="text-xs font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
+                        <Bell className="h-3.5 w-3.5 text-zinc-600 dark:text-zinc-400" />
+                        Global Push Notifications
+                      </Label>
+                      <p className="text-[10px] text-zinc-500 dark:text-zinc-400">
+                        Master switch to allow or suppress push notifications.
+                      </p>
+                    </div>
+                    <Switch
+                      checked={
+                        localSettings.enableGlobalPushNotifications !== false
+                      }
+                      onCheckedChange={(v) =>
+                        handleUpdate({ enableGlobalPushNotifications: v })
+                      }
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between p-3.5 rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
+                    <div className="space-y-0.5">
+                      <Label className="text-xs font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
+                        <Mail className="h-3.5 w-3.5 text-zinc-600 dark:text-zinc-400" />
+                        Global Email Notifications
+                      </Label>
+                      <p className="text-[10px] text-zinc-500 dark:text-zinc-400">
+                        Master switch to allow or suppress automated email alerts.
+                      </p>
+                    </div>
+                    <Switch
+                      checked={
+                        localSettings.enableGlobalEmailNotifications !== false
+                      }
+                      onCheckedChange={(v) =>
+                        handleUpdate({ enableGlobalEmailNotifications: v })
+                      }
+                    />
+                  </div>
+                </div>
+
+                {/* Sub-modules: Points, Badges, Ranks */}
+                <div className="space-y-3">
+                  <Label className="text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
+                    Module Alert Channels
+                  </Label>
+
+                  {/* Points Alerts */}
+                  <div className="p-4 rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/30 dark:bg-zinc-900/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="h-9 w-9 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center justify-center shrink-0">
+                        <Coins className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
+                          Point Reward Alerts
+                        </h4>
+                        <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                          Dispatch alerts when members earn points from triggers.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4 shrink-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] font-medium text-zinc-600 dark:text-zinc-400">
+                          Push
+                        </span>
+                        <Switch
+                          checked={
+                            localSettings.pointsPushNotificationEnabled !== false
+                          }
+                          onCheckedChange={(v) =>
+                            handleUpdate({ pointsPushNotificationEnabled: v })
+                          }
+                        />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] font-medium text-zinc-600 dark:text-zinc-400">
+                          Email
+                        </span>
+                        <Switch
+                          checked={
+                            localSettings.pointsEmailNotificationEnabled !== false
+                          }
+                          onCheckedChange={(v) =>
+                            handleUpdate({ pointsEmailNotificationEnabled: v })
+                          }
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Badges Alerts */}
+                  <div className="p-4 rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/30 dark:bg-zinc-900/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="h-9 w-9 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 flex items-center justify-center shrink-0">
+                        <Award className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
+                          Badge Unlock Alerts
+                        </h4>
+                        <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                          Dispatch celebrations when members achieve new badges.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4 shrink-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] font-medium text-zinc-600 dark:text-zinc-400">
+                          Push
+                        </span>
+                        <Switch
+                          checked={
+                            localSettings.badgesPushNotificationEnabled !== false
+                          }
+                          onCheckedChange={(v) =>
+                            handleUpdate({ badgesPushNotificationEnabled: v })
+                          }
+                        />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] font-medium text-zinc-600 dark:text-zinc-400">
+                          Email
+                        </span>
+                        <Switch
+                          checked={
+                            localSettings.badgesEmailNotificationEnabled !== false
+                          }
+                          onCheckedChange={(v) =>
+                            handleUpdate({ badgesEmailNotificationEnabled: v })
+                          }
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Ranks Alerts */}
+                  <div className="p-4 rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/30 dark:bg-zinc-900/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="h-9 w-9 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center justify-center shrink-0">
+                        <Crown className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
+                          Rank Tier Promotion Alerts
+                        </h4>
+                        <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                          Dispatch congratulations when members are promoted to higher tiers.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4 shrink-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] font-medium text-zinc-600 dark:text-zinc-400">
+                          Push
+                        </span>
+                        <Switch
+                          checked={
+                            localSettings.ranksPushNotificationEnabled !== false
+                          }
+                          onCheckedChange={(v) =>
+                            handleUpdate({ ranksPushNotificationEnabled: v })
+                          }
+                        />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] font-medium text-zinc-600 dark:text-zinc-400">
+                          Email
+                        </span>
+                        <Switch
+                          checked={
+                            localSettings.ranksEmailNotificationEnabled !== false
+                          }
+                          onCheckedChange={(v) =>
+                            handleUpdate({ ranksEmailNotificationEnabled: v })
+                          }
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </PolarisFormCard>
           </div>
 
           {/* Floating Action Bar */}
@@ -356,7 +590,7 @@ export function SettingsPanel() {
             onSave={handleSave}
             onReset={handleReset}
             title="Save Engine Settings"
-            description="You have unsaved changes to the gamification rules."
+            description="You have unsaved changes to the gamification rules and notification settings."
             buttonText="Save Settings"
           />
         </div>

@@ -1,11 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { List, Plus, History, Network } from "lucide-react";
+import { LayoutDashboard, List, Plus, History, Network } from "lucide-react";
 import MenuItemsLayout from "@/components/layout/menu-items-layout";
 import { withSubscriptionCheck } from "@/components/hoc/with-subscription-check";
 import { useModulePermission } from "@/hooks/use-module-permission";
-
 import { useModuleStore } from "@/store/useModuleStore";
 
 function CommunitiesLayout({ children }: { children: React.ReactNode }) {
@@ -42,7 +41,7 @@ function CommunitiesLayout({ children }: { children: React.ReactNode }) {
         locked: !canRead,
       },
     ];
-  }, [canCreate, canRead, moduleName]);
+  }, [canCreate, canRead, moduleName, singularName]);
 
   return (
     <MenuItemsLayout active="communities" items={items}>

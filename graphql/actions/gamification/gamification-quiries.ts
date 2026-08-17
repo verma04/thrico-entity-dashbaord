@@ -134,6 +134,12 @@ export interface Badge {
   count?: number;
   points?: number;
   condition?: any;
+  allowPushNotification?: boolean;
+  allowEmailNotification?: boolean;
+  pushNotificationTitle?: string;
+  pushNotificationBody?: string;
+  emailNotificationSubject?: string;
+  emailNotificationBody?: string;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -170,6 +176,12 @@ const GET_BADGES = gql`
       action
       targetValue
       condition
+      allowPushNotification
+      allowEmailNotification
+      pushNotificationTitle
+      pushNotificationBody
+      emailNotificationSubject
+      emailNotificationBody
       isActive
       createdAt
       updatedAt
@@ -205,6 +217,12 @@ export interface PointRule {
   monthlyCap?: number;
   description?: string;
   isActive: boolean;
+  allowPushNotification?: boolean;
+  allowEmailNotification?: boolean;
+  pushNotificationTitle?: string;
+  pushNotificationBody?: string;
+  emailNotificationSubject?: string;
+  emailNotificationBody?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -236,6 +254,12 @@ const GET_POINT_RULES = gql`
       monthlyCap
       description
       isActive
+      allowPushNotification
+      allowEmailNotification
+      pushNotificationTitle
+      pushNotificationBody
+      emailNotificationSubject
+      emailNotificationBody
       createdAt
       updatedAt
     }
@@ -263,6 +287,12 @@ export interface Rank {
   color: string;
   icon: string;
   order: number;
+  allowPushNotification?: boolean;
+  allowEmailNotification?: boolean;
+  pushNotificationTitle?: string;
+  pushNotificationBody?: string;
+  emailNotificationSubject?: string;
+  emailNotificationBody?: string;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -286,6 +316,12 @@ const GET_RANKS = gql`
       color
       icon
       order
+      allowPushNotification
+      allowEmailNotification
+      pushNotificationTitle
+      pushNotificationBody
+      emailNotificationSubject
+      emailNotificationBody
       isActive
       createdAt
       updatedAt

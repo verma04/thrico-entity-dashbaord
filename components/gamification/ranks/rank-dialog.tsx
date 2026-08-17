@@ -34,7 +34,11 @@ import {
   Layers,
   Loader2,
   Info,
+  Bell,
+  Mail,
 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/components/ui/textarea";
 
 interface RankDialogProps {
   isOpen: boolean;
@@ -122,6 +126,12 @@ export function RankDialog({
       maxPoints: editingRank?.maxPoints ?? 1000,
       order: editingRank?.order || nextOrder,
       isActive: editingRank?.isActive ?? true,
+      allowPushNotification: editingRank?.allowPushNotification !== undefined ? editingRank.allowPushNotification : true,
+      allowEmailNotification: editingRank?.allowEmailNotification !== undefined ? editingRank.allowEmailNotification : true,
+      pushNotificationTitle: editingRank?.pushNotificationTitle ?? "",
+      pushNotificationBody: editingRank?.pushNotificationBody ?? "",
+      emailNotificationSubject: editingRank?.emailNotificationSubject ?? "",
+      emailNotificationBody: editingRank?.emailNotificationBody ?? "",
     },
     enableReinitialize: true,
     validationSchema,
@@ -528,7 +538,211 @@ export function RankDialog({
             </div>
           </div>
 
-          {/* Section 3: Status Toggle */}
+          {/* Section 3: Notification Settings */}
+          <div className="space-y-4 rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/40 dark:bg-zinc-900/30 p-4">
+            <div className="flex items-center justify-between pb-2 border-b border-zinc-200/60 dark:border-zinc-800">
+              <Label className="text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
+                3. Notification Settings
+              </Label>
+              <Bell className="h-3.5 w-3.5 text-zinc-400" />
+            </div>
+
+            <div className="grid grid-cols-1 gap-4">
+              {/* Push Notification */}
+              <div className={cn(
+                "rounded-xl border transition-all p-4 space-y-3",
+                formik.values.allowPushNotification
+                  ? "border-zinc-900/30 dark:border-zinc-100/30 bg-white dark:bg-zinc-900/50"
+                  : "border-zinc-200 dark:border-zinc-700/80 bg-white/50 dark:bg-zinc-800/10 opacity-75"
+              )}>
+                <div
+                  onClick={() =>
+                    formik.setFieldValue(
+                      "allowPushNotification",
+                      !formik.values.allowPushNotification,
+                    )
+                  }
+                  className="flex items-start gap-3 cursor-pointer select-none"
+                >
+                  <div className="pt-0.5" onClick={(e) => e.stopPropagation()}>
+                    <Checkbox
+                      id="allowPushNotification"
+                      checked={formik.values.allowPushNotification}
+                      onCheckedChange={(checked) =>
+                        formik.setFieldValue("allowPushNotification", !!checked)
+                      }
+                    />
+                  </div>
+                  <div className="space-y-0.5 flex-1">
+                    <div className="flex items-center gap-2">
+                      <Bell className="h-3.5 w-3.5 text-zinc-700 dark:text-zinc-300" />
+                      <Label
+                        htmlFor="allowPushNotification"
+                        className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 cursor-pointer"
+                      >
+                        Push notification on rank-up
+                      </Label>
+                    </div>
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                      Alert the user when they are promoted to this rank.
+                    </p>
+                  </div>
+                </div>
+
+                {formik.values.allowPushNotification && (
+                  <div className="space-y-2.5 pt-2.5 border-t border-zinc-200/60 dark:border-zinc-700/60 animate-in fade-in-50 duration-200">
+                    <div className="space-y-1">
+                      <Label htmlFor="pushNotificationTitle" className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300">
+                        Push Title
+                      </Label>
+                      <Input
+                        id="pushNotificationTitle"
+                        placeholder="e.g. 👑 You've been promoted!"
+                        {...formik.getFieldProps("pushNotificationTitle")}
+                        className="h-9 text-xs bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="pushNotificationBody" className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300">
+                        Push Message
+                      </Label>
+                      <Textarea
+                        id="pushNotificationBody"
+                        placeholder="e.g. Congrats! You've reached {{rankName}}!"
+                        {...formik.getFieldProps("pushNotificationBody")}
+                        className="min-h-[60px] text-xs bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 resize-none"
+                      />
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[10px] text-zinc-400 dark:text-zinc-500">
+                      <span>Variables:</span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          formik.setFieldValue(
+                            "pushNotificationBody",
+                            `${formik.values.pushNotificationBody} {{rankName}}`.trim(),
+                          )
+                        }
+                        className="px-1.5 py-0.5 rounded bg-zinc-200/70 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-300 dark:hover:bg-zinc-600 transition-colors font-mono"
+                      >
+                        {"{{rankName}}"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          formik.setFieldValue(
+                            "pushNotificationBody",
+                            `${formik.values.pushNotificationBody} {{userName}}`.trim(),
+                          )
+                        }
+                        className="px-1.5 py-0.5 rounded bg-zinc-200/70 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-300 dark:hover:bg-zinc-600 transition-colors font-mono"
+                      >
+                        {"{{userName}}"}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Email Notification */}
+              <div className={cn(
+                "rounded-xl border transition-all p-4 space-y-3",
+                formik.values.allowEmailNotification
+                  ? "border-zinc-900/30 dark:border-zinc-100/30 bg-white dark:bg-zinc-900/50"
+                  : "border-zinc-200 dark:border-zinc-700/80 bg-white/50 dark:bg-zinc-800/10 opacity-75"
+              )}>
+                <div
+                  onClick={() =>
+                    formik.setFieldValue(
+                      "allowEmailNotification",
+                      !formik.values.allowEmailNotification,
+                    )
+                  }
+                  className="flex items-start gap-3 cursor-pointer select-none"
+                >
+                  <div className="pt-0.5" onClick={(e) => e.stopPropagation()}>
+                    <Checkbox
+                      id="allowEmailNotification"
+                      checked={formik.values.allowEmailNotification}
+                      onCheckedChange={(checked) =>
+                        formik.setFieldValue("allowEmailNotification", !!checked)
+                      }
+                    />
+                  </div>
+                  <div className="space-y-0.5 flex-1">
+                    <div className="flex items-center gap-2">
+                      <Mail className="h-3.5 w-3.5 text-zinc-700 dark:text-zinc-300" />
+                      <Label
+                        htmlFor="allowEmailNotification"
+                        className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 cursor-pointer"
+                      >
+                        Email notification on rank-up
+                      </Label>
+                    </div>
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                      Send a celebratory email when a member reaches this rank.
+                    </p>
+                  </div>
+                </div>
+
+                {formik.values.allowEmailNotification && (
+                  <div className="space-y-2.5 pt-2.5 border-t border-zinc-200/60 dark:border-zinc-700/60 animate-in fade-in-50 duration-200">
+                    <div className="space-y-1">
+                      <Label htmlFor="emailNotificationSubject" className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300">
+                        Email Subject
+                      </Label>
+                      <Input
+                        id="emailNotificationSubject"
+                        placeholder="e.g. You've reached {{rankName}}!"
+                        {...formik.getFieldProps("emailNotificationSubject")}
+                        className="h-9 text-xs bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="emailNotificationBody" className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300">
+                        Email Body
+                      </Label>
+                      <Textarea
+                        id="emailNotificationBody"
+                        placeholder="e.g. Congratulations on reaching {{rankName}}!"
+                        {...formik.getFieldProps("emailNotificationBody")}
+                        className="min-h-[60px] text-xs bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 resize-none"
+                      />
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[10px] text-zinc-400 dark:text-zinc-500">
+                      <span>Variables:</span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          formik.setFieldValue(
+                            "emailNotificationBody",
+                            `${formik.values.emailNotificationBody} {{rankName}}`.trim(),
+                          )
+                        }
+                        className="px-1.5 py-0.5 rounded bg-zinc-200/70 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-300 dark:hover:bg-zinc-600 transition-colors font-mono"
+                      >
+                        {"{{rankName}}"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          formik.setFieldValue(
+                            "emailNotificationBody",
+                            `${formik.values.emailNotificationBody} {{userName}}`.trim(),
+                          )
+                        }
+                        className="px-1.5 py-0.5 rounded bg-zinc-200/70 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-300 dark:hover:bg-zinc-600 transition-colors font-mono"
+                      >
+                        {"{{userName}}"}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Section 4: Status Toggle */}
           <div className="flex items-center justify-between p-4 rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/40 dark:bg-zinc-900/30">
             <div className="space-y-0.5">
               <div className="flex items-center gap-2">
