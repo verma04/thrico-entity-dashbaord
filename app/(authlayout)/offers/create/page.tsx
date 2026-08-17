@@ -19,7 +19,8 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ImageUploadWithCrop } from "@/components/ui/image-upload-with-crop";
+import { ImageCropper } from "@/components/communities/add/image-cropper";
+import Image from "next/image";
 import { toast } from "sonner";
 import {
   Star,
@@ -34,6 +35,7 @@ import {
   ShieldCheck,
   Clock,
   Layers,
+  Camera,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FormikProvider, useFormik } from "formik";
@@ -86,6 +88,11 @@ function CreateOfferPage() {
   const moduleName =
     useModuleStore((state) => state.offerModuleName) || "Offers";
 
+  const [imageUrl, setImageUrl] = React.useState<string | null>(null);
+  const [cropModalVisible, setCropModalVisible] = React.useState(false);
+  const [selectedImage, setSelectedImage] = React.useState<string | null>(null);
+  const [coverFile, setCoverFile] = React.useState<File | null>(null);
+
   const [createOfferMutation, { loading: isCreating }] = useCreateOffer({
     refetchQueries: ["GetOffers", "GetOfferStats"],
     awaitRefetchQueries: true,
@@ -106,7 +113,6 @@ function CreateOfferPage() {
     initialValues: {
       title: "",
       description: "",
-      image: "",
       categoryId: "",
       discount: "",
       code: "",
@@ -133,7 +139,7 @@ function CreateOfferPage() {
               validityEnd: values.validTo
                 ? new Date(values.validTo).toISOString()
                 : new Date().toISOString(),
-              image: values.image || undefined,
+              image: coverFile || undefined,
               termsAndConditions: values.terms
                 ? values.terms.trim()
                 : undefined,
@@ -148,6 +154,26 @@ function CreateOfferPage() {
       }
     },
   });
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setSelectedImage(e.target?.result as string);
+      setCropModalVisible(true);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleCropComplete = (croppedImage: any, croppedUrl: string) => {
+    setCoverFile(croppedImage);
+    setImageUrl(croppedUrl);
+    setCropModalVisible(false);
+    setSelectedImage(null);
+    toast.success("Banner image updated successfully");
+  };
 
   const handleCancel = () => {
     router.push("/offers/all");
@@ -192,9 +218,9 @@ function CreateOfferPage() {
                   <div className="space-y-3">
                     {/* Visual Asset Preview */}
                     <div className="aspect-[2/1] rounded-xl bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700/80 flex items-center justify-center overflow-hidden relative group">
-                      {formik.values.image ? (
+                      {imageUrl ? (
                         <img
-                          src={formik.values.image}
+                          src={imageUrl}
                           alt="Preview"
                           className="w-full h-full object-cover"
                         />
@@ -303,18 +329,42 @@ function CreateOfferPage() {
                 badge="Visuals"
               >
                 <div className="space-y-3">
-                  <ImageUploadWithCrop
-                    label=""
-                    currentImage={formik.values.image}
-                    onImageUpdate={(url) => formik.setFieldValue("image", url)}
-                    recommendedWidth={800}
-                    recommendedHeight={400}
-                    aspectRatio={2}
-                    maxFileSize={3}
-                  />
+                  <div className="relative group aspect-[2/1] w-full rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center">
+                    <Image
+                      src={
+                        imageUrl ||
+                        `https://cdn.thrico.network/defaultEventCover.png`
+                      }
+                      alt={`${singularName} banner`}
+                      width={800}
+                      height={400}
+                      className="object-cover w-full h-full transition-transform group-hover:scale-105 duration-300"
+                    />
+                    <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        className="h-9 px-4 bg-zinc-900/80 hover:bg-zinc-900 text-white backdrop-blur-md border-none text-xs font-semibold shadow-md gap-2 cursor-pointer"
+                        onClick={() =>
+                          document.getElementById("offer-banner-upload")?.click()
+                        }
+                      >
+                        <Camera className="h-3.5 w-3.5" />
+                        {imageUrl ? "Change Banner Image" : "Upload Banner Image"}
+                      </Button>
+                    </div>
+                    <input
+                      id="offer-banner-upload"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleImageUpload}
+                    />
+                  </div>
                   <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
                     Supports PNG, JPG, or WebP. Optimal ratio is 2:1 for
-                    seamless cross-device rendering.
+                    seamless cross-device rendering. Max 5MB.
                   </p>
                 </div>
               </PolarisFormCard>
@@ -666,6 +716,19 @@ function CreateOfferPage() {
           </PolarisFormLayout>
         </EcosystemContainer>
       </EcosystemWrapper>
+
+      {/* Image Cropper Modal */}
+      {selectedImage && (
+        <ImageCropper
+          cropModalVisible={cropModalVisible}
+          image={selectedImage}
+          onCropComplete={handleCropComplete}
+          onCancel={() => {
+            setCropModalVisible(false);
+            setSelectedImage(null);
+          }}
+        />
+      )}
     </FormikProvider>
   );
 }
