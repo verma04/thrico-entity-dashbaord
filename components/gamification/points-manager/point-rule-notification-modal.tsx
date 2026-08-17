@@ -16,7 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Bell, Mail, Loader2, Zap } from "lucide-react";
-import { PointRule, useUpdatePointRule } from "@/graphql/actions";
+import { PointRule, useUpdatePointRuleNotifications } from "@/graphql/actions";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -33,7 +33,8 @@ export function PointRuleNotificationModal({
   onOpenChange,
   onSuccess,
 }: PointRuleNotificationModalProps) {
-  const [updatePointRule, { loading: isUpdating }] = useUpdatePointRule();
+  const [updatePointRuleNotifications, { loading: isUpdating }] =
+    useUpdatePointRuleNotifications();
 
   const [allowPush, setAllowPush] = useState(true);
   const [pushTitle, setPushTitle] = useState("");
@@ -61,7 +62,7 @@ export function PointRuleNotificationModal({
     if (!rule) return;
 
     try {
-      const res = await updatePointRule({
+      const res = await updatePointRuleNotifications({
         variables: {
           id: rule.id,
           input: {

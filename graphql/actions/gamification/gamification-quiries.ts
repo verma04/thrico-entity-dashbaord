@@ -771,3 +771,54 @@ export function useGetEntityCurrencyWallets(
     options
   );
 }
+
+// ---------------------------------------------------------
+// GAMIFICATION GENERAL SETTINGS
+// ---------------------------------------------------------
+
+export interface GamificationGeneralSettings {
+  isEnabled: boolean;
+  dailyPointsCap?: number | null;
+  weeklyPointsCap?: number | null;
+  monthlyPointsCap?: number | null;
+  enableGlobalPushNotifications?: boolean;
+  enableGlobalEmailNotifications?: boolean;
+  pointsPushNotificationEnabled?: boolean;
+  pointsEmailNotificationEnabled?: boolean;
+  badgesPushNotificationEnabled?: boolean;
+  badgesEmailNotificationEnabled?: boolean;
+  ranksPushNotificationEnabled?: boolean;
+  ranksEmailNotificationEnabled?: boolean;
+}
+
+export interface GetGamificationSettingsData {
+  getGamificationSettings: GamificationGeneralSettings;
+}
+
+export const GET_GAMIFICATION_SETTINGS = gql`
+  query GetGamificationSettings {
+    getGamificationSettings {
+      isEnabled
+      dailyPointsCap
+      weeklyPointsCap
+      monthlyPointsCap
+      enableGlobalPushNotifications
+      enableGlobalEmailNotifications
+      pointsPushNotificationEnabled
+      pointsEmailNotificationEnabled
+      badgesPushNotificationEnabled
+      badgesEmailNotificationEnabled
+      ranksPushNotificationEnabled
+      ranksEmailNotificationEnabled
+    }
+  }
+`;
+
+export function useGetGamificationSettings(
+  options?: QueryHookOptions<GetGamificationSettingsData>,
+) {
+  return useQuery<GetGamificationSettingsData>(
+    GET_GAMIFICATION_SETTINGS,
+    options,
+  );
+}

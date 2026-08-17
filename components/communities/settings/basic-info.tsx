@@ -16,7 +16,7 @@ import TextArea from "antd/es/input/TextArea";
 import { GiVideoConference } from "react-icons/gi";
 import { MdOutlineEventSeat } from "react-icons/md";
 import { RiLiveLine } from "react-icons/ri";
-import Cover from "../cover";
+import Cover from "../Cover";
 import type { communityEntity } from "../ts-types";
 import { updateBasicInfo } from "@/graphql/actions/group";
 import { useModuleStore } from "@/store/useModuleStore";

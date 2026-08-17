@@ -1,10 +1,9 @@
 "use client";
 
-import React from "react";
-import Manage from "../../../../../components/communities/settings/Manage";
+import Manage from "@/components/communities/settings/manage";
 import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
-import { getCommunityById } from "../../../../../graphql/actions/group";
+import { getCommunityById } from "@/graphql/actions/group";
 
 import {
   Sheet,

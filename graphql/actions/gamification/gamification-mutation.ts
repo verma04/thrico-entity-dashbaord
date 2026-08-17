@@ -270,12 +270,42 @@ const TOGGLE_POINT_RULE = gql`
   }
 `;
 
+export interface UpdatePointRuleNotificationInput {
+  allowPushNotification?: boolean;
+  pushNotificationTitle?: string;
+  pushNotificationBody?: string;
+  allowEmailNotification?: boolean;
+  emailNotificationSubject?: string;
+  emailNotificationBody?: string;
+}
+
+const UPDATE_POINT_RULE_NOTIFICATIONS = gql`
+  mutation UpdatePointRuleNotifications(
+    $id: ID!
+    $input: UpdatePointRuleNotificationInput!
+  ) {
+    updatePointRuleNotifications(id: $id, input: $input) {
+      id
+      allowPushNotification
+      allowEmailNotification
+      pushNotificationTitle
+      pushNotificationBody
+      emailNotificationSubject
+      emailNotificationBody
+    }
+  }
+`;
+
 export function useCreatePointRule(options?: MutationHookOptions) {
   return useMutation(CREATE_POINT_RULE, options);
 }
 
 export function useUpdatePointRule(options?: MutationHookOptions) {
   return useMutation(UPDATE_POINT_RULE, options);
+}
+
+export function useUpdatePointRuleNotifications(options?: MutationHookOptions) {
+  return useMutation(UPDATE_POINT_RULE_NOTIFICATIONS, options);
 }
 
 export function useDeletePointRule(options?: MutationHookOptions) {
@@ -395,12 +425,42 @@ const TOGGLE_RANK = gql`
   }
 `;
 
+export interface UpdateRankNotificationInput {
+  allowPushNotification?: boolean;
+  pushNotificationTitle?: string;
+  pushNotificationBody?: string;
+  allowEmailNotification?: boolean;
+  emailNotificationSubject?: string;
+  emailNotificationBody?: string;
+}
+
+const UPDATE_RANK_NOTIFICATIONS = gql`
+  mutation UpdateRankNotifications(
+    $id: ID!
+    $input: UpdateRankNotificationInput!
+  ) {
+    updateRankNotifications(id: $id, input: $input) {
+      id
+      allowPushNotification
+      allowEmailNotification
+      pushNotificationTitle
+      pushNotificationBody
+      emailNotificationSubject
+      emailNotificationBody
+    }
+  }
+`;
+
 export function useCreateRank(options?: MutationHookOptions) {
   return useMutation(CREATE_RANK, options);
 }
 
 export function useUpdateRank(options?: MutationHookOptions) {
   return useMutation(UPDATE_RANK, options);
+}
+
+export function useUpdateRankNotifications(options?: MutationHookOptions) {
+  return useMutation(UPDATE_RANK_NOTIFICATIONS, options);
 }
 
 export function useUpdateRankOrder(options?: MutationHookOptions) {
@@ -413,4 +473,46 @@ export function useDeleteRank(options?: MutationHookOptions) {
 
 export function useToggleRank(options?: MutationHookOptions) {
   return useMutation(TOGGLE_RANK, options);
+}
+
+// ---------------------------------------------------------
+// GAMIFICATION SETTINGS MUTATION
+// ---------------------------------------------------------
+
+export interface UpdateGamificationSettingsInput {
+  isEnabled?: boolean;
+  dailyPointsCap?: number | null;
+  weeklyPointsCap?: number | null;
+  monthlyPointsCap?: number | null;
+  enableGlobalPushNotifications?: boolean;
+  enableGlobalEmailNotifications?: boolean;
+  pointsPushNotificationEnabled?: boolean;
+  pointsEmailNotificationEnabled?: boolean;
+  badgesPushNotificationEnabled?: boolean;
+  badgesEmailNotificationEnabled?: boolean;
+  ranksPushNotificationEnabled?: boolean;
+  ranksEmailNotificationEnabled?: boolean;
+}
+
+const UPDATE_GAMIFICATION_SETTINGS = gql`
+  mutation UpdateGamificationSettings($input: UpdateGamificationSettingsInput!) {
+    updateGamificationSettings(input: $input) {
+      isEnabled
+      dailyPointsCap
+      weeklyPointsCap
+      monthlyPointsCap
+      enableGlobalPushNotifications
+      enableGlobalEmailNotifications
+      pointsPushNotificationEnabled
+      pointsEmailNotificationEnabled
+      badgesPushNotificationEnabled
+      badgesEmailNotificationEnabled
+      ranksPushNotificationEnabled
+      ranksEmailNotificationEnabled
+    }
+  }
+`;
+
+export function useUpdateGamificationSettings(options?: MutationHookOptions) {
+  return useMutation(UPDATE_GAMIFICATION_SETTINGS, options);
 }

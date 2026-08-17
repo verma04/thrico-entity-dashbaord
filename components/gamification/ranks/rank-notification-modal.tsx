@@ -16,7 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Bell, Mail, Loader2, Crown } from "lucide-react";
-import { Rank, useUpdateRank } from "@/graphql/actions";
+import { Rank, useUpdateRankNotifications } from "@/graphql/actions";
 import { BadgeIcon } from "@/components/gamification/badges/badge-icon";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -34,7 +34,8 @@ export function RankNotificationModal({
   onOpenChange,
   onSuccess,
 }: RankNotificationModalProps) {
-  const [updateRank, { loading: isUpdating }] = useUpdateRank();
+  const [updateRankNotifications, { loading: isUpdating }] =
+    useUpdateRankNotifications();
 
   const [allowPush, setAllowPush] = useState(true);
   const [pushTitle, setPushTitle] = useState("");
@@ -62,7 +63,7 @@ export function RankNotificationModal({
     if (!rank) return;
 
     try {
-      const res = await updateRank({
+      const res = await updateRankNotifications({
         variables: {
           id: rank.id,
           input: {

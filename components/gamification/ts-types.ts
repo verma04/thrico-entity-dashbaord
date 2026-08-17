@@ -92,9 +92,6 @@ export interface GamificationSettings {
   dailyPointsCap: number;
   weeklyPointsCap: number;
   monthlyPointsCap: number;
-  pointDecayEnabled: boolean;
-  pointDecayPercentage: number;
-  pointDecayPeriodDays: number;
   // Notification Settings
   enableGlobalPushNotifications?: boolean;
   enableGlobalEmailNotifications?: boolean;

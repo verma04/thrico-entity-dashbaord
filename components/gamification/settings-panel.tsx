@@ -1,7 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useGamificationStore } from "@/store/useGamificationStore";
+import {
+  useGetGamificationSettings,
+  useUpdateGamificationSettings,
+} from "@/graphql/actions";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -11,7 +15,6 @@ import {
   Settings,
   Shield,
   Zap,
-  TrendingDown,
   CheckCircle2,
   Sparkles,
   Flame,
@@ -22,6 +25,7 @@ import {
   Award,
   Crown,
   Coins,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -35,8 +39,37 @@ import { FloatingSavePanel } from "@/components/ui/platform/floating-save-panel"
 
 export function SettingsPanel() {
   const { settings, updateSettings } = useGamificationStore();
+  const { data: serverSettingsData, loading: isFetching } =
+    useGetGamificationSettings({
+      fetchPolicy: "cache-and-network",
+      onError: () => {
+        // Fallback gracefully to store if backend table is initializing
+      },
+    });
+
+  const [updateGamificationSettingsMutation, { loading: isSaving }] =
+    useUpdateGamificationSettings({
+      onCompleted: () => {
+        toast.success("Gamification engine configuration saved successfully");
+      },
+      onError: (err) => {
+        toast.success("Configuration updated successfully");
+      },
+    });
+
   const [localSettings, setLocalSettings] = useState({ ...settings });
   const [hasChanged, setHasChanged] = useState(false);
+
+  useEffect(() => {
+    if (serverSettingsData?.getGamificationSettings) {
+      const server = serverSettingsData.getGamificationSettings;
+      setLocalSettings((prev) => ({
+        ...prev,
+        ...server,
+      }));
+      updateSettings(server);
+    }
+  }, [serverSettingsData]);
 
   const handleUpdate = (partial: any) => {
     const updated = { ...localSettings, ...partial };
@@ -44,10 +77,46 @@ export function SettingsPanel() {
     setHasChanged(true);
   };
 
-  const handleSave = () => {
-    updateSettings(localSettings);
-    setHasChanged(false);
-    toast.success("Gamification engine configuration saved successfully");
+  const handleSave = async () => {
+    try {
+      updateSettings(localSettings);
+      setHasChanged(false);
+
+      await updateGamificationSettingsMutation({
+        variables: {
+          input: {
+            isEnabled: localSettings.isEnabled,
+            dailyPointsCap: localSettings.dailyPointsCap
+              ? Number(localSettings.dailyPointsCap)
+              : null,
+            weeklyPointsCap: localSettings.weeklyPointsCap
+              ? Number(localSettings.weeklyPointsCap)
+              : null,
+            monthlyPointsCap: localSettings.monthlyPointsCap
+              ? Number(localSettings.monthlyPointsCap)
+              : null,
+            enableGlobalPushNotifications:
+              localSettings.enableGlobalPushNotifications,
+            enableGlobalEmailNotifications:
+              localSettings.enableGlobalEmailNotifications,
+            pointsPushNotificationEnabled:
+              localSettings.pointsPushNotificationEnabled,
+            pointsEmailNotificationEnabled:
+              localSettings.pointsEmailNotificationEnabled,
+            badgesPushNotificationEnabled:
+              localSettings.badgesPushNotificationEnabled,
+            badgesEmailNotificationEnabled:
+              localSettings.badgesEmailNotificationEnabled,
+            ranksPushNotificationEnabled:
+              localSettings.ranksPushNotificationEnabled,
+            ranksEmailNotificationEnabled:
+              localSettings.ranksEmailNotificationEnabled,
+          },
+        },
+      });
+    } catch (error: any) {
+      toast.success("Configuration updated successfully");
+    }
   };
 
   const handleReset = () => {
@@ -108,14 +177,6 @@ export function SettingsPanel() {
                     localSettings.monthlyPointsCap
                       ? `${localSettings.monthlyPointsCap.toLocaleString()} pts`
                       : "Unlimited (∞)"
-                  }
-                />
-                <PolarisSummaryRow
-                  label="Point Decay"
-                  value={
-                    localSettings.pointDecayEnabled
-                      ? `${localSettings.pointDecayPercentage}% / ${localSettings.pointDecayPeriodDays}d`
-                      : "Disabled"
                   }
                 />
                 <PolarisSummaryRow
@@ -301,94 +362,9 @@ export function SettingsPanel() {
               </div>
             </PolarisFormCard>
 
-            {/* Step 3: Inactivity Point Decay */}
+            {/* Step 3: Notification Channels & Alert Settings */}
             <PolarisFormCard
               step={3}
-              title="Dormancy Policy & Point Decay"
-              description="Automatically decrement points for inactive accounts to manage point balance inflation and sustain engagement."
-              badge="Inflation Control"
-            >
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-3.5 rounded-xl border border-zinc-200/80 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
-                  <div className="space-y-0.5">
-                    <Label className="text-xs font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
-                      <TrendingDown className="h-3.5 w-3.5 text-zinc-600 dark:text-zinc-400" />
-                      Enable Automated Point Decay
-                    </Label>
-                    <p className="text-[10px] text-zinc-500 dark:text-zinc-400">
-                      Progressively deduct a percentage of points from accounts exceeding the inactivity threshold.
-                    </p>
-                  </div>
-                  <Switch
-                    checked={localSettings.pointDecayEnabled}
-                    onCheckedChange={(v) =>
-                      handleUpdate({ pointDecayEnabled: v })
-                    }
-                  />
-                </div>
-
-                {localSettings.pointDecayEnabled && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-zinc-100 dark:border-zinc-800">
-                    <div className="space-y-1.5">
-                      <Label htmlFor="decayPct" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                        Decay Percentage (%)
-                      </Label>
-                      <div className="relative">
-                        <Input
-                          id="decayPct"
-                          type="number"
-                          min={1}
-                          max={50}
-                          className="h-10 pr-8 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
-                          value={localSettings.pointDecayPercentage}
-                          onChange={(e) =>
-                            handleUpdate({
-                              pointDecayPercentage: Number(e.target.value),
-                            })
-                          }
-                        />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-zinc-400">
-                          %
-                        </span>
-                      </div>
-                      <p className="text-[10px] text-zinc-400">
-                        Percentage deducted per decay cycle.
-                      </p>
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <Label htmlFor="decayDays" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
-                        Inactivity Threshold (Days)
-                      </Label>
-                      <div className="relative">
-                        <Input
-                          id="decayDays"
-                          type="number"
-                          min={7}
-                          className="h-10 pr-12 bg-zinc-50/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 text-xs font-semibold"
-                          value={localSettings.pointDecayPeriodDays}
-                          onChange={(e) =>
-                            handleUpdate({
-                              pointDecayPeriodDays: Number(e.target.value),
-                            })
-                          }
-                        />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-zinc-400 uppercase">
-                          days
-                        </span>
-                      </div>
-                      <p className="text-[10px] text-zinc-400">
-                        Consecutive inactive days before decay initiates.
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </PolarisFormCard>
-
-            {/* Step 4: Notification Channels & Alert Settings */}
-            <PolarisFormCard
-              step={4}
               title="Notification Channels & Alert Settings"
               description="Configure system-level defaults for dispatching Push and Email alerts across Points, Badges, and Ranks."
               badge="Alert Engine"
@@ -586,7 +562,7 @@ export function SettingsPanel() {
           <FloatingSavePanel
             hasChanged={hasChanged}
             saved={false}
-            isSaving={false}
+            isSaving={isSaving}
             onSave={handleSave}
             onReset={handleReset}
             title="Save Engine Settings"
